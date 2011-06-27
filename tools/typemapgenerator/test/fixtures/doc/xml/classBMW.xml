@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="classBMW" kind="class" prot="public">
+    <compoundname>BMW</compoundname>
+    <basecompoundref refid="classCar" prot="public" virt="non-virtual">Car</basecompoundref>
+    <basecompoundref refid="classLuxury" prot="private" virt="non-virtual">Luxury</basecompoundref>
+    <includes refid="bmw_8h" local="no">bmw.h</includes>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Typemaps</definition>
+        <argsstring></argsstring>
+        <name>Typemaps</name>
+        <reimplements refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f">Typemaps</reimplements>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" line="7" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" bodystart="7" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float BMW::price</definition>
+        <argsstring></argsstring>
+        <name>price</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" line="9" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" bodystart="9" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int BMW::serial</definition>
+        <argsstring></argsstring>
+        <name>serial</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" line="11" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" bodystart="11" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>Luxury</label>
+        <link refid="classLuxury"/>
+      </node>
+      <node id="0">
+        <label>BMW</label>
+        <link refid="classBMW"/>
+        <childnode refid="1" relation="public-inheritance">
+        </childnode>
+        <childnode refid="2" relation="private-inheritance">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>Car</label>
+        <link refid="classCar"/>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="9">
+        <label>Luxury</label>
+        <link refid="classLuxury"/>
+      </node>
+      <node id="3">
+        <label>BMW</label>
+        <link refid="classBMW"/>
+        <childnode refid="4" relation="public-inheritance">
+        </childnode>
+        <childnode refid="9" relation="private-inheritance">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>Wheel</label>
+        <link refid="classWheel"/>
+        <childnode refid="7" relation="usage">
+          <edgelabel>rim</edgelabel>
+        </childnode>
+        <childnode refid="8" relation="usage">
+          <edgelabel>tire</edgelabel>
+        </childnode>
+      </node>
+      <node id="8">
+        <label>Tire</label>
+        <link refid="classTire"/>
+      </node>
+      <node id="7">
+        <label>Rim</label>
+        <link refid="classRim"/>
+      </node>
+      <node id="4">
+        <label>Car</label>
+        <link refid="classCar"/>
+        <childnode refid="5" relation="usage">
+          <edgelabel>engine</edgelabel>
+        </childnode>
+        <childnode refid="6" relation="usage">
+          <edgelabel>wheels</edgelabel>
+        </childnode>
+      </node>
+      <node id="5">
+        <label>Engine</label>
+        <link refid="classEngine"/>
+      </node>
+    </collaborationgraph>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" line="8" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/bmw.h" bodystart="7" bodyend="14"/>
+    <listofallmembers>
+      <member refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" prot="public" virt="non-virtual"><scope>BMW</scope><name>price</name></member>
+      <member refid="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" prot="private" virt="non-virtual"><scope>BMW</scope><name>serial</name></member>
+      <member refid="classLuxury_1a1b98504fe4a14567b66939a31ca20ab9" prot="private" virt="non-virtual"><scope>BMW</scope><name>sort</name></member>
+      <member refid="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" prot="public" virt="non-virtual"><scope>BMW</scope><name>transformToMech</name></member>
+      <member refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>BMW</scope><name>Typemaps</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

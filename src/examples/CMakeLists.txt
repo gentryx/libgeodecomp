@@ -1,0 +1,8 @@
+add_subdirectory(ants)
+add_subdirectory(chromotography)
+add_subdirectory(circle)
+add_subdirectory(gameoflife)
+add_subdirectory(jacobi2d)
+add_subdirectory(jacobi3d)
+add_subdirectory(latticeboltzmann)
+add_subdirectory(wing)

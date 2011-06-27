@@ -1,0 +1,64 @@
+# Copyright (C) 2006,2007 Andreas Schaefer <gentryx@gmx.de>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301 USA.
+
+# Mapping of C++ datatypes names to MPI datatypes names. Support for
+# built-in types as found in section 10.1.6 of MPI-2, see
+# http://www.mpi-forum.org/docs/mpi-20-html/node229.htm. We also
+# include the optional 'long long' types.
+class Datatype < Hash
+  def initialize
+    ["char",
+     "signed char",
+     "unsigned char",
+     "short",
+     "unsigned short",
+     "int",
+     "unsigned",
+     "long",
+     "unsigned long",
+     "float",
+     "double",
+     "long double",
+     "bool",
+     "long long",
+     "unsigned long long",
+    ].each do |t|
+      self[t] = Datatype.cpp_to_mpi(t)
+    end
+
+    self["wchar_t"] = "MPI::WCHAR"
+    self["std::complex<float>"] = "MPI::COMPLEX"
+    self["std::complex<double>"] = "MPI::DOUBLE_COMPLEX"
+    self["std::complex<long double>"] = "MPI::LONG_DOUBLE_COMPLEX"
+  end
+
+  class << self
+    # Convert a C++ class or type name into the MPI equivalent: use
+    # the built-in MPI name for primitive types, and generate a MPI
+    # name for user-defined types. This is just a means for name
+    # conversions, don't mix it up with the look-up operator []. The
+    # loop-up operator must not in any case return some value other
+    # than nil as this would prevent the MPIParser from recognizing
+    # pending classes. If in doubt take a look at the calls to
+    # Datatype#[] and Datatype::class2mpi.
+    def cpp_to_mpi(type, partial = false)
+      ret = "MPI::" + type.gsub(/[ :<>]+/, '_').upcase
+      ret += "_PARTIAL" if partial
+      return ret
+    end
+  end
+end

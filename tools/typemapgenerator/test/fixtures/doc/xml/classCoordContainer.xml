@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="classCoordContainer" kind="class" prot="public">
+    <compoundname>CoordContainer</compoundname>
+    <includes refid="coordcontainer_8h" local="no">coordcontainer.h</includes>
+    <templateparamlist>
+      <param>
+        <type>int</type>
+        <declname>DIMENSIONS</declname>
+        <defname>DIMENSIONS</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classCoordContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Typemaps</definition>
+        <argsstring></argsstring>
+        <name>Typemaps</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h" line="9" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="9" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classCoordContainer_1a23e8ba94c4b744137d6df8499016352f" prot="private" static="no" mutable="no">
+        <type>Coord&lt; DIMENSIONS &gt;</type>
+        <definition>Coord&lt;DIMENSIONS&gt; CoordContainer&lt; DIMENSIONS &gt;::pos</definition>
+        <argsstring></argsstring>
+        <name>pos</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h" line="11" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="11" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h" line="8" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="7" bodyend="12"/>
+    <listofallmembers>
+      <member refid="classCoordContainer_1a23e8ba94c4b744137d6df8499016352f" prot="private" virt="non-virtual"><scope>CoordContainer</scope><name>pos</name></member>
+      <member refid="classCoordContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>CoordContainer</scope><name>Typemaps</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

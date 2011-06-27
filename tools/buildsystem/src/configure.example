@@ -1,0 +1,136 @@
+#!/usr/bin/ruby
+# -*- coding: utf-8 -*-
+require 'fileutils'
+require 'optparse'
+require 'ostruct'
+require 'pathname'
+require 'yaml'
+
+opts = OpenStruct.new
+dir = Pathname.new(__FILE__).parent
+dir = Pathname.new(FileUtils.pwd) + dir if dir.relative?
+opts.srcdir = dir
+arch = `uname -ms`.chomp.gsub(/ /, '-')
+opts.builddir = opts.srcdir + "../build/#{opts.arch}"
+opts.cxxtestdir = opts.srcdir + "../lib/cxxtest"
+opts.doxygen = "doxygen"
+opts.mpi = true
+opts.mpiprefix = ENV['OMPI_PREFIX'] 
+unless opts.mpiprefix
+  mpirun_dir = `which mpirun`
+  raise "could not find mpi installation" unless $?.success?
+  opts.mpiprefix = Pathname.new(mpirun_dir).parent.parent.to_s
+end
+opts.mpiexec = "#{opts.mpiprefix}/bin/mpiexec"
+opts.typemapsdir = opts.srcdir + "mpilayer"
+opts.typemaps = true
+opts.distclean_files = 
+  [opts.srcdir + "foobar",
+   opts.srcdir + "blah"]
+opts.allowed_tests = { 
+  :unit => true, 
+  :mpi => true
+}
+
+opts.make = "make"
+if `#{opts.make} -v 2>/dev/null` =~ /GNU Make/
+  num_proc = `grep "^processor.*\: " /proc/cpuinfo  | wc -l`.to_i 
+  opts.makeopts = "-j#{num_proc + 1}"
+else
+  opts.makeopts = ""
+end
+
+if `#{opts.make} -h` =~ /CodeGear/
+  opts.cmake = "cmake -G'Borland Makefiles'"
+else 
+  opts.cmake = "cmake"
+end
+opts.cpack = "cpack"
+
+parser = OptionParser.new do |o|
+  o.banner = "Usage: #$0 PARAMS"
+  o.separator "Configure build options with the following parameters:"
+
+  o.on("-c", "--cmake <command>", 
+       "Use <command> to call CMake.") do |cmake|
+    opts.cmake = cmake
+  end
+
+  o.on("--[no-]typemaps", 
+       "Control MPI typemap generation.") do |f|
+    opts.typemaps = f
+  end
+
+  o.on("--[no-]mpi", 
+       "Control MPI support.") do |f|
+    opts.mpi = f
+    opts.allowed_tests.delete(:mpi)
+  end
+end
+parser.parse!(ARGV)
+
+File.open("conf.yaml", "w") do |f|
+  f.write(YAML.dump(opts))
+end
+
+File.open("conf.cmake", "w") do |f|
+  tests = ""
+  opts.allowed_tests.each do |name, enabled| 
+    tests += "set(FEATURE_#{name.to_s.upcase}_TEST true)\n" if enabled
+  end
+
+  f.puts <<EOF
+#{tests}
+set(PACKAGE_NAME "testpackage")
+set(PACKAGE_VERSION "r12345")
+set(PACKAGE_VENDOR "The Smurfs")
+set(PACKAGE_HOMEPAGE "http:\\\\\\\\www.my-project-home-page.org")
+set(PACKAGE_EMAIL "me@my-personal-home-page.com")
+
+# installer stuff
+set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PACKAGE_NAME})
+set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PACKAGE_NAME})
+
+# will be shown e.g. in windows' control center package info
+set(CPACK_PACKAGE_VENDOR ${PACKAGE_VENDOR})
+# fixme:
+# #SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
+# fixme:
+# #SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
+# fixme:
+# set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PACKAGE_NAME})
+
+if(WIN32 AND NOT UNIX)
+  # unused in current nsis versions, fix pending (http://www.cmake.org/Bug/print_bug_page.php?bug_id=8682)
+  set(CPACK_NSIS_DISPLAY_NAME ${PACKAGE_NAME})
+
+  # name to show in software tab of control center
+  set(CPACK_NSIS_DISPLAY_NAME ${PACKAGE_NAME})
+  # will be shown e.g. in windows' control center package info
+  set(CPACK_NSIS_HELP_LINK ${PACKAGE_HOMEPAGE})
+  # will be shown e.g. in windows' control center package info  
+  set(CPACK_NSIS_URL_INFO_ABOUT ${PACKAGE_HOMEPAGE})
+  # will be shown e.g. in windows' control center package info
+  set(CPACK_NSIS_CONTACT ${PACKAGE_EMAIL})
+  set(CPACK_NSIS_MODIFY_PATH ON)
+
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  # fixme:
+  #  set(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+  # fixme:
+  #  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\helloworld.exe")
+#else(WIN32 AND NOT UNIX)
+# fixme:
+#  set(CPACK_STRIP_FILES "bin/MyExecutable")
+# fixme:
+#  set(CPACK_SOURCE_STRIP_FILES "")
+endif(WIN32 AND NOT UNIX)
+set(CPACK_PACKAGE_EXECUTABLES "helloworld" "My Hello World")
+
+include(CPack)
+EOF
+
+end

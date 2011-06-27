@@ -1,0 +1,25 @@
+This is the TypemapGenerator, a simple code generator to automate the
+construction of MPI datatypes for custom C++ classes. Rather than
+parsing the source code itself, it relies relies on Doxygen's XML
+output. It will produce a class "Typemaps", located in the files
+"YOUR_PATH/typemaps.{h,cpp}". This class will contain the MPI code
+create the neccessary extended struct derived datatypes. The
+TypemapGenerator will only generate datatypes for its friends.
+
+To get an idea how it's working, have a look at the demonstation
+project in "./sample". The "compile.sh" script exhibits the three
+phase build process: (a) parsing via Doxygen, (b) code generation
+using the TypemapGenerator and (c) compilation using Make.
+
+LICENSE
+=======
+
+This project is GPLed, see LICENSE for details.
+
+
+INSTALLATION
+============
+
+You will probably want to integrate the TypemapGenerator into your build
+process (similar to "compile.sh"). How this is done will depend on
+your setup.

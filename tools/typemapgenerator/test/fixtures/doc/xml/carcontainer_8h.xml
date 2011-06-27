@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="carcontainer_8h" kind="file">
+    <compoundname>carcontainer.h</compoundname>
+    <includes refid="car_8h" local="yes">car.h</includes>
+    <incdepgraph>
+      <node id="30">
+        <label>car.h</label>
+        <link refid="car_8h"/>
+        <childnode refid="31" relation="include">
+        </childnode>
+        <childnode refid="32" relation="include">
+        </childnode>
+        <childnode refid="33" relation="include">
+        </childnode>
+      </node>
+      <node id="33">
+        <label>wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="34" relation="include">
+        </childnode>
+        <childnode refid="35" relation="include">
+        </childnode>
+      </node>
+      <node id="31">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
+      <node id="35">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="29">
+        <label>src/carcontainer.h</label>
+        <link refid="carcontainer.h"/>
+        <childnode refid="30" relation="include">
+        </childnode>
+      </node>
+      <node id="34">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="32">
+        <label>mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="30" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <innerclass refid="classCarContainer" prot="public">CarContainer</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_carcontainer_h_</highlight></codeline>
+<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_carcontainer_h_</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="car_8h" kindref="compound">car.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="classCarContainer" refkind="compound"><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCarContainer" kindref="compound" tooltip="The CarContainer class is meant to demonstrate the TypemapGenerator&amp;#39;s ability...">CarContainer</ref><sp/>{</highlight></codeline>
+<codeline lineno="12" refid="classCarContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCarContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14" refid="classCarContainer_1a4e715ccebe727f2ed474824b97b4c503" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/>*<ref refid="classCarContainer_1a4e715ccebe727f2ed474824b97b4c503" kindref="member">alpha</ref>;</highlight></codeline>
+<codeline lineno="15" refid="classCarContainer_1a1d7a63b50ac41f486b32b7a9ad595187" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/>*<ref refid="classCarContainer_1a1d7a63b50ac41f486b32b7a9ad595187" kindref="member">bravo</ref>;</highlight></codeline>
+<codeline lineno="16" refid="classCarContainer_1a17760f8972b9bda4450275d853a51391" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/>*<ref refid="classCarContainer_1a17760f8972b9bda4450275d853a51391" kindref="member">charly</ref>;</highlight></codeline>
+<codeline lineno="17" refid="classCarContainer_1a0c4ce9f0f1abe0a455e48ddd11cab96b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/>*<ref refid="classCarContainer_1a0c4ce9f0f1abe0a455e48ddd11cab96b" kindref="member">delta</ref>;</highlight></codeline>
+<codeline lineno="18" refid="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/>*<ref refid="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" kindref="member">echo</ref>;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20" refid="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" kindref="member">size</ref>;</highlight></codeline>
+<codeline lineno="21" refid="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classWheel" kindref="compound">Wheel</ref><sp/><ref refid="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" kindref="member">spareWheel</ref>;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h"/>
+  </compounddef>
+</doxygen>

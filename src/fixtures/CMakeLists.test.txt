@@ -1,0 +1,27 @@
+set(RELATIVE_PATH "")
+include(auto.cmake)
+
+get_filename_component(PWD ./ ABSOLUTE)
+string(REPLACE "${LIBGEODECOMP_SOURCE_DIR}" "" RELATIVE_PATH ${PWD})
+string(REPLACE "/" _ BUFFER1 ${RELATIVE_PATH})
+string(REPLACE ":" _ BUFFER2 ${BUFFER1})
+set(UNIT_TARGET test_${BUFFER2})
+
+get_filename_component(DIRNAME ${PWD} NAME)
+string(REGEX MATCH "^parallel_mpi" is_mpi_test ${DIRNAME})
+string(REGEX MATCH "^unit" is_unit_test ${DIRNAME})
+
+set(allowed_test false)
+if (is_unit_test AND LIBGEODECOMP_FEATURE_UNIT)
+  set(allowed_test true)
+endif(is_unit_test AND LIBGEODECOMP_FEATURE_UNIT)
+if (is_mpi_test AND LIBGEODECOMP_FEATURE_MPI)
+  set(allowed_test true)
+endif(is_mpi_test AND LIBGEODECOMP_FEATURE_MPI)
+
+if(allowed_test)
+  include_directories(${LIBGEODECOMP_SOURCE_DIR}/../lib/cxxtest)
+  add_executable(${UNIT_TARGET} ${SOURCES})
+  set_target_properties(${UNIT_TARGET} PROPERTIES OUTPUT_NAME test)
+  target_link_libraries(${UNIT_TARGET} ${LOCAL_LIBGEODECOMP_LINK_LIB})
+endif(allowed_test)

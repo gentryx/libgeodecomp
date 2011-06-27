@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="engine_8h" kind="file">
+    <compoundname>engine.h</compoundname>
+    <includedby refid="car_8h" local="yes">src/car.h</includedby>
+    <invincdepgraph>
+      <node id="45">
+        <label>src/car.h</label>
+        <link refid="car_8h"/>
+        <childnode refid="46" relation="include">
+        </childnode>
+        <childnode refid="47" relation="include">
+        </childnode>
+        <childnode refid="48" relation="include">
+        </childnode>
+        <childnode refid="49" relation="include">
+        </childnode>
+        <childnode refid="50" relation="include">
+        </childnode>
+      </node>
+      <node id="49">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
+        <childnode refid="49" relation="include">
+        </childnode>
+      </node>
+      <node id="44">
+        <label>src/engine.h</label>
+        <link refid="engine.h"/>
+        <childnode refid="45" relation="include">
+        </childnode>
+      </node>
+      <node id="47">
+        <label>src/car.cpp</label>
+        <link refid="car_8cpp"/>
+      </node>
+      <node id="46">
+        <label>src/bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="46" relation="include">
+        </childnode>
+      </node>
+      <node id="51">
+        <label>src/mech.cpp</label>
+        <link refid="mech_8cpp"/>
+      </node>
+      <node id="48">
+        <label>src/carcontainer.h</label>
+        <link refid="carcontainer_8h"/>
+      </node>
+      <node id="50">
+        <label>src/mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="45" relation="include">
+        </childnode>
+        <childnode refid="51" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classEngine" prot="public">Engine</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_engine_h_</highlight></codeline>
+<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_engine_h_</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4" refid="classEngine" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classEngine" kindref="compound">Engine</ref><sp/></highlight></codeline>
+<codeline lineno="5"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="6" refid="classEngine_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classEngine_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8" refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/><ref refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160" kindref="member">Fuel</ref><sp/>{<ref refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160aa7d03b07702bc46b9fbf22228d4406da" kindref="member">DIESEL</ref>,<sp/><ref refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a" kindref="member">GASOLINE</ref>,<sp/><ref refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160ac9683a44177815441e518e565f09f95c" kindref="member">AUTOGAS</ref>};</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10" refid="classEngine_1ad874d9a0b419440d94ab443becb64257" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="classEngine_1ad874d9a0b419440d94ab443becb64257" kindref="member">capacity</ref>;</highlight></codeline>
+<codeline lineno="11" refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160" kindref="member">Fuel</ref><sp/><ref refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" kindref="member">fuel</ref>;</highlight></codeline>
+<codeline lineno="12" refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" kindref="member">gearRatios</ref>[6];</highlight></codeline>
+<codeline lineno="13"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/engine.h"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="classCar" kind="class" prot="public">
+    <compoundname>Car</compoundname>
+    <derivedcompoundref refid="classBMW" prot="public" virt="non-virtual">BMW</derivedcompoundref>
+    <includes refid="car_8h" local="no">car.h</includes>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Typemaps</definition>
+        <argsstring></argsstring>
+        <name>Typemaps</name>
+        <reimplementedby refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f">Typemaps</reimplementedby>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" line="12" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" bodystart="12" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-static-attrib">
+      <memberdef kind="variable" id="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" prot="private" static="yes" mutable="no">
+        <type>const unsigned</type>
+        <definition>const unsigned Car::NumWheels</definition>
+        <argsstring></argsstring>
+        <name>NumWheels</name>
+        <initializer> 4</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" line="14" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" prot="private" static="no" mutable="no">
+        <type><ref refid="classWheel" kindref="compound">Wheel</ref></type>
+        <definition>Wheel Car::wheels[NumWheels]</definition>
+        <argsstring>[NumWheels]</argsstring>
+        <name>wheels</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" line="15" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCar_1a6120a2d6a20db3b25035536006ed6f9e" prot="private" static="no" mutable="no">
+        <type><ref refid="classEngine" kindref="compound">Engine</ref></type>
+        <definition>Engine Car::engine</definition>
+        <argsstring></argsstring>
+        <name>engine</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" line="16" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classMech" kindref="compound">Mech</ref></type>
+        <definition>Mech Car::transformToMech</definition>
+        <argsstring>()</argsstring>
+        <name>transformToMech</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" line="19" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.cpp" bodystart="3" bodyend="5"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="11">
+        <label>BMW</label>
+        <link refid="classBMW"/>
+        <childnode refid="10" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="10">
+        <label>Car</label>
+        <link refid="classCar"/>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="14">
+        <label>Wheel</label>
+        <link refid="classWheel"/>
+        <childnode refid="15" relation="usage">
+          <edgelabel>rim</edgelabel>
+        </childnode>
+        <childnode refid="16" relation="usage">
+          <edgelabel>tire</edgelabel>
+        </childnode>
+      </node>
+      <node id="16">
+        <label>Tire</label>
+        <link refid="classTire"/>
+      </node>
+      <node id="15">
+        <label>Rim</label>
+        <link refid="classRim"/>
+      </node>
+      <node id="12">
+        <label>Car</label>
+        <link refid="classCar"/>
+        <childnode refid="13" relation="usage">
+          <edgelabel>engine</edgelabel>
+        </childnode>
+        <childnode refid="14" relation="usage">
+          <edgelabel>wheels</edgelabel>
+        </childnode>
+      </node>
+      <node id="13">
+        <label>Engine</label>
+        <link refid="classEngine"/>
+      </node>
+    </collaborationgraph>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" line="11" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.h" bodystart="10" bodyend="20"/>
+    <listofallmembers>
+      <member refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" prot="private" virt="non-virtual"><scope>Car</scope><name>engine</name></member>
+      <member refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" prot="private" virt="non-virtual"><scope>Car</scope><name>NumWheels</name></member>
+      <member refid="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" prot="public" virt="non-virtual"><scope>Car</scope><name>transformToMech</name></member>
+      <member refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Car</scope><name>Typemaps</name></member>
+      <member refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" prot="private" virt="non-virtual"><scope>Car</scope><name>wheels</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

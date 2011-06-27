@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="classCarContainer" kind="class" prot="public">
+    <compoundname>CarContainer</compoundname>
+    <includes refid="carcontainer_8h" local="no">carcontainer.h</includes>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classCarContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Typemaps</definition>
+        <argsstring></argsstring>
+        <name>Typemaps</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="12" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="12" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classCarContainer_1a4e715ccebe727f2ed474824b97b4c503" prot="private" static="no" mutable="no">
+        <type><ref refid="classCar" kindref="compound">Car</ref> *</type>
+        <definition>Car* CarContainer::alpha</definition>
+        <argsstring></argsstring>
+        <name>alpha</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="14" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCarContainer_1a1d7a63b50ac41f486b32b7a9ad595187" prot="private" static="no" mutable="no">
+        <type><ref refid="classCar" kindref="compound">Car</ref> *</type>
+        <definition>Car* CarContainer::bravo</definition>
+        <argsstring></argsstring>
+        <name>bravo</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="15" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCarContainer_1a17760f8972b9bda4450275d853a51391" prot="private" static="no" mutable="no">
+        <type><ref refid="classCar" kindref="compound">Car</ref> *</type>
+        <definition>Car* CarContainer::charly</definition>
+        <argsstring></argsstring>
+        <name>charly</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="16" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCarContainer_1a0c4ce9f0f1abe0a455e48ddd11cab96b" prot="private" static="no" mutable="no">
+        <type><ref refid="classCar" kindref="compound">Car</ref> *</type>
+        <definition>Car* CarContainer::delta</definition>
+        <argsstring></argsstring>
+        <name>delta</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="17" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" prot="private" static="no" mutable="no">
+        <type><ref refid="classCar" kindref="compound">Car</ref> *</type>
+        <definition>Car* CarContainer::echo</definition>
+        <argsstring></argsstring>
+        <name>echo</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="18" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int CarContainer::size</definition>
+        <argsstring></argsstring>
+        <name>size</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="20" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" prot="private" static="no" mutable="no">
+        <type><ref refid="classWheel" kindref="compound">Wheel</ref></type>
+        <definition>Wheel CarContainer::spareWheel</definition>
+        <argsstring></argsstring>
+        <name>spareWheel</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="21" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>The <ref refid="classCarContainer" kindref="compound">CarContainer</ref> class is meant to demonstrate the TypemapGenerator&apos;s ability to create partial MPI datatypes for classes containing pointer members. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="19">
+        <label>Wheel</label>
+        <link refid="classWheel"/>
+        <childnode refid="20" relation="usage">
+          <edgelabel>rim</edgelabel>
+        </childnode>
+        <childnode refid="21" relation="usage">
+          <edgelabel>tire</edgelabel>
+        </childnode>
+      </node>
+      <node id="21">
+        <label>Tire</label>
+        <link refid="classTire"/>
+      </node>
+      <node id="20">
+        <label>Rim</label>
+        <link refid="classRim"/>
+      </node>
+      <node id="22">
+        <label>Car</label>
+        <link refid="classCar"/>
+        <childnode refid="23" relation="usage">
+          <edgelabel>engine</edgelabel>
+        </childnode>
+        <childnode refid="19" relation="usage">
+          <edgelabel>wheels</edgelabel>
+        </childnode>
+      </node>
+      <node id="23">
+        <label>Engine</label>
+        <link refid="classEngine"/>
+      </node>
+      <node id="18">
+        <label>CarContainer</label>
+        <link refid="classCarContainer"/>
+        <childnode refid="19" relation="usage">
+          <edgelabel>spareWheel</edgelabel>
+        </childnode>
+        <childnode refid="22" relation="usage">
+          <edgelabel>charly</edgelabel>
+          <edgelabel>delta</edgelabel>
+          <edgelabel>echo</edgelabel>
+          <edgelabel>bravo</edgelabel>
+          <edgelabel>alpha</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" line="11" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/carcontainer.h" bodystart="11" bodyend="22"/>
+    <listofallmembers>
+      <member refid="classCarContainer_1a4e715ccebe727f2ed474824b97b4c503" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>alpha</name></member>
+      <member refid="classCarContainer_1a1d7a63b50ac41f486b32b7a9ad595187" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>bravo</name></member>
+      <member refid="classCarContainer_1a17760f8972b9bda4450275d853a51391" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>charly</name></member>
+      <member refid="classCarContainer_1a0c4ce9f0f1abe0a455e48ddd11cab96b" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>delta</name></member>
+      <member refid="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>echo</name></member>
+      <member refid="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>size</name></member>
+      <member refid="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>spareWheel</name></member>
+      <member refid="classCarContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>CarContainer</scope><name>Typemaps</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="coordcontainer_8h" kind="file">
+    <compoundname>coordcontainer.h</compoundname>
+    <innerclass refid="classCoordContainer" prot="public">CoordContainer</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_coordcontainer_</highlight></codeline>
+<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_coordcontainer_</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal">include<sp/></highlight><highlight class="stringliteral">&quot;coord.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">template</highlight><highlight class="normal">&lt;</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>DIMENSIONS&gt;</highlight></codeline>
+<codeline lineno="7" refid="classCoordContainer" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordContainer" kindref="compound">CoordContainer</ref></highlight></codeline>
+<codeline lineno="8"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="9" refid="classCoordContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="classCoordContainer_1a23e8ba94c4b744137d6df8499016352f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>Coord&lt;DIMENSIONS&gt;<sp/><ref refid="classCoordContainer_1a23e8ba94c4b744137d6df8499016352f" kindref="member">pos</ref>;</highlight></codeline>
+<codeline lineno="12"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainer.h"/>
+  </compounddef>
+</doxygen>

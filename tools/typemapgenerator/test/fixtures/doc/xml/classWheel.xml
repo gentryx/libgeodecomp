@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="classWheel" kind="class" prot="public">
+    <compoundname>Wheel</compoundname>
+    <includes refid="wheel_8h" local="no">wheel.h</includes>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Typemaps</definition>
+        <argsstring></argsstring>
+        <name>Typemaps</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" line="9" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" bodystart="9" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" prot="private" static="no" mutable="no">
+        <type><ref refid="classTire" kindref="compound">Tire</ref></type>
+        <definition>Tire Wheel::tire</definition>
+        <argsstring></argsstring>
+        <name>tire</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" line="10" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classWheel_1ab06f8ebfea44fd279b081980f7e24594" prot="private" static="no" mutable="no">
+        <type><ref refid="classRim" kindref="compound">Rim</ref></type>
+        <definition>Rim Wheel::rim</definition>
+        <argsstring></argsstring>
+        <name>rim</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" line="11" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" bodystart="11" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="59">
+        <label>Wheel</label>
+        <link refid="classWheel"/>
+        <childnode refid="60" relation="usage">
+          <edgelabel>rim</edgelabel>
+        </childnode>
+        <childnode refid="61" relation="usage">
+          <edgelabel>tire</edgelabel>
+        </childnode>
+      </node>
+      <node id="61">
+        <label>Tire</label>
+        <link refid="classTire"/>
+      </node>
+      <node id="60">
+        <label>Rim</label>
+        <link refid="classRim"/>
+      </node>
+    </collaborationgraph>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" line="8" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/wheel.h" bodystart="7" bodyend="12"/>
+    <listofallmembers>
+      <member refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" prot="private" virt="non-virtual"><scope>Wheel</scope><name>rim</name></member>
+      <member refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" prot="private" virt="non-virtual"><scope>Wheel</scope><name>tire</name></member>
+      <member refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Wheel</scope><name>Typemaps</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

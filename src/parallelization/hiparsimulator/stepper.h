@@ -1,0 +1,54 @@
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifndef _libgeodecomp_parallelization_hiparsimulator_stepper_h_
+#define _libgeodecomp_parallelization_hiparsimulator_stepper_h_
+
+#include <boost/shared_ptr.hpp>
+#include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
+#include <libgeodecomp/misc/typetraits.h>
+
+namespace LibGeoDecomp {
+namespace HiParSimulator {
+
+/**
+ * Abstract interface class. Steppers contain some arbitrary region of
+ * the grid which they can update. See StepperHelper for details on
+ * accessing ghost zones. Do not inherit directly from Stepper, but
+ * rather from StepperHelper.
+ *
+ * fixme: doxygen syntax to link to StepperHelper...
+ * fixme: cells store the number of dimensions, now, so remove this
+ * parameter
+ *
+ * fixme: deduce DIM from partition?!
+ */
+template<typename CELL_TYPE, int DIM>
+class Stepper
+{
+public:
+    friend class StepperTest;
+    typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
+
+    inline Stepper(
+        const boost::shared_ptr<PartitionManager<DIM> >& _partitionManager,
+        const boost::shared_ptr<Initializer<CELL_TYPE> >& _initializer) :
+        partitionManager(_partitionManager),
+        initializer(_initializer)
+    {}
+
+    inline virtual void update(int nanoSteps) = 0;
+    inline virtual const GridType& grid() const = 0;
+    // returns current step and nanoStep
+    inline virtual std::pair<int, int> currentStep() const = 0;
+
+protected:
+    boost::shared_ptr<PartitionManager<DIM> > partitionManager;
+    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+};
+
+}
+}
+
+#endif
+#endif

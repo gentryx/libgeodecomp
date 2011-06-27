@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="pair_8h" kind="file">
+    <compoundname>pair.h</compoundname>
+    <includes refid="pair_8h" local="yes">coord.h</includes>
+    <includedby refid="pair_8h" local="yes">src/pair.h</includedby>
+    <incdepgraph>
+      <node id="88">
+        <label>src/pair.h</label>
+        <link refid="pair.h"/>
+        <childnode refid="88" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="89">
+        <label>src/pair.h</label>
+        <link refid="pair.h"/>
+        <childnode refid="89" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classCoordPair" prot="public">CoordPair</innerclass>
+    <innerclass refid="classDummy" prot="public">Dummy</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_pair_h_</highlight></codeline>
+<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_pair_h_</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="coord_8h" kindref="compound">coord.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6" refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">template</highlight><highlight class="normal">&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>A,<sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>B&gt;</highlight></codeline>
+<codeline lineno="7" refid="classCoordPair" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordPair" kindref="compound">CoordPair</ref></highlight></codeline>
+<codeline lineno="8" refid="classCoordPair_1af50cd114d307e8e7b8e8c921a42f836c" refkind="member"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="9" refid="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/>A<sp/><ref refid="classCoordPair_1af50cd114d307e8e7b8e8c921a42f836c" kindref="member">a</ref>;</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/><sp/><sp/><sp/>B<sp/><ref refid="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" kindref="member">b</ref>;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15" refid="classDummy" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classDummy" kindref="compound">Dummy</ref></highlight></codeline>
+<codeline lineno="16"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="17" refid="classDummy_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classDummy_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="19" refid="classDummy_1ab415b6f2ca22d2dda9fc58225d2dfbd2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordPair" kindref="compound">CoordPair&lt;int, int&gt;</ref><sp/><ref refid="classDummy_1ab415b6f2ca22d2dda9fc58225d2dfbd2" kindref="member">p1</ref>;</highlight></codeline>
+<codeline lineno="20" refid="classDummy_1a7fdcca20c08335125684cdf2bb1d1ff9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordPair" kindref="compound">CoordPair&lt;int, double&gt;</ref><sp/><ref refid="classDummy_1a7fdcca20c08335125684cdf2bb1d1ff9" kindref="member">p2</ref>;</highlight></codeline>
+<codeline lineno="21" refid="classDummy_1aa7e675a876e00118719c954ddce26276" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordPair" kindref="compound">CoordPair&lt;Coord&lt;3&gt;</ref>,<sp/><ref refid="classCoord_3_012_01_4" kindref="compound">Coord&lt;2&gt;</ref><sp/>&gt;<sp/><ref refid="classDummy_1aa7e675a876e00118719c954ddce26276" kindref="member">p3</ref>;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h"/>
+  </compounddef>
+</doxygen>

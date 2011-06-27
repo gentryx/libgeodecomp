@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="coordcontainercontainer_8h" kind="file">
+    <compoundname>coordcontainercontainer.h</compoundname>
+    <innerclass refid="classCoordContainerContainer" prot="public">CoordContainerContainer</innerclass>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="coordcontainercontainer_8h_1a887c098ffbed04f2503382676b8ea1f9" prot="public" static="no">
+        <name>_coordcontainercontainer__</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="2" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="2" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_coordcontainercontainer_</highlight></codeline>
+<codeline lineno="2" refid="coordcontainercontainer_8h_1a887c098ffbed04f2503382676b8ea1f9" refkind="member"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_coordcontainercontainer__</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal">include<sp/></highlight><highlight class="stringliteral">&quot;coordcontainer.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6" refid="classCoordContainerContainer" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordContainerContainer" kindref="compound">CoordContainerContainer</ref></highlight></codeline>
+<codeline lineno="7"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="8" refid="classCoordContainerContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordContainerContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10" refid="classCoordContainerContainer_1a5b6772d353d45d3ff8259f86823d7a41" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordContainer" kindref="compound">CoordContainer&lt;1&gt;</ref><sp/><ref refid="classCoordContainerContainer_1a5b6772d353d45d3ff8259f86823d7a41" kindref="member">cargo1</ref>;</highlight></codeline>
+<codeline lineno="11" refid="classCoordContainerContainer_1ae0c2e5a883413699fa483d8a79cc81ad" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordContainer" kindref="compound">CoordContainer&lt;2&gt;</ref><sp/><ref refid="classCoordContainerContainer_1ae0c2e5a883413699fa483d8a79cc81ad" kindref="member">cargo2</ref>;</highlight></codeline>
+<codeline lineno="12" refid="classCoordContainerContainer_1a8875c1cb4985bf787a213fa47d9ddc28" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordContainer" kindref="compound">CoordContainer&lt;3&gt;</ref><sp/><ref refid="classCoordContainerContainer_1a8875c1cb4985bf787a213fa47d9ddc28" kindref="member">cargo3</ref>;</highlight></codeline>
+<codeline lineno="13" refid="classCoordContainerContainer_1a23b426913ab8a039eccc9cd3fed7ef3b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCoordContainer" kindref="compound">CoordContainer&lt;4&gt;</ref><sp/><ref refid="classCoordContainerContainer_1a23b426913ab8a039eccc9cd3fed7ef3b" kindref="member">cargo4</ref>;</highlight></codeline>
+<codeline lineno="14"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/coordcontainercontainer.h"/>
+  </compounddef>
+</doxygen>

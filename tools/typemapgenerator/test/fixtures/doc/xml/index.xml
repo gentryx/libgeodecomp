@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.6.3">
+  <compound refid="classBMW" kind="class"><name>BMW</name>
+    <member refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kind="variable"><name>price</name></member>
+    <member refid="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" kind="variable"><name>serial</name></member>
+  </compound>
+  <compound refid="classCar" kind="class"><name>Car</name>
+    <member refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kind="variable"><name>NumWheels</name></member>
+    <member refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" kind="variable"><name>wheels</name></member>
+    <member refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" kind="variable"><name>engine</name></member>
+    <member refid="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" kind="function"><name>transformToMech</name></member>
+  </compound>
+  <compound refid="classCarContainer" kind="class"><name>CarContainer</name>
+    <member refid="classCarContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCarContainer_1a4e715ccebe727f2ed474824b97b4c503" kind="variable"><name>alpha</name></member>
+    <member refid="classCarContainer_1a1d7a63b50ac41f486b32b7a9ad595187" kind="variable"><name>bravo</name></member>
+    <member refid="classCarContainer_1a17760f8972b9bda4450275d853a51391" kind="variable"><name>charly</name></member>
+    <member refid="classCarContainer_1a0c4ce9f0f1abe0a455e48ddd11cab96b" kind="variable"><name>delta</name></member>
+    <member refid="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" kind="variable"><name>echo</name></member>
+    <member refid="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" kind="variable"><name>size</name></member>
+    <member refid="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" kind="variable"><name>spareWheel</name></member>
+  </compound>
+  <compound refid="classCoord_3_012_01_4" kind="class"><name>Coord&lt; 2 &gt;</name>
+    <member refid="classCoord_3_012_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCoord_3_012_01_4_1a624d168ba1b3f61e7b548580773d1604" kind="variable"><name>x</name></member>
+    <member refid="classCoord_3_012_01_4_1a093afe42603f0f06a4151795e459d692" kind="variable"><name>y</name></member>
+  </compound>
+  <compound refid="classCoord_3_013_01_4" kind="class"><name>Coord&lt; 3 &gt;</name>
+    <member refid="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCoord_3_013_01_4_1a7f23cad7fae04639fb4c8770e6bcca27" kind="variable"><name>x</name></member>
+    <member refid="classCoord_3_013_01_4_1a39b49f99ea21d316f463fa50ea152d10" kind="variable"><name>y</name></member>
+    <member refid="classCoord_3_013_01_4_1a0b00dc30f1500de789d9d1f21708ec2d" kind="variable"><name>z</name></member>
+  </compound>
+  <compound refid="classCoordContainer" kind="class"><name>CoordContainer</name>
+    <member refid="classCoordContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCoordContainer_1a23e8ba94c4b744137d6df8499016352f" kind="variable"><name>pos</name></member>
+  </compound>
+  <compound refid="classCoordContainerContainer" kind="class"><name>CoordContainerContainer</name>
+    <member refid="classCoordContainerContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCoordContainerContainer_1a5b6772d353d45d3ff8259f86823d7a41" kind="variable"><name>cargo1</name></member>
+    <member refid="classCoordContainerContainer_1ae0c2e5a883413699fa483d8a79cc81ad" kind="variable"><name>cargo2</name></member>
+    <member refid="classCoordContainerContainer_1a8875c1cb4985bf787a213fa47d9ddc28" kind="variable"><name>cargo3</name></member>
+    <member refid="classCoordContainerContainer_1a23b426913ab8a039eccc9cd3fed7ef3b" kind="variable"><name>cargo4</name></member>
+  </compound>
+  <compound refid="classCoordPair" kind="class"><name>CoordPair</name>
+    <member refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCoordPair_1af50cd114d307e8e7b8e8c921a42f836c" kind="variable"><name>a</name></member>
+    <member refid="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" kind="variable"><name>b</name></member>
+  </compound>
+  <compound refid="classDummy" kind="class"><name>Dummy</name>
+    <member refid="classDummy_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classDummy_1ab415b6f2ca22d2dda9fc58225d2dfbd2" kind="variable"><name>p1</name></member>
+    <member refid="classDummy_1a7fdcca20c08335125684cdf2bb1d1ff9" kind="variable"><name>p2</name></member>
+    <member refid="classDummy_1aa7e675a876e00118719c954ddce26276" kind="variable"><name>p3</name></member>
+  </compound>
+  <compound refid="classEngine" kind="class"><name>Engine</name>
+    <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160" kind="enum"><name>Fuel</name></member>
+    <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160aa7d03b07702bc46b9fbf22228d4406da" kind="enumvalue"><name>DIESEL</name></member>
+    <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a" kind="enumvalue"><name>GASOLINE</name></member>
+    <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160ac9683a44177815441e518e565f09f95c" kind="enumvalue"><name>AUTOGAS</name></member>
+    <member refid="classEngine_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classEngine_1ad874d9a0b419440d94ab443becb64257" kind="variable"><name>capacity</name></member>
+    <member refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" kind="variable"><name>fuel</name></member>
+    <member refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" kind="variable"><name>gearRatios</name></member>
+  </compound>
+  <compound refid="classLuxury" kind="class"><name>Luxury</name>
+    <member refid="classLuxury_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classLuxury_1a1b98504fe4a14567b66939a31ca20ab9" kind="variable"><name>sort</name></member>
+  </compound>
+  <compound refid="classMech" kind="class"><name>Mech</name>
+    <member refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" kind="variable"><name>armor</name></member>
+    <member refid="classMech_1a0a24b56451092323eef033edfa3969b5" kind="variable"><name>ammo</name></member>
+    <member refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" kind="variable"><name>power</name></member>
+    <member refid="classMech_1af16dc449c38d2e30c15aadb6869b7d77" kind="function"><name>Mech</name></member>
+    <member refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" kind="function"><name>transformToCar</name></member>
+  </compound>
+  <compound refid="classRim" kind="class"><name>Rim</name>
+    <member refid="classRim_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classRim_1af3aa5502df8e41468157661e861b7773" kind="variable"><name>chromePlated</name></member>
+  </compound>
+  <compound refid="classTire" kind="class"><name>Tire</name>
+    <member refid="classTire_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" kind="variable"><name>treadDepth</name></member>
+  </compound>
+  <compound refid="classWheel" kind="class"><name>Wheel</name>
+    <member refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" kind="variable"><name>tire</name></member>
+    <member refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" kind="variable"><name>rim</name></member>
+  </compound>
+  <compound refid="bmw_8h" kind="file"><name>bmw.h</name>
+  </compound>
+  <compound refid="car_8cpp" kind="file"><name>car.cpp</name>
+  </compound>
+  <compound refid="car_8h" kind="file"><name>car.h</name>
+  </compound>
+  <compound refid="carcontainer_8h" kind="file"><name>carcontainer.h</name>
+  </compound>
+  <compound refid="coord_8h" kind="file"><name>coord.h</name>
+  </compound>
+  <compound refid="coordcontainer_8h" kind="file"><name>coordcontainer.h</name>
+  </compound>
+  <compound refid="coordcontainercontainer_8h" kind="file"><name>coordcontainercontainer.h</name>
+    <member refid="coordcontainercontainer_8h_1a887c098ffbed04f2503382676b8ea1f9" kind="define"><name>_coordcontainercontainer__</name></member>
+  </compound>
+  <compound refid="engine_8h" kind="file"><name>engine.h</name>
+  </compound>
+  <compound refid="luxury_8h" kind="file"><name>luxury.h</name>
+  </compound>
+  <compound refid="main_8cpp" kind="file"><name>main.cpp</name>
+    <member refid="main_8cpp_1a0ddf1224851353fc92bfbff6f499fa97" kind="function"><name>main</name></member>
+  </compound>
+  <compound refid="mech_8cpp" kind="file"><name>mech.cpp</name>
+  </compound>
+  <compound refid="mech_8h" kind="file"><name>mech.h</name>
+  </compound>
+  <compound refid="pair_8h" kind="file"><name>pair.h</name>
+  </compound>
+  <compound refid="rim_8h" kind="file"><name>rim.h</name>
+  </compound>
+  <compound refid="tire_8h" kind="file"><name>tire.h</name>
+  </compound>
+  <compound refid="wheel_8h" kind="file"><name>wheel.h</name>
+  </compound>
+  <compound refid="dir_f1e3d554da75903c386950a9779f8401" kind="dir"><name>src/</name>
+  </compound>
+</doxygenindex>

@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+  <compounddef id="classDummy" kind="class" prot="public">
+    <compoundname>Dummy</compoundname>
+    <includes refid="pair_8h" local="no">pair.h</includes>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classDummy_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Typemaps</definition>
+        <argsstring></argsstring>
+        <name>Typemaps</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" line="17" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="classDummy_1ab415b6f2ca22d2dda9fc58225d2dfbd2" prot="public" static="no" mutable="no">
+        <type><ref refid="classCoordPair" kindref="compound">CoordPair</ref>&lt; int, int &gt;</type>
+        <definition>CoordPair&lt;int, int&gt; Dummy::p1</definition>
+        <argsstring></argsstring>
+        <name>p1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" line="19" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" bodystart="19" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDummy_1a7fdcca20c08335125684cdf2bb1d1ff9" prot="public" static="no" mutable="no">
+        <type><ref refid="classCoordPair" kindref="compound">CoordPair</ref>&lt; int, double &gt;</type>
+        <definition>CoordPair&lt;int, double&gt; Dummy::p2</definition>
+        <argsstring></argsstring>
+        <name>p2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" line="20" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classDummy_1aa7e675a876e00118719c954ddce26276" prot="public" static="no" mutable="no">
+        <type><ref refid="classCoordPair" kindref="compound">CoordPair</ref>&lt; Coord&lt; 3 &gt;, Coord&lt; 2 &gt; &gt;</type>
+        <definition>CoordPair&lt;Coord&lt;3&gt;, Coord&lt;2&gt; &gt; Dummy::p3</definition>
+        <argsstring></argsstring>
+        <name>p3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" line="21" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="44">
+        <label>Coord&lt; 3 &gt;</label>
+        <link refid="classCoord_3_013_01_4"/>
+      </node>
+      <node id="41">
+        <label>Dummy</label>
+        <link refid="classDummy"/>
+        <childnode refid="42" relation="usage">
+          <edgelabel>p3</edgelabel>
+        </childnode>
+        <childnode refid="45" relation="usage">
+          <edgelabel>p2</edgelabel>
+        </childnode>
+        <childnode refid="46" relation="usage">
+          <edgelabel>p1</edgelabel>
+        </childnode>
+      </node>
+      <node id="46">
+        <label>CoordPair&lt; int, int &gt;</label>
+        <link refid="classCoordPair"/>
+      </node>
+      <node id="42">
+        <label>CoordPair&lt; Coord&lt; 3 &gt;, Coord&lt; 2 &gt; &gt;</label>
+        <link refid="classCoordPair"/>
+        <childnode refid="43" relation="usage">
+          <edgelabel>b</edgelabel>
+        </childnode>
+        <childnode refid="44" relation="usage">
+          <edgelabel>a</edgelabel>
+        </childnode>
+      </node>
+      <node id="43">
+        <label>Coord&lt; 2 &gt;</label>
+        <link refid="classCoord_3_012_01_4"/>
+      </node>
+      <node id="45">
+        <label>CoordPair&lt; int, double &gt;</label>
+        <link refid="classCoordPair"/>
+      </node>
+    </collaborationgraph>
+    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" line="16" bodyfile="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/pair.h" bodystart="15" bodyend="22"/>
+    <listofallmembers>
+      <member refid="classDummy_1ab415b6f2ca22d2dda9fc58225d2dfbd2" prot="public" virt="non-virtual"><scope>Dummy</scope><name>p1</name></member>
+      <member refid="classDummy_1a7fdcca20c08335125684cdf2bb1d1ff9" prot="public" virt="non-virtual"><scope>Dummy</scope><name>p2</name></member>
+      <member refid="classDummy_1aa7e675a876e00118719c954ddce26276" prot="public" virt="non-virtual"><scope>Dummy</scope><name>p3</name></member>
+      <member refid="classDummy_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Dummy</scope><name>Typemaps</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
