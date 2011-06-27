@@ -491,13 +491,15 @@ def detect_defaults
   @opts.supplement(:mpiexec, @opts.mpiprefix + "bin" + "mpiexec") if @opts.mpi
   @opts.supplement(:typemaps, @opts.mpi == true) 
 
+  opencl = false
   ENV['CPLUS_INCLUDE_PATH'].split(":").each do |path|
     header = Pathname.new(path) + "CL" + "cl.hpp"
     if File.exist?(header)
       puts "found at #{header}"
-      @opts.supplement(:opencl, true) 
+      opencl = true
     end
   end
+  @opts.supplement(:opencl, opencl) 
 
   cpuinfo = `cat /proc/cpuinfo 2>/dev/null`
   @opts.supplement(:cell, cpuinfo =~ /Cell Broadband Engine/ ? true : false)
