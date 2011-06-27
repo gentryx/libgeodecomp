@@ -494,10 +494,7 @@ def detect_defaults
   opencl = false
   ENV['CPLUS_INCLUDE_PATH'].split(":").each do |path|
     header = Pathname.new(path) + "CL" + "cl.hpp"
-    if File.exist?(header)
-      puts "found at #{header}"
-      opencl = true
-    end
+    opencl ||= File.exist?(header)
   end
   @opts.supplement(:opencl, opencl) 
 
