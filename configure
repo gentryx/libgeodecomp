@@ -158,6 +158,15 @@ EOF
 EOF
   end
 
+  if @opts.opencl
+    cmake_opts += <<EOF
+set(LIBGEODECOMP_FEATURE_OPENCL true)
+EOF
+    config_header += <<EOF
+#define LIBGEODECOMP_FEATURE_OPENCL
+EOF
+  end
+
   if @opts.cell
     cmake_opts += <<EOF
 set(LIBGEODECOMP_FEATURE_CELL true)
@@ -390,6 +399,11 @@ def read_commandline_options
       @opts.mpi = f
     end
 
+    o.on("--[no-]opencl", 
+         "Build/disable OpenCL components.") do |f|
+      @opts.opencl = f
+    end
+
     o.on("--[no-]cell", 
          "Set whether Cell BE specific modules are built..") do |f|
       @opts.cell = f
@@ -476,6 +490,14 @@ def detect_defaults
   # MPI is required for typemaps to work
   @opts.supplement(:mpiexec, @opts.mpiprefix + "bin" + "mpiexec") if @opts.mpi
   @opts.supplement(:typemaps, @opts.mpi == true) 
+
+  ENV['CPLUS_INCLUDE_PATH'].split(":").each do |path|
+    header = Pathname.new(path) + "CL" + "cl.hpp"
+    if File.exist?(header)
+      puts "found at #{header}"
+      @opts.supplement(:opencl, true) 
+    end
+  end
 
   cpuinfo = `cat /proc/cpuinfo 2>/dev/null`
   @opts.supplement(:cell, cpuinfo =~ /Cell Broadband Engine/ ? true : false)
