@@ -13,7 +13,7 @@ else(WIN32)
 endif(WIN32)
 
 # LIBDIRS is used to find source files and headers 
-set(LIBDIRS          io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions parallelization/partitioningsimulator)
+set(LIBDIRS          io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. The may for instance include additionally libraries to be
 # linked into the main lib.

@@ -1,16 +1,13 @@
 syntax: glob
 *~
-libgeodecomp/**/test/**/*test.cpp
-libgeodecomp/**/test/**/main.cpp
-libgeodecomp/**/auto.cmake
-libgeodecomp/trunk/doc
-libgeodecomp/trunk/build
-libgeodecomp/trunk/conf.yaml
-libgeodecomp/trunk/src/conf.cmake
-libgeodecomp/trunk/src/boost
-libgeodecomp/trunk/src/libgeodecomp/config.h
-libgeodecomp/trunk/src/libgeodecomp/mpilayer/typemaps.cpp
-libgeodecomp/trunk/src/libgeodecomp/mpilayer/typemaps.h
-libgeodecomp/branches/windowsinstaller/build/*
-libgeodecomp/branches/windowsinstaller/conf.yaml
-libgeodecomp/branches/windowsinstaller/src/conf.cmake
+./**/test/**/*test.cpp
+./**/test/**/main.cpp
+./**/auto.cmake
+./doc
+./build
+./conf.yaml
+./src/conf.cmake
+./src/boost
+./src/config.h
+./src/mpilayer/typemaps.cpp
+./src/mpilayer/typemaps.h
