@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
 using namespace LibGeoDecomp; 
@@ -15,6 +16,9 @@ namespace HiParSimulator {
 class VanillaStepperTest : public CxxTest::TestSuite
 {
 public:
+    
+    typedef VanillaStepper<TestCell<3>, 3> MyStepper;
+
     void testFoo() {
         std::cout << "test fooooooo\n";
 
@@ -47,19 +51,46 @@ public:
 
         partitionManager->resetGhostZones(boundingBoxes);
 
+        for (int i = 0; i < MPILayer().size(); ++i) {
+            MPILayer().barrier();
+            if (i == MPILayer().rank())
+                std::cout << "ownRegion[0]: " << partitionManager->ownRegion(0).boundingBox() 
+                          << "ownRegion[1]: " << partitionManager->ownRegion(1).boundingBox()
+                          << "ownRegExpand: " << partitionManager->ownRegion(0).expand(1).boundingBox()
+                          << "simulationAr: " << partitionManager->simulationArea.boundingBox()
+                          << "box: " << box 
+                          << "ownExpandedRegion: " << partitionManager->ownExpandedRegion().boundingBox() << "\n";
+            MPILayer().barrier();
+        }
+
         // Let's go
-        VanillaStepper<TestCell<3>, 3> stepper(
+        MyStepper stepper(
             partitionManager,
             init);
+
+        // boost::shared_ptr<
+        //     PatchBuffer<MyStepper::GridType, MyStepper::GridType, TestCell<3> > > p1(
+        //         new PatchBuffer<MyStepper::GridType, MyStepper::GridType, TestCell<3> >);
+        // boost::shared_ptr< PatchAccepter<MyStepper::GridType> > p2(p1);
+        // p1->pushRequest(&partitionManager->rim(ghostZoneWidth), 0);
+        // stepper.addPatchAccepter(p1);
+
+        // stepper.update(1);
+        
+        // MyStepper::GridType g(init->gridDimensions());
+        // p1->get(g, partitionManager->rim(ghostZoneWidth), 0);
+
+        std::cout << "test baaaaaaaaar\n";
                
         /**
-         * save inner rim
-         * update ghost
-         * save inner ghost
-         * restore inner rim
          * update kernel
-         * restore ghost
          * perform output
+         * handle ghost
+         *   restore ghost
+         *   save inner rim
+         *   update ghost
+         *   save inner ghost
+         *   restore inner rim
          */
     }
 

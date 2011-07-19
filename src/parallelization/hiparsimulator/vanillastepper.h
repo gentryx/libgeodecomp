@@ -3,8 +3,9 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
-#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 
 namespace LibGeoDecomp {
@@ -13,12 +14,13 @@ namespace HiParSimulator {
 // fixme: deduce DIM from partition?!
 template<typename CELL_TYPE, int DIM>
 class VanillaStepper : 
-        public StepperHelper<CELL_TYPE, DIM, Grid<CELL_TYPE, typename CELL_TYPE::Topology> >
+        public StepperHelper<CELL_TYPE, DIM, DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> >
 {
 public:
     friend class VanillaStepperRegionTest;
     friend class VanillaStepperBasicTest;
-    typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
+    friend class VanillaStepperTest;
+    typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
     typedef class StepperHelper<CELL_TYPE, DIM, GridType> ParentType;
 
     inline VanillaStepper(
@@ -26,9 +28,9 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
         ParentType(_partitionManager, _initializer)
     {
-        initGrids();
         curStep = this->getInitializer().startStep();
         curNanoStep = 0;
+        initGrids();
     }
 
     inline virtual void update(int nanoSteps) 
@@ -37,9 +39,9 @@ public:
             update();
     }
 
-    inline virtual const GridType& grid() const
+    inline virtual const Grid<CELL_TYPE, typename CELL_TYPE::Topology>& grid() const
     {
-        return *oldGrid;
+        return *oldGrid->vanillaGrid();
     }
 
     inline virtual std::pair<int, int> currentStep() const
@@ -53,6 +55,7 @@ private:
     int validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
+    PatchBuffer<GridType, GridType, CELL_TYPE> patchBuffer;
 
     inline void update()
     {
@@ -61,34 +64,45 @@ private:
         for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) 
             (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), curNanoStep);
         std::swap(oldGrid, newGrid);
-        curNanoStep++;
+
+        ++curNanoStep;
         if (curNanoStep == CELL_TYPE::nanoSteps()) {
             curNanoStep = 0;
             curStep++;
         }
 
+        notifyPatchAccepters(region);
+
+
+
+        // if (validGhostZoneWidth == 0) {
+        //     notifyPatchProviders();
+        //     resetValidGhostZoneWidth();
+        // }
+    }
+
+    inline void notifyPatchAccepters(const Region<DIM>& region)
+    {
         for (class ParentType::PatchAccepterList::iterator i = 
                  this->patchAccepters.begin();
              i != this->patchAccepters.end();
              ++i)
             if (globalNanoStep() == (*i)->nextRequiredNanoStep()) 
                 (*i)->put(*oldGrid, region, globalNanoStep());
-
-        if (validGhostZoneWidth == 0) {
-            for (typename ParentType::PatchProviderList::iterator i = 
-                     this->patchProviders.begin();
-                 i != this->patchProviders.end();
-                 ++i)
-                (*i)->get(
-                    *oldGrid,
-                    this->getPartitionManager().getOuterRim(),
-                    globalNanoStep());
-            resetValidGhostZoneWidth();
-        }
     }
 
-    // fixme: use only one global nano step counter, and deduce the
-    // nano step from it, rather than vice versa
+    inline void notifyPatchProviders()
+    {
+        for (typename ParentType::PatchProviderList::iterator i = 
+                 this->patchProviders.begin();
+             i != this->patchProviders.end();
+             ++i)
+            (*i)->get(
+                *oldGrid,
+                this->getPartitionManager().getOuterRim(),
+                globalNanoStep());
+    }
+
     inline long globalNanoStep() const
     {
         return curStep * CELL_TYPE::nanoSteps() + curNanoStep;
@@ -96,12 +110,20 @@ private:
 
     inline void initGrids()
     {
-        Coord<DIM> dim = this->getInitializer().gridBox().dimensions;
-        oldGrid.reset(new GridType(dim));
-        newGrid.reset(new GridType(dim));
+        CoordBox<DIM> gridBox = 
+            this->getPartitionManager().ownExpandedRegion().boundingBox();
+        // std::cout << "my gridBox: " << gridBox << "\n";
+        oldGrid.reset(new GridType(gridBox));
+        newGrid.reset(new GridType(gridBox));
         this->getInitializer().grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
+
+        const Region<DIM> rim = this->getPartitionManager().rim(
+            this->getPartitionManager().getGhostZoneWidth());
+        patchBuffer.pushRequest(&rim, 0);
+        patchBuffer.put(*oldGrid, 
+                        this->getPartitionManager().ownExpandedRegion(), globalNanoStep());
     }
 
     inline void resetValidGhostZoneWidth()

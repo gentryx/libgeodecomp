@@ -28,8 +28,10 @@ public:
         // the currently requested region.
         if (requestedNanoSteps.empty() || nanoStep < requestedNanoSteps.front())
             return;
-        if (nanoStep > requestedNanoSteps.front()) 
+        if (nanoStep > requestedNanoSteps.front()) {
+            std::cout << "got: " << nanoStep << " expected " << requestedNanoSteps.front() << "\n";
             throw std::logic_error("expected nano step was left out");
+        }
         storedRegions.push_back(
             GridVecConv::gridToVector<CELL_TYPE>(
                 grid, 

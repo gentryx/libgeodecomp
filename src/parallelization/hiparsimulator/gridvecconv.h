@@ -11,20 +11,20 @@ namespace HiParSimulator {
 class GridVecConv
 {
 public:
-    template<typename CELL_TYPE, typename GRID_TYPE>
+    template<typename CELL_TYPE, typename GRID_TYPE, int DIM>
     static SuperVector<CELL_TYPE> gridToVector(
         const GRID_TYPE& sourceGrid, 
-        const Region<2>& region)
+        const Region<DIM>& region)
     {
         unsigned size = 0;
-        // fixme: cache region size directly in region?!
-        for (StreakIterator<2> i = region.beginStreak(); 
+        // fixme: cache region size directly in region?!<2
+        for (StreakIterator<DIM> i = region.beginStreak(); 
              i != region.endStreak(); ++i) 
             size += i->length();
         SuperVector<CELL_TYPE> res(size);
         CELL_TYPE *dest = &res[0];
 
-        for (StreakIterator<2> i = region.beginStreak(); 
+        for (StreakIterator<DIM> i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             const CELL_TYPE *start = &sourceGrid[i->origin];
             std::copy(start, start + i->length(), dest);
@@ -35,14 +35,14 @@ public:
     }
 
     // fixme: check that region size == stored vector size
-    template<typename CELL_TYPE, typename GRID_TYPE>
+    template<typename CELL_TYPE, typename GRID_TYPE, int DIM>
     static void vectorToGrid(
         const SuperVector<CELL_TYPE>& sourceVector, 
         GRID_TYPE& destGrid, 
-        const Region<2>& region)
+        const Region<DIM>& region)
     {
         const CELL_TYPE *source = &sourceVector[0];
-        for (StreakIterator<2> i = region.beginStreak(); 
+        for (StreakIterator<DIM> i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             unsigned length = i->length();
             const CELL_TYPE *end = source + length;

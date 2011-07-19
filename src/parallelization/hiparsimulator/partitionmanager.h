@@ -15,6 +15,7 @@ namespace HiParSimulator {
 template<int DIM>
 class PartitionManager {
     friend class PartitionManagerTest;
+    friend class VanillaStepperTest;
     template<int> friend class RimMarker;
     template<int> friend class InnerSetMarker;
     friend class HiParSimulatorTest;
@@ -45,11 +46,8 @@ public:
         const unsigned& _ghostZoneWidth) 
     {
         regionAccu.reset(_regionAccu);
-        Coord<DIM> end = _simulationArea.origin + _simulationArea.dimensions;
         simulationArea = Region<DIM>();
-        for (int y = _simulationArea.origin.y(); y < end.y(); ++y)
-            simulationArea << 
-                Streak<DIM>(Coord<DIM>(_simulationArea.origin.x(), y), end.x());
+        simulationArea << _simulationArea;
         rank = _rank;
         ghostZoneWidth = _ghostZoneWidth;
         regions.clear();
@@ -170,7 +168,6 @@ private:
     inline void fillOwnRegion()
     {
         fillRegion(rank);
-        // fixme: instead of rim we could use outerRim, benchmark this!
         Region<DIM> rim((ownRegion().expand(1) - ownRegion()) & simulationArea);
         Region<DIM> kernel(ownRegion() - rim.expand(getGhostZoneWidth()));
         innerRim = ownRegion() - kernel;
