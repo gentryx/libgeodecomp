@@ -178,8 +178,8 @@ class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
     CellInitializer(
-        const Coord<2> _dim = Coord<2>(100, 100),
-        const unsigned _steps = 2000) :
+        const Coord<2> _dim = Coord<2>(240, 135),
+        const unsigned _steps = 400000) :
         SimpleInitializer<Cell>(_dim, _steps)
     {}
 
