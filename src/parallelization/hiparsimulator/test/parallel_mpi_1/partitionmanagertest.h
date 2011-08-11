@@ -137,6 +137,50 @@ public:
         TS_ASSERT_EQUALS(expected, partitionManager.getOuterRim());
     }
 
+    void test3D()
+    {
+        int ghostZoneWidth = 4;
+        CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
+
+        StripingPartition<3> partition(Coord<3>(), box.dimensions);
+        SuperVector<unsigned> weights;
+        weights << 10000;
+        weights << 15000;
+        weights << 25000;
+        weights << box.dimensions.prod() - weights.sum();
+
+        PartitionManager<3, Topologies::Torus<3>::Topology> partitionManager;
+        partitionManager.resetRegions(
+            box, 
+            new VanillaRegionAccumulator<StripingPartition<3>, 3>(
+                partition,
+                0,
+                weights),
+            0,
+            ghostZoneWidth);
+
+        SuperVector<CoordBox<3> > boundingBoxes;
+        for (int i = 0; i < 4; ++i)
+            boundingBoxes << partitionManager.getRegion(i, 0).boundingBox();
+
+        partitionManager.resetGhostZones(boundingBoxes);
+        
+        Region<3> expected;
+        for (int z = 0; z < 4; ++z)
+            for (int y = 0; y < 47; ++y)
+                expected << Streak<3>(Coord<3>(0, y, z), 55);
+        for (int y = 0; y < 41; ++y)
+                expected << Streak<3>(Coord<3>(0, y, 4), 55);
+        expected << Streak<3>(Coord<3>(0,  41, 4), 46);
+        expected << Streak<3>(Coord<3>(54, 41, 4), 55);
+        expected << Streak<3>(Coord<3>(0,  46, 4), 55);
+
+        for (int y = 0; y < 47; ++y)
+                expected << Streak<3>(Coord<3>(0, y, 30), 55);
+        
+        TS_ASSERT_EQUALS(expected, partitionManager.ownRegion(1));
+    }
+
 private:
     Coord<2> dimensions;
     unsigned offset;

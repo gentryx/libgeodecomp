@@ -25,9 +25,10 @@ public:
     typedef boost::shared_ptr<PatchAccepter<GRID_TYPE> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
     typedef std::deque<PatchAccepterPtr> PatchAccepterList;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
 
     inline StepperHelper(
-        const boost::shared_ptr<PartitionManager<DIM> >& _partitionManager,
+        const boost::shared_ptr<MyPartitionManager>& _partitionManager,
         const boost::shared_ptr<Initializer<CELL_TYPE> >& _initializer) :
         Stepper<CELL_TYPE, DIM>(_partitionManager, _initializer)
     {}
@@ -47,7 +48,7 @@ protected:
     PatchAccepterList patchAccepters;
 
     inline
-    PartitionManager<DIM>& getPartitionManager()
+    MyPartitionManager& getPartitionManager()
     {
         return *this->partitionManager;
     }

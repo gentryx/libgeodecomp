@@ -143,21 +143,6 @@ public:
         }
     }
 
-    void test3D()
-    {
-        MPILayer layer;
-        PartitionManager<3> manager;
-        Coord<3> offset(0, 0, 0);
-        Coord<3> dimensions(30, 40, 30);
-        StripingPartition<3> partition(offset, dimensions);
-
-        weights = SuperVector<unsigned>(layer.size(), dimensions.prod() / 9);
-        weights[2] *= 0.5;
-        weights[4] *= 1.5;
-        // sanity check
-        TS_ASSERT_EQUALS(weights.sum(), dimensions.prod());
-    }
-
 private:
     MPILayer layer;
     PartitionManager<2> manager;

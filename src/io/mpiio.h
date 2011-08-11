@@ -40,9 +40,7 @@ public:
             // the coords need to be normalized because on torus
             // topologies the coordnates may exceed the bounding box
             // (especially negative coordnates may occurr).
-            Coord<DIM> coord;
-            CoordNormalizer<DIM, DIM> normalizer(&coord, dimensions);
-            TOPOLOGY::locate(normalizer, i->origin);
+            Coord<DIM> coord = TOPOLOGY::normalize(i->origin, dimensions);
             file.Seek(
                 offset(headerLength, coord, dimensions, cellLength), 
                 MPI_SEEK_SET);

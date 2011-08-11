@@ -132,6 +132,7 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
+    // fixme: remove
     inline const ConstSliceRef operator[](const Index& y) const
     {
         return cellMatrix[y];
@@ -140,6 +141,7 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
+    // fixme: remove
     inline SliceRef operator[](const Index& y) 
     {
         return cellMatrix[y];

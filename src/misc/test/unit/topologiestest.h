@@ -129,7 +129,7 @@ public:
             int>()(g, Coord<2>(1, 2), Coord<2>(3, 4)) = 4711;
         TS_ASSERT_EQUALS(4711, g[2][1]);
 
-        // // correct since NormalizeCoord is a NOP for the Cube topology
+        // correct since NormalizeCoord is a NOP for the Cube topology
         Topologies::Cube<2>::Topology::LocateHelper<
             2,
             int>()(g, Coord<2>(3, 2), Coord<2>(3, 4)) = 4711;
@@ -221,6 +221,18 @@ public:
 
         Topologies::Torus<2>::Topology::locate(g, Coord<2>(4, -1)) = 4711;
         TS_ASSERT_EQUALS(4711, g[8][4]);
+    }
+
+    void testNormalize()
+    {
+        typedef Topologies::Torus<3>::Topology Topo;
+        Coord<3> c;
+
+        c = Topo::normalize(Coord<3>(1, 1, 1), Coord<3>(5, 6, 7));
+        TS_ASSERT_EQUALS(c, Coord<3>(1, 1, 1));
+
+        c = Topo::normalize(Coord<3>(5, 2, -2), Coord<3>(5, 6, 7));
+        TS_ASSERT_EQUALS(c, Coord<3>(0, 2, 5));
     }
 };
 

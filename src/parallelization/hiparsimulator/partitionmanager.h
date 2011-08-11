@@ -12,7 +12,31 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-template<int DIM>
+template<typename TOPOLOGY>
+class TopologyWrapsXAxis
+{
+public:
+    bool operator()()
+    {
+        if (TOPOLOGY::DIMENSIONS == 1) {
+            return TOPOLOGY::WrapEdges;
+        } else {
+            return TopologyWrapsXAxis<typename TOPOLOGY::ParentTopology>()();
+        }
+    }
+};
+
+template<>
+class TopologyWrapsXAxis<Topologies::ZeroDimensional>
+{
+public:
+    bool operator()()
+    {
+        return 0;
+    }
+};
+
+template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
 class PartitionManager {
     friend class PartitionManagerTest;
     friend class VanillaStepperTest;
@@ -154,15 +178,77 @@ public:
     }
     
 private:
-
     inline void fillRegion(const unsigned& node)
     {
         SuperVector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
         regionExpansion[0] = regionAccu->getRegion(node);
-        for (int i = 1; i <= getGhostZoneWidth(); ++i)
-            regionExpansion[i] = 
-                regionExpansion[i - 1].expand(1) & simulationArea;
+        for (int i = 1; i <= getGhostZoneWidth(); ++i) {
+            Region<DIM> expanded = regionExpansion[i - 1].expand(1);
+            Region<DIM> trimmed;
+
+            for (StreakIterator<DIM> s = expanded.beginStreak(); 
+                 s != expanded.endStreak(); ++s) {
+                
+                if (TopologyWrapsXAxis<TOPOLOGY>()()) {
+                    splitStreak(*s, &trimmed);
+                } else {
+                    trimmed << *s;
+                }
+            }
+
+            regionExpansion[i] = trimmed & simulationArea;
+        }
+    }
+
+    void splitStreak(const Streak<DIM>& streak, Region<DIM> *target)
+    {
+        int width = simulationArea.boundingBox().dimensions.x();
+
+        int currentX = streak.origin.x();
+        if (currentX < 0) {
+            Streak<DIM> section = streak;
+            section.endX = std::min(streak.endX, 0);
+            currentX = section.endX;
+
+            // normalize left overhang
+            section.origin.x() += width;
+            section.endX += width;
+            normalizeStreak(section, target);
+        }
+
+        if (currentX < streak.endX) {
+            Streak<DIM> section = streak;
+            section.origin.x() = currentX;
+            section.endX = std::min(streak.endX, width);
+            currentX = section.endX;
+
+            normalizeStreak(section, target);
+        }
+
+        if (currentX < streak.endX) {
+            Streak<DIM> section = streak;
+            section.origin.x() = currentX;
+
+            // normalize right overhang
+            section.origin.x() -= width;
+            section.endX -= width;
+            normalizeStreak(section, target);
+        }
+    }
+    
+    void normalizeStreak(const Streak<DIM>& streak, Region<DIM> *target)
+    {
+        Coord<DIM> c;
+        Streak<DIM> ret;
+        CoordNormalizer<DIM, DIM> normalizer(
+            &c, 
+            simulationArea.boundingBox().dimensions);
+        ret.origin = TOPOLOGY::locate(normalizer, streak.origin);
+        ret.endX = ret.origin.x() + streak.length();
+
+        if (ret.origin != normalizer.getEdgeCell())
+            (*target) << ret;
     }
 
     inline void fillOwnRegion()

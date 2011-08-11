@@ -47,7 +47,6 @@ public:
 
     void setUp()
     {
-        std::cout << "foo1\n";
         // Init simulation area
         ghostZoneWidth = 3;
         init.reset(new TestInitializer<2>(Coord<2>(17, 12)));
@@ -67,7 +66,6 @@ public:
                 0,
                 weights);
 
-        std::cout << "foo2\n";
         // Feed the partition into the partition manager
         partitionManager.reset(new PartitionManager<2>());
         partitionManager->resetRegions(
@@ -84,20 +82,16 @@ public:
         patchBuffer.reset(
             new MockPatchBuffer<DisplacedGrid<TestCell<2> >, 
                                 DisplacedGrid<TestCell<2> >, TestCell<2> >());
-        std::cout << "foo3\n";
         stepper.reset(
             new VanillaStepper<TestCell<2>, 2>(partitionManager, init));
         stepper->addPatchProvider(patchBuffer);
-        std::cout << "foo3a\n";
 
         // As a reference the stepper itself is used, which is kind of
         // ugly, but this time we're not decomposing the grid. this
         // kind of behavior is checked in vanillastepperbasittest.h.
         referencePartitionManager.reset(new PartitionManager<2>(rect)); 
-        std::cout << "foo3b\n";
         referenceStepper.reset(
             new VanillaStepper<TestCell<2>, 2>(referencePartitionManager, init));
-        std::cout << "foo3b1\n";
         // referenceStepper->update(ghostZoneWidth);
         // std::cout << "foo3c\n";
         // patchBuffer->pushRequest(
@@ -108,7 +102,6 @@ public:
         //     referenceStepper->grid(), 
         //     referencePartitionManager->ownRegion(),
         //     ghostZoneWidth);
-        std::cout << "foo4\n";
     }
 
     void testUpdate()

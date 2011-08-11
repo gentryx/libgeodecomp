@@ -21,7 +21,8 @@ public:
 
     CoordNormalizer(Coord<DIM> *c, Coord<DIM> dim) :
         target(c),
-        dimensions(dim)
+        dimensions(dim),
+        edge(CoordDiagonal<DIM>()(-1))
     {}
 
     const Coord<DIM>& getDimensions() const
@@ -84,9 +85,6 @@ class Topologies
 public:
     template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES>
     class NDimensional;
-
-    template<bool WRAP_EDGES>
-    class OneDimensional;
 
     template<bool WRAP_EDGES, int DIMENSION, typename COORD> 
     class NormalizeCoordElement;
@@ -215,6 +213,17 @@ public:
         const static int DIMENSIONS = N_MINUS_1_DIMENSIONAL::DIMENSIONS + 1;
         const static bool WrapEdges = WRAP_EDGES;
         typedef N_MINUS_1_DIMENSIONAL ParentTopology;
+
+        static Coord<DIMENSIONS> normalize(
+            const Coord<DIMENSIONS>& coord,
+            const Coord<DIMENSIONS>& dimensions)
+        {
+            Coord<DIMENSIONS> res;
+            CoordNormalizer<DIMENSIONS, DIMENSIONS> normalizer(
+                &res, dimensions);
+            locate(normalizer, coord);
+            return res;
+        }
 
         /**
          * This class facilitates the computation of the actual

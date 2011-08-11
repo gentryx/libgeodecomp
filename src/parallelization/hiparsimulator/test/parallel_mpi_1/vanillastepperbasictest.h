@@ -74,6 +74,7 @@ public:
 
     void testUpdate()
     {
+        // fixme:
     //     TS_ASSERT_TEST_GRID(DisplacedGrid<TestCell<2> >, stepper->grid(), 0);
     //     stepper->update();
     //     TS_ASSERT_TEST_GRID(DisplacedGrid<TestCell<2> >, stepper->grid(), 1);

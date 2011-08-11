@@ -140,9 +140,7 @@ private:
             // the coords need to be normalized because on torus
             // topologies the coordnates may exceed the bounding box
             // (especially negative coordnates may occurr).
-            Coord<DIM> coord;
-            CoordNormalizer<DIM, DIM> normalizer(&coord, dimensions);
-            Topology::locate(normalizer, i->origin);
+            Coord<DIM> coord = Topology::normalize(i->origin, dimensions);
             int dataComponents = SELECTOR_TYPE::dataComponents();
             MPI::Offset index = 
                 CoordToIndex<DIM>()(coord, dimensions) * varLength * dataComponents;

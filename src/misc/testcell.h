@@ -199,11 +199,8 @@ public:
             }
 
             Coord<DIM> rawPos = pos + relativeLoc;
-            Coord<DIM> expectedPos;
-            CoordNormalizer<DIM, DIM> normalizer(
-                &expectedPos,
-                dimensions.dimensions);
-            Topology::locate(normalizer, rawPos);
+            Coord<DIM> expectedPos = 
+                Topology::normalize(rawPos, dimensions.dimensions);
 
             if (other.pos != expectedPos) {
                 (*TestCellBase::stream) << "TestCell error: other position " 

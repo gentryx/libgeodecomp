@@ -65,7 +65,51 @@ public:
         TS_ASSERT_EQUALS(1,  grid[Coord<3>(6, 6, 6)]);
         TS_ASSERT_EQUALS(newBox, grid.boundingBox());
     }
-    
+
+    void testTopologicalNormalizationWithTorus()
+    {
+        /**
+         * This test should check whether it is possible to let a
+         * displaced grid act on a 15x10 torus as if it would cover a
+         * 8x6 field shifted by an offset of (-3, -2), as outlined
+         * below. The code will access the fields marked with a
+         * through d.
+         *
+         *   0123456789abcde
+         * 9 XXXXX_______cXX
+         * 8 XXXXX_______aXX
+         * 7 _______________
+         * 6 _______________
+         * 5 _______________
+         * 4 _______________
+         * 3 XXXXX_______XXX
+         * 2 XXXXX_______XXX
+         * 1 XXXXX_______XXX
+         * 0 bXXXX_______XXd
+         *
+         */
+
+        DisplacedGrid<int, Topologies::Torus<2>::Topology, true> grid(
+            CoordBox<2>(Coord<2>(-3, -2), Coord<2>(8, 6)), -2);
+        grid.topologicalDimensions() = Coord<2>(15, 10);
+
+        for (int y = -2; y < 4; ++y) 
+            for (int x = -3; x < 5; ++x)
+                grid[Coord<2>(x, y)] = (y+3) * 10 + (x+3);
+
+        // for (int y = 3; y >= -2; --y) {
+        //     std::cout << y << " : ";
+        //     for (int x = -3; x < 5; ++x)
+        //         std::cout << grid[Coord<2>(x, y)] << " ";
+        //     std::cout << "\n";
+        // }
+        // std::cout << "\n";
+
+        TS_ASSERT_EQUALS(10, grid[Coord<2>(-3, -2)]);
+        TS_ASSERT_EQUALS(33, grid[Coord<2>( 0,  0)]);
+        TS_ASSERT_EQUALS(20, grid[Coord<2>(12, 9)]);
+        TS_ASSERT_EQUALS(32, grid[Coord<2>(14, 0)]);
+    }
 };
 
 };

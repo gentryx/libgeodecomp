@@ -29,9 +29,10 @@ class Stepper
 public:
     friend class StepperTest;
     typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
 
     inline Stepper(
-        const boost::shared_ptr<PartitionManager<DIM> >& _partitionManager,
+        const boost::shared_ptr<MyPartitionManager>& _partitionManager,
         const boost::shared_ptr<Initializer<CELL_TYPE> >& _initializer) :
         partitionManager(_partitionManager),
         initializer(_initializer)
@@ -43,7 +44,7 @@ public:
     inline virtual std::pair<int, int> currentStep() const = 0;
 
 protected:
-    boost::shared_ptr<PartitionManager<DIM> > partitionManager;
+    boost::shared_ptr<MyPartitionManager> partitionManager;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
 };
 

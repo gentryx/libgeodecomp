@@ -7,7 +7,17 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL_TYPE, typename TOPOLOGY=Topologies::Cube<2>::Topology>
+/**
+ * A grid whose origin has been shiftet by a certain offset. If
+ * TOPOLOGICALLY_CORRECT is set to true, the coordinates will be
+ * normalized according to the given topology and some superordinate
+ * dimension (see topologicalDimensions()) before using them for
+ * access. Useful for writing topology agnostic code that should work
+ * an a torus, too.
+ */
+template<typename CELL_TYPE, 
+         typename TOPOLOGY=Topologies::Cube<2>::Topology, 
+         bool TOPOLOGICALLY_CORRECT=false>
 class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
 {
 public:
@@ -15,8 +25,6 @@ public:
 
     typedef CELL_TYPE CellType;
     typedef TOPOLOGY Topology;
-    typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, 1> RowRef;
-    typedef typename boost::detail::multi_array::const_sub_array<CELL_TYPE, 1> ConstRowRef;
     typedef typename boost::multi_array<CELL_TYPE, DIMENSIONS>::index Index;
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> MyCoordMap;
@@ -33,6 +41,16 @@ public:
         delegate(_grid),
         origin(_origin)
     {}
+
+    inline const Coord<DIMENSIONS>& topologicalDimensions() const
+    {
+        return topoDimensions;
+    }
+
+    inline Coord<DIMENSIONS>& topologicalDimensions()
+    {
+        return topoDimensions;
+    }
 
     inline CELL_TYPE *baseAddress()
     {
@@ -68,23 +86,15 @@ public:
     inline CELL_TYPE& operator[](const Coord<DIMENSIONS>& absoluteCoord)
     {
         Coord<DIMENSIONS> relativeCoord = absoluteCoord - origin;
+        if (TOPOLOGICALLY_CORRECT) 
+            relativeCoord = 
+                Topology::normalize(relativeCoord, topoDimensions);
         return delegate[relativeCoord];
     }
 
     inline const CELL_TYPE& operator[](const Coord<DIMENSIONS>& absoluteCoord) const
     {
-        Coord<DIMENSIONS> relativeCoord = absoluteCoord - origin;
-        return delegate[relativeCoord];
-    }
-
-    inline const ConstRowRef operator[](const Index& y) const
-    {
-        return delegate[y - origin.y];
-    }
-
-    inline RowRef operator[](const Index& y) 
-    {
-        return delegate[y - origin.y];
+        return (const_cast<DisplacedGrid&>(*this))[absoluteCoord];
     }
 
     virtual CELL_TYPE& at(const Coord<DIMENSIONS>& coord)
@@ -153,6 +163,7 @@ public:
 
 private:
     Delegate delegate;
+    Coord<DIMENSIONS> topoDimensions;
     Coord<DIMENSIONS> origin;
 };
 

@@ -11,7 +11,63 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: deduce DIM from partition?!
+template<int INDEX, int DIM, typename TOPOLOGY>
+class OffsetHelper
+{
+public:
+    void operator()(
+        Coord<DIM> *offset,
+        Coord<DIM> *dimensions,
+        const CoordBox<DIM>& ownBoundingBox, 
+        const CoordBox<DIM>& simulationArea,
+        const int& ghostZoneWidth)
+    {
+        offset->c[INDEX] = 0;
+        if (TOPOLOGY::WrapEdges) {
+            int enlargedWidth = 
+                ownBoundingBox.dimensions.c[INDEX] + 2 * ghostZoneWidth;
+            if (enlargedWidth < simulationArea.dimensions.c[INDEX]) {
+                offset->c[INDEX] = 
+                    ownBoundingBox.origin.c[INDEX] - ghostZoneWidth;
+            } else {
+                offset->c[INDEX] = 0;
+            }
+            dimensions->c[INDEX] = 
+                std::min(enlargedWidth, simulationArea.dimensions.c[INDEX]);
+        } else {
+            offset->c[INDEX] = 
+                std::max(0, ownBoundingBox.origin.c[INDEX] - ghostZoneWidth);
+            int end = std::min(simulationArea.origin.c[INDEX] + 
+                               simulationArea.dimensions.c[INDEX],
+                               ownBoundingBox.origin.c[INDEX] + 
+                               ownBoundingBox.dimensions.c[INDEX] + 
+                               ghostZoneWidth);
+            dimensions->c[INDEX] = end - offset->c[INDEX];
+        } 
+
+        OffsetHelper<INDEX - 1, DIM, typename TOPOLOGY::ParentTopology>()(
+            offset, 
+            dimensions, 
+            ownBoundingBox, 
+            simulationArea, 
+            ghostZoneWidth);
+    }
+};
+
+template<int DIM, typename TOPOLOGY>
+class OffsetHelper<-1, DIM, TOPOLOGY>
+{
+public:
+    void operator()(
+        Coord<DIM> *offset,
+        Coord<DIM> *dimensions,
+        const CoordBox<DIM>& ownBoundingBox, 
+        const CoordBox<DIM>& simulationArea,
+        const int& ghostZoneWidth)
+    {}
+};
+
+// fixme: deduce DIM from CELL_TYPE?!
 template<typename CELL_TYPE, int DIM>
 class VanillaStepper : 
         public StepperHelper<CELL_TYPE, DIM, DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> >
@@ -22,9 +78,10 @@ public:
     friend class VanillaStepperTest;
     typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
     typedef class StepperHelper<CELL_TYPE, DIM, GridType> ParentType;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
 
     inline VanillaStepper(
-        boost::shared_ptr<PartitionManager<DIM> > _partitionManager,
+        boost::shared_ptr<MyPartitionManager> _partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
         ParentType(_partitionManager, _initializer)
     {
@@ -53,6 +110,9 @@ private:
     int curStep;
     int curNanoStep;
     int validGhostZoneWidth;
+    // fixme: do we need these two everywhere?
+    Coord<DIM> offset;
+    Coord<DIM> dimensions;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
     PatchBuffer<GridType, GridType, CELL_TYPE> patchBuffer;
@@ -110,8 +170,10 @@ private:
 
     inline void initGrids()
     {
+        guessOffset();
         CoordBox<DIM> gridBox = 
             this->getPartitionManager().ownExpandedRegion().boundingBox();
+        
         // std::cout << "my gridBox: " << gridBox << "\n";
         oldGrid.reset(new GridType(gridBox));
         newGrid.reset(new GridType(gridBox));
@@ -129,6 +191,23 @@ private:
     inline void resetValidGhostZoneWidth()
     {
         validGhostZoneWidth = this->getPartitionManager().getGhostZoneWidth();
+    }
+
+    /**
+     * calculates a (mostly) suitable offset which (in conjuction with
+     * a DisplacedGrid) avoids having grids with a size equal to the
+     * whole simulation area on torus topologies.
+     */
+    inline void guessOffset()
+    {
+        const CoordBox<DIM>& boundingBox = 
+            this->getPartitionManager().ownRegion().boundingBox();
+        OffsetHelper<DIM - 1, DIM, typename CELL_TYPE::Topology>()(
+            &offset,
+            &dimensions,
+            boundingBox,
+            this->getInitializer().gridBox(),
+            this->getPartitionManager().getGhostZoneWidth());
     }
 };
 

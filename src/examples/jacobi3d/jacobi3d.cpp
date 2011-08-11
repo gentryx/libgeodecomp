@@ -29,10 +29,9 @@ public:
         temp = (neighborhood[Coord<3>( 0,  0, -1)].temp + 
                 neighborhood[Coord<3>( 0, -1,  0)].temp + 
                 neighborhood[Coord<3>(-1,  0,  0)].temp + 
-                neighborhood[Coord<3>( 0,  0,  0)].temp +
                 neighborhood[Coord<3>( 1,  0,  0)].temp + 
                 neighborhood[Coord<3>( 0,  1,  0)].temp + 
-                neighborhood[Coord<3>( 0,  0,  1)].temp) * (1.0 / 7.0);
+                neighborhood[Coord<3>( 0,  0,  1)].temp) * (1.0 / 6.0);
     }
 
     static void update(
@@ -40,7 +39,7 @@ public:
         Cell *center, Cell *bottom, Cell *left, 
         const int& length, const unsigned& nanoStep) 
     {
-        double factor = 1.0 / 7.0;
+        double factor = 1.0 / 6.0;
         __m128d xFactor, cell1, cell2, cell3, cell4, tmp0, tmp1, tmp2, tmp3, tmp4;
         xFactor = _mm_set_pd(factor, factor);
 
