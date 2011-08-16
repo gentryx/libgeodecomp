@@ -218,7 +218,7 @@ public:
             const Coord<DIMENSIONS>& coord,
             const Coord<DIMENSIONS>& dimensions)
         {
-            Coord<DIMENSIONS> res;
+            Coord<DIMENSIONS> res = CoordDiagonal<DIMENSIONS>()(-1);
             CoordNormalizer<DIMENSIONS, DIMENSIONS> normalizer(
                 &res, dimensions);
             locate(normalizer, coord);

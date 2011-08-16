@@ -130,10 +130,10 @@
             ollKorrect = false;                                         \
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
-        CoordBoxSequence<_GRID_TYPE::DIMENSIONS> i =                    \
+        CoordBoxSequence<_GRID_TYPE::DIM> i =                           \
             assertGrid.boundingBox().sequence();                        \
         while (i.hasNext()) {                                           \
-            LibGeoDecomp::Coord<_GRID_TYPE::DIMENSIONS> c = i.next();   \
+            LibGeoDecomp::Coord<_GRID_TYPE::DIM> c = i.next();          \
             bool flag = assertGrid[c].valid();                          \
             flag &= (assertGrid[c].isEdgeCell == false);                \
             flag &= (assertGrid[c].cycleCounter == expectedCycle);      \
@@ -150,15 +150,15 @@
 #define TS_ASSERT_TEST_GRID_REGION(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE) \
     {                                                                   \
         _GRID_TYPE assertGrid = _GRID;                                  \
-        Region<2> assertRegion = _REGION;                               \
+        Region<_GRID_TYPE::DIM> assertRegion = _REGION;                 \
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
         bool ollKorrect = true;                                         \
         std::ostringstream message;                                     \
                                                                         \
         ollKorrect &= assertGrid.getEdgeCell().isEdgeCell;              \
         ollKorrect &= assertGrid.getEdgeCell().valid();                 \
-        Region<2>::Iterator end = assertRegion.end();                   \
-        for (Region<2>::Iterator i = assertRegion.begin(); i != end; ++i) { \
+        Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
+        for (Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
             bool flag = assertGrid[*i].valid();                         \
             flag &= (assertGrid[*i].isEdgeCell == false);               \
             flag &= (assertGrid[*i].cycleCounter == expectedCycle);     \
@@ -173,6 +173,7 @@
     } while(0)
 
 
+// fixme: this is 2D code, only!
 #define TS_ASSERT_TEST_GRID_NO_CYCLE(_GRID_TYPE, _GRID)                 \
     {                                                                   \
         _GRID_TYPE assertGrid = _GRID;                                  \

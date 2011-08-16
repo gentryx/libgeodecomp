@@ -58,7 +58,8 @@ public:
 
         // Init utility classes
         ghostZoneWidth = 4;
-        init.reset(new TestInitializer<3>(Coord<3>(55, 47, 31)));
+        Coord<3> gridDim(55, 47, 31);
+        init.reset(new TestInitializer<3>(gridDim));
         CoordBox<3> box = init->gridBox();
         MPILayer mpiLayer;
 
@@ -85,23 +86,22 @@ public:
 
         partitionManager->resetGhostZones(boundingBoxes);
 
-        for (int i = 0; i < mpiLayer.size(); ++i) {
-            mpiLayer.barrier();
-            if (i == mpiLayer.rank())
-                std::cout << "ownRegion[0]: " << partitionManager->ownRegion(0).boundingBox() 
-                          << "ownRegion[1]: " << partitionManager->ownRegion(1).boundingBox()
-        //                   << "ownRegExpand: " << partitionManager->ownRegion(0).expand(1).boundingBox()
-        //                   << "simulationAr: " << partitionManager->simulationArea.boundingBox()
-        //                   << "box: " << box 
-                          << "ownExpandedRegion: " << partitionManager->ownExpandedRegion().boundingBox() << "\n";
-            mpiLayer.barrier();
-        }
+        // for (int i = 0; i < mpiLayer.size(); ++i) {
+        //     mpiLayer.barrier();
+        //     if (i == mpiLayer.rank())
+        //         std::cout << "ownRegion[0]: " << partitionManager->ownRegion(0).boundingBox() 
+        //                   << "ownRegion[1]: " << partitionManager->ownRegion(1).boundingBox()
+        // //                   << "ownRegExpand: " << partitionManager->ownRegion(0).expand(1).boundingBox()
+        // //                   << "simulationAr: " << partitionManager->simulationArea.boundingBox()
+        // //                   << "box: " << box 
+        //                   << "ownExpandedRegion: " << partitionManager->ownExpandedRegion().boundingBox() << "\n";
+        //     mpiLayer.barrier();
+        // }
 
-        // Let's go
-        MyStepper stepper(
-            partitionManager,
-            init);
+        // let's go
+        stepper.reset(new MyStepper(partitionManager, init));
 
+        // verify that the grids got set up properly
         Coord<3> expectedOffset;
         Coord<3> expectedDimensions;
         switch (mpiLayer.rank()) {
@@ -127,17 +127,31 @@ public:
             break;
         }
         
-        TS_ASSERT_EQUALS(expectedOffset, stepper.offset);
-        TS_ASSERT_EQUALS(expectedDimensions, stepper.dimensions);
-        
-        for (int i = 0; i < mpiLayer.size(); ++i) {
-            mpiLayer.barrier();
-            if (i == mpiLayer.rank()) {
-                std::cout << "offset[" << i << "]: " << stepper.offset << "\n";
-                std::cout << "dimensions[" << i << "]: " << stepper.dimensions << "\n";
-            }
-            mpiLayer.barrier();
+        TS_ASSERT_EQUALS(expectedOffset, stepper->oldGrid->getOrigin());
+        TS_ASSERT_EQUALS(expectedDimensions, stepper->oldGrid->getDimensions());
+        TS_ASSERT_EQUALS(gridDim, stepper->oldGrid->topologicalDimensions());
+
+        if (mpiLayer.rank() == 0) {
+            // std::cout << "innerSet(1)\n"
+            //           << partitionManager->innerSet(1)
+            //           << "innerSet(2)\n"
+            //           << partitionManager->innerSet(2);
+
+            // checkInnerSet(0, 0);
+            // checkRim(0, 0);
+            // stepper->update(1);
+            // checkInnerSet(1, 1);
+            // stepper->update(1);
+            // checkInnerSet(2, 2);
         }
+
+        // for (int i = 0; i < mpiLayer.size(); ++i) {
+        //     mpiLayer.barrier();
+        //     if (i == mpiLayer.rank()) {
+        //         std::cout << "boundingBox: " << stepper.oldGrid->boundingBox() << "\n";
+        //     }
+        //     mpiLayer.barrier();
+        // }
 
         // boost::shared_ptr<
         //     PatchBuffer<MyStepper::GridType, MyStepper::GridType, TestCell<3> > > p1(
@@ -169,7 +183,29 @@ private:
     int ghostZoneWidth;
     boost::shared_ptr<TestInitializer<3> > init;
     boost::shared_ptr<MyPartitionManager> partitionManager;
-    boost::shared_ptr<VanillaStepper<TestCell<3>, 3> > stepper;
+    boost::shared_ptr<MyStepper> stepper;
+
+    void checkInnerSet(
+        const unsigned& shrink, 
+        const unsigned& expectedStep)
+    {
+        TS_ASSERT_TEST_GRID_REGION(
+            MyStepper::GridType, 
+            stepper->grid(), 
+            partitionManager->innerSet(shrink),
+            expectedStep);
+    }
+
+    void checkRim(
+        const unsigned& shrink, 
+        const unsigned& expectedStep)
+    {
+        TS_ASSERT_TEST_GRID_REGION(
+            MyStepper::GridType, 
+            stepper->grid(), 
+            partitionManager->rim(shrink),
+            expectedStep);
+    }
 
 };
 

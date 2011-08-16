@@ -70,13 +70,14 @@ public:
 // fixme: deduce DIM from CELL_TYPE?!
 template<typename CELL_TYPE, int DIM>
 class VanillaStepper : 
-        public StepperHelper<CELL_TYPE, DIM, DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> >
+    public StepperHelper<CELL_TYPE, DIM, 
+                         DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> >
 {
 public:
     friend class VanillaStepperRegionTest;
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
-    typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
+    typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef class StepperHelper<CELL_TYPE, DIM, GridType> ParentType;
     typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
 
@@ -96,31 +97,29 @@ public:
             update();
     }
 
-    inline virtual const Grid<CELL_TYPE, typename CELL_TYPE::Topology>& grid() const
-    {
-        return *oldGrid->vanillaGrid();
-    }
-
     inline virtual std::pair<int, int> currentStep() const
     {
         return std::make_pair(curStep, curNanoStep);
+    }
+
+    inline virtual const GridType& grid() const
+    {
+        return *oldGrid;
     }
 
 private:
     int curStep;
     int curNanoStep;
     int validGhostZoneWidth;
-    // fixme: do we need these two everywhere?
-    Coord<DIM> offset;
-    Coord<DIM> dimensions;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
     PatchBuffer<GridType, GridType, CELL_TYPE> patchBuffer;
 
     inline void update()
     {
-        unsigned index = --validGhostZoneWidth;
-        const Region<DIM>& region = this->getPartitionManager().ownRegion(index);
+        unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
+        std::cout << "index: " << index << "\n";
+        const Region<DIM>& region = this->getPartitionManager().innerSet(index);
         for (typename Region<DIM>::Iterator i = region.begin(); i != region.end(); ++i) 
             (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), curNanoStep);
         std::swap(oldGrid, newGrid);
@@ -131,7 +130,7 @@ private:
             curStep++;
         }
 
-        notifyPatchAccepters(region);
+        // notifyPatchAccepters(region);
 
 
 
@@ -170,13 +169,12 @@ private:
 
     inline void initGrids()
     {
-        guessOffset();
-        CoordBox<DIM> gridBox = 
-            this->getPartitionManager().ownExpandedRegion().boundingBox();
-        
-        // std::cout << "my gridBox: " << gridBox << "\n";
-        oldGrid.reset(new GridType(gridBox));
-        newGrid.reset(new GridType(gridBox));
+        Coord<DIM> topoDim = this->getInitializer().gridDimensions();
+        CoordBox<DIM> gridBox;
+        guessOffset(&gridBox.origin, &gridBox.dimensions);
+
+        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
+        newGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
         this->getInitializer().grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
@@ -188,9 +186,14 @@ private:
                         this->getPartitionManager().ownExpandedRegion(), globalNanoStep());
     }
 
+    inline const unsigned& ghostZoneWidth() const
+    {
+        return this->getPartitionManager().getGhostZoneWidth();
+    }
+    
     inline void resetValidGhostZoneWidth()
     {
-        validGhostZoneWidth = this->getPartitionManager().getGhostZoneWidth();
+        validGhostZoneWidth = ghostZoneWidth();
     }
 
     /**
@@ -198,13 +201,13 @@ private:
      * a DisplacedGrid) avoids having grids with a size equal to the
      * whole simulation area on torus topologies.
      */
-    inline void guessOffset()
+    inline void guessOffset(Coord<DIM> *offset, Coord<DIM> *dimensions)
     {
         const CoordBox<DIM>& boundingBox = 
             this->getPartitionManager().ownRegion().boundingBox();
         OffsetHelper<DIM - 1, DIM, typename CELL_TYPE::Topology>()(
-            &offset,
-            &dimensions,
+            offset,
+            dimensions,
             boundingBox,
             this->getInitializer().gridBox(),
             this->getPartitionManager().getGhostZoneWidth());

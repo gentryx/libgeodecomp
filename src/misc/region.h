@@ -8,6 +8,30 @@
 
 namespace LibGeoDecomp {
 
+template<typename TOPOLOGY>
+class TopologyWrapsXAxis
+{
+public:
+    bool operator()()
+    {
+        if (TOPOLOGY::DIMENSIONS == 1) {
+            return TOPOLOGY::WrapEdges;
+        } else {
+            return TopologyWrapsXAxis<typename TOPOLOGY::ParentTopology>()();
+        }
+    }
+};
+
+template<>
+class TopologyWrapsXAxis<Topologies::ZeroDimensional>
+{
+public:
+    bool operator()()
+    {
+        return 0;
+    }
+};
+
 template<int DIM>
 class StreakMapDefine;
 
@@ -458,7 +482,38 @@ public:
         }
         return ret;
     }
-    
+
+    template<typename TOPOLOGY>
+    inline Region expandWithTopology(
+        const unsigned& width, 
+        const Coord<DIM>& dimensions, 
+        TOPOLOGY /*instance unused, but without this statement g++ would complain... */) const
+    {
+        Region ret;
+        Coord<DIM> dia = CoordDiagonal<DIM>()(width);
+
+        for (StreakIterator<DIM> i = beginStreak(); i != endStreak(); ++i) {
+            Streak<DIM> streak = *i;
+
+            Coord<DIM> boxOrigin = streak.origin - dia;
+            Coord<DIM> boxDim = CoordDiagonal<DIM>()(2 * width + 1);
+            boxDim.x() = 1;
+            CoordBox<DIM> box(boxOrigin, boxDim);
+            CoordBoxSequence<DIM> s = box.sequence();
+            int endX = streak.endX + width;
+
+            while (s.hasNext()) {
+                Streak<DIM> newStreak(s.next(), endX);
+                if (TopologyWrapsXAxis<TOPOLOGY>()()) {
+                    this->splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
+                } else {
+                    this->normalizeStreak<TOPOLOGY>(trimStreak(newStreak, dimensions), &ret, dimensions);
+                }
+            }
+        }
+        return ret;
+    }
+       
     inline const unsigned& numStreaks() const
     {
         if (geometryCacheTainted)
@@ -602,6 +657,71 @@ private:
     {
         determineGeometry();       
         geometryCacheTainted = false;
+    }
+
+    inline Streak<DIM> trimStreak(const Streak<DIM>& s, const Coord<DIM>& dimensions) const
+    {
+        int width = dimensions.x();
+        Streak<DIM> buf = s;
+        buf.origin.x() = std::max(buf.origin.x(), 0);
+        buf.endX = std::min(width, buf.endX);
+        return buf;
+    }
+
+    template<typename TOPOLOGY>
+    void splitStreak(
+        const Streak<DIM>& streak, 
+        Region<DIM> *target, 
+        const Coord<DIM>& dimensions) const 
+    {
+        int width = dimensions.x();
+
+        int currentX = streak.origin.x();
+        if (currentX < 0) {
+            Streak<DIM> section = streak;
+            section.endX = std::min(streak.endX, 0);
+            currentX = section.endX;
+
+            // normalize left overhang
+            section.origin.x() += width;
+            section.endX += width;
+            normalizeStreak<TOPOLOGY>(section, target, dimensions);
+        }
+
+        if (currentX < streak.endX) {
+            Streak<DIM> section = streak;
+            section.origin.x() = currentX;
+            section.endX = std::min(streak.endX, width);
+            currentX = section.endX;
+
+            normalizeStreak<TOPOLOGY>(section, target, dimensions);
+        }
+
+        if (currentX < streak.endX) {
+            Streak<DIM> section = streak;
+            section.origin.x() = currentX;
+
+            // normalize right overhang
+            section.origin.x() -= width;
+            section.endX -= width;
+            normalizeStreak<TOPOLOGY>(section, target, dimensions);
+        }
+    }
+    
+    template<typename TOPOLOGY>
+    void normalizeStreak(
+        const Streak<DIM>& streak, 
+        Region<DIM> *target, 
+        const Coord<DIM>& dimensions) const
+    {
+        Streak<DIM> ret;
+        ret.origin = TOPOLOGY::normalize(streak.origin, dimensions);
+        ret.endX = ret.origin.x() + streak.length();
+
+        // it's bad to use a magic value to check for out of bounds
+        // accesses, but throwing exceptions might be slower
+        if (ret.origin != CoordDiagonal<DIM>()(-1))
+            (*target) << ret;
     }
 };
 

@@ -13,9 +13,9 @@ template<typename CELL_TYPE, typename GRID_TYPE=Grid<CELL_TYPE, Topologies::Cube
 class CoordMap 
 {
 public:
-    const static int DIMENSIONS = GRID_TYPE::DIMENSIONS;
+    const static int DIM = GRID_TYPE::DIM;
 
-    inline CoordMap(const Coord<DIMENSIONS>& origin, GRID_TYPE *grid) :
+    inline CoordMap(const Coord<DIM>& origin, GRID_TYPE *grid) :
         _origin(origin), _grid(grid) {};
 
     /**
@@ -25,7 +25,7 @@ public:
      * unlikely to lead to errors as the Grid itself implements range
      * checks.
      */
-    inline const CELL_TYPE& operator[](const Coord<DIMENSIONS>& relCoord) const
+    inline const CELL_TYPE& operator[](const Coord<DIM>& relCoord) const
     {
         return (*_grid)[_origin + relCoord];
     }
@@ -38,7 +38,7 @@ public:
 
 
 private:
-    Coord<DIMENSIONS> _origin;
+    Coord<DIM> _origin;
     GRID_TYPE *_grid;
 };
 

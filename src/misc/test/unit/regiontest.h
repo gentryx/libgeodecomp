@@ -745,6 +745,53 @@ public:
         TS_ASSERT_EQUALS(expected, actual);
     }
 
+    void testExpandWithTopology1()
+    {
+        Region<2> region;
+        region << Streak<2>(Coord<2>(0, 0), 15)
+               << Streak<2>(Coord<2>(0, 1), 20)
+               << Streak<2>(Coord<2>(0, 2), 20);
+
+        Region<2> actual = region.expandWithTopology(
+            2, 
+            Coord<2>(20, 20),
+            Topologies::Torus<2>::Topology());
+
+        Region<2> expected;
+        expected << Streak<2>(Coord<2>(0,   0), 20)
+                 << Streak<2>(Coord<2>(0,   1), 20)
+                 << Streak<2>(Coord<2>(0,   2), 20)
+                 << Streak<2>(Coord<2>(0,   3), 20)
+                 << Streak<2>(Coord<2>(0,   4), 20)
+                 << Streak<2>(Coord<2>(0,  18), 17)
+                 << Streak<2>(Coord<2>(18, 18), 20)
+                 << Streak<2>(Coord<2>(0,  19), 20);
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testExpandWithTopology2()
+    {
+        Region<2> region;
+        region << Streak<2>(Coord<2>(0, 0), 15)
+               << Streak<2>(Coord<2>(0, 1), 20)
+               << Streak<2>(Coord<2>(0, 2), 20);
+
+        Region<2> actual = region.expandWithTopology(
+            2, 
+            Coord<2>(20, 20),
+            Topologies::Cube<2>::Topology());
+
+        Region<2> expected;
+        expected << Streak<2>(Coord<2>(0,   0), 20)
+                 << Streak<2>(Coord<2>(0,   1), 20)
+                 << Streak<2>(Coord<2>(0,   2), 20)
+                 << Streak<2>(Coord<2>(0,   3), 20)
+                 << Streak<2>(Coord<2>(0,   4), 20);
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
     void testBoolean3D()
     {
         Region<3> leftCube, rightCube, frontCube, mergerLR, mergerFL;

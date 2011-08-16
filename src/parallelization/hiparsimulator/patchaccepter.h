@@ -13,7 +13,7 @@ template<class GRID_TYPE>
 class PatchAccepter
 {
 public:
-    const static int DIM = GRID_TYPE::DIMENSIONS;
+    const static int DIM = GRID_TYPE::DIM;
 
     virtual ~PatchAccepter() {};
 

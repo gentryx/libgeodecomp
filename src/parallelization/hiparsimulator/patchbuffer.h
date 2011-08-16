@@ -17,7 +17,7 @@ class PatchBuffer :
         public PatchProvider<GRID_TYPE2>
 {
 public:
-    const static int DIM = GRID_TYPE1::DIMENSIONS;
+    const static int DIM = GRID_TYPE1::DIM;
 
     virtual void put(
         const GRID_TYPE1& grid, 

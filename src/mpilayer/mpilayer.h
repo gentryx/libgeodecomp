@@ -173,8 +173,8 @@ public:
     {
         // fixme: don't send individual rows, but rather one contiguous block
         for (unsigned y = startRow; y < endRow; y++) {
-            Coord<GRID<CELL, TOPO>::DIMENSIONS> c;
-            c.c[GRID<CELL, TOPO>::DIMENSIONS - 1] = y;
+            Coord<GRID<CELL, TOPO>::DIM> c;
+            c.c[GRID<CELL, TOPO>::DIM - 1] = y;
             MPI::Request req = _comm->Isend(
                 &(const_cast<GRID<CELL, TOPO>&>(*grid))[c],
                 grid->getDimensions().x(),
@@ -199,8 +199,8 @@ public:
         const MPI::Datatype& datatype = Typemaps::lookup<CELL>())
     {
         for (unsigned y = startRow; y < endRow; y++) {
-            Coord<Grid<CELL, TOPO>::DIMENSIONS> c;
-            c.c[GRID<CELL, TOPO>::DIMENSIONS - 1] = y;
+            Coord<TOPO::DIMENSIONS> c;
+            c.c[TOPO::DIMENSIONS - 1] = y;
             MPI::Request req = _comm->Irecv(
                 &(*grid)[c],
                 grid->getDimensions().x(),

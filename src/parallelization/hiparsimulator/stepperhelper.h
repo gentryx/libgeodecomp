@@ -20,7 +20,7 @@ class StepperHelper : Stepper<CELL_TYPE, DIM>
 {
 public:
     friend class StepperTest;
-    typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
+    typedef GRID_TYPE GridType;
     typedef boost::shared_ptr<PatchProvider<GRID_TYPE> > PatchProviderPtr;
     typedef boost::shared_ptr<PatchAccepter<GRID_TYPE> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
@@ -43,21 +43,31 @@ public:
         patchAccepters.push_back(ghostZonePatchAccepter);
     }
 
+    inline virtual const GridType& grid() const =0;
+
 protected:
     PatchProviderList patchProviders;
     PatchAccepterList patchAccepters;
 
-    inline
-    MyPartitionManager& getPartitionManager()
+    inline Initializer<CELL_TYPE>& getInitializer()
+    {
+        return *this->initializer;
+    }
+
+    inline const Initializer<CELL_TYPE>& getInitializer() const
+    {
+        return *this->initializer;
+    }
+
+    inline MyPartitionManager& getPartitionManager()
     {
         return *this->partitionManager;
     }
 
     inline
-    Initializer<CELL_TYPE>&
-    getInitializer()
+    const MyPartitionManager& getPartitionManager() const
     {
-        return *this->initializer;
+        return *this->partitionManager;
     }
 };
 

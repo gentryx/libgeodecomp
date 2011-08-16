@@ -44,6 +44,8 @@ private:
 class VanillaStepperRegionTest : public CxxTest::TestSuite
 {
 public:
+    typedef VanillaStepper<TestCell<2>, 2> MyStepper;
+    typedef MyStepper::GridType GridType;
 
     void setUp()
     {
@@ -80,10 +82,9 @@ public:
 
         // The Unit Under Test: the stepper
         patchBuffer.reset(
-            new MockPatchBuffer<DisplacedGrid<TestCell<2> >, 
-                                DisplacedGrid<TestCell<2> >, TestCell<2> >());
+            new MockPatchBuffer<GridType, GridType, TestCell<2> >());
         stepper.reset(
-            new VanillaStepper<TestCell<2>, 2>(partitionManager, init));
+            new MyStepper(partitionManager, init));
         stepper->addPatchProvider(patchBuffer);
 
         // As a reference the stepper itself is used, which is kind of
@@ -91,7 +92,9 @@ public:
         // kind of behavior is checked in vanillastepperbasittest.h.
         referencePartitionManager.reset(new PartitionManager<2>(rect)); 
         referenceStepper.reset(
-            new VanillaStepper<TestCell<2>, 2>(referencePartitionManager, init));
+            new MyStepper(referencePartitionManager, init));
+
+        // fixme:
         // referenceStepper->update(ghostZoneWidth);
         // std::cout << "foo3c\n";
         // patchBuffer->pushRequest(
@@ -106,6 +109,7 @@ public:
 
     void testUpdate()
     {
+        // fixme:
         // checkRegion(3, 0);
         // stepper->update();
 
@@ -131,26 +135,22 @@ private:
     int ghostZoneWidth;
     boost::shared_ptr<TestInitializer<2> > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
-    boost::shared_ptr<VanillaStepper<TestCell<2>, 2> > stepper;
-    boost::shared_ptr<MockPatchBuffer<
-                          DisplacedGrid<TestCell<2> >, 
-                          DisplacedGrid<TestCell<2> >, 
-                          TestCell<2> > > patchBuffer;
+    boost::shared_ptr<MyStepper > stepper;
+    boost::shared_ptr<MockPatchBuffer<GridType, GridType, TestCell<2> > > patchBuffer;
 
     boost::shared_ptr<PartitionManager<2> > referencePartitionManager;
-    boost::shared_ptr<VanillaStepper<TestCell<2>, 2> > referenceStepper;
+    boost::shared_ptr<MyStepper > referenceStepper;
 
     void checkRegion(
         const unsigned& expansionWidth, 
         const unsigned& expectedStep)
     {
         TS_ASSERT_TEST_GRID_REGION(
-            DisplacedGrid<TestCell<2> >, 
+            GridType, 
             stepper->grid(), 
             partitionManager->ownRegion(expansionWidth),
             expectedStep);
     }
-
 };
 
 }

@@ -35,14 +35,14 @@ class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
     friend class ParallelStripingSimulatorTest;
     
 public:
-    const static int DIMENSIONS = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIMENSIONS;
 
 #ifndef __CODEGEARC__
-    typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIMENSIONS - 1> SliceRef;
+    typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIM - 1> SliceRef;
     typedef typename boost::detail::multi_array::const_sub_array<CELL_TYPE, 1> ConstSliceRef;
-    typedef typename boost::multi_array<CELL_TYPE, DIMENSIONS - 1> Row;
-    typedef typename boost::multi_array<CELL_TYPE, DIMENSIONS> CellMatrix;
-    typedef typename boost::multi_array<CELL_TYPE, DIMENSIONS>::index Index;
+    typedef typename boost::multi_array<CELL_TYPE, DIM - 1> Row;
+    typedef typename boost::multi_array<CELL_TYPE, DIM> CellMatrix;
+    typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
 #else
     typedef SuperVector<CELL_TYPE>& SliceRef;
     typedef const SuperVector<CELL_TYPE>& ConstSliceRef;
@@ -55,14 +55,14 @@ public:
     typedef CELL_TYPE CellType;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > MyCoordMap;
 
-    Grid(const Coord<DIMENSIONS>& dim=Coord<DIMENSIONS>(),
+    Grid(const Coord<DIM>& dim=Coord<DIM>(),
          const CELL_TYPE& _defaultCell=CELL_TYPE(),
          const CELL_TYPE& _edgeCell=CELL_TYPE()) :
         dimensions(dim),
         cellMatrix(dim.toExtents()),
         edgeCell(_edgeCell)
     {
-        GridFiller<DIMENSIONS, CellMatrix, CELL_TYPE>()(
+        GridFiller<DIM, CellMatrix, CELL_TYPE>()(
             &cellMatrix, _defaultCell);
     }
 
@@ -76,13 +76,13 @@ public:
         return *this;
     }
 
-    inline void resize(const Coord<DIMENSIONS>& newDim)
+    inline void resize(const Coord<DIM>& newDim)
     {
         // temporarly resize to 0-sized array to avoid having two
         // large arrays simultaneously allocated. somehow I feel
         // boost::multi_array::resize should be responsible for
         // this...
-        Coord<DIMENSIONS> tempDim;
+        Coord<DIM> tempDim;
         cellMatrix.resize(tempDim.toExtents());
         dimensions = newDim;
         cellMatrix.resize(newDim.toExtents());
@@ -92,7 +92,7 @@ public:
      * returns a map that is referenced by relative coordinates from the
      * originating coordinate coord.
      */
-    inline MyCoordMap getNeighborhood(const Coord<DIMENSIONS>& center)
+    inline MyCoordMap getNeighborhood(const Coord<DIM>& center)
     {
         return MyCoordMap(center, this);
     }
@@ -119,12 +119,12 @@ public:
         return edgeCell;
     }
 
-    inline CELL_TYPE& operator[](const Coord<DIMENSIONS>& coord)
+    inline CELL_TYPE& operator[](const Coord<DIM>& coord)
     {
         return Topology::locate(*this, coord);
     }
 
-    inline const CELL_TYPE& operator[](const Coord<DIMENSIONS>& coord) const
+    inline const CELL_TYPE& operator[](const Coord<DIM>& coord) const
     {
         return (const_cast<Grid&>(*this))[coord];
     }
@@ -149,8 +149,8 @@ public:
 
     inline bool operator==(const Grid& other) const
     {
-        if (this->boundingBox() == CoordBox<DIMENSIONS>() && 
-            other.boundingBox() == CoordBox<DIMENSIONS>())
+        if (this->boundingBox() == CoordBox<DIM>() && 
+            other.boundingBox() == CoordBox<DIM>())
             return true;
 
         return 
@@ -163,12 +163,12 @@ public:
         return !(*this == other);
     }
 
-    virtual CELL_TYPE& at(const Coord<DIMENSIONS>& coord)
+    virtual CELL_TYPE& at(const Coord<DIM>& coord)
     {
         return (*this)[coord];
     }
 
-    virtual const CELL_TYPE& at(const Coord<DIMENSIONS>& coord) const
+    virtual const CELL_TYPE& at(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
@@ -183,7 +183,7 @@ public:
         return getEdgeCell();
     }
 
-    inline const Coord<DIMENSIONS>& getDimensions() const
+    inline const Coord<DIM>& getDimensions() const
     {
         return dimensions;
     }
@@ -204,9 +204,9 @@ public:
                     << "), other (" << other.edgeCell << "))\n";
         }
 
-        CoordBox<DIMENSIONS> b = boundingBox();
-        for (CoordBoxSequence<DIMENSIONS> s = b.sequence(); s.hasNext();) {
-            Coord<DIMENSIONS> c = s.next();
+        CoordBox<DIM> b = boundingBox();
+        for (CoordBoxSequence<DIM> s = b.sequence(); s.hasNext();) {
+            Coord<DIM> c = s.next();
             if ((*this)[c] != other[c]) {
                 message << "\nat coordinate " << c << "\n" <<
                     "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
@@ -232,23 +232,23 @@ public:
                 << "edgeCell:\n"
                 << edgeCell << "\n";
 
-        for (CoordBoxSequence<DIMENSIONS> s = 
+        for (CoordBoxSequence<DIM> s = 
                  this->boundingBox().sequence(); s.hasNext();) {
-            Coord<DIMENSIONS> coord(s.next());
+            Coord<DIM> coord(s.next());
             message << "Coord" << coord << ":\n" << (*this)[coord] << "\n";
         }
 
         return message.str();
     }
 
-    virtual CoordBox<DIMENSIONS> boundingBox() const
+    virtual CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIMENSIONS>(Coord<DIMENSIONS>(), dimensions);
+        return CoordBox<DIM>(Coord<DIM>(), dimensions);
     }
 
 
 private:
-    Coord<DIMENSIONS> dimensions;
+    Coord<DIM> dimensions;
     CellMatrix cellMatrix;
     // This dummy stores the constant edge constraint
     CELL_TYPE edgeCell;

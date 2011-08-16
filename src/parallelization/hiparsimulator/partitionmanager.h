@@ -12,30 +12,6 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-template<typename TOPOLOGY>
-class TopologyWrapsXAxis
-{
-public:
-    bool operator()()
-    {
-        if (TOPOLOGY::DIMENSIONS == 1) {
-            return TOPOLOGY::WrapEdges;
-        } else {
-            return TopologyWrapsXAxis<typename TOPOLOGY::ParentTopology>()();
-        }
-    }
-};
-
-template<>
-class TopologyWrapsXAxis<Topologies::ZeroDimensional>
-{
-public:
-    bool operator()()
-    {
-        return 0;
-    }
-};
-
 template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
 class PartitionManager {
     friend class PartitionManagerTest;
@@ -45,6 +21,7 @@ class PartitionManager {
     friend class HiParSimulatorTest;
 public:
     typedef SuperMap<int, SuperVector<Region<DIM> > > RegionVecMap;
+    typedef TOPOLOGY Topology;
 
     enum AccessCode {OUTGROUP = -1};
 
@@ -70,8 +47,7 @@ public:
         const unsigned& _ghostZoneWidth) 
     {
         regionAccu.reset(_regionAccu);
-        simulationArea = Region<DIM>();
-        simulationArea << _simulationArea;
+        simulationArea = _simulationArea;
         rank = _rank;
         ghostZoneWidth = _ghostZoneWidth;
         regions.clear();
@@ -184,78 +160,26 @@ private:
         regionExpansion.resize(getGhostZoneWidth() + 1);
         regionExpansion[0] = regionAccu->getRegion(node);
         for (int i = 1; i <= getGhostZoneWidth(); ++i) {
-            Region<DIM> expanded = regionExpansion[i - 1].expand(1);
-            Region<DIM> trimmed;
-
-            for (StreakIterator<DIM> s = expanded.beginStreak(); 
-                 s != expanded.endStreak(); ++s) {
-                
-                if (TopologyWrapsXAxis<TOPOLOGY>()()) {
-                    splitStreak(*s, &trimmed);
-                } else {
-                    trimmed << *s;
-                }
-            }
-
-            regionExpansion[i] = trimmed & simulationArea;
+            Region<DIM> expanded;
+            const Region<DIM>& reg = regionExpansion[i - 1];
+            expanded = reg.expandWithTopology(
+                1, 
+                simulationArea.dimensions,
+                Topology());
+            regionExpansion[i] = expanded;
         }
-    }
-
-    void splitStreak(const Streak<DIM>& streak, Region<DIM> *target)
-    {
-        int width = simulationArea.boundingBox().dimensions.x();
-
-        int currentX = streak.origin.x();
-        if (currentX < 0) {
-            Streak<DIM> section = streak;
-            section.endX = std::min(streak.endX, 0);
-            currentX = section.endX;
-
-            // normalize left overhang
-            section.origin.x() += width;
-            section.endX += width;
-            normalizeStreak(section, target);
-        }
-
-        if (currentX < streak.endX) {
-            Streak<DIM> section = streak;
-            section.origin.x() = currentX;
-            section.endX = std::min(streak.endX, width);
-            currentX = section.endX;
-
-            normalizeStreak(section, target);
-        }
-
-        if (currentX < streak.endX) {
-            Streak<DIM> section = streak;
-            section.origin.x() = currentX;
-
-            // normalize right overhang
-            section.origin.x() -= width;
-            section.endX -= width;
-            normalizeStreak(section, target);
-        }
-    }
-    
-    void normalizeStreak(const Streak<DIM>& streak, Region<DIM> *target)
-    {
-        Coord<DIM> c;
-        Streak<DIM> ret;
-        CoordNormalizer<DIM, DIM> normalizer(
-            &c, 
-            simulationArea.boundingBox().dimensions);
-        ret.origin = TOPOLOGY::locate(normalizer, streak.origin);
-        ret.endX = ret.origin.x() + streak.length();
-
-        if (ret.origin != normalizer.getEdgeCell())
-            (*target) << ret;
     }
 
     inline void fillOwnRegion()
     {
         fillRegion(rank);
-        Region<DIM> rim((ownRegion().expand(1) - ownRegion()) & simulationArea);
-        Region<DIM> kernel(ownRegion() - rim.expand(getGhostZoneWidth()));
+        Region<DIM> rim(ownRegion().expandWithTopology(
+                            1, simulationArea.dimensions, Topology()) - 
+                        ownRegion());
+        Region<DIM> kernel(ownRegion() - rim.expandWithTopology(
+                               getGhostZoneWidth(), 
+                               simulationArea.dimensions, 
+                               Topology()));
         innerRim = ownRegion() - kernel;
         outerRim = ownExpandedRegion() - ownRegion();
         ownRims.resize(getGhostZoneWidth() + 1);
@@ -263,13 +187,15 @@ private:
 
         ownRims.back() = innerRim;
         for (int i = getGhostZoneWidth() - 1; i >= 0; --i)
-            ownRims[i] = ownRims[i + 1].expand() & simulationArea;
+            ownRims[i] = ownRims[i + 1].expandWithTopology(
+                1, simulationArea.dimensions, Topology());
 
         ownInnerSets.front() = ownRegion();
-        Region<DIM> minuend = rim.expand();
+        Region<DIM> minuend = 
+            rim.expandWithTopology(1, simulationArea.dimensions, Topology());
         for (int i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
-            minuend = minuend.expand();
+            minuend = minuend.expandWithTopology(1, simulationArea.dimensions, Topology());
         }
     }
 
@@ -287,7 +213,7 @@ private:
 
 private:
     boost::shared_ptr<RegionAccumulator<DIM> > regionAccu;
-    Region<DIM> simulationArea;
+    CoordBox<DIM> simulationArea;
     //fixme: remove inner/outer rim? isn't innerrim covered in ownRims anyways?
     Region<DIM> outerRim;
     Region<DIM> innerRim;

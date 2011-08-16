@@ -21,33 +21,35 @@ template<typename CELL_TYPE,
 class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
 {
 public:
-    const static int DIMENSIONS = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIMENSIONS;
 
     typedef CELL_TYPE CellType;
     typedef TOPOLOGY Topology;
-    typedef typename boost::multi_array<CELL_TYPE, DIMENSIONS>::index Index;
+    typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> MyCoordMap;
 
     DisplacedGrid(
-        const CoordBox<DIMENSIONS>& box = CoordBox<DIMENSIONS>(),
-        const CELL_TYPE& _defaultCell=CELL_TYPE()) :
+        const CoordBox<DIM>& box = CoordBox<DIM>(),
+        const CELL_TYPE& _defaultCell=CELL_TYPE(),
+        const Coord<DIM>& topologicalDimensions=Coord<DIM>()) :
         delegate(box.dimensions, _defaultCell),
-        origin(box.origin)
+        origin(box.origin),
+        topoDimensions(topologicalDimensions)
     {}
 
     DisplacedGrid(const Delegate& _grid,
-                  const Coord<DIMENSIONS>& _origin=Coord<DIMENSIONS>()) :
+                  const Coord<DIM>& _origin=Coord<DIM>()) :
         delegate(_grid),
         origin(_origin)
     {}
 
-    inline const Coord<DIMENSIONS>& topologicalDimensions() const
+    inline const Coord<DIM>& topologicalDimensions() const
     {
         return topoDimensions;
     }
 
-    inline Coord<DIMENSIONS>& topologicalDimensions()
+    inline Coord<DIM>& topologicalDimensions()
     {
         return topoDimensions;
     }
@@ -62,7 +64,7 @@ public:
         return delegate.baseAddress();
     }
 
-    inline const Coord<DIMENSIONS>& getOrigin() const
+    inline const Coord<DIM>& getOrigin() const
     {
         return origin;
     }
@@ -77,32 +79,31 @@ public:
         return delegate.getEdgeCell();
     }
 
-    inline void resize(const CoordBox<DIMENSIONS>& box)
+    inline void resize(const CoordBox<DIM>& box)
     {
         delegate.resize(box.dimensions);
         origin = box.origin;
     }
 
-    inline CELL_TYPE& operator[](const Coord<DIMENSIONS>& absoluteCoord)
+    inline CELL_TYPE& operator[](const Coord<DIM>& absoluteCoord)
     {
-        Coord<DIMENSIONS> relativeCoord = absoluteCoord - origin;
+        Coord<DIM> relativeCoord = absoluteCoord - origin;
         if (TOPOLOGICALLY_CORRECT) 
-            relativeCoord = 
-                Topology::normalize(relativeCoord, topoDimensions);
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
         return delegate[relativeCoord];
     }
 
-    inline const CELL_TYPE& operator[](const Coord<DIMENSIONS>& absoluteCoord) const
+    inline const CELL_TYPE& operator[](const Coord<DIM>& absoluteCoord) const
     {
         return (const_cast<DisplacedGrid&>(*this))[absoluteCoord];
     }
 
-    virtual CELL_TYPE& at(const Coord<DIMENSIONS>& coord)
+    virtual CELL_TYPE& at(const Coord<DIM>& coord)
     {
         return (*this)[coord];
     }
 
-    virtual const CELL_TYPE& at(const Coord<DIMENSIONS>& coord) const
+    virtual const CELL_TYPE& at(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
@@ -118,25 +119,25 @@ public:
     }
 
     template<typename  GRID_TYPE>
-    inline void paste(const GRID_TYPE& grid, const Region<DIMENSIONS>& region)
+    inline void paste(const GRID_TYPE& grid, const Region<DIM>& region)
     {
-        for (StreakIterator<DIMENSIONS> i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
             const CELL_TYPE *start = &grid[i->origin];
             std::copy(start, start + i->length(), &(*this)[i->origin]);
         }
     }
 
-    inline const Coord<DIMENSIONS>& getDimensions() const
+    inline const Coord<DIM>& getDimensions() const
     {
         return delegate.getDimensions();
     }
 
-    virtual CoordBox<DIMENSIONS> boundingBox() const
+    virtual CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIMENSIONS>(origin, delegate.getDimensions());
+        return CoordBox<DIM>(origin, delegate.getDimensions());
     }
 
-    inline MyCoordMap getNeighborhood(const Coord<DIMENSIONS>& center)
+    inline MyCoordMap getNeighborhood(const Coord<DIM>& center)
     {
         return MyCoordMap(center - origin, &delegate);
     }
@@ -163,16 +164,16 @@ public:
 
 private:
     Delegate delegate;
-    Coord<DIMENSIONS> topoDimensions;
-    Coord<DIMENSIONS> origin;
+    Coord<DIM> origin;
+    Coord<DIM> topoDimensions;
 };
 
 };
 
-template<typename _CharT, typename _Traits, typename _CellT, typename _Topology>
+template<typename _CharT, typename _Traits, typename _CellT, typename _Topology, bool _Correctness>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::DisplacedGrid<_CellT, _Topology>& grid)
+           const LibGeoDecomp::DisplacedGrid<_CellT, _Topology, _Correctness>& grid)
 {
     __os << grid.toString();
     return __os;

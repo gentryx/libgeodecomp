@@ -170,7 +170,8 @@ public:
             (*TestCellBase::stream) 
                 << "Update Error for " << this->toString() << ":\n"
                 << "Invalid Neighbor at " << relativeLoc << ":\n" 
-                << other.toString() << "\n";
+                << other.toString() << "\n"
+                << "--------------" << "\n";
             return false;
         }
         bool otherShouldBeEdge = !inBounds(pos + relativeLoc);

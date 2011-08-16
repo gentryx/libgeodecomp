@@ -39,7 +39,8 @@ public:
     {}
 
     inline virtual void update(int nanoSteps) = 0;
-    inline virtual const GridType& grid() const = 0;
+    //fixme:
+    // inline virtual const GridType& grid() const = 0;
     // returns current step and nanoStep
     inline virtual std::pair<int, int> currentStep() const = 0;
 

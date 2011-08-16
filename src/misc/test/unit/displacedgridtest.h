@@ -90,8 +90,10 @@ public:
          */
 
         DisplacedGrid<int, Topologies::Torus<2>::Topology, true> grid(
-            CoordBox<2>(Coord<2>(-3, -2), Coord<2>(8, 6)), -2);
-        grid.topologicalDimensions() = Coord<2>(15, 10);
+            CoordBox<2>(Coord<2>(-3, -2), 
+                        Coord<2>(8, 6)), 
+            -2,
+            Coord<2>(15, 10));
 
         for (int y = -2; y < 4; ++y) 
             for (int x = -3; x < 5; ++x)
