@@ -28,12 +28,13 @@ public:
         if (!this->checkNanoStepPut(nanoStep))
             return;
 
-        this->storedRegions.push_back(
-            GridVecConv::gridToVector<CellType>(grid, region));
+        storedRegions.push_back(
+            GridVecConv::gridToVector(grid, region));
         this->storedNanoSteps.push_back(this->requestedNanoSteps.front());
         this->requestedNanoSteps.pop_front();
     }
 
+    // fixme: use pointer to grid here!
     virtual void get(
         GRID_TYPE2& destinationGrid, 
         const Region<DIM>& patchableRegion, 
@@ -41,14 +42,14 @@ public:
         const bool& remove=true) 
     {
         this->checkNanoStepGet(nanoStep);
+        if (storedRegions.empty())
+            throw std::logic_error("no region available");
 
-        GridVecConv::vectorToGrid<CellType>(
-            this->storedRegions.front(), 
-            destinationGrid, 
-            region);
+        GridVecConv::vectorToGrid(
+            storedRegions.front(), &destinationGrid, region);
 
         if (remove) {
-            this->storedRegions.pop_front();
+            storedRegions.pop_front();
             this->storedNanoSteps.pop_front();
         }
 
@@ -61,7 +62,7 @@ public:
 
 private:
     Region<DIM> region;
-
+    std::deque<SuperVector<CellType> > storedRegions;
 };
 
 }

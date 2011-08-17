@@ -21,6 +21,7 @@ public:
 
     virtual ~PatchProvider() {};
 
+    // fixme: use pointer to destiantion grid here!
     virtual void get(
         GRID_TYPE& destinationGrid, 
         const Region<DIM>& patchableRegion, 
@@ -29,13 +30,11 @@ public:
 
 protected:
     std::deque<long> storedNanoSteps;
-    std::deque<SuperVector<CellType> > storedRegions;
 
-    void checkNanoStepGet(const long& nanoStep)
+    void checkNanoStepGet(const long& nanoStep) const
     {
-        if (storedRegions.empty())
-            throw std::logic_error("no region available");
-
+        if (storedNanoSteps.empty())
+            throw std::logic_error("no nano step available");
         if (storedNanoSteps.front() != nanoStep) 
             throw std::logic_error(
                 std::string(

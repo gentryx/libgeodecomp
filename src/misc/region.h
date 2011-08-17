@@ -301,6 +301,7 @@ public:
 
     inline Region() :
         myNumStreaks(0),
+        mySize(0),
         geometryCacheTainted(false)
     {}
 
@@ -462,6 +463,13 @@ public:
         return myBoundingBox;
     }
 
+    inline const long& size() const
+    {
+        if (geometryCacheTainted)
+            resetGeometryCache();
+        return mySize;
+    }
+
     inline Region expand(const unsigned& width=1) const
     {
         Region ret;
@@ -483,11 +491,16 @@ public:
         return ret;
     }
 
+    /**
+     * does the same as expand, but will wrap overlap at edges
+     * correctly. The instance of the TOPOLOGY is actually unused, but
+     * without it statement g++ would complain...
+     */
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
         const unsigned& width, 
         const Coord<DIM>& dimensions, 
-        TOPOLOGY /*instance unused, but without this statement g++ would complain... */) const
+        TOPOLOGY /* unused */) const
     {
         Region ret;
         Coord<DIM> dia = CoordDiagonal<DIM>()(width);
@@ -582,6 +595,7 @@ private:
     StreakMap streaks;
     mutable CoordBox<DIM> myBoundingBox;
     mutable unsigned myNumStreaks;
+    mutable long mySize;
     mutable bool geometryCacheTainted;
 
     Line& lookupLine(const Coord<DIM> c)
@@ -634,22 +648,27 @@ private:
         if (empty()) {
             myBoundingBox = CoordBox<DIM>();
             myNumStreaks = 0;
+            mySize = 0;
         } else {
             const Streak<DIM>& someStreak = *beginStreak();
             Coord<DIM> min = someStreak.origin;
             Coord<DIM> max = someStreak.origin;
 
             myNumStreaks = 0;
-            for (StreakIterator<DIM> i = beginStreak(); i != endStreak(); ++i) {
+            mySize = 0;
+            for (StreakIterator<DIM> i = beginStreak(); 
+                 i != endStreak(); ++i) {
                 Coord<DIM> left = i->origin;
                 Coord<DIM> right = i->origin;
                 right.x() = i->endX - 1;
 
                 min = min.min(left);
                 max = max.max(right);
+                mySize += i->endX - i->origin.x();
                 myNumStreaks++;
             }
-            myBoundingBox = CoordBox<DIM>(min, max - min + CoordDiagonal<DIM>()(1));
+            myBoundingBox = 
+                CoordBox<DIM>(min, max - min + CoordDiagonal<DIM>()(1));
         }
     }
 
@@ -659,7 +678,9 @@ private:
         geometryCacheTainted = false;
     }
 
-    inline Streak<DIM> trimStreak(const Streak<DIM>& s, const Coord<DIM>& dimensions) const
+    inline Streak<DIM> trimStreak(
+        const Streak<DIM>& s, 
+        const Coord<DIM>& dimensions) const
     {
         int width = dimensions.x();
         Streak<DIM> buf = s;

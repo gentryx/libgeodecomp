@@ -26,7 +26,7 @@ public:
         const Region<DIM>& validRegion, 
         const long& nanoStep) = 0;
 
-    virtual long nextRequiredNanoStep()
+    virtual long nextRequiredNanoStep() const
     {
         return requestedNanoSteps.front();
     }
@@ -39,7 +39,7 @@ public:
 protected:
     std::deque<long> requestedNanoSteps;
 
-    bool checkNanoStepPut(const long& nanoStep)
+    bool checkNanoStepPut(const long& nanoStep) const
     {
         if (requestedNanoSteps.empty() || 
             nanoStep < requestedNanoSteps.front())

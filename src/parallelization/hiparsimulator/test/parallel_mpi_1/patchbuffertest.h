@@ -25,7 +25,7 @@ public:
         testGrid1 = GridType(Coord<2>(7, 5), 0);
         testGrid2 = GridType(Coord<2>(7, 5), 0);
         testGrid3 = GridType(Coord<2>(7, 5), 0);
-        zeroGrid  = GridType(Coord<2>(7, 5));
+        zeroGrid  = GridType(Coord<2>(7, 5), 0);
         
         // fixme: replace this by region<<coordbox
         for (int y = 0; y < baseGrid.getDimensions().y(); ++y)
@@ -98,6 +98,7 @@ public:
         TS_ASSERT_EQUALS(testGrid2, compGrid);
     }
 
+private:
     GridType baseGrid;
     GridType testGrid1;
     GridType testGrid2;

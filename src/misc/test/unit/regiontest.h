@@ -376,6 +376,18 @@ public:
                          c.boundingBox());
     }
 
+    void testSize()
+    {
+        Region<2> c;
+        TS_ASSERT_EQUALS(0, c.size());
+        c << Streak<2>(Coord<2>(10, 10), 20);
+        TS_ASSERT_EQUALS(10, c.size());
+        c << Streak<2>(Coord<2>(17, 20), 98);
+        TS_ASSERT_EQUALS(91, c.size());
+        c >> Streak<2>(Coord<2>(15, 10), 18);
+        TS_ASSERT_EQUALS(88, c.size());
+    }
+
     void testExpand1()
     {
         //
@@ -631,7 +643,8 @@ public:
         Region<2> actual(s.begin(), s.end());
         Region<2> expected;
         for (int y = origin.y(); y != (origin.y() + dimensions.y()); ++y)
-            expected << Streak<2>(Coord<2>(origin.x(), y), origin.x() + dimensions.x());
+            expected << Streak<2>(Coord<2>(origin.x(), y), 
+                                  origin.x() + dimensions.x());
         TS_ASSERT_EQUALS(actual, expected);
     }
 
@@ -643,7 +656,8 @@ public:
 
         a.clear();
         TS_ASSERT(a.empty());
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(0, 0), Coord<2>(0, 0)), a.boundingBox());
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(0, 0), Coord<2>(0, 0)), 
+                         a.boundingBox());
     }
 
     void test3DSimple1()

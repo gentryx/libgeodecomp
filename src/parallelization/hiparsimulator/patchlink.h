@@ -24,17 +24,17 @@ public:
     class Link 
     {
     public:
+        typedef typename GRID_TYPE::CellType CellType;
+
         inline Link(
             MPILayer *_mpiLayer,
+            const Region<DIM>& _region,
             const int& _tag) :
             mpiLayer(_mpiLayer),
+            region(_region),
+            buffer(_region.size()),
             tag(_tag)
         {}
-
-        inline void setRegion(const Region<DIM>& newRegion)
-        {
-            region = newRegion;
-        }
 
         inline void wait()
         {
@@ -44,6 +44,7 @@ public:
     protected:
         MPILayer *mpiLayer;
         Region<DIM> region;
+        SuperVector<CellType> buffer;
         int tag;
     };
 
@@ -52,27 +53,61 @@ public:
         public PatchAccepter<GRID_TYPE>
     {
     public:
+        inline Accepter(
+            MPILayer *_mpiLayer=0,
+            const Region<DIM>& _region=Region<DIM>(),
+            const int& _tag=0,
+            const int& _dest=0) :
+            Link(_mpiLayer, _region, _tag),
+            dest(_dest)
+        {}
+
         virtual void put(
             const GRID_TYPE& grid, 
             const Region<DIM>& /*validRegion*/, 
-            const unsigned& nanoStep) 
+            const long& nanoStep) 
         {
             if (!this->checkNanoStepPut(nanoStep))
                 return;
+
+            GridVecConv::gridToVector(grid, &this->buffer, this->region);
         }
+
+    private:
+        int dest;
     };
 
     class Provider : 
         public Link,
         public PatchProvider<GRID_TYPE>
     {
+    public:
+        inline Provider(
+            MPILayer *_mpiLayer=0,
+            const Region<DIM>& _region=Region<DIM>(),
+            const int& _tag=0,
+            const int& _source=0) :
+            Link(_mpiLayer, _region, _tag),
+            source(_source)
+        {}
+
         virtual void get(
             GRID_TYPE& destinationGrid, 
             const Region<DIM>& patchableRegion, 
-            const unsigned& nanoStep,
+            const long& nanoStep,
             const bool& remove=true) 
         {
+            this->checkNanoStepGet(nanoStep);
+            // fixme
         }
+
+        void recv(const long& nanoStep)
+        {
+            // fixme
+        }
+
+    private:
+        int source;
     };
 
 };

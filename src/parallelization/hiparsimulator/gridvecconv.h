@@ -11,46 +11,51 @@ namespace HiParSimulator {
 class GridVecConv
 {
 public:
-    template<typename CELL_TYPE, typename GRID_TYPE, int DIM>
-    static SuperVector<CELL_TYPE> gridToVector(
-        const GRID_TYPE& sourceGrid, 
-        const Region<DIM>& region)
+    template<typename GRID_TYPE>
+    static SuperVector<typename GRID_TYPE::CellType> gridToVector(
+        const GRID_TYPE& grid, 
+        const Region<GRID_TYPE::DIM>& region)
     {
-        unsigned size = 0;
-        // fixme: cache region size directly in region?!<2
-        for (StreakIterator<DIM> i = region.beginStreak(); 
-             i != region.endStreak(); ++i) 
-            size += i->length();
-        SuperVector<CELL_TYPE> res(size);
-        CELL_TYPE *dest = &res[0];
+        SuperVector<typename GRID_TYPE::CellType> ret(region.size());
+        gridToVector(grid, &ret, region);
+        return ret;
+    }
 
-        for (StreakIterator<DIM> i = region.beginStreak(); 
+    template<typename GRID_TYPE>
+    static void gridToVector(
+        const GRID_TYPE& grid, 
+        SuperVector<typename GRID_TYPE::CellType> *vec,
+        const Region<GRID_TYPE::DIM>& region)
+    {
+        typename GRID_TYPE::CellType *dest = &(*vec)[0];
+
+        for (StreakIterator<GRID_TYPE::DIM> i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
-            const CELL_TYPE *start = &sourceGrid[i->origin];
+            const typename GRID_TYPE::CellType *start = &grid[i->origin];
             std::copy(start, start + i->length(), dest);
             dest += i->length();
         }
 
-        return res;
     }
 
-    // fixme: check that region size == stored vector size
-    template<typename CELL_TYPE, typename GRID_TYPE, int DIM>
+    template<typename GRID_TYPE>
     static void vectorToGrid(
-        const SuperVector<CELL_TYPE>& sourceVector, 
-        GRID_TYPE& destGrid, 
-        const Region<DIM>& region)
+        const SuperVector<typename GRID_TYPE::CellType>& vec, 
+        GRID_TYPE *grid, 
+        const Region<GRID_TYPE::DIM>& region)
     {
-        const CELL_TYPE *source = &sourceVector[0];
-        for (StreakIterator<DIM> i = region.beginStreak(); 
+        if (vec.size() != region.size())
+            throw std::logic_error("region doesn't match vector size");
+
+        const typename GRID_TYPE::CellType *source = &vec[0];
+        for (StreakIterator<GRID_TYPE::DIM> i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             unsigned length = i->length();
-            const CELL_TYPE *end = source + length;
-            std::copy(source, end, &destGrid[i->origin]);
+            const typename GRID_TYPE::CellType *end = source + length;
+            typename GRID_TYPE::CellType *dest = &(*grid)[i->origin];
+            std::copy(source, end, dest);
             source = end;
         }
-        if (source != &sourceVector.back() + 1)
-            throw std::logic_error("region doesn't match vector size");
     }
 };
 

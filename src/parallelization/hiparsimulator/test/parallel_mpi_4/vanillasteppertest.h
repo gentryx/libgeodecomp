@@ -84,6 +84,7 @@ public:
         for (int i = 0; i < 4; ++i)
             boundingBoxes << partitionManager->getRegion(i, 0).boundingBox();
         partitionManager->resetGhostZones(boundingBoxes);
+       
         stepper.reset(new MyStepper(partitionManager, init));
 
         // verify that the grids got set up properly
@@ -155,31 +156,6 @@ public:
         checkInnerSet(1, 1);
         stepper->update(3);
         checkInnerSet(4, 4);
-
-        
-
-        // stepper->update(1);
-
-        
-        // for (int i = 0; i < mpiLayer.size(); ++i) {
-        //     mpiLayer.barrier();
-        //     if (i == mpiLayer.rank()) {
-        //         std::cout << "boundingBox: " << stepper.oldGrid->boundingBox() << "\n";
-        //     }
-        //     mpiLayer.barrier();
-        // }
-
-        // boost::shared_ptr<
-        //     PatchBuffer<MyStepper::GridType, MyStepper::GridType, TestCell<3> > > p1(
-        //         new PatchBuffer<MyStepper::GridType, MyStepper::GridType, TestCell<3> >);
-        // boost::shared_ptr< PatchAccepter<MyStepper::GridType> > p2(p1);
-        // p1->pushRequest(&partitionManager->rim(ghostZoneWidth), 0);
-        // stepper.addPatchAccepter(p1);
-
-        // stepper.update(1);
-        
-        // MyStepper::GridType g(init->gridDimensions());
-        // p1->get(g, partitionManager->rim(ghostZoneWidth), 0);
 
         std::cout << "test baaaaaaaaar\n";
                
