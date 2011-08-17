@@ -68,7 +68,7 @@ public:
 
                         pro.recv(nanoStep);
                         pro.wait();
-                        pro.get(actual, boundingBox, nanoStep);
+                        pro.get(&actual, boundingBox, nanoStep);
                         TS_ASSERT_EQUALS(actual, expected);
                     }
                 }

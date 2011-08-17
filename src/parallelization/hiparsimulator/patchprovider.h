@@ -21,9 +21,8 @@ public:
 
     virtual ~PatchProvider() {};
 
-    // fixme: use pointer to destiantion grid here!
     virtual void get(
-        GRID_TYPE& destinationGrid, 
+        GRID_TYPE *destinationGrid, 
         const Region<DIM>& patchableRegion, 
         const long& nanoStep,
         const bool& remove=true) =0;

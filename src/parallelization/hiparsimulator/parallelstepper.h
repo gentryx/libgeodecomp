@@ -63,7 +63,7 @@ public:
         while (deltaT > 0) {
             if (ghostZonePatchProvider) 
                 ghostZonePatchProvider->get(
-                    *oldGrid, 
+                    &*oldGrid, 
                     partitionManager->getOuterOutgroupGhostZoneFragment(), 
                     nanoStepCounter);
             waitForGhostZones();

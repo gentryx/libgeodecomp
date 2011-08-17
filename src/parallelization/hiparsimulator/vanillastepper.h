@@ -169,7 +169,7 @@ private:
              i != this->patchProviders[patchType].end();
              ++i)
             (*i)->get(
-                *oldGrid,
+                &*oldGrid,
                 region,
                 globalNanoStep());
     }
@@ -226,7 +226,7 @@ private:
 
         // We need to restore the rim since it got destroyed while the
         // kernel was updated.
-        rimBuffer.get(*oldGrid, rim(), globalNanoStep(), false);
+        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), false);
 
         // 2: actual ghostzone update
         int nextNanoStep = curNanoStep;
@@ -250,12 +250,12 @@ private:
 
         // 3: restore grid for kernel update
         rimBuffer.get(
-            *oldGrid, 
+            &*oldGrid, 
             rim(), 
             globalNanoStep(), 
             true);
         kernelBuffer.get(
-            *oldGrid, 
+            &*oldGrid, 
             partitionManager().getVolatileKernel(), 
             globalNanoStep(), 
             true);

@@ -551,7 +551,8 @@ public:
 
     void testPerf()
     {
-        benchmark(256, 100);
+        // fixme: add performance test targets
+        // benchmark(256, 100);
     }
 };
 

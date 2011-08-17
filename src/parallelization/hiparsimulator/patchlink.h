@@ -97,14 +97,14 @@ public:
         {}
 
         virtual void get(
-            GRID_TYPE& grid, 
+            GRID_TYPE *grid, 
             const Region<DIM>& patchableRegion, 
             const long& nanoStep,
             const bool& remove=true) 
         {
             this->checkNanoStepGet(nanoStep);
             wait();
-            GridVecConv::vectorToGrid(this->buffer, &grid, this->region);
+            GridVecConv::vectorToGrid(this->buffer, grid, this->region);
         }
 
         void recv(const long& nanoStep)

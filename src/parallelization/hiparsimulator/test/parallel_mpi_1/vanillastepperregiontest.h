@@ -26,7 +26,7 @@ public:
     {
         events.push_back(Event(patchRegion, nanoStep));
         PatchBuffer<GRID_TYPE1, GRID_TYPE2>::get(
-            destinationGrid,
+            &destinationGrid,
             patchRegion,
             nanoStep);
     }

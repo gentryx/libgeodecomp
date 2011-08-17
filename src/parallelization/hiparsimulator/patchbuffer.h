@@ -28,8 +28,9 @@ public:
         const Region<DIM>& /*validRegion*/, 
         const long& nanoStep) 
     {
-        // fixme: check whether validRegion is actually a superset of
-        // the requested region.
+        // It would be nice to check if validRegion was actually a
+        // superset of the region we'll save, but that would be
+        // prohibitively slow.
         if (!this->checkNanoStepPut(nanoStep))
             return;
 
@@ -39,9 +40,8 @@ public:
         this->requestedNanoSteps.pop_front();
     }
 
-    // fixme: use pointer to grid here!
     virtual void get(
-        GRID_TYPE2& destinationGrid, 
+        GRID_TYPE2 *destinationGrid, 
         const Region<DIM>& patchableRegion, 
         const long& nanoStep,
         const bool& remove=true) 
@@ -51,7 +51,7 @@ public:
             throw std::logic_error("no region available");
 
         GridVecConv::vectorToGrid(
-            storedRegions.front(), &destinationGrid, region);
+            storedRegions.front(), destinationGrid, region);
 
         if (remove) {
             storedRegions.pop_front();
