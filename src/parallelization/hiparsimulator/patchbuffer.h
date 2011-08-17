@@ -25,7 +25,7 @@ public:
         const unsigned& nanoStep) 
     {
         // fixme: check whether validRegion is actually a superset of
-        // the currently requested region.
+        // the requested region.
         if (requestedNanoSteps.empty() || nanoStep < requestedNanoSteps.front())
             return;
         if (nanoStep > requestedNanoSteps.front()) {
@@ -33,12 +33,9 @@ public:
             throw std::logic_error("expected nano step was left out");
         }
         storedRegions.push_back(
-            GridVecConv::gridToVector<CELL_TYPE>(
-                grid, 
-                *requestedRegions.front()));
+            GridVecConv::gridToVector<CELL_TYPE>(grid, region));
         storedNanoSteps.push_back(requestedNanoSteps.front());
         requestedNanoSteps.pop_front();
-        requestedRegions.pop_front();
     }
 
     virtual long nextRequiredNanoStep()
@@ -48,7 +45,7 @@ public:
 
     virtual void get(
         GRID_TYPE2& destinationGrid, 
-        const Region<DIM>& patchRegion, 
+        const Region<DIM>& patchableRegion, 
         const unsigned& nanoStep,
         const bool& remove=true) 
     {
@@ -64,7 +61,7 @@ public:
         GridVecConv::vectorToGrid<CELL_TYPE>(
             storedRegions.front(), 
             destinationGrid, 
-            patchRegion);
+            region);
 
         if (remove) {
             storedRegions.pop_front();
@@ -72,14 +69,18 @@ public:
         }
     }
 
-    void pushRequest(const Region<DIM> *region, const long& nanoStep)
+    void pushRequest(const long& nanoStep)
     {
-        requestedRegions.push_back(region);
         requestedNanoSteps.push_back(nanoStep);
     }
 
+    void setRegion(const Region<DIM>& newRegion)
+    {
+        region = newRegion;
+    }
+
 private:
-    std::deque<const Region<DIM>*> requestedRegions;
+    Region<DIM> region;
     std::deque<long> requestedNanoSteps;
     std::deque<SuperVector<CELL_TYPE> > storedRegions;
     std::deque<unsigned> storedNanoSteps;

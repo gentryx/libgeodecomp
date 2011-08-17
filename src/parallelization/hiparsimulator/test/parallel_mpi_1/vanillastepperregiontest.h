@@ -85,7 +85,7 @@ public:
             new MockPatchBuffer<GridType, GridType, TestCell<2> >());
         stepper.reset(
             new MyStepper(partitionManager, init));
-        stepper->addPatchProvider(patchBuffer);
+        stepper->addPatchProvider(patchBuffer, MyStepper::GHOST);
 
         // As a reference the stepper itself is used, which is kind of
         // ugly, but this time we're not decomposing the grid. this

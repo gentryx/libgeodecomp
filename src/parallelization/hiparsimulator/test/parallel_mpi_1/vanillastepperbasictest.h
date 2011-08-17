@@ -55,6 +55,7 @@ class VanillaStepperBasicTest : public CxxTest::TestSuite
 {
 public:
     typedef DisplacedGrid<TestCell<2>, Topologies::Cube<2>::Topology, true> GridType;
+    typedef VanillaStepper<TestCell<2>, 2> MyStepper;
 
     void setUp()
     {
@@ -68,9 +69,9 @@ public:
    
         partitionManager.reset(new PartitionManager<2>(rect));
         stepper.reset(
-            new VanillaStepper<TestCell<2>, 2>(partitionManager, init));
+            new MyStepper(partitionManager, init));
 
-        stepper->addPatchAccepter(patchAccepter);
+        stepper->addPatchAccepter(patchAccepter, MyStepper::GHOST);
     }
 
     void testUpdate()
@@ -100,7 +101,7 @@ public:
 private:
     boost::shared_ptr<TestInitializer<2> > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
-    boost::shared_ptr<VanillaStepper<TestCell<2>, 2> > stepper;
+    boost::shared_ptr<MyStepper> stepper;
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };
 

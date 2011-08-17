@@ -19,13 +19,16 @@ template<typename CELL_TYPE, int DIM, typename GRID_TYPE>
 class StepperHelper : Stepper<CELL_TYPE, DIM>
 {
 public:
+    enum PatchType {GHOST=0, INNER_SET=1};
+
     friend class StepperTest;
     typedef GRID_TYPE GridType;
     typedef boost::shared_ptr<PatchProvider<GRID_TYPE> > PatchProviderPtr;
     typedef boost::shared_ptr<PatchAccepter<GRID_TYPE> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
     typedef std::deque<PatchAccepterPtr> PatchAccepterList;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
+    typedef PartitionManager<
+        DIM, typename CELL_TYPE::Topology> MyPartitionManager;
 
     inline StepperHelper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,
@@ -33,21 +36,25 @@ public:
         Stepper<CELL_TYPE, DIM>(_partitionManager, _initializer)
     {}
 
-    void addPatchProvider(const PatchProviderPtr& ghostZonePatchProvider)
+    void addPatchProvider(
+        const PatchProviderPtr& ghostZonePatchProvider, 
+        const PatchType& patchType)
     {
-        patchProviders.push_back(ghostZonePatchProvider);
+        patchProviders[patchType].push_back(ghostZonePatchProvider);
     }
 
-    void addPatchAccepter(const PatchAccepterPtr& ghostZonePatchAccepter)
+    void addPatchAccepter(
+        const PatchAccepterPtr& ghostZonePatchAccepter, 
+        const PatchType& patchType)
     {
-        patchAccepters.push_back(ghostZonePatchAccepter);
+        patchAccepters[patchType].push_back(ghostZonePatchAccepter);
     }
 
     inline virtual const GridType& grid() const =0;
 
 protected:
-    PatchProviderList patchProviders;
-    PatchAccepterList patchAccepters;
+    PatchProviderList patchProviders[2];
+    PatchAccepterList patchAccepters[2];
 
     inline Initializer<CELL_TYPE>& getInitializer()
     {
