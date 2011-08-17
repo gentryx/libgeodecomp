@@ -49,7 +49,8 @@ public:
     virtual void get(
         GRID_TYPE2& destinationGrid, 
         const Region<DIM>& patchRegion, 
-        const unsigned& nanoStep) 
+        const unsigned& nanoStep,
+        const bool& remove=true) 
     {
         if (storedRegions.empty())
             throw std::logic_error("no region available");
@@ -65,8 +66,10 @@ public:
             destinationGrid, 
             patchRegion);
 
-        storedRegions.pop_front();
-        storedNanoSteps.pop_front();
+        if (remove) {
+            storedRegions.pop_front();
+            storedNanoSteps.pop_front();
+        }
     }
 
     void pushRequest(const Region<DIM> *region, const long& nanoStep)

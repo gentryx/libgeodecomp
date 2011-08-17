@@ -72,7 +72,7 @@ public:
         // outgroup ghost zone fragments are computed a tad generous,
         // an exact, greedy calculation would be more complicated
         Region<DIM> outer = outerRim;
-        Region<DIM> inner = innerRim;
+        Region<DIM> inner = rim(getGhostZoneWidth());
         for (typename RegionVecMap::iterator i = outerGhostZoneFragments.begin();
              i != outerGhostZoneFragments.end();
              ++i)
@@ -152,6 +152,11 @@ public:
     {
         return outerRim;
     }
+
+    inline const Region<DIM>& getVolatileKernel() const
+    {
+        return volatileKernel;
+    }
     
 private:
     inline void fillRegion(const unsigned& node)
@@ -173,30 +178,35 @@ private:
     inline void fillOwnRegion()
     {
         fillRegion(rank);
-        Region<DIM> rim(ownRegion().expandWithTopology(
-                            1, simulationArea.dimensions, Topology()) - 
-                        ownRegion());
-        Region<DIM> kernel(ownRegion() - rim.expandWithTopology(
-                               getGhostZoneWidth(), 
-                               simulationArea.dimensions, 
-                               Topology()));
-        innerRim = ownRegion() - kernel;
+        Region<DIM> surface(
+            ownRegion().expandWithTopology(
+                1, simulationArea.dimensions, Topology()) - 
+            ownRegion());
+        Region<DIM> kernel(
+            ownRegion() - 
+            surface.expandWithTopology(
+                getGhostZoneWidth(), 
+                simulationArea.dimensions, 
+                Topology()));
         outerRim = ownExpandedRegion() - ownRegion();
         ownRims.resize(getGhostZoneWidth() + 1);
         ownInnerSets.resize(getGhostZoneWidth() + 1);
 
-        ownRims.back() = innerRim;
+        ownRims.back() = ownRegion() - kernel;
         for (int i = getGhostZoneWidth() - 1; i >= 0; --i)
             ownRims[i] = ownRims[i + 1].expandWithTopology(
                 1, simulationArea.dimensions, Topology());
 
         ownInnerSets.front() = ownRegion();
-        Region<DIM> minuend = 
-            rim.expandWithTopology(1, simulationArea.dimensions, Topology());
+        Region<DIM> minuend = surface.expandWithTopology(
+            1, simulationArea.dimensions, Topology());
         for (int i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
-            minuend = minuend.expandWithTopology(1, simulationArea.dimensions, Topology());
+            minuend = minuend.expandWithTopology(
+                1, simulationArea.dimensions, Topology());
         }
+
+        volatileKernel = ownInnerSets.back() & rim(1) ;
     }
 
     inline void intersect(const unsigned& node) 
@@ -214,10 +224,8 @@ private:
 private:
     boost::shared_ptr<RegionAccumulator<DIM> > regionAccu;
     CoordBox<DIM> simulationArea;
-    //fixme: remove inner/outer rim? isn't innerrim covered in ownRims anyways?
     Region<DIM> outerRim;
-    Region<DIM> innerRim;
-    Region<DIM> groupRegion;
+    Region<DIM> volatileKernel;
     RegionVecMap regions;
     RegionVecMap outerGhostZoneFragments;
     RegionVecMap innerGhostZoneFragments;

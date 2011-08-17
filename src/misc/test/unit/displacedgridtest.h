@@ -99,18 +99,13 @@ public:
             for (int x = -3; x < 5; ++x)
                 grid[Coord<2>(x, y)] = (y+3) * 10 + (x+3);
 
-        // for (int y = 3; y >= -2; --y) {
-        //     std::cout << y << " : ";
-        //     for (int x = -3; x < 5; ++x)
-        //         std::cout << grid[Coord<2>(x, y)] << " ";
-        //     std::cout << "\n";
-        // }
-        // std::cout << "\n";
-
         TS_ASSERT_EQUALS(10, grid[Coord<2>(-3, -2)]);
         TS_ASSERT_EQUALS(33, grid[Coord<2>( 0,  0)]);
         TS_ASSERT_EQUALS(20, grid[Coord<2>(12, 9)]);
         TS_ASSERT_EQUALS(32, grid[Coord<2>(14, 0)]);
+
+        TS_ASSERT_EQUALS(21, grid.getNeighborhood(
+                             Coord<2>(12, 9))[Coord<2>(1, 0)]);
     }
 };
 

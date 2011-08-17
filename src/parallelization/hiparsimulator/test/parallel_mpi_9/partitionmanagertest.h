@@ -143,6 +143,26 @@ public:
         }
     }
 
+    void testVolatileKernel()
+    {
+        Region<2> expected;
+        unsigned startLine = 
+            startingLine(layer.rank()) + ghostZoneWidth;
+        unsigned endLine   = 
+            startingLine(layer.rank()) + ghostZoneWidth * 2 - 1;
+        expected += fillLines(startLine, endLine);
+
+        if (layer.rank() != layer.size() - 1) {
+            unsigned startLine = 
+                startingLine(layer.rank() + 1) - ghostZoneWidth * 2 + 1;
+            unsigned endLine   = 
+                startingLine(layer.rank() + 1) - ghostZoneWidth;
+            expected += fillLines(startLine, endLine);
+        }
+
+        TS_ASSERT_EQUALS(expected, manager.getVolatileKernel());
+    }
+
 private:
     MPILayer layer;
     PartitionManager<2> manager;

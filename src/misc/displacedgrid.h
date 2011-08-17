@@ -36,7 +36,8 @@ public:
         delegate(box.dimensions, _defaultCell),
         origin(box.origin),
         topoDimensions(topologicalDimensions)
-    {}
+    { }
+
 
     DisplacedGrid(const Delegate& _grid,
                   const Coord<DIM>& _origin=Coord<DIM>()) :
@@ -89,7 +90,8 @@ public:
     {
         Coord<DIM> relativeCoord = absoluteCoord - origin;
         if (TOPOLOGICALLY_CORRECT) 
-            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+            relativeCoord = 
+                Topology::normalize(relativeCoord, topoDimensions);
         return delegate[relativeCoord];
     }
 
@@ -139,7 +141,11 @@ public:
 
     inline MyCoordMap getNeighborhood(const Coord<DIM>& center)
     {
-        return MyCoordMap(center - origin, &delegate);
+        Coord<DIM> relativeCoord = center - origin;
+        if (TOPOLOGICALLY_CORRECT) 
+            relativeCoord = 
+                Topology::normalize(relativeCoord, topoDimensions);
+        return MyCoordMap(relativeCoord, &delegate);
     }
 
     inline const Delegate *vanillaGrid() const

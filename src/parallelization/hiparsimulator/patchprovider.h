@@ -20,7 +20,8 @@ public:
     virtual void get(
         GRID_TYPE& destinationGrid, 
         const Region<DIM>& patchRegion, 
-        const unsigned& nanoStep) = 0;
+        const unsigned& nanoStep,
+        const bool& remove=true) = 0;
 };
 
 }

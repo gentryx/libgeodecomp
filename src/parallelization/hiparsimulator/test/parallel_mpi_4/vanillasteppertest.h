@@ -86,18 +86,6 @@ public:
 
         partitionManager->resetGhostZones(boundingBoxes);
 
-        // for (int i = 0; i < mpiLayer.size(); ++i) {
-        //     mpiLayer.barrier();
-        //     if (i == mpiLayer.rank())
-        //         std::cout << "ownRegion[0]: " << partitionManager->ownRegion(0).boundingBox() 
-        //                   << "ownRegion[1]: " << partitionManager->ownRegion(1).boundingBox()
-        // //                   << "ownRegExpand: " << partitionManager->ownRegion(0).expand(1).boundingBox()
-        // //                   << "simulationAr: " << partitionManager->simulationArea.boundingBox()
-        // //                   << "box: " << box 
-        //                   << "ownExpandedRegion: " << partitionManager->ownExpandedRegion().boundingBox() << "\n";
-        //     mpiLayer.barrier();
-        // }
-
         // let's go
         stepper.reset(new MyStepper(partitionManager, init));
 
@@ -131,20 +119,15 @@ public:
         TS_ASSERT_EQUALS(expectedDimensions, stepper->oldGrid->getDimensions());
         TS_ASSERT_EQUALS(gridDim, stepper->oldGrid->topologicalDimensions());
 
-        if (mpiLayer.rank() == 0) {
-            // std::cout << "innerSet(1)\n"
-            //           << partitionManager->innerSet(1)
-            //           << "innerSet(2)\n"
-            //           << partitionManager->innerSet(2);
+        checkInnerSet(0, 0);
+        stepper->update(1);
+        checkInnerSet(1, 1);
+        stepper->update(3);
+        checkInnerSet(4, 4);
 
-            // checkInnerSet(0, 0);
-            // checkRim(0, 0);
-            // stepper->update(1);
-            // checkInnerSet(1, 1);
-            // stepper->update(1);
-            // checkInnerSet(2, 2);
-        }
+        // stepper->update(1);
 
+        
         // for (int i = 0; i < mpiLayer.size(); ++i) {
         //     mpiLayer.barrier();
         //     if (i == mpiLayer.rank()) {
@@ -168,14 +151,14 @@ public:
         std::cout << "test baaaaaaaaar\n";
                
         /**
-         * update kernel
-         * perform output
-         * handle ghost
-         *   restore ghost
+         * handle ghost (if validGhostZoneWidth == 0)
+         *   restore ghost (inner and outer)
          *   save inner rim
          *   update ghost
          *   save inner ghost
          *   restore inner rim
+         * update kernel
+         * perform output
          */
     }
 
