@@ -19,12 +19,10 @@ public:
 
     inline SuperMap() {};
 
-
     inline const Value& operator[](const Key& key) const
     {
         return (*(const_cast<SuperMap<Key, Value>*>(this)))[key];
     }
-
 
     // C++ weirdness: we have to explicitly reimplement this method as
     // in templates overloaded methods in templates hide inherited
@@ -33,7 +31,6 @@ public:
     {
         return (*((std::map<Key, Value>*)this))[key];
     }
-
 
     inline std::string toString() const {
         std::ostringstream temp;
@@ -47,7 +44,6 @@ public:
         temp << "}";
         return temp.str();
     }
-
 };
 
 }

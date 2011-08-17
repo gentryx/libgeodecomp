@@ -14,8 +14,8 @@ namespace HiParSimulator {
 
 typedef std::pair<Region<2>, unsigned> Event;
 
-template<class GRID_TYPE1, class GRID_TYPE2, class CELL_TYPE>
-class MockPatchBuffer : public PatchBuffer<GRID_TYPE1, GRID_TYPE2, CELL_TYPE>
+template<class GRID_TYPE1, class GRID_TYPE2>
+class MockPatchBuffer : public PatchBuffer<GRID_TYPE1, GRID_TYPE2>
 {
 public:
 
@@ -25,7 +25,7 @@ public:
         const unsigned& nanoStep) 
     {
         events.push_back(Event(patchRegion, nanoStep));
-        PatchBuffer<GRID_TYPE1, GRID_TYPE2, CELL_TYPE>::get(
+        PatchBuffer<GRID_TYPE1, GRID_TYPE2>::get(
             destinationGrid,
             patchRegion,
             nanoStep);
@@ -44,7 +44,7 @@ private:
 class VanillaStepperRegionTest : public CxxTest::TestSuite
 {
 public:
-    typedef VanillaStepper<TestCell<2>, 2> MyStepper;
+    typedef VanillaStepper<TestCell<2> > MyStepper;
     typedef MyStepper::GridType GridType;
 
     void setUp()
@@ -81,10 +81,8 @@ public:
         partitionManager->resetGhostZones(boundingBoxes);
 
         // The Unit Under Test: the stepper
-        patchBuffer.reset(
-            new MockPatchBuffer<GridType, GridType, TestCell<2> >());
-        stepper.reset(
-            new MyStepper(partitionManager, init));
+        patchBuffer.reset(new MockPatchBuffer<GridType, GridType>());
+        stepper.reset(new MyStepper(partitionManager, init));
         stepper->addPatchProvider(patchBuffer, MyStepper::GHOST);
 
         // As a reference the stepper itself is used, which is kind of
@@ -136,7 +134,7 @@ private:
     boost::shared_ptr<TestInitializer<2> > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
     boost::shared_ptr<MyStepper > stepper;
-    boost::shared_ptr<MockPatchBuffer<GridType, GridType, TestCell<2> > > patchBuffer;
+    boost::shared_ptr<MockPatchBuffer<GridType, GridType> > patchBuffer;
 
     boost::shared_ptr<PartitionManager<2> > referencePartitionManager;
     boost::shared_ptr<MyStepper > referenceStepper;

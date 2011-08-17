@@ -12,6 +12,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+// fixme: get rid of DIM, deduce it from TOPOLOGY
 template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
 class PartitionManager {
     friend class PartitionManagerTest;
@@ -62,12 +63,15 @@ public:
         boundingBoxes = _boundingBoxes;
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();
 
-        for (unsigned i = 0; i < boundingBoxes.size(); ++i) 
+        for (unsigned i = 0; i < boundingBoxes.size(); ++i) {
             if (i != rank && 
                 boundingBoxes[i].intersects(ownBoundingBox) &&
-                (!(getRegion(rank, ghostZoneWidth) & getRegion(i,    0)).empty() ||
-                 !(getRegion(i,    ghostZoneWidth) & getRegion(rank, 0)).empty())) 
+                (!(getRegion(rank, ghostZoneWidth) & 
+                   getRegion(i,    0)).empty() ||
+                 !(getRegion(i,    ghostZoneWidth) & 
+                   getRegion(rank, 0)).empty())) 
                 intersect(i); 
+        }
 
         // outgroup ghost zone fragments are computed a tad generous,
         // an exact, greedy calculation would be more complicated

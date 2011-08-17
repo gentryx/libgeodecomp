@@ -210,6 +210,7 @@ public:
     class NDimensional
     {
     public:
+        // fixme: rename to DIM
         const static int DIMENSIONS = N_MINUS_1_DIMENSIONAL::DIMENSIONS + 1;
         const static bool WrapEdges = WRAP_EDGES;
         typedef N_MINUS_1_DIMENSIONAL ParentTopology;

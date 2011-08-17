@@ -1,10 +1,5 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
-
-// fixme: remove this dependency
-#include <libgeodecomp/mpilayer/mpilayer.h>
 
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
@@ -70,19 +65,22 @@ public:
     {}
 };
 
-// fixme: deduce DIM from CELL_TYPE?!
-template<typename CELL_TYPE, int DIM>
+template<typename CELL_TYPE>
 class VanillaStepper : 
-    public StepperHelper<CELL_TYPE, DIM, 
-                         DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> >
+    public StepperHelper<DisplacedGrid<
+                             CELL_TYPE, typename CELL_TYPE::Topology, true> >
 {
 public:
+    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+
     friend class VanillaStepperRegionTest;
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
-    typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
-    typedef class StepperHelper<CELL_TYPE, DIM, GridType> ParentType;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
+    typedef DisplacedGrid<
+        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef class StepperHelper<GridType> ParentType;
+    typedef PartitionManager< 
+        DIM, typename CELL_TYPE::Topology> MyPartitionManager;
 
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
@@ -116,7 +114,7 @@ private:
     int validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
-    PatchBuffer<GridType, GridType, CELL_TYPE> rimBuffer;
+    PatchBuffer<GridType, GridType> rimBuffer;
     Region<DIM> kernelFraction;
 
     inline void update()
@@ -219,7 +217,7 @@ private:
         // save/restore those.
         // fixme: make this a persistent member and set its region
         // only on initGrids()?
-        PatchBuffer<GridType, GridType, CELL_TYPE> kernelBuffer;
+        PatchBuffer<GridType, GridType> kernelBuffer;
         kernelBuffer.setRegion(partitionManager().getVolatileKernel());
         kernelBuffer.pushRequest(globalNanoStep());
         kernelBuffer.put(*oldGrid, 
@@ -319,5 +317,4 @@ private:
 }
 }
 
-#endif
 #endif

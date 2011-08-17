@@ -12,14 +12,12 @@ class MPILayerTest : public CxxTest::TestSuite
 {
 public:
 
-
     TestCell<2> demoCell(int testValue = 1)
     {
         TestCell<2> c;
         c.testValue = testValue;
         return c;
     }
-
 
     void testRequestHandlingCell()
     {
@@ -35,7 +33,6 @@ public:
         TS_ASSERT_EQUALS((unsigned)0, layer._requests[0].size());
     }
 
-
     void testSendRecvCell()
     {
         MPILayer layer;
@@ -47,7 +44,6 @@ public:
         TS_ASSERT_EQUALS(receivedCell, sendCell);
     }
 
-
     void testSendRecvGridBox()
     {
         MPILayer layer;
@@ -58,8 +54,10 @@ public:
         Grid<double> expectedTarget(Coord<2>(7, 8));
         int rectWidth = 3;
         int rectHeight= 2;
-        CoordBox<2> sourceRect(Coord<2>(1, 1), Coord<2>(rectWidth, rectHeight));
-        CoordBox<2> targetRect(Coord<2>(2, 4), Coord<2>(rectWidth, rectHeight));
+        CoordBox<2> sourceRect(Coord<2>(1, 1), 
+                               Coord<2>(rectWidth, rectHeight));
+        CoordBox<2> targetRect(Coord<2>(2, 4), 
+                               Coord<2>(rectWidth, rectHeight));
 
         // setting up temperatures so that communication integrity can be
         // verified
@@ -76,9 +74,9 @@ public:
         layer.sendGridBox(&source, sourceRect, 0);
         layer.recvGridBox(&target, targetRect, 0);
         layer.waitAll();
-        TSM_ASSERT_EQUALS(expectedTarget.diff(target).c_str(), expectedTarget, target);
+        TSM_ASSERT_EQUALS(
+            expectedTarget.diff(target).c_str(), expectedTarget, target);
     }
-
 
     void testSize() 
     { 
@@ -86,64 +84,11 @@ public:
         TS_ASSERT_EQUALS((unsigned)1, layer.size());
     } 
 
-
     void testRank() 
     { 
         MPILayer layer; 
         TS_ASSERT(layer.rank() < layer.size()); 
     } 
-
-
-    void testSendRecvRows()
-    {
-        MPILayer layer;
-        Grid<TestCell<2> > whole = mangledGrid(1.0);
-        Grid<TestCell<2> > expected(Coord<2>(27, 10));
-        for (int y = 10; y < 20; ++y)
-            for (int x = 0; x < 27; ++x)
-                expected[Coord<2>(x, y - 10)] = whole[Coord<2>(x, y)];
-        Grid<TestCell<2> > actual(Coord<2>(27, 10));
-
-        layer.sendRows(&whole, 10, 20, 0);
-        layer.recvRows(&actual, 0, 10, 0);
-        layer.waitAll();
-        TSM_ASSERT_EQUALS(expected.diff(actual).c_str(), expected, actual);
-    }
-
-
-    void testSelectiveWait()
-    {
-        MPILayer layer;
-        Grid<TestCell<2> > send = mangledGrid(1.0);
-        Grid<TestCell<2> > recv(Coord<2>(27, 10));
-
-        layer.sendRows(&send, 10, 20, 0, 47);
-        layer.sendRows(&send, 10, 20, 0, 11);
-        layer.recvRows(&recv, 0, 10, 0, 47);
-
-        TS_ASSERT_EQUALS(layer._requests[11].size(), (unsigned)10);
-        TS_ASSERT_EQUALS(layer._requests[47].size(), (unsigned)20);
-        TS_ASSERT_EQUALS(layer._requests[99].size(), (unsigned)0);
-
-        layer.wait(47);
-
-        TS_ASSERT_EQUALS(layer._requests[11].size(), (unsigned)10);
-        TS_ASSERT_EQUALS(layer._requests[47].size(), (unsigned)0);
-        TS_ASSERT_EQUALS(layer._requests[99].size(), (unsigned)0);
-
-        layer.recvRows(&recv, 0, 10, 0, 99);
-
-        TS_ASSERT_EQUALS(layer._requests[11].size(), (unsigned)10);
-        TS_ASSERT_EQUALS(layer._requests[47].size(), (unsigned)0);
-        TS_ASSERT_EQUALS(layer._requests[99].size(), (unsigned)10);
-
-        layer.waitAll();
-
-        TS_ASSERT_EQUALS(layer._requests[11].size(), (unsigned)0);
-        TS_ASSERT_EQUALS(layer._requests[47].size(), (unsigned)0);
-        TS_ASSERT_EQUALS(layer._requests[99].size(), (unsigned)0);
-    }
-
 
     void testSendRecvVec()
     {
@@ -161,7 +106,6 @@ public:
         layer.waitAll();
         TS_ASSERT_EQUALS(expected, actual);
     }
-
 
     void testRegionCommunication()
     {
@@ -201,11 +145,11 @@ public:
 
         for (int c = 0; c < chunks; c++) {
             for (unsigned i = 0; i < lengths[c]; i++) {
-                TS_ASSERT_EQUALS(addresses[c][i], (addresses[c] - fieldSend + fieldRecv)[i]);
+                TS_ASSERT_EQUALS(addresses[c][i], 
+                                 (addresses[c] - fieldSend + fieldRecv)[i]);
             }
         }
     }
-
 
     void testCreateRegionForGrid()
     {
@@ -223,8 +167,8 @@ public:
         CoordBox<2> targetRect(Coord<2>(2, 4), 
                                Coord<2>(rectWidth, rectHeight));
 
-        // setting up temperatures so that communication integrity can be
-        // verified
+        // setting up temperatures so that communication integrity can
+        // be verified
         fillGrid(source, 100.0);
         fillGrid(target, 200.0);
         fillGrid(expectedTarget, 200.0);
@@ -244,22 +188,19 @@ public:
         layer.sendRegion(&(source[base]), sendRP, 0);
         layer.recvRegion(&(target[base]), recvRP, 0);
         layer.waitAll();
-        TSM_ASSERT_EQUALS(expectedTarget.diff(target).c_str(), expectedTarget, target);
+        TSM_ASSERT_EQUALS(
+            expectedTarget.diff(target).c_str(), 
+            expectedTarget, target);
     }
-
     
 private:
-    // Sets @a grid temperatures within @a rect to @a temp.
     template<typename T>
     void fillGridRect(
             Grid<T>& grid, const CoordBox<2>& rect, const T& val)
     {
-        if (!grid.boundingBox().contains(rect)) 
-            throw std::invalid_argument("rect must be inside grid!");
         for (CoordBoxSequence<2> s = rect.sequence(); s.hasNext();) 
             grid[s.next()] = val;
     }
-
 
     template<typename T>
     void fillGrid(Grid<T>& grid, const T& val)
@@ -267,16 +208,15 @@ private:
         fillGridRect(grid, grid.boundingBox(), val);
     }
 
-
     Grid<TestCell<2> > mangledGrid(double foo)
     {
         Grid<TestCell<2> > grid(Coord<2>(27, 81));
         for (unsigned y = 0; y < grid.getDimensions().y(); y++) 
             for (unsigned x = 0; x < grid.getDimensions().x(); x++) 
-                grid[y][x].testValue = foo + y * grid.getDimensions().y() + x;
+                grid[y][x].testValue = 
+                    foo + y * grid.getDimensions().y() + x;
         return grid;
     }    
-
 };
 
 }

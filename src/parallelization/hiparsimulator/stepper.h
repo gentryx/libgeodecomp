@@ -18,15 +18,13 @@ namespace HiParSimulator {
  * rather from StepperHelper.
  *
  * fixme: doxygen syntax to link to StepperHelper...
- * fixme: cells store the number of dimensions, now, so remove this
- * parameter
- *
- * fixme: deduce DIM from partition?!
  */
-template<typename CELL_TYPE, int DIM>
+template<typename CELL_TYPE>
 class Stepper
 {
 public:
+    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+
     friend class StepperTest;
     typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
     typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;

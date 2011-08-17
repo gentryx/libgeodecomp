@@ -73,7 +73,6 @@ public:
         }
     }
 
-
     void testAlternativeRegionRegistration()
     {
         MPILayer layer;
@@ -135,7 +134,6 @@ public:
         }
     }
 
-
     void testYetAnotherRegionRegistration()        
     {
         MPILayer layer;
@@ -168,7 +166,6 @@ public:
                     TS_ASSERT_EQUALS(recvgrid[Coord<2>(x, y)].testValue, 1.1);
     }
 
-
     void testAllGather()
     {
         MPILayer layer;
@@ -177,7 +174,6 @@ public:
         UVec actual = layer.allGather(layer.rank());
         TS_ASSERT_EQUALS(actual, expected);
     }
-
 
     void testGather()
     {
@@ -195,7 +191,6 @@ public:
         }
     }
 
-
     void testBroadcast()
     {
         MPILayer layer;
@@ -208,7 +203,6 @@ public:
         actual = layer.broadcast(source, root);
         TS_ASSERT_EQUALS(actual, expected);
     }
-
 
     void testBroadcastVector()
     {
@@ -223,7 +217,6 @@ public:
         actual = layer.broadcastVector(source, root);
         TSMA_ASSERT_EQUALS(actual, expected);
     }
-
 
     void testSendRecvCell()
     {
@@ -247,7 +240,6 @@ public:
             TS_ASSERT_EQUALS(b, Coord<2>(6, 7));
         }
     }
-
     
     void testSendRecvRegion()
     {
@@ -266,36 +258,6 @@ public:
         }        
     }
 
-
-    void testSendRecvRows()
-    {
-        MPILayer layer;
-        Grid<TestCell<2> > grid(Coord<2>(2, 2));
-        grid[Coord<2>(0, 0)] = TestCell<2>(Coord<2>(21, 22), Coord<2>(23, 24));
-        grid[Coord<2>(1, 0)] = TestCell<2>(Coord<2>(25, 26), Coord<2>(27, 28));
-        grid[Coord<2>(0, 1)] = TestCell<2>(Coord<2>(29, 30), Coord<2>(31, 32));
-        grid[Coord<2>(1, 1)] = TestCell<2>(Coord<2>(33, 34), Coord<2>(35, 36));
-        
-        if (layer.rank() == 0) {
-            Grid<TestCell<2> > expected = grid;
-            grid[Coord<2>(0, 0)] = 
-                TestCell<2>(Coord<2>( 1,  2), Coord<2>( 3,  4));
-            grid[Coord<2>(1, 0)] = 
-                TestCell<2>(Coord<2>( 5,  6), Coord<2>( 7,  8));
-            grid[Coord<2>(0, 1)] = 
-                TestCell<2>(Coord<2>( 9, 10), Coord<2>(11, 12));
-            grid[Coord<2>(1, 1)] = 
-                TestCell<2>(Coord<2>(13, 14), Coord<2>(15, 16));
-            layer.recvRows(&grid, 1, 2, 1, 47);
-            layer.waitAll();
-            TS_ASSERT_EQUALS(grid[1], expected[1]);
-        } else {
-            layer.sendRows(&grid, 1, 2, 0, 47);
-            layer.waitAll();
-        }
-    }
-
-
     void testAllGatherAgain()
     {
         MPILayer layer;
@@ -306,7 +268,6 @@ public:
         layer.allGather(i, &actual);
         TS_ASSERT_EQUALS(actual, expected);
     }
-
 
     void testAllGatherV1()
     {
@@ -325,7 +286,7 @@ public:
         expected += 1, 2, 3, 4, 5, 6, 7, 8;
         TS_ASSERT_EQUALS(expected, target);
     }
-
+    
     void testAllGatherV2()
     {
         MPILayer layer;
@@ -344,4 +305,4 @@ public:
     }
 };
 
-};
+}

@@ -51,7 +51,7 @@ class VanillaStepperTest : public CxxTest::TestSuite
 {
 public:
     typedef PartitionManager<3, TestCell<3>::Topology> MyPartitionManager;
-    typedef VanillaStepper<TestCell<3>, 3> MyStepper;
+    typedef VanillaStepper<TestCell<3> > MyStepper;
 
     void testFoo() {
         std::cout << "test fooooooo\n";
@@ -83,10 +83,7 @@ public:
         SuperVector<CoordBox<3> > boundingBoxes;
         for (int i = 0; i < 4; ++i)
             boundingBoxes << partitionManager->getRegion(i, 0).boundingBox();
-
         partitionManager->resetGhostZones(boundingBoxes);
-
-        // let's go
         stepper.reset(new MyStepper(partitionManager, init));
 
         // verify that the grids got set up properly
@@ -115,15 +112,51 @@ public:
             break;
         }
         
-        TS_ASSERT_EQUALS(expectedOffset, stepper->oldGrid->getOrigin());
-        TS_ASSERT_EQUALS(expectedDimensions, stepper->oldGrid->getDimensions());
-        TS_ASSERT_EQUALS(gridDim, stepper->oldGrid->topologicalDimensions());
+        TS_ASSERT_EQUALS(expectedOffset, 
+                         stepper->oldGrid->getOrigin());
+        TS_ASSERT_EQUALS(expectedDimensions, 
+                         stepper->oldGrid->getDimensions());
+        TS_ASSERT_EQUALS(gridDim, 
+                         stepper->oldGrid->topologicalDimensions());
 
+        // ensure that the ghostzones we're about to send/receive do
+        // actually match
+        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
+            for (int recver = 0; recver < mpiLayer.size(); ++recver) {
+                if (sender != recver) {
+                    if (sender == mpiLayer.rank()) {
+                        MyPartitionManager::RegionVecMap m =
+                            stepper->partitionManager().
+                            getInnerGhostZoneFragments();
+                        Region<3> region;
+                        if (m.count(recver) > 0)
+                            region = m[recver][ghostZoneWidth];
+                        mpiLayer.sendRegion(region, recver);
+                    }
+
+                    if (recver == mpiLayer.rank()) {
+                        MyPartitionManager::RegionVecMap m =
+                            stepper->partitionManager().
+                            getOuterGhostZoneFragments();
+                        Region<3> expected;
+                        if (m.count(sender) > 0)
+                            expected = m[sender][ghostZoneWidth];
+                        Region<3> actual;
+                        mpiLayer.recvRegion(&actual, sender);
+                        TS_ASSERT_EQUALS(actual, expected);
+                    }
+                }
+            }
+        }
+
+        // let's go
         checkInnerSet(0, 0);
         stepper->update(1);
         checkInnerSet(1, 1);
         stepper->update(3);
         checkInnerSet(4, 4);
+
+        
 
         // stepper->update(1);
 

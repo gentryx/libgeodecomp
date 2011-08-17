@@ -123,57 +123,6 @@ public:
         TS_ASSERT_EQUALS(false, seq2.hasNext());
     }
 
-    void testResized()
-    {
-        CoordBox<2> rect(Coord<2>(-2, 3), Coord<2>(5, 7));
-        TS_ASSERT_EQUALS(
-            CoordBox<2>(Coord<2>(-4, 1), Coord<2>(9, 11)), rect.resized(2));
-        TS_ASSERT_EQUALS(
-            CoordBox<2>(Coord<2>(-1, 4), Coord<2>(3,  5)), rect.resized(-1));
-        TS_ASSERT_EQUALS(
-            CoordBox<2>(Coord<2>( 0, 5), Coord<2>(1,  3)), rect.resized(-2));
-        TS_ASSERT_EQUALS(
-            CoordBox<2>(Coord<2>( 0, 0), Coord<2>(0,  0)), rect.resized(-3));
-        TS_ASSERT_EQUALS(
-            CoordBox<2>(Coord<2>( 0, 0), Coord<2>(0,  0)), rect.resized(-4));
-    }
-
-
-    void testOriginOpposite()
-    {
-        CoordBox<2> rect(Coord<2>(-2, 3), Coord<2>(5, 7));
-        Coord<2> expected(2, 9);
-        TS_ASSERT_EQUALS(rect.originOpposite(), expected);
-    }
-
-
-    void testIntersection()
-    {
-        CoordBox<2> rect1(Coord<2>(-2, 3), Coord<2>(5, 7));
-        CoordBox<2> rect2(Coord<2>(1, -1), Coord<2>(3, 8));
-        CoordBox<2> expected(Coord<2>(1, 3), Coord<2>(2, 4));
-        TS_ASSERT_EQUALS(rect1.intersect(rect2),
-                         rect2.intersect(rect1));
-        TS_ASSERT_EQUALS(rect1.intersect(rect2), expected);
-
-        CoordBox<2> rect3(Coord<2>(0, 0), Coord<2>(4, 2));
-        CoordBox<2> rect4(Coord<2>(0, 0), Coord<2>(3, 1));
-        TS_ASSERT_EQUALS(rect3.intersect(rect4), rect4);
-
-        CoordBox<2> rect5(Coord<2>(0, 0), Coord<2>(4, 2));
-        CoordBox<2> rect6(Coord<2>(5, 7), Coord<2>(3, 1));
-        TS_ASSERT_EQUALS(rect5.intersect(rect6).size(), (unsigned)0);
-    }
-
-    void testContains()
-    {
-        CoordBox<2> rect1(Coord<2>(-2, 3), Coord<2>(5, 7));
-        CoordBox<2> rect2(Coord<2>( 0, 3), Coord<2>(3, 2));
-        CoordBox<2> rect3(Coord<2>( 0, 0), Coord<2>(4, 2));
-        TS_ASSERT_EQUALS(rect1.contains(rect2), true);
-        TS_ASSERT_EQUALS(rect1.contains(rect3), false);
-    }
-
     void testSize()
     {
         CoordBox<2> rect1(Coord<2>(-2, 3), Coord<2>(5, 7));
@@ -204,6 +153,10 @@ public:
         TS_ASSERT_EQUALS(
             false, rect.intersects(CoordBox<2>(Coord<2>(40, 60), 
                                                Coord<2>(10, 10))));
+
+        CoordBox<3> box1(Coord<3>(0, 0, 0), Coord<3>(55, 47, 31));
+        CoordBox<3> box2(Coord<3>(0, 0, 3), Coord<3>(55, 47,  7));
+        TS_ASSERT_EQUALS(true, box1.intersects(box2));
     }
 };
 

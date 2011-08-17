@@ -158,59 +158,6 @@ public:
             recv(&((*grid)[s.next()]), src, 1, datatype); 
     }
 
-    // fixme: remove this legacy code
-    /**
-     * like send(), but for a bunch of rows at once
-     */
-    template<typename CELL, typename TOPO, template<typename T1, typename T2> class GRID>
-    void sendRows(
-        const GRID<CELL, TOPO> *grid,
-        const unsigned& startRow,
-        const unsigned& endRow,
-        const int& dest,
-        const int& waitTag = 0,
-        const MPI::Datatype& datatype = Typemaps::lookup<CELL>())
-    {
-        // fixme: don't send individual rows, but rather one contiguous block
-        for (unsigned y = startRow; y < endRow; y++) {
-            Coord<GRID<CELL, TOPO>::DIM> c;
-            c.c[GRID<CELL, TOPO>::DIM - 1] = y;
-            MPI::Request req = _comm->Isend(
-                &(const_cast<GRID<CELL, TOPO>&>(*grid))[c],
-                grid->getDimensions().x(),
-                datatype,
-                dest,
-                _tag);
-            _requests[waitTag].push_back(req);
-        }
-    }
-
-    // fixme: remove this legacy code
-    /**
-     * like recv(), but for a bunch of rows at once
-     */
-    template<typename CELL, typename TOPO, template<typename T1, typename T2> class GRID>
-    void recvRows(
-        GRID<CELL, TOPO> *grid,
-        const unsigned& startRow,
-        const unsigned& endRow,
-        const int& src,
-        const int& waitTag = 0,
-        const MPI::Datatype& datatype = Typemaps::lookup<CELL>())
-    {
-        for (unsigned y = startRow; y < endRow; y++) {
-            Coord<TOPO::DIMENSIONS> c;
-            c.c[TOPO::DIMENSIONS - 1] = y;
-            MPI::Request req = _comm->Irecv(
-                &(*grid)[c],
-                grid->getDimensions().x(),
-                datatype,
-                src,
-                _tag);
-            _requests[waitTag].push_back(req);
-        }
-    }
-
     template<typename T>
     void sendVec(
         const SuperVector<T> *vec, 
@@ -249,8 +196,8 @@ public:
         unsigned numStreaks = region.numStreaks();
         MPI::Request req = _comm->Isend(&numStreaks, 1, MPI::UNSIGNED, dest, _tag);
         SuperVector<Streak<DIM> > buf = region.toVector();
-        req.Wait();
         _comm->Send(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), dest, _tag);
+        req.Wait();
     }
 
     template<int DIM>
@@ -419,7 +366,7 @@ public:
         if (!region)
             return;
         MPI::Request req = _comm->Irecv(base, 1, region->indices, src, _tag);
-         _requests[waitTag].push_back(req);    
+        _requests[waitTag].push_back(req);    
     }
 
     template<typename T>
@@ -582,7 +529,7 @@ private:
 
 };
 
-};
+}
 
 
 #endif

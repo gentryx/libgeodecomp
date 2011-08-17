@@ -20,7 +20,7 @@ public:
     virtual void put(
         const GRID_TYPE& /*grid*/, 
         const Region<2>& /*validRegion*/, 
-        const unsigned& nanoStep) 
+        const long& nanoStep) 
     {
         offeredNanoSteps.push_back(nanoStep);
         requestedNanoSteps.pop_front();
@@ -55,7 +55,7 @@ class VanillaStepperBasicTest : public CxxTest::TestSuite
 {
 public:
     typedef DisplacedGrid<TestCell<2>, Topologies::Cube<2>::Topology, true> GridType;
-    typedef VanillaStepper<TestCell<2>, 2> MyStepper;
+    typedef VanillaStepper<TestCell<2> > MyStepper;
 
     void setUp()
     {

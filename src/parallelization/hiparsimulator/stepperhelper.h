@@ -15,25 +15,27 @@ namespace HiParSimulator {
  * internal storage format, which is in turn required by 
  * PatchProvider and PatchAccepter.
  */
-template<typename CELL_TYPE, int DIM, typename GRID_TYPE>
-class StepperHelper : Stepper<CELL_TYPE, DIM>
+template<typename GRID_TYPE>
+class StepperHelper : Stepper<typename GRID_TYPE::CellType>
 {
 public:
+    friend class StepperTest;
     enum PatchType {GHOST=0, INNER_SET=1};
 
-    friend class StepperTest;
     typedef GRID_TYPE GridType;
+    typedef typename GridType::CellType CellType;
+    const static int DIM = CellType::Topology::DIMENSIONS;
     typedef boost::shared_ptr<PatchProvider<GRID_TYPE> > PatchProviderPtr;
     typedef boost::shared_ptr<PatchAccepter<GRID_TYPE> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
     typedef std::deque<PatchAccepterPtr> PatchAccepterList;
     typedef PartitionManager<
-        DIM, typename CELL_TYPE::Topology> MyPartitionManager;
+        DIM, typename CellType::Topology> MyPartitionManager;
 
     inline StepperHelper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,
-        const boost::shared_ptr<Initializer<CELL_TYPE> >& _initializer) :
-        Stepper<CELL_TYPE, DIM>(_partitionManager, _initializer)
+        const boost::shared_ptr<Initializer<CellType> >& _initializer) :
+        Stepper<CellType>(_partitionManager, _initializer)
     {}
 
     void addPatchProvider(
@@ -56,12 +58,12 @@ protected:
     PatchProviderList patchProviders[2];
     PatchAccepterList patchAccepters[2];
 
-    inline Initializer<CELL_TYPE>& getInitializer()
+    inline Initializer<CellType>& getInitializer()
     {
         return *this->initializer;
     }
 
-    inline const Initializer<CELL_TYPE>& getInitializer() const
+    inline const Initializer<CellType>& getInitializer() const
     {
         return *this->initializer;
     }

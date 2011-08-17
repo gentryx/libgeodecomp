@@ -13,7 +13,7 @@ class PatchBufferTest : public CxxTest::TestSuite
 {
 public:
     typedef Grid<int> GridType;
-    typedef PatchBuffer<GridType, GridType, int> MyPatchBuffer;
+    typedef PatchBuffer<GridType, GridType> MyPatchBuffer;
 
     void setUp()
     {
@@ -61,7 +61,7 @@ public:
         // check that an empty region causes no changes at all
         patchBuffer.setRegion(region0);
         patchBuffer.pushRequest(0);
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i) 
             patchBuffer.put(baseGrid, validRegion, i);
         compGrid = zeroGrid;
         patchBuffer.get(compGrid, validRegion, 0);
@@ -79,7 +79,7 @@ public:
         compGrid = zeroGrid;
         patchBuffer.get(compGrid, validRegion, 2, true);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
-        
+
         // this is actually ugly: by changing the region, the copy out
         // targets different coordinated than the original
         // storage. but it should just work.

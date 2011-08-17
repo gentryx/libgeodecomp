@@ -48,7 +48,6 @@ public:
                 relativeCoord, dimensions);
     }
 
-
     std::string toString() const
     {
         std::ostringstream temp;
@@ -57,64 +56,10 @@ public:
         return temp.str();
     }
 
-    /**
-     * @return a box that has been symmetrically enlarged/shrunk on all
-     * sides by @a rimWidth. A box with non-positive width or height will
-     * be set to a box with size 0 and origin 0^DIM.
-     */
-    // fixme: remove
-    CoordBox resized(const int& rimWidth) const
-    {
-        Coord<DIM> offset = CoordDiagonal<DIM>()(rimWidth);
-        Coord<DIM> newOrigin = origin - offset;
-        Coord<DIM> newDimensions = dimensions + offset * 2;
-
-        Coord<DIM> test = CoordDiagonal<DIM>()(1).max(newDimensions);
-        if (test != newDimensions)
-            return CoordBox();
-
-
-        return CoordBox(newOrigin, newDimensions);
-    }
-
-
-    // fixme: remove
     bool intersects(const CoordBox& other) const
     {
-        Coord<DIM> maxOrigin(
-            std::max(origin.x(), other.origin.x()),
-            std::max(origin.y(), other.origin.y()));
+        Coord<DIM> maxOrigin = origin.max(other.origin);
         return inBounds(maxOrigin) && other.inBounds(maxOrigin);
-    }
-
-    // fixme: remove
-    CoordBox intersect(const CoordBox& other) const
-    {
-        Coord<DIM> opposite1 = this->originOpposite();
-        Coord<DIM> opposite2 = other.originOpposite();
-
-        Coord<DIM> resUL = this->origin.max(other.origin);
-        Coord<DIM> resLR = opposite1.min(opposite2);
-        resLR += CoordDiagonal<DIM>()(1);
-
-        Coord<DIM> zero;
-        Coord<DIM> dim = zero.max(resLR - resUL);
-
-        return CoordBox(resUL, dim);
-    }
-
-    // fixme: remove
-    bool contains(const CoordBox& other) const
-    {
-        return intersect(other) == other;
-    }
-
-    // fixme: remove
-    inline Coord<DIM> originOpposite() const 
-    { 
-        Coord<DIM> ret = origin + dimensions + CoordDiagonal<DIM>()(-1);
-
-        return ret;
     }
 
     inline unsigned size() const 
