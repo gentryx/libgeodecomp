@@ -151,6 +151,8 @@ public:
         }
 
         // let's go
+        // fixme: once working, use this code to reimplement the
+        // update group
         checkInnerSet(0, 0);
         stepper->update(1);
         checkInnerSet(1, 1);

@@ -15,8 +15,13 @@ class PatchBuffer :
         public PatchProvider<GRID_TYPE2>
 {
 public:
+    friend class PatchBufferTest;
     typedef typename GRID_TYPE1::CellType CellType;
     const static int DIM = GRID_TYPE1::DIM;
+
+    PatchBuffer(const Region<DIM>& _region=Region<DIM>()) :
+        region(_region)
+    {}
 
     virtual void put(
         const GRID_TYPE1& grid, 
@@ -53,11 +58,6 @@ public:
             this->storedNanoSteps.pop_front();
         }
 
-    }
-
-    void setRegion(const Region<DIM>& newRegion)
-    {
-        region = newRegion;
     }
 
 private:

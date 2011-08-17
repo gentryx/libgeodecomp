@@ -26,6 +26,9 @@ public:
     public:
         typedef typename GRID_TYPE::CellType CellType;
 
+        // fixme: patch link needs to be unique between the sending
+        // and the receiving node. ensure this by e.g. a local
+        // registry coupled with a peer exchange
         inline Link(
             MPILayer *_mpiLayer,
             const Region<DIM>& _region,
@@ -71,6 +74,8 @@ public:
                 return;
 
             GridVecConv::gridToVector(grid, &this->buffer, this->region);
+            this->mpiLayer->send(
+                &this->buffer[0], dest, this->buffer.size(), this->tag);
         }
 
     private:
@@ -92,18 +97,21 @@ public:
         {}
 
         virtual void get(
-            GRID_TYPE& destinationGrid, 
+            GRID_TYPE& grid, 
             const Region<DIM>& patchableRegion, 
             const long& nanoStep,
             const bool& remove=true) 
         {
             this->checkNanoStepGet(nanoStep);
-            // fixme
+            wait();
+            GridVecConv::vectorToGrid(this->buffer, &grid, this->region);
         }
 
         void recv(const long& nanoStep)
         {
-            // fixme
+            this->storedNanoSteps.push_back(nanoStep);
+            this->mpiLayer->recv(
+                &this->buffer[0], source, this->buffer.size(), this->tag);
         }
 
     private:

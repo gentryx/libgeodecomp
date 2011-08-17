@@ -56,10 +56,9 @@ public:
 
     void testCopyInCopyOut()
     {
-        MyPatchBuffer patchBuffer;
 
         // check that an empty region causes no changes at all
-        patchBuffer.setRegion(region0);
+        MyPatchBuffer patchBuffer(region0);
         patchBuffer.pushRequest(0);
         for (int i = 0; i < 4; ++i) 
             patchBuffer.put(baseGrid, validRegion, i);
@@ -68,7 +67,7 @@ public:
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
 
         // check that we can copy out regions multiple times
-        patchBuffer.setRegion(region1);
+        patchBuffer = MyPatchBuffer(region1);
         patchBuffer.pushRequest(2);
         patchBuffer.pushRequest(3);
         for (int i = 0; i < 4; ++i)
@@ -83,13 +82,13 @@ public:
         // this is actually ugly: by changing the region, the copy out
         // targets different coordinated than the original
         // storage. but it should just work.
-        patchBuffer.setRegion(region2);
+        patchBuffer.region = region2;
         compGrid = zeroGrid;
         patchBuffer.get(compGrid, validRegion, 3);
         TS_ASSERT_EQUALS(testGrid3, compGrid);
 
         // just another normal retrieval
-        patchBuffer.setRegion(region2);
+        patchBuffer.region = region2;
         patchBuffer.pushRequest(1);
         for (int i = 0; i < 4; ++i)
             patchBuffer.put(baseGrid, validRegion, i);
