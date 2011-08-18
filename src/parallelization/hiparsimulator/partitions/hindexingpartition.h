@@ -471,7 +471,7 @@ public:
                     return Coord<2>(-x,  y);
                 }
             }
-            throw std::runtime_error("bad curType or curCounter");
+            throw std::invalid_argument("bad curType or curCounter");
         }
 
         static inline Coord<2> subtriangleDimensions(const Coord<2>& dimensions, const unsigned& type)

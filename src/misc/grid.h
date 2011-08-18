@@ -10,6 +10,8 @@
 #endif
 
 #include <iostream>
+
+#include <libgeodecomp/misc/alignedallocator.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordmap.h>
 #include <libgeodecomp/misc/coordbox.h>
@@ -21,12 +23,11 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
-
 template<int DIM, typename MATRIX_TYPE, typename CELL_TYPE>
 class GridFiller;
 
 /**
- * represents the problem space.
+ * A multi-dimensional regular grid
  */
 template<typename CELL_TYPE, typename TOPOLOGY=Topologies::Cube<2>::Topology>
 class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
@@ -40,14 +41,13 @@ public:
 #ifndef __CODEGEARC__
     typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIM - 1> SliceRef;
     typedef typename boost::detail::multi_array::const_sub_array<CELL_TYPE, 1> ConstSliceRef;
-    typedef typename boost::multi_array<CELL_TYPE, DIM - 1> Row;
-    typedef typename boost::multi_array<CELL_TYPE, DIM> CellMatrix;
-    typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
+    typedef typename boost::multi_array<
+        // always align on cache line boundaries
+        CELL_TYPE, DIM, AlignedAllocator<CELL_TYPE, 64> > CellMatrix;
+    typedef typename CellMatrix::index Index;
 #else
     typedef SuperVector<CELL_TYPE>& SliceRef;
     typedef const SuperVector<CELL_TYPE>& ConstSliceRef;
-    typedef SuperVector<CELL_TYPE> Row;
-    typedef SuperVector<Row> CellMatrix;
     typedef int Index;
 #endif
 

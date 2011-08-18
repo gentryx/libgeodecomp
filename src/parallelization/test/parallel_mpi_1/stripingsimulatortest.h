@@ -464,7 +464,6 @@ public:
         kernelLib(back, up, same, down, front, store, n);
     }
 
-    // typedef boost::multi_array<double, 3> Matrix;
     typedef DisplacedGrid<Cell, Topologies::Cube<3>::Topology> Matrix;
 
     long long getUTtime()
@@ -482,22 +481,10 @@ public:
                     (*target)[Coord<3>(x, y, z)].temp = x * y * z;
     }
 
-    void checkAlignment(void *p, int alignment)
-    {
-        std::cout << "checkAlignment(" << p << ")\n";
-        int offset = ((long)p) % alignment;
-        if (offset % alignment != 0)
-            std::cout << "Alignment failed, offset " << offset << "\n";
-    }
-
     Region<3> region;
 
     void update(Matrix *source, Matrix *target, int n)
     {
-        // int alignment = 16;
-        // checkAlignment(&(*source)[Coord<3>(0, 0, 0)], alignment);
-        // checkAlignment(&(*target)[Coord<3>(0, 0, 0)], alignment);
-
         for (StreakIterator<3> i = region.beginStreak(); 
              i != region.endStreak(); 
              ++i) {
@@ -523,8 +510,6 @@ public:
         Matrix *mat1 = new Matrix(Coord<3>(n, n, n));
         Matrix *mat2 = new Matrix(Coord<3>(n, n, n));
         initi(mat1, n);
-        checkAlignment(&(*mat1)[Coord<3>()], 64);
-        checkAlignment(&(*mat2)[Coord<3>()], 64);
 
         region.clear();
         for (int z = 1; z < n - 1; ++z) 
@@ -552,7 +537,7 @@ public:
     void testPerf()
     {
         // fixme: add performance test targets
-        // benchmark(256, 100);
+        benchmark(256, 100);
     }
 };
 

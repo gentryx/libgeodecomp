@@ -189,24 +189,6 @@ public:
         TS_ASSERT_EQUALS((*testGrid)[Coord<2>(2, 3)].testValue, 11);
     }
 
-    void testOperatorSquareBracketsOfRow()
-    {
-        (*testGrid)[Coord<2>(2, 3)].testValue = 13;
-        TS_ASSERT_EQUALS((*testGrid)[Coord<2>(2, 3)],
-                         (*testGrid)[3][2]);
-        (*testGrid)[Coord<2>(2, 3)].testValue = 17;
-        TS_ASSERT_EQUALS((*testGrid)[Coord<2>(2, 3)],
-                         (*testGrid)[3][2]);
-        int row = 2;
-        Grid<TestCell<2> >::Row vec(
-            boost::extents[testGrid->getDimensions().x()]);
-        for (unsigned i = 0; i < vec.size(); i++) {
-            vec[i] = (*testGrid)[Coord<2>(i, row)];
-        }
-        Grid<TestCell<2> >::Row vec2 = (*testGrid)[row];
-        TS_ASSERT_EQUALS(vec2, vec);
-    }
-
     void testResize()
     {
         Grid<int> g(Coord<2>(64, 20));
@@ -319,9 +301,6 @@ public:
         TS_ASSERT_EQUALS(g[Coord<2>(-1,  0)], 11);
     }
 
-    typedef boost::multi_array<double, 3> array_type;
-    typedef boost::array<array_type::index,3> index_type;
-
     inline int trans(const int& x, const int& dimension)
     {
         return (x + dimension) % dimension;
@@ -361,4 +340,4 @@ public:
     }
 };
 
-};
+}
