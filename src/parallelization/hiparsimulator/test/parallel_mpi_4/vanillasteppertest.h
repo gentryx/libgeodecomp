@@ -54,8 +54,6 @@ public:
     typedef VanillaStepper<TestCell<3> > MyStepper;
 
     void testFoo() {
-        std::cout << "test fooooooo\n";
-
         // Init utility classes
         ghostZoneWidth = 4;
         Coord<3> gridDim(55, 47, 31);
@@ -159,8 +157,6 @@ public:
         stepper->update(3);
         checkInnerSet(4, 4);
 
-        std::cout << "test baaaaaaaaar\n";
-               
         /**
          * handle ghost (if validGhostZoneWidth == 0)
          *   restore ghost (inner and outer)

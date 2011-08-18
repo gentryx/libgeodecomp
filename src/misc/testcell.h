@@ -41,7 +41,6 @@ class TestCell
 public:
     typedef typename TestCellTopology<DIM>::Topology Topology;
 
-    static inline unsigned numStates() { return 2; }
     static inline unsigned nanoSteps() { return 27; }
 
     Coord<DIM> pos;
@@ -75,11 +74,6 @@ public:
         testValue(_testValue)
     {
         isEdgeCell = !inBounds(pos);
-    }
-
-    inline unsigned char approximateState() const
-    { 
-        return valid();
     }
 
     const bool& valid() const { return isValid; }    

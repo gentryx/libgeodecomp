@@ -2,7 +2,6 @@
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
 #include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 
@@ -66,9 +65,8 @@ public:
 };
 
 template<typename CELL_TYPE>
-class VanillaStepper : 
-    public StepperHelper<DisplacedGrid<
-                             CELL_TYPE, typename CELL_TYPE::Topology, true> >
+class VanillaStepper : public StepperHelper<
+    DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> >
 {
 public:
     const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
@@ -190,9 +188,6 @@ private:
         initializer().grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
-
-        // fixme
-        // kernelFraction = partitionManager().
 
         // save inner rim
         rimBuffer = MyPatchBuffer(rim());

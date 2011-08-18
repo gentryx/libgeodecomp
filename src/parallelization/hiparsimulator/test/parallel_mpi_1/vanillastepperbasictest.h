@@ -1,4 +1,3 @@
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/testinitializer.h>
@@ -62,6 +61,7 @@ public:
         init.reset(new TestInitializer<2>(Coord<2>(17, 12)));
         CoordBox<2> rect = init->gridBox();
 
+        // fixme: kill this?
         patchAccepter.reset(new MockPatchAccepter<GridType>());
         patchAccepter->pushRequest(2);
         patchAccepter->pushRequest(10);

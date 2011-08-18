@@ -6,6 +6,7 @@
 
 namespace LibGeoDecomp {
 
+// fixme: remove
 class SimpleCell
 {
     friend class Typemaps;
