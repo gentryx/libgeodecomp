@@ -205,10 +205,8 @@ set(PACKAGE_NAME "#{package_name}")
 set(PACKAGE_VERSION "r12345")
 # fixme
 set(PACKAGE_VENDOR "The Smurfs")
-# fixme
-set(PACKAGE_HOMEPAGE "http:\\\\\\\\www.my-project-home-page.org")
-# fixme
-set(PACKAGE_EMAIL "me@my-personal-home-page.com")
+set(PACKAGE_HOMEPAGE "http:\\\\\\\\www.libgeodecomp.org")
+set(PACKAGE_EMAIL "users@libgeodecomp.org")
 
 # installer stuff
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})
@@ -317,6 +315,7 @@ def print_report
   puts "Build type: #{@opts.build_type}"
   puts "MPI:        #{@opts.mpi}"
   puts "MPI prefix: #{@opts.mpiprefix.to_s}" if @opts.mpi
+  puts "OpenCL:     #{@opts.opencl ? 'yes' : 'no'}"
   puts "Typemaps:   #{@opts.typemaps}"
   allowed_tests = 
     @opts.allowed_tests.keys.find_all { |key| @opts.allowed_tests[key] }
@@ -324,6 +323,7 @@ def print_report
   puts "Tests:      #{pp_s(allowed_tests)}"
   puts "Make:       #{@opts.make}"
   puts "Makeopts:   #{pp_s(@opts.makeopts)}"
+  puts "Cflags:     #{@opts.cflags}"
 end
 
 ##################
@@ -492,7 +492,9 @@ def detect_defaults
   @opts.supplement(:typemaps, @opts.mpi == true) 
 
   opencl = false
-  ENV['CPLUS_INCLUDE_PATH'].split(":").each do |path|
+  paths = ENV['CPLUS_INCLUDE_PATH'].split(":")
+  paths << "/usr/include"
+  paths.each do |path|
     header = Pathname.new(path) + "CL" + "cl.h"
     opencl ||= File.exist?(header)
   end
@@ -516,7 +518,6 @@ def detect_defaults
   @opts.supplement(:typemapsdir,
                    @opts.srcdir + "libgeodecomp" + "mpilayer")
   @opts.supplement(:verbose, false)
-  # @opts.supplement(:cflags, cflags)
   @opts.supplement(:cmake, "cmake")
   @opts.supplement(:build_type, "Release")
 
