@@ -7,6 +7,15 @@
 
 using namespace LibGeoDecomp;
 
+Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
+                        Coord<2>( 0, -1),
+                        Coord<2>( 1, -1),
+                        Coord<2>(-1,  0),
+                        Coord<2>( 1,  0),
+                        Coord<2>(-1,  1),
+                        Coord<2>( 0,  1),
+                        Coord<2>( 1,  1)};
+
 class Cell
 {
     friend class CellToColor;
@@ -64,15 +73,15 @@ public:
                         if (targetCell.state == FOOD &&
                             state == BUSY_ANT) {
                             dropFood = true;
-                        //     // drop food and move approximately back
-                        //     // (angle 90°)
-                        //     dir = dir + 180 - 45 + rand() % 90;
-                        //     if (dir > 360)
-                        //         dir -= 360;
-                        // } else {
+                            //     // drop food and move approximately back
+                            //     // (angle 90°)
+                            //     dir = dir + 180 - 45 + rand() % 90;
+                            //     if (dir > 360)
+                            //         dir -= 360;
+                            // } else {
                         }
                         randomTurn();
-                    // }
+                        // }
                     }
                 }
             }
@@ -80,22 +89,22 @@ public:
 
         // count incoming ants
         if (nanoStep == 1) {
-            Coord<2>::Vector n = Coord<2>().getNeighbors8();
-            for (Coord<2>::Vector::iterator i = n.begin(); i != n.end(); ++i)
-                if (*i == -neighborhood[*i].target)
+            for (int i = 0; i < 8; ++i) {
+                Coord<2> neigh = NEIGHBORS[i];
+                if (neigh == -neighborhood[neigh].target)
                     ++incoming;
+            }
         }
             
         // move
         if (nanoStep == 2) {
             if (incoming == 1) {
-                Coord<2>::Vector n = Coord<2>().getNeighbors8();
-                for (Coord<2>::Vector::iterator i = n.begin(); 
-                     i != n.end(); ++i) {
-                    if (*i == -neighborhood[*i].target) {
-                        *this = neighborhood[*i];
-                        posX += i->x();
-                        posY += i->y();
+                for (int i = 0; i < 8; ++i) {
+                    Coord<2> neigh = NEIGHBORS[i];
+                    if (neigh == -neighborhood[neigh].target) {
+                        *this = neighborhood[neigh];
+                        posX += neigh.x();
+                        posY += neigh.y();
                         if (dropFood) {
                             state = IDLE_ANT;
                             dropFood = false;

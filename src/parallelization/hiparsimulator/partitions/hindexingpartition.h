@@ -420,7 +420,8 @@ public:
             Coord<2> offset0 = newOrigin(curType, curCounter,     leftHalf, rightHalf, upperHalf, lowerHalf, curDim->x(), curDim->y());
             Coord<2> offset1 = newOrigin(curType, curCounter + 1, leftHalf, rightHalf, upperHalf, lowerHalf, curDim->x(), curDim->y());
             *curOri += offset0;
-            *curDim = (offset1 - offset0).abs();
+            Coord<2> dim = offset1 - offset0;
+            *curDim = Coord<2>(std::abs(dim.x()), std::abs(dim.y()));
         }
 
         static inline Coord<2> newOrigin(

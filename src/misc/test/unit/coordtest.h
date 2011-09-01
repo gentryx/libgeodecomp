@@ -144,41 +144,6 @@ public:
         TS_ASSERT(!(*_c1 < Coord<2>(1, 1)));
     }
 
-    void testGetNeighbors5()
-    {            
-        Coord<2>::Vector coordsAroundZeroZero =
-            Coord<2>(0,0).getNeighbors5();
-
-        TS_ASSERT(includesCoord(coordsAroundZeroZero, -1,  0));
-
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  0, -1));
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  0,  0));
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  0,  1));
-
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  1,  0));
-
-        TS_ASSERT_EQUALS(coordsAroundZeroZero.size(), (unsigned)5);
-    }
-
-    void testGetNeighbors4()
-    {            
-        Coord<2>::Vector coordsAroundZeroZero = Coord<2>(0,0).getNeighbors4();
-
-        TS_ASSERT(includesCoord(coordsAroundZeroZero, -1,  0));
-
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  0, -1));
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  0,  1));
-
-        TS_ASSERT(includesCoord(coordsAroundZeroZero,  1,  0));
-
-        TS_ASSERT_EQUALS(coordsAroundZeroZero.size(), (unsigned)4);
-    }
-
-    void testGetNeighbors8()
-    {
-        TS_ASSERT_EQUALS(Coord<2>(0, 0).getNeighbors8().size(), (unsigned)8);
-    }
-
     void testToString()
     {
         TS_ASSERT_EQUALS(Coord<2>(1, 0).toString(), "(1, 0)");

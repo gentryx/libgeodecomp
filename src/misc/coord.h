@@ -204,58 +204,6 @@ public:
         return boost::extents[y()][x()];
     }
 
-    inline Coord abs() const
-    {
-        return Coord(std::abs(x()), std::abs(y()));
-    }
-
-    /**
-     * provides a neighbourhood definition around the cell at @a Coord.    
-     * The Coord itself is included in that neighborhood.
-     */
-    Vector getNeighbors5() const
-    {
-        Vector neighbors = getNeighbors4();
-        neighbors.push_back(*this);
-        return neighbors;
-    }
-
-    /**
-     * provides the 3x3 square shaped neighbourhood around @a Coord.
-     */
-    Vector getNeighbors8() const
-    {
-        Vector result;
-
-        for (int cx = x() - 1; cx <= x() + 1; cx++) {
-            for (int cy = y() - 1; cy <= y() + 1; cy++) {
-                if (cx != x() || cy != y())
-                    result.push_back(Coord(cx, cy));
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * provides the cross shaped neighbourhood around @a Coord.
-     */
-    Vector getNeighbors4() const
-    {
-        Vector result(4);
-
-        result[0] = Coord(x() - 1, y()    );
-        result[1] = Coord(x()    , y() - 1);
-        result[2] = Coord(x()    , y() + 1);
-        result[3] = Coord(x() + 1, y()    );
-
-        return result;
-    }
-
-
-    /**
-     * prints the coordinates to a string, suited for human viewing.
-     */
     std::string toString() const
     {
         std::stringstream s;
