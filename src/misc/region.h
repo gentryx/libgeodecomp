@@ -8,30 +8,6 @@
 
 namespace LibGeoDecomp {
 
-template<typename TOPOLOGY>
-class TopologyWrapsXAxis
-{
-public:
-    bool operator()()
-    {
-        if (TOPOLOGY::DIMENSIONS == 1) {
-            return TOPOLOGY::WrapEdges;
-        } else {
-            return TopologyWrapsXAxis<typename TOPOLOGY::ParentTopology>()();
-        }
-    }
-};
-
-template<>
-class TopologyWrapsXAxis<Topologies::ZeroDimensional>
-{
-public:
-    bool operator()()
-    {
-        return 0;
-    }
-};
-
 template<int DIM>
 class StreakMapDefine;
 
@@ -517,7 +493,7 @@ public:
 
             while (s.hasNext()) {
                 Streak<DIM> newStreak(s.next(), endX);
-                if (TopologyWrapsXAxis<TOPOLOGY>()()) {
+                if (TOPOLOGY::wrapsAxis(0)) {
                     this->splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
                     this->normalizeStreak<TOPOLOGY>(trimStreak(newStreak, dimensions), &ret, dimensions);

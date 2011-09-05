@@ -204,6 +204,11 @@ public:
     {
     public:
         const static int DIMENSIONS = 0;
+
+        static inline bool wrapsAxis(const int& dim)
+        {
+            return false;
+        }
     };
 
     template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES>
@@ -214,17 +219,6 @@ public:
         const static int DIMENSIONS = N_MINUS_1_DIMENSIONAL::DIMENSIONS + 1;
         const static bool WrapEdges = WRAP_EDGES;
         typedef N_MINUS_1_DIMENSIONAL ParentTopology;
-
-        static Coord<DIMENSIONS> normalize(
-            const Coord<DIMENSIONS>& coord,
-            const Coord<DIMENSIONS>& dimensions)
-        {
-            Coord<DIMENSIONS> res = CoordDiagonal<DIMENSIONS>()(-1);
-            CoordNormalizer<DIMENSIONS, DIMENSIONS> normalizer(
-                &res, dimensions);
-            locate(normalizer, coord);
-            return res;
-        }
 
         /**
          * This class facilitates the computation of the actual
@@ -340,6 +334,17 @@ public:
             }
         };
 
+        static Coord<DIMENSIONS> normalize(
+            const Coord<DIMENSIONS>& coord,
+            const Coord<DIMENSIONS>& dimensions)
+        {
+            Coord<DIMENSIONS> res = CoordDiagonal<DIMENSIONS>()(-1);
+            CoordNormalizer<DIMENSIONS, DIMENSIONS> normalizer(
+                &res, dimensions);
+            locate(normalizer, coord);
+            return res;
+        }
+
         template<typename GRID, int DIM>
         static inline const typename GRID::CellType& locate(
             const GRID& grid, 
@@ -368,6 +373,15 @@ public:
 
             return LocateHelper<DIM, typename GRID::CellType>()(
                 grid, coord, grid.getDimensions());
+        }
+
+        static inline bool wrapsAxis(const int& dim)
+        {
+            if (dim == DIMENSIONS - 1) {
+                return WrapEdges;
+            } else {
+                return ParentTopology::wrapsAxis(dim);
+            }
         }
     };
 };

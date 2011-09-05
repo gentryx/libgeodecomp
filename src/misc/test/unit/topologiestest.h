@@ -234,6 +234,21 @@ public:
         c = Topo::normalize(Coord<3>(5, 2, -2), Coord<3>(5, 6, 7));
         TS_ASSERT_EQUALS(c, Coord<3>(0, 2, 5));
     }
+
+    void testWrapsAxis()
+    {
+        TS_ASSERT_EQUALS(false, Topologies::Cube<3>::Topology::wrapsAxis(0));
+        TS_ASSERT_EQUALS(false, Topologies::Cube<3>::Topology::wrapsAxis(1));
+        TS_ASSERT_EQUALS(false, Topologies::Cube<3>::Topology::wrapsAxis(2));
+
+        TS_ASSERT_EQUALS(true, Topologies::Torus<3>::Topology::wrapsAxis(0));
+        TS_ASSERT_EQUALS(true, Topologies::Torus<3>::Topology::wrapsAxis(1));
+        TS_ASSERT_EQUALS(true, Topologies::Torus<3>::Topology::wrapsAxis(2));
+
+        typedef Topologies::NDimensional<Topologies::NDimensional<Topologies::ZeroDimensional, true>, false> MyTopo;
+        TS_ASSERT_EQUALS(true,  MyTopo::wrapsAxis(0));
+        TS_ASSERT_EQUALS(false, MyTopo::wrapsAxis(1));
+    }
 };
 
 }
