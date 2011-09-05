@@ -29,7 +29,7 @@ public:
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
     typedef CoordMap<CELL_TYPE, Delegate> MyCoordMap;
 
-    DisplacedGrid(
+    explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const CELL_TYPE& _defaultCell=CELL_TYPE(),
         const Coord<DIM>& topologicalDimensions=Coord<DIM>()) :

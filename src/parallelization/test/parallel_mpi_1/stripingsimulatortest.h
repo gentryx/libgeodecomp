@@ -507,8 +507,8 @@ public:
 
     void benchmark(int n, long repeats)
     {
-        Matrix *mat1 = new Matrix(Coord<3>(n, n, n));
-        Matrix *mat2 = new Matrix(Coord<3>(n, n, n));
+        Matrix *mat1 = new Matrix(CoordBox<3>(Coord<3>(), Coord<3>(n, n, n)));
+        Matrix *mat2 = new Matrix(CoordBox<3>(Coord<3>(), Coord<3>(n, n, n)));
         initi(mat1, n);
 
         region.clear();

@@ -20,7 +20,7 @@ public:
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
-
+    
     explicit CoordBox(const Coord<DIM>& origin_ = Coord<DIM>(), 
                       const Coord<DIM>& dimensions_ = Coord<DIM>()) :
         origin(origin_),
@@ -39,7 +39,9 @@ public:
         return ! (*this == other);
     }
 
-
+    /**
+     * checks whether the box' volume includes coord.
+     */
     inline bool inBounds(const Coord<DIM>& coord) const
     {
         Coord<DIM> relativeCoord = coord - origin;

@@ -55,7 +55,7 @@ public:
     typedef CELL_TYPE CellType;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > MyCoordMap;
 
-    Grid(const Coord<DIM>& dim=Coord<DIM>(),
+    explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
          const CELL_TYPE& _defaultCell=CELL_TYPE(),
          const CELL_TYPE& _edgeCell=CELL_TYPE()) :
         dimensions(dim),
