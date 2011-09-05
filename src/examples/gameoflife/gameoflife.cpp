@@ -44,12 +44,12 @@ public:
 
     void update(const CoordMap<ConwayCell>& neighborhood, const unsigned&)
     {
-        int livingNeigbors = countLivingNeighbors(neighborhood);
+        int livingNeighbors = countLivingNeighbors(neighborhood);
         alive = neighborhood[Coord<2>(0, 0)].alive;
         if (alive) {
-            alive = (2 <= livingNeigbors) && (livingNeigbors <= 3);
+            alive = (2 <= livingNeighbors) && (livingNeighbors <= 3);
         } else {
-            alive = (livingNeigbors == 3);
+            alive = (livingNeighbors == 3);
         }
     }
 
