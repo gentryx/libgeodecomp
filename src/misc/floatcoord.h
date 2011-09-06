@@ -1,6 +1,8 @@
 #ifndef _libgeodecomp_misc_floatcoord_h_
 #define _libgeodecomp_misc_floatcoord_h_
 
+#include <boost/array.hpp>
+
 namespace LibGeoDecomp {
 
 /**

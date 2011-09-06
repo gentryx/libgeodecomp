@@ -3,7 +3,6 @@
 
 #include <list>
 #include <set>
-#include <boost/array.hpp>
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supermap.h>
