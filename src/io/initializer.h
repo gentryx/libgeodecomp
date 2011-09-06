@@ -1,7 +1,7 @@
 #ifndef _libgeodecomp_io_initializer_h_
 #define _libgeodecomp_io_initializer_h_
 
-#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/gridbase.h>
 
 namespace LibGeoDecomp {
 

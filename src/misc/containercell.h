@@ -1,58 +1,65 @@
 #ifndef _libgeodecomp_misc_containercell_h_
 #define _libgeodecomp_misc_containercell_h_
 
+#include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/coordbox.h>
+
 namespace LibGeoDecomp {
 
-template<class CARGO, int SIZE, typename KEY=int>
+template<class NEIGHBORHOOD, typename KEY, typename CARGO, int DIM>
+class NeighborhoodAdapter
+{
+public:
+    typedef KEY Key;
+    typedef CARGO Cargo;
+
+    NeighborhoodAdapter(NEIGHBORHOOD *_neighbors) :
+        neighbors(_neighbors)
+    {}
+
+    const Cargo& operator[](const Key& id) 
+    {
+        Cargo *res = (*neighbors)[Coord<DIM>()][id];
+            
+        if (res)
+            return *res;
+
+        CoordBox<DIM> surroundingBox(CoordDiagonal<DIM>()(-1), CoordDiagonal<DIM>()(3));
+        CoordBoxSequence<DIM> s = surroundingBox.sequence();
+        while (s.hasNext()) {
+            Coord<DIM> c = s.next();
+            if (c != Coord<DIM>()) {
+                res = (*neighbors)[c][id];
+                if (res)
+                    return *res;
+            }
+        }
+
+        throw std::logic_error("id not found");
+    }
+
+    inline const Cargo& operator[](const Key& id) const
+    {
+        return (const_cast<NeighborhoodAdapter&>(*this))[id];
+    }
+
+
+private:
+    NEIGHBORHOOD *neighbors;
+};
+
+template<class CARGO, int SIZE, class TOPOLOGY=typename CARGO::Topology, typename KEY=int>
 class ContainerCell {
 public:
     friend class ContainerCellTest;
 
     typedef CARGO Cargo;
     typedef KEY Key;
-    typedef typename Cargo::Topology Topology;
+    typedef TOPOLOGY Topology;
+    typedef Cargo* Iterator;
 
     const static int DIM = Topology::DIMENSIONS;
     const static int MAX_SIZE = SIZE;
-
-    template<class NEIGHBORHOOD>
-    class NeighborhoodAdapter
-    {
-    public:
-        NeighborhoodAdapter(NEIGHBORHOOD *_neighbors) :
-            neighbors(_neighbors)
-        {}
-
-        const Cargo& operator[](const Key& id) 
-        {
-            Cargo *res = (*neighbors)[Coord<DIM>()][id];
-            
-            if (res)
-                return *res;
-
-            CoordBox<DIM> surroundingBox(CoordDiagonal<DIM>()(-1), CoordDiagonal<DIM>()(3));
-            CoordBoxSequence<DIM> s = surroundingBox.sequence();
-            while (s.hasNext()) {
-                Coord<DIM> c = s.next();
-                if (c != Coord<DIM>()) {
-                    res = (*neighbors)[c][id];
-                    if (res)
-                        return *res;
-                }
-            }
-
-            throw std::logic_error("id not found");
-        }
-
-        inline const Cargo& operator[](const Key& id) const
-        {
-            return (const_cast<NeighborhoodAdapter&>(*this))[id];
-        }
-
-
-    private:
-        NEIGHBORHOOD *neighbors;
-    };
 
     inline ContainerCell() : 
         size(0)
@@ -105,12 +112,27 @@ public:
         return (const_cast<ContainerCell&>(*this))[id];
     }
 
+    inline Cargo *begin()
+    {
+        return cells;
+    }
+
+    inline Cargo *end()
+    {
+        return cells + size;
+    }
+
     template<class NEIGHBORHOOD>
     inline void update(NEIGHBORHOOD neighbors, const int& nanoStep)
     {
-        NeighborhoodAdapter<NEIGHBORHOOD> adapter(&neighbors);;
+        NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);;
         for (int i = 0; i < size; ++i) 
             cells[i].update(adapter, nanoStep);
+    }
+
+    inline const int& getSize() const
+    {
+        return size;
     }
 
 private:

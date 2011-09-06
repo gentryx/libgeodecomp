@@ -2,6 +2,7 @@
 #define _libgeodecomp_misc_gridbase_h_
 
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/coordbox.h>
 
 namespace LibGeoDecomp {
 

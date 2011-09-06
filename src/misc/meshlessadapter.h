@@ -5,6 +5,7 @@
 #include <set>
 #include <boost/array.hpp>
 #include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/topologies.h>
 
 namespace LibGeoDecomp {
@@ -83,7 +84,7 @@ public:
      * stencil cells will be of size boxSize^DIMENSIONS.
      */
     inline MeshlessAdapter(
-        const FloatCoord<DIM>& _dimensions, 
+        const FloatCoord<DIM>& _dimensions=FloatCoord<DIM>(), 
         const double& _boxSize=1) :
         dimensions(_dimensions)
     {
@@ -242,9 +243,42 @@ public:
         return true;
     }
 
-    const Coord<DIM> getDiscreteDim()
+    const Coord<DIM>& getDiscreteDim() const
     {
         return discreteDim;
+    }
+
+    SuperMap<std::string, double> reportFillLevels(const CoordVec& positions) const
+    {
+        SuperMap<Coord<DIM>, int> cache;
+        for (typename CoordVec::const_iterator i = positions.begin(); i != positions.end(); ++i) {
+            Coord<DIM> c = posToCoord(*i);
+            cache[c]++;
+        }
+
+        long sum = 0;
+        long emptyCells = 0;
+        int lowestFill = cache[Coord<DIM>()];
+        int highestFill = cache[Coord<DIM>()];
+
+        CoordBox<DIM> box(Coord<DIM>(), discreteDim);
+        CoordBoxSequence<DIM> s = box.sequence();
+        while (s.hasNext()) {
+            Coord<DIM> c = s.next();
+            lowestFill  = std::min(cache[c], lowestFill);
+            highestFill = std::max(cache[c], highestFill);
+            sum += cache[c];
+
+            if (cache[c] == 0)
+                ++emptyCells;
+        }
+
+        SuperMap<std::string, double> ret;
+        ret["emptyCells"]  = emptyCells;
+        ret["averageFill"] = 1.0 * sum / discreteDim.prod();
+        ret["lowestFill"]  = lowestFill;
+        ret["highestFill"] = highestFill;
+        return ret;
     }
 
 private:
