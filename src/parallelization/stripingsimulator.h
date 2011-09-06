@@ -9,6 +9,7 @@
 #include <libgeodecomp/misc/commontypedefs.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/chronometer.h>
@@ -31,6 +32,7 @@ public:
     {
         Coord<DIM> c = streak.origin;
         for (; c.x() < streak.endX; ++c.x()) {
+            std::cout << "update at " << c << "\n";
             CoordMap<CELL_TYPE, Grid<CELL_TYPE, Topology> >  n  = 
                 curGrid->getNeighborhood(c);
             (*newGrid)[c].update(n, nanoStep);
@@ -483,6 +485,12 @@ private:
                 ghostHeightUpper = (startRow > 0? 1 : 0);
                 ghostHeightLower = (endRow   < newPartitions.back()? 1 : 0);
             }
+        }
+
+        // no need for upper/lower ghost if only one node is present
+        if (newPartitions.size() == 2) {
+            ghostHeightUpper = 0;
+            ghostHeightLower = 0;
         }
 
         initRegions(startRow, endRow);
