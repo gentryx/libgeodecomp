@@ -32,7 +32,6 @@ public:
     {
         Coord<DIM> c = streak.origin;
         for (; c.x() < streak.endX; ++c.x()) {
-            std::cout << "update at " << c << "\n";
             CoordMap<CELL_TYPE, Grid<CELL_TYPE, Topology> >  n  = 
                 curGrid->getNeighborhood(c);
             (*newGrid)[c].update(n, nanoStep);

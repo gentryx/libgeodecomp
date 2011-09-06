@@ -89,9 +89,16 @@ public:
     template<class NEIGHBORHOOD>
     inline void update(NEIGHBORHOOD neighbors, const int& nanoStep)
     {
+        *this = neighbors[Coord<DIM>()];
+
         NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);;
         for (int i = 0; i < size; ++i) 
             cells[i].update(adapter, nanoStep);
+    }
+
+    inline const Key *getIDs() const
+    {
+        return ids;
     }
 
     inline const int& getSize() const

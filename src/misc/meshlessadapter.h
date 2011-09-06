@@ -4,61 +4,12 @@
 #include <list>
 #include <set>
 #include <boost/array.hpp>
+#include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/topologies.h>
 
 namespace LibGeoDecomp {
-
-/**
- * A real valued coordinate class, which contains an optional ID.
- */
-template<int DIM>
-class FloatCoordBase
-{
-public:
-    boost::array<double, DIM> c;
-    int id;
-};
-
-template<int DIM>
-class FloatCoord;
-
-template<>
-class FloatCoord<1> : public FloatCoordBase<1>
-{
-public:
-    FloatCoord(const double& x = 0, const int _id = 0) 
-    {
-        c[0] = x;
-        id = _id;
-    }
-};
-
-template<>
-class FloatCoord<2> : public FloatCoordBase<2>
-{
-public:
-    FloatCoord(const double& x = 0, const double& y = 0, const int _id = 0) 
-    {
-        c[0] = x;
-        c[1] = y;
-        id = _id;
-    }
-};
-
-template<>
-class FloatCoord<3> : public FloatCoordBase<3>
-{
-public:
-    FloatCoord(const double& x = 0, const double& y = 0, const double& z = 0, const int _id = 0) 
-    {
-        c[0] = x;
-        c[1] = y;
-        c[2] = z;
-        id = _id;
-    }
-};
 
 /**
  * A utility class which supports users in porting meshless codes to
@@ -235,11 +186,12 @@ public:
 
     bool checkBoxSize(const CoordVec& positions, const Graph& graph)
     {
-        for (int i = 0; i < graph.size(); ++i)
+        for (int i = 0; i < graph.size(); ++i) 
             for (SuperVector<int>::const_iterator n = graph[i].begin(); 
                  n != graph[i].end(); ++n) 
                 if (manhattanDistance(positions[i], positions[*n]) > 1)
                     return false;
+
         return true;
     }
 
@@ -279,6 +231,11 @@ public:
         ret["lowestFill"]  = lowestFill;
         ret["highestFill"] = highestFill;
         return ret;
+    }
+
+    const double& getBoxSize() const
+    {
+        return boxSize;
     }
 
 private:

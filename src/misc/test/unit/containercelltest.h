@@ -53,7 +53,7 @@ public:
 
         TS_ASSERT_EQUALS(5, container.size);
         TS_ASSERT_THROWS(container.insert(47, MockCell(47, 0)), std::logic_error);
-        TS_ASSERT_THROWS(container.insert(3,  MockCell(3 , 0)),  std::logic_error);
+        TS_ASSERT_THROWS(container.insert(3,  MockCell(3 , 0)), std::logic_error);
 
 
         for (int i = 0; i < 5; ++i) {
