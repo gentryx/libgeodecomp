@@ -2,6 +2,7 @@
 #define _libgeodecomp_io_simplecellinitializer_h_
 
 #include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/simplecell.h>
 
 namespace LibGeoDecomp {

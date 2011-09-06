@@ -7,6 +7,7 @@
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
+#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/typetraits.h>
 
 namespace LibGeoDecomp {
