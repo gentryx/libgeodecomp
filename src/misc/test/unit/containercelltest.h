@@ -68,6 +68,25 @@ public:
         for (int i = 0; i < 5; ++i) 
             TS_ASSERT_EQUALS(container.cells + i, container[ids[i]]);
     }
+    
+    void testRemove()
+    {
+        ContainerCell<MockCell, 5> container;
+        SuperVector<int> ids;
+        ids << 1 << 2 << 6 << 7;
+        
+        container.insert(2, MockCell(2, &ids));
+        container.insert(1, MockCell(1, &ids));
+        container.insert(6, MockCell(6, &ids));
+        container.insert(5, MockCell(5, &ids));
+        container.insert(7, MockCell(7, &ids));
+        container.remove(5);
+
+        for (int i = 0; i < 4; ++i) {
+            TS_ASSERT_EQUALS(ids[i], container.ids[i]);
+            TS_ASSERT_EQUALS(ids[i], container.cells[i].id);
+        }
+    }
 
     void testUpdate()
     {

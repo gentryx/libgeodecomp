@@ -58,6 +58,22 @@ public:
         size++;
     }
 
+    inline bool remove(const Key& id)
+    {
+        Cargo *pos = (*this)[id];
+        if (pos) {
+            int offset = pos - cells;
+            for (int i = offset; i < size - 1; ++i) {
+                cells[i] = cells[i + 1];
+                ids[i] = ids[i + 1];
+            }
+            size--;
+            return true;
+        }
+
+        return false;
+    }
+
     inline Cargo *operator[](const Key& id) 
     {
         Key *end = ids + size;
@@ -71,7 +87,7 @@ public:
         return 0;
     }
 
-    inline Cargo *operator[](const Key& id) const
+    inline const Cargo *operator[](const Key& id) const
     {
         return (const_cast<ContainerCell&>(*this))[id];
     }
@@ -90,8 +106,7 @@ public:
     inline void update(NEIGHBORHOOD neighbors, const int& nanoStep)
     {
         *this = neighbors[Coord<DIM>()];
-
-        NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);;
+        NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
         for (int i = 0; i < size; ++i) 
             cells[i].update(adapter, nanoStep);
     }
@@ -113,7 +128,7 @@ private:
 
     inline void checkSize() const
     {
-        if (size == MAX_SIZE)
+        if (size == MAX_SIZE) 
             throw std::logic_error("ContainerCell capacity exeeded");
     }
 };

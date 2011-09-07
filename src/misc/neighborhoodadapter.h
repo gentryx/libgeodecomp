@@ -25,7 +25,7 @@ public:
 
     const Cargo& operator[](const Key& id) 
     {
-        Cargo *res = (*neighbors)[Coord<DIM>()][id];
+        const Cargo *res = (*neighbors)[Coord<DIM>()][id];
             
         if (res)
             return *res;
@@ -48,7 +48,6 @@ public:
     {
         return (const_cast<NeighborhoodAdapter&>(*this))[id];
     }
-
 
 private:
     NEIGHBORHOOD *neighbors;

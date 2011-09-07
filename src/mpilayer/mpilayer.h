@@ -109,6 +109,21 @@ public:
         requestVec.clear();
     }
 
+    void testAll()
+    {
+        for (RequestsMap::iterator i = _requests.begin(); 
+             i != _requests.end();
+             ++i) {            
+            test(i->first);
+        }
+    }
+
+    void test(const int& testTag) 
+    { 
+        std::vector<MPI::Request>& requestVec = _requests[testTag];
+        MPI::Request::Testall(requestVec.size(), &requestVec[0]);
+    }
+
     void barrier()
     {
         _comm->Barrier();

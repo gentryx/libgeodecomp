@@ -21,7 +21,7 @@ class MeshlessAdapter
 public:
     friend class MeshlessAdapterTest;
     static const int DIM = TOPOLOGY::DIMENSIONS;
-    static const int MAX_SIZE = 100000;
+    static const int MAX_SIZE = 300000;
 
     typedef std::list<FloatCoord<DIM> > CoordList;
     typedef Grid<CoordList, TOPOLOGY> CoordListGrid;
@@ -261,7 +261,7 @@ private:
             discreteDim.c[i] = std::max(1.0, std::floor(dimensions.c[i] * scale));
         }
 
-        if (discreteDim.prod() > MAX_SIZE)
+        if (discreteDim.prod() > MAX_SIZE) 
             throw std::logic_error("too many container cells are required");
     }
 
