@@ -25,7 +25,7 @@ public:
         requestedNanoSteps.pop_front();
     }
     
-    virtual long nextRequiredNanoStep()
+    virtual long nextRequiredNanoStep() const
     {
         return requestedNanoSteps.front();
     }
@@ -61,7 +61,6 @@ public:
         init.reset(new TestInitializer<2>(Coord<2>(17, 12)));
         CoordBox<2> rect = init->gridBox();
 
-        // fixme: kill this?
         patchAccepter.reset(new MockPatchAccepter<GridType>());
         patchAccepter->pushRequest(2);
         patchAccepter->pushRequest(10);
@@ -76,26 +75,26 @@ public:
 
     void testUpdate()
     {
-        // fixme:
-    //     TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 0);
-    //     stepper->update();
-    //     TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 1);
-    // }
+        TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 0);
+        stepper->update();
+        TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 1);
+    }
 
-    // void testUpdateMultiple()
-    // {
-    //     stepper->update(8);
-    //     TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 8);
-    //     stepper->update(30);
-    //     TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 38);
-    // }
+    void testUpdateMultiple()
+    {
+        stepper->update(8);
+        TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 8);
+        stepper->update(30);
+        TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 38);
+    }
 
-    // void testPutPatch()
-    // {
-    //     stepper->update(9);
-    //     TS_ASSERT_EQUALS(1, patchAccepter->offeredNanoSteps.size());
-    //     stepper->update(4);
-    //     TS_ASSERT_EQUALS(3, patchAccepter->offeredNanoSteps.size());
+    void testPutPatch()
+    {
+        stepper->update(9);
+        TS_ASSERT_EQUALS(2, patchAccepter->offeredNanoSteps.size());
+
+        stepper->update(4);
+        TS_ASSERT_EQUALS(3, patchAccepter->offeredNanoSteps.size());
     }
 
 private:

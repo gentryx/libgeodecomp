@@ -222,6 +222,7 @@ public:
 
         // let's go
         checkInnerSet(0, 0);
+        //fixme: check rim, too
         stepper->update(1);
         checkInnerSet(1, 1);
 
