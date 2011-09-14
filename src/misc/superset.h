@@ -34,19 +34,30 @@ public:
         return temp.str();
     }
 
-
-    inline T max() const
+    inline const T& min() const
     {
-        return *(this->rbegin());
+        return *this->begin();
     }
 
+    inline const T& max() const
+    {
+        return *this->rbegin();
+    }
 
-    /**
-     * set intersection
-     */
-    inline SuperSet<T> operator&&(const SuperSet<T>& other) const 
+    inline void erase_min()
+    {
+        this->erase(this->begin());
+    }
+
+    inline SuperSet& operator<<(const T& elem) 
+    {
+        this->insert(elem);
+        return *this;
+    }
+
+    inline SuperSet operator&&(const SuperSet<T>& other) const 
     {        
-        SuperSet<T> result;
+        SuperSet result;
         std::set_intersection(
             this->begin(), this->end(), 
             other.begin(), other.end(), 
@@ -54,13 +65,9 @@ public:
         return result;
     }
 
-
-    /**
-     * set union
-     */
-    inline SuperSet<T> operator||(const SuperSet<T>& other) const 
+    inline SuperSet operator||(const SuperSet<T>& other) const 
     {        
-        SuperSet<T> result;
+        SuperSet result;
         std::set_union(
             this->begin(), this->end(), 
             other.begin(), other.end(), 

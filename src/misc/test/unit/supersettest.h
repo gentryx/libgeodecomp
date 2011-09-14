@@ -10,16 +10,20 @@ class SuperSetTest : public CxxTest::TestSuite
 {
 public:
 
-    void testMax()
+    void testInsertMinMaxAndEraseMin()
     {
         SuperSet<int> set;
         set.insert(2);
         set.insert(1);
         set.insert(3);
-        set.insert(0);
-        TS_ASSERT_EQUALS(set.max(), 3); 
-    }
+        set << 0
+            << -1;
+        TS_ASSERT_EQUALS(set.max(),  3); 
+        TS_ASSERT_EQUALS(set.min(), -1); 
 
+        set.erase_min();
+        TS_ASSERT_EQUALS(set.min(), 0); 
+    }
 
     void testOperatorAndAnd()
     {
@@ -42,7 +46,6 @@ public:
 
         TS_ASSERT_EQUALS(set0 && set1, expected);
     }
-
 
     void testOperatorOrOr()
     {
