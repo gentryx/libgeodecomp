@@ -26,7 +26,7 @@ public:
     public:
         typedef typename GRID_TYPE::CellType CellType;
 
-        // fixme: patch link needs to be unique between the sending
+        // fixme: tag needs to be unique between the sending
         // and the receiving node. ensure this by e.g. a local
         // registry coupled with a peer exchange
         inline Link(

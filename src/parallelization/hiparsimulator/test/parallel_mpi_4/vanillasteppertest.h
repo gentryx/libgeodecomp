@@ -171,28 +171,32 @@ public:
         m = partitionManager->getOuterGhostZoneFragments();
         for (MyPartitionManager::RegionVecMap::iterator i = m.begin(); i != m.end(); ++i) {
             if (i->first != MyPartitionManager::OUTGROUP) {
-                // fixme: exclude empty regions
-                MyPatchProviderPtr p(
-                    new MyPatchLink::Provider(
-                        i->second[ghostZoneWidth], 
-                        i->first,
-                        tag));                
-                providers << p;
-                stepper->addPatchProvider(p, MyStepper::GHOST);
+                Region<3>& region = i->second[ghostZoneWidth];
+                if (!region.empty()) {
+                    MyPatchProviderPtr p(
+                        new MyPatchLink::Provider(
+                            region, 
+                            i->first,
+                            tag));                
+                    providers << p;
+                    stepper->addPatchProvider(p, MyStepper::GHOST);
+                } 
             }
         }
          
         m = partitionManager->getInnerGhostZoneFragments();  
         for (MyPartitionManager::RegionVecMap::iterator i = m.begin(); i != m.end(); ++i) {
             if (i->first != MyPartitionManager::OUTGROUP) {
-                // fixme: exclude empty regions
-                MyPatchAccepterPtr p(
-                    new MyPatchLink::Accepter(
-                        i->second[ghostZoneWidth], 
-                        i->first,
-                        tag));
-                accepters << p;
-                stepper->addPatchAccepter(p, MyStepper::GHOST);
+                Region<3>& region = i->second[ghostZoneWidth];
+                if (!region.empty()) {
+                    MyPatchAccepterPtr p(
+                        new MyPatchLink::Accepter(
+                            region,
+                            i->first,
+                            tag));
+                    accepters << p;
+                    stepper->addPatchAccepter(p, MyStepper::GHOST);
+                } 
             }
         }
 
