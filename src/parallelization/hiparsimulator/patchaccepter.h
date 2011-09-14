@@ -3,9 +3,8 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_patchaccepter_h_
 #define _libgeodecomp_parallelization_hiparsimulator_patchaccepter_h_
 
-#include <deque>
-
 #include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/misc/superset.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
 namespace LibGeoDecomp {
@@ -28,24 +27,26 @@ public:
 
     virtual long nextRequiredNanoStep() const
     {
-        return requestedNanoSteps.front();
+        if (requestedNanoSteps.empty())
+            return -1;
+        return *requestedNanoSteps.begin();
     }
 
     void pushRequest(const long& nanoStep)
     {
-        requestedNanoSteps.push_back(nanoStep);
+        requestedNanoSteps << nanoStep;
     }
 
 protected:
-    std::deque<long> requestedNanoSteps;
+    SuperSet<long> requestedNanoSteps;
 
     bool checkNanoStepPut(const long& nanoStep) const
     {
         if (requestedNanoSteps.empty() || 
-            nanoStep < requestedNanoSteps.front())
+            nanoStep < requestedNanoSteps.min())
             return false;
-        if (nanoStep > requestedNanoSteps.front()) {
-            std::cout << "got: " << nanoStep << " expected " << requestedNanoSteps.front() << "\n";
+        if (nanoStep > requestedNanoSteps.min()) {
+            std::cout << "got: " << nanoStep << " expected " << requestedNanoSteps.min() << "\n";
             throw std::logic_error("expected nano step was left out");
         }
         return true;

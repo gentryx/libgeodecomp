@@ -3,9 +3,8 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_patchprovider_h_
 #define _libgeodecomp_parallelization_hiparsimulator_patchprovider_h_
 
-#include <deque>
-
 #include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/misc/superset.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
@@ -28,17 +27,17 @@ public:
         const bool& remove=true) =0;
 
 protected:
-    std::deque<long> storedNanoSteps;
+    SuperSet<long> storedNanoSteps;
 
     void checkNanoStepGet(const long& nanoStep) const
     {
         if (storedNanoSteps.empty())
             throw std::logic_error("no nano step available");
-        if (storedNanoSteps.front() != nanoStep) 
+        if (storedNanoSteps.min() != nanoStep) 
             throw std::logic_error(
                 std::string(
                     "requested time step doesn't match expected nano step.") 
-                + " expected: " + StringConv::itoa(storedNanoSteps.front()) 
+                + " expected: " + StringConv::itoa(storedNanoSteps.min()) 
                 + " is: " + StringConv::itoa(nanoStep));
     }
 };

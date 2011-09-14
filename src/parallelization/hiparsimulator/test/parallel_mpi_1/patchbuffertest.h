@@ -17,21 +17,18 @@ public:
 
     void setUp()
     {
-        baseGrid = GridType(Coord<2>(7, 5), 0);
+        Coord<2> dimensions(7, 5);
+        baseGrid = GridType(dimensions, 0);
         for (int y = 0; y < 5; ++y)
             for (int x = 0; x < 7; ++x)
                 baseGrid[Coord<2>(x, y)] = 10 * y + x;
 
-        testGrid1 = GridType(Coord<2>(7, 5), 0);
-        testGrid2 = GridType(Coord<2>(7, 5), 0);
-        testGrid3 = GridType(Coord<2>(7, 5), 0);
-        zeroGrid  = GridType(Coord<2>(7, 5), 0);
+        testGrid1 = GridType(dimensions, 0);
+        testGrid2 = GridType(dimensions, 0);
+        testGrid3 = GridType(dimensions, 0);
+        zeroGrid  = GridType(dimensions, 0);
+        validRegion << CoordBox<2>(Coord<2>(0, 0), dimensions);
         
-        // fixme: replace this by region<<coordbox
-        for (int y = 0; y < baseGrid.getDimensions().y(); ++y)
-            validRegion << 
-                Streak<2>(Coord<2>(0, y), baseGrid.getDimensions().x());
-
         region0.clear();
         region1.clear();
         region1 << Streak<2>(Coord<2>(2, 2), 4);

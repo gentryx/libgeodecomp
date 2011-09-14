@@ -30,22 +30,35 @@ public:
         // and the receiving node. ensure this by e.g. a local
         // registry coupled with a peer exchange
         inline Link(
-            MPILayer *_mpiLayer,
             const Region<DIM>& _region,
             const int& _tag) :
-            mpiLayer(_mpiLayer),
+            lastNanoStep(0),
+            stride(1),
             region(_region),
             buffer(_region.size()),
             tag(_tag)
         {}
 
+        virtual ~Link()
+        {
+            this->wait();
+        }
+
+        virtual void charge(const long& next, const long& last, const long& newStride) 
+        {          
+            lastNanoStep = last;
+            stride = newStride;
+        }
+
         inline void wait()
         {
-            mpiLayer->wait(tag);
+            mpiLayer.wait(tag);
         }
 
     protected:
-        MPILayer *mpiLayer;
+        long lastNanoStep;
+        long stride;
+        MPILayer mpiLayer;
         Region<DIM> region;
         SuperVector<CellType> buffer;
         int tag;
@@ -57,25 +70,35 @@ public:
     {
     public:
         inline Accepter(
-            MPILayer *_mpiLayer=0,
             const Region<DIM>& _region=Region<DIM>(),
-            const int& _tag=0,
-            const int& _dest=0) :
-            Link(_mpiLayer, _region, _tag),
+            const int& _dest=0,
+            const int& _tag=0) :
+            Link(_region, _tag),
             dest(_dest)
         {}
+
+        virtual void charge(const long& next, const long& last, const long& newStride) 
+        {
+            Link::charge(next, last, newStride);
+            this->pushRequest(next);
+        }
 
         virtual void put(
             const GRID_TYPE& grid, 
             const Region<DIM>& /*validRegion*/, 
             const long& nanoStep) 
         {
+            this->wait();
             if (!this->checkNanoStepPut(nanoStep))
                 return;
 
             GridVecConv::gridToVector(grid, &this->buffer, this->region);
-            this->mpiLayer->send(
+            this->mpiLayer.send(
                 &this->buffer[0], dest, this->buffer.size(), this->tag);
+            long nextNanoStep = this->requestedNanoSteps.min() + this->stride;
+            if (nextNanoStep < this->lastNanoStep)
+                this->requestedNanoSteps << nextNanoStep;
+            this->requestedNanoSteps.erase_min();
         }
 
     private:
@@ -88,13 +111,18 @@ public:
     {
     public:
         inline Provider(
-            MPILayer *_mpiLayer=0,
             const Region<DIM>& _region=Region<DIM>(),
-            const int& _tag=0,
-            const int& _source=0) :
-            Link(_mpiLayer, _region, _tag),
+            const int& _source=0,
+            const int& _tag=0) :
+            Link(_region, _tag),
             source(_source)
         {}
+
+        virtual void charge(const long& next, const long& last, const long& newStride) 
+        {
+            Link::charge(next, last, newStride);
+            recv(next);
+        }
 
         virtual void get(
             GRID_TYPE *grid, 
@@ -103,15 +131,19 @@ public:
             const bool& remove=true) 
         {
             this->checkNanoStepGet(nanoStep);
-            wait();
+            this->wait();
             GridVecConv::vectorToGrid(this->buffer, grid, this->region);
+
+            long nextNanoStep = this->storedNanoSteps.min() + this->stride;
+            if (nextNanoStep < this->lastNanoStep)
+                recv(nextNanoStep);
+            this->storedNanoSteps.erase_min();
         }
 
         void recv(const long& nanoStep)
         {
-            this->storedNanoSteps.push_back(nanoStep);
-            this->mpiLayer->recv(
-                &this->buffer[0], source, this->buffer.size(), this->tag);
+            this->storedNanoSteps << nanoStep;
+            this->mpiLayer.recv(&this->buffer[0], source, this->buffer.size(), this->tag);
         }
 
     private:

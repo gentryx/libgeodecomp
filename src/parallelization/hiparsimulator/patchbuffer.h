@@ -3,6 +3,8 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_patchbuffer_h_
 #define _libgeodecomp_parallelization_hiparsimulator_patchbuffer_h_
 
+#include <deque>
+
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
 
@@ -36,8 +38,8 @@ public:
 
         storedRegions.push_back(
             GridVecConv::gridToVector(grid, region));
-        this->storedNanoSteps.push_back(this->requestedNanoSteps.front());
-        this->requestedNanoSteps.pop_front();
+        this->storedNanoSteps << this->requestedNanoSteps.min();
+        this->requestedNanoSteps.erase_min();
     }
 
     virtual void get(
@@ -55,7 +57,7 @@ public:
 
         if (remove) {
             storedRegions.pop_front();
-            this->storedNanoSteps.pop_front();
+            this->storedNanoSteps.erase_min();
         }
 
     }

@@ -1,8 +1,9 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
+#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 
 namespace LibGeoDecomp {
@@ -79,7 +80,8 @@ public:
     typedef class StepperHelper<GridType> ParentType;
     typedef PartitionManager< 
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-    typedef PatchBuffer<GridType, GridType> MyPatchBuffer;
+    typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
+    typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
 
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
@@ -113,7 +115,8 @@ private:
     int validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
-    MyPatchBuffer rimBuffer;
+    MyPatchBuffer2 rimBuffer;
+    MyPatchBuffer1 kernelBuffer;
     Region<DIM> kernelFraction;
 
     inline void update()
@@ -133,34 +136,34 @@ private:
             curStep++;
         }
 
-        // fixme: we'll have to distinguish between
-        // accepters/providers for the ghost zones and the kernel
-        // here...
-        notifyPatchAccepters(region, ParentType::INNER_SET);
+        notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
-            // fixme: ensure this restores the outer ghost zone
             notifyPatchProviders(
-                partitionManager().rim(0), ParentType::GHOST);
+                partitionManager().rim(0), ParentType::GHOST, globalNanoStep());
+            updateGhost();
             resetValidGhostZoneWidth();
         }
     }
 
     inline void notifyPatchAccepters(
         const Region<DIM>& region, 
-        const typename ParentType::PatchType& patchType)
+        const typename ParentType::PatchType& patchType,
+        const long& nanoStep)
     {
         for (class ParentType::PatchAccepterList::iterator i = 
                  this->patchAccepters[patchType].begin();
              i != this->patchAccepters[patchType].end();
              ++i)
-            if (globalNanoStep() == (*i)->nextRequiredNanoStep()) 
-                (*i)->put(*oldGrid, region, globalNanoStep());
+            if (nanoStep == (*i)->nextRequiredNanoStep()) 
+                (*i)->put(*oldGrid, region, nanoStep);
     }
 
     inline void notifyPatchProviders(
         const Region<DIM>& region, 
-        const typename ParentType::PatchType& patchType)
+        const typename ParentType::PatchType& patchType,
+        const long& nanoStep)
     {
         for (typename ParentType::PatchProviderList::iterator i = 
                  this->patchProviders[patchType].begin();
@@ -169,7 +172,7 @@ private:
             (*i)->get(
                 &*oldGrid,
                 region,
-                globalNanoStep());
+                nanoStep);
     }
 
     inline long globalNanoStep() const
@@ -189,10 +192,9 @@ private:
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
 
-        // save inner rim
-        rimBuffer = MyPatchBuffer(rim());
-        rimBuffer.pushRequest(globalNanoStep());
-        rimBuffer.put(*oldGrid, rim(), globalNanoStep());
+        kernelBuffer = MyPatchBuffer1(partitionManager().getVolatileKernel());
+        rimBuffer = MyPatchBuffer2(rim());
+        saveRim(globalNanoStep());
         updateGhost();
     }
     
@@ -207,21 +209,17 @@ private:
      */
     inline void updateGhost() 
     {
-        // fixme: refactor this by method extraction
+        // fixme: needs test for ghostzonewidth % 2 = 1
+        // fixme: skip all this ghost zone buffering for
+        // ghostZoneWidth == 1?             
+
         // 1: Prepare grid. The following update of the ghostzone will
         // destroy parts of the kernel, which is why we'll
         // save/restore those.
-        // fixme: make this a persistent member and set its region
-        // only on initGrids()?
-        MyPatchBuffer kernelBuffer(partitionManager().getVolatileKernel());
-        kernelBuffer.pushRequest(globalNanoStep());
-        kernelBuffer.put(*oldGrid, 
-                         partitionManager().innerSet(ghostZoneWidth()),
-                         globalNanoStep());
-
+        saveKernel();
         // We need to restore the rim since it got destroyed while the
         // kernel was updated.
-        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), false);
+        restoreRim(false);
 
         // 2: actual ghostzone update
         int nextNanoStep = curNanoStep;
@@ -236,24 +234,17 @@ private:
             ++nextNanoStep;
             std::swap(oldGrid, newGrid);
         }
-
+        // offset ghostZoneWidth() for nanoStep needed as ghost zone
+        // updates preceede updates to the inner set.
         nextNanoStep = globalNanoStep() + ghostZoneWidth();
-        rimBuffer.pushRequest(nextNanoStep);
-        rimBuffer.put(*oldGrid, rim(), nextNanoStep);
+        notifyPatchAccepters(rim(), ParentType::GHOST, nextNanoStep);
+                   saveRim(nextNanoStep);
         if (ghostZoneWidth() % 2)
             std::swap(oldGrid, newGrid);
 
         // 3: restore grid for kernel update
-        rimBuffer.get(
-            &*oldGrid, 
-            rim(), 
-            globalNanoStep(), 
-            true);
-        kernelBuffer.get(
-            &*oldGrid, 
-            partitionManager().getVolatileKernel(), 
-            globalNanoStep(), 
-            true);
+        restoreRim(true);
+        restoreKernel();
     }
 
     inline const unsigned& ghostZoneWidth() const
@@ -306,6 +297,34 @@ private:
     inline const Initializer<CELL_TYPE>& initializer() const
     {
         return this->getInitializer();
+    }
+
+    inline void saveRim(const long& nanoStep)
+    {
+        rimBuffer.pushRequest(nanoStep);
+        rimBuffer.put(*oldGrid, rim(), nanoStep);
+    }
+
+    inline void restoreRim(const bool& remove)
+    {
+        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
+    }
+
+    inline void saveKernel()
+    {
+        kernelBuffer.pushRequest(globalNanoStep());
+        kernelBuffer.put(*oldGrid, 
+                         partitionManager().innerSet(ghostZoneWidth()),
+                         globalNanoStep());
+    }
+
+    inline void restoreKernel()
+    {
+        kernelBuffer.get(
+            &*oldGrid, 
+            partitionManager().getVolatileKernel(), 
+            globalNanoStep(), 
+            true);
     }
 };
 

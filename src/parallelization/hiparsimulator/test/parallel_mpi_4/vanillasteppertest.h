@@ -4,7 +4,7 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
 using namespace LibGeoDecomp; 
@@ -16,7 +16,8 @@ namespace HiParSimulator {
 class OffsetHelperTest : public CxxTest::TestSuite
 {
 public:
-    void testTorus() {
+    void testTorus() 
+    {
         Coord<2> offset;
         Coord<2> dimensions;
         OffsetHelper<1, 2, Topologies::Torus<2>::Topology>()(
@@ -31,7 +32,8 @@ public:
         TS_ASSERT_EQUALS(Coord<2>(9, 7), dimensions);
     }
 
-    void testCube() {
+    void testCube() 
+    {
         Coord<2> offset;
         Coord<2> dimensions;
         OffsetHelper<1, 2, Topologies::Cube<2>::Topology>()(
@@ -52,14 +54,22 @@ class VanillaStepperTest : public CxxTest::TestSuite
 public:
     typedef PartitionManager<3, TestCell<3>::Topology> MyPartitionManager;
     typedef VanillaStepper<TestCell<3> > MyStepper;
+    typedef PatchLink<MyStepper::GridType> MyPatchLink;
+    typedef boost::shared_ptr<MyPatchLink::Accepter> MyPatchAccepterPtr;
+    typedef boost::shared_ptr<MyPatchLink::Provider> MyPatchProviderPtr;
 
-    void testFoo() {
+    void tearDown()
+    {
+        stepper.reset();
+    }
+
+    void testFoo() 
+    {
         // Init utility classes
         ghostZoneWidth = 4;
         Coord<3> gridDim(55, 47, 31);
         init.reset(new TestInitializer<3>(gridDim));
         CoordBox<3> box = init->gridBox();
-        MPILayer mpiLayer;
 
         StripingPartition<3> partition(Coord<3>(), box.dimensions);
         SuperVector<unsigned> weights;
@@ -148,25 +158,74 @@ public:
             }
         }
 
-        // let's go
+        int tag = 4711;
+
         // fixme: once working, use this code to reimplement the
         // update group
+
+        SuperVector<MyPatchProviderPtr> providers;
+        SuperVector<MyPatchAccepterPtr> accepters;
+
+        // manually set up patch links for ghost zone communication
+        MyPartitionManager::RegionVecMap m;
+        m = partitionManager->getOuterGhostZoneFragments();
+        for (MyPartitionManager::RegionVecMap::iterator i = m.begin(); i != m.end(); ++i) {
+            if (i->first != MyPartitionManager::OUTGROUP) {
+                // fixme: exclude empty regions
+                MyPatchProviderPtr p(
+                    new MyPatchLink::Provider(
+                        i->second[ghostZoneWidth], 
+                        i->first,
+                        tag));                
+                providers << p;
+                stepper->addPatchProvider(p, MyStepper::GHOST);
+            }
+        }
+         
+        m = partitionManager->getInnerGhostZoneFragments();  
+        for (MyPartitionManager::RegionVecMap::iterator i = m.begin(); i != m.end(); ++i) {
+            if (i->first != MyPartitionManager::OUTGROUP) {
+                // fixme: exclude empty regions
+                MyPatchAccepterPtr p(
+                    new MyPatchLink::Accepter(
+                        i->second[ghostZoneWidth], 
+                        i->first,
+                        tag));
+                accepters << p;
+                stepper->addPatchAccepter(p, MyStepper::GHOST);
+            }
+        }
+
+        // add events to patchlinks
+        // fixme: unite the two vectors
+        for (SuperVector<MyPatchProviderPtr>::iterator i = providers.begin();
+             i != providers.end();
+             ++i) {
+            (*i)->charge(ghostZoneWidth, ghostZoneWidth * 5, ghostZoneWidth);
+        }
+
+        for (SuperVector<MyPatchAccepterPtr>::iterator i = accepters.begin();
+             i != accepters.end();
+             ++i) {
+            (*i)->charge(ghostZoneWidth, ghostZoneWidth * 5, ghostZoneWidth);
+        }
+
+        // need to re-init after PatchLinks have been added since
+        // initGrids() will also re-update the ghost zone. during that
+        // update the patch accepters will be notified, which is
+        // required to get the patch communication going.
+        stepper->initGrids();
+
+        // let's go
         checkInnerSet(0, 0);
         stepper->update(1);
         checkInnerSet(1, 1);
-        stepper->update(3);
-        checkInnerSet(4, 4);
 
-        /**
-         * handle ghost (if validGhostZoneWidth == 0)
-         *   restore ghost (inner and outer)
-         *   save inner rim
-         *   update ghost
-         *   save inner ghost
-         *   restore inner rim
-         * update kernel
-         * perform output
-         */
+        stepper->update(3);
+        checkInnerSet(0, 4);
+
+        stepper->update(11);
+        checkInnerSet(3, 15);
     }
 
 private:
@@ -174,6 +233,7 @@ private:
     boost::shared_ptr<TestInitializer<3> > init;
     boost::shared_ptr<MyPartitionManager> partitionManager;
     boost::shared_ptr<MyStepper> stepper;
+    MPILayer mpiLayer;
 
     void checkInnerSet(
         const unsigned& shrink, 
