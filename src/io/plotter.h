@@ -29,7 +29,6 @@ public:
         setCellDimensions(width, height);
     }
 
-
     /**
      * sets the pixel dimensions of a cell when plotted 
      */
@@ -38,7 +37,6 @@ public:
         _cellWidth = width;
         _cellHeight = height;
     }
-
 
     /**
      * @return the dimensions of a cell when plotted (width, height).
@@ -50,7 +48,6 @@ public:
         ret[1] = _cellHeight;
         return ret;
     }
-
     
     Image plotGrid(const Grid<CELL, typename CELL::Topology>& grid) const
     {
@@ -58,7 +55,6 @@ public:
         unsigned height = _cellHeight * grid.getDimensions().y();
         return plotGridInViewport(grid, Coord<2>(0, 0), width, height);
     }
-
 
     /**
      * Plot the Grid in the given viewport. upperLeft, width and
@@ -81,14 +77,12 @@ public:
         ex = std::min(ex, (int)grid.getDimensions().x());
         ey = std::min(ey, (int)grid.getDimensions().y());
 
-        int maxY = grid.getDimensions().y() - 1;
         for (int y = sy; y < ey; y++) {            
             for (int x = sx; x < ex; x++) {
                 Coord<2> relativeUpperLeft = 
                     Coord<2>(x * _cellWidth, y * _cellHeight) - upperLeft; 
                 _cellPlotter->plotCell(
-                    // fixme: don't plot upside down
-                    grid[Coord<2>(x, maxY - y)], 
+                    grid[Coord<2>(x, y)], 
                     &ret, 
                     relativeUpperLeft, 
                     _cellWidth, 
