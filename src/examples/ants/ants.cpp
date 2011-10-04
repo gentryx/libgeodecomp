@@ -44,14 +44,6 @@ public:
     {
         *this = neighborhood[Coord<2>(0, 0)];
 
-        // if (isAnt())
-        //     std::cout << "nanoStep: " << nanoStep << "\n"
-        //               << "pos(" << posX << ", " << posY << ")\n"
-        //               << "target: " << target << "\n"
-        //               << "dir: " << dir << "\n"
-        //               << "busy: " << (state == BUSY_ANT) << "\n"
-        //               << "dropFood: " << dropFood << "\n\n";
-
         // determine target cell
         if (nanoStep == 0) {
             incoming = 0;
@@ -70,18 +62,10 @@ public:
                          state == IDLE_ANT)) {
                         // move there
                     } else {
-                        if (targetCell.state == FOOD &&
-                            state == BUSY_ANT) {
+                        if (targetCell.state == FOOD && state == BUSY_ANT) {
                             dropFood = true;
-                            //     // drop food and move approximately back
-                            //     // (angle 90°)
-                            //     dir = dir + 180 - 45 + rand() % 90;
-                            //     if (dir > 360)
-                            //         dir -= 360;
-                            // } else {
                         }
                         randomTurn();
-                        // }
                     }
                 }
             }
@@ -120,8 +104,6 @@ public:
             } else {
                 if (isAnt() && target != Coord<2>(0, 0)) {
                     if (neighborhood[target].incoming == 1) {
-                        // std::cout << "DELETING SELF, dropped " << dropFood
-                        //           << "\n";
                         *this = Cell(dropFood? FOOD :EMPTY);
                     } else {
                         randomTurn();
@@ -207,9 +189,6 @@ public:
     }
 
 private:
-
-    // fixme: this is bad since a cell's state should only depend on
-    // it's state and it's neighbors state
     Coord<2> randCoord() const
     {
         int x = rand() % gridDimensions().x();

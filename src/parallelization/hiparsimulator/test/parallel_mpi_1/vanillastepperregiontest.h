@@ -81,52 +81,16 @@ public:
         partitionManager->resetGhostZones(boundingBoxes);
 
         // The Unit Under Test: the stepper
-        patchBuffer.reset(new MockPatchBuffer<GridType, GridType>());
         stepper.reset(new MyStepper(partitionManager, init));
-        stepper->addPatchProvider(patchBuffer, MyStepper::GHOST);
-
-        // As a reference the stepper itself is used, which is kind of
-        // ugly, but this time we're not decomposing the grid. this
-        // kind of behavior is checked in vanillastepperbasittest.h.
-        referencePartitionManager.reset(new PartitionManager<2>(rect)); 
-        referenceStepper.reset(
-            new MyStepper(referencePartitionManager, init));
-
-        // fixme:
-        // referenceStepper->update(ghostZoneWidth);
-        // std::cout << "foo3c\n";
-        // patchBuffer->pushRequest(
-        //     &partitionManager->getOuterRim(), 
-        //     ghostZoneWidth);
-        // std::cout << "foo3d\n";
-        // patchBuffer->put(
-        //     referenceStepper->grid(), 
-        //     referencePartitionManager->ownRegion(),
-        //     ghostZoneWidth);
     }
 
     void testUpdate()
     {
-        // fixme:
-        // checkRegion(3, 0);
-        // stepper->update();
-
-        // checkRegion(2, 1);
-        // stepper->update();
-
-        // checkRegion(1, 2);
-
-
-        // Region<2> r = referencePartitionManager->ownRegion();
-        // stepper->update();
-        // checkRegion(3, 3);
-        // stepper->update(2);
-        // checkRegion(1, 5);
-
-        // SuperVector<Event> events = patchBuffer->getEvents();
-        // TS_ASSERT_EQUALS(1, events.size());
-        // TS_ASSERT_EQUALS(3, events[0].second);
-        // TS_ASSERT_EQUALS(partitionManager->getOuterRim(), events[0].first);
+        checkInnerSet(0, 0);
+        stepper->update();
+        checkInnerSet(1, 1);
+        stepper->update();
+        checkInnerSet(2, 2);
     }
 
 private:
@@ -134,19 +98,15 @@ private:
     boost::shared_ptr<TestInitializer<2> > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
     boost::shared_ptr<MyStepper > stepper;
-    boost::shared_ptr<MockPatchBuffer<GridType, GridType> > patchBuffer;
 
-    boost::shared_ptr<PartitionManager<2> > referencePartitionManager;
-    boost::shared_ptr<MyStepper > referenceStepper;
-
-    void checkRegion(
-        const unsigned& expansionWidth, 
+    void checkInnerSet(
+        const unsigned& shrink, 
         const unsigned& expectedStep)
     {
         TS_ASSERT_TEST_GRID_REGION(
             GridType, 
             stepper->grid(), 
-            partitionManager->ownRegion(expansionWidth),
+            partitionManager->innerSet(shrink),
             expectedStep);
     }
 };
