@@ -84,17 +84,16 @@ public:
     {
 #define GET_COMP(X, Y, Z, COMP) neighborhood[Coord<3>(X, Y, Z)].comp[COMP]
 #define SQR(X) ((X)*(X))
-        const double omega_w0 = 0.1;
-        const double omega_w1 = 0.1;
-        const double omega_w2 = 0.1;
-        const double omega_trm = 0.1;
+        const double omega = 1.0/1.7;
+        const double omega_trm = 1.0 - omega;
+        const double omega_w0 = 3.0 * 1.0 / 3.0 * omega;
+        const double omega_w1 = 3.0*1.0/18.0*omega;
+        const double omega_w2 = 3.0*1.0/36.0*omega;
         const double one_third = 1.0 / 3.0;
         const int x = 0;
         const int y = 0;
         const int z = 0;
-        double velX,
-            velY,
-            velZ;
+        double velX, velY, velZ;
 
         velX  =
             GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
@@ -230,7 +229,7 @@ public:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    CellInitializer(Coord<3> dim) : SimpleInitializer<Cell>(dim, 100)
+    CellInitializer(Coord<3> dim, int maxSteps) : SimpleInitializer<Cell>(dim, maxSteps)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)
@@ -260,7 +259,7 @@ public:
                         s = Cell::TOP;
 
                     if (box.inBounds(c))
-                        ret->at(c) = Cell(1, s);
+                        ret->at(c) = Cell(0, s);
                 }
             }
         }
@@ -325,7 +324,7 @@ void runSimulation()
 {
     int outputFrequency = 10;
     StripingSimulator<Cell> sim(
-        new CellInitializer(Coord<3>(100, 100, 100)),
+        new CellInitializer(Coord<3>(100, 100, 100), 1000),
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
         1000,
         MPI::DOUBLE);
