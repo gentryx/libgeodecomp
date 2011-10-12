@@ -123,6 +123,7 @@ task :cmake_prep do
   dirmap.each do |dir, files|
     header_paths = files.select { |f| f.fnmatch("*.h") }
     source_paths = files.select { |f| f.fnmatch("*.cpp") }
+    source_paths += files.select { |f| f.fnmatch("*.cu") }
     header_paths.sort!
     source_paths.sort!
     headers = header_paths.map { |f| "  ${RELATIVE_PATH}#{f.basename}" }
@@ -206,7 +207,7 @@ else
 end
 
 def all_sources
-  FileList[@opts.srcdir + "**/*.{h,cpp}"]
+  FileList[@opts.srcdir + "**/*.{h,cpp,cu}"]
 end
 
 def generate_documentation

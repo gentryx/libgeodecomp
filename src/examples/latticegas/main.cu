@@ -1,6 +1,11 @@
 #include <iostream>
 #include <sstream>
 
+__global__ void plasma1(float *image, int repeats, int tileDim, int width)
+{
+    image[0] = 5;
+}
+
 class Cell
 {
 public:
@@ -426,8 +431,6 @@ int main(int argc, char **argv)
     Cell::initTransportTable();
 
     // testModel();
-
-    
 
     return 0;
 }
