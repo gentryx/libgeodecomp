@@ -492,7 +492,7 @@ def detect_defaults
   @opts.supplement(:typemaps, @opts.mpi == true) 
 
   opencl = false
-  paths = ENV['CPLUS_INCLUDE_PATH'].split(":")
+  paths = ENV['CPLUS_INCLUDE_PATH'].nil? ? [] : ENV['CPLUS_INCLUDE_PATH'].split(":") 
   paths << "/usr/include"
   paths.each do |path|
     header = Pathname.new(path) + "CL" + "cl.h"
