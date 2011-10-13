@@ -1,9 +1,25 @@
 #include <iostream>
 #include <sstream>
 
-__global__ void plasma1(float *image, int repeats, int tileDim, int width)
+#include <QtGui/QApplication>
+#include <QtCore/QTimer>
+#include <QThreadPool>
+#include <libgeodecomp/examples/latticegas/framegrabber.h>
+#include <libgeodecomp/examples/latticegas/flowwidget.h>
+#include <libgeodecomp/examples/latticegas/interactivesimulator.h>
+
+// fixme: using namespace LibGeoDecomp;
+
+__global__ void plasma1(int *image, int offset)
 {
-    image[0] = 5;
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int idx = y * 1024 + x;
+    image[idx + 0] = 
+        (0xff << 24) +
+        ((x & 0xff) << 16) +
+        (((y * 2 + offset) & 0xff) << 8) +
+        (128 << 0);
 }
 
 class Cell
@@ -425,6 +441,56 @@ void testModel()
     }
 }
 
+int runQtApp(int argc, char **argv)
+{
+    QApplication app(argc, argv);
+    FlowWidget flow;
+    flow.resize(1200, 900);
+
+    InteractiveSimulator *sim = new InteractiveSimulator(&flow);
+    FrameGrabber *grabber = new FrameGrabber(&flow);
+
+    QTimer *timerFlow = new QTimer(&flow);
+    QTimer *timerGrab = new QTimer(&flow);
+    QTimer *timerInfo = new QTimer(&flow);
+
+    // cudaSetDevice(0);
+    // int *imageDev;
+
+    // dim3 gridDim(2, 768);
+    // dim3 blockDim(512, 1);
+    // long imageWidth = gridDim.x * blockDim.x;
+    // long imageHeight = gridDim.y * blockDim.y;
+    // long size = imageWidth * imageHeight;
+    // long byteSize = size * 4;
+    
+    // cudaMalloc(&imageDev, byteSize);
+    // plasma1<<<gridDim, blockDim>>>(imageDev, 0);
+    // cudaDeviceSynchronize();
+    // cudaMemcpy(flow.getImage(), imageDev, byteSize, cudaMemcpyDeviceToHost);
+    // cudaDeviceSynchronize();
+    // cudaFree(imageDev);
+
+    QObject::connect(timerInfo, SIGNAL(timeout()),          &flow,   SLOT(info()));
+    QObject::connect(timerInfo, SIGNAL(timeout()),          grabber, SLOT(info()));
+    QObject::connect(timerInfo, SIGNAL(timeout()),          sim,     SLOT(info()));
+
+    QObject::connect(timerFlow, SIGNAL(timeout()),          &flow,   SLOT(ping()));
+    QObject::connect(timerGrab, SIGNAL(timeout()),          grabber, SLOT(grab()));
+    QObject::connect(&app,      SIGNAL(lastWindowClosed()), sim,     SLOT(quit()));
+
+    QThreadPool *threadPool = QThreadPool::globalInstance();
+    threadPool->start(sim);
+
+    timerFlow->start(10);
+    timerGrab->start(1000);
+    timerInfo->start(500);
+    flow.show();
+    int ret = app.exec();
+    threadPool->waitForDone();
+    return ret;
+}
+
 int main(int argc, char **argv)
 {
     std::cout << "ok\n";
@@ -432,5 +498,5 @@ int main(int argc, char **argv)
 
     // testModel();
 
-    return 0;
-}
+    return runQtApp(argc, argv);
+ }
