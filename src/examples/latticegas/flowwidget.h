@@ -49,16 +49,18 @@ public:
 public slots:
     void ping()
     {
+        emit updateImage((unsigned*)image.scanLine(0), image.width(), image.height());
         update();
         incFrames();
-        // std::cout << ".";
-        // std::cout << "ping() @ " << fps() << " fps\n";
     }
 
     void info()
     {
         std::cout << "FlowWidget @ " << fps() << " FPS\n";
     }
+
+signals:
+    void updateImage(unsigned *image, unsigned width, unsigned height);
 
 private:
     int counter;

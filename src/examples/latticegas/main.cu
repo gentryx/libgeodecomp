@@ -448,7 +448,7 @@ int runQtApp(int argc, char **argv)
     flow.resize(1200, 900);
 
     InteractiveSimulator *sim = new InteractiveSimulator(&flow);
-    FrameGrabber *grabber = new FrameGrabber(&flow);
+    FrameGrabber *grabber = new FrameGrabber(true, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);
@@ -477,7 +477,10 @@ int runQtApp(int argc, char **argv)
     QObject::connect(timerFlow, SIGNAL(timeout()),           &flow,   SLOT(ping()));
     QObject::connect(timerGrab, SIGNAL(timeout()),           grabber, SLOT(grab()));
 
-    QObject::connect(grabber,   SIGNAL(newFrame(unsigned*)), sim,     SLOT(updateCam(unsigned*)));
+    QObject::connect(grabber,   SIGNAL(newFrame(unsigned*, unsigned, unsigned)), 
+                     sim,       SLOT(updateCam( unsigned*, unsigned, unsigned)));
+    QObject::connect(&flow,     SIGNAL(updateImage(unsigned*, unsigned, unsigned)),
+                     sim,       SLOT(renderImage(unsigned*, unsigned, unsigned)));
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  sim,     SLOT(quit()));
 
     QThreadPool *threadPool = QThreadPool::globalInstance();
@@ -485,7 +488,7 @@ int runQtApp(int argc, char **argv)
 
     timerFlow->start(10);
     timerGrab->start(1000);
-    timerInfo->start(500);
+    timerInfo->start(5000);
     flow.show();
     int ret = app.exec();
     threadPool->waitForDone();

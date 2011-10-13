@@ -11,7 +11,7 @@ class FrameGrabber : public QObject, FPSCounter
     Q_OBJECT
 
 public:
-    FrameGrabber(QObject *parent);
+    FrameGrabber(bool fakeCam, QObject *parent);
 
     ~FrameGrabber();
 
@@ -24,11 +24,12 @@ public slots:
     }
 
 signals:
-    void newFrame(unsigned *frame);
+    void newFrame(unsigned *frame, unsigned width, unsigned height);
 
 private:
     // ugly hack. we can't include cv.h here since nvcc won't compile it
     void *capture;
+    bool fakeCam;
 };
 
 #endif

@@ -15,20 +15,42 @@ public:
     InteractiveSimulator(QObject *parent) :
         QObject(parent),
         t(0),
-        mutex(QMutex::Recursive)
+        mutex(QMutex::Recursive),
+        frame(1),
+        frameWidth(1),
+        frameHeight(1)
     {}
 
 public slots:
-    void updateCam(unsigned *frame)
+    void updateCam(unsigned *camFrame, unsigned width, unsigned height)
     {
         mutex.lock();
-        std::cout << "\nupdateCam()\n";
+        std::cout << "updateCam()\n";
+        unsigned size = width * height;
+        frame.resize(size);
+        std::copy(camFrame, camFrame + size, &frame[0]);
+        frameWidth = width;
+        frameHeight = height;
         mutex.unlock();
     }
 
-    void renderImage(unsigned *image, unsigned& width, unsigned& height)
+    void renderImage(unsigned *image, unsigned width, unsigned height)
     {
-        std::cout << "\nrenderImage(" << width << ", " << height << ")\n";
+        mutex.lock();
+
+        if (frameWidth < 1 || frameHeight < 1) 
+            throw std::logic_error("captured frame too small");
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                int sourceX = x * (frameWidth - 1)  / width;
+                int sourceY = y * (frameHeight - 1) / height;
+                unsigned val = frame[sourceY * frameWidth + sourceX];
+                image[y * width + x] = val;
+            }
+        }
+
+        mutex.unlock();
     }
 
     void step()
@@ -63,6 +85,9 @@ private:
     int t;
     volatile bool running;
     QMutex mutex;
+    std::vector<unsigned> frame;
+    unsigned frameWidth;
+    unsigned frameHeight;
 };
 
 #endif
