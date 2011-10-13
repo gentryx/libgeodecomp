@@ -26,14 +26,11 @@ void FrameGrabber::grab()
         unsigned *frame = new unsigned[MAX_X * MAX_Y];
         for (int y = 0; y < MAX_Y; ++y) {
             for (int x = 0; x < MAX_X; ++x) {
-                // double r = y > (MAX_Y / 2) ? MAX_Y - y : y;
-                // double g = x > (MAX_X / 2) ? MAX_X - x : x;
-                // int fixedR = 255.0 * r * (1.0 / (MAX_Y / 2));
-                // int fixedG = 255.0 * g * (1.0 / (MAX_X / 2));
+                int r = y > (MAX_Y / 2) ? MAX_Y - y : y;
+                int g = x > (MAX_X / 2) ? MAX_X - x : x;
+                r = 255.0 * r * (1.0 / (MAX_Y / 2));
+                g = 255.0 * g * (1.0 / (MAX_X / 2));
 
-                unsigned char r =  255 * x / MAX_X;
-                unsigned char g =  255 * y / MAX_Y;
-                
                 unsigned val = (0xff << 24) + (r << 16) + (g << 8) + 0;
                 frame[y * MAX_X + x] = val;
             }

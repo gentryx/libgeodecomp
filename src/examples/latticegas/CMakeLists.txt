@@ -8,7 +8,10 @@ find_package(Qt4)
 if (CUDA_FOUND)
   include(${QT_USE_FILE})
 
-  set(CMAKE_CXX_FLAGS "-I/usr/include/opencv  -lml -lcvaux -lhighgui -lcv -lcxcore ${CMAKE_CXX_FLAGS}")
+  execute_process(COMMAND pkg-config opencv --cflags --libs
+    OUTPUT_VARIABLE OPENCV_FLAGS)
+  STRING(REGEX REPLACE "\n" "" OPENCV_FLAGS ${OPENCV_FLAGS})
+  set(CMAKE_CXX_FLAGS "${OPENCV_FLAGS} ${CMAKE_CXX_FLAGS}")
 
   # fixme: rework this
   set(MY_HEADERS

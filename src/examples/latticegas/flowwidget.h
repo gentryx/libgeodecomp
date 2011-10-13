@@ -37,6 +37,7 @@ public:
         // painter.drawImage(rect(), image);
         painter.drawImage(0, 0, image);
 
+        painter.setPen(Qt::red);
         painter.drawLine(10 + counter, 10, 500 + counter, 500);
         ++counter;
     }
