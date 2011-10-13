@@ -471,13 +471,14 @@ int runQtApp(int argc, char **argv)
     // cudaDeviceSynchronize();
     // cudaFree(imageDev);
 
-    QObject::connect(timerInfo, SIGNAL(timeout()),          &flow,   SLOT(info()));
-    QObject::connect(timerInfo, SIGNAL(timeout()),          grabber, SLOT(info()));
-    QObject::connect(timerInfo, SIGNAL(timeout()),          sim,     SLOT(info()));
+    QObject::connect(timerInfo, SIGNAL(timeout()),           &flow,   SLOT(info()));
+    QObject::connect(timerInfo, SIGNAL(timeout()),           grabber, SLOT(info()));
+    QObject::connect(timerInfo, SIGNAL(timeout()),           sim,     SLOT(info()));
+    QObject::connect(timerFlow, SIGNAL(timeout()),           &flow,   SLOT(ping()));
+    QObject::connect(timerGrab, SIGNAL(timeout()),           grabber, SLOT(grab()));
 
-    QObject::connect(timerFlow, SIGNAL(timeout()),          &flow,   SLOT(ping()));
-    QObject::connect(timerGrab, SIGNAL(timeout()),          grabber, SLOT(grab()));
-    QObject::connect(&app,      SIGNAL(lastWindowClosed()), sim,     SLOT(quit()));
+    QObject::connect(grabber,   SIGNAL(newFrame(unsigned*)), sim,     SLOT(updateCam(unsigned*)));
+    QObject::connect(&app,      SIGNAL(lastWindowClosed()),  sim,     SLOT(quit()));
 
     QThreadPool *threadPool = QThreadPool::globalInstance();
     threadPool->start(sim);

@@ -2,6 +2,7 @@
 #define _libgeodecomp_examples_latticegas_interactivesimulator_h_
 
 #include <iostream>
+#include <QMutex>
 #include <QObject>
 #include <QRunnable>
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
@@ -13,13 +14,16 @@ class InteractiveSimulator : public QObject, public QRunnable, FPSCounter
 public:
     InteractiveSimulator(QObject *parent) :
         QObject(parent),
-        t(0)
+        t(0),
+        mutex(QMutex::Recursive)
     {}
 
 public slots:
-    void updateCam()
+    void updateCam(unsigned *frame)
     {
+        mutex.lock();
         std::cout << "\nupdateCam()\n";
+        mutex.unlock();
     }
 
     void renderImage(unsigned *image, unsigned& width, unsigned& height)
@@ -29,8 +33,10 @@ public slots:
 
     void step()
     {
+        mutex.lock();
         incFrames();
         ++t;
+        mutex.unlock();
     }
      
     void info()
@@ -44,7 +50,7 @@ public slots:
         while (running) {
             step();
             // std::cout << "\r" << t << " " << fps() << " FPS";
-     }
+        }
     }
 
     void quit()
@@ -56,6 +62,7 @@ public slots:
 private:
     int t;
     volatile bool running;
+    QMutex mutex;
 };
 
 #endif
