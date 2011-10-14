@@ -17,7 +17,7 @@ public:
     InteractiveSimulator(QObject *parent);
     ~InteractiveSimulator();
 
-    static char pixelToState(char r, char g, char b)
+    static char pixelToState(unsigned char r, unsigned char g, unsigned char b)
     {
         float sum = 
             r * SimParams::weightR +

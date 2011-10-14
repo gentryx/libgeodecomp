@@ -15,6 +15,7 @@ if (CUDA_FOUND)
 
   # fixme: rework this
   set(MY_HEADERS
+    cameratester.h
     flowwidget.h
     framegrabber.h
     interactivesimulator.h

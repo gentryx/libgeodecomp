@@ -13,9 +13,12 @@ public:
         modelSize = modelWidth * modelHeight;
         maxImageSize = 2048 * 2048;
         cudaDevice = 0;
-        weightR = 0.0030;
-        weightG = 0.0020;
-        weightB = 0.0020;
+        // weightR = 0.0030;
+        // weightG = 0.0020;
+        // weightB = 0.0020;
+        weightR = 0.0060;
+        weightG = 0.0060;
+        weightB = 0.0010;
         threads = 512;
     }
     

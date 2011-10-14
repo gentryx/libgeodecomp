@@ -4,6 +4,7 @@
 #include <QtCore/QTimer>
 #include <QThreadPool>
 #include <libgeodecomp/examples/latticegas/cell.h>
+#include <libgeodecomp/examples/latticegas/cameratester.h>
 #include <libgeodecomp/examples/latticegas/framegrabber.h>
 #include <libgeodecomp/examples/latticegas/flowwidget.h>
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
@@ -123,6 +124,21 @@ int runQtApp(int argc, char **argv)
     return ret;
 }
 
+void testCamera()
+{
+    std::cout << "hello\n";
+    FrameGrabber grabber(false, 0);
+    CameraTester tester;
+
+    QObject::connect(&grabber,   SIGNAL(newFrame(char*, unsigned, unsigned)), 
+                     &tester,    SLOT(updateCam( char*, unsigned, unsigned)));
+    for (int i = 0; i < 50; ++i) {
+        grabber.grab();
+        sleep(1);
+    }
+    std::cout << "bye\n";
+}
+
 int main(int argc, char **argv)
 {
     Cell::initTransportTable();
@@ -130,7 +146,9 @@ int main(int argc, char **argv)
     SimParams::initParams(argc, argv);
     cudaSetDevice(SimParams::cudaDevice);
 
+    testCamera();
     // testModel();
+    return 0;
 
-    return runQtApp(argc, argv);
+    // return runQtApp(argc, argv);
  }
