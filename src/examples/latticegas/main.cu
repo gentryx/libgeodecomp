@@ -11,18 +11,6 @@
 
 // fixme: using namespace LibGeoDecomp;
 
-__global__ void plasma1(int *image, int offset)
-{
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
-    int idx = y * 1024 + x;
-    image[idx + 0] = 
-        (0xff << 24) +
-        ((x & 0xff) << 16) +
-        (((y * 2 + offset) & 0xff) << 8) +
-        (128 << 0);
-}
-
 int simpleRand(int i) {
     return i * 69069 + 1327217885;
 }
@@ -110,23 +98,6 @@ int runQtApp(int argc, char **argv)
     QTimer *timerGrab = new QTimer(&flow);
     QTimer *timerInfo = new QTimer(&flow);
 
-    // cudaSetDevice(0);
-    // int *imageDev;
-
-    // dim3 gridDim(2, 768);
-    // dim3 blockDim(512, 1);
-    // long imageWidth = gridDim.x * blockDim.x;
-    // long imageHeight = gridDim.y * blockDim.y;
-    // long size = imageWidth * imageHeight;
-    // long byteSize = size * 4;
-    
-    // cudaMalloc(&imageDev, byteSize);
-    // plasma1<<<gridDim, blockDim>>>(imageDev, 0);
-    // cudaDeviceSynchronize();
-    // cudaMemcpy(flow.getImage(), imageDev, byteSize, cudaMemcpyDeviceToHost);
-    // cudaDeviceSynchronize();
-    // cudaFree(imageDev);
-
     QObject::connect(timerInfo, SIGNAL(timeout()),           &flow,   SLOT(info()));
     QObject::connect(timerInfo, SIGNAL(timeout()),           grabber, SLOT(info()));
     QObject::connect(timerInfo, SIGNAL(timeout()),           sim,     SLOT(info()));
@@ -142,6 +113,7 @@ int runQtApp(int argc, char **argv)
     QThreadPool *threadPool = QThreadPool::globalInstance();
     threadPool->start(sim);
 
+    grabber->grab();
     timerFlow->start(10);
     timerGrab->start(1000);
     timerInfo->start(5000);

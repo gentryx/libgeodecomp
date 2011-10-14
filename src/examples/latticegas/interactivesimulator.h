@@ -2,9 +2,9 @@
 #define _libgeodecomp_examples_latticegas_interactivesimulator_h_
 
 #include <iostream>
-#include <QMutex>
 #include <QObject>
 #include <QRunnable>
+#include <QSemaphore>
 #include <libgeodecomp/examples/latticegas/bigcell.h>
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
@@ -67,8 +67,6 @@ public:
 public slots:
     void updateCam(unsigned *rawFrame, unsigned width, unsigned height)
     {
-        mutex.lock();
-
         // std::cout << "  cam -> states\n";
         for (int y = 0; y < SimParams::modelHeight; ++y) {
             for (int x = 0; x < SimParams::modelWidth; ++x) {
@@ -80,38 +78,14 @@ public slots:
                 states[y * SimParams::modelWidth + x] = state;
             }
         }
-
-        // std::cout << "  states -> cells\n";
-        for (int y = 0; y < SimParams::modelHeight; ++y) {
-            for (int x = 0; x < SimParams::modelWidth; ++x) {
-                unsigned pos = y * SimParams::modelWidth + x;
-                gridOld[pos][0].getState() = states[pos];
-                gridOld[pos][1].getState() = states[pos];
-            }
-        }
-
-        mutex.unlock();
+        
+        newCameraFrame.release();
     }
 
     void renderImage(unsigned *image, unsigned width, unsigned height);
 
-    void step()
-    {
-        for (int y = 1; y < SimParams::modelHeight - 1; ++y) {
-            for (int x = 1; x < SimParams::modelWidth - 1; ++x) {
-                unsigned pos = y * SimParams::modelWidth + x;
-                gridNew[pos].update(&gridOld[pos - SimParams::modelWidth],
-                                     &gridOld[pos],
-                                     &gridOld[pos + SimParams::modelWidth]);
-            }
-        }
-        // fixme: need this mutex?
-        std::swap(gridNew, gridOld);
+    void step();
 
-        incFrames();
-        ++t;
-    }
-     
     void info()
     {
         std::cout << "InteractiveSimulator @ " << fps() << " FPS\n\n";
@@ -135,7 +109,14 @@ public slots:
 private:
     int t;
     volatile bool running;
-    QMutex mutex;
+    QSemaphore newOutputFrameRequested;
+    QSemaphore newOutputFrameAvailable;
+    QSemaphore newCameraFrame;
+
+    unsigned *outputFrame;
+    volatile unsigned outputFrameWidth;
+    volatile unsigned outputFrameHeight;
+
     std::vector<char> states;
     std::vector<BigCell> gridOld;
     std::vector<BigCell> gridNew;

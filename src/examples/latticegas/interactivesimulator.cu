@@ -73,7 +73,6 @@ __global__ void scaleFrame(unsigned *frame, unsigned *image, int sourceWidth, in
 InteractiveSimulator::InteractiveSimulator(QObject *parent) :
     QObject(parent),
     t(0),
-    mutex(QMutex::Recursive),
     states(SimParams::modelSize, Cell::liquid),
     gridOld(SimParams::modelSize),
     gridNew(SimParams::modelSize),
@@ -101,23 +100,53 @@ InteractiveSimulator::~InteractiveSimulator()
 
 void InteractiveSimulator::renderImage(unsigned *image, unsigned width, unsigned height)
 {
-    mutex.lock();
-
-    cudaMemcpy(gridOldDev, &gridOld[0], SimParams::modelSize * sizeof(BigCell), cudaMemcpyHostToDevice);
-
-    {
-        dim3 blockDim(SimParams::threads, 1);
-        dim3 gridDim(SimParams::modelWidth / SimParams::threads, SimParams::modelHeight);
-        cellsToFrame<<<gridDim, blockDim>>>(gridOldDev, frameDev);
-    }
-    {
-        dim3 blockDim(width, 1);
-        dim3 gridDim(1, height);
-        scaleFrame<<<gridDim, blockDim>>>(frameDev, imageDev, SimParams::modelWidth, SimParams::modelHeight);
-    }
-
-    cudaMemcpy(image, imageDev, width * height * 4, cudaMemcpyDeviceToHost);
-
-    mutex.unlock();
+    outputFrame = image;
+    outputFrameWidth = width;
+    outputFrameHeight = height;
+    newOutputFrameRequested.release(1);
+    newOutputFrameAvailable.acquire(1);
 }
 
+void InteractiveSimulator::step()
+{
+    if (newCameraFrame.tryAcquire()) {
+        // std::cout << "  states -> cells\n";
+        for (int y = 0; y < SimParams::modelHeight; ++y) {
+            for (int x = 0; x < SimParams::modelWidth; ++x) {
+                unsigned pos = y * SimParams::modelWidth + x;
+                gridOld[pos][0].getState() = states[pos];
+                gridOld[pos][1].getState() = states[pos];
+            }
+        }
+    }
+
+    if (newOutputFrameRequested.tryAcquire()) {
+        cudaMemcpy(gridOldDev, &gridOld[0], SimParams::modelSize * sizeof(BigCell), cudaMemcpyHostToDevice);
+        {
+            dim3 blockDim(SimParams::threads, 1);
+            dim3 gridDim(SimParams::modelWidth / SimParams::threads, SimParams::modelHeight);
+            cellsToFrame<<<gridDim, blockDim>>>(gridOldDev, frameDev);
+        }
+        {
+            dim3 blockDim(outputFrameWidth, 1);
+            dim3 gridDim(1, outputFrameHeight);
+            scaleFrame<<<gridDim, blockDim>>>(frameDev, imageDev, SimParams::modelWidth, SimParams::modelHeight);
+        }
+        cudaMemcpy(outputFrame, imageDev, outputFrameWidth * outputFrameHeight * 4, cudaMemcpyDeviceToHost);
+
+        newOutputFrameAvailable.release();
+    }
+
+    for (int y = 1; y < SimParams::modelHeight - 1; ++y) {
+        for (int x = 1; x < SimParams::modelWidth - 1; ++x) {
+            unsigned pos = y * SimParams::modelWidth + x;
+            gridNew[pos].update(&gridOld[pos - SimParams::modelWidth],
+                                &gridOld[pos],
+                                &gridOld[pos + SimParams::modelWidth]);
+        }
+    }
+    std::swap(gridNew, gridOld);
+
+    incFrames();
+    ++t;
+}
