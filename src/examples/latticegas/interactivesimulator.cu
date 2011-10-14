@@ -70,6 +70,16 @@ __global__ void scaleFrame(unsigned *frame, unsigned *image, int sourceWidth, in
 
 }
 
+void checkCudaError()
+{
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        const char *errorMessage = cudaGetErrorString(error);
+        std::cerr << "CUDA: " << errorMessage << "\n";
+        throw std::runtime_error("CUDA call failed");
+    }
+}
+
 InteractiveSimulator::InteractiveSimulator(QObject *parent) :
     QObject(parent),
     t(0),
@@ -122,17 +132,21 @@ void InteractiveSimulator::step()
 
     if (newOutputFrameRequested.tryAcquire()) {
         cudaMemcpy(gridOldDev, &gridOld[0], SimParams::modelSize * sizeof(BigCell), cudaMemcpyHostToDevice);
+        checkCudaError();
         {
             dim3 blockDim(SimParams::threads, 1);
             dim3 gridDim(SimParams::modelWidth / SimParams::threads, SimParams::modelHeight);
             cellsToFrame<<<gridDim, blockDim>>>(gridOldDev, frameDev);
+            checkCudaError();
         }
         {
             dim3 blockDim(outputFrameWidth, 1);
             dim3 gridDim(1, outputFrameHeight);
             scaleFrame<<<gridDim, blockDim>>>(frameDev, imageDev, SimParams::modelWidth, SimParams::modelHeight);
+            checkCudaError();
         }
         cudaMemcpy(outputFrame, imageDev, outputFrameWidth * outputFrameHeight * 4, cudaMemcpyDeviceToHost);
+        checkCudaError();
 
         newOutputFrameAvailable.release();
     }
