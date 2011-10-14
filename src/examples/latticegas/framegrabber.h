@@ -24,7 +24,7 @@ public slots:
     }
 
 signals:
-    void newFrame(unsigned *frame, unsigned width, unsigned height);
+    void newFrame(char *frame, unsigned width, unsigned height);
 
 private:
     // ugly hack. we can't include cv.h here since nvcc won't compile it

@@ -104,8 +104,8 @@ int runQtApp(int argc, char **argv)
     QObject::connect(timerFlow, SIGNAL(timeout()),           &flow,   SLOT(ping()));
     QObject::connect(timerGrab, SIGNAL(timeout()),           grabber, SLOT(grab()));
 
-    QObject::connect(grabber,   SIGNAL(newFrame(unsigned*, unsigned, unsigned)), 
-                     sim,       SLOT(updateCam( unsigned*, unsigned, unsigned)));
+    QObject::connect(grabber,   SIGNAL(newFrame(char*, unsigned, unsigned)), 
+                     sim,       SLOT(updateCam( char*, unsigned, unsigned)));
     QObject::connect(&flow,     SIGNAL(updateImage(unsigned*, unsigned, unsigned)),
                      sim,       SLOT(renderImage(unsigned*, unsigned, unsigned)));
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  sim,     SLOT(quit()));

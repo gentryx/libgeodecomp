@@ -67,7 +67,6 @@ __global__ void scaleFrame(unsigned *frame, unsigned *image, int sourceWidth, in
     int sourceOffset = sourceY * sourceWidth + sourceX;
 
     image[offset] = frame[sourceOffset];
-
 }
 
 void checkCudaError()
@@ -92,11 +91,11 @@ InteractiveSimulator::InteractiveSimulator(QObject *parent) :
     gridOld[190 * SimParams::modelWidth + 10][0] = Cell(Cell::liquid, Cell::R, 1);
 
     cudaMalloc(&frameDev, SimParams::modelSize * 4);
-    cudaMalloc(&imageDev, SimParams::maxImageSize * 4 );
+    cudaMalloc(&imageDev, SimParams::maxImageSize * 4);
     cudaMalloc(&gridOldDev, SimParams::modelSize * sizeof(BigCell));
     cudaMalloc(&gridNewDev, SimParams::modelSize * sizeof(BigCell));
     cudaMemcpyToSymbol(paletteDev, Cell::palette, sizeof(Cell::palette));
-
+    checkCudaError();
 }
 
 InteractiveSimulator::~InteractiveSimulator()
@@ -132,22 +131,19 @@ void InteractiveSimulator::step()
 
     if (newOutputFrameRequested.tryAcquire()) {
         cudaMemcpy(gridOldDev, &gridOld[0], SimParams::modelSize * sizeof(BigCell), cudaMemcpyHostToDevice);
-        checkCudaError();
         {
             dim3 blockDim(SimParams::threads, 1);
             dim3 gridDim(SimParams::modelWidth / SimParams::threads, SimParams::modelHeight);
             cellsToFrame<<<gridDim, blockDim>>>(gridOldDev, frameDev);
-            checkCudaError();
         }
         {
             dim3 blockDim(outputFrameWidth, 1);
             dim3 gridDim(1, outputFrameHeight);
             scaleFrame<<<gridDim, blockDim>>>(frameDev, imageDev, SimParams::modelWidth, SimParams::modelHeight);
-            checkCudaError();
         }
         cudaMemcpy(outputFrame, imageDev, outputFrameWidth * outputFrameHeight * 4, cudaMemcpyDeviceToHost);
-        checkCudaError();
 
+        checkCudaError();
         newOutputFrameAvailable.release();
     }
 

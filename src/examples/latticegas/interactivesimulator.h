@@ -17,11 +17,8 @@ public:
     InteractiveSimulator(QObject *parent);
     ~InteractiveSimulator();
 
-    static char pixelToState(unsigned val)
+    static char pixelToState(char r, char g, char b)
     {
-        float r = (val >> 16) & 0xff;
-        float g = (val >>  8) & 0xff;
-        float b = (val >>  0) & 0xff;
         float sum = 
             r * SimParams::weightR +
             g * SimParams::weightG +
@@ -30,15 +27,18 @@ public:
     }
 
 public slots:
-    void updateCam(unsigned *rawFrame, unsigned width, unsigned height)
+    void updateCam(char *rawFrame, unsigned width, unsigned height)
     {
         // std::cout << "  cam -> states\n";
         for (int y = 0; y < SimParams::modelHeight; ++y) {
             for (int x = 0; x < SimParams::modelWidth; ++x) {
                 int sourceX = x * (width  - 1) / SimParams::modelWidth;
                 int sourceY = y * (height - 1) / SimParams::modelHeight;
-                unsigned val = rawFrame[sourceY * width + sourceX];
-                char state = pixelToState(val);
+                int sourceOffset = sourceY * width + sourceX;
+                char r = rawFrame[sourceOffset * 3 + 0];
+                char g = rawFrame[sourceOffset * 3 + 1];
+                char b = rawFrame[sourceOffset * 3 + 2];
+                char state = pixelToState(r, g, b);
 
                 states[y * SimParams::modelWidth + x] = state;
             }
