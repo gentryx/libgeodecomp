@@ -29,41 +29,6 @@ public:
         return sum <= 1 ? Cell::liquid : Cell::solid;
     }
 
-    // fixme: kill this
-    static unsigned bigCellToColor(BigCell c)
-    {
-        unsigned r = 0;
-        unsigned g = 0;
-        unsigned b = 0;
-   
-        for (int y = 0; y < 2; ++y) {
-            if (c[y].getState() != Cell::liquid) {
-                r += 255;
-                g += 255;
-                b += 255;
-            } else {
-                for (int i = 0; i < 7; ++i) {
-                    r += Cell::palette[c[y][i]][0];
-                    g += Cell::palette[c[y][i]][1];
-                    b += Cell::palette[c[y][i]][2];
-                }
-            }
-        }
-
-        if (r > 255)
-            r = 255;
-        if (g > 255)
-            g = 255;
-        if (b > 255)
-            b = 255;
-
-        return (0xff << 24) +
-            (r << 16) +
-            (g << 8) +
-            (b << 0);
-    }
-    
-
 public slots:
     void updateCam(unsigned *rawFrame, unsigned width, unsigned height)
     {
@@ -118,6 +83,7 @@ private:
     volatile unsigned outputFrameHeight;
 
     std::vector<char> states;
+    // fixme: get rid of these
     std::vector<BigCell> gridOld;
     std::vector<BigCell> gridNew;
     std::vector<unsigned> frame;
