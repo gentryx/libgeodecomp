@@ -40,7 +40,6 @@ public:
                         down[ 0][0][Cell::UL]);
     } 
 
-private:
     Cell cells[2];
 };
 

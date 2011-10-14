@@ -14,17 +14,8 @@ class InteractiveSimulator : public QObject, public QRunnable, FPSCounter
     Q_OBJECT
     
 public:
-    InteractiveSimulator(QObject *parent) :
-        QObject(parent),
-        t(0),
-        mutex(QMutex::Recursive),
-        states(SimParams::modelSize, Cell::liquid),
-        cellsOld(SimParams::modelSize),
-        cellsNew(SimParams::modelSize),
-        frame(SimParams::modelSize)
-    {
-        cellsOld[10 * SimParams::modelWidth + 10][0] = Cell(Cell::liquid, Cell::R, 1);
-    }
+    InteractiveSimulator(QObject *parent);
+    ~InteractiveSimulator();
 
     static char pixelToState(unsigned val)
     {
@@ -38,18 +29,7 @@ public:
         return sum <= 1 ? Cell::liquid : Cell::solid;
     }
 
-    static unsigned stateToPixel(char state)
-    {
-        switch (state) {
-        case Cell::liquid:
-            return 0xff000000;
-        case Cell::solid:
-            return 0xffffffff;
-        default:
-            return 0xffff0000;
-        }
-    }
-
+    // fixme: kill this
     static unsigned bigCellToColor(BigCell c)
     {
         unsigned r = 0;
@@ -105,55 +85,31 @@ public slots:
         for (int y = 0; y < SimParams::modelHeight; ++y) {
             for (int x = 0; x < SimParams::modelWidth; ++x) {
                 unsigned pos = y * SimParams::modelWidth + x;
-                cellsOld[pos][0].getState() = states[pos];
-                cellsOld[pos][1].getState() = states[pos];
+                gridOld[pos][0].getState() = states[pos];
+                gridOld[pos][1].getState() = states[pos];
             }
         }
 
         mutex.unlock();
     }
 
-    void renderImage(unsigned *image, unsigned width, unsigned height)
-    {
-        mutex.lock();
-
-        // std::cout << "  cells -> frame\n";
-        for (int y = 0; y < SimParams::modelHeight; ++y) {
-            for (int x = 0; x < SimParams::modelWidth; ++x) {
-                unsigned pos = y * SimParams::modelWidth + x;
-                frame[pos] = bigCellToColor(cellsOld[pos]);
-            }
-        }
-
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                int sourceX = x * (SimParams::modelWidth  - 1) / width;
-                int sourceY = y * (SimParams::modelHeight - 1) / height;
-                unsigned val = frame[sourceY * SimParams::modelWidth + sourceX];
-                image[y * width + x] = val;
-            }
-        }
-
-        mutex.unlock();
-    }
+    void renderImage(unsigned *image, unsigned width, unsigned height);
 
     void step()
     {
-        mutex.lock();
-
         for (int y = 1; y < SimParams::modelHeight - 1; ++y) {
             for (int x = 1; x < SimParams::modelWidth - 1; ++x) {
                 unsigned pos = y * SimParams::modelWidth + x;
-                cellsNew[pos].update(&cellsOld[pos - SimParams::modelWidth],
-                                     &cellsOld[pos],
-                                     &cellsOld[pos + SimParams::modelWidth]);
+                gridNew[pos].update(&gridOld[pos - SimParams::modelWidth],
+                                     &gridOld[pos],
+                                     &gridOld[pos + SimParams::modelWidth]);
             }
         }
-        std::swap(cellsNew, cellsOld);
+        // fixme: need this mutex?
+        std::swap(gridNew, gridOld);
 
         incFrames();
         ++t;
-        mutex.unlock();
     }
      
     void info()
@@ -181,8 +137,8 @@ private:
     volatile bool running;
     QMutex mutex;
     std::vector<char> states;
-    std::vector<BigCell> cellsOld;
-    std::vector<BigCell> cellsNew;
+    std::vector<BigCell> gridOld;
+    std::vector<BigCell> gridNew;
     std::vector<unsigned> frame;
 };
 

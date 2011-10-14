@@ -153,10 +153,10 @@ int runQtApp(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    std::cout << "ok\n";
     Cell::initTransportTable();
     Cell::initPalette();
     SimParams::initParams(argc, argv);
+    cudaSetDevice(SimParams::cudaDevice);
 
     // testModel();
 

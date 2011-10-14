@@ -305,10 +305,10 @@ public:
             transportTable[p.getFlowState()][offset][i] = p.getDest(i);
     } 
     
-private:
     char particles[7];
     char state;
 
+private:
     inline bool not0(const char& c) const
     {
         return c != 0? 1 : 0;

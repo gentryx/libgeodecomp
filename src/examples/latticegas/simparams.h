@@ -8,17 +8,23 @@ public:
     {
         // fixme: parse command line!
 
-        modelWidth = 1000;
-        modelHeight = 400;
+        modelWidth = 1024;
+        modelHeight = 512;
         modelSize = modelWidth * modelHeight;
+        maxImageSize = 2048 * 2048;
+        cudaDevice = 0;
         weightR = 0.0030;
         weightG = 0.0020;
         weightB = 0.0020;
+        threads = 512;
     }
     
     static unsigned modelWidth;
     static unsigned modelHeight;
     static unsigned modelSize;
+    static unsigned threads;
+    static unsigned maxImageSize;
+    static unsigned cudaDevice;
     static float weightR;
     static float weightG;
     static float weightB;

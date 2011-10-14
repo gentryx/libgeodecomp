@@ -21,30 +21,11 @@ public:
     {
         QPainter painter(this);
 
-        // for (int y = 0; y < 768; ++y) {
-        //     QRgb *line = (QRgb*)image.scanLine(y);
-
-        //     for (int x = 0; x < 1024; ++x) {
-        //         line[x] = 
-        //             (0xff << 24) + 
-        //             ((counter & 0xff) << 16) +
-        //             ((x & 0xff) << 8) +
-        //             ((y & 0xff) << 0);
-        //     }
-        // }
-
-        // slow!
-        // painter.drawImage(rect(), image);
         painter.drawImage(0, 0, image);
 
         painter.setPen(Qt::red);
         painter.drawLine(10 + counter, 10, 500 + counter, 500);
         ++counter;
-    }
-
-    char *getImage()
-    {
-        return (char*)image.scanLine(0);
     }
 
 public slots:

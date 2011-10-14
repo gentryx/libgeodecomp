@@ -27,6 +27,7 @@ if (CUDA_FOUND)
   QT4_ADD_RESOURCES(MY_RESOURCE_HEADERS ${MY_RESOURCES})
   include_directories(./)
 
+  # set(CUDA_NVCC_FLAGS "-arch sm_20 ${CUDA_NVCC_FLAGS}")u
   cuda_add_executable(latticegas ${SOURCES} ${MY_MOC_SOURCES})
   target_link_libraries(latticegas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES})
 endif(CUDA_FOUND)
