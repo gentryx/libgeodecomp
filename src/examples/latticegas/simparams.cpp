@@ -8,6 +8,8 @@ unsigned SimParams::cudaDevice;
 unsigned SimParams::maxImageSize;
 bool SimParams::fakeCamera;
 bool SimParams::testCamera;
+bool SimParams::showGui;
+bool SimParams::dumpFrames;
 bool SimParams::debug;
 float SimParams::weightR;
 float SimParams::weightG;
