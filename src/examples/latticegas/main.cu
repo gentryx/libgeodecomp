@@ -93,7 +93,7 @@ int runQtApp(int argc, char **argv)
     flow.resize(1200, 900);
 
     InteractiveSimulator *sim = new InteractiveSimulator(&flow);
-    FrameGrabber *grabber = new FrameGrabber(false, &flow);
+    FrameGrabber *grabber = new FrameGrabber(SimParams::fakeCamera, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);

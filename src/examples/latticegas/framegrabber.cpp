@@ -8,6 +8,7 @@ FrameGrabber::FrameGrabber(bool _fakeCam, QObject *parent) :
     capture((void*)cvCaptureFromCAM(CV_CAP_ANY)),
     fakeCam(_fakeCam)
 {
+    std::cout << "fakeCam: " << fakeCam << "\n";
     if (!fakeCam && !capture)
         throw std::runtime_error("could not access any capture devices");
 }
@@ -27,8 +28,8 @@ void FrameGrabber::grab()
         std::vector<char> frame(MAX_X * MAX_Y * 3);
         for (int y = 0; y < MAX_Y; ++y) {
             for (int x = 0; x < MAX_X; ++x) {
-                int r = y > (MAX_Y / 2) ? MAX_Y - y : y;
-                int g = x > (MAX_X / 2) ? MAX_X - x : x;
+                int r = y > (MAX_Y / 2) ? y - MAX_Y / 2 : MAX_Y / 2 - y;
+                int g = x > (MAX_X / 2) ? x - MAX_X / 2 : MAX_X / 2 - x;
                 int b = 0;
 
                 r = 255.0 * r * (1.0 / (MAX_Y / 2));

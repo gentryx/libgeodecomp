@@ -23,8 +23,8 @@ public:
 
         painter.drawImage(0, 0, image);
 
-        painter.setPen(Qt::red);
-        painter.drawLine(10 + counter, 10, 500 + counter, 500);
+        painter.setPen(Qt::green);
+        painter.drawText(32, 32, "Frame " + QString::number(counter));
         ++counter;
     }
 

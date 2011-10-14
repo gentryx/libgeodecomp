@@ -163,27 +163,37 @@ public:
         const char& ll,
         const char& lr)
     {
-        int flowState = 
-            (not0(ul) << 6) +
-            (not0(ur) << 5) +
-            (not0(l)  << 4) +
-            (not0(c)  << 3) +
-            (not0(r)  << 2) +
-            (not0(ll) << 1) +
-            (not0(lr) << 0);
-
-        int rand = ((randSeed ^ flowState) >> 3) & 3;
-        if (flowState == 20) 
-            std::cout << "yuk: " << flowState << " and " << rand << "\n";
-
-        particles[(int)transportTable[flowState][rand][0]] = ul;
-        particles[(int)transportTable[flowState][rand][1]] = ur;
-        particles[(int)transportTable[flowState][rand][2]] =  l;
-        particles[(int)transportTable[flowState][rand][3]] =  c;
-        particles[(int)transportTable[flowState][rand][4]] =  r;
-        particles[(int)transportTable[flowState][rand][5]] = ll;
-        particles[(int)transportTable[flowState][rand][6]] = lr;
         state = oldState;
+
+        if (oldState == liquid) {
+            int flowState = 
+                (not0(ul) << 6) +
+                (not0(ur) << 5) +
+                (not0(l)  << 4) +
+                (not0(c)  << 3) +
+                (not0(r)  << 2) +
+                (not0(ll) << 1) +
+                (not0(lr) << 0);
+
+            int rand = ((randSeed ^ flowState) >> 3) & 3;
+
+            particles[(int)transportTable[flowState][rand][0]] = ul;
+            particles[(int)transportTable[flowState][rand][1]] = ur;
+            particles[(int)transportTable[flowState][rand][2]] =  l;
+            particles[(int)transportTable[flowState][rand][3]] =  c;
+            particles[(int)transportTable[flowState][rand][4]] =  r;
+            particles[(int)transportTable[flowState][rand][5]] = ll;
+            particles[(int)transportTable[flowState][rand][6]] = lr;
+            return;
+        }
+
+        particles[UL] = ul;
+        particles[UR] = ur;
+        particles[L ] = l;
+        particles[C ] = c;
+        particles[R ] = r;
+        particles[LL] = ll;
+        particles[LR] = lr;
     } 
 
     inline char& getState() 

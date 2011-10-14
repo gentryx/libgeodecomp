@@ -13,15 +13,19 @@ public:
         modelSize = modelWidth * modelHeight;
         maxImageSize = 2048 * 2048;
         cudaDevice = 0;
-	testCamera = true;
+	testCamera = false;
+        fakeCamera = true;
 	debug = false;
 
-        // weightR = 0.0030;
-        // weightG = 0.0020;
-        // weightB = 0.0020;
-        weightR = 0.0060;
-        weightG = 0.0060;
-        weightB = 0.0010;
+        // good for fake camera mode
+        weightR = 0.0080;
+        weightG = 0.0070;
+        weightB = 0.0020;
+        
+        // good for real camera images
+        // weightR = 0.0060;
+        // weightG = 0.0060;
+        // weightB = 0.0010;
         threads = 512;
     }
     
@@ -31,6 +35,7 @@ public:
     static unsigned threads;
     static unsigned maxImageSize;
     static unsigned cudaDevice;
+    static bool fakeCamera;
     static bool testCamera;
     static bool debug;
     static float weightR;

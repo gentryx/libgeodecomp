@@ -30,6 +30,7 @@ public slots:
     void updateCam(char *rawFrame, unsigned width, unsigned height)
     {
         // std::cout << "  cam -> states\n";
+        // fixme: move this to GPU?
         for (int y = 0; y < SimParams::modelHeight; ++y) {
             for (int x = 0; x < SimParams::modelWidth; ++x) {
                 int sourceX = x * (width  - 1) / SimParams::modelWidth;
@@ -40,6 +41,9 @@ public slots:
                 char b = rawFrame[sourceOffset * 3 + 2];
                 char state = pixelToState(r, g, b);
 
+                // add upper and lower walls
+                if (y <= 1 || y >= SimParams::modelHeight - 2)
+                    state = Cell::solid;
                 states[y * SimParams::modelWidth + x] = state;
             }
         }

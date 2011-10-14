@@ -87,8 +87,12 @@ InteractiveSimulator::InteractiveSimulator(QObject *parent) :
     gridNew(SimParams::modelSize),
     frame(SimParams::modelSize)
 {
-    gridOld[10  * SimParams::modelWidth + 10][0] = Cell(Cell::liquid, Cell::R, 1);
-    gridOld[190 * SimParams::modelWidth + 10][0] = Cell(Cell::liquid, Cell::R, 1);
+    // add initial cells
+    for (int y = 5; y < SimParams::modelHeight - 5; y += 10) {
+        for (int x = 5; x < SimParams::modelWidth - 5; x += 10) {
+            gridOld[y  * SimParams::modelWidth + x][0] = Cell(Cell::liquid, Cell::R, 1);
+        }
+    }
 
     cudaMalloc(&frameDev, SimParams::modelSize * 4);
     cudaMalloc(&imageDev, SimParams::maxImageSize * 4);
