@@ -23,7 +23,7 @@ public:
             r * SimParams::weightR +
             g * SimParams::weightG +
             b * SimParams::weightB;
-        return sum <= 1 ? Cell::liquid : Cell::solid;
+        return sum >= 1 ? Cell::liquid : Cell::solid;
     }
 
 public slots:

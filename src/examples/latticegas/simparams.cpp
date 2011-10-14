@@ -6,6 +6,8 @@ unsigned SimParams::modelSize;
 unsigned SimParams::threads;
 unsigned SimParams::cudaDevice;
 unsigned SimParams::maxImageSize;
+bool SimParams::testCamera;
+bool SimParams::debug;
 float SimParams::weightR;
 float SimParams::weightG;
 float SimParams::weightB;

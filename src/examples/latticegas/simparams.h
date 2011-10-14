@@ -13,6 +13,9 @@ public:
         modelSize = modelWidth * modelHeight;
         maxImageSize = 2048 * 2048;
         cudaDevice = 0;
+	testCamera = true;
+	debug = false;
+
         // weightR = 0.0030;
         // weightG = 0.0020;
         // weightB = 0.0020;
@@ -28,6 +31,8 @@ public:
     static unsigned threads;
     static unsigned maxImageSize;
     static unsigned cudaDevice;
+    static bool testCamera;
+    static bool debug;
     static float weightR;
     static float weightG;
     static float weightB;

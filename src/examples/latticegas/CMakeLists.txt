@@ -1,6 +1,7 @@
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
+set(CUDA_TOOLKIT_ROOT_DIR "/opt/cuda")
 find_package(CUDA)
 find_package(Qt4)
 

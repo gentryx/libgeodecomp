@@ -21,8 +21,6 @@ public:
 public slots:
     void updateCam(char *rawFrame, unsigned width, unsigned height)
     {
-        std::cout << "updateCam()\n";
-
         std::ostringstream filename;
         filename << "snapshot." << std::setfill('0') << std::setw(4) << t;
         writeImage(filename.str() + ".orig.ppm", rawFrame, width, height, true);

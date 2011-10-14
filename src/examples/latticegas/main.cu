@@ -93,7 +93,7 @@ int runQtApp(int argc, char **argv)
     flow.resize(1200, 900);
 
     InteractiveSimulator *sim = new InteractiveSimulator(&flow);
-    FrameGrabber *grabber = new FrameGrabber(true, &flow);
+    FrameGrabber *grabber = new FrameGrabber(false, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);
@@ -116,7 +116,7 @@ int runQtApp(int argc, char **argv)
 
     grabber->grab();
     timerFlow->start(10);
-    timerGrab->start(1000);
+    timerGrab->start(100);
     timerInfo->start(5000);
     flow.show();
     int ret = app.exec();
@@ -124,6 +124,7 @@ int runQtApp(int argc, char **argv)
     return ret;
 }
 
+// determine optimal weights for cutoff
 void testCamera()
 {
     std::cout << "hello\n";
@@ -132,9 +133,50 @@ void testCamera()
 
     QObject::connect(&grabber,   SIGNAL(newFrame(char*, unsigned, unsigned)), 
                      &tester,    SLOT(updateCam( char*, unsigned, unsigned)));
+
+
+    // upper and lower boundaries
+    float upperR = 1.0;
+    float upperG = 1.0;
+    float upperB = 0.3;
+
+    float lowerR = 0.0;
+    float lowerG = 0.0;
+    float lowerB = 0.0;
+
     for (int i = 0; i < 50; ++i) {
+        SimParams::weightR = (upperR + lowerR) * 0.5;
+        SimParams::weightG = (upperG + lowerG) * 0.5;
+        SimParams::weightB = (upperB + lowerB) * 0.5;
+
+        std::cout << " determining (weightR, weightG, weightB)\n"
+		  << " current: (" 
+		  << SimParams::weightR << ", " 
+		  << SimParams::weightG << ", "
+	          << SimParams::weightB << ")\n";
         grabber.grab();
-        sleep(1);
+
+	for (;;) {
+	    std::cout << "is this too dark? (y/n)\n";
+	    std::string answer;
+	    std::cin >> answer;
+	    if (answer == "y") {
+	        upperR = SimParams::weightR;
+		upperG = SimParams::weightG;
+		upperB = SimParams::weightB;
+		break;
+            }
+
+	    if (answer == "n") {
+	        lowerR = SimParams::weightR;
+		lowerG = SimParams::weightG;
+		lowerB = SimParams::weightB;
+		break;
+	    }
+
+	    std::cout << "please answer \"y\" or \"n\"\n";
+	}
+	std::cout << "\n";
     }
     std::cout << "bye\n";
 }
@@ -146,9 +188,11 @@ int main(int argc, char **argv)
     SimParams::initParams(argc, argv);
     cudaSetDevice(SimParams::cudaDevice);
 
-    testCamera();
+    if (SimParams::testCamera) {
+      testCamera();
     // testModel();
-    return 0;
-
-    // return runQtApp(argc, argv);
+      return 0;
+    } else {
+      return runQtApp(argc, argv);
+    }
  }

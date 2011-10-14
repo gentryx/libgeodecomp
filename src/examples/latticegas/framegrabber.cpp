@@ -1,6 +1,7 @@
-#include <libgeodecomp/examples/latticegas/framegrabber.h>
 #include <cv.h>
 #include <highgui.h>
+#include <libgeodecomp/examples/latticegas/framegrabber.h>
+#include <libgeodecomp/examples/latticegas/simparams.h>
 
 FrameGrabber::FrameGrabber(bool _fakeCam, QObject *parent) :
     QObject(parent),
@@ -54,21 +55,22 @@ void FrameGrabber::grab()
     if (frame->nChannels != 3)
         throw std::runtime_error("unexpected number of channels");
 
-    std::cout << "Capture:\n"
-              << "  nChannels: " << frame->nChannels << "\n"
-              << "  depth: " << frame->depth << "\n"
-              << "  IPL_DEPTH_8U:  " << IPL_DEPTH_8U  << "\n"
-              << "  IPL_DEPTH_8S:  " << IPL_DEPTH_8S << "\n"
-              << "  IPL_DEPTH_16U: " << IPL_DEPTH_16U  << "\n"
-              << "  IPL_DEPTH_16S: " << IPL_DEPTH_16S << "\n"
-              << "  IPL_DEPTH_32S: " << IPL_DEPTH_32S << "\n"
-              << "  IPL_DEPTH_32F: " << IPL_DEPTH_32F  << "\n"
-              << "  IPL_DEPTH_64F: " << IPL_DEPTH_64F << "\n"
-              << "  dataOrder: " << frame->dataOrder << "\n"
-              << "  width: " << frame->width << "\n"
-              << "  height: " << frame->height << "\n"
-              << "  imageSize: " << frame->imageSize << "\n"
-              << "  widthStep: " << frame->widthStep << "\n\n";
+    if (SimParams::debug)
+      std::cerr << "Capture:\n"
+		<< "  nChannels: " << frame->nChannels << "\n"
+		<< "  depth: " << frame->depth << "\n"
+		<< "  IPL_DEPTH_8U:  " << IPL_DEPTH_8U  << "\n"
+		<< "  IPL_DEPTH_8S:  " << IPL_DEPTH_8S << "\n"
+		<< "  IPL_DEPTH_16U: " << IPL_DEPTH_16U  << "\n"
+		<< "  IPL_DEPTH_16S: " << IPL_DEPTH_16S << "\n"
+		<< "  IPL_DEPTH_32S: " << IPL_DEPTH_32S << "\n"
+		<< "  IPL_DEPTH_32F: " << IPL_DEPTH_32F  << "\n"
+		<< "  IPL_DEPTH_64F: " << IPL_DEPTH_64F << "\n"
+		<< "  dataOrder: " << frame->dataOrder << "\n"
+		<< "  width: " << frame->width << "\n"
+		<< "  height: " << frame->height << "\n"
+		<< "  imageSize: " << frame->imageSize << "\n"
+		<< "  widthStep: " << frame->widthStep << "\n\n";
 
     emit newFrame(frame->imageData, frame->width, frame->height);
 }
