@@ -200,7 +200,7 @@ public:
     template<typename COORD_MAP>
     void updateNorthAcc(const COORD_MAP& neighborhood)
     {
-        const double w_1 = 0.1;
+        const double w_1 = 0.01;
         comp[S] =GET_COMP(0,-1,0,N);
         comp[SE]=GET_COMP(1,-1,0,NW)+6*w_1*0.1;
         comp[SW]=GET_COMP(-1,-1,0,NE)-6*w_1*0.1;
@@ -322,18 +322,26 @@ public:
 
 void runSimulation()
 {
-    int outputFrequency = 10;
-    StripingSimulator<Cell> sim(
-        new CellInitializer(Coord<3>(100, 100, 100), 1000),
-        MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
-        1000,
-        MPI::DOUBLE);
+    MPI::Aint displacements[] = {0};
+    MPI::Datatype memberTypes[] = {MPI::CHAR};
+    int lengths[] = {sizeof(Cell)};
+    MPI::Datatype objType;
+    objType = 
+        MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
+    objType.Commit();
 
-    new BOVWriter<Cell, DensitySelector>("lbm.density", &sim, 1);
-    new BOVWriter<Cell, VelocitySelector>("lbm.velocity", &sim, 1);
+    int outputFrequency = 1000;
+    StripingSimulator<Cell> sim(
+        new CellInitializer(Coord<3>(400, 400, 400), 2000000),
+        MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
+        1000000,
+        objType);
+
+    new BOVWriter<Cell, DensitySelector>("lbm.density", &sim, outputFrequency);
+    new BOVWriter<Cell, VelocitySelector>("lbm.velocity", &sim, outputFrequency);
 
     if (MPILayer().rank() == 0)
-        new TracingWriter<Cell>(&sim, outputFrequency);
+        new TracingWriter<Cell>(&sim, 20);
 
     sim.run();
 }
@@ -341,6 +349,8 @@ void runSimulation()
 int main(int argc, char *argv[])
 {
     MPI_Init(&argc, &argv);
+    Typemaps::initializeMaps();
+
     runSimulation();
     MPI_Finalize();
     return 0;

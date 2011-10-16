@@ -30,6 +30,7 @@ private:
     // ugly hack. we can't include cv.h here since nvcc won't compile it
     void *capture;
     bool fakeCam;
+    int t;
 };
 
 #endif

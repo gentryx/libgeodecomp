@@ -12,7 +12,7 @@ if (CUDA_FOUND)
   execute_process(COMMAND pkg-config opencv --cflags --libs
     OUTPUT_VARIABLE OPENCV_FLAGS)
   STRING(REGEX REPLACE "\n" "" OPENCV_FLAGS ${OPENCV_FLAGS})
-  set(CMAKE_CXX_FLAGS "${OPENCV_FLAGS} ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${OPENCV_FLAGS} ${CMAKE_CXX_FLAGS} -fopenmp")
 
   # fixme: rework this
   set(MY_HEADERS

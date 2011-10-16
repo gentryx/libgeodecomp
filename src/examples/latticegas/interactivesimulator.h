@@ -41,9 +41,19 @@ public slots:
                 char b = rawFrame[sourceOffset * 3 + 2];
                 char state = pixelToState(r, g, b);
 
+                // influx
+                if (x <= 1)
+                    state = Cell::source;
+
+                // add right walls
+                if (x >= SimParams::modelWidth - 2)
+                    if ((y & 63) > SimParams::effluxSize)
+                        state = Cell::solid;
+
                 // add upper and lower walls
                 if (y <= 1 || y >= SimParams::modelHeight - 2)
-                    state = Cell::solid;
+                    state = Cell::slip;
+
                 states[y * SimParams::modelWidth + x] = state;
             }
         }

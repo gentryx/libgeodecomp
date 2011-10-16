@@ -6,7 +6,8 @@
 FrameGrabber::FrameGrabber(bool _fakeCam, QObject *parent) :
     QObject(parent),
     capture((void*)cvCaptureFromCAM(CV_CAP_ANY)),
-    fakeCam(_fakeCam)
+    fakeCam(_fakeCam),
+    t(0)
 {
     std::cout << "fakeCam: " << fakeCam << "\n";
     if (!fakeCam && !capture)
@@ -23,6 +24,7 @@ void FrameGrabber::grab()
     incFrames();
 
     if (fakeCam) {
+        ++t;
         const int MAX_X = 400;
         const int MAX_Y = 300;
         std::vector<char> frame(MAX_X * MAX_Y * 3);
@@ -35,6 +37,12 @@ void FrameGrabber::grab()
                 r = 255.0 * r * (1.0 / (MAX_Y / 2));
                 g = 255.0 * g * (1.0 / (MAX_X / 2));
                 b = 0;
+
+                if (t > 500) {
+                    r = 255;
+                    g = 255;
+                    b = 255;
+                }
 
                 frame[(y * MAX_X + x) * 3 + 0] = r;
                 frame[(y * MAX_X + x) * 3 + 1] = g;

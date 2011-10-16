@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <libgeodecomp/examples/latticegas/simparams.h>
 
 class Cell
 {
@@ -27,9 +28,14 @@ public:
     enum State {
         liquid,
         solid,
+        slip,
         source,
         drain
     };
+
+    static int simpleRand(int i) {
+        return i * 69069 + 1327217885;
+    }
 
     class Pattern
     {
@@ -153,6 +159,7 @@ public:
     }
 
     inline void update(
+        const int& t,
         const int& randSeed,
         const char& oldState,
         const char& ul, 
@@ -164,26 +171,45 @@ public:
         const char& lr)
     {
         state = oldState;
+        int flowState = 
+            (not0(ul) << 6) +
+            (not0(ur) << 5) +
+            (not0(l)  << 4) +
+            (not0(c)  << 3) +
+            (not0(r)  << 2) +
+            (not0(ll) << 1) +
+            (not0(lr) << 0);
+        int rand = randSeed >> 7;
+        int tinyRand = rand & 3;
+        int bigRand  = rand & 0xff;
 
         if (oldState == liquid) {
-            int flowState = 
-                (not0(ul) << 6) +
-                (not0(ur) << 5) +
-                (not0(l)  << 4) +
-                (not0(c)  << 3) +
-                (not0(r)  << 2) +
-                (not0(ll) << 1) +
-                (not0(lr) << 0);
+            particles[(int)transportTable[flowState][tinyRand][0]] = ul;
+            particles[(int)transportTable[flowState][tinyRand][1]] = ur;
+            particles[(int)transportTable[flowState][tinyRand][2]] =  l;
+            particles[(int)transportTable[flowState][tinyRand][3]] =  c;
+            particles[(int)transportTable[flowState][tinyRand][4]] =  r;
+            particles[(int)transportTable[flowState][tinyRand][5]] = ll;
+            particles[(int)transportTable[flowState][tinyRand][6]] = lr;
+            return;
+        }
 
-            int rand = ((randSeed ^ flowState) >> 3) & 3;
+        if (oldState == slip) {
+            particles[UL] = ur;
+            particles[UR] = ul;
+            particles[L ] = r;
+            particles[C ] = c;
+            particles[R ] = l;
+            particles[LL] = lr;
+            particles[LR] = ll;
 
-            particles[(int)transportTable[flowState][rand][0]] = ul;
-            particles[(int)transportTable[flowState][rand][1]] = ur;
-            particles[(int)transportTable[flowState][rand][2]] =  l;
-            particles[(int)transportTable[flowState][rand][3]] =  c;
-            particles[(int)transportTable[flowState][rand][4]] =  r;
-            particles[(int)transportTable[flowState][rand][5]] = ll;
-            particles[(int)transportTable[flowState][rand][6]] = lr;
+            if (particles[UR] == 0) 
+                std::swap(particles[UR], particles[UL]);
+            if (particles[LR] == 0) 
+                std::swap(particles[LR], particles[LL]);
+            if (particles[R] == 0) 
+                std::swap(particles[R], particles[L]);
+                
             return;
         }
 
@@ -194,6 +220,12 @@ public:
         particles[R ] = r;
         particles[LL] = ll;
         particles[LR] = lr;
+
+        if (state == source) {
+            if (bigRand < 8) {
+                particles[R] = ((t / SimParams::colorSwitchCycles) & 3) + 1;
+            }
+        }
     } 
 
     inline char& getState() 
@@ -249,12 +281,16 @@ public:
         // add patterns according to Fig. 7.2:
         {
             // a
-            Pattern p[2];
+            Pattern p[4];
             p[0](L, LR);
             p[0](R, UL);
             p[1](L, UR);
             p[1](R, LL);
-            addPattern(p, 2);
+            p[2](L, UL);
+            p[2](R, LR);
+            p[3](L, LL);
+            p[3](R, UR);
+            addPattern(p, 4);
         }
         {
             // b
@@ -266,14 +302,55 @@ public:
         }
         {
             // c
-            // fixme
-            // Pattern p[2];
-            // p[0](L, UR);
-            // p[0](C, LR);
-            // p[0](L, LR);
-            // p[0](C, UR);
-            // addPattern(p, 2);
+            Pattern p[2];
+            p[0](L, UR);
+            p[0](C, LR);
+            p[1](L, LR);
+            p[1](C, UR);
+            addPattern(p, 2);
         }
+        {
+            // d'
+            Pattern p[4];
+            p[0](UL, C);
+            p[0](LL, R);
+            p[1](UL, R);
+            p[1](LL, C);
+            p[2](UL, UR);
+            p[2](LL, LR);
+            p[3](UL, LR);
+            p[3](LL, UR);
+            addPattern(p, 4);
+        }
+        {
+            // e
+            Pattern p[2];
+            p[0](L, UL);
+            p[0](C, C);
+            p[0](R, LR);
+            p[1](L, LL);
+            p[1](C, C);
+            p[1](R, UR);
+            addPattern(p, 2);
+        }
+        {
+            // f
+            Pattern p[1];
+            p[0](UL, UL);
+            p[0](LL, LL);
+            p[0](R,  R);
+            p[0](C,  C);
+            addPattern(p, 1);
+        }
+        // {
+        //     // fixme
+        //     Pattern p[2];
+        //     p[0](L, UR);
+        //     p[0](C, LR);
+        //     p[1](L, LR);
+        //     p[1](C, UR);
+        //     addPattern(p, 2);
+        // }
 
     }
 
@@ -281,13 +358,27 @@ public:
         palette[0][0] = 0;
         palette[0][1] = 0;
         palette[0][2] = 0;
-        palette[1][0] = 255;
+
+        palette[1][0] = 0;
         palette[1][1] = 0;
-        palette[1][2] = 0;
-        for (int i = 2; i < 256; ++i) {
-            palette[i][0] = 0;
-            palette[i][1] = 255;
-            palette[i][2] = 255;
+        palette[1][2] = 255;
+
+        palette[2][0] = 0;
+        palette[2][1] = 255;
+        palette[2][2] = 0;
+
+        palette[3][0] = 0;
+        palette[3][1] = 0;
+        palette[3][2] = 255;
+
+        palette[4][0] = 0;
+        palette[4][1] = 255;
+        palette[4][2] = 0;
+
+        for (int i = 5; i < 256; ++i) {
+            palette[i][0] = 255;
+            palette[i][1] = 0;
+            palette[i][2] = 0;
         }
     }
 

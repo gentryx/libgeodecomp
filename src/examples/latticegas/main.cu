@@ -12,10 +12,6 @@
 
 // fixme: using namespace LibGeoDecomp;
 
-int simpleRand(int i) {
-    return i * 69069 + 1327217885;
-}
-
 void testModel()
 {
     int width = 7;
@@ -49,8 +45,10 @@ void testModel()
 
         for (int y = 1; y < height - 1; ++y) {
             for (int x = 1; x < width - 1; ++x) {
+                int rand = Cell::simpleRand(Cell::simpleRand(Cell::simpleRand(x) + y) + t);
                 gridB[y][x][0].update(
-                    simpleRand(x + y * 2 * width + 0 * width + t),
+                    t,
+                    rand,
                     gridA[y + 0][x + 0][0].getState(),
                     gridA[y - 1][x + 0][1][Cell::LR],
                     gridA[y - 1][x + 1][1][Cell::LL],
@@ -61,7 +59,8 @@ void testModel()
                     gridA[y + 0][x + 1][1][Cell::UL]);
 
                 gridB[y][x][1].update(
-                    simpleRand(x + y * 2 * width + 1 * width + t),
+                    t,
+                    Cell::simpleRand(rand + 1),
                     gridA[y + 0][x + 0][1].getState(),
                     gridA[y + 0][x - 1][0][Cell::LR],
                     gridA[y + 0][x + 0][0][Cell::LL],

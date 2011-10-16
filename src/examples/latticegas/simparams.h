@@ -13,21 +13,30 @@ public:
         modelSize = modelWidth * modelHeight;
         maxImageSize = 2048 * 2048;
         cudaDevice = 0;
+
+        // must be >= 0 and <= 64
+        effluxSize = 64;
+
+        colorSwitchCycles = 2048;
+
+        // andis test mode
+        // testCamera = false;
+        // fakeCamera = true;
+        // dumpFrames = true;
+        // debug = false;
+        // weightR = 0.0070;
+        // weightG = 0.0070;
+        // weightB = 0.0020;
+
+        // prime time mode
         testCamera = false;
         fakeCamera = false;
-        showGUI = true;
         dumpFrames = false;
         debug = false;
-
-        // good for fake camera mode
-        //weightR = 0.0080;
-        //weightG = 0.0070;
-        //weightB = 0.0020;
-        
-        // good for real camera images
         weightR = 0.0060;
         weightG = 0.0060;
         weightB = 0.0010;
+
         threads = 512;
     }
     
@@ -37,9 +46,10 @@ public:
     static unsigned threads;
     static unsigned maxImageSize;
     static unsigned cudaDevice;
+    static unsigned effluxSize;
+    static unsigned colorSwitchCycles;
     static bool fakeCamera;
     static bool testCamera;
-    static bool showGUI;
     static bool dumpFrames;
     static bool debug;
     static float weightR;

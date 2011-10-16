@@ -40,7 +40,7 @@ class JacobiInitializer : public SimpleInitializer<JacobiCell>
 {
 public:
     JacobiInitializer(Coord<3> dimensions) :
-        SimpleInitializer(dimensions)
+        SimpleInitializer<JacobiCell>(dimensions)
     {}
 
     virtual void grid(GridBase<JacobiCell, 3> *ret)

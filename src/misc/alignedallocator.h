@@ -1,6 +1,8 @@
 #ifndef _libgeodecomp_misc_alignedallocator_h_
 #define _libgeodecomp_misc_alignedallocator_h_
 
+#include <malloc.h>
+
 namespace LibGeoDecomp {
 
 template<class T, size_t ALIGNMENT>

@@ -146,7 +146,6 @@ void InteractiveSimulator::step()
             scaleFrame<<<gridDim, blockDim>>>(frameDev, imageDev, SimParams::modelWidth, SimParams::modelHeight);
         }
         cudaMemcpy(outputFrame, imageDev, outputFrameWidth * outputFrameHeight * 4, cudaMemcpyDeviceToHost);
-
         checkCudaError();
         newOutputFrameAvailable.release();
     }
@@ -154,7 +153,9 @@ void InteractiveSimulator::step()
     for (int y = 1; y < SimParams::modelHeight - 1; ++y) {
         for (int x = 1; x < SimParams::modelWidth - 1; ++x) {
             unsigned pos = y * SimParams::modelWidth + x;
-            gridNew[pos].update(&gridOld[pos - SimParams::modelWidth],
+            gridNew[pos].update(t,
+                                Cell::simpleRand(pos + t),
+                                &gridOld[pos - SimParams::modelWidth],
                                 &gridOld[pos],
                                 &gridOld[pos + SimParams::modelWidth]);
         }
