@@ -20,6 +20,8 @@ if (CUDA_FOUND)
     flowwidget.h
     framegrabber.h
     interactivesimulator.h
+    interactivesimulatorcpu.h
+    interactivesimulatorgpu.h
     )
   set(MY_UI)
   set(MY_RESOURCES)

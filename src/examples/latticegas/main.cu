@@ -8,6 +8,8 @@
 #include <libgeodecomp/examples/latticegas/framegrabber.h>
 #include <libgeodecomp/examples/latticegas/flowwidget.h>
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
+#include <libgeodecomp/examples/latticegas/interactivesimulatorcpu.h>
+#include <libgeodecomp/examples/latticegas/interactivesimulatorgpu.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
 // fixme: using namespace LibGeoDecomp;
@@ -91,7 +93,8 @@ int runQtApp(int argc, char **argv)
     FlowWidget flow;
     flow.resize(1200, 900);
 
-    InteractiveSimulator *sim = new InteractiveSimulator(&flow);
+    //fixme: make this configurable via simparams
+    InteractiveSimulator *sim = new InteractiveSimulatorCPU(&flow);
     FrameGrabber *grabber = new FrameGrabber(SimParams::fakeCamera, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);

@@ -9,13 +9,19 @@
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
-class InteractiveSimulator : public QObject, public QRunnable, FPSCounter
+class InteractiveSimulator : public QObject, public QRunnable, protected FPSCounter
 {
     Q_OBJECT
     
 public:
-    InteractiveSimulator(QObject *parent);
-    ~InteractiveSimulator();
+    InteractiveSimulator(QObject *parent) :
+        QObject(parent),
+        t(0),
+        states(SimParams::modelSize, Cell::liquid)
+    {}
+
+    virtual ~InteractiveSimulator()
+    {}
 
     static char pixelToState(unsigned char r, unsigned char g, unsigned char b)
     {
@@ -61,10 +67,33 @@ public slots:
         newCameraFrame.release();
     }
 
-    void renderImage(unsigned *image, unsigned width, unsigned height);
+    void renderImage(unsigned *image, unsigned width, unsigned height) 
+    {
+        outputFrame = image;
+        outputFrameWidth = width;
+        outputFrameHeight = height;
+        newOutputFrameRequested.release(1);
+        newOutputFrameAvailable.acquire(1);
+    }
 
-    void step();
+    void step() 
+    {
+        if (newCameraFrame.tryAcquire()) 
+            loadStates();
+        if (newOutputFrameRequested.tryAcquire()) {
+            renderOutput();
+            newOutputFrameAvailable.release();
+        }
 
+        update();
+        incFrames();
+        ++t;
+    }
+
+    virtual void loadStates() = 0;
+    virtual void renderOutput() = 0;
+    virtual void update() = 0;
+    
     void info()
     {
         std::cout << "InteractiveSimulator @ " << fps() << " FPS\n\n";
@@ -85,7 +114,7 @@ public slots:
         running = false;
     }
 
-private:
+protected:
     int t;
     volatile bool running;
     QSemaphore newOutputFrameRequested;
@@ -97,10 +126,6 @@ private:
     volatile unsigned outputFrameHeight;
 
     std::vector<char> states;
-    // fixme: get rid of these
-    std::vector<BigCell> gridOld;
-    std::vector<BigCell> gridNew;
-    std::vector<unsigned> frame;
 };
 
 #endif

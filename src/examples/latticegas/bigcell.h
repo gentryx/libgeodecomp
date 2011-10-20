@@ -18,27 +18,29 @@ public:
 
     void update(const int& t, const int& seed, const BigCell *up, const BigCell *same, const BigCell *down)
     {
-        cells[0].update(t, 
-                        seed, 
-                        same[ 0][0].getState(),
-                        up[   0][1][Cell::LR],
-                        up[   1][1][Cell::LL],
-                        same[-1][0][Cell::R],
-                        same[ 0][0][Cell::C],
-                        same[ 1][0][Cell::L],
-                        same[ 0][1][Cell::UR],
-                        same[ 1][1][Cell::UL]);
+        cells[0].update(
+            t, 
+            seed, 
+            same[ 0][0].getState(),
+            up[   0][1][Cell::LR],
+            up[   1][1][Cell::LL],
+            same[-1][0][Cell::R],
+            same[ 0][0][Cell::C],
+            same[ 1][0][Cell::L],
+            same[ 0][1][Cell::UR],
+            same[ 1][1][Cell::UL]);
         int newSeed = (seed >> 16) ^ (seed << 16) ^ seed;
-        cells[1].update(t, 
-                        newSeed, 
-                        same[ 0][1].getState(),
-                        same[-1][0][Cell::LR],
-                        same[ 0][0][Cell::LL],
-                        same[-1][1][Cell::R],
-                        same[ 0][1][Cell::C],
-                        same[ 1][1][Cell::L],
-                        down[-1][0][Cell::UR],
-                        down[ 0][0][Cell::UL]);
+        cells[1].update(
+            t, 
+            newSeed, 
+            same[ 0][1].getState(),
+            same[-1][0][Cell::LR],
+            same[ 0][0][Cell::LL],
+            same[-1][1][Cell::R],
+            same[ 0][1][Cell::C],
+            same[ 1][1][Cell::L],
+            down[-1][0][Cell::UR],
+            down[ 0][0][Cell::UL]);
     } 
 
     Cell cells[2];
