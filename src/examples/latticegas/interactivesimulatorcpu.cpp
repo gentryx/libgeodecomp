@@ -53,7 +53,7 @@ void InteractiveSimulatorCPU::renderOutput()
 void InteractiveSimulatorCPU::update()
 {
     // fixme: use stepper here
-   for (int y = 1; y < simParamsHost.modelHeight - 1; ++y) {
+    for (int y = 1; y < simParamsHost.modelHeight - 1; ++y) {
         for (int x = 1; x < simParamsHost.modelWidth - 1; ++x) {
             unsigned offset = y * simParamsHost.modelWidth + x;
             gridNew[offset].update(

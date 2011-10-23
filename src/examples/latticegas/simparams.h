@@ -22,7 +22,7 @@ public:
         // andis test mode
         testCamera = false;
         fakeCamera = true;
-        dumpFrames = true;
+        dumpFrames = false;
         debug = false;
         weightR = 0.0070;
         weightG = 0.0070;
@@ -62,7 +62,7 @@ public:
     // bytes to reduce bank conflicts on Nvidia GPUs.
     char transportTable[128][4][7];
     unsigned char palette[256][3];
-
+    int randomFields[3][1024];
 };
 
 extern SimParams simParamsHost;

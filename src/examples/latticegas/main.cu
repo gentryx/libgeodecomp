@@ -184,8 +184,7 @@ void testCamera()
 
 int main(int argc, char **argv)
 {
-    Cell::initTransportTable();
-    Cell::initPalette();
+    Cell::init();
     simParamsHost.initParams(argc, argv);
     cudaSetDevice(simParamsHost.cudaDevice);
 

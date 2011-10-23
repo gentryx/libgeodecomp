@@ -188,9 +188,11 @@ public:
             (not0(r)  << 2) +
             (not0(ll) << 1) +
             (not0(lr) << 0);
-        long tmp = (long)this;
-        int rand = tmp;
-        rand = simpleRand((rand >> 13) ^ t);
+        long tmp = (long)(char*)this;
+        int rand1 = simpleRand(simParams->randomFields[0][(tmp >> 13) & 0xffff]);
+        int rand2 = simParams->randomFields[1][(tmp >>  3) & 0xffff];
+        int rand3 = simParams->randomFields[2][(t)         & 0xffff];
+        int rand = rand1 ^ rand2 ^ rand3;
         int tinyRand = rand & 3;
         int bigRand  = rand & 0xff;
 
@@ -269,6 +271,41 @@ public:
         return buf.str();
     }
 
+    static void init()
+    {
+        initTransportTable();
+        initPalette();
+        initRand();
+    }
+
+    static void addPattern(const Pattern *p, const int& num)
+    {
+        for (int angle = 0; angle < 6; ++angle) {
+            for (int offset = 0; offset < num; ++offset) {
+                Pattern rot = p[offset].rotate(angle);
+                addFinalPattern(offset, rot);
+                if (num == 2) {
+                    addFinalPattern(offset + 2, rot);
+                }
+                if (num == 1) {
+                    addFinalPattern(offset + 1, rot);
+                    addFinalPattern(offset + 2, rot);
+                    addFinalPattern(offset + 3, rot);
+                }
+            }
+        }
+    }
+
+    static void addFinalPattern(const int& offset, const Pattern& p)
+    {
+        for (int i = 0; i < 7; ++i)
+            simParamsHost.transportTable[p.getFlowState()][offset][i] = p.getDest(i);
+    } 
+    
+    char particles[7];
+    char state;
+
+private:
     static void initTransportTable() 
     {
         Cell::Pattern p;
@@ -394,34 +431,18 @@ public:
         }
     }
 
-    static void addPattern(const Pattern *p, const int& num)
+    static void initRand()
     {
-        for (int angle = 0; angle < 6; ++angle) {
-            for (int offset = 0; offset < num; ++offset) {
-                Pattern rot = p[offset].rotate(angle);
-                addFinalPattern(offset, rot);
-                if (num == 2) {
-                    addFinalPattern(offset + 2, rot);
-                }
-                if (num == 1) {
-                    addFinalPattern(offset + 1, rot);
-                    addFinalPattern(offset + 2, rot);
-                    addFinalPattern(offset + 3, rot);
-                }
+        int foo = 1;
+        // fixme: use better random number generator here
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 1024; ++x) {
+                foo = simpleRand(foo);
+                simParamsHost.randomFields[y][x] = foo;
             }
         }
     }
 
-    static void addFinalPattern(const int& offset, const Pattern& p)
-    {
-        for (int i = 0; i < 7; ++i)
-            simParamsHost.transportTable[p.getFlowState()][offset][i] = p.getDest(i);
-    } 
-    
-    char particles[7];
-    char state;
-
-private:
     __device__ __host__ inline bool not0(const char& c) const
     {
         return c != 0? 1 : 0;
