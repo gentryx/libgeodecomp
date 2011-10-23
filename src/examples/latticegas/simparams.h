@@ -4,7 +4,7 @@
 class SimParams
 {
 public:
-    static void initParams(int argc, char **argv)
+    void initParams(int argc, char **argv)
     {
         // fixme: parse command line!
 
@@ -20,41 +20,51 @@ public:
         colorSwitchCycles = 2048;
 
         // andis test mode
-        // testCamera = false;
-        // fakeCamera = true;
-        // dumpFrames = true;
-        // debug = false;
-        // weightR = 0.0070;
-        // weightG = 0.0070;
-        // weightB = 0.0020;
+        testCamera = false;
+        fakeCamera = true;
+        dumpFrames = true;
+        debug = false;
+        weightR = 0.0070;
+        weightG = 0.0070;
+        weightB = 0.0020;
 
         // prime time mode
-        testCamera = false;
-        fakeCamera = false;
-        dumpFrames = false;
-        debug = false;
-        weightR = 0.0060;
-        weightG = 0.0060;
-        weightB = 0.0010;
+        // testCamera = false;
+        // fakeCamera = false;
+        // dumpFrames = false;
+        // debug = false;
+        // weightR = 0.0060;
+        // weightG = 0.0060;
+        // weightB = 0.0010;
 
         threads = 512;
     }
     
-    static unsigned modelWidth;
-    static unsigned modelHeight;
-    static unsigned modelSize;
-    static unsigned threads;
-    static unsigned maxImageSize;
-    static unsigned cudaDevice;
-    static unsigned effluxSize;
-    static unsigned colorSwitchCycles;
-    static bool fakeCamera;
-    static bool testCamera;
-    static bool dumpFrames;
-    static bool debug;
-    static float weightR;
-    static float weightG;
-    static float weightB;
+    unsigned modelWidth;
+    unsigned modelHeight;
+    unsigned modelSize;
+    unsigned threads;
+    unsigned maxImageSize;
+    unsigned cudaDevice;
+    unsigned effluxSize;
+    unsigned colorSwitchCycles;
+    bool fakeCamera;
+    bool testCamera;
+    bool dumpFrames;
+    bool debug;
+    float weightR;
+    float weightG;
+    float weightB;
+
+    // defines for each of the 2^7 flow states which particle moves to
+    // which position. stores four variants since the FHP-II model
+    // sometimes requires a probabilistic selection. Don't pad to 8
+    // bytes to reduce bank conflicts on Nvidia GPUs.
+    char transportTable[128][4][7];
+    unsigned char palette[256][3];
+
 };
+
+extern SimParams simParamsHost;
 
 #endif

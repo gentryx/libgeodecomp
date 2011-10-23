@@ -17,7 +17,7 @@ public:
     InteractiveSimulator(QObject *parent) :
         QObject(parent),
         t(0),
-        states(SimParams::modelSize, Cell::liquid)
+        states(simParamsHost.modelSize, Cell::liquid)
     {}
 
     virtual ~InteractiveSimulator()
@@ -26,9 +26,9 @@ public:
     static char pixelToState(unsigned char r, unsigned char g, unsigned char b)
     {
         float sum = 
-            r * SimParams::weightR +
-            g * SimParams::weightG +
-            b * SimParams::weightB;
+            r * simParamsHost.weightR +
+            g * simParamsHost.weightG +
+            b * simParamsHost.weightB;
         return sum >= 1 ? Cell::liquid : Cell::solid;
     }
 
@@ -37,10 +37,10 @@ public slots:
     {
         // std::cout << "  cam -> states\n";
         // fixme: move this to GPU?
-        for (int y = 0; y < SimParams::modelHeight; ++y) {
-            for (int x = 0; x < SimParams::modelWidth; ++x) {
-                int sourceX = x * (width  - 1) / SimParams::modelWidth;
-                int sourceY = y * (height - 1) / SimParams::modelHeight;
+        for (int y = 0; y < simParamsHost.modelHeight; ++y) {
+            for (int x = 0; x < simParamsHost.modelWidth; ++x) {
+                int sourceX = x * (width  - 1) / simParamsHost.modelWidth;
+                int sourceY = y * (height - 1) / simParamsHost.modelHeight;
                 int sourceOffset = sourceY * width + sourceX;
                 char r = rawFrame[sourceOffset * 3 + 0];
                 char g = rawFrame[sourceOffset * 3 + 1];
@@ -52,15 +52,15 @@ public slots:
                     state = Cell::source;
 
                 // add right walls
-                if (x >= SimParams::modelWidth - 2)
-                    if ((y & 63) > SimParams::effluxSize)
+                if (x >= simParamsHost.modelWidth - 2)
+                    if ((y & 63) > simParamsHost.effluxSize)
                         state = Cell::solid;
 
                 // add upper and lower walls
-                if (y <= 1 || y >= SimParams::modelHeight - 2)
+                if (y <= 1 || y >= simParamsHost.modelHeight - 2)
                     state = Cell::slip;
 
-                states[y * SimParams::modelWidth + x] = state;
+                states[y * simParamsHost.modelWidth + x] = state;
             }
         }
         

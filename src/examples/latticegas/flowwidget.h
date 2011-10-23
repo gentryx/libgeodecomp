@@ -35,7 +35,7 @@ public slots:
     void ping()
     {
         emit updateImage((unsigned*)image.scanLine(0), image.width(), image.height());        
-        if (SimParams::dumpFrames) 
+        if (simParamsHost.dumpFrames) 
             dumpFrame();
         update();
         incFrames();

@@ -47,10 +47,9 @@ void testModel()
 
         for (int y = 1; y < height - 1; ++y) {
             for (int x = 1; x < width - 1; ++x) {
-                int rand = Cell::simpleRand(Cell::simpleRand(Cell::simpleRand(x) + y) + t);
                 gridB[y][x][0].update(
+                    &simParamsHost,
                     t,
-                    rand,
                     gridA[y + 0][x + 0][0].getState(),
                     gridA[y - 1][x + 0][1][Cell::LR],
                     gridA[y - 1][x + 1][1][Cell::LL],
@@ -61,8 +60,8 @@ void testModel()
                     gridA[y + 0][x + 1][1][Cell::UL]);
 
                 gridB[y][x][1].update(
+                    &simParamsHost,
                     t,
-                    Cell::simpleRand(rand + 1),
                     gridA[y + 0][x + 0][1].getState(),
                     gridA[y + 0][x - 1][0][Cell::LR],
                     gridA[y + 0][x + 0][0][Cell::LL],
@@ -95,7 +94,7 @@ int runQtApp(int argc, char **argv)
 
     //fixme: make this configurable via simparams
     InteractiveSimulator *sim = new InteractiveSimulatorCPU(&flow);
-    FrameGrabber *grabber = new FrameGrabber(SimParams::fakeCamera, &flow);
+    FrameGrabber *grabber = new FrameGrabber(simParamsHost.fakeCamera, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);
@@ -147,15 +146,15 @@ void testCamera()
     float lowerB = 0.0;
 
     for (int i = 0; i < 50; ++i) {
-        SimParams::weightR = (upperR + lowerR) * 0.5;
-        SimParams::weightG = (upperG + lowerG) * 0.5;
-        SimParams::weightB = (upperB + lowerB) * 0.5;
+        simParamsHost.weightR = (upperR + lowerR) * 0.5;
+        simParamsHost.weightG = (upperG + lowerG) * 0.5;
+        simParamsHost.weightB = (upperB + lowerB) * 0.5;
 
         std::cout << " determining (weightR, weightG, weightB)\n"
 		  << " current: (" 
-		  << SimParams::weightR << ", " 
-		  << SimParams::weightG << ", "
-	          << SimParams::weightB << ")\n";
+		  << simParamsHost.weightR << ", " 
+		  << simParamsHost.weightG << ", "
+	          << simParamsHost.weightB << ")\n";
         grabber.grab();
 
 	for (;;) {
@@ -163,16 +162,16 @@ void testCamera()
 	    std::string answer;
 	    std::cin >> answer;
 	    if (answer == "y") {
-	        upperR = SimParams::weightR;
-		upperG = SimParams::weightG;
-		upperB = SimParams::weightB;
+	        upperR = simParamsHost.weightR;
+		upperG = simParamsHost.weightG;
+		upperB = simParamsHost.weightB;
 		break;
             }
 
 	    if (answer == "n") {
-	        lowerR = SimParams::weightR;
-		lowerG = SimParams::weightG;
-		lowerB = SimParams::weightB;
+	        lowerR = simParamsHost.weightR;
+		lowerG = simParamsHost.weightG;
+		lowerB = simParamsHost.weightB;
 		break;
 	    }
 
@@ -187,12 +186,12 @@ int main(int argc, char **argv)
 {
     Cell::initTransportTable();
     Cell::initPalette();
-    SimParams::initParams(argc, argv);
-    cudaSetDevice(SimParams::cudaDevice);
+    simParamsHost.initParams(argc, argv);
+    cudaSetDevice(simParamsHost.cudaDevice);
 
-    if (SimParams::testCamera) {
+    if (simParamsHost.testCamera) {
       testCamera();
-    // testModel();
+      // testModel();
       return 0;
     } else {
       return runQtApp(argc, argv);

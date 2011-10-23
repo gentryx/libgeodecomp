@@ -17,6 +17,7 @@ public:
 private:
     std::vector<BigCell> gridOld;
     std::vector<BigCell> gridNew;
+    std::vector<unsigned> frame;
 };
 
 #endif

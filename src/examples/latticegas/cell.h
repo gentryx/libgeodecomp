@@ -8,12 +8,6 @@
 class Cell
 {
 public:
-    // defines for each of the 2^7 flow states which particle moves to
-    // which position. stores four variants since the FHP-II model
-    // sometimes requires a probabilistic selection. Don't pad to 8
-    // bytes to reduce bank conflicts on Nvidia GPUs.
-    static char transportTable[128][4][7];
-    static unsigned char palette[256][3];
 
     enum Position { 
         UL, // upper left
@@ -33,7 +27,15 @@ public:
         drain
     };
 
-    static int simpleRand(int i) {
+#ifndef __device__
+#define __device__
+#endif
+
+#ifndef __host__
+#define __host__
+#endif
+
+    __device__ __host__ static int simpleRand(int i) {
         return i * 69069 + 1327217885;
     }
 
@@ -158,9 +160,16 @@ public:
             particles[k] = val;
     }
 
-    inline void update(
+    __device__ __host__ inline void swap(char& a, char& b)
+    {
+        char buf = a;
+        a = b;
+        b = buf;
+    }
+    
+    __device__ __host__ inline void update(
+        SimParams *simParams,
         const int& t,
-        const int& randSeed,
         const char& oldState,
         const char& ul, 
         const char& ur, 
@@ -179,18 +188,20 @@ public:
             (not0(r)  << 2) +
             (not0(ll) << 1) +
             (not0(lr) << 0);
-        int rand = randSeed >> 7;
+        long tmp = (long)this;
+        int rand = tmp;
+        rand = simpleRand((rand >> 13) ^ t);
         int tinyRand = rand & 3;
         int bigRand  = rand & 0xff;
 
         if (oldState == liquid) {
-            particles[(int)transportTable[flowState][tinyRand][0]] = ul;
-            particles[(int)transportTable[flowState][tinyRand][1]] = ur;
-            particles[(int)transportTable[flowState][tinyRand][2]] =  l;
-            particles[(int)transportTable[flowState][tinyRand][3]] =  c;
-            particles[(int)transportTable[flowState][tinyRand][4]] =  r;
-            particles[(int)transportTable[flowState][tinyRand][5]] = ll;
-            particles[(int)transportTable[flowState][tinyRand][6]] = lr;
+            particles[(int)simParams->transportTable[flowState][tinyRand][0]] = ul;
+            particles[(int)simParams->transportTable[flowState][tinyRand][1]] = ur;
+            particles[(int)simParams->transportTable[flowState][tinyRand][2]] =  l;
+            particles[(int)simParams->transportTable[flowState][tinyRand][3]] =  c;
+            particles[(int)simParams->transportTable[flowState][tinyRand][4]] =  r;
+            particles[(int)simParams->transportTable[flowState][tinyRand][5]] = ll;
+            particles[(int)simParams->transportTable[flowState][tinyRand][6]] = lr;
             return;
         }
 
@@ -204,11 +215,11 @@ public:
             particles[LR] = ll;
 
             if (particles[UR] == 0) 
-                std::swap(particles[UR], particles[UL]);
+                swap(particles[UR], particles[UL]);
             if (particles[LR] == 0) 
-                std::swap(particles[LR], particles[LL]);
+                swap(particles[LR], particles[LL]);
             if (particles[R] == 0) 
-                std::swap(particles[R], particles[L]);
+                swap(particles[R], particles[L]);
                 
             return;
         }
@@ -223,22 +234,22 @@ public:
 
         if (state == source) {
             if (bigRand < 8) {
-                particles[R] = ((t / SimParams::colorSwitchCycles) & 3) + 1;
+                particles[R] = ((t / simParams->colorSwitchCycles) & 3) + 1;
             }
         }
     } 
 
-    inline char& getState() 
+    __device__ __host__ inline char& getState() 
     {
         return state;
     }
 
-    inline const char& getState() const
+    __device__ __host__ inline const char& getState() const
     {
         return state;
     }
 
-    inline const char& operator[](const int& i) const
+    __device__ __host__ inline const char& operator[](const int& i) const
     {
         return particles[i];
     }
@@ -354,31 +365,32 @@ public:
 
     }
 
-    static void initPalette() {
-        palette[0][0] = 0;
-        palette[0][1] = 0;
-        palette[0][2] = 0;
+    static void initPalette() 
+    {
+        simParamsHost.palette[0][0] = 0;
+        simParamsHost.palette[0][1] = 0;
+        simParamsHost.palette[0][2] = 0;
 
-        palette[1][0] = 0;
-        palette[1][1] = 0;
-        palette[1][2] = 255;
+        simParamsHost.palette[1][0] = 0;
+        simParamsHost.palette[1][1] = 0;
+        simParamsHost.palette[1][2] = 255;
 
-        palette[2][0] = 0;
-        palette[2][1] = 255;
-        palette[2][2] = 0;
+        simParamsHost.palette[2][0] = 0;
+        simParamsHost.palette[2][1] = 255;
+        simParamsHost.palette[2][2] = 0;
 
-        palette[3][0] = 0;
-        palette[3][1] = 0;
-        palette[3][2] = 255;
+        simParamsHost.palette[3][0] = 0;
+        simParamsHost.palette[3][1] = 0;
+        simParamsHost.palette[3][2] = 255;
 
-        palette[4][0] = 0;
-        palette[4][1] = 255;
-        palette[4][2] = 0;
+        simParamsHost.palette[4][0] = 0;
+        simParamsHost.palette[4][1] = 255;
+        simParamsHost.palette[4][2] = 0;
 
         for (int i = 5; i < 256; ++i) {
-            palette[i][0] = 255;
-            palette[i][1] = 0;
-            palette[i][2] = 0;
+            simParamsHost.palette[i][0] = 255;
+            simParamsHost.palette[i][1] = 0;
+            simParamsHost.palette[i][2] = 0;
         }
     }
 
@@ -403,14 +415,14 @@ public:
     static void addFinalPattern(const int& offset, const Pattern& p)
     {
         for (int i = 0; i < 7; ++i)
-            transportTable[p.getFlowState()][offset][i] = p.getDest(i);
+            simParamsHost.transportTable[p.getFlowState()][offset][i] = p.getDest(i);
     } 
     
     char particles[7];
     char state;
 
 private:
-    inline bool not0(const char& c) const
+    __device__ __host__ inline bool not0(const char& c) const
     {
         return c != 0? 1 : 0;
     }
@@ -456,13 +468,13 @@ private:
                        const char& ll,
                        const char& lr)
     {
-        transportTable[flowState][rand][UL] = ul;
-        transportTable[flowState][rand][UR] = ur;
-        transportTable[flowState][rand][L]  = l;
-        transportTable[flowState][rand][C]  = c;
-        transportTable[flowState][rand][R]  = r;
-        transportTable[flowState][rand][LL] = ll;
-        transportTable[flowState][rand][LR] = lr;
+        simParamsHost.transportTable[flowState][rand][UL] = ul;
+        simParamsHost.transportTable[flowState][rand][UR] = ur;
+        simParamsHost.transportTable[flowState][rand][L]  = l;
+        simParamsHost.transportTable[flowState][rand][C]  = c;
+        simParamsHost.transportTable[flowState][rand][R]  = r;
+        simParamsHost.transportTable[flowState][rand][LL] = ll;
+        simParamsHost.transportTable[flowState][rand][LR] = lr;
     }
 };
 

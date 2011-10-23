@@ -64,7 +64,7 @@ void FrameGrabber::grab()
     if (frame->nChannels != 3)
         throw std::runtime_error("unexpected number of channels");
 
-    if (SimParams::debug)
+    if (simParamsHost.debug)
       std::cerr << "Capture:\n"
 		<< "  nChannels: " << frame->nChannels << "\n"
 		<< "  depth: " << frame->depth << "\n"

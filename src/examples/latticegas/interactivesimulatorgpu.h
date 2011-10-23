@@ -13,11 +13,6 @@ public:
     virtual void loadStates();
     virtual void renderOutput();
     virtual void update();
-
-private:
-    // fixme: get rid of these
-    std::vector<BigCell> gridOld;
-    std::vector<BigCell> gridNew;
 };
 
 #endif

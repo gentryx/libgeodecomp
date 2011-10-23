@@ -50,9 +50,9 @@ private:
 
                 if (!passThrough) {
                     char state = InteractiveSimulator::pixelToState(r, g, b);
-                    r = Cell::palette[(int)state][0];
-                    g = Cell::palette[(int)state][1];
-                    b = Cell::palette[(int)state][2];
+                    r = simParamsHost.palette[(int)state][0];
+                    g = simParamsHost.palette[(int)state][1];
+                    b = simParamsHost.palette[(int)state][2];
                 }
 
                 outfile << r << g << b;
