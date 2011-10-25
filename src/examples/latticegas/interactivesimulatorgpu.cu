@@ -51,15 +51,17 @@ __global__ void updateGrid(unsigned t, BigCell *gridOld, BigCell *gridNew)
         &gridOld[offset + simParamsDev.modelWidth]);
 }
 
-__global__ void setStates(char *states, BigCell *grid)
+__global__ void setStates(char *states, BigCell *gridOld, BigCell *gridNew)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
     int width = blockDim.x * gridDim.x;
     int offset = y * width + x;
 
-    grid[offset][0].getState() = states[offset];
-    grid[offset][1].getState() = states[offset];
+    gridOld[offset][0].getState() = states[offset];
+    gridOld[offset][1].getState() = states[offset];
+    gridNew[offset][0].getState() = states[offset];
+    gridNew[offset][1].getState() = states[offset];
 }
 
 void checkCudaError()
@@ -110,7 +112,7 @@ void InteractiveSimulatorGPU::loadStates()
     dim3 gridDim(simParamsHost.modelWidth / simParamsHost.threads, simParamsHost.modelHeight);
     cudaMemcpy(statesDev, &states[0], simParamsHost.modelSize, 
                cudaMemcpyHostToDevice);
-    setStates<<<gridDim, blockDim>>>(statesDev, gridOldDev);
+    setStates<<<gridDim, blockDim>>>(statesDev, gridOldDev, gridNewDev);
 }
 
 void InteractiveSimulatorGPU::renderOutput()

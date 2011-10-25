@@ -29,7 +29,7 @@ public:
             r * simParamsHost.weightR +
             g * simParamsHost.weightG +
             b * simParamsHost.weightB;
-        return sum >= 1 ? Cell::liquid : Cell::solid;
+        return sum >= 1 ? Cell::liquid : Cell::solid1;
     }
 
 public slots:
@@ -54,7 +54,7 @@ public slots:
                 // add right walls
                 if (x >= simParamsHost.modelWidth - 2)
                     if ((y & 63) > simParamsHost.effluxSize)
-                        state = Cell::solid;
+                        state = Cell::solid1;
 
                 // add upper and lower walls
                 if (y <= 1 || y >= simParamsHost.modelHeight - 2)

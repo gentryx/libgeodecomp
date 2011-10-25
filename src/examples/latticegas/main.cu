@@ -50,26 +50,24 @@ void testModel()
                 gridB[y][x][0].update(
                     &simParamsHost,
                     t,
-                    gridA[y + 0][x + 0][0].getState(),
-                    gridA[y - 1][x + 0][1][Cell::LR],
-                    gridA[y - 1][x + 1][1][Cell::LL],
-                    gridA[y + 0][x - 1][0][Cell::R ],
-                    gridA[y + 0][x + 0][0][Cell::C ],
-                    gridA[y + 0][x + 1][0][Cell::L ],
-                    gridA[y + 0][x + 0][1][Cell::UR],
-                    gridA[y + 0][x + 1][1][Cell::UL]);
+                    gridA[y - 1][x + 0][1],
+                    gridA[y - 1][x + 1][1],
+                    gridA[y + 0][x - 1][0],
+                    gridA[y + 0][x + 0][0],
+                    gridA[y + 0][x + 1][0],
+                    gridA[y + 0][x + 0][1],
+                    gridA[y + 0][x + 1][1]);
 
                 gridB[y][x][1].update(
                     &simParamsHost,
                     t,
-                    gridA[y + 0][x + 0][1].getState(),
-                    gridA[y + 0][x - 1][0][Cell::LR],
-                    gridA[y + 0][x + 0][0][Cell::LL],
-                    gridA[y + 0][x - 1][1][Cell::R ],
-                    gridA[y + 0][x + 0][1][Cell::C ],
-                    gridA[y + 0][x + 1][1][Cell::L ],
-                    gridA[y + 1][x - 1][0][Cell::UR],
-                    gridA[y + 1][x + 0][0][Cell::UL]);
+                    gridA[y + 0][x - 1][0],
+                    gridA[y + 0][x + 0][0],
+                    gridA[y + 0][x - 1][1],
+                    gridA[y + 0][x + 0][1],
+                    gridA[y + 0][x + 1][1],
+                    gridA[y + 1][x - 1][0],
+                    gridA[y + 1][x + 0][0]);
             }
         }
 
@@ -117,7 +115,7 @@ int runQtApp(int argc, char **argv)
 
     grabber->grab();
     timerFlow->start(10);
-    timerGrab->start(100);
+    timerGrab->start(5000);
     timerInfo->start(5000);
     flow.show();
     int ret = app.exec();

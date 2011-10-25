@@ -24,27 +24,27 @@ public:
         cells[0].update(
             simParams,
             t, 
-            same[ 0][0].getState(),
-            up[   0][1][Cell::LR],
-            up[   1][1][Cell::LL],
-            same[-1][0][Cell::R],
-            same[ 0][0][Cell::C],
-            same[ 1][0][Cell::L],
-            same[ 0][1][Cell::UR],
-            same[ 1][1][Cell::UL]);
+            up[   0][1],
+            up[   1][1],
+            same[-1][0],
+            same[ 0][0],
+            same[ 1][0],
+            same[ 0][1],
+            same[ 1][1]);
+
         cells[1].update(
             simParams,
             t, 
-            same[ 0][1].getState(),
-            same[-1][0][Cell::LR],
-            same[ 0][0][Cell::LL],
-            same[-1][1][Cell::R],
-            same[ 0][1][Cell::C],
-            same[ 1][1][Cell::L],
-            down[-1][0][Cell::UR],
-            down[ 0][0][Cell::UL]);
+            same[-1][0],
+            same[ 0][0],
+            same[-1][1],
+            same[ 0][1],
+            same[ 1][1],
+            down[-1][0],
+            down[ 0][0]);
     } 
 
+    // fixme: return two unsigneds here in order to render both cells
     __device__ __host__ unsigned toColor(SimParams *simParams)
     {
         unsigned r = 0;
@@ -53,12 +53,13 @@ public:
 
         for (int y = 0; y < 2; ++y) {
             if (cells[y].state != Cell::liquid) {
-                r += 255;
-                g += 255;
-                b += 255;
+                int col = cells[y].state;
+                r = simParams->palette[col][0];
+                g = simParams->palette[col][1];
+                b = simParams->palette[col][2];
             } else {
                 for (int i = 0; i < 7; ++i) {
-                    int col = cells[y].particles[i];
+                    int col = 7 + cells[y].particles[i];
                     r += simParams->palette[col][0];
                     g += simParams->palette[col][1];
                     b += simParams->palette[col][2];

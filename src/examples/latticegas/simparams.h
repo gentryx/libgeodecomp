@@ -8,14 +8,14 @@ public:
     {
         // fixme: parse command line!
 
-        modelWidth = 1024;
-        modelHeight = 512;
+        modelWidth = 512;
+        modelHeight = 256;
         modelSize = modelWidth * modelHeight;
         maxImageSize = 2048 * 2048;
         cudaDevice = 0;
 
         // must be >= 0 and <= 64
-        effluxSize = 64;
+        effluxSize = 32;
 
         colorSwitchCycles = 2048;
 

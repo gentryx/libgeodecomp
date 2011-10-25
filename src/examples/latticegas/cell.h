@@ -1,6 +1,7 @@
 #ifndef _libgeodecomp_examples_latticegas_cell_h_
 #define _libgeodecomp_examples_latticegas_cell_h_
 
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <libgeodecomp/examples/latticegas/simparams.h>
@@ -21,7 +22,9 @@ public:
 
     enum State {
         liquid,
-        solid,
+        solid1,
+        solid2,
+        solid3,
         slip,
         source,
         drain
@@ -170,16 +173,23 @@ public:
     __device__ __host__ inline void update(
         SimParams *simParams,
         const int& t,
-        const char& oldState,
-        const char& ul, 
-        const char& ur, 
-        const char& l, 
-        const char& c, 
-        const char& r,
-        const char& ll,
-        const char& lr)
+        const Cell& ulCell, 
+        const Cell& urCell, 
+        const Cell& lCell, 
+        const Cell& cCell, 
+        const Cell& rCell,
+        const Cell& llCell,
+        const Cell& lrCell)
     {
-        state = oldState;
+        const char& ul = ulCell[LR];
+        const char& ur = urCell[LL];
+        const char& l  = lCell[R];
+        const char& c  = cCell[C];
+        const char& r  = rCell[L];
+        const char& ll = llCell[UR];
+        const char& lr = lrCell[UL];
+
+        state = cCell.state;
         int flowState = 
             (not0(ul) << 6) +
             (not0(ur) << 5) +
@@ -196,7 +206,7 @@ public:
         int tinyRand = rand & 3;
         int bigRand  = rand & 0xff;
 
-        if (oldState == liquid) {
+        if (state == liquid) {
             particles[(int)simParams->transportTable[flowState][tinyRand][0]] = ul;
             particles[(int)simParams->transportTable[flowState][tinyRand][1]] = ur;
             particles[(int)simParams->transportTable[flowState][tinyRand][2]] =  l;
@@ -207,7 +217,7 @@ public:
             return;
         }
 
-        if (oldState == slip) {
+        if (state == slip) {
             particles[UL] = ur;
             particles[UR] = ul;
             particles[L ] = r;
@@ -216,13 +226,6 @@ public:
             particles[LL] = lr;
             particles[LR] = ll;
 
-            if (particles[UR] == 0) 
-                swap(particles[UR], particles[UL]);
-            if (particles[LR] == 0) 
-                swap(particles[LR], particles[LL]);
-            if (particles[R] == 0) 
-                swap(particles[R], particles[L]);
-                
             return;
         }
 
@@ -238,6 +241,36 @@ public:
             if (bigRand < 8) {
                 particles[R] = ((t / simParams->colorSwitchCycles) & 3) + 1;
             }
+        }
+
+        if (state != liquid) {
+            // state transition for displacement of particles
+            if (ulCell.state == solid1 &&
+                urCell.state == solid1 &&
+                lCell.state  == solid1 &&
+                cCell.state  == solid1 &&
+                rCell.state  == solid1 &&
+                llCell.state == solid1 &&
+                lrCell.state == solid1) 
+                state = solid2;
+
+            if (ulCell.state == solid2 &&
+                urCell.state == solid2 &&
+                lCell.state  == solid2 &&
+                cCell.state  == solid2 &&
+                rCell.state  == solid2 &&
+                llCell.state == solid2 &&
+                lrCell.state == solid2) 
+                state = solid3;
+
+            if (ulCell.state == solid3 &&
+                urCell.state == solid3 &&
+                lCell.state  == solid3 &&
+                cCell.state  == solid3 &&
+                rCell.state  == solid3 &&
+                llCell.state == solid3 &&
+                lrCell.state == solid3)
+                state = solid1;
         }
     } 
 
@@ -404,27 +437,61 @@ private:
 
     static void initPalette() 
     {
-        simParamsHost.palette[0][0] = 0;
+        // unused entries are set to red
+        simParamsHost.palette[0][0] = 255;
         simParamsHost.palette[0][1] = 0;
         simParamsHost.palette[0][2] = 0;
 
-        simParamsHost.palette[1][0] = 0;
-        simParamsHost.palette[1][1] = 0;
+        // colors for solid1, solid2, solid2
+        simParamsHost.palette[1][0] = 255;
+        simParamsHost.palette[1][1] = 255;
         simParamsHost.palette[1][2] = 255;
 
-        simParamsHost.palette[2][0] = 0;
-        simParamsHost.palette[2][1] = 255;
-        simParamsHost.palette[2][2] = 0;
+        simParamsHost.palette[2][0] = 191;
+        simParamsHost.palette[2][1] = 191;
+        simParamsHost.palette[2][2] = 191;
 
-        simParamsHost.palette[3][0] = 0;
-        simParamsHost.palette[3][1] = 0;
-        simParamsHost.palette[3][2] = 255;
+        simParamsHost.palette[3][0] = 127;
+        simParamsHost.palette[3][1] = 127;
+        simParamsHost.palette[3][2] = 127;
 
-        simParamsHost.palette[4][0] = 0;
+        // colors for slip and source
+        simParamsHost.palette[4][0] = 255;
         simParamsHost.palette[4][1] = 255;
-        simParamsHost.palette[4][2] = 0;
+        simParamsHost.palette[4][2] = 255;
 
-        for (int i = 5; i < 256; ++i) {
+        simParamsHost.palette[5][0] = 0;
+        simParamsHost.palette[5][1] = 0;
+        simParamsHost.palette[5][2] = 0;
+
+        // unused entries are set to red
+        simParamsHost.palette[6][0] = 255;
+        simParamsHost.palette[6][1] = 0;
+        simParamsHost.palette[6][2] = 0;
+
+        // colors for particles
+        simParamsHost.palette[7][0] = 0;
+        simParamsHost.palette[7][1] = 0;
+        simParamsHost.palette[7][2] = 0;
+
+        simParamsHost.palette[8][0] = 0;
+        simParamsHost.palette[8][1] = 0;
+        simParamsHost.palette[8][2] = 255;
+
+        simParamsHost.palette[9][0] = 0;
+        simParamsHost.palette[9][1] = 0;
+        simParamsHost.palette[9][2] = 255;
+
+        simParamsHost.palette[10][0] = 0;
+        simParamsHost.palette[10][1] = 255;
+        simParamsHost.palette[10][2] = 0;
+
+        simParamsHost.palette[11][0] = 0;
+        simParamsHost.palette[11][1] = 255;
+        simParamsHost.palette[11][2] = 0;
+
+        // unused entries are set to red
+        for (int i = 12; i < 256; ++i) {
             simParamsHost.palette[i][0] = 255;
             simParamsHost.palette[i][1] = 0;
             simParamsHost.palette[i][2] = 0;
@@ -434,10 +501,9 @@ private:
     static void initRand()
     {
         int foo = 1;
-        // fixme: use better random number generator here
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 1024; ++x) {
-                foo = simpleRand(foo);
+                foo = rand();
                 simParamsHost.randomFields[y][x] = foo;
             }
         }
@@ -468,7 +534,11 @@ private:
         switch (state) {
         case liquid:
             return "l";
-        case solid:
+        case solid1:
+            return "S";
+        case solid2:
+            return "S";
+        case solid3:
             return "S";
         case source:
             return "s";

@@ -26,6 +26,8 @@ void InteractiveSimulatorCPU::loadStates()
             unsigned offset = y * simParamsHost.modelWidth + x;
             gridOld[offset][0].getState() = states[offset];
             gridOld[offset][1].getState() = states[offset];
+            gridNew[offset][0].getState() = states[offset];
+            gridNew[offset][1].getState() = states[offset];
         }
     }
 }
