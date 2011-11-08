@@ -8,13 +8,11 @@
 #include <libgeodecomp/examples/latticegas/framegrabber.h>
 #include <libgeodecomp/examples/latticegas/flowwidget.h>
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
+#include <libgeodecomp/examples/latticegas/interactivesimulatorcpu.h>
+#include <libgeodecomp/examples/latticegas/interactivesimulatorgpu.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
 // fixme: using namespace LibGeoDecomp;
-
-int simpleRand(int i) {
-    return i * 69069 + 1327217885;
-}
 
 void testModel()
 {
@@ -50,26 +48,26 @@ void testModel()
         for (int y = 1; y < height - 1; ++y) {
             for (int x = 1; x < width - 1; ++x) {
                 gridB[y][x][0].update(
-                    simpleRand(x + y * 2 * width + 0 * width + t),
-                    gridA[y + 0][x + 0][0].getState(),
-                    gridA[y - 1][x + 0][1][Cell::LR],
-                    gridA[y - 1][x + 1][1][Cell::LL],
-                    gridA[y + 0][x - 1][0][Cell::R ],
-                    gridA[y + 0][x + 0][0][Cell::C ],
-                    gridA[y + 0][x + 1][0][Cell::L ],
-                    gridA[y + 0][x + 0][1][Cell::UR],
-                    gridA[y + 0][x + 1][1][Cell::UL]);
+                    &simParamsHost,
+                    t,
+                    gridA[y - 1][x + 0][1],
+                    gridA[y - 1][x + 1][1],
+                    gridA[y + 0][x - 1][0],
+                    gridA[y + 0][x + 0][0],
+                    gridA[y + 0][x + 1][0],
+                    gridA[y + 0][x + 0][1],
+                    gridA[y + 0][x + 1][1]);
 
                 gridB[y][x][1].update(
-                    simpleRand(x + y * 2 * width + 1 * width + t),
-                    gridA[y + 0][x + 0][1].getState(),
-                    gridA[y + 0][x - 1][0][Cell::LR],
-                    gridA[y + 0][x + 0][0][Cell::LL],
-                    gridA[y + 0][x - 1][1][Cell::R ],
-                    gridA[y + 0][x + 0][1][Cell::C ],
-                    gridA[y + 0][x + 1][1][Cell::L ],
-                    gridA[y + 1][x - 1][0][Cell::UR],
-                    gridA[y + 1][x + 0][0][Cell::UL]);
+                    &simParamsHost,
+                    t,
+                    gridA[y + 0][x - 1][0],
+                    gridA[y + 0][x + 0][0],
+                    gridA[y + 0][x - 1][1],
+                    gridA[y + 0][x + 0][1],
+                    gridA[y + 0][x + 1][1],
+                    gridA[y + 1][x - 1][0],
+                    gridA[y + 1][x + 0][0]);
             }
         }
 
@@ -92,8 +90,9 @@ int runQtApp(int argc, char **argv)
     FlowWidget flow;
     flow.resize(1200, 900);
 
-    InteractiveSimulator *sim = new InteractiveSimulator(&flow);
-    FrameGrabber *grabber = new FrameGrabber(SimParams::fakeCamera, &flow);
+    //fixme: make this configurable via simparams
+    InteractiveSimulator *sim = new InteractiveSimulatorCPU(&flow);
+    FrameGrabber *grabber = new FrameGrabber(simParamsHost.fakeCamera, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);
@@ -116,7 +115,7 @@ int runQtApp(int argc, char **argv)
 
     grabber->grab();
     timerFlow->start(10);
-    timerGrab->start(100);
+    timerGrab->start(5000);
     timerInfo->start(5000);
     flow.show();
     int ret = app.exec();
@@ -145,15 +144,15 @@ void testCamera()
     float lowerB = 0.0;
 
     for (int i = 0; i < 50; ++i) {
-        SimParams::weightR = (upperR + lowerR) * 0.5;
-        SimParams::weightG = (upperG + lowerG) * 0.5;
-        SimParams::weightB = (upperB + lowerB) * 0.5;
+        simParamsHost.weightR = (upperR + lowerR) * 0.5;
+        simParamsHost.weightG = (upperG + lowerG) * 0.5;
+        simParamsHost.weightB = (upperB + lowerB) * 0.5;
 
         std::cout << " determining (weightR, weightG, weightB)\n"
 		  << " current: (" 
-		  << SimParams::weightR << ", " 
-		  << SimParams::weightG << ", "
-	          << SimParams::weightB << ")\n";
+		  << simParamsHost.weightR << ", " 
+		  << simParamsHost.weightG << ", "
+	          << simParamsHost.weightB << ")\n";
         grabber.grab();
 
 	for (;;) {
@@ -161,16 +160,16 @@ void testCamera()
 	    std::string answer;
 	    std::cin >> answer;
 	    if (answer == "y") {
-	        upperR = SimParams::weightR;
-		upperG = SimParams::weightG;
-		upperB = SimParams::weightB;
+	        upperR = simParamsHost.weightR;
+		upperG = simParamsHost.weightG;
+		upperB = simParamsHost.weightB;
 		break;
             }
 
 	    if (answer == "n") {
-	        lowerR = SimParams::weightR;
-		lowerG = SimParams::weightG;
-		lowerB = SimParams::weightB;
+	        lowerR = simParamsHost.weightR;
+		lowerG = simParamsHost.weightG;
+		lowerB = simParamsHost.weightB;
 		break;
 	    }
 
@@ -183,14 +182,13 @@ void testCamera()
 
 int main(int argc, char **argv)
 {
-    Cell::initTransportTable();
-    Cell::initPalette();
-    SimParams::initParams(argc, argv);
-    cudaSetDevice(SimParams::cudaDevice);
+    Cell::init();
+    simParamsHost.initParams(argc, argv);
+    cudaSetDevice(simParamsHost.cudaDevice);
 
-    if (SimParams::testCamera) {
+    if (simParamsHost.testCamera) {
       testCamera();
-    // testModel();
+      // testModel();
       return 0;
     } else {
       return runQtApp(argc, argv);

@@ -176,7 +176,6 @@ public:
 
     virtual void grid(GridBase<Cell, 2> *ret)
     {
-        CoordBox<2> rect = ret->boundingBox();
         ret->atEdge() = Cell(Cell::BARRIER);
         int numAnts =  100;
         int numFood = 500;
