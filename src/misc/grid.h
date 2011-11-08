@@ -105,7 +105,7 @@ public:
     // fixme: not dim-safe. do we need this anyway?
     inline CELL_TYPE *baseAddress() 
     {
-        return &(*this)[0][0];
+        return &(*this)[Coord<DIM>()];
     }
 
     // fixme: not dim-safe. do we need this anyway?

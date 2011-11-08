@@ -1,1 +1,6 @@
 include(../../../../fixtures/CMakeLists.test.txt)
+if(allowed_test)
+  if (LIBGEODECOMP_FEATURE_OPENCL)
+      target_link_libraries(${UNIT_TARGET} OpenCL)
+  endif (LIBGEODECOMP_FEATURE_OPENCL)
+endif(allowed_test)
