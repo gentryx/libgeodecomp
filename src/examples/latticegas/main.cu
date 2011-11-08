@@ -91,7 +91,7 @@ int runQtApp(int argc, char **argv)
     flow.resize(1200, 900);
 
     //fixme: make this configurable via simparams
-    InteractiveSimulator *sim = new InteractiveSimulatorCPU(&flow);
+    InteractiveSimulator *sim = new InteractiveSimulatorGPU(&flow);
     FrameGrabber *grabber = new FrameGrabber(simParamsHost.fakeCamera, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);

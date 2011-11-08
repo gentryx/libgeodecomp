@@ -93,8 +93,10 @@ InteractiveSimulatorGPU::InteractiveSimulatorGPU(QObject *parent) :
     cudaMalloc(&statesDev, simParamsHost.modelSize);
     cudaMalloc(&gridOldDev, simParamsHost.modelSize * sizeof(BigCell));
     cudaMalloc(&gridNewDev, simParamsHost.modelSize * sizeof(BigCell));
+    std::cout << "cpy1\n";
     cudaMemcpyToSymbol(&simParamsDev, &simParamsHost, sizeof(SimParams));
     checkCudaError();
+    std::cout << "cpy2\n";
 }
 
 InteractiveSimulatorGPU::~InteractiveSimulatorGPU()
