@@ -73,7 +73,8 @@ public:
     // fixme: need test
     inline void run()
     {
-        unsigned remainingNanoSteps = this->initializer->maxSteps() * CELL_TYPE::nanoSteps() - nanoStepCounter;
+        unsigned remainingNanoSteps = this->initializer->maxSteps() * 
+            CELL_TYPE::nanoSteps() - nanoStepCounter;
         nanoStep(remainingNanoSteps);
     }
 
