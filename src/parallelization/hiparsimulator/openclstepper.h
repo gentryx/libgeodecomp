@@ -33,10 +33,9 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
         ParentType(_partitionManager, _initializer)
     {
-        // fixme: select OpenCL device in constructor
+        // fixme: openCL selection routine
         int platformId = 0;
         int deviceId = 0;
-
         try {
             std::vector<cl::Platform> platforms;
             cl::Platform::get(&platforms);
@@ -45,10 +44,10 @@ public:
             cl::Device usedDevice = devices.at(deviceId);
             context = cl::Context(devices);
             cmdQueue = cl::CommandQueue(context, usedDevice);
-        } catch (cl::Error &err) {
-            std::cerr << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
         }
-        // throw
+        /*catch (cl::Error &err) {
+            std::cerr << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
+        }*/
         curStep = initializer().startStep();
         curNanoStep = 0;
         initGrids();
@@ -62,17 +61,13 @@ public:
     inline virtual void update(int nanoSteps) 
     {
         // fixme: implement me (later)
+        
     }
 
     inline virtual const GridType& grid() const
     {
         cmdQueue.enqueueReadBuffer(deviceGrid, true, 0, 
             hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
-        /**
-         * fixme:
-         * - copy grid from device to hostGrid
-         */
-
         return *hostGrid;
     }
 
@@ -95,11 +90,6 @@ private:
         
         deviceGrid = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
             hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
-        /**
-         * fixme:
-         * - allocate grid on OpenCL device
-         * - copy hostGrid to device
-         */
     }
 
     inline MyPartitionManager& partitionManager() 
