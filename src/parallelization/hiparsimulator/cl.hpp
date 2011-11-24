@@ -38,7 +38,7 @@
  *				#define USE_CL_DEVICE_FISSION
  */
 
-/*! \mainpage
+/*!
  * \section intro Introduction
  * For many large applications C++ is the language of choice and so it seems
  * reasonable to define C++ bindings for OpenCL.
