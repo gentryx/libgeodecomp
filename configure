@@ -39,9 +39,11 @@ def package_name
 end
 
 def cflags
-  # fixme: make this configurable via a command line parameter
-  # "-g -fno-inline -fno-default-inline -finline-limit=1"  
-  "-O2 -Wall -Wno-sign-compare"
+  if @opts.build_type == "Debug"
+    "-g -fno-inline -fno-default-inline -finline-limit=1" 
+  else
+    "-O2 -Wall -Wno-sign-compare"
+  end
 end
 
 def set_gnu_make_opts
@@ -239,18 +241,14 @@ if(WIN32 AND NOT UNIX)
 
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
-  # fixme:
-  #  set(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-  # fixme:
-  #  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\helloworld.exe")
+  set(CPACK_PACKAGE_ICON             "${CMake_SOURCE_DIR}/..\\\\libgeodecomp_icon.png")
+  set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMake_SOURCE_DIR}/..\\\\libgeodecomp_icon.png)
+# further options:
 #else(WIN32 AND NOT UNIX)
-# fixme:
 #  set(CPACK_STRIP_FILES "bin/MyExecutable")
-# fixme:
 #  set(CPACK_SOURCE_STRIP_FILES "")
+#  set(CPACK_PACKAGE_EXECUTABLES "helloworld" "My Hello World")
 endif(WIN32 AND NOT UNIX)
-# fixme
-# set(CPACK_PACKAGE_EXECUTABLES "helloworld" "My Hello World")
 
 include(CPack)
 EOF
