@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# -*- coding: utf-8 -*-
 require 'fileutils'
 require 'optparse'
 require 'ostruct'
@@ -203,8 +204,7 @@ EOF
 set(PACKAGE_NAME "#{package_name}")
 # fixme
 set(PACKAGE_VERSION "r12345")
-# fixme
-set(PACKAGE_VENDOR "The Smurfs")
+set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http:\\\\\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
 
@@ -216,12 +216,9 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PACKAGE_NAME})
 
 # will be shown e.g. in windows' control center package info
 set(CPACK_PACKAGE_VENDOR ${PACKAGE_VENDOR})
-# fixme:
-# #SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
-# fixme:
-# #SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
-# fixme:
-# set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PACKAGE_NAME})
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PACKAGE_NAME})
 
 if(WIN32 AND NOT UNIX)
   # unused in current nsis versions, fix pending (http://www.cmake.org/Bug/print_bug_page.php?bug_id=8682)
