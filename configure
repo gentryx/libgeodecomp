@@ -353,7 +353,6 @@ def init_default_options
   puts
 
   @opts.cmake = "cmake"
-  @opts.cpack = "cpack"
   @opts.doxygen = "doxygen"
 
   # configurable options:
