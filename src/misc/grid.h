@@ -102,16 +102,14 @@ public:
         return edgeCell;
     }
 
-    // fixme: not dim-safe. do we need this anyway?
     inline CELL_TYPE *baseAddress() 
     {
-        return &(*this)[0][0];
+        return &(*this)[Coord<DIM>()];
     }
 
-    // fixme: not dim-safe. do we need this anyway?
     inline const CELL_TYPE *baseAddress() const
     {
-        return &(*this)[0][0];
+        return &(*this)[Coord<DIM>()];
     }
 
     inline const CELL_TYPE& getEdgeCell() const
@@ -132,7 +130,6 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
-    // fixme: remove
     inline const ConstSliceRef operator[](const Index& y) const
     {
         return cellMatrix[y];
@@ -141,7 +138,6 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
-    // fixme: remove
     inline SliceRef operator[](const Index& y) 
     {
         return cellMatrix[y];

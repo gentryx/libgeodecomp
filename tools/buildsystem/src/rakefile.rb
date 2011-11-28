@@ -26,7 +26,7 @@ end
 
 # check options:
 
-required_opts = [:srcdir, :builddir, :cxxtestdir, :doxygen, :make, :cmake, :cpack, :allowed_tests]
+required_opts = [:srcdir, :builddir, :cxxtestdir, :doxygen, :make, :cmake, :allowed_tests]
 required_opts += [:mpiexec] if @opts.mpi
 required_opts += [:typemapsdir] if @opts.typemaps
 required_opts.each do |opt|
@@ -226,7 +226,7 @@ end
 
 task :installer => :compile do
   cd @opts.builddir
-  sh "#{@opts.cpack}"  
+  sh "#{@opts.make} #{@opts.makeopts} package"  
 end
 
 file "#{@opts.builddir}/Makefile" => [:cmake_prep, @opts.builddir] do
@@ -237,7 +237,6 @@ file "#{@opts.builddir}/Makefile" => [:cmake_prep, @opts.builddir] do
   sh "#{@opts.cmake} #{src_relative}"
 end
 
-# fixme: don't delete boost dirs upon rake clean, but upon rake distclean
 task :clean do
   auto_cmakes = Set.new
   all_sources.each do |file|
