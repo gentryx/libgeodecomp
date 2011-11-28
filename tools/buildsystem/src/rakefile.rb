@@ -168,7 +168,7 @@ else
     puts "regenerating Typemaps"
     generate_documentation
     namespace = @opts.namespace.nil? ? "" : "--namespace #{@opts.namespace}"
-    sh "ruby '#{@opts.srcdir}/../tools/typemapgenerator/generate.rb' #{namespace} ../doc/xml '#{@opts.typemapsdir}'"
+    sh "ruby '#{@opts.srcdir}/../tools/typemapgenerator/generate.rb' #{namespace} --header-fix ^.+/src:#{@opts.namespace.downcase} ../doc/xml '#{@opts.typemapsdir}'"
   end
   
   headers = FileList["#{@opts.srcdir}/**/*.h"].exclude(test_header_pattern).exclude(@typemaps_header)

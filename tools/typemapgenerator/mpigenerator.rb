@@ -62,9 +62,9 @@ class MPIGenerator
 
   # The Typemap Class needs a header file, declaring all the static
   # variables, macros and so on. This method will generate it's code.
-  def generate_header(classes, datatype_map, headers)
+  def generate_header(classes, datatype_map, headers, header_pattern=nil, header_replacement=nil)
     ret = File.read(@path + "template_typemaps.h");
-    ret.gsub!(/HEADERS/, headers(headers))
+    ret.gsub!(/HEADERS/, map_headers(headers, header_pattern, header_replacement))
     ret.gsub!(/NAMESPACE_GUARD/, @namespace_guard)
     ret.gsub!(/NAMESPACE_BEGIN\n/, @namespace_begin)
     ret.gsub!(/NAMESPACE_END\n/, @namespace_end)
@@ -89,9 +89,10 @@ class MPIGenerator
     return ret
   end
 
-  def headers(headers)
+  def map_headers(headers, header_pattern, header_replacement)
     h = headers.map do |header|
-      "#include \"#{header}\""
+      header_name = header.gsub(header_pattern, header_replacement)
+      "#include <#{header_name}>"
     end
     return h.join("\n")
   end
@@ -123,8 +124,8 @@ class MPIGenerator
   end
 
   # wraps the code generation for multiple typemaps.
-  def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers)
-    return [generate_header(topological_class_sortation, datatype_map, headers), 
+  def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers, header_pattern=nil, header_replacement=nil)
+    return [generate_header(topological_class_sortation, datatype_map, headers, header_pattern, header_replacement), 
             generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)]
   end
 end

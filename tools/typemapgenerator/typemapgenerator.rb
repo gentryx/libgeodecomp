@@ -26,11 +26,14 @@ class TypemapGenerator
     def generate_forest(xml_path, 
                         template_path="./", 
                         sloppy=false, 
-                        namespace=nil)
+                        namespace=nil,
+                        header_pattern=/^$/,
+                        header_replacement="")
       parser = MPIParser.new(xml_path, sloppy, namespace)
       generator = MPIGenerator.new(template_path, namespace)
       classes = parser.find_classes_to_be_serialized.sort
-      return generator.generate_forest(*parser.resolve_forest(classes))
+      options = parser.resolve_forest(classes) + [header_pattern, header_replacement]
+      return generator.generate_forest(*options) 
     end
 
     def find_classes_to_be_serialized(xml_path)
