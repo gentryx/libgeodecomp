@@ -17,7 +17,7 @@ public:
         // must be >= 0 and <= 64
         effluxSize = 32;
 
-        colorSwitchCycles = 2048;
+        colorSwitchCycles = 512;
 
         // andis test mode
         testCamera = false;

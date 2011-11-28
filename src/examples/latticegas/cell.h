@@ -2,6 +2,7 @@
 #define _libgeodecomp_examples_latticegas_cell_h_
 
 #include <cstdlib>
+#include <cstdio>
 #include <iostream>
 #include <sstream>
 #include <libgeodecomp/examples/latticegas/simparams.h>
@@ -170,6 +171,36 @@ public:
         b = buf;
     }
     
+    __device__ __host__ inline const Cell& getNeighbor(
+        const int& source,
+        const Cell& ulCell,
+        const Cell& urCell, 
+        const Cell& lCell, 
+        const Cell& cCell, 
+        const Cell& rCell, 
+        const Cell& llCell, 
+        const Cell& lrCell) const
+    {
+        switch (source) {
+        case UL:
+            return ulCell;
+        case UR:
+            return urCell;
+        case L:
+            return lCell;
+        case C:
+            return cCell;
+        case R:
+            return rCell;
+        case LL:
+            return llCell;
+        case LR:
+            return lrCell;
+        default:
+            return cCell;
+        }
+    }
+
     __device__ __host__ inline void update(
         SimParams *simParams,
         const int& t,
@@ -218,6 +249,7 @@ public:
         }
 
         if (state == slip) {
+            // fixme: is this really necessary?
             particles[UL] = ur;
             particles[UR] = ul;
             particles[L ] = r;
@@ -238,39 +270,76 @@ public:
         particles[LR] = lr;
 
         if (state == source) {
-            if (bigRand < 8) {
+            if (bigRand < 0) {
                 particles[R] = ((t / simParams->colorSwitchCycles) & 3) + 1;
             }
         }
 
-        if (state != liquid) {
-            // state transition for displacement of particles
-            if (ulCell.state == solid1 &&
-                urCell.state == solid1 &&
-                lCell.state  == solid1 &&
-                cCell.state  == solid1 &&
-                rCell.state  == solid1 &&
-                llCell.state == solid1 &&
-                lrCell.state == solid1) 
-                state = solid2;
+        // state transition for displacement of particles
+        if (ulCell.state == solid1 &&
+            urCell.state == solid1 &&
+            lCell.state  == solid1 &&
+            cCell.state  == solid1 &&
+            rCell.state  == solid1 &&
+            llCell.state == solid1 &&
+            lrCell.state == solid1) 
+            state = solid2;
 
-            if (ulCell.state == solid2 &&
-                urCell.state == solid2 &&
-                lCell.state  == solid2 &&
-                cCell.state  == solid2 &&
-                rCell.state  == solid2 &&
-                llCell.state == solid2 &&
-                lrCell.state == solid2) 
-                state = solid3;
+        if (ulCell.state == solid2 &&
+            urCell.state == solid2 &&
+            lCell.state  == solid2 &&
+            cCell.state  == solid2 &&
+            rCell.state  == solid2 &&
+            llCell.state == solid2 &&
+            lrCell.state == solid2) 
+            state = solid3;
 
-            if (ulCell.state == solid3 &&
-                urCell.state == solid3 &&
-                lCell.state  == solid3 &&
-                cCell.state  == solid3 &&
-                rCell.state  == solid3 &&
-                llCell.state == solid3 &&
-                lrCell.state == solid3)
-                state = solid1;
+        if (ulCell.state == solid3 &&
+            urCell.state == solid3 &&
+            lCell.state  == solid3 &&
+            cCell.state  == solid3 &&
+            rCell.state  == solid3 &&
+            llCell.state == solid3 &&
+            lrCell.state == solid3)
+            state = solid1;
+
+        int source = 0;
+        int target = 0;
+            
+        while (source < 7 && target < 7) {
+            if (particles[source] == 0) {
+                ++source;
+                continue;
+            }
+
+            const Cell& targetCell = 
+                getNeighbor(source, ulCell, urCell, lCell, cCell, rCell, llCell, lrCell);
+
+            bool targetValid = false;
+            if ((cCell.state == solid1) && (targetCell.state == liquid))
+                targetValid = true;
+            if ((cCell.state == solid1) && (targetCell.state == solid3))
+                targetValid = true;
+            if ((cCell.state == solid2) && (targetCell.state == solid1))
+                targetValid = true;
+            if ((cCell.state == solid3) && (targetCell.state == solid2))
+                targetValid = true;
+            if (targetValid)
+                printf("boom\n");
+
+            if (particles[target] != 0)
+                targetValid = false;
+            
+            if (!targetValid) {
+                ++target;
+                continue;
+            }
+
+            
+            particles[target] = particles[source];
+            particles[source] = 0;
+            ++source;
+            ++target;
         }
     } 
 
