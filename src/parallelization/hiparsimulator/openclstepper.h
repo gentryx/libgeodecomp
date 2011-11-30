@@ -12,6 +12,8 @@
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 
+#include <fstream>
+
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
@@ -36,18 +38,42 @@ public:
         // fixme: openCL selection routine
         int platformId = 0;
         int deviceId = 0;
-        try {
-            std::vector<cl::Platform> platforms;
-            cl::Platform::get(&platforms);
-            std::vector<cl::Device> devices;
-            platforms.at(platformId).getDevices(CL_DEVICE_TYPE_ALL, &devices);
-            cl::Device usedDevice = devices.at(deviceId);
-            context = cl::Context(devices);
-            cmdQueue = cl::CommandQueue(context, usedDevice);
-        }
-        /*catch (cl::Error &err) {
-            std::cerr << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
-        }*/
+	try {
+	  std::vector<cl::Platform> platforms;
+	  cl::Platform::get(&platforms);
+	  std::vector<cl::Device> devices;
+	  platforms.at(platformId).getDevices(CL_DEVICE_TYPE_ALL, &devices);
+	  cl::Device usedDevice = devices.at(deviceId);
+	  context = cl::Context(devices);
+	  cmdQueue = cl::CommandQueue(context, usedDevice);
+ 
+	  std::ifstream clSourceFile;
+	  std::string oclsrc = "./openclkernel.cl";
+	    
+	  clSourceFile.open(oclsrc.c_str()); //std::ifstream::in);
+	  std::string clSourceString;
+	  while (clSourceFile.good()) {
+	    char c = clSourceFile.get();
+	    clSourceString.append(1, c);
+	  }
+	  clSourceFile.close();
+	    
+	  cl::Program::Sources clSource = cl::Program::Sources(1, std::make_pair(clSourceString.c_str(), clSourceString.size() - 1));
+	  cl::Program clProgram = cl::Program(context, clSource);
+	    
+	  std::string options = std::string(" -I ") + oclsrc;
+	    
+	  clProgram.build(devices, options.c_str(), NULL, NULL);
+	  std::cout << "Build Log: " << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(usedDevice) << std::endl;
+	  std::cout << "----------" << std::endl;
+	    
+	  kernel = cl::Kernel(clProgram, "execute");
+        } catch (cl::Error &err) {
+	  std::cerr << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
+	  throw err;
+        } catch (...) {
+	  throw;
+	}
         curStep = initializer().startStep();
         curNanoStep = 0;
         initGrids();
@@ -60,13 +86,61 @@ public:
 
     inline virtual void update(int nanoSteps) 
     {
-        // fixme: implement me (later)
+      // fixme: implement me (later)
+      try {
+	cl::Buffer startCoordsBuffer, endCoordsBuffer;
         
+	Coord<DIM> c = this->getInitializer().gridDimensions();
+	int zDim = c.z();
+	int yDim = c.y();
+	int xDim = c.x();
+	
+	int actualX = xDim;
+	int actualY = yDim;
+                
+	std::vector<int> startCoords;
+	std::vector<int> endCoords;
+                
+        genThreadCoords(&startCoords,
+                        &endCoords,
+                        0,
+                        0,
+			0,
+                        xDim,
+                        yDim,
+                        zDim,
+                        actualX,
+                        actualY,
+                        zDim,
+                        1);
+
+        startCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, startCoords.size()*sizeof(int), &startCoords[0]);
+        endCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, endCoords.size()*sizeof(int), &endCoords[0]);
+        
+	cl::NDRange global(actualX, actualY, zDim);
+	//fixme: local range could be chosen dynamically
+	cl::NDRange local(16, 16, 1);
+        
+	cl::KernelFunctor livingKernel = kernel.bind(cmdQueue, global, local);
+        livingKernel(inputDeviceGrid, outputDeviceGrid, zDim, yDim, xDim,
+		     1, 0, 0, 0,
+		     startCoordsBuffer, endCoordsBuffer, actualX, actualY);
+        livingKernel.getError();
+        cmdQueue.finish();
+        
+
+      } catch (cl::Error& err) {
+	std::cerr << "OpenCL error: " << err.what() << ", " << oclStrerror(err.err()) << std::endl;
+	throw err;
+      } catch (...) {
+	throw;
+      }
+
     }
 
     inline virtual const GridType& grid() const
     {
-        cmdQueue.enqueueReadBuffer(deviceGrid, true, 0, 
+        cmdQueue.enqueueReadBuffer(outputDeviceGrid, true, 0, 
             hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
         return *hostGrid;
     }
@@ -77,9 +151,51 @@ private:
     int curNanoStep;
     boost::shared_ptr<GridType> hostGrid;
 
-    cl::Buffer deviceGrid;
+    cl::Buffer inputDeviceGrid;
+    cl::Buffer outputDeviceGrid;
     cl::Context context;
     cl::CommandQueue cmdQueue;
+    cl::Kernel kernel;
+    
+    inline void genThreadCoords(std::vector<int> *startCoords,
+			 std::vector<int> *endCoords,
+			 const int& offset_x,
+			 const int& offset_y,
+			 const int& offset_z,
+			 const int& active_x,
+			 const int& active_y,
+			 const int& active_z,
+			 const int& actual_x,
+			 const int& actual_y,
+			 const int& actual_z,
+			 const int& planes)
+    {
+      int maxX = active_x;
+      int maxY = active_y;
+      int maxZ = ceil(1.0 * actual_z/planes);
+      int numThreads = actual_x * actual_y * maxZ;
+      startCoords->resize(numThreads);
+      endCoords->resize(numThreads);
+    
+      for (int z = 0; z < maxZ; ++z) {
+        int startZ = offset_z + z * planes;
+        int endZ = std::min(offset_z + active_z, 
+                            startZ + planes);
+        
+        for (int y = 0; y < actual_y; ++y) {
+	  for (int x = 0; x < actual_x; ++x) {
+	    int threadID = (z * actual_x * actual_y) + (y * actual_x) + x; 
+	    int myEndZ = endZ;
+	    if (x >= maxX || y >= maxY)
+	      myEndZ = startZ;
+                
+	    (*startCoords)[threadID] = startZ;
+	    (*endCoords)[threadID] = myEndZ;
+	  }
+        }
+      }
+    }
+
 
     inline void initGrids()
     {
@@ -88,8 +204,11 @@ private:
         hostGrid.reset(new GridType(gridBox, CELL_TYPE()));
         initializer().grid(&*hostGrid);
         
-        deviceGrid = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
+        inputDeviceGrid = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
             hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
+	std::vector<CELL_TYPE> zeroMem(hostGrid->getDimensions().prod(), 0);
+	outputDeviceGrid = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
+				      hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), &zeroMem[0]);
     }
 
     inline MyPartitionManager& partitionManager() 
@@ -110,6 +229,112 @@ private:
     inline const Initializer<CELL_TYPE>& initializer() const
     {
         return this->getInitializer();
+    }
+    
+    inline std::string oclStrerror (int nr) {
+      switch (nr) {
+      case 0:
+	return "CL_SUCCESS";
+      case -1:
+	return "CL_DEVICE_NOT_FOUND";
+      case -2:
+	return "CL_DEVICE_NOT_AVAILABLE";
+      case -3:
+	return "CL_COMPILER_NOT_AVAILABLE";
+      case -4:
+	return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
+      case -5:
+	return "CL_OUT_OF_RESOURCES";
+      case -6:
+	return "CL_OUT_OF_HOST_MEMORY";
+      case -7:
+	return "CL_PROFILING_INFO_NOT_AVAILABLE";
+      case -8:
+	return "CL_MEM_COPY_OVERLAP";
+      case -9:
+	return "CL_IMAGE_FORMAT_MISMATCH";
+      case -10:
+	return "CL_IMAGE_FORMAT_NOT_SUPPORTED";
+      case -11:
+	return "CL_BUILD_PROGRAM_FAILURE";
+      case -12:
+	return "CL_MAP_FAILURE";
+      case -13:
+	return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
+      case -14: 
+	return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
+      case -30:
+	return "CL_INVALID_VALUE";
+      case -31:
+	return "CL_INVALID_DEVICE_TYPE";
+      case -32:
+	return "CL_INVALID_PLATFORM";
+      case -33:
+	return "CL_INVALID_DEVICE";
+      case -34:
+	return "CL_INVALID_CONTEXT";
+      case -35:
+	return "CL_INVALID_QUEUE_PROPERTIES";
+      case -36:
+	return "CL_INVALID_COMMAND_QUEUE";
+      case -37:
+	return "CL_INVALID_HOST_PTR";
+      case -38:
+	return "CL_INVALID_MEM_OBJECT";
+      case -39:
+	return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
+      case -40:
+	return "CL_INVALID_IMAGE_SIZE";
+      case -41:
+	return "CL_INVALID_SAMPLER";
+      case -42:
+	return "CL_INVALID_BINARY";
+      case -43:
+	return "CL_INVALID_BUILD_OPTIONS";
+      case -44:
+	return "CL_INVALID_PROGRAM";
+      case -45:
+	return "CL_INVALID_PROGRAM_EXECUTABLE";
+      case -46:
+	return "CL_INVALID_KERNEL_NAME";
+      case -47:
+	return "CL_INVALID_KERNEL_DEFINITION";
+      case -48:
+	return "CL_INVALID_KERNEL";
+      case -49:
+	return "CL_INVALID_ARG_INDEX";
+      case -50:
+	return "CL_INVALID_ARG_VALUE";
+      case -51:
+	return "CL_INVALID_ARG_SIZE";
+      case -52:
+	return "CL_INVALID_KERNEL_ARGS";
+      case -53:
+	return "CL_INVALID_WORK_DIMENSION";
+      case -54:
+	return "CL_INVALID_WORK_GROUP_SIZE";
+      case -55:
+	return "CL_INVALID_WORK_ITEM_SIZE";
+      case -56:
+	return "CL_INVALID_GLOBAL_OFFSET";
+      case -57:
+	return "CL_INVALID_EVENT_WAIT_LIST";
+      case -58:
+	return "CL_INVALID_EVENT";
+      case -59:
+	return "CL_INVALID_OPERATION";
+      case -60:
+	return "CL_INVALID_GL_OBJECT";
+      case -61:
+	return "CL_INVALID_BUFFER_SIZE";
+      case -62:
+	return "CL_INVALID_MIP_LEVEL";
+      case -63:
+	return "CL_INVALID_GLOBAL_WORK_SIZE";
+      case -64:
+	return "CL_INVALID_PROPERTY";
+      }
+      return "nothing found";
     }
 };
 
