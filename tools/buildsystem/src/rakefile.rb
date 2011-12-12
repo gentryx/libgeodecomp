@@ -244,7 +244,8 @@ task :clean do
     auto_cmakes.add(pathname.parent + "auto.cmake")
   end
   all_files = auto_cmakes.to_a + clobber_list +
-    [@opts.srcdir + "../doc", 
+    [@opts.srcdir + "../doc/html", 
+     @opts.srcdir + "../doc/xml", 
      @opts.builddir, 
      @typemaps_source, 
      @typemaps_header, 

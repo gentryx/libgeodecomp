@@ -3,7 +3,8 @@ syntax: glob
 ./**/test/**/*test.cpp
 ./**/test/**/main.cpp
 ./**/auto.cmake
-./doc
+./doc/html
+./doc/xml
 ./build
 ./conf.yaml
 ./src/conf.cmake
