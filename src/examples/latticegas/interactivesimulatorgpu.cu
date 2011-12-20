@@ -1,6 +1,7 @@
 #include <libgeodecomp/examples/latticegas/interactivesimulatorgpu.h>
 
 __constant__ SimParams simParamsDev;
+__constant__ SimParams simParamsDev2;
 
 // fixme: make these members of the simulator, somehow
 __device__ unsigned *frameDev;
@@ -74,6 +75,9 @@ void checkCudaError()
     }
 }
 
+// __constant__ float constData[1024*5];
+__constant__ SimParams constData;
+
 InteractiveSimulatorGPU::InteractiveSimulatorGPU(QObject *parent) :
     InteractiveSimulator(parent)
 {
@@ -85,18 +89,15 @@ InteractiveSimulatorGPU::InteractiveSimulatorGPU(QObject *parent) :
             grid[y  * simParamsHost.modelWidth + x][0] = Cell(Cell::liquid, Cell::R, 1);
         }
     }
-    cudaMemcpy(gridOldDev, &grid[0], simParamsHost.modelSize * sizeof(BigCell), 
-               cudaMemcpyHostToDevice);
-
     cudaMalloc(&frameDev, simParamsHost.modelSize * 4);
     cudaMalloc(&imageDev, simParamsHost.maxImageSize * 4);
     cudaMalloc(&statesDev, simParamsHost.modelSize);
     cudaMalloc(&gridOldDev, simParamsHost.modelSize * sizeof(BigCell));
     cudaMalloc(&gridNewDev, simParamsHost.modelSize * sizeof(BigCell));
-    std::cout << "cpy1\n";
-    cudaMemcpyToSymbol(&simParamsDev, &simParamsHost, sizeof(SimParams));
+    cudaMemcpy(gridOldDev, &grid[0], simParamsHost.modelSize * sizeof(BigCell), 
+               cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(simParamsDev, &simParamsHost, sizeof(SimParams));
     checkCudaError();
-    std::cout << "cpy2\n";
 }
 
 InteractiveSimulatorGPU::~InteractiveSimulatorGPU()
@@ -110,6 +111,7 @@ InteractiveSimulatorGPU::~InteractiveSimulatorGPU()
 
 void InteractiveSimulatorGPU::loadStates()
 {
+    std::cout << "loadStates()\n";
     dim3 blockDim(simParamsHost.threads, 1);
     dim3 gridDim(simParamsHost.modelWidth / simParamsHost.threads, simParamsHost.modelHeight);
     cudaMemcpy(statesDev, &states[0], simParamsHost.modelSize, 
@@ -119,23 +121,30 @@ void InteractiveSimulatorGPU::loadStates()
 
 void InteractiveSimulatorGPU::renderOutput()
 {
+    std::cout << "renderOutput1()\n";
     dim3 blockDim1(simParamsHost.threads, 1);
     dim3 gridDim1(simParamsHost.modelWidth / simParamsHost.threads, 
                   simParamsHost.modelHeight);
     cellsToFrame<<<gridDim1, blockDim1>>>(gridOldDev, frameDev);
+    checkCudaError();
+    std::cout << "renderOutput2()\n";
 
     dim3 blockDim2(outputFrameWidth, 1);
     dim3 gridDim2(1, outputFrameHeight);
     scaleFrame<<<gridDim2, blockDim2>>>(
         frameDev, imageDev, simParamsHost.modelWidth, simParamsHost.modelHeight);
+    checkCudaError();
+    std::cout << "renderOutput3()\n";
 
     cudaMemcpy(outputFrame, imageDev, outputFrameWidth * outputFrameHeight * 4, 
                cudaMemcpyDeviceToHost);
     checkCudaError();
+    std::cout << "renderOutput4()\n";
 }
 
 void InteractiveSimulatorGPU::update()
 {
+    std::cout << "update()\n";
     dim3 blockDim(simParamsHost.threads, 1);
     dim3 gridDim(simParamsHost.modelWidth / simParamsHost.threads, simParamsHost.modelHeight);
     updateGrid<<<gridDim, blockDim>>>(t, gridOldDev, gridNewDev);
