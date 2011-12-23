@@ -52,6 +52,7 @@ public:
 class OpenCLStepperBasicTest : public CxxTest::TestSuite
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_OPENCL
     typedef OpenCLStepper<JacobiCell> MyStepper;
 
     void setUp()
@@ -63,16 +64,21 @@ public:
         stepper.reset(
             new MyStepper(partitionManager, init));
     }
+#endif
 
     void testBasic()
     {
+#ifdef LIBGEODECOMP_FEATURE_OPENCL
         std::cout << "fixme: andi, implement me!\n";
+#endif
     }
 
+#ifdef LIBGEODECOMP_FEATURE_OPENCL
 private:
     boost::shared_ptr<JacobiInitializer> init;
     boost::shared_ptr<PartitionManager<3> > partitionManager;
     boost::shared_ptr<MyStepper> stepper;
+#endif
 };
 
 }
