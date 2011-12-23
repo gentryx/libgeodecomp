@@ -55,10 +55,12 @@ public:
             0x32, 0x30, 0x30, 0x20,   // width, 
             0x32, 0x32, 0x30, 0x20,   // height,
             0x32, 0x35, 0x35, 0x0a;   // and maxcolor (space separated)
+        // each cell gets plotted as a tile. we check the first lines
+        // of the two leftmost cells in the upper grid line
         for (int i = 0; i < 20; i++)
-            expected += 0x65, 0x2f, 0x0b; // rgb rgb...
+            expected += 0x01, 0x2f, 0x0b; // rgb rgb...
         for (int i = 0; i < 20; i++)
-            expected += 0x66, 0x2f, 0x0b; // rgb rgb...
+            expected += 0x02, 0x2f, 0x0b; // rgb rgb...
 
         std::vector<char> content;
         for (unsigned i = 0; i < expected.size(); i++) 
