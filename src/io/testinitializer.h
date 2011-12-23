@@ -55,10 +55,7 @@ public:
         unsigned cycle = startStep() * TestCell<DIM>::nanoSteps();
         for (CoordBoxSequence<DIM> s = rect.sequence(); s.hasNext();) {
             Coord<DIM> rawPos = s.next();
-            Coord<DIM> coord;
-            CoordNormalizer<DIM, DIM> normalizer(&coord, dimensions);
-            TestCell<DIM>::Topology::locate(normalizer, rawPos);
-
+            Coord<DIM> coord = TestCell<DIM>::Topology::normalize(rawPos, dimensions);
             double i = 1 + CoordToIndex<DIM>()(coord, dimensions);
             ret->at(rawPos) = TestCell<DIM>(coord, dimensions, cycle, i);
         }

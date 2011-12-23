@@ -51,7 +51,13 @@ module UtilityFunctions
     path = @testdir + "fixtures" + src_dir + "*"
     files = Dir.glob(path)
     assert(!files.empty?)
-    FileUtils.cp_r(files, @tmp_dir + "src")
+    target_src  = @tmp_dir + "src"
+    FileUtils.cp_r(files, target_src)
+    
+    target_link = target_src + "packagefoo" 
+    if !File.exist?(target_link)
+      FileUtils.ln_s(target_src, target_link);
+    end
   end
   
   def configure(path, args="")
