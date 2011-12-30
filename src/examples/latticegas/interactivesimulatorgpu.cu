@@ -74,9 +74,6 @@ void checkCudaError()
     }
 }
 
-// __constant__ float constData[1024*5];
-__constant__ SimParams constData;
-
 InteractiveSimulatorGPU::InteractiveSimulatorGPU(QObject *parent) :
     InteractiveSimulator(parent)
 {

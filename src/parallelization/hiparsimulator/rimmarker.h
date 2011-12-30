@@ -10,6 +10,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+// fixme: remove
 template<int DIM>
 class RimMarker
 {
