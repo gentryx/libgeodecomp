@@ -434,10 +434,10 @@ class MPIParser
   end
 
   # iterates though all members of klass class that are instance specific variables.
-  def sweep_all_members(klass)
+  def sweep_all_members(klass, kind="variable")
     filename = class_to_filename(klass)
     doc = @xml_docs[filename]
-    xpath = "doxygen/compounddef/sectiondef/memberdef[@kind='variable'][@static='no']"
+    xpath = "doxygen/compounddef/sectiondef/memberdef[@kind='#{kind}'][@static='no']"
 
     doc.elements.each(xpath) do |member|
       yield member

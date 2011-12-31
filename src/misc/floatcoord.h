@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
  * A real valued coordinate class, which contains an optional ID.
  */
 template<int DIM>
-class FloatCoordBase
+class FloatCoordBase 
 {
 public:
     std::string toString() const
@@ -67,7 +67,6 @@ public:
 
 }
 
-// fixme: replace this with a unified type trait "HasToString"?
 template<typename _CharT, typename _Traits, int DIMENSIONS>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
