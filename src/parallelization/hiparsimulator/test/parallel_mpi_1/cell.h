@@ -1,4 +1,5 @@
 #ifdef __cplusplus
+// this makes it easier in our unit tests to locate this file
 std::string cellSourceFile = __FILE__;
 
 #ifndef __global 

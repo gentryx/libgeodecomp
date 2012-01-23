@@ -6,12 +6,11 @@
 
 #include <boost/shared_ptr.hpp>
 #include <CL/cl.h>
-#define __CL_ENABLE_EXCEPTIONS
-
-// fixme: move cl.hpp?
-#include <libgeodecomp/parallelization/hiparsimulator/cl.hpp>
+#include <libgeodecomp/misc/cl.hpp>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 #include <libgeodecomp/misc/displacedgrid.h>
+
+#define __CL_ENABLE_EXCEPTIONS
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

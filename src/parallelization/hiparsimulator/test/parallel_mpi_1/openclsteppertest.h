@@ -2,9 +2,9 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/cell.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/openclstepper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/test/parallel_mpi_1/cell.h>
 
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 
@@ -12,39 +12,14 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class JacobiCell
+class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    typedef Topologies::Cube<3>::Topology Topology;
-
-    static inline unsigned nanoSteps() { return 1; }
-    
-    JacobiCell(const double& _temp=-1) :
-        temp(_temp)
+    CellInitializer(Coord<3> dimensions) :
+        SimpleInitializer<Cell>(dimensions)
     {}
 
-    template<typename COORD_MAP>
-    void update(const COORD_MAP& neighbors, const unsigned& nanoStep) 
-    {
-        temp = (neighbors[Coord<3>( 0,  0, -1)] +
-                neighbors[Coord<3>( 0, -1,  0)] +
-                neighbors[Coord<3>(-1,  0,  0)] +
-                neighbors[Coord<3>( 0,  1,  0)] +
-                neighbors[Coord<3>( 0,  0,  1)]) * (1.0 / 6.0);
-    }
-
-private:
-    double temp;
-};
-
-class JacobiInitializer : public SimpleInitializer<JacobiCell>
-{
-public:
-    JacobiInitializer(Coord<3> dimensions) :
-        SimpleInitializer<JacobiCell>(dimensions)
-    {}
-
-    virtual void grid(GridBase<JacobiCell, 3> *ret)
+    virtual void grid(GridBase<Cell, 3> *ret)
     {
         // fixme: andi, implement me!
     }
@@ -54,7 +29,7 @@ class OpenCLStepperBasicTest : public CxxTest::TestSuite
 {
 public:
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
-    typedef OpenCLStepper<JacobiCell> MyStepper;
+    typedef OpenCLStepper<Cell> MyStepper;
 
     void setUp()
     {
@@ -70,7 +45,6 @@ public:
     void testBasic()
     {
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
-        std::cout << "source: " << cellSourceFile << "\n";
         std::cout << "fixme: andi, implement me!\n";
 #endif
     }
