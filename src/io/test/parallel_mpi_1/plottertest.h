@@ -27,23 +27,23 @@ public:
 class PlotterTest : public CxxTest::TestSuite 
 {
 private:
-    unsigned int _width;
-    unsigned int _height;
-    Plotter<SimpleCell, SimpleCellPlotter> *_p;   
-    SimpleCellPlotter _s;
+    unsigned width;
+    unsigned height;
+    Plotter<SimpleCell, SimpleCellPlotter> *plotter;   
+    SimpleCellPlotter simplePlotter;
 
 public:
     void setUp()
     {
-        _width = 10;
-        _height = 24;
-        _p = new Plotter<SimpleCell, SimpleCellPlotter>(&_s, _width, _height);
+        width = 10;
+        height = 24;
+        plotter = new Plotter<SimpleCell, SimpleCellPlotter>(&simplePlotter, width, height);
     }
 
 
     void tearDown()
     {
-        delete _p;
+        delete plotter;
     }    
 
 
@@ -51,11 +51,11 @@ public:
     {
         unsigned gridDimX = 2;
         unsigned gridDimY = 3;
-        unsigned expectedDimX = gridDimX * _width;
-        unsigned expectedDimY = gridDimY * _height;
+        unsigned expectedDimX = gridDimX * width;
+        unsigned expectedDimY = gridDimY * height;
 
         Grid<SimpleCell> testGrid(Coord<2>(gridDimX, gridDimY));
-        Image result = _p->plotGrid(testGrid);
+        Image result = plotter->plotGrid(testGrid);
 
         TS_ASSERT_EQUALS(result.getDimensions().x(),  expectedDimX);
         TS_ASSERT_EQUALS(result.getDimensions().y(), expectedDimY);
@@ -66,8 +66,8 @@ public:
     {
         unsigned gridDimX = 2;
         unsigned gridDimY = 3;
-        unsigned expectedDimX = gridDimX * _width;
-        unsigned expectedDimY = gridDimY * _height;
+        unsigned expectedDimX = gridDimX * width;
+        unsigned expectedDimY = gridDimY * height;
 
         Grid<SimpleCell> testGrid(Coord<2>(gridDimX, gridDimY));
         testGrid[Coord<2>(0, 0)] =  33;
@@ -77,29 +77,42 @@ public:
         testGrid[Coord<2>(0, 2)] = 166;
         testGrid[Coord<2>(1, 2)] = 200;
 
-        Image result = _p->plotGrid(testGrid);
+        Image result = plotter->plotGrid(testGrid);
         
         Image expected(expectedDimX, expectedDimY);
 
-        Image f(_width, _height);
-        _s.plotCell(testGrid[Coord<2>(0, 2)], 
-                    &f, Coord<2>(0, 0), _width, _height);
-        expected.paste(Coord<2>(0 * _width, 0 * _height), f);
-        _s.plotCell(testGrid[Coord<2>(1, 2)], 
-                    &f, Coord<2>(0, 0), _width, _height);
-        expected.paste(Coord<2>(1 * _width, 0 * _height), f);
-        _s.plotCell(testGrid[Coord<2>(0, 1)], 
-                    &f, Coord<2>(0, 0), _width, _height);
-        expected.paste(Coord<2>(0 * _width, 1 * _height), f);
-        _s.plotCell(testGrid[Coord<2>(1, 1)], 
-                    &f, Coord<2>(0, 0), _width, _height);
-        expected.paste(Coord<2>(1 * _width, 1 * _height), f);
-        _s.plotCell(testGrid[Coord<2>(0, 0)], 
-                    &f, Coord<2>(0, 0), _width, _height);
-        expected.paste(Coord<2>(0 * _width, 2 * _height), f);
-        _s.plotCell(testGrid[Coord<2>(1, 0)], 
-                    &f, Coord<2>(0, 0), _width, _height);
-        expected.paste(Coord<2>(1 * _width, 2 * _height), f);
+        Image f(width, height);
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 2; ++x) {
+                Coord<2> pos(x, y);
+                simplePlotter.plotCell(testGrid[pos], &f, Coord<2>(), width, height);
+                expected.paste(Coord<2>(x * width, y * height), f);
+            }
+        }
+            
+        // simplePlotter.plotCell(testGrid[Coord<2>(0, 2)], 
+        //             &f, Coord<2>(0, 0), width, height);
+        // expected.paste(Coord<2>(0 * width, 0 * height), f);
+
+        // simplePlotter.plotCell(testGrid[Coord<2>(1, 2)], 
+        //             &f, Coord<2>(0, 0), width, height);
+        // expected.paste(Coord<2>(1 * width, 0 * height), f);
+
+        // simplePlotter.plotCell(testGrid[Coord<2>(0, 1)], 
+        //             &f, Coord<2>(0, 0), width, height);
+        // expected.paste(Coord<2>(0 * width, 1 * height), f);
+
+        // simplePlotter.plotCell(testGrid[Coord<2>(1, 1)], 
+        //             &f, Coord<2>(0, 0), width, height);
+        // expected.paste(Coord<2>(1 * width, 1 * height), f);
+
+        // simplePlotter.plotCell(testGrid[Coord<2>(0, 0)], 
+        //             &f, Coord<2>(0, 0), width, height);
+        // expected.paste(Coord<2>(0 * width, 2 * height), f);
+
+        // simplePlotter.plotCell(testGrid[Coord<2>(1, 0)], 
+        //             &f, Coord<2>(0, 0), width, height);
+        // expected.paste(Coord<2>(1 * width, 2 * height), f);
         
         TS_ASSERT_EQUALS(expected, result);
     }
@@ -115,7 +128,7 @@ public:
         testGrid[Coord<2>(1, 1)] = 133;
         testGrid[Coord<2>(0, 2)] = 166;
         testGrid[Coord<2>(1, 2)] = 200;
-        Image uncut = _p->plotGrid(testGrid);
+        Image uncut = plotter->plotGrid(testGrid);
 
         int x = 15;
         int y = 10;
@@ -127,7 +140,7 @@ public:
         int blackWidth = width - colorWidth;
         int blackHeight = height - colorHeight;
 
-        Image actual = _p->plotGridInViewport(testGrid, Coord<2>(x, y), 
+        Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(x, y), 
                                               width, height);
         /* check dimensions */
         TS_ASSERT_EQUALS(actual.getDimensions().x(), width);
@@ -152,7 +165,7 @@ public:
     {
         Grid<SimpleCell> testGrid(Coord<2>(2000, 2000));
         int t1 = time(0);
-        Image actual = _p->plotGridInViewport(testGrid, Coord<2>(500, 500), 
+        Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(500, 500), 
                                               1000, 1000);
         int t2 = time(0);
         int span = t2 - t1;
@@ -165,8 +178,8 @@ public:
         UVec dims(2);
         dims[0] = 42;
         dims[1] = 11;
-        _p->setCellDimensions(dims[0], dims[1]);
-        TS_ASSERT_EQUALS(dims, _p->getCellDimensions());
+        plotter->setCellDimensions(dims[0], dims[1]);
+        TS_ASSERT_EQUALS(dims, plotter->getCellDimensions());
     }
 
 };

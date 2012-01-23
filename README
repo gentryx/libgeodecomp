@@ -1,0 +1,9 @@
+LibGeoDecomp (Library for Geometric Decomposition codes) is a generic
+library for stencil codes. Users can build custom computer simulations
+(in most cases natural sciences or engineering problems) by describing
+their model in a C++ class. This class is then supplied to the library
+as a template parameter. The library essentially relieves the user
+from the pains of parallel programming, but is limited to this class
+of applications. Its modular architecture makes it applicable to
+various architectures (e.g. multi core CPUs, GPUs, MPI clusters). For
+more details see and a user guide http://www.libgeodecomp.org

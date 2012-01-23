@@ -108,7 +108,7 @@ private:
     template<class GRID_POINTER, class REGION_MARKER>
     void bump(GRID_POINTER oldGrid, GRID_POINTER newGrid, const REGION_MARKER& marker, const unsigned& step, const unsigned& nanoStep)const
     {
-        bump(oldGrid, newGrid, marker, step, nanoStep, ProvidesStreakIterator<REGION_MARKER>());
+        bump(oldGrid, newGrid, marker, step, nanoStep, boost::false_type());
     }
 
     template<class GRID_POINTER, class REGION_MARKER>
@@ -120,7 +120,7 @@ private:
     template<class GRID_POINTER, class REGION_MARKER>
     void bump(GRID_POINTER oldGrid, GRID_POINTER newGrid, const REGION_MARKER& marker, const unsigned& step, const unsigned& nanoStep, const boost::true_type&) const
     {
-        bumpImplStreaks(oldGrid, newGrid, marker.beginStreak(step), marker.endStreak(step), nanoStep, ProvidesDirectUpdate<CELL_TYPE>());
+        bumpImplStreaks(oldGrid, newGrid, marker.beginStreak(step), marker.endStreak(step), nanoStep, boost::false_type());
     }
 
     template<class GRID_POINTER, class ITERATOR1, class ITERATOR2>

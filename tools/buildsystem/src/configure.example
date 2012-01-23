@@ -11,6 +11,7 @@ dir = Pathname.new(__FILE__).parent
 dir = Pathname.new(FileUtils.pwd) + dir if dir.relative?
 opts.srcdir = dir
 arch = `uname -ms`.chomp.gsub(/ /, '-')
+opts.package_namespace = "packagefoo"
 opts.builddir = opts.srcdir + "../build/#{opts.arch}"
 opts.cxxtestdir = opts.srcdir + "../lib/cxxtest"
 opts.doxygen = "doxygen"

@@ -11,7 +11,7 @@ InteractiveSimulatorCPU::InteractiveSimulatorCPU(QObject *parent) :
     // add initial cells
     for (int y = 5; y < simParamsHost.modelHeight - 5; y += 10) {
         for (int x = 5; x < simParamsHost.modelWidth - 5; x += 10) {
-            gridOld[y  * simParamsHost.modelWidth + x][0] = Cell(Cell::liquid, Cell::R, 1);
+            gridOld[y  * simParamsHost.modelWidth + x][0] = Cell(Cell::liquid, Cell::C, 1);
         }
     }
 }

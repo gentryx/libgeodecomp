@@ -19,14 +19,23 @@ def test_header_pattern
   "#{@opts.srcdir}/**/test/*/*test.h"
 end
 
+def regen_typemaps
+  puts "regenerating Typemaps"
+  generate_documentation
+  namespace = "--namespace #{@opts.package_namespace}"
+  sh "ruby '#{@opts.srcdir}/../tools/typemapgenerator/generate.rb' #{namespace} --header-fix ^.+/src:#{@opts.package_namespace.downcase} ../doc/xml '#{@opts.typemapsdir}'"
+end
+
+# handle filenames with spaces safely (for cxxtest it isn't enough to
+# enclose a path in quotes...) spaces are common when building on
+# Windows, so this is no arcane feature.
 def escape_pathname(path)
-  # for cxxtest it isn't enough to enclose a path in quotes...
   path.to_s.gsub(/ /, "\\\\ ")
 end
 
 # check options:
 
-required_opts = [:srcdir, :builddir, :cxxtestdir, :doxygen, :make, :cmake, :cpack, :allowed_tests]
+required_opts = [:srcdir, :builddir, :cxxtestdir, :doxygen, :make, :cmake, :allowed_tests, :package_namespace]
 required_opts += [:mpiexec] if @opts.mpi
 required_opts += [:typemapsdir] if @opts.typemaps
 required_opts.each do |opt|
@@ -160,15 +169,12 @@ else
     typemaps_deps = File.read(@headercache).split("\n")
   end
 
-  task :typemaps => [@headercache, @typemaps_header]
+  task :typemaps => [@headercache, @typemaps_header, @typemaps_source]
 
   file @typemaps_header => @typemaps_source
   
   file @typemaps_source => typemaps_deps do  
-    puts "regenerating Typemaps"
-    generate_documentation
-    namespace = @opts.namespace.nil? ? "" : "--namespace #{@opts.namespace}"
-    sh "ruby '#{@opts.srcdir}/../tools/typemapgenerator/generate.rb' #{namespace} ../doc/xml '#{@opts.typemapsdir}'"
+    regen_typemaps
   end
   
   headers = FileList["#{@opts.srcdir}/**/*.h"].exclude(test_header_pattern).exclude(@typemaps_header)
@@ -190,18 +196,19 @@ else
       `grep 'friend class Typemaps;' #{h} 2>&1`
       buffer = [h] if $?.success?
     elsif newer_headers.size > 1
-      buffer = `grep "^.*friend class Typemaps;" #{newer_headers.join(" ")} 2>&1` 
+      buffer = `grep "^.*friend class Typemaps;" #{newer_headers.join(" ")} 2>/dev/null` 
+
       buffer = buffer.split("\n").map do |h| 
         h =~ /^(.+)\: /
         $1
       end
     end
-    
+
     new_typemaps_deps = (buffer + typemaps_deps).uniq.sort
     if typemaps_deps != new_typemaps_deps    
       File.open(@headercache, "w") { |f| f.puts new_typemaps_deps.join("\n")}
-      # adding these dependencies will trigger a rebuild of the Typemaps class
-      file @typemaps_source => new_typemaps_deps
+      # instantly rebuild typemaps
+      regen_typemaps
     end
   end
 end
@@ -226,7 +233,7 @@ end
 
 task :installer => :compile do
   cd @opts.builddir
-  sh "#{@opts.cpack}"  
+  sh "#{@opts.make} #{@opts.makeopts} package"  
 end
 
 file "#{@opts.builddir}/Makefile" => [:cmake_prep, @opts.builddir] do
@@ -237,7 +244,6 @@ file "#{@opts.builddir}/Makefile" => [:cmake_prep, @opts.builddir] do
   sh "#{@opts.cmake} #{src_relative}"
 end
 
-# fixme: don't delete boost dirs upon rake clean, but upon rake distclean
 task :clean do
   auto_cmakes = Set.new
   all_sources.each do |file|
@@ -245,7 +251,8 @@ task :clean do
     auto_cmakes.add(pathname.parent + "auto.cmake")
   end
   all_files = auto_cmakes.to_a + clobber_list +
-    [@opts.srcdir + "../doc", 
+    [@opts.srcdir + "../doc/html", 
+     @opts.srcdir + "../doc/xml", 
      @opts.builddir, 
      @typemaps_source, 
      @typemaps_header, 

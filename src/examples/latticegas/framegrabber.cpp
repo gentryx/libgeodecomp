@@ -38,7 +38,7 @@ void FrameGrabber::grab()
                 g = 255.0 * g * (1.0 / (MAX_X / 2));
                 b = 0;
 
-                if (t > 500) {
+                if (t < 2 || t > 5) {
                     r = 255;
                     g = 255;
                     b = 255;

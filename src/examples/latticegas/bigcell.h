@@ -55,16 +55,17 @@ public:
             if (cells[y].state != Cell::liquid) {
                 int col = cells[y].state;
                 r = simParams->palette[col][0];
-                g = simParams->palette[col][1];
-                b = simParams->palette[col][2];
-            } else {
+                // g = simParams->palette[col][1];
+                // b = simParams->palette[col][2];
+            }
+            // } else {
                 for (int i = 0; i < 7; ++i) {
                     int col = 7 + cells[y].particles[i];
                     r += simParams->palette[col][0];
                     g += simParams->palette[col][1];
                     b += simParams->palette[col][2];
                 }
-            }
+            // }
         }
 
         if (r > 255)

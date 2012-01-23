@@ -42,9 +42,6 @@ public:
     double val;
 };
 
-template<>
-class ProvidesDirectUpdate<SimpleCell> : public boost::true_type {};
-
 }
 
 #endif

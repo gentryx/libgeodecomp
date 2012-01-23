@@ -85,18 +85,15 @@ InteractiveSimulatorGPU::InteractiveSimulatorGPU(QObject *parent) :
             grid[y  * simParamsHost.modelWidth + x][0] = Cell(Cell::liquid, Cell::R, 1);
         }
     }
-    cudaMemcpy(gridOldDev, &grid[0], simParamsHost.modelSize * sizeof(BigCell), 
-               cudaMemcpyHostToDevice);
-
     cudaMalloc(&frameDev, simParamsHost.modelSize * 4);
     cudaMalloc(&imageDev, simParamsHost.maxImageSize * 4);
     cudaMalloc(&statesDev, simParamsHost.modelSize);
     cudaMalloc(&gridOldDev, simParamsHost.modelSize * sizeof(BigCell));
     cudaMalloc(&gridNewDev, simParamsHost.modelSize * sizeof(BigCell));
-    std::cout << "cpy1\n";
-    cudaMemcpyToSymbol(&simParamsDev, &simParamsHost, sizeof(SimParams));
+    cudaMemcpy(gridOldDev, &grid[0], simParamsHost.modelSize * sizeof(BigCell), 
+               cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(simParamsDev, &simParamsHost, sizeof(SimParams));
     checkCudaError();
-    std::cout << "cpy2\n";
 }
 
 InteractiveSimulatorGPU::~InteractiveSimulatorGPU()
@@ -123,11 +120,13 @@ void InteractiveSimulatorGPU::renderOutput()
     dim3 gridDim1(simParamsHost.modelWidth / simParamsHost.threads, 
                   simParamsHost.modelHeight);
     cellsToFrame<<<gridDim1, blockDim1>>>(gridOldDev, frameDev);
+    checkCudaError();
 
     dim3 blockDim2(outputFrameWidth, 1);
     dim3 gridDim2(1, outputFrameHeight);
     scaleFrame<<<gridDim2, blockDim2>>>(
         frameDev, imageDev, simParamsHost.modelWidth, simParamsHost.modelHeight);
+    checkCudaError();
 
     cudaMemcpy(outputFrame, imageDev, outputFrameWidth * outputFrameHeight * 4, 
                cudaMemcpyDeviceToHost);

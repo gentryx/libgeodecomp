@@ -61,6 +61,12 @@ opts = OptionParser.new do |o|
        "and look after classes in <ns> whilst resolving references to them.") do |namespace|
     options[:namespace] = namespace
   end
+  o.on("--header-fix REPLACEMENT_PATTERN",
+       "replace a pattern in the header paths") do |pattern|
+    pattern =~ /(.+):(.+)/
+    options[:header_pattern] = $1
+    options[:header_replacement] = $2
+  end
 end
 
 opts.parse!(ARGV)
@@ -87,7 +93,12 @@ if options[:scan]
   end  
 else
   output_path = Pathname.new(ARGV[1] || "./")
-  header, source = TypemapGenerator.generate_forest(xml_path, basedir, options[:sloppy], options[:namespace])
+  header, source = 
+    TypemapGenerator.generate_forest(xml_path, basedir, 
+                                     options[:sloppy], 
+                                     options[:namespace],
+                                     /#{options[:header_pattern]}/, 
+                                     options[:header_replacement])
   File.open(output_path + "typemaps.h",  "w").write(header)
   File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)
 end
