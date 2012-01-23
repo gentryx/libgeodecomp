@@ -8,6 +8,9 @@ File.open(@configfile) do |f|
   @opts = YAML.load(f)
 end
 
+OPENCL_KERNEL_ESCAPED = @opts.srcdir + "parallelization/hiparsimulator/escapedopenclkernel.h"
+OPENCL_KERNEL_SOURCE  = @opts.srcdir + "parallelization/hiparsimulator/openclkernel.cl"
+
 class Pathname
   # Returns true if path lies below directory
   def below?(directory)
@@ -68,14 +71,29 @@ task :cmake_prep => :code_generation
 
 task :code_generation => @opts.builddir.to_s
 
+task :code_generation => :typemaps 
+
+task :code_generation => OPENCL_KERNEL_ESCAPED
+
 task :install => :compile do
   cd @opts.builddir
   sh "#{@opts.make} #{@opts.makeopts} install" 
 end
 
-task :code_generation => :typemaps 
 
 directory @opts.builddir.to_s
+
+# escape OpenCL kernel source to make it includable in C++ source
+file OPENCL_KERNEL_ESCAPED => OPENCL_KERNEL_SOURCE do
+  File.open(OPENCL_KERNEL_ESCAPED, "w+") do |file_out|
+    File.open(OPENCL_KERNEL_SOURCE) do |file_in|
+      while line = file_in.gets
+        escaped_line = line.chomp.gsub(/"/, "\\\"")
+        file_out.puts "\"#{escaped_line}\\n\""
+      end
+    end
+  end
+end
 
 # unit test generation:
 

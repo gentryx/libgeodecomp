@@ -4,15 +4,14 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
 
+#include <boost/shared_ptr.hpp>
 #include <CL/cl.h>
 #define __CL_ENABLE_EXCEPTIONS
+
+// fixme: move cl.hpp?
 #include <libgeodecomp/parallelization/hiparsimulator/cl.hpp>
-#include <boost/shared_ptr.hpp>
-
-#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
-
-#include <fstream>
+#include <libgeodecomp/misc/displacedgrid.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -23,14 +22,17 @@ class OpenCLStepper : public StepperHelper<
 {
 public:
     const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+
     friend class OpenCLStepperTest;
+
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, false> GridType;
     typedef class StepperHelper<GridType> ParentType;
     typedef PartitionManager< 
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-
+  
     inline OpenCLStepper(
+        const std::string& cellSourceFile,
         boost::shared_ptr<MyPartitionManager> _partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
         ParentType(_partitionManager, _initializer)
@@ -38,45 +40,45 @@ public:
         // fixme: openCL selection routine
         int platformId = 0;
         int deviceId = 0;
-	try {
-	  std::vector<cl::Platform> platforms;
-	  cl::Platform::get(&platforms);
-	  std::vector<cl::Device> devices;
-	  platforms.at(platformId).getDevices(CL_DEVICE_TYPE_ALL, &devices);
-	  cl::Device usedDevice = devices.at(deviceId);
-	  context = cl::Context(devices);
-	  cmdQueue = cl::CommandQueue(context, usedDevice);
- 
-	  std::ifstream clSourceFile;
-	  std::string oclsrc = "./openclkernel.cl";
-	    
-	  clSourceFile.open(oclsrc.c_str()); //std::ifstream::in);
-	  std::string clSourceString;
-	  while (clSourceFile.good()) {
-	    char c = clSourceFile.get();
-	    clSourceString.append(1, c);
-	  }
-	  clSourceFile.close();
-	    
-	  cl::Program::Sources clSource = cl::Program::Sources(1, std::make_pair(clSourceString.c_str(), clSourceString.size() - 1));
-	  cl::Program clProgram = cl::Program(context, clSource);
-	    
-	  std::string options = std::string(" -I ") + oclsrc;
-	    
-	  clProgram.build(devices, options.c_str(), NULL, NULL);
-	  std::cout << "Build Log: " << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(usedDevice) << std::endl;
-	  std::cout << "----------" << std::endl;
-	    
-	  kernel = cl::Kernel(clProgram, "execute");
-        } catch (cl::Error &err) {
-	  std::cerr << "OpenCL error: " << err.what() << "(" << err.err() << ")" << std::endl;
-	  throw err;
+
+        std::vector<cl::Platform> platforms;
+        cl::Platform::get(&platforms);
+        std::vector<cl::Device> devices;
+        platforms.at(platformId).getDevices(CL_DEVICE_TYPE_ALL, &devices);
+        cl::Device usedDevice = devices.at(deviceId);
+        context = cl::Context(devices);
+        cmdQueue = cl::CommandQueue(context, usedDevice);
+
+        std::string clSourceString = 
+"#if defined(cl_khr_fp64)\n"
+"#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
+"#elif defined(cl_amd_fp64)\n"
+"#pragma OPENCL EXTENSION cl_amd_fp64 : enable\n"
+"#endif\n"
+"\n"
+"#include \"" + cellSourceFile + "\"\n"
+#include <libgeodecomp/parallelization/hiparsimulator/escapedopenclkernel.h>
+            ;
+
+        cl::Program::Sources clSource = 
+            cl::Program::Sources(
+                1, 
+                std::make_pair(clSourceString.c_str(), 
+                               clSourceString.size()));
+        cl::Program clProgram = cl::Program(context, clSource);
+
+
+        try {
+            clProgram.build(devices);
         } catch (...) {
-	  throw;
-	}
-        curStep = initializer().startStep();
-        curNanoStep = 0;
-        initGrids();
+            std::cout << "Build Log: " << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(usedDevice) << std::endl;
+            throw;
+        }
+
+        kernel = cl::Kernel(clProgram, "execute");
+        // curStep = initializer().startStep();
+        // curNanoStep = 0;
+        // initGrids();
     }
 
     inline virtual std::pair<int, int> currentStep() const

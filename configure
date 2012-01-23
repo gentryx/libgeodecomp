@@ -39,11 +39,12 @@ def package_name
 end
 
 def cflags
+  ret = "-O2 -Wall -Wno-sign-compare"
   if @opts.build_type == "Debug"
-    "-g -fno-inline -fno-default-inline -finline-limit=1" 
-  else
-    "-O2 -Wall -Wno-sign-compare"
+    ret = "-g -fno-inline -fno-default-inline -finline-limit=1" 
   end
+
+  return ret
 end
 
 def set_gnu_make_opts
@@ -467,6 +468,17 @@ def read_commandline_options
   parser.parse!(ARGV)
 end
 
+def find_opencl
+  paths = ENV['CPLUS_INCLUDE_PATH'].nil? ? [] : ENV['CPLUS_INCLUDE_PATH'].split(":") 
+  paths << "/usr/include"
+  paths.each do |path|
+    header = Pathname.new(path) + "CL" + "cl.h"
+    return true if File.exist?(header)
+  end
+
+  return nil
+end
+
 # fill in options which are currently unspecified
 def detect_defaults
   puts "Detecting defaults"
@@ -487,15 +499,7 @@ def detect_defaults
   # MPI is required for typemaps to work
   @opts.supplement(:mpiexec, @opts.mpiprefix + "bin" + "mpiexec") if @opts.mpi
   @opts.supplement(:typemaps, @opts.mpi == true) 
-
-  opencl = false
-  paths = ENV['CPLUS_INCLUDE_PATH'].nil? ? [] : ENV['CPLUS_INCLUDE_PATH'].split(":") 
-  paths << "/usr/include"
-  paths.each do |path|
-    header = Pathname.new(path) + "CL" + "cl.h"
-    opencl ||= File.exist?(header)
-  end
-  @opts.supplement(:opencl, opencl) 
+  @opts.supplement(:opencl, find_opencl) 
 
   cpuinfo = `cat /proc/cpuinfo 2>/dev/null`
   @opts.supplement(:cell, cpuinfo =~ /Cell Broadband Engine/ ? true : false)

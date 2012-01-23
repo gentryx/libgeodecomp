@@ -2,6 +2,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/cell.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/openclstepper.h>
 
@@ -62,13 +63,14 @@ public:
 
         partitionManager.reset(new PartitionManager<3>(rect));
         stepper.reset(
-            new MyStepper(partitionManager, init));
+            new MyStepper(cellSourceFile, partitionManager, init));
     }
 #endif
 
     void testBasic()
     {
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
+        std::cout << "source: " << cellSourceFile << "\n";
         std::cout << "fixme: andi, implement me!\n";
 #endif
     }
