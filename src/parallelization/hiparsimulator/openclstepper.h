@@ -33,18 +33,16 @@ public:
     inline OpenCLStepper(
         const std::string& cellSourceFile,
         boost::shared_ptr<MyPartitionManager> _partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
+        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer,
+        const int& platformID=0,
+        const int& deviceID=0) :
         ParentType(_partitionManager, _initializer)
     {
-        // fixme: openCL selection routine
-        int platformId = 0;
-        int deviceId = 0;
-
         std::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
         std::vector<cl::Device> devices;
-        platforms.at(platformId).getDevices(CL_DEVICE_TYPE_ALL, &devices);
-        cl::Device usedDevice = devices.at(deviceId);
+        platforms.at(platformID).getDevices(CL_DEVICE_TYPE_ALL, &devices);
+        cl::Device usedDevice = devices.at(deviceID);
         context = cl::Context(devices);
         cmdQueue = cl::CommandQueue(context, usedDevice);
 
@@ -59,22 +57,27 @@ public:
 #include <libgeodecomp/parallelization/hiparsimulator/escapedopenclkernel.h>
             ;
 
-        cl::Program::Sources clSource = 
-            cl::Program::Sources(
-                1, 
-                std::make_pair(clSourceString.c_str(), 
-                               clSourceString.size()));
+        cl::Program::Sources clSource(
+            1, 
+            std::make_pair(clSourceString.c_str(), 
+                           clSourceString.size()));
         cl::Program clProgram = cl::Program(context, clSource);
-
 
         try {
             clProgram.build(devices);
         } catch (...) {
-            std::cout << "Build Log: " << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(usedDevice) << std::endl;
+            // Normally we don't catch exceptions, but in this case
+            // printing the build log (which might get lost otherwise)
+            // is valuable for the user who needs to debug his code.
+            std::cerr << "Build Log: " 
+                      << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(
+                          usedDevice) << "\n";
             throw;
         }
 
         kernel = cl::Kernel(clProgram, "execute");
+
+        // fixme:
         // curStep = initializer().startStep();
         // curNanoStep = 0;
         // initGrids();
