@@ -12,6 +12,7 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+#ifdef LIBGEODECOMP_FEATURE_OPENCL
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
@@ -24,6 +25,7 @@ public:
         // fixme: andi, implement me!
     }
 };
+#endif
 
 class OpenCLStepperBasicTest : public CxxTest::TestSuite
 {
