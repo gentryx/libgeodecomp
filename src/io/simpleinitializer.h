@@ -12,8 +12,8 @@ public:
     const static int DIMENSIONS = CELL_TYPE::Topology::DIMENSIONS;
 
     SimpleInitializer(
-        const Coord<DIMENSIONS> _dimensions,
-        const unsigned _steps = 300) :
+        const Coord<DIMENSIONS>& _dimensions,
+        const unsigned& _steps = 300) :
         dimensions(_dimensions), steps(_steps)
     {}
 

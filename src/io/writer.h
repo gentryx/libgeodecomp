@@ -37,8 +37,10 @@ public:
     Writer(
         const std::string& _prefix, 
         MonolithicSimulator<CELL_TYPE> *_sim, 
-        const unsigned& _period = 1): 
-        prefix(_prefix), sim(_sim), period(_period)
+        const unsigned& _period = 1) : 
+        prefix(_prefix), 
+        sim(_sim), 
+        period(_period)
     {
         if (prefix == "") 
             throw std::invalid_argument("empty prefixes are forbidden");
