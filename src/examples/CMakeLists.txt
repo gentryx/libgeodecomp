@@ -1,4 +1,5 @@
 add_subdirectory(ants)
+add_subdirectory(bouncingspheres)
 add_subdirectory(chromotography)
 add_subdirectory(circle)
 add_subdirectory(hardwarefluke)
