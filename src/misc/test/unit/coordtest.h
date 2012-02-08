@@ -8,17 +8,9 @@ namespace LibGeoDecomp {
 
 class CoordTest : public CxxTest::TestSuite 
 {
-    double EPSILON;
-    double RELAXED_EPSILON;
     Coord<2> *_c1;
 
 public:
-    CoordTest()
-    {
-        EPSILON = boost::math::tools::epsilon<double>();
-        RELAXED_EPSILON = 1.14e-13;
-    }
-
     bool includesCoord(Coord<2>::Vector vec, int x, int y) {
         Coord<2> compare(x, y);
         for(Coord<2>::Vector::iterator i = vec.begin(); i != vec.end(); i++) {
