@@ -201,7 +201,6 @@ public:
         }
 
         // add events to patchlinks
-        // fixme: unite the two vectors
         for (SuperVector<MyPatchProviderPtr>::iterator i = providers.begin();
              i != providers.end();
              ++i) {
