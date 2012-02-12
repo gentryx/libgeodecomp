@@ -10,7 +10,6 @@
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
-#include <libgeodecomp/parallelization/hiparsimulator/parallelstepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/intersectingregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/innersetmarker.h>
@@ -89,17 +88,16 @@ public:
         const GridType **grid, 
         const Region<2> **validRegion) 
     {
-        *grid = regionStepper.getGrid();
         *validRegion = &partitionManager.ownRegion();
     }
 
     inline const DisplacedGrid<CELL_TYPE> *getDisplacedGrid()
     {        
-        return regionStepper.getGrid();
+        return 0;
+        // return regionStepper.getGrid();
     }
 
 private:
-    ParallelStepper<CELL_TYPE> regionStepper;
 //     SuperMap<unsigned, Outgroup<PARTITION> > outgroups;
     // fixme: who deletes the balancer?
     LoadBalancer *balancer;
@@ -120,7 +118,6 @@ private:
         
         while (nanoStepCounter < endNanoStep) {
             std::pair<unsigned, EventSet> currentEvents = extractCurrentEvents();
-            regionStepper.nanoStep(currentEvents.first, events.begin()->first, nanoStepCounter);
             nanoStepCounter = currentEvents.first;
             handleEvents(currentEvents.second);
         }
@@ -177,9 +174,6 @@ private:
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager.resetGhostZones(boundingBoxes);
         // fixme: care for validGhostZoneWidth
-        regionStepper.resetRegions(
-            &partitionManager,
-            this->initializer);
     }
 
     inline SuperVector<unsigned> initialWeights() const
