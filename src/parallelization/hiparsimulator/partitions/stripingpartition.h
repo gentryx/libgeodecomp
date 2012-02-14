@@ -7,11 +7,12 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-template<int DIM>
+template<int DIMENSIONS>
 class StripingPartition
 {
     friend class StripingPartitionTest;
 public:
+    const static int DIM = DIMENSIONS;
 
     class Iterator 
     {

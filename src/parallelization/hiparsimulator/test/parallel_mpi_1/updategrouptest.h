@@ -17,84 +17,35 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: remove this test
-
-// template<class CELL_TYPE>
-// class MockPatchProvider : public PatchProvider<CELL_TYPE>
-// {
-// public:
-//     virtual void get(DisplacedGrid<CELL_TYPE> *destinationGrid, const Region& region, const unsigned& nanoStep)
-//     {
-//         if (storedRegions.front() != region) {
-//             Region delta = (storedRegions.front() - region) + (region - storedRegions.front());
-//             throw std::logic_error("requested region doesn't match stored region, delta is: " + delta.toString());
-//         }
-//         if (storedNanoSteps.front() != nanoStep) 
-//             throw std::logic_error("requested time step doesn't match expected nano step");
-//         GridVecConv::vectorToGrid(storage.front(), destinationGrid, region);
-//         storage.pop_front();
-//         storedRegions.pop_front();
-//         storedNanoSteps.pop_front();
-//     }
-
-//     template<class GRID_TYPE>
-//     void push(const GRID_TYPE& grid, const Region& region, const unsigned& nanoStep)
-//     {
-//         storedRegions.push_back(region);
-//         storedNanoSteps.push_back(nanoStep);
-//         storage.push_back(GridVecConv::gridToVector(grid, region));
-//     }
-
-// private:
-//     std::deque<SuperVector<CELL_TYPE> > storage;
-//     std::deque<Region> storedRegions;
-//     std::deque<unsigned> storedNanoSteps;
-// };
-
-// template<class CELL_TYPE>
-// class MockPatchAccepter : public PatchAccepter<CELL_TYPE>
-// {
-// public:
-//     virtual void put(const DisplacedGrid<CELL_TYPE>& grid, const Region& validRegion, const unsigned& nanoStep)
-//     {
-//         if (storedNanoSteps.empty() || nanoStep < storedNanoSteps.front())
-//             return;
-//         if (nanoStep > storedNanoSteps.front()) 
-//             throw std::logic_error("expected nano step was left out");
-//         if (!(storedRegions.front() - validRegion).empty()) 
-//             throw std::logic_error("validRegion is not a super set of the expected region");
-//         storage.push_back(GridVecConv::gridToVector(grid, storedRegions.front()));
-//         storedNanoSteps.pop_front();
-//         storedRegions.pop_front();
-//     }
-
-//     void push(const Region& region, const unsigned& nanoStep)
-//     {
-//         storedRegions.push_back(region);
-//         storedNanoSteps.push_back(nanoStep);
-//     }
-
-// private:
-//     std::deque<SuperVector<CELL_TYPE> > storage;
-//     std::deque<Region> storedRegions;
-//     std::deque<unsigned> storedNanoSteps;
-// };
-
 class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
-//     typedef ZCurvePartition Partition;
-//     typedef PartitionManager<IntersectingRegionAccumulator<Partition> >::RegionVecMap RegionVecMap;
-//     typedef PartitionManager<RegionAccumulator<Partition> > PartitionManager;
-    
+    typedef ZCurvePartition<3> Partition;
+    typedef VanillaStepper<TestCell<3> > MyStepper;
+    typedef UpdateGroup<TestCell<3>, Partition, MyStepper> MyUpdateGroup;
+
     void setUp()
     {
-//         rank = MPILayer().rank();
-//         dimensions = Coord(280, 200);
-//         partition = Partition(Coord(0, 0), dimensions);
-//         nodeGhostZoneWidth = 10;
-//         clusterGhostZoneWidth = 33;
+        rank = MPILayer().rank();
+        dimensions = Coord<3>(280, 50, 32);
+        partition = Partition(Coord<3>(), dimensions);
+        weights.clear();
+        weights << 0;
+        weights << dimensions.prod();
+        ghostZoneWidth = 10;
+        init.reset(new TestInitializer<3>(dimensions));
+        updateGroup.reset(
+            new MyUpdateGroup(
+                Partition(Coord<3>(), dimensions),
+                weights,
+                0,
+                CoordBox<3>(Coord<3>(), dimensions),
+                ghostZoneWidth,
+                init));
+                
+                              
 
+// fixme: remove dead code
 //         maxSteps = 1500;
 //         firstStep = 20;
 //         firstNanoStep = 18;
@@ -185,48 +136,14 @@ public:
 //         // fixme: check events on mockpatchprovider/accepter
     }
 
-// private:
-//     boost::shared_ptr<Initializer<TestCell> > init;
-//     boost::shared_ptr<UpdateGroup<TestCell, Partition> > clusterGhostZoneGroup;   
-//     boost::shared_ptr<UpdateGroup<TestCell, Partition, RegionAccumulator> > simulationAreaGroup;
-//     boost::shared_ptr<SerialSimulator<TestCell> > serialSim;
-//     boost::shared_ptr<MockPatchProvider<TestCell> > mockPatchProvider;
-//     boost::shared_ptr<MockPatchAccepter<TestCell> > mockPatchAccepter;
-//     Partition partition;
-//     PartitionManager partitionManager;
-//     Region clusterRegion;
-//     Region innerClusterRim;
-//     Region patchRegion;
-//     Coord dimensions;
-//     unsigned rank;
-//     unsigned nodeGhostZoneWidth;
-//     unsigned clusterGhostZoneWidth;
-//     SuperVector<unsigned> weights;
-//     SuperVector<CoordRectangle> boundingBoxes;
-//     unsigned offset;
-//     unsigned maxSteps;
-//     unsigned firstStep;
-//     unsigned firstNanoStep;
-//     unsigned firstCycle;
-
-//     TestInitializer testInit()
-//     {
-//         return TestInitializer(dimensions.x, dimensions.y, maxSteps, firstStep, firstNanoStep);
-//     }
-
-//     SuperVector<CoordRectangle> genBoundingBoxes(const Partition& partition, const unsigned& offset, const SuperVector<unsigned>& weights)
-//     {
-//         SuperVector<CoordRectangle> ret(weights.size());
-//         unsigned currentOffset = offset;
-//         for (int i = 0; i < weights.size(); ++i) {
-//             Region s;
-//             for (Partition::Iterator c = partition[currentOffset]; c != partition[currentOffset + weights[i]]; ++c)
-//                 s << *c;
-//             ret[i] = s.boundingBox();
-//             currentOffset += weights[i];
-//         }
-//         return ret;
-//     }
+private:
+    unsigned rank;
+    Coord<3> dimensions;
+    SuperVector<unsigned> weights;
+    Partition partition;
+    unsigned ghostZoneWidth;
+    boost::shared_ptr<Initializer<TestCell<3> > > init;
+    boost::shared_ptr<UpdateGroup<TestCell<3>, Partition > > updateGroup;
 };
 
 }

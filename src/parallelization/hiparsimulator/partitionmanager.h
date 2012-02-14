@@ -15,11 +15,11 @@ namespace HiParSimulator {
 // fixme: get rid of DIM, deduce it from TOPOLOGY
 template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
 class PartitionManager {
-    friend class PartitionManagerTest;
-    friend class VanillaStepperTest;
     template<int> friend class RimMarker;
     template<int> friend class InnerSetMarker;
     friend class HiParSimulatorTest;
+    friend class PartitionManagerTest;
+    friend class VanillaStepperTest;
 public:
     typedef SuperMap<int, SuperVector<Region<DIM> > > RegionVecMap;
     typedef TOPOLOGY Topology;
@@ -32,8 +32,8 @@ public:
         SuperVector<unsigned> weights(1, _simulationArea.size());
         StripingPartition<DIM> partition(
             Coord<DIM>(), _simulationArea.dimensions);
-        VanillaRegionAccumulator<StripingPartition<DIM>, DIM> *accu = 
-            new VanillaRegionAccumulator<StripingPartition<DIM>, DIM>(
+        VanillaRegionAccumulator<StripingPartition<DIM> > *accu = 
+            new VanillaRegionAccumulator<StripingPartition<DIM> >(
                 partition,
                 0,
                 weights);

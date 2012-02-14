@@ -68,7 +68,7 @@ public:
         // 7: -----11---
         // 8: -----11---
         // 9: ---222222-
-        IntersectingRegionAccumulator<StripingPartition<2>, 2> ax(
+        IntersectingRegionAccumulator<StripingPartition<2> > ax(
             overlay, partition, offset, weights);
         
         Region<2> expected0, expected1, expected2;

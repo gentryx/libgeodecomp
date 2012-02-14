@@ -35,7 +35,7 @@ public:
 
         intersector.resetRegions(
             CoordBox<2>(Coord<2>(0, 0), dimensions),
-            new VanillaRegionAccumulator<StripingPartition<2>, 2>(
+            new VanillaRegionAccumulator<StripingPartition<2> >(
                 partition,
                 offset,
                 weights),

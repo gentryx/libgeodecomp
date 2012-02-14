@@ -153,8 +153,8 @@ private:
 
     inline void resetSimulation(const unsigned &ghostZoneWidth)
     {
-        this->resetEvents();
-        this->resetRegions(ghostZoneWidth);
+        // this->resetEvents();
+        // this->resetRegions(ghostZoneWidth);
     }
 
     inline void resetRegions(const unsigned &ghostZoneWidth)
@@ -162,7 +162,7 @@ private:
         partitionManager.resetRegions(
             CoordBox<2>(Coord<2>(), 
                         this->initializer->gridDimensions()),
-            new VanillaRegionAccumulator<PARTITION, DIMENSIONS>(
+            new VanillaRegionAccumulator<PARTITION>(
             myPartition(),
             myOffset(),
             initialWeights()),

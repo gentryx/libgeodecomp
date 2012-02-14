@@ -70,7 +70,7 @@ public:
 
         partitionManager.resetRegions(
             CoordBox<2>(Coord<2>(), dimensions),
-            new VanillaRegionAccumulator<StripingPartition<2>, 2>(
+            new VanillaRegionAccumulator<StripingPartition<2> >(
                 partition, offset, weights),
             rank,
             ghostZoneWidth);
@@ -152,7 +152,7 @@ public:
         PartitionManager<3, Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
             box, 
-            new VanillaRegionAccumulator<StripingPartition<3>, 3>(
+            new VanillaRegionAccumulator<StripingPartition<3> >(
                 partition,
                 0,
                 weights),

@@ -9,11 +9,12 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: deduce DIM from partition?!
-template<typename PARTITION, int DIM>
-class VanillaRegionAccumulator : public RegionAccumulator<DIM>
+template<typename PARTITION>
+class VanillaRegionAccumulator : public RegionAccumulator<PARTITION::DIM>
 {
 public:
+    const static int DIM = PARTITION::DIM;
+
     inline VanillaRegionAccumulator(
         const PARTITION& _partition=PARTITION(), 
         const unsigned& offset=0,

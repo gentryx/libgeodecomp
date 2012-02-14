@@ -16,7 +16,7 @@ namespace HiParSimulator {
  * PatchProvider and PatchAccepter.
  */
 template<typename GRID_TYPE>
-class StepperHelper : Stepper<typename GRID_TYPE::CellType>
+class StepperHelper : public Stepper<typename GRID_TYPE::CellType>
 {
 public:
     friend class StepperTest;

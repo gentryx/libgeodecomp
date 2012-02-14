@@ -15,12 +15,14 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-template<int DIM>
-class ZCurvePartition : public SpaceFillingCurve<DIM>
+template<int DIMENSIONS>
+class ZCurvePartition : public SpaceFillingCurve<DIMENSIONS>
 {
     friend class ZCurvePartitionTest;
 
 public:
+    const static int DIM = DIMENSIONS;
+
     typedef boost::shared_ptr<boost::multi_array<typename Coord<DIM>::Vector, DIM> > Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
     typedef typename Topology::template LocateHelper<DIM, typename Coord<DIM>::Vector> LocateHelper;
@@ -353,7 +355,7 @@ public:
 
 private:
     static Cache coordsCache;
-    static Coord<DIM> maxCachedDimensions;
+    static Coord<DIMENSIONS> maxCachedDimensions;
     static bool cachesInitialized;
 
     Coord<DIM> origin;

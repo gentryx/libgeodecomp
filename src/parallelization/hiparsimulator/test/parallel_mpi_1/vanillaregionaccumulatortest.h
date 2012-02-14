@@ -35,7 +35,7 @@ public:
         // 7: 1111111111
         // 8: 1111111111
         // 9: 1122222222
-        VanillaRegionAccumulator<StripingPartition<2>, 2> ax(partition, offset, weights);
+        VanillaRegionAccumulator<StripingPartition<2> > ax(partition, offset, weights);
         
         Region<2> expected0, expected1, expected2;
         expected0 << Streak<2>(Coord<2>(9, 0), 10)

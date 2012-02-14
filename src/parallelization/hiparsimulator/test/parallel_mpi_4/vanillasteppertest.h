@@ -81,7 +81,7 @@ public:
         partitionManager.reset(new MyPartitionManager());
         partitionManager->resetRegions(
             box, 
-            new VanillaRegionAccumulator<StripingPartition<3>, 3>(
+            new VanillaRegionAccumulator<StripingPartition<3> >(
                 partition,
                 0,
                 weights),

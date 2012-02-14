@@ -36,7 +36,7 @@ public:
 
         manager.resetRegions(
             CoordBox<2>(Coord<2>(), dimensions),
-            new VanillaRegionAccumulator<StripingPartition<2>, 2>(
+            new VanillaRegionAccumulator<StripingPartition<2> >(
                 partition,
                 offset,
                 weights),

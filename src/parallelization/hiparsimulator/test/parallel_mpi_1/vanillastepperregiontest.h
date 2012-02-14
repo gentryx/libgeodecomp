@@ -62,8 +62,8 @@ public:
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];
-        VanillaRegionAccumulator<StripingPartition<2>, 2> *accu = 
-            new VanillaRegionAccumulator<StripingPartition<2>, 2>(
+        VanillaRegionAccumulator<StripingPartition<2> > *accu = 
+            new VanillaRegionAccumulator<StripingPartition<2> >(
                 partition,
                 0,
                 weights);
