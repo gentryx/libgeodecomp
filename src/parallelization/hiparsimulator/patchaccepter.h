@@ -8,12 +8,15 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+/**
+ * The PatchAccepter collects grid snippets from steppers, either for
+ * IO or for ghostzone synchronization.
+ */
 template<class GRID_TYPE>
 class PatchAccepter
 {
-public:
     friend class PatchBufferTest;
-
+public:
     const static int DIM = GRID_TYPE::DIM;
 
     virtual ~PatchAccepter() {};

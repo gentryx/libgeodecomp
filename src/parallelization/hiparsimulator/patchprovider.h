@@ -9,6 +9,11 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+/**
+ * PatchProvider fills in grid patches into a Stepper, which is
+ * important for ghostzone synchronization, but could be used for
+ * steering, too.
+ */
 template<class GRID_TYPE>
 class PatchProvider
 {

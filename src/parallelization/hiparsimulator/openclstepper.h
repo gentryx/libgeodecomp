@@ -54,6 +54,7 @@ public:
 "#endif\n"
 "\n"
 "#include \"" + cellSourceFile + "\"\n"
+"\n"
 #include <libgeodecomp/parallelization/hiparsimulator/escapedopenclkernel.h>
             ;
 
