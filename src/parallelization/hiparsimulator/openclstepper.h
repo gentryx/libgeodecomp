@@ -41,8 +41,8 @@ public:
         std::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
         std::vector<cl::Device> devices;
-        platforms.at(platformID).getDevices(CL_DEVICE_TYPE_ALL, &devices);
-        cl::Device usedDevice = devices.at(deviceID);
+        platforms[platformID].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+        cl::Device usedDevice = devices[deviceID];
         context = cl::Context(devices);
         cmdQueue = cl::CommandQueue(context, usedDevice);
 
@@ -62,7 +62,7 @@ public:
             1, 
             std::make_pair(clSourceString.c_str(), 
                            clSourceString.size()));
-        cl::Program clProgram = cl::Program(context, clSource);
+        cl::Program clProgram(context, clSource);
 
         try {
             clProgram.build(devices);
@@ -71,8 +71,7 @@ public:
             // printing the build log (which might get lost otherwise)
             // is valuable for the user who needs to debug his code.
             std::cerr << "Build Log: " 
-                      << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(
-                          usedDevice) << "\n";
+                      << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(usedDevice) << "\n";
             throw;
         }
 
