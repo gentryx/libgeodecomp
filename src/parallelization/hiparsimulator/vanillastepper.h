@@ -1,69 +1,12 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
-#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
-
-template<int INDEX, int DIM, typename TOPOLOGY>
-class OffsetHelper
-{
-public:
-    void operator()(
-        Coord<DIM> *offset,
-        Coord<DIM> *dimensions,
-        const CoordBox<DIM>& ownBoundingBox, 
-        const CoordBox<DIM>& simulationArea,
-        const int& ghostZoneWidth)
-    {
-        offset->c[INDEX] = 0;
-        if (TOPOLOGY::WrapEdges) {
-            int enlargedWidth = 
-                ownBoundingBox.dimensions.c[INDEX] + 2 * ghostZoneWidth;
-            if (enlargedWidth < simulationArea.dimensions.c[INDEX]) {
-                offset->c[INDEX] = 
-                    ownBoundingBox.origin.c[INDEX] - ghostZoneWidth;
-            } else {
-                offset->c[INDEX] = 0;
-            }
-            dimensions->c[INDEX] = 
-                std::min(enlargedWidth, simulationArea.dimensions.c[INDEX]);
-        } else {
-            offset->c[INDEX] = 
-                std::max(0, ownBoundingBox.origin.c[INDEX] - ghostZoneWidth);
-            int end = std::min(simulationArea.origin.c[INDEX] + 
-                               simulationArea.dimensions.c[INDEX],
-                               ownBoundingBox.origin.c[INDEX] + 
-                               ownBoundingBox.dimensions.c[INDEX] + 
-                               ghostZoneWidth);
-            dimensions->c[INDEX] = end - offset->c[INDEX];
-        } 
-
-        OffsetHelper<INDEX - 1, DIM, typename TOPOLOGY::ParentTopology>()(
-            offset, 
-            dimensions, 
-            ownBoundingBox, 
-            simulationArea, 
-            ghostZoneWidth);
-    }
-};
-
-template<int DIM, typename TOPOLOGY>
-class OffsetHelper<-1, DIM, TOPOLOGY>
-{
-public:
-    void operator()(
-        Coord<DIM> *offset,
-        Coord<DIM> *dimensions,
-        const CoordBox<DIM>& ownBoundingBox, 
-        const CoordBox<DIM>& simulationArea,
-        const int& ghostZoneWidth)
-    {}
-};
 
 template<typename CELL_TYPE>
 class VanillaStepper : public StepperHelper<
@@ -184,7 +127,7 @@ private:
     {
         Coord<DIM> topoDim = initializer().gridDimensions();
         CoordBox<DIM> gridBox;
-        guessOffset(&gridBox.origin, &gridBox.dimensions);
+        this->guessOffset(&gridBox.origin, &gridBox.dimensions);
 
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
@@ -260,23 +203,6 @@ private:
     inline void resetValidGhostZoneWidth()
     {
         validGhostZoneWidth = ghostZoneWidth();
-    }
-
-    /**
-     * calculates a (mostly) suitable offset which (in conjuction with
-     * a DisplacedGrid) avoids having grids with a size equal to the
-     * whole simulation area on torus topologies.
-     */
-    inline void guessOffset(Coord<DIM> *offset, Coord<DIM> *dimensions)
-    {
-        const CoordBox<DIM>& boundingBox = 
-            partitionManager().ownRegion().boundingBox();
-        OffsetHelper<DIM - 1, DIM, typename CELL_TYPE::Topology>()(
-            offset,
-            dimensions,
-            boundingBox,
-            initializer().gridBox(),
-            partitionManager().getGhostZoneWidth());
     }
 
     inline MyPartitionManager& partitionManager() 

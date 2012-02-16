@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/typetraits.h>
@@ -47,6 +48,24 @@ public:
 protected:
     boost::shared_ptr<MyPartitionManager> partitionManager;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+
+    /**
+     * calculates a (mostly) suitable offset which (in conjuction with
+     * a DisplacedGrid) avoids having grids with a size equal to the
+     * whole simulation area on torus topologies.
+     */
+    inline void guessOffset(Coord<DIM> *offset, Coord<DIM> *dimensions)
+    {
+        const CoordBox<DIM>& boundingBox = 
+            partitionManager->ownRegion().boundingBox();
+        OffsetHelper<DIM - 1, DIM, typename CELL_TYPE::Topology>()(
+            offset,
+            dimensions,
+            boundingBox,
+            initializer->gridBox(),
+            partitionManager->getGhostZoneWidth());
+    }
+
 };
 
 }
