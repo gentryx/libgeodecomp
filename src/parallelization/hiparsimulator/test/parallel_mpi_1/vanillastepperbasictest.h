@@ -2,6 +2,7 @@
 
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/mockpatchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
 using namespace LibGeoDecomp; 
@@ -9,46 +10,6 @@ using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
-
-template<class GRID_TYPE>
-class MockPatchAccepter : public PatchAccepter<GRID_TYPE>
-{
-public:
-    friend class VanillaStepperBasicTest;
-
-    virtual void put(
-        const GRID_TYPE& /*grid*/, 
-        const Region<2>& /*validRegion*/, 
-        const long& nanoStep) 
-    {
-        offeredNanoSteps.push_back(nanoStep);
-        requestedNanoSteps.pop_front();
-    }
-    
-    virtual long nextRequiredNanoStep() const
-    {
-        return requestedNanoSteps.front();
-    }
-
-    void pushRequest(const long& nanoStep)
-    {
-        requestedNanoSteps.push_back(nanoStep);
-    }
-
-    const std::deque<long>& getRequestedNanoSteps() const
-    {
-        return requestedNanoSteps;
-    }
-
-    const std::deque<long>& getOfferedNanoSteps() const
-    {
-        return offeredNanoSteps;
-    }
-
-private:
-    std::deque<long> requestedNanoSteps;
-    std::deque<long> offeredNanoSteps;
-};
 
 class VanillaStepperBasicTest : public CxxTest::TestSuite
 {
