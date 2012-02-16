@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_patchbuffer_h_
 #define _libgeodecomp_parallelization_hiparsimulator_patchbuffer_h_
 
@@ -70,5 +68,4 @@ private:
 }
 }
 
-#endif
 #endif

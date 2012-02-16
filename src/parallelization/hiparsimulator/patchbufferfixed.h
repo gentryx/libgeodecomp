@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_patchbufferfixed_h_
 #define _libgeodecomp_parallelization_hiparsimulator_patchbufferfixed_h_
 
@@ -11,7 +9,7 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 /**
- * The PatchBuffer's cousin. Can only store a fixed number of regions
+ * The PatchBuffer's cousin can only store a fixed number of regions
  * at a time, but avoids the memory allocation hassle during
  * put().
  */
@@ -83,5 +81,4 @@ private:
 }
 }
 
-#endif
 #endif
