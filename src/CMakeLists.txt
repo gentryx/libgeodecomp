@@ -32,6 +32,9 @@ add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 target_link_libraries(geodecomp boost_date_time${BOOST_LINK_SUFFIX})
 target_link_libraries(geodecomp boost_filesystem${BOOST_LINK_SUFFIX})
 target_link_libraries(geodecomp boost_system${BOOST_LINK_SUFFIX})
+if (LIBGEODECOMP_FEATURE_OPENCL)
+  target_link_libraries(geodecomp OpenCL)
+endif (LIBGEODECOMP_FEATURE_OPENCL)
 install(TARGETS geodecomp DESTINATION lib)
 
 # install all headers

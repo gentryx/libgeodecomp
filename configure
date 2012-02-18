@@ -435,7 +435,7 @@ def read_commandline_options
       @opts.include_dirs += paths
     end
 
-    o.on("--link DIR[,DIR...]", Array,
+    o.on("--lib DIR[,DIR...]", Array,
          "Add DIR to the link path. Useful when required",
          "libraries (e.g. boost) are located outside the default",
          "paths.") do |paths|

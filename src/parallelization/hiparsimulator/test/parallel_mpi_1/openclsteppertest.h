@@ -13,6 +13,15 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
+
+class Cell
+{
+public:
+    typedef Topologies::Cube<3>::Topology Topology;
+
+    double val;
+};
+
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
@@ -35,7 +44,7 @@ public:
 
     void setUp()
     {
-        init.reset(new JacobiInitializer(Coord<3>(128, 128, 128)));
+        init.reset(new CellInitializer(Coord<3>(128, 128, 128)));
         CoordBox<3> rect = init->gridBox();
 
         partitionManager.reset(new PartitionManager<3>(rect));
@@ -53,7 +62,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
 private:
-    boost::shared_ptr<JacobiInitializer> init;
+    boost::shared_ptr<CellInitializer> init;
     boost::shared_ptr<PartitionManager<3> > partitionManager;
     boost::shared_ptr<MyStepper> stepper;
 #endif

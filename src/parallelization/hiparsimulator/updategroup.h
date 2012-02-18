@@ -61,7 +61,13 @@ public:
                 partitionManager,
                 initializer));
     }
+    
+    inline void update(int nanoSteps) 
+    {
+        // fixme
+    }
 
+private:
     // fixme: kill this dead code
     // UpdateGroup(
     //     const Region<2>& baseRegion,

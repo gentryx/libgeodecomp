@@ -14,7 +14,7 @@ public:
     /**
      * initializes all cells of the grid at @a target 
      */
-    virtual void grid(GridBase<CELL, DIMENSIONS> *target) =0;
+    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) =0;
 
     virtual ~Initializer() 
     {}

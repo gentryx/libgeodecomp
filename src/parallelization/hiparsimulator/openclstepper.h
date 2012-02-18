@@ -4,13 +4,15 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
 
+#ifndef __CL_ENABLE_EXCEPTIONS
+#define __CL_ENABLE_EXCEPTIONS
+#endif
+
 #include <boost/shared_ptr.hpp>
 #include <CL/cl.h>
 #include <libgeodecomp/misc/cl.hpp>
 #include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
 #include <libgeodecomp/misc/displacedgrid.h>
-
-#define __CL_ENABLE_EXCEPTIONS
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -90,65 +92,65 @@ public:
 
     inline virtual void update(int nanoSteps) 
     {
-      // fixme: implement me (later)
-      try {
-	cl::Buffer startCoordsBuffer, endCoordsBuffer;
+        // fixme: implement me (later)
+        try {
+            cl::Buffer startCoordsBuffer, endCoordsBuffer;
         
-	Coord<DIM> c = this->getInitializer().gridDimensions();
-	int zDim = c.z();
-	int yDim = c.y();
-	int xDim = c.x();
+            Coord<DIM> c = this->getInitializer().gridDimensions();
+            int zDim = c.z();
+            int yDim = c.y();
+            int xDim = c.x();
 	
-	int actualX = xDim;
-	int actualY = yDim;
+            int actualX = xDim;
+            int actualY = yDim;
                 
-	std::vector<int> startCoords;
-	std::vector<int> endCoords;
+            std::vector<int> startCoords;
+            std::vector<int> endCoords;
                 
-        genThreadCoords(&startCoords,
-                        &endCoords,
-                        0,
-                        0,
-			0,
-                        xDim,
-                        yDim,
-                        zDim,
-                        actualX,
-                        actualY,
-                        zDim,
-                        1);
+            genThreadCoords(
+                &startCoords,
+                &endCoords,
+                0,
+                0,
+                0,
+                xDim,
+                yDim,
+                zDim,
+                actualX,
+                actualY,
+                zDim,
+                1);
 
-        startCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, startCoords.size()*sizeof(int), &startCoords[0]);
-        endCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, endCoords.size()*sizeof(int), &endCoords[0]);
+            startCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, startCoords.size()*sizeof(int), &startCoords[0]);
+            endCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, endCoords.size()*sizeof(int), &endCoords[0]);
         
-	cl::NDRange global(actualX, actualY, zDim);
-	//fixme: local range could be chosen dynamically
-	cl::NDRange local(16, 16, 1);
+            cl::NDRange global(actualX, actualY, zDim);
+            //fixme: local range could be chosen dynamically
+            cl::NDRange local(16, 16, 1);
         
-	cl::KernelFunctor livingKernel = kernel.bind(cmdQueue, global, local);
-        livingKernel(inputDeviceGrid, outputDeviceGrid, zDim, yDim, xDim,
-		     1, 0, 0, 0,
-		     startCoordsBuffer, endCoordsBuffer, actualX, actualY);
-        livingKernel.getError();
-        cmdQueue.finish();
+            cl::KernelFunctor livingKernel = kernel.bind(cmdQueue, global, local);
+            livingKernel(inputDeviceGrid, outputDeviceGrid, zDim, yDim, xDim,
+                         1, 0, 0, 0,
+                         startCoordsBuffer, endCoordsBuffer, actualX, actualY);
+            livingKernel.getError();
+            cmdQueue.finish();
         
 
-      } catch (cl::Error& err) {
-	std::cerr << "OpenCL error: " << err.what() << ", " << oclStrerror(err.err()) << std::endl;
-	throw err;
-      } catch (...) {
-	throw;
-      }
-
+        } catch (cl::Error& err) {
+            std::cerr << "OpenCL error: " << err.what() << ", " << oclStrerror(err.err()) << std::endl;
+            throw err;
+        } catch (...) {
+            throw;
+        }
     }
 
     inline virtual const GridType& grid() const
     {
-        cmdQueue.enqueueReadBuffer(outputDeviceGrid, true, 0, 
+        cmdQueue.enqueueReadBuffer(
+            outputDeviceGrid, true, 0, 
             hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
         return *hostGrid;
     }
-
 
 private:
     int curStep;
