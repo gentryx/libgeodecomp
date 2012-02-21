@@ -11,16 +11,15 @@ namespace HiParSimulator {
 template<typename CELL_TYPE>
 class VanillaStepper : public Stepper<CELL_TYPE>
 {
-public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
-
     friend class VanillaStepperRegionTest;
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+public:
+    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+
     typedef class Stepper<CELL_TYPE> ParentType;
-    typedef PartitionManager< 
+    typedef typename ParentType::GridType GridType;
+    typedef PartitionManager<
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
     typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
     typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
