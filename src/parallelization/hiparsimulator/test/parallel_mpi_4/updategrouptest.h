@@ -1,10 +1,11 @@
 #include <fstream>
 #include <iostream>
 
-#include <libgeodecomp/io/simplecellinitializer.h>
-#include <libgeodecomp/parallelization/chronometer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+#include "../../../../io/testinitializer.h"
+#include "../../../../misc/testcell.h"
+#include "../../mockpatchaccepter.h"
+#include "../../partitions/zcurvepartition.h"
+#include "../../updategroup.h"
 
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 
@@ -15,51 +16,59 @@ namespace HiParSimulator {
 class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
-    // typedef ZCurvePartition Partition;
+    typedef ZCurvePartition<2> Partition;
+    typedef VanillaStepper<TestCell<2> > MyStepper;
+    typedef UpdateGroup<TestCell<2>, Partition, MyStepper> MyUpdateGroup;
+    typedef MyStepper::GridType GridType;
+
+    void setUp()
+    {
+        rank = MPILayer().rank();
+        dimensions = Coord<2>(231, 350);
+        partition = Partition(Coord<2>(), dimensions);
+        weights = genWeights(dimensions.x(), dimensions.y(), MPILayer().size());
+        ghostZoneWidth = 10;
+        init.reset(new TestInitializer<2>(dimensions));
+        updateGroup.reset(
+            new MyUpdateGroup(
+                Partition(Coord<2>(), dimensions),
+                weights,
+                0,
+                CoordBox<2>(Coord<2>(), dimensions),
+                ghostZoneWidth,
+                init));
+        mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
+        mockPatchAccepter->pushRequest(5);
+        mockPatchAccepter->pushRequest(7);
+        mockPatchAccepter->pushRequest(8);
+        updateGroup->addPatchAccepter(mockPatchAccepter, MyStepper::INNER_SET);
+    }
+
+    void tearDown()
+    {
+        init.reset();
+        updateGroup.reset();
+    }
 
     void testBench()
     {
-//         int width, height, maxSteps, ghostZoneWidth;
-//         std::ifstream params("./params");
-//         if (!params)
-//             throw std::logic_error("could not open param file");
-//         params >> width;
-//         params >> height;
-//         params >> maxSteps;
-//         params >> ghostZoneWidth;
-//         if (MPILayer().rank() == 0) {
-//             std::cout << "width: " << width << "\n"
-//                       << "height: " << height << "\n"
-//                       << "maxSteps: " << maxSteps << "\n"
-//                       << "ghostZoneWidth: " << ghostZoneWidth << "\n";
-//         }
-//         SimpleInitializer init(width, height, maxSteps);   
-//         Partition partition(Coord(0, 0), Coord(width, height));
-//         SuperVector<unsigned> weights = genWeights(width, height, MPILayer().size());
-//         UpdateGroup<SimpleCell, Partition, RegionAccumulator> group(
-//             partition,
-//             weights,
-//             0,
-//             CoordRectangle(Coord(0, 0), Coord(width, height)),
-//             ghostZoneWidth,
-//             &init,
-//             0,
-//             0);
-
-//         if (MPILayer().rank() == 0) 
-//             std::cout << "weights: " << weights << "\n";
-
-//         long long tStart = Chronometer::timeUSec();
-//         group.nanoStep(maxSteps, 1);
-//         long long tEnd = Chronometer::timeUSec();
-
-//         if (MPILayer().rank() == 0) 
-//             std::cout << "wallclock time: " << (tEnd - tStart) << " res: " << (*group.getGrid())[Coord(10, 10)].val << "\n";
+        updateGroup->update(9);
     }
     
 private:
+    unsigned rank;
+    Coord<2> dimensions;
+    SuperVector<unsigned> weights;
+    Partition partition;
+    unsigned ghostZoneWidth;
+    boost::shared_ptr<Initializer<TestCell<2> > > init;
+    boost::shared_ptr<UpdateGroup<TestCell<2>, Partition > > updateGroup;
+    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 
-    SuperVector<unsigned> genWeights(const unsigned& width, const unsigned& height, const unsigned& size)
+    SuperVector<unsigned> genWeights(
+        const unsigned& width, 
+        const unsigned& height, 
+        const unsigned& size)
     {
         SuperVector<unsigned> ret(size);
         unsigned totalSize = width * height;

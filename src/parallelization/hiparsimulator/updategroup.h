@@ -12,6 +12,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
@@ -25,6 +26,14 @@ class UpdateGroup
     friend class UpdateGroupTest;
 public:
     const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    typedef DisplacedGrid<
+        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
+    typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
+    typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
+    typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
+    typedef typename MyPartitionManager::RegionVecMap RegionVecMap;
 
     UpdateGroup(
         const PARTITION& _partition, 
@@ -42,7 +51,7 @@ public:
         mpiLayer(communicator),
         rank(mpiLayer.rank())
     {
-        partitionManager.reset(new PartitionManager<DIM, typename CELL_TYPE::Topology>());
+        partitionManager.reset(new MyPartitionManager());
         partitionManager->resetRegions(
             box,
             new VanillaRegionAccumulator<PARTITION>(
@@ -56,94 +65,64 @@ public:
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
 
-        stepper.reset(
-            new STEPPER(
-                partitionManager,
-                initializer));
+        stepper.reset( new STEPPER( partitionManager, initializer));
+
+        RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
+        for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
+            if (!i->second.back().empty()) {
+                boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
+                    new typename PatchLink<GridType>::Accepter(
+                        i->second.back(), i->first));
+                addPatchAccepter(link, Stepper<CELL_TYPE>::GHOST);
+                patchLinks << link;
+            }
+        }
+
+        map = partitionManager->getOuterGhostZoneFragments();
+        for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
+            if (!i->second.back().empty()) {
+                boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
+                    new typename PatchLink<GridType>::Provider(
+                        i->second.back(), i->first));
+                addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
+                patchLinks << link;
+            }
+        }
+
+        // fixme: recharge regularly?
+        // for (int i = 0; i < patchLinks.size(); ++i) {
+        //     patchLinks[i]->charge(ghostZoneWidth, 2 * ghostZoneWidth, ghostZoneWidth);
+        // }
+    }
+
+    void addPatchProvider(
+        const PatchProviderPtr& ghostZonePatchProvider, 
+        const PatchType& patchType)
+    {
+        stepper->addPatchProvider(ghostZonePatchProvider, patchType);
+    }
+
+    void addPatchAccepter(
+        const PatchAccepterPtr& ghostZonePatchAccepter, 
+        const PatchType& patchType)
+    {
+        stepper->addPatchAccepter(ghostZonePatchAccepter, patchType);
     }
     
     inline void update(int nanoSteps) 
     {
-        // fixme
+        stepper->update(nanoSteps);
     }
 
-private:
-    // fixme: kill this dead code
-    // UpdateGroup(
-    //     const Region<2>& baseRegion,
-    //     const PARTITION& _partition, 
-    //     const SuperVector<unsigned>& _weights, 
-    //     const unsigned& _offset,
-    //     const CoordBox<2>& box, 
-    //     const unsigned& _ghostZoneWidth,
-    //     Initializer<CELL_TYPE> *initializer,
-    //     PatchProvider<DisplacedGrid<CELL_TYPE> > *ghostZonePatchProvider = 0,
-    //     PatchAccepter<DisplacedGrid<CELL_TYPE> > *ghostZonePatchAccepter = 0,
-    //     MPI::Comm *communicator = &MPI::COMM_WORLD) : 
-    //     // stepper(communicator, ghostZonePatchProvider, ghostZonePatchAccepter),
-    //     partition(_partition),
-    //     weights(_weights),
-    //     offset(_offset),
-    //     ghostZoneWidth(_ghostZoneWidth),
-    //     nanoStepCounter(initializer->startStep() * CELL_TYPE::nanoSteps() + initializer->startNanoStep()),
-    //     mpiLayer(communicator),
-    //     rank(mpiLayer.rank())
-    // {
-    //      partitionManager.resetRegions(
-    //         box,
-    //         new IntersectingRegionAccumulator<PARTITION, 2>(
-    //             baseRegion,
-    //             partition,
-    //             offset,
-    //             weights),
-    //         rank,
-    //         ghostZoneWidth);
-    //     SuperVector<CoordBox<2> > boundingBoxes(mpiLayer.size());
-    //     CoordBox<2> ownBoundingBox(partitionManager.ownRegion().boundingBox());
-    //     mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
-    //     partitionManager.resetGhostZones(boundingBoxes);
-
-    //     // stepper.resetRegions(
-    //     //     &partitionManager,
-    //     //     initializer);
-    // }
-
-    // inline void nanoStep(
-    //     const unsigned& curHopLenght, 
-    //     const unsigned& nextHopLength)
-    // {
-    //     unsigned curStop = nanoStepCounter + curHopLenght;
-    //     unsigned nextStop = curStop + nextHopLength;
-    //     // stepper.nanoStep(curStop, nextStop, nanoStepCounter);
-    //     nanoStepCounter = curStop;
-    // }
-
-    // inline Region<2>& getOuterOutgroupGhostZone()
-    // {
-    //     return partitionManager.getOuterOutgroupGhostZoneFragment();
-    // }
-
-    // inline unsigned getNanoStep()
-    // {
-    //     return nanoStepCounter;
-    // }
-
-    // fixme: make return type const
-    DisplacedGrid<CELL_TYPE> *getGrid() const
+    const GridType& grid() const
     {
-        return 0;
+        return stepper->grid();
     }
-
-    // fixme: remove
-    DisplacedGrid<CELL_TYPE> *getNewGrid() const
-    {
-        return 0;
-    }
-
 
 private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
-    boost::shared_ptr<PartitionManager<DIM, typename CELL_TYPE::Topology> > partitionManager;
+    boost::shared_ptr<MyPartitionManager> partitionManager;
+    SuperVector<PatchLinkPtr> patchLinks;
     PARTITION partition;
     SuperVector<unsigned> weights;
     unsigned offset;
