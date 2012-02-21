@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_stepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_stepper_h_
 
@@ -8,7 +6,9 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
-#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
+#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/typetraits.h>
 
 namespace LibGeoDecomp {
@@ -25,12 +25,18 @@ namespace HiParSimulator {
 template<typename CELL_TYPE>
 class Stepper
 {
-public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
-
     friend class StepperTest;
-    typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
+public:
+    enum PatchType {GHOST=0, INNER_SET=1};
+    typedef typename CELL_TYPE::Topology Topology;
+    const static int DIM = Topology::DIMENSIONS;
+
+    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
+    typedef PartitionManager<DIM, Topology> MyPartitionManager;
+    typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
+    typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
+    typedef std::deque<PatchProviderPtr> PatchProviderList;
+    typedef std::deque<PatchAccepterPtr> PatchAccepterList;
 
     inline Stepper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,
@@ -39,15 +45,32 @@ public:
         initializer(_initializer)
     {}
 
-    inline virtual void update(int nanoSteps) = 0;
-    //fixme:
-    // inline virtual const GridType& grid() const = 0;
+    virtual void update(int nanoSteps) = 0;
+
+    virtual const GridType& grid() const = 0;
+
     // returns current step and nanoStep
-    inline virtual std::pair<int, int> currentStep() const = 0;
+    virtual std::pair<int, int> currentStep() const = 0;
+
+    void addPatchProvider(
+        const PatchProviderPtr& ghostZonePatchProvider, 
+        const PatchType& patchType)
+    {
+        patchProviders[patchType].push_back(ghostZonePatchProvider);
+    }
+
+    void addPatchAccepter(
+        const PatchAccepterPtr& ghostZonePatchAccepter, 
+        const PatchType& patchType)
+    {
+        patchAccepters[patchType].push_back(ghostZonePatchAccepter);
+    }
 
 protected:
     boost::shared_ptr<MyPartitionManager> partitionManager;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    PatchProviderList patchProviders[2];
+    PatchAccepterList patchAccepters[2];
 
     /**
      * calculates a (mostly) suitable offset which (in conjuction with
@@ -58,18 +81,16 @@ protected:
     {
         const CoordBox<DIM>& boundingBox = 
             partitionManager->ownRegion().boundingBox();
-        OffsetHelper<DIM - 1, DIM, typename CELL_TYPE::Topology>()(
+        OffsetHelper<DIM - 1, DIM, Topology>()(
             offset,
             dimensions,
             boundingBox,
             initializer->gridBox(),
             partitionManager->getGhostZoneWidth());
     }
-
 };
 
 }
 }
 
-#endif
 #endif

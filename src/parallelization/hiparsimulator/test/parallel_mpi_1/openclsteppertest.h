@@ -2,7 +2,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/openclstepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/test/parallel_mpi_1/cell.h>
 

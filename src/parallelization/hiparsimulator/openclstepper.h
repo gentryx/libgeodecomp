@@ -10,9 +10,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <CL/cl.h>
+
 #include <libgeodecomp/misc/cl.hpp>
-#include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
-#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

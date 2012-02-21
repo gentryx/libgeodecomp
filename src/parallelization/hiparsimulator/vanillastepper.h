@@ -3,14 +3,13 @@
 
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 template<typename CELL_TYPE>
-class VanillaStepper : public StepperHelper<
-    DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> >
+class VanillaStepper : public Stepper<CELL_TYPE>
 {
 public:
     const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
@@ -20,7 +19,7 @@ public:
     friend class VanillaStepperTest;
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
-    typedef class StepperHelper<GridType> ParentType;
+    typedef class Stepper<CELL_TYPE> ParentType;
     typedef PartitionManager< 
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
     typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
@@ -31,7 +30,7 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
         ParentType(_partitionManager, _initializer)
     {
-        curStep = initializer().startStep();
+        curStep = getInitializer().startStep();
         curNanoStep = 0;
         initGrids();
     }
@@ -65,7 +64,7 @@ private:
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        const Region<DIM>& region = partitionManager().innerSet(index);
+        const Region<DIM>& region = getPartitionManager().innerSet(index);
         // fixme: honor streak updaters here, akin to StripingSimulator
         for (typename Region<DIM>::Iterator i = region.begin(); 
              i != region.end(); 
@@ -84,7 +83,7 @@ private:
 
         if (validGhostZoneWidth == 0) {
             notifyPatchProviders(
-                partitionManager().rim(0), ParentType::GHOST, globalNanoStep());
+                getPartitionManager().rim(0), ParentType::GHOST, globalNanoStep());
             updateGhost();
             resetValidGhostZoneWidth();
         }
@@ -125,17 +124,17 @@ private:
 
     inline void initGrids()
     {
-        Coord<DIM> topoDim = initializer().gridDimensions();
+        Coord<DIM> topoDim = getInitializer().gridDimensions();
         CoordBox<DIM> gridBox;
         this->guessOffset(&gridBox.origin, &gridBox.dimensions);
 
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
-        initializer().grid(&*oldGrid);
+        getInitializer().grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
 
-        kernelBuffer = MyPatchBuffer1(partitionManager().getVolatileKernel());
+        kernelBuffer = MyPatchBuffer1(getPartitionManager().getVolatileKernel());
         rimBuffer = MyPatchBuffer2(rim());
         saveRim(globalNanoStep());
         updateGhost();
@@ -167,7 +166,7 @@ private:
         // 2: actual ghostzone update
         int nextNanoStep = curNanoStep;
         for (int t = 0; t < ghostZoneWidth(); ++t) {
-            const Region<DIM>& region = partitionManager().rim(t + 1);
+            const Region<DIM>& region = getPartitionManager().rim(t + 1);
             for (typename Region<DIM>::Iterator i = region.begin(); 
                  i != region.end(); 
                  ++i) {
@@ -192,12 +191,12 @@ private:
 
     inline const unsigned& ghostZoneWidth() const
     {
-        return partitionManager().getGhostZoneWidth();
+        return getPartitionManager().getGhostZoneWidth();
     }
     
     inline const Region<DIM>& rim() const
     {
-        return partitionManager().rim(ghostZoneWidth());
+        return getPartitionManager().rim(ghostZoneWidth());
     }
 
     inline void resetValidGhostZoneWidth()
@@ -205,24 +204,24 @@ private:
         validGhostZoneWidth = ghostZoneWidth();
     }
 
-    inline MyPartitionManager& partitionManager() 
+    inline MyPartitionManager& getPartitionManager() 
     {
-        return this->getPartitionManager();
+        return *this->partitionManager;
     }
 
-    inline const MyPartitionManager& partitionManager() const
+    inline const MyPartitionManager& getPartitionManager() const
     {
-        return this->getPartitionManager();
+        return *this->partitionManager;
     }
 
-    inline Initializer<CELL_TYPE>& initializer() 
+    inline Initializer<CELL_TYPE>& getInitializer() 
     {
-        return this->getInitializer();
+        return *this->initializer;
     }
 
-    inline const Initializer<CELL_TYPE>& initializer() const
+    inline const Initializer<CELL_TYPE>& getInitializer() const
     {
-        return this->getInitializer();
+        return *this->initializer;
     }
 
     inline void saveRim(const long& nanoStep)
@@ -240,7 +239,7 @@ private:
     {
         kernelBuffer.pushRequest(globalNanoStep());
         kernelBuffer.put(*oldGrid, 
-                         partitionManager().innerSet(ghostZoneWidth()),
+                         getPartitionManager().innerSet(ghostZoneWidth()),
                          globalNanoStep());
     }
 
@@ -248,7 +247,7 @@ private:
     {
         kernelBuffer.get(
             &*oldGrid, 
-            partitionManager().getVolatileKernel(), 
+            getPartitionManager().getVolatileKernel(), 
             globalNanoStep(), 
             true);
     }

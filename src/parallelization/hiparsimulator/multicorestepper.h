@@ -1,9 +1,8 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_multicorestepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_multicorestepper_h_
 
-#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepperhelper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
