@@ -1,3 +1,5 @@
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_patchlink_h_
 #define _libgeodecomp_parallelization_hiparsimulator_patchlink_h_
 
@@ -26,9 +28,12 @@ public:
     public:
         typedef typename GRID_TYPE::CellType CellType;
 
-        // fixme: tag needs to be unique between the sending
-        // and the receiving node. ensure this by e.g. a local
-        // registry coupled with a peer exchange
+        // fixme: there may be multiple PatchLinks connecting any two
+        // nodes. Since MPI matches messages by node, datatype and tag
+        // and the first two of these three will be identical, we need
+        // to make sure that the tag differs. We could use the "level"
+        // of the UpdateGroup in the hierarchy for this or some kind
+        // of registry.
         inline Link(
             const Region<DIM>& _region,
             const int& _tag) :
@@ -154,4 +159,6 @@ public:
 
 }
 }
+
+#endif
 #endif
