@@ -39,7 +39,7 @@ def package_name
 end
 
 def cflags
-  ret = "-O2 -Wall -Wno-sign-compare"
+  ret = "-O2 -Wall -Werror -Wno-sign-compare"
   if @opts.build_type == "Debug"
     ret = "-g -fno-inline -fno-default-inline -finline-limit=1" 
   end
