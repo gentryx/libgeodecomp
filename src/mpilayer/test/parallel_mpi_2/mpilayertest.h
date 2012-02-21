@@ -303,6 +303,15 @@ public:
         expected += 1, 2, 3, 4, 5, 6, 7, 8;
         TS_ASSERT_EQUALS(expected, target);
     }
+
+    void testDesctructor()
+    {
+        if (MPILayer().rank() == 0) {
+            MPILayer layer;
+            int i = 0;
+            layer.recv(&i, 1, 1);
+        }
+    }
 };
 
 }
