@@ -22,6 +22,7 @@ class PatchLink
 {
 public:
     const static int DIM = GRID_TYPE::DIM;
+    const static int ENDLESS = -1;
 
     class Link 
     {
@@ -36,9 +37,11 @@ public:
         // of registry.
         inline Link(
             const Region<DIM>& _region,
-            const int& _tag) :
+            const int& _tag,
+            MPI::Comm *communicator = &MPI::COMM_WORLD) :
             lastNanoStep(0),
             stride(1),
+            mpiLayer(communicator),
             region(_region),
             buffer(_region.size()),
             tag(_tag)
@@ -58,6 +61,11 @@ public:
         inline void wait()
         {
             mpiLayer.wait(tag);
+        }
+
+        inline void cancel()
+        {
+            mpiLayer.cancelAll();
         }
 
     protected:
@@ -93,15 +101,16 @@ public:
             const Region<DIM>& /*validRegion*/, 
             const long& nanoStep) 
         {
-            this->wait();
             if (!this->checkNanoStepPut(nanoStep))
                 return;
 
+            this->wait();
             GridVecConv::gridToVector(grid, &this->buffer, this->region);
             this->mpiLayer.send(
                 &this->buffer[0], dest, this->buffer.size(), this->tag);
             long nextNanoStep = this->requestedNanoSteps.min() + this->stride;
-            if (nextNanoStep < this->lastNanoStep)
+            if ((this->lastNanoStep == ENDLESS) || 
+                (nextNanoStep < this->lastNanoStep))
                 this->requestedNanoSteps << nextNanoStep;
             this->requestedNanoSteps.erase_min();
         }
@@ -140,7 +149,8 @@ public:
             GridVecConv::vectorToGrid(this->buffer, grid, this->region);
 
             long nextNanoStep = this->storedNanoSteps.min() + this->stride;
-            if (nextNanoStep < this->lastNanoStep)
+            if ((this->lastNanoStep == ENDLESS) || 
+                (nextNanoStep < this->lastNanoStep))
                 recv(nextNanoStep);
             this->storedNanoSteps.erase_min();
         }

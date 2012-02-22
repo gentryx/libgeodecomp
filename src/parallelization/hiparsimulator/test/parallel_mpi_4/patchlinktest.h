@@ -127,6 +127,54 @@ public:
         }
     }
 
+    void testMultiple2() 
+    {
+        SuperVector<MyPatchAccepter> accepters;
+        SuperVector<MyPatchProvider> providers;
+        int stride = 4;
+        int maxNanoSteps = 100;
+
+        for (int i = 0; i < mpiLayer.size(); ++i) {
+            if (i != mpiLayer.rank()) {
+                accepters << MyPatchAccepter(
+                    region1,
+                    i,
+                    genTag(mpiLayer.rank(), i));
+                
+                providers << MyPatchProvider(
+                    region1,
+                    i,
+                    genTag(i, mpiLayer.rank()));
+            }
+        }
+
+        for (int i = 0; i < mpiLayer.size() - 1; ++i) {
+            accepters[i].charge(0, PatchLink<GridType>::ENDLESS, stride);
+            providers[i].charge(0, PatchLink<GridType>::ENDLESS, stride);
+        }
+
+        for (int nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
+            GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
+        
+            for (int i = 0; i < mpiLayer.size() - 1; ++i) 
+                accepters[i].put(mySendGrid, boundingBox, nanoStep);
+
+            for (int i = 0; i < mpiLayer.size() - 1; ++i) {
+                int senderRank = i >= mpiLayer.rank() ? i + 1 : i;
+                GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
+                GridType actual = zeroGrid;
+                providers[i].get(&actual, boundingBox, nanoStep);
+
+                TS_ASSERT_EQUALS(actual, expected);
+            }
+        }
+
+        for (int i = 0; i < mpiLayer.size() - 1; ++i) {
+            accepters[i].cancel();
+            providers[i].cancel();
+        }
+    }
+
 private:
     int tag;
     MPILayer mpiLayer;
