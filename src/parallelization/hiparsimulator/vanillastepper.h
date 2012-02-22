@@ -157,7 +157,6 @@ private:
      */
     inline void updateGhost() 
     {
-        // fixme: needs test for ghostzonewidth % 2 = 1
         // fixme: skip all this ghost zone buffering for
         // ghostZoneWidth == 1?             
 
