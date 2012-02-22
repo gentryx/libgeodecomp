@@ -1,8 +1,6 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
-// fixme
-#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
