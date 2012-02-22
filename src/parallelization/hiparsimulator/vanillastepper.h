@@ -1,6 +1,8 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
+// fixme
+#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
@@ -23,14 +25,21 @@ public:
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
     typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
     typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
+    typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
+        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer,
+        const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec()) :
         ParentType(_partitionManager, _initializer)
     {
         curStep = getInitializer().startStep();
         curNanoStep = 0;
+
+        for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
+            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
+        }
+
         initGrids();
     }
 
@@ -79,7 +88,7 @@ private:
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
-
+        
         if (validGhostZoneWidth == 0) {
             notifyPatchProviders(
                 getPartitionManager().rim(0), ParentType::GHOST, globalNanoStep());
@@ -163,21 +172,30 @@ private:
         restoreRim(false);
 
         // 2: actual ghostzone update
-        int nextNanoStep = curNanoStep;
+        int oldNanoStep = curNanoStep;
+        int oldStep = curStep;
         for (int t = 0; t < ghostZoneWidth(); ++t) {
             const Region<DIM>& region = getPartitionManager().rim(t + 1);
             for (typename Region<DIM>::Iterator i = region.begin(); 
                  i != region.end(); 
                  ++i) {
                 (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), 
-                                      nextNanoStep);
+                                      curNanoStep);
             }
-            ++nextNanoStep;
+            ++curNanoStep;
+            if (curNanoStep == CELL_TYPE::nanoSteps()) {
+                curNanoStep = 0;
+                curStep++;
+            }
+
             std::swap(oldGrid, newGrid);
         }
+        curNanoStep = oldNanoStep;
+        curStep = oldStep;
+
         // offset ghostZoneWidth() for nanoStep needed as ghost zone
         // updates preceede updates to the inner set.
-        nextNanoStep = globalNanoStep() + ghostZoneWidth();
+        int nextNanoStep = globalNanoStep() + ghostZoneWidth();
         notifyPatchAccepters(rim(), ParentType::GHOST, nextNanoStep);
                    saveRim(nextNanoStep);
         if (ghostZoneWidth() % 2)

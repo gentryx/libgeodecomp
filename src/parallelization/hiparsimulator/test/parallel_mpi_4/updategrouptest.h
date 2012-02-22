@@ -52,7 +52,7 @@ public:
 
     void testBench()
     {
-        updateGroup->update(9);
+        updateGroup->update(100);
     }
     
 private:
