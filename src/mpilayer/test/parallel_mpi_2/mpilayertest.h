@@ -304,12 +304,13 @@ public:
         TS_ASSERT_EQUALS(expected, target);
     }
 
-    void testDesctructor()
+    void testCancel()
     {
         if (MPILayer().rank() == 0) {
             MPILayer layer;
             int i = 0;
             layer.recv(&i, 1, 1);
+            layer.cancelAll();
         }
     }
 };

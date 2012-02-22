@@ -17,7 +17,6 @@ namespace LibGeoDecomp {
 
 class MPILayer
 {
-
     friend class MPILayerTest;
     friend class ParallelMPILayerTest;
 public:
@@ -41,9 +40,8 @@ public:
         tag(0)
     {}
 
-    ~MPILayer()
+    virtual ~MPILayer()
     {
-        cancelAll();
         waitAll();
     }
 
