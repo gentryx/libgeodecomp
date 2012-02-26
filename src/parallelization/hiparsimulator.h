@@ -66,22 +66,20 @@ public:
                               ghostZoneWidth,
                               this->initializer,
                               communicator));
-
-        // resetSimulation(ghostZoneWidth);
     }   
 
     // fixme: need test
     inline void run()
     {
-        // unsigned remainingNanoSteps = this->initializer->maxSteps() * 
-        //     CELL_TYPE::nanoSteps() - nanoStepCounter;
-        // nanoStep(remainingNanoSteps);
+        unsigned remainingNanoSteps = this->initializer->maxSteps() * 
+            CELL_TYPE::nanoSteps() - nanoStepCounter;
+        nanoStep(remainingNanoSteps);
     }
 
     // fixme: need test
     inline void step()
     {
-        // nanoStep(CELL_TYPE::nanoSteps());
+        nanoStep(CELL_TYPE::nanoSteps());
     }
 
     // fixme: need test
@@ -102,6 +100,7 @@ private:
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
+    // fixme: need this?
     EventMap events;
     PartitionManager<DIM, Topology> partitionManager;
     MPI::Comm *communicator;
@@ -121,17 +120,20 @@ private:
         return ret;
     }
 
-//     inline void nanoStep(const unsigned& s)
-//     {
-//         unsigned endNanoStep = nanoStepCounter + s;
-//         events[endNanoStep].insert(PAUSE);
+    inline void nanoStep(const unsigned& s)
+    {
+        updateGroup->update(s);
+
+        // fixme: honor events here:
+        // unsigned endNanoStep = nanoStepCounter + s;
+        // events[endNanoStep].insert(PAUSE);
         
-//         while (nanoStepCounter < endNanoStep) {
-//             std::pair<unsigned, EventSet> currentEvents = extractCurrentEvents();
-//             nanoStepCounter = currentEvents.first;
-//             handleEvents(currentEvents.second);
-//         }
-//     }
+        // while (nanoStepCounter < endNanoStep) {
+        //     std::pair<unsigned, EventSet> currentEvents = extractCurrentEvents();
+        //     nanoStepCounter = currentEvents.first;
+        //     handleEvents(currentEvents.second);
+        // }
+    }
 
 //     inline std::pair<unsigned, EventSet> extractCurrentEvents()
 //     {
