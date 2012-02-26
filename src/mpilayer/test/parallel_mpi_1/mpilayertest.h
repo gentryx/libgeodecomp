@@ -24,13 +24,13 @@ public:
         MPILayer layer;
         TestCell<2> foo;
         TestCell<2> demo = demoCell();
-        TS_ASSERT_EQUALS((unsigned)0, layer._requests[0].size());
+        TS_ASSERT_EQUALS((unsigned)0, layer.requests[0].size());
         layer.send(&demo, 0);
-        TS_ASSERT_EQUALS((unsigned)1, layer._requests[0].size());
+        TS_ASSERT_EQUALS((unsigned)1, layer.requests[0].size());
         layer.recv(&foo, 0);
-        TS_ASSERT_EQUALS((unsigned)2, layer._requests[0].size());
+        TS_ASSERT_EQUALS((unsigned)2, layer.requests[0].size());
         layer.waitAll();
-        TS_ASSERT_EQUALS((unsigned)0, layer._requests[0].size());
+        TS_ASSERT_EQUALS((unsigned)0, layer.requests[0].size());
     }
 
     void testSendRecvCell()

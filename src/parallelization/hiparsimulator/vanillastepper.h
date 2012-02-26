@@ -11,27 +11,33 @@ namespace HiParSimulator {
 template<typename CELL_TYPE>
 class VanillaStepper : public Stepper<CELL_TYPE>
 {
-public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
-
     friend class VanillaStepperRegionTest;
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+public:
+    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+
     typedef class Stepper<CELL_TYPE> ParentType;
-    typedef PartitionManager< 
+    typedef typename ParentType::GridType GridType;
+    typedef PartitionManager<
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
     typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
     typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
+    typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
-        Initializer<CELL_TYPE> *_initializer) :
+        Initializer<CELL_TYPE> *_initializer,
+        const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec()) :
         ParentType(_partitionManager, _initializer)
     {
         curStep = getInitializer().startStep();
         curNanoStep = 0;
+
+        for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
+            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
+        }
+
         initGrids();
     }
 
@@ -80,7 +86,7 @@ private:
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
-
+        
         if (validGhostZoneWidth == 0) {
             notifyPatchProviders(
                 getPartitionManager().rim(0), ParentType::GHOST, globalNanoStep());
@@ -151,7 +157,6 @@ private:
      */
     inline void updateGhost() 
     {
-        // fixme: needs test for ghostzonewidth % 2 = 1
         // fixme: skip all this ghost zone buffering for
         // ghostZoneWidth == 1?             
 
@@ -164,21 +169,30 @@ private:
         restoreRim(false);
 
         // 2: actual ghostzone update
-        int nextNanoStep = curNanoStep;
+        int oldNanoStep = curNanoStep;
+        int oldStep = curStep;
         for (int t = 0; t < ghostZoneWidth(); ++t) {
             const Region<DIM>& region = getPartitionManager().rim(t + 1);
             for (typename Region<DIM>::Iterator i = region.begin(); 
                  i != region.end(); 
                  ++i) {
                 (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), 
-                                      nextNanoStep);
+                                      curNanoStep);
             }
-            ++nextNanoStep;
+            ++curNanoStep;
+            if (curNanoStep == CELL_TYPE::nanoSteps()) {
+                curNanoStep = 0;
+                curStep++;
+            }
+
             std::swap(oldGrid, newGrid);
         }
+        curNanoStep = oldNanoStep;
+        curStep = oldStep;
+
         // offset ghostZoneWidth() for nanoStep needed as ghost zone
         // updates preceede updates to the inner set.
-        nextNanoStep = globalNanoStep() + ghostZoneWidth();
+        int nextNanoStep = globalNanoStep() + ghostZoneWidth();
         notifyPatchAccepters(rim(), ParentType::GHOST, nextNanoStep);
                    saveRim(nextNanoStep);
         if (ghostZoneWidth() % 2)

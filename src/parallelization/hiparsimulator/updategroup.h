@@ -19,6 +19,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+// fixme: STEPPER does not have to be a template parameter. it can also be defined solely in the constructor
 template<class CELL_TYPE, class PARTITION, class STEPPER=VanillaStepper<CELL_TYPE> >
 class UpdateGroup
 {
@@ -29,11 +30,12 @@ public:
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
-    typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
-    typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
+    typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
+    typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
     typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
     typedef typename MyPartitionManager::RegionVecMap RegionVecMap;
+    typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
 
     UpdateGroup(
         const PARTITION& _partition, 
@@ -65,19 +67,31 @@ public:
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
 
-        stepper.reset(new STEPPER( partitionManager, initializer));
-
+        // we have to hand over a list of all ghostzone senders as the
+        // stepper will perform an initial update of the ghostzones
+        // upon creation and we have to send those over to our neighbors.
+        PatchAccepterVec ghostZoneAccepterLinks;
         RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
             if (!i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
                     new typename PatchLink<GridType>::Accepter(
                         i->second.back(), i->first));
-                addPatchAccepter(link, Stepper<CELL_TYPE>::GHOST);
+                ghostZoneAccepterLinks << link;
                 patchLinks << link;
+
+                link->charge(
+                    ghostZoneWidth, 
+                    PatchLink<GridType>::ENDLESS, 
+                    ghostZoneWidth);
             }
         }
 
+        stepper.reset(new STEPPER(partitionManager, initializer, ghostZoneAccepterLinks));
+
+        // the ghostzone receivers may be safely added after
+        // initialization as they're only really needed when the next
+        // ghostzone generation is being received.
         map = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
             if (!i->second.back().empty()) {
@@ -86,27 +100,31 @@ public:
                         i->second.back(), i->first));
                 addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
                 patchLinks << link;
+         
+                link->charge(
+                    ghostZoneWidth, 
+                    PatchLink<GridType>::ENDLESS, 
+                    ghostZoneWidth);
             }
         }
+    }
 
-        // fixme: recharge regularly?
-        // for (int i = 0; i < patchLinks.size(); ++i) {
-        //     patchLinks[i]->charge(ghostZoneWidth, 2 * ghostZoneWidth, ghostZoneWidth);
-        // }
+    virtual ~UpdateGroup()
+    { 
     }
 
     void addPatchProvider(
-        const PatchProviderPtr& ghostZonePatchProvider, 
+        const PatchProviderPtr& patchProvider, 
         const PatchType& patchType)
     {
-        stepper->addPatchProvider(ghostZonePatchProvider, patchType);
+        stepper->addPatchProvider(patchProvider, patchType);
     }
 
     void addPatchAccepter(
-        const PatchAccepterPtr& ghostZonePatchAccepter, 
+        const PatchAccepterPtr& patchAccepter, 
         const PatchType& patchType)
     {
-        stepper->addPatchAccepter(ghostZonePatchAccepter, patchType);
+        stepper->addPatchAccepter(patchAccepter, patchType);
     }
     
     inline void update(int nanoSteps) 

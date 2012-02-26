@@ -18,17 +18,14 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 template<typename CELL_TYPE>
-class OpenCLStepper : public StepperHelper<
-    DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, false> >
+class OpenCLStepper : public Stepper<CELL_TYPE>
 {
+    friend class OpenCLStepperTest;
 public:
     const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
 
-    friend class OpenCLStepperTest;
-
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, false> GridType;
-    typedef class StepperHelper<GridType> ParentType;
+    typedef class Stepper<CELL_TYPE> ParentType;
+    typedef typename ParentType::GridType GridType;
     typedef PartitionManager< 
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
   
@@ -96,7 +93,7 @@ public:
         try {
             cl::Buffer startCoordsBuffer, endCoordsBuffer;
         
-            Coord<DIM> c = this->getInitializer().gridDimensions();
+            Coord<DIM> c = this->initializer->gridDimensions();
             int zDim = c.z();
             int yDim = c.y();
             int xDim = c.x();
@@ -202,41 +199,26 @@ private:
       }
     }
 
-
     inline void initGrids()
     {
         const CoordBox<DIM>& gridBox = 
-            partitionManager().ownRegion().boundingBox();
+            this->partitionManager->ownRegion().boundingBox();
         hostGrid.reset(new GridType(gridBox, CELL_TYPE()));
-        initializer().grid(&*hostGrid);
+        this->initializer->grid(&*hostGrid);
         
-        inputDeviceGrid = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
-            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
+        inputDeviceGrid = cl::Buffer(
+            context, 
+            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
+            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), 
+            hostGrid->baseAddress());
 	std::vector<CELL_TYPE> zeroMem(hostGrid->getDimensions().prod(), 0);
-	outputDeviceGrid = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
-				      hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), &zeroMem[0]);
+	outputDeviceGrid = cl::Buffer(
+            context, 
+            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
+            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), 
+            &zeroMem[0]);
     }
 
-    inline MyPartitionManager& partitionManager() 
-    {
-        return this->getPartitionManager();
-    }
-
-    inline const MyPartitionManager& partitionManager() const
-    {
-        return this->getPartitionManager();
-    }
-
-    inline Initializer<CELL_TYPE>& initializer() 
-    {
-        return this->getInitializer();
-    }
-
-    inline const Initializer<CELL_TYPE>& initializer() const
-    {
-        return this->getInitializer();
-    }
-    
     inline std::string oclStrerror (int nr) {
       switch (nr) {
       case 0:

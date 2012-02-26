@@ -17,7 +17,6 @@ namespace LibGeoDecomp {
 
 class MPILayer
 {
-
     friend class MPILayerTest;
     friend class ParallelMPILayerTest;
 public:
@@ -37,10 +36,15 @@ public:
     typedef boost::shared_ptr<MPIRegion> MPIRegionPointer;
 
     MPILayer(MPI::Comm *c = &MPI::COMM_WORLD) :
-        _comm(c),
-        _tag(0)
+        comm(c),
+        tag(0)
     {}
 
+    virtual ~MPILayer()
+    {
+        waitAll();
+    }
+
     template<typename T>
     inline void send(
         const T *c, 
@@ -48,7 +52,7 @@ public:
         const int& num = 1,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
-        send(c, dest, num, _tag, datatype);
+        send(c, dest, num, tag, datatype);
     }
 
     template<typename T>
@@ -59,8 +63,8 @@ public:
         const int& tag,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
-        MPI::Request req = _comm->Isend(c, num, datatype, dest, tag);
-        _requests[tag].push_back(req);
+        MPI::Request req = comm->Isend(c, num, datatype, dest, tag);
+        requests[tag].push_back(req);
     }
     
     template<typename T>
@@ -70,7 +74,7 @@ public:
         const int& num = 1,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
-        recv(c, src, num, _tag, datatype);
+        recv(c, src, num, tag, datatype);
     }
     
     template<typename T>
@@ -81,8 +85,26 @@ public:
         const int& tag,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
-        MPI::Request req = _comm->Irecv(c, num, datatype, src, tag);
-        _requests[tag].push_back(req);    
+        MPI::Request req = comm->Irecv(c, num, datatype, src, tag);
+        requests[tag].push_back(req);    
+    }
+
+    void cancelAll()
+    {
+        for (RequestsMap::iterator i = requests.begin(); 
+             i != requests.end();
+             ++i) {            
+            cancel(i->first);
+        }
+    }
+
+    void cancel(const int& waitTag) 
+    { 
+        std::vector<MPI::Request>& requestVec = requests[waitTag];
+        for (std::vector<MPI::Request>::iterator i = requestVec.begin();
+             i != requestVec.end(); ++i) {
+            i->MPI::Request::Cancel();
+        }
     }
     
     /** 
@@ -91,8 +113,8 @@ public:
      */ 
     void waitAll()
     {
-        for (RequestsMap::iterator i = _requests.begin(); 
-             i != _requests.end();
+        for (RequestsMap::iterator i = requests.begin(); 
+             i != requests.end();
              ++i) {            
             wait(i->first);
         }
@@ -104,15 +126,15 @@ public:
      */
     void wait(const int& waitTag) 
     { 
-        std::vector<MPI::Request>& requestVec = _requests[waitTag];
+        std::vector<MPI::Request>& requestVec = requests[waitTag];
         MPI::Request::Waitall(requestVec.size(), &requestVec[0]);
         requestVec.clear();
     }
 
     void testAll()
     {
-        for (RequestsMap::iterator i = _requests.begin(); 
-             i != _requests.end();
+        for (RequestsMap::iterator i = requests.begin(); 
+             i != requests.end();
              ++i) {            
             test(i->first);
         }
@@ -120,13 +142,13 @@ public:
 
     void test(const int& testTag) 
     { 
-        std::vector<MPI::Request>& requestVec = _requests[testTag];
+        std::vector<MPI::Request>& requestVec = requests[testTag];
         MPI::Request::Testall(requestVec.size(), &requestVec[0]);
     }
 
     void barrier()
     {
-        _comm->Barrier();
+        comm->Barrier();
     }
 
     /** 
@@ -134,7 +156,7 @@ public:
      */ 
     unsigned size() const
     {
-        return _comm->Get_size(); 
+        return comm->Get_size(); 
     }
 
     /** 
@@ -142,7 +164,7 @@ public:
      */ 
     unsigned rank() const
     {
-        return _comm->Get_rank(); 
+        return comm->Get_rank(); 
     } 
     
     /**
@@ -180,13 +202,13 @@ public:
         const int& waitTag = 0, 
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
-        MPI::Request req = _comm->Isend(
+        MPI::Request req = comm->Isend(
             &(const_cast<UVec&>(*vec))[0], 
             vec->size(),
             datatype,
             dest,
-            _tag);
-        _requests[waitTag].push_back(req);    
+            tag);
+        requests[waitTag].push_back(req);    
     }
 
     template<typename T>
@@ -196,22 +218,22 @@ public:
         const int& waitTag = 0,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
-        MPI::Request req = _comm->Irecv(
+        MPI::Request req = comm->Irecv(
             &(*vec)[0], 
             vec->size(),
             datatype,
             src,
-            _tag);
-        _requests[waitTag].push_back(req);    
+            tag);
+        requests[waitTag].push_back(req);    
     }
 
     template<int DIM>
     void sendRegion(const Region<DIM>& region, const int& dest)
     {
         unsigned numStreaks = region.numStreaks();
-        MPI::Request req = _comm->Isend(&numStreaks, 1, MPI::UNSIGNED, dest, _tag);
+        MPI::Request req = comm->Isend(&numStreaks, 1, MPI::UNSIGNED, dest, tag);
         SuperVector<Streak<DIM> > buf = region.toVector();
-        _comm->Send(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), dest, _tag);
+        comm->Send(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), dest, tag);
         req.Wait();
     }
 
@@ -219,9 +241,9 @@ public:
     void recvRegion(Region<DIM> *region, const int& src)
     {
         unsigned numStreaks;
-        _comm->Recv(&numStreaks, 1, MPI::UNSIGNED, src, _tag);
+        comm->Recv(&numStreaks, 1, MPI::UNSIGNED, src, tag);
         SuperVector<Streak<DIM> > buf(numStreaks);
-        _comm->Recv(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), src, _tag);
+        comm->Recv(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), src, tag);
         region->clear();
         region->load(buf.begin(), buf.end());
     }
@@ -366,8 +388,8 @@ public:
         // skip empty regions (nil pointers)
         if (!region)
             return;
-        MPI::Request req = _comm->Isend(base, 1, region->indices, dest, _tag);
-        _requests[waitTag].push_back(req);
+        MPI::Request req = comm->Isend(base, 1, region->indices, dest, tag);
+        requests[waitTag].push_back(req);
     }
 
     template<typename T>
@@ -380,8 +402,8 @@ public:
         // skip empty regions (nil pointers)
         if (!region)
             return;
-        MPI::Request req = _comm->Irecv(base, 1, region->indices, src, _tag);
-        _requests[waitTag].push_back(req);    
+        MPI::Request req = comm->Irecv(base, 1, region->indices, src, tag);
+        requests[waitTag].push_back(req);    
     }
 
     template<typename T>
@@ -400,7 +422,7 @@ public:
         SuperVector<T> *target, 
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        _comm->Allgather(&source, 1, datatype, &(target->front()), 1, datatype);
+        comm->Allgather(&source, 1, datatype, &(target->front()), 1, datatype);
     }
 
     template<typename T>
@@ -425,7 +447,7 @@ public:
         displacements[0] = 0;
         for (int i = 0; i < size() - 1; ++i)
             displacements[i + 1] = displacements[i] + lengths[i];
-        _comm->Allgatherv(source, lengths[rank()], datatype, &(target->front()), &(lengths.front()), &(displacements.front()), datatype);
+        comm->Allgatherv(source, lengths[rank()], datatype, &(target->front()), &(lengths.front()), &(displacements.front()), datatype);
     }
 
     template<typename T>
@@ -435,7 +457,7 @@ public:
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         SuperVector<T> result(size());
-        _comm->Gather(&item, 1, datatype, &(result.front()), 1, datatype, root);
+        comm->Gather(&item, 1, datatype, &(result.front()), 1, datatype, root);
         if (rank() == root) {
             return result;
         } else {
@@ -453,7 +475,7 @@ public:
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         T buff(source);
-        _comm->Bcast(&buff, 1, datatype, root);
+        comm->Bcast(&buff, 1, datatype, root);
         return buff;
     }
 
@@ -468,7 +490,7 @@ public:
         SuperVector<T> buff(size);
         if (size == 0) return buff;
         if (rank() == root) buff = source;
-        _comm->Bcast(&(buff.front()), size, datatype, root);
+        comm->Bcast(&(buff.front()), size, datatype, root);
         return buff;
     }
 
@@ -481,13 +503,13 @@ public:
         unsigned size = buff->size();
         size = broadcast(size, root);
         if (size > 0) 
-            _comm->Bcast(&(buff->front()), size, datatype, root);
+            comm->Bcast(&(buff->front()), size, datatype, root);
     }
 
 private:
-    MPI::Comm *_comm;
-    int _tag;
-    RequestsMap _requests;
+    MPI::Comm *comm;
+    int tag;
+    RequestsMap requests;
 
     typedef std::pair<const void*, unsigned> ChunkSpec;
 

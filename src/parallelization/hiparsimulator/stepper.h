@@ -37,6 +37,7 @@ public:
     typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
     typedef std::deque<PatchAccepterPtr> PatchAccepterList;
+    typedef SuperVector<PatchAccepterPtr> PatchAccepterVec;
 
     inline Stepper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,
@@ -53,17 +54,17 @@ public:
     virtual std::pair<int, int> currentStep() const = 0;
 
     void addPatchProvider(
-        const PatchProviderPtr& ghostZonePatchProvider, 
+        const PatchProviderPtr& patchProvider, 
         const PatchType& patchType)
     {
-        patchProviders[patchType].push_back(ghostZonePatchProvider);
+        patchProviders[patchType].push_back(patchProvider);
     }
 
     void addPatchAccepter(
-        const PatchAccepterPtr& ghostZonePatchAccepter, 
+        const PatchAccepterPtr& patchAccepter, 
         const PatchType& patchType)
     {
-        patchAccepters[patchType].push_back(ghostZonePatchAccepter);
+        patchAccepters[patchType].push_back(patchAccepter);
     }
 
 protected:
