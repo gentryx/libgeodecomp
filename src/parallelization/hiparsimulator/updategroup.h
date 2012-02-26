@@ -37,11 +37,11 @@ public:
 
     UpdateGroup(
         const PARTITION& _partition, 
-        const SuperVector<unsigned>& _weights, 
+        const SuperVector<long>& _weights, 
         const unsigned& _offset,
         const CoordBox<DIM>& box, 
         const unsigned& _ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer,
+        Initializer<CELL_TYPE> *_initializer,
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
         partition(_partition),
         weights(_weights),
@@ -65,7 +65,7 @@ public:
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
 
-        stepper.reset( new STEPPER( partitionManager, initializer));
+        stepper.reset(new STEPPER( partitionManager, initializer));
 
         RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
@@ -124,10 +124,10 @@ private:
     boost::shared_ptr<MyPartitionManager> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
     PARTITION partition;
-    SuperVector<unsigned> weights;
+    SuperVector<long> weights;
     unsigned offset;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    Initializer<CELL_TYPE> *initializer;
     MPILayer mpiLayer;
     unsigned rank;
 };

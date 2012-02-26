@@ -18,6 +18,7 @@ public:
         dimensions = Coord<2>(20, 20);
         offset = 10 * 20 + 8;
         partition = StripingPartition<2>(Coord<2>(), dimensions);
+        weights.clear();
         weights += 15, 12, 1, 32, 25, 40, 67;
         /**
          * the grid should look like this: (line no. at beginning of
@@ -143,10 +144,8 @@ public:
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
         StripingPartition<3> partition(Coord<3>(), box.dimensions);
-        SuperVector<unsigned> weights;
-        weights << 10000;
-        weights << 15000;
-        weights << 25000;
+        SuperVector<long> weights;
+        weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
 
         PartitionManager<3, Topologies::Torus<3>::Topology> partitionManager;
@@ -188,7 +187,7 @@ private:
     Coord<2> dimensions;
     unsigned offset;
     StripingPartition<2> partition;
-    SuperVector<unsigned> weights;
+    SuperVector<long> weights;
     unsigned rank;
     unsigned ghostZoneWidth;
     SuperVector<CoordBox<2> > boundingBoxes;
@@ -198,12 +197,12 @@ private:
         const unsigned& offset, 
         const unsigned& size,
         const unsigned& ghostZoneWidth,
-        const SuperVector<unsigned>& weights,
+        const SuperVector<long>& weights,
         const StripingPartition<2>& partition)
     {
         SuperVector<CoordBox<2> > boundingBoxes(size);
-        unsigned startOffset = offset;
-        unsigned endOffset = offset;
+        long startOffset = offset;
+        long endOffset = offset;
         for (unsigned i = 0; i < size; ++i) {
             endOffset += weights[i];
             Region<2> s;

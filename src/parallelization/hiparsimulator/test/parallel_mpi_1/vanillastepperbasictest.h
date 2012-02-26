@@ -29,7 +29,7 @@ public:
    
         partitionManager.reset(new PartitionManager<2>(rect));
         stepper.reset(
-            new MyStepper(partitionManager, init));
+            new MyStepper(partitionManager, &*init));
 
         stepper->addPatchAccepter(patchAccepter, MyStepper::GHOST);
     }

@@ -27,7 +27,7 @@ public:
         offset = startLine * dimensions.x();
         ghostZoneWidth = 6;
         rank = 0;
-        weights = SuperVector<unsigned> (9, 30 * dimensions.x());
+        weights = SuperVector<long> (9, 30 * dimensions.x());
         weights[3] = 40 * dimensions.x();
         weights[5] = 20 * dimensions.x();
         // sanity check
@@ -64,7 +64,7 @@ private:
     PartitionManager<2> intersector;
     StripingPartition<2> partition;
     Coord<2> dimensions;
-    SuperVector<unsigned> weights;
+    SuperVector<long> weights;
     unsigned startLine;
     unsigned offset;
     unsigned ghostZoneWidth;

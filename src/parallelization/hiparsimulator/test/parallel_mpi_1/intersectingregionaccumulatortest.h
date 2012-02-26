@@ -20,7 +20,7 @@ public:
         StripingPartition<2> partition(origin, dimensions);
 
         unsigned offset = 9;
-        SuperVector<unsigned> weights;
+        SuperVector<long> weights;
         weights += 25, 58, 8;
         Region<2> overlay;
         overlay << Streak<2>(Coord<2>(5, 0), 7)

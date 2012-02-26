@@ -22,7 +22,7 @@ public:
 
 
         unsigned offset = 9;
-        SuperVector<unsigned> weights;
+        SuperVector<long> weights;
         weights += 25, 58, 8;
         // should look like this:
         // 0: ---------0

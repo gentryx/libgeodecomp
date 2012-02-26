@@ -1,3 +1,4 @@
+#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/testinitializer.h>
@@ -7,6 +8,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
+using namespace boost::assign;
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 
 
@@ -72,10 +74,8 @@ public:
         CoordBox<3> box = init->gridBox();
 
         StripingPartition<3> partition(Coord<3>(), box.dimensions);
-        SuperVector<unsigned> weights;
-        weights << 10000;
-        weights << 15000;
-        weights << 25000;
+        SuperVector<long> weights;
+        weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
 
         partitionManager.reset(new MyPartitionManager());
@@ -93,7 +93,7 @@ public:
             boundingBoxes << partitionManager->getRegion(i, 0).boundingBox();
         partitionManager->resetGhostZones(boundingBoxes);
        
-        stepper.reset(new MyStepper(partitionManager, init));
+        stepper.reset(new MyStepper(partitionManager, &*init));
 
         // verify that the grids got set up properly
         Coord<3> expectedOffset;

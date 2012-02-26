@@ -19,14 +19,15 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     
+    inline Simulator(Initializer<CELL_TYPE> *_initializer) : 
+        stepNum(0), 
+        initializer(_initializer)
+    {}
+
     inline virtual ~Simulator() 
     { 
         delete initializer;
     }
-
-    inline Simulator(Initializer<CELL_TYPE> *_initializer) : 
-        stepNum(0), initializer(_initializer)
-    {}
 
     /**
      * performs a single simulation step.

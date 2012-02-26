@@ -29,7 +29,7 @@ public:
     PartitionManager(
         const CoordBox<DIM>& _simulationArea=CoordBox<DIM>())
     {
-        SuperVector<unsigned> weights(1, _simulationArea.size());
+        SuperVector<long> weights(1, _simulationArea.size());
         StripingPartition<DIM> partition(
             Coord<DIM>(), _simulationArea.dimensions);
         VanillaRegionAccumulator<StripingPartition<DIM> > *accu = 

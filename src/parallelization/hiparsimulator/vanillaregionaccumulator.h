@@ -17,17 +17,17 @@ public:
 
     inline VanillaRegionAccumulator(
         const PARTITION& _partition=PARTITION(), 
-        const unsigned& offset=0,
-        const SuperVector<unsigned>& weights=SuperVector<unsigned>(2)) :
+        const long& offset=0,
+        const SuperVector<long>& weights=SuperVector<long>(2)) :
         partition(_partition)
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
-        for (unsigned i = 0; i < weights.size(); ++i)
+        for (long i = 0; i < weights.size(); ++i)
             startOffsets[i + 1] = startOffsets[i] + weights[i];        
     }
 
-    inline virtual Region<DIM> getRegion(const unsigned& node)
+    inline virtual Region<DIM> getRegion(const long& node)
     {
         return Region<DIM>(
             partition[startOffsets[node]], 
@@ -36,7 +36,7 @@ public:
 
 private:
     PARTITION partition;
-    SuperVector<unsigned> startOffsets;
+    SuperVector<long> startOffsets;
 };
 
 };

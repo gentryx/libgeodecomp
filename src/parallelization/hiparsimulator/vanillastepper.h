@@ -27,7 +27,7 @@ public:
 
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer) :
+        Initializer<CELL_TYPE> *_initializer) :
         ParentType(_partitionManager, _initializer)
     {
         curStep = getInitializer().startStep();

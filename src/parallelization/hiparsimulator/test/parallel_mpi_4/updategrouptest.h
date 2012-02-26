@@ -28,7 +28,7 @@ public:
         partition = Partition(Coord<2>(), dimensions);
         weights = genWeights(dimensions.x(), dimensions.y(), MPILayer().size());
         ghostZoneWidth = 10;
-        init.reset(new TestInitializer<2>(dimensions));
+        init = new TestInitializer<2>(dimensions);
         updateGroup.reset(
             new MyUpdateGroup(
                 Partition(Coord<2>(), dimensions),
@@ -46,7 +46,7 @@ public:
 
     void tearDown()
     {
-        init.reset();
+        delete init;
         updateGroup.reset();
     }
 
@@ -58,26 +58,26 @@ public:
 private:
     unsigned rank;
     Coord<2> dimensions;
-    SuperVector<unsigned> weights;
+    SuperVector<long> weights;
     Partition partition;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<Initializer<TestCell<2> > > init;
+    Initializer<TestCell<2> > *init;
     boost::shared_ptr<UpdateGroup<TestCell<2>, Partition > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 
-    SuperVector<unsigned> genWeights(
+    SuperVector<long> genWeights(
         const unsigned& width, 
         const unsigned& height, 
         const unsigned& size)
     {
-        SuperVector<unsigned> ret(size);
+        SuperVector<long> ret(size);
         unsigned totalSize = width * height;
         for (int i = 0; i < ret.size(); ++i) 
             ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
         return ret;            
     }
 
-    unsigned pos(const unsigned& i, const unsigned& size, const unsigned& totalSize)
+    long pos(const unsigned& i, const unsigned& size, const unsigned& totalSize)
     {
         return i * totalSize / size;
     }

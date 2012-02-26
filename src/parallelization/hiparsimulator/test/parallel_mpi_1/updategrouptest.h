@@ -32,10 +32,10 @@ public:
         weights.clear();
         weights << dimensions.prod();
         ghostZoneWidth = 10;
-        init.reset(new TestInitializer<3>(dimensions));
+        init = new TestInitializer<3>(dimensions);
         updateGroup.reset(
             new MyUpdateGroup(
-                Partition(Coord<3>(), dimensions),
+                partition,
                 weights,
                 0,
                 CoordBox<3>(Coord<3>(), dimensions),
@@ -50,7 +50,7 @@ public:
                               
     void tearDown()
     {
-        init.reset();
+        delete init;
         updateGroup.reset();
     }
 
@@ -69,10 +69,10 @@ public:
 private:
     unsigned rank;
     Coord<3> dimensions;
-    SuperVector<unsigned> weights;
+    SuperVector<long> weights;
     Partition partition;
     unsigned ghostZoneWidth;
-    boost::shared_ptr<Initializer<TestCell<3> > > init;
+    Initializer<TestCell<3> > *init;
     boost::shared_ptr<UpdateGroup<TestCell<3>, Partition > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 };

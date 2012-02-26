@@ -31,8 +31,7 @@ public:
         loadBalancingPeriod = 31;
         ghostZoneWidth = 10;
         s.reset(new HiParSimulator<TestCell<2>, StripingPartition<2> >(
-                    init, 0, outputPeriod, 
-                    loadBalancingPeriod, ghostZoneWidth));
+                    init, 0, loadBalancingPeriod, ghostZoneWidth));
         // mockWriter = new MockWriter(&(*s));
     }
 

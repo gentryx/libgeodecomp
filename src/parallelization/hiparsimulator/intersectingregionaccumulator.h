@@ -17,13 +17,13 @@ public:
     inline IntersectingRegionAccumulator(
         const Region<DIM>& _intersectionRegion,
         const PARTITION& _partition, 
-        const unsigned& offset=0,
-        const SuperVector<unsigned>& weights=SuperVector<unsigned>()) :
+        const long& offset=0,
+        const SuperVector<long>& weights=SuperVector<long>()) :
         VanillaRegionAccumulator<PARTITION>(_partition, offset, weights),
         intersectionRegion(_intersectionRegion)
     {}
 
-    inline virtual Region<DIM> getRegion(const unsigned& node)
+    inline virtual Region<DIM> getRegion(const long& node)
     {
         return this->VanillaRegionAccumulator<PARTITION>::getRegion(node) & intersectionRegion;
     }

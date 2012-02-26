@@ -40,7 +40,7 @@ public:
 
     inline Stepper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,
-        const boost::shared_ptr<Initializer<CELL_TYPE> >& _initializer) :
+        Initializer<CELL_TYPE>  *_initializer) :
         partitionManager(_partitionManager),
         initializer(_initializer)
     {}
@@ -68,7 +68,7 @@ public:
 
 protected:
     boost::shared_ptr<MyPartitionManager> partitionManager;
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    Initializer<CELL_TYPE> *initializer;
     PatchProviderList patchProviders[2];
     PatchAccepterList patchAccepters[2];
 

@@ -12,7 +12,7 @@ template<int DIM>
 class RegionAccumulator
 {
 public:
-    virtual Region<DIM> getRegion(const unsigned& node) = 0;
+    virtual Region<DIM> getRegion(const long& node) = 0;
 };
 
 };
