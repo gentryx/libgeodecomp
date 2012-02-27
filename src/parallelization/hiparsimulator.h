@@ -71,8 +71,11 @@ public:
     // fixme: need test
     inline void run()
     {
-        unsigned remainingNanoSteps = this->initializer->maxSteps() * 
-            CELL_TYPE::nanoSteps() - nanoStepCounter;
+        // fixme: this is ugly
+        std::pair<int, int> currentStep = updateGroup->currentStep();
+        unsigned remainingNanoSteps = 
+            (this->initializer->maxSteps() - currentStep.first) * CELL_TYPE::nanoSteps() - 
+            currentStep.second;
         nanoStep(remainingNanoSteps);
     }
 
@@ -122,7 +125,7 @@ private:
 
     inline void nanoStep(const unsigned& s)
     {
-        updateGroup->update(s);
+        // updateGroup->update(s);
 
         // fixme: honor events here:
         // unsigned endNanoStep = nanoStepCounter + s;

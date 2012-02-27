@@ -10,6 +10,7 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class ParallelWriter; 
 
+// fixme: add short doxygen doc for every class
 template<typename CELL_TYPE>
 class DistributedSimulator : public Simulator<CELL_TYPE>
 {
@@ -34,6 +35,8 @@ public:
      * register @a writer which will observe the simulation. The
      * DistributedSimulator will assume that it now owns the
      * ParallelWriter, so it'll delete it upon destruction.
+     *
+     * fixme: replace @a by \a and @return by \returns ...
      */
     virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
     {

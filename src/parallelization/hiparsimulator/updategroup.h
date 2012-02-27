@@ -66,6 +66,8 @@ public:
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
+        long firstSyncPoint =  
+            initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
@@ -81,7 +83,7 @@ public:
                 patchLinks << link;
 
                 link->charge(
-                    ghostZoneWidth, 
+                    firstSyncPoint, 
                     PatchLink<GridType>::ENDLESS, 
                     ghostZoneWidth);
             }
@@ -102,7 +104,7 @@ public:
                 patchLinks << link;
          
                 link->charge(
-                    ghostZoneWidth, 
+                    firstSyncPoint, 
                     PatchLink<GridType>::ENDLESS, 
                     ghostZoneWidth);
             }
@@ -110,8 +112,7 @@ public:
     }
 
     virtual ~UpdateGroup()
-    { 
-    }
+    { }
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider, 
@@ -135,6 +136,11 @@ public:
     const GridType& grid() const
     {
         return stepper->grid();
+    }
+
+    inline virtual std::pair<int, int> currentStep() const
+    {
+        return stepper->currentStep();
     }
 
 private:

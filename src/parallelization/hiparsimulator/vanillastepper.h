@@ -103,9 +103,11 @@ private:
         for (class ParentType::PatchAccepterList::iterator i = 
                  this->patchAccepters[patchType].begin();
              i != this->patchAccepters[patchType].end();
-             ++i)
-            if (nanoStep == (*i)->nextRequiredNanoStep()) 
+             ++i) {
+            if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
+            }
+        }
     }
 
     inline void notifyPatchProviders(
