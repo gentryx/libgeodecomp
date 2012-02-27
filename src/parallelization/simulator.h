@@ -18,7 +18,12 @@ class Simulator
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    
+  
+    /**
+     * Creates the abstract Simulator object. The Initializer is
+     * assumed to belong to the Simulator, which means that it'll
+     * delete the @a _initializer at the end of its lifetime.
+     */
     inline Simulator(Initializer<CELL_TYPE> *_initializer) : 
         stepNum(0), 
         initializer(_initializer)
@@ -40,7 +45,7 @@ public:
     virtual void run() = 0;
 
     /**
-     * @return the number of the current logical step.
+     * @return the number of the current logical simulation step.
      */
     virtual unsigned getStep() const 
     { 

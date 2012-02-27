@@ -29,16 +29,15 @@ public:
     virtual const typename Simulator<CELL_TYPE>::GridType *getGrid() = 0;
 
     /**
-     * register @a writer to receive the Writer callbacks.
+     * register @a writer which will observe the simulation. The
+     * MonolithicSimulator will assume that it now owns the Writer, so
+     * it'll delete it upon destruction.
      */
     virtual void registerWriter(Writer<CELL_TYPE> *writer)
     {
         writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
     }
 
-    /**
-     * @return currently registered Writers.
-     */
     virtual WriterVector getWriters() const
     {
         return writers;

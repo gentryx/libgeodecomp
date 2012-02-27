@@ -31,16 +31,15 @@ public:
         const Region<Topology::DIMENSIONS> **validRegion) = 0;
 
     /**
-     * register @a writer to receive the Writer callbacks.
+     * register @a writer which will observe the simulation. The
+     * DistributedSimulator will assume that it now owns the
+     * ParallelWriter, so it'll delete it upon destruction.
      */
     virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         writers.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
     }
 
-    /**
-     * @return currently registered Writers.
-     */
     virtual WriterVector getWriters() const
     {
         return writers;
