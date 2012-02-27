@@ -26,6 +26,9 @@ public:
     
     virtual long nextRequiredNanoStep() const
     {
+        if (requestedNanoSteps.empty()) {
+            return -1;
+        }
         return requestedNanoSteps.front();
     }
 
