@@ -32,7 +32,7 @@ public:
     inline OpenCLStepper(
         const std::string& cellSourceFile,
         boost::shared_ptr<MyPartitionManager> _partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > _initializer,
+        Initializer<CELL_TYPE> *_initializer,
         const int& platformID=0,
         const int& deviceID=0) :
         ParentType(_partitionManager, _initializer)

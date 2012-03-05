@@ -41,7 +41,7 @@ public:
 
     inline Stepper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,
-        Initializer<CELL_TYPE>  *_initializer) :
+        Initializer<CELL_TYPE> *_initializer) :
         partitionManager(_partitionManager),
         initializer(_initializer)
     {}
