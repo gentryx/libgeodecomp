@@ -36,6 +36,7 @@ if (LIBGEODECOMP_FEATURE_OPENCL)
   target_link_libraries(geodecomp OpenCL)
 endif (LIBGEODECOMP_FEATURE_OPENCL)
 install(TARGETS geodecomp DESTINATION lib)
+install(FILES config.h DESTINATION include/${PACKAGE_NAME})
 
 # install all headers
 foreach(dir ${LIBDIRS})

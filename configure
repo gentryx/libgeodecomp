@@ -204,7 +204,6 @@ EOF
 
   cmake_opts += <<EOF
 # packaging stuff
-set(PACKAGE_NAME "#{package_name}")
 set(PACKAGE_VERSION "$ENV{LIBGEODECOMP_VERSION}")
 if(NOT PACKAGE_VERSION)
   set(PACKAGE_VERSION "0.0.1")
