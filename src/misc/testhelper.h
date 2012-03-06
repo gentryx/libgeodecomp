@@ -107,26 +107,19 @@
         }                                                               \
     } while(0)
 
-// fixme: recheck that all those methods do the right thing
-// fixme: these macros are so ugly...
-// fixme: ugly that i have to specify the type here, could get rid of
-// that with a template function
-
-
-
 #define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE)         \
     {                                                                   \
-        _GRID_TYPE assertGrid = _GRID;                                  \
+        const _GRID_TYPE& assertGrid = _GRID;                           \
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
         bool ollKorrect = true;                                         \
         std::ostringstream message;                                     \
                                                                         \
-        TS_ASSERT(assertGrid.getEdgeCell().isEdgeCell);                 \
-        if (!assertGrid.getEdgeCell().isEdgeCell) {                     \
+        TS_ASSERT(assertGrid.atEdge().isEdgeCell);                      \
+        if (!assertGrid.atEdge().isEdgeCell) {                          \
             ollKorrect = false;                                         \
             message << "edgeCell isn't an edgeCell\n";                  \
         }                                                               \
-        if (!assertGrid.getEdgeCell().valid()) {                        \
+        if (!assertGrid.atEdge().valid()) {                             \
             ollKorrect = false;                                         \
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
@@ -134,13 +127,13 @@
             assertGrid.boundingBox().sequence();                        \
         while (i.hasNext()) {                                           \
             LibGeoDecomp::Coord<_GRID_TYPE::DIM> c = i.next();          \
-            bool flag = assertGrid[c].valid();                          \
-            flag &= (assertGrid[c].isEdgeCell == false);                \
-            flag &= (assertGrid[c].cycleCounter == expectedCycle);      \
+            bool flag = assertGrid.at(c).valid();                       \
+            flag &= (assertGrid.at(c).isEdgeCell == false);             \
+            flag &= (assertGrid.at(c).cycleCounter == expectedCycle);   \
             TS_ASSERT(flag);                                            \
             ollKorrect &= flag;                                         \
             if (!flag)                                                  \
-                message << "TS_ASSERT_GRID failed at Coord " << c << "\n"; \
+                message << "TS_ASSERT_TEST_GRID failed at Coord " << c << "\n"; \
         }                                                               \
                                                                         \
         if (!ollKorrect)                                                \
@@ -149,54 +142,22 @@
 
 #define TS_ASSERT_TEST_GRID_REGION(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE) \
     {                                                                   \
-        _GRID_TYPE assertGrid = _GRID;                                  \
+        const _GRID_TYPE& assertGrid = _GRID;                           \
         Region<_GRID_TYPE::DIM> assertRegion = _REGION;                 \
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
         bool ollKorrect = true;                                         \
         std::ostringstream message;                                     \
                                                                         \
-        ollKorrect &= assertGrid.getEdgeCell().isEdgeCell;              \
-        ollKorrect &= assertGrid.getEdgeCell().valid();                 \
+        ollKorrect &= assertGrid.atEdge().isEdgeCell;                   \
+        ollKorrect &= assertGrid.atEdge().valid();                      \
         Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
         for (Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
-            bool flag = assertGrid[*i].valid();                         \
-            flag &= (assertGrid[*i].isEdgeCell == false);               \
-            flag &= (assertGrid[*i].cycleCounter == expectedCycle);     \
+            bool flag = assertGrid.at(*i).valid();                      \
+            flag &= (assertGrid.at(*i).isEdgeCell == false);            \
+            flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
             TS_ASSERT(flag);                                            \
             ollKorrect &= flag;                                         \
             if (!flag)                                                  \
-                message << "TS_ASSERT_GRID_REGION failed at Coord " << *i << "\n"; \
+                message << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
         }                                                               \
-                                                                        \
-        if (!ollKorrect)                                                \
-            std::cout << message.str() << assertGrid;                   \
     } while(0)
-
-
-// fixme: this is 2D code, only!
-#define TS_ASSERT_TEST_GRID_NO_CYCLE(_GRID_TYPE, _GRID)                 \
-    {                                                                   \
-        _GRID_TYPE assertGrid = _GRID;                                  \
-        bool ollKorrect = true;                                         \
-        std::ostringstream message;                                     \
-                                                                        \
-        ollKorrect &= assertGrid.getEdgeCell().isEdgeCell;              \
-        ollKorrect &= assertGrid.getEdgeCell().valid();                 \
-        for (unsigned x = 0; x < assertGrid.getDimensions().x(); x++) {   \
-            for (unsigned y = 0; y < assertGrid.getDimensions().y(); y++) { \
-                LibGeoDecomp::Coord<2> c(x, y);                         \
-                Coord<2> origin = assertGrid.boundingBox().origin;      \
-                bool flag = assertGrid[c + origin].valid();             \
-                flag &= (assertGrid[c + origin].isEdgeCell == false);   \
-                TS_ASSERT(flag);                                        \
-                ollKorrect &= flag;                                     \
-                if (!flag)                                              \
-                    message << "TS_ASSERT_GRID_NO_CYCLE failed at Coord " << c << "\n"; \
-            }                                                           \
-        }                                                               \
-                                                                        \
-        if (!ollKorrect)                                                \
-            std::cout << message.str() << assertGrid;                   \
-    } while(0)
-
-#endif

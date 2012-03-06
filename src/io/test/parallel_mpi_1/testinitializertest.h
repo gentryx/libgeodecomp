@@ -49,7 +49,11 @@ public:
             }
         }
 
-        TS_ASSERT_TEST_GRID_NO_CYCLE(DisplacedGrid<TestCell<2> >, newGrid);
+        for (unsigned x = 1; x < rect.dimensions.x() - 1; x++) {
+            for (unsigned y = 1; y < rect.dimensions.y() - 1; y++) { 
+                TS_ASSERT(newGrid[Coord<2>(x, y)].valid());
+            }
+        }
     }
 
     void testGrid2()
