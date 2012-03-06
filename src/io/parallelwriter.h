@@ -57,8 +57,8 @@ public:
 
     /**
      * is called from @a distSim after each simulation step. One
-     * important difference to a normal writer is, that a \a
-     * DistributedWriter MAY call this function multiple times per
+     * important difference to a normal writer is, that a 
+     * DistributedSimulator MAY call this function multiple times per
      * step on a single node. The reason for this is that a some
      * parallelizations may choose to update parts of the grid
      * seperately from other parts.

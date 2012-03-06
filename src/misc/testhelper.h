@@ -161,3 +161,5 @@
                 message << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
         }                                                               \
     } while(0)
+
+#endif
