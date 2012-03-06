@@ -42,7 +42,8 @@ class HiParSimulator : public DistributedSimulator<CELL_TYPE>
     friend class HiParSimulatorTest;
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
+    typedef DistributedSimulator<CELL_TYPE> ParentType;
+    typedef typename ParentType::GridType GridType;
     static const int DIM = Topology::DIMENSIONS;
 
     inline HiParSimulator(
@@ -51,21 +52,22 @@ public:
         const unsigned& _loadBalancingPeriod = 1,
         const unsigned &_ghostZoneWidth = 1,
         MPI::Comm *_communicator = &MPI::COMM_WORLD) : 
-        DistributedSimulator<CELL_TYPE>(_initializer),
+        ParentType(_initializer),
         balancer(_balancer),
         loadBalancingPeriod(_loadBalancingPeriod * CELL_TYPE::nanoSteps()),
         ghostZoneWidth(_ghostZoneWidth),
         communicator(_communicator)
     {
         CoordBox<DIM> box = this->initializer->gridBox();
-        updateGroup.reset(new UpdateGroup<CELL_TYPE, PARTITION>(
-                              PARTITION(box.origin, box.dimensions),
-                              initialWeights(box.dimensions.prod(), communicator->Get_size()),
-                              0,
-                              box,
-                              ghostZoneWidth,
-                              this->initializer,
-                              communicator));
+        updateGroup.reset(
+            new UpdateGroup<CELL_TYPE, PARTITION>(
+                PARTITION(box.origin, box.dimensions),
+                initialWeights(box.dimensions.prod(), communicator->Get_size()),
+                0,
+                box,
+                ghostZoneWidth,
+                this->initializer,
+                communicator));
     }   
 
     // fixme: need test
@@ -88,8 +90,10 @@ public:
     // fixme: need test
     virtual void getGridFragment(
         const GridType **grid, 
-        const Region<2> **validRegion) 
+        const Region<DIM> **validRegion) 
     {
+        // *grid = &updateGroup->grid();
+        // // fixme: we can't even guarantee this part
         // *validRegion = &partitionManager.ownRegion();
     }
 
@@ -125,7 +129,7 @@ private:
 
     inline void nanoStep(const unsigned& s)
     {
-        // updateGroup->update(s);
+        updateGroup->update(s);
 
         // fixme: honor events here:
         // unsigned endNanoStep = nanoStepCounter + s;

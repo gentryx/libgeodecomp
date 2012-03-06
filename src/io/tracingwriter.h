@@ -3,8 +3,9 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
-#include <libgeodecomp/io/writer.h>
+
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
 
