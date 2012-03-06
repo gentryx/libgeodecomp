@@ -52,7 +52,7 @@ public:
             new MyStepper(cellSourceFile, partitionManager, init));
     }
 
-    void testDown()
+    void tearDown()
     {
         delete init;
     }
