@@ -2,7 +2,9 @@
 #include <sstream>
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
+
 #include "../../grid.h"
+#include "../../displacedgrid.h"
 #include "../../testcell.h"
 
 #define GRIDWIDTH 4
@@ -337,6 +339,25 @@ public:
             for (int y=0; y < dim.y(); ++y)
                 for (int x=0; x < dim.x(); ++x) 
                     TS_ASSERT_EQUALS(g[Coord<3>(x, y, z)], 47);
+    }
+
+    void testCompare()
+    {
+        Coord<2> dim(5, 4);
+        Grid<int> g1(dim, 4);
+        Grid<int> g2(dim, 9);
+        DisplacedGrid<int> g3(CoordBox<2>(Coord<2>(), dim), 4);
+        DisplacedGrid<int> g4(CoordBox<2>(Coord<2>(), dim), 9);
+        DisplacedGrid<int> g5(CoordBox<2>(Coord<2>(), Coord<2>(5, 5)), 9);
+
+        TS_ASSERT(g1 != g2);
+        TS_ASSERT(g1 == g3);
+        TS_ASSERT(g1 != g4);
+        TS_ASSERT(g1 != g5);
+
+        TS_ASSERT(g2 != g3);
+        TS_ASSERT(g2 == g4);
+        TS_ASSERT(g2 != g5);
     }
 };
 

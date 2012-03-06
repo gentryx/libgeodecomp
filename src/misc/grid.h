@@ -154,10 +154,35 @@ public:
             (cellMatrix == other.cellMatrix);
     }
 
+    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    {
+        if (this->boundingBox() != other.boundingBox())
+            return false;
+
+        if (this->edgeCell != other.atEdge())
+            return false;
+
+        CoordBoxSequence<DIM> s = boundingBox().sequence();
+        while (s.hasNext()) {
+            Coord<DIM> c = s.next();
+            if ((*this)[c] != other.at(c)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     inline bool operator!=(const Grid& other) const
     {
         return !(*this == other);
     }
+
+    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    {
+        return !(*this == other);
+    }
+
 
     virtual CELL_TYPE& at(const Coord<DIM>& coord)
     {
