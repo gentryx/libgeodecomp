@@ -156,13 +156,8 @@ class BadBalancerNum : public LoadBalancer {
 
 class StripingSimulatorTest : public CxxTest::TestSuite
 {
-private:
-    LoadBalancer *balancer;
-    MonolithicSimulator<TestCell<2> > *referenceSim;
-    StripingSimulator<TestCell<2> > *testSim;
-    Initializer<TestCell<2> > *init;
-
 public:
+    typedef GridBase<TestCell<2>, 2> GridBaseType;
 
     void setUp() 
     {
@@ -241,14 +236,13 @@ public:
 
     void testStep()
     {
-        const DisplacedGrid<TestCell<2> > *grid;
+        const GridBaseType *grid;
         const Region<2> *region;
         
         testSim->getGridFragment(&grid, &region);
         TS_ASSERT_EQUALS(referenceSim->getStep(), 
                          testSim->getStep());
-        TS_ASSERT_EQUALS(*(referenceSim->getGrid()), 
-                         *(grid->vanillaGrid()));
+        TS_ASSERT(*(referenceSim->getGrid()) == *grid);
 
         for (int i = 0; i < 50; i++) {
             referenceSim->step();
@@ -257,10 +251,9 @@ public:
             TS_ASSERT_EQUALS(referenceSim->getStep(), 
                              testSim->getStep());
             TS_ASSERT_EQUALS(referenceSim->getGrid()->getDimensions(), 
-                             grid->getDimensions());
-            TS_ASSERT_EQUALS(*referenceSim->getGrid(), 
-                             *grid->vanillaGrid());
-            TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *grid->vanillaGrid(), 
+                             grid->boundingBox().dimensions);
+            TS_ASSERT(*referenceSim->getGrid() == *grid);
+            TS_ASSERT_TEST_GRID(GridBaseType, *grid, 
                                 (i + 1) * TestCell<2>::nanoSteps());
         }        
     }
@@ -275,27 +268,27 @@ public:
     {
         testSim->run();
         referenceSim->run();
-        const DisplacedGrid<TestCell<2> > *grid;
+        const GridBaseType *grid;
         const Region<2> *region;
         testSim->getGridFragment(&grid, &region);
         Grid<TestCell<2> > refGrid = *referenceSim->getGrid();
 
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
-        TS_ASSERT_EQUALS(*grid->vanillaGrid(), refGrid);
+        TS_ASSERT(refGrid == *grid);
     }
 
     void testRunMustResetGridPriorToSimulation()
     {
         const Region<2> *r;
-        const DisplacedGrid<TestCell<2> > *g;
+        const GridBaseType *g;
 
         testSim->run();
         testSim->getGridFragment(&g, &r);
-        int cycle1 = (*g)[Coord<2>(4, 4)].cycleCounter;
+        int cycle1 = g->at(Coord<2>(4, 4)).cycleCounter;
 
         testSim->run();
         testSim->getGridFragment(&g, &r);
-        int cycle2 = (*g)[Coord<2>(4, 4)].cycleCounter;
+        int cycle2 = g->at(Coord<2>(4, 4)).cycleCounter;
 
         TS_ASSERT_EQUALS(cycle1, cycle2);
     }
@@ -539,6 +532,12 @@ public:
         // fixme: add performance test targets
         benchmark(256, 100);
     }
+
+private:
+    LoadBalancer *balancer;
+    MonolithicSimulator<TestCell<2> > *referenceSim;
+    StripingSimulator<TestCell<2> > *testSim;
+    Initializer<TestCell<2> > *init;
 };
 
 };

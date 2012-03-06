@@ -216,7 +216,7 @@ public:
     }
 
     virtual void getGridFragment(
-        const GridType **grid, 
+        const GridBase<CELL_TYPE, DIM> **grid, 
         const Region<DIM> **validRegion)
     {
         *grid = curStripe;

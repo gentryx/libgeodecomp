@@ -152,7 +152,7 @@ private:
             if (buffer.size() != effectiveLength)
                 buffer = SuperVector<VariableType>(effectiveLength);
             for (int i = 0; i < effectiveLength; i += dataComponents) {
-                SELECTOR_TYPE()((*grid)[walker], &buffer[i]);
+                SELECTOR_TYPE()(grid->at(walker), &buffer[i]);
                 walker.x()++;
             }
             file.Write(&buffer[0], effectiveLength, datatype);

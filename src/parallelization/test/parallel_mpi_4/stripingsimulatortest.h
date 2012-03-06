@@ -32,6 +32,8 @@ public:
 class ParallelStripingSimulatorTest : public CxxTest::TestSuite
 {
 private:
+    typedef GridBase<TestCell<2>, 2> GridBaseType;
+
     MonolithicSimulator<TestCell<2> > *referenceSim;
     StripingSimulator<TestCell<2> > *testSim;
     int rank;
@@ -138,12 +140,12 @@ public:
                          testSim->getStep());
         
         const Region<2> *region;
-        const DisplacedGrid<TestCell<2> > *grid;
+        const GridBaseType *grid;
         int cycle = firstCycle;
 
         testSim->getGridFragment(&grid, &region);
         TS_ASSERT_TEST_GRID_REGION(
-            DisplacedGrid<TestCell<2> >, 
+            GridBaseType, 
             *grid, 
             *region, 
             cycle);
@@ -158,7 +160,7 @@ public:
 
             testSim->getGridFragment(&grid, &region);
             TS_ASSERT_TEST_GRID_REGION(
-                DisplacedGrid<TestCell<2> >, 
+                GridBaseType, 
                 *grid, 
                 *region, 
                 cycle);
@@ -173,12 +175,12 @@ public:
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
 
         const Region<2> *region;
-        const DisplacedGrid<TestCell<2> > *grid;
+        const GridBaseType *grid;
         testSim->getGridFragment(&grid, &region);
         int cycle = maxSteps * TestCell<2>::nanoSteps();
 
         TS_ASSERT_TEST_GRID_REGION(
-            DisplacedGrid<TestCell<2> >, 
+            GridBaseType, 
             *grid, 
             *region, 
             cycle);
@@ -257,12 +259,12 @@ public:
         referenceSim->run();
 
         const Region<2> *region;
-        const DisplacedGrid<TestCell<2> > *grid;
+        const GridBaseType *grid;
         int cycle = maxSteps * TestCell<2>::nanoSteps();
         testSim->getGridFragment(&grid, &region);
 
         TS_ASSERT_TEST_GRID_REGION(
-            DisplacedGrid<TestCell<2> >, 
+            GridBaseType, 
             *grid, 
             *region, 
             cycle);

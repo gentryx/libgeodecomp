@@ -73,11 +73,12 @@ public:
     // fixme: need test
     inline void run()
     {
-        // fixme: this is ugly
+        // fixme: use events here
         std::pair<int, int> currentStep = updateGroup->currentStep();
+        unsigned remainingSteps = 
+            this->initializer->maxSteps() - currentStep.first;
         unsigned remainingNanoSteps = 
-            (this->initializer->maxSteps() - currentStep.first) * CELL_TYPE::nanoSteps() - 
-            currentStep.second;
+            remainingSteps * CELL_TYPE::nanoSteps() - currentStep.second;
         nanoStep(remainingNanoSteps);
     }
 
@@ -92,16 +93,10 @@ public:
         const GridType **grid, 
         const Region<DIM> **validRegion) 
     {
-        // *grid = &updateGroup->grid();
-        // // fixme: we can't even guarantee this part
-        // *validRegion = &partitionManager.ownRegion();
+        *grid = &updateGroup->grid();
+        // fixme: we can't even guarantee this part
+        *validRegion = &partitionManager.ownRegion();
     }
-
-    // inline const DisplacedGrid<CELL_TYPE> *getDisplacedGrid()
-    // {        
-    //     return 0;
-    //     // return regionStepper.getGrid();
-    // }
 
 private:
     boost::shared_ptr<LoadBalancer> balancer;

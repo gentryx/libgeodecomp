@@ -86,7 +86,7 @@ public:
             file.Write(&dimensions,         1, Typemaps::lookup<Coord<DIM> >());
             file.Write(&step,               1, MPI::UNSIGNED);
             file.Write(&maxSteps,           1, MPI::UNSIGNED);
-            file.Write(&grid.getEdgeCell(), 1, mpiDatatype);
+            file.Write(&grid.atEdge(),      1, mpiDatatype);
         }
 
         for (StreakIterator<DIM> i = region.beginStreak();
@@ -101,7 +101,7 @@ public:
             file.Seek(offset(headerLength, coord, dimensions, cellLength), 
                       MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
-            file.Write(&grid[i->origin], length, mpiDatatype);
+            file.Write(&grid.at(i->origin), length, mpiDatatype);
         }
 
         file.Close();

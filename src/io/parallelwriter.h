@@ -49,20 +49,26 @@ public:
     virtual ~ParallelWriter() {};    
 
     /**
-     * is called back from @a distSim after the initialization phase is finished.
-     * This allow the Writer to query static parameters from the Simulator.
+     * is called from @a distSim after the initialization phase is
+     * finished. This allow the Writer to query static parameters from
+     * the Simulator.
      */
     virtual void initialized() = 0;
 
     /**
-     * is called back from @a distSim after each simulation step. The Writer has to
-     * decide whether it likes to write this step's results.
+     * is called from @a distSim after each simulation step. One
+     * important difference to a normal writer is, that a \a
+     * DistributedWriter MAY call this function multiple times per
+     * step on a single node. The reason for this is that a some
+     * parallelizations may choose to update parts of the grid
+     * seperately from other parts.
      */
     virtual void stepFinished() = 0;
 
     /**
-     * is called back from @a distSim at the end of the whole simulation. The Writer
-     * may close open files or do any other finalization routine.
+     * is called from @a distSim at the end of the whole
+     * simulation. The Writer may close open files or do any other
+     * finalization routine.
      */
     virtual void allDone() = 0;
 
