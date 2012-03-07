@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/supervector.h>
 #include <libgeodecomp/parallelization/simulator.h>
 
 namespace LibGeoDecomp {
@@ -17,7 +18,7 @@ class DistributedSimulator : public Simulator<CELL_TYPE>
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
-    typedef std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
+    typedef SuperVector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
 
     inline DistributedSimulator(Initializer<CELL_TYPE> *_initializer) : 
         Simulator<CELL_TYPE>(_initializer)
@@ -43,7 +44,7 @@ public:
         writers.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
     }
 
-    virtual WriterVector getWriters() const
+    virtual const WriterVector& getWriters() const
     {
         return writers;
     }

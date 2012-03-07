@@ -34,7 +34,7 @@ public:
         ghostzZoneWidth = 10;
         s.reset(new MySimulator(
                     init, 0, loadBalancingPeriod, ghostzZoneWidth));
-        // mockWriter = new MockWriter(&(*s));
+        mockWriter = new MockWriter(&(*s));
     }
 
     void tearDown()
@@ -44,13 +44,15 @@ public:
 
     void testStep()
     {
-        const MySimulator::GridType *grid;
-        const Region<2> *validRegion;
+        // const MySimulator::GridType *grid;
+        // const Region<2> *validRegion;
 
-        s->getGridFragment(&grid, &validRegion);
+        // s->getGridFragment(&grid, &validRegion);
         // std::cout << "got " << (*grid)[Coord<2>(5, 5)] << "\n";
 
-        // s->step();
+        s->step();
+        s->step();
+        s->step();
     }
 
     // void testCallsToWriter()

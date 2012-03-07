@@ -100,10 +100,12 @@ private:
         const typename ParentType::PatchType& patchType,
         const long& nanoStep)
     {
+        std::cout << "notifyPatchAccepters(" << nanoStep << ")\n";
         for (class ParentType::PatchAccepterList::iterator i = 
                  this->patchAccepters[patchType].begin();
              i != this->patchAccepters[patchType].end();
              ++i) {
+            std::cout << "  @ " << (*i)->nextRequiredNanoStep() << "\n";
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
             }

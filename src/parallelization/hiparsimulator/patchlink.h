@@ -152,6 +152,7 @@ public:
             if ((this->lastNanoStep == ENDLESS) || 
                 (nextNanoStep < this->lastNanoStep))
                 recv(nextNanoStep);
+            // fixme: extract method for this
             this->storedNanoSteps.erase_min();
         }
 
