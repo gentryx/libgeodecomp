@@ -55,12 +55,14 @@ public:
         LoadBalancer *_balancer = 0,
         const unsigned& _loadBalancingPeriod = 1,
         const unsigned &_ghostZoneWidth = 1,
+        const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
         MPI::Comm *_communicator = &MPI::COMM_WORLD) : 
         ParentType(_initializer),
         balancer(_balancer),
         loadBalancingPeriod(_loadBalancingPeriod * CELL_TYPE::nanoSteps()),
         ghostZoneWidth(_ghostZoneWidth),
-        communicator(_communicator)
+        communicator(_communicator),
+        cellMPIDatatype(_cellMPIDatatype)
     {
     }   
 
@@ -136,6 +138,7 @@ private:
     EventMap events;
     PartitionManager<DIM, Topology> partitionManager;
     MPI::Comm *communicator;
+    MPI::Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
@@ -196,6 +199,7 @@ private:
                 this->initializer,
                 writerAdaptersGhost,
                 writerAdaptersInner,
+                cellMPIDatatype,
                 communicator));
 
         writerAdaptersGhost.clear();

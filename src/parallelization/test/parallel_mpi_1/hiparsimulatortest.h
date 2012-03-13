@@ -55,12 +55,12 @@ public:
         s->step();
     }
 
-    // void testCallsToWriter()
-    // {
+    void testCallsToWriter()
+    {
     //     std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n";
-    //     s->run();
-    //     std::cout << "-----------got events : " << mockWriter->events() << "\n";
-    // }
+        s->run();
+        std::cout << "-----------got events : " << mockWriter->events() << "\n";
+    }
 
 private:
     boost::shared_ptr<MySimulator > s;

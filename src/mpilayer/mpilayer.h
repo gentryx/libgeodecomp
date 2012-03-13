@@ -15,6 +15,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * MPILayer is a wrapper that provides a mostly 1:1 identical access
+ * to MPI functions, but with a number of convenient twists, where
+ * appropriate. 
+ */
 class MPILayer
 {
     friend class MPILayerTest;
@@ -151,6 +156,11 @@ public:
         comm->Barrier();
     }
 
+    MPI::Comm *getCommunicator()
+    {
+        return comm;
+    }
+    
     /** 
      * @return the number of nodes in the communicator. 
      */ 

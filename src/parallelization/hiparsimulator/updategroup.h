@@ -46,6 +46,7 @@ public:
         Initializer<CELL_TYPE> *_initializer,
         PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
+        const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
         partition(_partition),
         weights(_weights),
@@ -53,6 +54,7 @@ public:
         ghostZoneWidth(_ghostZoneWidth),
         initializer(_initializer),
         mpiLayer(communicator),
+        cellMPIDatatype(_cellMPIDatatype),
         rank(mpiLayer.rank())
     {
         partitionManager.reset(new MyPartitionManager());
@@ -80,7 +82,11 @@ public:
             if (!i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
                     new typename PatchLink<GridType>::Accepter(
-                        i->second.back(), i->first));
+                        i->second.back(), 
+                        i->first, 
+                        0,
+                        cellMPIDatatype, 
+                        mpiLayer.getCommunicator()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
 
@@ -105,7 +111,11 @@ public:
             if (!i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
                     new typename PatchLink<GridType>::Provider(
-                        i->second.back(), i->first));
+                        i->second.back(), 
+                        i->first,
+                        0,
+                        cellMPIDatatype, 
+                        mpiLayer.getCommunicator()));
                 addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
                 patchLinks << link;
          
@@ -159,6 +169,7 @@ private:
     unsigned ghostZoneWidth;
     Initializer<CELL_TYPE> *initializer;
     MPILayer mpiLayer;
+    MPI::Datatype cellMPIDatatype;
     unsigned rank;
 };
 

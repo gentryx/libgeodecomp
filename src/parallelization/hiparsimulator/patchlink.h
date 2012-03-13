@@ -83,11 +83,15 @@ public:
     {
     public:
         inline Accepter(
-            const Region<DIM>& _region=Region<DIM>(),
-            const int& _dest=0,
-            const int& _tag=0) :
-            Link(_region, _tag),
-            dest(_dest)
+            const Region<DIM>& _region = Region<DIM>(),
+            const int& _dest = 0,
+            const int& _tag = 0,
+            const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<typename GRID_TYPE::CellType>(),
+            MPI::Comm *communicator = &MPI::COMM_WORLD) : 
+            Link(_region, _tag, communicator),
+            dest(_dest),
+            cellMPIDatatype(_cellMPIDatatype)
+
         {}
 
         virtual void charge(const long& next, const long& last, const long& newStride) 
@@ -107,7 +111,7 @@ public:
             this->wait();
             GridVecConv::gridToVector(grid, &this->buffer, this->region);
             this->mpiLayer.send(
-                &this->buffer[0], dest, this->buffer.size(), this->tag);
+                &this->buffer[0], dest, this->buffer.size(), this->tag, cellMPIDatatype);
             long nextNanoStep = this->requestedNanoSteps.min() + this->stride;
             if ((this->lastNanoStep == ENDLESS) || 
                 (nextNanoStep < this->lastNanoStep))
@@ -117,6 +121,7 @@ public:
 
     private:
         int dest;
+        MPI::Datatype cellMPIDatatype;
     };
 
     class Provider : 
@@ -127,9 +132,12 @@ public:
         inline Provider(
             const Region<DIM>& _region=Region<DIM>(),
             const int& _source=0,
-            const int& _tag=0) :
-            Link(_region, _tag),
-            source(_source)
+            const int& _tag=0,
+            const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<typename GRID_TYPE::CellType>(),
+            MPI::Comm *communicator = &MPI::COMM_WORLD) : 
+            Link(_region, _tag, communicator),
+            source(_source),
+            cellMPIDatatype(_cellMPIDatatype)
         {}
 
         virtual void charge(const long& next, const long& last, const long& newStride) 
@@ -159,11 +167,12 @@ public:
         void recv(const long& nanoStep)
         {
             this->storedNanoSteps << nanoStep;
-            this->mpiLayer.recv(&this->buffer[0], source, this->buffer.size(), this->tag);
+            this->mpiLayer.recv(&this->buffer[0], source, this->buffer.size(), this->tag, cellMPIDatatype);
         }
 
     private:
         int source;
+        MPI::Datatype cellMPIDatatype;
     };
 
 };
