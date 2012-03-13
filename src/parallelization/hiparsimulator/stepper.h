@@ -16,11 +16,8 @@ namespace HiParSimulator {
 
 /**
  * Abstract interface class. Steppers contain some arbitrary region of
- * the grid which they can update. See StepperHelper for details on
- * accessing ghost zones. Do not inherit directly from Stepper, but
- * rather from StepperHelper.
- *
- * fixme: doxygen syntax to link to StepperHelper...
+ * the grid which they can update. IO and ghostzone communication are
+ * handled via PatchAccepter and PatchProvider objects.
  */
 template<typename CELL_TYPE>
 class Stepper
@@ -50,7 +47,9 @@ public:
 
     virtual const GridType& grid() const = 0;
 
-    // returns current step and nanoStep
+    /**
+     * returns current step and nanoStep
+     */
     virtual std::pair<int, int> currentStep() const = 0;
 
     void addPatchProvider(
