@@ -156,7 +156,6 @@ private:
 
     inline void nanoStep(const unsigned& s)
     {
-        std::cout << "nanoStep(" << s << ")\n";
         updateGroup->update(s);
 
         // fixme: honor events here:
