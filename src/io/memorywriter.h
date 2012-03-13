@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_io_memorywriter_h_
 #define _libgeodecomp_io_memorywriter_h_
 
@@ -10,6 +8,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The MemoryWriter is good for debugging a Simulator. As it name
+ * says, it will simply store all grids in memory for later inspection.
+ */
 template<typename CELL_TYPE>
 class MemoryWriter : public Writer<CELL_TYPE>
 {
@@ -18,8 +20,8 @@ public:
     typedef typename Simulator<CELL_TYPE>::GridType GridType;
 
     MemoryWriter(MonolithicSimulator<CELL_TYPE>* sim, int period = 1) : 
-        Writer<CELL_TYPE>("foobar", sim, period) {}
-
+        Writer<CELL_TYPE>("foobar", sim, period) 
+    {}
     
     void initialized()
     {
@@ -59,5 +61,4 @@ private:
 
 };
 
-#endif
 #endif
