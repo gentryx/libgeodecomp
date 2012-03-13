@@ -47,6 +47,7 @@ public:
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE, PARTITION> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
+    typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, PARTITION> ParallelWriterAdapterType;
     static const int DIM = Topology::DIMENSIONS;
 
     inline HiParSimulator(
@@ -61,21 +62,13 @@ public:
         ghostZoneWidth(_ghostZoneWidth),
         communicator(_communicator)
     {
-        CoordBox<DIM> box = this->initializer->gridBox();
-        updateGroup.reset(
-            new UpdateGroupType(
-                PARTITION(box.origin, box.dimensions),
-                initialWeights(box.dimensions.prod(), communicator->Get_size()),
-                0,
-                box,
-                ghostZoneWidth,
-                this->initializer,
-                communicator));
     }   
 
     // fixme: need test
     inline void run()
     {
+        initUpdateGroup();
+
         // fixme: use events here
         std::pair<int, int> currentStep = updateGroup->currentStep();
         unsigned remainingSteps = 
@@ -88,6 +81,8 @@ public:
     // fixme: need test
     inline void step()
     {
+        initUpdateGroup();
+
         nanoStep(CELL_TYPE::nanoSteps());
     }
 
@@ -103,34 +98,47 @@ public:
 
     virtual unsigned getStep() const 
     {
-        return updateGroup->currentStep().first;
+        if (updateGroup) {
+            return updateGroup->currentStep().first;
+        } else {
+            return this->initializer->startStep();
+        }
     }
 
     virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         DistributedSimulator<CELL_TYPE>::registerWriter(writer);
 
-        typename UpdateGroupType::PatchAccepterPtr adapter(
-            new ParallelWriterAdapter<
-                typename UpdateGroupType::GridType, 
-                CELL_TYPE, 
-                PARTITION>(
+        // we need two adapters as each ParallelWriter needs to be
+        // notified twice: once for the (inner) ghost zone, and once
+        // for the inner set.
+        typename UpdateGroupType::PatchAccepterPtr adapterGhost(
+            new ParallelWriterAdapterType(
+                this,
+                this->getWriters().back(),
+                this->initializer->startStep(),
+                this->initializer->maxSteps()));
+        typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
+            new ParallelWriterAdapterType(
                 this, 
-                this->getWriters().back()));
-        // fixme: use different adapters here to avoid nanostep confusion b/c of ghostzone updates
-        // updateGroup->addPatchAccepter(adapter, Stepper<CELL_TYPE>::GHOST);
-        updateGroup->addPatchAccepter(adapter, Stepper<CELL_TYPE>::INNER_SET);
+                this->getWriters().back(),
+                this->initializer->startStep(),
+                this->initializer->maxSteps()));
+
+        writerAdaptersGhost.push_back(adapterGhost);
+        writerAdaptersInner.push_back(adapterInnerSet);
     }
 
 private:
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    // fixme: need this?
     EventMap events;
     PartitionManager<DIM, Topology> partitionManager;
     MPI::Comm *communicator;
     boost::shared_ptr<UpdateGroupType> updateGroup;
+    typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
+    typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
 
     SuperVector<long> initialWeights(const long& items, const long& size) const
     {    
@@ -160,6 +168,39 @@ private:
         //     nanoStepCounter = currentEvents.first;
         //     handleEvents(currentEvents.second);
         // }
+    }
+
+    /**
+     * We need to do late/lazy initialization to give the user time to
+     * add ParallelWriter objects before calling run(). Writers may
+     * only be added savely to an UpdateGroup upon creation because of
+     * the way the Stepper handles ghostzone updates. It's a long
+     * story... At the end of the day this remains the best compromise
+     * of hiding complexity (in the Stepper) and a convenient API of
+     * the Simulator on the one hand, and avoiding objects with an
+     * uninitialized state on the other.
+     */
+    inline void initUpdateGroup()
+    {
+        if (updateGroup) {
+            return;
+        }
+
+        CoordBox<DIM> box = this->initializer->gridBox();
+        updateGroup.reset(
+            new UpdateGroupType(
+                PARTITION(box.origin, box.dimensions),
+                initialWeights(box.dimensions.prod(), communicator->Get_size()),
+                0,
+                box,
+                ghostZoneWidth,
+                this->initializer,
+                writerAdaptersGhost,
+                writerAdaptersInner,
+                communicator));
+
+        writerAdaptersGhost.clear();
+        writerAdaptersInner.clear();
     }
 
 //     inline std::pair<unsigned, EventSet> extractCurrentEvents()

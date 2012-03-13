@@ -28,7 +28,8 @@ public:
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
         Initializer<CELL_TYPE> *_initializer,
-        const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec()) :
+        const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
+        const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
         ParentType(_partitionManager, _initializer)
     {
         curStep = getInitializer().startStep();
@@ -36,6 +37,9 @@ public:
 
         for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
             addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
+        }
+        for (int i = 0; i < innerSetPatchAccepters.size(); ++i) {
+            addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
 
         initGrids();
@@ -100,12 +104,10 @@ private:
         const typename ParentType::PatchType& patchType,
         const long& nanoStep)
     {
-        std::cout << "notifyPatchAccepters(" << nanoStep << ")\n";
         for (class ParentType::PatchAccepterList::iterator i = 
                  this->patchAccepters[patchType].begin();
              i != this->patchAccepters[patchType].end();
              ++i) {
-            std::cout << "  @ " << (*i)->nextRequiredNanoStep() << "\n";
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
             }
@@ -120,11 +122,12 @@ private:
         for (typename ParentType::PatchProviderList::iterator i = 
                  this->patchProviders[patchType].begin();
              i != this->patchProviders[patchType].end();
-             ++i)
+             ++i) {
             (*i)->get(
                 &*oldGrid,
                 region,
                 nanoStep);
+        }
     }
 
     inline long globalNanoStep() const
@@ -143,6 +146,15 @@ private:
         getInitializer().grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
+
+        notifyPatchAccepters(
+            rim(),     
+            ParentType::GHOST,     
+            globalNanoStep());
+        notifyPatchAccepters(
+            getPartitionManager().innerSet(0), 
+            ParentType::INNER_SET, 
+            globalNanoStep());
 
         kernelBuffer = MyPatchBuffer1(getPartitionManager().getVolatileKernel());
         rimBuffer = MyPatchBuffer2(rim());
@@ -175,6 +187,8 @@ private:
         // 2: actual ghostzone update
         int oldNanoStep = curNanoStep;
         int oldStep = curStep;
+        int curGlobalNanoStep = globalNanoStep();
+
         for (int t = 0; t < ghostZoneWidth(); ++t) {
             const Region<DIM>& region = getPartitionManager().rim(t + 1);
             for (typename Region<DIM>::Iterator i = region.begin(); 
@@ -190,15 +204,14 @@ private:
             }
 
             std::swap(oldGrid, newGrid);
+
+            ++curGlobalNanoStep;
+            notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
         }
         curNanoStep = oldNanoStep;
         curStep = oldStep;
 
-        // offset ghostZoneWidth() for nanoStep needed as ghost zone
-        // updates preceede updates to the inner set.
-        int nextNanoStep = globalNanoStep() + ghostZoneWidth();
-        notifyPatchAccepters(rim(), ParentType::GHOST, nextNanoStep);
-                   saveRim(nextNanoStep);
+        saveRim(curGlobalNanoStep);
         if (ghostZoneWidth() % 2)
             std::swap(oldGrid, newGrid);
 

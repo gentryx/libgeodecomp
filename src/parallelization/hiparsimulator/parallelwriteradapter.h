@@ -23,11 +23,16 @@ public:
 
     ParallelWriterAdapter(
         HiParSimulatorType *_sim,
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer) :
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
+        const long& firstStep,
+        const long& lastStep) :
         sim(_sim),
-        writer(_writer)
+        writer(_writer),
+        firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
+        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps())
     {
-        reload();
+        reload(firstNanoStep);
+        reload(lastNanoStep);
     }
 
     virtual void put(
@@ -35,34 +40,45 @@ public:
         const Region<GRID_TYPE::DIM>& validRegion, 
         const long& nanoStep) 
     {
-        std::cout << "bingobongoA " << nanoStep << "\n";
         if (!this->checkNanoStepPut(nanoStep))
             return;
         this->requestedNanoSteps.erase_min();
 
-        std::cout << "bingobongoB " << nanoStep << "\n";
-        // fixme: load next event
         // fixme: set simulator up to link to correct grid/validRegion
-        // writer->stepFinished();
+        if (nanoStep == firstNanoStep) {
+            writer->initialized();
+        } else {
+            if (nanoStep == lastNanoStep) {
+                writer->allDone();
+            } else {
+                writer->stepFinished();
+            }
+        }
+
         reload();
     }
 
 private:
     HiParSimulatorType *sim;
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
+    long firstNanoStep;
+    long lastNanoStep;
 
-    long nextOutputStep()
+    long nextOutputStep(const long& step)
     {
-        long step = sim->getStep();
         long remainder = step % writer->getPeriod();
-        step += writer->getPeriod() - remainder;
-        return step;
+        long next = step + writer->getPeriod() - remainder;
+        return next;
     }
 
     void reload()
     {
-        long nextNanoStep = nextOutputStep() * CELL_TYPE::nanoSteps();
-        std::cout << "nextNanoStep: " << nextNanoStep << "\n";
+        long nextNanoStep = nextOutputStep(sim->getStep()) * CELL_TYPE::nanoSteps();
+        reload(nextNanoStep);
+    }
+
+    void reload(const long& nextNanoStep)
+    {
         this->pushRequest(nextNanoStep);
     }
  

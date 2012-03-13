@@ -44,6 +44,8 @@ public:
         const CoordBox<DIM>& box, 
         const unsigned& _ghostZoneWidth,
         Initializer<CELL_TYPE> *_initializer,
+        PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
+        PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
         partition(_partition),
         weights(_weights),
@@ -89,7 +91,11 @@ public:
             }
         }
 
-        stepper.reset(new STEPPER(partitionManager, initializer, ghostZoneAccepterLinks));
+        stepper.reset(new STEPPER(
+                          partitionManager, 
+                          initializer,
+                          patchAcceptersGhost + ghostZoneAccepterLinks,
+                          patchAcceptersInner));
 
         // the ghostzone receivers may be safely added after
         // initialization as they're only really needed when the next
