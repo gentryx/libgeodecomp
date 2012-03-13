@@ -74,7 +74,7 @@ public:
         SuperVector<int> c;
         c += 1, 2, 3, 4, 5;
 
-        TS_ASSERT_EQUALS(a.concat(b), c);
+        TS_ASSERT_EQUALS(a + b, c);
         a.append(b);
         TS_ASSERT_EQUALS(a, c);
     }
@@ -94,16 +94,6 @@ public:
         a += 0, 1;
         TS_ASSERT_EQUALS(a.contains(2), false);
         TS_ASSERT_EQUALS(a.contains(1), true);
-    }
-
-    void testHasCommonElement()
-    {
-        SuperVector<int> a, b, c;
-        a += 0, 1;
-        b += 2, 3;
-        c += 1, 3;
-        TS_ASSERT_EQUALS(a.hasCommonElement(b), false);
-        TS_ASSERT_EQUALS(a.hasCommonElement(c), true);
     }
 
     void testSort()

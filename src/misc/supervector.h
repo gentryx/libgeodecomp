@@ -57,6 +57,18 @@ public:
         return *this;
     }
 
+    inline void append(const SuperVector& other)
+    {
+        insert(this->end(), other.begin(), other.end());
+    }
+
+    inline SuperVector operator+(const SuperVector& other) const
+    {
+        SuperVector ret = *this;
+        ret.append(other);
+        return ret;
+    }
+
     inline void push_front(const T& obj) 
     {
         insert(this->begin(), obj);
@@ -78,31 +90,9 @@ public:
 
     }
 
-    inline SuperVector<T> concat(const SuperVector<T>& other) const 
-    {        
-        SuperVector<T> ret = *this;
-        ret.append(other);
-        return ret;
-    }
-
-    inline void append(const SuperVector<T>& other) 
-    {        
-        insert(this->end(), other.begin(), other.end());
-    }
-
     inline bool contains(const T& element) const
     {
         return std::find(this->begin(), this->end(), element) != this->end();
-    }
-
-    /**
-     * true iff self and other have at least one common member
-     */
-    inline bool hasCommonElement(const SuperVector<T>& other) const
-    {
-        for (const_iterator i = this->begin(); i != this->end(); i++)
-            if (other.contains(*i)) return true;
-        return false;
     }
 
     inline void sort()
