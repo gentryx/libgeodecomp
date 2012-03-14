@@ -56,7 +56,8 @@ public:
                         acc.reset(new MyPatchAccepter(
                                       region,
                                       receiver,
-                                      tag));
+                                      tag,
+                                      MPI::INT));
 
                         acc->pushRequest(nanoStep);
                         acc->put(sendGrid, boundingBox, nanoStep);
@@ -67,7 +68,8 @@ public:
                         pro.reset(new MyPatchProvider(
                                       region,
                                       sender,
-                                      tag));
+                                      tag,
+                                      MPI::INT));
 
                         expected = markGrid(region, sender);
                         actual = zeroGrid;
@@ -96,12 +98,14 @@ public:
                 accepters << MyPatchAccepter(
                     region1,
                     i,
-                    genTag(mpiLayer.rank(), i));
+                    genTag(mpiLayer.rank(), i),
+                    MPI::INT);
                 
                 providers << MyPatchProvider(
                     region1,
                     i,
-                    genTag(i, mpiLayer.rank()));
+                    genTag(i, mpiLayer.rank()),
+                    MPI::INT);
             }
         }
 
@@ -139,12 +143,14 @@ public:
                 accepters << MyPatchAccepter(
                     region1,
                     i,
-                    genTag(mpiLayer.rank(), i));
+                    genTag(mpiLayer.rank(), i),
+                    MPI::INT);
                 
                 providers << MyPatchProvider(
                     region1,
                     i,
-                    genTag(i, mpiLayer.rank()));
+                    genTag(i, mpiLayer.rank()),
+                    MPI::INT);
             }
         }
 

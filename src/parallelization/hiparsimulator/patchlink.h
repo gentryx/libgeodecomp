@@ -83,10 +83,10 @@ public:
     {
     public:
         inline Accepter(
-            const Region<DIM>& _region = Region<DIM>(),
-            const int& _dest = 0,
-            const int& _tag = 0,
-            const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<typename GRID_TYPE::CellType>(),
+            const Region<DIM>& _region,
+            const int& _dest,
+            const int& _tag,
+            const MPI::Datatype& _cellMPIDatatype,
             MPI::Comm *communicator = &MPI::COMM_WORLD) : 
             Link(_region, _tag, communicator),
             dest(_dest),
@@ -130,10 +130,10 @@ public:
     {
     public:
         inline Provider(
-            const Region<DIM>& _region=Region<DIM>(),
-            const int& _source=0,
-            const int& _tag=0,
-            const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<typename GRID_TYPE::CellType>(),
+            const Region<DIM>& _region,
+            const int& _source,
+            const int& _tag,
+            const MPI::Datatype& _cellMPIDatatype,
             MPI::Comm *communicator = &MPI::COMM_WORLD) : 
             Link(_region, _tag, communicator),
             source(_source),

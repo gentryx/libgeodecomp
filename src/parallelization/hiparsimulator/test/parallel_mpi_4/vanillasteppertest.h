@@ -177,7 +177,8 @@ public:
                         new MyPatchLink::Provider(
                             region, 
                             i->first,
-                            tag));                
+                            tag,
+                            Typemaps::lookup<TestCell<3> >()));                
                     providers << p;
                     stepper->addPatchProvider(p, MyStepper::GHOST);
                 } 
@@ -193,7 +194,8 @@ public:
                         new MyPatchLink::Accepter(
                             region,
                             i->first,
-                            tag));
+                            tag,
+                            Typemaps::lookup<TestCell<3> >()));
                     accepters << p;
                     stepper->addPatchAccepter(p, MyStepper::GHOST);
                 } 
