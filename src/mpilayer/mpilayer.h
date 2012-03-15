@@ -245,8 +245,9 @@ public:
                                 const int& tag,
                                 const MPI::Datatype& datatype)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) 
-            recv(&(*stripe)[i->origin], src, i->length(), tag, datatype);
+        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+            recv(&(*stripe).at(i->origin), src, i->length(), tag, datatype);
+        }
     }
 
     template<typename GRID_TYPE, int DIM>
@@ -256,8 +257,9 @@ public:
                                 const int& tag,
                                 const MPI::Datatype& datatype)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) 
-            send(&(*stripe)[i->origin], dest, i->length(), tag, datatype);
+        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+            send(&(*stripe).at(i->origin), dest, i->length(), tag, datatype);
+        }
     }
         
     template<typename T>
