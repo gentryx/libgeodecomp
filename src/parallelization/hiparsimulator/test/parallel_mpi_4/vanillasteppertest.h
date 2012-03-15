@@ -160,9 +160,6 @@ public:
 
         int tag = 4711;
 
-        // fixme: once working, use this code to reimplement the
-        // update group
-
         SuperVector<MyPatchProviderPtr> providers;
         SuperVector<MyPatchAccepterPtr> accepters;
 
@@ -223,7 +220,7 @@ public:
 
         // let's go
         checkInnerSet(0, 0);
-        //fixme: check rim, too
+
         stepper->update(1);
         checkInnerSet(1, 1);
 

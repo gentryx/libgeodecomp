@@ -51,14 +51,15 @@ public:
         // std::cout << "got " << (*grid)[Coord<2>(5, 5)] << "\n";
 
         s->step();
-        s->step();
-        s->step();
+        // s->step();
+        // s->step();
+        std::cout << "-----------got events : " << mockWriter->events() << "\n";
     }
 
     void testCallsToWriter()
     {
     //     std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n";
-        s->run();
+        // s->run();
         std::cout << "-----------got events : " << mockWriter->events() << "\n";
     }
 

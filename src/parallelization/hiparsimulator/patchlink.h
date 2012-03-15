@@ -112,6 +112,7 @@ public:
             GridVecConv::gridToVector(grid, &this->buffer, this->region);
             this->mpiLayer.send(
                 &this->buffer[0], dest, this->buffer.size(), this->tag, cellMPIDatatype);
+
             long nextNanoStep = this->requestedNanoSteps.min() + this->stride;
             if ((this->lastNanoStep == ENDLESS) || 
                 (nextNanoStep < this->lastNanoStep))
@@ -158,9 +159,9 @@ public:
 
             long nextNanoStep = this->storedNanoSteps.min() + this->stride;
             if ((this->lastNanoStep == ENDLESS) || 
-                (nextNanoStep < this->lastNanoStep))
+                (nextNanoStep < this->lastNanoStep)) {
                 recv(nextNanoStep);
-            // fixme: extract method for this
+            }
             this->storedNanoSteps.erase_min();
         }
 

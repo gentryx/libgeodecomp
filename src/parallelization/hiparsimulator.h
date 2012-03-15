@@ -93,9 +93,20 @@ public:
         const GridType **grid, 
         const Region<DIM> **validRegion) 
     {
-        *grid = &updateGroup->grid();
-        // fixme: we can't even guarantee this part
-        *validRegion = &partitionManager.ownRegion();
+        *grid = currentGrid;
+        *validRegion = currentValidRegion;
+    }
+
+    /**
+     * Since HiParSimulator doesn't store any Grid fragments on its
+     * own, external objects need to configure the pointers.
+     */
+    virtual void setGridFragment(
+        const GridType *grid,
+        const Region<DIM> *validRegion)
+    {
+        currentGrid = grid;
+        currentValidRegion = validRegion;
     }
 
     virtual unsigned getStep() const 
@@ -142,6 +153,8 @@ private:
     boost::shared_ptr<UpdateGroupType> updateGroup;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
+    const GridType *currentGrid;
+    const Region<DIM> *currentValidRegion;
 
     SuperVector<long> initialWeights(const long& items, const long& size) const
     {    

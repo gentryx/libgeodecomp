@@ -44,7 +44,8 @@ public:
             return;
         this->requestedNanoSteps.erase_min();
 
-        // fixme: set simulator up to link to correct grid/validRegion
+        sim->setGridFragment(&grid, &validRegion);
+
         if (nanoStep == firstNanoStep) {
             writer->initialized();
         } else {
@@ -54,6 +55,10 @@ public:
                 writer->stepFinished();
             }
         }
+
+        // delete the pointers from the Simulator to prevent accesses
+        // to stale pointers:
+        sim->setGridFragment(0, 0);
 
         reload();
     }
