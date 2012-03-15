@@ -129,6 +129,14 @@ public:
         }
     }
 
+    inline void pasteGridBase(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
+    {
+        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+            const CELL_TYPE *start = &grid.at(i->origin);
+            std::copy(start, start + i->length(), &(*this)[i->origin]);
+        }
+    }
+
     inline const Coord<DIM>& getDimensions() const
     {
         return delegate.getDimensions();

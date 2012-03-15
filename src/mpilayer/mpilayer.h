@@ -177,34 +177,6 @@ public:
         return comm->Get_rank(); 
     } 
     
-    /**
-     * sends a sub-box of @a grid to @a dest asynchronously.
-     */
-    template<typename T>
-    void sendGridBox(
-        const Grid<T> *grid, 
-        const CoordBox<2>& box, 
-        const int& dest,
-        const MPI::Datatype& datatype = Typemaps::lookup<T>())
-    {
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) 
-            send(&(*grid)[s.next()], dest, 1, datatype); 
-    }
-
-    /**
-     * receives a sub-box of @a grid to @a dest asynchronously.
-     */
-    template<typename T>
-    void recvGridBox(
-        Grid<T>* grid, 
-        const CoordBox<2>& box, 
-        const int& src,
-        const MPI::Datatype& datatype = Typemaps::lookup<T>())
-    {
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) 
-            recv(&((*grid)[s.next()]), src, 1, datatype); 
-    }
-
     template<typename T>
     void sendVec(
         const SuperVector<T> *vec, 
@@ -273,8 +245,9 @@ public:
                                 const int& tag,
                                 const MPI::Datatype& datatype)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) 
-            recv(&(*stripe)[i->origin], src, i->length(), tag, datatype);
+        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+            recv(&(*stripe).at(i->origin), src, i->length(), tag, datatype);
+        }
     }
 
     template<typename GRID_TYPE, int DIM>
@@ -284,8 +257,9 @@ public:
                                 const int& tag,
                                 const MPI::Datatype& datatype)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) 
-            send(&(*stripe)[i->origin], dest, i->length(), tag, datatype);
+        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+            send(&(*stripe).at(i->origin), dest, i->length(), tag, datatype);
+        }
     }
         
     template<typename T>

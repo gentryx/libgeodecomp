@@ -24,6 +24,8 @@ public:
             CoordBox<2>(Coord<2>( 0,  0), Coord<2>(100, 100)), 47.11);
         DisplacedGrid<double> target(
             CoordBox<2>(Coord<2>(40, 60), Coord<2>( 30,  30)), -1.23);
+        DisplacedGrid<double> target2(
+            CoordBox<2>(Coord<2>(40, 60), Coord<2>( 30,  30)), -5);
 
         Region<2> innerSquare;
         for (int i = 70; i < 80; ++i)
@@ -44,6 +46,14 @@ public:
         for (Region<2>::Iterator i = innerSquare.begin(); 
              i != innerSquare.end(); ++i)
             TS_ASSERT_EQUALS(47.11, target[*i]);
+
+        target2.pasteGridBase(target, outerRing);
+        for (Region<2>::Iterator i = outerRing.begin(); 
+             i != outerRing.end(); ++i)
+            TS_ASSERT_EQUALS(-1.23, target2[*i]);
+        for (Region<2>::Iterator i = innerSquare.begin(); 
+             i != innerSquare.end(); ++i)
+            TS_ASSERT_EQUALS(-5, target2[*i]);
     }
 
     void testResize()

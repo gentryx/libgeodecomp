@@ -44,40 +44,6 @@ public:
         TS_ASSERT_EQUALS(receivedCell, sendCell);
     }
 
-    void testSendRecvGridBox()
-    {
-        MPILayer layer;
-        double edgeCell = -1;
-
-        Grid<double> source(Coord<2>(6, 4));
-        Grid<double> target(Coord<2>(7, 8));
-        Grid<double> expectedTarget(Coord<2>(7, 8));
-        int rectWidth = 3;
-        int rectHeight= 2;
-        CoordBox<2> sourceRect(Coord<2>(1, 1), 
-                               Coord<2>(rectWidth, rectHeight));
-        CoordBox<2> targetRect(Coord<2>(2, 4), 
-                               Coord<2>(rectWidth, rectHeight));
-
-        // setting up temperatures so that communication integrity can be
-        // verified
-        fillGrid(source, 100.0);
-        fillGrid(target, 200.0);
-        fillGrid(expectedTarget, 200.0);
-        fillGridRect(source, sourceRect, 300.0);
-        fillGridRect(expectedTarget, targetRect, 300.0);
-        source.getEdgeCell() = edgeCell;
-        target.getEdgeCell() = edgeCell;
-        expectedTarget.getEdgeCell() = edgeCell;
-
-        TS_ASSERT_DIFFERS(expectedTarget, target);
-        layer.sendGridBox(&source, sourceRect, 0);
-        layer.recvGridBox(&target, targetRect, 0);
-        layer.waitAll();
-        TSM_ASSERT_EQUALS(
-            expectedTarget.diff(target).c_str(), expectedTarget, target);
-    }
-
     void testSize() 
     { 
         MPILayer layer; 
