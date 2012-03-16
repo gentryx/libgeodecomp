@@ -25,6 +25,21 @@ class MPILayer
     friend class MPILayerTest;
     friend class ParallelMPILayerTest;
 public:
+    /**
+     * Tags are required to distinguish different transmissions with
+     * identical sender, receiver, and communicator. We list all tags
+     * in a central place to check for collisions. Mostly having one
+     * tag per class should be enough (assuming that those objects
+     * communicate with their siblings only). In those cases when we
+     * have multiple instances (e.g. two PatchLink connections), an
+     * offset to the tag should be used.
+     */
+    enum Tag {
+        // reserve [100, 199], assuming there won't be more than 100
+        // links between any two nodes.
+        PATCH_LINK = 100, 
+        PARALLEL_MEMORY_WRITER = 200
+    };
 
     class MPIRegion {
         friend class MPILayer;        
@@ -40,9 +55,9 @@ public:
     typedef std::map<int, std::vector<MPI::Request> > RequestsMap;
     typedef boost::shared_ptr<MPIRegion> MPIRegionPointer;
 
-    MPILayer(MPI::Comm *c = &MPI::COMM_WORLD) :
+    MPILayer(MPI::Comm *c = &MPI::COMM_WORLD, int _tag = 0) :
         comm(c),
-        tag(0)
+        tag(_tag)
     {}
 
     virtual ~MPILayer()

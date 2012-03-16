@@ -1,11 +1,14 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <sstream>
+
 #include "../../../io/mockwriter.h"
+#include "../../../io/parallelmemorywriter.h"
 #include "../../../io/testinitializer.h"
 #include "../../../misc/testcell.h"
 #include "../../../misc/testhelper.h"
 #include "../../hiparsimulator.h"
-#include "../../hiparsimulator/partitions/stripingpartition.h"
+#include "../../hiparsimulator/partitions/zcurvepartition.h"
 
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 
@@ -16,217 +19,64 @@ namespace HiParSimulator {
 class HiParSimulatorTest : public CxxTest::TestSuite
 {
 public:
+    typedef HiParSimulator<TestCell<2>, ZCurvePartition<2> > SimulatorType;
+    typedef ParallelMemoryWriter<TestCell<2> > MemoryWriterType;
 
     void setUp()
     {
-        width = 131;
-        height = 241;
+        int width = 131;
+        int height = 241;
+        dim = Coord<2>(width, height);
         maxSteps = 1500;
         firstStep = 20;
         firstCycle = firstStep * TestCell<2>::nanoSteps();
         TestInitializer<2> *init = new TestInitializer<2>(
-            Coord<2>(width, height), maxSteps, firstStep);
-        
-        outputPeriod = 17;
+            dim, maxSteps, firstStep);
+
+        outputPeriod = 4;
         loadBalancingPeriod = 31;
         ghostZoneWidth = 10;
-        s.reset(new HiParSimulator<TestCell<2>, StripingPartition<2> >(
+        s.reset(new SimulatorType(
                     init, 0, loadBalancingPeriod, ghostZoneWidth));
-        // mockWriter = new MockWriter(&(*s));
+        mockWriter = new MockWriter(&*s);
+        memoryWriter = new MemoryWriterType(&*s, outputPeriod);
     }
 
     void tearDown()
     {
-        s.reset();        
+        s.reset();
     }
 
-    void testRegionConsistency()
+    void testStep()
     {
-        // fixme
-    //     TS_ASSERT_EQUALS(s->partitionManager.ownRegion(), 
-    //                      s->partitionManager.innerSet(ghostZoneWidth) + 
-    //                      s->partitionManager.rim(ghostZoneWidth));
-    // }
+        s->step();
+        s->step();
+        s->step();
+        s->step();
 
-    // void testNanoStepSimple()
-    // {
-    //     s->nanoStep(1);
-    //     // s->regionStepper.waitForGhostZones();
+        std::stringstream expectedEvents;
+        expectedEvents << "initialized()\ninitialized()\n";
+        for (int t = 21; t < 25; t += 1) {
+            expectedEvents << "stepFinished(step=" << t << ")\n"
+                           << "stepFinished(step=" << t << ")\n";
+        }
+        TS_ASSERT_EQUALS(expectedEvents.str(), mockWriter->events());
 
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 1);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0),      
-    //         firstCycle + 1);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-
-    //     s->nanoStep(1);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 2);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0),      
-    //         firstCycle + 2);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-
-    //     s->nanoStep(1);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 3);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0),      
-    //         firstCycle + 3);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-    // }
-
-    // void testNanoStepStillSimple()
-    // {
-    //     s->nanoStep(2);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 2);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0), 
-    //         firstCycle + 2);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-
-    //     s->nanoStep(3);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 5);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0), 
-    //         firstCycle + 5);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-
-    //     s->nanoStep(7);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(),
-    //         s->partitionManager.ownRegion(),
-    //         firstCycle + 12);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >,
-    //         *s->getDisplacedGrid(),
-    //         s->partitionManager.rim(0),
-    //         firstCycle + 12);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-    // }
-
-    // void testNanoStepWithOneLoopIteration()
-    // {
-    //     s->nanoStep(18);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 18);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0),
-    //         firstCycle + 18);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-    // }
-
-    // void testNanoStepWithMultipleLoopIterations()
-    // {
-    //     s->nanoStep(51);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.ownRegion(), 
-    //         firstCycle + 51);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >, 
-    //         *s->getDisplacedGrid(), 
-    //         s->partitionManager.rim(0),
-    //         firstCycle + 51);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-
-    //     s->nanoStep(666);
-    //     // s->regionStepper.waitForGhostZones();
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >,
-    //         *s->getDisplacedGrid(),
-    //         s->partitionManager.ownRegion(),
-    //         firstCycle + 51 + 666);
-    //     TS_ASSERT_TEST_GRID_REGION(
-    //         DisplacedGrid<TestCell<2> >,
-    //         *s->getDisplacedGrid(),
-    //         s->partitionManager.rim(0),
-    //         firstCycle + 51 + 666);
-    //     // TS_ASSERT_EQUALS(s->regionStepper.validGhostZoneWidth, ghostZoneWidth);
-    // }
-
-    // void testAllGatherGroupRegion1()
-    // {
-    //     SuperVector<Region<2> > parts(4);
-    //     parts[0] << Streak<2>(Coord<2>(0,  0), 10)
-    //              << Streak<2>(Coord<2>(0,  1), 10)
-    //              << Streak<2>(Coord<2>(0, 14), 10)
-    //              << Streak<2>(Coord<2>(0, 15), 10);
-    //     parts[1] << Streak<2>(Coord<2>(0,  2), 10)
-    //              << Streak<2>(Coord<2>(0,  3), 10)
-    //              << Streak<2>(Coord<2>(0, 12), 10)
-    //              << Streak<2>(Coord<2>(0, 13), 10);
-    //     parts[2] << Streak<2>(Coord<2>(0,  4), 10)
-    //              << Streak<2>(Coord<2>(0,  5), 10)
-    //              << Streak<2>(Coord<2>(0, 10), 10)
-    //              << Streak<2>(Coord<2>(0, 11), 10);
-    //     parts[3] << Streak<2>(Coord<2>(0,  6), 10)
-    //              << Streak<2>(Coord<2>(0,  7), 10)
-    //              << Streak<2>(Coord<2>(0,  8), 10)
-    //              << Streak<2>(Coord<2>(0,  9), 10);
-    //     Region<2> expected;
-    //     for (int y = 0; y < 16; ++y)
-    //         expected << Streak<2>(Coord<2>(0, y), 10);
-    //     Region<2> actual = s->allGatherGroupRegion(parts[MPILayer().rank()]);
-    //     TS_ASSERT_EQUALS(expected, actual);
-    // }
-
-    // void testAllGatherGroupRegion2()
-    // {
-    //     Region<2> actual = s->allGatherGroupRegion();
-    //     Region<2> expected;
-    //     for (int y = 0; y < height; ++y)
-    //         expected << Streak<2>(Coord<2>(0, y), width);
-    //     TS_ASSERT_EQUALS(expected, actual);
+        for (int t = 20; t < 25; t += outputPeriod) {
+            int globalNanoStep = t * TestCell<2>::nanoSteps();
+            MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+            TS_ASSERT_TEST_GRID(
+                MemoryWriterType::GridType, 
+                grids[t], 
+                globalNanoStep);
+            TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
+        }
     }
 
 
 private:
-    boost::shared_ptr<HiParSimulator<TestCell<2>, StripingPartition<2> > > s;
-    unsigned width;
-    unsigned height;
+    boost::shared_ptr<SimulatorType> s;
+    Coord<2> dim;
     unsigned maxSteps;
     unsigned firstStep;
     unsigned firstCycle;
@@ -234,6 +84,7 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     MockWriter *mockWriter;
+    MemoryWriterType *memoryWriter;
 };
 
 };

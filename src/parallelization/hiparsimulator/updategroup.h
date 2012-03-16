@@ -84,7 +84,7 @@ public:
                     new typename PatchLink<GridType>::Accepter(
                         i->second.back(), 
                         i->first, 
-                        0,
+                        MPILayer::PATCH_LINK,
                         cellMPIDatatype, 
                         mpiLayer.getCommunicator()));
                 ghostZoneAccepterLinks << link;
@@ -113,7 +113,7 @@ public:
                     new typename PatchLink<GridType>::Provider(
                         i->second.back(), 
                         i->first,
-                        0,
+                        MPILayer::PATCH_LINK,
                         cellMPIDatatype, 
                         mpiLayer.getCommunicator()));
                 addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);

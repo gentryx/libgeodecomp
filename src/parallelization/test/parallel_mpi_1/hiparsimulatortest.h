@@ -1,13 +1,16 @@
+#include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
+using namespace boost::assign; 
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 
 
@@ -18,23 +21,26 @@ class HiParSimulatorTest : public CxxTest::TestSuite
 {
 public:
     // fixme: rename types a la "MyFoobar" to "FoobarType"
-    typedef HiParSimulator<TestCell<2>, StripingPartition<2> > MySimulator;
+    typedef HiParSimulator<TestCell<2>, StripingPartition<2> > SimulatorType;
+    typedef ParallelMemoryWriter<TestCell<2> > MemoryWriterType;
 
     void setUp()
     {
-        width = 11;
-        height = 21;
+        int width = 11;
+        int height = 21;
+        dim = Coord<2>(width, height);
         maxSteps = 200;
         firstStep = 20;
         TestInitializer<2> *init = new TestInitializer<2>(
-            Coord<2>(width, height), maxSteps, firstStep);
+            dim, maxSteps, firstStep);
         
-        outputPeriod = 17;
+        outputPeriod = 1;
         loadBalancingPeriod = 31;
         ghostzZoneWidth = 10;
-        s.reset(new MySimulator(
+        s.reset(new SimulatorType(
                     init, 0, loadBalancingPeriod, ghostzZoneWidth));
-        mockWriter = new MockWriter(&(*s));
+        mockWriter = new MockWriter(&*s);
+        memoryWriter = new MemoryWriterType(&*s, outputPeriod);
     }
 
     void tearDown()
@@ -44,35 +50,61 @@ public:
 
     void testStep()
     {
-        // const MySimulator::GridType *grid;
-        // const Region<2> *validRegion;
-
-        // s->getGridFragment(&grid, &validRegion);
-        // std::cout << "got " << (*grid)[Coord<2>(5, 5)] << "\n";
-
         s->step();
-        // s->step();
-        // s->step();
-        std::cout << "-----------got events : " << mockWriter->events() << "\n";
+
+        std::string expectedEvents = "initialized()\ninitialized()\nstepFinished(step=21)\nstepFinished(step=21)\n";
+
+        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
+        
+        SuperVector<unsigned> actualSteps;
+        SuperVector<unsigned> expectedSteps;
+        expectedSteps += 20, 21;
+
+        MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+        for (MemoryWriterType::GridMap::iterator i = grids.begin(); i != grids.end(); ++i) {
+            actualSteps << i->first;
+            int globalNanoStep = i->first * TestCell<2>::nanoSteps();
+            TS_ASSERT_TEST_GRID(
+                MemoryWriterType::GridType, i->second, globalNanoStep);
+        }
+
+        TS_ASSERT_EQUALS(expectedSteps, actualSteps);
     }
 
-    void testCallsToWriter()
+    void testRun()
     {
-    //     std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n";
-        // s->run();
-        std::cout << "-----------got events : " << mockWriter->events() << "\n";
+        s->run();
+
+        std::string expectedEvents = "initialized()\ninitialized()\n";
+        for (int t = 21; t < 200; ++t) {
+            std::stringstream addend;
+            addend << "stepFinished(step=" << t << ")\n";
+            expectedEvents += addend.str() + addend.str();
+        }
+        expectedEvents += "allDone()\nallDone()\n";
+        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
+
+        for (int t = 20; t <= 200; ++t) {
+            int globalNanoStep = t * TestCell<2>::nanoSteps();
+            MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+            TS_ASSERT_TEST_GRID(
+                MemoryWriterType::GridType, 
+                grids[t], 
+                globalNanoStep);
+            TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
+        }
     }
 
 private:
-    boost::shared_ptr<MySimulator > s;
-    unsigned width;
-    unsigned height;
+    boost::shared_ptr<SimulatorType> s;
+    Coord<2> dim;
     unsigned maxSteps;
     unsigned firstStep;
     unsigned outputPeriod;
     unsigned loadBalancingPeriod;
     unsigned ghostzZoneWidth;
     MockWriter *mockWriter;
+    MemoryWriterType *memoryWriter;
 };
 
 };
