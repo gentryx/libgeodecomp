@@ -7,6 +7,7 @@
 #include <QtGui/QColor>
 #include <QtGui/QPainter>
 #include <QtGui/QWidget>
+
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
