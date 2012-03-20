@@ -19,6 +19,11 @@ public:
         QObject(parent)
     {}
 
+    QImage **getOutputFrame()
+    {
+        return &outputFrame;
+    }
+
 public slots:
     void updateCam(char *rawFrame, unsigned width, unsigned height)
     {
@@ -33,7 +38,7 @@ public slots:
         newCameraFrame.release();
     }
 
-    void step() 
+    virtual void step() 
     {
         if (newCameraFrame.tryAcquire()) 
             readCam();
@@ -60,13 +65,13 @@ public slots:
     virtual void readCam() = 0;
     virtual void renderOutput() = 0;
     virtual void update() = 0;
-    
+
     void info()
     {
         std::cout << "InteractiveSimulator @ " << fps() << " FPS\n\n";
     }
 
-    void run()
+    virtual void run()
     {
         running = true;
         while (running) {

@@ -2,8 +2,9 @@
 #define _libgeodecomp_examples_flowingcanvas_flowwidget_h_
 
 #include <iostream>
-#include <QtGui/QPainter>
-#include <QtGui/QWidget>
+#include <QKeyEvent>
+#include <QPainter>
+#include <QWidget>
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
 
 class FlowWidget : public QWidget, FPSCounter
@@ -14,10 +15,12 @@ public:
     FlowWidget() :
         frameCounter(0),
         image(1024, 768, QImage::Format_ARGB32)
-    {}
+    {
+        setFocusPolicy(Qt::StrongFocus);
+    }
 
     // fixme: do we need to always draw the whole image?
-    void paintEvent(QPaintEvent * /* event */)
+    virtual void paintEvent(QPaintEvent * /* event */)
     {
         QPainter painter(this);
 
@@ -26,6 +29,14 @@ public:
         painter.setPen(Qt::green);
         painter.drawText(32, 32, "Frame " + QString::number(frameCounter));
         ++frameCounter;
+    }
+
+    virtual void keyPressEvent(QKeyEvent *event)
+    {
+        std::cout << "got key " << event->key() << "\n";
+        if (event->key() == Qt::Key_Space) {
+            emit cycleViewMode();
+        }
     }
 
 public slots:
@@ -45,6 +56,7 @@ public slots:
 
 signals:
     void updateImage(QImage*);
+    void cycleViewMode();
 
 private:
     int frameCounter;

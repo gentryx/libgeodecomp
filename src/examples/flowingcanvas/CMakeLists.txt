@@ -12,6 +12,7 @@ set(CMAKE_CXX_FLAGS "${OPENCV_FLAGS} ${CMAKE_CXX_FLAGS} -fopenmp")
 include(${QT_USE_FILE})
 
 set(MY_HEADERS
+  canvaswriter.h
   flowwidget.h
   framegrabber.h
   interactivesimulator.h)
