@@ -13,6 +13,7 @@ include(${QT_USE_FILE})
 
 set(MY_HEADERS
   flowwidget.h
+  framegrabber.h
   interactivesimulator.h)
 
 QT4_WRAP_CPP(MY_MOC_SOURCES ${MY_HEADERS})

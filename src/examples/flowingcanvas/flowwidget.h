@@ -31,7 +31,7 @@ public:
 public slots:
     void ping()
     {
-        emit updateImage((unsigned*)image.scanLine(0), image.width(), image.height());        
+        emit updateImage(&image);
         // if (simParamsHost.dumpFrames) 
         //     dumpFrame();
         update();
@@ -44,7 +44,7 @@ public slots:
     }
 
 signals:
-    void updateImage(unsigned *image, unsigned width, unsigned height);
+    void updateImage(QImage*);
 
 private:
     int frameCounter;

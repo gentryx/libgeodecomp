@@ -19,6 +19,11 @@ public:
         ++frames;
     }
 
+    long long getFrames()
+    {
+        return frames;
+    }
+
     double fps()
     {
         long long time = Chronometer::timeUSec();
