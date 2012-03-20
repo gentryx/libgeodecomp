@@ -62,7 +62,7 @@ public:
                  MonolithicSimulator<CanvasCell> *_sim) :
         Writer("foo", _sim, 1),
         outputFrame(_outputFrame),
-        mode(0)
+        mode(5)
     {}
 
     virtual void initialized()
@@ -86,6 +86,9 @@ public:
         case 4:
             drawForce(SelectForceTotal());
             break;
+        case 5:
+            drawParticles();
+            break;
         default:
             break;
         }
@@ -98,7 +101,7 @@ public:
 public slots:
     virtual void cycleViewMode()
     {
-        mode = (mode + 1) % 5;
+        mode = (mode + 1) % 6;
     }
 
 private:
@@ -134,8 +137,8 @@ private:
                 int endX = startX + offsetX;
                 int endY = startY + offsetY;
                 p.drawLine(startX, startY, endX, endY); 
-                QRectF rec(endX - spacingX * 0.1, endY - spacingY * 0.1, spacingX * 0.2, spacingY * 0.2);
-                p.drawPie(rec, 0, 5760);
+                QRectF rect(endX - spacingX * 0.1, endY - spacingY * 0.1, spacingX * 0.2, spacingY * 0.2);
+                p.drawPie(rect, 0, 5760);
             }
         }
     }
@@ -153,6 +156,34 @@ private:
                 (*outputFrame)->setPixel(x, y, selector(grid->at(Coord<2>(x, y))));
             }
         }
+    }
+
+    void drawParticles()
+    {
+        Coord<2> dim = sim->getInitializer()->gridDimensions();
+        // const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
+
+        // float factorX = 1.0 * (*outputFrame)->width()  / dim.x();
+        // float factorY = 1.0 * (*outputFrame)->height() / dim.y();
+
+        QPainter p(*outputFrame);
+        p.setBrush(QBrush(Qt::black));
+        p.drawRect(0, 0, (*outputFrame)->width(), (*outputFrame)->height());
+        p.setBrush(QBrush(Qt::white));
+        p.setPen(QPen(Qt::white));
+
+        // for (int y = 0; y < dim.y(); ++y) {
+        //     for (int x = 0; x < dim.x(); ++x) {
+        //         const CanvasCell& cell = grid->at(Coord<2>(x, y));
+        //         if (cell.numParticles > 1)
+        //             std::cout << cell.numParticles << "\n";
+        //         for (int i = 0; i < cell.numParticles; ++i) {
+        //             const CanvasCell::Particle& particle = cell.particles[i];
+        //             QRectF rect(particle.pos[0] * factorX, particle.pos[1] * factorY, 1, 1);
+        //             p.drawPie(rect, 0, 5760);
+        //         }
+        //     }
+        // }
     }
 };
 

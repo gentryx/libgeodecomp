@@ -26,20 +26,17 @@ public:
     virtual void readCam()
     {
         Coord<2> dim = this->getInitializer()->gridDimensions();
-        // fixme: ugly hack
-        GridType *grid = (GridType*)this->getGrid();
         float factorX = 1.0 * cameraFrameWidth  / dim.x();
         float factorY = 1.0 * cameraFrameHeight / dim.y();
 
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
                 Coord<2> c(x, y);
-                (*grid)[c].readCam(&cameraFrame[0], factorX, factorY, cameraFrameWidth, cameraFrameHeight);
+                (*this->curGrid)[c].readCam(&cameraFrame[0], factorX, factorY, cameraFrameWidth, cameraFrameHeight);
             }
         }
     }
 
-    // fixme: move this out of the simulator!
     virtual void renderOutput()
     {
         for(unsigned i = 0; i < this->writers.size(); i++) 

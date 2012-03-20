@@ -79,6 +79,10 @@ public:
         return curGrid;
     }
 
+protected:
+    GridType *curGrid;
+    GridType *newGrid;
+
     void nanoStep(const unsigned& nanoStep)
     {
         CoordBox<DIMENSIONS> gridRect = curGrid->boundingBox();
@@ -93,10 +97,6 @@ public:
 
         std::swap(curGrid, newGrid);
     }
-
-private:
-    GridType *curGrid;
-    GridType *newGrid;
 };
 
 };

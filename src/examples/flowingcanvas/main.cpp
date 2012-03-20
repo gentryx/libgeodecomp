@@ -26,7 +26,7 @@ int runGUI(int argc, char **argv)
     FlowWidget flow;
     flow.resize(1200, 900);
 
-    InteractiveSimulatorCPU<CanvasCell> *sim = new InteractiveSimulatorCPU<CanvasCell>(
+    InteractiveSimulatorGPU<CanvasCell> *sim = new InteractiveSimulatorGPU<CanvasCell>(
         &flow,
         new CanvasInitializer());
     CanvasWriter *writer = new CanvasWriter(sim->getOutputFrame(), sim);

@@ -12,10 +12,29 @@ public:
     class Particle
     {
     public:
+        Particle(const float& pos0 = 0, const float& pos1 = 0, const float& _lifetime = 1000) :
+            lifetime(_lifetime)
+        {
+            pos[0] = pos0;
+            pos[1] = pos1;
+            vel[0] = 0;
+            vel[1] = 0;
+        }
 
-    private:
+        void update(const float& deltaT, const float& force0, const float& force1, const float& forceFactor, const float& friction)
+        {
+            vel[0] += deltaT * forceFactor * force0;
+            vel[1] += deltaT * forceFactor * force1;
+            vel[0] *= friction;
+            vel[1] *= friction;
+            // pos[0] += deltaT * vel[0];
+            // pos[1] += deltaT * vel[1];
+            --lifetime;
+        }
+
         float pos[2];
         float vel[2];
+        int lifetime;
     };
 
     typedef Topologies::Cube<2>::Topology Topology;
@@ -31,7 +50,8 @@ public:
         Coord<2> _pos = Coord<2>(), 
         bool _forceSet = false,
         FloatCoord<2> _forceFixed = FloatCoord<2>()) :
-        cameraLevel(0)
+        cameraLevel(0),
+        numParticles(0)
     {
         pos[0] = _pos.x();
         pos[1] = _pos.y();
@@ -49,6 +69,18 @@ public:
         pos[1] = oldSelf.pos[1];
         cameraPixel = oldSelf.cameraPixel;
         cameraLevel = oldSelf.cameraLevel;
+        numParticles = oldSelf.numParticles;
+        for (int i = 0; i < numParticles; ++i) {
+            particles[i] = oldSelf.particles[i];
+        } 
+        // fixme: render particles
+        // fixme: spawn particles
+        // fixme: move particles to other cells
+        // fixme: kill dead particles
+        if (numParticles < 1) {
+            particles[numParticles] = Particle(pos[0], pos[1]);
+            numParticles = 1;
+        }
 
         forceSet = oldSelf.forceSet;
         if (forceSet) {
@@ -88,6 +120,12 @@ public:
         forceTotal[0] = 0.5 * (forceFixed[0] + forceVario[0]);
         forceTotal[1] = 0.5 * (forceFixed[1] + forceVario[1]);
 
+        for (int i = 0; i < numParticles; ++i) {
+            Particle& p = particles[i];
+            // fixme: parameters
+            p.update(1.0, forceTotal[0], forceTotal[1], 1.0, 0.99);
+        }
+        
 //         float gradient[2];
 //         gradient[0] = hood[Coord<2>(1, 0)].smoothCam - hood[Coord<2>(-1, 0)].smoothCam;
 //         gradient[1] = hood[Coord<2>(0, 1)].smoothCam - hood[Coord<2>(0, -1)].smoothCam;
@@ -139,7 +177,8 @@ public:
     float forceVario[2];
     float forceFixed[2];
     float forceTotal[2];
-    Particle particles;  
+    int numParticles;
+    Particle particles[20];  
 
     void updateParticles()
     {}
