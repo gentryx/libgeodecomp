@@ -32,7 +32,9 @@ public:
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
                 Coord<2> c(x, y);
-                (*this->curGrid)[c].readCam(&cameraFrame[0], factorX, factorY, cameraFrameWidth, cameraFrameHeight);
+                int index = (int)(y * factorY) * cameraFrameWidth + x * factorX;
+                unsigned char *pixel = &cameraFrame[3 * index];
+                (*this->curGrid)[c].readCam(pixel[0], pixel[1], pixel[2]);
             }
         }
     }

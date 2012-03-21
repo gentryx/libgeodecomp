@@ -20,6 +20,7 @@ public:
     class Particle
     {
     public:
+        __host__ __device__
         Particle(const float& pos0 = 0, const float& pos1 = 0, const float& _lifetime = 1000) :
             lifetime(_lifetime)
         {
@@ -29,6 +30,7 @@ public:
             vel[1] = 0;
         }
 
+        __host__ __device__
         void update(const float& deltaT, const float& force0, const float& force1, const float& forceFactor, const float& friction)
         {
             vel[0] += deltaT * forceFactor * force0;
@@ -162,23 +164,24 @@ public:
         update(&hood[Coord<2>(0, -1)], &hood[Coord<2>(0, 0)], &hood[Coord<2>(0, 1)], nanoStep);
     }
 
-    void readCam(unsigned char *frame, const float& factorX, const float& factorY, const int& width, const int& height)
-    {
-        int posX = pos[0] * factorX;
-        int posY = pos[1] * factorY;
-        
-        int index = posY * width * 3 + posX * 3;
-        cameraPixel = (0xff << 24) + 
-            (frame[index + 0] << 16) +
-            (frame[index + 1] <<  8) +
-            (frame[index + 2] <<  0);
 
-        int val = (int)frame[index + 0] + (int)frame[index + 1] + (int)frame[index + 2];
+    __host__ __device__
+    void readCam(const unsigned char& r, const unsigned char& g, const unsigned char& b)
+    {
+        cameraPixel = (0xff << 24) + (r << 16) + (g <<  8) + (b <<  0);
+
+        int val = (int)r + (int)g + (int)b;
         if (val < 500) {
             cameraLevel = 1.0;
         } else {
-            cameraLevel = std::max(0.0, cameraLevel - 0.05);
+            cameraLevel = max(0.0, cameraLevel - 0.05);
         }
+    }
+
+    __host__ __device__
+    float max(const float& a, const float& b)
+    {
+        return a > b ? a : b;
     }
 
     // fixme:
