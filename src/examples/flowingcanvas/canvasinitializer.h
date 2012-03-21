@@ -11,8 +11,8 @@ class CanvasInitializer : public SimpleInitializer<CanvasCell>
 public:
     CanvasInitializer() :
         // SimpleInitializer<CanvasCell>(Coord<2>(240, 135), 100)
-        // SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
-        SimpleInitializer<CanvasCell>(Coord<2>(384, 216), 100)
+        SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
+        // SimpleInitializer<CanvasCell>(Coord<2>(384, 216), 100)
         // SimpleInitializer<CanvasCell>(Coord<2>(640, 360), 100)
     {}
 
@@ -42,7 +42,7 @@ public:
                 force.c[0] = -1;
             }
 
-            ret->at(c) = CanvasCell(c, setForce, force);
+            ret->at(c) = CanvasCell(c, setForce, force, rand() % CanvasCell::MAX_SPAWN_COUNTDOWN);
         }
     }
 };

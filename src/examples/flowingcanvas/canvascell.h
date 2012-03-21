@@ -1,6 +1,7 @@
 #ifndef _libgeodecomp_examples_flowingcanvas_canvascell_h_
 #define _libgeodecomp_examples_flowingcanvas_canvascell_h_
 
+#include <stdio.h>
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/topologies.h>
 
@@ -16,12 +17,13 @@ namespace LibGeoDecomp {
 
 class CanvasCell
 {
+    friend class CanvasWriter;
 public:
     class Particle
     {
     public:
         __host__ __device__
-        Particle(const float& pos0 = 0, const float& pos1 = 0, const float& _lifetime = 1000) :
+        Particle(const float& pos0 = 0, const float& pos1 = 0, const float& _lifetime = 100) :
             lifetime(_lifetime)
         {
             pos[0] = pos0;
@@ -37,8 +39,8 @@ public:
             vel[1] += deltaT * forceFactor * force1;
             vel[0] *= friction;
             vel[1] *= friction;
-            // pos[0] += deltaT * vel[0];
-            // pos[1] += deltaT * vel[1];
+            pos[0] += deltaT * vel[0];
+            pos[1] += deltaT * vel[1];
             --lifetime;
         }
 
@@ -47,19 +49,23 @@ public:
         int lifetime;
     };
 
+    static const int MAX_PARTICLES = 20;
+    static const int MAX_SPAWN_COUNTDOWN = 100;
     typedef Topologies::Cube<2>::Topology Topology;
     static const int TILE_WIDTH = 4;
     static const int TILE_HEIGHT = 4;
     
     static inline unsigned nanoSteps()
     {
-        return 1;
+        return 2;
     }
 
     CanvasCell(
         Coord<2> _pos = Coord<2>(), 
         bool _forceSet = false,
-        FloatCoord<2> _forceFixed = FloatCoord<2>()) :
+        FloatCoord<2> _forceFixed = FloatCoord<2>(),
+        int _spawnCountdown = 0) :
+        spawnCountdown(_spawnCountdown),
         cameraLevel(0),
         numParticles(0)
     {
@@ -74,8 +80,123 @@ public:
     __host__ __device__
     void update(const CanvasCell *up, const CanvasCell *same, const CanvasCell *down, const unsigned& nanoStep)
     {
-        const CanvasCell& oldSelf = *same;
+        if (nanoStep == 1) {
+            // fixme: can we avoid this?
+            *this = *same;
+            moveParticles(up, same, down);
+            return;
+        }
 
+        updateForces(up, same, down, nanoStep);
+        spawnParticles();
+        updateParticles();
+    }
+
+    template<typename COORD_MAP>
+    void update(const COORD_MAP& hood, const unsigned& nanoStep)
+    {
+        update(&hood[Coord<2>(0, -1)], &hood[Coord<2>(0, 0)], &hood[Coord<2>(0, 1)], nanoStep);
+    }
+
+
+    __host__ __device__
+    void readCam(const unsigned char& r, const unsigned char& g, const unsigned char& b)
+    {
+        cameraPixel = (0xff << 24) + (r << 16) + (g <<  8) + (b <<  0);
+
+        int val = (int)r + (int)g + (int)b;
+        if (val < 500) {
+            cameraLevel = 1.0;
+        } else {
+            cameraLevel = max(0.0, cameraLevel - 0.05);
+        }
+    }
+
+    // fixme:
+private:
+    unsigned color[TILE_HEIGHT][TILE_WIDTH];
+    unsigned cameraPixel;
+    unsigned spawnCountdown;
+    float pos[2];
+    bool forceSet;
+
+    float cameraLevel;
+    float forceVario[2];
+    float forceFixed[2];
+    float forceTotal[2];
+    int numParticles;
+    Particle particles[MAX_PARTICLES];  
+
+    /**
+     * Transition particles between neighboring cells
+     */
+    __host__ __device__
+    void moveParticles(const CanvasCell *up, const CanvasCell *same, const CanvasCell *down)
+    {
+        numParticles = 0;
+        for (int x = -1; x < 2; ++x) {
+            addParticles(up[x]);
+            addParticles(same[x]);
+            addParticles(down[x]);
+        }
+    }
+
+    __host__ __device__
+    void addParticles(const CanvasCell& cell)
+    {
+        for (int i = 0; i < cell.numParticles; ++i) {
+            const Particle& particle = cell.particles[i];
+            // fixme: refactor via "extract method" for readability
+            if ((((int)pos[0]) == ((int)particle.pos[0])) &&
+                (((int)pos[1]) == ((int)particle.pos[1])) &&
+                (particle.lifetime > 0)) {
+                if (numParticles < MAX_PARTICLES) {
+                    particles[numParticles] = particle;
+                    ++numParticles; 
+                } else {
+                    printf("uhoh\n");
+                }
+            }
+        }
+    }
+
+    __host__ __device__
+    void spawnParticles()
+    {
+        // fixme: render particles
+        // fixme: spawn particles
+        // fixme: move particles to other cells
+
+        if (spawnCountdown <= 0) {
+            spawnCountdown = MAX_SPAWN_COUNTDOWN;
+
+            if ((numParticles < 1) && ((int)pos[0] % 5 == 0) && ((int)pos[1] % 5 == 0)) {
+                particles[numParticles] = Particle(pos[0], pos[1]);
+                numParticles = 1;
+            }
+            
+        } else {
+            --spawnCountdown;
+        }
+    }
+
+    __host__ __device__
+    void updateParticles()
+    {
+        
+        for (int i = 0; i < numParticles; ++i) {
+            Particle& p = particles[i];
+            // fixme: parameters
+            p.update(0.5, forceTotal[0], forceTotal[1], 1.0, 0.9);
+        }
+    }
+
+    __host__ __device__
+    void updateForces(const CanvasCell *up, const CanvasCell *same, const CanvasCell *down, const unsigned& nanoStep)
+    {
+        const CanvasCell& oldSelf = *same;
+        
+        spawnCountdown = oldSelf.spawnCountdown;
         pos[0] = oldSelf.pos[0];
         pos[1] = oldSelf.pos[1];
         cameraPixel = oldSelf.cameraPixel;
@@ -84,14 +205,6 @@ public:
         for (int i = 0; i < numParticles; ++i) {
             particles[i] = oldSelf.particles[i];
         } 
-        // fixme: render particles
-        // fixme: spawn particles
-        // fixme: move particles to other cells
-        // fixme: kill dead particles
-        // if (numParticles < 1) {
-            // particles[numParticles] = Particle(pos[0], pos[1]);
-            // numParticles = 1;
-        // }
 
         forceSet = oldSelf.forceSet;
         if (forceSet) {
@@ -130,52 +243,6 @@ public:
 
         forceTotal[0] = 0.5 * (forceFixed[0] + forceVario[0]);
         forceTotal[1] = 0.5 * (forceFixed[1] + forceVario[1]);
-
-        for (int i = 0; i < numParticles; ++i) {
-            // Particle& p = particles[i];
-            // fixme: parameters
-            // p.update(1.0, forceTotal[0], forceTotal[1], 1.0, 0.99);
-        }
-        
-//         float gradient[2];
-//         gradient[0] = hood[Coord<2>(1, 0)].smoothCam - hood[Coord<2>(-1, 0)].smoothCam;
-//         gradient[1] = hood[Coord<2>(0, 1)].smoothCam - hood[Coord<2>(0, -1)].smoothCam;
-
-//         forceVario[0] = 0;
-//         forceVario[1] = 0;
-        
-//         if ((gradient[0] * gradient[0]) > gradientCutoff) {
-//             forceVario[0] = 1.0 / gradient[0];
-//         }
-
-//         if ((gradient[1] * gradient[1]) > gradientCutoff) {
-//             forceVario[1] = 1.0 / gradient[1];
-//         }
-
-//         updateParticles(oldSelf.particle, 
-//                         forceVario[0] + forceFixed[0],
-//                         forceVario[1] + forceFixed[1]);
-//         // moveParticles();
-    }
-
-    template<typename COORD_MAP>
-    void update(const COORD_MAP& hood, const unsigned& nanoStep)
-    {
-        update(&hood[Coord<2>(0, -1)], &hood[Coord<2>(0, 0)], &hood[Coord<2>(0, 1)], nanoStep);
-    }
-
-
-    __host__ __device__
-    void readCam(const unsigned char& r, const unsigned char& g, const unsigned char& b)
-    {
-        cameraPixel = (0xff << 24) + (r << 16) + (g <<  8) + (b <<  0);
-
-        int val = (int)r + (int)g + (int)b;
-        if (val < 500) {
-            cameraLevel = 1.0;
-        } else {
-            cameraLevel = max(0.0, cameraLevel - 0.05);
-        }
     }
 
     __host__ __device__
@@ -183,26 +250,6 @@ public:
     {
         return a > b ? a : b;
     }
-
-    // fixme:
-// private:
-    unsigned color[TILE_HEIGHT][TILE_WIDTH];
-    unsigned cameraPixel;
-    float pos[2];
-    bool forceSet;
-
-    float cameraLevel;
-    float forceVario[2];
-    float forceFixed[2];
-    float forceTotal[2];
-    int numParticles;
-    Particle particles[20];  
-
-    void updateParticles()
-    {}
-
-    void moveParticles()
-    {}
 };
 
 }
