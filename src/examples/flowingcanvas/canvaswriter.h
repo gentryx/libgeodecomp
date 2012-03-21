@@ -160,7 +160,7 @@ private:
 
     void drawParticles()
     {
-        Coord<2> dim = sim->getInitializer()->gridDimensions();
+      //        Coord<2> dim = sim->getInitializer()->gridDimensions();
         // const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
 
         // float factorX = 1.0 * (*outputFrame)->width()  / dim.x();

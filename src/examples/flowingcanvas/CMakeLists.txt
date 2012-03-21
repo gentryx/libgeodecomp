@@ -26,6 +26,6 @@ find_package(Qt4)
 
 if (CUDA_FOUND)
   cuda_add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
-  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB})
+  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES})
 endif(CUDA_FOUND)
 
