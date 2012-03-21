@@ -10,10 +10,7 @@ class CanvasInitializer : public SimpleInitializer<CanvasCell>
 {
 public:
     CanvasInitializer() :
-        SimpleInitializer<CanvasCell>(Coord<2>(240, 135), 100)
-        // SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
-        // SimpleInitializer<CanvasCell>(Coord<2>(384, 216), 100)
-        // SimpleInitializer<CanvasCell>(Coord<2>(640, 360), 100)
+        SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
     {}
 
     virtual void grid(GridBase<CanvasCell, 2> *ret)
@@ -25,19 +22,19 @@ public:
             bool setForce = false;
             FloatCoord<2> force;
 
-            if ((c.x() == 100) && (c.y() >= 100) && (c.y() <= 200)) {
+            if ((c.x() == 140) && (c.y() >= 80) && (c.y() <= 160)) {
                 setForce = true;
                 force.c[1] = -1;
             }
-            if ((c.x() == 200) && (c.y() >= 100) && (c.y() <= 200)) {
+            if ((c.x() == 220) && (c.y() >= 80) && (c.y() <= 160)) {
                 setForce = true;
                 force.c[1] = 1;
             }
-            if ((c.y() == 100) && (c.x() >= 100) && (c.x() <= 200)) {
+            if ((c.y() == 80) && (c.x() >= 140) && (c.x() <= 220)) {
                 setForce = true;
                 force.c[0] = 1;
             }
-            if ((c.y() == 200) && (c.x() >= 100) && (c.x() <= 200)) {
+            if ((c.y() == 160) && (c.x() >= 140) && (c.x() <= 220)) {
                 setForce = true;
                 force.c[0] = -1;
             }

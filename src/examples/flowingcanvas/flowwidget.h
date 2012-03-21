@@ -43,6 +43,11 @@ public:
         }
     }
 
+    virtual void resizeEvent(QResizeEvent *event)
+    {
+        image = QImage(event->size(), QImage::Format_ARGB32);
+    }
+
 public slots:
     void ping()
     {
