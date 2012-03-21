@@ -27,8 +27,9 @@ public:
     SerialSimulator(Initializer<CELL_TYPE> *_initializer) : 
         MonolithicSimulator<CELL_TYPE>(_initializer)
     {
-        curGrid = new GridType(this->initializer->gridBox().dimensions);
-        newGrid = new GridType(this->initializer->gridBox().dimensions);
+        Coord<DIMENSIONS> dim = this->initializer->gridBox().dimensions;
+        curGrid = new GridType(dim);
+        newGrid = new GridType(dim);
         this->initializer->grid(curGrid);
         this->initializer->grid(newGrid);
     }
