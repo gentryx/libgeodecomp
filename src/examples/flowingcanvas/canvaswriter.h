@@ -62,7 +62,8 @@ public:
                  MonolithicSimulator<CanvasCell> *_sim) :
         Writer<CanvasCell>("foo", _sim, 1),
         outputFrame(_outputFrame),
-        mode(5)
+        particleMode(3),
+        cameraMode(1)
     {}
 
     virtual void initialized()
@@ -70,24 +71,31 @@ public:
 
     virtual void stepFinished()
     {
-        switch (mode) {
+        const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
+
+        switch (particleMode) {
         case 0:
-            drawAttribute(SelectCameraPixel());
+            drawForce(grid, SelectForceVario());
             break;
         case 1:
-            drawAttribute(SelectCameraLevel());
+            drawForce(grid, SelectForceFixed());
             break;
         case 2:
-            drawForce(SelectForceVario());
+            drawForce(grid, SelectForceTotal());
             break;
         case 3:
-            drawForce(SelectForceFixed());
+            drawParticles(grid);
             break;
-        case 4:
-            drawForce(SelectForceTotal());
+        default:
             break;
-        case 5:
-            drawParticles();
+        }
+
+        switch (cameraMode) {
+        case 0:
+            drawAttribute(grid, SelectCameraPixel());
+            break;
+        case 1:
+            drawAttribute(grid, SelectCameraLevel());
             break;
         default:
             break;
@@ -99,20 +107,25 @@ public:
     }
 
 public slots:
-    virtual void cycleViewMode()
+    virtual void cycleViewModeParticle()
     {
-        mode = (mode + 1) % 6;
+        particleMode = (particleMode + 1) % 4;
+    }
+
+    virtual void cycleViewModeCamera()
+    {
+        cameraMode = (cameraMode + 1) % 3;
     }
 
 private:
     QImage **outputFrame;
-    int mode;
+    int particleMode;
+    int cameraMode;
 
     template<typename SELECTOR>
-    void drawForce(const SELECTOR& selector)
+    void drawForce(const typename Simulator<CanvasCell>::GridType *grid, const SELECTOR& selector)
     {
         Coord<2> dim = sim->getInitializer()->gridDimensions();
-        const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
        
         int spacingX = 10;
         int spacingY = 10;
@@ -146,10 +159,9 @@ private:
     // fixme: erase background
     // fixme: scale to image size
     template<typename SELECTOR>
-    void drawAttribute(const SELECTOR& selector)
+    void drawAttribute(const typename Simulator<CanvasCell>::GridType *grid, const SELECTOR& selector)
     {
         Coord<2> dim = sim->getInitializer()->gridDimensions();
-        const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
        
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
@@ -158,11 +170,9 @@ private:
         }
     }
 
-    void drawParticles()
+    void drawParticles(const typename Simulator<CanvasCell>::GridType *grid)
     {
         Coord<2> dim = sim->getInitializer()->gridDimensions();
-        const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
-
         float factorX = 1.0 * (*outputFrame)->width()  / dim.x();
         float factorY = 1.0 * (*outputFrame)->height() / dim.y();
 

@@ -43,11 +43,14 @@ int runGUI(int argc, char **argv)
     QObject::connect(timerFlow, SIGNAL(timeout()),           &flow,   SLOT(ping()));
     QObject::connect(timerGrab, SIGNAL(timeout()),           grabber, SLOT(grab()));
 
-    QObject::connect(&flow,     SIGNAL(cycleViewMode()),     writer,  SLOT(cycleViewMode()));
+    QObject::connect(&flow,     SIGNAL(cycleViewModeParticle()), writer,  SLOT(cycleViewModeParticle()));
+    QObject::connect(&flow,     SIGNAL(cycleViewModeCamera()),   writer,  SLOT(cycleViewModeCamera()));
+
     QObject::connect(grabber,   SIGNAL(newFrame(char*, unsigned, unsigned)), 
                      sim,       SLOT(updateCam( char*, unsigned, unsigned)));
     QObject::connect(&flow,     SIGNAL(updateImage(QImage*)),
                      sim,       SLOT(renderImage(QImage*)));
+
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  sim,       SLOT(quit()));
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  timerFlow, SLOT(stop()));
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  timerGrab, SLOT(stop()));
@@ -61,7 +64,7 @@ int runGUI(int argc, char **argv)
 
     grabber->grab();
     timerFlow->start(10);
-    timerGrab->start(200);
+    timerGrab->start(100);
     timerInfo->start(5000);
     flow.show();
     int ret = app.exec();

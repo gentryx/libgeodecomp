@@ -35,7 +35,11 @@ public:
     {
         std::cout << "got key " << event->key() << "\n";
         if (event->key() == Qt::Key_Space) {
-            emit cycleViewMode();
+            emit cycleViewModeParticle();
+        }
+
+        if (event->key() == Qt::Key_Enter) {
+            emit cycleViewModeCamera();
         }
     }
 
@@ -56,7 +60,8 @@ public slots:
 
 signals:
     void updateImage(QImage*);
-    void cycleViewMode();
+    void cycleViewModeParticle();
+    void cycleViewModeCamera();
 
 private:
     int frameCounter;

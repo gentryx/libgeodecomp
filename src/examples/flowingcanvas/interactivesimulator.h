@@ -51,7 +51,7 @@ public slots:
 
         update();
         incFrames();
-        std::cout << getFrames() << " " << fps() << " FPS\r";
+        // std::cout << "\r" << getFrames() << " " << fps() << " FPS";
     }
 
     void renderImage(QImage *image) 

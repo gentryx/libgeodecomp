@@ -57,7 +57,7 @@ public:
     
     static inline unsigned nanoSteps()
     {
-        return 5;
+        return 8;
     }
 
     CanvasCell(

@@ -10,8 +10,8 @@ class CanvasInitializer : public SimpleInitializer<CanvasCell>
 {
 public:
     CanvasInitializer() :
-        // SimpleInitializer<CanvasCell>(Coord<2>(240, 135), 100)
-        SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
+        SimpleInitializer<CanvasCell>(Coord<2>(240, 135), 100)
+        // SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
         // SimpleInitializer<CanvasCell>(Coord<2>(384, 216), 100)
         // SimpleInitializer<CanvasCell>(Coord<2>(640, 360), 100)
     {}
