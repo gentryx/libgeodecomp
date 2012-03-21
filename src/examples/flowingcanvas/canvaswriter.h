@@ -60,9 +60,9 @@ public:
 
     CanvasWriter(QImage **_outputFrame,
                  MonolithicSimulator<CanvasCell> *_sim) :
-        Writer("foo", _sim, 1),
+        Writer<CanvasCell>("foo", _sim, 1),
         outputFrame(_outputFrame),
-        mode(5)
+        mode(4)
     {}
 
     virtual void initialized()

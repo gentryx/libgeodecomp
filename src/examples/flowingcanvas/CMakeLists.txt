@@ -20,5 +20,12 @@ set(MY_HEADERS
 QT4_WRAP_CPP(MY_MOC_SOURCES ${MY_HEADERS})
 include_directories(./)
 
-add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
-target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB})
+set(CUDA_TOOLKIT_ROOT_DIR "/opt/cuda")
+find_package(CUDA)
+find_package(Qt4)
+
+if (CUDA_FOUND)
+  cuda_add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
+  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB})
+endif(CUDA_FOUND)
+

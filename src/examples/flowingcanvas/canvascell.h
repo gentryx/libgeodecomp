@@ -4,6 +4,14 @@
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/topologies.h>
 
+#ifndef __host__
+#define __host__
+#endif
+
+#ifndef __device__
+#define __device__
+#endif
+
 namespace LibGeoDecomp {
 
 class CanvasCell
@@ -60,10 +68,11 @@ public:
         forceSet = _forceSet;
     }
 
-    template<typename COORD_MAP>
-    void update(const COORD_MAP& hood, const unsigned& nanoStep)
+    // fixme: faster conversion if moore-neighborhood is used (instead of von neumann)?
+    __host__ __device__
+    void update(const CanvasCell *up, const CanvasCell *same, const CanvasCell *down, const unsigned& nanoStep)
     {
-        const CanvasCell& oldSelf = hood[Coord<2>()];
+        const CanvasCell& oldSelf = *same;
 
         pos[0] = oldSelf.pos[0];
         pos[1] = oldSelf.pos[1];
@@ -77,33 +86,33 @@ public:
         // fixme: spawn particles
         // fixme: move particles to other cells
         // fixme: kill dead particles
-        if (numParticles < 1) {
-            particles[numParticles] = Particle(pos[0], pos[1]);
-            numParticles = 1;
-        }
+        // if (numParticles < 1) {
+            // particles[numParticles] = Particle(pos[0], pos[1]);
+            // numParticles = 1;
+        // }
 
         forceSet = oldSelf.forceSet;
         if (forceSet) {
             forceFixed[0] = oldSelf.forceFixed[0];
             forceFixed[1] = oldSelf.forceFixed[1];
         } else {
-            forceFixed[0] = (hood[Coord<2>(0, -1)].forceFixed[0] +
-                             hood[Coord<2>(-1, 0)].forceFixed[0] +
-                             hood[Coord<2>(1,  0)].forceFixed[0] +
-                             hood[Coord<2>(0,  1)].forceFixed[0]) * 0.25;
-            forceFixed[1] = (hood[Coord<2>(0, -1)].forceFixed[1] +
-                             hood[Coord<2>(-1, 0)].forceFixed[1] +
-                             hood[Coord<2>(1,  0)].forceFixed[1] +
-                             hood[Coord<2>(0,  1)].forceFixed[1]) * 0.25;
+            forceFixed[0] = (up[0].forceFixed[0] +
+                             same[-1].forceFixed[0] +
+                             same[1].forceFixed[0] +
+                             down[0].forceFixed[0]) * 0.25;
+            forceFixed[1] = (up[0].forceFixed[1] +
+                             same[-1].forceFixed[1] +
+                             same[1].forceFixed[1] +
+                             down[0].forceFixed[1]) * 0.25;
         }
 
-        cameraLevel = (hood[Coord<2>(0, -1)].cameraLevel +
-                             hood[Coord<2>(-1, 0)].cameraLevel +
-                             hood[Coord<2>(1,  0)].cameraLevel +
-                             hood[Coord<2>(0,  1)].cameraLevel) * 0.25;
+        cameraLevel = (up[0].cameraLevel +
+                             same[-1].cameraLevel +
+                             same[1].cameraLevel +
+                             down[0].cameraLevel) * 0.25;
         
-        float gradientX = hood[Coord<2>(1, 0)].cameraLevel - hood[Coord<2>(-1, 0)].cameraLevel;
-        float gradientY = hood[Coord<2>(0, 1)].cameraLevel - hood[Coord<2>(0, -1)].cameraLevel;
+        float gradientX = same[1].cameraLevel - same[-1].cameraLevel;
+        float gradientY = down[0].cameraLevel - up[0].cameraLevel;
         forceVario[0] = 0;
         if ((gradientX > 0.011) || (gradientX < -0.011)) {
             forceVario[0] = 0.01 / gradientX;
@@ -121,9 +130,9 @@ public:
         forceTotal[1] = 0.5 * (forceFixed[1] + forceVario[1]);
 
         for (int i = 0; i < numParticles; ++i) {
-            Particle& p = particles[i];
+            // Particle& p = particles[i];
             // fixme: parameters
-            p.update(1.0, forceTotal[0], forceTotal[1], 1.0, 0.99);
+            // p.update(1.0, forceTotal[0], forceTotal[1], 1.0, 0.99);
         }
         
 //         float gradient[2];
@@ -145,6 +154,12 @@ public:
 //                         forceVario[0] + forceFixed[0],
 //                         forceVario[1] + forceFixed[1]);
 //         // moveParticles();
+    }
+
+    template<typename COORD_MAP>
+    void update(const COORD_MAP& hood, const unsigned& nanoStep)
+    {
+        update(&hood[Coord<2>(0, -1)], &hood[Coord<2>(0, 0)], &hood[Coord<2>(0, 1)], nanoStep);
     }
 
     void readCam(unsigned char *frame, const float& factorX, const float& factorY, const int& width, const int& height)
