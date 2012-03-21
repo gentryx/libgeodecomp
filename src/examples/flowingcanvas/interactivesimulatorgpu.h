@@ -127,6 +127,7 @@ public:
         int byteSize = gridHost.getDimensions().prod() * sizeof(CELL_TYPE);
         cudaMemcpy(gridHost.baseAddress(), transferGridDevice, byteSize, cudaMemcpyDeviceToHost);
         checkCudaError();
+        // fixme: copy only particles back
         return &gridHost;
     }
 

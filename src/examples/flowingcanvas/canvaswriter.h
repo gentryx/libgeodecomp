@@ -181,7 +181,7 @@ private:
         p.drawRect(0, 0, (*outputFrame)->width(), (*outputFrame)->height());
         p.setBrush(QBrush(Qt::white));
         p.setPen(QPen(Qt::white));
-
+        
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
                 const CanvasCell& cell = grid->at(Coord<2>(x, y));

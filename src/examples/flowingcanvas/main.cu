@@ -63,7 +63,7 @@ int runGUI(int argc, char **argv)
     QObject::connect(timerFlow, SIGNAL(timeout()),           sim,       SLOT(step()));
 
     grabber->grab();
-    timerFlow->start(10);
+    timerFlow->start(5);
     timerGrab->start(100);
     timerInfo->start(5000);
     flow.show();

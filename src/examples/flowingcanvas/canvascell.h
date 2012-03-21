@@ -52,8 +52,6 @@ public:
     static const int MAX_PARTICLES = 10;
     static const int MAX_SPAWN_COUNTDOWN = 60;
     typedef Topologies::Cube<2>::Topology Topology;
-    static const int TILE_WIDTH = 4;
-    static const int TILE_HEIGHT = 4;
     
     static inline unsigned nanoSteps()
     {
@@ -117,7 +115,7 @@ public:
 
     // fixme:
 private:
-    unsigned color[TILE_HEIGHT][TILE_WIDTH];
+    unsigned color;
     unsigned cameraPixel;
     unsigned spawnCountdown;
     float pos[2];
