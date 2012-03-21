@@ -40,26 +40,32 @@ public slots:
 
     virtual void step() 
     {
-        if (newCameraFrame.tryAcquire()) 
+        if (newCameraFrame.tryAcquire()) {
             readCam();
+        }
         if (newOutputFrameRequested.tryAcquire()) {
             renderOutput();
-            newOutputFrameAvailable.release();
+            // fixme: sync_update_patch
+            // newOutputFrameAvailable.release();
         }
 
         update();
         incFrames();
+        std::cout << getFrames() << " " << fps() << " FPS\r";
     }
 
     void renderImage(QImage *image) 
     {
-        if (!running) {
-            return;
-        }
-
+        // fixme: sync_update_patch
+        // fixme
+        // if (!running) {
+        //     return;
+        // }
+        
         outputFrame = image;
         newOutputFrameRequested.release();
-        newOutputFrameAvailable.acquire();
+        // fixme: sync_update_patch
+        // newOutputFrameAvailable.acquire();
     }
 
     virtual void readCam() = 0;
@@ -76,7 +82,6 @@ public slots:
         running = true;
         while (running) {
             step();
-            std::cout << getFrames() << " " << fps() << " FPS\r";
         }
     }
 

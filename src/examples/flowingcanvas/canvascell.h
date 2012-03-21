@@ -49,15 +49,15 @@ public:
         int lifetime;
     };
 
-    static const int MAX_PARTICLES = 20;
-    static const int MAX_SPAWN_COUNTDOWN = 100;
+    static const int MAX_PARTICLES = 10;
+    static const int MAX_SPAWN_COUNTDOWN = 60;
     typedef Topologies::Cube<2>::Topology Topology;
     static const int TILE_WIDTH = 4;
     static const int TILE_HEIGHT = 4;
     
     static inline unsigned nanoSteps()
     {
-        return 2;
+        return 5;
     }
 
     CanvasCell(
@@ -80,7 +80,7 @@ public:
     __host__ __device__
     void update(const CanvasCell *up, const CanvasCell *same, const CanvasCell *down, const unsigned& nanoStep)
     {
-        if (nanoStep == 1) {
+        if (nanoStep == (nanoSteps() - 1)) {
             // fixme: can we avoid this?
             *this = *same;
             moveParticles(up, same, down);
@@ -88,8 +88,11 @@ public:
         }
 
         updateForces(up, same, down, nanoStep);
-        spawnParticles();
-        updateParticles();
+
+        if (nanoStep == (nanoSteps() - 2)) {
+            spawnParticles();
+            updateParticles();
+        }
     }
 
     template<typename COORD_MAP>
@@ -105,7 +108,7 @@ public:
         cameraPixel = (0xff << 24) + (r << 16) + (g <<  8) + (b <<  0);
 
         int val = (int)r + (int)g + (int)b;
-        if (val < 500) {
+        if (val < 250) {
             cameraLevel = 1.0;
         } else {
             cameraLevel = max(0.0, cameraLevel - 0.05);

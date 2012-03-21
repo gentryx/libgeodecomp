@@ -238,9 +238,7 @@ public:
 
     virtual void update()
     {
-        for (int fixme = 0; fixme < 500; ++fixme) 
-            GPUSimulator<CELL_TYPE>::step();
-        sleep(1);
+        GPUSimulator<CELL_TYPE>::step();
     }
 
     virtual void registerWriter(Writer<CELL_TYPE> *writer)

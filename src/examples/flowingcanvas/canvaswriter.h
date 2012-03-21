@@ -179,8 +179,8 @@ private:
                     const CanvasCell::Particle& particle = cell.particles[i];
                     QPoint origin(particle.pos[0] * factorX,
                                   particle.pos[1] * factorY);
-                    QPoint direction(particle.vel[0] * 50,
-                                     particle.vel[1] * 50);
+                    QPoint direction(particle.vel[0] * 20,
+                                     particle.vel[1] * 20);
                     QPoint end = origin + direction;
                     QPoint offset(2, 2);
                     QSize size(4, 4);

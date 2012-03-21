@@ -26,12 +26,12 @@ int runGUI(int argc, char **argv)
     FlowWidget flow;
     flow.resize(1200, 900);
 
-    // InteractiveSimulatorGPU<CanvasCell> *sim = new InteractiveSimulatorGPU<CanvasCell>(
-    InteractiveSimulatorCPU<CanvasCell> *sim = new InteractiveSimulatorCPU<CanvasCell>(
+    InteractiveSimulatorGPU<CanvasCell> *sim = new InteractiveSimulatorGPU<CanvasCell>(
+    // InteractiveSimulatorCPU<CanvasCell> *sim = new InteractiveSimulatorCPU<CanvasCell>(
         &flow,
         new CanvasInitializer());
     CanvasWriter *writer = new CanvasWriter(sim->getOutputFrame(), sim);
-    FrameGrabber *grabber = new FrameGrabber(true, &flow);
+    FrameGrabber *grabber = new FrameGrabber(false, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);
@@ -54,11 +54,14 @@ int runGUI(int argc, char **argv)
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  timerInfo, SLOT(stop()));
 
     QThreadPool *threadPool = QThreadPool::globalInstance();
-    threadPool->start(sim);
+    // fixme: sync_update_patch
+    // threadPool->start(sim);
+    // fixme: sync_update_patch
+    QObject::connect(timerFlow, SIGNAL(timeout()),           sim,       SLOT(step()));
 
     grabber->grab();
-    timerFlow->start(50);
-    timerGrab->start(100);
+    timerFlow->start(10);
+    timerGrab->start(200);
     timerInfo->start(5000);
     flow.show();
     int ret = app.exec();
