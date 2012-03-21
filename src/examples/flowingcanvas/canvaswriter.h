@@ -1,6 +1,7 @@
 #ifndef _libgeodecomp_examples_flowingcanvas_canvaswriter_h_
 #define _libgeodecomp_examples_flowingcanvas_canvaswriter_h_
 
+#include <QtCore/qmath.h>
 #include <QImage>
 #include <QPainter>
 #include <libgeodecomp/io/writer.h>
@@ -58,12 +59,21 @@ public:
         }
     };
 
+    class SelectOriginalPixel
+    {
+    public:
+        unsigned operator()(const CanvasCell& cell) const
+        {
+            return cell.originalPixel;
+        }
+    };
+
     CanvasWriter(QImage **_outputFrame,
                  MonolithicSimulator<CanvasCell> *_sim) :
         Writer<CanvasCell>("foo", _sim, 1),
         outputFrame(_outputFrame),
         particleMode(3),
-        cameraMode(1)
+        cameraMode(3)
     {}
 
     virtual void initialized()
@@ -92,9 +102,12 @@ public:
 
         switch (cameraMode) {
         case 0:
-            drawAttribute(grid, SelectCameraPixel());
+            drawAttribute(grid, SelectOriginalPixel());
             break;
         case 1:
+            drawAttribute(grid, SelectCameraPixel());
+            break;
+        case 2:
             drawAttribute(grid, SelectCameraLevel());
             break;
         default:
@@ -114,7 +127,7 @@ public slots:
 
     virtual void cycleViewModeCamera()
     {
-        cameraMode = (cameraMode + 1) % 3;
+        cameraMode = (cameraMode + 1) % 4;
     }
 
 private:
@@ -181,6 +194,9 @@ private:
         p.drawRect(0, 0, (*outputFrame)->width(), (*outputFrame)->height());
         p.setBrush(QBrush(Qt::white));
         p.setPen(QPen(Qt::white));
+
+        QRect ellipse(-10, -3, 20, 6);
+        p.setPen(QPen(Qt::transparent));
         
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
@@ -189,6 +205,23 @@ private:
                     const CanvasCell::Particle& particle = cell.particles[i];
                     QPoint origin(particle.pos[0] * factorX,
                                   particle.pos[1] * factorY);
+
+                    // double length = particle.vel[0] * particle.vel[0] + particle.vel[1] * particle.vel[1];
+                    // double angle = 0;
+
+                    // if (length > 0) {
+                    //     length = qSqrt(length);
+                    //     angle = (360.0 / 2.0 / 3.14159) * qAsin(particle.vel[1] / length);
+                    // }
+
+                    // p.save();
+                    // p.translate(origin);
+                    // p.rotate(angle);
+                    // p.setBrush(QBrush(particle.color));
+                    // p.drawEllipse(ellipse);
+
+                    // p.restore();
+
                     QPoint direction(particle.vel[0] * 20,
                                      particle.vel[1] * 20);
                     QPoint end = origin + direction;

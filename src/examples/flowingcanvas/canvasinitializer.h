@@ -1,6 +1,7 @@
 #ifndef _libgeodecomp_examples_flowingcanvas_canvasinitializer_h_
 #define _libgeodecomp_examples_flowingcanvas_canvasinitializer_h_
 
+#include <QPixmap>
 #include <libgeodecomp/examples/flowingcanvas/canvascell.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 
@@ -11,11 +12,17 @@ class CanvasInitializer : public SimpleInitializer<CanvasCell>
 public:
     CanvasInitializer() :
         SimpleInitializer<CanvasCell>(Coord<2>(320, 180), 100)
+        // SimpleInitializer<CanvasCell>(Coord<2>(640, 360), 100)
     {}
 
     virtual void grid(GridBase<CanvasCell, 2> *ret)
     {
         CoordBox<2> box = ret->boundingBox();
+
+        // fixme:
+        // QImage source = QPixmap("starry_night.png").scaled(box.dimensions.x(), box.dimensions.y()).toImage();
+        // source.convertToFormat(QImage::Format_ARGB32);
+
         CoordBoxSequence<2> s = box.sequence();
         while (s.hasNext()) {
             Coord<2> c = s.next();
@@ -39,7 +46,10 @@ public:
                 force.c[0] = -1;
             }
 
-            ret->at(c) = CanvasCell(c, setForce, force, rand() % CanvasCell::MAX_SPAWN_COUNTDOWN);
+            // fixme
+            // unsigned pixel = source.pixel(c.x(), c.y());
+            unsigned pixel = (0xff << 24) + ((c.x() * 255 / 400) << 16) + ((c.y() * 255 / 200) << 8) + 0;
+            ret->at(c) = CanvasCell(pixel, c, setForce, force, rand() % CanvasCell::MAX_SPAWN_COUNTDOWN);
         }
     }
 };

@@ -24,7 +24,7 @@ int runGUI(int argc, char **argv)
 {
     QApplication app(argc, argv);
     FlowWidget flow;
-    flow.resize(1200, 900);
+    flow.resize(1024, 768);
 
     InteractiveSimulatorGPU<CanvasCell> *sim = new InteractiveSimulatorGPU<CanvasCell>(
     // InteractiveSimulatorCPU<CanvasCell> *sim = new InteractiveSimulatorCPU<CanvasCell>(

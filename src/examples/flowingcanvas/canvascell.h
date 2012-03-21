@@ -23,8 +23,9 @@ public:
     {
     public:
         __host__ __device__
-        Particle(const float& pos0 = 0, const float& pos1 = 0, const float& _lifetime = 100) :
-            lifetime(_lifetime)
+        Particle(const float& pos0 = 0, const float& pos1 = 0, const unsigned& _color = 0, const int& _lifetime = 100) :
+            lifetime(_lifetime),
+            color(_color)
         {
             pos[0] = pos0;
             pos[1] = pos1;
@@ -47,22 +48,26 @@ public:
         float pos[2];
         float vel[2];
         int lifetime;
+        unsigned color;
     };
 
     static const int MAX_PARTICLES = 10;
     static const int MAX_SPAWN_COUNTDOWN = 60;
     typedef Topologies::Cube<2>::Topology Topology;
     
+    __host__ __device__
     static inline unsigned nanoSteps()
     {
         return 8;
     }
 
     CanvasCell(
-        Coord<2> _pos = Coord<2>(), 
-        bool _forceSet = false,
-        FloatCoord<2> _forceFixed = FloatCoord<2>(),
-        int _spawnCountdown = 0) :
+        const unsigned& _originalPixel = 0,
+        const Coord<2>& _pos = Coord<2>(), 
+        const bool& _forceSet = false,
+        const FloatCoord<2>& _forceFixed = FloatCoord<2>(),
+        const int& _spawnCountdown = 0) :
+        originalPixel(_originalPixel),
         spawnCountdown(_spawnCountdown),
         cameraLevel(0),
         numParticles(0)
@@ -115,7 +120,7 @@ public:
 
     // fixme:
 private:
-    unsigned color;
+    unsigned originalPixel;
     unsigned cameraPixel;
     unsigned spawnCountdown;
     float pos[2];
@@ -172,7 +177,7 @@ private:
             spawnCountdown = MAX_SPAWN_COUNTDOWN;
 
             if ((numParticles < 1) && ((int)pos[0] % 5 == 0) && ((int)pos[1] % 5 == 0)) {
-                particles[numParticles] = Particle(pos[0], pos[1]);
+                particles[numParticles] = Particle(pos[0], pos[1], originalPixel);
                 numParticles = 1;
             }
             
@@ -200,6 +205,7 @@ private:
         spawnCountdown = oldSelf.spawnCountdown;
         pos[0] = oldSelf.pos[0];
         pos[1] = oldSelf.pos[1];
+        originalPixel = oldSelf.originalPixel;
         cameraPixel = oldSelf.cameraPixel;
         cameraLevel = oldSelf.cameraLevel;
         numParticles = oldSelf.numParticles;
