@@ -58,7 +58,7 @@ public:
     __host__ __device__
     static inline unsigned nanoSteps()
     {
-        return 8;
+        return 4;
     }
 
     CanvasCell(
@@ -114,7 +114,7 @@ public:
         if (val < 250) {
             cameraLevel = 1.0;
         } else {
-            cameraLevel = max(0.0, cameraLevel - 0.05);
+            cameraLevel = max(0.0, cameraLevel - 0.02);
         }
     }
 
@@ -236,26 +236,35 @@ private:
         float gradientX = same[1].cameraLevel - same[-1].cameraLevel;
         float gradientY = down[0].cameraLevel - up[0].cameraLevel;
         forceVario[0] = 0;
-        if ((gradientX > 0.011) || (gradientX < -0.011)) {
-            forceVario[0] = 0.01 / gradientX;
+
+        float gradientLimit = 0.001;
+        
+        if ((gradientX > gradientLimit) || (gradientX < -gradientLimit)) {
+            forceVario[0] = min(1.0, 0.01 / gradientX);
         } else {
             forceVario[0] = 0;
         }
 
-        if ((gradientY > 0.011) || (gradientY < -0.011)) {
-            forceVario[1] = 0.01 / gradientY;
+        if ((gradientY > gradientLimit) || (gradientY < -gradientLimit)) {
+            forceVario[1] = min(1.0, 0.01 / gradientY);
         } else {
             forceVario[1] = 0;
         }
 
-        forceTotal[0] = 0.5 * (forceFixed[0] + forceVario[0]);
-        forceTotal[1] = 0.5 * (forceFixed[1] + forceVario[1]);
+        forceTotal[0] = 0.8 * forceFixed[0] + 0.2 * forceVario[0];
+        forceTotal[1] = 0.8 * forceFixed[1] + 0.2 * forceVario[1];
     }
 
     __host__ __device__
     float max(const float& a, const float& b)
     {
         return a > b ? a : b;
+    }
+
+    __host__ __device__
+    float min(const float& a, const float& b)
+    {
+        return a < b ? a : b;
     }
 };
 
