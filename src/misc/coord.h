@@ -180,7 +180,7 @@ public:
         return x() * y();
     }
 
-    inline const int sum() const
+    inline int sum() const
     {
         return x() + y();
     }
@@ -326,7 +326,7 @@ public:
         return x() * y() * z();
     }
 
-    inline const int sum() const
+    inline int sum() const
     {
         return x() + y() + z();
     }

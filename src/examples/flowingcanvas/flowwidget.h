@@ -2,8 +2,9 @@
 #define _libgeodecomp_examples_flowingcanvas_flowwidget_h_
 
 #include <iostream>
-#include <QtGui/QPainter>
-#include <QtGui/QWidget>
+#include <QKeyEvent>
+#include <QPainter>
+#include <QWidget>
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
 
 class FlowWidget : public QWidget, FPSCounter
@@ -14,10 +15,12 @@ public:
     FlowWidget() :
         frameCounter(0),
         image(1024, 768, QImage::Format_ARGB32)
-    {}
+    {
+        setFocusPolicy(Qt::StrongFocus);
+    }
 
     // fixme: do we need to always draw the whole image?
-    void paintEvent(QPaintEvent * /* event */)
+    virtual void paintEvent(QPaintEvent * /* event */)
     {
         QPainter painter(this);
 
@@ -28,10 +31,27 @@ public:
         ++frameCounter;
     }
 
+    virtual void keyPressEvent(QKeyEvent *event)
+    {
+        std::cout << "got key " << event->key() << "\n";
+        if (event->key() == Qt::Key_Space) {
+            emit cycleViewModeParticle();
+        }
+
+        if (event->key() == Qt::Key_Enter) {
+            emit cycleViewModeCamera();
+        }
+    }
+
+    virtual void resizeEvent(QResizeEvent *event)
+    {
+        image = QImage(event->size(), QImage::Format_ARGB32);
+    }
+
 public slots:
     void ping()
     {
-        emit updateImage((unsigned*)image.scanLine(0), image.width(), image.height());        
+        emit updateImage(&image);
         // if (simParamsHost.dumpFrames) 
         //     dumpFrame();
         update();
@@ -44,7 +64,9 @@ public slots:
     }
 
 signals:
-    void updateImage(unsigned *image, unsigned width, unsigned height);
+    void updateImage(QImage*);
+    void cycleViewModeParticle();
+    void cycleViewModeCamera();
 
 private:
     int frameCounter;

@@ -8,49 +8,55 @@
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
-class InteractiveSimulatorCPU : public InteractiveSimulator
+class InteractiveSimulatorCPU : public SerialSimulator<CELL_TYPE>, public InteractiveSimulator
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef typename SerialSimulator<CELL_TYPE>::GridType GridType;
+    typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
+
     InteractiveSimulatorCPU(QObject *parent, Initializer<CELL_TYPE> *initializer) :
-        InteractiveSimulator(parent),
-        sim(initializer)
+        SerialSimulator<CELL_TYPE>(initializer),
+        InteractiveSimulator(parent)
     {}
 
     virtual ~InteractiveSimulatorCPU()
-    {
-        std::cout << "InteractiveSimulatorCPU dying\n";
-    }
+    {}
 
-    virtual void loadStates()
+    virtual void readCam()
     {
-        std::cout << "loadStates()\n";
-    }
+        Coord<2> dim = this->getInitializer()->gridDimensions();
+        float factorX = 1.0 * cameraFrameWidth  / dim.x();
+        float factorY = 1.0 * cameraFrameHeight / dim.y();
 
-    // fixme: move this out of the simulator!
-    virtual void renderOutput()
-    {
-        Coord<2> dim = sim.getInitializer()->gridDimensions();
-        const typename SerialSimulator<CELL_TYPE>::GridType *grid = sim.getGrid();
-        int maxX = std::min((int)outputFrameWidth,  dim.x());
-        int maxY = std::min((int)outputFrameHeight, dim.y());
-
-        for (int y = 0; y < maxY; ++y) {
-            for (int x = 0; x < maxX; ++x) {
-                outputFrame[y * outputFrameWidth + x] = (*grid)[Coord<2>(x, y)].toColor();
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                Coord<2> c(x, y);
+                int index = (int)(y * factorY) * cameraFrameWidth + x * factorX;
+                unsigned char *pixel = &cameraFrame[3 * index];
+                (*this->curGrid)[c].readCam(pixel[0], pixel[1], pixel[2]);
             }
         }
     }
 
-    virtual void update()
+    virtual void renderOutput()
     {
-        sim.step();
+        for(unsigned i = 0; i < this->writers.size(); i++) 
+            this->writers[i]->stepFinished();
     }
 
-private:
-    SerialSimulator<CELL_TYPE> sim;
-    std::vector<unsigned> frame;
+    virtual void update()
+    {
+        SerialSimulator<CELL_TYPE>::step();
+    }
+
+    virtual void registerWriter(Writer<CELL_TYPE> *writer)
+    {
+        writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
+    }
+
+protected:
+    WriterVector writers;
 };
 
 }

@@ -12,11 +12,20 @@ set(CMAKE_CXX_FLAGS "${OPENCV_FLAGS} ${CMAKE_CXX_FLAGS} -fopenmp")
 include(${QT_USE_FILE})
 
 set(MY_HEADERS
+  canvaswriter.h
   flowwidget.h
+  framegrabber.h
   interactivesimulator.h)
 
 QT4_WRAP_CPP(MY_MOC_SOURCES ${MY_HEADERS})
 include_directories(./)
 
-add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
-target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB})
+set(CUDA_TOOLKIT_ROOT_DIR "/opt/cuda")
+find_package(CUDA)
+find_package(Qt4)
+
+if (CUDA_FOUND)
+  cuda_add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
+  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES})
+endif(CUDA_FOUND)
+

@@ -2,6 +2,7 @@
 #define _libgeodecomp_examples_flowingcanvas_interactivesimulator_h_
 
 #include <iostream>
+#include <QImage>
 #include <QObject>
 #include <QRunnable>
 #include <QSemaphore>
@@ -18,76 +19,87 @@ public:
         QObject(parent)
     {}
 
+    QImage **getOutputFrame()
+    {
+        return &outputFrame;
+    }
+
 public slots:
     void updateCam(char *rawFrame, unsigned width, unsigned height)
     {
+        // fixme: we could get raceconditions here as the simulator
+        // may not have consumed the last camera frame
+        int frameSize = 3 * width * height;
+        cameraFrameWidth  = width;
+        cameraFrameHeight = height;
+        cameraFrame.resize(frameSize);
+        std::copy(rawFrame, rawFrame + frameSize, &cameraFrame[0]);
+
+        newCameraFrame.release();
     }
 
-    void step() 
+    virtual void step() 
     {
-        if (newCameraFrame.tryAcquire()) 
-            loadStates();
+        if (newCameraFrame.tryAcquire()) {
+            readCam();
+        }
         if (newOutputFrameRequested.tryAcquire()) {
             renderOutput();
-            newOutputFrameAvailable.release();
+            // fixme: sync_update_patch
+            // newOutputFrameAvailable.release();
         }
 
         update();
         incFrames();
-        ++t;
+        // std::cout << "\r" << getFrames() << " " << fps() << " FPS";
     }
 
-    void renderImage(unsigned *image, unsigned width, unsigned height) 
+    void renderImage(QImage *image) 
     {
-        if (!running) {
-            return;
-        }
-
+        // fixme: sync_update_patch
+        // fixme
+        // if (!running) {
+        //     return;
+        // }
+        
         outputFrame = image;
-        outputFrameWidth = width;
-        outputFrameHeight = height;
         newOutputFrameRequested.release();
-        newOutputFrameAvailable.acquire();
+        // fixme: sync_update_patch
+        // newOutputFrameAvailable.acquire();
     }
 
-    virtual void loadStates() = 0;
+    virtual void readCam() = 0;
     virtual void renderOutput() = 0;
     virtual void update() = 0;
-    
+
     void info()
     {
         std::cout << "InteractiveSimulator @ " << fps() << " FPS\n\n";
     }
 
-    void run()
+    virtual void run()
     {
         running = true;
         while (running) {
             step();
-            std::cout << t << " " << fps() << " FPS\r";
         }
-        std::cout << "run done\n";
-        std::cout << "newOutputFrameRequested: " << newOutputFrameRequested.available() << "\n"
-                  << "newOutputFrameAvailable: " << newOutputFrameAvailable.available() << "\n"
-                  << "newCameraFrame:          " << newCameraFrame.available() << "\n";
     }
 
     void quit()
     {
-        std::cout << "i've been told to quit\n";
         running = false;
     }
 
 protected:
-    int t;
     volatile bool running;
     QSemaphore newOutputFrameRequested;
     QSemaphore newOutputFrameAvailable;
     QSemaphore newCameraFrame;
 
-    unsigned *outputFrame;
-    volatile unsigned outputFrameWidth;
-    volatile unsigned outputFrameHeight;
+    QImage *outputFrame;
+    SuperVector<unsigned char> cameraFrame;
+    int cameraFrameWidth;
+    int cameraFrameHeight;
 };
 
 }
