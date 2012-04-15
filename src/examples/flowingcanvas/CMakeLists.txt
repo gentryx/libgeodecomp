@@ -3,6 +3,7 @@ include(auto.cmake)
 
 find_package(Qt4)
 
+# fixme: introduce feature "with/without qt"
 # fixme: use configure script to find opencv, same in latticegas
 execute_process(COMMAND pkg-config opencv --cflags --libs
   OUTPUT_VARIABLE OPENCV_FLAGS)
