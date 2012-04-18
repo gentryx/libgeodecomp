@@ -354,10 +354,10 @@ public:
             neig2 = _mm_load_pd(src + x + offsetZ + 4);
             neig3 = _mm_load_pd(src + x + offsetZ + 6);
 
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[5][x + 0]));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[5][x + 2]));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[5][x + 4]));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[5][x + 6]));
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[6][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[6][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[6][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[6][x + 6]));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
@@ -391,12 +391,472 @@ public:
     }
 };
 
+class ExtendedScalar3D
+{
+public:
+    static int coefficients()
+    {
+        return 13;
+    }
+
+    inline void step(double *coeff[13], double *src, double *dst, int offsetY, int offsetZ, int startX, int endX)
+    {
+        for (int x = startX; x < endX; ++x) {
+            dst[x] = 
+                coeff[ 0][x] * src[x - offsetZ - offsetY] +
+                coeff[ 1][x] * src[x - offsetZ] +
+                coeff[ 2][x] * src[x - offsetZ + offsetY] +
+                coeff[ 3][x] * src[x - offsetY] +
+                coeff[ 4][x] * src[x - 1] +
+                coeff[ 5][x] * src[x] +
+                coeff[ 6][x] * src[x + 1] +
+                coeff[ 7][x] * src[x + offsetY] +
+                coeff[ 8][x] * src[x + offsetZ - offsetY] +
+                coeff[ 9][x] * src[x + offsetZ] +
+                coeff[10][x] * src[x + offsetZ + offsetY] +
+                coeff[11][x - offsetZ - offsetY] +
+                coeff[11][x - offsetZ] +
+                coeff[11][x - offsetZ + offsetY] +
+                coeff[11][x - offsetY] +
+                coeff[11][x] +
+                coeff[11][x + offsetY] +
+                coeff[11][x + offsetZ - offsetY] +
+                coeff[11][x + offsetZ] +
+                coeff[11][x + offsetZ + offsetY] +
+                coeff[12][x - offsetZ - offsetY] +
+                coeff[12][x - offsetZ] +
+                coeff[12][x - offsetZ + offsetY] +
+                coeff[12][x - offsetY] +
+                coeff[12][x] +
+                coeff[12][x + offsetY] +
+                coeff[12][x + offsetZ - offsetY] +
+                coeff[12][x + offsetZ] +
+                coeff[12][x + offsetZ + offsetY];
+        }
+    }
+
+    int flops()
+    {
+        return 40;
+    }
+};
+
+class ExtendedVectorized3D
+{
+public:
+    static int coefficients()
+    {
+        return 13;
+    }
+
+    inline void step(double *coeff[13], double *src, double *dst, int offsetY, int offsetZ, int startX, int endX)
+    {
+        int x = startX;
+        ExtendedScalar3D scalarUpdater;
+
+        if ((x & 1) == 1) {
+            scalarUpdater.step(coeff, src, dst, offsetY, offsetZ, x, x + 1);
+            x += 1;
+        }
+
+        __m128d same0 = _mm_load_pd(src + x + 0);
+        __m128d neig0 = _mm_loadu_pd(src + x + 1);
+        
+        int paddedEndX = endX - 7;
+        for (; x < paddedEndX; x += 8) {
+            __m128d same1 = _mm_load_pd(src + x + 2);
+            __m128d same2 = _mm_load_pd(src + x + 4);
+            __m128d same3 = _mm_load_pd(src + x + 6);
+            __m128d same4 = _mm_load_pd(src + x + 8);
+
+            __m128d neig1 = _mm_shuffle_pd(same0, same1, (1 << 0) | (0 << 2));
+            __m128d neig2 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
+            __m128d neig3 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
+            __m128d neig4 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
+
+            same0 = _mm_mul_pd(same0, _mm_load_pd(&coeff[3][x + 0]));
+            same1 = _mm_mul_pd(same1, _mm_load_pd(&coeff[3][x + 2]));
+            same2 = _mm_mul_pd(same2, _mm_load_pd(&coeff[3][x + 4]));
+            same3 = _mm_mul_pd(same3, _mm_load_pd(&coeff[3][x + 6]));
+
+            __m128d temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[2][x + 0]));
+            __m128d temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[2][x + 2]));
+            __m128d temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[2][x + 4]));
+            __m128d temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[2][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            temp1 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[4][x + 0]));
+            temp2 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[4][x + 2]));
+            temp3 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[4][x + 4]));
+            temp4 = _mm_mul_pd(neig4, _mm_load_pd(&coeff[4][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(src + x - offsetZ + 0);
+            neig1 = _mm_load_pd(src + x - offsetZ + 2);
+            neig2 = _mm_load_pd(src + x - offsetZ + 4);
+            neig3 = _mm_load_pd(src + x - offsetZ + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[0][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[0][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[0][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[0][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(src + x - offsetY + 0);
+            neig1 = _mm_load_pd(src + x - offsetY + 2);
+            neig2 = _mm_load_pd(src + x - offsetY + 4);
+            neig3 = _mm_load_pd(src + x - offsetY + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[1][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[1][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[1][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[1][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(src + x + offsetY + 0);
+            neig1 = _mm_load_pd(src + x + offsetY + 2);
+            neig2 = _mm_load_pd(src + x + offsetY + 4);
+            neig3 = _mm_load_pd(src + x + offsetY + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[5][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[5][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[5][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[5][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(src + x + offsetZ + 0);
+            neig1 = _mm_load_pd(src + x + offsetZ + 2);
+            neig2 = _mm_load_pd(src + x + offsetZ + 4);
+            neig3 = _mm_load_pd(src + x + offsetZ + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[6][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[6][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[6][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[6][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(src + x - offsetZ - offsetY + 0);
+            neig1 = _mm_load_pd(src + x - offsetZ - offsetY + 2);
+            neig2 = _mm_load_pd(src + x - offsetZ - offsetY + 4);
+            neig3 = _mm_load_pd(src + x - offsetZ - offsetY + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[7][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[7][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[7][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[7][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(src + x - offsetZ + offsetY + 0);
+            neig1 = _mm_load_pd(src + x - offsetZ + offsetY + 2);
+            neig2 = _mm_load_pd(src + x - offsetZ + offsetY + 4);
+            neig3 = _mm_load_pd(src + x - offsetZ + offsetY + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[8][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[8][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[8][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[8][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(src + x + offsetZ - offsetY + 0);
+            neig1 = _mm_load_pd(src + x + offsetZ - offsetY + 2);
+            neig2 = _mm_load_pd(src + x + offsetZ - offsetY + 4);
+            neig3 = _mm_load_pd(src + x + offsetZ - offsetY + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[9][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[9][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[9][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[9][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(src + x + offsetZ + offsetY + 0);
+            neig1 = _mm_load_pd(src + x + offsetZ + offsetY + 2);
+            neig2 = _mm_load_pd(src + x + offsetZ + offsetY + 4);
+            neig3 = _mm_load_pd(src + x + offsetZ + offsetY + 6);
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&coeff[10][x + 0]));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&coeff[10][x + 2]));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&coeff[10][x + 4]));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&coeff[10][x + 6]));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x - offsetZ - offsetY + 0);
+            neig1 = _mm_load_pd(coeff[11] + x - offsetZ - offsetY + 2);
+            neig2 = _mm_load_pd(coeff[11] + x - offsetZ - offsetY + 4);
+            neig3 = _mm_load_pd(coeff[11] + x - offsetZ - offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x - offsetZ + 0);
+            neig1 = _mm_load_pd(coeff[11] + x - offsetZ + 2);
+            neig2 = _mm_load_pd(coeff[11] + x - offsetZ + 4);
+            neig3 = _mm_load_pd(coeff[11] + x - offsetZ + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x - offsetZ + offsetY + 0);
+            neig1 = _mm_load_pd(coeff[11] + x - offsetZ + offsetY + 2);
+            neig2 = _mm_load_pd(coeff[11] + x - offsetZ + offsetY + 4);
+            neig3 = _mm_load_pd(coeff[11] + x - offsetZ + offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x - offsetY + 0);
+            neig1 = _mm_load_pd(coeff[11] + x - offsetY + 2);
+            neig2 = _mm_load_pd(coeff[11] + x - offsetY + 4);
+            neig3 = _mm_load_pd(coeff[11] + x - offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + offsetY + x + 0);
+            neig1 = _mm_load_pd(coeff[11] + offsetY + x + 2);
+            neig2 = _mm_load_pd(coeff[11] + offsetY + x + 4);
+            neig3 = _mm_load_pd(coeff[11] + offsetY + x + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x + 0);
+            neig1 = _mm_load_pd(coeff[11] + x + 2);
+            neig2 = _mm_load_pd(coeff[11] + x + 4);
+            neig3 = _mm_load_pd(coeff[11] + x + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x + offsetZ - offsetY + 0);
+            neig1 = _mm_load_pd(coeff[11] + x + offsetZ - offsetY + 2);
+            neig2 = _mm_load_pd(coeff[11] + x + offsetZ - offsetY + 4);
+            neig3 = _mm_load_pd(coeff[11] + x + offsetZ - offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x + offsetZ + 0);
+            neig1 = _mm_load_pd(coeff[11] + x + offsetZ + 2);
+            neig2 = _mm_load_pd(coeff[11] + x + offsetZ + 4);
+            neig3 = _mm_load_pd(coeff[11] + x + offsetZ + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[11] + x + offsetZ + offsetY + 0);
+            neig1 = _mm_load_pd(coeff[11] + x + offsetZ + offsetY + 2);
+            neig2 = _mm_load_pd(coeff[11] + x + offsetZ + offsetY + 4);
+            neig3 = _mm_load_pd(coeff[11] + x + offsetZ + offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x - offsetZ - offsetY + 0);
+            neig1 = _mm_load_pd(coeff[12] + x - offsetZ - offsetY + 2);
+            neig2 = _mm_load_pd(coeff[12] + x - offsetZ - offsetY + 4);
+            neig3 = _mm_load_pd(coeff[12] + x - offsetZ - offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x - offsetZ + 0);
+            neig1 = _mm_load_pd(coeff[12] + x - offsetZ + 2);
+            neig2 = _mm_load_pd(coeff[12] + x - offsetZ + 4);
+            neig3 = _mm_load_pd(coeff[12] + x - offsetZ + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x - offsetZ + offsetY + 0);
+            neig1 = _mm_load_pd(coeff[12] + x - offsetZ + offsetY + 2);
+            neig2 = _mm_load_pd(coeff[12] + x - offsetZ + offsetY + 4);
+            neig3 = _mm_load_pd(coeff[12] + x - offsetZ + offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x - offsetY + 0);
+            neig1 = _mm_load_pd(coeff[12] + x - offsetY + 2);
+            neig2 = _mm_load_pd(coeff[12] + x - offsetY + 4);
+            neig3 = _mm_load_pd(coeff[12] + x - offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + offsetY + x + 0);
+            neig1 = _mm_load_pd(coeff[12] + offsetY + x + 2);
+            neig2 = _mm_load_pd(coeff[12] + offsetY + x + 4);
+            neig3 = _mm_load_pd(coeff[12] + offsetY + x + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x + 0);
+            neig1 = _mm_load_pd(coeff[12] + x + 2);
+            neig2 = _mm_load_pd(coeff[12] + x + 4);
+            neig3 = _mm_load_pd(coeff[12] + x + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x + offsetZ - offsetY + 0);
+            neig1 = _mm_load_pd(coeff[12] + x + offsetZ - offsetY + 2);
+            neig2 = _mm_load_pd(coeff[12] + x + offsetZ - offsetY + 4);
+            neig3 = _mm_load_pd(coeff[12] + x + offsetZ - offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x + offsetZ + 0);
+            neig1 = _mm_load_pd(coeff[12] + x + offsetZ + 2);
+            neig2 = _mm_load_pd(coeff[12] + x + offsetZ + 4);
+            neig3 = _mm_load_pd(coeff[12] + x + offsetZ + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(coeff[12] + x + offsetZ + offsetY + 0);
+            neig1 = _mm_load_pd(coeff[12] + x + offsetZ + offsetY + 2);
+            neig2 = _mm_load_pd(coeff[12] + x + offsetZ + offsetY + 4);
+            neig3 = _mm_load_pd(coeff[12] + x + offsetZ + offsetY + 6);
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //yyyyyyyyyyyyy
+            _mm_store_pd(dst + 0, same0);
+            _mm_store_pd(dst + 2, same1);
+            _mm_store_pd(dst + 4, same2);
+            _mm_store_pd(dst + 6, same3);
+
+            same0 = same4;
+            neig0 = neig4;
+
+            // dst[x] = 
+            //     coeff[0][x] * src[x - offsetZ] +
+            //     coeff[1][x] * src[x - offsetY] +
+            //     coeff[2][x] * src[x - 1] +
+            //     coeff[3][x] * src[x] +
+            //     coeff[4][x] * src[x + 1] +
+            //     coeff[5][x] * src[x + offsetY] +
+            //     coeff[6][x] * src[x + offsetZ];
+        }
+
+        scalarUpdater.step(coeff, src, dst, offsetY, offsetZ, x, endX);
+    }
+
+    int flops()
+    {
+        return 40;
+    }
+};
+
 
 int main(int argc, char *argv[])
 {
     // Benchmark<Scalar3D, 3>().exercise();
-    Benchmark<Vectorized3D, 3>().exercise();
+    // Benchmark<Vectorized3D, 3>().exercise();
     // Benchmark<VectorizedSSEMelbourneShuffle2D>().exercise();
+    Benchmark<ExtendedVectorized3D, 3>().exercise();
 
 
     // std::vector<cl::Platform> platforms;
