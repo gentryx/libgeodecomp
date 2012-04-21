@@ -162,6 +162,18 @@ public:
                         coeffCoord.c[DIM - 1] += dim.c[DIM - 1];
                     }
                     updater.step(&coefficients[0], &oldGrid->at(c), &newGrid->at(c), dim.c[1], dim.c[2], 1, dim.c[0] - 1);
+                    // double *source[9] = {
+                    //     &oldGrid->at(Coord<DIM>(0, y - 1, z + 1)),
+                    //     &oldGrid->at(Coord<DIM>(0, y - 1, z    )),
+                    //     &oldGrid->at(Coord<DIM>(0, y - 1, z - 1)),
+                    //     &oldGrid->at(Coord<DIM>(0, y,     z + 1)),
+                    //     &oldGrid->at(Coord<DIM>(0, y,     z    )),
+                    //     &oldGrid->at(Coord<DIM>(0, y,     z - 1)),
+                    //     &oldGrid->at(Coord<DIM>(0, y + 1, z + 1)),
+                    //     &oldGrid->at(Coord<DIM>(0, y + 1, z    )),
+                    //     &oldGrid->at(Coord<DIM>(0, y + 1, z - 1))
+                    // };
+                    // updater.update(source, &newGrid->at(c), 1, dim.c[0] - 1);
                 }
             }
             std::swap(newGrid, oldGrid);
@@ -186,8 +198,11 @@ public:
                 if (d > lastDim) {
                     lastDim = d;
                     Coord<DIM> dim;
-                    for (int i = 0; i < DIM; ++i)
-                        dim.c[i] = d;
+                    dim.c[0] = d;
+                    dim.c[1] = 4;
+                    dim.c[2] = 4;
+                    // for (int i = 0; i < DIM; ++i)
+                    //     dim.c[i] = d;
                     int repeats = std::max(1, 10000000 / dim.prod());
                     run(dim, repeats);
                 }
@@ -217,6 +232,151 @@ private:
 
 
 };
+
+#define TN 0
+#define T  1
+#define TS 2
+#define N  3
+#define C  4
+#define S  5
+#define BN 6
+#define B  7
+#define BS 8
+
+class Jacobi3D
+{
+public:
+    static int coefficients()
+    {
+        return 1;
+    }
+
+    inline void update(double **src, double *dst, int startX, int endX)
+    {
+       int x = startX;
+
+       if ((x & 1) == 1) {
+           updateScalar(src, dst, x, x + 1);
+           x += 1;
+       }
+
+       __m128d oneSeventh = _mm_set_pd(1.0/7.0, 1.0/7.0);
+       __m128d buff0 = _mm_loadu_pd(src[C] + x - 1);
+       __m128d same0 = _mm_load_pd(src[C] + x + 0);
+
+       int paddedEndX = endX - 7;
+       for (; x < paddedEndX; x += 8) {
+           // load center row
+           __m128d same1 = _mm_load_pd(src[0] + x + 2);
+           __m128d same2 = _mm_load_pd(src[0] + x + 4);
+           __m128d same3 = _mm_load_pd(src[0] + x + 6);
+           __m128d same4 = _mm_load_pd(src[0] + x + 8);
+            
+           // shuffle values obtain left/right neighbors
+           __m128d buff1 = _mm_shuffle_pd(same0, same1, (1 << 0) | (0 << 2));
+           __m128d buff2 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
+           __m128d buff3 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
+           __m128d buff4 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
+   
+           // load top row
+           __m128d temp0 = _mm_load_pd(src[T] + x + 0);
+           __m128d temp1 = _mm_load_pd(src[T] + x + 2);
+           __m128d temp2 = _mm_load_pd(src[T] + x + 4);
+           __m128d temp3 = _mm_load_pd(src[T] + x + 6);
+
+           // add center row with left...
+           same0 = _mm_add_pd(same0, buff0);
+           same1 = _mm_add_pd(same1, buff1);
+           same2 = _mm_add_pd(same2, buff2);
+           same3 = _mm_add_pd(same3, buff3);
+
+           // ...and right neighbors
+           same0 = _mm_add_pd(same0, buff1);
+           same1 = _mm_add_pd(same1, buff2);
+           same2 = _mm_add_pd(same2, buff3);
+           same3 = _mm_add_pd(same3, buff4);
+    
+           // load bottom row
+           buff0 = _mm_load_pd(src[B] + x + 0);
+           buff1 = _mm_load_pd(src[B] + x + 2);
+           buff2 = _mm_load_pd(src[B] + x + 4);
+           buff3 = _mm_load_pd(src[B] + x + 6);
+        
+           // add top row
+           same0 = _mm_add_pd(same0, temp0);
+           same1 = _mm_add_pd(same1, temp1);
+           same2 = _mm_add_pd(same2, temp2);
+           same3 = _mm_add_pd(same3, temp3);
+
+           // load north row
+           temp0 = _mm_load_pd(src[N] + x + 0);
+           temp1 = _mm_load_pd(src[N] + x + 2);
+           temp2 = _mm_load_pd(src[N] + x + 4);
+           temp3 = _mm_load_pd(src[N] + x + 6);
+
+           // add bottom row
+           same0 = _mm_add_pd(same0, buff0);
+           same1 = _mm_add_pd(same1, buff1);
+           same2 = _mm_add_pd(same2, buff2);
+           same3 = _mm_add_pd(same3, buff3);
+            
+           // load south row
+           buff0 = _mm_load_pd(src[S] + x + 0);
+           buff1 = _mm_load_pd(src[S] + x + 2);
+           buff2 = _mm_load_pd(src[S] + x + 4);
+           buff3 = _mm_load_pd(src[S] + x + 6);
+
+           // add north row
+           same0 = _mm_add_pd(same0, temp0);
+           same1 = _mm_add_pd(same1, temp1);
+           same2 = _mm_add_pd(same2, temp2);
+           same3 = _mm_add_pd(same3, temp3);
+
+           // add south row
+           same0 = _mm_add_pd(same0, buff0);
+           same1 = _mm_add_pd(same1, buff1);
+           same2 = _mm_add_pd(same2, buff2);
+           same3 = _mm_add_pd(same3, buff3);
+
+           // scale down...
+           same0 = _mm_mul_pd(same0, oneSeventh);
+           same1 = _mm_mul_pd(same1, oneSeventh);
+           same2 = _mm_mul_pd(same2, oneSeventh);
+           same3 = _mm_mul_pd(same3, oneSeventh);
+
+           // ...and store
+           _mm_store_pd(dst + x + 0, same0);
+           _mm_store_pd(dst + x + 2, same1);
+           _mm_store_pd(dst + x + 4, same2);
+           _mm_store_pd(dst + x + 6, same3);
+
+           same0 = same4;
+           buff0 = buff4;
+       }
+
+       updateScalar(src, dst, x, endX);
+    }
+
+    inline void updateScalar(double *src[9], double *dst, int startX, int endX)
+    {
+        for (int x = startX; x < endX; ++x) {
+            dst[x] = 
+                (src[S][x] +
+                 src[T][x] +
+                 src[C][x - 1] +
+                 src[C][x] +
+                 src[C][x + 1] +
+                 src[B][x] +
+                 src[N][x]) * (1.0 / 7.0);
+        }
+    }
+
+    int flops()
+    {
+        return 8;
+    }
+};
+
 
 class Scalar3D
 {
@@ -857,6 +1017,7 @@ int main(int argc, char *argv[])
     // Benchmark<Vectorized3D, 3>().exercise();
     // Benchmark<VectorizedSSEMelbourneShuffle2D>().exercise();
     Benchmark<ExtendedVectorized3D, 3>().exercise();
+    // Benchmark<Jacobi3D, 3>().exercise();
 
 
     // std::vector<cl::Platform> platforms;
