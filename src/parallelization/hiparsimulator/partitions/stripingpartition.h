@@ -107,8 +107,8 @@ private:
     Coord<DIM> dimensions;
 };
 
-};
-};
+}
+}
 
 template<typename _CharT, typename _Traits, int _Dim>
 std::basic_ostream<_CharT, _Traits>&
