@@ -12,3 +12,7 @@ syntax: glob
 ./src/config.h
 ./src/mpilayer/typemaps.cpp
 ./src/mpilayer/typemaps.h
+./tools/typemapgenerator/sample/src/*.o
+./tools/typemapgenerator/sample/src/demo
+./tools/typemapgenerator/sample/src/typemaps.h
+./tools/typemapgenerator/sample/src/typemaps.cpp
