@@ -11,12 +11,6 @@ project in "./sample". The "compile.sh" script exhibits the three
 phase build process: (a) parsing via Doxygen, (b) code generation
 using the TypemapGenerator and (c) compilation using Make.
 
-LICENSE
-=======
-
-This project is GPLed, see LICENSE for details.
-
-
 INSTALLATION
 ============
 

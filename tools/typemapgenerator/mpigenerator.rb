@@ -91,7 +91,10 @@ class MPIGenerator
 
   def map_headers(headers, header_pattern, header_replacement)
     h = headers.map do |header|
-      header_name = header.gsub(header_pattern, header_replacement)
+      header_name = header
+      if !header_replacement.nil?
+        header_name = header.gsub(header_pattern, header_replacement)
+      end
       "#include <#{header_name}>"
     end
     return h.join("\n")
