@@ -63,7 +63,7 @@ class MPIParser
   # those classes, whose MPI type could not be found in @datatype_map,
   # it'll try to create a new MPI type map specification.
   def resolve_forest(classes)
-    classes = classes.dup
+    classes = classes.sort
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
@@ -127,7 +127,7 @@ class MPIParser
       end
     end
 
-    return params.uniq
+    return params.sort.uniq
   end
 
   def map_template_parameters(members, template_params, values)

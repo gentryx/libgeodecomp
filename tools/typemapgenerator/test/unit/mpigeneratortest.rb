@@ -45,8 +45,9 @@ class TestMPIGenerator < Test::Unit::TestCase
                                                @datatype_map,
                                                @headers)
     # avoid comparing absolute pathnames (beneficial as the tests have to run in various locations)
-    expected_header.gsub!(/(#include ").*\/(\w+\.h")/) { |m| $1+$2 }
-    actual_header.gsub!(  /(#include ").*\/(\w+\.h")/) { |m| $1+$2 }
+    expected_header.gsub!(/(#include <).*\/(\w+\.h>)/) { |m| $1+$2 }
+    actual_header.gsub!(  /(#include <).*\/(\w+\.h>)/) { |m| $1+$2 }
+
     assert_equal(expected_header, actual_header)
   end
 

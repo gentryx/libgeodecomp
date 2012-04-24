@@ -57,7 +57,7 @@ class MPIGenerator
       end
     end
     member_specs = member_specs1 + member_specs2
-    ret.sub!(/ *MEMBERSPECS/, member_specs.join(",\n"))
+    ret.sub!(/ *MEMBERSPECS/, member_specs.sort.join(",\n"))
   end
 
   # The Typemap Class needs a header file, declaring all the static

@@ -145,8 +145,9 @@ class TestMPIParser < Test::Unit::TestCase
   end
 
   def test_used_template_parameters
-    expected = [["int", "int"], ["int", "double"], 
-                ["Coord<3 >", "Coord<2 >"]]
+    expected = [["Coord<3 >", "Coord<2 >"],
+                ["int", "double"],
+                ["int", "int"]]
     assert_equal(expected, @parser.used_template_parameters("CoordPair"))
 
     expected = [["1"], ["2"], ["3"], ["4"]]
@@ -366,12 +367,12 @@ class TestMPIParser < Test::Unit::TestCase
       "Tire" => tire_map
     }
 
-    expected_sortation = %w{Rim Engine Tire Wheel Car}
+    expected_sortation = %w{Engine Tire Rim Wheel Car}
 
     expected_headers = 
-      ["fixtures/src/rim.h",
-       "fixtures/src/engine.h",
+      ["fixtures/src/engine.h",
        "fixtures/src/tire.h",
+       "fixtures/src/rim.h",
        "fixtures/src/wheel.h",
        "fixtures/src/car.h"]
 
@@ -425,10 +426,8 @@ class TestSloppyParsing < Test::Unit::TestCase
     classes = %w(Car Wheel Rim Tire CarContainer)
     resolved_classes = @parser.resolve_forest(classes)[0]
     
-
-    assert_equal(%w(wheels), 
-                 resolved_classes["Car"].keys)
-    assert_equal(%w(size spareWheel), resolved_classes["CarContainer"].keys)
+    assert_equal(%w(wheels), resolved_classes["Car"].keys)
+    assert_equal(%w(size spareWheel), resolved_classes["CarContainer"].keys.sort)
   end
 
   def test_incomplete_sloppy_parsing_should_yield_correct_typemap_names

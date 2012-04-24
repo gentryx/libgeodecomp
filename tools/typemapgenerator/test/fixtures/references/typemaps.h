@@ -3,13 +3,13 @@
 
 #include <complex>
 #include <mpi.h>
-#include "/home/gentryx/typemapgenerator/trunk/test/fixtures/src/tire.h"
-#include "/home/gentryx/typemapgenerator/trunk/test/fixtures/src/rim.h"
-#include "/home/gentryx/typemapgenerator/trunk/test/fixtures/src/wheel.h"
+#include <rim.h>
+#include <tire.h>
+#include <wheel.h>
 
 namespace MPI {
-    extern Datatype TIRE;
     extern Datatype RIM;
+    extern Datatype TIRE;
     extern Datatype WHEEL;
 }
 
@@ -23,8 +23,8 @@ public:
     }
 
 private:
-    static MPI::Datatype generateMapTire();
     static MPI::Datatype generateMapRim();
+    static MPI::Datatype generateMapTire();
     static MPI::Datatype generateMapWheel();
 
     static inline MPI::Datatype lookup(bool*) { return MPI::BOOL; }
@@ -46,8 +46,8 @@ private:
     static inline MPI::Datatype lookup(unsigned long long*) { return MPI::UNSIGNED_LONG_LONG; }
     static inline MPI::Datatype lookup(unsigned short*) { return MPI::UNSIGNED_SHORT; }
     static inline MPI::Datatype lookup(wchar_t*) { return MPI::WCHAR; }
-    static inline MPI::Datatype lookup(Tire*) { return MPI::TIRE; }
     static inline MPI::Datatype lookup(Rim*) { return MPI::RIM; }
+    static inline MPI::Datatype lookup(Tire*) { return MPI::TIRE; }
     static inline MPI::Datatype lookup(Wheel*) { return MPI::WHEEL; }
 };
 

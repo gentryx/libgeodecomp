@@ -2,8 +2,8 @@
 #include "typemaps.h"
 
 namespace MPI \{
-    Datatype TIRE;
     Datatype RIM;
+    Datatype TIRE;
     Datatype WHEEL;
 \}
 
@@ -27,11 +27,11 @@ bool addressLower\(MemberSpec a, MemberSpec b\)
 \}
 
 MPI\:\:Datatype
-Typemaps\:\:generateMapTire\(\) \{.*
+Typemaps\:\:generateMapRim\(\) \{.*
 \}
 
 MPI\:\:Datatype
-Typemaps\:\:generateMapRim\(\) \{.*
+Typemaps\:\:generateMapTire\(\) \{.*
 \}
 
 MPI\:\:Datatype
@@ -40,7 +40,7 @@ Typemaps\:\:generateMapWheel\(\) \{.*
 
 void Typemaps\:\:initializeMaps\(\)
 \{
-    MPI\:\:TIRE = generateMapTire\(\);
     MPI\:\:RIM = generateMapRim\(\);
+    MPI\:\:TIRE = generateMapTire\(\);
     MPI\:\:WHEEL = generateMapWheel\(\);
 \}

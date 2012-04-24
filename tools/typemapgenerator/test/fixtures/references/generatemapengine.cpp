@@ -8,9 +8,9 @@ Typemaps::generateMapEngine() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
+        MemberSpec(MPI::Get_address(&obj->capacity), MPI::DOUBLE, 1),
         MemberSpec(MPI::Get_address(&obj->fuel), MPI::INT, 1),
-        MemberSpec(MPI::Get_address(&obj->gearRatios), MPI::DOUBLE, 6),
-        MemberSpec(MPI::Get_address(&obj->capacity), MPI::DOUBLE, 1)
+        MemberSpec(MPI::Get_address(&obj->gearRatios), MPI::DOUBLE, 6)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
