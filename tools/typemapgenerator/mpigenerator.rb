@@ -41,7 +41,7 @@ class MPIGenerator
   # returns the code of a method suitable to create a typemap for the
   # given klass.
   def generate_single_map(klass, members, parents)
-    ret = File.read(@path + "template_generatesinglemap.cc");
+    ret = File.read(@path + "template_generatesinglemap.cpp");
 
     ret.gsub!(/KLASS_NAME/, simple_name(klass))
     ret.gsub!(/KLASS/, klass)
