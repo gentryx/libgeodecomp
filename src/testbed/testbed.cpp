@@ -128,7 +128,14 @@ public:
     }
 };
 
-template<int DIM_X, int DIM_Y, int DIM_Z>
+// FC = FixedCoord
+template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>
+class FC
+{
+public:
+};
+
+template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX=0>
 class Neighborhood
 {
 public:
@@ -147,6 +154,24 @@ public:
     const double& src(const int& x) const
     {
         return source[Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
+    }
+
+    template<int X, int Y, int Z>
+    Neighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>
+    operator[](FC<X, Y, Z> /*unused*/) const
+    {
+        return Neighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>(coefficients, source);
+    }
+
+    const double& srcB(const int& x) const
+    {
+        return source[INDEX + x];
+    }
+
+    template<int C> 
+    const double& coeffB(const FC<C, 0, 0> /*unused*/, const int& x) const
+    { 
+        return coefficients[C * DIM_X * DIM_Y * DIM_Z + INDEX];
     }
 
 private:
@@ -183,13 +208,20 @@ public:
                     Coord<DIM> c(0, y, z);
                     Coord<DIM> coeffCoord = c;
 
+                    // Defiant
                     updater.step(
                         Neighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
                         &newGrid->at(c), 
-                        dim.c[0], 
-                        dim.c[0] * dim.c[1], 
                         1, 
                         dim.c[0] - 1);
+
+                    // updater.step(
+                    //     Neighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
+                    //     &newGrid->at(c), 
+                    //     dim.c[0], 
+                    //     dim.c[0] * dim.c[1], 
+                    //     1, 
+                    //     dim.c[0] - 1);
                     
                     // for (int i = 0; i < UPDATER::coefficients(); ++i) {
                     //     coefficients[i] = &coeff.at(coeffCoord);
@@ -1936,6 +1968,457 @@ public:
     }
 };
 
+class ExtendedVectorized3DDefiant
+{
+public:
+    static int coefficients()
+    {
+        return 13;
+    }
+
+    template<class NEIGHBORHOOD>
+    inline void step(const NEIGHBORHOOD& hood, double *dst, int startX, int endX)
+    {
+        int x = startX;
+
+        if ((x & 1) == 1) {
+            stepScalar(hood, dst, x, x + 1);
+            x += 1;
+        }
+
+        __m128d same0 = _mm_load_pd(&(hood[FC<0, 0, 0>()].srcB(x)));
+        __m128d neig0 = _mm_loadu_pd(&(hood[FC<1, 0, 0>()].srcB(x)));
+
+        int paddedEndX = endX - 7;
+        for (; x < paddedEndX; x += 8) {
+            __m128d same1 = _mm_load_pd(&hood[FC<2, 0, 0>()].srcB(x));
+            __m128d same2 = _mm_load_pd(&hood[FC<4, 0, 0>()].srcB(x));
+            __m128d same3 = _mm_load_pd(&hood[FC<6, 0, 0>()].srcB(x));
+            __m128d same4 = _mm_load_pd(&hood[FC<8, 0, 0>()].srcB(x));
+
+            __m128d neig1 = _mm_shuffle_pd(same0, same1, (1 << 0) | (0 << 2));
+            __m128d neig2 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
+            __m128d neig3 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
+            __m128d neig4 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
+
+            same0 = _mm_mul_pd(same0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 3>(), x)));
+            same1 = _mm_mul_pd(same1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 3>(), x)));
+            same2 = _mm_mul_pd(same2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 3>(), x)));
+            same3 = _mm_mul_pd(same3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 3>(), x)));
+
+            __m128d temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 2>(), x)));
+            __m128d temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 2>(), x)));
+            __m128d temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 2>(), x)));
+            __m128d temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 2>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            temp1 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 4>(), x)));
+            temp2 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 4>(), x)));
+            temp3 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 4>(), x)));
+            temp4 = _mm_mul_pd(neig4, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 4>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(&hood[FC<0, 0, -1>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, -1>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, -1>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, -1>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 0>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 0>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 0>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 0>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(&hood[FC<0, -1, 0>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, 0>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, 0>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, 0>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 1>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 1>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 1>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 1>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(&hood[FC<0, 1, 0>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, 0>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, 0>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, 0>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 5>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 5>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 5>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 5>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, 1>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, 1>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, 1>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, 1>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 6>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 6>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 6>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 6>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, -1>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, -1>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, -1>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, -1>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 7>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 7>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 7>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 7>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, -1>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, -1>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, -1>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, -1>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 8>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 8>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 8>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 8>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, 1>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, 1>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, 1>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, 1>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 9>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 9>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 9>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 9>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, 1>()].srcB(x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, 1>()].srcB(x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, 1>()].srcB(x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, 1>()].srcB(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC<10>(), x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC<10>(), x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC<10>(), x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC<10>(), x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, -1>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, -1>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, -1>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, -1>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, -1>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, -1>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, -1>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, -1>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, -1>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, -1>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, -1>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, -1>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, 0>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, 0>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, 0>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, 0>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, 0>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, 0>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, 0>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, 0>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, 1>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, 1>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, 1>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, 1>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, 1>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, 1>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, 1>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, 1>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, 1>()].coeffB(FC<11>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, 1>()].coeffB(FC<11>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, 1>()].coeffB(FC<11>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, 1>()].coeffB(FC<11>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, -1>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, -1>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, -1>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, -1>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, -1>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, -1>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, -1>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, -1>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, -1>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, -1>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, -1>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, -1>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, 0>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, 0>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, 0>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, 0>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, 0>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, 0>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, 0>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, 0>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, -1, 1>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, -1, 1>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, -1, 1>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, -1, 1>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 0, 1>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 0, 1>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 0, 1>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 0, 1>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood[FC<0, 1, 1>()].coeffB(FC<12>(), x));
+            neig1 = _mm_load_pd(&hood[FC<2, 1, 1>()].coeffB(FC<12>(), x));
+            neig2 = _mm_load_pd(&hood[FC<4, 1, 1>()].coeffB(FC<12>(), x));
+            neig3 = _mm_load_pd(&hood[FC<6, 1, 1>()].coeffB(FC<12>(), x));
+
+            same0 = _mm_add_pd(same0, neig0);
+            same1 = _mm_add_pd(same1, neig1);
+            same2 = _mm_add_pd(same2, neig2);
+            same3 = _mm_add_pd(same3, neig3);
+
+            //yyyyyyyyyyyyy
+            _mm_store_pd(dst + x + 0, same0);
+            _mm_store_pd(dst + x + 2, same1);
+            _mm_store_pd(dst + x + 4, same2);
+            _mm_store_pd(dst + x + 6, same3);
+
+            same0 = same4;
+            neig0 = neig4;
+
+            // dst[x] = 
+            //     coeff[0][x] * src[x - offsetZ] +
+            //     coeff[1][x] * src[x - offsetY] +
+            //     coeff[2][x] * src[x - 1] +
+            //     coeff[3][x] * src[x] +
+            //     coeff[4][x] * src[x + 1] +
+            //     coeff[5][x] * src[x + offsetY] +
+            //     coeff[6][x] * src[x + offsetZ];
+        }
+
+        stepScalar(hood, dst, x, endX);
+    }
+
+    template<class NEIGHBORHOOD>
+    inline void stepScalar(const NEIGHBORHOOD& hood, double *dst, int startX, int endX)
+    {
+        for (int x = startX; x < endX; ++x) {
+            dst[x] = 
+                hood[FC<0, 0, 0>()].coeffB(FC< 0>(), x) * hood[FC< 0, -1, -1>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 1>(), x) * hood[FC< 0,  0, -1>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 2>(), x) * hood[FC< 0,  1, -1>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 3>(), x) * hood[FC< 0, -1,  0>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 4>(), x) * hood[FC<-1,  0,  0>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 5>(), x) * hood[FC< 0,  0,  0>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 6>(), x) * hood[FC< 1,  0,  0>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 7>(), x) * hood[FC< 0,  1,  0>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 8>(), x) * hood[FC< 0, -1,  1>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC< 9>(), x) * hood[FC< 0,  0,  1>()].srcB(x) +
+                hood[FC<0, 0, 0>()].coeffB(FC<10>(), x) * hood[FC< 0,  1,  1>()].srcB(x) +
+
+                hood[FC<0, -1, -1>()].coeffB(FC<11>(), x) +
+                hood[FC<0,  0, -1>()].coeffB(FC<11>(), x) +
+                hood[FC<0,  1, -1>()].coeffB(FC<11>(), x) +
+                hood[FC<0, -1,  0>()].coeffB(FC<11>(), x) +
+                hood[FC<-1, 0,  0>()].coeffB(FC<11>(), x) +
+                hood[FC<0,  0,  0>()].coeffB(FC<11>(), x) +
+                hood[FC<1,  0,  0>()].coeffB(FC<11>(), x) +
+                hood[FC<0,  1,  0>()].coeffB(FC<11>(), x) +
+                hood[FC<0, -1,  1>()].coeffB(FC<11>(), x) +
+                hood[FC<0,  0,  1>()].coeffB(FC<11>(), x) +
+                hood[FC<0,  1,  1>()].coeffB(FC<11>(), x) +
+
+                hood[FC<0, -1, -1>()].coeffB(FC<12>(), x) +
+                hood[FC<0,  0, -1>()].coeffB(FC<12>(), x) +
+                hood[FC<0,  1, -1>()].coeffB(FC<12>(), x) +
+                hood[FC<0, -1,  0>()].coeffB(FC<12>(), x) +
+                hood[FC<-1, 0,  0>()].coeffB(FC<12>(), x) +
+                hood[FC<0,  0,  0>()].coeffB(FC<12>(), x) +
+                hood[FC<1,  0,  0>()].coeffB(FC<12>(), x) +
+                hood[FC<0,  1,  0>()].coeffB(FC<12>(), x) +
+                hood[FC<0, -1,  1>()].coeffB(FC<12>(), x) +
+                hood[FC<0,  0,  1>()].coeffB(FC<12>(), x) +
+                hood[FC<0,  1,  1>()].coeffB(FC<12>(), x);
+        }
+    }
+
+    int flops()
+    {
+        return 40;
+    }
+};
 
 int main(int argc, char *argv[])
 {
@@ -1944,7 +2427,8 @@ int main(int argc, char *argv[])
     // Benchmark<VectorizedSSEMelbourneShuffle2D>().exercise();
     // Benchmark<ExtendedVectorized3D, 3>().exercise();
     // Benchmark<ExtendedVectorized3DFixed, 3>().exercise();
-    Benchmark<ExtendedVectorized3DNextGen<4, 4, MY_SIZE>, 3>().exercise();
+    // Benchmark<ExtendedVectorized3DNextGen<4, 4, MY_SIZE>, 3>().exercise();
+    Benchmark<ExtendedVectorized3DDefiant, 3>().exercise();
     // Benchmark<Jacobi3D, 3>().exercise();
 
 
