@@ -128,50 +128,87 @@ public:
     }
 };
 
-// FC = FixedCoord
 template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>
-class FC
+class FixedCoord
 {
 public:
 };
 
-template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX=0>
+template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>
 class Neighborhood
 {
 public:
-    Neighborhood(double *_coefficients, double *_source) :
+    Neighborhood(double *_coefficients, double *_source, const int& _index) :
+        coefficients(_coefficients),
+        source(_source),
+        index(_index)
+    {}
+
+    Neighborhood
+    operator[](Coord<3> coord) const
+    {
+        return Neighborhood<DIM_X, DIM_Y, DIM_Z>(
+            coefficients, 
+            source,
+            coord.x() +
+            coord.y() * DIM_X + 
+            coord.z() * DIM_X * DIM_Y);
+    }
+
+    const double& src(const int& x = 0) const
+    {
+        return source[index + x];
+    }
+
+    template<int C> 
+    const double& coeff(const FixedCoord<C, 0, 0> /*unused*/, const int& x) const
+    { 
+        return coefficients[C * DIM_X * DIM_Y * DIM_Z + index + x];
+    }
+
+private:
+    double *coefficients;
+    double *source;
+    int index;
+};
+
+template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX=0>
+class FixedNeighborhood
+{
+public:
+    FixedNeighborhood(double *_coefficients, double *_source) :
         coefficients(_coefficients),
         source(_source)
     {}
 
-    template<int X, int Y, int Z, int C> 
-    const double& coeff(const int& x) const
-    {
-        return coefficients[C * DIM_X * DIM_Y * DIM_Z + Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
-    }
+    // template<int X, int Y, int Z, int C> 
+    // const double& coeff(const int& x) const
+    // {
+    //     return coefficients[C * DIM_X * DIM_Y * DIM_Z + Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
+    // }
 
-    template<int X, int Y, int Z> 
-    const double& src(const int& x) const
-    {
-        return source[Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
-    }
+    // template<int X, int Y, int Z> 
+    // const double& src(const int& x) const
+    // {
+    //     return source[Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
+    // }
 
     template<int X, int Y, int Z>
-    Neighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>
-    operator[](FC<X, Y, Z> /*unused*/) const
+    FixedNeighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>
+    operator[](FixedCoord<X, Y, Z> /*unused*/) const
     {
-        return Neighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>(coefficients, source);
+        return FixedNeighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>(coefficients, source);
     }
 
-    const double& srcB(const int& x) const
+    const double& src(const int& x) const
     {
         return source[INDEX + x];
     }
 
     template<int C> 
-    const double& coeffB(const FC<C, 0, 0> /*unused*/, const int& x) const
+    const double& coeff(const FixedCoord<C, 0, 0> /*unused*/, const int& x) const
     { 
-        return coefficients[C * DIM_X * DIM_Y * DIM_Z + INDEX];
+        return coefficients[C * DIM_X * DIM_Y * DIM_Z + INDEX + x];
     }
 
 private:
@@ -210,7 +247,7 @@ public:
 
                     // Defiant
                     updater.step(
-                        Neighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
+                        FixedNeighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
                         &newGrid->at(c), 
                         1, 
                         dim.c[0] - 1);
@@ -1977,110 +2014,109 @@ public:
     }
 
     template<class NEIGHBORHOOD>
-    inline void step(const NEIGHBORHOOD& hood, double *dst, int startX, int endX)
+    inline void step(const NEIGHBORHOOD& hoody, double *dst, int startX, int endX)
     {
         int x = startX;
 
         if ((x & 1) == 1) {
-            stepScalar(hood, dst, x, x + 1);
+            stepScalar(hoody, dst, x, x + 1);
             x += 1;
         }
 
-        __m128d same0 = _mm_load_pd(&(hood[FC<0, 0, 0>()].srcB(x)));
-        __m128d neig0 = _mm_loadu_pd(&(hood[FC<1, 0, 0>()].srcB(x)));
+#define hood(X, Y, Z) hoody[FixedCoord<X, Y, Z>()]
+#define C00 FixedCoord< 0, 0, 0>()
+#define C01 FixedCoord< 1, 0, 0>()
+#define C02 FixedCoord< 2, 0, 0>()
+#define C03 FixedCoord< 3, 0, 0>()
+#define C04 FixedCoord< 4, 0, 0>()
+#define C05 FixedCoord< 5, 0, 0>()
+#define C06 FixedCoord< 6, 0, 0>()
+#define C07 FixedCoord< 7, 0, 0>()
+#define C08 FixedCoord< 8, 0, 0>()
+#define C09 FixedCoord< 9, 0, 0>()
+#define C10 FixedCoord<10, 0, 0>()
+#define C11 FixedCoord<11, 0, 0>()
+#define C12 FixedCoord<12, 0, 0>()
+
+        __m128d same0 = _mm_load_pd(&(hood(0, 0, 0).src(x)));
+        __m128d neig0 = _mm_loadu_pd(&(hood(1, 0, 0).src(x)));
 
         int paddedEndX = endX - 7;
         for (; x < paddedEndX; x += 8) {
-            __m128d same1 = _mm_load_pd(&hood[FC<2, 0, 0>()].srcB(x));
-            __m128d same2 = _mm_load_pd(&hood[FC<4, 0, 0>()].srcB(x));
-            __m128d same3 = _mm_load_pd(&hood[FC<6, 0, 0>()].srcB(x));
-            __m128d same4 = _mm_load_pd(&hood[FC<8, 0, 0>()].srcB(x));
+            __m128d same1 = _mm_load_pd(&hood(2, 0, 0).src(x));
+            __m128d same2 = _mm_load_pd(&hood(4, 0, 0).src(x));
+            __m128d same3 = _mm_load_pd(&hood(6, 0, 0).src(x));
+            __m128d same4 = _mm_load_pd(&hood(8, 0, 0).src(x));
 
             __m128d neig1 = _mm_shuffle_pd(same0, same1, (1 << 0) | (0 << 2));
             __m128d neig2 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
             __m128d neig3 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
             __m128d neig4 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
 
-            same0 = _mm_mul_pd(same0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 3>(), x)));
-            same1 = _mm_mul_pd(same1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 3>(), x)));
-            same2 = _mm_mul_pd(same2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 3>(), x)));
-            same3 = _mm_mul_pd(same3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 3>(), x)));
+            same0 = _mm_mul_pd(same0, _mm_load_pd(&hood(0, 0, 0).coeff(C03, x)));
+            same1 = _mm_mul_pd(same1, _mm_load_pd(&hood(2, 0, 0).coeff(C03, x)));
+            same2 = _mm_mul_pd(same2, _mm_load_pd(&hood(4, 0, 0).coeff(C03, x)));
+            same3 = _mm_mul_pd(same3, _mm_load_pd(&hood(6, 0, 0).coeff(C03, x)));
 
-            __m128d temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 2>(), x)));
-            __m128d temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 2>(), x)));
-            __m128d temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 2>(), x)));
-            __m128d temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 2>(), x)));
-
-            same0 = _mm_add_pd(same0, temp1);
-            same1 = _mm_add_pd(same1, temp2);
-            same2 = _mm_add_pd(same2, temp3);
-            same3 = _mm_add_pd(same3, temp4);
-
-            temp1 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 4>(), x)));
-            temp2 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 4>(), x)));
-            temp3 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 4>(), x)));
-            temp4 = _mm_mul_pd(neig4, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 4>(), x)));
+            __m128d temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C02, x)));
+            __m128d temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C02, x)));
+            __m128d temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C02, x)));
+            __m128d temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C02, x)));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
             same2 = _mm_add_pd(same2, temp3);
             same3 = _mm_add_pd(same3, temp4);
 
-            neig0 = _mm_load_pd(&hood[FC<0, 0, -1>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, -1>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, -1>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, -1>()].srcB(x));
-
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 0>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 0>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 0>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 0>(), x)));
+            temp1 = _mm_mul_pd(neig1, _mm_load_pd(&hood(0, 0, 0).coeff(C04, x)));
+            temp2 = _mm_mul_pd(neig2, _mm_load_pd(&hood(2, 0, 0).coeff(C04, x)));
+            temp3 = _mm_mul_pd(neig3, _mm_load_pd(&hood(4, 0, 0).coeff(C04, x)));
+            temp4 = _mm_mul_pd(neig4, _mm_load_pd(&hood(6, 0, 0).coeff(C04, x)));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
             same2 = _mm_add_pd(same2, temp3);
             same3 = _mm_add_pd(same3, temp4);
 
-            neig0 = _mm_load_pd(&hood[FC<0, -1, 0>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, 0>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, 0>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, 0>()].srcB(x));
+            neig0 = _mm_load_pd(&hood(0, 0, -1).src(x));
+            neig1 = _mm_load_pd(&hood(2, 0, -1).src(x));
+            neig2 = _mm_load_pd(&hood(4, 0, -1).src(x));
+            neig3 = _mm_load_pd(&hood(6, 0, -1).src(x));
 
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 1>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 1>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 1>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 1>(), x)));
-
-            same0 = _mm_add_pd(same0, temp1);
-            same1 = _mm_add_pd(same1, temp2);
-            same2 = _mm_add_pd(same2, temp3);
-            same3 = _mm_add_pd(same3, temp4);
-
-            neig0 = _mm_load_pd(&hood[FC<0, 1, 0>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, 0>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, 0>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, 0>()].srcB(x));
-
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 5>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 5>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 5>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 5>(), x)));
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C00, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C00, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C00, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C00, x)));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
             same2 = _mm_add_pd(same2, temp3);
             same3 = _mm_add_pd(same3, temp4);
 
-            //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, 1>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, 1>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, 1>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, 1>()].srcB(x));
+            neig0 = _mm_load_pd(&hood(0, -1, 0).src(x));
+            neig1 = _mm_load_pd(&hood(2, -1, 0).src(x));
+            neig2 = _mm_load_pd(&hood(4, -1, 0).src(x));
+            neig3 = _mm_load_pd(&hood(6, -1, 0).src(x));
 
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 6>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 6>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 6>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 6>(), x)));
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C01, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C01, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C01, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C01, x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            neig0 = _mm_load_pd(&hood(0, 1, 0).src(x));
+            neig1 = _mm_load_pd(&hood(2, 1, 0).src(x));
+            neig2 = _mm_load_pd(&hood(4, 1, 0).src(x));
+            neig3 = _mm_load_pd(&hood(6, 1, 0).src(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C05, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C05, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C05, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C05, x)));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
@@ -2088,31 +2124,15 @@ public:
             same3 = _mm_add_pd(same3, temp4);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, -1>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, -1>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, -1>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, -1>()].srcB(x));
+            neig0 = _mm_load_pd(&hood(0, 0, 1).src(x));
+            neig1 = _mm_load_pd(&hood(2, 0, 1).src(x));
+            neig2 = _mm_load_pd(&hood(4, 0, 1).src(x));
+            neig3 = _mm_load_pd(&hood(6, 0, 1).src(x));
 
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 7>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 7>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 7>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 7>(), x)));
-
-            same0 = _mm_add_pd(same0, temp1);
-            same1 = _mm_add_pd(same1, temp2);
-            same2 = _mm_add_pd(same2, temp3);
-            same3 = _mm_add_pd(same3, temp4);
-
-            //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, -1>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, -1>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, -1>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, -1>()].srcB(x));
-
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 8>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 8>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 8>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 8>(), x)));
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C06, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C06, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C06, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C06, x)));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
@@ -2120,31 +2140,15 @@ public:
             same3 = _mm_add_pd(same3, temp4);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, 1>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, 1>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, 1>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, 1>()].srcB(x));
+            neig0 = _mm_load_pd(&hood(0, -1, -1).src(x));
+            neig1 = _mm_load_pd(&hood(2, -1, -1).src(x));
+            neig2 = _mm_load_pd(&hood(4, -1, -1).src(x));
+            neig3 = _mm_load_pd(&hood(6, -1, -1).src(x));
 
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC< 9>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC< 9>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC< 9>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC< 9>(), x)));
-
-            same0 = _mm_add_pd(same0, temp1);
-            same1 = _mm_add_pd(same1, temp2);
-            same2 = _mm_add_pd(same2, temp3);
-            same3 = _mm_add_pd(same3, temp4);
-
-            //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, 1>()].srcB(x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, 1>()].srcB(x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, 1>()].srcB(x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, 1>()].srcB(x));
-
-            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC<10>(), x)));
-            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC<10>(), x)));
-            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC<10>(), x)));
-            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC<10>(), x)));
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C07, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C07, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C07, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C07, x)));
 
             same0 = _mm_add_pd(same0, temp1);
             same1 = _mm_add_pd(same1, temp2);
@@ -2152,10 +2156,58 @@ public:
             same3 = _mm_add_pd(same3, temp4);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, -1>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, -1>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, -1>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, -1>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, -1).src(x));
+            neig1 = _mm_load_pd(&hood(2, 1, -1).src(x));
+            neig2 = _mm_load_pd(&hood(4, 1, -1).src(x));
+            neig3 = _mm_load_pd(&hood(6, 1, -1).src(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C08, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C08, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C08, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C08, x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood(0, -1, 1).src(x));
+            neig1 = _mm_load_pd(&hood(2, -1, 1).src(x));
+            neig2 = _mm_load_pd(&hood(4, -1, 1).src(x));
+            neig3 = _mm_load_pd(&hood(6, -1, 1).src(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C09, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C09, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C09, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C09, x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood(0, 1, 1).src(x));
+            neig1 = _mm_load_pd(&hood(2, 1, 1).src(x));
+            neig2 = _mm_load_pd(&hood(4, 1, 1).src(x));
+            neig3 = _mm_load_pd(&hood(6, 1, 1).src(x));
+
+            temp1 = _mm_mul_pd(neig0, _mm_load_pd(&hood(0, 0, 0).coeff(C10, x)));
+            temp2 = _mm_mul_pd(neig1, _mm_load_pd(&hood(2, 0, 0).coeff(C10, x)));
+            temp3 = _mm_mul_pd(neig2, _mm_load_pd(&hood(4, 0, 0).coeff(C10, x)));
+            temp4 = _mm_mul_pd(neig3, _mm_load_pd(&hood(6, 0, 0).coeff(C10, x)));
+
+            same0 = _mm_add_pd(same0, temp1);
+            same1 = _mm_add_pd(same1, temp2);
+            same2 = _mm_add_pd(same2, temp3);
+            same3 = _mm_add_pd(same3, temp4);
+
+            //xxxxxxxxxxxxx
+            neig0 = _mm_load_pd(&hood(0, -1, -1).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, -1, -1).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, -1, -1).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, -1, -1).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2163,10 +2215,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, -1>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, -1>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, -1>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, -1>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 0, -1).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, 0, -1).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, 0, -1).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, 0, -1).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2174,10 +2226,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, -1>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, -1>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, -1>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, -1>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, -1).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, 1, -1).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, 1, -1).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, 1, -1).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2185,10 +2237,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, 0>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, 0>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, 0>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, 0>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, -1, 0).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, -1, 0).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, -1, 0).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, -1, 0).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2196,10 +2248,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, 0>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, 0>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, 0>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, 0>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, 0).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, 1, 0).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, 1, 0).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, 1, 0).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2207,10 +2259,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 0, 0).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, 0, 0).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, 0, 0).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, 0, 0).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2218,10 +2270,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, 1>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, 1>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, 1>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, 1>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, -1, 1).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, -1, 1).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, -1, 1).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, -1, 1).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2229,10 +2281,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, 1>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, 1>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, 1>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, 1>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 0, 1).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, 0, 1).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, 0, 1).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, 0, 1).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2240,10 +2292,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, 1>()].coeffB(FC<11>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, 1>()].coeffB(FC<11>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, 1>()].coeffB(FC<11>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, 1>()].coeffB(FC<11>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, 1).coeff(C11, x));
+            neig1 = _mm_load_pd(&hood(2, 1, 1).coeff(C11, x));
+            neig2 = _mm_load_pd(&hood(4, 1, 1).coeff(C11, x));
+            neig3 = _mm_load_pd(&hood(6, 1, 1).coeff(C11, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2251,10 +2303,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, -1>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, -1>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, -1>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, -1>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, -1, -1).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, -1, -1).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, -1, -1).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, -1, -1).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2262,10 +2314,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, -1>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, -1>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, -1>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, -1>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, 0, -1).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, 0, -1).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, 0, -1).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, 0, -1).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2273,10 +2325,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, -1>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, -1>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, -1>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, -1>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, -1).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, 1, -1).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, 1, -1).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, 1, -1).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2284,10 +2336,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, 0>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, 0>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, 0>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, 0>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, -1, 0).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, -1, 0).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, -1, 0).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, -1, 0).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2295,10 +2347,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, 0>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, 0>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, 0>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, 0>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, 0).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, 1, 0).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, 1, 0).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, 1, 0).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2306,10 +2358,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, 0>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, 0>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, 0>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, 0>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, 0, 0).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, 0, 0).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, 0, 0).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, 0, 0).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2317,10 +2369,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, -1, 1>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, -1, 1>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, -1, 1>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, -1, 1>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, -1, 1).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, -1, 1).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, -1, 1).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, -1, 1).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2328,10 +2380,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 0, 1>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 0, 1>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 0, 1>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 0, 1>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, 0, 1).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, 0, 1).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, 0, 1).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, 0, 1).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2339,10 +2391,10 @@ public:
             same3 = _mm_add_pd(same3, neig3);
 
             //xxxxxxxxxxxxx
-            neig0 = _mm_load_pd(&hood[FC<0, 1, 1>()].coeffB(FC<12>(), x));
-            neig1 = _mm_load_pd(&hood[FC<2, 1, 1>()].coeffB(FC<12>(), x));
-            neig2 = _mm_load_pd(&hood[FC<4, 1, 1>()].coeffB(FC<12>(), x));
-            neig3 = _mm_load_pd(&hood[FC<6, 1, 1>()].coeffB(FC<12>(), x));
+            neig0 = _mm_load_pd(&hood(0, 1, 1).coeff(C12, x));
+            neig1 = _mm_load_pd(&hood(2, 1, 1).coeff(C12, x));
+            neig2 = _mm_load_pd(&hood(4, 1, 1).coeff(C12, x));
+            neig3 = _mm_load_pd(&hood(6, 1, 1).coeff(C12, x));
 
             same0 = _mm_add_pd(same0, neig0);
             same1 = _mm_add_pd(same1, neig1);
@@ -2368,49 +2420,49 @@ public:
             //     coeff[6][x] * src[x + offsetZ];
         }
 
-        stepScalar(hood, dst, x, endX);
+        stepScalar(hoody, dst, x, endX);
     }
 
     template<class NEIGHBORHOOD>
-    inline void stepScalar(const NEIGHBORHOOD& hood, double *dst, int startX, int endX)
+    inline void stepScalar(const NEIGHBORHOOD& hoody, double *dst, int startX, int endX)
     {
         for (int x = startX; x < endX; ++x) {
             dst[x] = 
-                hood[FC<0, 0, 0>()].coeffB(FC< 0>(), x) * hood[FC< 0, -1, -1>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 1>(), x) * hood[FC< 0,  0, -1>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 2>(), x) * hood[FC< 0,  1, -1>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 3>(), x) * hood[FC< 0, -1,  0>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 4>(), x) * hood[FC<-1,  0,  0>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 5>(), x) * hood[FC< 0,  0,  0>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 6>(), x) * hood[FC< 1,  0,  0>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 7>(), x) * hood[FC< 0,  1,  0>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 8>(), x) * hood[FC< 0, -1,  1>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC< 9>(), x) * hood[FC< 0,  0,  1>()].srcB(x) +
-                hood[FC<0, 0, 0>()].coeffB(FC<10>(), x) * hood[FC< 0,  1,  1>()].srcB(x) +
+                hood(0, 0, 0).coeff(C00, x) * hood( 0, -1, -1).src(x) +
+                hood(0, 0, 0).coeff(C01, x) * hood( 0,  0, -1).src(x) +
+                hood(0, 0, 0).coeff(C02, x) * hood( 0,  1, -1).src(x) +
+                hood(0, 0, 0).coeff(C03, x) * hood( 0, -1,  0).src(x) +
+                hood(0, 0, 0).coeff(C04, x) * hood(-1,  0,  0).src(x) +
+                hood(0, 0, 0).coeff(C05, x) * hood( 0,  0,  0).src(x) +
+                hood(0, 0, 0).coeff(C06, x) * hood( 1,  0,  0).src(x) +
+                hood(0, 0, 0).coeff(C07, x) * hood( 0,  1,  0).src(x) +
+                hood(0, 0, 0).coeff(C08, x) * hood( 0, -1,  1).src(x) +
+                hood(0, 0, 0).coeff(C09, x) * hood( 0,  0,  1).src(x) +
+                hood(0, 0, 0).coeff(C10, x) * hood( 0,  1,  1).src(x) +
 
-                hood[FC<0, -1, -1>()].coeffB(FC<11>(), x) +
-                hood[FC<0,  0, -1>()].coeffB(FC<11>(), x) +
-                hood[FC<0,  1, -1>()].coeffB(FC<11>(), x) +
-                hood[FC<0, -1,  0>()].coeffB(FC<11>(), x) +
-                hood[FC<-1, 0,  0>()].coeffB(FC<11>(), x) +
-                hood[FC<0,  0,  0>()].coeffB(FC<11>(), x) +
-                hood[FC<1,  0,  0>()].coeffB(FC<11>(), x) +
-                hood[FC<0,  1,  0>()].coeffB(FC<11>(), x) +
-                hood[FC<0, -1,  1>()].coeffB(FC<11>(), x) +
-                hood[FC<0,  0,  1>()].coeffB(FC<11>(), x) +
-                hood[FC<0,  1,  1>()].coeffB(FC<11>(), x) +
+                hood(0, -1, -1).coeff(C11, x) +
+                hood(0,  0, -1).coeff(C11, x) +
+                hood(0,  1, -1).coeff(C11, x) +
+                hood(0, -1,  0).coeff(C11, x) +
+                hood(-1, 0,  0).coeff(C11, x) +
+                hood(0,  0,  0).coeff(C11, x) +
+                hood(1,  0,  0).coeff(C11, x) +
+                hood(0,  1,  0).coeff(C11, x) +
+                hood(0, -1,  1).coeff(C11, x) +
+                hood(0,  0,  1).coeff(C11, x) +
+                hood(0,  1,  1).coeff(C11, x) +
 
-                hood[FC<0, -1, -1>()].coeffB(FC<12>(), x) +
-                hood[FC<0,  0, -1>()].coeffB(FC<12>(), x) +
-                hood[FC<0,  1, -1>()].coeffB(FC<12>(), x) +
-                hood[FC<0, -1,  0>()].coeffB(FC<12>(), x) +
-                hood[FC<-1, 0,  0>()].coeffB(FC<12>(), x) +
-                hood[FC<0,  0,  0>()].coeffB(FC<12>(), x) +
-                hood[FC<1,  0,  0>()].coeffB(FC<12>(), x) +
-                hood[FC<0,  1,  0>()].coeffB(FC<12>(), x) +
-                hood[FC<0, -1,  1>()].coeffB(FC<12>(), x) +
-                hood[FC<0,  0,  1>()].coeffB(FC<12>(), x) +
-                hood[FC<0,  1,  1>()].coeffB(FC<12>(), x);
+                hood(0, -1, -1).coeff(C12, x) +
+                hood(0,  0, -1).coeff(C12, x) +
+                hood(0,  1, -1).coeff(C12, x) +
+                hood(0, -1,  0).coeff(C12, x) +
+                hood(-1, 0,  0).coeff(C12, x) +
+                hood(0,  0,  0).coeff(C12, x) +
+                hood(1,  0,  0).coeff(C12, x) +
+                hood(0,  1,  0).coeff(C12, x) +
+                hood(0, -1,  1).coeff(C12, x) +
+                hood(0,  0,  1).coeff(C12, x) +
+                hood(0,  1,  1).coeff(C12, x);
         }
     }
 
