@@ -150,6 +150,7 @@ public:
         return Neighborhood<DIM_X, DIM_Y, DIM_Z>(
             coefficients, 
             source,
+            index +
             coord.x() +
             coord.y() * DIM_X + 
             coord.z() * DIM_X * DIM_Y);
@@ -197,7 +198,19 @@ public:
     FixedNeighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>
     operator[](FixedCoord<X, Y, Z> /*unused*/) const
     {
-        return FixedNeighborhood<DIM_X, DIM_Y, DIM_Z, X + Y * DIM_X + Z * DIM_X * DIM_Y>(coefficients, source);
+        return FixedNeighborhood<DIM_X, DIM_Y, DIM_Z, INDEX + X + Y * DIM_X + Z * DIM_X * DIM_Y>(coefficients, source);
+    }
+
+    Neighborhood<DIM_X, DIM_Y, DIM_Z>
+    operator[](Coord<3> coord) const
+    {
+        return Neighborhood<DIM_X, DIM_Y, DIM_Z>(
+            coefficients, 
+            source,
+            INDEX +
+            coord.x() +
+            coord.y() * DIM_X + 
+            coord.z() * DIM_X * DIM_Y);
     }
 
     const double& src(const int& x) const

@@ -64,7 +64,7 @@ public:
         TS_ASSERT_EQUALS(Coord<2>(3, 1), grid.getDimensions());
 
         for (int i = 0; i < 6; ++i) 
-            adapter.insert(&grid, FloatCoord<2>(i + 0.5, 0.5, i));
+            adapter.insert(&grid, FloatCoord<2>(i + 0.5, 0.5), i);
 
         std::set<int> coords;
         std::set<int> expected;
@@ -123,7 +123,7 @@ public:
         MyAdapter::CoordVec positions;
         MyAdapter::Graph graph;
         for (int i = 0; i < width; ++i) {
-            positions.push_back(FloatCoord<2>(i * 0.5, 0.5, i));
+            positions.push_back(std::make_pair(FloatCoord<2>(i * 0.5, 0.5), i));
             SuperVector<int> neighbors;
             neighbors << ((i + width - 1) % width)
                       << ((i + width + 1) % width);

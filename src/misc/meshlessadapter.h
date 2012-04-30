@@ -23,9 +23,9 @@ public:
     static const int DIM = TOPOLOGY::DIMENSIONS;
     static const int MAX_SIZE = 300000;
 
-    typedef std::list<FloatCoord<DIM> > CoordList;
+    typedef std::list<std::pair<FloatCoord<DIM>, int> > CoordList;
     typedef Grid<CoordList, TOPOLOGY> CoordListGrid;
-    typedef SuperVector<FloatCoord<DIM> > CoordVec;
+    typedef SuperVector<std::pair<FloatCoord<DIM>, int> > CoordVec;
     typedef SuperVector<SuperVector<int> > Graph;
 
     /**
@@ -57,10 +57,10 @@ public:
         return c;
     }
 
-    inline void insert(CoordListGrid *grid, const FloatCoord<DIM>& pos) const
+    inline void insert(CoordListGrid *grid, const FloatCoord<DIM>& pos, const int& id) const
     {
         Coord<2> c = posToCoord(pos);
-        (*grid)[c].push_back(pos);
+        (*grid)[c].push_back(std::make_pair(pos, id));
     }
 
     /**
@@ -95,8 +95,8 @@ public:
         CoordBox<DIM> box = positions.boundingBox();
         CoordBoxSequence<DIM> s = box.sequence();
         while (s.hasNext()) {
-            const std::list<FloatCoord<DIM> >& list = positions[s.next()];
-            for (typename std::list<FloatCoord<DIM> >::const_iterator iter = list.begin();
+            const CoordList& list = positions[s.next()];
+            for (typename CoordList::const_iterator iter = list.begin();
                  iter != list.end();
                  ++iter) {
                 ret.push_back(*iter);
@@ -188,7 +188,7 @@ public:
         for (int i = 0; i < graph.size(); ++i) 
             for (SuperVector<int>::const_iterator n = graph[i].begin(); 
                  n != graph[i].end(); ++n) 
-                if (manhattanDistance(positions[i], positions[*n]) > 1)
+                if (manhattanDistance(positions[i].first, positions[*n].first) > 1)
                     return false;
 
         return true;
@@ -266,19 +266,19 @@ private:
     }
 
     bool searchList(
-        const std::list<FloatCoord<DIM> >& list,
+        const CoordList& list,
         const FloatCoord<DIM>& pos,
         std::set<int> *coords = 0) const
     {
         bool found = false;
 
-        for (typename std::list<FloatCoord<DIM> >::const_iterator iter = list.begin();
+        for (typename CoordList::const_iterator iter = list.begin();
              iter != list.end();
              ++iter) {
-            if (distance2(pos, *iter) < radius2) {
+            if (distance2(pos, iter->first) < radius2) {
                 found = true;
                 if (coords)
-                    coords->insert(iter->id);
+                    coords->insert(iter->second);
             }
         }
 

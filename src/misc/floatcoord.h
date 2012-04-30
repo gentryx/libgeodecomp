@@ -8,7 +8,8 @@
 namespace LibGeoDecomp {
 
 /**
- * A real valued coordinate class, which contains an optional ID.
+ * A real valued coordinate class. Can also be seen as a short,
+ * fixed-size vector.
  */
 template<int DIM>
 class FloatCoordBase 
@@ -26,8 +27,6 @@ public:
     }
 
     boost::array<double, DIM> c;
-    // fixme: get rid of this
-    int id;
 };
 
 template<int DIM>
@@ -39,10 +38,9 @@ class FloatCoord<1> : public FloatCoordBase<1>
 public:
     explicit
     inline
-    FloatCoord(const double& x = 0, const int _id = 0) 
+    FloatCoord(const double& x = 0) 
     {
         c[0] = x;
-        id = _id;
     }
 
     inline
@@ -67,12 +65,10 @@ public:
     inline
     FloatCoord(
         const double& x = 0, 
-        const double& y = 0, 
-        const int _id = 0) 
+        const double& y = 0) 
     {
         c[0] = x;
         c[1] = y;
-        id = _id;
     }
 
     inline
@@ -99,13 +95,11 @@ public:
     FloatCoord(
         const double& x = 0, 
         const double& y = 0, 
-        const double& z = 0,
-        const int _id = 0) 
+        const double& z = 0)
     {
         c[0] = x;
         c[1] = y;
         c[2] = z;
-        id = _id;
     }
 
     inline
