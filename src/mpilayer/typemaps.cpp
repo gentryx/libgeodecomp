@@ -198,8 +198,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->origin), MPI::LIBGEODECOMP_COORD_1_, 1),
-        MemberSpec(MPI::Get_address(&obj->endX), MPI::INT, 1)
+        MemberSpec(MPI::Get_address(&obj->endX), MPI::INT, 1),
+        MemberSpec(MPI::Get_address(&obj->origin), MPI::LIBGEODECOMP_COORD_1_, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -236,8 +236,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->origin), MPI::LIBGEODECOMP_COORD_2_, 1),
-        MemberSpec(MPI::Get_address(&obj->endX), MPI::INT, 1)
+        MemberSpec(MPI::Get_address(&obj->endX), MPI::INT, 1),
+        MemberSpec(MPI::Get_address(&obj->origin), MPI::LIBGEODECOMP_COORD_2_, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -274,8 +274,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->origin), MPI::LIBGEODECOMP_COORD_3_, 1),
-        MemberSpec(MPI::Get_address(&obj->endX), MPI::INT, 1)
+        MemberSpec(MPI::Get_address(&obj->endX), MPI::INT, 1),
+        MemberSpec(MPI::Get_address(&obj->origin), MPI::LIBGEODECOMP_COORD_3_, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -504,12 +504,12 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->isEdgeCell), MPI::BOOL, 1),
-        MemberSpec(MPI::Get_address(&obj->dimensions), MPI::LIBGEODECOMP_COORDBOX_1_, 1),
         MemberSpec(MPI::Get_address(&obj->cycleCounter), MPI::UNSIGNED, 1),
-        MemberSpec(MPI::Get_address(&obj->testValue), MPI::DOUBLE, 1),
+        MemberSpec(MPI::Get_address(&obj->dimensions), MPI::LIBGEODECOMP_COORDBOX_1_, 1),
+        MemberSpec(MPI::Get_address(&obj->isEdgeCell), MPI::BOOL, 1),
+        MemberSpec(MPI::Get_address(&obj->isValid), MPI::BOOL, 1),
         MemberSpec(MPI::Get_address(&obj->pos), MPI::LIBGEODECOMP_COORD_1_, 1),
-        MemberSpec(MPI::Get_address(&obj->isValid), MPI::BOOL, 1)
+        MemberSpec(MPI::Get_address(&obj->testValue), MPI::DOUBLE, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -546,12 +546,12 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->isEdgeCell), MPI::BOOL, 1),
-        MemberSpec(MPI::Get_address(&obj->dimensions), MPI::LIBGEODECOMP_COORDBOX_2_, 1),
         MemberSpec(MPI::Get_address(&obj->cycleCounter), MPI::UNSIGNED, 1),
-        MemberSpec(MPI::Get_address(&obj->testValue), MPI::DOUBLE, 1),
+        MemberSpec(MPI::Get_address(&obj->dimensions), MPI::LIBGEODECOMP_COORDBOX_2_, 1),
+        MemberSpec(MPI::Get_address(&obj->isEdgeCell), MPI::BOOL, 1),
+        MemberSpec(MPI::Get_address(&obj->isValid), MPI::BOOL, 1),
         MemberSpec(MPI::Get_address(&obj->pos), MPI::LIBGEODECOMP_COORD_2_, 1),
-        MemberSpec(MPI::Get_address(&obj->isValid), MPI::BOOL, 1)
+        MemberSpec(MPI::Get_address(&obj->testValue), MPI::DOUBLE, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -588,12 +588,12 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->isEdgeCell), MPI::BOOL, 1),
-        MemberSpec(MPI::Get_address(&obj->dimensions), MPI::LIBGEODECOMP_COORDBOX_3_, 1),
         MemberSpec(MPI::Get_address(&obj->cycleCounter), MPI::UNSIGNED, 1),
-        MemberSpec(MPI::Get_address(&obj->testValue), MPI::DOUBLE, 1),
+        MemberSpec(MPI::Get_address(&obj->dimensions), MPI::LIBGEODECOMP_COORDBOX_3_, 1),
+        MemberSpec(MPI::Get_address(&obj->isEdgeCell), MPI::BOOL, 1),
+        MemberSpec(MPI::Get_address(&obj->isValid), MPI::BOOL, 1),
         MemberSpec(MPI::Get_address(&obj->pos), MPI::LIBGEODECOMP_COORD_3_, 1),
-        MemberSpec(MPI::Get_address(&obj->isValid), MPI::BOOL, 1)
+        MemberSpec(MPI::Get_address(&obj->testValue), MPI::DOUBLE, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
