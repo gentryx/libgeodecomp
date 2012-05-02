@@ -11,11 +11,15 @@ namespace LibGeoDecomp {
 class FloatCoordTest : public CxxTest::TestSuite 
 {
 public:
-    void testDefaultConstructor()
+    void testDefaultConstructors()
     {
         FloatCoord<2> a;
         FloatCoord<2> b(0, 0);
         TS_ASSERT_EQUALS(a, b);
+
+        Coord<3> c(1, 2, 3);
+        FloatCoord<3> d(c);
+        TS_ASSERT_EQUALS(d, FloatCoord<3>(1, 2, 3));
     }
 
     void testLength()
@@ -95,11 +99,11 @@ public:
                          FloatCoord<3>(1, 2, 3) * 4);
 
         TS_ASSERT_EQUALS(FloatCoord<1>(4),
-                         4 * FloatCoord<1>(1));
+                         FloatCoord<1>(1) * 4);
         TS_ASSERT_EQUALS(FloatCoord<2>(4, 8),
-                         4 * FloatCoord<2>(1, 2));
+                         FloatCoord<2>(1, 2) * 4);
         TS_ASSERT_EQUALS(FloatCoord<3>(4, 8, 12),
-                         4 * FloatCoord<3>(1, 2, 3));
+                         FloatCoord<3>(1, 2, 3) * 4);
         {
             FloatCoord<1> f(3);
             f *= 5;

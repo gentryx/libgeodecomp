@@ -360,6 +360,7 @@ public:
     }
 };
 
+// fixme: make this a static member function
 template<int DIM>
 class CoordDiagonal;
 

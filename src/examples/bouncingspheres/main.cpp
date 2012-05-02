@@ -68,9 +68,9 @@ public:
             for (int j = 0; j < numSpheres[i]; ++j) 
                 if (neighborSpheres[i][j].id != id)
 
-                    vel += DELTA_T * force(neighborSpheres[i][j]);
+                    vel += force(neighborSpheres[i][j]) * DELTA_T;
             for (int j = 0; j < numBoundaries[i]; ++j)
-                vel += DELTA_T * force(neighborBoundaries[i][j]);
+                vel += force(neighborBoundaries[i][j]) * DELTA_T;
         }
         pos += vel * DELTA_T;
 
@@ -111,7 +111,7 @@ public:
             delta.c[2] * other.normal.c[2];
         
         if (distance < SPHERE_RADIUS) {
-            FloatCoord<3> planar = (pos - distance * other.normal) - other.center;
+            FloatCoord<3> planar = (pos - other.normal * distance) - other.center;
             if ((abs(planar.c[0]) < (BOUNDARY_DIM * 0.5)) &&
                 (abs(planar.c[1]) < (BOUNDARY_DIM * 0.5)) &&
                 (abs(planar.c[2]) < (BOUNDARY_DIM * 0.5))) {

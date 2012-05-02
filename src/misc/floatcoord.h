@@ -5,6 +5,8 @@
 #include <sstream>
 #include <boost/array.hpp>
 
+#include <libgeodecomp/misc/coord.h>
+
 namespace LibGeoDecomp {
 
 /**
@@ -44,6 +46,12 @@ public:
     }
 
     inline
+    FloatCoord(const Coord<1>& p) 
+    {
+        c[0] = p.c[0];
+    }
+
+    inline
     double length() const
     {
         return fabs(c[0]); 
@@ -53,6 +61,57 @@ public:
     const double& sum() const
     {
         return c[0];
+    }
+
+    inline
+    FloatCoord<1> operator+(const FloatCoord<1>& a) const
+    {
+        return FloatCoord<1>(c[0] + a.c[0]);
+    }
+
+    inline
+    FloatCoord<1> operator-(const FloatCoord<1>& a) const
+    {
+        return FloatCoord<1>(c[0] - a.c[0]);
+    }
+
+    inline
+    FloatCoord<1>& operator+=(const FloatCoord<1>& a) 
+    {
+        c[0] += a.c[0];
+        return *this;
+    }
+
+    inline
+    FloatCoord<1>& operator-=(const FloatCoord<1>& a) 
+    {
+        c[0] -= a.c[0];
+        return *this;
+    }
+
+    inline 
+    FloatCoord<1> operator*(const double& s) const
+    {
+        return FloatCoord<1>(c[0] * s);
+    }
+
+    inline 
+    FloatCoord<1>& operator*=(const double& s)
+    {
+        c[0] *= s;
+        return *this;
+    }
+
+    inline
+    bool operator==(const FloatCoord<1>& a) const
+    {
+        return (c[0] == a.c[0]);
+    }
+
+    inline
+    bool operator!=(const FloatCoord<1>& a) const
+    {
+        return !(*this == a);
     }
 };
 
@@ -72,6 +131,13 @@ public:
     }
 
     inline
+    FloatCoord(const Coord<2>& p) 
+    {
+        c[0] = p.c[0];
+        c[1] = p.c[1];
+    }
+
+    inline
     double length() const
     {
         return sqrt(c[0] * c[0] + 
@@ -82,6 +148,62 @@ public:
     double sum() const
     {
         return c[0] + c[1];
+    }
+
+    inline
+    FloatCoord<2> operator+(const FloatCoord<2>& a) const
+    {
+        return FloatCoord<2>(c[0] + a.c[0],
+                             c[1] + a.c[1]);
+    }
+
+    inline
+    FloatCoord<2> operator-(const FloatCoord<2>& a) const
+    {
+        return FloatCoord<2>(c[0] - a.c[0],
+                             c[1] - a.c[1]);
+    }
+
+    inline
+    FloatCoord<2>& operator+=(const FloatCoord<2>& a) 
+    {
+        c[0] += a.c[0];
+        c[1] += a.c[1];
+        return *this;
+    }
+
+    inline
+    FloatCoord<2>& operator-=(const FloatCoord<2>& a) 
+    {
+        c[0] -= a.c[0];
+        c[1] -= a.c[1];
+        return *this;
+    }
+
+    inline 
+    FloatCoord<2> operator*(const double& s) const
+    {
+        return FloatCoord<2>(c[0] * s, c[1] * s);
+    }
+
+    inline 
+    FloatCoord<2>& operator*=(const double& s)
+    {
+        c[0] *= s;
+        c[1] *= s;
+        return *this;
+    }
+
+    inline
+    bool operator==(const FloatCoord<2>& a) const
+    {
+        return (c[0] == a.c[0]) && (c[1] == a.c[1]);
+    }
+
+    inline
+    bool operator!=(const FloatCoord<2>& a) const
+    {
+        return !(*this == a);
     }
 };
 
@@ -103,6 +225,14 @@ public:
     }
 
     inline
+    FloatCoord(const Coord<3>& p) 
+    {
+        c[0] = p.c[0];
+        c[1] = p.c[1];
+        c[2] = p.c[2];
+    }
+
+    inline
     double length() const
     {
         return sqrt(c[0] * c[0] + 
@@ -115,183 +245,68 @@ public:
     {
         return c[0] + c[1] + c[2];
     }
+
+    inline
+    FloatCoord<3> operator+(const FloatCoord<3>& a) const
+    {
+        return FloatCoord<3>(c[0] + a.c[0],
+                             c[1] + a.c[1],
+                             c[2] + a.c[2]);
+    }
+
+    inline
+    FloatCoord<3> operator-(const FloatCoord<3>& a) const
+    {
+        return FloatCoord<3>(c[0] - a.c[0],
+                             c[1] - a.c[1],
+                             c[2] - a.c[2]);
+    }
+
+    inline
+    FloatCoord<3>& operator+=(const FloatCoord<3>& a) 
+    {
+        c[0] += a.c[0];
+        c[1] += a.c[1];
+        c[2] += a.c[2];
+        return *this;
+    }
+
+    inline
+    FloatCoord<3>& operator-=(const FloatCoord<3>& a) 
+    {
+        c[0] -= a.c[0];
+        c[1] -= a.c[1];
+        c[2] -= a.c[2];
+        return *this;
+    }
+
+    inline 
+    FloatCoord<3> operator*(const double& s) const
+    {
+        return FloatCoord<3>(c[0] * s, c[1] * s, c[2] * s);
+    }
+
+    inline 
+    FloatCoord<3>& operator*=(const double& s)
+    {
+        c[0] *= s;
+        c[1] *= s;
+        c[2] *= s;
+        return *this;
+    }
+
+    inline
+    bool operator==(const FloatCoord<3>& a) const
+    {
+        return (c[0] == a.c[0]) && (c[1] == a.c[1]) && (c[2] == a.c[2]);
+    }
+
+    inline
+    bool operator!=(const FloatCoord<3>& a) const
+    {
+        return !(*this == a);
+    }
 };
-
-inline
-FloatCoord<1> operator+(const FloatCoord<1>& a, const FloatCoord<1>& b) 
-{
-    return FloatCoord<1>(a.c[0] + b.c[0]);
-}
-
-inline
-FloatCoord<2> operator+(const FloatCoord<2>& a, const FloatCoord<2>& b) 
-{
-    return FloatCoord<2>(a.c[0] + b.c[0],
-                         a.c[1] + b.c[1]);
-}
-
-inline
-FloatCoord<3> operator+(const FloatCoord<3>& a, const FloatCoord<3>& b) 
-{
-    return FloatCoord<3>(a.c[0] + b.c[0],
-                         a.c[1] + b.c[1],
-                         a.c[2] + b.c[2]);
-}
-
-inline
-FloatCoord<1> operator-(const FloatCoord<1>& a, const FloatCoord<1>& b) 
-{
-    return FloatCoord<1>(a.c[0] - b.c[0]);
-}
-
-inline
-FloatCoord<2> operator-(const FloatCoord<2>& a, const FloatCoord<2>& b) 
-{
-    return FloatCoord<2>(a.c[0] - b.c[0],
-                         a.c[1] - b.c[1]);
-}
-
-inline
-FloatCoord<3> operator-(const FloatCoord<3>& a, const FloatCoord<3>& b) 
-{
-    return FloatCoord<3>(a.c[0] - b.c[0],
-                         a.c[1] - b.c[1],
-                         a.c[2] - b.c[2]);
-}
-
-inline
-FloatCoord<1>& operator+=(FloatCoord<1>& a, const FloatCoord<1>& b) 
-{
-    a.c[0] += b.c[0];
-    return a;
-}
-
-inline
-FloatCoord<2>& operator+=(FloatCoord<2>& a, const FloatCoord<2>& b) 
-{
-    a.c[0] += b.c[0];
-    a.c[1] += b.c[1];
-    return a;
-}
-
-inline
-FloatCoord<3>& operator+=(FloatCoord<3>& a, const FloatCoord<3>& b) 
-{
-    a.c[0] += b.c[0];
-    a.c[1] += b.c[1];
-    a.c[2] += b.c[2];
-    return a;
-}
-
-inline
-FloatCoord<1>& operator-=(FloatCoord<1>& a, const FloatCoord<1>& b) 
-{
-    a.c[0] -= b.c[0];
-    return a;
-}
-
-inline
-FloatCoord<2>& operator-=(FloatCoord<2>& a, const FloatCoord<2>& b) 
-{
-    a.c[0] -= b.c[0];
-    a.c[1] -= b.c[1];
-    return a;
-}
-
-inline
-FloatCoord<3>& operator-=(FloatCoord<3>& a, const FloatCoord<3>& b) 
-{
-    a.c[0] -= b.c[0];
-    a.c[1] -= b.c[1];
-    a.c[2] -= b.c[2];
-    return a;
-}
-
-inline 
-FloatCoord<1> operator*(const FloatCoord<1>& a, const double& s)
-{
-    return FloatCoord<1>(a.c[0] * s);
-}
-
-inline 
-FloatCoord<2> operator*(const FloatCoord<2>& a, const double& s)
-{
-    return FloatCoord<2>(a.c[0] * s, a.c[1] * s);
-}
-
-inline 
-FloatCoord<3> operator*(const FloatCoord<3>& a, const double& s)
-{
-    return FloatCoord<3>(a.c[0] * s, a.c[1] * s, a.c[2] * s);
-}
-
-
-inline 
-FloatCoord<1> operator*(const double& s, const FloatCoord<1>& a)
-{
-    return FloatCoord<1>(a.c[0] * s);
-}
-
-inline 
-FloatCoord<2> operator*(const double& s, const FloatCoord<2>& a)
-{
-    return FloatCoord<2>(a.c[0] * s, a.c[1] * s);
-}
-
-inline 
-FloatCoord<3> operator*(const double& s, const FloatCoord<3>& a)
-{
-    return FloatCoord<3>(a.c[0] * s, a.c[1] * s, a.c[2] * s);
-}
-
-inline 
-FloatCoord<1>& operator*=(FloatCoord<1>& a, const double& s)
-{
-    a.c[0] *= s;
-    return a;
-}
-
-inline 
-FloatCoord<2>& operator*=(FloatCoord<2>& a, const double& s)
-{
-    a.c[0] *= s;
-    a.c[1] *= s;
-    return a;
-}
-
-inline 
-FloatCoord<3>& operator*=(FloatCoord<3>& a, const double& s)
-{
-    a.c[0] *= s;
-    a.c[1] *= s;
-    a.c[2] *= s;
-    return a;
-}
-
-inline
-bool operator==(const FloatCoord<1>& a, const FloatCoord<1>& b) 
-{
-    return (a.c[0] == b.c[0]);
-}
-
-inline
-bool operator==(const FloatCoord<2>& a, const FloatCoord<2>& b) 
-{
-    return (a.c[0] == b.c[0]) && (a.c[1] == b.c[1]);
-}
-
-inline
-bool operator==(const FloatCoord<3>& a, const FloatCoord<3>& b) 
-{
-    return (a.c[0] == b.c[0]) && (a.c[1] == b.c[1]) && (a.c[2] == b.c[2]);
-}
-
-template<int DIM>
-inline
-bool operator!=(const FloatCoord<DIM>& a, const FloatCoord<DIM>& b) 
-{
-    return !(a == b);
-}
 
 }
 
