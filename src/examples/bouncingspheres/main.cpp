@@ -191,7 +191,7 @@ private:
         const Boundary *hoodB[27];
         int numS[27];
         int numB[27];
-        CoordBox<3> box(CoordDiagonal<3>()(-1), CoordDiagonal<3>()(3));
+        CoordBox<3> box(Coord<3>::diagonal(-1), Coord<3>::diagonal(3));
         CoordBoxSequence<3> s = box.sequence();
         int i = 0;
 
@@ -213,7 +213,7 @@ private:
     template<typename COORD_MAP>
     void moveSpheres(const COORD_MAP& neighborhood)
     {
-        CoordBox<3> box(CoordDiagonal<3>()(-1), CoordDiagonal<3>()(3));
+        CoordBox<3> box(Coord<3>::diagonal(-1), Coord<3>::diagonal(3));
         CoordBoxSequence<3> s = box.sequence();
         numSpheres = 0;
 

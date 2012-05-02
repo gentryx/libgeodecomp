@@ -30,7 +30,7 @@ public:
         if (res)
             return *res;
 
-        CoordBox<DIM> surroundingBox(CoordDiagonal<DIM>()(-1), CoordDiagonal<DIM>()(3));
+        CoordBox<DIM> surroundingBox(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
         CoordBoxSequence<DIM> s = surroundingBox.sequence();
         while (s.hasNext()) {
             Coord<DIM> c = s.next();

@@ -192,9 +192,9 @@ public:
 
     void testCoordDiagonal()
     {
-        TS_ASSERT_EQUALS(CoordDiagonal<1>()(32), Coord<1>(32));
-        TS_ASSERT_EQUALS(CoordDiagonal<2>()(31), Coord<2>(31, 31));
-        TS_ASSERT_EQUALS(CoordDiagonal<3>()(30), Coord<3>(30, 30, 30));
+        TS_ASSERT_EQUALS(Coord<1>::diagonal(32), Coord<1>(32));
+        TS_ASSERT_EQUALS(Coord<2>::diagonal(31), Coord<2>(31, 31));
+        TS_ASSERT_EQUALS(Coord<3>::diagonal(30), Coord<3>(30, 30, 30));
     }
 
     void testIndexToCoord()

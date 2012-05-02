@@ -114,8 +114,8 @@ public:
         }
 
         // check complete Moore neighborhood (including old self)
-        CoordBox<DIM> neighborBox(CoordDiagonal<DIM>()(-1),
-                                  CoordDiagonal<DIM>()(3));
+        CoordBox<DIM> neighborBox(Coord<DIM>::diagonal(-1),
+                                  Coord<DIM>::diagonal(3));
         CoordBoxSequence<DIM> seq = neighborBox.sequence();
         while (seq.hasNext()) {
             Coord<DIM> relativeLoc = seq.next();

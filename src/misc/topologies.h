@@ -22,7 +22,7 @@ public:
     CoordNormalizer(Coord<DIM> *c, Coord<DIM> dim) :
         target(c),
         dimensions(dim),
-        edge(CoordDiagonal<DIM>()(-1))
+        edge(Coord<DIM>::diagonal(-1))
     {}
 
     const Coord<DIM>& getDimensions() const
@@ -338,7 +338,7 @@ public:
             const Coord<DIMENSIONS>& coord,
             const Coord<DIMENSIONS>& dimensions)
         {
-            Coord<DIMENSIONS> res = CoordDiagonal<DIMENSIONS>()(-1);
+            Coord<DIMENSIONS> res = Coord<DIMENSIONS>::diagonal(-1);
             CoordNormalizer<DIMENSIONS, DIMENSIONS> normalizer(
                 &res, dimensions);
             locate(normalizer, coord);

@@ -148,7 +148,7 @@ public:
     {
         CoordBox<3> box = ret->boundingBox();
         Coord<3> offset = 
-            CoordDiagonal<3>()(this->gridDimensions().x() * 5 / 128);
+            Coord<3>::diagonal(this->gridDimensions().x() * 5 / 128);
         int size = this->gridDimensions().x() * 50 / 128;
         
 

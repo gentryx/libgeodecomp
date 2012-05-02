@@ -59,7 +59,7 @@ public:
             double i = 1 + CoordToIndex<DIM>()(coord, dimensions);
             ret->at(rawPos) = TestCell<DIM>(coord, dimensions, cycle, i);
         }
-        ret->atEdge() = TestCell<DIM>(CoordDiagonal<DIM>()(-1), dimensions);
+        ret->atEdge() = TestCell<DIM>(Coord<DIM>::diagonal(-1), dimensions);
         ret->atEdge().isEdgeCell = true;
     }
 

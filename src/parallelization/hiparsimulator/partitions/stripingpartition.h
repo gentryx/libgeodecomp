@@ -78,7 +78,7 @@ public:
         if (dimensions.prod() == 0) {
             // set all dimensions to 1 except for the last one to
             // avoid division by 0 in operator[]
-            dimensions = CoordDiagonal<DIM>()(1);
+            dimensions = Coord<DIM>::diagonal(1);
             dimensions.c[DIM - 1] = 0;
         }
     }

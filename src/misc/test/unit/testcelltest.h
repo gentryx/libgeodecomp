@@ -130,7 +130,7 @@ public:
         Grid3D gridA(dim);
         Grid3D gridB(dim);
         gridA.getEdgeCell() = 
-            TestCell<3>(CoordDiagonal<3>()(-1), dim);
+            TestCell<3>(Coord<3>::diagonal(-1), dim);
         gridA.getEdgeCell().isEdgeCell = true;
 
         gridB.getEdgeCell() = 
@@ -177,7 +177,7 @@ public:
         Grid3D gridA(dim);
         Grid3D gridB(dim);
         gridA.getEdgeCell() = 
-            TestCell<3>(CoordDiagonal<3>()(-1), dim);
+            TestCell<3>(Coord<3>::diagonal(-1), dim);
         gridA.getEdgeCell().isEdgeCell = true;
         gridB.getEdgeCell() = 
             gridA.getEdgeCell();

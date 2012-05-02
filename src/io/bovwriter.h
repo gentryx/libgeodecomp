@@ -40,7 +40,7 @@ public:
         // BOV only accepts 3D data, so we'll have to inflate 1D and
         // 2D dimensions.
         Coord<DIM> c = this->distSim->getInitializer()->gridDimensions();
-        Coord<3> initDim = CoordDiagonal<3>()(1);
+        Coord<3> initDim = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i)
             initDim.c[i] = c.c[i]; 
         bricDim = (brickletDim == Coord<3>()) ? initDim : brickletDim;
@@ -96,7 +96,7 @@ private:
             // BOV only accepts 3D data, so we'll have to inflate 1D
             // and 2D dimensions.
             Coord<DIM> c = this->distSim->getInitializer()->gridDimensions();
-            Coord<3> bovDim = CoordDiagonal<3>()(1);
+            Coord<3> bovDim = Coord<3>::diagonal(1);
             for (int i = 0; i < DIM; ++i)
                 bovDim.c[i] = c.c[i]; 
 

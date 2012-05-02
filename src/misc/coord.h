@@ -29,7 +29,12 @@ public:
 
     int c[1];
 
-    inline explicit Coord(int nx=0) 
+    static Coord<1> diagonal(const int& nx)
+    {
+        return Coord<1>(nx);
+    }
+
+    inline explicit Coord(const int& nx=0) 
     {
         c[0] = nx;
     }
@@ -92,7 +97,12 @@ public:
 
     int c[2];
 
-    inline explicit Coord(int nx=0, int ny=0) 
+    static Coord<2> diagonal(const int& nx)
+    {
+        return Coord<2>(nx, nx);
+    }
+
+    inline explicit Coord(const int& nx=0, const int& ny=0) 
     {
         c[0] = nx;
         c[1] = ny;
@@ -222,7 +232,12 @@ public:
 
     int c[3];
 
-    inline explicit Coord(int nx=0, int ny=0, int nz=0) 
+    static Coord<3> diagonal(const int& nx)
+    {
+        return Coord<3>(nx, nx, nx);
+    }
+
+    inline explicit Coord(const int& nx=0, const int& ny=0, const int& nz=0) 
     {
         c[0] = nx;
         c[1] = ny;
@@ -360,40 +375,7 @@ public:
     }
 };
 
-// fixme: make this a static member function
-template<int DIM>
-class CoordDiagonal;
-
-template<>
-class CoordDiagonal<1>
-{
-public:
-    Coord<1> operator()(const int& d)
-    {
-        return Coord<1>(d);
-    }
-};
-
-template<>
-class CoordDiagonal<2>
-{
-public:
-    Coord<2> operator()(const int& d)
-    {
-        return Coord<2>(d, d);
-    }
-};
-
-template<>
-class CoordDiagonal<3>
-{
-public:
-    Coord<3> operator()(const int& d)
-    {
-        return Coord<3>(d, d, d);
-    }
-};
-
+// fixme: make IndexToCoord and CoordToIndex both members of Coord
 /**
  * converts a linear index to a coordinate in a cuboid of size dim
  */

@@ -449,13 +449,13 @@ public:
     inline Region expand(const unsigned& width=1) const
     {
         Region ret;
-        Coord<DIM> dia = CoordDiagonal<DIM>()(width);
+        Coord<DIM> dia = Coord<DIM>::diagonal(width);
 
         for (StreakIterator<DIM> i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
 
             Coord<DIM> boxOrigin = streak.origin - dia;
-            Coord<DIM> boxDim = CoordDiagonal<DIM>()(2 * width + 1);
+            Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
             boxDim.x() = 1;
             CoordBox<DIM> box(boxOrigin, boxDim);
             CoordBoxSequence<DIM> s = box.sequence();
@@ -479,13 +479,13 @@ public:
         TOPOLOGY /* unused */) const
     {
         Region ret;
-        Coord<DIM> dia = CoordDiagonal<DIM>()(width);
+        Coord<DIM> dia = Coord<DIM>::diagonal(width);
 
         for (StreakIterator<DIM> i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
 
             Coord<DIM> boxOrigin = streak.origin - dia;
-            Coord<DIM> boxDim = CoordDiagonal<DIM>()(2 * width + 1);
+            Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
             boxDim.x() = 1;
             CoordBox<DIM> box(boxOrigin, boxDim);
             CoordBoxSequence<DIM> s = box.sequence();
@@ -644,7 +644,7 @@ private:
                 myNumStreaks++;
             }
             myBoundingBox = 
-                CoordBox<DIM>(min, max - min + CoordDiagonal<DIM>()(1));
+                CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
         }
     }
 
@@ -717,7 +717,7 @@ private:
 
         // it's bad to use a magic value to check for out of bounds
         // accesses, but throwing exceptions might be slower
-        if (ret.origin != CoordDiagonal<DIM>()(-1))
+        if (ret.origin != Coord<DIM>::diagonal(-1))
             (*target) << ret;
     }
 };

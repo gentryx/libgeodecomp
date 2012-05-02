@@ -77,7 +77,7 @@ public:
         bool found = false;
         Coord<DIM> center = posToCoord(pos);
    
-        CoordBox<DIM> box(CoordDiagonal<DIM>()(-1), CoordDiagonal<DIM>()(3));
+        CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
         CoordBoxSequence<DIM> s = box.sequence();
         while (s.hasNext()) {
             Coord<DIM> newCenter = center + s.next();

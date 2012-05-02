@@ -327,7 +327,7 @@ public:
     {
         // store squares of at most maxDim in size. the division by
         // DIM^2 is a trick to keep the cache small if DIM is large.
-        Coord<DIM> maxDim = CoordDiagonal<DIM>(68/DIM/DIM);
+        Coord<DIM> maxDim = Coord<DIM>::diagonal(68 / DIM / DIM);
         ZCurvePartition<DIM>::coordsCache.reset(
             new boost::multi_array<typename Coord<DIM>::Vector, DIM>(
                 maxDim.toExtents()));
