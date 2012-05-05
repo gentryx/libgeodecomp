@@ -41,8 +41,9 @@ public:
         // 2D dimensions.
         Coord<DIM> c = this->distSim->getInitializer()->gridDimensions();
         Coord<3> initDim = Coord<3>::diagonal(1);
-        for (int i = 0; i < DIM; ++i)
-            initDim.c[i] = c.c[i]; 
+        for (int i = 0; i < DIM; ++i) {
+            initDim[i] = c[i]; 
+        }
         bricDim = (brickletDim == Coord<3>()) ? initDim : brickletDim;
     }
 
@@ -97,8 +98,9 @@ private:
             // and 2D dimensions.
             Coord<DIM> c = this->distSim->getInitializer()->gridDimensions();
             Coord<3> bovDim = Coord<3>::diagonal(1);
-            for (int i = 0; i < DIM; ++i)
-                bovDim.c[i] = c.c[i]; 
+            for (int i = 0; i < DIM; ++i) {
+                bovDim[i] = c[i]; 
+            }
 
             std::ostringstream buf;
             buf << "TIME: " << step << "\n"

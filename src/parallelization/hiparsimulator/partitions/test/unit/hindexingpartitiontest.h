@@ -14,9 +14,11 @@ namespace HiParSimulator {
 class HIndexingPartitionTest : public CxxTest::TestSuite 
 {
 public:
+    typedef SuperVector<Coord<2> > CoordVector;
+
     void testFillRectangles()
     {
-        SuperMap<Coord<2>, Coord<2>::Vector> expected;
+        SuperMap<Coord<2>, CoordVector> expected;
         expected[Coord<2>(4, 1)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0), Coord<2>(3, 0);
         expected[Coord<2>(1, 5)] += Coord<2>(0, 0), Coord<2>(0, 1), Coord<2>(0, 2), Coord<2>(0, 3), Coord<2>(0, 4);
         expected[Coord<2>(2, 2)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1), Coord<2>(0, 1);
@@ -42,12 +44,12 @@ public:
             Coord<2>(0, 3), Coord<2>(0, 2), Coord<2>(1, 2), 
             Coord<2>(0, 1);                
 
-        for (SuperMap<Coord<2>, Coord<2>::Vector>::iterator i = expected.begin();
+        for (SuperMap<Coord<2>, CoordVector>::iterator i = expected.begin();
              i != expected.end();
              i++) {
             Coord<2> origin(47, 11);
             Coord<2> dimension(i->first);
-            Coord<2>::Vector coords = i->second;
+            CoordVector coords = i->second;
 
             unsigned c = 0;
             HIndexingPartition h(origin, dimension);
@@ -61,7 +63,7 @@ public:
     void testBeginEnd()
     {
         HIndexingPartition h(Coord<2>(10, 20), Coord<2>(3, 5));
-        Coord<2>::Vector expected, actual;
+        CoordVector expected, actual;
         // expected traversal order:
         // 034
         // 125
@@ -163,7 +165,7 @@ public:
 
     void testSquareBracketsOperatorForPartialIteration()
     {
-        Coord<2>::Vector expected, actual, buffer;
+        CoordVector expected, actual, buffer;
         unsigned start = 11;
         unsigned end = 47;
 

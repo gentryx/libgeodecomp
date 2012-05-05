@@ -14,15 +14,16 @@ namespace HiParSimulator {
 class StripingPartitionTest : public CxxTest::TestSuite
 {
 public:
+    typedef SuperVector<Coord<2> > CoordVector;
 
     void setUp()
     {
         expected.clear();
     }
 
-    void check(StripingPartition<2> p, Coord<2>::Vector expected)
+    void check(StripingPartition<2> p, CoordVector expected)
     {
-        Coord<2>::Vector actual;
+        CoordVector actual;
         StripingPartition<2>::Iterator end = p.end();
 
         for (StripingPartition<2>::Iterator i = p.begin(); i != end; ++i)
@@ -100,7 +101,7 @@ public:
     }
     
 private:
-    Coord<2>::Vector  expected;
+    CoordVector  expected;
 };
 
 };

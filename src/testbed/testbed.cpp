@@ -239,7 +239,7 @@ public:
     void run(Coord<DIM> dim, int repeats)
     {
         Coord<DIM> coeffDim = dim;
-        coeffDim.c[DIM - 1] *= UPDATER::coefficients();
+        coeffDim[DIM - 1] *= UPDATER::coefficients();
         GridType coeff(coeffDim, 0.1);
         GridType a(dim, 1.0);
         GridType b(dim, 1.0);
@@ -253,8 +253,8 @@ public:
         std::vector<double*> coefficients(UPDATER::coefficients());
 
         for (int t = 0; t < repeats; ++t) {
-            for (int z = 1; z < dim.c[2] - 1; ++z) {
-                for (int y = 1; y < dim.c[1] - 1; ++y) {
+            for (int z = 1; z < dim[2] - 1; ++z) {
+                for (int y = 1; y < dim[1] - 1; ++y) {
                     Coord<DIM> c(0, y, z);
                     Coord<DIM> coeffCoord = c;
 
@@ -263,28 +263,28 @@ public:
                         FixedNeighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
                         &newGrid->at(c), 
                         1, 
-                        dim.c[0] - 1);
+                        dim[0] - 1);
 
                     // updater.step(
                     //     Neighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
                     //     &newGrid->at(c), 
-                    //     dim.c[0], 
-                    //     dim.c[0] * dim.c[1], 
+                    //     dim[0], 
+                    //     dim[0] * dim[1], 
                     //     1, 
-                    //     dim.c[0] - 1);
+                    //     dim[0] - 1);
                     
                     // for (int i = 0; i < UPDATER::coefficients(); ++i) {
                     //     coefficients[i] = &coeff.at(coeffCoord);
-                    //     coeffCoord.c[DIM - 1] += dim.c[DIM - 1];
+                    //     coeffCoord[DIM - 1] += dim[DIM - 1];
                     // }
                     // updater.step(
                     //     &coefficients[0], 
                     //     &oldGrid->at(c), 
                     //     &newGrid->at(c), 
-                    //     dim.c[0], 
-                    //     dim.c[0] * dim.c[1], 
+                    //     dim[0], 
+                    //     dim[0] * dim[1], 
                     //     1, 
-                    //     dim.c[0] - 1);
+                    //     dim[0] - 1);
 
                     // double *source[9] = {
                     //     &oldGrid->at(Coord<DIM>(0, y - 1, z + 1)),
@@ -297,7 +297,7 @@ public:
                     //     &oldGrid->at(Coord<DIM>(0, y + 1, z    )),
                     //     &oldGrid->at(Coord<DIM>(0, y + 1, z - 1))
                     // };
-                    // updater.update(source, &newGrid->at(c), 1, dim.c[0] - 1);
+                    // updater.update(source, &newGrid->at(c), 1, dim[0] - 1);
                 }
             }
             std::swap(newGrid, oldGrid);
@@ -322,11 +322,11 @@ public:
                 if (d > lastDim) {
                     lastDim = d;
                     Coord<DIM> dim;
-                    dim.c[0] = d;
-                    dim.c[1] = 4;
-                    dim.c[2] = 4;
+                    dim[0] = d;
+                    dim[1] = 4;
+                    dim[2] = 4;
                     // for (int i = 0; i < DIM; ++i)
-                    //     dim.c[i] = d;
+                    //     dim[i] = d;
                     int repeats = std::max(1, 10000000 / dim.prod());
                     run(dim, repeats);
                 }
@@ -348,7 +348,7 @@ private:
         double seconds = 1.0 * uTime / 1000 / 1000;
         Coord<DIM> inner = dim;
         for (int i = 0; i < DIM; ++i)
-            inner.c[i] -= 2;
+            inner[i] -= 2;
         double gflops = 1.0 * UPDATER().flops() * inner.prod() * 
             repeats / 1000 / 1000 / 1000 / seconds;
         std::cout << dim.x() << " " << gflops << "\n";

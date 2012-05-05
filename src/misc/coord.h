@@ -23,11 +23,7 @@ template<>
 class Coord<1>
 {
     friend class Typemaps;
-
 public:
-    typedef SuperVector<Coord> Vector;
-
-    int c[1];
 
     static Coord<1> diagonal(const int& nx)
     {
@@ -47,6 +43,16 @@ public:
     const int& x() const
     { 
         return c[0]; 
+    }
+
+    inline int& operator[](const int& i)
+    {
+        return c[i];
+    }
+
+    inline const int& operator[](const int& i) const
+    {
+        return c[i];
     }
 
     inline bool operator==(const Coord& comp) const
@@ -85,17 +91,16 @@ public:
         s << "(" << x() << ")";
         return s.str();
     }
+
+private:
+    int c[1];
 };
 
 template<>
 class Coord<2>
 {
     friend class Typemaps;
-
 public:
-    typedef SuperVector<Coord> Vector;
-
-    int c[2];
 
     static Coord<2> diagonal(const int& nx)
     {
@@ -126,6 +131,16 @@ public:
     const int& y() const
     { 
         return c[1]; 
+    }
+
+    inline int& operator[](const int& i)
+    {
+        return c[i];
+    }
+
+    inline const int& operator[](const int& i) const
+    {
+        return c[i];
     }
 
     inline bool operator==(const Coord& comp) const
@@ -220,17 +235,16 @@ public:
         s << "(" << x() << ", " << y() << ")";
         return s.str();
     }
+
+private:
+    int c[2];
 };
 
 template<>
 class Coord<3>
 {
     friend class Typemaps;
-
 public:
-    typedef SuperVector<Coord> Vector;
-
-    int c[3];
 
     static Coord<3> diagonal(const int& nx)
     {
@@ -272,6 +286,16 @@ public:
     const int& z() const
     { 
         return c[2]; 
+    }
+
+    inline int& operator[](const int& i)
+    {
+        return c[i];
+    }
+
+    inline const int& operator[](const int& i) const
+    {
+        return c[i];
     }
 
     inline bool operator==(const Coord& comp) const
@@ -373,6 +397,9 @@ public:
         s << "(" << x() << ", " << y() << ", " << z() << ")";
         return s.str();
     }
+
+private:
+    int c[3];
 };
 
 // fixme: make IndexToCoord and CoordToIndex both members of Coord
@@ -453,7 +480,6 @@ public:
             c.x();
     }
 };
-
 
 }
 

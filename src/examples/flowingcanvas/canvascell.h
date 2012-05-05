@@ -74,12 +74,11 @@ public:
     {
         pos[0] = _pos.x();
         pos[1] = _pos.y();
-        forceFixed[0] = _forceFixed.c[0];
-        forceFixed[1] = _forceFixed.c[1];
+        forceFixed[0] = _forceFixed[0];
+        forceFixed[1] = _forceFixed[1];
         forceSet = _forceSet;
     }
 
-    // fixme: faster conversion if moore-neighborhood is used (instead of von neumann)?
     __host__ __device__
     void update(const CanvasCell *up, const CanvasCell *same, const CanvasCell *down, const unsigned& nanoStep)
     {

@@ -28,6 +28,17 @@ public:
         return s.str();
     }
 
+    inline double& operator[](const int& i)
+    {
+        return c[i];
+    }
+
+    inline const double& operator[](const int& i) const
+    {
+        return c[i];
+    }
+
+protected:
     boost::array<double, DIM> c;
 };
 
@@ -48,7 +59,7 @@ public:
     inline
     FloatCoord(const Coord<1>& p) 
     {
-        c[0] = p.c[0];
+        c[0] = p[0];
     }
 
     inline
@@ -133,8 +144,8 @@ public:
     inline
     FloatCoord(const Coord<2>& p) 
     {
-        c[0] = p.c[0];
-        c[1] = p.c[1];
+        c[0] = p[0];
+        c[1] = p[1];
     }
 
     inline
@@ -227,9 +238,9 @@ public:
     inline
     FloatCoord(const Coord<3>& p) 
     {
-        c[0] = p.c[0];
-        c[1] = p.c[1];
-        c[2] = p.c[2];
+        c[0] = p[0];
+        c[1] = p[1];
+        c[2] = p[2];
     }
 
     inline

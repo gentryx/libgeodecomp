@@ -169,7 +169,7 @@ public:
                 "(Non-Root) needs an empty LoadBalancer");
         }
 
-        int height = gridDimensions().c[DIM - 1];
+        int height = gridDimensions()[DIM - 1];
         partitions = partition(height, mpilayer.size());
         CoordBox<DIM> box = adaptDimensions(partitions);
         curStripe = new GridType(box);
@@ -285,7 +285,9 @@ private:
      */
     void balanceLoad()
     {
-        if (this->stepNum % loadBalancingPeriod != 0) return;
+        if (this->stepNum % loadBalancingPeriod != 0) {
+            return;
+        }
 
         double ratio = chrono.nextCycle();
         DVec loads = mpilayer.gather(ratio, 0);
@@ -349,8 +351,8 @@ private:
         int height = std::max((int)(end - start), 0);
         Coord<DIM> startCorner;
         Coord<DIM> dim = gridDimensions();
-        startCorner.c[DIM - 1] = start;
-        dim.c[DIM - 1] = height;
+        startCorner[DIM - 1] = start;
+        dim[DIM - 1] = height;
 
         return CoordBox<DIM>(startCorner, dim);
     }

@@ -119,9 +119,9 @@ public:
     //             "test.bov", MPI::COMM_SELF);
             
     //         Coord<3> bovDim;
-    //         bovDim.c[0] = std::max(1, dimensions.c[0]);
-    //         bovDim.c[1] = std::max(1, dimensions.c[1]);
-    //         bovDim.c[2] = std::max(1, dimensions.c[2]);
+    //         bovDim[0] = std::max(1, dimensions[0]);
+    //         bovDim[1] = std::max(1, dimensions[1]);
+    //         bovDim[2] = std::max(1, dimensions[2]);
 
     //         std::ostringstream buf;
     //         buf << "TIME: " << 100 << "\n"

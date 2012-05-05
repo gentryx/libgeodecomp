@@ -77,13 +77,13 @@ public:
         // need to determine to which container to move next
         for (int d = 0; d < 3; ++d) {
             double val = 0;
-            if (pos.c[d] < parentOrigin.c[d]) {
+            if (pos[d] < parentOrigin[d]) {
                 val = -1;
             }
-            if (pos.c[d] >= (parentOrigin.c[d] + CONTAINER_DIM)) {
+            if (pos[d] >= (parentOrigin[d] + CONTAINER_DIM)) {
                 val = 1;
             }
-            targetContainer.c[d] = val;
+            targetContainer[d] = val;
         }
     }
 
@@ -106,15 +106,15 @@ public:
         FloatCoord<3> ret;
         FloatCoord<3> delta = pos - other.center;
         double distance = 
-            delta.c[0] * other.normal.c[0] + 
-            delta.c[1] * other.normal.c[1] + 
-            delta.c[2] * other.normal.c[2];
+            delta[0] * other.normal[0] + 
+            delta[1] * other.normal[1] + 
+            delta[2] * other.normal[2];
         
         if (distance < SPHERE_RADIUS) {
             FloatCoord<3> planar = (pos - other.normal * distance) - other.center;
-            if ((abs(planar.c[0]) < (BOUNDARY_DIM * 0.5)) &&
-                (abs(planar.c[1]) < (BOUNDARY_DIM * 0.5)) &&
-                (abs(planar.c[2]) < (BOUNDARY_DIM * 0.5))) {
+            if ((abs(planar[0]) < (BOUNDARY_DIM * 0.5)) &&
+                (abs(planar[1]) < (BOUNDARY_DIM * 0.5)) &&
+                (abs(planar[2]) < (BOUNDARY_DIM * 0.5))) {
                 double scale = (SPHERE_RADIUS * SPHERE_RADIUS) / distance / distance;
                 ret = other.normal * scale;
             }
@@ -314,8 +314,8 @@ private:
     {
         std::stringstream buf;
         buf << "sphere {\n"
-            << "  <" << ball.pos.c[0] << ", " << ball.pos.c[1] << ", " 
-            << ball.pos.c[2] << ">, " << SPHERE_RADIUS << "\n"
+            << "  <" << ball.pos[0] << ", " << ball.pos[1] << ", " 
+            << ball.pos[2] << ">, " << SPHERE_RADIUS << "\n"
             << "  texture {\n"
             << "    pigment {color White}\n"
             << "    finish {phong 0.9 metallic}\n"
@@ -345,12 +345,12 @@ private:
 
         std::stringstream buf;
         buf << "box {\n"
-            << "  <" <<  corner1.c[0] 
-            << ", "  <<  corner1.c[1] 
-            << ", "  <<  corner1.c[2] 
-            << ">, <" << corner2.c[0]
-            << ", "  <<  corner2.c[1] 
-            << ", "  <<  corner2.c[2] 
+            << "  <" <<  corner1[0] 
+            << ", "  <<  corner1[1] 
+            << ", "  <<  corner1[2] 
+            << ">, <" << corner2[0]
+            << ", "  <<  corner2[1] 
+            << ", "  <<  corner2[2] 
             << ">\n"
             << "  texture {\n"
             << "    pigment {color Blue transmit " << transmit << "}\n"
@@ -405,27 +405,27 @@ public:
             // to overly reduncant code.
             
             // left boundary
-            if (c.c[0] == 0)
+            if (c[0] == 0)
                 addBoundary(&container, center, FloatCoord<3>(1, 0, 0));
 
             // right boundary
-            if (c.c[0] == (box.dimensions.c[0] - 1))
+            if (c[0] == (box.dimensions[0] - 1))
                 addBoundary(&container, center, FloatCoord<3>(-1, 0, 0));
 
             // lower boundary
-            if (c.c[1] == 0)
+            if (c[1] == 0)
                 addBoundary(&container, center, FloatCoord<3>(0, 1, 0));
 
             // upper boundary
-            if (c.c[1] == (box.dimensions.c[1] - 1))
+            if (c[1] == (box.dimensions[1] - 1))
                 addBoundary(&container, center, FloatCoord<3>(0, -1, 0));
 
             // front boundary
-            if (c.c[2] == 0)
+            if (c[2] == 0)
                 addBoundary(&container, center, FloatCoord<3>(0, 0, 1));
 
             // rear boundary
-            if (c.c[2] == (box.dimensions.c[2] - 1))
+            if (c[2] == (box.dimensions[2] - 1))
                 addBoundary(&container, center, FloatCoord<3>(0, 0, -1));
 
             target->at(c) = container;

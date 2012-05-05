@@ -31,19 +31,19 @@ public:
 
             if ((c.x() == 140) && (c.y() >= 80) && (c.y() <= 160)) {
                 setForce = true;
-                force.c[1] = -1;
+                force[1] = -1;
             }
             if ((c.x() == 220) && (c.y() >= 80) && (c.y() <= 160)) {
                 setForce = true;
-                force.c[1] = 1;
+                force[1] = 1;
             }
             if ((c.y() == 80) && (c.x() >= 140) && (c.x() <= 220)) {
                 setForce = true;
-                force.c[0] = 1;
+                force[0] = 1;
             }
             if ((c.y() == 160) && (c.x() >= 140) && (c.x() <= 220)) {
                 setForce = true;
-                force.c[0] = -1;
+                force[0] = -1;
             }
 
             // fixme

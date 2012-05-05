@@ -45,14 +45,14 @@ public:
         {
             int i;
             for (i = 0; i < DIM - 1; ++i) {
-                if (++cursor.c[i] == end.c[i]) {
-                    cursor.c[i] = origin.c[i];
+                if (++cursor[i] == end[i]) {
+                    cursor[i] = origin[i];
                 } else {
                     break;
                 }
             }
             if (i == DIM - 1)
-                ++cursor.c[DIM - 1];
+                ++cursor[DIM - 1];
             return *this;
         }
 
@@ -79,7 +79,7 @@ public:
             // set all dimensions to 1 except for the last one to
             // avoid division by 0 in operator[]
             dimensions = Coord<DIM>::diagonal(1);
-            dimensions.c[DIM - 1] = 0;
+            dimensions[DIM - 1] = 0;
         }
     }
 
@@ -91,7 +91,7 @@ public:
     Iterator end() const 
     {
         Coord<DIM> endOffset;
-        endOffset.c[DIM - 1] = dimensions.c[DIM - 1];
+        endOffset[DIM - 1] = dimensions[DIM - 1];
         return Iterator(origin, origin + endOffset, dimensions);
     }
 

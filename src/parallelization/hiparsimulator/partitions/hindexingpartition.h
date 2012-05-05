@@ -1,15 +1,5 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
 #define _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
-//fixme: todo:
-//fixme: generic partition interface: 
-//fixme:   begin(unsigned i = 0) -> returns an iterator starting at position i
-//fixme:   end(unsigned i = UNSIGNEDMAX)   -> returns an iterator starting at position i, defaults to the partitions end
-//fixme:   iterator needs:
-//fixme:     ++i
-//fixme:     *i
-//fixme:     i != j
-//fixme: rename hindexing to hindexingpartition
-//fixme: benchmark hindexing vs. striping vs. recursive bisection
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/multi_array.hpp>
@@ -82,6 +72,8 @@ class HIndexingPartition : public SpaceFillingCurve<2>
     friend class HIndexingPartitionTest;
 
 public:
+    typedef SuperVector<Coord<2> > CoordVector;
+
     class Triangle
     {
     public:
@@ -118,7 +110,7 @@ public:
     // original one.
     static int triangleTransitions[4][4];
     // (dimensions.x(), dimensions.y(), type) -> coord sequence
-    static boost::shared_ptr<boost::multi_array<Coord<2>::Vector, 3> > triangleCoordsCache;
+    static boost::shared_ptr<boost::multi_array<CoordVector, 3> > triangleCoordsCache;
     static Coord<2> maxCachedDimensions;
     static SuperMap<std::pair<Coord<2>, unsigned>, unsigned> triangleLengthCache;
     static bool cachesInitialized;
@@ -256,7 +248,7 @@ public:
         {
             sublevelState = CACHED;
             cachedTriangleOrigin = triangle.origin;
-            Coord<2>::Vector &coords = (*triangleCoordsCache)[triangle.dimensions.x()][triangle.dimensions.y()][triangle.type];
+            CoordVector& coords = (*triangleCoordsCache)[triangle.dimensions.x()][triangle.dimensions.y()][triangle.type];
             cachedTriangleCoordsIterator = &coords[counter];
             cachedTriangleCoordsEnd = &coords[0] + coords.size();
         }
@@ -551,7 +543,7 @@ private:
         // store triangles of at most maxDim in size
         Coord<2> maxDim(17, 17);
         triangleCoordsCache.reset(
-            new boost::multi_array<Coord<2>::Vector, 3>(
+            new boost::multi_array<CoordVector, 3>(
                 boost::extents[maxDim.x()][maxDim.y()][4]));
 
         for (int y = 2; y < maxDim.y(); ++y) {
@@ -559,7 +551,7 @@ private:
             for (int x = 2; x < maxDim.x(); ++x) {
                 Coord<2> dimensions(x, y);
                 for (unsigned t = 0; t < 4; t++) {
-                    Coord<2>::Vector coords;
+                    CoordVector coords;
                     Iterator end(Coord<2>(0, 0));
                     for (Iterator h(Coord<2>(0, 0), t, dimensions); h != end; ++h) 
                         coords.push_back(*h);                    

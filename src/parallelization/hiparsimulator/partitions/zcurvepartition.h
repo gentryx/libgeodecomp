@@ -23,9 +23,11 @@ class ZCurvePartition : public SpaceFillingCurve<DIMENSIONS>
 public:
     const static int DIM = DIMENSIONS;
 
-    typedef boost::shared_ptr<boost::multi_array<typename Coord<DIM>::Vector, DIM> > Cache;
+    typedef SuperVector<Coord<DIM> > CoordVector;
+    typedef boost::shared_ptr<boost::multi_array<CoordVector, DIM> > Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
-    typedef typename Topology::template LocateHelper<DIM, typename Coord<DIM>::Vector> LocateHelper;
+    typedef typename Topology::template LocateHelper<DIM, CoordVector> LocateHelper;
+  
 
     class Square
     {
@@ -94,7 +96,7 @@ public:
             // std::cout << "operatorIncTrivial, " << trivialSquareCounter << "\n"
             //           << this->cursor << "\n";
             if (--trivialSquareCounter > 0) {
-                this->cursor.c[trivialSquareDirDim]++;
+                this->cursor[trivialSquareDirDim]++;
             } else {
                 digUpDown();
             }
@@ -157,11 +159,11 @@ public:
 
             trivialSquareDirDim = 0;
             for (int i = 1; i < DIM; ++i) 
-                if (dimensions.c[i] > 1) 
+                if (dimensions[i] > 1) 
                     trivialSquareDirDim = i;
                 
-            trivialSquareCounter = dimensions.c[trivialSquareDirDim] - offset;
-            this->cursor.c[trivialSquareDirDim] += offset;
+            trivialSquareCounter = dimensions[trivialSquareDirDim] - offset;
+            this->cursor[trivialSquareDirDim] += offset;
 
         }
 
@@ -171,7 +173,7 @@ public:
             const unsigned& offset)
         {
             this->sublevelState = CACHED;
-            typename Coord<DIM>::Vector &coords = 
+            CoordVector& coords = 
                 LocateHelper()(
                     *ZCurvePartition<DIM>::coordsCache,
                     dimensions,
@@ -206,9 +208,9 @@ public:
                 Coord<DIM> quadrantDim;
 
                 for (int d = 0; d < DIM; ++d) {
-                    quadrantDim.c[d] = quadrantShift[d]?
-                        remainingDimensions.c[d] :
-                        halfDimensions.c[d];
+                    quadrantDim[d] = quadrantShift[d]?
+                        remainingDimensions[d] :
+                        halfDimensions[d];
                 }
 
                 quadrantDims[i] = quadrantDim;
@@ -234,8 +236,8 @@ public:
 
             std::bitset<DIM> quadrantShift(index);
             for (int d = 0; d < DIM; ++d) {
-                newOrigin.c[d] = quadrantShift[d]? 
-                    halfDimensions.c[d] :
+                newOrigin[d] = quadrantShift[d]? 
+                    halfDimensions[d] :
                     0;
             }
             newOrigin += currentSquare.origin;
@@ -296,7 +298,7 @@ public:
         {
             bool ret = true;
             for (int i = 0; i < DIM; ++i)
-                ret &= dimensions.c[i] < maxCachedDimensions.c[i];
+                ret &= dimensions[i] < maxCachedDimensions[i];
             return ret;
         }
     };
@@ -329,7 +331,7 @@ public:
         // DIM^2 is a trick to keep the cache small if DIM is large.
         Coord<DIM> maxDim = Coord<DIM>::diagonal(68 / DIM / DIM);
         ZCurvePartition<DIM>::coordsCache.reset(
-            new boost::multi_array<typename Coord<DIM>::Vector, DIM>(
+            new boost::multi_array<CoordVector, DIM>(
                 maxDim.toExtents()));
 
         CoordBox<DIM> box(Coord<DIM>(), maxDim);
@@ -337,7 +339,7 @@ public:
         while (s.hasNext()) {
             Coord<DIM> dim = s.next();
             if (!hasTrivialDimensions(dim)) {
-                typename Coord<DIM>::Vector coords;
+                CoordVector coords;
                 Iterator end(Coord<DIM>());
                 for (Iterator i(Coord<DIM>(), dim, 0); i != end; ++i)
                     coords.push_back(*i);

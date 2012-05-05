@@ -37,7 +37,7 @@ public:
 
     CoordNormalizer<DIM, DIMINDEX - 1> operator[](const int& i)
     {
-        target->c[DIMINDEX - 1] = i;
+        (*target)[DIMINDEX - 1] = i;
         return CoordNormalizer<DIM, DIMINDEX - 1>(target, dimensions);
     }
 
@@ -70,7 +70,7 @@ public:
 
     Coord<DIM>& operator[](const int& i)
     {
-        target->c[0] = i;
+        (*target)[0] = i;
         return *target;
     }
 
@@ -89,37 +89,35 @@ public:
     template<bool WRAP_EDGES, int DIMENSION, typename COORD> 
     class NormalizeCoordElement;
 
-    template<int DIMENSION, typename COORD> 
-    class NormalizeCoordElement<true, DIMENSION, COORD>
+    template<int DIM, typename COORD> 
+    class NormalizeCoordElement<true, DIM, COORD>
+    {
+    public:
+        inline int operator()(
+            const COORD& coord, 
+            const COORD& dimensions) const
+        {
+            return (dimensions[DIM] + coord[DIM]) % dimensions[DIM];
+        }
+    };
+
+    template<int DIM, typename COORD> 
+    class NormalizeCoordElement<false, DIM, COORD>
     {
     public:
         inline int operator()(
             const COORD& coord, 
             const COORD& boundingBox) const
         {
-            return 
-                (boundingBox.c[DIMENSION] + coord.c[DIMENSION]) %
-                boundingBox.c[DIMENSION];
+            return coord[DIM];
         }
     };
 
-    template<int DIMENSION, typename COORD> 
-    class NormalizeCoordElement<false, DIMENSION, COORD>
-    {
-    public:
-        inline int operator()(
-            const COORD& coord, 
-            const COORD& boundingBox) const
-        {
-            return coord.c[DIMENSION];
-        }
-    };
-
-    template<bool WRAP_EDGES, int DIMENSION, typename COORD> 
+    template<bool WRAP_EDGES, int DIM, typename COORD> 
     class IsOutOfBounds;
 
-    template<int DIMENSION, typename COORD> 
-    class IsOutOfBounds<true, DIMENSION, COORD>
+    template<int DIM, typename COORD> 
+    class IsOutOfBounds<true, DIM, COORD>
     {
     public:
         inline bool operator()(
@@ -130,22 +128,21 @@ public:
         }
     };
 
-    template<int DIMENSION, typename COORD> 
-    class IsOutOfBounds<false, DIMENSION, COORD>
+    template<int DIM, typename COORD> 
+    class IsOutOfBounds<false, DIM, COORD>
     {
     public:
         inline bool operator()(
             const COORD& coord, 
             const COORD& boundingBox) const
         {
-            return
-                (coord.c[DIMENSION] < 0) || 
-                (coord.c[DIMENSION] >= 
-                 boundingBox.c[DIMENSION]);
+            return 
+                (coord[DIM] < 0) || 
+                (coord[DIM] >= boundingBox[DIM]);
         }
     };
 
-    template<int DIMENSION, typename COORD, typename TOPOLOGY>
+    template<int DIM, typename COORD, typename TOPOLOGY>
     class IsOutOfBoundsHelper
     {
     public:
@@ -154,9 +151,9 @@ public:
             const COORD& boundingBox) const
         {
             return 
-                IsOutOfBounds<TOPOLOGY::WrapEdges, DIMENSION, COORD>()(
+                IsOutOfBounds<TOPOLOGY::WrapEdges, DIM, COORD>()(
                     coord, boundingBox) ||
-                IsOutOfBoundsHelper<DIMENSION - 1, COORD, 
+                IsOutOfBoundsHelper<DIM - 1, COORD, 
                                     typename TOPOLOGY::ParentTopology>()(
                                         coord, boundingBox);
         }
@@ -165,8 +162,8 @@ public:
 
     class ZeroDimensional;
 
-    template<int DIMENSION, typename COORD>
-    class IsOutOfBoundsHelper<DIMENSION, COORD, ZeroDimensional>
+    template<int DIM, typename COORD>
+    class IsOutOfBoundsHelper<DIM, COORD, ZeroDimensional>
     {
     public:
         inline bool operator()(

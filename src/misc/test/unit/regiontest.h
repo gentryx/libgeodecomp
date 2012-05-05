@@ -13,6 +13,7 @@ namespace LibGeoDecomp {
 class RegionTest : public CxxTest::TestSuite 
 {
 public:
+    typedef SuperVector<Coord<2> > CoordVector;
     typedef Region<2>::Line Line;
     typedef Region<2>::StreakMap StreakMap;
 
@@ -180,7 +181,7 @@ public:
 
     void testInsert2()
     {
-        SuperVector<Coord<2> > expected;
+        CoordVector expected;
         expected += 
             Coord<2>(17, 22), 
             Coord<2>(18, 22), 
@@ -201,7 +202,7 @@ public:
             Coord<2>(41, 44), 
             Coord<2>(42, 44);
             
-        for (SuperVector<Coord<2> >::iterator i = expected.begin(); 
+        for (CoordVector::iterator i = expected.begin(); 
              i != expected.end(); i++) 
             c << *i;
 
@@ -277,8 +278,9 @@ public:
 
     void testBigInsert()
     {
-        SuperVector<Coord<2> > res;
-        for (SuperVector<Coord<2> >::iterator i = bigInsertShuffled.begin(); i != bigInsertShuffled.end(); i++) 
+        CoordVector res;
+        for (CoordVector::iterator i = bigInsertShuffled.begin(); 
+             i != bigInsertShuffled.end(); i++) 
             c << *i; 
 
         for (Region<2>::Iterator i = c.begin(); i != c.end(); ++i) 
@@ -949,12 +951,12 @@ public:
 
 private:
     Region<2> c;
-    Coord<2>::Vector bigInsertOrdered;
-    Coord<2>::Vector bigInsertShuffled;        
+    CoordVector bigInsertOrdered;
+    CoordVector bigInsertShuffled;        
 
-    Coord<2>::Vector transform(const SuperVector<std::string>& shape)
+    CoordVector transform(const SuperVector<std::string>& shape)
     {
-        Coord<2>::Vector ret;
+        CoordVector ret;
         for (int y = 0; y < (int)shape.size(); y++) {
             std::string line = shape[y];
             for (int x = 0; x < (int)line.size(); x++) {

@@ -227,7 +227,8 @@ private:
         const unsigned& end, 
         const PARTITION& partition)
     {        
-        Coord<2>::Vector expected, actual;
+        SuperVector<Coord<2> > expected;
+        SuperVector<Coord<2> > actual;
         for (typename PARTITION::Iterator i = partition[start]; 
              i != partition[end]; 
              ++i) 

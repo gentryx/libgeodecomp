@@ -18,27 +18,27 @@ public:
         const CoordBox<DIM>& simulationArea,
         const int& ghostZoneWidth)
     {
-        offset->c[INDEX] = 0;
+        (*offset)[INDEX] = 0;
         if (TOPOLOGY::WrapEdges) {
             int enlargedWidth = 
-                ownBoundingBox.dimensions.c[INDEX] + 2 * ghostZoneWidth;
-            if (enlargedWidth < simulationArea.dimensions.c[INDEX]) {
-                offset->c[INDEX] = 
-                    ownBoundingBox.origin.c[INDEX] - ghostZoneWidth;
+                ownBoundingBox.dimensions[INDEX] + 2 * ghostZoneWidth;
+            if (enlargedWidth < simulationArea.dimensions[INDEX]) {
+                (*offset)[INDEX] = 
+                    ownBoundingBox.origin[INDEX] - ghostZoneWidth;
             } else {
-                offset->c[INDEX] = 0;
+                (*offset)[INDEX] = 0;
             }
-            dimensions->c[INDEX] = 
-                std::min(enlargedWidth, simulationArea.dimensions.c[INDEX]);
+            (*dimensions)[INDEX] = 
+                std::min(enlargedWidth, simulationArea.dimensions[INDEX]);
         } else {
-            offset->c[INDEX] = 
-                std::max(0, ownBoundingBox.origin.c[INDEX] - ghostZoneWidth);
-            int end = std::min(simulationArea.origin.c[INDEX] + 
-                               simulationArea.dimensions.c[INDEX],
-                               ownBoundingBox.origin.c[INDEX] + 
-                               ownBoundingBox.dimensions.c[INDEX] + 
+            (*offset)[INDEX] = 
+                std::max(0, ownBoundingBox.origin[INDEX] - ghostZoneWidth);
+            int end = std::min(simulationArea.origin[INDEX] + 
+                               simulationArea.dimensions[INDEX],
+                               ownBoundingBox.origin[INDEX] + 
+                               ownBoundingBox.dimensions[INDEX] + 
                                ghostZoneWidth);
-            dimensions->c[INDEX] = end - offset->c[INDEX];
+            (*dimensions)[INDEX] = end - (*offset)[INDEX];
         } 
 
         OffsetHelper<INDEX - 1, DIM, typename TOPOLOGY::ParentTopology>()(

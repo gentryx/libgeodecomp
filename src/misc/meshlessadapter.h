@@ -51,8 +51,8 @@ public:
         Coord<DIM> c;
         for (int i = 0; i < DIM; ++i) {
             // cut all overhanging coords
-            c.c[i] = std::min(discreteDim.c[i] - 1,
-                              (int)(pos.c[i] * scale));
+            c[i] = std::min(discreteDim[i] - 1,
+                              (int)(pos[i] * scale));
         }
         return c;
     }
@@ -160,13 +160,13 @@ public:
         // cells. this step enlarges the box size slightly to ensure a
         // smooth distribution.
         for (int i = 0; i < DIM; ++i) {
-            double current = dimensions.c[i] / upperBorderDim.c[i];
+            double current = dimensions[i] / upperBorderDim[i];
             if (current > maxBoxSize) {
                 maxBoxSize = current;
                 // because the loop condition above is not tight, the
                 // next smaller box size might represet a valid
                 // solution, too.
-                nextLower = dimensions.c[i] / (upperBorderDim.c[i] + 1);
+                nextLower = dimensions[i] / (upperBorderDim[i] + 1);
             }
         }
             
@@ -258,7 +258,7 @@ private:
         // boundary container cells on the right would not contain all
         // required neighbors.
         for (int i = 0; i < DIM; ++i) {
-            discreteDim.c[i] = std::max(1.0, std::floor(dimensions.c[i] * scale));
+            discreteDim[i] = std::max(1.0, std::floor(dimensions[i] * scale));
         }
 
         if (discreteDim.prod() > MAX_SIZE) 
@@ -293,9 +293,9 @@ private:
         double dist2 = 0;
 
         for (int i = 0; i < DIM; ++i) {
-            double delta = std::abs(a.c[i] - b.c[i]);
+            double delta = std::abs(a[i] - b[i]);
             if (TOPOLOGY::wrapsAxis(i))
-                delta = std::min(delta, dimensions.c[i] - delta);
+                delta = std::min(delta, dimensions[i] - delta);
             dist2 += delta * delta;
         }
 
@@ -310,9 +310,9 @@ private:
         int maxDist = 0;
         
         for (int i = 0; i < DIM; ++i) {
-            int dist = std::abs(delta.c[i]);
+            int dist = std::abs(delta[i]);
             if (TOPOLOGY::wrapsAxis(i))
-                dist = std::min(dist, discreteDim.c[i] - dist);
+                dist = std::min(dist, discreteDim[i] - dist);
             maxDist = std::max(dist, maxDist);
         }
 
@@ -323,7 +323,7 @@ private:
     {
         int maxDist = 0;
         for (int i = 0; i < DIM; ++i) {
-            maxDist = std::max(maxDist, std::abs(a.c[i] - b.c[i]));
+            maxDist = std::max(maxDist, std::abs(a[i] - b[i]));
         }
         return maxDist > 1;
 

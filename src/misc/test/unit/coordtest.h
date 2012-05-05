@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/math/tools/precision.hpp>
-#include "../../coord.h"
+#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/misc/coord.h>
 
 using namespace LibGeoDecomp; 
 
@@ -11,11 +12,12 @@ class CoordTest : public CxxTest::TestSuite
     Coord<2> *_c1;
 
 public:
-    bool includesCoord(Coord<2>::Vector vec, int x, int y) {
+    bool includesCoord(SuperVector<Coord<2> > vec, int x, int y) {
         Coord<2> compare(x, y);
-        for(Coord<2>::Vector::iterator i = vec.begin(); i != vec.end(); i++) {
-            if (*i == compare)
+        for(SuperVector<Coord<2> >::iterator i = vec.begin(); i != vec.end(); i++) {
+            if (*i == compare) {
                 return true;
+            }
         }
         return false;
     }
@@ -153,16 +155,16 @@ public:
     void testElement()
     {
         Coord<2> c1(5);
-        TS_ASSERT_EQUALS(5, c1.c[0]);
+        TS_ASSERT_EQUALS(5, c1[0]);
         
         Coord<2> c2(4, 6);
-        TS_ASSERT_EQUALS(4, c2.c[0]);
-        TS_ASSERT_EQUALS(6, c2.c[1]);
+        TS_ASSERT_EQUALS(4, c2[0]);
+        TS_ASSERT_EQUALS(6, c2[1]);
         
         Coord<3> c3(1, 7, 9);
-        TS_ASSERT_EQUALS(1, c3.c[0]);
-        TS_ASSERT_EQUALS(7, c3.c[1]);
-        TS_ASSERT_EQUALS(9, c3.c[2]);
+        TS_ASSERT_EQUALS(1, c3[0]);
+        TS_ASSERT_EQUALS(7, c3[1]);
+        TS_ASSERT_EQUALS(9, c3[2]);
     }
 
     void testToExtents()
@@ -263,6 +265,36 @@ public:
         TS_ASSERT_EQUALS(7,  Coord<2>(3, 4)    * Coord<2>(1, 1));
         TS_ASSERT_EQUALS(26, Coord<3>(3, 4, 1) * Coord<3>(4, 3, 2));
     }
+
+    // fixme: move this to performance tests
+    // void testSpeed()
+    // {
+    //     long long tStart = Chronometer::timeUSec();
+
+    //     const int SIZE = 100;
+    //     Coord<3> coords[SIZE];
+    //     for (int i = 0; i < SIZE; ++i) {
+    //         coords[i] = Coord<3>(i, i + 1, i + 2);
+    //     }
+
+    //     for (int r = 0; r < 10000000; ++r) {
+    //         Coord<3> buf;
+    //         for (int i = 0; i < (SIZE - 1); ++i) {
+    //             buf += coords[i];
+    //             coords[i] = coords[i + 1];
+    //         }
+    //         for (int d = 0; d < 3; ++d) {
+    //             if (buf[d] > 0x010000) {
+    //                 buf[d] &= (0x010000 - 1);
+    //             }
+    //         }
+    //         coords[SIZE - 1] = buf;
+    //     }
+
+    //     long long tEnd = Chronometer::timeUSec();
+    //     double delta = (tEnd - tStart) / 1000000.0;
+    //     std::cout << "delta: " << delta << "\n";
+    // }
 };
 
 }
