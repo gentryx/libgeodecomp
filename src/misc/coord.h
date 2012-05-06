@@ -60,6 +60,56 @@ public:
         return (x() == comp.x());
     }
 
+    inline bool operator!=(const Coord& comp) const
+    {
+        return (x() != comp.x());
+    }
+
+    inline bool operator<(const Coord& comp) const
+    {
+        return (x() < comp.x());
+    }
+  
+    inline Coord operator+(const Coord& addend) const
+    {
+        return Coord(x() + addend.x());
+    }
+
+    inline void operator+=(const Coord& addend)
+    {
+        x() += addend.x();
+    }
+
+    inline void operator-=(const Coord& minuend)
+    {
+        x() -= minuend.x();
+    }
+
+    inline Coord operator-(const Coord& minuend) const
+    {
+        return Coord(x() - minuend.x());
+    }
+
+    inline Coord operator-() const
+    {
+        return Coord(-x());
+    }
+
+    inline Coord operator*(const int& scale) const
+    {
+        return Coord(scale * x());
+    }
+
+    inline int operator*(const Coord& multiplier) const
+    {
+        return x() * multiplier.x();
+    }
+
+    inline Coord operator/(const int& divisor) const
+    {
+        return Coord(x()/ divisor);
+    }
+
     inline const int& prod() const
     {
         return x();
@@ -190,9 +240,9 @@ public:
         return Coord(scale * x(), scale * y());
     }
 
-    inline int operator*(const Coord& multiplyer) const
+    inline int operator*(const Coord& multiplier) const
     {
-        return x() * multiplyer.x() + y() * multiplyer.y();
+        return x() * multiplier.x() + y() * multiplier.y();
     }
 
     inline Coord operator/(const int& divisor) const
@@ -350,9 +400,9 @@ public:
         return Coord(scale * x(), scale * y(), scale * z());
     }
 
-    inline int operator*(const Coord& multiplyer) const
+    inline int operator*(const Coord& multiplier) const
     {
-        return x() * multiplyer.x() + y() * multiplyer.y() + z() * multiplyer.z();
+        return x() * multiplier.x() + y() * multiplier.y() + z() * multiplier.z();
     }
 
     inline Coord operator/(const int& divisor) const

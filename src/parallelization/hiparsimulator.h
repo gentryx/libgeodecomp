@@ -4,7 +4,6 @@
 #define _libgeodecomp_parallelization_hiparsimulator_h_
 
 #include <cmath>
-
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -198,7 +197,7 @@ private:
     inline void initUpdateGroup()
     {
         if (updateGroup) {
-            return;
+            return; 
         }
 
         CoordBox<DIM> box = this->initializer->gridBox();

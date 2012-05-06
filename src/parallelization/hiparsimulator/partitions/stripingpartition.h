@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/coordbox.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -13,61 +14,7 @@ class StripingPartition
     friend class StripingPartitionTest;
 public:
     const static int DIM = DIMENSIONS;
-
-    class Iterator 
-    {
-    public:
-        inline Iterator(
-            const Coord<DIM>& _origin, 
-            const Coord<DIM>& start, 
-            const Coord<DIM>& dimensions) :
-            cursor(start),
-            origin(_origin),
-            end(_origin + dimensions)
-        {}
-
-        inline bool operator==(const Iterator& other) const
-        {
-            return cursor == other.cursor;
-        }
-
-        inline bool operator!=(const Iterator& other) const
-        {
-            return !(*this == other);
-        }
-
-        inline const Coord<DIM>& operator*() const
-        {
-            return cursor;
-        }
-
-        inline Iterator& operator++()
-        {
-            int i;
-            for (i = 0; i < DIM - 1; ++i) {
-                if (++cursor[i] == end[i]) {
-                    cursor[i] = origin[i];
-                } else {
-                    break;
-                }
-            }
-            if (i == DIM - 1)
-                ++cursor[DIM - 1];
-            return *this;
-        }
-
-        inline std::string toString() const
-        {
-            std::ostringstream buffer;
-            buffer << "StripingPartition::Iterator(" << cursor << ", " << end << ")";
-            return buffer.str();
-        }
-            
-    private:
-        Coord<DIM> cursor;
-        Coord<DIM> origin;
-        Coord<DIM> end;
-    };
+    typedef typename CoordBox<DIM>::Iterator Iterator;
 
     StripingPartition(
         const Coord<DIM>& _origin=Coord<DIM>(), 

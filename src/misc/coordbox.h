@@ -17,6 +17,61 @@ class CoordBox
     friend class Typemaps;
 
 public:    
+    class Iterator 
+    {
+    public:
+        inline Iterator(
+            const Coord<DIM>& _origin, 
+            const Coord<DIM>& start, 
+            const Coord<DIM>& dimensions) :
+            cursor(start),
+            origin(_origin),
+            end(_origin + dimensions)
+        {}
+
+        inline bool operator==(const Iterator& other) const
+        {
+            return cursor == other.cursor;
+        }
+
+        inline bool operator!=(const Iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        inline const Coord<DIM>& operator*() const
+        {
+            return cursor;
+        }
+
+        inline Iterator& operator++()
+        {
+            int i;
+            for (i = 0; i < DIM - 1; ++i) {
+                if (++cursor[i] == end[i]) {
+                    cursor[i] = origin[i];
+                } else {
+                    break;
+                }
+            }
+            if (i == DIM - 1) {
+                ++cursor[DIM - 1];
+            }
+            return *this;
+        }
+
+        inline std::string toString() const
+        {
+            std::ostringstream buffer;
+            buffer << "StripingPartition::Iterator(" << cursor << ", " << end << ")";
+            return buffer.str();
+        }
+            
+    private:
+        Coord<DIM> cursor;
+        Coord<DIM> origin;
+        Coord<DIM> end;
+    };
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
@@ -37,6 +92,18 @@ public:
     inline bool operator!=(const CoordBox& other) const
     {
         return ! (*this == other);
+    }
+
+    inline Iterator begin() const
+    {
+        return Iterator(origin, origin, dimensions);
+    }
+
+    inline Iterator end() const
+    {
+        Coord<DIM> pos = origin;
+        pos[DIM - 1] += dimensions[DIM - 1];
+        return Iterator(origin, pos, dimensions);
     }
 
     /**
