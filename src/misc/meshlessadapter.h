@@ -76,11 +76,10 @@ public:
     {
         bool found = false;
         Coord<DIM> center = posToCoord(pos);
-   
         CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
-        CoordBoxSequence<DIM> s = box.sequence();
-        while (s.hasNext()) {
-            Coord<DIM> newCenter = center + s.next();
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            Coord<DIM> newCenter = center + *i;
             bool res = searchList(positions[newCenter], pos, coords);
             found |= res;
         }
@@ -91,15 +90,12 @@ public:
     inline CoordVec findAllPositions(const CoordListGrid& positions) const
     {
         CoordVec ret;
-
         CoordBox<DIM> box = positions.boundingBox();
-        CoordBoxSequence<DIM> s = box.sequence();
-        while (s.hasNext()) {
-            const CoordList& list = positions[s.next()];
-            for (typename CoordList::const_iterator iter = list.begin();
-                 iter != list.end();
-                 ++iter) {
-                ret.push_back(*iter);
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            const CoordList& list = positions[*i];
+            for (typename CoordList::const_iterator j = list.begin(); j != list.end(); ++j) {
+                ret.push_back(*i);
             }
         }
 
@@ -211,17 +207,16 @@ public:
         long emptyCells = 0;
         int lowestFill = cache[Coord<DIM>()];
         int highestFill = cache[Coord<DIM>()];
-
         CoordBox<DIM> box(Coord<DIM>(), discreteDim);
-        CoordBoxSequence<DIM> s = box.sequence();
-        while (s.hasNext()) {
-            Coord<DIM> c = s.next();
-            lowestFill  = std::min(cache[c], lowestFill);
-            highestFill = std::max(cache[c], highestFill);
-            sum += cache[c];
 
-            if (cache[c] == 0)
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            lowestFill  = std::min(cache[*i], lowestFill);
+            highestFill = std::max(cache[*i], highestFill);
+            sum += cache[*i];
+
+            if (cache[*i] == 0) {
                 ++emptyCells;
+            }
         }
 
         SuperMap<std::string, double> ret;

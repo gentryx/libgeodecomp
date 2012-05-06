@@ -123,17 +123,16 @@
             ollKorrect = false;                                         \
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
-        CoordBoxSequence<_GRID_TYPE::DIM> i =                           \
-            assertGrid.boundingBox().sequence();                        \
-        while (i.hasNext()) {                                           \
-            LibGeoDecomp::Coord<_GRID_TYPE::DIM> c = i.next();          \
-            bool flag = assertGrid.at(c).valid();                       \
-            flag &= (assertGrid.at(c).isEdgeCell == false);             \
-            flag &= (assertGrid.at(c).cycleCounter == expectedCycle);   \
+        CoordBox<_GRID_TYPE::DIM> box = assertGrid.boundingBox();       \
+        for (CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
+            bool flag = assertGrid.at(*i).valid();                      \
+            flag &= (assertGrid.at(*i).isEdgeCell == false);            \
+            flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
             TS_ASSERT(flag);                                            \
             ollKorrect &= flag;                                         \
-            if (!flag)                                                  \
-                message << "TS_ASSERT_TEST_GRID failed at Coord " << c << "\n"; \
+            if (!flag) {                                                \
+                message << "TS_ASSERT_TEST_GRID failed at Coord " << *i << "\n"; \
+            }                                                           \
         }                                                               \
                                                                         \
         if (!ollKorrect)                                                \

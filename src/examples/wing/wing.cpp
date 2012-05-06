@@ -330,9 +330,9 @@ public:
         CoordBox<2> box = grid->boundingBox();
         grid->atEdge() = Cell(SOLID);
 
-        CoordBoxSequence<2> s = box.sequence();
-        while (s.hasNext()) 
-            grid->at(s.next()) = Cell(LIQUID, 1);
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            grid->at(*i) = Cell(LIQUID, 1);
+        }
 
 #if SETUP==LID
         addLid(grid);

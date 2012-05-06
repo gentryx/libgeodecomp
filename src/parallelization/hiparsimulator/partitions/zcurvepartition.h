@@ -335,9 +335,8 @@ public:
                 maxDim.toExtents()));
 
         CoordBox<DIM> box(Coord<DIM>(), maxDim);
-        CoordBoxSequence<DIM> s = box.sequence();
-        while (s.hasNext()) {
-            Coord<DIM> dim = s.next();
+        for (typename CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
+            Coord<DIM> dim = *iter;
             if (!hasTrivialDimensions(dim)) {
                 CoordVector coords;
                 Iterator end(Coord<DIM>());

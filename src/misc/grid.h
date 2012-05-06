@@ -10,7 +10,6 @@
 #endif
 
 #include <iostream>
-
 #include <libgeodecomp/misc/alignedallocator.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordmap.h>
@@ -162,10 +161,9 @@ public:
         if (this->edgeCell != other.atEdge())
             return false;
 
-        CoordBoxSequence<DIM> s = boundingBox().sequence();
-        while (s.hasNext()) {
-            Coord<DIM> c = s.next();
-            if ((*this)[c] != other.at(c)) {
+        CoordBox<DIM> box = boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            if ((*this)[*i] != other.at(*i)) {
                 return false;
             }
         }
@@ -225,15 +223,14 @@ public:
                     << "), other (" << other.edgeCell << "))\n";
         }
 
-        CoordBox<DIM> b = boundingBox();
-        for (CoordBoxSequence<DIM> s = b.sequence(); s.hasNext();) {
-            Coord<DIM> c = s.next();
-            if ((*this)[c] != other[c]) {
-                message << "\nat coordinate " << c << "\n" <<
+        CoordBox<DIM> box = boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            if ((*this)[*i] != other[*i]) {
+                message << "\nat coordinate " << *i << "\n" <<
                     "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-                    (*this)[c] <<
+                    (*this)[*i] <<
                     "========================================\n" <<
-                    other[c] << 
+                    other[*i] << 
                     ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
             }
         }
@@ -253,10 +250,9 @@ public:
                 << "edgeCell:\n"
                 << edgeCell << "\n";
 
-        for (CoordBoxSequence<DIM> s = 
-                 this->boundingBox().sequence(); s.hasNext();) {
-            Coord<DIM> coord(s.next());
-            message << "Coord" << coord << ":\n" << (*this)[coord] << "\n";
+        CoordBox<DIM> box = boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            message << "Coord" << *i << ":\n" << (*this)[*i] << "\n";
         }
 
         return message.str();

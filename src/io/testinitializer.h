@@ -53,11 +53,10 @@ public:
     {
         CoordBox<DIM> rect = ret->boundingBox();
         unsigned cycle = startStep() * TestCell<DIM>::nanoSteps();
-        for (CoordBoxSequence<DIM> s = rect.sequence(); s.hasNext();) {
-            Coord<DIM> rawPos = s.next();
-            Coord<DIM> coord = TestCell<DIM>::Topology::normalize(rawPos, dimensions);
-            double i = 1 + CoordToIndex<DIM>()(coord, dimensions);
-            ret->at(rawPos) = TestCell<DIM>(coord, dimensions, cycle, i);
+        for (typename CoordBox<DIM>::Iterator i = rect.begin(); i != rect.end(); ++i) {
+            Coord<DIM> coord = TestCell<DIM>::Topology::normalize(*i, dimensions);
+            double index = 1 + CoordToIndex<DIM>()(coord, dimensions);
+            ret->at(*i) = TestCell<DIM>(coord, dimensions, cycle, index);
         }
         ret->atEdge() = TestCell<DIM>(Coord<DIM>::diagonal(-1), dimensions);
         ret->atEdge().isEdgeCell = true;

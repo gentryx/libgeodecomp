@@ -655,10 +655,9 @@ public:
         Grid<ContainerCell> grid = createBasicGrid();
         fillGeometryData(&grid);
 
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) {
-            Coord<2> c = s.next();
-            ret->at(c) = grid[c];
-            ret->at(c).coord = c;
+        for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            ret->at(*i) = grid[*i];
+            ret->at(*i).coord = *i;
         }
     }
 
@@ -914,8 +913,8 @@ private:
         double maxDiameter = 0;
 
         CoordBox<2> box(Coord<2>(), grid->getDimensions());
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) {
-            Coord<2> containerCoord = s.next();
+        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
+            Coord<2> containerCoord = *iter;
             ContainerCell& container = (*grid)[containerCoord];
             maxCells = std::max(maxCells, container.numCells);
 
@@ -991,9 +990,8 @@ private:
     {
         int n = 0;
         CoordBox<2> box(Coord<2>(), grid.getDimensions());
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) {
-            Coord<2> containerCoord = s.next();
-            n += grid[containerCoord].numCells;
+        for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            n += grid[*i].numCells;
         }
         return n;
     }
@@ -1006,9 +1004,8 @@ private:
         SuperVector<float> y;
 
         CoordBox<2> box(Coord<2>(), grid.getDimensions());
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) {
-            Coord<2> containerCoord = s.next();
-            const ContainerCell& container = grid[containerCoord];
+        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
+            const ContainerCell& container = grid[iter];
             for (int i = 0; i < container.numCells; ++i) {
                 x << container.cells[i].center.x();
                 y << container.cells[i].center.y();
@@ -1029,9 +1026,8 @@ private:
         SuperVector<int> shapeSizes;
 
         CoordBox<2> box(Coord<2>(), grid.getDimensions());
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) {
-            Coord<2> containerCoord = s.next();
-            const ContainerCell& container = grid[containerCoord];
+        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
+            const ContainerCell& container = grid[*iter];
             for (int i = 0; i < container.numCells; ++i) {
                 SuperVector<Coord<2> > coords(container.cells[i].shapeSize);
                 std::copy(container.cells[i].shape,
@@ -1090,9 +1086,8 @@ private:
 #define WRITE_SCALAR(FIELD, NAME)                                       \
         {                                                               \
             SuperVector<double> buf;                                    \
-            for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) { \
-                Coord<2> containerCoord = s.next();                     \
-                const ContainerCell& container = grid[containerCoord];  \
+            for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) { \
+                const ContainerCell& container = grid[*iter];           \
                 for (int i = 0; i < container.numCells; ++i)            \
                     buf << container.cells[i].FIELD;                    \
             }                                                           \
@@ -1109,9 +1104,8 @@ private:
 
         SuperVector<double> velocityX;
         SuperVector<double> velocityY;
-        for (CoordBoxSequence<2> s = box.sequence(); s.hasNext();) {
-            Coord<2> containerCoord = s.next();
-            const ContainerCell& container = grid[containerCoord];
+        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) { 
+            const ContainerCell& container = grid[*iter];
 
             for (int i = 0; i < container.numCells; ++i) {
                 velocityX << container.cells[i].velocityX;

@@ -214,9 +214,9 @@ public:
         // invalidated:
         CoordBox<3> box(Coord<3>(0, 0, actualZ - 1), 
                         Coord<3>(dim.x(), dim.y(), 3));
-        CoordBoxSequence<3> seq = box.sequence();
-        while (seq.hasNext()) 
-            TS_ASSERT(!gridB[seq.next()].valid());
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TS_ASSERT(!gridB[*i].valid());
+        }
     }
 
     void update(unsigned nanoStep = 0)

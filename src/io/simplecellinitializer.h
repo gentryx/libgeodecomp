@@ -17,14 +17,13 @@ public:
     {}
 
     
-    virtual Grid<SimpleCell> grid(const CoordBox<2>& rect)
+    virtual Grid<SimpleCell> grid(const CoordBox<2>& box)
     {
-        Grid<SimpleCell> grid(rect.dimensions);
-        for (CoordBoxSequence<2> s = rect.sequence(); s.hasNext();) {
-            Coord<2> coord = s.next();
-            double i = 1 + coord.x() + coord.y() * gridDimensions().x();
-            Coord<2> local = coord - rect.origin;
-            grid[local] = SimpleCell(i);
+        Grid<SimpleCell> grid(box.dimensions);
+        for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            double index = 1 + i->x() + i->y() * gridDimensions().x();
+            Coord<2> local = *i - box.origin;
+            grid[local] = SimpleCell(index);
         }
         grid.getEdgeCell() = SimpleCell(-1);
         return grid;

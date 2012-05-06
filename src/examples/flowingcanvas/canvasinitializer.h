@@ -23,33 +23,34 @@ public:
         // QImage source = QPixmap("starry_night.png").scaled(box.dimensions.x(), box.dimensions.y()).toImage();
         // source.convertToFormat(QImage::Format_ARGB32);
 
-        CoordBoxSequence<2> s = box.sequence();
-        while (s.hasNext()) {
-            Coord<2> c = s.next();
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
             bool setForce = false;
             FloatCoord<2> force;
 
-            if ((c.x() == 140) && (c.y() >= 80) && (c.y() <= 160)) {
+            if ((i->x() == 140) && (i->y() >= 80) && (i->y() <= 160)) {
                 setForce = true;
                 force[1] = -1;
             }
-            if ((c.x() == 220) && (c.y() >= 80) && (c.y() <= 160)) {
+            if ((i->x() == 220) && (i->y() >= 80) && (i->y() <= 160)) {
                 setForce = true;
                 force[1] = 1;
             }
-            if ((c.y() == 80) && (c.x() >= 140) && (c.x() <= 220)) {
+            if ((i->y() == 80) && (i->x() >= 140) && (i->x() <= 220)) {
                 setForce = true;
                 force[0] = 1;
             }
-            if ((c.y() == 160) && (c.x() >= 140) && (c.x() <= 220)) {
+            if ((i->y() == 160) && (i->x() >= 140) && (i->x() <= 220)) {
                 setForce = true;
                 force[0] = -1;
             }
 
             // fixme
-            // unsigned pixel = source.pixel(c.x(), c.y());
-            unsigned pixel = (0xff << 24) + ((c.x() * 255 / 400) << 16) + ((c.y() * 255 / 200) << 8) + 0;
-            ret->at(c) = CanvasCell(pixel, c, setForce, force, rand() % CanvasCell::MAX_SPAWN_COUNTDOWN);
+            // unsigned pixel = source.pixel(i->x(), i->y());
+            unsigned pixel = (0xff << 24) + 
+                ((i->x() * 255 / 400) << 16) + 
+                ((i->y() * 255 / 200) << 8) + 0;
+            ret->at(*i) = CanvasCell(pixel, *i, setForce, force, 
+                                     rand() % CanvasCell::MAX_SPAWN_COUNTDOWN);
         }
     }
 };

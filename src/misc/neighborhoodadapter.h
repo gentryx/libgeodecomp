@@ -27,17 +27,17 @@ public:
     {
         const Cargo *res = (*neighbors)[Coord<DIM>()][id];
             
-        if (res)
+        if (res) {
             return *res;
+        }
 
-        CoordBox<DIM> surroundingBox(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
-        CoordBoxSequence<DIM> s = surroundingBox.sequence();
-        while (s.hasNext()) {
-            Coord<DIM> c = s.next();
-            if (c != Coord<DIM>()) {
-                res = (*neighbors)[c][id];
-                if (res)
+        CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            if (*i != Coord<DIM>()) {
+                res = (*neighbors)[*i][id];
+                if (res) {
                     return *res;
+                }
             }
         }
 

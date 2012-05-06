@@ -67,63 +67,6 @@ public:
         TS_ASSERT(!rect.inBounds(Coord<3>( 3,  4, 15)));
     }
 
-    void testSequence2D()
-    {
-        // row major order is guaranteed
-        CoordBox<2> rect(Coord<2>(-2, 3), Coord<2>(5, 7)); 
-        CoordBoxSequence<2> seq = rect.sequence();
-        for (int y = rect.origin.y();
-                y < rect.origin.y() + (int)rect.dimensions.y();
-                y ++) {
-            for (int x = rect.origin.x();
-                    x < rect.origin.x() + (int)rect.dimensions.x();
-                    x ++) {
-                TS_ASSERT_EQUALS(true, seq.hasNext());
-                Coord<2> res = seq.next();
-                if (res != Coord<2>(x, y))
-                    std::cout << "expected: " << Coord<2>(x, y) << "\n"
-                              << "actual: " << res << "\n\n";
-                TS_ASSERT_EQUALS(Coord<2>(x, y), res);
-            }
-        }
-        TS_ASSERT_EQUALS(false, seq.hasNext());
-        TS_ASSERT_THROWS(seq.next(), std::out_of_range);
-
-        CoordBox<2> rect2(Coord<2>(1, 0), Coord<2>(0, 1)); 
-        CoordBoxSequence<2> seq2 = rect2.sequence();
-        TS_ASSERT_EQUALS(false, seq2.hasNext());
-    }
-
-    void testSequence3D()
-    {
-        // plane/row major order is guaranteed
-        CoordBox<3> rect(Coord<3>(-2, 3, 4), Coord<3>(5, 7, 8)); 
-        CoordBoxSequence<3> seq = rect.sequence();
-
-        for (int z = rect.origin.z();
-                z < rect.origin.z() + (int)rect.dimensions.z();
-                z ++) {
-            for (int y = rect.origin.y();
-                 y < rect.origin.y() + (int)rect.dimensions.y();
-                 y ++) {
-                for (int x = rect.origin.x();
-                     x < rect.origin.x() + (int)rect.dimensions.x();
-                     x ++) {
-                    TS_ASSERT_EQUALS(true, seq.hasNext());
-                    Coord<3> next = seq.next();
-                    TS_ASSERT_EQUALS(Coord<3>(x, y, z), next);
-                }
-            }
-        }
-
-        TS_ASSERT_EQUALS(false, seq.hasNext());
-        TS_ASSERT_THROWS(seq.next(), std::out_of_range);
-
-        CoordBox<3> rect2(Coord<3>(1, 1, 1), Coord<3>(0, 1, 1)); 
-        CoordBoxSequence<3> seq2 = rect2.sequence();
-        TS_ASSERT_EQUALS(false, seq2.hasNext());
-    }
-
     void testSize()
     {
         CoordBox<2> rect1(Coord<2>(-2, 3), Coord<2>(5, 7));

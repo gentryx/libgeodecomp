@@ -162,10 +162,11 @@ public:
 private:
     template<typename T>
     void fillGridRect(
-            Grid<T>& grid, const CoordBox<2>& rect, const T& val)
+            Grid<T>& grid, const CoordBox<2>& box, const T& val)
     {
-        for (CoordBoxSequence<2> s = rect.sequence(); s.hasNext();) 
-            grid[s.next()] = val;
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            grid[*i] = val;
+        }
     }
 
     template<typename T>

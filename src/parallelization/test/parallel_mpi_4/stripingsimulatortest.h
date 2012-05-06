@@ -125,9 +125,9 @@ public:
 
             Region<2> expected;
             CoordBox<2> box = init->gridBox();
-            CoordBoxSequence<2> s = box.sequence();
-            while (s.hasNext()) 
-                expected << s.next();
+            for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+                expected << *i;
+            }
 
             TS_ASSERT_EQUALS(expected, whole);
         }

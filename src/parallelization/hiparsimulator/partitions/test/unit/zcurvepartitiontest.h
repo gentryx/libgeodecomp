@@ -145,9 +145,8 @@ public:
         SuperVector<Coord<3> > expected;
 
         CoordBox<3> box(offset, dimensions);
-        CoordBoxSequence<3> seq = box.sequence();
-        while (seq.hasNext()) {
-            expected << seq.next();
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            expected << *i;
         }
         
         for (int i = 0; i < dimensions.prod(); ++i)

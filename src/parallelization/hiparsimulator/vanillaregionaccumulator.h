@@ -39,8 +39,8 @@ private:
     SuperVector<long> startOffsets;
 };
 
-};
-};
+}
+}
 
 #endif
 #endif

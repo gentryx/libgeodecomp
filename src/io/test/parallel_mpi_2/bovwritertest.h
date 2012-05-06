@@ -69,10 +69,9 @@ public:
             Grid<double, Topologies::Cube<3>::Topology> actual;
 
             init->grid(&buffer);
-            CoordBoxSequence<3> s = CoordBox<3>(Coord<3>(), dimensions).sequence();
-            while (s.hasNext()) {
-                Coord<3> c = s.next();
-                expected[c] = buffer[c].testValue;
+            CoordBox<3> box(Coord<3>(), dimensions);
+            for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+                expected[*i] = buffer[*i].testValue;
             }
 
             // only test the data files
@@ -144,10 +143,8 @@ public:
     //         file = MPIIO<double, Topologies::Cube<3>::Topology>::openFileForWrite(
     //             "test.data", MPI::COMM_SELF);
     //         CoordBox<3> box(offset, dimensions);
-    //         CoordBoxSequence<3> seq = box.sequence();
-    //         while (seq.hasNext()) {
-    //             Coord<3> c = seq.next();
-    //             file.Write(&g[c], 1, MPI::DOUBLE);
+    //         for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+    //             file.Write(&g[*i], 1, MPI::DOUBLE);
     //         }
     //         file.Close();
     //     }

@@ -114,12 +114,9 @@ public:
         }
 
         // check complete Moore neighborhood (including old self)
-        CoordBox<DIM> neighborBox(Coord<DIM>::diagonal(-1),
-                                  Coord<DIM>::diagonal(3));
-        CoordBoxSequence<DIM> seq = neighborBox.sequence();
-        while (seq.hasNext()) {
-            Coord<DIM> relativeLoc = seq.next();
-            isValid &= checkNeighbor(neighborhood[relativeLoc], relativeLoc);
+        CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            isValid &= checkNeighbor(neighborhood[*i], *i);
         }
 
         if (nanoStep >= nanoSteps()) {

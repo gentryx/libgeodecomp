@@ -310,9 +310,9 @@ public:
         int width = box.dimensions.x();
         box.dimensions.x() = 1;
 
-        CoordBoxSequence<DIM> s = box.sequence();
-        while (s.hasNext()) 
-            *this << Streak<DIM>(s.next(), width);
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            *this << Streak<DIM>(*i, width);
+        }
         
         return *this;
     }
@@ -457,12 +457,12 @@ public:
             Coord<DIM> boxOrigin = streak.origin - dia;
             Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
             boxDim.x() = 1;
-            CoordBox<DIM> box(boxOrigin, boxDim);
-            CoordBoxSequence<DIM> s = box.sequence();
             int endX = streak.endX + width;
+            CoordBox<DIM> box(boxOrigin, boxDim);
 
-            while (s.hasNext()) 
-                ret << Streak<DIM>(s.next(), endX);
+            for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+                ret << Streak<DIM>(*i, endX);
+            }
         }
         return ret;
     }
@@ -487,16 +487,16 @@ public:
             Coord<DIM> boxOrigin = streak.origin - dia;
             Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
             boxDim.x() = 1;
-            CoordBox<DIM> box(boxOrigin, boxDim);
-            CoordBoxSequence<DIM> s = box.sequence();
             int endX = streak.endX + width;
+            CoordBox<DIM> box(boxOrigin, boxDim);
 
-            while (s.hasNext()) {
-                Streak<DIM> newStreak(s.next(), endX);
+            for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+                Streak<DIM> newStreak(*i, endX);
                 if (TOPOLOGY::wrapsAxis(0)) {
                     this->splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
-                    this->normalizeStreak<TOPOLOGY>(trimStreak(newStreak, dimensions), &ret, dimensions);
+                    this->normalizeStreak<TOPOLOGY>(
+                        trimStreak(newStreak, dimensions), &ret, dimensions);
                 }
             }
         }

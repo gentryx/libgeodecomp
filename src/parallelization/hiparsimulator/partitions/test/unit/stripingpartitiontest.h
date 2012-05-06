@@ -87,15 +87,16 @@ public:
         Coord<3> offset(4, 3, 5);
         Coord<3> dim(4, 3, 5);
         CoordBox<3> box(offset, dim);
-        CoordBoxSequence<3> s = box.sequence();
-        
-        while (s.hasNext()) 
-            expected << s.next();
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            expected << *i;
+        }
 
         StripingPartition<3> p(offset, dim);
 
-        for (StripingPartition<3>::Iterator i = p.begin(); i != p.end(); ++i)
+        for (StripingPartition<3>::Iterator i = p.begin(); i != p.end(); ++i) {
             actual << *i;
+        }
 
         TS_ASSERT_EQUALS(expected, actual);
     }

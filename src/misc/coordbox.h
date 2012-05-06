@@ -17,61 +17,7 @@ class CoordBox
     friend class Typemaps;
 
 public:    
-    class Iterator 
-    {
-    public:
-        inline Iterator(
-            const Coord<DIM>& _origin, 
-            const Coord<DIM>& start, 
-            const Coord<DIM>& dimensions) :
-            cursor(start),
-            origin(_origin),
-            end(_origin + dimensions)
-        {}
-
-        inline bool operator==(const Iterator& other) const
-        {
-            return cursor == other.cursor;
-        }
-
-        inline bool operator!=(const Iterator& other) const
-        {
-            return !(*this == other);
-        }
-
-        inline const Coord<DIM>& operator*() const
-        {
-            return cursor;
-        }
-
-        inline Iterator& operator++()
-        {
-            int i;
-            for (i = 0; i < DIM - 1; ++i) {
-                if (++cursor[i] == end[i]) {
-                    cursor[i] = origin[i];
-                } else {
-                    break;
-                }
-            }
-            if (i == DIM - 1) {
-                ++cursor[DIM - 1];
-            }
-            return *this;
-        }
-
-        inline std::string toString() const
-        {
-            std::ostringstream buffer;
-            buffer << "StripingPartition::Iterator(" << cursor << ", " << end << ")";
-            return buffer.str();
-        }
-            
-    private:
-        Coord<DIM> cursor;
-        Coord<DIM> origin;
-        Coord<DIM> end;
-    };
+    class Iterator;
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
@@ -136,44 +82,66 @@ public:
         return dimensions.prod();
     }
 
-    inline CoordBoxSequence<DIM> sequence() const
+    class Iterator
     {
-        return CoordBoxSequence<DIM>(*this);
-    }
-};
+    public:
+        inline Iterator(
+            const Coord<DIM>& _origin, 
+            const Coord<DIM>& start, 
+            const Coord<DIM>& dimensions) :
+            cursor(start),
+            origin(_origin),
+            end(_origin + dimensions)
+        {}
 
-// fixme: replace this poor class by a proper iterator
-template<int DIM>
-class CoordBoxSequence
-{
-public: 
-    CoordBoxSequence(const CoordBox<DIM>& nbox) :
-        box(nbox),
-        index(0)
-    {}
+        inline bool operator==(const Iterator& other) const
+        {
+            return cursor == other.cursor;
+        }
 
-    inline virtual ~CoordBoxSequence() {}
+        inline bool operator!=(const Iterator& other) const
+        {
+            return !(*this == other);
+        }
 
-    inline bool hasNext() const
-    { 
-        return index < box.size();
-    }
+        inline const Coord<DIM>& operator*() const
+        {
+            return cursor;
+        }
 
-    inline Coord<DIM> next() 
-    {
-        if (!hasNext()) 
-            throw std::out_of_range(
-                "next() called at end of CoordBoxSequence");            
+        inline const Coord<DIM>* operator->() const 
+        {
+            return &cursor;
+        }
         
-        Coord<DIM> offset = IndexToCoord<DIM>()(index, box.dimensions);
-        index += 1;
+        inline Iterator& operator++()
+        {
+            int i;
+            for (i = 0; i < DIM - 1; ++i) {
+                if (++cursor[i] == end[i]) {
+                    cursor[i] = origin[i];
+                } else {
+                    break;
+                }
+            }
+            if (i == DIM - 1) {
+                ++cursor[DIM - 1];
+            }
+            return *this;
+        }
 
-        return box.origin + offset;
-    }
-
-private:
-    CoordBox<DIM> box;
-    unsigned index;
+        inline std::string toString() const
+        {
+            std::ostringstream buffer;
+            buffer << "StripingPartition::Iterator(" << cursor << ", " << end << ")";
+            return buffer.str();
+        }
+            
+    private:
+        Coord<DIM> cursor;
+        Coord<DIM> origin;
+        Coord<DIM> end;
+    };
 };
 
 /**

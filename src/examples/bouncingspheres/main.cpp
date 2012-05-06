@@ -192,15 +192,13 @@ private:
         int numS[27];
         int numB[27];
         CoordBox<3> box(Coord<3>::diagonal(-1), Coord<3>::diagonal(3));
-        CoordBoxSequence<3> s = box.sequence();
         int i = 0;
 
-        while (s.hasNext()) {
-            Coord<3> c = s.next();
-            hoodS[i] = neighborhood[c].spheres;
-            hoodB[i] = neighborhood[c].boundaries;
-            numS[i] = neighborhood[c].numSpheres;
-            numB[i] = neighborhood[c].numBoundaries;
+        for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
+            hoodS[i] = neighborhood[*j].spheres;
+            hoodB[i] = neighborhood[*j].boundaries;
+            numS[i] = neighborhood[*j].numSpheres;
+            numB[i] = neighborhood[*j].numBoundaries;
             ++i;
         }
 
@@ -214,14 +212,12 @@ private:
     void moveSpheres(const COORD_MAP& neighborhood)
     {
         CoordBox<3> box(Coord<3>::diagonal(-1), Coord<3>::diagonal(3));
-        CoordBoxSequence<3> s = box.sequence();
         numSpheres = 0;
 
-        while (s.hasNext()) {
-            Coord<3> c = s.next();
-            const Container& other = neighborhood[c];
+        for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
+            const Container& other = neighborhood[*j];
             for (int i = 0; i < other.numSpheres; ++i) {
-                if (other.spheres[i].targetContainer == -c) {
+                if (other.spheres[i].targetContainer == -*j) {
                     spheres[numSpheres] = other.spheres[i];
                     ++numSpheres;
                 }
@@ -297,10 +293,8 @@ private:
              << "light_source { <20, 30, -30> color White}\n\n";
 
         CoordBox<3> box = this->sim->getGrid()->boundingBox();
-        CoordBoxSequence<3> s = box.sequence();
-        while (s.hasNext()) {
-            Coord<3> c = s.next();
-            const Container& container = (*this->sim->getGrid())[c];
+        for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
+            const Container& container = (*this->sim->getGrid())[*j];
 
             for (int i = 0; i < container.numSpheres; ++i) 
                 file << sphereToPOV(container.spheres[i]);
@@ -373,27 +367,25 @@ public:
     {
         CoordBox<3> box = target->boundingBox();
 
-        CoordBoxSequence<3> s = box.sequence();
-        while (s.hasNext()) {
-            Coord<3> c = s.next();
+        for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
             // We use bad pseudo random numbers as we need to ensure
             // that all cells get initialized the same way on all MPI
             // nodes. This would be hard with a stateful pseudo random
             // number generator.
-            double pseudo_rand1 = (c.sum() * 11 % 16 - 8) / 256.0;
-            double pseudo_rand2 = (c.sum() * 31 % 16 - 8) / 256.0;
-            double pseudo_rand3 = (c.sum() * 41 % 16 - 8) / 256.0;
+            double pseudo_rand1 = (j->sum() * 11 % 16 - 8) / 256.0;
+            double pseudo_rand2 = (j->sum() * 31 % 16 - 8) / 256.0;
+            double pseudo_rand3 = (j->sum() * 41 % 16 - 8) / 256.0;
             
             FloatCoord<3> center(
-                (c.x() + 0.5) * CONTAINER_DIM, 
-                (c.y() + 0.5) * CONTAINER_DIM, 
-                (c.z() + 0.5) * CONTAINER_DIM);
+                (j->x() + 0.5) * CONTAINER_DIM, 
+                (j->y() + 0.5) * CONTAINER_DIM, 
+                (j->z() + 0.5) * CONTAINER_DIM);
 
-            Container container(c * CONTAINER_DIM);
+            Container container(*j * CONTAINER_DIM);
 
             container.addSphere(
                 Sphere(
-                    c * Coord<3>(1, 100, 10000),
+                    *j * Coord<3>(1, 100, 10000),
                     center,
                     FloatCoord<3>(
                         pseudo_rand1,
@@ -405,30 +397,30 @@ public:
             // to overly reduncant code.
             
             // left boundary
-            if (c[0] == 0)
+            if (j->x() == 0)
                 addBoundary(&container, center, FloatCoord<3>(1, 0, 0));
 
             // right boundary
-            if (c[0] == (box.dimensions[0] - 1))
+            if (j->x() == (box.dimensions[0] - 1))
                 addBoundary(&container, center, FloatCoord<3>(-1, 0, 0));
 
             // lower boundary
-            if (c[1] == 0)
+            if (j->y() == 0)
                 addBoundary(&container, center, FloatCoord<3>(0, 1, 0));
 
             // upper boundary
-            if (c[1] == (box.dimensions[1] - 1))
+            if (j->y() == (box.dimensions[1] - 1))
                 addBoundary(&container, center, FloatCoord<3>(0, -1, 0));
 
             // front boundary
-            if (c[2] == 0)
+            if (j->z() == 0)
                 addBoundary(&container, center, FloatCoord<3>(0, 0, 1));
 
             // rear boundary
-            if (c[2] == (box.dimensions[2] - 1))
+            if (j->z() == (box.dimensions[2] - 1))
                 addBoundary(&container, center, FloatCoord<3>(0, 0, -1));
 
-            target->at(c) = container;
+            target->at(*j) = container;
         }
     }
 

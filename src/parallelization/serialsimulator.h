@@ -86,14 +86,12 @@ protected:
 
     void nanoStep(const unsigned& nanoStep)
     {
-        CoordBox<DIMENSIONS> gridRect = curGrid->boundingBox();
+        CoordBox<DIMENSIONS> box = curGrid->boundingBox();
 
-        for(CoordBoxSequence<DIMENSIONS> s = 
-                gridRect.sequence(); s.hasNext();) {
-            Coord<DIMENSIONS> coord = s.next();
+        for(typename CoordBox<DIMENSIONS>::Iterator i = box.begin(); i != box.end(); ++i) {
             CoordMap<CELL_TYPE, GridType> neighborhood = 
-                curGrid->getNeighborhood(coord);
-            (*newGrid)[coord].update(neighborhood, nanoStep);
+                curGrid->getNeighborhood(*i);
+            (*newGrid)[*i].update(neighborhood, nanoStep);
         }
 
         std::swap(curGrid, newGrid);
