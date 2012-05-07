@@ -1,9 +1,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/mpilayer/mpilayer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
-
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
@@ -20,7 +18,6 @@ public:
         layer = MPILayer();
         manager = PartitionManager<2>();
         dimensions = Coord<2>(20, 400);
-        partition = StripingPartition<2>(Coord<2>(0, 0), dimensions);
 
         // assume this is a dual cluster setup and on the current
         // level we're in the second cluster which is responsible for
@@ -34,12 +31,10 @@ public:
         // sanity check
         TS_ASSERT_EQUALS(weights.sum() + offset, dimensions.prod());
 
+        partition = new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights);
         manager.resetRegions(
             CoordBox<2>(Coord<2>(), dimensions),
-            new VanillaRegionAccumulator<StripingPartition<2> >(
-                partition,
-                offset,
-                weights),
+            partition,
             layer.rank(),
             ghostZoneWidth);
         SuperVector<CoordBox<2> > boundingBoxes(
@@ -53,6 +48,7 @@ public:
             if ((i == layer.rank() - 1) || (i == layer.rank() + 1)) {
                 SuperVector<Region<2> > outerFragments;
                 SuperVector<Region<2> > innerFragments;
+
                 unsigned startLine = startingLine(i);
                 if (i == layer.rank() - 1)
                     startLine = startingLine(i + 1);
@@ -79,7 +75,7 @@ public:
                 TS_ASSERT_EQUALS(
                     manager.getOuterGhostZoneFragments().count(i), 0);
                 if (manager.getOuterGhostZoneFragments().count(i) != 0)
-                    std::cout << "rank: " << layer.rank() << "\n"
+                    std::cerr << "rank: " << layer.rank() << "\n"
                               << "i: " << i << "\n"
                               << "fragments:" << manager.getOuterGhostZoneFragments()[i] << "\n";
             }
@@ -166,7 +162,7 @@ public:
 private:
     MPILayer layer;
     PartitionManager<2> manager;
-    StripingPartition<2> partition;
+    StripingPartition<2> *partition;
     Coord<2> dimensions;
     SuperVector<long> weights;
     unsigned offset;

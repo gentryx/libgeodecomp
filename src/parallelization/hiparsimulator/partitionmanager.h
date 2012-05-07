@@ -6,7 +6,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
 namespace LibGeoDecomp {
@@ -30,24 +29,19 @@ public:
         const CoordBox<DIM>& _simulationArea=CoordBox<DIM>())
     {
         SuperVector<long> weights(1, _simulationArea.size());
-        StripingPartition<DIM> partition(
-            Coord<DIM>(), _simulationArea.dimensions);
-        VanillaRegionAccumulator<StripingPartition<DIM> > *accu = 
-            new VanillaRegionAccumulator<StripingPartition<DIM> >(
-                partition,
-                0,
-                weights);
-        resetRegions(_simulationArea, accu, 0, 1);
+        Partition<DIM> *partition = 
+            new StripingPartition<DIM>(Coord<DIM>(), _simulationArea.dimensions, 0, weights);
+        resetRegions(_simulationArea, partition, 0, 1);
         resetGhostZones(SuperVector<CoordBox<DIM> >(1));
     }
 
     inline void resetRegions(
         const CoordBox<DIM>& _simulationArea,
-        RegionAccumulator<DIM> *_regionAccu,
+        Partition<DIM> *_partition,
         const unsigned& _rank,
         const unsigned& _ghostZoneWidth) 
     {
-        regionAccu.reset(_regionAccu);
+        partition.reset(_partition);
         simulationArea = _simulationArea;
         rank = _rank;
         ghostZoneWidth = _ghostZoneWidth;
@@ -167,7 +161,7 @@ private:
     {
         SuperVector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
-        regionExpansion[0] = regionAccu->getRegion(node);
+        regionExpansion[0] = partition->getRegion(node);
         for (int i = 1; i <= getGhostZoneWidth(); ++i) {
             Region<DIM> expanded;
             const Region<DIM>& reg = regionExpansion[i - 1];
@@ -226,7 +220,7 @@ private:
     }
 
 private:
-    boost::shared_ptr<RegionAccumulator<DIM> > regionAccu;
+    boost::shared_ptr<Partition<DIM> > partition;
     CoordBox<DIM> simulationArea;
     Region<DIM> outerRim;
     Region<DIM> volatileKernel;

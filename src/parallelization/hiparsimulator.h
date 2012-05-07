@@ -9,12 +9,8 @@
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/innersetmarker.h>
-#include <libgeodecomp/parallelization/hiparsimulator/intersectingregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/rimmarker.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
         
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -44,7 +40,7 @@ class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef DistributedSimulator<CELL_TYPE> ParentType;
-    typedef UpdateGroup<CELL_TYPE, PARTITION> UpdateGroupType;
+    typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, PARTITION> ParallelWriterAdapterType;
     static const int DIM = Topology::DIMENSIONS;
@@ -203,9 +199,11 @@ private:
         CoordBox<DIM> box = this->initializer->gridBox();
         updateGroup.reset(
             new UpdateGroupType(
-                PARTITION(box.origin, box.dimensions),
-                initialWeights(box.dimensions.prod(), communicator->Get_size()),
-                0,
+                new PARTITION(
+                    box.origin, 
+                    box.dimensions, 
+                    0,
+                    initialWeights(box.dimensions.prod(), communicator->Get_size())), 
                 box,
                 ghostZoneWidth,
                 this->initializer,

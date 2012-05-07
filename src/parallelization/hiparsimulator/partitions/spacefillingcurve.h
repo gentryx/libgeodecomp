@@ -2,6 +2,8 @@
 #define _libgeodecomp_parallelization_hiparsimulator_partitions_spacefillingcurve_h_
 
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partition.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -9,7 +11,7 @@ namespace HiParSimulator {
 enum SpaceFillingCurveSublevelState {TRIVIAL, CACHED};
 
 template<int DIM>
-class SpaceFillingCurve
+class SpaceFillingCurve : public Partition<DIM>
 {
 public:
 
@@ -55,6 +57,12 @@ public:
         bool endReached;
         SpaceFillingCurveSublevelState sublevelState;
     };
+
+    inline SpaceFillingCurve(
+        const long& offset,
+        const SuperVector<long>& weights) :
+        Partition<DIM>(offset, weights)
+    {}
 };
 
 }

@@ -57,27 +57,23 @@ public:
 
         // Set up a striping partition. We'll take rank 1, placing us
         // between the two others 0 and 2.
-        StripingPartition<2> partition(Coord<2>(0, 0), rect.dimensions);
         SuperVector<long> weights(3);
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];
-        VanillaRegionAccumulator<StripingPartition<2> > *accu = 
-            new VanillaRegionAccumulator<StripingPartition<2> >(
-                partition,
-                0,
-                weights);
+        Partition<2> *partition = 
+            new StripingPartition<2>(Coord<2>(0, 0), rect.dimensions, 0, weights);
 
         // Feed the partition into the partition manager
         partitionManager.reset(new PartitionManager<2>());
         partitionManager->resetRegions(
             init->gridBox(),
-            accu,
+            partition,
             1,
             ghostZoneWidth);
         SuperVector<CoordBox<2> > boundingBoxes;
         for (int i = 0; i < 3; ++i)
-            boundingBoxes.push_back(accu->getRegion(i).boundingBox());
+            boundingBoxes.push_back(partition->getRegion(i).boundingBox());
         partitionManager->resetGhostZones(boundingBoxes);
 
         // The Unit Under Test: the stepper

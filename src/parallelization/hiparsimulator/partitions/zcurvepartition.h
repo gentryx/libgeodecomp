@@ -7,7 +7,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <list>
-
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/topologies.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/spacefillingcurve.h>
@@ -19,7 +18,6 @@ template<int DIMENSIONS>
 class ZCurvePartition : public SpaceFillingCurve<DIMENSIONS>
 {
     friend class ZCurvePartitionTest;
-
 public:
     const static int DIM = DIMENSIONS;
 
@@ -28,7 +26,6 @@ public:
     typedef typename Topologies::Cube<DIM>::Topology Topology;
     typedef typename Topology::template LocateHelper<DIM, CoordVector> LocateHelper;
   
-
     class Square
     {
     public:
@@ -305,7 +302,10 @@ public:
 
     inline ZCurvePartition(
         const Coord<DIM>& _origin=Coord<DIM>(), 
-        const Coord<DIM>& _dimensions=Coord<DIM>()) :
+        const Coord<DIM>& _dimensions=Coord<DIM>(),
+        const long& offset=0,
+        const SuperVector<long>& weights=SuperVector<long>(2)) :
+        SpaceFillingCurve<DIM>(offset, weights),
         origin(_origin),              
         dimensions(_dimensions)
     {}
@@ -323,6 +323,13 @@ public:
     inline Iterator end() const
     {
         return Iterator(origin);
+    }
+
+    inline Region<DIM> getRegion(const long& node) const 
+    {
+        return Region<DIM>(
+            (*this)[this->startOffsets[node + 0]], 
+            (*this)[this->startOffsets[node + 1]]);
     }
 
     static inline bool fillCaches() 

@@ -73,18 +73,16 @@ public:
         init.reset(new TestInitializer<3>(gridDim));
         CoordBox<3> box = init->gridBox();
 
-        StripingPartition<3> partition(Coord<3>(), box.dimensions);
         SuperVector<long> weights;
         weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
+        Partition<3> *partition = 
+            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights);
 
         partitionManager.reset(new MyPartitionManager());
         partitionManager->resetRegions(
             box, 
-            new VanillaRegionAccumulator<StripingPartition<3> >(
-                partition,
-                0,
-                weights),
+            partition,
             mpiLayer.rank(),
             ghostZoneWidth);
 

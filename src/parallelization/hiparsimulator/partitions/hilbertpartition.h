@@ -287,8 +287,12 @@ public:
         }
     };
 
-    inline HilbertPartition(const Coord<2>& _origin=Coord<2>(0, 0), 
-                            const Coord<2>& _dimensions=Coord<2>(0, 0)) :
+    inline HilbertPartition(
+        const Coord<2>& _origin=Coord<2>(0, 0), 
+        const Coord<2>& _dimensions=Coord<2>(0, 0),
+        const long& offset=0,
+        const SuperVector<long>& weights=SuperVector<long>(2)) :
+        SpaceFillingCurve<2>(offset, weights),
         origin(_origin),              
         dimensions(_dimensions)
     {}
@@ -306,6 +310,13 @@ public:
     inline Iterator end() const
     {
         return Iterator(origin);
+    }
+
+    inline Region<2> getRegion(const long& node) const 
+    {
+        return Region<2>(
+            (*this)[this->startOffsets[node + 0]], 
+            (*this)[this->startOffsets[node + 1]]);
     }
 
 private:

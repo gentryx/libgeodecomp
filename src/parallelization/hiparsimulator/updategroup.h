@@ -7,20 +7,18 @@
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/intersectingregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 // fixme: STEPPER does not have to be a template parameter. it can also be defined solely in the constructor
-template<class CELL_TYPE, class PARTITION, class STEPPER=VanillaStepper<CELL_TYPE> >
+template<class CELL_TYPE, class STEPPER=VanillaStepper<CELL_TYPE> >
 class UpdateGroup
 {
     friend class UpdateGroupPrototypeTest;
@@ -38,9 +36,7 @@ public:
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
 
     UpdateGroup(
-        const PARTITION& _partition, 
-        const SuperVector<long>& _weights, 
-        const unsigned& _offset,
+        Partition<DIM> *partition, 
         const CoordBox<DIM>& box, 
         const unsigned& _ghostZoneWidth,
         Initializer<CELL_TYPE> *_initializer,
@@ -48,9 +44,6 @@ public:
         PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
         const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
-        partition(_partition),
-        weights(_weights),
-        offset(_offset),
         ghostZoneWidth(_ghostZoneWidth),
         initializer(_initializer),
         mpiLayer(communicator),
@@ -60,10 +53,7 @@ public:
         partitionManager.reset(new MyPartitionManager());
         partitionManager->resetRegions(
             box,
-            new VanillaRegionAccumulator<PARTITION>(
-                partition,
-                offset,
-                weights),
+            partition,
             rank,
             ghostZoneWidth);
         SuperVector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
@@ -164,9 +154,6 @@ private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<MyPartitionManager> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
-    PARTITION partition;
-    SuperVector<long> weights;
-    unsigned offset;
     unsigned ghostZoneWidth;
     Initializer<CELL_TYPE> *initializer;
     MPILayer mpiLayer;

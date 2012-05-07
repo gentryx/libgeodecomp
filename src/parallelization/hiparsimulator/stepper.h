@@ -68,6 +68,8 @@ public:
 
 protected:
     boost::shared_ptr<MyPartitionManager> partitionManager;
+    // fixme: replace this by a shared_ptr, refactor all calls to
+    // stepper constructors which look like VanillaStepper(... &*init);
     Initializer<CELL_TYPE> *initializer;
     PatchProviderList patchProviders[2];
     PatchAccepterList patchAccepters[2];

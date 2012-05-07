@@ -19,25 +19,23 @@ namespace HiParSimulator {
 class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
-    typedef ZCurvePartition<3> Partition;
+    typedef ZCurvePartition<3> MyPartition;
     typedef VanillaStepper<TestCell<3> > MyStepper;
-    typedef UpdateGroup<TestCell<3>, Partition, MyStepper> MyUpdateGroup;
+    typedef UpdateGroup<TestCell<3>, MyStepper> MyUpdateGroup;
     typedef MyStepper::GridType GridType;
 
     void setUp()
     {
         rank = MPILayer().rank();
         dimensions = Coord<3>(28, 50, 32);
-        partition = Partition(Coord<3>(), dimensions);
         weights.clear();
         weights << dimensions.prod();
+        partition = new MyPartition(Coord<3>(), dimensions, 0, weights);
         ghostZoneWidth = 10;
         init = new TestInitializer<3>(dimensions);
         updateGroup.reset(
             new MyUpdateGroup(
                 partition,
-                weights,
-                0,
                 CoordBox<3>(Coord<3>(), dimensions),
                 ghostZoneWidth,
                 init));
@@ -70,10 +68,10 @@ private:
     unsigned rank;
     Coord<3> dimensions;
     SuperVector<long> weights;
-    Partition partition;
+    MyPartition *partition;
     unsigned ghostZoneWidth;
     Initializer<TestCell<3> > *init;
-    boost::shared_ptr<UpdateGroup<TestCell<3>, Partition > > updateGroup;
+    boost::shared_ptr<UpdateGroup<TestCell<3> > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 };
 

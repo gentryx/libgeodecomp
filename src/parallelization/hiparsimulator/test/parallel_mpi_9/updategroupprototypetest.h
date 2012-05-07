@@ -10,7 +10,6 @@
 #include "../../../../mpilayer/mpilayer.h"
 #include "../../updategroup.h"
 #include "../../partitionmanager.h"
-#include "../../vanillaregionaccumulator.h"
 #include "../../partitions/hilbertpartition.h"
 #include "../../partitions/hindexingpartition.h"
 #include "../../partitions/stripingpartition.h"

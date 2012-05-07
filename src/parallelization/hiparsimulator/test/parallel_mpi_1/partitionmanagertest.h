@@ -1,5 +1,4 @@
 #include <boost/assign/std/vector.hpp>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillaregionaccumulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
@@ -17,7 +16,6 @@ public:
     {
         dimensions = Coord<2>(20, 20);
         offset = 10 * 20 + 8;
-        partition = StripingPartition<2>(Coord<2>(), dimensions);
         weights.clear();
         weights += 15, 12, 1, 32, 25, 40, 67;
         /**
@@ -61,6 +59,7 @@ public:
          * 19: --------------------
          *
          */
+        partition = new StripingPartition<2>(Coord<2>(), dimensions, offset, weights);
         boundingBoxes = 
             fakeBoundingBoxes(
                 offset, 
@@ -71,8 +70,7 @@ public:
 
         partitionManager.resetRegions(
             CoordBox<2>(Coord<2>(), dimensions),
-            new VanillaRegionAccumulator<StripingPartition<2> >(
-                partition, offset, weights),
+            partition,
             rank,
             ghostZoneWidth);
         partitionManager.resetGhostZones(boundingBoxes);
@@ -143,18 +141,16 @@ public:
         int ghostZoneWidth = 4;
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
-        StripingPartition<3> partition(Coord<3>(), box.dimensions);
         SuperVector<long> weights;
         weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
+        Partition<3> *partition = 
+            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights);
 
         PartitionManager<3, Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
             box, 
-            new VanillaRegionAccumulator<StripingPartition<3> >(
-                partition,
-                0,
-                weights),
+            partition,
             0,
             ghostZoneWidth);
 
@@ -186,7 +182,7 @@ public:
 private:
     Coord<2> dimensions;
     unsigned offset;
-    StripingPartition<2> partition;
+    StripingPartition<2> *partition;
     SuperVector<long> weights;
     unsigned rank;
     unsigned ghostZoneWidth;
@@ -198,19 +194,22 @@ private:
         const unsigned& size,
         const unsigned& ghostZoneWidth,
         const SuperVector<long>& weights,
-        const StripingPartition<2>& partition)
+        const StripingPartition<2> *partition)
     {
         SuperVector<CoordBox<2> > boundingBoxes(size);
         long startOffset = offset;
         long endOffset = offset;
+
         for (unsigned i = 0; i < size; ++i) {
             endOffset += weights[i];
             Region<2> s;
             
-            for (StripingPartition<2>::Iterator coords = partition[startOffset]; 
-                 coords != partition[endOffset]; 
-                 ++coords)
+            for (StripingPartition<2>::Iterator coords = (*partition)[startOffset]; 
+                 coords != (*partition)[endOffset]; 
+                 ++coords) {
                 s << *coords;
+            }
+
             s = s.expand(ghostZoneWidth);
             boundingBoxes[i] = s.boundingBox();
             startOffset = endOffset;
@@ -218,19 +217,18 @@ private:
         
         return boundingBoxes;
     }
-    
    
     template<class PARTITION>
     void checkRegion(
         const Region<2>& region, 
         const unsigned& start, 
         const unsigned& end, 
-        const PARTITION& partition)
+        const PARTITION *partition)
     {        
         SuperVector<Coord<2> > expected;
         SuperVector<Coord<2> > actual;
-        for (typename PARTITION::Iterator i = partition[start]; 
-             i != partition[end]; 
+        for (typename PARTITION::Iterator i = (*partition)[start]; 
+             i != (*partition)[end]; 
              ++i) 
             expected += *i;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) 

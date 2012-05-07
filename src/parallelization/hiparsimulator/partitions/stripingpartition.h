@@ -4,12 +4,13 @@
 #include <sstream>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/spacefillingcurve.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 template<int DIMENSIONS>
-class StripingPartition
+class StripingPartition : public SpaceFillingCurve<DIMENSIONS>
 {
     friend class StripingPartitionTest;
 public:
@@ -18,7 +19,10 @@ public:
 
     StripingPartition(
         const Coord<DIM>& _origin=Coord<DIM>(), 
-        const Coord<DIM>& _dimensions=Coord<DIM>()) :
+        const Coord<DIM>& _dimensions=Coord<DIM>(),
+        const long& offset=0,
+        const SuperVector<long>& weights=SuperVector<long>(2)) :
+        SpaceFillingCurve<DIM>(offset, weights),
         origin(_origin),
         dimensions(_dimensions)
     {
@@ -40,6 +44,13 @@ public:
         Coord<DIM> endOffset;
         endOffset[DIM - 1] = dimensions[DIM - 1];
         return Iterator(origin, origin + endOffset, dimensions);
+    }
+
+    inline Region<DIM> getRegion(const long& node) const 
+    {
+        return Region<DIM>(
+            (*this)[this->startOffsets[node + 0]], 
+            (*this)[this->startOffsets[node + 1]]);
     }
 
     Iterator operator[](const unsigned& pos) const
