@@ -12,6 +12,7 @@ class Partition
 {
 public:
     inline Partition(
+        // fixme: drop offset and bounding box from all partitions in favor of simulation region specifier?
         const long& offset,
         const SuperVector<long>& weights)
     {

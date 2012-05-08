@@ -311,7 +311,7 @@ public:
         box.dimensions.x() = 1;
 
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            *this << Streak<DIM>(*i, width);
+            *this << Streak<DIM>(*i, i->x() + width);
         }
         
         return *this;
