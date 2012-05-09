@@ -15,7 +15,6 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
     friend class SerialSimulatorTest;
     friend class PPMWriterTest;
-    
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
@@ -45,13 +44,16 @@ public:
      */
     virtual void step()
     {
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++)
+        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
+        }
 
         this->stepNum++;    
+
         // call back all registered Writers
-        for(unsigned i = 0; i < this->writers.size(); i++) 
+        for(unsigned i = 0; i < this->writers.size(); i++) {
             this->writers[i]->stepFinished();
+        }
     }
 
     /**
@@ -61,15 +63,18 @@ public:
     {
         this->initializer->grid(curGrid);
         this->stepNum = 0;
-        for(unsigned i = 0; i < this->writers.size(); i++) 
+        for(unsigned i = 0; i < this->writers.size(); i++) {
             this->writers[i]->initialized();
+        }
 
         for (this->stepNum = this->initializer->startStep(); 
-             this->stepNum < this->initializer->maxSteps();) 
+             this->stepNum < this->initializer->maxSteps();) {
             step();
+        }
 
-        for(unsigned i = 0; i < this->writers.size(); i++) 
+        for(unsigned i = 0; i < this->writers.size(); i++) {
             this->writers[i]->allDone();        
+        }
     }
 
     /**
