@@ -4,7 +4,7 @@
 #include <cmath>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 
-//fixme: check this number
+//fixme: benchmark this number
 #define GOLDEN_RATIO  1.6180339887498948482
 #define EULERS_NUMBER 2.71828182845904523536
 
@@ -19,7 +19,7 @@ namespace LibGeoDecomp {
  * From all these questionable assumptions a possibly optimal new load
  * distribution is derived but, to keep errors at bounds, the
  * OozeBalancer will return a weighted linear combination of the old
- * distribution (currentLoads) and the new one is returned.
+ * distribution (weights) and the new one is returned.
  */
 class OozeBalancer : public LoadBalancer
 {
@@ -37,11 +37,11 @@ public:
      */
     OozeBalancer(double newLoadWeight = GOLDEN_RATIO / EULERS_NUMBER);
 
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads);
+    virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads);
 
 private:
     /**
-     * Given that each node \f$n\f$ works on \f$currentLoads[n]\f$
+     * Given that each node \f$n\f$ works on \f$weights[n]\f$
      * items, that this takes him \f$relativeLoads[n]\f$ time and that
      * all nodes are roughly equally fast, then the optimal
      * distribution \f$dist\f$ can be determined by cutting the
@@ -55,27 +55,28 @@ private:
      * where \f$l\f$ is the target load per node 
      *
      * \f[
-     * l = \frac{1}{n} \sum_{i=0}^{i<n} \cdot \mbox{currentLoads}[i]
+     * l = \frac{1}{n} \sum_{i=0}^{i<n} \cdot \mbox{weights}[i]
      * \f]
      * 
      * and \f$f(t)\f$ it the load (or time) necessary to compute item \f$t\f$:
      *
      * \f[
-     * f(t) = \frac{\mbox{relativeLoads}[a]}{\mbox{currentLoads}[a]}
+     * f(t) = \frac{\mbox{relativeLoads}[a]}{\mbox{weights}[a]}
      * \f]
      *
      * (\f$t\f$ is currently computed on node \f$a\f$.)
      */
-    DVec expectedOptimalDistribution(const UVec& currentLoads, 
-                                     const DVec& relativeLoads) const;
+    LoadVec expectedOptimalDistribution(
+        const WeightVec& weights, 
+        const LoadVec& relativeLoads) const;
 
 private:
     double _newLoadWeight;
 
-    UVec equalize(const DVec& loads);
-    DVec linearCombo(const UVec& loadsA, const DVec& loadsB);
+    WeightVec equalize(const LoadVec& loads);
+    LoadVec linearCombo(const WeightVec& oldLoads, const LoadVec& newLoads);
 };
 
-};
+}
 
 #endif

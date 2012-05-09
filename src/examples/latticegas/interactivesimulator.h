@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QRunnable>
 #include <QSemaphore>
+#include <vector>
 #include <libgeodecomp/examples/latticegas/bigcell.h>
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>

@@ -155,8 +155,26 @@ public:
     {
         return volatileKernel;
     }
+
+    inline const SuperVector<long>& getWeights() const
+    {
+        return partition->getWeights();
+    }
     
 private:
+    boost::shared_ptr<Partition<DIM> > partition;
+    CoordBox<DIM> simulationArea;
+    Region<DIM> outerRim;
+    Region<DIM> volatileKernel;
+    RegionVecMap regions;
+    RegionVecMap outerGhostZoneFragments;
+    RegionVecMap innerGhostZoneFragments;
+    SuperVector<Region<DIM> > ownRims;
+    SuperVector<Region<DIM> > ownInnerSets;
+    unsigned rank;
+    unsigned ghostZoneWidth;
+    SuperVector<CoordBox<DIM> > boundingBoxes;
+
     inline void fillRegion(const unsigned& node)
     {
         SuperVector<Region<DIM> >& regionExpansion = regions[node];
@@ -218,20 +236,6 @@ private:
             innerGhosts[i] = getRegion(rank, 0) & getRegion(node, i);
         }
     }
-
-private:
-    boost::shared_ptr<Partition<DIM> > partition;
-    CoordBox<DIM> simulationArea;
-    Region<DIM> outerRim;
-    Region<DIM> volatileKernel;
-    RegionVecMap regions;
-    RegionVecMap outerGhostZoneFragments;
-    RegionVecMap innerGhostZoneFragments;
-    SuperVector<Region<DIM> > ownRims;
-    SuperVector<Region<DIM> > ownInnerSets;
-    unsigned rank;
-    unsigned ghostZoneWidth;
-    SuperVector<CoordBox<DIM> > boundingBoxes;
 };
 
 }

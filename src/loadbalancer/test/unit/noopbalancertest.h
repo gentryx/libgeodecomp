@@ -12,13 +12,13 @@ public:
     void testEcho()
     {
         NoOpBalancer b;
-        UVec loads(3);
+        NoOpBalancer::WeightVec loads(3);
         loads[0] = 47;
         loads[1] = 11;
         loads[2] = 9;
 
-        TS_ASSERT_EQUALS(loads, b.balance(loads, DVec()));
+        TS_ASSERT_EQUALS(loads, b.balance(loads, NoOpBalancer::LoadVec()));
     }
 };
 
-};
+}

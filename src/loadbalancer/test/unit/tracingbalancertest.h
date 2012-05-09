@@ -13,12 +13,12 @@ public:
 
     void setUp()
     {
-        _loads = UVec(3);
+        _loads = TracingBalancer::WeightVec(3);
         _loads[0] = 47;
         _loads[1] = 11;
         _loads[2] = 9;
 
-        _relLoads = DVec(3);
+        _relLoads = TracingBalancer::LoadVec(3);
         _relLoads[0] = 0.2;
         _relLoads[1] = 0.3;
         _relLoads[2] = 0.4;       
@@ -59,7 +59,7 @@ public:
         TracingBalancer b(new MockBalancer, output);
         std::string expected = std::string() + 
             "TracingBalancer::balance()\n" + 
-            "  currentLoads: " + _loads.toString() + "\n" +
+            "  weights: " + _loads.toString() + "\n" +
             "  relativeLoads: " + _relLoads.toString() + "\n";
         std::string longExpected = expected + expected + expected + expected;
         
@@ -74,8 +74,8 @@ public:
 
 
 private:
-    UVec _loads;
-    DVec _relLoads;
+    TracingBalancer::WeightVec _loads;
+    TracingBalancer::LoadVec _relLoads;
 };
 
 };

@@ -17,13 +17,15 @@ namespace LibGeoDecomp {
 class CheckBalancer : public LoadBalancer
 {
 public:
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads)
+    virtual NoOpBalancer::WeightVec balance(
+        const NoOpBalancer::WeightVec& weights, 
+        const NoOpBalancer::LoadVec& relativeLoads)
     {
         for (unsigned i = 0; i < relativeLoads.size(); i++) {
             TS_ASSERT(relativeLoads[i] >= 0);
             TS_ASSERT(relativeLoads[i] < 1);
         }
-        return currentLoads;
+        return weights;
     }
 
 };
@@ -209,10 +211,10 @@ public:
 
     void testRedistributeGrid1()
     {
-        UVec oldPartitions = testSim->partitions;
-        UVec newPartitions = toMonoPartitions(oldPartitions);
+        NoOpBalancer::WeightVec weights1 = testSim->partitions;
+        NoOpBalancer::WeightVec weights2 = toMonoPartitions(weights1);
 
-        testSim->redistributeGrid(oldPartitions, newPartitions);
+        testSim->redistributeGrid(weights1, weights2);
         testSim->waitForGhostRegions();
 
         TS_ASSERT_EQUALS(testSim->ghostHeightLower, (unsigned)0);
@@ -230,15 +232,15 @@ public:
 
     void testRedistributeGrid2()
     {
-        UVec oldPartitions = testSim->partitions;
-        UVec newPartitions = toWeirdoPartitions(oldPartitions);
+        NoOpBalancer::WeightVec weights1 = testSim->partitions;
+        NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
-        testSim->redistributeGrid(oldPartitions, newPartitions);
+        testSim->redistributeGrid(weights1, weights2);
         testSim->waitForGhostRegions();
 
 
-        unsigned s = newPartitions[rank    ] - testSim->ghostHeightUpper;
-        unsigned e = newPartitions[rank + 1] + testSim->ghostHeightLower;
+        unsigned s = weights2[rank    ] - testSim->ghostHeightUpper;
+        unsigned e = weights2[rank + 1] + testSim->ghostHeightLower;
 
         int width = init->gridBox().dimensions.x();
         DisplacedGrid<TestCell<2> > expectedStripe(
@@ -249,10 +251,10 @@ public:
                           actualStripe, *expectedStripe.vanillaGrid());
     }
 
-    void checkRunWithDifferentPartitions(UVec newPartitions)
+    void checkRunWithDifferentPartitions(NoOpBalancer::WeightVec weights2)
     {
-        UVec oldPartitions = testSim->partitions;
-        testSim->redistributeGrid(oldPartitions, newPartitions);
+        NoOpBalancer::WeightVec weights1 = testSim->partitions;
+        testSim->redistributeGrid(weights1, weights2);
         testSim->waitForGhostRegions();
 
         testSim->run();
@@ -268,7 +270,7 @@ public:
             *grid, 
             *region, 
             cycle);
-        TS_ASSERT_EQUALS(testSim->partitions, newPartitions);
+        TS_ASSERT_EQUALS(testSim->partitions, weights2);
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
     }
 
@@ -286,12 +288,12 @@ public:
 
     void testRedistributeGrid5()
     {
-        UVec oldPartitions = testSim->partitions;
-        UVec newPartitions = toWeirdoPartitions(oldPartitions);
+        NoOpBalancer::WeightVec weights1 = testSim->partitions;
+        NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
-        testSim->redistributeGrid(oldPartitions, newPartitions);
+        testSim->redistributeGrid(weights1, weights2);
         
-        TS_ASSERT_EQUALS(testSim->partitions, newPartitions);
+        TS_ASSERT_EQUALS(testSim->partitions, weights2);
         switch (rank) {
         case 0:
             TS_ASSERT_EQUALS((int)testSim->ghostHeightUpper, 0);
@@ -404,30 +406,30 @@ public:
 private:
 
     // just a boring partition: everything on _one_ node
-    UVec toMonoPartitions(UVec oldPartitions) 
+    NoOpBalancer::WeightVec toMonoPartitions(NoOpBalancer::WeightVec weights1) 
     {
-        UVec newPartitions(5);
-        newPartitions[0] = 0;
-        newPartitions[1] = oldPartitions[4];
-        newPartitions[2] = oldPartitions[4];
-        newPartitions[3] = oldPartitions[4];
-        newPartitions[4] = oldPartitions[4];
-        return newPartitions;
+        NoOpBalancer::WeightVec weights2(5);
+        weights2[0] = 0;
+        weights2[1] = weights1[4];
+        weights2[2] = weights1[4];
+        weights2[3] = weights1[4];
+        weights2[4] = weights1[4];
+        return weights2;
     }
 
     // a weird new partition, max. difference to the uniform one
-    UVec toWeirdoPartitions(UVec oldPartitions)
+    NoOpBalancer::WeightVec toWeirdoPartitions(NoOpBalancer::WeightVec weights1)
     {
-        UVec newPartitions(5);
-        newPartitions[0] = 0;
-        newPartitions[1] = 3;
-        newPartitions[2] = 3;
-        newPartitions[3] = 10;
-        newPartitions[4] = oldPartitions[4];
+        NoOpBalancer::WeightVec weights2(5);
+        weights2[0] = 0;
+        weights2[1] = 3;
+        weights2[2] = 3;
+        weights2[3] = 10;
+        weights2[4] = weights1[4];
         // just to be sure the config file hasn't been tainted
-        TS_ASSERT(oldPartitions[4] > 10);
-        return newPartitions;
+        TS_ASSERT(weights1[4] > 10);
 
+        return weights2;
     }
 
     Grid<TestCell<2> > mangledGrid(double foo)

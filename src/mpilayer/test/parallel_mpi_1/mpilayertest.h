@@ -59,8 +59,8 @@ public:
     void testSendRecvVec()
     {
         MPILayer layer; 
-        UVec actual(5);
-        UVec expected(5);
+        SuperVector<unsigned> actual(5);
+        SuperVector<unsigned> expected(5);
         expected[0] = 1;
         expected[1] = 2;
         expected[2] = 3;

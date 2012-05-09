@@ -12,9 +12,9 @@ namespace LibGeoDecomp {
 class RandomBalancer : public LoadBalancer
 {
 public:
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads);
+    virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads);
 };
 
-};
+}
 
 #endif

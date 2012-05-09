@@ -5,6 +5,7 @@
 #include "../../../io/mockwriter.h"
 #include "../../../io/parallelmemorywriter.h"
 #include "../../../io/testinitializer.h"
+#include "../../../loadbalancer/mockbalancer.h"
 #include "../../../misc/testcell.h"
 #include "../../../misc/testhelper.h"
 #include "../../hiparsimulator.h"
@@ -27,7 +28,7 @@ public:
         int width = 131;
         int height = 241;
         dim = Coord<2>(width, height);
-        maxSteps = 1500;
+        maxSteps = 100;
         firstStep = 20;
         firstCycle = firstStep * TestCell<2>::nanoSteps();
         TestInitializer<2> *init = new TestInitializer<2>(
@@ -37,7 +38,10 @@ public:
         loadBalancingPeriod = 31;
         ghostZoneWidth = 10;
         s.reset(new SimulatorType(
-                    init, 0, loadBalancingPeriod, ghostZoneWidth));
+                    init, 
+                    new MockBalancer(), 
+                    loadBalancingPeriod, 
+                    ghostZoneWidth));
         mockWriter = new MockWriter(&*s);
         memoryWriter = new MemoryWriterType(&*s, outputPeriod);
     }
@@ -50,9 +54,14 @@ public:
     void testStep()
     {
         s->step();
+        TS_ASSERT_EQUALS((31 - 1)       * 27, s->timeToNextEvent());
+        TS_ASSERT_EQUALS((100 - 20 - 1) * 27, s->timeToLastEvent());
         s->step();
         s->step();
         s->step();
+
+        TS_ASSERT_EQUALS((31 - 4)       * 27, s->timeToNextEvent());
+        TS_ASSERT_EQUALS((100 - 20 - 4) * 27, s->timeToLastEvent());
 
         std::stringstream expectedEvents;
         expectedEvents << "initialized()\ninitialized()\n";
@@ -73,6 +82,29 @@ public:
         }
     }
 
+    void testRun()
+    {
+        s->run();
+
+        for (int t = firstStep; t < maxSteps; t += outputPeriod) {
+            int globalNanoStep = t * TestCell<2>::nanoSteps();
+            MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+            TS_ASSERT_TEST_GRID(
+                MemoryWriterType::GridType, 
+                grids[t], 
+                globalNanoStep);
+            TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
+        }
+
+        if (MPILayer().rank() == 0) {
+            std::string expectedEvents;
+            for (int i = 0; i < 2; ++i) {
+                expectedEvents += "balance() [7892, 7893, 7893, 7893] [1, 1, 1, 1]\n";
+            }
+
+            TS_ASSERT_EQUALS(expectedEvents, MockBalancer::events);
+        }
+    }
 
 private:
     boost::shared_ptr<SimulatorType> s;

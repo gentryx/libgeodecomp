@@ -3,25 +3,27 @@
 
 namespace LibGeoDecomp {
 
-UVec RandomBalancer::balance(const UVec& currentLoads, const DVec&)
+RandomBalancer::WeightVec RandomBalancer::balance(
+    const RandomBalancer::WeightVec& weights, 
+    const RandomBalancer::LoadVec& /* unused */)
 {
-    UVec ret(currentLoads.size());
-    DVec randomBase(currentLoads.size());
+    WeightVec ret(weights.size());
+    LoadVec randomBase(weights.size());
 
     // independent random fill
     for (unsigned i = 0; i < randomBase.size(); i++)
         randomBase[i] = Random::gen_d(1.0);
     // calc. scaling wheights
     double randSum = 0;
-    unsigned loadsSum = 0;
+    long loadsSum = 0;
     for (unsigned i = 0; i < ret.size(); i++) {
         randSum += randomBase[i];
-        loadsSum += currentLoads[i];
+        loadsSum += weights[i];
     }
     // scaled fill & calc. remainder
-    unsigned remainder = loadsSum;
+    long remainder = loadsSum;
     for (unsigned i = 0; i < ret.size(); i++) {
-        ret[i] = (unsigned) (randomBase[i] * loadsSum / randSum);
+        ret[i] = (long)(randomBase[i] * loadsSum / randSum);
         remainder -= ret[i];
     }
     // scatter remainder
@@ -31,4 +33,4 @@ UVec RandomBalancer::balance(const UVec& currentLoads, const DVec&)
     return ret;
 }
 
-};
+}

@@ -9,27 +9,29 @@ BiasBalancer::BiasBalancer(LoadBalancer *balancer) :
 }
 
 
-UVec BiasBalancer::oneNodeOnly(UVec currentLoads) const
+BiasBalancer::WeightVec BiasBalancer::oneNodeOnly(WeightVec weights) const
 {
-    unsigned sum = 0;
-    for (unsigned i = 0; i < currentLoads.size(); i++) {
-        sum += currentLoads[i];
+    long sum = 0;
+    for (unsigned i = 0; i < weights.size(); i++) {
+        sum += weights[i];
     }
     
-    UVec ret(currentLoads.size(), 0);
+    WeightVec ret(weights.size(), 0);
     ret[0] = sum;
     return ret;
 }
 
 
-UVec BiasBalancer::balance(const UVec& currentLoads, const DVec& relativeLoads)
+BiasBalancer::WeightVec BiasBalancer::balance(
+    const BiasBalancer::WeightVec& weights, 
+    const BiasBalancer::LoadVec& relativeLoads)
 {
     if (_pristine) {
         _pristine = false;
-        return oneNodeOnly(currentLoads);
+        return oneNodeOnly(weights);
     } else {
-        return _balancer->balance(currentLoads, relativeLoads);
+        return _balancer->balance(weights, relativeLoads);
     }
 }
 
-};
+}

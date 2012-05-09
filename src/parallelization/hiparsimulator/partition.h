@@ -14,7 +14,8 @@ public:
     inline Partition(
         // fixme: drop offset and bounding box from all partitions in favor of simulation region specifier?
         const long& offset,
-        const SuperVector<long>& weights)
+        const SuperVector<long>& _weights) :
+        weights(_weights)
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
@@ -22,9 +23,15 @@ public:
             startOffsets[i + 1] = startOffsets[i] + weights[i];        
     }
 
+    inline const SuperVector<long>& getWeights() const
+    {
+        return weights;
+    }
+
     virtual Region<DIM> getRegion(const long& node) const = 0;
 
 protected:
+    SuperVector<long> weights;
     SuperVector<long> startOffsets;
 };
 

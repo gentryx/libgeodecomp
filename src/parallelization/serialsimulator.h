@@ -98,6 +98,6 @@ protected:
     }
 };
 
-};
+}
 
 #endif

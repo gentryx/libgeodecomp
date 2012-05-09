@@ -7,7 +7,6 @@
 #include <map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <libgeodecomp/misc/commontypedefs.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/region.h>
@@ -200,7 +199,7 @@ public:
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Isend(
-            &(const_cast<UVec&>(*vec))[0], 
+            &(const_cast<SuperVector<T>&>(*vec))[0], 
             vec->size(),
             datatype,
             dest,

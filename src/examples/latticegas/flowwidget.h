@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <QtGui/QColor>
 #include <QtGui/QPainter>
 #include <QtGui/QWidget>

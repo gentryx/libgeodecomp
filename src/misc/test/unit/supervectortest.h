@@ -1,7 +1,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 #include "../../supervector.h"
-#include "../../commontypedefs.h"
 
 using namespace boost::assign;
 using namespace LibGeoDecomp; 
@@ -98,7 +97,8 @@ public:
 
     void testSort()
     {
-        UVec v, w;
+        SuperVector<unsigned> v;
+        SuperVector<unsigned> w;
         v += 0, 3, 1, 2; 
         w += 0, 1, 2, 3;
         v.sort();
@@ -107,7 +107,7 @@ public:
 
     void testMax()
     {
-        UVec a;
+        SuperVector<unsigned> a;
         a += 0, 3, 1 ,2;
         TS_ASSERT_EQUALS(a.max(), (unsigned)3); 
     }

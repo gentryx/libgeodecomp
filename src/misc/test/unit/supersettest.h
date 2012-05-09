@@ -1,6 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../supermap.h"
-#include "../../commontypedefs.h"
+#include "../../superset.h"
 
 using namespace LibGeoDecomp; 
 
@@ -68,4 +67,4 @@ public:
     }
 };
 
-};
+}

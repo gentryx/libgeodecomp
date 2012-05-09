@@ -10,11 +10,11 @@ class MockBalancer : public LoadBalancer
 public:
     MockBalancer();
     virtual ~MockBalancer();
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads);
+    virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads);
 
     static std::string events;
 };
 
-};
+}
 
 #endif

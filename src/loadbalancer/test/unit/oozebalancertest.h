@@ -20,23 +20,23 @@ public:
     }
 
 
-    void checkExpectedOptimalDistribution(DVec expected, UVec loads, DVec relLoads)
+    void checkExpectedOptimalDistribution(OozeBalancer::LoadVec expected, OozeBalancer::WeightVec loads, OozeBalancer::LoadVec relLoads)
     {
         OozeBalancer b(0.2);
-        DVec actual = b.expectedOptimalDistribution(loads, relLoads);
+        OozeBalancer::LoadVec actual = b.expectedOptimalDistribution(loads, relLoads);
 
-        TS_ASSERT_EQUALS_DVEC(actual, expected);
+        TS_ASSERT_EQUALS_DOUBLE_VEC(actual, expected);
     }
 
 
     void testExpectedOptimalDistribution1()
     {
-        UVec loads(3);
+        OozeBalancer::WeightVec loads(3);
         loads[0] = 4;
         loads[1] = 2;
         loads[2] = 5;
         
-        DVec relLoads(3);
+        OozeBalancer::LoadVec relLoads(3);
         relLoads[0] = 0.2;
         relLoads[1] = 0.9;
         relLoads[2] = 1.0;       
@@ -46,7 +46,7 @@ public:
         // load is 0.2, so each item costs 0.05 time. Similarly each
         // item for the second node takes 0.45 and for the third one
         // 0.2.
-        DVec expected(3);
+        OozeBalancer::LoadVec expected(3);
         // the fist node gets 10/9 items from the second one added...
         expected[0] = 4 + 10.0 / 9;
         // ...which gets itself another 1.5 items from the third one.
@@ -60,30 +60,30 @@ public:
 
     void testExpectedOptimalDistribution2()
     {
-        UVec loads(3);
+        OozeBalancer::WeightVec loads(3);
         loads[0] = 100;
         loads[1] = 0;
         loads[2] = 0;
 
-        DVec relLoads(3);
+        OozeBalancer::LoadVec relLoads(3);
         relLoads[0] = 0.8;
         relLoads[1] = 0.0;
         relLoads[2] = 0.0;       
 
-        DVec expected(3, 100.0 / 3);
+        OozeBalancer::LoadVec expected(3, 100.0 / 3);
         checkExpectedOptimalDistribution(expected, loads, relLoads);
     }
 
 
     void testOptDistWithElementsTooLargeForOneNode()
     {
-        UVec loads(4);
+        OozeBalancer::WeightVec loads(4);
         loads[0] = 2;
         loads[1] = 2;
         loads[2] = 3;
         loads[3] = 2;
 
-        DVec relLoads(4);
+        OozeBalancer::LoadVec relLoads(4);
         relLoads[0] = 0.13;
         relLoads[1] = 5.0;
         relLoads[2] = 0.21;
@@ -91,7 +91,7 @@ public:
         // target load per node:
         //   1/n * \sum relLoads == 1/4 * 5.46 == 1.34
 
-        DVec expected(4);
+        OozeBalancer::LoadVec expected(4);
         expected[0] = 
             2 +        // both elements from loads[0]          => 0.13 load
             0.492;     // 49.2% of the 1st one in loads[1]     => 1.23 load
@@ -125,7 +125,7 @@ class OozeBalancerTest2 : public CxxTest::TestSuite
 {
 public:
 
-    void checkBoundaryConditions(UVec oldLoads, UVec newLoads)
+    void checkBoundaryConditions(OozeBalancer::WeightVec oldLoads, OozeBalancer::WeightVec newLoads)
     {
         TS_ASSERT_EQUALS(oldLoads.size(), newLoads.size());
         TS_ASSERT_EQUALS(oldLoads.sum(), newLoads.sum());
@@ -137,9 +137,9 @@ public:
      * items @a loads, how complex each item is @a itemLoads and how
      * fast the node itself is @a nodeSpeeds .
      */
-    DVec calcRelLoads(UVec loads, DVec itemLoads, DVec nodeSpeeds)
+    OozeBalancer::LoadVec calcRelLoads(OozeBalancer::WeightVec loads, OozeBalancer::LoadVec itemLoads, OozeBalancer::LoadVec nodeSpeeds)
     {       
-        DVec ret(nodeSpeeds.size(), 0);
+        OozeBalancer::LoadVec ret(nodeSpeeds.size(), 0);
         unsigned cursor = 0;
         for (unsigned node = 0; node < ret.size(); node++) {
             for (unsigned i = 0; i < loads[node]; i++) 
@@ -151,15 +151,15 @@ public:
     }
 
 
-    void checkConvergence(UVec startLoads, DVec itemLoads, DVec nodeSpeeds)
+    void checkConvergence(OozeBalancer::WeightVec startLoads, OozeBalancer::LoadVec itemLoads, OozeBalancer::LoadVec nodeSpeeds)
     {
         OozeBalancer b;
         
-        UVec oldLoads = startLoads;
-        UVec newLoads;
+        OozeBalancer::WeightVec oldLoads = startLoads;
+        OozeBalancer::WeightVec newLoads;
             
         for (int i = 0; i < 64; i++) {
-            DVec relLoads = calcRelLoads(oldLoads, itemLoads, nodeSpeeds);
+            OozeBalancer::LoadVec relLoads = calcRelLoads(oldLoads, itemLoads, nodeSpeeds);
             newLoads = b.balance(oldLoads, relLoads);
             checkBoundaryConditions(newLoads, oldLoads);
             oldLoads = newLoads;
@@ -167,7 +167,7 @@ public:
 
         double targetLoadPerNode = itemLoads.sum() / nodeSpeeds.sum();
 
-        DVec relLoads = calcRelLoads(newLoads, itemLoads, nodeSpeeds);
+        OozeBalancer::LoadVec relLoads = calcRelLoads(newLoads, itemLoads, nodeSpeeds);
         for (unsigned i = 0; i < relLoads.size(); i++) {
             // 5% is a good approximation after so few steps
             TS_ASSERT_DELTA(targetLoadPerNode, relLoads[i], targetLoadPerNode * 0.05);
@@ -175,9 +175,9 @@ public:
     }
 
 
-    DVec itemLoads1() 
+    OozeBalancer::LoadVec itemLoads1() 
     {
-        DVec itemLoads(1500);
+        OozeBalancer::LoadVec itemLoads(1500);
         for (int i = 0; i < 400; i++) 
             itemLoads[i] = 0.1;
         for (int i = 400; i < 1300; i++) 
@@ -188,9 +188,9 @@ public:
     }
 
     
-    DVec nodeSpeeds1()
+    OozeBalancer::LoadVec nodeSpeeds1()
     {
-        DVec nodeSpeeds(5);
+        OozeBalancer::LoadVec nodeSpeeds(5);
         nodeSpeeds[0] = 20;
         nodeSpeeds[1] = 15;
         nodeSpeeds[2] = 25;
@@ -203,7 +203,7 @@ public:
     void testConvergence1()
     {
         // all items to node 0
-        UVec startLoads(5, 0);
+        OozeBalancer::WeightVec startLoads(5, 0);
         startLoads[0] = 1500;
 
         checkConvergence(startLoads, itemLoads1(), nodeSpeeds1());
@@ -213,15 +213,15 @@ public:
     void testConvergence2()
     {
         // equidistribution
-        UVec startLoads(5, 300);
+        OozeBalancer::WeightVec startLoads(5, 300);
 
         checkConvergence(startLoads, itemLoads1(), nodeSpeeds1());
     }
 
 
-    DVec tLoads()
+    OozeBalancer::LoadVec tLoads()
     {
-        DVec dLoads(5);
+        OozeBalancer::LoadVec dLoads(5);
         dLoads[0] = 1.6;
         dLoads[1] = 5.7;
         dLoads[2] = 9.4;
@@ -233,7 +233,7 @@ public:
 
     void testEqualize1()
     {
-        UVec expected(5);
+        OozeBalancer::WeightVec expected(5);
         expected[0] = 1;
         expected[1] = 6;
         expected[2] = 9;
@@ -251,46 +251,47 @@ public:
 
     void testEqualize2()
     {
-        DVec loads(1, 12.1);
-        UVec expected(1, 12);
+        OozeBalancer::LoadVec loads(1, 12.1);
+        OozeBalancer::WeightVec expected(1, 12);
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(loads));
     }
 
 
     void testEqualize3()
     {
-        DVec loads(1, 11.9);
-        UVec expected(1, 12);
+        OozeBalancer::LoadVec loads(1, 11.9);
+        OozeBalancer::WeightVec expected(1, 12);
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(loads));
     }
 
     
     void testLinearCombo()
     {
-        UVec base(5);
+        OozeBalancer::WeightVec base(5);
         base[0] = 4;
         base[1] = 8;
         base[2] = 2;
         base[3] = 5;
         base[4] = 7;
 
-        DVec expected(5);
+        OozeBalancer::LoadVec expected(5);
         expected[0] = 4 * 0.9 + 1.6 * 0.1;
         expected[1] = 8 * 0.9 + 5.7 * 0.1;
         expected[2] = 2 * 0.9 + 9.4 * 0.1;
         expected[3] = 5 * 0.9 + 3.4 * 0.1;
         expected[4] = 7 * 0.9 + 6.9 * 0.1;            
 
-        TS_ASSERT_EQUALS_DVEC(expected, 
-                              OozeBalancer(0.1).linearCombo(base, tLoads()));
+        TS_ASSERT_EQUALS_DOUBLE_VEC(
+            expected, 
+            OozeBalancer(0.1).linearCombo(base, tLoads()));
 
     }
 
 
     void testZeroRelativeLoads()
     {        
-        UVec loads(5, 100);
-        TS_ASSERT_EQUALS(loads, OozeBalancer().balance(loads, DVec(5, 0)));
+        OozeBalancer::WeightVec loads(5, 100);
+        TS_ASSERT_EQUALS(loads, OozeBalancer().balance(loads, OozeBalancer::LoadVec(5, 0)));
     }
 };
 

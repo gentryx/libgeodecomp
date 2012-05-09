@@ -1,5 +1,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
+#include "../../../misc/superset.h"
 #include "../../../misc/supervector.h"
 #include "../../../misc/testhelper.h"
 #include "../../mpilayer.h"
@@ -169,9 +170,9 @@ public:
     void testAllGather()
     {
         MPILayer layer;
-        UVec expected;
+        SuperVector<unsigned> expected;
         for (unsigned i = 0; i < layer.size(); i++) expected.push_back(i);
-        UVec actual = layer.allGather(layer.rank());
+        SuperVector<unsigned> actual = layer.allGather(layer.rank());
         TS_ASSERT_EQUALS(actual, expected);
     }
 
@@ -179,11 +180,11 @@ public:
     {
         MPILayer layer;
         unsigned root = 0;
-        UVec expected_root;
-        UVec expected_slave;
+        SuperVector<unsigned> expected_root;
+        SuperVector<unsigned> expected_slave;
         for (unsigned i = 0; i < layer.size(); i++) expected_root.push_back(i);
 
-        UVec actual = layer.gather(layer.rank(), root);
+        SuperVector<unsigned> actual = layer.gather(layer.rank(), root);
         if (layer.rank() == root) {
             TS_ASSERT_EQUALS(actual, expected_root);
         } else {
@@ -208,14 +209,19 @@ public:
     {
         MPILayer layer;
         unsigned root = 0;
-        DVec expected;
+        SuperVector<double> expected;
         expected += 2,4,24;
-        DVec actual;
-        DVec source;
-        if (layer.rank() == root) source = expected;
-        else source = DVec();
+        SuperVector<double> actual;
+        SuperVector<double> source;
+
+        if (layer.rank() == root) {
+            source = expected; 
+        } else {
+            source = SuperVector<double>();
+        }
+
         actual = layer.broadcastVector(source, root);
-        TSMA_ASSERT_EQUALS(actual, expected);
+        TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testSendRecvCell()

@@ -150,6 +150,11 @@ public:
         return stepper->currentStep();
     }
 
+    inline const SuperVector<long>& getWeights() const
+    {
+        return partitionManager->getWeights();
+    }
+
 private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<MyPartitionManager> partitionManager;

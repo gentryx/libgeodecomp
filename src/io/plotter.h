@@ -8,7 +8,6 @@
 #include <cmath>
 #endif
 #include <vector>
-#include <libgeodecomp/misc/commontypedefs.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/io/image.h>
 
@@ -41,12 +40,9 @@ public:
     /**
      * @return the dimensions of a cell when plotted (width, height).
      */
-    UVec getCellDimensions() const
+    Coord<2> getCellDimensions() const
     {
-        UVec ret(2);
-        ret[0] = _cellWidth;
-        ret[1] = _cellHeight;
-        return ret;
+        return Coord<2>(_cellWidth, _cellHeight);
     }
     
     Image plotGrid(const Grid<CELL, typename CELL::Topology>& grid) const

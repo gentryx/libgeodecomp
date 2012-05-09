@@ -12,12 +12,12 @@ namespace LibGeoDecomp {
 class NoOpBalancer : public LoadBalancer
 {
 public:
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads)
+    virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads)
     {
-        return currentLoads;
+        return weights;
     }
 };
 
-};
+}
 
 #endif

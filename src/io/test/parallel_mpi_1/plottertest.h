@@ -175,9 +175,7 @@ public:
 
     void testSetGetDimensions()
     {
-        UVec dims(2);
-        dims[0] = 42;
-        dims[1] = 11;
+        Coord<2> dims(42, 11);
         plotter->setCellDimensions(dims[0], dims[1]);
         TS_ASSERT_EQUALS(dims, plotter->getCellDimensions());
     }

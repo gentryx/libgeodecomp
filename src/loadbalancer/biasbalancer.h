@@ -15,15 +15,15 @@ class BiasBalancer : public LoadBalancer
 {
 public:
     BiasBalancer(LoadBalancer *balancer);
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads);
+    virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads);
 
 private:
     bool _pristine;
     boost::shared_ptr<LoadBalancer> _balancer;
 
-    UVec oneNodeOnly(UVec currentLoads) const;
+    WeightVec oneNodeOnly(WeightVec weights) const;
 };
 
-};
+}
 
 #endif

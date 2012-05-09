@@ -4,9 +4,7 @@
 #define _libgeodecomp_parallelization_stripingsimulator_h_
 
 #include <algorithm>
-
 #include <boost/shared_ptr.hpp>
-#include <libgeodecomp/misc/commontypedefs.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -128,6 +126,8 @@ class StripingSimulator : public DistributedSimulator<CELL_TYPE>
     friend class ParallelStripingSimulatorTest;
 
 public:
+    typedef LoadBalancer::WeightVec WeightVec;
+    typedef LoadBalancer::LoadVec LoadVec;
     typedef typename CELL_TYPE::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIMENSIONS;
@@ -256,7 +256,7 @@ private:
     Region<DIM> outerUpperGhostRegion;
     Region<DIM> outerLowerGhostRegion;
     // contains the start and stop rows for each node's stripe
-    UVec partitions;
+    WeightVec partitions;
     unsigned loadBalancingPeriod;
     MPI::Datatype cellMPIDatatype;
     Chronometer chrono;
@@ -270,9 +270,9 @@ private:
      * "partition()[i]" is the first row for which node i is
      * responsible, "partition()[i + 1] - 1" is the last one.
      */
-    UVec partition(unsigned gridHeight, unsigned size) const
+    WeightVec partition(unsigned gridHeight, unsigned size) const
     {    
-        UVec ret(size + 1);
+        WeightVec ret(size + 1);
         for (unsigned i = 0; i < size; i++) {
             ret[i] = gridHeight * i / size;
         }
@@ -290,20 +290,20 @@ private:
         }
 
         double ratio = chrono.nextCycle();
-        DVec loads = mpilayer.gather(ratio, 0);
+        LoadVec loads = mpilayer.gather(ratio, 0);
 
         if (mpilayer.rank() == 0) {
-            UVec oldWorkloads = partitionsToWorkloads(partitions);
-            UVec newWorkloads = balancer->balance(oldWorkloads, loads);
+            WeightVec oldWorkloads = partitionsToWorkloads(partitions);
+            WeightVec newWorkloads = balancer->balance(oldWorkloads, loads);
             validateLoads(newWorkloads, oldWorkloads);
-            UVec newPartitions = workloadsToPartitions(newWorkloads);
+            WeightVec newPartitions = workloadsToPartitions(newWorkloads);
             
             for (unsigned i = 0; i < mpilayer.size(); i++) 
                 mpilayer.sendVec(&newPartitions, i, BALANCELOADS);
         }
 
-        UVec oldPartitions = partitions;
-        UVec newPartitions(partitions.size());
+        WeightVec oldPartitions = partitions;
+        WeightVec newPartitions(partitions.size());
         mpilayer.recvVec(&newPartitions, 0, BALANCELOADS);
         mpilayer.wait(BALANCELOADS);
         
@@ -467,7 +467,7 @@ private:
      * doesn't actually resize the stripes since different actions are
      * required during load balancing and initialization.
      */
-    CoordBox<DIM> adaptDimensions(const UVec& newPartitions)
+    CoordBox<DIM> adaptDimensions(const WeightVec& newPartitions)
     {
         unsigned startRow = 
             newPartitions[mpilayer.rank()    ];
@@ -544,18 +544,18 @@ private:
         return upperNeighbor;
     }
 
-    UVec partitionsToWorkloads(const UVec& partitions) const
+    WeightVec partitionsToWorkloads(const WeightVec& partitions) const
     {
-        UVec ret(partitions.size() - 1);
+        WeightVec ret(partitions.size() - 1);
         for (unsigned i = 0; i < ret.size(); i++) {
             ret[i] = partitions[i + 1] - partitions[i];
         }
         return ret;
     }
 
-    UVec workloadsToPartitions(const UVec& workloads) const
+    WeightVec workloadsToPartitions(const WeightVec& workloads) const
     {
-        UVec ret(workloads.size() + 1);
+        WeightVec ret(workloads.size() + 1);
         ret[0] = 0;
         for (unsigned i = 0; i < workloads.size(); i++) {
             ret[i + 1] = ret[i] + workloads[i];
@@ -563,8 +563,8 @@ private:
         return ret;
     }
 
-    void redistributeGrid(const UVec& oldPartitions, 
-                          const UVec& newPartitions)
+    void redistributeGrid(const WeightVec& oldPartitions, 
+                          const WeightVec& newPartitions)
     {
         waitForGhostRegions();
         if (newPartitions == oldPartitions) return;
@@ -628,7 +628,7 @@ private:
      * ensures that newLoads and oldLoads have the same size and that
      * the sums of their elements match.
      */
-    void validateLoads(const UVec& newLoads, const UVec& oldLoads) const
+    void validateLoads(const WeightVec& newLoads, const WeightVec& oldLoads) const
     {
         if (newLoads.size() != oldLoads.size() || 
             newLoads.sum() != oldLoads.sum()) {
@@ -643,7 +643,7 @@ private:
     }
 };
 
-};
+}
 
 #endif
 #endif

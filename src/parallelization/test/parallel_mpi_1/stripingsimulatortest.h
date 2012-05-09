@@ -137,8 +137,8 @@ class UpdateFunctor<Cell> : public StreakUpdateFunctor<Cell>
 {};
 
 class BadBalancerSum : public LoadBalancer {
-    virtual UVec balance(const UVec& currentLoads, const DVec&) {
-        UVec ret = currentLoads;
+    virtual NoOpBalancer::WeightVec balance(const NoOpBalancer::WeightVec& currentLoads, const NoOpBalancer::LoadVec&) {
+        NoOpBalancer::WeightVec ret = currentLoads;
         ret[0]++;
         return ret;
     }
@@ -146,8 +146,8 @@ class BadBalancerSum : public LoadBalancer {
 
 
 class BadBalancerNum : public LoadBalancer {
-    virtual UVec balance(const UVec& currentLoads, const DVec&) {
-        UVec ret = currentLoads;
+    virtual NoOpBalancer::WeightVec balance(const NoOpBalancer::WeightVec& currentLoads, const NoOpBalancer::LoadVec&) {
+        NoOpBalancer::WeightVec ret = currentLoads;
         ret.push_back(45);
         return ret;
     }
@@ -200,15 +200,15 @@ public:
     {
         int gridWidth = 27;
         int size = 1;
-        UVec actual = testSim->partition(gridWidth, size);
-        UVec expected(2);
+        NoOpBalancer::WeightVec actual = testSim->partition(gridWidth, size);
+        NoOpBalancer::WeightVec expected(2);
         expected[0] = 0;
         expected[1] = 27;
         TS_ASSERT_EQUALS(actual, expected);
         
         size = 2;
         actual = testSim->partition(gridWidth, size);
-        expected = UVec(3);
+        expected = NoOpBalancer::WeightVec(3);
         expected[0] = 0;
         expected[1] = 13;
         expected[2] = 27;
@@ -216,7 +216,7 @@ public:
 
         size = 3;
         actual = testSim->partition(gridWidth, size);
-        expected = UVec(4);
+        expected = NoOpBalancer::WeightVec(4);
         expected[0] = 0;
         expected[1] = 9;
         expected[2] = 18;
@@ -225,7 +225,7 @@ public:
         
         size = 4;
         actual = testSim->partition(gridWidth, size);
-        expected = UVec(5);
+        expected = NoOpBalancer::WeightVec(5);
         expected[0] = 0;
         expected[1] = 6;
         expected[2] = 13;
@@ -295,7 +295,7 @@ public:
 
     void testPartitionsToWorkloadsAndBackAgain()
     {
-        UVec partitions(6);
+        NoOpBalancer::WeightVec partitions(6);
         partitions[0] =  0;
         partitions[1] =  1;
         partitions[2] = 11;
@@ -303,7 +303,7 @@ public:
         partitions[4] = 20;
         partitions[5] = 90;
 
-        UVec workloads(5);
+        NoOpBalancer::WeightVec workloads(5);
         workloads[0] =  1;
         workloads[1] = 10;
         workloads[2] =  0;

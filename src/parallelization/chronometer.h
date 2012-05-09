@@ -2,7 +2,6 @@
 #define _libgeodecomp_parallelization_chronometer_h_
 
 #include <stdexcept>
-#include <libgeodecomp/misc/commontypedefs.h>
 
 namespace LibGeoDecomp {
 

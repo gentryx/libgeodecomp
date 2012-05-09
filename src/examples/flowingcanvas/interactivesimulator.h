@@ -6,7 +6,9 @@
 #include <QObject>
 #include <QRunnable>
 #include <QSemaphore>
+// move fpscounter to misc?
 #include <libgeodecomp/examples/latticegas/fpscounter.h>
+#include <libgeodecomp/misc/supervector.h>
 
 namespace LibGeoDecomp {
 

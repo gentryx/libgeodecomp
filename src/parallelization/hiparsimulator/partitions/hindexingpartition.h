@@ -7,7 +7,6 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <libgeodecomp/misc/commontypedefs.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/spacefillingcurve.h>

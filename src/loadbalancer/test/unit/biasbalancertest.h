@@ -12,12 +12,12 @@ public:
 
     void setUp()
     {
-        _loads = UVec(3);
+        _loads = BiasBalancer::WeightVec(3);
         _loads[0] = 47;
         _loads[1] = 11;
         _loads[2] = 9;
 
-        _relLoads = DVec(3);
+        _relLoads = BiasBalancer::LoadVec(3);
         _relLoads[0] = 0.2;
         _relLoads[1] = 0.3;
         _relLoads[2] = 0.4;       
@@ -27,7 +27,7 @@ public:
     void testDestabilization()
     {
         BiasBalancer b(0);
-        UVec expected(3, 0);
+        BiasBalancer::WeightVec expected(3, 0);
         expected[0] = 67;
 
         TS_ASSERT_EQUALS(expected, b.balance(_loads, _relLoads));
@@ -61,8 +61,8 @@ public:
     }
 
 private:
-    UVec _loads;
-    DVec _relLoads;
+    BiasBalancer::WeightVec _loads;
+    BiasBalancer::LoadVec _relLoads;
 };
 
 };

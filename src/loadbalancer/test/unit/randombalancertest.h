@@ -12,14 +12,14 @@ public:
     void testEcho()
     {
         RandomBalancer b;
-        UVec loads(4);
+        RandomBalancer::WeightVec loads(4);
         loads[0] = 0;
         loads[1] = 8;
         loads[2] = 15;
         loads[3] = 1;
 
-        UVec actualA = b.balance(loads, DVec());
-        UVec actualB = b.balance(loads, DVec());
+        RandomBalancer::WeightVec actualA = b.balance(loads, RandomBalancer::LoadVec());
+        RandomBalancer::WeightVec actualB = b.balance(loads, RandomBalancer::LoadVec());
         TS_ASSERT_DIFFERS(actualA, actualB);
 
         TS_ASSERT_EQUALS((unsigned)4,  actualA.size());

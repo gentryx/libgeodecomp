@@ -42,43 +42,30 @@
 } while (0)
 
 
-/**
- * ASSERT_EQUAL macro that generates a sensible error message automatically
- */
-#define TSMA_ASSERT_EQUALS(actual, expected)                                             \
-{                                                                                        \
-    std::ostringstream message;                                                          \
-    message                                                                              \
-        << "\nExpected\n" << expected                                                    \
-        << "\nbut was\n" << actual;                                                      \
-    TSM_ASSERT_EQUALS(message.str().c_str(), actual, expected);                          \
-} while (0)
+#define TS_ASSERT_EQUALS_DOUBLE_VEC(va, vb)                             \
+    {                                                                   \
+        SuperVector<double> tsa_comp2_a = va;                           \
+        SuperVector<double> tsa_comp2_b = vb;                           \
+        TS_ASSERT_EQUALS(tsa_comp2_a.size(), tsa_comp2_b.size());       \
+        for (unsigned i = 0; i < tsa_comp2_b.size(); i++) {             \
+            TS_ASSERT_EQUALS_DOUBLE(tsa_comp2_a[i], tsa_comp2_b[i]);    \
+        }                                                               \
+    } while (0)
 
 
-#define TS_ASSERT_EQUALS_DVEC(va, vb)                                                    \
-{                                                                                        \
-    DVec tsa_comp2_a = va;                                                               \
-    DVec tsa_comp2_b = vb;                                                               \
-    TS_ASSERT_EQUALS(tsa_comp2_a.size(), tsa_comp2_b.size());                            \
-    for (unsigned i = 0; i < tsa_comp2_b.size(); i++)                                    \
-        TS_ASSERT_EQUALS_DOUBLE(tsa_comp2_a[i], tsa_comp2_b[i]);                         \
-} while (0)
+#define TS_ASSERT_FILE(filename)                                        \
+    {                                                                   \
+        boost::filesystem::path path(filename);                         \
+        TSM_ASSERT("File " + filename + " should exist, but doesn't",   \
+                   boost::filesystem::exists(path));                    \
+    } while (0)
 
-
-#define TS_ASSERT_FILE(filename)                                                         \
-{                                                                                        \
-    boost::filesystem::path path(filename);                                              \
-    TSM_ASSERT("File " + filename + " should exist, but doesn't",       \
-        boost::filesystem::exists(path));                                                \
-} while (0)
-
-
-#define TS_ASSERT_NO_FILE(filename)                                                      \
-{                                                                                        \
-    boost::filesystem::path path(filename);                                              \
-    TSM_ASSERT("File " + filename + " should not exist, but does",                       \
-        !boost::filesystem::exists(path));                                               \
-} while (0)
+#define TS_ASSERT_NO_FILE(filename)                                     \
+    {                                                                   \
+        boost::filesystem::path path(filename);                         \
+        TSM_ASSERT("File " + filename + " should not exist, but does",  \
+                   !boost::filesystem::exists(path));                   \
+    } while (0)
 
 #define TS_ASSERT_FILE_CONTENTS_EQUAL(_filename1, _filename2)           \
     {                                                                   \

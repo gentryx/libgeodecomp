@@ -13,26 +13,28 @@ OozeBalancer::OozeBalancer(double newLoadWeight) : _newLoadWeight(newLoadWeight)
 }
 
 
-DVec OozeBalancer::expectedOptimalDistribution(const UVec& currentLoads, const DVec& relativeLoads) const
+OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
+    const OozeBalancer::WeightVec& weights, 
+    const OozeBalancer::LoadVec& relativeLoads) const
 {
-    unsigned n = currentLoads.size();
+    unsigned n = weights.size();
     // calculate approximate load share we want on each node
     double targetLoadPerNode = relativeLoads.sum() / n;
 
     if (targetLoadPerNode == 0) 
-        return DVec(n, currentLoads.sum()/ (double)n);    
+        return LoadVec(n, weights.sum()/ (double)n);    
 
-    DVec ret(n, 0);
-    DVec loadPerItem;   
+    LoadVec ret(n, 0);
+    LoadVec loadPerItem;   
     for (unsigned i = 0; i < n; i++) {
-        if (currentLoads[i]) {
-            DVec add(currentLoads[i], relativeLoads[i] / currentLoads[i]);
+        if (weights[i]) {
+            LoadVec add(weights[i], relativeLoads[i] / weights[i]);
             loadPerItem.append(add);
         }
     }
     // stores the remaining fraction, which is still to be assigned,
     // of each item.
-    DVec remFractPerItem(currentLoads.sum(), 1.0);
+    LoadVec remFractPerItem(weights.sum(), 1.0);
 
     // now fill up one node after another so that each gets his
     // targeted share...
@@ -67,25 +69,25 @@ DVec OozeBalancer::expectedOptimalDistribution(const UVec& currentLoads, const D
 }
 
 
-UVec OozeBalancer::balance(const UVec& currentLoads, const DVec& relativeLoads)
+OozeBalancer::WeightVec OozeBalancer::balance(
+    const OozeBalancer::WeightVec& weights, 
+    const OozeBalancer::LoadVec& relativeLoads)
 {    
-    DVec expectedOptimal = expectedOptimalDistribution(currentLoads, relativeLoads);
-    DVec newLoads = linearCombo(currentLoads, expectedOptimal);
+    LoadVec expectedOptimal = expectedOptimalDistribution(weights, relativeLoads);
+    LoadVec newLoads = linearCombo(weights, expectedOptimal);
 
-    // I don't trust this code so much, yet.
-    UVec ret = equalize(newLoads);
-    if (currentLoads.sum() != ret.sum()) {
+    WeightVec ret = equalize(newLoads);
+    if (weights.sum() != ret.sum()) {
         std::cerr << "OozeBalancer::balance() failed\n"            
-                  << "  currentLoads.sum() = " << currentLoads.sum() << "\n"
+                  << "  weights.sum() = " << weights.sum() << "\n"
                   << "  ret.sum() = " << ret.sum() << "\n"
                   << "  expectedOptimal.sum() = " << expectedOptimal.sum() << "\n"
-                  << "  currentLoads = " << currentLoads << "\n"
+                  << "  weights = " << weights << "\n"
                   << "  relativeLoads = " << relativeLoads << "\n"
                   << "  expectedOptimal = " << expectedOptimal << "\n"
                   << "  newLoads = " << newLoads << "\n"
-                  << "  ret = " << ret << "\n"
-                  << "IMPORTANT: please send a mail with this log attached to Andreas Schäfer, gentryx@gmx.de\n";
-        throw std::logic_error("ret.sum does not match currentLoads.sum");
+                  << "  ret = " << ret << "\n";
+        throw std::logic_error("ret.sum does not match weights.sum");
     }
     return ret;
 }
@@ -99,14 +101,14 @@ inline double frac(const double& d)
 }
 
 
-UVec OozeBalancer::equalize(const DVec& loads)
+OozeBalancer::WeightVec OozeBalancer::equalize(const LoadVec& loads)
 {
-    UVec ret(loads.size());
+    OozeBalancer::WeightVec ret(loads.size());
     double balance = 0;
     for (unsigned i = 0; i < ret.size() - 1; i++) {
         double f = frac(loads[i]);
         double roundUpCost = 1 - f;
-        ret[i] = (int)loads[i];
+        ret[i] = (long)loads[i];
 
         if (roundUpCost < balance) {
             balance -= roundUpCost;
@@ -116,7 +118,7 @@ UVec OozeBalancer::equalize(const DVec& loads)
         }            
     }
     
-    ret.back() = (int)loads.back();
+    ret.back() = (long)loads.back();
     if (frac(loads.back())  > (0.5 - balance))
         ret.back()++;
 
@@ -124,13 +126,15 @@ UVec OozeBalancer::equalize(const DVec& loads)
 }
 
 
-DVec OozeBalancer::linearCombo(const UVec& oldLoads, const DVec& newLoads)
+OozeBalancer::LoadVec OozeBalancer::linearCombo(
+    const OozeBalancer::WeightVec& oldLoads, 
+    const OozeBalancer::LoadVec& newLoads)
 {
-    DVec ret(newLoads.size());
+    OozeBalancer::LoadVec ret(newLoads.size());
     for (unsigned i = 0; i < ret.size(); i++)
         ret[i] = newLoads[i] * _newLoadWeight + 
             oldLoads[i] * (1 - _newLoadWeight);
     return ret;
 }
 
-};
+}

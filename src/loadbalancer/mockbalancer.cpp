@@ -12,13 +12,15 @@ MockBalancer::~MockBalancer()
     events += "deleted\n"; 
 }
 
-UVec MockBalancer::balance(const UVec& currentLoads, const DVec& relativeLoads)
+MockBalancer::WeightVec MockBalancer::balance(
+    const MockBalancer::WeightVec& weights, 
+    const MockBalancer::LoadVec& relativeLoads)
 {
-    events += "balance() " + currentLoads.toString() + " " + 
+    events += "balance() " + weights.toString() + " " + 
         relativeLoads.toString() + "\n";    
-    return currentLoads;
+    return weights;
 }
 
 std::string MockBalancer::events;
 
-};
+}

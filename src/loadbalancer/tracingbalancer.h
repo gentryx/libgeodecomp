@@ -20,13 +20,13 @@ public:
         _balancer.reset(balancer);
     }
 
-    virtual UVec balance(const UVec& currentLoads, const DVec& relativeLoads)
+    virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads)
     {
         _stream << "TracingBalancer::balance()\n";
-        _stream << "  currentLoads: " << currentLoads << "\n";
+        _stream << "  weights: " << weights << "\n";
         _stream << "  relativeLoads: " << relativeLoads << "\n";
         
-        return _balancer->balance(currentLoads, relativeLoads);
+        return _balancer->balance(weights, relativeLoads);
     }
 
 private:
@@ -34,6 +34,6 @@ private:
     std::ostream& _stream;
 };
 
-};
+}
 
 #endif

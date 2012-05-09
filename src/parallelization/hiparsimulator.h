@@ -4,6 +4,7 @@
 #define _libgeodecomp_parallelization_hiparsimulator_h_
 
 #include <cmath>
+#include <stdexcept>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -15,9 +16,9 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-enum EventPoint {LOAD_BALANCING, END, PAUSE};
+enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
-typedef SuperMap<unsigned, EventSet> EventMap;
+typedef SuperMap<long, EventSet> EventMap;
 
 inline std::string eventToStr(const EventPoint& event) 
 {
@@ -26,8 +27,6 @@ inline std::string eventToStr(const EventPoint& event)
         return "LOAD_BALANCING";
     case END:
         return "END";
-    case PAUSE:
-        return "PAUSE";
     default:
         return "invalid";
     }
@@ -61,29 +60,20 @@ public:
     {
     }   
 
-    // fixme: need test
     inline void run()
     {
-        initUpdateGroup();
+        initSimulation();
 
-        // fixme: use events here
-        std::pair<int, int> currentStep = updateGroup->currentStep();
-        unsigned remainingSteps = 
-            this->initializer->maxSteps() - currentStep.first;
-        unsigned remainingNanoSteps = 
-            remainingSteps * CELL_TYPE::nanoSteps() - currentStep.second;
-        nanoStep(remainingNanoSteps);
+        nanoStep(timeToLastEvent());
     }
 
-    // fixme: need test
     inline void step()
     {
-        initUpdateGroup();
+        initSimulation();
 
         nanoStep(CELL_TYPE::nanoSteps());
     }
 
-    // fixme: need test
     virtual void getGridFragment(
         const GridType **grid, 
         const Region<DIM> **validRegion) 
@@ -165,19 +155,15 @@ private:
         return ret;
     }
 
-    inline void nanoStep(const unsigned& s)
+    inline void nanoStep(const long& s)
     {
-        updateGroup->update(s);
-
-        // fixme: honor events here:
-        // unsigned endNanoStep = nanoStepCounter + s;
-        // events[endNanoStep].insert(PAUSE);
-        
-        // while (nanoStepCounter < endNanoStep) {
-        //     std::pair<unsigned, EventSet> currentEvents = extractCurrentEvents();
-        //     nanoStepCounter = currentEvents.first;
-        //     handleEvents(currentEvents.second);
-        // }
+        long remainingNanoSteps = s;
+        while (remainingNanoSteps > 0) {
+            long hop = std::min(remainingNanoSteps, timeToNextEvent());
+            updateGroup->update(hop);
+            handleEvents();
+            remainingNanoSteps -= hop;
+        }
     }
 
     /**
@@ -190,13 +176,14 @@ private:
      * the Simulator on the one hand, and avoiding objects with an
      * uninitialized state on the other.
      */
-    inline void initUpdateGroup()
+    inline void initSimulation()
     {
         if (updateGroup) {
             return; 
         }
 
         CoordBox<DIM> box = this->initializer->gridBox();
+
         updateGroup.reset(
             new UpdateGroupType(
                 new PARTITION(
@@ -214,144 +201,85 @@ private:
 
         writerAdaptersGhost.clear();
         writerAdaptersInner.clear();
+
+        initEvents();
     }
 
-//     inline std::pair<unsigned, EventSet> extractCurrentEvents()
-//     {
-//         EventMap::iterator curEventsPair = events.begin();
-//         unsigned curStop  = curEventsPair->first;
-//         EventSet curEvents = curEventsPair->second;
-//         if (curStop < nanoStepCounter)
-//             throw std::logic_error("Stale events found in event point queue");
-//         events.erase(curEventsPair);
-//         return std::make_pair(curStop, curEvents);
-//     }
-
-
-//     inline void handleEvents(const EventSet& curEvents)
-//     {
-//         //fixme: handle events
-//         //             for (EventSet::iterator event = curEvents.begin(); event != curEvents.end(); ++event) 
-//         //                 std::cout << "  nanoStep: " << nanoStepCounter << " got event: " << eventToStr(*event) << "\n";
-//         //             if (curEvents.size() > 1)
-//         //                 std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n";
-//         //             std::cout << "\n";
-            
-//         if (curEvents.count(OUTPUT)) 
-//             events[this->nextOutput(eventRepetitionHorizon)].insert(OUTPUT);
-//         if (curEvents.count(LOAD_BALANCING))
-//             events[this->nextLoadBalancing(eventRepetitionHorizon)].insert(LOAD_BALANCING);
-//     }
-
-
-//     inline void resetSimulation(const unsigned &ghostZoneWidth)
-//     {
-//         // this->resetEvents();
-//         // this->resetRegions(ghostZoneWidth);
-//     }
-
-//     inline void resetRegions(const unsigned &ghostZoneWidth)
-//     {
-//         partitionManager.resetRegions(
-//             CoordBox<2>(Coord<2>(), 
-//                         this->initializer->gridDimensions()),
-//             new VanillaRegionAccumulator<PARTITION>(
-//             myPartition(),
-//             myOffset(),
-//             initialWeights()),
-//             mpiLayer.rank(),
-//             ghostZoneWidth);
-
-//         SuperVector<CoordBox<2> > boundingBoxes(mpiLayer.size());
-//         CoordBox<2> ownBoundingBox(partitionManager.ownRegion().boundingBox());
-//         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
-//         partitionManager.resetGhostZones(boundingBoxes);
-//         // fixme: care for validGhostZoneWidth
-//     }
-
-//     inline SuperVector<unsigned> initialWeights() const
-//     {
-//         SuperVector<unsigned> weights(mpiLayer.size());
-//         if (mpiLayer.rank() == root) {
-//             unsigned remainingCells = this->initializer->gridBox().size();
-//             for (unsigned i = mpiLayer.size(); i > 0; --i) {
-//                 unsigned curWeight = (unsigned)round((double)remainingCells / i);
-//                 weights[i - 1] = curWeight;
-//                 remainingCells -= curWeight;
-//             }
-//         }
-//         mpiLayer.broadcastVector(&weights, root);
-//         return weights;
-//     }
-    
-//     inline void resetEvents()
-//     {
-//         nanoStepCounter = this->initializer->startStep() * CELL_TYPE::nanoSteps();
-//         events.clear();
-//         unsigned firstOutput        = ((int)ceil(nanoStepCounter / (double)outputPeriod))        * outputPeriod;
-//         unsigned firstLoadBalancing = ((int)ceil(nanoStepCounter / (double)loadBalancingPeriod)) * loadBalancingPeriod;
-//         for (int i = 0; i < eventRepetitionHorizon; ++i) {
-//             events[firstOutput        + i * outputPeriod       ].insert(OUTPUT);
-//             events[firstLoadBalancing + i * loadBalancingPeriod].insert(LOAD_BALANCING);
-//         }
-//         events[this->initializer->maxSteps() * CELL_TYPE::nanoSteps()].insert(SIMULATION_END);
-//     }
-
-//     inline unsigned nextOutput(const unsigned& horizon=1) const
-//     {
-//         return (nanoStepCounter / outputPeriod + horizon) * outputPeriod;
-//     }    
-
-//     inline unsigned nextLoadBalancing(const unsigned horizon=1) const
-//     {
-//         return (nanoStepCounter / loadBalancingPeriod + horizon) * loadBalancingPeriod;
-//     }    
-
-//     inline Region<2> allGatherGroupRegion() 
-//     {
-//         return allGatherGroupRegion(partitionManager.ownRegion());
-//     }
-
-//     inline Region<2> allGatherGroupRegion(const Region<2>& region) 
-//     {
-//         int streakNum = region.numStreaks();
-//         SuperVector<int> streakNums(mpiLayer.allGather(streakNum));
-//         SuperVector<Streak<2> > ownStreaks(region.toVector());
-//         SuperVector<Streak<2> > allStreaks(mpiLayer.allGatherV(&ownStreaks[0], streakNums));
-//         Region<2> ret;
-//         for (SuperVector<Streak<2> >::iterator i = allStreaks.begin(); 
-//              i != allStreaks.end(); ++i)
-//             ret << *i;
-//         return ret;
-//     }
-
-//     inline void registerOutgroupRegion(const unsigned& relativeLevel, const Region<2>& region)
-//     {
-// //         outgroupSteppers[relativeLevel].resetRegions(
-
-// // IntersectingRegionAccumulator<PARTITION>(region, myPartition(), myOffset(), initialWeights());
-//     }
-
-//     inline void updateOutgroupRegion(const unsigned& relativeLevel, const unsigned& steps)
-//     {
+    inline void initEvents()
+    {
+        events.clear();
+        long lastNanoStep = this->initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        events[lastNanoStep] << END;
         
-//     }
+        insertNextLoadBalancingEvent();
+    }
 
-//     inline PARTITION myPartition() const
-//     {
-//         return PARTITION(Coord<2>(0, 0), 
-//                          this->initializer->gridDimensions());
-//     }
+    inline void handleEvents()
+    {
+        if (currentNanoStep() > events.begin()->first) {
+            throw std::logic_error("stale event found, should have been handled previously");
+        }
+        if (currentNanoStep() < events.begin()->first) {
+            // don't need to handle future events now
+            return;
+        }
 
-//     inline unsigned myOffset() const
-//     {
-//         return 0;
-//     }
+        const EventSet& curEvents = events.begin()->second;
+        for (EventSet::const_iterator i = curEvents.begin(); i != curEvents.end(); ++i) {
+            if (*i == LOAD_BALANCING) {
+                balanceLoad();
+                insertNextLoadBalancingEvent();
+            }
+        }
+        events.erase(events.begin());
+    }
 
+    inline void insertNextLoadBalancingEvent()
+    {
+        long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
+        events[nextLoadBalancing] << LOAD_BALANCING;
+    }
+
+    inline long currentNanoStep() const
+    {
+        std::pair<int, int> now = updateGroup->currentStep();
+        return (long)now.first * CELL_TYPE::nanoSteps() + now.second;
+    }
+
+    /**
+     * returns the number of nano steps until the next event needs to be handled.
+     */
+    inline long timeToNextEvent() const
+    {
+        return events.begin()->first - currentNanoStep();
+    }
+
+    /**
+     * returns the number of nano steps until simulation end.
+     */
+    inline long timeToLastEvent() const
+    {
+        return  events.rbegin()->first - currentNanoStep();
+    }
+
+    inline void balanceLoad()
+    {
+        if (communicator->Get_rank() == 0) {
+            if (!balancer) {
+                return;
+            }
+
+            int size = communicator->Get_size();
+            LoadBalancer::LoadVec loads(size, 1.0);
+            LoadBalancer::WeightVec newWeights = 
+                balancer->balance(updateGroup->getWeights(), loads);
+            // fixme: actually balance the load!
+        }
+    }
 };
 
-};
-};
+}
+}
 
 #endif
 #endif
