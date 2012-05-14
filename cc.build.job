@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -e
-
-./configure
-rake clean
-rake
-rake test

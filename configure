@@ -156,6 +156,7 @@ EOF
 set(LIBGEODECOMP_FEATURE_MPI true)
 set(CMAKE_C_COMPILER   #{@opts.mpiprefix}/bin/mpicc)
 set(CMAKE_CXX_COMPILER #{@opts.mpiprefix}/bin/mpic++)
+set(MPIEXEC #{@opts.mpiexec})
 EOF
     config_header += <<EOF
 #define LIBGEODECOMP_FEATURE_MPI

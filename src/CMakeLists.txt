@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
 project(LIBGEODECOMP)
+include(FeatureSummary)
 include(conf.cmake)
 
 include_directories(${LIBGEODECOMP_SOURCE_DIR})
@@ -11,6 +12,11 @@ if(WIN32)
 else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
+
+option(LIMIT_TESTS "Limit the directories of tests to run." OFF)
+add_feature_info(LimitTests LIMIT_TESTS "Only tests matching the specified pattern will be run.")
+
+add_custom_target(test echo "Tests passed...")
 
 # LIBDIRS is used to find source files and headers 
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
