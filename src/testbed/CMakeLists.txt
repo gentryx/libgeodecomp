@@ -1,3 +1,5 @@
+generate_sourcelists("./")
+
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
