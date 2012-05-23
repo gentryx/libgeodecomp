@@ -127,6 +127,20 @@ endif(WIN32 AND NOT UNIX)
 
 include(CPack)
 
+#============= RECURSE SUBDIRS ====================================
+set(HEADERS "")
+set(SOURCES "")
+
+foreach(dir ${SUBDIRS})
+  add_subdirectory(${dir})
+endforeach(dir)
+
+foreach(dir ${AUXDIRS})
+  set(HEADERS "")
+  set(SOURCES "")
+  include(${dir}/aux.cmake)
+endforeach(dir)
+
 #============= ADD THE MAIN LIBRARY ===============================
 if(WIN32)
   add_library(local_libgeodecomp_lib STATIC IMPORTED)
@@ -162,20 +176,6 @@ foreach(dir ${LIBDIRS})
   set(RELATIVE_PATH ${dir}/)
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
-endforeach(dir)
-
-set(HEADERS "")
-set(SOURCES "")
-
-#============= RECURSE SUBDIRS ====================================
-foreach(dir ${SUBDIRS})
-  add_subdirectory(${dir})
-endforeach(dir)
-
-foreach(dir ${AUXDIRS})
-  set(HEADERS "")
-  set(SOURCES "")
-  include(${dir}/aux.cmake)
 endforeach(dir)
 
 #============= TYPEMAPS GENERATION ================================

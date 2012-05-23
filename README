@@ -23,7 +23,7 @@ We recommend an out-of-source build:
   BUILD_DIR=build/`uname -ms | sed s/\ /-/g`
   mkdir -p $BUILD_DIR
   cd $BUILD_DIR
-  cmake ../../src
+  cmake ../../src/
   make -j3
 
 That's it. Additionally you may want to run the library's unit tests
