@@ -54,9 +54,10 @@ class MPIParser
 
     @datatype_map = Datatype.new
     @datatype_map.merge!(map_enums)
+    classes_to_be_serialized = find_classes_to_be_serialized
     @type_hierarchy_closure = @datatype_map.keys.to_set +
-      find_classes_to_be_serialized 
-    @all_classes = find_classes_to_be_serialized
+      classes_to_be_serialized 
+    @all_classes = classes_to_be_serialized 
   end
 
   # tries to resolve all datatypes given in classes to MPI type. For
@@ -70,6 +71,10 @@ class MPIParser
     @type_hierarchy_closure = @type_hierarchy_closure.union(classes)
 
     while classes.any?
+      # puts "  classes:"
+      # print "  "
+      # pp classes
+
       num_unresolved = classes.size
 
       classes.each do |klass|
@@ -104,16 +109,17 @@ class MPIParser
   end
 
   def used_template_parameters(klass)
+    # puts "used_template_parameters(#{klass})"
     params = []
     klass =~ /^(#@namespace::|)(.+)/
     class_name = $2
-    
+
     @all_classes.each do |c|
       c_template_params = template_parameters(c)
       members = get_members(c)
 
       members.each do |name, spec|
-        if  spec[:type]=~ /^(#@namespace::|)#{class_name}<(.+)>/
+        if spec[:type] =~ /^(#@namespace::|)#{class_name}<(.+)>/
           # this will fail for constructs like Foo<Bar<int,int>,int>
           values = $2.split(",")
           values.map! { |v| v.strip }
@@ -160,6 +166,7 @@ class MPIParser
 
       template_params = template_parameters(klass)
 
+      # puts "----------------------------------"
       # puts "resolve_class(#{klass})"
       # puts "members"
       # pp members
@@ -169,6 +176,8 @@ class MPIParser
       # pp resolved_classes
       # puts "template_params"
       # pp template_params
+      # puts "----------------------------------"
+      # puts
 
       if template_params.empty?
         resolve_class_simple(klass, members, parents,
@@ -182,7 +191,6 @@ class MPIParser
         # pp used_params
         # puts
 
-        # fixme: move to method
         used_params.each do |values|
           new_members = 
             map_template_parameters(members, template_params, values)

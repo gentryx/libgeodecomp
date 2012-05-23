@@ -1,3 +1,4 @@
+generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
@@ -5,8 +6,8 @@ get_filename_component(PWD ./ ABSOLUTE)
 string(REPLACE "${LIBGEODECOMP_SOURCE_DIR}" "" RELATIVE_PATH ${PWD})
 string(REPLACE "/" _ BUFFER1 ${RELATIVE_PATH})
 string(REPLACE ":" _ BUFFER2 ${BUFFER1})
-set(UNIT_TEST_EXE test_${BUFFER2})
-set(RUN_UNIT_TEST run_${BUFFER2})
+set(TARGET_UNIT_TEST_EXE test_${BUFFER2})
+set(TARGET_RUN_UNIT_TEST run_${BUFFER2})
 
 get_filename_component(DIRNAME ${PWD} NAME)
 string(REGEX MATCH "^parallel_mpi" is_mpi_test ${DIRNAME})
@@ -14,15 +15,15 @@ string(REGEX MATCH "^unit" is_unit_test ${DIRNAME})
 
 # check if config enabled this test class
 set(allowed_test false)
-if (is_unit_test AND LIBGEODECOMP_FEATURE_UNIT)
+if (is_unit_test)
   set(allowed_test true)
-  add_custom_target(${RUN_UNIT_TEST} echo "running tests in..." && pwd && ./test)
-endif(is_unit_test AND LIBGEODECOMP_FEATURE_UNIT)
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ./test)
+endif(is_unit_test)
 
 if (is_mpi_test AND LIBGEODECOMP_FEATURE_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
-  add_custom_target(${RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} -np ${NUM_PROC} ./test)
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} -np ${NUM_PROC} ./test)
 endif(is_mpi_test AND LIBGEODECOMP_FEATURE_MPI)
 
 # check whether LIMIT_TESTS selected the test, too
@@ -32,11 +33,32 @@ if (LIMIT_TESTS)
 endif (LIMIT_TESTS)
 
 if(allowed_test AND selected_test)
-  include_directories(${LIBGEODECOMP_SOURCE_DIR}/../lib/cxxtest)
-  add_executable(${UNIT_TEST_EXE} ${SOURCES})
-  set_target_properties(${UNIT_TEST_EXE} PROPERTIES OUTPUT_NAME test)
-  target_link_libraries(${UNIT_TEST_EXE} ${LOCAL_LIBGEODECOMP_LINK_LIB})
+  set(SOURCES)
+  
+  foreach(header ${HEADERS})
+    if(header MATCHES "test.h")
+      # cxxtestgen for test headers...
+      string(REPLACE "test.h" "test.cpp" source "${header}")
+      list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
 
-  add_dependencies(test ${RUN_UNIT_TEST})
-  add_dependencies(${RUN_UNIT_TEST} ${UNIT_TEST_EXE})
+      add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+        COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+        DEPENDS ${header} )
+    endif()
+  endforeach(header)
+
+  # ...and main()
+  list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
+    COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp" --root --error-printer )
+
+  include_directories(${LIBGEODECOMP_SOURCE_DIR}/../lib/cxxtest)
+  add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
+  set_target_properties(${TARGET_UNIT_TEST_EXE} PROPERTIES OUTPUT_NAME test)
+  target_link_libraries(${TARGET_UNIT_TEST_EXE} ${LOCAL_LIBGEODECOMP_LINK_LIB})
+
+  add_dependencies(test ${TARGET_RUN_UNIT_TEST})
+  add_dependencies(${TARGET_RUN_UNIT_TEST} ${TARGET_UNIT_TEST_EXE})
 endif(allowed_test AND selected_test)

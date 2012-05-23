@@ -1,3 +1,4 @@
+generate_sourcelists("./")
 add_subdirectory(ants)
 add_subdirectory(bouncingspheres)
 add_subdirectory(chromotography)

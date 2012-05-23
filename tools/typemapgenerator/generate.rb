@@ -17,8 +17,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA.
 
+require 'fileutils'
 require 'pathname'
 require 'optparse'
+require 'pp'
+require 'shell'
 
 basedir = Pathname.new($0).dirname
 $: << basedir
@@ -32,6 +35,12 @@ opts = OptionParser.new do |o|
   o.banner = "Usage: #$0 [OPTIONS] PATH_TO_XML_DOC [OUTPUT_PATH]"
   o.separator "Tool for automatically generating MPI typemaps from Doxygen XML output."
   o.separator ""
+  o.on("-c", "--cache CACHE_FILE",
+       "Scan headers for serialization candidates and ",
+       "list them in a cache file, useful for integration ",
+       "into larger builds.") do |cache_file|
+    options[:cache] = cache_file
+  end
   o.on("-s", "--scan-only",
        "Only write out the header files containing ",
        "classes for which MPI typemaps should be ",
@@ -80,6 +89,56 @@ end
 xml_path = ARGV[0]
 output_path = Pathname.new(ARGV[1] || "./")
 
+if options[:cache]
+  cache_file = options[:cache]
+  source_dir = ARGV[0]
+  headers = ARGV[1].split(":")
+  FileUtils::cd(source_dir)
+  
+  typemaps_deps = []
+  if File.exists?(cache_file)
+    typemaps_deps = File.read(cache_file).split("\n")
+  end
+
+  # puts "headers:"
+  # pp headers
+  # puts "typemaps_deps:"
+  # pp typemaps_deps
+
+  # at least create a empty file to indicate that there are no
+  # classes to be serialized yet...
+  unless File.exists?(cache_file)  
+    FileUtils.touch cache_file
+    # ...but fake the access time so all headers are considered newer.
+    File.utime(Time.at(0), Time.at(0), cache_file)
+  end
+  
+  cache_age = File.mtime(cache_file)
+  newer_headers = headers.find_all { |h| File.mtime(h) > cache_age }
+
+  buffer = []
+  if newer_headers.size > 0
+    buffer = `grep "^.*friend class Typemaps;" #{newer_headers.join(" ")} 2>/dev/null` 
+    
+    buffer = buffer.split("\n").map do |h| 
+      h =~ /^(.+)\: /
+      $1
+    end
+  end
+
+  if buffer.size > 0
+    # touching cache as a relevant header is newer
+    FileUtils.touch cache_file
+  end
+
+  new_typemaps_deps = (buffer + typemaps_deps).uniq.sort
+  if typemaps_deps != new_typemaps_deps    
+    File.open(cache_file, "w") { |f| f.puts new_typemaps_deps.join("\n")}
+  end
+
+  exit(0)
+end
+
 if options[:scan]
   friends = `grep -r 'friend class Typemaps' #{xml_path}`.split("\n")
   friends.map! do |f|
@@ -91,14 +150,16 @@ if options[:scan]
     File.open(f).read =~ /location file="(.*\.h)" line/
     $1
   end  
-else
-  output_path = Pathname.new(ARGV[1] || "./")
-  header, source = 
-    TypemapGenerator.generate_forest(xml_path, basedir, 
-                                     options[:sloppy], 
-                                     options[:namespace],
-                                     /#{options[:header_pattern]}/, 
-                                     options[:header_replacement])
-  File.open(output_path + "typemaps.h",  "w").write(header)
-  File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)
+
+  exit(0)
 end
+
+output_path = Pathname.new(ARGV[1] || "./")
+header, source = 
+  TypemapGenerator.generate_forest(xml_path, basedir, 
+                                   options[:sloppy], 
+                                   options[:namespace],
+                                   /#{options[:header_pattern]}/, 
+                                   options[:header_replacement])
+File.open(output_path + "typemaps.h",  "w").write(header)
+File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)
