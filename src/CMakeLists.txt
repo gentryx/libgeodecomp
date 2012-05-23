@@ -82,6 +82,12 @@ if(FEATURE_QT AND NOT QT4_FOUND)
   message("FEATURE_QT selected, but could not find QT4")
 endif()
 
+if(WIN32)
+  set(LOCAL_LIBGEODECOMP_LINK_LIB local_libgeodecomp_lib)
+else(WIN32)
+  set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
+endif(WIN32)
+
 generate_sourcelists("./")
 
 #============= TOP-LEVEL TARGETS ==================================
@@ -145,9 +151,6 @@ endforeach(dir)
 if(WIN32)
   add_library(local_libgeodecomp_lib STATIC IMPORTED)
   set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/libgeodecomp/geodecomp.lib)
-  set(LOCAL_LIBGEODECOMP_LINK_LIB local_libgeodecomp_lib)
-else(WIN32)
-  set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
 # link all sources 
