@@ -24,7 +24,7 @@ We recommend an out-of-source build:
   mkdir -p $BUILD_DIR
   cd $BUILD_DIR
   cmake ../../src/
-  make -j3
+  make
 
 That's it. Additionally you may want to run the library's unit tests
 via "make test" to ensure that it's actually working.
