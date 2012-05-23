@@ -21,7 +21,7 @@ require 'pathname'
 # Here we generate the C++ code that will in turn create the typemaps
 # for MPI.
 class MPIGenerator  
-  def initialize(template_path="./", namespace=nil)
+  def initialize(template_path="./", namespace=nil, macro_guard=nil)
     @path = Pathname.new(template_path)
     if namespace
       @namespace_guard = namespace.downcase + "_"
@@ -32,6 +32,8 @@ class MPIGenerator
       @namespace_begin = ""
       @namespace_end = ""
     end
+
+    @macro_guard = macro_guard
   end
 
   def simple_name(name)
@@ -86,6 +88,10 @@ class MPIGenerator
     end
     ret.sub!(/.*LOOKUP_DEFINITIONS/, lookups.join("\n"))
 
+    if @macro_guard
+      ret = "#ifdef #{@macro_guard}\n#{ret}\n#endif\n"
+    end
+
     return ret
   end
 
@@ -122,6 +128,10 @@ class MPIGenerator
       "    #{datatype_map[klass]} = generateMap#{simple_name(klass)}();"
     end
     ret.sub!(/.+ASSIGNMENTS/, assignments.join("\n"))
+
+    if @macro_guard
+      ret = "#ifdef #{@macro_guard}\n#{ret}\n#endif\n"
+    end
 
     return ret;
   end

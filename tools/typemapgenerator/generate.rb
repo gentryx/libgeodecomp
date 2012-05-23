@@ -76,6 +76,11 @@ opts = OptionParser.new do |o|
     options[:header_pattern] = $1
     options[:header_replacement] = $2
   end
+  o.on("--macro-guard MACRO",
+       "encapsulate code in #ifdef(MACRO), #endif guards") do |macro|
+    options[:macro_guard] = macro
+  end
+  
 end
 
 opts.parse!(ARGV)
@@ -160,6 +165,7 @@ header, source =
                                    options[:sloppy], 
                                    options[:namespace],
                                    /#{options[:header_pattern]}/, 
-                                   options[:header_replacement])
+                                   options[:header_replacement],
+                                   options[:macro_guard])
 File.open(output_path + "typemaps.h",  "w").write(header)
 File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)

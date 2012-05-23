@@ -1,3 +1,4 @@
+#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_typemaps_h_
 #define _libgeodecomp_typemaps_h_
 
@@ -104,5 +105,7 @@ private:
     static inline MPI::Datatype lookup(LibGeoDecomp::TestCellMPIDatatypeHelper*) { return MPI::LIBGEODECOMP_TESTCELLMPIDATATYPEHELPER; }
 };
 };
+
+#endif
 
 #endif

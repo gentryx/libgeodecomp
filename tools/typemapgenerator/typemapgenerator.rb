@@ -28,9 +28,10 @@ class TypemapGenerator
                         sloppy=false, 
                         namespace=nil,
                         header_pattern=/^$/,
-                        header_replacement="")
+                        header_replacement="",
+                        macro_guard=nil)
       parser = MPIParser.new(xml_path, sloppy, namespace)
-      generator = MPIGenerator.new(template_path, namespace)
+      generator = MPIGenerator.new(template_path, namespace, macro_guard)
       classes = parser.find_classes_to_be_serialized.sort
       options = parser.resolve_forest(classes) + [header_pattern, header_replacement]
       return generator.generate_forest(*options) 

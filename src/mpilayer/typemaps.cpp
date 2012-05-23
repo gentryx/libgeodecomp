@@ -1,3 +1,4 @@
+#ifdef LIBGEODECOMP_FEATURE_MPI
 #include <algorithm>
 #include "typemaps.h"
 
@@ -679,3 +680,5 @@ void Typemaps::initializeMaps()
     MPI::LIBGEODECOMP_TESTCELLMPIDATATYPEHELPER = generateMapLibGeoDecomp_TestCellMPIDatatypeHelper();
 }
 };
+
+#endif
