@@ -314,7 +314,7 @@ public:
         for (int i = 4; i <= 4096; i *= 2) {
             int intermediateSteps = 8;
             for (int j = 0; j < intermediateSteps; ++j) {
-                int d = i * std::pow(2, j * (1.0 / intermediateSteps));
+                int d = (int)(i * std::pow(2.0, j * (1.0 / intermediateSteps)));
                 if (d % 2) {
                     d += 1;
                 }

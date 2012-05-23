@@ -23,6 +23,9 @@ public:
             startOffsets[i + 1] = startOffsets[i] + weights[i];        
     }
 
+    virtual ~Partition()
+    {}
+
     inline const SuperVector<long>& getWeights() const
     {
         return weights;

@@ -17,6 +17,9 @@ class GridBase
 public:
     const static int DIM = DIMENSIONS;
 
+    virtual ~GridBase()
+    {}
+
     virtual CELL& at(const Coord<DIM>&) = 0;
     virtual const CELL& at(const Coord<DIM>&) const = 0;
     virtual CELL& atEdge() = 0;

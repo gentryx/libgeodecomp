@@ -65,8 +65,6 @@ public:
             &cellMatrix, _defaultCell);
     }
 
-    ~Grid() {}
-
     Grid& operator=(const Grid& other)
     {
         resize(other.getDimensions());

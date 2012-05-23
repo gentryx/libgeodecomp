@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(LIBGEODECOMP)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
@@ -8,6 +8,10 @@ find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
 find_package(Qt4)
+
+if(NOT DEFINED ${QT4_FOUND})
+  set(QT4_FOUND false)
+endif()
 
 #============= CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ON false)
@@ -35,6 +39,8 @@ dump_config("config.h")
 
 #============= GENERAL CONFIGURATION ==============================
 include_directories(${LIBGEODECOMP_SOURCE_DIR})
+include_directories(${Boost_INCLUDE_DIRS})
+
 # LIBDIRS is used to find source files and headers 
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
 # AUXDIRS lists auxiliary directories to be included in the main
@@ -161,6 +167,7 @@ foreach(dir ${LIBDIRS})
 endforeach(dir)
 
 list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/mpilayer/typemaps.cpp")
+
 set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
 

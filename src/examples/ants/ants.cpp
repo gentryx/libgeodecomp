@@ -53,7 +53,7 @@ public:
                 posX += cos(dir * 2 * PI / 360);
                 posY += sin(dir * 2 * PI / 360);
             
-                target = Coord<2>(posX, posY);
+                target = Coord<2>((int)posX, (int)posY);
 
                 if (target != Coord<2>(0, 0)) {
                     Cell targetCell = neighborhood[target];
@@ -138,7 +138,7 @@ private:
         dir = rand() % 360;
         posX = 0;
         posY = 0;
-        target = Coord<2>(posX, posY);
+        target = Coord<2>(0, 0);
     }
 
 };

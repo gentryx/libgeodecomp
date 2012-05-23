@@ -57,6 +57,6 @@ class Image : public Grid<Color>
     }
 };
 
-};
+}
 
 #endif

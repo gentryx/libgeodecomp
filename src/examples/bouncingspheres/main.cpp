@@ -58,7 +58,7 @@ public:
     {}
 
     void update(
-        const Coord<3>& parentOrigin, 
+        const FloatCoord<3>& parentOrigin, 
         const Sphere **neighborSpheres, 
         const int *numSpheres,
         const Boundary **neighborBoundaries,
@@ -76,7 +76,7 @@ public:
 
         // need to determine to which container to move next
         for (int d = 0; d < 3; ++d) {
-            double val = 0;
+            int val = 0;
             if (pos[d] < parentOrigin[d]) {
                 val = -1;
             }
@@ -112,9 +112,9 @@ public:
         
         if (distance < SPHERE_RADIUS) {
             FloatCoord<3> planar = (pos - other.normal * distance) - other.center;
-            if ((abs(planar[0]) < (BOUNDARY_DIM * 0.5)) &&
-                (abs(planar[1]) < (BOUNDARY_DIM * 0.5)) &&
-                (abs(planar[2]) < (BOUNDARY_DIM * 0.5))) {
+            if ((fabs(planar[0]) < (BOUNDARY_DIM * 0.5)) &&
+                (fabs(planar[1]) < (BOUNDARY_DIM * 0.5)) &&
+                (fabs(planar[2]) < (BOUNDARY_DIM * 0.5))) {
                 double scale = (SPHERE_RADIUS * SPHERE_RADIUS) / distance / distance;
                 ret = other.normal * scale;
             }
@@ -138,7 +138,7 @@ public:
 
     typedef Topologies::Cube<3>::Topology Topology;
 
-    Container(const Coord<3>& myOrigin = Coord<3>()) :
+    Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
         origin(myOrigin),
         numSpheres(0),
         numBoundaries(0)
@@ -180,7 +180,7 @@ public:
 private:
     Sphere spheres[CONTAINER_SIZE];
     Boundary boundaries[CONTAINER_SIZE];
-    Coord<3> origin;
+    FloatCoord<3> origin;
     int numSpheres;
     int numBoundaries;
 
@@ -381,7 +381,7 @@ public:
                 (j->y() + 0.5) * CONTAINER_DIM, 
                 (j->z() + 0.5) * CONTAINER_DIM);
 
-            Container container(*j * CONTAINER_DIM);
+            Container container(FloatCoord<3>(*j) * CONTAINER_DIM);
 
             container.addSphere(
                 Sphere(
