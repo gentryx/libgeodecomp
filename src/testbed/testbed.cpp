@@ -235,7 +235,6 @@ class Benchmark
 public:
     typedef Grid<double, typename Topologies::Cube<DIM>::Topology> GridType;
 
-
     void run(Coord<DIM> dim, int repeats)
     {
         Coord<DIM> coeffDim = dim;
