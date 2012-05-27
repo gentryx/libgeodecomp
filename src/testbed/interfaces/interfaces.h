@@ -73,6 +73,17 @@ public:
     }
 
     template<typename HOOD>
+    void update2(const HOOD& hood)
+    {
+        val = 
+            (hood[FixedCoord< 0, -1>()].val +
+             hood[FixedCoord<-1,  0>()].val +
+             hood[FixedCoord< 0,  0>()].val +
+             hood[FixedCoord< 1,  0>()].val +
+             hood[FixedCoord< 0,  1>()].val) * (1.0 / 5.0);
+    }
+
+    template<typename HOOD>
     static void updateStreak(CellStraight *c, const HOOD& hood, const int& startX, const int& endX)
     {
         // for (int x = startX; x < endX; ++x) {
@@ -194,6 +205,26 @@ public:
 private:
     StraightGridType *grid;
     Coord<2> center;
+};
+
+class HoodSteak
+{
+public:
+    HoodSteak(CellStraight **_lines, int *_offset) :
+        lines(_lines),
+        offset(_offset)
+    {}
+
+    template<int X, int Y>
+    inline CellStraight& operator[](const FixedCoord<X, Y, 0>&) const
+    {
+        return lines[1 + Y][X + *offset];
+    }
+
+private:
+    CellStraight **lines;
+    int *offset;
+
 };
 
 class HoodStreak

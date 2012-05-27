@@ -131,6 +131,53 @@ private:
     StraightGridType gridB;
 };
 
+class SteakInterfaceRunner
+{
+public:
+    SteakInterfaceRunner(Coord<2> _dim) :
+        dim(_dim),
+        gridA(dim),
+        gridB(dim)
+    {}
+
+    double run(long repeats)
+    {
+        StraightGridType *oldGrid = &gridA;
+        StraightGridType *newGrid = &gridB;
+        
+        for (long t = 0; t < repeats; ++t) {
+            for (int y = 1; y < dim.y() - 1; ++y) {
+                CellStraight *c = &(*newGrid)[Coord<2>(0, y)];
+                CellStraight *lines[3] = {
+                    &(*oldGrid)[Coord<2>(0, y - 1)],
+                    &(*oldGrid)[Coord<2>(0, y + 0)],
+                    &(*oldGrid)[Coord<2>(0, y + 1)]
+                };
+                int x = 1;
+                HoodSteak hood(lines, &x);
+                
+                for (; x < dim.x() - 1; ++x) {
+                    c->update2(hood);
+                }
+            }
+
+            std::swap(oldGrid, newGrid);
+        }
+
+        return gridA[Coord<2>(1, 1)].val;
+    }
+
+    static int flops()
+    {
+        return 5;
+    }
+
+private:
+    Coord<2> dim;
+    StraightGridType gridA;
+    StraightGridType gridB;
+};
+
 class StreakInterfaceRunner
 {
 public:
@@ -147,7 +194,7 @@ public:
         
         for (long t = 0; t < repeats; ++t) {
             for (int y = 1; y < dim.y() - 1; ++y) {
-                CellStraight *c = &(*oldGrid)[Coord<2>(0, y)];
+                CellStraight *c = &(*newGrid)[Coord<2>(0, y)];
                 CellStraight *lines[3] = {
                     &(*oldGrid)[Coord<2>(0, y - 1)],
                     &(*oldGrid)[Coord<2>(0, y + 0)],
@@ -283,10 +330,10 @@ private:
 
 int main(int argc, char *argv[])
 {
-    // Benchmark<VanillaRunner>().exercise();
-    // Benchmark<VirtualInterfaceRunner>().exercise();
-    // Benchmark<StraightInterfaceRunner>().exercise();
-    // Benchmark<StreakInterfaceRunner>().exercise();
+    Benchmark<VanillaRunner>().exercise();
+    Benchmark<VirtualInterfaceRunner>().exercise();
+    Benchmark<StraightInterfaceRunner>().exercise();
+    Benchmark<StreakInterfaceRunner>().exercise();
     Benchmark<StreakInterfaceRunnerSSE>().exercise();
     return 0;
 }
