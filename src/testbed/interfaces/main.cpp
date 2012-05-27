@@ -285,7 +285,7 @@ public:
     {
         std::cout << "# " << typeid(RUNNER).name() << "\n";
         int lastDim = 0;
-        for (int i = 4; i <= 4096; i *= 2) {
+        for (int i = 4; i < 4096; i *= 2) {
             int intermediateSteps = 8;
             for (int j = 0; j < intermediateSteps; ++j) {
                 int d = i * std::pow(2, j * (1.0 / intermediateSteps));
@@ -295,12 +295,7 @@ public:
 
                 if (d > lastDim) {
                     lastDim = d;
-                    Coord<DIM> dim;
-                    dim[0] = d;
-                    dim[1] = 4;
-                    dim[2] = 4;
-                    // for (int i = 0; i < DIM; ++i)
-                    //     dim[i] = d;
+                    Coord<DIM> dim = Coord<2>::diagonal(d);
                     int repeats = std::max(1, 100000000 / dim.prod());
                     run(dim, repeats);
                 }
