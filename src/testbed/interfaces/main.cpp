@@ -333,6 +333,7 @@ int main(int argc, char *argv[])
     Benchmark<VanillaRunner>().exercise();
     Benchmark<VirtualInterfaceRunner>().exercise();
     Benchmark<StraightInterfaceRunner>().exercise();
+    Benchmark<SteakInterfaceRunner>().exercise();
     Benchmark<StreakInterfaceRunner>().exercise();
     Benchmark<StreakInterfaceRunnerSSE>().exercise();
     return 0;
