@@ -3,6 +3,27 @@ project(LIBGEODECOMP)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
 
+#============= DETECT DEFAULTS ====================================
+if(EXISTS "/etc/lsb-release")
+  file(READ "/etc/lsb-release" lsb_release)
+  string(REGEX MATCH "\".*\"" distro "${lsb_release}")
+  string(REPLACE "\"" "" distro "${distro}")
+endif()
+
+if(NOT DEFINED distro)
+  if(EXISTS "/etc/fedora-release")
+    set(distro "Fedora")
+  endif()
+endif()
+
+if(NOT DEFINED distro)
+  if(EXISTS "/etc/debian_version")
+    set(distro "Debian")
+  endif()
+endif()
+
+message("distro: ${distro}")
+
 find_package(Boost REQUIRED date_time filesystem system)
 find_package(CUDA)
 find_package(OpenCL)
