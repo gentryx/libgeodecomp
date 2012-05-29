@@ -6,12 +6,11 @@ include(util.cmake)
 #============= DETECT DEFAULTS ====================================
 set(RELEASE false)
 
-detect_distro()
-
 if(NOT DEFINED BOOST_ROOT)
   set(BOOST_ROOT "/opt/boost")
 endif()
 
+detect_distro()
 find_package(Boost REQUIRED date_time filesystem system)
 find_package(CUDA)
 find_package(OpenCL)
@@ -39,8 +38,16 @@ if(NOT DEFINED ADD_BOOST_INCLUDE_PATH)
   endif()
 endif()
 
+set(DEFAULT_FLAGS "-O2 -Wall -Werror -Wno-sign-compare")
+set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+
+if(RELEASE)
+  set(DEFAULT_FLAGS "-O2 -Wall -Wno-sign-compare")
+  set(DEFAULT_TYPEMAP_GENERATION false)
+endif()
+
 #============= CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${RUBY_FOUND} false)
+add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." DEFAULT_TYPEMAP_GENERATION false)
 
 add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
 
@@ -48,7 +55,7 @@ add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" fals
 
 add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
 
-add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "-O2 -Wall -Werror -Wno-sign-compare" false)
+add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
 
 add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for Windows builds" "SHARED" false)
 
