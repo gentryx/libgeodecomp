@@ -4,35 +4,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
 
 #============= DETECT DEFAULTS ====================================
-if(EXISTS "/etc/lsb-release")
-  file(READ "/etc/lsb-release" lsb_release)
+set(RELEASE false)
 
-  if(lsb_release MATCHES "Gentoo")
-    set(distro "Gentoo")
-  endif()
-
-  if(lsb_release MATCHES "core")
-    set(distro "Cray")
-  endif()
-endif()
-
-if(NOT DEFINED distro)
-  if(EXISTS "/etc/fedora-release")
-    set(distro "Fedora")
-  endif()
-endif()
-
-if(NOT DEFINED distro)
-  if(EXISTS "/etc/debian_version")
-    set(distro "Debian")
-  endif()
-endif()
-
-if(NOT DEFINED distro)
-  set(distro "Unknown")
-endif()
-
-message(STATUS "distro: ${distro}")
+detect_distro()
 
 if(NOT DEFINED BOOST_ROOT)
   set(BOOST_ROOT "/opt/boost")

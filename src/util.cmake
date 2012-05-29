@@ -98,3 +98,35 @@ function(escape_kernel outfile infile)
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${infile}"
     )
 endfunction(escape_kernel)
+
+function(detect_distro)
+  if(EXISTS "/etc/lsb-release")
+    file(READ "/etc/lsb-release" lsb_release)
+
+    if(lsb_release MATCHES "Gentoo")
+      set(distro "Gentoo")
+    endif()
+
+    if(lsb_release MATCHES "core")
+      set(distro "Cray")
+    endif()
+  endif()
+
+  if(NOT DEFINED distro)
+    if(EXISTS "/etc/fedora-release")
+      set(distro "Fedora")
+    endif()
+  endif()
+
+  if(NOT DEFINED distro)
+    if(EXISTS "/etc/debian_version")
+      set(distro "Debian")
+    endif()
+  endif()
+
+  if(NOT DEFINED distro)
+    set(distro "Unknown")
+  endif()
+
+  set(distro ${distro} PARENT_SCOPE)
+endfunction(detect_distro)
