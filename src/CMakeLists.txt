@@ -111,8 +111,7 @@ if(FEATURE_MPI)
   endif()
 
   if(MPI_FOUND)
-    set(CMAKE_C_COMPILER   "${MPI_C_COMPILER}")
-    set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
+    set(CMAKE_CXX_COMPILER "${MPI_COMPILER}")
   endif()
 endif()
 
