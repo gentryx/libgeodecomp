@@ -20,17 +20,17 @@ if (is_unit_test)
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ./test)
 endif(is_unit_test)
 
-if (is_mpi_test AND LIBGEODECOMP_FEATURE_MPI)
+if (is_mpi_test AND FEATURE_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} -np ${NUM_PROC} ./test)
-endif(is_mpi_test AND LIBGEODECOMP_FEATURE_MPI)
+endif()
 
-# check whether LIMIT_TESTS selected the test, too
+# check whether LIMIT_TESTS selected this path, too
 set(selected_test true)
-if (LIMIT_TESTS)
+if(LIMIT_TESTS)
   string(REGEX MATCH ${LIMIT_TESTS} selected_test ${RELATIVE_PATH})
-endif (LIMIT_TESTS)
+endif()
 
 if(allowed_test AND selected_test)
   set(SOURCES)
@@ -61,4 +61,4 @@ if(allowed_test AND selected_test)
 
   add_dependencies(test ${TARGET_RUN_UNIT_TEST})
   add_dependencies(${TARGET_RUN_UNIT_TEST} ${TARGET_UNIT_TEST_EXE})
-endif(allowed_test AND selected_test)
+endif()
