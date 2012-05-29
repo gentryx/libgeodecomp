@@ -28,7 +28,11 @@ if(NOT DEFINED distro)
   endif()
 endif()
 
-message("distro: ${distro}")
+if(NOT DEFINED distro)
+  set(distro "Unknown")
+endif()
+
+message(STATUS "distro: ${distro}")
 
 if(NOT DEFINED BOOST_ROOT)
   set(BOOST_ROOT "/opt/boost")
@@ -51,6 +55,14 @@ endif()
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(NOT DEFINED ADD_BOOST_INCLUDE_PATH)
+  if (distro MATCHES "Gentoo")
+    set(ADD_BOOST_INCLUDE_PATH false)
+  else()
+    set(ADD_BOOST_INCLUDE_PATH true)
+  endif()
 endif()
 
 #============= CONFIGURABLE BUILD OPTIONS =========================
@@ -79,7 +91,10 @@ dump_config("config.h")
 
 #============= GENERAL CONFIGURATION ==============================
 include_directories(${LIBGEODECOMP_SOURCE_DIR})
-include_directories(${Boost_INCLUDE_DIRS})
+
+if(ADD_BOOST_INCLUDE_PATH)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 # LIBDIRS is used to find source files and headers 
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
@@ -206,8 +221,6 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
 endforeach(dir)
 
-list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/mpilayer/typemaps.cpp")
-
 set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
 
@@ -244,7 +257,7 @@ if (GENERATE_TYPEMAPS)
   
   add_custom_command(
     OUTPUT "${CMAKE_BINARY_DIR}/cache"
-    COMMAND cp -a "${CMAKE_BINARY_DIR}/last_cache" "${CMAKE_BINARY_DIR}/cache" 2>/dev/null || touch "${CMAKE_BINARY_DIR}/cache"
+    COMMAND cp -a "${CMAKE_BINARY_DIR}/last_cache" "${CMAKE_BINARY_DIR}/cache" 2>/dev/null || echo "still ok >/dev/null"
     COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --cache "${CMAKE_BINARY_DIR}/cache" "${CMAKE_CURRENT_SOURCE_DIR}" "${CANDIDATES}"
     COMMAND cp -a "${CMAKE_BINARY_DIR}/cache" "${CMAKE_BINARY_DIR}/last_cache")
 endif(GENERATE_TYPEMAPS)
