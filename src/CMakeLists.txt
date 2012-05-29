@@ -4,10 +4,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
 
 #============= DETECT DEFAULTS ====================================
-if(EXISTS "/etc/lsb-release")
-  file(READ "/etc/lsb-release" lsb_release)
-  string(REGEX MATCH "\".*\"" distro "${lsb_release}")
-  string(REPLACE "\"" "" distro "${distro}")
+file(READ "/etc/lsb-release" lsb_release)
+string(REGEX MATCH "Gentoo" lsb_release_match "${lsb_release}")
+
+if(lsb_release_match)
+  set(distro "Gentoo")
 endif()
 
 if(NOT DEFINED distro)
@@ -28,6 +29,7 @@ find_package(Boost REQUIRED date_time filesystem system)
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
+find_package(Ruby)
 find_package(Qt4)
 
 if(NOT DEFINED ${QT4_FOUND})
@@ -45,7 +47,7 @@ message("BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 
 #============= CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ON false)
+add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${RUBY_FOUND} false)
 
 add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
 
