@@ -4,11 +4,16 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
 
 #============= DETECT DEFAULTS ====================================
-file(READ "/etc/lsb-release" lsb_release)
-string(REGEX MATCH "Gentoo" lsb_release_match "${lsb_release}")
+if(EXISTS "/etc/lsb-release")
+  file(READ "/etc/lsb-release" lsb_release)
 
-if(lsb_release_match)
-  set(distro "Gentoo")
+  if(lsb_release MATCHES "Gentoo")
+    set(distro "Gentoo")
+  endif()
+
+  if(lsb_release MATCHES "core")
+    set(distro "Cray")
+  endif()
 endif()
 
 if(NOT DEFINED distro)
@@ -43,7 +48,6 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
-message("BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 
 #============= CONFIGURABLE BUILD OPTIONS =========================
