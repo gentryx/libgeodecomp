@@ -34,6 +34,16 @@ if(NOT DEFINED ${QT4_FOUND})
   set(QT4_FOUND false)
 endif()
 
+if(NOT DEFINED ${CUDA_FOUND})
+  set(CUDA_FOUND false)
+endif()
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+message("BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+
 #============= CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ON false)
 
