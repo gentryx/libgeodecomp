@@ -89,7 +89,7 @@ class MPIGenerator
     ret.sub!(/.*LOOKUP_DEFINITIONS/, lookups.join("\n"))
 
     if @macro_guard
-      ret = "#ifdef #{@macro_guard}\n#{ret}\n#endif\n"
+      return guard(ret)
     end
 
     return ret
@@ -130,7 +130,7 @@ class MPIGenerator
     ret.sub!(/.+ASSIGNMENTS/, assignments.join("\n"))
 
     if @macro_guard
-      ret = "#ifdef #{@macro_guard}\n#{ret}\n#endif\n"
+      return guard(ret)
     end
 
     return ret;
@@ -140,5 +140,9 @@ class MPIGenerator
   def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers, header_pattern=nil, header_replacement=nil)
     return [generate_header(topological_class_sortation, datatype_map, headers, header_pattern, header_replacement), 
             generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)]
+  end
+
+  def guard(ret)
+    return "#include<libgeodecomp/config.h>\n#ifdef #{@macro_guard}\n#{ret}\n#endif\n"
   end
 end

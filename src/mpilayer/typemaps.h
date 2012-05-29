@@ -1,3 +1,4 @@
+#include<libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_typemaps_h_
 #define _libgeodecomp_typemaps_h_
