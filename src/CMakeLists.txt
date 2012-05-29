@@ -30,6 +30,10 @@ endif()
 
 message("distro: ${distro}")
 
+if(NOT DEFINED BOOST_ROOT)
+  set(BOOST_ROOT "/opt/boost")
+endif()
+
 find_package(Boost REQUIRED date_time filesystem system)
 find_package(CUDA)
 find_package(OpenCL)
@@ -47,10 +51,6 @@ endif()
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-if(NOT DEFINED BOOST_ROOT)
-  set(BOOST_ROOT "/opt/boost")
 endif()
 
 #============= CONFIGURABLE BUILD OPTIONS =========================
