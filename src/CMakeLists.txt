@@ -57,7 +57,7 @@ execute_process(
 string(REGEX MATCH " [456]\\.[0123456789]\\.[0123456789]" gcc_version "${gcc_version}")
 message("gcc_version: X${gcc_version}X")
 
-if(gcc_version VERSION_GREATER 4.4.0)
+if(gcc_version VERSION_GREATER 4.4.9)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
