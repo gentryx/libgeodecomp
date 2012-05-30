@@ -24,7 +24,13 @@ We recommend an out-of-source build:
   mkdir -p $BUILD_DIR
   cd $BUILD_DIR
   cmake ../../src/
-  make
+  make 
 
 That's it. Additionally you may want to run the library's unit tests
-via "make test" to ensure that it's actually working.
+via "make test" to ensure that it's actually working. For speedier
+builds you may want to run make in parallel, e.g. "make -j 4". Replace
+the 4 by the number of cores in your system. For more details please
+refer to:
+
+  http://www.libgeodecomp.org/documentation.html#userguide and
+  http://www.libgeodecomp.org/faq.html
