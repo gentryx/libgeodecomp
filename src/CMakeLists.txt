@@ -22,6 +22,10 @@ if(NOT DEFINED QT4_FOUND)
   set(QT4_FOUND false)
 endif()
 
+if(NOT DEFINED RUBY_FOUND)
+  set(RUBY_FOUND false)
+endif()
+
 if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
 endif()
