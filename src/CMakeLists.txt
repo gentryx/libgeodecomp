@@ -38,16 +38,27 @@ if(NOT DEFINED ADD_BOOST_INCLUDE_PATH)
   endif()
 endif()
 
-set(DEFAULT_FLAGS "-O2 -Wall -Werror -Wno-sign-compare")
-set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+set(DEFAULT_FLAGS "-O2 -Wall -Wno-sign-compare")
+set(DEFAULT_TYPEMAP_GENERATION false)
 
-if(RELEASE)
-  set(DEFAULT_FLAGS "-O2 -Wall -Wno-sign-compare")
-  set(DEFAULT_TYPEMAP_GENERATION false)
+if(NOT RELEASE)
+  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Werror")
+  set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+endif()
+
+execute_process(
+  COMMAND g++ --version | head -1
+  OUTPUT_VARIABLE gcc_version
+  ERROR_QUIET)
+string(REGEX MATCH " [456]\\.[0123456789]\\.[0123456789]" gcc_version "${gcc_version}")
+message("gcc_version: X${gcc_version}X")
+
+if(gcc_version VERSION_GREATER 4.4.0)
+  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
 #============= CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." DEFAULT_TYPEMAP_GENERATION false)
+add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
 add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
 
