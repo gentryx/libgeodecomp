@@ -114,7 +114,7 @@ if options[:cache]
   # classes to be serialized yet...
   unless File.exists?(cache_file)  
     FileUtils.touch cache_file
-    # ...but fake the access time so all headers are considered newer.
+    # ...but fake the modification time so all headers are considered newer.
     File.utime(Time.at(0), Time.at(0), cache_file)
   end
   
@@ -139,6 +139,11 @@ if options[:cache]
   new_typemaps_deps = (buffer + typemaps_deps).uniq.sort
   if typemaps_deps != new_typemaps_deps    
     File.open(cache_file, "w") { |f| f.puts new_typemaps_deps.join("\n")}
+
+    # fake the modification time so that typemaps don't get regenerated on ALL fresh checkouts
+    times = new_typemaps_deps.map { |h| File.mtime(h) }
+    newest_time = times.max
+    File.utime(newest_time, newest_time, cache_file)
   end
 
   exit(0)
