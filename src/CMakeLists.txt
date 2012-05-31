@@ -91,28 +91,12 @@ print_options()
 dump_config("config.h")
 
 #============= GENERAL CONFIGURATION ==============================
-include_directories(${LIBGEODECOMP_SOURCE_DIR})
-
-if(ADD_BOOST_INCLUDE_PATH)
-  include_directories(${Boost_INCLUDE_DIRS})
-endif()
-
-# LIBDIRS is used to find source files and headers 
-set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
-# AUXDIRS lists auxiliary directories to be included in the main
-# build. They may for instance include additionally libraries to be
-# linked into the main lib.
-set(AUXDIRS)
-# set(AUXDIRS misc/testbed/cell/spustuff)
-set(SUBDIRS examples io loadbalancer misc mpilayer parallelization testbed)
 
 set(PACKAGE_NAME libgeodecomp)
 set(CMAKE_C_FLAGS   "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
-set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
-
-set(PACKAGE_VERSION "0.1.0")
+set(PACKAGE_VERSION "0.0.1")
 set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
@@ -120,6 +104,11 @@ set(PACKAGE_EMAIL "users@libgeodecomp.org")
 # import settings detected by packages to decouple from their
 # interfaces, perform sanity checks to match selected options and
 # detected environment...
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+if(ADD_BOOST_INCLUDE_PATH)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 if(FEATURE_CUDA AND NOT CUDA_FOUND)
   message("FEATURE_CUDA selected, but could not find the Nvidia CUDA toolkit.")
@@ -148,6 +137,17 @@ if(WIN32)
 else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
+
+# LIBDIRS is used to find source files and headers 
+set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
+# AUXDIRS lists auxiliary directories to be included in the main
+# build. They may for instance include additionally libraries to be
+# linked into the main lib.
+set(AUXDIRS)
+# set(AUXDIRS misc/testbed/cell/spustuff)
+set(SUBDIRS examples io loadbalancer misc mpilayer parallelization testbed)
+
+set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
 
 generate_sourcelists("./")
 
