@@ -1,6 +1,7 @@
 generate_sourcelists("./")
 
 add_subdirectory(interfaces)
+add_subdirectory(wavefront)
 
 set(RELATIVE_PATH "")
 include(auto.cmake)
