@@ -99,6 +99,11 @@ public:
         return edgeCell;
     }
 
+    inline const CELL_TYPE& getEdgeCell() const
+    {
+        return edgeCell;
+    }
+
     inline CELL_TYPE *baseAddress() 
     {
         return &(*this)[Coord<DIM>()];
@@ -107,11 +112,6 @@ public:
     inline const CELL_TYPE *baseAddress() const
     {
         return &(*this)[Coord<DIM>()];
-    }
-
-    inline const CELL_TYPE& getEdgeCell() const
-    {
-        return edgeCell;
     }
 
     inline CELL_TYPE& operator[](const Coord<DIM>& coord)

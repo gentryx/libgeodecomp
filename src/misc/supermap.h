@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <sstream>
 
 namespace LibGeoDecomp {
 
