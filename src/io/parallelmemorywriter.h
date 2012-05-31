@@ -67,7 +67,7 @@ private:
     {
         unsigned step = this->distSim->getStep();
 
-        if (grids.count(step) == 0) {
+        if (grids[step].boundingBox() != boundingBox) {
             grids[step].resize(boundingBox);
         }
 
@@ -85,13 +85,22 @@ private:
                 if (sender != receiver) {
                     if (sender == mpiLayer.rank()) {
                         mpiLayer.sendRegion(*region, receiver);
-                        // fixme: don't fix TestCell<2> MPI datatype here
-                        mpiLayer.sendUnregisteredRegion(grid, *region, receiver, MPILayer::PARALLEL_MEMORY_WRITER, Typemaps::lookup<TestCell<2> >());
+                        mpiLayer.sendUnregisteredRegion(
+                            grid, 
+                            *region, 
+                            receiver, 
+                            MPILayer::PARALLEL_MEMORY_WRITER, 
+                            Typemaps::lookup<CELL_TYPE>());
                     }
                     if (receiver == mpiLayer.rank()) {
                         Region<DIM> recvRegion;
                         mpiLayer.recvRegion(&recvRegion, sender);
-                        mpiLayer.recvUnregisteredRegion(&grids[step], recvRegion, sender, MPILayer::PARALLEL_MEMORY_WRITER, Typemaps::lookup<TestCell<2> >());                    
+                        mpiLayer.recvUnregisteredRegion(
+                            &grids[step], 
+                            recvRegion, 
+                            sender, 
+                            MPILayer::PARALLEL_MEMORY_WRITER, 
+                            Typemaps::lookup<CELL_TYPE>());                    
                     }
                 }
             }

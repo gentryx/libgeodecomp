@@ -91,12 +91,12 @@ public:
             writer->stepFinished();        
         }
 
-        TS_ASSERT_EQUALS(writer->getGrids()[  0].getDimensions(), dim);
-        TS_ASSERT_EQUALS(writer->getGrids()[123].getDimensions(), Coord<2>());
+        TS_ASSERT_EQUALS(writer->getGrid(  0).getDimensions(), dim);
+        TS_ASSERT_EQUALS(writer->getGrid(123).getDimensions(), Coord<2>());
 
         TS_ASSERT_TEST_GRID(
             ParallelMemoryWriter<TestCell<2> >::GridType, 
-            writer->getGrids()[0], 
+            writer->getGrid(0), 
             0);
 
         sim->setStep(123);
@@ -112,11 +112,11 @@ public:
 
         TS_ASSERT_TEST_GRID(
             ParallelMemoryWriter<TestCell<2> >::GridType, 
-            writer->getGrids()[0], 
+            writer->getGrid(0), 
             0);
         TS_ASSERT_TEST_GRID(
             ParallelMemoryWriter<TestCell<2> >::GridType, 
-            writer->getGrids()[123], 
+            writer->getGrid(123), 
             0);
     }
 
