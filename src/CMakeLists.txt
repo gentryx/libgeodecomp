@@ -45,10 +45,11 @@ endif()
 set(DEFAULT_FLAGS "-O2 -Wall -Wno-sign-compare")
 set(DEFAULT_TYPEMAP_GENERATION false)
 
-if(NOT RELEASE)
-  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Werror")
-  set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
-endif()
+# Boost is creating too many warnings, -Werror is just too much
+# if(NOT RELEASE)
+#   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Werror")
+#   set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+# endif()
 
 execute_process(
   COMMAND uname -m
