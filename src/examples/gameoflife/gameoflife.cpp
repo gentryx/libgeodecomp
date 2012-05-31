@@ -118,12 +118,22 @@ class StateSelector
 public:
     typedef double VariableType;
 
-    const double operator()(const ConwayCell& in)
+    void operator()(const ConwayCell& in, double *out) const
     {
-        return in.alive;
+        *out = in.alive;
     }
 
-    static std::string dataFormat()
+    static std::string varName() 
+    {
+        return "alive";
+    }
+
+    static int dataComponents()
+    {
+        return 1;
+    }
+
+    static std::string dataFormat() 
     {
         return "DOUBLE";
     }
@@ -133,21 +143,21 @@ void runSimulation()
 {
     int outputFrequency = 1;
 
-    // StripingSimulator<ConwayCell> sim(
-    //     new CellInitializer(),
-    //     MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()), 
-    //     10, 
-    //     MPI::BOOL); 
-    // new BOVWriter<ConwayCell, StateSelector>("game", &sim, outputFrequency, "alive");
+    StripingSimulator<ConwayCell> sim(
+        new CellInitializer(),
+        MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()), 
+        10, 
+        MPI::BOOL); 
+    new BOVWriter<ConwayCell, StateSelector>("game", &sim, outputFrequency);
 
-    SerialSimulator<ConwayCell> sim(
-        new CellInitializer());
-    new PPMWriter<ConwayCell, SimpleCellPlotter<ConwayCell, CellToColor> >(
-        "./gameoflife", 
-        &sim,
-        outputFrequency,
-        12,
-        12);
+    // SerialSimulator<ConwayCell> sim(
+    //     new CellInitializer());
+    // new PPMWriter<ConwayCell, SimpleCellPlotter<ConwayCell, CellToColor> >(
+    //     "./gameoflife", 
+    //     &sim,
+    //     outputFrequency,
+    //     12,
+    //     12);
 
     new TracingWriter<ConwayCell>(&sim, 1);
 
