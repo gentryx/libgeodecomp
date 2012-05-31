@@ -22,6 +22,10 @@ if(NOT DEFINED QT4_FOUND)
   set(QT4_FOUND false)
 endif()
 
+if(NOT DEFINED RUBY_FOUND)
+  set(RUBY_FOUND false)
+endif()
+
 if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
 endif()
@@ -47,13 +51,17 @@ if(NOT RELEASE)
 endif()
 
 execute_process(
+  COMMAND uname -m
+  OUTPUT_VARIABLE MACHINE_ARCH
+  ERROR_QUIET)
+
+execute_process(
   COMMAND g++ --version | head -1
   OUTPUT_VARIABLE gcc_version
   ERROR_QUIET)
 string(REGEX MATCH " [456]\\.[0123456789]\\.[0123456789]" gcc_version "${gcc_version}")
-message("gcc_version: X${gcc_version}X")
 
-if(gcc_version VERSION_GREATER 4.4.0)
+if(gcc_version VERSION_GREATER 4.4.9)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
