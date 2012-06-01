@@ -111,25 +111,29 @@ if(ADD_BOOST_INCLUDE_PATH)
 endif()
 
 if(FEATURE_CUDA AND NOT CUDA_FOUND)
-  message("FEATURE_CUDA selected, but could not find the Nvidia CUDA toolkit.")
+  message(FATAL_ERROR "FEATURE_CUDA selected, but could not find the Nvidia CUDA toolkit.")
 endif()
 
 if(FEATURE_MPI)
   if(NOT MPI_FOUND)
-    message("FEATURE_MPI selected, but could find no MPI implementation.")
+    message(FATAL_ERROR "FEATURE_MPI selected, but could find no MPI implementation.")
   endif()
 
   if(MPI_FOUND)
+    if(NOT MPIEXEC)
+      message(FATAL_ERROR "FEATURE_MPI selected, but mpiexec not found.")
+    endif()
+
     set(CMAKE_CXX_COMPILER "${MPI_COMPILER}")
   endif()
 endif()
 
 if(FEATURE_OPENCL AND NOT OPENCL_FOUND)
-  message("FEATURE_OPENCL selected, but could not find any OpenCL library.")
+  message(FATAL_ERROR "FEATURE_OPENCL selected, but could not find any OpenCL library.")
 endif()
 
 if(FEATURE_QT AND NOT QT4_FOUND)
-  message("FEATURE_QT selected, but could not find QT4")
+  message(FATAL_ERROR "FEATURE_QT selected, but could not find QT4")
 endif()
 
 if(WIN32)
