@@ -12,7 +12,7 @@ class FixedCoord
 public:
 };
 
-typedef Grid<double, typename Topologies::Cube<2>::Topology> GridType;
+typedef Grid<double, Topologies::Cube<2>::Topology> GridType;
 
 class HoodOld;
 
@@ -34,7 +34,7 @@ private:
     double val;
 };
 
-typedef Grid<CellVirtual, typename Topologies::Cube<2>::Topology> VirtualGridType;
+typedef Grid<CellVirtual, Topologies::Cube<2>::Topology> VirtualGridType;
 
 class HoodOld
 {
@@ -187,7 +187,7 @@ public:
     double val;
 };
 
-typedef Grid<CellStraight, typename Topologies::Cube<2>::Topology> StraightGridType;
+typedef Grid<CellStraight, Topologies::Cube<2>::Topology> StraightGridType;
 
 class HoodStraight
 {
