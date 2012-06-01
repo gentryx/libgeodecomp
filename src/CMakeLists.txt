@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(LIBGEODECOMP)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
+include(CheckCXXCompilerFlag)
 
 #============= DETECT DEFAULTS ====================================
 set(RELEASE false)
@@ -56,13 +57,8 @@ execute_process(
   OUTPUT_VARIABLE MACHINE_ARCH
   ERROR_QUIET)
 
-execute_process(
-  COMMAND g++ --version | head -1
-  OUTPUT_VARIABLE gcc_version
-  ERROR_QUIET)
-string(REGEX MATCH " [456]\\.[0123456789]\\.[0123456789]" gcc_version "${gcc_version}")
-
-if(gcc_version VERSION_GREATER 4.4.9)
+CHECK_CXX_COMPILER_FLAG("-march=native" SUPPORTS_MARCH_NATIVE)
+if(SUPPORTS_MARCH_NATIVE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
@@ -86,6 +82,8 @@ add_config_option(FEATURE_MPI "If set, all MPI related components will be built.
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
+
+add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
 print_options()
 dump_config("config.h")
