@@ -127,7 +127,7 @@ public:
                 this->cursor = origin;
                 return;
             }
-            if (hasTrivialDimensions(dimensions)) {
+            if (this->hasTrivialDimensions(dimensions)) {
                 // std::cout << "digging3\n";
                 digDownTrivial(origin, dimensions, offset);
             } else if (isCached(dimensions)) {

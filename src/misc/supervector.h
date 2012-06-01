@@ -16,6 +16,9 @@ template<typename T, typename Allocator = std::allocator<T> >
 class SuperVector : public std::vector<T, Allocator>
 {
 public:
+
+    using std::vector<T, Allocator>::insert;
+
     typedef typename std::vector<T>::iterator iterator;
     typedef typename std::vector<T>::const_iterator const_iterator;
 
@@ -28,7 +31,7 @@ public:
      */
     inline void del(const T &obj) 
     {
-        erase(std::remove(this->begin(), this->end(), obj), this->end());
+        this->erase(std::remove(this->begin(), this->end(), obj), this->end());
     }
 
     // We have to use the inherited operator by hand, as this requires a cast
@@ -59,7 +62,7 @@ public:
 
     inline void append(const SuperVector& other)
     {
-        insert(this->end(), other.begin(), other.end());
+        this->insert(this->end(), other.begin(), other.end());
     }
 
     inline SuperVector operator+(const SuperVector& other) const
