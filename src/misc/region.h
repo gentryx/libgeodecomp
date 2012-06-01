@@ -493,9 +493,9 @@ public:
             for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
                 Streak<DIM> newStreak(*i, endX);
                 if (TOPOLOGY::wrapsAxis(0)) {
-                    this->splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
+                    splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
-                    this->normalizeStreak<TOPOLOGY>(
+                    normalizeStreak<TOPOLOGY>(
                         trimStreak(newStreak, dimensions), &ret, dimensions);
                 }
             }
@@ -513,7 +513,7 @@ public:
     inline SuperVector<Streak<DIM> > toVector() const
     {
         SuperVector<Streak<DIM> > ret(numStreaks());
-        std::copy(this->beginStreak(), this->endStreak(), ret.begin());
+        std::copy(beginStreak(), endStreak(), ret.begin());
         return ret;
     }
     

@@ -49,8 +49,8 @@ public:
     inline Region<DIM> getRegion(const long& node) const 
     {
         return Region<DIM>(
-            (*this)[this->startOffsets[node + 0]], 
-            (*this)[this->startOffsets[node + 1]]);
+            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 1]]);
     }
 
     Iterator operator[](const unsigned& pos) const
@@ -61,6 +61,8 @@ public:
 
 
 private:
+    using SpaceFillingCurve<DIMENSIONS>::startOffsets;
+
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 };

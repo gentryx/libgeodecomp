@@ -29,6 +29,9 @@ public:
     typedef PartitionManager< 
         DIM, typename CELL_TYPE::Topology> MyPartitionManager;
   
+    using Stepper<CELL_TYPE>::initializer;
+    using Stepper<CELL_TYPE>::partitionManager;
+
     inline OpenCLStepper(
         const std::string& cellSourceFile,
         boost::shared_ptr<MyPartitionManager> _partitionManager,
@@ -93,7 +96,7 @@ public:
         try {
             cl::Buffer startCoordsBuffer, endCoordsBuffer;
         
-            Coord<DIM> c = this->initializer->gridDimensions();
+            Coord<DIM> c = initializer->gridDimensions();
             int zDim = c.z();
             int yDim = c.y();
             int xDim = c.x();
@@ -202,9 +205,9 @@ private:
     inline void initGrids()
     {
         const CoordBox<DIM>& gridBox = 
-            this->partitionManager->ownRegion().boundingBox();
+            partitionManager->ownRegion().boundingBox();
         hostGrid.reset(new GridType(gridBox, CELL_TYPE()));
-        this->initializer->grid(&*hostGrid);
+        initializer->grid(&*hostGrid);
         
         inputDeviceGrid = cl::Buffer(
             context, 

@@ -52,8 +52,15 @@ public:
 
     class Iterator : public SpaceFillingCurve<DIM>::Iterator
     {
-        friend class ZCurvePartitionTest;
     public:
+        friend class ZCurvePartitionTest;
+
+        using SpaceFillingCurve<DIM>::Iterator::cursor;
+        using SpaceFillingCurve<DIM>::Iterator::endReached;
+        using SpaceFillingCurve<DIM>::Iterator::hasTrivialDimensions;
+        using SpaceFillingCurve<DIM>::Iterator::origin;
+        using SpaceFillingCurve<DIM>::Iterator::sublevelState;
+
         inline Iterator(
             const Coord<DIM>& origin, 
             const Coord<DIM>& dimensions, 
@@ -71,9 +78,9 @@ public:
         inline Iterator& operator++()
         {
             // std::cout << "operator++\n";
-            if (this->endReached)
+            if (endReached)
                 return *this;
-            if (this->sublevelState == TRIVIAL) {
+            if (sublevelState == TRIVIAL) {
                 operatorIncTrivial();
             } else {
                 operatorIncCached();
@@ -91,9 +98,9 @@ public:
         inline void operatorIncTrivial()
         {
             // std::cout << "operatorIncTrivial, " << trivialSquareCounter << "\n"
-            //           << this->cursor << "\n";
+            //           << cursor << "\n";
             if (--trivialSquareCounter > 0) {
-                this->cursor[trivialSquareDirDim]++;
+                cursor[trivialSquareDirDim]++;
             } else {
                 digUpDown();
             }
@@ -104,7 +111,7 @@ public:
             // std::cout << "operatorIncCached\n";
             cachedSquareCoordsIterator++;
             if (cachedSquareCoordsIterator != cachedSquareCoordsEnd) {
-                this->cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
+                cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
             } else {
                 digUpDown();
             }
@@ -123,11 +130,11 @@ public:
 
             if (offset >= dimensions.prod()) {
                 // std::cout << "digging2\n";
-                this->endReached = true;
-                this->cursor = origin;
+                endReached = true;
+                cursor = origin;
                 return;
             }
-            if (this->hasTrivialDimensions(dimensions)) {
+            if (hasTrivialDimensions(dimensions)) {
                 // std::cout << "digging3\n";
                 digDownTrivial(origin, dimensions, offset);
             } else if (isCached(dimensions)) {
@@ -145,14 +152,14 @@ public:
             const Coord<DIM>& dimensions, 
             const unsigned& offset)
         {
-            this->sublevelState = TRIVIAL;
-            this->cursor = origin;
+            sublevelState = TRIVIAL;
+            cursor = origin;
 
             // std::cout << "digDownTrivial()\n"
             //           << origin << "\n"
             //           << dimensions << "\n"
             //           << offset << "\n"
-            //           << "cursor: " << this->cursor << "\n\n";
+            //           << "cursor: " << cursor << "\n\n";
 
             trivialSquareDirDim = 0;
             for (int i = 1; i < DIM; ++i) 
@@ -160,7 +167,7 @@ public:
                     trivialSquareDirDim = i;
                 
             trivialSquareCounter = dimensions[trivialSquareDirDim] - offset;
-            this->cursor[trivialSquareDirDim] += offset;
+            cursor[trivialSquareDirDim] += offset;
 
         }
 
@@ -169,7 +176,7 @@ public:
             const Coord<DIM>& dimensions, 
             const unsigned& offset)
         {
-            this->sublevelState = CACHED;
+            sublevelState = CACHED;
             CoordVector& coords = 
                 LocateHelper()(
                     *ZCurvePartition<DIM>::coordsCache,
@@ -179,7 +186,7 @@ public:
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
-            this->cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
+            cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
         }
 
         static inline int numQuadrants()
@@ -275,8 +282,8 @@ public:
 
             if (squareStack.empty()) {
                 // std::cout << "  empty\n";
-                this->endReached = true;
-                this->cursor = this->origin;
+                endReached = true;
+                cursor = origin;
             } else {
                 // std::cout << "  quadrant++\n";
                 squareStack.back().quadrant++;
@@ -286,8 +293,9 @@ public:
         inline void digUpDown()
         {
             digUp();
-            if (this->endReached)
+            if (endReached) {
                 return;
+            }
             digDown(0);
         }
 
@@ -328,8 +336,8 @@ public:
     inline Region<DIM> getRegion(const long& node) const 
     {
         return Region<DIM>(
-            (*this)[this->startOffsets[node + 0]], 
-            (*this)[this->startOffsets[node + 1]]);
+            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 1]]);
     }
 
     static inline bool fillCaches() 
@@ -362,6 +370,8 @@ public:
     }
 
 private:
+    using SpaceFillingCurve<DIM>::startOffsets;
+
     static Cache coordsCache;
     static Coord<DIMENSIONS> maxCachedDimensions;
     static bool cachesInitialized;

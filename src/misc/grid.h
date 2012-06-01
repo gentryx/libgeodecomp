@@ -142,7 +142,7 @@ public:
 
     inline bool operator==(const Grid& other) const
     {
-        if (this->boundingBox() == CoordBox<DIM>() && 
+        if (boundingBox() == CoordBox<DIM>() && 
             other.boundingBox() == CoordBox<DIM>())
             return true;
 
@@ -153,10 +153,10 @@ public:
 
     inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
     {
-        if (this->boundingBox() != other.boundingBox())
+        if (boundingBox() != other.boundingBox())
             return false;
 
-        if (this->edgeCell != other.atEdge())
+        if (edgeCell != other.atEdge())
             return false;
 
         CoordBox<DIM> box = boundingBox();
@@ -207,7 +207,7 @@ public:
   
     inline std::string diff(const Grid& other) const
     {
-        if (this->boundingBox() != other.boundingBox()) {
+        if (boundingBox() != other.boundingBox()) {
             std::ostringstream message;
             message << 
                 "dimensions mismatch (is (" << boundingBox() << 

@@ -18,9 +18,13 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename ATTRIBUTE_SELECTOR>
 class ASCIIWriter : public Writer<CELL_TYPE>
 {    
+ public:
     friend class ASCIIWriterTest;
 
- public:
+    using Writer<CELL_TYPE>::sim;
+    using Writer<CELL_TYPE>::period;
+    using Writer<CELL_TYPE>::prefix;
+
     ASCIIWriter(
         const std::string& prefix, 
         MonolithicSimulator<CELL_TYPE> *sim, 
@@ -35,7 +39,7 @@ class ASCIIWriter : public Writer<CELL_TYPE>
 
     virtual void stepFinished()
     {
-        if (this->sim->getStep() % this->period == 0)
+        if (sim->getStep() % period == 0)
             writeStep();
     }
 
@@ -44,11 +48,11 @@ class ASCIIWriter : public Writer<CELL_TYPE>
  private:
     void writeStep()
     {
-        const Grid<CELL_TYPE> *grid = this->sim->getGrid();
+        const Grid<CELL_TYPE> *grid = sim->getGrid();
 
         std::ostringstream filename;
-        filename << this->prefix << "." << std::setfill('0') << std::setw(4)
-                 << this->sim->getStep() << ".ascii";
+        filename << prefix << "." << std::setfill('0') << std::setw(4)
+                 << sim->getStep() << ".ascii";
         std::ofstream outfile(filename.str().c_str());
         if (!outfile) 
             throw FileOpenException("Cannot open output file", 

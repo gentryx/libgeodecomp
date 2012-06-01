@@ -18,6 +18,9 @@ public:
     typedef typename std::map<Key, Value>::iterator iterator;
     typedef typename std::map<Key, Value>::const_iterator const_iterator;
 
+    using std::map<Key, Value>::begin;
+    using std::map<Key, Value>::end;
+
     inline SuperMap() {};
 
     inline const Value& operator[](const Key& key) const
@@ -33,14 +36,17 @@ public:
         return (*((std::map<Key, Value>*)this))[key];
     }
 
-    inline std::string toString() const {
+    inline std::string toString() const 
+    {
         std::ostringstream temp;
         temp << "{";
-        for (const_iterator i = this->begin(); i != this->end();) {
+
+        for (const_iterator i = begin(); i != end();) {
             temp << i->first << " => " << i->second;
             i++;
-            if (i != this->end())
+            if (i != end()) {
                 temp << ", ";
+            }
         }
         temp << "}";
         return temp.str();

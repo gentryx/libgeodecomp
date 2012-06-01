@@ -17,6 +17,10 @@ public:
 
     static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
 
+    using ParallelWriter<CELL_TYPE>::distSim;
+    using ParallelWriter<CELL_TYPE>::period;
+    using ParallelWriter<CELL_TYPE>::prefix;
+
     ParallelMPIIOWriter(
         const std::string& prefix, 
         DistributedSimulator<CELL_TYPE> *sim, 
@@ -35,7 +39,7 @@ public:
 
     virtual void stepFinished()
     {
-        if ((this->distSim->getStep() % this->period) == 0) 
+        if ((distSim->getStep() % period) == 0) 
             writeGrid();
     }
 
@@ -51,7 +55,7 @@ private:
     std::string filename(const unsigned& step) const 
     {
         std::ostringstream buf;
-        buf << this->prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";
+        buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";
         return buf.str();
     }
 
@@ -59,18 +63,18 @@ private:
     {
         const Region<DIM> *region;
         const typename DistributedSimulator<CELL_TYPE>::GridType *grid;
-        this->distSim->getGridFragment(&grid, &region);
-        unsigned step = this->distSim->getStep();
+        distSim->getGridFragment(&grid, &region);
+        unsigned step = distSim->getStep();
 
         MPIIO<CELL_TYPE>::writeRegion(
             *grid, 
-            this->distSim->getInitializer()->gridDimensions(),
+            distSim->getInitializer()->gridDimensions(),
             step,
-            this->distSim->getInitializer()->maxSteps(),
-            this->filename(step),
+            distSim->getInitializer()->maxSteps(),
+            filename(step),
             *region,
-            this->datatype,
-            this->comm);
+            datatype,
+            comm);
     }
 };
 

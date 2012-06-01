@@ -269,14 +269,18 @@ public:
     }
 
 private:
+    using Writer<Container>::sim;
+    using Writer<Container>::period;
+    using Writer<Container>::prefix;
+
     void writeStep()
     {
-        if (this->sim->getStep() % this->period != 0)
+        if (sim->getStep() % period != 0)
             return;
 
         std::stringstream filename;
-        filename << this->prefix << "_" << std::setfill('0') << std::setw(6) 
-                 << this->sim->getStep() << ".pov";
+        filename << prefix << "_" << std::setfill('0') << std::setw(6) 
+                 << sim->getStep() << ".pov";
         std::ofstream file(filename.str().c_str());
 
         file << "#include \"colors.inc\"\n"
@@ -292,9 +296,9 @@ private:
              << "} \n"
              << "light_source { <20, 30, -30> color White}\n\n";
 
-        CoordBox<3> box = this->sim->getGrid()->boundingBox();
+        CoordBox<3> box = sim->getGrid()->boundingBox();
         for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            const Container& container = (*this->sim->getGrid())[*j];
+            const Container& container = (*sim->getGrid())[*j];
 
             for (int i = 0; i < container.numSpheres; ++i) 
                 file << sphereToPOV(container.spheres[i]);

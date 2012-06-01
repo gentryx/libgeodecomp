@@ -62,14 +62,18 @@ public:
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIMENSIONS;
 
+    using MonolithicSimulator<CELL_TYPE>::initializer;
+    using MonolithicSimulator<CELL_TYPE>::stepNum;
+    using MonolithicSimulator<CELL_TYPE>::writers;
+
     GPUSimulator(Initializer<CELL_TYPE> *initializer, const int& device = 0) :
         MonolithicSimulator<CELL_TYPE>(initializer),
         inputBufferDevice(0),
         inputBufferSize(0)
     {
-        Coord<DIM> dim = this->initializer->gridDimensions();
+        Coord<DIM> dim = initializer->gridDimensions();
         gridHost.resize(dim);
-        this->initializer->grid(&gridHost);
+        initializer->grid(&gridHost);
 
         cudaSetDevice(device);
         int byteSize = dim.prod() * sizeof(CELL_TYPE);
@@ -107,10 +111,10 @@ public:
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++)
             nanoStep(i);
 
-        this->stepNum++;    
+        stepNum++;    
         // call back all registered Writers
-        for(unsigned i = 0; i < this->writers.size(); i++) 
-            this->writers[i]->stepFinished();
+        for(unsigned i = 0; i < writers.size(); i++) 
+            writers[i]->stepFinished();
     }
 
     virtual void run()
@@ -138,7 +142,7 @@ public:
         int byteSize = inputDim.prod() * 3 * sizeof(unsigned char);
         cudaMemcpy(inputBufferDevice, data, byteSize, cudaMemcpyHostToDevice);
   
-        Coord<2> simGridDim = this->getInitializer()->gridDimensions();
+        Coord<2> simGridDim = initializer->gridDimensions();
         float factorX = 1.0 * inputDim.x() / simGridDim.x();
         float factorY = 1.0 * inputDim.y() / simGridDim.y();
 
@@ -216,6 +220,10 @@ public:
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
     static const int DIM = Topology::DIMENSIONS;
 
+    using GPUSimulator<CELL_TYPE>::initializer;
+    using GPUSimulator<CELL_TYPE>::updateInputBuffer;
+    using GPUSimulator<CELL_TYPE>::writers;
+
     InteractiveSimulatorGPU(QObject *parent, Initializer<CELL_TYPE> *initializer) :
         GPUSimulator<CELL_TYPE>(initializer),
         InteractiveSimulator(parent)
@@ -226,15 +234,16 @@ public:
 
     virtual void readCam()
     {
-        Coord<DIM> dim = this->initializer->gridDimensions();
-        this->updateInputBuffer(&cameraFrame[0], Coord<2>(cameraFrameWidth, cameraFrameHeight));
+        Coord<DIM> dim = initializer->gridDimensions();
+        updateInputBuffer(&cameraFrame[0], Coord<2>(cameraFrameWidth, cameraFrameHeight));
     }
 
     virtual void renderOutput()
     {
         // fixme: this is the same for InteractiveSimulatorCPU. refactor?
-        for(unsigned i = 0; i < this->writers.size(); i++) 
-            this->writers[i]->stepFinished();
+        for(unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->stepFinished();
+        }
     }
 
     virtual void update()

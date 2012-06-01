@@ -9,29 +9,47 @@
 
 namespace LibGeoDecomp {
 
-class ParallelMockWriter : public ParallelWriter<TestCell<2> > {
+class ParallelMockWriter : public ParallelWriter<TestCell<2> > 
+{
 public:
-
     static std::string staticEvents;
 
-    ParallelMockWriter(DistributedSimulator<TestCell<2> > *sim)
-        : ParallelWriter<TestCell<2> >("foobar", sim, 1) {}
+    using ParallelWriter<TestCell<2> >::distSim;
 
-    ~ParallelMockWriter() { staticEvents += "deleted\n"; }
+    ParallelMockWriter(DistributedSimulator<TestCell<2> > *sim) : 
+        ParallelWriter<TestCell<2> >("foobar", sim, 1)
+    {}
 
-    void initialized() { myEvents << "initialized()\n"; }
+    ~ParallelMockWriter() 
+    { 
+        staticEvents += "deleted\n"; 
+    }
 
-    void stepFinished() { myEvents << "stepFinished(step=" << this->distSim->getStep() << ")\n"; }
+    void initialized() 
+    { 
+        myEvents << "initialized()\n"; 
+    }
 
-    void allDone() { myEvents << "allDone()\n"; }
+    void stepFinished() 
+    { 
+        myEvents << "stepFinished(step=" << distSim->getStep() << ")\n"; 
+    }
 
-    std::string events() { return myEvents.str(); }
+    void allDone() 
+    { 
+        myEvents << "allDone()\n"; 
+    }
+
+    std::string events() 
+    {
+        return myEvents.str(); 
+    }
 
 private:
     std::ostringstream myEvents;
 };
 
-};
+}
 
 #endif
 #endif

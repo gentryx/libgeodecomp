@@ -199,6 +199,8 @@ private:
 class AntTracer : public TracingWriter<Cell>
 {
 public:
+    using TracingWriter<Cell>::sim;
+
     AntTracer(
         MonolithicSimulator<Cell> *sim,
         const int& period) :
@@ -209,9 +211,9 @@ public:
     {
         TracingWriter<Cell>::stepFinished();
 
-        if ((this->sim->getStep() % ParallelWriter<Cell>::period) != 0) return;
+        if ((sim->getStep() % ParallelWriter<Cell>::period) != 0) return;
 
-        const Grid<Cell> *grid = this->sim->getGrid();
+        const Grid<Cell> *grid = sim->getGrid();
         int numAnts = 0;
         int numFood = 0;
         

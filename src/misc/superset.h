@@ -19,15 +19,21 @@ public:
     typedef typename std::set<T>::iterator iterator;
     typedef typename std::set<T>::const_iterator const_iterator;
 
+    using std::set<T>::begin;
+    using std::set<T>::end;
+    using std::set<T>::erase;
+    using std::set<T>::insert;
+    using std::set<T>::rbegin;
+
     inline SuperSet() {};
 
     inline std::string toString() const {
         std::ostringstream temp;
         temp << "{";
-        for (const_iterator i = this->begin(); i != this->end();) {
+        for (const_iterator i = begin(); i != end();) {
             temp << *i;
             i++;
-            if (i != this->end())
+            if (i != end())
                 temp << "\n";
         }
         temp << "}";
@@ -36,22 +42,22 @@ public:
 
     inline const T& min() const
     {
-        return *this->begin();
+        return *begin();
     }
 
     inline const T& max() const
     {
-        return *this->rbegin();
+        return *rbegin();
     }
 
     inline void erase_min()
     {
-        this->erase(this->begin());
+        erase(begin());
     }
 
     inline SuperSet& operator<<(const T& elem) 
     {
-        this->insert(elem);
+        insert(elem);
         return *this;
     }
 
@@ -59,7 +65,7 @@ public:
     {        
         SuperSet result;
         std::set_intersection(
-            this->begin(), this->end(), 
+            begin(), end(), 
             other.begin(), other.end(), 
             std::inserter(result, result.begin()));
         return result;
@@ -69,7 +75,7 @@ public:
     {        
         SuperSet result;
         std::set_union(
-            this->begin(), this->end(), 
+            begin(), end(), 
             other.begin(), other.end(), 
             std::inserter(result, result.begin()));
         return result;

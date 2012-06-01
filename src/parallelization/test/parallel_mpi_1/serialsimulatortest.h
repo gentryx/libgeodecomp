@@ -80,8 +80,7 @@ public:
     void testRegisterWriter()
     {
         MockWriter *w = new MockWriter(simulator);
-        SerialSimulator<TestCell<2> >::WriterVector writers = 
-            simulator->getWriters();
+        SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
         TS_ASSERT_EQUALS((unsigned)1, writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
     }

@@ -58,7 +58,16 @@ public:
     class Iterator : public SpaceFillingCurve<2>::Iterator
     {
     public:
-        inline Iterator(const Coord<2>& _origin, const Coord<2>& dimensions, const unsigned& pos=0, const Form& form=ENUM_PREFIX LL_TO_LR) :
+        using SpaceFillingCurve<2>::Iterator::cursor;
+        using SpaceFillingCurve<2>::Iterator::endReached;
+        using SpaceFillingCurve<2>::Iterator::hasTrivialDimensions;
+        using SpaceFillingCurve<2>::Iterator::sublevelState;
+
+        inline Iterator(
+            const Coord<2>& _origin, 
+            const Coord<2>& dimensions, 
+            const unsigned& pos=0, 
+            const Form& form=ENUM_PREFIX LL_TO_LR) :
             SpaceFillingCurve<2>::Iterator(_origin, false)
         {
             squareStack.push_back(Square(origin, dimensions, 0, form));
@@ -71,9 +80,9 @@ public:
 
         inline Iterator& operator++()
         {
-            if (this->endReached)
+            if (endReached)
                 return *this;
-            if (this->sublevelState == TRIVIAL) {
+            if (sublevelState == TRIVIAL) {
                 operatorIncTrivial();
             } else {
                 operatorIncCached();
@@ -93,9 +102,9 @@ public:
         {
             if (--trivialSquareCounter > 0) {
                 if (trivialSquareHorizontal) {
-                    this->cursor.x()++;
+                    cursor.x()++;
                 } else {
-                    this->cursor.y()++;
+                    cursor.y()++;
                 }
             } else {
                 digUpDown();
@@ -106,7 +115,7 @@ public:
         {
             cachedSquareCoordsIterator++;
             if (cachedSquareCoordsIterator != cachedSquareCoordsEnd) {
-                this->cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
+                cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
             } else {
                 digUpDown();
             }
@@ -115,7 +124,7 @@ public:
         inline void digUpDown()
         {
             digUp();
-            if (this->endReached)
+            if (endReached)
                 return;
             digDown(0);
         }
@@ -130,8 +139,8 @@ public:
             const Form& form = currentSquare.form;
 
             if ((int)offset >= dimensions.x() * dimensions.y()) {
-                this->endReached = true;
-                this->cursor = origin;
+                endReached = true;
+                cursor = origin;
                 return;
             }
             if (hasTrivialDimensions(dimensions)) {
@@ -148,16 +157,16 @@ public:
             const Coord<2>& dimensions, 
             const unsigned& offset)
         {
-            this->sublevelState = TRIVIAL;
-            this->cursor = origin;
+            sublevelState = TRIVIAL;
+            cursor = origin;
             if (dimensions.x() > 1) {
                 trivialSquareCounter = dimensions.x() - offset;
                 trivialSquareHorizontal = true;
-                this->cursor.x() += offset;
+                cursor.x() += offset;
             } else {
                 trivialSquareCounter = dimensions.y() - offset;
                 trivialSquareHorizontal = false;
-                this->cursor.y() += offset;
+                cursor.y() += offset;
             }
         }
         
@@ -167,13 +176,13 @@ public:
             const unsigned& offset, 
             const Form& form)
         {
-            this->sublevelState = CACHED;
+            sublevelState = CACHED;
             SuperVector<Coord<2> > &coords = 
                 (*squareCoordsCache)[dimensions.x()][dimensions.y()][form];
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
-            this->cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
+            cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
         }
 
         inline void digDownRecursion(
@@ -276,8 +285,8 @@ public:
                     return;
                 }
             }
-            this->endReached = true;
-            this->cursor = origin;
+            endReached = true;
+            cursor = origin;
         }
 
         inline bool isCached(const Coord<2>& dimensions) const
@@ -315,11 +324,13 @@ public:
     inline Region<2> getRegion(const long& node) const 
     {
         return Region<2>(
-            (*this)[this->startOffsets[node + 0]], 
-            (*this)[this->startOffsets[node + 1]]);
+            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 1]]);
     }
 
 private:
+    using SpaceFillingCurve<2>::startOffsets;
+
     Coord<2> origin;
     Coord<2> dimensions;
 

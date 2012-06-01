@@ -543,8 +543,8 @@ public:
     inline Region<2> getRegion(const long& node) const 
     {
         return Region<2>(
-            (*this)[this->startOffsets[node + 0]], 
-            (*this)[this->startOffsets[node + 1]]);
+            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 1]]);
     }
 
     inline Iterator operator[](const unsigned& pos) const
@@ -553,6 +553,8 @@ public:
     }
 
 private:
+    using SpaceFillingCurve<2>::startOffsets;
+
     Coord<2> origin;
     Coord<2> dimensions;
 

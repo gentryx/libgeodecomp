@@ -229,13 +229,15 @@ public:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
+    using SimpleInitializer<Cell>::gridDimensions;
+
     CellInitializer(Coord<3> dim, int maxSteps) : SimpleInitializer<Cell>(dim, maxSteps)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)
     {
         CoordBox<3> box = ret->boundingBox();
-        Coord<3> size = this->gridDimensions();
+        Coord<3> size = gridDimensions();
 
         for (int z = 0; z < size.z(); ++z) {
             for (int y = 0; y < size.y(); ++y) {

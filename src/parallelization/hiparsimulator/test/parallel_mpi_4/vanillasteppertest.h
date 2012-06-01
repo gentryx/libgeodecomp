@@ -133,8 +133,7 @@ public:
                 if (sender != recver) {
                     if (sender == mpiLayer.rank()) {
                         MyPartitionManager::RegionVecMap m =
-                            stepper->getPartitionManager().
-                            getInnerGhostZoneFragments();
+                            stepper->partitionManager->getInnerGhostZoneFragments();
                         Region<3> region;
                         if (m.count(recver) > 0)
                             region = m[recver][ghostZoneWidth];
@@ -143,8 +142,7 @@ public:
 
                     if (recver == mpiLayer.rank()) {
                         MyPartitionManager::RegionVecMap m =
-                            stepper->getPartitionManager().
-                            getOuterGhostZoneFragments();
+                            stepper->partitionManager->getOuterGhostZoneFragments();
                         Region<3> expected;
                         if (m.count(sender) > 0)
                             expected = m[sender][ghostZoneWidth];

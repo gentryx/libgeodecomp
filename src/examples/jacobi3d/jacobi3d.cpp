@@ -141,6 +141,8 @@ class UpdateFunctor<Cell> : public StreakUpdateFunctor<Cell>
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
+    using SimpleInitializer<Cell>::gridDimensions;
+
     CellInitializer(int num) : SimpleInitializer<Cell>(Coord<3>(64, 64, 64 * num), 100)
     {}
 
@@ -148,8 +150,8 @@ public:
     {
         CoordBox<3> box = ret->boundingBox();
         Coord<3> offset = 
-            Coord<3>::diagonal(this->gridDimensions().x() * 5 / 128);
-        int size = this->gridDimensions().x() * 50 / 128;
+            Coord<3>::diagonal(gridDimensions().x() * 5 / 128);
+        int size = gridDimensions().x() * 50 / 128;
         
 
         for (int z = 0; z < size; ++z) {

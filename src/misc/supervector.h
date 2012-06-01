@@ -16,8 +16,13 @@ template<typename T, typename Allocator = std::allocator<T> >
 class SuperVector : public std::vector<T, Allocator>
 {
 public:
-
+    using std::vector<T, Allocator>::back;
+    using std::vector<T, Allocator>::begin;
     using std::vector<T, Allocator>::insert;
+    using std::vector<T, Allocator>::end;
+    using std::vector<T, Allocator>::erase;
+    using std::vector<T, Allocator>::pop_back;
+    using std::vector<T, Allocator>::push_back;
 
     typedef typename std::vector<T>::iterator iterator;
     typedef typename std::vector<T>::const_iterator const_iterator;
@@ -31,7 +36,7 @@ public:
      */
     inline void del(const T &obj) 
     {
-        this->erase(std::remove(this->begin(), this->end(), obj), this->end());
+        erase(std::remove(begin(), end(), obj), end());
     }
 
     // We have to use the inherited operator by hand, as this requires a cast
@@ -44,10 +49,10 @@ public:
     {
         std::ostringstream temp;
         temp << "[";
-        for (const_iterator i = this->begin(); i != this->end();) {
+        for (const_iterator i = begin(); i != end();) {
             temp << *i;
             i++;
-            if (i != this->end())
+            if (i != end())
                 temp << ", ";
         }
         temp << "]";
@@ -56,13 +61,13 @@ public:
 
     inline SuperVector& operator<<(const T& obj)
     {
-        this->push_back(obj);
+        push_back(obj);
         return *this;
     }
 
     inline void append(const SuperVector& other)
     {
-        this->insert(this->end(), other.begin(), other.end());
+        insert(end(), other.begin(), other.end());
     }
 
     inline SuperVector operator+(const SuperVector& other) const
@@ -74,20 +79,20 @@ public:
 
     inline void push_front(const T& obj) 
     {
-        insert(this->begin(), obj);
+        insert(begin(), obj);
     }
 
     inline T pop()
     {
-        T ret = this->back();
-        this->pop_back();
+        T ret = back();
+        pop_back();
         return ret;
     }
 
     inline T sum() const 
     {
         T res = 0;
-        for (const_iterator i = this->begin(); i != this->end(); i++) 
+        for (const_iterator i = begin(); i != end(); i++) 
             res += *i;
         return res;
 
@@ -95,22 +100,22 @@ public:
 
     inline bool contains(const T& element) const
     {
-        return std::find(this->begin(), this->end(), element) != this->end();
+        return std::find(begin(), end(), element) != end();
     }
 
     inline void sort()
     {
-        std::sort(this->begin(), this->end());
+        std::sort(begin(), end());
     }
 
     T& max()
     {
-        return *(std::max_element(this->begin(), this->end()));
+        return *(std::max_element(begin(), end()));
     }
 
     const T& max() const
     {
-        return *(std::max_element(this->begin(), this->end()));
+        return *(std::max_element(begin(), end()));
     }
 };
 

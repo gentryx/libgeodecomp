@@ -15,6 +15,10 @@ public:
     typedef typename SerialSimulator<CELL_TYPE>::GridType GridType;
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
+    using SerialSimulator<CELL_TYPE>::curGrid;
+    using SerialSimulator<CELL_TYPE>::getInitializer;
+    using SerialSimulator<CELL_TYPE>::writers;
+
     InteractiveSimulatorCPU(QObject *parent, Initializer<CELL_TYPE> *initializer) :
         SerialSimulator<CELL_TYPE>(initializer),
         InteractiveSimulator(parent)
@@ -25,7 +29,7 @@ public:
 
     virtual void readCam()
     {
-        Coord<2> dim = this->getInitializer()->gridDimensions();
+        Coord<2> dim = getInitializer()->gridDimensions();
         float factorX = 1.0 * cameraFrameWidth  / dim.x();
         float factorY = 1.0 * cameraFrameHeight / dim.y();
 
@@ -34,15 +38,16 @@ public:
                 Coord<2> c(x, y);
                 int index = (int)(y * factorY) * cameraFrameWidth + x * factorX;
                 unsigned char *pixel = &cameraFrame[3 * index];
-                (*this->curGrid)[c].readCam(pixel[0], pixel[1], pixel[2]);
+                (*curGrid)[c].readCam(pixel[0], pixel[1], pixel[2]);
             }
         }
     }
 
     virtual void renderOutput()
     {
-        for(unsigned i = 0; i < this->writers.size(); i++) 
-            this->writers[i]->stepFinished();
+        for(unsigned i = 0; i < writers.size(); ++i) {
+            writers[i]->stepFinished();
+        }
     }
 
     virtual void update()

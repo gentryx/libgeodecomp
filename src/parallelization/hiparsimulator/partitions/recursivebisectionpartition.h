@@ -31,9 +31,9 @@ public:
     inline Region<DIM> getRegion(const long& i) const
     {
         CoordBox<DIM> cuboid = searchNodeCuboid(
-            this->startOffsets.begin(), 
-            this->startOffsets.end() - 1,
-            this->startOffsets.begin() + i,
+            startOffsets.begin(), 
+            startOffsets.end() - 1,
+            startOffsets.begin() + i,
             CoordBox<DIM>(origin, dimensions));
 
         Region<DIM> r;
@@ -42,6 +42,8 @@ public:
     }
 
 private:
+    using Partition<DIM>::startOffsets;
+
     Coord<DIM> origin;
     Coord<DIM> dimensions;
     FloatCoord<DIM> dimWeights;

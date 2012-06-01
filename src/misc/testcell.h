@@ -87,12 +87,12 @@ public:
 
     bool operator==(const TestCell& other) const
     {
-        return (this->pos == other.pos)
-            && (this->dimensions == other.dimensions)
-            && (this->cycleCounter == other.cycleCounter)
-            && (this->isEdgeCell == other.isEdgeCell)
-            && (this->isValid == other.isValid)            
-            && (this->testValue == other.testValue);            
+        return (pos == other.pos)
+            && (dimensions == other.dimensions)
+            && (cycleCounter == other.cycleCounter)
+            && (isEdgeCell == other.isEdgeCell)
+            && (isValid == other.isValid)            
+            && (testValue == other.testValue);            
     }
 
     bool operator!=(const TestCell& other) const
@@ -159,7 +159,7 @@ public:
     {
         if (!other.isValid) {
             (*TestCellBase::stream) 
-                << "Update Error for " << this->toString() << ":\n"
+                << "Update Error for " << toString() << ":\n"
                 << "Invalid Neighbor at " << relativeLoc << ":\n" 
                 << other.toString() << "\n"
                 << "--------------" << "\n";
@@ -178,7 +178,7 @@ public:
             if (other.cycleCounter != cycleCounter) {
                 (*TestCellBase::stream) 
                     << "Update Error for TestCell " 
-                    << this->toString() << ":\n"
+                    << toString() << ":\n"
                     << "cycle counter out of sync with neighbor " 
                     << other.toString() << "\n";
                 return false;

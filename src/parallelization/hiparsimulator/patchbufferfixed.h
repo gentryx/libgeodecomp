@@ -23,6 +23,11 @@ public:
     typedef typename GRID_TYPE1::CellType CellType;
     const static int DIM = GRID_TYPE1::DIM;
 
+    using PatchAccepter<GRID_TYPE1>::checkNanoStepPut;
+    using PatchAccepter<GRID_TYPE1>::requestedNanoSteps;
+    using PatchProvider<GRID_TYPE2>::checkNanoStepGet;
+    using PatchProvider<GRID_TYPE2>::storedNanoSteps;
+
     PatchBufferFixed(const Region<DIM>& _region=Region<DIM>()) :
         region(_region),
         indexRead(0),
@@ -38,14 +43,16 @@ public:
         // It would be nice to check if validRegion was actually a
         // superset of the region we'll save, but that would be
         // prohibitively slow.
-        if (!this->checkNanoStepPut(nanoStep))
+        if (!checkNanoStepPut(nanoStep)) {
             return;
-        if (this->storedNanoSteps.size() >= SIZE)
+        }
+        if (storedNanoSteps.size() >= SIZE) {
             throw std::logic_error("PatchBufferFixed capacity exceeded.");
+        }
 
         GridVecConv::gridToVector(grid, &buffer[indexWrite], region);
-        this->storedNanoSteps << this->requestedNanoSteps.min();
-        this->requestedNanoSteps.erase_min();
+        storedNanoSteps << requestedNanoSteps.min();
+        requestedNanoSteps.erase_min();
         inc(&indexWrite);
     }
 
@@ -55,13 +62,13 @@ public:
         const long& nanoStep,
         const bool& remove=true) 
     {
-        this->checkNanoStepGet(nanoStep);
+        checkNanoStepGet(nanoStep);
 
         GridVecConv::vectorToGrid(
             buffer[indexRead], destinationGrid, region);
 
         if (remove) {
-            this->storedNanoSteps.erase_min();
+            storedNanoSteps.erase_min();
             inc(&indexRead);
         }
     }

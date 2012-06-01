@@ -44,11 +44,6 @@ public:
         writers.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
     }
 
-    virtual const WriterVector& getWriters() const
-    {
-        return writers;
-    }
-
 protected:
     WriterVector writers;
 

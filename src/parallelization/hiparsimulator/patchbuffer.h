@@ -19,6 +19,11 @@ public:
     typedef typename GRID_TYPE1::CellType CellType;
     const static int DIM = GRID_TYPE1::DIM;
 
+    using PatchAccepter<GRID_TYPE1>::checkNanoStepPut;
+    using PatchAccepter<GRID_TYPE1>::requestedNanoSteps;
+    using PatchProvider<GRID_TYPE2>::checkNanoStepGet;
+    using PatchProvider<GRID_TYPE2>::storedNanoSteps;
+
     PatchBuffer(const Region<DIM>& _region=Region<DIM>()) :
         region(_region)
     {}
@@ -31,13 +36,14 @@ public:
         // It would be nice to check if validRegion was actually a
         // superset of the region we'll save, but that would be
         // prohibitively slow.
-        if (!this->checkNanoStepPut(nanoStep))
+        if (!checkNanoStepPut(nanoStep)) {
             return;
+        }
 
         storedRegions.push_back(
             GridVecConv::gridToVector(grid, region));
-        this->storedNanoSteps << this->requestedNanoSteps.min();
-        this->requestedNanoSteps.erase_min();
+        storedNanoSteps << requestedNanoSteps.min();
+        requestedNanoSteps.erase_min();
     }
 
     virtual void get(
@@ -46,16 +52,17 @@ public:
         const long& nanoStep,
         const bool& remove=true) 
     {
-        this->checkNanoStepGet(nanoStep);
-        if (storedRegions.empty())
+        checkNanoStepGet(nanoStep);
+        if (storedRegions.empty()) {
             throw std::logic_error("no region available");
+        }
 
         GridVecConv::vectorToGrid(
             storedRegions.front(), destinationGrid, region);
 
         if (remove) {
             storedRegions.pop_front();
-            this->storedNanoSteps.erase_min();
+            storedNanoSteps.erase_min();
         }
 
     }

@@ -16,9 +16,13 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename CELL_PLOTTER>
 class PPMWriter : public Writer<CELL_TYPE>
 {    
+ public:
     friend class PPMWriterTest;
 
- public:
+    using Writer<CELL_TYPE>::sim;
+    using Writer<CELL_TYPE>::period;
+    using Writer<CELL_TYPE>::prefix;
+
     PPMWriter(
         const std::string& prefix, 
         MonolithicSimulator<CELL_TYPE> *sim, 
@@ -36,7 +40,7 @@ class PPMWriter : public Writer<CELL_TYPE>
 
     virtual void stepFinished()
     {
-        if (this->sim->getStep() % this->period == 0)
+        if (sim->getStep() % period == 0)
             writeStep();
     }
 
@@ -51,14 +55,14 @@ class PPMWriter : public Writer<CELL_TYPE>
     {
         writePPM(
             _gridPlotter.plotGrid(
-                *this->sim->getGrid()));
+                *sim->getGrid()));
     }
 
     void writePPM(Image img)
     {
         std::ostringstream filename;
-        filename << this->prefix << "." << std::setfill('0') << std::setw(4)
-                 << this->sim->getStep() << ".ppm";
+        filename << prefix << "." << std::setfill('0') << std::setw(4)
+                 << sim->getStep() << ".ppm";
         std::ofstream outfile(filename.str().c_str());
         if (!outfile) 
             throw FileOpenException("Cannot open output file", 

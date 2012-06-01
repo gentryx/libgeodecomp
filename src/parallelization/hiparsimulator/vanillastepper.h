@@ -25,6 +25,13 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
+    using Stepper<CELL_TYPE>::addPatchAccepter;
+    using Stepper<CELL_TYPE>::initializer;
+    using Stepper<CELL_TYPE>::guessOffset;
+    using Stepper<CELL_TYPE>::patchAccepters;
+    using Stepper<CELL_TYPE>::patchProviders;
+    using Stepper<CELL_TYPE>::partitionManager;
+
     inline VanillaStepper(
         boost::shared_ptr<MyPartitionManager> _partitionManager,
         Initializer<CELL_TYPE> *_initializer,
@@ -32,7 +39,7 @@ public:
         const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
         ParentType(_partitionManager, _initializer)
     {
-        curStep = getInitializer().startStep();
+        curStep = initializer->startStep();
         curNanoStep = 0;
 
         for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
@@ -74,7 +81,7 @@ private:
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        const Region<DIM>& region = getPartitionManager().innerSet(index);
+        const Region<DIM>& region = partitionManager->innerSet(index);
         // fixme: honor streak updaters here, akin to StripingSimulator
         for (typename Region<DIM>::Iterator i = region.begin(); 
              i != region.end(); 
@@ -93,7 +100,7 @@ private:
         
         if (validGhostZoneWidth == 0) {
             notifyPatchProviders(
-                getPartitionManager().rim(0), ParentType::GHOST, globalNanoStep());
+                partitionManager->rim(0), ParentType::GHOST, globalNanoStep());
             updateGhost();
             resetValidGhostZoneWidth();
         }
@@ -105,8 +112,8 @@ private:
         const long& nanoStep)
     {
         for (class ParentType::PatchAccepterList::iterator i = 
-                 this->patchAccepters[patchType].begin();
-             i != this->patchAccepters[patchType].end();
+                 patchAccepters[patchType].begin();
+             i != patchAccepters[patchType].end();
              ++i) {
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
@@ -120,8 +127,8 @@ private:
         const long& nanoStep)
     {
         for (typename ParentType::PatchProviderList::iterator i = 
-                 this->patchProviders[patchType].begin();
-             i != this->patchProviders[patchType].end();
+                 patchProviders[patchType].begin();
+             i != patchProviders[patchType].end();
              ++i) {
             (*i)->get(
                 &*oldGrid,
@@ -137,13 +144,13 @@ private:
 
     inline void initGrids()
     {
-        Coord<DIM> topoDim = getInitializer().gridDimensions();
+        Coord<DIM> topoDim = initializer->gridDimensions();
         CoordBox<DIM> gridBox;
-        this->guessOffset(&gridBox.origin, &gridBox.dimensions);
+        guessOffset(&gridBox.origin, &gridBox.dimensions);
 
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
-        getInitializer().grid(&*oldGrid);
+        initializer->grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
 
@@ -152,11 +159,11 @@ private:
             ParentType::GHOST,     
             globalNanoStep());
         notifyPatchAccepters(
-            getPartitionManager().innerSet(0), 
+            partitionManager->innerSet(0), 
             ParentType::INNER_SET, 
             globalNanoStep());
 
-        kernelBuffer = MyPatchBuffer1(getPartitionManager().getVolatileKernel());
+        kernelBuffer = MyPatchBuffer1(partitionManager->getVolatileKernel());
         rimBuffer = MyPatchBuffer2(rim());
         saveRim(globalNanoStep());
         updateGhost();
@@ -190,7 +197,7 @@ private:
         int curGlobalNanoStep = globalNanoStep();
 
         for (int t = 0; t < ghostZoneWidth(); ++t) {
-            const Region<DIM>& region = getPartitionManager().rim(t + 1);
+            const Region<DIM>& region = partitionManager->rim(t + 1);
             for (typename Region<DIM>::Iterator i = region.begin(); 
                  i != region.end(); 
                  ++i) {
@@ -222,37 +229,17 @@ private:
 
     inline const unsigned& ghostZoneWidth() const
     {
-        return getPartitionManager().getGhostZoneWidth();
+        return partitionManager->getGhostZoneWidth();
     }
     
     inline const Region<DIM>& rim() const
     {
-        return getPartitionManager().rim(ghostZoneWidth());
+        return partitionManager->rim(ghostZoneWidth());
     }
 
     inline void resetValidGhostZoneWidth()
     {
         validGhostZoneWidth = ghostZoneWidth();
-    }
-
-    inline MyPartitionManager& getPartitionManager() 
-    {
-        return *this->partitionManager;
-    }
-
-    inline const MyPartitionManager& getPartitionManager() const
-    {
-        return *this->partitionManager;
-    }
-
-    inline Initializer<CELL_TYPE>& getInitializer() 
-    {
-        return *this->initializer;
-    }
-
-    inline const Initializer<CELL_TYPE>& getInitializer() const
-    {
-        return *this->initializer;
     }
 
     inline void saveRim(const long& nanoStep)
@@ -270,7 +257,7 @@ private:
     {
         kernelBuffer.pushRequest(globalNanoStep());
         kernelBuffer.put(*oldGrid, 
-                         getPartitionManager().innerSet(ghostZoneWidth()),
+                         partitionManager->innerSet(ghostZoneWidth()),
                          globalNanoStep());
     }
 
@@ -278,7 +265,7 @@ private:
     {
         kernelBuffer.get(
             &*oldGrid, 
-            getPartitionManager().getVolatileKernel(), 
+            partitionManager->getVolatileKernel(), 
             globalNanoStep(), 
             true);
     }

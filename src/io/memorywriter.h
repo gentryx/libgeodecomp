@@ -19,6 +19,9 @@ class MemoryWriter : public Writer<CELL_TYPE>
 public:
     typedef typename Simulator<CELL_TYPE>::GridType GridType;
 
+    using Writer<CELL_TYPE>::period;
+    using Writer<CELL_TYPE>::sim;
+
     MemoryWriter(MonolithicSimulator<CELL_TYPE>* sim, int period = 1) : 
         Writer<CELL_TYPE>("foobar", sim, period) 
     {}
@@ -30,7 +33,7 @@ public:
 
     void stepFinished()
     {
-        if ((this->sim->getStep() % this->period) == 0) 
+        if ((sim->getStep() % period) == 0) 
             saveGrid();
     }
     
@@ -55,7 +58,7 @@ private:
 
     void saveGrid()
     {
-        grids.push_back(*(this->sim->getGrid()));
+        grids.push_back(*(sim->getGrid()));
     }
 };
 

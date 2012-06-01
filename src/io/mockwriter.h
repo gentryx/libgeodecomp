@@ -14,8 +14,10 @@ namespace LibGeoDecomp {
 class MockWriter : public Writer<TestCell<2> >, public ParallelWriter<TestCell<2> >
 {
 public:
-
     static std::string staticEvents;
+
+    using Writer<TestCell<2> >::sim;
+    using ParallelWriter<TestCell<2> >::distSim;
 
     MockWriter(MonolithicSimulator<TestCell<2> > *sim) : 
         Writer<TestCell<2> >("foobar", sim, 1),
@@ -40,10 +42,10 @@ public:
     void stepFinished() 
     { 
         unsigned step;
-        if (this->sim != 0) {
-            step = this->sim->getStep();
+        if (sim != 0) {
+            step = sim->getStep();
         } else {
-            step = this->distSim->getStep();
+            step = distSim->getStep();
         }
 
         myEvents << "stepFinished(step=" << step << ")\n"; 
@@ -63,7 +65,7 @@ private:
     std::ostringstream myEvents;
 };
 
-};
+}
 
 #endif
 #endif

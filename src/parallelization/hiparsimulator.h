@@ -99,7 +99,7 @@ public:
         if (updateGroup) {
             return updateGroup->currentStep().first;
         } else {
-            return this->initializer->startStep();
+            return initializer->startStep();
         }
     }
 
@@ -113,21 +113,24 @@ public:
         typename UpdateGroupType::PatchAccepterPtr adapterGhost(
             new ParallelWriterAdapterType(
                 this,
-                this->getWriters().back(),
-                this->initializer->startStep(),
-                this->initializer->maxSteps()));
+                writers.back(),
+                initializer->startStep(),
+                initializer->maxSteps()));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
                 this, 
-                this->getWriters().back(),
-                this->initializer->startStep(),
-                this->initializer->maxSteps()));
+                writers.back(),
+                initializer->startStep(),
+                initializer->maxSteps()));
 
         writerAdaptersGhost.push_back(adapterGhost);
         writerAdaptersInner.push_back(adapterInnerSet);
     }
 
 private:
+    using DistributedSimulator<CELL_TYPE>::initializer;
+    using DistributedSimulator<CELL_TYPE>::writers;
+
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
@@ -182,7 +185,7 @@ private:
             return; 
         }
 
-        CoordBox<DIM> box = this->initializer->gridBox();
+        CoordBox<DIM> box = initializer->gridBox();
 
         updateGroup.reset(
             new UpdateGroupType(
@@ -193,7 +196,7 @@ private:
                     initialWeights(box.dimensions.prod(), communicator->Get_size())), 
                 box,
                 ghostZoneWidth,
-                this->initializer,
+                initializer,
                 writerAdaptersGhost,
                 writerAdaptersInner,
                 cellMPIDatatype,
@@ -208,7 +211,7 @@ private:
     inline void initEvents()
     {
         events.clear();
-        long lastNanoStep = this->initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
         events[lastNanoStep] << END;
         
         insertNextLoadBalancingEvent();

@@ -49,7 +49,7 @@ public:
 
         virtual ~Link()
         {
-            this->wait();
+            wait();
         }
 
         virtual void charge(const long& next, const long& last, const long& newStride) 
@@ -82,6 +82,17 @@ public:
         public PatchAccepter<GRID_TYPE>
     {
     public:
+        using Link::buffer;
+        using Link::lastNanoStep;
+        using Link::mpiLayer;
+        using Link::region;
+        using Link::stride;
+        using Link::tag;
+        using Link::wait;
+        using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
+        using PatchAccepter<GRID_TYPE>::pushRequest;
+        using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
+
         inline Accepter(
             const Region<DIM>& _region,
             const int& _dest,
@@ -97,7 +108,7 @@ public:
         virtual void charge(const long& next, const long& last, const long& newStride) 
         {
             Link::charge(next, last, newStride);
-            this->pushRequest(next);
+            pushRequest(next);
         }
 
         virtual void put(
@@ -105,19 +116,20 @@ public:
             const Region<DIM>& /*validRegion*/, 
             const long& nanoStep) 
         {
-            if (!this->checkNanoStepPut(nanoStep))
+            if (!checkNanoStepPut(nanoStep))
                 return;
 
-            this->wait();
-            GridVecConv::gridToVector(grid, &this->buffer, this->region);
-            this->mpiLayer.send(
-                &this->buffer[0], dest, this->buffer.size(), this->tag, cellMPIDatatype);
+            wait();
+            GridVecConv::gridToVector(grid, &buffer, region);
+            mpiLayer.send(
+                &buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
-            long nextNanoStep = this->requestedNanoSteps.min() + this->stride;
-            if ((this->lastNanoStep == ENDLESS) || 
-                (nextNanoStep < this->lastNanoStep))
-                this->requestedNanoSteps << nextNanoStep;
-            this->requestedNanoSteps.erase_min();
+            long nextNanoStep = requestedNanoSteps.min() + stride;
+            if ((lastNanoStep == ENDLESS) || 
+                (nextNanoStep < lastNanoStep)) {
+                requestedNanoSteps << nextNanoStep;
+            }
+            requestedNanoSteps.erase_min();
         }
 
     private:
@@ -130,6 +142,16 @@ public:
         public PatchProvider<GRID_TYPE>
     {
     public:
+        using Link::buffer;
+        using Link::lastNanoStep;
+        using Link::mpiLayer;
+        using Link::region;
+        using Link::stride;
+        using Link::tag;
+        using Link::wait;
+        using PatchProvider<GRID_TYPE>::checkNanoStepGet;
+        using PatchProvider<GRID_TYPE>::storedNanoSteps;
+
         inline Provider(
             const Region<DIM>& _region,
             const int& _source,
@@ -153,22 +175,22 @@ public:
             const long& nanoStep,
             const bool& remove=true) 
         {
-            this->checkNanoStepGet(nanoStep);
-            this->wait();
-            GridVecConv::vectorToGrid(this->buffer, grid, this->region);
+            checkNanoStepGet(nanoStep);
+            wait();
+            GridVecConv::vectorToGrid(buffer, grid, region);
 
-            long nextNanoStep = this->storedNanoSteps.min() + this->stride;
-            if ((this->lastNanoStep == ENDLESS) || 
-                (nextNanoStep < this->lastNanoStep)) {
+            long nextNanoStep = storedNanoSteps.min() + stride;
+            if ((lastNanoStep == ENDLESS) || 
+                (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
             }
-            this->storedNanoSteps.erase_min();
+            storedNanoSteps.erase_min();
         }
 
         void recv(const long& nanoStep)
         {
-            this->storedNanoSteps << nanoStep;
-            this->mpiLayer.recv(&this->buffer[0], source, this->buffer.size(), this->tag, cellMPIDatatype);
+            storedNanoSteps << nanoStep;
+            mpiLayer.recv(&buffer[0], source, buffer.size(), tag, cellMPIDatatype);
         }
 
     private:

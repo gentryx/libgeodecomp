@@ -23,12 +23,15 @@ public:
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
     typedef SuperMap<unsigned, GridType> GridMap;
 
+    using ParallelWriter<CELL_TYPE>::distSim;
+    using ParallelWriter<CELL_TYPE>::period;
+
     ParallelMemoryWriter(
         DistributedSimulator<CELL_TYPE>* sim, 
         int period = 1,
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
         ParallelWriter<CELL_TYPE>("foobar", sim, period),
-        boundingBox(this->distSim->getInitializer()->gridBox()),
+        boundingBox(distSim->getInitializer()->gridBox()),
         mpiLayer(communicator, MPILayer::PARALLEL_MEMORY_WRITER)
     {}
     
@@ -39,7 +42,7 @@ public:
 
     void stepFinished()
     {
-        if ((this->distSim->getStep() % this->period) == 0) 
+        if ((distSim->getStep() % period) == 0) 
             saveGrid();
     }
     
@@ -65,7 +68,7 @@ private:
 
     void saveGrid()
     {
-        unsigned step = this->distSim->getStep();
+        unsigned step = distSim->getStep();
 
         if (grids[step].boundingBox() != boundingBox) {
             grids[step].resize(boundingBox);
@@ -73,7 +76,7 @@ private:
 
         const SimulatorGridType *grid;
         const Region<DIM> *region;
-        this->distSim->getGridFragment(&grid, &region);
+        distSim->getGridFragment(&grid, &region);
 
         grids[step].pasteGridBase(*grid, *region);
         grids[step].atEdge() = grid->atEdge();

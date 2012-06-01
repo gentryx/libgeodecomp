@@ -139,6 +139,9 @@ public:
         GHOSTREGION_BETA
     };
 
+    using DistributedSimulator<CELL_TYPE>::initializer;
+    using DistributedSimulator<CELL_TYPE>::writers;
+    using DistributedSimulator<CELL_TYPE>::stepNum;
 
     StripingSimulator(
         Initializer<CELL_TYPE> *_initializer, 
@@ -193,7 +196,7 @@ public:
         balanceLoad();
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++)
             nanoStep(i);
-        this->stepNum++;    
+        stepNum++;    
         handleOutput();
     }
 
@@ -204,15 +207,18 @@ public:
     {
         initSimulation();
 
-        this->stepNum = this->initializer->startStep();
-        for (unsigned i = 0; i < this->writers.size(); i++) 
-            this->writers[i]->initialized();
+        stepNum = initializer->startStep();
+        for (unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->initialized();
+        }
 
-        while (this->stepNum < this->initializer->maxSteps()) 
+        while (stepNum < initializer->maxSteps()) {
             step();
+        }
     
-        for (unsigned i = 0; i < this->writers.size(); i++) 
-            this->writers[i]->allDone();        
+        for (unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->allDone();        
+        }
     }
 
     virtual void getGridFragment(
@@ -285,7 +291,7 @@ private:
      */
     void balanceLoad()
     {
-        if (this->stepNum % loadBalancingPeriod != 0) {
+        if (stepNum % loadBalancingPeriod != 0) {
             return;
         }
 
@@ -335,8 +341,9 @@ private:
 
     void handleOutput()
     {
-        for(unsigned i = 0; i < this->writers.size(); i++) 
-            this->writers[i]->stepFinished();
+        for(unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->stepFinished();
+        }
     }
 
     /**
@@ -456,9 +463,9 @@ private:
         CoordBox<DIM> box = curStripe->boundingBox();
         curStripe->resize(box);
         newStripe->resize(box);
-        this->initializer->grid(curStripe);
+        initializer->grid(curStripe);
         newStripe->getEdgeCell() = curStripe->getEdgeCell();
-        this->stepNum = 0;
+        stepNum = 0;
     }
 
     /**
@@ -639,7 +646,7 @@ private:
 
     inline Coord<DIM> gridDimensions() const
     {
-        return this->initializer->gridDimensions();
+        return initializer->gridDimensions();
     }
 };
 

@@ -36,7 +36,7 @@ public:
 
     virtual void stepFinished()
     {
-        if ((this->sim->getStep() % this->period) == 0) 
+        if ((sim->getStep() % period) == 0) 
             writeGrid();
     }
 
@@ -46,32 +46,36 @@ public:
     }
 
 private:
+    using Writer<CELL_TYPE>::sim;
+    using Writer<CELL_TYPE>::period;
+    using Writer<CELL_TYPE>::prefix;
+
     MPI::Intracomm comm;
     MPI::Datatype datatype;
 
     std::string filename(const unsigned& step) const 
     {
         std::ostringstream buf;
-        buf << this->prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";
+        buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";
         return buf.str();
     }
 
     void writeGrid()
     {
         Region<DIM> region;
-        CoordBox<DIM> boundingBox = this->sim->getInitializer()->gridBox();
+        CoordBox<DIM> boundingBox = sim->getInitializer()->gridBox();
         region << boundingBox;
-        unsigned step = this->sim->getStep();
+        unsigned step = sim->getStep();
         
         MPIIO<CELL_TYPE>::writeRegion(
-            *this->sim->getGrid(), 
+            *sim->getGrid(), 
             boundingBox.dimensions,
             step,
-            this->sim->getInitializer()->maxSteps(),
-            this->filename(step),
+            sim->getInitializer()->maxSteps(),
+            filename(step),
             region,
-            this->datatype,
-            this->comm);
+            datatype,
+            comm);
     }
 };
 

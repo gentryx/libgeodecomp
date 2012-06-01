@@ -970,21 +970,24 @@ public:
 
     virtual void initialized() 
     {
-        output(*this->sim->getGrid(), this->sim->getStep());
+        output(*sim->getGrid(), sim->getStep());
     }
 
     virtual void stepFinished() 
     {
-        if (this->sim->getStep() % period == 0)
-            output(*this->sim->getGrid(), this->sim->getStep());
+        if (sim->getStep() % period == 0) {
+            output(*sim->getGrid(), sim->getStep());
+        }
     }
 
     virtual void allDone() 
     {
-        output(*this->sim->getGrid(), this->sim->getStep());
+        output(*sim->getGrid(), sim->getStep());
     }
 
 private:
+    using Writer<ContainerCell>::sim;
+    using Writer<ContainerCell>::prefix;
 
     int countCells(const Grid<ContainerCell>& grid)
     {
@@ -1119,7 +1122,7 @@ private:
     void output(const Grid<ContainerCell>& grid, const int& time)
     {
         std::ostringstream filename;
-        filename << this->prefix << "." << std::setfill('0') << std::setw(5)
+        filename << prefix << "." << std::setfill('0') << std::setw(5)
                  << time << ".silo";
 
         DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,

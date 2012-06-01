@@ -21,6 +21,10 @@ class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 public:
     typedef HiParSimulator<CELL_TYPE, PARTITION> HiParSimulatorType;
 
+    using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
+    using PatchAccepter<GRID_TYPE>::pushRequest;
+    using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
+
     ParallelWriterAdapter(
         HiParSimulatorType *_sim,
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
@@ -40,9 +44,10 @@ public:
         const Region<GRID_TYPE::DIM>& validRegion, 
         const long& nanoStep) 
     {
-        if (!this->checkNanoStepPut(nanoStep))
+        if (!checkNanoStepPut(nanoStep)) {
             return;
-        this->requestedNanoSteps.erase_min();
+        }
+        requestedNanoSteps.erase_min();
 
         sim->setGridFragment(&grid, &validRegion);
 
@@ -84,7 +89,7 @@ private:
 
     void reload(const long& nextNanoStep)
     {
-        this->pushRequest(nextNanoStep);
+        pushRequest(nextNanoStep);
     }
  
 };

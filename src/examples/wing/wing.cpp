@@ -319,6 +319,8 @@ public:
 class AeroInitializer : public LibGeoDecomp::SimpleInitializer<Cell>
 {
 public:
+    using LibGeoDecomp::SimpleInitializer<Cell>::dimensions;
+
     AeroInitializer(
         const Coord<2>& _dim,
         const unsigned& _steps) :
@@ -351,9 +353,9 @@ public:
         Cell driverCell(CONST, 1, DRIVER_VELOCITY_X, DRIVER_VELOCITY_Y);
         Cell slipCell(SLIP, 1);
 
-        for (int y = 0; y < this->dimensions.y(); ++y) {
+        for (int y = 0; y < dimensions.y(); ++y) {
             Coord<2> c1(0, y);
-            Coord<2> c2(this->dimensions.x() - 1, y);
+            Coord<2> c2(dimensions.x() - 1, y);
             if (box.inBounds(c1))
                 grid->at(c1) = slipCell;
             if (box.inBounds(c2))
@@ -361,14 +363,14 @@ public:
         }
 
 
-        for (int x = 0; x < this->dimensions.x(); ++x) {
+        for (int x = 0; x < dimensions.x(); ++x) {
             Coord<2> c(x, 0);
             if (box.inBounds(c))
                 grid->at(c) = slipCell;
         }
 
-        for (int x = 1; x < this->dimensions.x() - 1; ++x) {
-            Coord<2> c(x, this->dimensions.y() - 1);
+        for (int x = 1; x < dimensions.x() - 1; ++x) {
+            Coord<2> c(x, dimensions.y() - 1);
             if (box.inBounds(c))
                 grid->at(c) = driverCell;
         }
@@ -379,9 +381,9 @@ public:
         CoordBox<2> box = grid->boundingBox();
 
         Cell driverCell(CONST, 1, DRIVER_VELOCITY_X, DRIVER_VELOCITY_Y);
-        for (int y = 1; y < this->dimensions.y() - 1; ++y) {
+        for (int y = 1; y < dimensions.y() - 1; ++y) {
             Coord<2> c1(0, y);
-            Coord<2> c2(this->dimensions.x() - 1, y);
+            Coord<2> c2(dimensions.x() - 1, y);
 
             if (box.inBounds(c1))
                 grid->at(c1) = driverCell;
@@ -463,11 +465,7 @@ public:
             }
         }
     }
-        
 };
-
-
-
 
 int main(int argc, char *argv[])
 {

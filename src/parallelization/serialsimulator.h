@@ -26,11 +26,11 @@ public:
     SerialSimulator(Initializer<CELL_TYPE> *_initializer) : 
         MonolithicSimulator<CELL_TYPE>(_initializer)
     {
-        Coord<DIMENSIONS> dim = this->initializer->gridBox().dimensions;
+        Coord<DIMENSIONS> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
         newGrid = new GridType(dim);
-        this->initializer->grid(curGrid);
-        this->initializer->grid(newGrid);
+        initializer->grid(curGrid);
+        initializer->grid(newGrid);
     }
 
     ~SerialSimulator()
@@ -48,11 +48,11 @@ public:
             nanoStep(i);
         }
 
-        this->stepNum++;    
+        stepNum++;    
 
         // call back all registered Writers
-        for(unsigned i = 0; i < this->writers.size(); i++) {
-            this->writers[i]->stepFinished();
+        for(unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->stepFinished();
         }
     }
 
@@ -61,19 +61,19 @@ public:
      */
     virtual void run()
     {
-        this->initializer->grid(curGrid);
-        this->stepNum = 0;
-        for(unsigned i = 0; i < this->writers.size(); i++) {
-            this->writers[i]->initialized();
+        initializer->grid(curGrid);
+        stepNum = 0;
+        for(unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->initialized();
         }
 
-        for (this->stepNum = this->initializer->startStep(); 
-             this->stepNum < this->initializer->maxSteps();) {
+        for (stepNum = initializer->startStep(); 
+             stepNum < initializer->maxSteps();) {
             step();
         }
 
-        for(unsigned i = 0; i < this->writers.size(); i++) {
-            this->writers[i]->allDone();        
+        for(unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->allDone();        
         }
     }
 
@@ -86,6 +86,10 @@ public:
     }
 
 protected:
+    using MonolithicSimulator<CELL_TYPE>::initializer;
+    using MonolithicSimulator<CELL_TYPE>::stepNum;
+    using MonolithicSimulator<CELL_TYPE>::writers;
+
     GridType *curGrid;
     GridType *newGrid;
 

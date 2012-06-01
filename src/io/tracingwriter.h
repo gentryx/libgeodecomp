@@ -16,6 +16,9 @@ public:
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
 
+    using Writer<CELL_TYPE>::sim;
+    using ParallelWriter<CELL_TYPE>::distSim;
+
     TracingWriter(MonolithicSimulator<CELL_TYPE> *sim, 
                   const unsigned& period = 1, 
                   std::ostream& _stream = std::cout) :
@@ -43,12 +46,12 @@ public:
     {
         int step;
         unsigned maxSteps;
-        if (this->sim) {
-            step     = this->sim->getStep();
-            maxSteps = this->sim->getInitializer()->maxSteps();
+        if (sim) {
+            step     = sim->getStep();
+            maxSteps = sim->getInitializer()->maxSteps();
         } else {
-            step     = this->distSim->getStep();
-            maxSteps = this->distSim->getInitializer()->maxSteps();
+            step     = distSim->getStep();
+            maxSteps = distSim->getInitializer()->maxSteps();
         }
 
         if (step % Writer<CELL_TYPE>::period != 0) return;
@@ -59,14 +62,14 @@ public:
         Time eta = now + remaining;
         Coord<CELL_TYPE::Topology::DIMENSIONS> coordBox;
         
-        if (this->sim) {
-            step     = this->sim->getStep();
-            maxSteps = this->sim->getInitializer()->maxSteps();
-            coordBox = this->sim->getInitializer()->gridDimensions();
+        if (sim) {
+            step     = sim->getStep();
+            maxSteps = sim->getInitializer()->maxSteps();
+            coordBox = sim->getInitializer()->gridDimensions();
         } else {
-            step     = this->distSim->getStep();
-            maxSteps = this->distSim->getInitializer()->maxSteps();
-            coordBox = this->distSim->getInitializer()->gridDimensions();
+            step     = distSim->getStep();
+            maxSteps = distSim->getInitializer()->maxSteps();
+            coordBox = distSim->getInitializer()->gridDimensions();
         }
 
         double updates = 1.0 * step * CELL_TYPE::nanoSteps() * coordBox.prod();

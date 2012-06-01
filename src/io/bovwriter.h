@@ -26,6 +26,10 @@ public:
 
     static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
 
+    using ParallelWriter<CELL_TYPE>::distSim;
+    using ParallelWriter<CELL_TYPE>::period;
+    using ParallelWriter<CELL_TYPE>::prefix;
+
     BOVWriter(
         const std::string& prefix, 
         DistributedSimulator<CELL_TYPE> *sim, 
@@ -39,7 +43,7 @@ public:
     {
         // BOV only accepts 3D data, so we'll have to inflate 1D and
         // 2D dimensions.
-        Coord<DIM> c = this->distSim->getInitializer()->gridDimensions();
+        Coord<DIM> c = distSim->getInitializer()->gridDimensions();
         Coord<3> initDim = Coord<3>::diagonal(1);
         for (int i = 0; i < DIM; ++i) {
             initDim[i] = c[i]; 
@@ -54,8 +58,9 @@ public:
 
     virtual void stepFinished()
     {
-        if ((this->distSim->getStep() % this->period) == 0) 
+        if ((distSim->getStep() % period) == 0) {
             writeGrid();
+        }
     }
 
     virtual void allDone()
@@ -71,7 +76,7 @@ private:
     std::string filename(const unsigned& step, const std::string& suffix) const 
     {
         std::ostringstream buf;
-        buf << this->prefix << "." << std::setfill('0') << std::setw(5) << step << "." << suffix;
+        buf << prefix << "." << std::setfill('0') << std::setw(5) << step << "." << suffix;
         return buf.str();
     }
 
@@ -79,10 +84,10 @@ private:
     {
         const Region<DIM> *region;
         const typename DistributedSimulator<CELL_TYPE>::GridType *grid;
-        this->distSim->getGridFragment(&grid, &region);
-        unsigned step = this->distSim->getStep();
+        distSim->getGridFragment(&grid, &region);
+        unsigned step = distSim->getStep();
         Coord<DIM> dimensions = 
-            this->distSim->getInitializer()->gridDimensions();
+            distSim->getInitializer()->gridDimensions();
 
         writeHeader(step, dimensions);
         writeRegion(step, dimensions, grid, *region);
@@ -91,12 +96,12 @@ private:
     void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
     {
         MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
-            this->filename(step, "bov"), comm);
+            filename(step, "bov"), comm);
 
         if (comm.Get_rank() == 0) {
             // BOV only accepts 3D data, so we'll have to inflate 1D
             // and 2D dimensions.
-            Coord<DIM> c = this->distSim->getInitializer()->gridDimensions();
+            Coord<DIM> c = distSim->getInitializer()->gridDimensions();
             Coord<3> bovDim = Coord<3>::diagonal(1);
             for (int i = 0; i < DIM; ++i) {
                 bovDim[i] = c[i]; 
@@ -104,7 +109,7 @@ private:
 
             std::ostringstream buf;
             buf << "TIME: " << step << "\n"
-                << "DATA_FILE: " << this->filename(step, "data") << "\n"
+                << "DATA_FILE: " << filename(step, "data") << "\n"
                 << "DATA_SIZE: " 
                 << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
                 << "DATA_FORMAT: " << SELECTOR_TYPE::dataFormat() << "\n"
@@ -132,7 +137,7 @@ private:
         const Region<DIM>& region)
     {
         MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
-            this->filename(step, "data"), comm);
+            filename(step, "data"), comm);
         MPI::Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
         SuperVector<VariableType> buffer;
 
