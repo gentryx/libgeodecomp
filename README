@@ -31,12 +31,14 @@ change these by specifying their valued via "-D NAME=value", e.g.
 
   cmake -D FEATURE_CUDA=false ../../src/
 
-...turns CUDA support off. This may be handy in case CMake did detect
-CUDA, but you don't have a compatible GPU installed. Additionally you
-may want to run the library's unit tests via "make test" to ensure
-that it's actually working. For speedier builds you may want to run
-make in parallel, e.g. "make -j 4". Replace the 4 by the number of
-cores in your system. For more details please refer to:
+...turns CUDA support off. This specific option may come in handy in
+case CMake did detect CUDA, but you don't have a compatible GPU
+installed. 
+
+Additionally you may want to run the library's unit tests via "make
+test" to ensure that it's actually working. For speedier builds you
+may want to run make in parallel, e.g. "make -j 4". Replace the 4 by
+the number of cores in your system. For more details please refer to:
 
   http://www.libgeodecomp.org/documentation.html#userguide and
   http://www.libgeodecomp.org/faq.html

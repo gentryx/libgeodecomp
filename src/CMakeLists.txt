@@ -106,6 +106,10 @@ set(PACKAGE_EMAIL "users@libgeodecomp.org")
 # detected environment...
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+if(FEATURE_MPI)
+  add_definitions(${MPI_COMPILE_FLAGS})
+  include_directories(${MPI_INCLUDE_PATH})
+endif()
 if(ADD_BOOST_INCLUDE_PATH)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
@@ -119,12 +123,8 @@ if(FEATURE_MPI)
     message(FATAL_ERROR "FEATURE_MPI selected, but could find no MPI implementation.")
   endif()
 
-  if(MPI_FOUND)
-    if(NOT MPIEXEC)
-      message(FATAL_ERROR "FEATURE_MPI selected, but mpiexec not found.")
-    endif()
-
-    set(CMAKE_CXX_COMPILER "${MPI_COMPILER}")
+  if(NOT MPIEXEC)
+    message(FATAL_ERROR "FEATURE_MPI selected, but mpiexec not found.")
   endif()
 endif()
 
@@ -189,11 +189,11 @@ if(WIN32 AND NOT UNIX)
   # sure there is at least one set of four (4) backlasshes.
   set(CPACK_PACKAGE_ICON             "${CMake_SOURCE_DIR}/..\\libgeodecomp_icon.png")
   set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMake_SOURCE_DIR}/..\\libgeodecomp_icon.png")
-# further options:
-#else(WIN32 AND NOT UNIX)
-#  set(CPACK_STRIP_FILES "bin/MyExecutable")
-#  set(CPACK_SOURCE_STRIP_FILES "")
-#  set(CPACK_PACKAGE_EXECUTABLES "helloworld" "My Hello World")
+  # further options:
+  #else(WIN32 AND NOT UNIX)
+  #  set(CPACK_STRIP_FILES "bin/MyExecutable")
+  #  set(CPACK_SOURCE_STRIP_FILES "")
+  #  set(CPACK_PACKAGE_EXECUTABLES "helloworld" "My Hello World")
 endif(WIN32 AND NOT UNIX)
 
 include(CPack)
@@ -230,10 +230,15 @@ set(ALL_HEADERS ${HEADERS})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 target_link_libraries(geodecomp ${Boost_LIBRARIES})
+if(FEATURE_MPI)
+  target_link_libraries(geodecomp ${MPI_LIBRARIES})
+  set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
+endif()
 if(FEATURE_OPENCL)
   target_link_libraries(geodecomp OpenCL)
-endif(FEATURE_OPENCL)
+endif()
 
+#============= INSTALLER CONFIG ===================================
 install(TARGETS geodecomp DESTINATION lib)
 install(FILES config.h DESTINATION include/${PACKAGE_NAME})
 

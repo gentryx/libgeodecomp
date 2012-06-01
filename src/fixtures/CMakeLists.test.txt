@@ -23,7 +23,7 @@ endif(is_unit_test)
 if (is_mpi_test AND FEATURE_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} -np ${NUM_PROC} ./test)
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS})
 endif()
 
 # check whether LIMIT_TESTS selected this path, too
