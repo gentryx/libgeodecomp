@@ -12,10 +12,10 @@ if(FEATURE_CUDA AND FEATURE_QT AND FEATURE_OPENCV)
     framegrabber.h
     interactivesimulator.h)
 
-  QT4_WRAP_CPP(MY_MOC_SOURCES ${MY_HEADERS})
+  QT4_WRAP_CPP(MY_MOC_SOURCES ${MY_HEADERS} OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
   include_directories(./)
   include_directories(${OpenCV_INCLUDE_DIRS})
 
   cuda_add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
-  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES} ${OpenCV_LIBRARIES})
+  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES} ${OpenCV_LIBS})
 endif()
