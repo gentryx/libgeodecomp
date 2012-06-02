@@ -32,6 +32,10 @@ if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
 endif()
 
+if(NOT DEFINED OpenCV_FOUND)
+  set(OpenCV_FOUND false)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
@@ -114,6 +118,11 @@ endif()
 if(ADD_BOOST_INCLUDE_PATH)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
+
+if(FEATURE_OPENCV AND NOT OpenCV_FOUND)
+  message(FATAL_ERROR "FEATURE_OPENCV selected, but could not find OpenCV.")
+endif()
+
 
 if(FEATURE_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "FEATURE_CUDA selected, but could not find the Nvidia CUDA toolkit.")
