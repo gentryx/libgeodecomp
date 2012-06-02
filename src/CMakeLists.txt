@@ -40,14 +40,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if(NOT DEFINED ADD_BOOST_INCLUDE_PATH)
-  if (distro MATCHES "Gentoo")
-    set(ADD_BOOST_INCLUDE_PATH false)
-  else()
-    set(ADD_BOOST_INCLUDE_PATH true)
-  endif()
-endif()
-
 set(DEFAULT_FLAGS "-O2 -Wall -Wno-sign-compare")
 set(DEFAULT_TYPEMAP_GENERATION false)
 
@@ -115,9 +107,8 @@ if(FEATURE_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
   include_directories(${MPI_INCLUDE_PATH})
 endif()
-if(ADD_BOOST_INCLUDE_PATH)
-  include_directories(${Boost_INCLUDE_DIRS})
-endif()
+
+include_directories(${Boost_INCLUDE_DIRS})
 
 if(FEATURE_OPENCV AND NOT OpenCV_FOUND)
   message(FATAL_ERROR "FEATURE_OPENCV selected, but could not find OpenCV.")
