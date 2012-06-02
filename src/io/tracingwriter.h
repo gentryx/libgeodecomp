@@ -24,7 +24,8 @@ public:
                   std::ostream& _stream = std::cout) :
         Writer<CELL_TYPE>("foo", sim, period), 
         ParallelWriter<CELL_TYPE>("foo", 0, period), 
-        stream(_stream) 
+        stream(_stream),
+        lastStep(0)
     {}
 
     TracingWriter(DistributedSimulator<CELL_TYPE> *sim, 
@@ -32,7 +33,8 @@ public:
                   std::ostream& _stream = std::cout) :
         Writer<CELL_TYPE>("foo", 0, period), 
         ParallelWriter<CELL_TYPE>("foo", sim, period), 
-        stream(_stream) 
+        stream(_stream),
+        lastStep(0)
     {}
 
     virtual void initialized()
@@ -40,11 +42,12 @@ public:
         startTime = currentTime();
         stream << "TracingWriter::initialized()\n";
         printTime();
+        lastStep = sim->getStep();
     }
 
     virtual void stepFinished()
     {
-        int step;
+        unsigned step;
         unsigned maxSteps;
         if (sim) {
             step     = sim->getStep();
@@ -54,7 +57,17 @@ public:
             maxSteps = distSim->getInitializer()->maxSteps();
         }
 
-        if (step % Writer<CELL_TYPE>::period != 0) return;
+        // we need to check this as stepFinished may be called
+        // multiple times per time step (see
+        // ParallelWriter::stepFinished() )
+        if (lastStep == step) {
+            return;
+        }
+        lastStep = step;
+
+        if (step % Writer<CELL_TYPE>::period != 0) {
+            return;
+        }
 
         Time now = currentTime();
         Duration delta = now - startTime;
@@ -73,8 +86,8 @@ public:
         }
 
         double updates = 1.0 * step * CELL_TYPE::nanoSteps() * coordBox.prod();
-        double glups = updates / delta.total_microseconds() * 1000.0 * 1000.0 
-            / 1000.0 / 1000.0 / 1000.0;
+        double seconds = delta.total_microseconds() / 1000.0 / 1000.0;
+        double glups = updates / seconds / 1000.0 / 1000.0 / 1000.0;
         double bandwidth = glups * 2 * sizeof(CELL_TYPE);
 
         stream << "TracingWriter::stepFinished()\n"
@@ -101,6 +114,7 @@ public:
 private:
     std::ostream& stream;
     Time startTime;
+    unsigned lastStep;
 
     void printTime() const
     {

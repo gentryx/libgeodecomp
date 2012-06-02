@@ -11,13 +11,11 @@ template<typename CELL_TYPE>
 class MonolithicSimulator;
 
 /**
- * Superclass for all output file formats.
- * 
- * The Writer defines three callbacks which are invoked by the Simulator on
- * appropriate times. Subclasses are required to implement the callbacks and
- * emit chunks of the output format. The file name prefix needs to be extended
- * by a specific suffix, which includes an optional step number and must end 
- * with a proper extension.
+ * Writer and ParallelWriter are the superclasses for all output
+ * formats. Writer is for use with MonolithicSimulator and its heirs.
+ * It defines three callbacks which are invoked by the simulator. The
+ * prefix may be used by file-based IO objects to generate file names.
+ * Usually one will add a time step number and a suitable extension.
  */
 template<typename CELL_TYPE>
 class Writer
@@ -27,12 +25,12 @@ class Writer
 public:
 
     /**
-     * initialize a writer using @a prefix which is an incomplete pathname to
-     * the output file(s) lacking an extension. The extension needs to be
-     * appended by the concrete Writer. If a Writer generates several output
-     * files, it should put a running number between the prefix and the
-     * extension. @a prefix must not be empty.
-     * The Writer should write a frame for @a frequency steps.
+     * initializes a writer using \param _prefix which subclasses may
+     * use to generate filenames. \param _period should be used by
+     * them to control how many time steps lie between outputs. The
+     * Writer will register at \param _sim which in turn will delete
+     * the Writer. Thus a writer should always be constructed via
+     * new(), unless _sim is 0.
      */
     Writer(
         const std::string& _prefix, 
@@ -42,31 +40,34 @@ public:
         sim(_sim), 
         period(_period)
     {
-        if (prefix == "") 
+        if (prefix == "") {
             throw std::invalid_argument("empty prefixes are forbidden");
-        if (period == 0) 
+        }
+        if (period == 0) {
             throw std::invalid_argument("period must be positive");
-        if (sim)
+        }
+        if (sim) {
             sim->registerWriter(this);
+        }
     }
 
     virtual ~Writer() {};    
 
     /**
-     * is called back from @a sim after the initialization phase is finished.
-     * This allow the Writer to query static parameters from the Simulator.
+     * is called back from \a sim after the initialization phase is
+     * finished. This may be useful to e.g. open files.
      */
     virtual void initialized() = 0;
 
     /**
-     * is called back from @a sim after each simulation step. The Writer has to
-     * decide whether it likes to write this step's results.
+     * is called back from \a sim after each simulation step.
      */
     virtual void stepFinished() = 0;
 
     /**
-     * is called back from @a sim at the end of the whole simulation. The Writer
-     * may close open files or do any other finalization routine.
+     * is called back from \a sim at the end of the whole simulation.
+     * The Writer may close open files or do any other finalization
+     * routine.
      */
     virtual void allDone() = 0;
 

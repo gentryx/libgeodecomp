@@ -156,8 +156,10 @@ private:
             int effectiveLength = length * dataComponents;
             Coord<DIM> walker = i->origin;
             
-            if (buffer.size() != effectiveLength)
+            if (buffer.size() != effectiveLength) {
                 buffer = SuperVector<VariableType>(effectiveLength);
+            }
+
             for (int i = 0; i < effectiveLength; i += dataComponents) {
                 SELECTOR_TYPE()(grid->at(walker), &buffer[i]);
                 walker.x()++;
