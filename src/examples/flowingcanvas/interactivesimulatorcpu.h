@@ -17,7 +17,6 @@ public:
 
     using SerialSimulator<CELL_TYPE>::curGrid;
     using SerialSimulator<CELL_TYPE>::getInitializer;
-    using SerialSimulator<CELL_TYPE>::writers;
 
     InteractiveSimulatorCPU(QObject *parent, Initializer<CELL_TYPE> *initializer) :
         SerialSimulator<CELL_TYPE>(initializer),

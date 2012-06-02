@@ -2,15 +2,10 @@ generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
-if(FEATURE_CUDA AND FEATURE_QT)
-  # fixme: use configure script to find opencv, same in latticegas
-  execute_process(COMMAND pkg-config opencv --cflags --libs
-    OUTPUT_VARIABLE OPENCV_FLAGS)
-  STRING(REGEX REPLACE "\n" "" OPENCV_FLAGS ${OPENCV_FLAGS})
-  set(CMAKE_CXX_FLAGS "${OPENCV_FLAGS} ${CMAKE_CXX_FLAGS} -fopenmp")
-
+if(FEATURE_CUDA AND FEATURE_QT AND FEATURE_OPENCV)
   include(${QT_USE_FILE})
 
+  # fixme: rework this
   set(MY_HEADERS
     canvaswriter.h
     flowwidget.h
@@ -19,7 +14,8 @@ if(FEATURE_CUDA AND FEATURE_QT)
 
   QT4_WRAP_CPP(MY_MOC_SOURCES ${MY_HEADERS})
   include_directories(./)
+  include_directories(${OpenCV_INCLUDE_DIRS})
 
   cuda_add_executable(flowingcanvas ${SOURCES} ${MY_MOC_SOURCES})
-  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES})
+  target_link_libraries(flowingcanvas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES} ${OpenCV_LIBRARIES})
 endif()

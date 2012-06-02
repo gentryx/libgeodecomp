@@ -222,7 +222,6 @@ public:
 
     using GPUSimulator<CELL_TYPE>::initializer;
     using GPUSimulator<CELL_TYPE>::updateInputBuffer;
-    using GPUSimulator<CELL_TYPE>::writers;
 
     InteractiveSimulatorGPU(QObject *parent, Initializer<CELL_TYPE> *initializer) :
         GPUSimulator<CELL_TYPE>(initializer),

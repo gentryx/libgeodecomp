@@ -16,6 +16,7 @@ find_package(Boost REQUIRED date_time filesystem system)
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
+find_package(OpenCV)
 find_package(Ruby)
 find_package(Qt4)
 
@@ -82,6 +83,8 @@ add_config_option(FEATURE_MPI "If set, all MPI related components will be built.
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
+
+add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
