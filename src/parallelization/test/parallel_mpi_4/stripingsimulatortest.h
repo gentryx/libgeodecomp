@@ -1,7 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
-#include <libgeodecomp/io/parallelmockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
@@ -191,7 +190,7 @@ public:
     void checkRunAndWriterInteraction(int everyN)
     {
         MockWriter *expectedCalls = new MockWriter(referenceSim);
-        ParallelMockWriter *actualCalls = new ParallelMockWriter(testSim);
+        MockWriter *actualCalls = new MockWriter(testSim);
 
         testSim->run();
         referenceSim->run();
@@ -332,7 +331,7 @@ public:
             balanceEveryN);
 
         MockWriter *expectedCalls = new MockWriter(referenceSim);
-        ParallelMockWriter *actualCalls = new ParallelMockWriter(&localTestSim);
+        MockWriter *actualCalls = new MockWriter(&localTestSim);
 
         localTestSim.run();
         referenceSim->run();
