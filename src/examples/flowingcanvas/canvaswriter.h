@@ -81,7 +81,7 @@ public:
 
     virtual void stepFinished()
     {
-        const typename Simulator<CanvasCell>::GridType *grid = sim->getGrid();
+        const Simulator<CanvasCell>::GridType *grid = sim->getGrid();
 
         switch (particleMode) {
         case 0:
@@ -183,7 +183,7 @@ private:
         }
     }
 
-    void drawParticles(const typename Simulator<CanvasCell>::GridType *grid)
+    void drawParticles(const Simulator<CanvasCell>::GridType *grid)
     {
         Coord<2> dim = sim->getInitializer()->gridDimensions();
         float factorX = 1.0 * (*outputFrame)->width()  / dim.x();
