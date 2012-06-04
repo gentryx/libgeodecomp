@@ -1,15 +1,14 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <sstream>
-
-#include "../../../io/mockwriter.h"
-#include "../../../io/parallelmemorywriter.h"
-#include "../../../io/testinitializer.h"
-#include "../../../loadbalancer/mockbalancer.h"
-#include "../../../misc/testcell.h"
-#include "../../../misc/testhelper.h"
-#include "../../hiparsimulator.h"
-#include "../../hiparsimulator/partitions/zcurvepartition.h"
+#include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/parallelmemorywriter.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/loadbalancer/mockbalancer.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/parallelization/hiparsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 

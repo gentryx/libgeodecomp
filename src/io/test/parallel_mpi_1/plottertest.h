@@ -7,8 +7,6 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-// fixme: unify include paths (../../foo/bar.h vs. <libgeodecomp/foo/bar.h>)
-
 class SimpleCellPlotter
 {
 public:
@@ -182,4 +180,4 @@ public:
 
 };
 
-};
+}

@@ -1,9 +1,9 @@
 #include <sstream>
 #include <cxxtest/TestSuite.h>
-#include "../../../misc/testcell.h"
-#include "../../../parallelization/serialsimulator.h"
-#include "../../testinitializer.h"
-#include "../../tracingwriter.h"
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
 
 using namespace LibGeoDecomp; 
 

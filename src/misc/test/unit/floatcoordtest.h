@@ -1,8 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/math/tools/precision.hpp>
-
-#include "../../floatcoord.h"
-#include "../../testhelper.h"
+#include <libgeodecomp/misc/floatcoord.h>
+#include <libgeodecomp/misc/testhelper.h>
 
 using namespace LibGeoDecomp; 
 

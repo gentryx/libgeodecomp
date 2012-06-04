@@ -1,9 +1,9 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include "../../../misc/superset.h"
-#include "../../../misc/supervector.h"
-#include "../../../misc/testhelper.h"
-#include "../../mpilayer.h"
+#include <libgeodecomp/misc/superset.h>
+#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/mpilayer/mpilayer.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp; 

@@ -1,8 +1,8 @@
 #include <limits>
 #include <cxxtest/TestSuite.h>
-#include "../../../misc/testhelper.h"
-#include "../../mockbalancer.h"
-#include "../../oozebalancer.h"
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/loadbalancer/mockbalancer.h>
+#include <libgeodecomp/loadbalancer/oozebalancer.h>
 
 using namespace LibGeoDecomp; 
 

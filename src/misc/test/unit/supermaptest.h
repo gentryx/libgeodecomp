@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../supermap.h"
+#include <libgeodecomp/misc/supermap.h>
 
 using namespace LibGeoDecomp; 
 

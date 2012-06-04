@@ -5,13 +5,13 @@
 #include <cxxtest/TestSuite.h>
 #include <stdio.h>
 #include <boost/assign/std/vector.hpp>
-#include "../../../misc/tempfile.h"
-#include "../../../misc/testcell.h"
-#include "../../../misc/testhelper.h"
-#include "../../../parallelization/serialsimulator.h"
-#include "../../asciiwriter.h"
-#include "../../ioexception.h"
-#include "../../testinitializer.h"
+#include <libgeodecomp/misc/tempfile.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/io/asciiwriter.h>
+#include <libgeodecomp/io/ioexception.h>
+#include <libgeodecomp/io/testinitializer.h>
 
 using namespace boost::assign; 
 using namespace LibGeoDecomp; 

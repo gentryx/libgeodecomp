@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../testplotter.h"
+#include <libgeodecomp/io/testplotter.h>
 
 using namespace LibGeoDecomp; 
 

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
-#include "../../alignedallocator.h"
+#include <libgeodecomp/misc/alignedallocator.h>
 
 using namespace LibGeoDecomp; 
 

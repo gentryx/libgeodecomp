@@ -1,16 +1,16 @@
 #include <fstream>
 #include <cerrno>
 #include <boost/assign/std/vector.hpp>
-#include "../../../../io/image.h"
-#include "../../../../io/ioexception.h"
-#include "../../../../io/testinitializer.h"
-#include "../../../../misc/testcell.h"
-#include "../../../../misc/testhelper.h"
-#include "../../../chronometer.h"
-#include "../../partitions/zcurvepartition.h"
-#include "../../ghostzoneresolution.h"
-#include "../../patchbuffer.h"
-#include "../../updategroup.h"
+#include <libgeodecomp/io/image.h>
+#include <libgeodecomp/io/ioexception.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/ghostzoneresolution.h>
+#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp; 

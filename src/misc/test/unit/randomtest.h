@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../random.h"
+#include <libgeodecomp/misc/random.h>
 
 using namespace LibGeoDecomp; 
 

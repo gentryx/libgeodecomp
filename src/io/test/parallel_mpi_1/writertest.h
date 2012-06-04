@@ -1,9 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 #include <stdexcept>
-#include "../../../parallelization/serialsimulator.h"
-#include "../../testinitializer.h"
-#include "../../writer.h"
+#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/writer.h>
 
 using namespace LibGeoDecomp; 
 
@@ -53,4 +53,4 @@ public:
     }
 };
 
-};
+}

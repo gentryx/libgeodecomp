@@ -1,6 +1,6 @@
 #include <fstream>
 #include <cxxtest/TestSuite.h>
-#include "../../tempfile.h"
+#include <libgeodecomp/misc/tempfile.h>
 
 using namespace LibGeoDecomp; 
 

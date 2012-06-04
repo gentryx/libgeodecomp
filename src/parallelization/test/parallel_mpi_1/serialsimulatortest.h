@@ -1,14 +1,14 @@
 #include <cxxtest/TestSuite.h>
 #include <sstream>
-#include "../../../io/writer.h"
-#include "../../../io/memorywriter.h"
-#include "../../../io/mockinitializer.h"
-#include "../../../io/mockwriter.h"
-#include "../../../io/testinitializer.h"
-#include "../../../misc/stringops.h"
-#include "../../../misc/testcell.h"
-#include "../../../misc/testhelper.h"
-#include "../../serialsimulator.h"
+#include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/io/memorywriter.h>
+#include <libgeodecomp/io/mockinitializer.h>
+#include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp; 
 

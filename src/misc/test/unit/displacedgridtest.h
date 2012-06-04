@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../displacedgrid.h"
+#include <libgeodecomp/misc/displacedgrid.h>
 
 using namespace LibGeoDecomp; 
 

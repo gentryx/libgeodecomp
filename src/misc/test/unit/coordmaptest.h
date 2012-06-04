@@ -1,6 +1,6 @@
 #include <cxxtest/TestSuite.h>
-#include "../../coordmap.h"
-#include "../../grid.h"
+#include <libgeodecomp/misc/coordmap.h>
+#include <libgeodecomp/misc/grid.h>
 
 using namespace LibGeoDecomp; 
 

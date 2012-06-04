@@ -2,7 +2,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/misc/coordbox.h>
-#include "../../stripingpartition.h"
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

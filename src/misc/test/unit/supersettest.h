@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../superset.h"
+#include <libgeodecomp/misc/superset.h>
 
 using namespace LibGeoDecomp; 
 

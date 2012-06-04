@@ -1,6 +1,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include "../../coordbox.h"
+#include <libgeodecomp/misc/coordbox.h>
 
 using namespace LibGeoDecomp; 
 using namespace boost::assign;

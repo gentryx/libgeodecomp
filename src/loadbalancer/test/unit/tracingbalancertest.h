@@ -1,7 +1,7 @@
 #include <sstream>
 #include <cxxtest/TestSuite.h>
-#include "../../tracingbalancer.h"
-#include "../../mockbalancer.h"
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
+#include <libgeodecomp/loadbalancer/mockbalancer.h>
 
 using namespace LibGeoDecomp; 
 

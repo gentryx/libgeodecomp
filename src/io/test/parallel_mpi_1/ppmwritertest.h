@@ -1,12 +1,12 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/assign/std/vector.hpp>
-#include "../../../misc/testhelper.h"
-#include "../../../misc/tempfile.h"
-#include "../../../parallelization/serialsimulator.h"
-#include "../../ioexception.h"
-#include "../../ppmwriter.h"
-#include "../../testinitializer.h"
-#include "../../testplotter.h"
+#include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/tempfile.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/io/ioexception.h>
+#include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/testplotter.h>
 
 using namespace boost::assign; 
 using namespace LibGeoDecomp; 
@@ -107,4 +107,4 @@ private:
     MonolithicSimulator<TestCell<2> > *_simulator;
 };
 
-};
+}

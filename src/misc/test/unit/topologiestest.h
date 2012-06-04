@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
-#include "../../topologies.h"
-#include "../../testcell.h"
-#include "../../grid.h"
+#include <libgeodecomp/misc/topologies.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/grid.h>
 
 using namespace LibGeoDecomp; 
 

@@ -1,6 +1,6 @@
 #include <cxxtest/TestSuite.h>
-#include "../../meshlessadapter.h"
-#include "../../testhelper.h"
+#include <libgeodecomp/misc/meshlessadapter.h>
+#include <libgeodecomp/misc/testhelper.h>
 
 using namespace LibGeoDecomp; 
 

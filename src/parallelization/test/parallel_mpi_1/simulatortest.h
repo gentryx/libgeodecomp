@@ -1,10 +1,10 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/shared_ptr.hpp>
-#include "../../../misc/testcell.h"
-#include "../../../io/mockinitializer.h"
-#include "../../../io/mockwriter.h"
-#include "../../mocksimulator.h"
-#include "../../simulator.h"
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/io/mockinitializer.h>
+#include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/parallelization/mocksimulator.h>
+#include <libgeodecomp/parallelization/simulator.h>
 
 using namespace LibGeoDecomp; 
 

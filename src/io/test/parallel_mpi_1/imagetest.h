@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../image.h"
+#include <libgeodecomp/io/image.h>
 
 using namespace LibGeoDecomp; 
 

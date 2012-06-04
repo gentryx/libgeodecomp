@@ -1,8 +1,8 @@
 #include <cxxtest/TestSuite.h>
-#include "../../displacedgrid.h"
-#include "../../meshlessadapter.h"
-#include "../../containercell.h"
-#include "../../testhelper.h"
+#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/meshlessadapter.h>
+#include <libgeodecomp/misc/containercell.h>
+#include <libgeodecomp/misc/testhelper.h>
 
 using namespace LibGeoDecomp; 
 

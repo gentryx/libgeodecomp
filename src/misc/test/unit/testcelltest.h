@@ -1,8 +1,8 @@
 #include <cxxtest/TestSuite.h>
 #include <sstream>
-#include "../../grid.h"
-#include "../../testcell.h"
-#include "../../testhelper.h"
+#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/testhelper.h>
 
 using namespace LibGeoDecomp; 
 
@@ -234,4 +234,4 @@ public:
 
 };
 
-};
+}

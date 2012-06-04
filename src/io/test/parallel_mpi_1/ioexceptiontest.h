@@ -1,6 +1,6 @@
 #include <cerrno>
 #include <cxxtest/TestSuite.h>
-#include "../../ioexception.h"
+#include <libgeodecomp/io/ioexception.h>
 
 using namespace LibGeoDecomp; 
 

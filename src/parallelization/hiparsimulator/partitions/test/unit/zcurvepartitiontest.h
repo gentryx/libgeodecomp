@@ -1,6 +1,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include "../../zcurvepartition.h"
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

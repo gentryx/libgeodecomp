@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../randombalancer.h"
+#include <libgeodecomp/loadbalancer/randombalancer.h>
 
 using namespace LibGeoDecomp; 
 

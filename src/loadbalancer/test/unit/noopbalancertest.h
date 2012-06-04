@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "../../noopbalancer.h"
+#include <libgeodecomp/loadbalancer/noopbalancer.h>
 
 using namespace LibGeoDecomp; 
 

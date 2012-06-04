@@ -1,8 +1,8 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
-#include "../../hindexingpartition.h"
-#include "../../stripingpartition.h"
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/hindexingpartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

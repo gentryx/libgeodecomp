@@ -2,10 +2,9 @@
 #include <sstream>
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
-
-#include "../../grid.h"
-#include "../../displacedgrid.h"
-#include "../../testcell.h"
+#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/testcell.h>
 
 #define GRIDWIDTH 4
 #define GRIDHEIGHT 5

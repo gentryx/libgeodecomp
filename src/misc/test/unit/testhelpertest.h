@@ -1,4 +1,4 @@
-#include "../../testhelper.h"
+#include <libgeodecomp/misc/testhelper.h>
 
 using namespace LibGeoDecomp; 
 
