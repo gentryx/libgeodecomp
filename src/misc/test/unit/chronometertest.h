@@ -1,6 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <unistd.h>
-#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/misc/chronometer.h>
 
 using namespace LibGeoDecomp; 
 

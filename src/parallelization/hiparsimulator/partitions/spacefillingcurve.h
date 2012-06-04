@@ -3,7 +3,7 @@
 
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/partition.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

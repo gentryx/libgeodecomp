@@ -2,9 +2,8 @@
 #define _libgeodecomp_parallelization_hiparsimulator_partitions_stripingpartition_h_
 
 #include <cmath>
-
 #include <libgeodecomp/misc/floatcoord.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/partition.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

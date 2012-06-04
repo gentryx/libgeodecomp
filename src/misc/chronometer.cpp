@@ -1,5 +1,5 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/misc/chronometer.h>
 
 namespace LibGeoDecomp {
 

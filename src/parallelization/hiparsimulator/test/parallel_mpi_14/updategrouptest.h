@@ -4,11 +4,10 @@
 #include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/chronometer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/ghostzoneresolution.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
 

@@ -1,6 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/math/tools/precision.hpp>
-#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 
 using namespace LibGeoDecomp; 

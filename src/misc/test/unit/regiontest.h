@@ -1,7 +1,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/parallelization/chronometer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
 using namespace boost::assign;

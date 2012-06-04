@@ -1,4 +1,4 @@
-#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/hindexingpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/hilbertpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
@@ -16,6 +16,7 @@ public:
     
     void testLargeBenchmark() 
     {
+        // fixme: move this to performace tests
 //         benchmark<HIndexingPartition, HIndexingPartition::Iterator>("HIndexing");
 //         benchmark<StripingPartition,  StripingPartition::Iterator >("Striping ");
 //         benchmark<HilbertPartition,   HilbertPartition::Iterator  >("Hilbert  ");
