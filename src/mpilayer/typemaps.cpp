@@ -1,7 +1,7 @@
 #include<libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#include <algorithm>
 #include "typemaps.h"
+#include <algorithm>
 
 namespace MPI {
     Datatype LIBGEODECOMP_COORD_1_;
