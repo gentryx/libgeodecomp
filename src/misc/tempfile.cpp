@@ -1,15 +1,14 @@
-#include <cstdlib>
-#include <fstream>
-#include <boost/filesystem.hpp>
-
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/misc/random.h>
-#include <libgeodecomp/misc/stringops.h>
-#include <libgeodecomp/misc/tempfile.h>
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #endif
+
+#include <fstream>
+#include <boost/filesystem.hpp>
+#include <libgeodecomp/misc/random.h>
+#include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/misc/tempfile.h>
 
 namespace LibGeoDecomp {
 

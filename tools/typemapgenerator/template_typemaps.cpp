@@ -1,5 +1,5 @@
-#include <algorithm>
 #include "typemaps.h"
+#include <algorithm>
 
 namespace MPI {
     CLASS_VARS

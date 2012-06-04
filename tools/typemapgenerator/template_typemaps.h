@@ -1,8 +1,8 @@
 #ifndef _NAMESPACE_GUARDtypemaps_h_
 #define _NAMESPACE_GUARDtypemaps_h_
 
-#include <complex>
 #include <mpi.h>
+#include <complex>
 HEADERS
 
 namespace MPI {

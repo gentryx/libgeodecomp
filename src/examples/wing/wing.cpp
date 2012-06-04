@@ -1,5 +1,10 @@
 #include <cmath>
-
+/** 
+ * We need to include typemaps first to avoid problems with Intel
+ * MPI's C++ bindings (which may collide with stdio.h's SEEK_SET,
+ * SEEK_CUR etc.).
+ */
+#include <libgeodecomp/mpilayer/typemaps.h>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/parallelmpiiowriter.h>
 #include <libgeodecomp/io/simpleinitializer.h>

@@ -3,8 +3,8 @@
 #ifndef _libgeodecomp_typemaps_h_
 #define _libgeodecomp_typemaps_h_
 
-#include <complex>
 #include <mpi.h>
+#include <complex>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/simplecell.h>
