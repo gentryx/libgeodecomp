@@ -2,7 +2,6 @@
 #define _libgeodecomp_parallelization_hiparsimulator_mockpatchaccepter_h_
 
 #include <deque>
-
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 
 namespace LibGeoDecomp {

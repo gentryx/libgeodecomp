@@ -1,14 +1,16 @@
 #include <fstream>
 #include <iostream>
-
-#include "../../../../io/testinitializer.h"
-#include "../../../../misc/testcell.h"
-#include "../../mockpatchaccepter.h"
-#include "../../partitions/zcurvepartition.h"
-#include "../../updategroup.h"
+#include <boost/assign/std/deque.hpp>
+#include <cxxtest/TestSuite.h>
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/parallelization/hiparsimulator/mockpatchaccepter.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
 
 using namespace LibGeoDecomp; 
 using namespace HiParSimulator; 
+using namespace boost::assign;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -35,10 +37,14 @@ public:
                 CoordBox<2>(Coord<2>(), dimensions),
                 ghostZoneWidth,
                 init));
+        expectedNanoSteps.clear();
+        expectedNanoSteps += 5, 7, 8, 33, 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
-        mockPatchAccepter->pushRequest(5);
-        mockPatchAccepter->pushRequest(7);
-        mockPatchAccepter->pushRequest(8);
+        for (std::deque<long>::iterator i = expectedNanoSteps.begin();
+             i != expectedNanoSteps.end();
+             ++i) {
+            mockPatchAccepter->pushRequest(*i);
+        }
         updateGroup->addPatchAccepter(mockPatchAccepter, MyStepper::INNER_SET);
     }
 
@@ -51,9 +57,12 @@ public:
     void testBench()
     {
         updateGroup->update(100);
+        std::deque<long> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();
+        TS_ASSERT_EQUALS(actualNanoSteps, expectedNanoSteps);
     }
     
 private:
+    std::deque<long> expectedNanoSteps;
     unsigned rank;
     Coord<2> dimensions;
     SuperVector<long> weights;

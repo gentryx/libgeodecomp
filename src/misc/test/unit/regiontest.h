@@ -838,6 +838,7 @@ public:
         TS_ASSERT_EQUALS(mergerFL - leftCube,  frontCube);
     }
 
+    // fixme: move to performance test
     // void testBenchStriping()
     // {
     //     int maxX = benchDim().x();
