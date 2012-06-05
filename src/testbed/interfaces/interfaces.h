@@ -75,12 +75,13 @@ public:
     template<typename HOOD>
     void update2(const HOOD& hood)
     {
+#define hoody(X, Y) hood[FixedCoord<X, Y>()]
         val = 
-            (hood[FixedCoord< 0, -1>()].val +
-             hood[FixedCoord<-1,  0>()].val +
-             hood[FixedCoord< 0,  0>()].val +
-             hood[FixedCoord< 1,  0>()].val +
-             hood[FixedCoord< 0,  1>()].val) * (1.0 / 5.0);
+            (hoody( 0, -1).val +
+             hoody(-1,  0).val +
+             hoody( 0,  0).val +
+             hoody( 1,  0).val +
+             hoody( 0,  1).val) * (1.0 / 5.0);
     }
 
     template<typename HOOD>
