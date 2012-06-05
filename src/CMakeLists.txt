@@ -49,7 +49,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(DEFAULT_FLAGS "-O2 -Wall -Wno-sign-compare")
+set(DEFAULT_FLAGS "-Wall -Wno-sign-compare")
 set(DEFAULT_TYPEMAP_GENERATION false)
 
 if(NOT RELEASE)
