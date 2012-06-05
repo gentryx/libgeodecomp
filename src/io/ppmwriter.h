@@ -40,8 +40,9 @@ class PPMWriter : public Writer<CELL_TYPE>
 
     virtual void stepFinished()
     {
-        if (sim->getStep() % period == 0)
+        if (sim->getStep() % period == 0) {
             writeStep();
+        }
     }
 
     virtual void allDone() {}

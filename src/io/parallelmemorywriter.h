@@ -42,8 +42,9 @@ public:
 
     void stepFinished()
     {
-        if ((distSim->getStep() % period) == 0) 
+        if ((distSim->getStep() % period) == 0) {
             saveGrid();
+        }
     }
     
     GridType& getGrid(int i)
@@ -111,7 +112,7 @@ private:
     }
 };
 
-};
+}
 
 #endif
 #endif

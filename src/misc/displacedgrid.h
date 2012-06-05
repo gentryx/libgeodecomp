@@ -182,7 +182,7 @@ private:
     Coord<DIM> topoDimensions;
 };
 
-};
+}
 
 template<typename _CharT, typename _Traits, typename _CellT, typename _Topology, bool _Correctness>
 std::basic_ostream<_CharT, _Traits>&
