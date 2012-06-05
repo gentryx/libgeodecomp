@@ -197,8 +197,8 @@ if(WIN32 AND NOT UNIX)
 
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
-  set(CPACK_PACKAGE_ICON             "${CMake_SOURCE_DIR}/..\\libgeodecomp_icon.png")
-  set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMake_SOURCE_DIR}/..\\libgeodecomp_icon.png")
+  set(CPACK_PACKAGE_ICON             "${CMAKE_SOURCE_DIR}/..\\libgeodecomp_icon.png")
+  set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_SOURCE_DIR}/..\\libgeodecomp_icon.png")
   # further options:
   #else(WIN32 AND NOT UNIX)
   #  set(CPACK_STRIP_FILES "bin/MyExecutable")
