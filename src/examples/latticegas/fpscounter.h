@@ -1,7 +1,7 @@
 #ifndef _libgeodecomp_examples_latticegas_framecounter_h_
 #define _libgeodecomp_examples_latticegas_framecounter_h_
 
-#include <libgeodecomp/parallelization/chronometer.h>
+#include <libgeodecomp/misc/chronometer.h>
 
 using namespace LibGeoDecomp;
 
