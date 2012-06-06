@@ -111,7 +111,7 @@ private:
         const typename ParentType::PatchType& patchType,
         const long& nanoStep)
     {
-        for (class ParentType::PatchAccepterList::iterator i = 
+        for (typename ParentType::PatchAccepterList::iterator i = 
                  patchAccepters[patchType].begin();
              i != patchAccepters[patchType].end();
              ++i) {
