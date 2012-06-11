@@ -127,7 +127,7 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
-    inline const ConstSliceRef operator[](const Index& y) const
+    inline const ConstSliceRef operator[](const Index y) const
     {
         return cellMatrix[y];
     }
@@ -135,7 +135,7 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
-    inline SliceRef operator[](const Index& y) 
+    inline SliceRef operator[](const Index y) 
     {
         return cellMatrix[y];
     }
