@@ -3,6 +3,7 @@ project(LIBGEODECOMP)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
 include(CheckCXXCompilerFlag)
+include(GNUInstallDirs)
 
 #============= DETECT DEFAULTS ====================================
 set(RELEASE false)
@@ -249,7 +250,7 @@ if(FEATURE_OPENCL)
 endif()
 
 #============= INSTALLER CONFIG ===================================
-install(TARGETS geodecomp DESTINATION lib)
+install(TARGETS geodecomp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 install(FILES config.h DESTINATION include/${PACKAGE_NAME})
 
 # install all headers
@@ -259,6 +260,18 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
+
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.rc" "prefix=${CMAKE_INSTALL_PREFIX}
+libdir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
+includedir=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/libgeodecomp
+ 
+Name: LibGeoDecomp
+Description: High performance stencil code library
+Version: ${PACKAGE_VERSION}
+Libs: -L\${libdir} -lgeodecomp
+Cflags: -I\${includedir}
+")
+install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.rc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 #============= TYPEMAPS GENERATION ================================
 if (GENERATE_TYPEMAPS)
