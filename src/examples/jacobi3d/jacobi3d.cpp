@@ -183,7 +183,10 @@ void runSimulation()
 int main(int argc, char *argv[])
 {
     MPI_Init(&argc, &argv);
+    Typemaps::initMaps();
+
     runSimulation();
+
     MPI_Finalize();
     return 0;
 }

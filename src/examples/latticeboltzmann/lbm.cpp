@@ -360,6 +360,7 @@ int main(int argc, char *argv[])
     Typemaps::initializeMaps();
 
     runSimulation();
+
     MPI_Finalize();
     return 0;
 }
