@@ -1,7 +1,9 @@
 #include <sstream>
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/loadbalancer/noopbalancer.h>
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/parallelization/stripingsimulator.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 
@@ -15,8 +17,10 @@ public:
 
     void setUp()
     {
-        simulator = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<2>());
+        simulator = new StripingSimulator<TestCell<2> >(
+            new TestInitializer<2>(),
+            MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
+            1000);
     }
 
 
@@ -51,7 +55,7 @@ public:
     }
 
 private:
-    MonolithicSimulator<TestCell<2> > *simulator;
+    DistributedSimulator<TestCell<2> > *simulator;
 };
 
 }

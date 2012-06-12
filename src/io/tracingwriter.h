@@ -42,19 +42,27 @@ public:
         startTime = currentTime();
         stream << "TracingWriter::initialized()\n";
         printTime();
-        lastStep = sim->getStep();
+        if (sim) {
+            lastStep = sim->getStep();
+        } else {
+            lastStep = distSim->getStep();
+        }
     }
 
     virtual void stepFinished()
     {
         unsigned step;
         unsigned maxSteps;
+        Coord<CELL_TYPE::Topology::DIMENSIONS> coordBox;
+
         if (sim) {
             step     = sim->getStep();
             maxSteps = sim->getInitializer()->maxSteps();
+            coordBox = sim->getInitializer()->gridDimensions();
         } else {
             step     = distSim->getStep();
             maxSteps = distSim->getInitializer()->maxSteps();
+            coordBox = distSim->getInitializer()->gridDimensions();
         }
 
         // we need to check this as stepFinished may be called
@@ -73,17 +81,6 @@ public:
         Duration delta = now - startTime;
         Duration remaining = delta * (maxSteps - step) / step;
         Time eta = now + remaining;
-        Coord<CELL_TYPE::Topology::DIMENSIONS> coordBox;
-        
-        if (sim) {
-            step     = sim->getStep();
-            maxSteps = sim->getInitializer()->maxSteps();
-            coordBox = sim->getInitializer()->gridDimensions();
-        } else {
-            step     = distSim->getStep();
-            maxSteps = distSim->getInitializer()->maxSteps();
-            coordBox = distSim->getInitializer()->gridDimensions();
-        }
 
         double updates = 1.0 * step * CELL_TYPE::nanoSteps() * coordBox.prod();
         double seconds = delta.total_microseconds() / 1000.0 / 1000.0;
