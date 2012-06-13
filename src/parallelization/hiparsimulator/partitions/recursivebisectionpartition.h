@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_stripingpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_stripingpartition_h_
+#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_recursivebisectionpartition_h_
+#define _libgeodecomp_parallelization_hiparsimulator_partitions_recursivebisectionpartition_h_
 
 #include <cmath>
 #include <libgeodecomp/misc/floatcoord.h>
