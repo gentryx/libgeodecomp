@@ -11,10 +11,6 @@ namespace LibGeoDecomp {
  */
 class IOException : public std::runtime_error
 {
-    std::string _file;
-    int _error;
-    bool _fatal;
-
 public:
     /**
      * Initializes a new IOException object which means that an error described
@@ -26,20 +22,49 @@ public:
     IOException(std::string msg, 
                 std::string file, 
                 int error = 0, 
-                bool fatal = true);
+                bool fatal = true) :
+        std::runtime_error(msg), 
+        myFile(file), 
+        myError(error), 
+        myFatal(fatal) 
+    {}
 
-    virtual ~IOException() throw () {}
+    virtual ~IOException() throw ()
+    {}
     
-    virtual std::string file();
+    virtual std::string file()
+    {
+        return myFile;
+    }
 
-    virtual int error();
 
-    virtual bool fatal();
+    virtual int error()
+    {
+        return myError;
+    }
+
+
+    virtual bool fatal()
+    {
+        return myFatal;
+    }
 
     /**
      * Generate a human readable error description suitable for stderr output.
      */
-    virtual std::string toString();
+    virtual std::string toString()
+    {
+        std::string out(std::string(what()) + " `" + myFile + "'");
+        if (myError != 0) {
+            out += std::string(": ") + strerror(myError);
+        }
+        return out;
+    }
+
+private:
+    std::string myFile;
+    int myError;
+    bool myFatal;
 };
 
 
@@ -49,9 +74,10 @@ public:
 class FileOpenException : public IOException
 {
 public:
-    FileOpenException(std::string msg, std::string file, int error = 0,
-                      bool fatal = true)
-        : IOException(msg, file, error, fatal) {}
+    FileOpenException(
+        std::string msg, std::string file, int error = 0, bool fatal = true) : 
+        IOException(msg, file, error, fatal) 
+    {}
 };
 
 
@@ -61,9 +87,10 @@ public:
 class FileWriteException : public IOException
 {
 public:
-    FileWriteException(std::string msg, std::string file, int error = 0,
-                       bool fatal = true)
-        : IOException(msg, file, error, fatal) {}
+    FileWriteException(
+        std::string msg, std::string file, int error = 0, bool fatal = true) : 
+        IOException(msg, file, error, fatal) 
+    {}
 };
 
 
@@ -73,11 +100,12 @@ public:
 class FileReadException : public IOException
 {
 public:
-    FileReadException(std::string msg, std::string file, int error = 0,
-                      bool fatal = true)
-        : IOException(msg, file, error, fatal) {}
+    FileReadException(
+        std::string msg, std::string file, int error = 0, bool fatal = true) : 
+        IOException(msg, file, error, fatal) 
+    {}
 };
 
-};
+}
 
 #endif
