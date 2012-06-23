@@ -1,7 +1,6 @@
 #include <sstream>
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
-#include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 #include <libgeodecomp/io/testinitializer.h>
@@ -19,7 +18,7 @@ public:
     {
         simulator = new StripingSimulator<TestCell<2> >(
             new TestInitializer<2>(),
-            MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
+            MPILayer().rank() ? 0 : new NoOpBalancer(), 
             1000);
     }
 
