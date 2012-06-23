@@ -15,11 +15,16 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * An output plugin for writing text files. Uses the same selector
+ * infrastucture as the BOVWriter.
+ */
 template<typename CELL_TYPE, typename ATTRIBUTE_SELECTOR>
 class ASCIIWriter : public Writer<CELL_TYPE>
 {    
- public:
     friend class ASCIIWriterTest;
+public:
+    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
 
     using Writer<CELL_TYPE>::sim;
     using Writer<CELL_TYPE>::period;
@@ -39,11 +44,15 @@ class ASCIIWriter : public Writer<CELL_TYPE>
 
     virtual void stepFinished()
     {
-        if (sim->getStep() % period == 0)
+        if (sim->getStep() % period == 0) {
             writeStep();
+        }
     }
 
-    virtual void allDone() {}
+    virtual void allDone() 
+    {
+        writeStep();
+    }
 
  private:
     void writeStep()
@@ -54,18 +63,27 @@ class ASCIIWriter : public Writer<CELL_TYPE>
         filename << prefix << "." << std::setfill('0') << std::setw(4)
                  << sim->getStep() << ".ascii";
         std::ofstream outfile(filename.str().c_str());
-        if (!outfile) 
+        if (!outfile) {
             throw FileOpenException("Cannot open output file", 
                                     filename.str(), errno);
-
-        for(int y = (int)grid->getDimensions().y() - 1; y >= 0; y--) {
-            for(int x = 0; x < (int)grid->getDimensions().x(); x++) 
-                outfile << ATTRIBUTE_SELECTOR()((*grid)[Coord<2>(x, y)]); 
-            outfile << "\n";
         }
-        if (!outfile.good()) 
+
+        CoordBox<DIM> box = grid->boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            if ((*i)[0] == 0) {
+                for (int d = 0; d < DIM; ++d) {
+                    if ((*i)[d] == 0) {
+                        outfile << "\n";
+                    }
+                }
+            }
+            outfile << ATTRIBUTE_SELECTOR()((*grid)[*i]) << " ";
+        }
+
+        if (!outfile.good()) {
             throw FileWriteException("Cannot write to output file",
                                      filename.str(), errno);
+        }
         outfile.close();
     }
 };

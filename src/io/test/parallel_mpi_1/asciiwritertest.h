@@ -33,55 +33,54 @@ public:
 
     void setUp()
     {
-        _tempFile = TempFile::parallel("libGeoDecompTempfile");
-        _simulator = new SerialSimulator<TestCell<2> >(
+        tempFile = TempFile::parallel("libGeoDecompTempfile");
+        simulator = new SerialSimulator<TestCell<2> >(
             new TestInitializer<2>(Coord<2>(2, 3)));
-        
     }
 
-
     void tearDown() {
-        delete _simulator;
+        delete simulator;
+
         for (int i = 0; i < 100; i++) {
             std::ostringstream f;
-            f << _tempFile << "." << std::setw(4) << std::setfill('0') << i << ".ascii";
+            f << tempFile << "." << std::setw(4) << std::setfill('0') << i << ".ascii";
             remove(f.str().c_str());
         }
     }
 
-
     void testWriteASCII()
     {
-        new ASCIIWriter<TestCell<2>, TestValueSelector>(_tempFile, _simulator);
-        _simulator->run();
+        new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, simulator);
+        simulator->run();
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
-            filename << _tempFile << "." << std::setfill('0') << std::setw(4)
+            filename << tempFile << "." << std::setfill('0') << std::setw(4)
                      << i << ".ascii";
             TS_ASSERT_FILE(filename.str());
         }
 
-        std::string firstFile = _tempFile + ".0002.ascii";
+        std::string firstFile = tempFile + ".0002.ascii";
         std::ifstream infile(firstFile.c_str());
 
-        std::string expected = "56\n34\n12\n";
+        std::string expected = "\n\n1 2 \n3 4 \n5 6 ";
         std::ostringstream content;
 
-        for (unsigned i = 0; i < expected.length(); i++)
+        for (unsigned i = 0; i < expected.length(); i++) {
             content << (char)infile.get();
+        }
 
         TS_ASSERT_EQUALS(content.str(), expected);
     }
 
-
     void testWriteASCIIEveryN()
     {
         int everyN = 2;
-        new ASCIIWriter<TestCell<2>, TestValueSelector>(_tempFile, _simulator, everyN);
-        _simulator->run();
+        new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, simulator, everyN);
+        simulator->run();
+
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
-            filename << _tempFile << "." << std::setfill('0') << std::setw(4)
+            filename << tempFile << "." << std::setfill('0') << std::setw(4)
                      << i << ".ascii";
             if (i % everyN == 0) {
                 TS_ASSERT_FILE(filename.str());
@@ -91,15 +90,14 @@ public:
         }
     }
 
-
     void testFileOpenError()
     {
         std::string path("/non/existent/path/prefix");
         ASCIIWriter<TestCell<2>, TestValueSelector> *writer = 
-            new ASCIIWriter<TestCell<2>, TestValueSelector>(path, _simulator);
+            new ASCIIWriter<TestCell<2>, TestValueSelector>(path, simulator);
         TS_ASSERT_THROWS_ASSERT(
             writer->initialized(),
-            FileOpenException &e, 
+            FileOpenException& e, 
             TS_ASSERT_SAME_DATA(
                 path.c_str(), 
                 e.file().c_str(), 
@@ -107,8 +105,8 @@ public:
     }
 
 private:
-    std::string _tempFile;
-    MonolithicSimulator<TestCell<2> > *_simulator;
+    std::string tempFile;
+    MonolithicSimulator<TestCell<2> > *simulator;
 };
 
-};
+}

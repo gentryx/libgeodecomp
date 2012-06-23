@@ -13,7 +13,8 @@ namespace LibGeoDecomp {
 
 /**
  * writes simulation snapshots compatible with VisIt's Brick of Values
- * (BOV) format using MPI-IO. 
+ * (BOV) format using MPI-IO. Uses a selector which maps a cell to a
+ * primitive data type so that it can be fed into VisIt.
  */
 template<typename CELL_TYPE, typename SELECTOR_TYPE>
 class BOVWriter : public ParallelWriter<CELL_TYPE>
