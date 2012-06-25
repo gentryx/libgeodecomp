@@ -9,6 +9,9 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename TOPOLOGY>
 class Grid;
 
+/**
+ * provides access to neighboring cells in a grid via relative coordinates.
+ */
 template<typename CELL_TYPE, typename GRID_TYPE=Grid<CELL_TYPE, Topologies::Cube<2>::Topology> >
 class CoordMap 
 {
