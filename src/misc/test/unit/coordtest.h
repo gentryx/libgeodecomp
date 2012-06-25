@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
 
 class CoordTest : public CxxTest::TestSuite 
 {
-    Coord<2> *_c1;
+    Coord<2> *c1;
 
 public:
     bool includesCoord(SuperVector<Coord<2> > vec, int x, int y) {
@@ -24,12 +24,12 @@ public:
     
     void setUp()
     {
-        _c1 = new Coord<2>(2, 3);
+        c1 = new Coord<2>(2, 3);
     }
     
     void tearDown()
     {
-        delete _c1;
+        delete c1;
     }
 
     void testDefaultConstructor()
@@ -50,8 +50,8 @@ public:
 
         Coord<2> c2(2, 3);
         Coord<2> c3(2, 4);
-        TS_ASSERT_EQUALS(*_c1, c2);
-        TS_ASSERT(!(*_c1 == c3));
+        TS_ASSERT_EQUALS(*c1, c2);
+        TS_ASSERT(!(*c1 == c3));
 
 
         Coord<3> d1(1, 2, 3);
@@ -65,10 +65,10 @@ public:
     void testNotEqual()
     {
         Coord<2> c2(2, 3);
-        TS_ASSERT(!(*_c1 != c2));
+        TS_ASSERT(!(*c1 != c2));
 
         Coord<2> c3(2, 4);
-        TS_ASSERT(*_c1 != c3);
+        TS_ASSERT(*c1 != c3);
 
     }
 
@@ -88,14 +88,14 @@ public:
     void testBinaryMinus()
     {
         Coord<2> minuend(10, 2), result(-8, 1);
-        TS_ASSERT_EQUALS(result, *_c1 - minuend);
+        TS_ASSERT_EQUALS(result, *c1 - minuend);
     }
 
 
     void testUnaryMinus()
     {
         Coord<2> result(-2, -3);
-        TS_ASSERT_EQUALS(result, -(*_c1));
+        TS_ASSERT_EQUALS(result, -(*c1));
     }
 
     void test3D()
@@ -130,12 +130,12 @@ public:
 
     void testLess()
     {
-        TS_ASSERT(*_c1 < Coord<2>(3, 4));
-        TS_ASSERT(*_c1 < Coord<2>(3, 1));
-        TS_ASSERT(*_c1 < Coord<2>(2, 4));
-        TS_ASSERT(!(*_c1 < Coord<2>(2, 3)));
-        TS_ASSERT(!(*_c1 < Coord<2>(1, 6)));
-        TS_ASSERT(!(*_c1 < Coord<2>(1, 1)));
+        TS_ASSERT(*c1 < Coord<2>(3, 4));
+        TS_ASSERT(*c1 < Coord<2>(3, 1));
+        TS_ASSERT(*c1 < Coord<2>(2, 4));
+        TS_ASSERT(!(*c1 < Coord<2>(2, 3)));
+        TS_ASSERT(!(*c1 < Coord<2>(1, 6)));
+        TS_ASSERT(!(*c1 < Coord<2>(1, 1)));
     }
 
     void testToString()
