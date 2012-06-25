@@ -1,6 +1,7 @@
 #ifndef _libgeodecomp_io_ioexception_h_
 #define _libgeodecomp_io_ioexception_h_
 
+#include <cstring>
 #include <stdexcept>
 
 namespace LibGeoDecomp {
