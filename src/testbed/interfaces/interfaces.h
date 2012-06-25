@@ -2,15 +2,11 @@
 #define LIBGEODECOMP_TESTBED_INTERFACES
 
 #include <emmintrin.h>
+#include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/neighborhood.h>
 
 using namespace LibGeoDecomp;
-
-template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>
-class FixedCoord
-{
-public:
-};
 
 typedef Grid<double, Topologies::Cube<2>::Topology> GridType;
 
@@ -82,6 +78,7 @@ public:
              hoody( 0,  0).val +
              hoody( 1,  0).val +
              hoody( 0,  1).val) * (1.0 / 5.0);
+#undef hoody
     }
 
     template<typename HOOD>
@@ -186,6 +183,8 @@ public:
     }
 
     double val;
+
+#undef hoody
 };
 
 typedef Grid<CellStraight, Topologies::Cube<2>::Topology> StraightGridType;
@@ -244,6 +243,25 @@ public:
 private:
     CellStraight **lines;
 
+};
+
+class CellLibGeoDecomp
+{
+public:
+    template<class NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, const int& /* unused: nanoStep */)
+    {
+#define hoody(X, Y) hood[FixedCoord<X, Y>()]
+        val = 
+            (hoody( 0, -1).val +
+             hoody(-1,  0).val +
+             hoody( 0,  0).val +
+             hoody( 1,  0).val +
+             hoody( 0,  1).val) * (1.0 / 5.0);
+#undef hoody
+    }
+
+    double val;
 };
 
 #endif

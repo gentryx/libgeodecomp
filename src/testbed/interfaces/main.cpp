@@ -1,8 +1,6 @@
 #include <cmath>
 #include <typeinfo> 
-// #include <CL/cl.h>
 #include <iostream>
-// #include <pmmintrin.h>
 #include <sys/time.h>
 #include <vector>
 
@@ -266,6 +264,56 @@ private:
     StraightGridType gridB;
 };
 
+class LibGeoDecompRunner
+{
+public:
+    typedef Grid<CellLibGeoDecomp, Topologies::Cube<2>::Topology> GridType;
+    
+    LibGeoDecompRunner(Coord<2> _dim) :
+        dim(_dim),
+        gridA(dim),
+        gridB(dim)
+    {}
+
+    double run(long repeats)
+    {
+        GridType *oldGrid = &gridA;
+        GridType *newGrid = &gridB;
+
+        for (long t = 0; t < repeats; ++t) {
+            for (int y = 1; y < dim.y() - 1; ++y) {
+                CellLibGeoDecomp *c = &(*newGrid)[Coord<2>(0, y)];
+                CellLibGeoDecomp *lines[3] = {
+                    &(*oldGrid)[Coord<2>(0, y - 1)],
+                    &(*oldGrid)[Coord<2>(0, y + 0)],
+                    &(*oldGrid)[Coord<2>(0, y + 1)]
+                };
+
+                long x = 1;
+                Neighborhood<CellLibGeoDecomp, Stencils::VonNeumann>  hood(lines, &x);
+
+                for (; x < dim.x() - 1; ++x) {
+                    c->update(hood, 0);
+                }
+            }
+
+            std::swap(oldGrid, newGrid);
+        }
+
+        return gridA[Coord<2>(1, 1)].val;
+    }
+
+    static int flops()
+    {
+        return 5;
+    }
+
+private:
+    Coord<2> dim;
+    GridType gridA;
+    GridType gridB;
+};
+
 
 template<typename RUNNER, int DIM=2>
 class Benchmark
@@ -325,11 +373,12 @@ private:
 
 int main(int argc, char *argv[])
 {
-    Benchmark<VanillaRunner>().exercise();
-    Benchmark<VirtualInterfaceRunner>().exercise();
-    Benchmark<StraightInterfaceRunner>().exercise();
+    // Benchmark<VanillaRunner>().exercise();
+    // Benchmark<VirtualInterfaceRunner>().exercise();
+    // Benchmark<StraightInterfaceRunner>().exercise();
     Benchmark<SteakInterfaceRunner>().exercise();
-    Benchmark<StreakInterfaceRunner>().exercise();
-    Benchmark<StreakInterfaceRunnerSSE>().exercise();
+    // Benchmark<StreakInterfaceRunner>().exercise();
+    // Benchmark<StreakInterfaceRunnerSSE>().exercise();
+    Benchmark<LibGeoDecompRunner>().exercise();
     return 0;
 }
