@@ -260,7 +260,7 @@ foreach(dir ${LIBDIRS})
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
 
-file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.rc" "prefix=${CMAKE_INSTALL_PREFIX}
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
 includedir=${CMAKE_INSTALL_PREFIX}/include/libgeodecomp
  
@@ -270,7 +270,7 @@ Version: ${PACKAGE_VERSION}
 Libs: -L\${libdir} -lgeodecomp
 Cflags: -I\${includedir}
 ")
-install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.rc" DESTINATION "lib/pkgconfig")
+install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")
 
 #============= TYPEMAPS GENERATION ================================
 if (GENERATE_TYPEMAPS)
