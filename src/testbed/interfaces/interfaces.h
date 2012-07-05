@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/neighborhood.h>
+#include <libgeodecomp/misc/stencils.h>
 
 using namespace LibGeoDecomp;
 

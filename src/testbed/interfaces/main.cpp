@@ -290,7 +290,7 @@ public:
                 };
 
                 long x = 1;
-                Neighborhood<CellLibGeoDecomp, Stencils::VonNeumann>  hood(lines, &x);
+                Neighborhood<CellLibGeoDecomp, Stencils::VonNeumann<2, 1>, false, false, false, false, false, false> hood(lines, &x);
 
                 for (; x < dim.x() - 1; ++x) {
                     c->update(hood, 0);
