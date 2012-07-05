@@ -284,10 +284,18 @@ public:
             for (int y = 1; y < dim.y() - 1; ++y) {
                 CellLibGeoDecomp *c = &(*newGrid)[Coord<2>(0, y)];
                 CellLibGeoDecomp *lines[3] = {
-                    &(*oldGrid)[Coord<2>(0, y - 1)],
-                    &(*oldGrid)[Coord<2>(0, y + 0)],
-                    &(*oldGrid)[Coord<2>(0, y + 1)]
+                    &(*oldGrid)[Coord<2>(-1,      y - 1)],
+                    &(*oldGrid)[Coord<2>(0,       y - 1)],
+                    &(*oldGrid)[Coord<2>(dim.x(), y - 1)],
+                    &(*oldGrid)[Coord<2>(-1,      y + 0)],
+                    &(*oldGrid)[Coord<2>(0,       y + 0)],
+                    &(*oldGrid)[Coord<2>(dim.x(), y + 0)],
+                    &(*oldGrid)[Coord<2>(-1,      y + 1)],
+                    &(*oldGrid)[Coord<2>(0,       y + 1)],
+                    &(*oldGrid)[Coord<2>(dim.x(), y + 1)],
                 };
+
+                // fixme: special cases for x == 0, x == dim.x() - 1
 
                 long x = 1;
                 LinePointerNeighborhood<CellLibGeoDecomp, Stencils::VonNeumann<2, 1>, false, false, false, false, false, false> hood(lines, &x);
