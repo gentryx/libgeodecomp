@@ -4,8 +4,7 @@
 #include <emmintrin.h>
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/neighborhood.h>
-#include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/misc/linepointerneighborhood.h>
 
 using namespace LibGeoDecomp;
 

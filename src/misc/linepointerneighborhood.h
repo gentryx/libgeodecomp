@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_neighborhood_h_
-#define _libgeodecomp_misc_neighborhood_h_
+#ifndef _libgeodecomp_misc_linepointerneighborhood_h_
+#define _libgeodecomp_misc_linepointerneighborhood_h_
 
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/stencils.h>
@@ -29,15 +29,15 @@ namespace LibGeoDecomp {
  * 
  */
 template<class CELL, class STENCIL, bool BOUNDARY_WEST, bool BOUNDARY_EAST, bool BOUNDARY_TOP, bool BOUNDARY_BOTTOM, bool BOUNDARY_SOUTH, bool BOUNDARY_NORTH>
-class Neighborhood
+class LinePointerNeighborhood
 {
 };
 
 template<class CELL, class STENCIL>
-class Neighborhood<CELL, STENCIL, false, false, false, false, false, false>
+class LinePointerNeighborhood<CELL, STENCIL, false, false, false, false, false, false>
 {
 public:
-    Neighborhood(CELL **_lines, long *_offset) :
+    LinePointerNeighborhood(CELL **_lines, long *_offset) :
         lines(_lines),
         offset(_offset)
     {}
