@@ -8,12 +8,6 @@
 
 namespace LibGeoDecomp {
 
-class TestCellBase 
-{
-public:
-    static std::ostream *stream;
-};
-
 template<int DIM>
 class TestCellTopology
 {
@@ -29,10 +23,31 @@ public:
     typedef Topologies::Torus<3>::Topology Topology;
 };
 
+class TestCellStdOutput
+{
+public:
+    template<typename T>
+    const TestCellStdOutput& operator<<(T output) const
+    {
+        std::cout << output;
+        return *this;
+    }
+};
+
+class TestCellNoOutput
+{
+public:
+    template<typename T>
+    const TestCellNoOutput& operator<<(T /*unused*/) const
+    {
+        return *this;
+    }
+};
+
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
-template<int DIM>
+template<int DIM, class OUTPUT=TestCellStdOutput>
 class TestCell
 {
     friend class Typemaps;
@@ -107,8 +122,7 @@ public:
         *this = neighborhood[Coord<DIM>(0, 0)];
 
         if (isEdgeCell) {
-            (*TestCellBase::stream) 
-                << "TestCell error: update called for edge cell\n";
+            OUTPUT() << "TestCell error: update called for edge cell\n";
             isValid = false;
             return;
         }
@@ -120,18 +134,17 @@ public:
         }
 
         if (nanoStep >= nanoSteps()) {
-            (*TestCellBase::stream) << "TestCell error: nanoStep too large: " 
-                                    << nanoStep << "\n";
+            OUTPUT() << "TestCell error: nanoStep too large: " 
+                     << nanoStep << "\n";
             isValid = false;
             return;
         }
 
         unsigned expectedNanoStep = cycleCounter % nanoSteps();
         if (nanoStep != expectedNanoStep) {
-            (*TestCellBase::stream) 
-                << "TestCell error: nanoStep out of sync. got " 
-                << nanoStep << " but expected " 
-                << expectedNanoStep << "\n";
+            OUTPUT() << "TestCell error: nanoStep out of sync. got " 
+                     << nanoStep << " but expected " 
+                     << expectedNanoStep << "\n";
             isValid = false;
             return;
         }
@@ -158,35 +171,31 @@ public:
                        const Coord<DIM>& relativeLoc) const
     {
         if (!other.isValid) {
-            (*TestCellBase::stream) 
-                << "Update Error for " << toString() << ":\n"
-                << "Invalid Neighbor at " << relativeLoc << ":\n" 
-                << other.toString() << "\n"
-                << "--------------" << "\n";
+            OUTPUT() << "Update Error for " << toString() << ":\n"
+                     << "Invalid Neighbor at " << relativeLoc << ":\n" 
+                     << other.toString() << "\n"
+                     << "--------------" << "\n";
             return false;
         }
         bool otherShouldBeEdge = !inBounds(pos + relativeLoc);
         if (other.isEdgeCell != otherShouldBeEdge) {
-            (*TestCellBase::stream) 
-                << "TestCell error: bad edge cell (expected: " 
-                << otherShouldBeEdge << ", is: " 
-                << other.isEdgeCell << " at relative coord " 
-                << relativeLoc << ")\n";
+            OUTPUT() << "TestCell error: bad edge cell (expected: " 
+                     << otherShouldBeEdge << ", is: " 
+                     << other.isEdgeCell << " at relative coord " 
+                     << relativeLoc << ")\n";
             return false;
         }        
         if (!otherShouldBeEdge) {
             if (other.cycleCounter != cycleCounter) {
-                (*TestCellBase::stream) 
-                    << "Update Error for TestCell " 
-                    << toString() << ":\n"
-                    << "cycle counter out of sync with neighbor " 
-                    << other.toString() << "\n";
+                OUTPUT() << "Update Error for TestCell " 
+                         << toString() << ":\n"
+                         << "cycle counter out of sync with neighbor " 
+                         << other.toString() << "\n";
                 return false;
             }
             if (other.dimensions != dimensions) {
-                (*TestCellBase::stream) 
-                    << "TestCell error: grid dimensions differ. Expected: " 
-                    << dimensions << ", but got " << other.dimensions << "\n";
+                OUTPUT() << "TestCell error: grid dimensions differ. Expected: " 
+                         << dimensions << ", but got " << other.dimensions << "\n";
                 return false;
             }
 
@@ -195,10 +204,10 @@ public:
                 Topology::normalize(rawPos, dimensions.dimensions);
 
             if (other.pos != expectedPos) {
-                (*TestCellBase::stream) << "TestCell error: other position " 
-                                        << other.pos
-                                        << " doesn't match expected "
-                                        << expectedPos << "\n";
+                OUTPUT() << "TestCell error: other position " 
+                         << other.pos
+                         << " doesn't match expected "
+                         << expectedPos << "\n";
                 return false;
             }
         }

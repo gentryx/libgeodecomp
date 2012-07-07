@@ -11,55 +11,51 @@ namespace LibGeoDecomp {
 class TestCellTest : public CxxTest::TestSuite 
 {
 private:
-    Grid<TestCell<2> > grid;
+    typedef TestCell<2, TestCellNoOutput> TestCellType;
+    Grid<TestCellType> grid;
     int width;
     int height;
-    std::ostringstream nirvana;
-    std::ostream *oldStream;
 
 public:
     void setUp() 
     {
-        oldStream = TestCellBase::stream;
-        TestCellBase::stream = &nirvana;
         width = 4;
         height = 3;
-        grid = Grid<TestCell<2> >(Coord<2>(width, height));
-        grid[Coord<2>(-1, -1)] = TestCell<2>(Coord<2>(-1, -1), 
+        grid = Grid<TestCellType >(Coord<2>(width, height));
+        grid[Coord<2>(-1, -1)] = TestCellType(Coord<2>(-1, -1), 
                                           Coord<2>(width, height));
         for (int x = 0; x < width; x++) 
             for (int y = 0; y < height; y++) 
                 grid[Coord<2>(x, y)] = 
-                    TestCell<2>(Coord<2>(x, y), Coord<2>(width, height), 0);
+                    TestCellType(Coord<2>(x, y), Coord<2>(width, height), 0);
     }
 
     void tearDown()
     {
-        TestCellBase::stream = oldStream;
     }
 
     void testDefaultConstructor()
     {
-        TS_ASSERT(!TestCell<2>().valid());
+        TS_ASSERT(!TestCellType().valid());
     }
 
     void testSetUp()
     {
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, grid, 0);
+        TS_ASSERT_TEST_GRID(Grid<TestCellType>, grid, 0);
     }
     
     void testUpdate()
     {
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, grid, 0);
+        TS_ASSERT_TEST_GRID(Grid<TestCellType>, grid, 0);
         update();
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, grid, 1);
+        TS_ASSERT_TEST_GRID(Grid<TestCellType>, grid, 1);
     }
 
     void testMultipleUpdate()
     {
         for (int i = 0; i < 100; i++) {
-            update(i % TestCell<2>::nanoSteps());
-            TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, grid, i + 1);
+            update(i % TestCellType::nanoSteps());
+            TS_ASSERT_TEST_GRID(Grid<TestCellType >, grid, i + 1);
         }
     }
 
@@ -77,7 +73,7 @@ public:
 
     void testUpdateBadEdgeCellInner()
     {
-        grid[1][1] = TestCell<2>(Coord<2>(-1, -1), Coord<2>(width, height));
+        grid[1][1] = TestCellType(Coord<2>(-1, -1), Coord<2>(width, height));
         update();
         TS_ASSERT(!grid[0][0].isValid);
     }
@@ -85,14 +81,14 @@ public:
     void testUpdateBadEdgeCellOuter()
     {
         grid[Coord<2>(-1, -1)] = 
-            TestCell<2>(Coord<2>(1, 1), Coord<2>(width, height));
+            TestCellType(Coord<2>(1, 1), Coord<2>(width, height));
         update();    
         TS_ASSERT(!grid[0][0].isValid);
     }
 
     void testUpdateInvalidNeighbor()
     {
-        grid[1][0] = TestCell<2>();
+        grid[1][0] = TestCellType();
         update();
         TS_ASSERT(!grid[0][0].isValid);
     }
@@ -106,7 +102,7 @@ public:
 
     void testUpdateBadRect()
     {
-        grid[0][0] = TestCell<2>(Coord<2>(0, 0), Coord<2>(123, 456));
+        grid[0][0] = TestCellType(Coord<2>(0, 0), Coord<2>(123, 456));
         update();
         TS_ASSERT(!grid[0][0].isValid);
     }
@@ -118,7 +114,8 @@ public:
         TS_ASSERT(!grid[0][0].isValid);
     }
 
-    typedef Grid<TestCell<3>, TestCell<3>::Topology> Grid3D;
+    typedef TestCell<3, TestCellNoOutput> TestCell3D;
+    typedef Grid<TestCell3D, TestCell3D::Topology> Grid3D;
 
     void test3D1()
     {
@@ -130,7 +127,7 @@ public:
         Grid3D gridA(dim);
         Grid3D gridB(dim);
         gridA.getEdgeCell() = 
-            TestCell<3>(Coord<3>::diagonal(-1), dim);
+            TestCell3D(Coord<3>::diagonal(-1), dim);
         gridA.getEdgeCell().isEdgeCell = true;
 
         gridB.getEdgeCell() = 
@@ -140,7 +137,7 @@ public:
             for (int y = 0; y < dim.y(); y++) {
                 for (int x = 0; x < dim.x(); x++) {
                     Coord<3> pos(x, y, z);
-                    gridA[pos] = TestCell<3>(pos, dim, 0);
+                    gridA[pos] = TestCell3D(pos, dim, 0);
                 }
             }
         }
@@ -177,7 +174,7 @@ public:
         Grid3D gridA(dim);
         Grid3D gridB(dim);
         gridA.getEdgeCell() = 
-            TestCell<3>(Coord<3>::diagonal(-1), dim);
+            TestCell3D(Coord<3>::diagonal(-1), dim);
         gridA.getEdgeCell().isEdgeCell = true;
         gridB.getEdgeCell() = 
             gridA.getEdgeCell();
@@ -186,7 +183,7 @@ public:
             for (int y = 0; y < dim.y(); y++) {
                 for (int x = 0; x < dim.x(); x++) {
                     Coord<3> pos(x, y, z);
-                    gridA[pos] = TestCell<3>(pos, dim, 0);
+                    gridA[pos] = TestCell3D(pos, dim, 0);
                 }
             }
         }
@@ -199,7 +196,7 @@ public:
         for (int y = 0; y < dim.y(); y++) 
             for (int x = 0; x < dim.x(); x++) 
                 gridA[Coord<3>(x, y, actualZ)] = 
-                    TestCell<3>(Coord<3>(x, y, badZ), dim, 0);
+                    TestCell3D(Coord<3>(x, y, badZ), dim, 0);
 
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); y++) {
@@ -221,10 +218,10 @@ public:
 
     void update(unsigned nanoStep = 0)
     {
-        Grid<TestCell<2> > newGrid(Coord<2>(width, height));
+        Grid<TestCellType > newGrid(Coord<2>(width, height));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                CoordMap<TestCell<2> > map(Coord<2>(x, y), &grid);
+                CoordMap<TestCellType > map(Coord<2>(x, y), &grid);
                 newGrid[Coord<2>(x, y)].update(map, nanoStep);
             }
         }
