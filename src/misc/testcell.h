@@ -127,12 +127,45 @@ public:
             return;
         }
 
-        // check complete Moore neighborhood (including old self)
-        CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            isValid &= checkNeighbor(neighborhood[*i], *i);
-        }
+        // check complete Moore neighborhood (including old self), ugly manual loop, 
+        isValid &= checkNeighbor(neighborhood[FixedCoord<-1, -1,  0>()], FixedCoord<-1, -1,  0>());
+        isValid &= checkNeighbor(neighborhood[FixedCoord< 0, -1,  0>()], FixedCoord< 0, -1,  0>());
+        isValid &= checkNeighbor(neighborhood[FixedCoord< 1, -1,  0>()], FixedCoord< 1, -1,  0>());
 
+        isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  0,  0>()], FixedCoord<-1,  0,  0>());
+        isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  0,  0>()], FixedCoord< 0,  0,  0>());
+        isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  0,  0>()], FixedCoord< 1,  0,  0>());
+
+        isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  1,  0>()], FixedCoord<-1,  1,  0>());
+        isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  1,  0>()], FixedCoord< 0,  1,  0>());
+        isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  1,  0>()], FixedCoord< 1,  1,  0>());
+        
+        if (DIM == 3) {
+            isValid &= checkNeighbor(neighborhood[FixedCoord<-1, -1, -1>()], FixedCoord<-1, -1, -1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 0, -1, -1>()], FixedCoord< 0, -1, -1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 1, -1, -1>()], FixedCoord< 1, -1, -1>());
+
+            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  0, -1>()], FixedCoord<-1,  0, -1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  0, -1>()], FixedCoord< 0,  0, -1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  0, -1>()], FixedCoord< 1,  0, -1>());
+
+            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  1, -1>()], FixedCoord<-1,  1, -1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  1, -1>()], FixedCoord< 0,  1, -1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  1, -1>()], FixedCoord< 1,  1, -1>());
+        
+            isValid &= checkNeighbor(neighborhood[FixedCoord<-1, -1,  1>()], FixedCoord<-1, -1,  1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 0, -1,  1>()], FixedCoord< 0, -1,  1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 1, -1,  1>()], FixedCoord< 1, -1,  1>());
+
+            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  0,  1>()], FixedCoord<-1,  0,  1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  0,  1>()], FixedCoord< 0,  0,  1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  0,  1>()], FixedCoord< 1,  0,  1>());
+
+            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  1,  1>()], FixedCoord<-1,  1,  1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  1,  1>()], FixedCoord< 0,  1,  1>());
+            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  1,  1>()], FixedCoord< 1,  1,  1>());
+        }
+    
         if (nanoStep >= nanoSteps()) {
             OUTPUT() << "TestCell error: nanoStep too large: " 
                      << nanoStep << "\n";
@@ -167,8 +200,9 @@ public:
 
     // returns true if valid neighbor is found (at the right place, in
     // the same cycle etc.)
-    bool checkNeighbor(const TestCell& other, 
-                       const Coord<DIM>& relativeLoc) const
+    bool checkNeighbor(
+        const TestCell& other, 
+        const Coord<DIM>& relativeLoc) const
     {
         if (!other.isValid) {
             OUTPUT() << "Update Error for " << toString() << ":\n"
@@ -212,6 +246,14 @@ public:
             }
         }
         return true;
+    }
+
+    template<int X, int Y, int Z>
+    bool checkNeighbor(
+        const TestCell& other, 
+        FixedCoord<X, Y, Z> coord) const
+    {
+        return checkNeighbor(other, Coord<DIM>(coord));
     }
 };
 
