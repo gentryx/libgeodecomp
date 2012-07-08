@@ -9,6 +9,7 @@
 
 #include <string>
 #include <stdlib.h>
+#include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/supervector.h>
 
 namespace LibGeoDecomp {
@@ -33,6 +34,12 @@ public:
     inline explicit Coord(const int& nx=0) 
     {
         c[0] = nx;
+    }
+
+    template<int X, int Y, int Z>
+    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/) 
+    {
+        c[0] = X;
     }
 
     int& x() 
@@ -161,6 +168,13 @@ public:
     {
         c[0] = nx;
         c[1] = ny;
+    }
+
+    template<int X, int Y, int Z>
+    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/) 
+    {
+        c[0] = X;
+        c[1] = Y;
     }
 
     int& x() 
@@ -306,6 +320,14 @@ public:
         c[0] = nx;
         c[1] = ny;
         c[2] = nz;
+    }
+
+    template<int X, int Y, int Z>
+    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/) 
+    {
+        c[0] = X;
+        c[1] = Y;
+        c[2] = Z;
     }
 
     int& x() 

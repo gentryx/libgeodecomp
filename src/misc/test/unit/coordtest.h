@@ -38,6 +38,14 @@ public:
         Coord<2> b(0, 0);
         TS_ASSERT_EQUALS(a, b);
     }
+
+    void testConstructFromFixedCoord()
+    {
+        FixedCoord<1, 2, 3> f;
+        TS_ASSERT_EQUALS(Coord<1>(1),       Coord<1>(f));
+        TS_ASSERT_EQUALS(Coord<2>(1, 2),    Coord<2>(f));
+        TS_ASSERT_EQUALS(Coord<3>(1, 2, 3), Coord<3>(f));
+    }
     
     void testEqual()
     {
