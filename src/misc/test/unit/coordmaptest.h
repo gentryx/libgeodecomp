@@ -10,7 +10,7 @@ class CoordMapTest : public CxxTest::TestSuite
 {
 public:
 
-    void testSqBracketsOp()
+    void testSquareBracketsOperator()
     {
         const int width = 12;
         const int height = 34;
@@ -30,6 +30,11 @@ public:
                 TS_ASSERT_EQUALS(g[relCoord + origin], m[relCoord]);
             }
         }
+
+        TS_ASSERT_EQUALS(g[Coord<2>(5, 7)], (m[FixedCoord< 0,  0>()]));
+        TS_ASSERT_EQUALS(g[Coord<2>(4, 7)], (m[FixedCoord<-1,  0>()]));
+        TS_ASSERT_EQUALS(g[Coord<2>(6, 6)], (m[FixedCoord< 1, -1>()]));
+        TS_ASSERT_EQUALS(g[Coord<2>(6, 8)], (m[FixedCoord< 1,  1>()]));
     }
 
 
