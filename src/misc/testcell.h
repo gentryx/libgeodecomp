@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/coordmap.h>
+#include <libgeodecomp/misc/stencils.h>
 
 namespace LibGeoDecomp {
 
@@ -54,6 +55,7 @@ class TestCell
     friend class TestCellTest;
 
 public:
+    typedef typename Stencils::Moore<DIM, 1> Stencil;
     typedef typename TestCellTopology<DIM>::Topology Topology;
 
     static inline unsigned nanoSteps() { return 27; }
@@ -119,7 +121,7 @@ public:
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) 
     {
         // initialize Cell by copying from previous state
-        *this = neighborhood[Coord<DIM>(0, 0)];
+        *this = neighborhood[FixedCoord<0, 0, 0>()];
 
         if (isEdgeCell) {
             OUTPUT() << "TestCell error: update called for edge cell\n";
