@@ -8,6 +8,34 @@
 namespace LibGeoDecomp
 {
 
+template<int DIM, class TOPOLOGY>
+class WrapsAxisHelper
+{
+public:
+    typedef typename TOPOLOGY::ParentTopology ParentTopology;
+    static const bool VALUE = WrapsAxisHelper<DIM - 1, ParentTopology>::VALUE;
+};
+
+template<class TOPOLOGY>
+class WrapsAxisHelper<0, TOPOLOGY>
+{
+public:
+    static const bool VALUE = TOPOLOGY::WRAP_EDGES;
+};
+
+/**
+ * provides a compile-time random access interface to topology
+ * features. Meant as an efficient alternative to
+ * ZeroDimensional::wrapsAxis().
+ */
+template<int DIM, class TOPOLOGY>
+class WrapsAxis
+{
+public:
+    static const bool VALUE = WrapsAxisHelper<TOPOLOGY::DIMENSIONS - DIM - 1, TOPOLOGY>::VALUE;
+
+};
+
 /**
  * This class is a crutch to borrow functionality from the topologies
  * in order to map neighboring coordinates correctly on the borders of
@@ -151,7 +179,7 @@ public:
             const COORD& boundingBox) const
         {
             return 
-                IsOutOfBounds<TOPOLOGY::WrapEdges, DIM, COORD>()(
+                IsOutOfBounds<TOPOLOGY::WRAP_EDGES, DIM, COORD>()(
                     coord, boundingBox) ||
                 IsOutOfBoundsHelper<DIM - 1, COORD, 
                                     typename TOPOLOGY::ParentTopology>()(
@@ -208,13 +236,13 @@ public:
         }
     };
 
-    template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES>
+    template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES_FLAG>
     class NDimensional
     {
     public:
         // fixme: rename to DIM
         const static int DIMENSIONS = N_MINUS_1_DIMENSIONAL::DIMENSIONS + 1;
-        const static bool WrapEdges = WRAP_EDGES;
+        const static bool WRAP_EDGES = WRAP_EDGES_FLAG;
         typedef N_MINUS_1_DIMENSIONAL ParentTopology;
 
         /**
@@ -286,7 +314,7 @@ public:
                             1,
                             Coord<2> >()(coord, boundingBox)]\
                     [ NormalizeCoordElement<
-                            ParentTopology::WrapEdges, 
+                            ParentTopology::WRAP_EDGES, 
                             0,
                             Coord<2> >()(coord, boundingBox)];
             }
@@ -321,11 +349,11 @@ public:
                             Coord<3> >()(coord, boundingBox)
                      ]\
                     [ NormalizeCoordElement<
-                            ParentTopology::WrapEdges, 
+                            ParentTopology::WRAP_EDGES, 
                             1,
                             Coord<3> >()(coord, boundingBox)]\
                     [ NormalizeCoordElement<
-                            ParentTopology::ParentTopology::WrapEdges, 
+                            ParentTopology::ParentTopology::WRAP_EDGES, 
                             0,
                             Coord<3> >()(coord, boundingBox)];
             }
@@ -375,7 +403,7 @@ public:
         static inline bool wrapsAxis(const int& dim)
         {
             if (dim == DIMENSIONS - 1) {
-                return WrapEdges;
+                return WRAP_EDGES;
             } else {
                 return ParentTopology::wrapsAxis(dim);
             }

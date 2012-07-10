@@ -10,6 +10,34 @@ namespace LibGeoDecomp {
 class TopologiesTest : public CxxTest::TestSuite 
 {
 public:
+    void testWrapsAxisClass()
+    {
+        typedef Topologies::Cube<2>::Topology Cube2;
+        typedef Topologies::Cube<3>::Topology Cube3;
+        typedef Topologies::Torus<2>::Topology Torus2;
+        typedef Topologies::Torus<3>::Topology Torus3;
+        typedef Topologies::NDimensional<Topologies::NDimensional<Topologies::ZeroDimensional, true>, false> MyTopo;
+
+        TS_ASSERT_EQUALS((WrapsAxis<0, Cube2>::VALUE), false);
+        TS_ASSERT_EQUALS((WrapsAxis<1, Cube2>::VALUE), false);
+
+        TS_ASSERT_EQUALS((WrapsAxis<0, Cube3>::VALUE), false);
+        TS_ASSERT_EQUALS((WrapsAxis<1, Cube3>::VALUE), false);
+        TS_ASSERT_EQUALS((WrapsAxis<2, Cube3>::VALUE), false);
+
+        TS_ASSERT_EQUALS((WrapsAxis<0, Torus2>::VALUE), true);
+        TS_ASSERT_EQUALS((WrapsAxis<1, Torus2>::VALUE), true);
+
+        TS_ASSERT_EQUALS((WrapsAxis<0, Torus3>::VALUE), true);
+        TS_ASSERT_EQUALS((WrapsAxis<1, Torus3>::VALUE), true);
+        TS_ASSERT_EQUALS((WrapsAxis<2, Torus3>::VALUE), true);
+
+        TS_ASSERT_EQUALS((WrapsAxis<0, MyTopo>::VALUE), true);
+        TS_ASSERT_EQUALS((WrapsAxis<1, MyTopo>::VALUE), false);
+
+        TS_ASSERT_EQUALS((WrapsAxis<0, MyTopo>::VALUE), MyTopo::wrapsAxis(0));
+        TS_ASSERT_EQUALS((WrapsAxis<1, MyTopo>::VALUE), MyTopo::wrapsAxis(1));
+    }
 
     void testIsOutOfBoundsCube2D()
     {
@@ -205,9 +233,11 @@ public:
     {
         Coord<2> dimensions(7, 9);
         Grid<int, Topologies::Torus<2>::Topology> g(dimensions, 0, -1);
-        for (int y = 0; y < 9; ++y)
-            for (int x = 0; x < 7; ++x)
+        for (int y = 0; y < 9; ++y) {
+            for (int x = 0; x < 7; ++x) {
                 g[Coord<2>(x, y)] = y * 10 + x;
+            }
+        }
         int actual;
 
         actual = Topologies::Torus<2>::Topology::locate(g, Coord<2>(1, 2));
@@ -248,6 +278,19 @@ public:
         typedef Topologies::NDimensional<Topologies::NDimensional<Topologies::ZeroDimensional, true>, false> MyTopo;
         TS_ASSERT_EQUALS(true,  MyTopo::wrapsAxis(0));
         TS_ASSERT_EQUALS(false, MyTopo::wrapsAxis(1));
+
+        Grid<int, MyTopo> grid(Coord<2>(7, 9), 0, -1);
+        for (int y = 0; y < 9; ++y) {
+            for (int x = 0; x < 7; ++x) {
+                grid[Coord<2>(x, y)] = y * 10 + x;
+            }
+        }
+         
+        TS_ASSERT_EQUALS(56, grid[Coord<2>(-1, 5)]);
+        TS_ASSERT_EQUALS(50, grid[Coord<2>(7, 5)]);
+
+        TS_ASSERT_EQUALS(-1, grid[Coord<2>(3, -1)]);
+        TS_ASSERT_EQUALS(-1, grid[Coord<2>(5,  9)]);
     }
 };
 
