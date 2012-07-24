@@ -6,6 +6,7 @@
 // #include <pmmintrin.h>
 #include <sys/time.h>
 #include <vector>
+#include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/grid.h>
 
 using namespace LibGeoDecomp;
@@ -126,12 +127,6 @@ public:
     {
         return 5;
     }
-};
-
-template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>
-class FixedCoord
-{
-public:
 };
 
 template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>

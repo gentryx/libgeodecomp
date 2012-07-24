@@ -8,7 +8,7 @@ function(dump_config outfile)
   file(WRITE "${outfile}.new" "#ifndef _libgeodecomp_config_h_\n\n${CONFIG_HEADER}\n#endif\n")
 
   execute_process(COMMAND cmake -E compare_files "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}" "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}.new" RESULT_VARIABLE res)
-  if(NOT (res EQUAL 0))
+  if(res GREATER 0)
     file(WRITE "${outfile}" "#ifndef _libgeodecomp_config_h_\n\n${CONFIG_HEADER}\n#endif\n")
   endif()
   

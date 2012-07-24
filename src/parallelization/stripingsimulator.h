@@ -485,7 +485,7 @@ private:
             ghostHeightUpper = 0;
             ghostHeightLower = 0;
         } else {
-            if (Topology::WrapEdges) {
+            if (Topology::WRAP_EDGES) {
                 ghostHeightUpper = 1;
                 ghostHeightLower = 1;
             } else {
@@ -513,7 +513,7 @@ private:
     {
         int lowerNeighbor;
 
-        if (Topology::WrapEdges) {
+        if (Topology::WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
             while (lowerNeighbor != mpilayer.rank() && 
@@ -534,7 +534,7 @@ private:
     {
         int upperNeighbor;
 
-        if (Topology::WrapEdges) {
+        if (Topology::WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
             while (upperNeighbor != mpilayer.rank() && 

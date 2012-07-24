@@ -35,6 +35,7 @@ class LinePointerNeighborhood
 
 class LinePointerNeighborhoodHelper
 {
+public:
     /**
      * Empty dummy
      */
