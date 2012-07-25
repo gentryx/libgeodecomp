@@ -2,6 +2,7 @@
 #define _libgeodecomp_parallelization_hiparsimulator_stepper_h_
 
 #include <boost/shared_ptr.hpp>
+#include <deque>
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
