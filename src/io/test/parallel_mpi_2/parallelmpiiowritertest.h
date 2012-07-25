@@ -43,8 +43,9 @@ public:
         simTest.run();
 
         if (MPILayer().rank() == 0) {
-            TestInitializer<3> *init = new TestInitializer<3>();
-            SerialSimulator<TestCell<3> > simReference(init);
+            TestInitializer<3> *init2 = new TestInitializer<3>();
+
+            SerialSimulator<TestCell<3> > simReference(init2);
             MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(
                 &simReference, 4);
 
