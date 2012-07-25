@@ -19,7 +19,7 @@ public:
         const int& ghostZoneWidth)
     {
         (*offset)[INDEX] = 0;
-        if (TOPOLOGY::WrapEdges) {
+        if (TOPOLOGY::WRAP_EDGES) {
             int enlargedWidth = 
                 ownBoundingBox.dimensions[INDEX] + 2 * ghostZoneWidth;
             if (enlargedWidth < simulationArea.dimensions[INDEX]) {
