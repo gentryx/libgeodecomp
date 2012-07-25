@@ -416,11 +416,21 @@ public:
 
     template<typename T>
     inline void allGather(
+        const T& source,
+        T *target,
+        const int& num,
+        const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
+    {
+        comm->Allgather(&source, num, datatype, target, num, datatype);
+    }
+        
+    template<typename T>
+    inline void allGather(
         const T& source, 
         SuperVector<T> *target, 
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        comm->Allgather(&source, 1, datatype, &(target->front()), 1, datatype);
+        allGather(source, &(target->front()), 1, datatype);
     }
 
     template<typename T>

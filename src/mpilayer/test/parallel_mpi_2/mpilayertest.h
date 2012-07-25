@@ -167,12 +167,32 @@ public:
                     TS_ASSERT_EQUALS(recvgrid[Coord<2>(x, y)].testValue, 1.1);
     }
 
-    void testAllGather()
+    void testAllGather1()
     {
         MPILayer layer;
         SuperVector<unsigned> expected;
         for (unsigned i = 0; i < layer.size(); i++) expected.push_back(i);
         SuperVector<unsigned> actual = layer.allGather(layer.rank());
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testAllGather2()
+    {
+        MPILayer layer;
+        SuperVector<unsigned> expected;
+        for (unsigned i = 0; i < layer.size(); i++) expected.push_back(i);
+        SuperVector<unsigned> actual(layer.size());
+        layer.allGather(layer.rank(), &actual[0], 1);
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testAllGather3()
+    {
+        MPILayer layer;
+        SuperVector<unsigned> expected;
+        for (unsigned i = 0; i < layer.size(); i++) expected.push_back(i);
+        SuperVector<unsigned> actual(layer.size());
+        layer.allGather(layer.rank(), &actual);
         TS_ASSERT_EQUALS(actual, expected);
     }
 
