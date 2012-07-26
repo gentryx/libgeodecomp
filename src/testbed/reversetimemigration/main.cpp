@@ -2,6 +2,7 @@
 #include <mpi.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
+#include <libgeodecomp/testbed/reversetimemigration/config.h>
 #include <libgeodecomp/testbed/reversetimemigration/cudastepperlib.h>
 
 using namespace LibGeoDecomp;
@@ -25,21 +26,19 @@ int main(int argc, char *argv[])
     SuperMap<std::string, int> hostCount;
     SuperMap<int, int> cudaIDs;
 
-    if (layer.rank() == 0) {
-        for (int i = 0; i < layer.size(); ++i) {
-            std::string name(names + i * MPI::MAX_PROCESSOR_NAME);
+    for (int i = 0; i < layer.size(); ++i) {
+        std::string name(names + i * MPI::MAX_PROCESSOR_NAME);
+        
+        int id = hostCount[name];
+        hostCount[name]++;
+        cudaIDs[i] = id;
 
-            int id = hostCount[name];
-            hostCount[name]++;
-            cudaIDs[i] = id;
-
+        if (layer.rank() == 0) {
             std::cout << "names[" << i << "] = " << name << " ID = " << id << "\n";
         }
     }
 
     int myDeviceID = cudaIDs[layer.rank()];
-    // fixme:
-    myDeviceID = 2;
 
     CudaStepperLib l;
     l.doit(myDeviceID);

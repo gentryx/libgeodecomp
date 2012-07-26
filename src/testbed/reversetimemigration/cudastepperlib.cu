@@ -4,8 +4,16 @@
 using namespace LibGeoDecomp;
 using namespace HiParSimulator;
 
+class RTMCell
+{
+public:
+    typedef Topologies::Cube<3>::Topology Topology;
+
+};
+
 void CudaStepperLib::doit(const int& deviceID)
 {
+    std::cout << "setting device " << deviceID << "\n";
     cudaSetDevice(deviceID);
-    CUDAStepper<double> stepper;
+    CUDAStepper<RTMCell> stepper;
 }
