@@ -15,9 +15,10 @@ __global__ void update(double *gridOld, double *gridNew)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int offset = y * DIM_X + x;
     for (int z = 0; z < DIM_Z; ++z) {
-        int offset = z * DIM_X * DIM_Y + y * DIM_X + x;
-        gridNew[offset] = gridOld[offset];
+        gridNew[offset] = gridOld[offset] + 1.0;
+        offset += DIM_X * DIM_Y;
     }
 }
 
@@ -36,8 +37,6 @@ public:
         cudaMalloc(&devGridOld, bytesize);
         cudaMalloc(&devGridNew, bytesize);
         checkForCUDAError();
-
-        sleep(10);
     }
     
     inline void step()
@@ -45,6 +44,7 @@ public:
         dim3 dimBlock(BLOCK_DIM_X, BLOCK_DIM_Y);
         dim3 dimGrid(GRID_DIM_X, GRID_DIM_Y);
         update<<<dimGrid, dimBlock>>>(devGridOld, devGridNew);
+        std::swap(devGridOld, devGridNew);
     }
 
     ~CUDAStepper()
@@ -54,12 +54,8 @@ public:
         cudaFree(devGridNew);
     }
 
-private:
-    double *devGridOld;
-    double *devGridNew;
-
     // fixme: move to utility class
-    void checkForCUDAError()
+    static void checkForCUDAError()
     {
         cudaError_t error = cudaGetLastError();
         if (error != cudaSuccess) {
@@ -67,6 +63,10 @@ private:
             throw std::runtime_error("CUDA error");
         }
     }
+
+private:
+    double *devGridOld;
+    double *devGridNew;
 };
 
 }

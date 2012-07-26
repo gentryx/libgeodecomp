@@ -5,10 +5,10 @@
 #define DIM_Y 256
 #define DIM_Z 512
 
-#define GRID_DIM_X 7
-#define GRID_DIM_Y 2
+#define GRID_DIM_X 28
+#define GRID_DIM_Y 16
 #define BLOCK_DIM_X 32
-#define BLOCK_DIM_Y 8
+#define BLOCK_DIM_Y 16
 
 
 #endif
