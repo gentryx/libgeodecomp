@@ -2,8 +2,10 @@
 #include <mpi.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
+#include <libgeodecomp/testbed/reversetimemigration/cudastepperlib.h>
 
 using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 int main(int argc, char *argv[])
 {
@@ -34,6 +36,13 @@ int main(int argc, char *argv[])
             std::cout << "names[" << i << "] = " << name << " ID = " << id << "\n";
         }
     }
+
+    int myDeviceID = cudaIDs[layer.rank()];
+    // fixme:
+    myDeviceID = 2;
+
+    CudaStepperLib l;
+    l.doit(myDeviceID);
 
     delete names;
     MPI_Finalize();
