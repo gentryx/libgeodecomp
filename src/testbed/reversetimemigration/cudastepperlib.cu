@@ -11,7 +11,7 @@ public:
     typedef Topologies::Cube<3>::Topology Topology;
     static int flops()
     {
-        return 1;
+        return 50;
     }
 
 };
@@ -31,7 +31,7 @@ void CudaStepperLib::doit(const int& deviceID)
 
     cudaThreadSynchronize();
     long long timeEnd = Chronometer::timeUSec();
-    double updates = 1.0 * repeats * DIM_Z * GRID_DIM_X * GRID_DIM_Y * BLOCK_DIM_X * BLOCK_DIM_Y;
+    double updates = 1.0 * repeats * (DIM_Z - 4)* GRID_DIM_X * GRID_DIM_Y * BLOCK_DIM_X * BLOCK_DIM_Y;
     double time = (timeEnd - timeStart) * 0.0000001;
     double glups = updates / time * 0.0000000001;
     double gflops = glups * RTMCell::flops();

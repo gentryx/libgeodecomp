@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     }
 
     int myDeviceID = cudaIDs[layer.rank()];
+    std::cout << "DIM_X = " << DIM_X << "\n";
 
     CudaStepperLib l;
     l.doit(myDeviceID);
