@@ -283,7 +283,7 @@ public:
         for (long t = 0; t < repeats; ++t) {
             for (int y = 1; y < dim.y() - 1; ++y) {
                 CellLibGeoDecomp *c = &(*newGrid)[Coord<2>(0, y)];
-                CellLibGeoDecomp *lines[3] = {
+                CellLibGeoDecomp *lines[9] = {
                     &(*oldGrid)[Coord<2>(-1,      y - 1)],
                     &(*oldGrid)[Coord<2>(0,       y - 1)],
                     &(*oldGrid)[Coord<2>(dim.x(), y - 1)],
@@ -387,6 +387,6 @@ int main(int argc, char *argv[])
     Benchmark<SteakInterfaceRunner>().exercise();
     // Benchmark<StreakInterfaceRunner>().exercise();
     // Benchmark<StreakInterfaceRunnerSSE>().exercise();
-    Benchmark<LibGeoDecompRunner>().exercise();
+    // Benchmark<LibGeoDecompRunner>().exercise();
     return 0;
 }

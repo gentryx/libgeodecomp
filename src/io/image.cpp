@@ -67,4 +67,4 @@ void Image::paste(const int& x, const int& y, const Image& img)
     paste(Coord<2>(x, y), img);
 }
 
-};
+}
