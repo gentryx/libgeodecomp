@@ -75,16 +75,28 @@ public:
             p.getRegion(4));
     }
 
-    void checkCuboid(SuperVector<long> weights, long node, Coord<2> expectedOffset, Coord<2> expectedDim)
+    void testDimWeights()
+    {
+        SuperVector<long> weights;
+        weights += 16, 16, 16, 16;
+        Coord<2> dim(96, 32);
+        Coord<2> dimWeights(1, 3);
+
+        checkCuboid(weights, 0, Coord<2>( 0,  0), Coord<2>(48, 16), dim, dimWeights);
+        checkCuboid(weights, 1, Coord<2>( 0, 16), Coord<2>(48, 16), dim, dimWeights);
+        checkCuboid(weights, 2, Coord<2>(48,  0), Coord<2>(48, 16), dim, dimWeights);
+        checkCuboid(weights, 3, Coord<2>(48, 16), Coord<2>(48, 16), dim, dimWeights);
+    }
+
+    void checkCuboid(SuperVector<long> weights, long node, Coord<2> expectedOffset, Coord<2> expectedDim, Coord<2> dimensions=Coord<2>(30, 20), Coord<2> dimWeights=Coord<2>::diagonal(1))
     {
         Coord<2> origin(0, 0);
-        Coord<2> dimensions(30, 20);
         RecursiveBisectionPartition<2> p(
             origin,
             dimensions,
             0,
             weights,
-            Coord<2>::diagonal(1));
+            dimWeights);
 
         TS_ASSERT_EQUALS(
             CoordBox<2>(expectedOffset, expectedDim),
