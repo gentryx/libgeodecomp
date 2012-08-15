@@ -61,11 +61,11 @@ public:
         expectedSteps += 20, 21;
 
         MemoryWriterType::GridMap grids = memoryWriter->getGrids();
-        for (MemoryWriterType::GridMap::iterator i = grids.begin(); i != grids.end(); ++i) {
-            actualSteps << i->first;
-            int globalNanoStep = i->first * TestCell<2>::nanoSteps();
+        for (MemoryWriterType::GridMap::iterator iter = grids.begin(); iter != grids.end(); ++iter) {
+            actualSteps << iter->first;
+            int globalNanoStep = iter->first * TestCell<2>::nanoSteps();
             TS_ASSERT_TEST_GRID(
-                MemoryWriterType::GridType, i->second, globalNanoStep);
+                MemoryWriterType::GridType, iter->second, globalNanoStep);
         }
 
         TS_ASSERT_EQUALS(expectedSteps, actualSteps);
@@ -107,5 +107,5 @@ private:
     MemoryWriterType *memoryWriter;
 };
 
-};
-};
+}
+}

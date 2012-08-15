@@ -85,8 +85,9 @@ private:
         // fixme: honor streak updaters here, akin to StripingSimulator
         for (typename Region<DIM>::Iterator i = region.begin(); 
              i != region.end(); 
-             ++i) 
+             ++i) {
             (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), curNanoStep);
+        }
         std::swap(oldGrid, newGrid);
 
         ++curNanoStep;
