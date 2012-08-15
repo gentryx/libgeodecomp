@@ -102,7 +102,6 @@ public:
             Link(_region, _tag, communicator),
             dest(_dest),
             cellMPIDatatype(_cellMPIDatatype)
-
         {}
 
         virtual void charge(const long& next, const long& last, const long& newStride) 
@@ -121,8 +120,7 @@ public:
 
             wait();
             GridVecConv::gridToVector(grid, &buffer, region);
-            mpiLayer.send(
-                &buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
+            mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
             long nextNanoStep = requestedNanoSteps.min() + stride;
             if ((lastNanoStep == ENDLESS) || 

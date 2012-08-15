@@ -134,7 +134,6 @@ public:
     {
     public:
         static const int VALUE = 1 * X + 3 * Y + 9 * Z + Sum<Moore, DIM - 1>::VALUE;
-;
     };
 
     template<int DIM, int X, int Y, int Z>
@@ -142,7 +141,6 @@ public:
     {
     public:
         static const int VALUE = 1 * X + 2 * Y + 3 * Z + DIM;
-;
     };
 
 private:
