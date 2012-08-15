@@ -40,7 +40,7 @@ public:
 
     /**
      * Reset the start time of the current cycle and flush all the
-     * woking times \f$w_i\f$, @returns \f$f\f$.
+     * working times \f$w_i\f$, @returns \f$f\f$.
      */
     double nextCycle();
 
