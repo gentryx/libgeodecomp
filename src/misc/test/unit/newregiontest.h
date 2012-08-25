@@ -88,6 +88,20 @@ public:
         TS_ASSERT_EQUALS(r.indices[0].size(), 3);
         TS_ASSERT_EQUALS(r.indices[1].size(), 2);
         TS_ASSERT_EQUALS(r.indices[2].size(), 2);
+
+        r >> Streak<3>(Coord<3>(35, 21, 29), 60);
+        TS_ASSERT_EQUALS(r.indices[0].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+
+        TS_ASSERT_EQUALS(r.indices[1][0].second, 0);
+        TS_ASSERT_EQUALS(r.indices[2][0].second, 0);
+        
+        r >> Streak<3>(Coord<3>(10, 20, 30), 15);
+
+        TS_ASSERT_EQUALS(r.indices[0].size(), 0);
+        TS_ASSERT_EQUALS(r.indices[1].size(), 0);
+        TS_ASSERT_EQUALS(r.indices[2].size(), 0);
     }
 
     void testStreakIterator()
@@ -129,22 +143,14 @@ public:
         }
         TS_ASSERT_EQUALS(actual, expected);
 
-        std::cout << "----------------------------------------------------------\n";
-
         newStreak = Streak<3>(Coord<3>(10, 20, 11), 20);
         expected << newStreak;
         r << newStreak;
-        std::cout << "----------------------------------------------------------\n";
         TS_ASSERT_EQUALS(4, r.size());
         actual.clear();
-        std::cout << "----------------------------------------------------------\n";
         for (NewRegion<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
-            std::cout << "actuak: " << *i << "\n";
         }
-        std::cout << "expected: " << expected << "\n";
-        std::cout << "actual: " << actual << "\n";
-        std::cout << "r: " << r << "\n";
         TS_ASSERT_EQUALS(actual, expected);
     }
 

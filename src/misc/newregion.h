@@ -93,7 +93,7 @@ protected:
 
     inline void incRemainder(const VecType::iterator& start, const VecType::iterator& end, const int& inserts)
     {
-        std::cout << "incrementing...\n";
+        std::cout << "incrementing by " << inserts << "...\n";
         if (inserts == 0) {
             return;
         }
@@ -479,9 +479,10 @@ public:
         if ((nextLevelStart - nextLevelEnd) == inserts) {
             entry = indices.erase(entry);
             myInserts = -1;
+        } else {
+            ++entry;
         }
 
-        ++entry;
         incRemainder(entry, indices.end(), inserts);
         return myInserts;
     }
