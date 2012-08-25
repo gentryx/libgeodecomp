@@ -190,13 +190,64 @@ public:
             return &streak;
         }
 
+        inline bool endReached() const
+        {
+            return iterators[0] == region->indices[0].end();
+        }
+
     private:
         VecType::const_iterator iterators[DIM];
         Streak<DIM> streak;
         const NewRegion<DIM> *region;
     };
 
+    class Iterator : public std::iterator<std::forward_iterator_tag, 
+                                          const Coord<DIM> >
+    {
+    public:
+        inline Iterator(const StreakIterator& _streakIterator) :
+            streakIterator(_streakIterator)
+        {
+            cursor = _streakIterator->origin;
+        }
+        
+        inline void operator++()
+        {
+            cursor.x()++;
+            if (cursor.x() >= streakIterator->endX) {
+                ++streakIterator;
+                cursor = streakIterator->origin;   
+            }             
+        }
+
+        inline bool operator==(const Iterator& other) const
+        {
+            return streakIterator == other.streakIterator &&
+                (streakIterator.endReached() || cursor == other.cursor);
+        }
+            
+        inline bool operator!=(const Iterator& other) const
+        {
+            return !(*this == other);
+        }
+        
+        inline const Coord<DIM>& operator*() const
+        {
+            return cursor;
+        }
+
+        inline const Coord<DIM> *operator->() const
+        {
+            return &cursor;
+        }
+
+    private:
+        StreakIterator streakIterator;
+        Coord<DIM> cursor;
+    };
+
     inline NewRegion() :
+        mySize(0),
         geometryCacheTainted(false)
     {}
 
@@ -274,6 +325,16 @@ public:
         StreakIterator ret(this);
         StreakIteratorHelper<DIM - 1>().initEnd(&ret.streak, ret.iterators, indices);
         return ret;
+    }
+
+    inline Iterator begin() const
+    {
+        return Iterator(beginStreak());
+    }
+    
+    inline Iterator end() const
+    {
+        return Iterator(endStreak());
     }
 
 private:

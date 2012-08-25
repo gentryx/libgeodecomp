@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
 class NewRegionTest : public CxxTest::TestSuite 
 {
 public:
-    void testInsert()
+    void testInsert3D()
     {
         NewRegion<3> r;
         TS_ASSERT_EQUALS(r.indices[0].size(), 0);
@@ -56,7 +56,7 @@ public:
         TS_ASSERT_EQUALS(r.indices[2].size(), 3);
     }
 
-    void testRemove()
+    void testRemove3D()
     {
         NewRegion<3> r;
         TS_ASSERT_EQUALS(r.size(), 0);
@@ -164,6 +164,27 @@ public:
         TS_ASSERT_EQUALS(actual, expected);
     }
 
+    void testNormalIterator()
+    {
+        SuperVector<Coord<3> > expected;
+        SuperVector<Coord<3> > actual;
+
+        NewRegion<3> r;
+        r << Streak<3>(Coord<3>(10, 20, 30), 40);
+        r << Streak<3>(Coord<3>(50, 60, 70), 80);
+        for (NewRegion<3>::Iterator i = r.begin(); i != r.end(); ++i) {
+            actual << *i;
+        }
+
+        for (int i = 10; i < 40; ++i) {
+            expected << Coord<3>(i, 20, 30);
+        }
+        for (int i = 50; i < 80; ++i) {
+            expected << Coord<3>(i, 60, 70);
+        }
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
 };
 
 }
