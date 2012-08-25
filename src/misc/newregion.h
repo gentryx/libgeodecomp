@@ -27,8 +27,6 @@ public:
         if (vectors[DIM].size() > 0) {
             streak->origin[DIM] = vectors[DIM][0].first;
         }
-
-        std::cout << "initBegin(" << (iterators[DIM] - vectors[DIM].begin()) << ")\n";
     }
 
     template<int STREAK_DIM>
@@ -36,13 +34,10 @@ public:
     {
         StreakIteratorHelper<DIM - 1>().initEnd(streak, iterators, vectors);
         iterators[DIM] = vectors[DIM].end();
-        std::cout << "initEnd(" << (iterators[DIM] - vectors[DIM].begin()) << ")\n";
     }
 
     inline bool compareIterators(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
-        std::cout << "compareIterators<" << DIM << "> = " << (a[DIM] == b[DIM]) << "\n";
-
         if (a[DIM] != b[DIM]) {
             return false;
         }
@@ -67,20 +62,16 @@ public:
             streak->endX = vectors[0][0].second;
             streak->origin[0] = vectors[0][0].first;
         }
-
-        std::cout << "initBegin(" << (iterators[0] - vectors[0].begin()) << ")\n";
     }
 
     template<int STREAK_DIM>
     inline void initEnd(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
         iterators[0] = vectors[0].end();
-        std::cout << "initEnd(" << (vectors[0].end() - vectors[0].begin()) << ")\n";
     }
 
     inline bool compareIterators(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
-        std::cout << "compareIterators<" << 0 << "> = " << (a[0] == b[0]) << "\n";
         return a[0] == b[0];
     }
 };
@@ -93,7 +84,6 @@ protected:
 
     inline void incRemainder(const VecType::iterator& start, const VecType::iterator& end, const int& inserts)
     {
-        std::cout << "incrementing by " << inserts << "...\n";
         if (inserts == 0) {
             return;
         }
@@ -141,11 +131,6 @@ public:
 
         inline void operator++()
         {
-            std::cout << "operator++\n";
-            for (int i = 0; i < DIM; ++i) {
-                std::cout << "  preInc(" << (iterators[i] - region->indices[i].begin()) << ")\n";
-            }
-
             ++iterators[0];
             streak.origin[0] = iterators[0]->first;
             streak.endX = iterators[0]->second;
@@ -159,12 +144,11 @@ public:
             for (int i = 1; i < DIM; ++i) {
                 VecType::const_iterator nextEnd = 
                     region->indices[i - 1].begin() + (iterators[i] + 1)->second;
-                std::cout << "nextEnd(" << i << ") = " << ((iterators[i] + 1)->second) << "\n";
+;
                 if (iterators[i - 1] != nextEnd) {
                     return;
                 }
 
-                std::cout << "incing " << i << "\n";
                 ++iterators[i];
                 streak.origin[i] = iterators[i]->first;
             }
@@ -397,10 +381,7 @@ public:
     template<int MY_DIM>
     int operator()(NewRegion<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
     {
-        std::cout << "operator(" << start << ", " << end << ")\n";
-        std::cout << "at " << DIM << "\n";
         int c = s.origin[DIM];
-        std::cout << "searching...\n";
         VecType& indices = region->indices[DIM];
 
         VecType::iterator i = 
@@ -410,8 +391,6 @@ public:
                 IntPair(c, 0), 
                 PairCompareFirst);
 
-        std::cout << "  delta: " << (i - indices.begin()) << "\n";
-
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
 
@@ -419,11 +398,9 @@ public:
         if (i != (indices.begin() + start)) {
             VecType::iterator entry = i;
             --entry;
-            std::cout << "nextLevelStart1 = " << nextLevelStart << "\n";
 
             // short-cut: no need to insert if index already present
             if (entry->first == c) {
-                std::cout << "  found it\n";
                 nextLevelStart = entry->second;
                 nextLevelEnd = region->indices[DIM - 1].size();
                 if (i != indices.end()) {
@@ -440,26 +417,20 @@ public:
             }
         } 
 
-        std::cout << "  mark1\n";
         if (i != indices.end()) {
-            std::cout << "  mark2\n";
             nextLevelStart = i->second;
         } else {
-            std::cout << "  mark3\n";
             nextLevelStart = region->indices[DIM - 1].size();
         }
         
         nextLevelEnd = nextLevelStart;
-        std::cout << "nextLevelStart2 = " << nextLevelStart << "\n";
         
         VecType::iterator followingEntries;
 
         if (i == indices.end()) {
-            std::cout << "inserting1...\n";
             indices << IntPair(c, nextLevelStart);
             followingEntries = indices.end();
         } else {
-            std::cout << "inserting2...\n";
             followingEntries = indices.insert(i, IntPair(c, nextLevelStart));
             ++followingEntries;
         }
@@ -481,7 +452,6 @@ public:
     template<int MY_DIM>
     inline int operator()(NewRegion<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
     {
-        std::cout << "operator(" << start << ", " << end << ")\n";
         IntPair curStreak(s.origin.x(), s.endX);
         VecType& indices = region->indices[0];
 
@@ -516,7 +486,6 @@ public:
         }
         
         indices.insert(cursor, curStreak);
-        std::cout << "fin\n";
         return inserts;
     }
 
@@ -556,9 +525,7 @@ public:
     template<int MY_DIM>
     int operator()(NewRegion<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
     {
-        std::cout << "at " << DIM << "\n";
         int c = s.origin[DIM];
-        std::cout << "searching...\n";
         VecType& indices = region->indices[DIM];
 
         VecType::iterator i = 
@@ -618,9 +585,7 @@ public:
     template<int MY_DIM>
     int operator()(NewRegion<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
     {
-        std::cout << "at " << 0 << "\n";
         int c = s.origin[0];
-        std::cout << "searching...\n";
         VecType& indices = region->indices[0];
         int inserts = 0;
 
