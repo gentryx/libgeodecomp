@@ -19,7 +19,7 @@ public:
     typedef SuperVector<IntPair> VecType;
     
     template<int STREAK_DIM>
-    inline void initBegin(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, VecType *vectors)
+    inline void initBegin(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
         StreakIteratorHelper<DIM - 1>().initBegin(streak, iterators, vectors);
         iterators[DIM] = vectors[DIM].begin();
@@ -32,7 +32,7 @@ public:
     }
 
     template<int STREAK_DIM>
-    inline void initEnd(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, VecType *vectors)
+    inline void initEnd(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
         StreakIteratorHelper<DIM - 1>().initEnd(streak, iterators, vectors);
         iterators[DIM] = vectors[DIM].end();
@@ -59,7 +59,7 @@ public:
     typedef SuperVector<IntPair> VecType;
     
     template<int STREAK_DIM>
-    inline void initBegin(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, VecType *vectors)
+    inline void initBegin(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
         iterators[0] = vectors[0].begin();
 
@@ -72,7 +72,7 @@ public:
     }
 
     template<int STREAK_DIM>
-    inline void initEnd(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, VecType *vectors)
+    inline void initEnd(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
         iterators[0] = vectors[0].end();
         std::cout << "initEnd(" << (vectors[0].end() - vectors[0].begin()) << ")\n";
@@ -185,11 +185,39 @@ public:
             return streak;
         }
 
+        inline const Streak<DIM> *operator->() const
+        {
+            return &streak;
+        }
+
     private:
         VecType::const_iterator iterators[DIM];
         Streak<DIM> streak;
         const NewRegion<DIM> *region;
     };
+
+    inline NewRegion() :
+        geometryCacheTainted(false)
+    {}
+
+    inline const CoordBox<DIM>& boundingBox() const
+    {
+        if (geometryCacheTainted)
+            resetGeometryCache();
+        return myBoundingBox;
+    }
+
+    inline const long& size() const
+    {
+        if (geometryCacheTainted)
+            resetGeometryCache();
+        return mySize;
+    }
+
+    inline const unsigned numStreaks() const
+    {
+        return indices[0].size();
+    }
 
     inline NewRegion& operator<<(const Streak<DIM>& s)
     {
@@ -198,6 +226,7 @@ public:
             return *this;
         }
 
+        geometryCacheTainted = true;
         NewRegionInsertHelper<DIM - 1>()(this, s);
         return *this;
     }
@@ -209,6 +238,7 @@ public:
             return *this;
         }
 
+        geometryCacheTainted = true;
         NewRegionRemoveHelper<DIM - 1>()(this, s);
         return *this;
     }
@@ -232,27 +262,56 @@ public:
         return (indices[0].size() == 0);
     }
 
-    inline StreakIterator beginStreak() 
+    inline StreakIterator beginStreak() const
     {
         StreakIterator ret(this);
         StreakIteratorHelper<DIM - 1>().initBegin(&ret.streak, ret.iterators, indices);
         return ret;
     }
 
-    inline StreakIterator endStreak() 
+    inline StreakIterator endStreak() const
     {
         StreakIterator ret(this);
         StreakIteratorHelper<DIM - 1>().initEnd(&ret.streak, ret.iterators, indices);
         return ret;
     }
 
-    inline const long size() const
-    {
-        return indices[0].size();
-    }
-
 private:
     VecType indices[DIM];
+    mutable CoordBox<DIM> myBoundingBox;
+    mutable long mySize;
+    mutable bool geometryCacheTainted;
+
+    inline void determineGeometry() const
+    {
+        if (empty()) {
+            myBoundingBox = CoordBox<DIM>();
+        } else {
+            const Streak<DIM>& someStreak = *beginStreak();
+            Coord<DIM> min = someStreak.origin;
+            Coord<DIM> max = someStreak.origin;
+
+            mySize = 0;
+            for (StreakIterator i = beginStreak(); 
+                 i != endStreak(); ++i) {
+                Coord<DIM> left = i->origin;
+                Coord<DIM> right = i->origin;
+                right.x() = i->endX - 1;
+
+                min = min.min(left);
+                max = max.max(right);
+                mySize += i->endX - i->origin.x();
+            }
+            myBoundingBox = 
+                CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
+        }
+    }
+
+    inline void resetGeometryCache() const
+    {
+        determineGeometry();       
+        geometryCacheTainted = false;
+    }
 };
 
 bool PairCompareFirst(const std::pair<int, int>& a, const std::pair<int, int>& b)

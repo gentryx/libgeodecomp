@@ -59,10 +59,16 @@ public:
     void testRemove()
     {
         NewRegion<3> r;
+        TS_ASSERT_EQUALS(r.size(), 0);
+        TS_ASSERT_EQUALS(r.boundingBox(), CoordBox<3>(Coord<3>(), Coord<3>()));
+
         r << Streak<3>(Coord<3>(10, 20, 30), 40);
         TS_ASSERT_EQUALS(r.indices[0].size(), 1);
         TS_ASSERT_EQUALS(r.indices[1].size(), 1);
         TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+        TS_ASSERT_EQUALS(r.size(), 30);
+        TS_ASSERT_EQUALS(r.boundingBox(), 
+                         CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(30, 1, 1)));
 
         r >> Streak<3>(Coord<3>(15, 20, 30), 35);
         TS_ASSERT_EQUALS(r.indices[0].size(), 2);
@@ -116,7 +122,8 @@ public:
         Streak<3> newStreak(Coord<3>(10, 10, 10), 20);
         r << newStreak;
         TS_ASSERT_EQUALS(newStreak, *r.beginStreak());
-        TS_ASSERT_EQUALS(1, r.size());
+        TS_ASSERT_EQUALS(1, r.numStreaks());
+        TS_ASSERT_EQUALS(10, r.size());
         for (NewRegion<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
         }
@@ -126,7 +133,8 @@ public:
         newStreak = Streak<3>(Coord<3>(10, 20, 10), 20);
         expected << newStreak;
         r << newStreak;
-        TS_ASSERT_EQUALS(2, r.size());
+        TS_ASSERT_EQUALS(2, r.numStreaks());
+        TS_ASSERT_EQUALS(20, r.size());
         actual.clear();
         for (NewRegion<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
@@ -136,7 +144,8 @@ public:
         newStreak = Streak<3>(Coord<3>(30, 20, 10), 40);
         expected << newStreak;
         r << newStreak;
-        TS_ASSERT_EQUALS(3, r.size());
+        TS_ASSERT_EQUALS(3, r.numStreaks());
+        TS_ASSERT_EQUALS(30, r.size());
         actual.clear();
         for (NewRegion<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
@@ -146,7 +155,8 @@ public:
         newStreak = Streak<3>(Coord<3>(10, 20, 11), 20);
         expected << newStreak;
         r << newStreak;
-        TS_ASSERT_EQUALS(4, r.size());
+        TS_ASSERT_EQUALS(4, r.numStreaks());
+        TS_ASSERT_EQUALS(40, r.size());
         actual.clear();
         for (NewRegion<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
