@@ -328,7 +328,7 @@ public:
         // replace the < operator by >= but rather by <=, which is
         // IMO really sick...
         if (cursor != line.begin()) {
-            // ...so we revert to landing one past the streak we're
+            // ...so we resort to landing one past the streak we're
             // searching and moving back afterwards:
             cursor--;
         }
@@ -384,11 +384,12 @@ public:
                      ++i)
                     line[i->origin.x()] = *i;
             } else {
-                cursor++;
+                ++cursor;
             }
                 
-            if (cursor == line.end() || !intersect(cursor->second, streak))
+            if (cursor == line.end() || !intersect(cursor->second, streak)) {
                 break;
+            }
         }
 
         if (line.empty())
