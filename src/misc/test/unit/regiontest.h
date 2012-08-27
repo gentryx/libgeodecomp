@@ -838,6 +838,28 @@ public:
         TS_ASSERT_EQUALS(mergerFL - leftCube,  frontCube);
     }
 
+    void testBig3D()
+    {
+        // std::cout << "MARK1------------------------------\n"
+        //           << "sizeof(SuperMap<int, Streak<3> >) = " << sizeof(SuperMap<int, Streak<3> >) << "\n"
+        //           << "sizeof(Streak<3>) = " << sizeof(Streak<3>) << "\n";
+        // Region<3> region;
+        // Coord<3> dim(2000, 2000, 1427);
+        // for (int z = 0; z < dim.z(); ++z) {
+        //     for (int y = 0; y < dim.y(); ++y) {
+        //         region << Streak<3>(Coord<3>(0, y, z), dim.x());
+        //     }
+        // }
+        // std::cout << region.boundingBox() << "\n";
+
+        // std::cout << "MARK2------------------------------\n";
+        // Region<3> expanded = region.expandWithTopology(
+        //     1, 
+        //     dim,
+        //     Topologies::Cube<3>::Topology());
+        // std::cout << expanded.boundingBox() << "\n";
+    }
+
     // fixme: move to performance test
     // void testBenchStriping()
     // {
