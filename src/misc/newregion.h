@@ -117,7 +117,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
-    class StreakIterator
+    class StreakIterator : public std::iterator<std::forward_iterator_tag, const Streak<DIM> >
     {
         template<int> friend class InitIterators;
         template<int> friend class NewRegion;
@@ -194,7 +194,7 @@ public:
         {
             cursor = _streakIterator->origin;
         }
-        
+
         inline void operator++()
         {
             cursor.x()++;
@@ -235,6 +235,32 @@ public:
         geometryCacheTainted(false)
     {}
 
+    template<class ITERATOR1, class ITERATOR2>
+    inline NewRegion(const ITERATOR1& start, const ITERATOR2& end) :
+        mySize(0),
+        geometryCacheTainted(false)
+    {
+        load(start, end);
+    }
+
+    template<class ITERATOR1, class ITERATOR2>
+    inline void load(const ITERATOR1& start, const ITERATOR2& end)
+    {
+        for (ITERATOR1 i = start; i != end; ++i) {
+            *this << *i;
+        }
+    }
+
+    inline void clear()
+    {
+        for (int i = 0; i < DIM; ++i) {
+            indices[i].clear();
+        }
+        mySize = 0;
+        myBoundingBox = CoordBox<DIM>();
+        geometryCacheTainted = false;
+    }
+
     inline const CoordBox<DIM>& boundingBox() const
     {
         if (geometryCacheTainted)
@@ -254,6 +280,76 @@ public:
         return indices[0].size();
     }
 
+    inline NewRegion expand(const unsigned& width=1) const
+    {
+        NewRegion ret;
+        Coord<DIM> dia = Coord<DIM>::diagonal(width);
+
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+            Streak<DIM> streak = *i;
+
+            Coord<DIM> boxOrigin = streak.origin - dia;
+            Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
+            boxDim.x() = 1;
+            int endX = streak.endX + width;
+            CoordBox<DIM> box(boxOrigin, boxDim);
+
+            for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+                ret << Streak<DIM>(*i, endX);
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * does the same as expand, but will wrap overlap at edges
+     * correctly. The instance of the TOPOLOGY is actually unused, but
+     * without it g++ would complain...
+     */
+    template<typename TOPOLOGY>
+    inline NewRegion expandWithTopology(
+        const unsigned& width, 
+        const Coord<DIM>& dimensions, 
+        TOPOLOGY /* unused */) const
+    {
+        NewRegion ret;
+        Coord<DIM> dia = Coord<DIM>::diagonal(width);
+
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+            Streak<DIM> streak = *i;
+
+            Coord<DIM> boxOrigin = streak.origin - dia;
+            Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
+            boxDim.x() = 1;
+            int endX = streak.endX + width;
+            CoordBox<DIM> box(boxOrigin, boxDim);
+
+            for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+                Streak<DIM> newStreak(*i, endX);
+                if (TOPOLOGY::wrapsAxis(0)) {
+                    splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
+                } else {
+                    normalizeStreak<TOPOLOGY>(
+                        trimStreak(newStreak, dimensions), &ret, dimensions);
+                }
+            }
+        }
+
+        return ret;
+    }
+       
+    inline bool operator==(const NewRegion<DIM>& other) const
+    {
+        for (int i = 0; i < DIM; ++i) {
+            if (indices[i] != other.indices[i]) {
+                return false;
+            }
+        }
+            
+        return true;
+    }
+
     inline NewRegion& operator<<(const Streak<DIM>& s)
     {
         //ignore 0 length streaks
@@ -263,6 +359,24 @@ public:
 
         geometryCacheTainted = true;
         NewRegionInsertHelper<DIM - 1>()(this, s);
+        return *this;
+    }
+
+    inline NewRegion& operator<<(const Coord<DIM>& c)
+    {
+        *this << Streak<DIM>(c, c.x() + 1);
+        return *this;
+    }
+
+    inline NewRegion& operator<<(CoordBox<DIM> box)
+    {
+        int width = box.dimensions.x();
+        box.dimensions.x() = 1;
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            *this << Streak<DIM>(*i, i->x() + width);
+        }
+        
         return *this;
     }
 
@@ -278,6 +392,61 @@ public:
         return *this;
     }
 
+    inline NewRegion& operator>>(const Coord<DIM>& c)
+    { 
+        *this >> Streak<DIM>(c, c.x() + 1);
+        return *this;
+    }
+
+    inline void operator-=(const NewRegion& other) 
+    {
+        for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
+            *this >> *i;
+        }
+    }
+    
+    inline NewRegion operator-(const NewRegion& other) const
+    {
+        NewRegion ret(*this);
+        ret -= other;
+        return ret;
+    }
+    
+    inline void operator&=(const NewRegion& other) 
+    {
+        NewRegion excess(*this);
+        excess -= other;
+        *this -= excess;
+    }
+    
+    inline NewRegion operator&(const NewRegion& other) const
+    {
+        NewRegion ret(*this);
+        ret &= other;
+        return ret;
+    }
+
+    inline void operator+=(const NewRegion& other)
+    {
+        for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
+            *this << *i;
+        }
+    }
+
+    inline NewRegion operator+(const NewRegion& other) const
+    {
+        NewRegion ret(*this);
+        ret += other;
+        return ret;
+    }
+
+    inline SuperVector<Streak<DIM> > toVector() const
+    {
+        SuperVector<Streak<DIM> > ret(numStreaks());
+        std::copy(beginStreak(), endStreak(), ret.begin());
+        return ret;
+    }
+    
     inline std::string toString() const
     {
         std::ostringstream buf;
@@ -356,6 +525,74 @@ private:
     {
         determineGeometry();       
         geometryCacheTainted = false;
+    }
+
+    inline Streak<DIM> trimStreak(
+        const Streak<DIM>& s, 
+        const Coord<DIM>& dimensions) const
+    {
+        int width = dimensions.x();
+        Streak<DIM> buf = s;
+        buf.origin.x() = std::max(buf.origin.x(), 0);
+        buf.endX = std::min(width, buf.endX);
+        return buf;
+    }
+
+    template<typename TOPOLOGY>
+    void splitStreak(
+        const Streak<DIM>& streak, 
+        NewRegion *target, 
+        const Coord<DIM>& dimensions) const 
+    {
+        int width = dimensions.x();
+
+        int currentX = streak.origin.x();
+        if (currentX < 0) {
+            Streak<DIM> section = streak;
+            section.endX = std::min(streak.endX, 0);
+            currentX = section.endX;
+
+            // normalize left overhang
+            section.origin.x() += width;
+            section.endX += width;
+            normalizeStreak<TOPOLOGY>(section, target, dimensions);
+        }
+
+        if (currentX < streak.endX) {
+            Streak<DIM> section = streak;
+            section.origin.x() = currentX;
+            section.endX = std::min(streak.endX, width);
+            currentX = section.endX;
+
+            normalizeStreak<TOPOLOGY>(section, target, dimensions);
+        }
+
+        if (currentX < streak.endX) {
+            Streak<DIM> section = streak;
+            section.origin.x() = currentX;
+
+            // normalize right overhang
+            section.origin.x() -= width;
+            section.endX -= width;
+            normalizeStreak<TOPOLOGY>(section, target, dimensions);
+        }
+    }
+    
+    template<typename TOPOLOGY>
+    void normalizeStreak(
+        const Streak<DIM>& streak, 
+        NewRegion *target, 
+        const Coord<DIM>& dimensions) const
+    {
+        Streak<DIM> ret;
+        ret.origin = TOPOLOGY::normalize(streak.origin, dimensions);
+        ret.endX = ret.origin.x() + streak.length();
+
+        // it's bad to use a magic value to check for out of bounds
+        // accesses, but throwing exceptions would be slower
+        if (ret.origin != Coord<DIM>::diagonal(-1)) {
+            (*target) << ret;
+        }
     }
 };
 
@@ -445,6 +682,7 @@ public:
 template<>
 class NewRegionInsertHelper<0>
 {
+    friend class NewRegionTest;
 public:
     typedef NewRegion<1>::IntPair IntPair;
     typedef NewRegion<1>::VecType VecType;
@@ -470,7 +708,8 @@ public:
 
         int inserts = 1;
 
-        while (cursor != (indices.begin() + end)) {
+        while ((cursor != (indices.begin() + end)) &&
+               (curStreak.second >= cursor->first)) {
             if (intersectOrTouch(*cursor, curStreak)) {
                 curStreak = fuse(*cursor, curStreak);
                 cursor = indices.erase(cursor);
@@ -480,7 +719,8 @@ public:
                 cursor++;
             }
                 
-            if ((cursor == (indices.begin() + end)) || (!intersectOrTouch(*cursor, curStreak))) {
+            if ((cursor == (indices.begin() + end)) || 
+                (!intersectOrTouch(*cursor, curStreak))) {
                 break;
             }
         }
@@ -578,6 +818,7 @@ public:
 template<>
 class NewRegionRemoveHelper<0>
 {
+    friend class NewRegionTest;
 public:
     typedef NewRegion<1>::IntPair IntPair;
     typedef NewRegion<1>::VecType VecType;
@@ -632,7 +873,6 @@ public:
     }
 
 private:
-
     inline bool intersect(const IntPair& a, const IntPair& b) const
     {
         return 
