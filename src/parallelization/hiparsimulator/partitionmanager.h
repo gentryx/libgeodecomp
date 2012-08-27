@@ -189,14 +189,10 @@ private:
 
     inline void fillRegion(const unsigned& node)
     {
-        std::cout << "fillRegion(" << node << ") {\n";
         SuperVector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
-        std::cout << "fillRegion@MARK1\n";
         regionExpansion[0] = partition->getRegion(node);
-        std::cout << "fillRegion@MARK2\n";
         for (int i = 1; i <= getGhostZoneWidth(); ++i) {
-            std::cout << "fillRegion@MARK3 " << i << "\n";
             Region<DIM> expanded;
             const Region<DIM>& reg = regionExpansion[i - 1];
             expanded = reg.expandWithTopology(
@@ -205,7 +201,6 @@ private:
                 Topology());
             regionExpansion[i] = expanded;
         }
-        std::cout << "fillRegion(" << node << ") }\n";
     }
 
     inline void fillOwnRegion()
