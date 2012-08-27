@@ -1,5 +1,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
 using namespace boost::assign;
@@ -161,23 +162,70 @@ public:
         partitionManager.resetGhostZones(boundingBoxes);
         
         Region<3> expected;
-        for (int z = 0; z < 3; ++z)
-            for (int y = 0; y < 47; ++y)
+        for (int z = 0; z < 3; ++z) {
+            for (int y = 0; y < 47; ++y) {
                 expected << Streak<3>(Coord<3>(0, y, z), 55);
-        for (int y = 0; y < 40; ++y)
+            }
+        }
+
+        for (int y = 0; y < 40; ++y) {
             expected << Streak<3>(Coord<3>(0, y, 3), 55);
+        }
+
         expected << Streak<3>(Coord<3>(0,  40, 3), 45);
         TS_ASSERT_EQUALS(expected, partitionManager.innerSet(0));
 
         expected.clear();
-        for (int z = 1; z < 2; ++z)
-            for (int y = 0; y < 47; ++y)
+        for (int z = 1; z < 2; ++z) {
+            for (int y = 0; y < 47; ++y) {
                 expected << Streak<3>(Coord<3>(0, y, z), 55);
-        for (int y = 1; y < 39; ++y)
+            }
+        }
+
+        for (int y = 1; y < 39; ++y) {
             expected << Streak<3>(Coord<3>(0, y, 2), 55);
+        }
+
         expected << Streak<3>(Coord<3>(1,  39, 2), 44);
         TS_ASSERT_EQUALS(expected, partitionManager.innerSet(1));
     }
+
+    void testBig3D()
+    {
+        // std::cout << "testBig3D start\n";
+
+        // int ghostZoneWidth = 3;
+        // CoordBox<3> box(Coord<3>(), Coord<3>(4000, 1000, 1000));
+        // SuperVector<long> weights;
+        // weights += 1000000000, 1000000000, 1000000000, 1000000000;
+        
+        // Partition<3> *partition = 
+        //     new RecursiveBisectionPartition<3>(Coord<3>(), box.dimensions, 0, weights);
+        // std::cout << "creating PartitionManager\n";
+
+        // PartitionManager<3, Topologies::Torus<3>::Topology> myPartitionManager;
+
+        // std::cout << "resetting regions\n";
+        // myPartitionManager.resetRegions(
+        //     box, 
+        //     partition,
+        //     0,
+        //     ghostZoneWidth);
+        // SuperVector<CoordBox<3> > boundingBoxes;
+        // for (int i = 0; i < 4; ++i) {
+        //     std::cout << "getting region " << i << "\n";
+
+        //     boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
+        // }
+
+        // myPartitionManager.resetGhostZones(boundingBoxes);
+
+        // for (int i = 0; i < 4; ++i) {
+        //     std::cout << "boundingBox[" << i << "] = \n"
+        //               << myPartitionManager.getRegion(i, 0).boundingBox() << "\n";
+        // }
+        // std::cout << "testBig3D end\n";
+     }
 
 private:
     Coord<2> dimensions;
@@ -217,7 +265,7 @@ private:
         
         return boundingBoxes;
     }
-   
+
     template<class PARTITION>
     void checkRegion(
         const Region<2>& region, 
