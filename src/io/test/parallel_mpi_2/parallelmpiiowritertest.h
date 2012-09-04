@@ -8,6 +8,8 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
+#include <libgeodecomp/misc/random.h>
+
 using namespace LibGeoDecomp; 
 
 namespace LibGeoDecomp {
@@ -25,8 +27,9 @@ public:
 
     void tearDown()
     {
-        for (int i = 0; i < files.size(); ++i)          
+        for (int i = 0; i < files.size(); ++i) {
             boost::filesystem::remove(files[i]);
+        }
     }
 
     void testBasic() 

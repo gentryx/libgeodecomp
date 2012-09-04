@@ -7,6 +7,7 @@
 #include <libgeodecomp/io/mpiiowriter.h>
 #include <libgeodecomp/io/parallelmpiiowriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
@@ -28,9 +29,11 @@ public:
 
     void tearDown()
     {
-        if (rank == 0) 
-            for (int i = 0; i < files.size(); ++i)          
+        if (rank == 0) {
+            for (int i = 0; i < files.size(); ++i) {
                 boost::filesystem::remove(files[i]);
+            }
+        }
     }
     
     void testBasic()
@@ -91,7 +94,6 @@ public:
             TS_ASSERT_EQUALS(expected, actual);
         }
     }
-
 };
 
 }
