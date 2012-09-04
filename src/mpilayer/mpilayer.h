@@ -259,7 +259,7 @@ public:
                                 const int& tag,
                                 const MPI::Datatype& datatype)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             recv(&(*stripe).at(i->origin), src, i->length(), tag, datatype);
         }
     }
@@ -271,7 +271,7 @@ public:
                                 const int& tag,
                                 const MPI::Datatype& datatype)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             send(&(*stripe).at(i->origin), dest, i->length(), tag, datatype);
         }
     }
@@ -525,7 +525,7 @@ private:
     class StreakToAddressTranslatingIterator
     {
     public:
-        inline StreakToAddressTranslatingIterator(const GRID_TYPE *_grid, StreakIterator<DIM> _iter) :
+        inline StreakToAddressTranslatingIterator(const GRID_TYPE *_grid, typename Region<DIM>::StreakIterator _iter) :
             grid(_grid),
             iter(_iter)
         {}
@@ -542,14 +542,14 @@ private:
 
     private:
         const GRID_TYPE *grid;
-        StreakIterator<DIM> iter;
+        typename Region<DIM>::StreakIterator iter;
     };
 
     template<int DIM>
     class StreakToLengthTranslatingIterator 
     {
     public:
-        inline StreakToLengthTranslatingIterator(StreakIterator<DIM> _iter) :
+        inline StreakToLengthTranslatingIterator(typename Region<DIM>::StreakIterator _iter) :
             iter(_iter)
         {}
 
@@ -564,7 +564,7 @@ private:
         }
 
     private:
-        StreakIterator<DIM> iter;
+        typename Region<DIM>::StreakIterator iter;
     };
 
     static bool addressLower(ChunkSpec a, ChunkSpec b)

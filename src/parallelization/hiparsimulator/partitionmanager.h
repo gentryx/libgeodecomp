@@ -14,8 +14,6 @@ namespace HiParSimulator {
 // fixme: get rid of DIM, deduce it from TOPOLOGY
 template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
 class PartitionManager {
-    template<int> friend class RimMarker;
-    template<int> friend class InnerSetMarker;
     friend class HiParSimulatorTest;
     friend class PartitionManagerTest;
     friend class VanillaStepperTest;
@@ -35,6 +33,20 @@ public:
         resetGhostZones(SuperVector<CoordBox<DIM> >(1));
     }
 
+    /**
+     * resets the domain decomposition. The simulation space is
+     * described by _simulationArea, the decomposition scheme by
+     * _partition. The ownership of _partition is assumed to be
+     * transfered to PartitionManager and will be deleted when the
+     * PartitionManager dies. _rank will usually correspond to the MPI
+     * rank and identifies the current process. _ghostZoneWidth
+     * specifies after how many steps the halo should be synchronized.
+     * Higher values mean that the halo will be wider, which requires
+     * fewer synchronizations, but the syncs need to communicate more
+     * data. This is primarily to combat high latency datapaths (e.g.
+     * network latency or if the data needs to go to remote
+     * accelerators).
+     */
     inline void resetRegions(
         const CoordBox<DIM>& _simulationArea,
         Partition<DIM> *_partition,

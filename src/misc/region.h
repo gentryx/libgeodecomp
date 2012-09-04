@@ -1,7 +1,10 @@
 #ifndef _libgeodecomp_misc_region_h_
 #define _libgeodecomp_misc_region_h_
 
+#include <algorithm>
+
 #include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/misc/outputpairs.h>
 #include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/supervector.h>
@@ -9,243 +12,244 @@
 namespace LibGeoDecomp {
 
 template<int DIM>
-class StreakMapDefine;
-
-template<>
-class StreakMapDefine<2> 
-{ 
-public:
-    typedef SuperMap<int, Streak<2> > Line;
-    typedef SuperMap<int, Line> StreakMap;
-};
-
-template<>
-class StreakMapDefine<3> 
-{ 
-public:
-    typedef SuperMap<int, Streak<3> > Line;
-    typedef SuperMap<int, Line> Slice;
-    typedef SuperMap<int, Slice> StreakMap;
-};
-
-template<int DIM>
-class StreakIterator;
-
-template<>
-class StreakIterator<2> : public std::iterator<std::forward_iterator_tag, const Streak<2> >
+class StreakIteratorCompareIterators
 {
 public:
-    typedef StreakMapDefine<2>::Line Line;
-    typedef StreakMapDefine<2>::StreakMap StreakMap;
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
 
-    inline StreakIterator(
-        const StreakMap::const_iterator& startLine, 
-        const StreakMap *_streaks) :
-        curLine(startLine),
-        streaks(_streaks)
+    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
-        if (!endReached()) 
-            curStreak = curLine->second.begin();
-    }
-
-    inline bool operator==(const StreakIterator& other) const
-    {         
-        return (curLine == other.curLine) && 
-            ((endReached() || other.endReached()) || curStreak == other.curStreak);
-    }
-
-    inline bool operator!=(const StreakIterator& other)
-    {
-        return !(*this == other);
-    }
-
-    inline void operator++()
-    {
-        if (curStreak != curLine->second.end())
-            curStreak++;
-        if (curStreak == curLine->second.end()) {
-            curLine++;
-            if (!endReached()) 
-                curStreak = curLine->second.begin();
+        if (a[DIM] != b[DIM]) {
+            return false;
         }
-    }
-
-    inline const Streak<2>& operator*() const
-    {
-        return curStreak->second;
-    }
-
-    inline const Streak<2> *operator->() const
-    {
-        return &curStreak->second;
-    }
-
-    inline bool endReached() const
-    {
-        return curLine == streaks->end();
-    }
-
-private:
-    StreakMap::const_iterator curLine;
-    Line::const_iterator curStreak;
-    const StreakMap *streaks;
-};
-
-template<>
-class StreakIterator<3> : public std::iterator<std::forward_iterator_tag, const Streak<3> >
-{
-public:
-    typedef StreakMapDefine<3>::Line Line;
-    typedef StreakMapDefine<3>::Slice Slice;
-    typedef StreakMapDefine<3>::StreakMap StreakMap;
-
-    inline StreakIterator(
-        const StreakMap::const_iterator& startSlice, 
-        const StreakMap *_streaks) :
-        curSlice(startSlice),
-        streaks(_streaks)
-    {
-        if (!endReached()) {
-            curLine = curSlice->second.begin();
-            curStreak = curLine->second.begin();
-        }
-    }
-
-    inline bool operator==(const StreakIterator& other) const
-    {         
-        return (curSlice == other.curSlice) && 
-            ((endReached() || other.endReached()) || 
-             ((curLine   == other.curLine) && 
-              (curStreak == other.curStreak)));
-    }
-
-    inline bool operator!=(const StreakIterator& other)
-    {
-        return !(*this == other);
-    }
-
-    inline void operator++()
-    {
-        if (curStreak != curLine->second.end())
-            curStreak++;
-        if (curStreak == curLine->second.end()) {
-            curLine++;
-            if (curLine == curSlice->second.end()) {
-                curSlice++;
-                if (!endReached()) 
-                    curLine = curSlice->second.begin();
-            }
-            
-            if (!endReached()) 
-                curStreak = curLine->second.begin();
-        }
-    }
-
-    inline const Streak<3>& operator*() const
-    {
-        return curStreak->second;
-    }
-
-    inline const Streak<3> *operator->() const
-    {
-        return &curStreak->second;
-    }
-
-    inline bool endReached() const
-    {
-        return curSlice == streaks->end();
-    }
-
-private:
-    StreakMap::const_iterator curSlice;
-    Slice::const_iterator curLine;
-    Line::const_iterator curStreak;
-    const StreakMap *streaks;
-};
-
-template<int DIM>
-class LookupLine;
-
-template<>
-class LookupLine<2>
-{
-public:
-    typedef StreakMapDefine<2>::Line Line;
-    typedef StreakMapDefine<2>::StreakMap StreakMap;
-
-    Line& operator()(StreakMap& streaks, const Coord<2> c)
-    {
-        return streaks[c.y()];
+        
+        return StreakIteratorCompareIterators<DIM - 1>()(a, b);
     }
 };
 
 template<>
-class LookupLine<3>
+class StreakIteratorCompareIterators<0>
 {
 public:
-    typedef StreakMapDefine<3>::Line Line;
-    typedef StreakMapDefine<3>::StreakMap StreakMap;
-
-    Line& operator()(StreakMap& streaks, const Coord<3> c)
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+    
+    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
-        return streaks[c.z()][c.y()];
+        return a[0] == b[0];
     }
 };
 
 template<int DIM>
-class EraseEmptyStreakEntries;
-
-template<>
-class EraseEmptyStreakEntries<2>
+class StreakIteratorInitBegin
 {
 public:
-    void operator()(StreakMapDefine<2>::StreakMap *streaks, const Streak<2>& streak)
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+    
+    template<int STREAK_DIM>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
-        streaks->erase(streak.origin.y());
+        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, vectors);
+        iterators[DIM] = vectors[DIM].begin();
+
+        if (vectors[DIM].size() > 0) {
+            streak->origin[DIM] = vectors[DIM][0].first;
+        }
     }
 };
 
 template<>
-class EraseEmptyStreakEntries<3>
+class StreakIteratorInitBegin<0>
 {
 public:
-    void operator()(StreakMapDefine<3>::StreakMap *streaks, const Streak<3>& streak)
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+    
+    template<int STREAK_DIM>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
-        (*streaks)[streak.origin.z()].erase(streak.origin.y());
-        if ((*streaks)[streak.origin.z()].empty())
-            streaks->erase(streak.origin.z());
+        iterators[0] = vectors[0].begin();
+
+        if (vectors[0].size() > 0) {
+            streak->endX = vectors[0][0].second;
+            streak->origin[0] = vectors[0][0].first;
+        }
     }
 };
 
+template<int DIM>
+class StreakIteratorInitEnd
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+    
+    template<int STREAK_DIM>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
+    {
+        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, vectors);
+        iterators[DIM] = vectors[DIM].end();
+    }
+};
+
+template<>
+class StreakIteratorInitEnd<0>
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    template<int STREAK_DIM>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
+    {
+        iterators[0] = vectors[0].end();
+    }
+};
+
+class RegionCommonHelper
+{
+public:
+    static inline bool PairCompareFirst(const std::pair<int, int>& a, const std::pair<int, int>& b)
+    {
+        return a.first < b.first;
+    }
+
+protected:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    inline void incRemainder(const VecType::iterator& start, const VecType::iterator& end, const int& inserts)
+    {
+        if (inserts == 0) {
+            return;
+        }
+
+        for (VecType::iterator incrementer = start; 
+             incrementer != end; ++incrementer) {
+            incrementer->second += inserts;
+        }
+    }
+};
+
+template<int DIM> 
+class RegionInsertHelper;
+
+template<int DIM> 
+class RegionRemoveHelper;
+
+/**
+ * Region stores a set of coordinates. It performs a run-length
+ * coding. Instead of storing complete Streak objects, these objects
+ * get split up and are stored implicitly in the hierarchical indices
+ * vectors.
+ */
 template<int DIM>
 class Region
 {
+    template<int MY_DIM> friend class RegionInsertHelper;
+    template<int MY_DIM> friend class RegionRemoveHelper;
     friend class RegionTest;
-    friend class Iterator;
-    friend class StreakIterator<2>;
-    friend class StreakIterator<3>;
 public:
-    typedef typename StreakMapDefine<DIM>::Line Line;
-    typedef typename StreakMapDefine<DIM>::StreakMap StreakMap;
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    class StreakIterator : public std::iterator<std::forward_iterator_tag, const Streak<DIM> >
+    {
+        template<int> friend class InitIterators;
+        template<int> friend class Region;
+    public:
+        typedef std::pair<int, int> IntPair;
+        typedef SuperVector<IntPair> VecType;
+
+        template<template<int D> class INIT_HELPER>
+        inline StreakIterator(const Region *_region, INIT_HELPER<DIM> /*unused*/) :
+            region(_region)
+        {
+            INIT_HELPER<DIM - 1>()(&streak, iterators, region->indices);
+        }
+
+        inline void operator++()
+        {
+            ++iterators[0];
+            if (iterators[0] == region->indices[0].end()) {
+                for (int i = 1; i < DIM; ++i) {
+                    iterators[i] = region->indices[i].end();
+                }
+                return;
+            } else {
+                streak.origin[0] = iterators[0]->first;
+                streak.endX = iterators[0]->second;
+            }
+
+            for (int i = 1; i < DIM; ++i) {
+                // we don't need to (and without performing illegal
+                // reads) advance upper-level iterators if they're
+                // already pointing at the secondt-to-last field:
+                if ((iterators[i] + 1) == region->indices[i].end()) {
+                    return;
+                }
+
+                VecType::const_iterator nextEnd = 
+                    region->indices[i - 1].begin() + (iterators[i] + 1)->second;
+
+                if (iterators[i - 1] != nextEnd) {
+                    return;
+                }
+
+                ++iterators[i];
+                streak.origin[i] = iterators[i]->first;
+            }
+        }
+
+        inline bool operator==(const StreakIterator& other) const
+        {
+            return StreakIteratorCompareIterators<DIM - 1>()(iterators, other.iterators);
+        }
+
+        inline bool operator!=(const StreakIterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        inline const Streak<DIM> operator*() const
+        {
+            return streak;
+        }
+
+        inline const Streak<DIM> *operator->() const
+        {
+            return &streak;
+        }
+
+        inline bool endReached() const
+        {
+            return iterators[0] == region->indices[0].end();
+        }
+
+    private:
+        VecType::const_iterator iterators[DIM];
+        Streak<DIM> streak;
+        const Region<DIM> *region;
+    };
 
     class Iterator : public std::iterator<std::forward_iterator_tag, 
                                           const Coord<DIM> >
     {
     public:
-        inline Iterator(const StreakIterator<DIM>& _streakIterator) :
+        inline Iterator(const StreakIterator& _streakIterator) :
             streakIterator(_streakIterator)
         {
-            if (!streakIterator.endReached()) 
-                cursor = _streakIterator->origin;
+            cursor = _streakIterator->origin;
         }
-        
+
         inline void operator++()
         {
             cursor.x()++;
             if (cursor.x() >= streakIterator->endX) {
                 ++streakIterator;
-                if (!streakIterator.endReached())
-                    cursor = streakIterator->origin;   
+                cursor = streakIterator->origin;   
             }             
         }
 
@@ -271,18 +275,19 @@ public:
         }
 
     private:
-        StreakIterator<DIM> streakIterator;
+        StreakIterator streakIterator;
         Coord<DIM> cursor;
     };
 
     inline Region() :
-        myNumStreaks(0),
         mySize(0),
         geometryCacheTainted(false)
     {}
 
     template<class ITERATOR1, class ITERATOR2>
-    inline Region(const ITERATOR1& start, const ITERATOR2& end)
+    inline Region(const ITERATOR1& start, const ITERATOR2& end) :
+        mySize(0),
+        geometryCacheTainted(false)
     {
         load(start, end);
     }
@@ -290,146 +295,19 @@ public:
     template<class ITERATOR1, class ITERATOR2>
     inline void load(const ITERATOR1& start, const ITERATOR2& end)
     {
-        for (ITERATOR1 i = start; i != end; ++i)
+        for (ITERATOR1 i = start; i != end; ++i) {
             *this << *i;
+        }
     }
 
     inline void clear()
     {
-        streaks.clear();
-        geometryCacheTainted = true;
-    }
-
-    inline Region& operator<<(const Coord<DIM>& coord)
-    {
-        return *this << Streak<DIM>(coord, coord.x() + 1);
-    }
-
-    inline Region& operator<<(CoordBox<DIM> box)
-    {
-        int width = box.dimensions.x();
-        box.dimensions.x() = 1;
-
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            *this << Streak<DIM>(*i, i->x() + width);
+        for (int i = 0; i < DIM; ++i) {
+            indices[i].clear();
         }
-        
-        return *this;
-    }
-   
-    inline Region& operator<<(const Streak<DIM>& streak)
-    {
-        geometryCacheTainted = true;
-        Line& line(lookupLine(streak.origin));
-        Streak<DIM> curStreak(streak);
-        typename Line::iterator cursor(line.upper_bound(curStreak.origin.x()));
-        // This will yield the streak AFTER the current origin
-        // c. We can't really use lower_bound() as this doesn't
-        // replace the < operator by >= but rather by <=, which is
-        // IMO really sick...
-        if (cursor != line.begin()) {
-            // ...so we revert to landing one past the streak we're
-            // searching and moving back afterwards:
-            cursor--;
-        }
-   
-        while (cursor != line.end()) {
-            if (intersectOrTouch(cursor->second, curStreak)) {
-                curStreak = fuse(cursor->second, curStreak);
-                line.erase(cursor);
-                cursor = line.upper_bound(curStreak.origin.x());
-            } else {
-                cursor++;
-            }
-                
-            if (cursor == line.end() || !intersectOrTouch(cursor->second, curStreak))
-                break;
-        }
-        
-        line[curStreak.origin.x()] = curStreak;
-        return *this;
-    }
-        
-    inline void operator>>(const Coord<DIM>& coord)
-    {
-        *this >> Streak<DIM>(coord, coord.x() + 1);
-    }
-    
-    inline Region& operator>>(const Streak<DIM>& streak)
-    {
-        //ignore 0 length streaks and empty selves
-        if (streak.endX <= streak.origin.x() || empty())
-            return *this;
-
-        geometryCacheTainted = true;
-        Line& line(lookupLine(streak.origin));
-        typename Line::iterator cursor(line.upper_bound(streak.origin.x()));
-        // This will yield the streak AFTER the current origin
-        // c. We can't really use lower_bound() as this doesn't
-        // replace the < operator by >= but rather by <=, which is
-        // IMO really sick...
-        if (cursor != line.begin()) {
-            // ...so we revert to landing one past the streak we're
-            // searching and moving back afterwards:
-            cursor--;
-        }
-   
-        while (cursor != line.end()) {
-            if (intersect(cursor->second, streak)) {
-                SuperVector<Streak<DIM> > newStreaks(substract(cursor->second, streak));
-                line.erase(cursor);
-                cursor = line.upper_bound(streak.origin.x());
-                for (typename SuperVector<Streak<DIM> >::iterator i = newStreaks.begin(); 
-                     i != newStreaks.end(); 
-                     ++i)
-                    line[i->origin.x()] = *i;
-            } else {
-                cursor++;
-            }
-                
-            if (cursor == line.end() || !intersect(cursor->second, streak))
-                break;
-        }
-
-        if (line.empty())
-            EraseEmptyStreakEntries<DIM>()(&streaks, streak);
-        
-        return *this;
-    }
-
-    inline bool operator==(const Region& other) const
-    {    
-        return streaks == other.streaks;
-    }
-
-    inline bool operator!=(const Region& other) const
-    {    
-        return !(*this == other);
-    }
-
-    inline StreakIterator<DIM> beginStreak() const
-    {
-        return StreakIterator<DIM>(streaks.begin(), &streaks);
-    }
-
-    inline StreakIterator<DIM> endStreak() const
-    {
-        return StreakIterator<DIM>(streaks.end(), &streaks);
-    }
-
-    inline Iterator begin() const
-    {
-        return Iterator(beginStreak());
-    }
-    
-    inline Iterator end() const
-    {
-        return Iterator(endStreak());
-    }
-
-    inline bool empty() const
-    {
-        return streaks.empty();
+        mySize = 0;
+        myBoundingBox = CoordBox<DIM>();
+        geometryCacheTainted = false;
     }
 
     inline const CoordBox<DIM>& boundingBox() const
@@ -446,12 +324,17 @@ public:
         return mySize;
     }
 
+    inline const unsigned numStreaks() const
+    {
+        return indices[0].size();
+    }
+
     inline Region expand(const unsigned& width=1) const
     {
         Region ret;
         Coord<DIM> dia = Coord<DIM>::diagonal(width);
 
-        for (StreakIterator<DIM> i = beginStreak(); i != endStreak(); ++i) {
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
 
             Coord<DIM> boxOrigin = streak.origin - dia;
@@ -464,13 +347,14 @@ public:
                 ret << Streak<DIM>(*i, endX);
             }
         }
+
         return ret;
     }
 
     /**
      * does the same as expand, but will wrap overlap at edges
      * correctly. The instance of the TOPOLOGY is actually unused, but
-     * without it statement g++ would complain...
+     * without it g++ would complain...
      */
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
@@ -481,7 +365,7 @@ public:
         Region ret;
         Coord<DIM> dia = Coord<DIM>::diagonal(width);
 
-        for (StreakIterator<DIM> i = beginStreak(); i != endStreak(); ++i) {
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
 
             Coord<DIM> boxOrigin = streak.origin - dia;
@@ -500,27 +384,74 @@ public:
                 }
             }
         }
+
         return ret;
     }
        
-    inline const unsigned& numStreaks() const
+    inline bool operator==(const Region<DIM>& other) const
     {
-        if (geometryCacheTainted)
-            resetGeometryCache();
-        return myNumStreaks;
+        for (int i = 0; i < DIM; ++i) {
+            if (indices[i] != other.indices[i]) {
+                return false;
+            }
+        }
+            
+        return true;
     }
 
-    inline SuperVector<Streak<DIM> > toVector() const
+    inline Region& operator<<(const Streak<DIM>& s)
     {
-        SuperVector<Streak<DIM> > ret(numStreaks());
-        std::copy(beginStreak(), endStreak(), ret.begin());
-        return ret;
+        //ignore 0 length streaks
+        if (s.endX <= s.origin.x()) {
+            return *this;
+        }
+
+        geometryCacheTainted = true;
+        RegionInsertHelper<DIM - 1>()(this, s);
+        return *this;
     }
-    
+
+    inline Region& operator<<(const Coord<DIM>& c)
+    {
+        *this << Streak<DIM>(c, c.x() + 1);
+        return *this;
+    }
+
+    inline Region& operator<<(CoordBox<DIM> box)
+    {
+        int width = box.dimensions.x();
+        box.dimensions.x() = 1;
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            *this << Streak<DIM>(*i, i->x() + width);
+        }
+        
+        return *this;
+    }
+
+    inline Region& operator>>(const Streak<DIM>& s)
+    { 
+        //ignore 0 length streaks and empty selves
+        if (s.endX <= s.origin.x() || empty()) {
+            return *this;
+        }
+
+        geometryCacheTainted = true;
+        RegionRemoveHelper<DIM - 1>()(this, s);
+        return *this;
+    }
+
+    inline Region& operator>>(const Coord<DIM>& c)
+    { 
+        *this >> Streak<DIM>(c, c.x() + 1);
+        return *this;
+    }
+
     inline void operator-=(const Region& other) 
     {
-        for (StreakIterator<DIM> i = other.beginStreak(); i != other.endStreak(); ++i) 
+        for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
             *this >> *i;
+        }
     }
     
     inline Region operator-(const Region& other) const
@@ -546,8 +477,9 @@ public:
 
     inline void operator+=(const Region& other)
     {
-        for (StreakIterator<DIM> i = other.beginStreak(); i != other.endStreak(); ++i) 
-        *this << *i;
+        for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
+            *this << *i;
+        }
     }
 
     inline Region operator+(const Region& other) const
@@ -557,82 +489,73 @@ public:
         return ret;
     }
 
+    inline SuperVector<Streak<DIM> > toVector() const
+    {
+        SuperVector<Streak<DIM> > ret(numStreaks());
+        std::copy(beginStreak(), endStreak(), ret.begin());
+        return ret;
+    }
+    
     inline std::string toString() const
     {
         std::ostringstream buf;
-        buf << "Region(\n"
-            << "  streaks: " << streaks << "\n"
-            << "  geometryCacheTainted: " << geometryCacheTainted << "\n"
-            << "  myBoundingBox: " << myBoundingBox << ")\n";
+        buf << "Region(\n";
+        for (int dim = 0; dim < DIM; ++dim) {
+            buf << "indices[" << dim << "] = " 
+                << indices[dim] << "\n";
+        }
+        buf << ")\n";
+
         return buf.str();
+
+    }
+
+    inline bool empty() const
+    {
+        return (indices[0].size() == 0);
+    }
+
+    inline StreakIterator beginStreak() const
+    {
+        StreakIterator ret(this, StreakIteratorInitBegin<DIM>());
+        // StreakIteratorHelper<DIM - 1>().initBegin(&ret.streak, ret.iterators, indices);
+        return ret;
+    }
+
+    inline StreakIterator endStreak() const
+    {
+        StreakIterator ret(this, StreakIteratorInitEnd<DIM>());
+        // StreakIteratorHelper<DIM - 1>().initEnd(&ret.streak, ret.iterators, indices);
+        return ret;
+    }
+
+    inline Iterator begin() const
+    {
+        return Iterator(beginStreak());
+    }
+    
+    inline Iterator end() const
+    {
+        return Iterator(endStreak());
     }
 
 private:
-    StreakMap streaks;
+    VecType indices[DIM];
     mutable CoordBox<DIM> myBoundingBox;
-    mutable unsigned myNumStreaks;
     mutable long mySize;
     mutable bool geometryCacheTainted;
-
-    Line& lookupLine(const Coord<DIM> c)
-    {
-        return LookupLine<DIM>()(streaks, c);
-    }
-    
-    inline bool intersectOrTouch(const Streak<DIM>& a, const Streak<DIM>& b) const
-    {
-        return 
-            ((a.origin.x() <= b.origin.x() && b.origin.x() <= a.endX) || 
-             (b.origin.x() <= a.origin.x() && a.origin.x() <= b.endX));
-    }
-    
-    inline bool intersect(const Streak<DIM>& a, const Streak<DIM>& b) const
-    {
-        return 
-            ((a.origin.x() <= b.origin.x() && b.origin.x() < a.endX) || 
-             (b.origin.x() <= a.origin.x() && a.origin.x() < b.endX));
-    }
-    
-    inline Streak<DIM> fuse(const Streak<DIM>& a, const Streak<DIM>& b) const
-    {
-        Streak<DIM> ret;
-        ret.origin = a.origin;
-        ret.origin.x() = std::min(a.origin.x(), b.origin.x());
-        ret.endX = std::max(a.endX, b.endX);
-        return ret;
-    }
-
-    inline SuperVector<Streak<DIM> > substract(
-        const Streak<DIM>& base, const Streak<DIM>& minuend) const
-    {
-        if (!intersect(base, minuend))
-            return SuperVector<Streak<DIM> >(1, base);
-        SuperVector<Streak<DIM> > ret;
-        Streak<DIM> s1(base.origin, minuend.origin.x());
-        Streak<DIM> s2(base);
-        s2.origin.x() = minuend.endX;
-
-        if (s1.endX > s1.origin.x())
-            ret.push_back(s1);
-        if (s2.endX > s2.origin.x())
-            ret.push_back(s2);
-        return ret;
-    }
 
     inline void determineGeometry() const
     {
         if (empty()) {
             myBoundingBox = CoordBox<DIM>();
-            myNumStreaks = 0;
-            mySize = 0;
         } else {
             const Streak<DIM>& someStreak = *beginStreak();
             Coord<DIM> min = someStreak.origin;
             Coord<DIM> max = someStreak.origin;
 
-            myNumStreaks = 0;
             mySize = 0;
-            for (StreakIterator<DIM> i = beginStreak(); 
+            for (StreakIterator i = beginStreak(); 
                  i != endStreak(); ++i) {
                 Coord<DIM> left = i->origin;
                 Coord<DIM> right = i->origin;
@@ -641,7 +564,6 @@ private:
                 min = min.min(left);
                 max = max.max(right);
                 mySize += i->endX - i->origin.x();
-                myNumStreaks++;
             }
             myBoundingBox = 
                 CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
@@ -668,7 +590,7 @@ private:
     template<typename TOPOLOGY>
     void splitStreak(
         const Streak<DIM>& streak, 
-        Region<DIM> *target, 
+        Region *target, 
         const Coord<DIM>& dimensions) const 
     {
         int width = dimensions.x();
@@ -708,7 +630,7 @@ private:
     template<typename TOPOLOGY>
     void normalizeStreak(
         const Streak<DIM>& streak, 
-        Region<DIM> *target, 
+        Region *target, 
         const Coord<DIM>& dimensions) const
     {
         Streak<DIM> ret;
@@ -716,9 +638,309 @@ private:
         ret.endX = ret.origin.x() + streak.length();
 
         // it's bad to use a magic value to check for out of bounds
-        // accesses, but throwing exceptions might be slower
-        if (ret.origin != Coord<DIM>::diagonal(-1))
+        // accesses, but throwing exceptions would be slower
+        if (ret.origin != Coord<DIM>::diagonal(-1)) {
             (*target) << ret;
+        }
+    }
+};
+
+template<int DIM>
+class RegionInsertHelper : public RegionCommonHelper
+{
+public:
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        VecType& indices = region->indices[DIM];
+        (*this)(region, s, 0, indices.size());
+    }
+
+    template<int MY_DIM>
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    {
+        int c = s.origin[DIM];
+        VecType& indices = region->indices[DIM];
+
+        VecType::iterator i = 
+            std::upper_bound(
+                indices.begin() + start, 
+                indices.begin() + end, 
+                IntPair(c, 0), 
+                RegionCommonHelper::PairCompareFirst);
+
+        int nextLevelStart = 0;
+        int nextLevelEnd = 0;
+
+        int startOffset = start;
+        if (i != (indices.begin() + start)) {
+            VecType::iterator entry = i;
+            --entry;
+
+            // short-cut: no need to insert if index already present
+            if (entry->first == c) {
+                nextLevelStart = entry->second;
+                nextLevelEnd = region->indices[DIM - 1].size();
+                if (i != indices.end()) {
+                    nextLevelEnd = i->second;
+                }
+
+                int inserts = RegionInsertHelper<DIM - 1>()(
+                    region, 
+                    s, 
+                    nextLevelStart,
+                    nextLevelEnd);
+                incRemainder(i, indices.end(), inserts);
+                return 0;
+            }
+        } 
+
+        if (i != indices.end()) {
+            nextLevelStart = i->second;
+        } else {
+            nextLevelStart = region->indices[DIM - 1].size();
+        }
+        
+        nextLevelEnd = nextLevelStart;
+        
+        VecType::iterator followingEntries;
+
+        if (i == indices.end()) {
+            indices << IntPair(c, nextLevelStart);
+            followingEntries = indices.end();
+        } else {
+            followingEntries = indices.insert(i, IntPair(c, nextLevelStart));
+            ++followingEntries;
+        }
+
+        int inserts = RegionInsertHelper<DIM - 1>()(region, s, nextLevelStart, nextLevelEnd);
+        incRemainder(followingEntries, indices.end(), inserts);
+        
+        return 1;
+    }
+};
+
+template<>
+class RegionInsertHelper<0>
+{
+    friend class RegionTest;
+public:
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
+    {
+        IntPair curStreak(s.origin.x(), s.endX);
+        VecType& indices = region->indices[0];
+
+        VecType::iterator cursor = 
+            std::upper_bound(indices.begin() + start, indices.begin() + end, 
+                             curStreak, RegionCommonHelper::PairCompareFirst);
+        // This will yield the streak AFTER the current origin
+        // c. We can't really use lower_bound() as this doesn't
+        // replace the < operator by >= but rather by <=, which is
+        // IMO really sick...
+        if (cursor != (indices.begin() + start)) {
+            // ...so we revert to landing one past the streak we're
+            // searching and moving back afterwards:
+            cursor--;
+        }
+
+        int inserts = 1;
+
+        while ((cursor != (indices.begin() + end)) &&
+               (curStreak.second >= cursor->first)) {
+            if (intersectOrTouch(*cursor, curStreak)) {
+                curStreak = fuse(*cursor, curStreak);
+                cursor = indices.erase(cursor);
+                --end;
+                --inserts;
+            } else {
+                cursor++;
+            }
+                
+            if ((cursor == (indices.begin() + end)) || 
+                (!intersectOrTouch(*cursor, curStreak))) {
+                break;
+            }
+        }
+        
+        indices.insert(cursor, curStreak);
+        return inserts;
+    }
+
+private:
+    inline bool intersectOrTouch(const IntPair& a, const IntPair& b) const
+    {
+        return 
+            ((a.first <= b.first && b.first <= a.second) || 
+             (b.first <= a.first && a.first <= b.second));
+    }
+    
+    inline IntPair fuse(const IntPair& a, const IntPair& b) const
+    {
+        return IntPair(std::min(a.first, b.first),
+                       std::max(a.second, b.second));
+    }
+};
+
+template<int DIM>
+class RegionRemoveHelper : public RegionCommonHelper
+{
+public:
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        VecType& indices = region->indices[DIM];
+        (*this)(region, s, 0, indices.size());
+    }
+
+    /**
+     * tries to remove a streak from the set. Returns the number of
+     * inserted streaks (may be negative).
+     */
+    template<int MY_DIM>
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    {
+        int c = s.origin[DIM];
+        VecType& indices = region->indices[DIM];
+
+        VecType::iterator i = 
+            std::upper_bound(
+                indices.begin() + start, 
+                indices.begin() + end, 
+                IntPair(c, 0), 
+                RegionCommonHelper::PairCompareFirst);
+
+        // key is not present, so no need to remove it
+        if (i == (indices.begin() + start)) {
+            return 0;
+        }
+
+        VecType::iterator entry = i;
+        --entry;
+
+        // ditto
+        if (entry->first != c) {
+            return 0;
+        }
+
+        int nextLevelStart = entry->second;
+        int nextLevelEnd = region->indices[DIM - 1].size();
+        if (i != indices.end()) {
+            nextLevelEnd = i->second;
+        }
+
+        int inserts = RegionRemoveHelper<DIM - 1>()(
+            region,
+            s,
+            nextLevelStart,
+            nextLevelEnd);
+
+        int myInserts = 0;
+
+        // current entry needs to be removed if no childs are left
+        if ((nextLevelStart - nextLevelEnd) == inserts) {
+            entry = indices.erase(entry);
+            myInserts = -1;
+        } else {
+            ++entry;
+        }
+
+        incRemainder(entry, indices.end(), inserts);
+        return myInserts;
+    }
+};
+
+template<>
+class RegionRemoveHelper<0>
+{
+    friend class RegionTest;
+public:
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
+    {
+        int c = s.origin[0];
+        VecType& indices = region->indices[0];
+        int inserts = 0;
+
+        // This will yield the streak AFTER the current origin
+        // c. We can't really use lower_bound() as this doesn't
+        // replace the < operator by >= but rather by <=, which is
+        // IMO really sick...
+        VecType::iterator cursor = 
+            std::upper_bound(
+                indices.begin() + start, 
+                indices.begin() + end, 
+                IntPair(c, 0), 
+                RegionCommonHelper::PairCompareFirst);
+        if (cursor != (indices.begin() + start)) {
+            // ...so we resort to landing one past the streak we're
+            // searching and moving back afterwards:
+            --cursor;
+        }
+
+        IntPair curStreak(s.origin.x(), s.endX);
+
+        while (cursor != (indices.begin() + end)) {
+            if (intersect(curStreak, *cursor)) {
+                VecType newStreaks(substract(*cursor, curStreak));
+                cursor = indices.erase(cursor);
+                int delta = newStreaks.size() - 1;
+                end += delta;
+                inserts += delta;
+
+                for (VecType::iterator i = newStreaks.begin(); i != newStreaks.end(); ++i) {
+                    cursor = indices.insert(cursor, *i);
+                    ++cursor;
+                }
+            } else {
+                ++cursor;
+            }
+
+            if (cursor == (indices.begin() + end) || !intersect(*cursor, curStreak)) {
+                break;
+            }
+        }
+
+        return inserts;
+    }
+
+private:
+    inline bool intersect(const IntPair& a, const IntPair& b) const
+    {
+        return 
+            ((a.first <= b.first && b.first < a.second) || 
+             (b.first <= a.first && a.first < b.second));
+    }
+    
+    inline VecType substract(const IntPair& base, const IntPair& minuend) const
+    {
+        if (!intersect(base, minuend)) {
+            return SuperVector<IntPair>(1, base);
+        }
+
+        SuperVector<IntPair> ret;
+        IntPair s1(base.first, minuend.first);
+        IntPair s2(minuend.second, base.second);
+
+        if (s1.second > s1.first) {
+            ret.push_back(s1);
+        }
+        if (s2.second > s2.first) {
+            ret.push_back(s2);
+        }
+        return ret;
     }
 };
 
@@ -732,5 +954,6 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
     __os << region.toString();
     return __os;
 }
+
 
 #endif

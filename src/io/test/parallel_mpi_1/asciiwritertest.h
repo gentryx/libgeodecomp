@@ -97,10 +97,10 @@ public:
             new ASCIIWriter<TestCell<2>, TestValueSelector>(path, simulator);
         TS_ASSERT_THROWS_ASSERT(
             writer->initialized(),
-            FileOpenException& e, 
+            FileOpenException& exception, 
             TS_ASSERT_SAME_DATA(
                 path.c_str(), 
-                e.file().c_str(), 
+                exception.file().c_str(), 
                 path.length()));
     }
 

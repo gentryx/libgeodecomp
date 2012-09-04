@@ -34,7 +34,7 @@ public:
         file.Seek(headerLength - cellLength, MPI_SEEK_SET);
         file.Read(&grid->atEdge(), 1, mpiDatatype);
 
-        for (StreakIterator<DIM> i = region.beginStreak();
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
             // the coords need to be normalized because on torus
@@ -89,7 +89,7 @@ public:
             file.Write(&grid.atEdge(),      1, mpiDatatype);
         }
 
-        for (StreakIterator<DIM> i = region.beginStreak();
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
             // the coords need to be normalized because on torus

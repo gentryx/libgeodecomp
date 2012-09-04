@@ -15,8 +15,9 @@ void Chronometer::tic()
 
 void Chronometer::toc()
 {
-    if (_workIntervalStart == 0) 
+    if (_workIntervalStart == 0) {
         throw std::logic_error( "Call Chronometer::tic() before calling toc()");
+    }
     _workLength += time() - _workIntervalStart;
 }
 

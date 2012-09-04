@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/linepointerneighborhood.h>
+#include <libgeodecomp/misc/linepointerupdatefunctor.h>
 
 using namespace LibGeoDecomp; 
 
@@ -133,44 +134,98 @@ public:
     void test2DCubeTopologyTotal()
     {
         Coord<2> dim(31, 20);
-        int endX = dim.x();
+        long endX = dim.x();
 
-        typedef Grid<TestCell<2> >GridType;
+        typedef Grid<TestCell<2>, TestCell<2>::Topology> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
         TestInitializer<2> init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
+        CoordBox<2> box = gridOld.boundingBox();
 
         TS_ASSERT_TEST_GRID(GridType, gridOld, 0);
         TS_ASSERT_TEST_GRID(GridType, gridNew, 0);
 
         for (int y = 0; y < dim.y(); ++y) {
-            // fixme: use LinePointerNeighborhood here!
-            for (int x = 0; x < dim.x(); ++x) {
-                Coord<2> c(x, y);
-                gridNew[c].update(gridOld.getNeighborhood(c), 0);
+            Coord<2> c(0, y);
+            TestCell<2> *pointers[] = {
+                &gridOld[Coord<2>(c.x() - 1, c.y() - 1)],
+                &gridOld[Coord<2>(c.x() + 0, c.y() - 1)],
+                &gridOld[Coord<2>(endX,      c.y() - 1)],
+                &gridOld[Coord<2>(c.x() - 1, c.y() + 0)],
+                &gridOld[Coord<2>(c.x() + 0, c.y() + 0)],
+                &gridOld[Coord<2>(endX,      c.y() + 0)],
+                &gridOld[Coord<2>(c.x() - 1, c.y() + 1)],
+                &gridOld[Coord<2>(c.x() + 0, c.y() + 1)],
+                &gridOld[Coord<2>(endX,      c.y() + 1)]
+            };
+            LinePointerUpdateFunctor<TestCell<2> >()(Streak<2>(c, endX), box, pointers, &gridNew[c]);
+
+        }
+
+        TS_ASSERT_TEST_GRID(GridType, gridOld, 0);
+        TS_ASSERT_TEST_GRID(GridType, gridNew, 1);
+    }
+
+    void test3DTorusTopologyTotal()
+    {
+        Coord<3> dim(13, 12, 11);
+        long endX = dim.x();
+
+        typedef Grid<TestCell<3>, TestCell<3>::Topology> GridType;
+        GridType gridOld(dim);
+        GridType gridNew(dim);
+        TestInitializer<3> init(dim);
+        init.grid(&gridOld);
+        init.grid(&gridNew);
+        CoordBox<3> box = gridOld.boundingBox();
+
+        TS_ASSERT_TEST_GRID(GridType, gridOld, 0);
+        TS_ASSERT_TEST_GRID(GridType, gridNew, 0);
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                Coord<3> c(0, y, z);
+                TestCell<3> *pointers[] = {
+                    &gridOld[Coord<3>(c.x() - 1, c.y() - 1, c.z() - 1)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() - 1, c.z() - 1)],
+                    &gridOld[Coord<3>(endX,      c.y() - 1, c.z() - 1)],
+                    &gridOld[Coord<3>(c.x() - 1, c.y() + 0, c.z() - 1)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() + 0, c.z() - 1)],
+                    &gridOld[Coord<3>(endX,      c.y() + 0, c.z() - 1)],
+                    &gridOld[Coord<3>(c.x() - 1, c.y() + 1, c.z() - 1)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() + 1, c.z() - 1)],
+                    &gridOld[Coord<3>(endX,      c.y() + 1, c.z() - 1)],
+
+                    &gridOld[Coord<3>(c.x() - 1, c.y() - 1, c.z() + 0)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() - 1, c.z() + 0)],
+                    &gridOld[Coord<3>(endX,      c.y() - 1, c.z() + 0)],
+                    &gridOld[Coord<3>(c.x() - 1, c.y() + 0, c.z() + 0)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() + 0, c.z() + 0)],
+                    &gridOld[Coord<3>(endX,      c.y() + 0, c.z() + 0)],
+                    &gridOld[Coord<3>(c.x() - 1, c.y() + 1, c.z() + 0)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() + 1, c.z() + 0)],
+                    &gridOld[Coord<3>(endX,      c.y() + 1, c.z() + 0)],
+
+                    &gridOld[Coord<3>(c.x() - 1, c.y() - 1, c.z() + 1)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() - 1, c.z() + 1)],
+                    &gridOld[Coord<3>(endX,      c.y() - 1, c.z() + 1)],
+                    &gridOld[Coord<3>(c.x() - 1, c.y() + 0, c.z() + 1)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() + 0, c.z() + 1)],
+                    &gridOld[Coord<3>(endX,      c.y() + 0, c.z() + 1)],
+                    &gridOld[Coord<3>(c.x() - 1, c.y() + 1, c.z() + 1)],
+                    &gridOld[Coord<3>(c.x() + 0, c.y() + 1, c.z() + 1)],
+                    &gridOld[Coord<3>(endX,      c.y() + 1, c.z() + 1)]
+                };
+                LinePointerUpdateFunctor<TestCell<3> >()(Streak<3>(c, endX), box, pointers, &gridNew[c]);
             }
         }
 
         TS_ASSERT_TEST_GRID(GridType, gridOld, 0);
         TS_ASSERT_TEST_GRID(GridType, gridNew, 1);
-
-        // long x = 0;
-        
-        // Coord<2> c(0, 0);
-        // int *pointers[] = {
-        //     &grid[Coord<2>(c.x() - 1, c.y() - 1)],
-        //     &grid[Coord<2>(c.x() + 0, c.y() - 1)],
-        //     &grid[Coord<2>(endX,      c.y() - 1)],
-        //     &grid[Coord<2>(c.x() - 1, c.y() + 0)],
-        //     &grid[Coord<2>(c.x() + 0, c.y() + 0)],
-        //     &grid[Coord<2>(endX,      c.y() + 0)],
-        //     &grid[Coord<2>(c.x() - 1, c.y() + 1)],
-        //     &grid[Coord<2>(c.x() + 0, c.y() + 1)],
-        //     &grid[Coord<2>(endX,      c.y() + 1)]
-        // };
     }
+
 private:
     template<class GRID_TYPE>
     void fillGrid(GRID_TYPE *grid)

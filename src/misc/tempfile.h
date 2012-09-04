@@ -12,6 +12,6 @@ public:
     static std::string parallel(const std::string& prefix);
 };
 
-};
+}
 
 #endif

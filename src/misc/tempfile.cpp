@@ -56,4 +56,4 @@ std::string TempFile::parallel(const std::string& prefix)
 }
 #endif
 
-};
+}

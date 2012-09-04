@@ -89,9 +89,9 @@ public:
     inline CELL_TYPE& operator[](const Coord<DIM>& absoluteCoord)
     {
         Coord<DIM> relativeCoord = absoluteCoord - origin;
-        if (TOPOLOGICALLY_CORRECT) 
-            relativeCoord = 
-                Topology::normalize(relativeCoord, topoDimensions);
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
         return delegate[relativeCoord];
     }
 
@@ -120,10 +120,10 @@ public:
         return getEdgeCell();
     }
 
-    template<typename  GRID_TYPE>
+    template<typename GRID_TYPE>
     inline void paste(const GRID_TYPE& grid, const Region<DIM>& region)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             const CELL_TYPE *start = &grid[i->origin];
             std::copy(start, start + i->length(), &(*this)[i->origin]);
         }
@@ -131,7 +131,7 @@ public:
 
     inline void pasteGridBase(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
     {
-        for (StreakIterator<DIM> i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             const CELL_TYPE *start = &grid.at(i->origin);
             std::copy(start, start + i->length(), &(*this)[i->origin]);
         }

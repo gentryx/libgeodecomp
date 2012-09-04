@@ -16,8 +16,9 @@ class Streak
 {
     friend class Typemaps;
 public:
-    Streak(const Coord<DIM>& _origin=Coord<DIM>(), 
-           const int& _endX=0) :
+    inline explicit Streak(
+        const Coord<DIM>& _origin=Coord<DIM>(), 
+        const int& _endX=0) :
         origin(_origin), 
         endX(_endX)
     {}

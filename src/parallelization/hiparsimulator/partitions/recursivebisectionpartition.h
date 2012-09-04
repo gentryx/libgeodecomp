@@ -20,7 +20,7 @@ public:
         const Coord<DIM>& _dimensions = Coord<DIM>(),
         const long& offset = 0,
         const LongVec weights = LongVec(),
-        const FloatCoord<DIM>& _dimWeights = Coord<DIM>::diagonal(1)) :
+        const Coord<DIM>& _dimWeights = Coord<DIM>::diagonal(1)) :
         Partition<DIM>(0, weights),
         origin(_origin),
         dimensions(_dimensions),
@@ -45,7 +45,7 @@ private:
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
-    FloatCoord<DIM> dimWeights;
+    Coord<DIM> dimWeights;
 
     /**
      * returns the CoordBox which belongs to the node whose weight is
@@ -100,7 +100,7 @@ private:
         int longestDim = 0;
         const Coord<DIM>& dim = oldBox.dimensions;
         for (int i = 1; i < DIM; ++i) {
-            if (dim[i] > dim[longestDim]) {
+            if ((dim[i] * dimWeights[i]) > (dim[longestDim] * dimWeights[longestDim])) {
                 longestDim = i;
             }
         }

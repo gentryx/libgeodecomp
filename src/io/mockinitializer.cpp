@@ -6,5 +6,6 @@ namespace LibGeoDecomp {
 
 std::string MockInitializer::events;
 
-};
+}
+
 #endif

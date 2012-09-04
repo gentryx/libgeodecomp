@@ -11,6 +11,16 @@ template<int DIM>
 class Partition
 {
 public:
+    /**
+     * initializes the partition so that the domain will be split up
+     * in chucks with sizes proportional to the weights specified in
+     * _weights. For most applications offset should be set to 0.
+     * Also, _weights.sum() should equal simulationArea.size() (where
+     * simulationArea is stored in PartitionManager). This basically
+     * means that each simulation cell corresponds to a weight of 1.
+     * Each entry in the weight vector will usually correspond to an
+     * MPI process, identified by its rank.
+     */
     inline Partition(
         // fixme: drop offset and bounding box from all partitions in favor of simulation region specifier?
         const long& offset,
