@@ -14,7 +14,6 @@ namespace LibGeoDecomp {
 class Random
 {
 public:
-
     static inline unsigned gen_u(const unsigned& max = max_rand)
     {
 #ifndef __CODEGEARC__

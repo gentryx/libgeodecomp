@@ -193,8 +193,9 @@ public:
     virtual void step()
     {   
         balanceLoad();
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++)
+        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
+        }
         stepNum++;    
         handleOutput();
     }
@@ -303,8 +304,9 @@ private:
             validateLoads(newWorkloads, oldWorkloads);
             WeightVec newPartitions = workloadsToPartitions(newWorkloads);
             
-            for (unsigned i = 0; i < mpilayer.size(); i++) 
+            for (unsigned i = 0; i < mpilayer.size(); i++) {
                 mpilayer.sendVec(&newPartitions, i, BALANCELOADS);
+            }
         }
 
         WeightVec oldPartitions = partitions;
@@ -366,7 +368,7 @@ private:
     void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
     {
         chrono.tic();
-        for (StreakIterator<DIM> i = region.beginStreak(); 
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); 
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
@@ -393,20 +395,22 @@ private:
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
-        if (upperNeighborRank != -1) 
+        if (upperNeighborRank != -1) { 
             mpilayer.recvUnregisteredRegion(
                 stripe, 
                 outerUpperGhostRegion, 
                 upperNeighborRank, 
                 GHOSTREGION_ALPHA,
                 cellMPIDatatype);
-        if (lowerNeighborRank != -1)
+        }
+        if (lowerNeighborRank != -1) {
             mpilayer.recvUnregisteredRegion(
                 stripe, 
                 outerLowerGhostRegion, 
                 lowerNeighborRank, 
                 GHOSTREGION_BETA,
                 cellMPIDatatype);
+        }
     }
 
     void sendInnerGhostRegion(GridType *stripe)
@@ -414,20 +418,22 @@ private:
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
-        if (upperNeighborRank != -1) 
+        if (upperNeighborRank != -1) {
             mpilayer.sendUnregisteredRegion(
                 stripe, 
                 innerUpperGhostRegion, 
                 upperNeighborRank, 
                 GHOSTREGION_BETA,
                 cellMPIDatatype);
-        if (lowerNeighborRank != -1)
+        }
+        if (lowerNeighborRank != -1) {
             mpilayer.sendUnregisteredRegion(
                 stripe, 
                 innerLowerGhostRegion, 
                 lowerNeighborRank, 
                 GHOSTREGION_ALPHA,
                 cellMPIDatatype);
+        }
     }
 
     void updateInside(const unsigned& nanoStep)
@@ -573,7 +579,9 @@ private:
                           const WeightVec& newPartitions)
     {
         waitForGhostRegions();
-        if (newPartitions == oldPartitions) return;
+        if (newPartitions == oldPartitions) {
+            return;
+        }
         CoordBox<DIM> box = adaptDimensions(newPartitions);
         newStripe->resize(box);
 
@@ -624,6 +632,7 @@ private:
         }
     
         mpilayer.wait(BALANCELOADS);
+
         curStripe->resize(box);
         swapGrids();
         sendInnerGhostRegion(curStripe);

@@ -478,7 +478,7 @@ public:
 
     void update(Matrix *source, Matrix *target, int n)
     {
-        for (StreakIterator<3> i = region.beginStreak(); 
+        for (Region<3>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); 
              ++i) {
             UpdateFunctor<Cell>()(

@@ -142,7 +142,7 @@ private:
         MPI::Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
         SuperVector<VariableType> buffer;
 
-        for (StreakIterator<DIM> i = region.beginStreak();
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
             // the coords need to be normalized because on torus

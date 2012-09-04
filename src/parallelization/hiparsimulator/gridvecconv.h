@@ -29,7 +29,7 @@ public:
     {
         typename GRID_TYPE::CellType *dest = &(*vec)[0];
 
-        for (StreakIterator<GRID_TYPE::DIM> i = region.beginStreak(); 
+        for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             const typename GRID_TYPE::CellType *start = &grid[i->origin];
             std::copy(start, start + i->length(), dest);
@@ -48,7 +48,7 @@ public:
             throw std::logic_error("region doesn't match vector size");
 
         const typename GRID_TYPE::CellType *source = &vec[0];
-        for (StreakIterator<GRID_TYPE::DIM> i = region.beginStreak(); 
+        for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             unsigned length = i->length();
             const typename GRID_TYPE::CellType *end = source + length;
