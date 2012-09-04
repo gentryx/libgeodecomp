@@ -129,15 +129,15 @@ void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
     
 
     std::cout << std::setiosflags(std::ios::left);
-    std::cout << std::setw(5) << revision << "; " 
+    std::cout << std::setw(18) << revision << "; " 
               << nowString << " ; " 
-              << std::setw(35) << hostname << "; " 
+              << std::setw(16) << hostname << "; " 
               << std::setw(48) << cpuID << "; " 
               << std::setw( 8) << benchmark.order() <<  "; " 
               << std::setw(16) << benchmark.family() <<  "; " 
               << std::setw( 8) << benchmark.species() <<  "; " 
-              << std::setw(20) << dim <<  "; " 
-              << std::setw(10) << benchmark.performance(dim) <<  "; " 
+              << std::setw(24) << dim <<  "; " 
+              << std::setw(12) << benchmark.performance(dim) <<  "; " 
               << std::setw( 8) << benchmark.unit() <<  "\n";
 }
 
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
     revision = argv[1];
 
-    std::cout << "#rev ; date                 ; host                               ; device                                          ; order   ; family          ; species ; dimensions          ; perf      ; unit\n";
+    std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family          ; species ; dimensions              ; perf        ; unit\n";
 
     evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
     evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
