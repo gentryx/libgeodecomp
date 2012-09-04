@@ -2,8 +2,11 @@
 #include <mpi.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
+#include <libgeodecomp/testbed/reversetimemigration/config.h>
+#include <libgeodecomp/testbed/reversetimemigration/cudastepperlib.h>
 
 using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 int main(int argc, char *argv[])
 {
@@ -23,17 +26,23 @@ int main(int argc, char *argv[])
     SuperMap<std::string, int> hostCount;
     SuperMap<int, int> cudaIDs;
 
-    if (layer.rank() == 0) {
-        for (int i = 0; i < layer.size(); ++i) {
-            std::string name(names + i * MPI::MAX_PROCESSOR_NAME);
+    for (int i = 0; i < layer.size(); ++i) {
+        std::string name(names + i * MPI::MAX_PROCESSOR_NAME);
+        
+        int id = hostCount[name];
+        hostCount[name]++;
+        cudaIDs[i] = id;
 
-            int id = hostCount[name];
-            hostCount[name]++;
-            cudaIDs[i] = id;
-
+        if (layer.rank() == 0) {
             std::cout << "names[" << i << "] = " << name << " ID = " << id << "\n";
         }
     }
+
+    int myDeviceID = cudaIDs[layer.rank()];
+    std::cout << "DIM_X = " << DIM_X << "\n";
+
+    CudaStepperLib l;
+    l.doit(myDeviceID);
 
     delete names;
     MPI_Finalize();
