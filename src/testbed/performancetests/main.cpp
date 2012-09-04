@@ -4,7 +4,7 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/region.h>
-#include <unistd.h>
+#include <stdio.h>
 
 using namespace LibGeoDecomp;
 
