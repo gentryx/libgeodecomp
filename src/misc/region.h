@@ -111,7 +111,7 @@ public:
 class RegionCommonHelper
 {
 public:
-    static inline bool PairCompareFirst(const std::pair<int, int>& a, const std::pair<int, int>& b)
+    static inline bool pairCompareFirst(const std::pair<int, int>& a, const std::pair<int, int>& b)
     {
         return a.first < b.first;
     }
@@ -130,6 +130,53 @@ protected:
              incrementer != end; ++incrementer) {
             incrementer->second += inserts;
         }
+    }
+};
+
+template<int DIM>
+class RegionIntersectHelper
+{
+public:
+    template<int MY_DIM>
+    static inline bool intersects(const Streak<MY_DIM>& s1, const Streak<MY_DIM>& s2)
+    {
+        if (s1.origin[DIM] != s2.origin[DIM]) {
+            return false;
+        }
+
+        return RegionIntersectHelper<DIM - 1>::intersects(s1, s2);
+    }
+
+    template<int MY_DIM>
+    static inline bool lessThan(const Streak<MY_DIM>& s1, const Streak<MY_DIM>& s2)
+    {
+        if (s1.origin[DIM] < s2.origin[DIM]) {
+            return true;
+        }
+        if (s1.origin[DIM] > s2.origin[DIM]) {
+            return false;
+        }
+
+        return RegionIntersectHelper<DIM - 1>::lessThan(s1, s2);
+    }
+};
+
+template<>
+class RegionIntersectHelper<0>
+{
+public:
+    template<int MY_DIM>
+    static inline bool intersects(const Streak<MY_DIM>& s1, const Streak<MY_DIM>& s2)
+    {
+        return ((s1.origin.x() <= s2.origin.x() && s2.origin.x() < s1.endX) || 
+                (s2.origin.x() <= s1.origin.x() && s1.origin.x() < s2.endX));
+
+    }
+
+    template<int MY_DIM>
+    static inline bool lessThan(const Streak<MY_DIM>& s1, const Streak<MY_DIM>& s2)
+    {
+        return s1.endX < s2.endX;
     }
 };
 
@@ -463,15 +510,39 @@ public:
     
     inline void operator&=(const Region& other) 
     {
-        Region excess(*this);
-        excess -= other;
-        *this -= excess;
+        Region intersection = other & *this;
+        *this = intersection;
     }
     
     inline Region operator&(const Region& other) const
     {
-        Region ret(*this);
-        ret &= other;
+        Region ret;
+        StreakIterator myIter = beginStreak();
+        StreakIterator otherIter = other.beginStreak();
+        
+        StreakIterator myEnd = endStreak();
+        StreakIterator otherEnd = other.endStreak();
+
+        for (;;) {
+            if ((myIter == myEnd) ||
+                (otherIter == otherEnd)) {
+                break;
+            }
+
+            if (RegionIntersectHelper<DIM - 1>::intersects(*myIter, *otherIter)) {
+                Streak<DIM> intersection = *myIter;
+                intersection.origin.x() = std::max(myIter->origin.x(), otherIter->origin.x());
+                intersection.endX = std::min(myIter->endX, otherIter->endX);
+                ret << intersection;
+            }
+
+            if (RegionIntersectHelper<DIM - 1>::lessThan(*myIter, *otherIter)) {
+                ++myIter;
+            } else {
+                ++otherIter;
+            }
+        }
+
         return ret;
     }
 
@@ -518,14 +589,12 @@ public:
     inline StreakIterator beginStreak() const
     {
         StreakIterator ret(this, StreakIteratorInitBegin<DIM>());
-        // StreakIteratorHelper<DIM - 1>().initBegin(&ret.streak, ret.iterators, indices);
         return ret;
     }
 
     inline StreakIterator endStreak() const
     {
         StreakIterator ret(this, StreakIteratorInitEnd<DIM>());
-        // StreakIteratorHelper<DIM - 1>().initEnd(&ret.streak, ret.iterators, indices);
         return ret;
     }
 
@@ -670,7 +739,7 @@ public:
                 indices.begin() + start, 
                 indices.begin() + end, 
                 IntPair(c, 0), 
-                RegionCommonHelper::PairCompareFirst);
+                RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
@@ -739,7 +808,7 @@ public:
 
         VecType::iterator cursor = 
             std::upper_bound(indices.begin() + start, indices.begin() + end, 
-                             curStreak, RegionCommonHelper::PairCompareFirst);
+                             curStreak, RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
@@ -817,7 +886,7 @@ public:
                 indices.begin() + start, 
                 indices.begin() + end, 
                 IntPair(c, 0), 
-                RegionCommonHelper::PairCompareFirst);
+                RegionCommonHelper::pairCompareFirst);
 
         // key is not present, so no need to remove it
         if (i == (indices.begin() + start)) {
@@ -883,7 +952,7 @@ public:
                 indices.begin() + start, 
                 indices.begin() + end, 
                 IntPair(c, 0), 
-                RegionCommonHelper::PairCompareFirst);
+                RegionCommonHelper::pairCompareFirst);
         if (cursor != (indices.begin() + start)) {
             // ...so we resort to landing one past the streak we're
             // searching and moving back afterwards:
