@@ -3,7 +3,6 @@
 
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>
-#include <libgeodecomp/misc/testcell.h>
 
 namespace LibGeoDecomp {
 
@@ -11,7 +10,7 @@ template<typename CELL_TYPE>
 class MockSteerer : public Steerer<CELL_TYPE>
 {
 public:
-    typedef typename Steerer<CELL_TYPE>::Topology Topology;;
+    typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
 
     MockSteerer(const unsigned& _period, std::ostringstream *eventsBuffer)  :

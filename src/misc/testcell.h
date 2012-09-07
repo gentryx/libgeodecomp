@@ -58,7 +58,10 @@ public:
     typedef typename Stencils::Moore<DIM, 1> Stencil;
     typedef typename TestCellTopology<DIM>::Topology Topology;
 
-    static inline unsigned nanoSteps() { return 27; }
+    static inline unsigned nanoSteps() 
+    { 
+        return 27; 
+    }
 
     Coord<DIM> pos;
     CoordBox<DIM> dimensions;
