@@ -29,6 +29,6 @@ public:
     virtual unsigned startStep() const = 0;
 };
 
-};
+}
 
 #endif

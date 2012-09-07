@@ -41,7 +41,7 @@ public:
      */
     virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
     {
-        writers.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
+        writers << boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer);
     }
 
 protected:

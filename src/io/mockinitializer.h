@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_io_mockinitializer_h_
 #define _libgeodecomp_io_mockinitializer_h_
 
@@ -10,7 +8,8 @@ namespace LibGeoDecomp {
 class MockInitializer : public TestInitializer<2>
 {
 public:
-    MockInitializer(const std::string& configString = "") { 
+    MockInitializer(const std::string& configString = "") 
+    { 
         events += "created, configString: '" + configString + "'\n";
     }
 
@@ -22,6 +21,6 @@ public:
     static std::string events;
 };
 
-};
-#endif
+}
+
 #endif
