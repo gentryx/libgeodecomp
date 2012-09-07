@@ -4,6 +4,7 @@
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockinitializer.h>
 #include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -16,22 +17,19 @@ namespace LibGeoDecomp {
 
 class SerialSimulatorTest : public CxxTest::TestSuite 
 {
-private:
-    SerialSimulator<TestCell<2> > *simulator;
-    Initializer<TestCell<2> > *init;
-
 public:
+    typedef MockSteerer<TestCell<2> > SteererType;
 
     void setUp() 
     {
-        init = new TestInitializer<2>();
-        simulator = new SerialSimulator<TestCell<2> >(new TestInitializer<2>());
+        init.reset(new TestInitializer<2>());
+        simulator.reset(new SerialSimulator<TestCell<2> >(new TestInitializer<2>()));
     }
     
     void tearDown()
     {
-        delete simulator;
-        delete init;
+        simulator.reset();
+        init.reset();
     }
 
     void testInitialization()
@@ -79,7 +77,7 @@ public:
     
     void testRegisterWriter()
     {
-        MockWriter *w = new MockWriter(simulator);
+        MockWriter *w = new MockWriter(&*simulator);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
         TS_ASSERT_EQUALS((unsigned)1, writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
@@ -87,7 +85,7 @@ public:
 
     void testSerialSimulatorShouldCallBackWriter()
     {
-        MockWriter *w = new MockWriter(simulator);
+        MockWriter *w = new MockWriter(&*simulator);
         simulator->run();
         
         std::string expectedEvents = "initialized()\n";
@@ -101,16 +99,16 @@ public:
 
     void testRunMustResetGridPriorToSimulation()
     {
-        MockWriter *eventWriter1 = new MockWriter(simulator);
+        MockWriter *eventWriter1 = new MockWriter(&*simulator);
         MemoryWriter<TestCell<2> > *gridWriter1 = 
-            new MemoryWriter<TestCell<2> >(simulator);
+            new MemoryWriter<TestCell<2> >(&*simulator);
         simulator->run();
         std::string events1 = eventWriter1->events();
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
-        MockWriter *eventWriter2 = new MockWriter(simulator);
+        MockWriter *eventWriter2 = new MockWriter(&*simulator);
         MemoryWriter<TestCell<2> > *gridWriter2 = 
-            new MemoryWriter<TestCell<2> >(simulator);
+            new MemoryWriter<TestCell<2> >(&*simulator);
         simulator->run();
         std::string events2 = eventWriter2->events();
         std::vector<Grid<TestCell<2> > > grids2 = gridWriter2->getGrids();
@@ -138,6 +136,28 @@ public:
         TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(), 
                             21 * TestCell<3>::nanoSteps());
     }
+
+    void testSteererCallback()
+    {
+        std::ostringstream events;
+        simulator->addSteerer(new SteererType(5, &events));
+        std::ostringstream expected;
+        expected << "created, period = 5\n";
+        TS_ASSERT_EQUALS(events.str(), expected.str());
+
+        simulator->run();
+        for (int i = 0; i < init->maxSteps(); i += 5) {
+            expected << "nextStep(" << i << ")\n";
+        }
+        expected << "deleted\n";
+
+        simulator.reset();
+        TS_ASSERT_EQUALS(events.str(), expected.str());
+    }
+
+private:
+    boost::shared_ptr<SerialSimulator<TestCell<2> > > simulator;
+    boost::shared_ptr<Initializer<TestCell<2> > > init;
 };
 
 }

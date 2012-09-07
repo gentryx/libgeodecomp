@@ -31,6 +31,13 @@ public:
         newGrid = new GridType(dim);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
+
+        CoordBox<DIMENSIONS> box = curGrid->boundingBox();
+        unsigned endX = box.dimensions.x();
+        box.dimensions.x() = 1;
+        for(typename CoordBox<DIMENSIONS>::Iterator i = box.begin(); i != box.end(); ++i) {
+            simArea << Streak<DIMENSIONS>(*i, endX);
+        }
     }
 
     ~SerialSimulator()
@@ -44,14 +51,22 @@ public:
      */
     virtual void step()
     {
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
+        // notify all registered Steerers
+        for(unsigned i = 0; i < steerers.size(); ++i) {
+            if (stepNum % steerers[i]->getPeriod() == 0) {
+                steerers[i]->nextStep(curGrid, simArea, stepNum);
+            }
+        }
+
+        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); ++i) {
             nanoStep(i);
         }
 
         stepNum++;    
 
         // call back all registered Writers
-        for(unsigned i = 0; i < writers.size(); i++) {
+        // fixme: only call back if period matches step
+        for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->stepFinished();
         }
     }
@@ -63,7 +78,7 @@ public:
     {
         initializer->grid(curGrid);
         stepNum = 0;
-        for(unsigned i = 0; i < writers.size(); i++) {
+        for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->initialized();
         }
 
@@ -72,7 +87,7 @@ public:
             step();
         }
 
-        for(unsigned i = 0; i < writers.size(); i++) {
+        for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->allDone();        
         }
     }
@@ -87,11 +102,13 @@ public:
 
 protected:
     using MonolithicSimulator<CELL_TYPE>::initializer;
+    using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
     using MonolithicSimulator<CELL_TYPE>::writers;
 
     GridType *curGrid;
     GridType *newGrid;
+    Region<DIMENSIONS> simArea;
 
     void nanoStep(const unsigned& nanoStep)
     {

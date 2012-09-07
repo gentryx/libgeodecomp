@@ -4,6 +4,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/misc/grid.h>
 
 namespace LibGeoDecomp {
@@ -18,7 +19,8 @@ class Simulator
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-  
+    typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
+
     /**
      * Creates the abstract Simulator object. The Initializer is
      * assumed to belong to the Simulator, which means that it'll
@@ -45,7 +47,7 @@ public:
     virtual void run() = 0;
 
     /**
-     * @return the number of the current logical simulation step.
+     * returns the number of the current logical simulation step.
      */
     virtual unsigned getStep() const 
     { 
@@ -56,12 +58,24 @@ public:
     {
         return initializer;
     }
+
+    /**
+     * adds a Steerer which will be called back before simulation
+     * steps as specified by the Steerer's period. The Steerer is
+     * assumed to be owned by the Simulator. It will destroy the
+     * Steerer upon its death.
+     */
+    virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
+    {
+        steerers << boost::shared_ptr<Steerer<CELL_TYPE> >(steerer);
+    }
     
 protected:
     unsigned stepNum;
     Initializer<CELL_TYPE> *initializer;
+    SteererVector steerers;
 };
 
-};
+}
 
 #endif
