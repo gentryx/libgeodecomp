@@ -85,13 +85,14 @@ public:
 
     void testSerialSimulatorShouldCallBackWriter()
     {
-        MockWriter *w = new MockWriter(&*simulator);
+        MockWriter *w = new MockWriter(&*simulator, 3);
         simulator->run();
         
         std::string expectedEvents = "initialized()\n";
-        for (unsigned i = 1; i <= init->maxSteps(); i++) 
+        for (unsigned i = 3; i <= init->maxSteps(); i += 3) {
             expectedEvents += 
-                "stepFinished(step=" + StringConv::itoa(i) + ")\n";        
+                "stepFinished(step=" + StringConv::itoa(i) + ")\n"; 
+        }
         expectedEvents += "allDone()\n";
 
         TS_ASSERT_EQUALS(expectedEvents, w->events());

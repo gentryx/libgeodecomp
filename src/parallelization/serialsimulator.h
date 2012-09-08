@@ -62,17 +62,18 @@ public:
             nanoStep(i);
         }
 
-        stepNum++;    
+        ++stepNum; 
 
         // call back all registered Writers
-        // fixme: only call back if period matches step
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->stepFinished();
+            if (stepNum % writers[i]->getPeriod() == 0) {
+                writers[i]->stepFinished();
+            }
         }
     }
 
     /**
-     * performs step() until the maximum number of steps is reached.
+     * continue simulating until the maximum number of steps is reached.
      */
     virtual void run()
     {
@@ -93,7 +94,7 @@ public:
     }
 
     /**
-     * Returns the current grid.
+     * returns the current grid.
      */
     virtual const GridType *getGrid()
     {

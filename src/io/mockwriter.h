@@ -17,14 +17,14 @@ public:
     using Writer<TestCell<2> >::sim;
     using ParallelWriter<TestCell<2> >::distSim;
 
-    MockWriter(MonolithicSimulator<TestCell<2> > *sim) : 
-        Writer<TestCell<2> >("foobar", sim, 1),
-        ParallelWriter<TestCell<2> >("foobar", 0, 1) 
+    MockWriter(MonolithicSimulator<TestCell<2> > *sim, const unsigned& _period=1) : 
+        Writer<TestCell<2> >("foobar", sim, _period),
+        ParallelWriter<TestCell<2> >("foobar", 0, _period) 
     {}
 
-    MockWriter(DistributedSimulator<TestCell<2> > *sim) : 
-        Writer<TestCell<2> >("foobar", 0, 1), 
-        ParallelWriter<TestCell<2> >("foobar", sim, 1) 
+    MockWriter(DistributedSimulator<TestCell<2> > *sim, const unsigned& _period=1) : 
+        Writer<TestCell<2> >("foobar", 0, _period), 
+        ParallelWriter<TestCell<2> >("foobar", sim, _period) 
     {}
 
     ~MockWriter() 
