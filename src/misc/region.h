@@ -744,7 +744,6 @@ public:
         int nextLevelStart = 0;
         int nextLevelEnd = 0;
 
-        int startOffset = start;
         if (i != (indices.begin() + start)) {
             VecType::iterator entry = i;
             --entry;
