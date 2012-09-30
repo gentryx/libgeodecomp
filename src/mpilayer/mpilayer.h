@@ -211,6 +211,9 @@ public:
         requests[waitTag].push_back(req);    
     }
 
+    /**
+     * Sends a region object synchronously to another node.
+     */
     template<int DIM>
     void sendRegion(const Region<DIM>& region, const int& dest)
     {
@@ -221,6 +224,9 @@ public:
         req.Wait();
     }
 
+    /**
+     * Receives a region object from another node, also synchronously.
+     */
     template<int DIM>
     void recvRegion(Region<DIM> *region, const int& src)
     {
@@ -232,6 +238,10 @@ public:
         region->load(buf.begin(), buf.end());
     }
     
+    /**
+     * Convenience function that will simply return the received
+     * Region by value.
+     */
     template<int DIM>
     Region<DIM> recvRegion(const int& src)
     {
