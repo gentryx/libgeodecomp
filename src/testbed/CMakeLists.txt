@@ -1,5 +1,6 @@
 generate_sourcelists("./")
 
+add_subdirectory(boostmpi)
 add_subdirectory(interfaces)
 add_subdirectory(performancetests)
 add_subdirectory(reversetimemigration)
