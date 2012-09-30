@@ -100,6 +100,152 @@ public:
     }
 };
 
+class CoordEnumerationVanilla
+{
+public:
+    std::string order()
+    {
+        return "CPU";
+    }
+
+    std::string family()
+    {
+        return "CoordEnumeration";
+    }
+
+    std::string species()
+    {
+        return "vanilla";
+    }
+
+    double performance(Coord<3> dim)
+    {
+        long long tStart = Chronometer::timeUSec();
+        
+        Coord<3> sum;
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    sum += Coord<3>(x, y, z);
+                }
+            }
+        }
+        // trick the compiler to not optimize away the loop above
+        if (sum == Coord<3>(1, 2, 3)) {
+            std::cout << "whatever";
+        }
+
+        long long tEnd = Chronometer::timeUSec();
+
+        return (tEnd - tStart) * 0.000001;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class CoordEnumerationBronze
+{
+public:
+    std::string order()
+    {
+        return "CPU";
+    }
+
+    std::string family()
+    {
+        return "CoordEnumeration";
+    }
+
+    std::string species()
+    {
+        return "bronze";
+    }
+
+    double performance(Coord<3> dim)
+    {
+        Region<3> region;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                region << Streak<3>(Coord<3>(0, y, z), dim.x());
+            }
+        }
+        long long tStart = Chronometer::timeUSec();
+        
+        Coord<3> sum;
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            sum += *i;
+        }
+        // trick the compiler to not optimize away the loop above
+        if (sum == Coord<3>(1, 2, 3)) {
+            std::cout << "whatever";
+        }
+
+        long long tEnd = Chronometer::timeUSec();
+
+        return (tEnd - tStart) * 0.000001;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class CoordEnumerationGold
+{
+public:
+    std::string order()
+    {
+        return "CPU";
+    }
+
+    std::string family()
+    {
+        return "CoordEnumeration";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(Coord<3> dim)
+    {
+        Region<3> region;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                region << Streak<3>(Coord<3>(0, y, z), dim.x());
+            }
+        }
+        long long tStart = Chronometer::timeUSec();
+        
+        Coord<3> sum;
+        for (Region<3>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            Coord<3> c = i->origin;
+            for (; c.x() < i->endX; c.x() += 1) {
+                sum += c;
+            }
+        }
+        // trick the compiler to not optimize away the loop above
+        if (sum == Coord<3>(1, 2, 3)) {
+            std::cout << "whatever";
+        }
+
+        long long tEnd = Chronometer::timeUSec();
+
+        return (tEnd - tStart) * 0.000001;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
 template<class BENCHMARK>
 void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
 {
@@ -159,6 +305,18 @@ int main(int argc, char **argv)
     evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
     evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
     evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
+
+    evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
+    evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
+    evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
+
+    evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
+    evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
+    evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
+
+    evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
+    evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
+    evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
     return 0;
 }
