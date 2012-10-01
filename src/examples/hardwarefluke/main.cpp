@@ -44,7 +44,7 @@ public:
         filename(infile)
     {}
 
-    virtual void grid(GridBase<BuggyCell, 2> *ret)
+    virtual void grid(GridBase<BuggyCell, 2> *ret) const
     {
         CoordBox<2> rect = ret->boundingBox();
         ret->atEdge() = BuggyCell();

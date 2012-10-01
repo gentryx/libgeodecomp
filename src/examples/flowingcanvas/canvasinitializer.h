@@ -15,7 +15,7 @@ public:
         // SimpleInitializer<CanvasCell>(Coord<2>(640, 360), 100)
     {}
 
-    virtual void grid(GridBase<CanvasCell, 2> *ret)
+    virtual void grid(GridBase<CanvasCell, 2> *ret) const
     {
         CoordBox<2> box = ret->boundingBox();
 

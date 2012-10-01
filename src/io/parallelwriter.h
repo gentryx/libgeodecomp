@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
+#include <boost/serialization/base_object.hpp>
+
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
@@ -27,22 +29,22 @@ template<typename CELL_TYPE>
 class ParallelWriter
 {
 public:
+    typedef typename CELL_TYPE::Topology Topology;
+    typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
+    typedef Region<Topology::DIMENSIONS> RegionType;
 
     /**
      * is the equivalent to Writer().
      */
     ParallelWriter(
         const std::string& _prefix, 
-        DistributedSimulator<CELL_TYPE> *_distSim, 
         const unsigned& _period = 1): 
-        prefix(_prefix), distSim(_distSim), period(_period)
+        prefix(_prefix), period(_period)
     {
         if (prefix == "") 
             throw std::invalid_argument("empty prefixes are forbidden");
         if (period == 0) 
             throw std::invalid_argument("period must be positive");
-        if (distSim)
-            distSim->registerWriter(this);
     }
 
     virtual ~ParallelWriter() {};    
@@ -50,7 +52,7 @@ public:
     /**
      * is equivalent to Writer::initialized()
      */
-    virtual void initialized() = 0;
+    virtual void initialized(GridType const & grid, RegionType const & region) = 0;
 
     /**
      * is similar to Writer::stepFinished() BUT this function may be
@@ -61,12 +63,12 @@ public:
      * The simulator will provide the ParallelWriter with which region
      * of the grid needs to be output.
      */
-    virtual void stepFinished() = 0;
+    virtual void stepFinished(GridType const & grid, RegionType const & region, std::size_t) = 0;
 
     /**
      * is equivalent to Writer::addDone()
      */
-    virtual void allDone() = 0;
+    virtual void allDone(GridType const & grid, RegionType const & region) = 0;
 
     const unsigned& getPeriod() const
     {
@@ -80,8 +82,15 @@ public:
 
 protected:
     std::string prefix;
-    DistributedSimulator<CELL_TYPE> *distSim;
     unsigned period;
+private:
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & prefix;
+        ar & period;
+    }
 };
 
 };

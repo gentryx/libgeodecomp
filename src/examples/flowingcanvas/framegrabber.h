@@ -15,7 +15,7 @@ public:
 
     ~FrameGrabber();
 
-public slots:
+public Q_SLOTS:
     void grab();
 
     void info()
@@ -23,7 +23,7 @@ public slots:
         std::cout << "FrameGrabber @ " << fps() << " FPS\n";
     }
 
-signals:
+Q_SIGNALS:
     void newFrame(char *frame, unsigned width, unsigned height);
 
 private:

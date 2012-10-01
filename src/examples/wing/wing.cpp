@@ -332,7 +332,7 @@ public:
         SimpleInitializer<Cell>(_dim, _steps)
     {}
     
-    virtual void grid(GridBase<Cell, 2> *grid)
+    virtual void grid(GridBase<Cell, 2> *grid) const
     {
         CoordBox<2> box = grid->boundingBox();
         grid->atEdge() = Cell(SOLID);
@@ -351,7 +351,7 @@ public:
 #endif
     }
 
-    void addLid(GridBase<Cell, 2> *grid)
+    void addLid(GridBase<Cell, 2> *grid) const
     {
         CoordBox<2> box = grid->boundingBox();
 
@@ -381,7 +381,7 @@ public:
         }
     }
 
-    void addInletOutlet(GridBase<Cell, 2> *grid)
+    void addInletOutlet(GridBase<Cell, 2> *grid) const
     {
         CoordBox<2> box = grid->boundingBox();
 
@@ -400,7 +400,7 @@ public:
     bool inCircle(const Coord<2>& point,
                   const Coord<2>& center,
                   const int& diameter,
-                  const double& xScale = 1.0)
+                  const double& xScale = 1.0) const
     {
         Coord<2> delta = center - point;
         double dist = delta.x() * delta.x() * xScale +
@@ -408,7 +408,7 @@ public:
         return sqrt(dist) <= diameter;
     }
 
-    void addWing(GridBase<Cell, 2> *grid)
+    void addWing(GridBase<Cell, 2> *grid) const
     {
         CoordBox<2> box = grid->boundingBox();
 

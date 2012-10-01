@@ -1,8 +1,7 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_gridvecconv_h_
 #define _libgeodecomp_parallelization_hiparsimulator_gridvecconv_h_
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/region.h>
 
 namespace LibGeoDecomp {
@@ -44,7 +43,7 @@ public:
         GRID_TYPE *grid, 
         const Region<GRID_TYPE::DIM>& region)
     {
-        if (vec.size() != region.size())
+        if (vec.size() != std::size_t(region.size()))
             throw std::logic_error("region doesn't match vector size");
 
         const typename GRID_TYPE::CellType *source = &vec[0];
@@ -62,5 +61,4 @@ public:
 }
 }
 
-#endif
 #endif

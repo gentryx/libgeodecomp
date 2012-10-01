@@ -17,7 +17,7 @@ public:
     {}
 
     
-    virtual Grid<SimpleCell> grid(const CoordBox<2>& box)
+    virtual Grid<SimpleCell> grid(const CoordBox<2>& box) const
     {
         Grid<SimpleCell> grid(box.dimensions);
         for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -28,6 +28,7 @@ public:
         grid.getEdgeCell() = SimpleCell(-1);
         return grid;
     }
+
 };
 
 }

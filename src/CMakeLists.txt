@@ -21,7 +21,7 @@ if(NOT DEFINED BOOST_ROOT)
 endif()
 
 detect_distro()
-find_package(Boost REQUIRED date_time filesystem system)
+find_package(Boost REQUIRED date_time filesystem system program_options serialization thread chrono)
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
@@ -45,11 +45,23 @@ if(NOT DEFINED OpenCV_FOUND)
   set(OpenCV_FOUND false)
 endif()
 
+if(NOT HPX_ROOT)
+    if(NOT $ENV{HPX_ROOT} STREQUAL "")
+        set(HPX_ROOT $ENV{HPX_ROOT})
+    endif()
+endif()
+
+if(HPX_ROOT)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
+endif()
+
+find_package(HPX)
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(DEFAULT_FLAGS "-Wall -Wno-sign-compare")
+set(DEFAULT_FLAGS "-Wall -Wno-sign-compare -std=c++0x")
 set(DEFAULT_TYPEMAP_GENERATION false)
 
 if(NOT RELEASE)
@@ -90,6 +102,8 @@ add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL device
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
 
 add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
+
+add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} false)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
@@ -144,6 +158,10 @@ endif()
 
 if(FEATURE_QT AND NOT QT4_FOUND)
   message(FATAL_ERROR "FEATURE_QT selected, but could not find QT4")
+endif()
+
+if(FEATURE_HPX AND NOT HPX_FOUND)
+    message(FATAL_ERROR "FEATURE_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
 endif()
 
 if(WIN32)

@@ -3,6 +3,8 @@
 
 #include <libgeodecomp/misc/gridbase.h>
 
+#include <boost/serialization/base_object.hpp>
+
 namespace LibGeoDecomp {
 
 template<typename CELL>
@@ -14,12 +16,12 @@ public:
     /**
      * initializes all cells of the grid at @a target 
      */
-    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) =0;
+    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) const =0;
 
     virtual ~Initializer() 
     {}
 
-    virtual CoordBox<DIMENSIONS> gridBox()
+    virtual CoordBox<DIMENSIONS> gridBox() const
     {
         return CoordBox<DIMENSIONS>(Coord<DIMENSIONS>(), gridDimensions());
     }
@@ -27,6 +29,12 @@ public:
     virtual Coord<DIMENSIONS> gridDimensions() const = 0;
     virtual unsigned maxSteps() const = 0;
     virtual unsigned startStep() const = 0;
+
+private:
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {}
 };
 
 }

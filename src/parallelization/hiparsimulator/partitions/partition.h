@@ -29,7 +29,7 @@ public:
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
-        for (long i = 0; i < weights.size(); ++i)
+        for (std::size_t i = 0; i < weights.size(); ++i)
             startOffsets[i + 1] = startOffsets[i] + weights[i];        
     }
 

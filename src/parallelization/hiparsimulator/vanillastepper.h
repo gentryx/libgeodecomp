@@ -42,10 +42,10 @@ public:
         curStep = initializer->startStep();
         curNanoStep = 0;
 
-        for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
+        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
             addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
         }
-        for (int i = 0; i < innerSetPatchAccepters.size(); ++i) {
+        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
 
@@ -89,15 +89,16 @@ private:
             (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), curNanoStep);
         }
         std::swap(oldGrid, newGrid);
-
+        
         ++curNanoStep;
-        if (curNanoStep == CELL_TYPE::nanoSteps()) {
+        if (std::size_t(curNanoStep) == CELL_TYPE::nanoSteps()) {
             curNanoStep = 0;
             curStep++;
         }
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
+
         
         if (validGhostZoneWidth == 0) {
             notifyPatchProviders(
@@ -197,7 +198,7 @@ private:
         int oldStep = curStep;
         int curGlobalNanoStep = globalNanoStep();
 
-        for (int t = 0; t < ghostZoneWidth(); ++t) {
+        for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             const Region<DIM>& region = partitionManager->rim(t + 1);
             for (typename Region<DIM>::Iterator i = region.begin(); 
                  i != region.end(); 
@@ -206,7 +207,7 @@ private:
                                       curNanoStep);
             }
             ++curNanoStep;
-            if (curNanoStep == CELL_TYPE::nanoSteps()) {
+            if (std::size_t(curNanoStep) == CELL_TYPE::nanoSteps()) {
                 curNanoStep = 0;
                 curStep++;
             }

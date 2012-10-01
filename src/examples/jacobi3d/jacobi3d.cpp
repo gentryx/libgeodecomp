@@ -146,7 +146,7 @@ public:
     CellInitializer(int num) : SimpleInitializer<Cell>(Coord<3>(64, 64, 64 * num), 100)
     {}
 
-    virtual void grid(GridBase<Cell, 3> *ret)
+    virtual void grid(GridBase<Cell, 3> *ret) const
     {
         CoordBox<3> box = ret->boundingBox();
         Coord<3> offset = 

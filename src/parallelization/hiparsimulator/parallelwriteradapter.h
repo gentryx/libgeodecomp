@@ -1,7 +1,7 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_parallelwriteradapter_h_
 #define _libgeodecomp_parallelization_hiparsimulator_parallelwriteradapter_h_
 
-#include <libgeodecomp/parallelization/hiparsimulator.h>
+//#include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 
 namespace LibGeoDecomp {
@@ -15,23 +15,22 @@ class HiParSimulator;
  * to a PatchAccepter, so that we can treat IO similarly to sending
  * ghost zones.
  */
-template<typename GRID_TYPE, typename CELL_TYPE, typename PARTITION>
+template<typename GRID_TYPE, typename CELL_TYPE, typename Simulator>
 class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
-    typedef HiParSimulator<CELL_TYPE, PARTITION> HiParSimulatorType;
 
     using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
     using PatchAccepter<GRID_TYPE>::pushRequest;
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        HiParSimulatorType *_sim,
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
+        Simulator * _sim,
         const long& firstStep,
         const long& lastStep) :
-        sim(_sim),
         writer(_writer),
+        sim(_sim),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps())
     {
@@ -49,28 +48,24 @@ public:
         }
         requestedNanoSteps.erase_min();
 
-        sim->setGridFragment(&grid, &validRegion);
-
         if (nanoStep == firstNanoStep) {
-            writer->initialized();
+            writer->initialized(grid, validRegion);
         } else {
             if (nanoStep == lastNanoStep) {
-                writer->allDone();
+                writer->allDone(grid, validRegion);
             } else {
-                writer->stepFinished();
+                writer->stepFinished(grid, validRegion, nanoStep);
             }
         }
 
         // delete the pointers from the Simulator to prevent accesses
         // to stale pointers:
-        sim->setGridFragment(0, 0);
-
         reload();
     }
 
 private:
-    HiParSimulatorType *sim;
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
+    Simulator * sim;
     long firstNanoStep;
     long lastNanoStep;
 

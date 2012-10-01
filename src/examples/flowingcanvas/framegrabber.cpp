@@ -1,6 +1,6 @@
 #include <cv.h>
 #include <highgui.h>
-#include <libgeodecomp/examples/flowingcanvas/framegrabber.h>
+#include <libgeodecomp/examples/flowingcanvas_hpx/framegrabber.h>
 
 FrameGrabber::FrameGrabber(bool _fakeCam, QObject *parent) :
     QObject(parent),

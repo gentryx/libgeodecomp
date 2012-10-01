@@ -608,6 +608,15 @@ public:
         return Iterator(endStreak());
     }
 
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & indices;
+        ar & myBoundingBox;
+        ar & mySize;
+        ar & geometryCacheTainted;
+    }
+
 private:
     VecType indices[DIM];
     mutable CoordBox<DIM> myBoundingBox;

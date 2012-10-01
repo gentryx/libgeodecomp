@@ -114,7 +114,7 @@ public:
         SimpleInitializer<CircleCell>(_dimensions, _steps)
     {}
 
-    virtual void grid(GridBase<CircleCell, 2> *ret)
+    virtual void grid(GridBase<CircleCell, 2> *ret) const
     {
         CoordBox<2> rect = ret->boundingBox();
         std::vector<std::pair<Coord<2>, CircleCell> > seeds(3);

@@ -1,9 +1,8 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_parallelization_hiparsimulator_partitionmanager_h_
 #define _libgeodecomp_parallelization_hiparsimulator_partitionmanager_h_
 // fixme: fix _hiparsimulator prefix in header guards, in this file and others
 
+#include <libgeodecomp/config.h>
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
@@ -192,7 +191,7 @@ private:
         SuperVector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
         regionExpansion[0] = partition->getRegion(node);
-        for (int i = 1; i <= getGhostZoneWidth(); ++i) {
+        for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             Region<DIM> expanded;
             const Region<DIM>& reg = regionExpansion[i - 1];
             expanded = reg.expandWithTopology(
@@ -228,7 +227,7 @@ private:
         ownInnerSets.front() = ownRegion();
         Region<DIM> minuend = surface.expandWithTopology(
             1, simulationArea.dimensions, Topology());
-        for (int i = 1; i <= getGhostZoneWidth(); ++i) {
+        for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
             minuend = minuend.expandWithTopology(
                 1, simulationArea.dimensions, Topology());
@@ -243,7 +242,7 @@ private:
         SuperVector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];
         outerGhosts.resize(getGhostZoneWidth() + 1);
         innerGhosts.resize(getGhostZoneWidth() + 1);
-        for (int i = 0; i <= getGhostZoneWidth(); ++i) {
+        for (std::size_t i = 0; i <= getGhostZoneWidth(); ++i) {
             outerGhosts[i] = getRegion(rank, i) & getRegion(node, 0);
             innerGhosts[i] = getRegion(rank, 0) & getRegion(node, i);
         }
@@ -253,5 +252,4 @@ private:
 }
 }
 
-#endif
 #endif

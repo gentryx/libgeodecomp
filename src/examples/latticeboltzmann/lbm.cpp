@@ -242,7 +242,7 @@ public:
     CellInitializer(Coord<3> dim, int maxSteps) : SimpleInitializer<Cell>(dim, maxSteps)
     {}
 
-    virtual void grid(GridBase<Cell, 3> *ret)
+    virtual void grid(GridBase<Cell, 3> *ret) const
     {
         CoordBox<3> box = ret->boundingBox();
         Coord<3> size = gridDimensions();

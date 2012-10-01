@@ -31,7 +31,7 @@ int runGUI(int argc, char **argv)
         &flow,
         new CanvasInitializer());
     CanvasWriter *writer = new CanvasWriter(sim->getOutputFrame(), sim);
-    FrameGrabber *grabber = new FrameGrabber(false, &flow);
+    FrameGrabber *grabber = new FrameGrabber(true, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
     QTimer *timerGrab = new QTimer(&flow);

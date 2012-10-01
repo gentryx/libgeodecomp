@@ -65,7 +65,7 @@ public:
     CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 800)
     {}
 
-    virtual void grid(GridBase<ConwayCell, 2> *ret)
+    virtual void grid(GridBase<ConwayCell, 2> *ret) const
     {
         CoordBox<2> rect = ret->boundingBox();
         SuperVector<Coord<2> > startCells;
