@@ -17,9 +17,9 @@ public:
 
     void testSum()
     {
-        TS_ASSERT_EQUALS( 1, (Stencils::Sum<Stencils::Moore, 0>::VALUE));
-        TS_ASSERT_EQUALS( 4, (Stencils::Sum<Stencils::Moore, 1>::VALUE));
-        TS_ASSERT_EQUALS(13, (Stencils::Sum<Stencils::Moore, 2>::VALUE));
+        TS_ASSERT_EQUALS( 1, (Stencils::Sum<Stencils::Moore, 0, 1>::VALUE));
+        TS_ASSERT_EQUALS( 4, (Stencils::Sum<Stencils::Moore, 1, 1>::VALUE));
+        TS_ASSERT_EQUALS(13, (Stencils::Sum<Stencils::Moore, 2, 1>::VALUE));
     }
 
     void testOffsetHelper()
@@ -50,6 +50,34 @@ public:
         TS_ASSERT_EQUALS(2, (Stencils::OffsetHelper<Stencils::VonNeumann<3, 1>, -1,  0,  0>::VALUE));     
         TS_ASSERT_EQUALS(3, (Stencils::OffsetHelper<Stencils::VonNeumann<3, 1>,  0,  0,  0>::VALUE));     
         TS_ASSERT_EQUALS(5, (Stencils::OffsetHelper<Stencils::VonNeumann<3, 1>,  0,  1,  0>::VALUE));     
+    }
+
+    void testCells()
+    {
+        TS_ASSERT_EQUALS(3,  (Stencils::Moore<1, 1>::VOLUME));
+        TS_ASSERT_EQUALS(5,  (Stencils::Moore<1, 2>::VOLUME));
+        TS_ASSERT_EQUALS(9,  (Stencils::Moore<2, 1>::VOLUME));
+        TS_ASSERT_EQUALS(25, (Stencils::Moore<2, 2>::VOLUME));
+        TS_ASSERT_EQUALS(27, (Stencils::Moore<3, 1>::VOLUME));
+
+        TS_ASSERT_EQUALS(3,  (Stencils::VonNeumann<1, 1>::VOLUME));
+        TS_ASSERT_EQUALS(5,  (Stencils::VonNeumann<1, 2>::VOLUME));
+        TS_ASSERT_EQUALS(5,  (Stencils::VonNeumann<2, 1>::VOLUME));
+        TS_ASSERT_EQUALS(13, (Stencils::VonNeumann<2, 2>::VOLUME));
+        TS_ASSERT_EQUALS(7,  (Stencils::VonNeumann<3, 1>::VOLUME));
+        TS_ASSERT_EQUALS(25, (Stencils::VonNeumann<3, 2>::VOLUME));
+
+        TS_ASSERT_EQUALS(3,  (Stencils::Cross<1, 1>::VOLUME));
+        TS_ASSERT_EQUALS(5,  (Stencils::Cross<1, 2>::VOLUME));
+        TS_ASSERT_EQUALS(5,  (Stencils::Cross<2, 1>::VOLUME));
+        TS_ASSERT_EQUALS(9,  (Stencils::Cross<2, 2>::VOLUME));
+        TS_ASSERT_EQUALS(7,  (Stencils::Cross<3, 1>::VOLUME));
+        TS_ASSERT_EQUALS(13, (Stencils::Cross<3, 2>::VOLUME));
+    }
+
+    void testCoords()
+    {
+        // TS_ASSERT_EQUALS(
     }
 };
 

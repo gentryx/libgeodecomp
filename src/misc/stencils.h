@@ -36,8 +36,14 @@ private:
     template<int BASE, int EXP>
     class Power;
 
-    template<template<int, int> class ADDEND, int INDEX>
+    template<template<int, int> class ADDEND, int INDEX, int DIM>
     class Sum;
+
+    /**
+     * Required for calculating the volume of a VonNeumann's stencil correctly.
+     */
+    template<int RADIUS, int DIM>
+    class VonNeumannHelper;
 
 public:
 
@@ -50,7 +56,10 @@ public:
     class Moore
     {
     public:
-        static const int CELLS = Power<RADIUS * 2 + 1, DIM>::VALUE;
+        static const int VOLUME = Power<RADIUS * 2 + 1, DIM>::VALUE;
+
+        template<int INDEX>
+        class Coords;
     };
 
     /**
@@ -62,6 +71,20 @@ public:
     template<int DIM, int RADIUS>
     class VonNeumann
     {
+    public:
+        static const int VOLUME = 
+            VonNeumann<DIM - 1, RADIUS>::VOLUME +
+            2 * Sum<VonNeumannHelper, RADIUS - 1, DIM - 1>::VALUE;
+
+        template<int INDEX>
+        class Coords;
+    };
+
+    template<int RADIUS>
+    class VonNeumann<0, RADIUS>
+    {
+    public:
+        static const int VOLUME = 1;
     };
 
     /**
@@ -76,7 +99,10 @@ public:
     class Cross
     {
     public:
-        static const int CELLS = 1 + 2 * RADIUS * DIM;
+        static const int VOLUME = 1 + 2 * RADIUS * DIM;
+
+        template<int INDEX>
+        class Coords;
     };
 
     /**
@@ -133,7 +159,7 @@ public:
     class OffsetHelper<Moore<DIM, 1>, X, Y, Z>
     {
     public:
-        static const int VALUE = 1 * X + 3 * Y + 9 * Z + Sum<Moore, DIM - 1>::VALUE;
+        static const int VALUE = 1 * X + 3 * Y + 9 * Z + Sum<Moore, DIM - 1, 1>::VALUE;
     };
 
     template<int DIM, int X, int Y, int Z>
@@ -158,18 +184,32 @@ private:
         static const int VALUE = 1;
     };
 
-    template<template<int, int> class ADDEND, int INDEX>
+    template<template<int, int> class ADDEND, int INDEX, int RADIUS>
     class Sum
     {
     public:
-        static const int VALUE = Sum<ADDEND, INDEX - 1>::VALUE + ADDEND<INDEX, 1>::CELLS;
+        static const int VALUE = Sum<ADDEND, INDEX - 1, RADIUS>::VALUE + ADDEND<INDEX, RADIUS>::VOLUME;
     };
 
-    template<template<int, int> class ADDEND>
-    class Sum<ADDEND, 0>
+    template<template<int, int> class ADDEND, int RADIUS>
+    class Sum<ADDEND, 0, RADIUS>
     {
     public:
-        static const int VALUE = ADDEND<0, 1>::CELLS;
+        static const int VALUE = ADDEND<0, RADIUS>::VOLUME;
+    };
+
+    template<int RADIUS, int DIM>
+    class VonNeumannHelper
+    {
+    public:
+        static const int VOLUME = VonNeumann<DIM, RADIUS>::VOLUME;
+    };
+
+    template<int DIM>
+    class VonNeumannHelper<0, DIM>
+    {
+    public:
+        static const int VOLUME = 1;
     };
 };
 
