@@ -70,6 +70,13 @@ public:
             TEMPLATE<PARAM, NUM - 1>()(cargo);
         }
 
+        template<typename CARGO1, typename CARGO2>
+        void operator()(CARGO1 cargo1, CARGO2 cargo2) const
+        {
+            Repeat<NUM - 1, TEMPLATE, PARAM>()(cargo1, cargo2);
+            TEMPLATE<PARAM, NUM - 1>()(cargo1, cargo2);
+        }
+
         template<typename CARGO1, typename CARGO2, typename CARGO3>
         void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
         {
@@ -87,6 +94,10 @@ public:
 
         template<typename CARGO>
         void operator()(const CARGO& cargo) const
+        {}
+
+        template<typename CARGO1, typename CARGO2>
+        void operator()(CARGO1 cargo1, CARGO2 cargo2) const
         {}
 
         template<typename CARGO1, typename CARGO2, typename CARGO3>

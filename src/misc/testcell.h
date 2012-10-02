@@ -9,6 +9,8 @@
 
 namespace LibGeoDecomp {
 
+namespace TestCellHelpers {
+
 template<int DIM>
 class TestCellTopology
 {
@@ -24,31 +26,46 @@ public:
     typedef Topologies::Torus<3>::Topology Topology;
 };
 
-class TestCellStdOutput
+class StdOutput
 {
 public:
     template<typename T>
-    const TestCellStdOutput& operator<<(T output) const
+    const StdOutput& operator<<(T output) const
     {
         std::cout << output;
         return *this;
     }
 };
 
-class TestCellNoOutput
+class NoOutput
 {
 public:
     template<typename T>
-    const TestCellNoOutput& operator<<(T /*unused*/) const
+    const NoOutput& operator<<(T /*unused*/) const
     {
         return *this;
     }
 };
 
+template<class STENCIL, int INDEX>
+class CheckNeighbor
+{
+public:
+    typedef typename STENCIL::template Coords<INDEX> RelCoord;
+
+    template<class TESTCELL, class NEIGHBORHOOD>
+    void operator()(bool *isValid, TESTCELL *cell, const NEIGHBORHOOD& neighborhood)
+    {
+        (*isValid) &= cell->checkNeighbor(neighborhood[RelCoord()], RelCoord());
+    }
+};
+
+}
+
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
-template<int DIM, class OUTPUT=TestCellStdOutput>
+template<int DIM, class STENCIL=Stencils::Moore<DIM, 1>, class OUTPUT=TestCellHelpers::StdOutput>
 class TestCell
 {
     friend class Typemaps;
@@ -56,7 +73,7 @@ class TestCell
 
 public:
     typedef typename Stencils::Moore<DIM, 1> Stencil;
-    typedef typename TestCellTopology<DIM>::Topology Topology;
+    typedef typename TestCellHelpers::TestCellTopology<DIM>::Topology Topology;
 
     static inline unsigned nanoSteps() 
     { 
@@ -132,44 +149,9 @@ public:
             return;
         }
 
-        // check complete Moore neighborhood (including old self), ugly manual loop, 
-        isValid &= checkNeighbor(neighborhood[FixedCoord<-1, -1,  0>()], FixedCoord<-1, -1,  0>());
-        isValid &= checkNeighbor(neighborhood[FixedCoord< 0, -1,  0>()], FixedCoord< 0, -1,  0>());
-        isValid &= checkNeighbor(neighborhood[FixedCoord< 1, -1,  0>()], FixedCoord< 1, -1,  0>());
-
-        isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  0,  0>()], FixedCoord<-1,  0,  0>());
-        isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  0,  0>()], FixedCoord< 0,  0,  0>());
-        isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  0,  0>()], FixedCoord< 1,  0,  0>());
-
-        isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  1,  0>()], FixedCoord<-1,  1,  0>());
-        isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  1,  0>()], FixedCoord< 0,  1,  0>());
-        isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  1,  0>()], FixedCoord< 1,  1,  0>());
-        
-        if (DIM == 3) {
-            isValid &= checkNeighbor(neighborhood[FixedCoord<-1, -1, -1>()], FixedCoord<-1, -1, -1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 0, -1, -1>()], FixedCoord< 0, -1, -1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 1, -1, -1>()], FixedCoord< 1, -1, -1>());
-
-            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  0, -1>()], FixedCoord<-1,  0, -1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  0, -1>()], FixedCoord< 0,  0, -1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  0, -1>()], FixedCoord< 1,  0, -1>());
-
-            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  1, -1>()], FixedCoord<-1,  1, -1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  1, -1>()], FixedCoord< 0,  1, -1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  1, -1>()], FixedCoord< 1,  1, -1>());
-        
-            isValid &= checkNeighbor(neighborhood[FixedCoord<-1, -1,  1>()], FixedCoord<-1, -1,  1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 0, -1,  1>()], FixedCoord< 0, -1,  1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 1, -1,  1>()], FixedCoord< 1, -1,  1>());
-
-            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  0,  1>()], FixedCoord<-1,  0,  1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  0,  1>()], FixedCoord< 0,  0,  1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  0,  1>()], FixedCoord< 1,  0,  1>());
-
-            isValid &= checkNeighbor(neighborhood[FixedCoord<-1,  1,  1>()], FixedCoord<-1,  1,  1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 0,  1,  1>()], FixedCoord< 0,  1,  1>());
-            isValid &= checkNeighbor(neighborhood[FixedCoord< 1,  1,  1>()], FixedCoord< 1,  1,  1>());
-        }
+        Stencils::Repeat<STENCIL::VOLUME,
+                         TestCellHelpers::CheckNeighbor,
+                         STENCIL>()(&isValid, this, neighborhood);
     
         if (nanoStep >= nanoSteps()) {
             OUTPUT() << "TestCell error: nanoStep too large: " 

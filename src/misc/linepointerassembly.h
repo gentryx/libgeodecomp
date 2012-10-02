@@ -6,9 +6,11 @@
 
 namespace LibGeoDecomp {
 
+namespace LinePointerAssemblyHelpers {
 /**
  * Utility class to deduce the X coordinate from a streak using the
- * original stencil's shape.
+ * original stencil's shape. See LinePointerUpdateFunctor for a
+ * description of the individual pointers' meaning.
  */
 template<int X>
 class CalcXCoord;
@@ -46,6 +48,44 @@ public:
     }
 };
 
+template<int DIM>
+class DetermineLinePointerCoord;
+
+template<>
+class DetermineLinePointerCoord<1>
+{
+public:
+    template<int X, int Y, int Z>
+    Coord<1> operator()(Streak<1> streak, FixedCoord<X, Y, Z>)
+    {
+        return Coord<1>(CalcXCoord<X>()(streak));
+    }
+};
+
+template<>
+class DetermineLinePointerCoord<2>
+{
+public:
+    template<int X, int Y, int Z>
+    Coord<2> operator()(Streak<2> streak, FixedCoord<X, Y, Z>)
+    {
+        return Coord<2>(CalcXCoord<X>()(streak), 
+                        streak.origin.y() + Y);
+    }
+};
+
+template<>
+class DetermineLinePointerCoord<3>
+{
+public:
+    template<int X, int Y, int Z>
+    Coord<3> operator()(Streak<3> streak, FixedCoord<X, Y, Z>)
+    {
+        return Coord<2>(CalcXCoord<X>()(streak), 
+                        streak.origin.y() + Y,
+                        streak.origin.z() + Z);
+    }
+};
 
 template<class STENCIL, int INDEX>
 class CopyCellPointer
@@ -56,11 +96,13 @@ public:
     template<typename CELL_TYPE, int DIM, typename GRID_TYPE>
     void operator()(CELL_TYPE **pointers, const Streak<DIM>& streak, GRID_TYPE *grid)
     {
-        Coord<2> c(CalcXCoord<RelCoord::X>()(streak), 
-                   streak.origin.y() + RelCoord::Y);
+        Coord<DIM> c(DetermineLinePointerCoord<DIM>()(
+                         streak, typename STENCIL::template Coords<INDEX>()));
         pointers[INDEX] = &(*grid)[c];
     }
 };
+
+}
 
 /**
  * will initialize an array of pointers so that it can be used with
@@ -78,7 +120,8 @@ public:
     void operator()(CELL *pointers[9], const Streak<2>& streak, GRID& grid)
     {
         Stencils::Repeat<Stencils::Moore<2, 1>::VOLUME, 
-                         CopyCellPointer, Stencils::Moore<2, 1> >()(pointers, streak, &grid);
+                         LinePointerAssemblyHelpers::CopyCellPointer, 
+                         Stencils::Moore<2, 1> >()(pointers, streak, &grid);
     }
 };
 
