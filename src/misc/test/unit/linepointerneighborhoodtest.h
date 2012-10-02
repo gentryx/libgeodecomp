@@ -160,7 +160,7 @@ public:
                 &gridOld[Coord<2>(c.x() + 0, c.y() + 1)],
                 &gridOld[Coord<2>(endX,      c.y() + 1)]
             };
-            LinePointerUpdateFunctor<TestCell<2> >()(Streak<2>(c, endX), box, pointers, &gridNew[c]);
+            LinePointerUpdateFunctor<TestCell<2> >()(Streak<2>(c, endX), box, pointers, &gridNew[c], 0);
 
         }
 
@@ -218,7 +218,7 @@ public:
                     &gridOld[Coord<3>(c.x() + 0, c.y() + 1, c.z() + 1)],
                     &gridOld[Coord<3>(endX,      c.y() + 1, c.z() + 1)]
                 };
-                LinePointerUpdateFunctor<TestCell<3> >()(Streak<3>(c, endX), box, pointers, &gridNew[c]);
+                LinePointerUpdateFunctor<TestCell<3> >()(Streak<3>(c, endX), box, pointers, &gridNew[c], 0);
             }
         }
 
