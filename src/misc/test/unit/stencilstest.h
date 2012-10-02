@@ -93,25 +93,6 @@ public:
         }
     };
 
-    template<int NUM, template<class C, int I> class TEMPLATE, class PARAM>
-    class Repeat
-    {
-    public:
-        void operator()()
-        {
-            Repeat<NUM - 1, TEMPLATE, PARAM>()();
-            TEMPLATE<PARAM, NUM - 1>()();
-        }
-    };
-
-    template<template<class C, int I> class TEMPLATE, class PARAM>
-    class Repeat<0, TEMPLATE, PARAM>
-    {
-    public:
-        void operator()()
-        {}
-    };
-
     void testCoords()
     {
         TS_ASSERT_EQUALS(Coord<3>(-1, 0, 0), Coord<3>(Stencils::Moore<1, 1>::Coords<0>()));
@@ -138,12 +119,12 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 1,  0, 0), Coord<3>(Stencils::VonNeumann<2, 1>::Coords<3>()));
         TS_ASSERT_EQUALS(Coord<3>( 0,  1, 0), Coord<3>(Stencils::VonNeumann<2, 1>::Coords<4>()));
 
-        Repeat<Stencils::Moore<1, 1>::VOLUME, TestStencilCoords, Stencils::Moore<1, 1> >()();
-        Repeat<Stencils::Moore<2, 1>::VOLUME, TestStencilCoords, Stencils::Moore<2, 1> >()();
-        Repeat<Stencils::Moore<3, 1>::VOLUME, TestStencilCoords, Stencils::Moore<3, 1> >()();
-        Repeat<Stencils::VonNeumann<1, 1>::VOLUME, TestStencilCoords, Stencils::VonNeumann<1, 1> >()();
-        Repeat<Stencils::VonNeumann<2, 1>::VOLUME, TestStencilCoords, Stencils::VonNeumann<2, 1> >()();
-        Repeat<Stencils::VonNeumann<3, 1>::VOLUME, TestStencilCoords, Stencils::VonNeumann<3, 1> >()();
+        Stencils::Repeat<Stencils::Moore<1, 1>::VOLUME, TestStencilCoords, Stencils::Moore<1, 1> >()();
+        Stencils::Repeat<Stencils::Moore<2, 1>::VOLUME, TestStencilCoords, Stencils::Moore<2, 1> >()();
+        Stencils::Repeat<Stencils::Moore<3, 1>::VOLUME, TestStencilCoords, Stencils::Moore<3, 1> >()();
+        Stencils::Repeat<Stencils::VonNeumann<1, 1>::VOLUME, TestStencilCoords, Stencils::VonNeumann<1, 1> >()();
+        Stencils::Repeat<Stencils::VonNeumann<2, 1>::VOLUME, TestStencilCoords, Stencils::VonNeumann<2, 1> >()();
+        Stencils::Repeat<Stencils::VonNeumann<3, 1>::VOLUME, TestStencilCoords, Stencils::VonNeumann<3, 1> >()();
     }
 };
 

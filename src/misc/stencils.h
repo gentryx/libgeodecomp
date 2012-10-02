@@ -47,6 +47,54 @@ private:
 
 public:
 
+    // Utility class to ease enumeration of statements, e.g. copying
+    // of all coords in a stencil. BOOST_PP_REPEAT and friends can't
+    // save us here as they can't handle the case where the number of
+    // iterations is just available as a static const int member of a
+    // class. This is mandatory for us -- each stencil has a different
+    // volume.
+    template<int NUM, template<class C, int I> class TEMPLATE, class PARAM>
+    class Repeat
+    {
+    public:
+        void operator()() const
+        {
+            Repeat<NUM - 1, TEMPLATE, PARAM>()();
+            TEMPLATE<PARAM, NUM - 1>()();
+        }
+
+        template<typename CARGO>
+        void operator()(CARGO cargo) const
+        {
+            Repeat<NUM - 1, TEMPLATE, PARAM>()(cargo);
+            TEMPLATE<PARAM, NUM - 1>()(cargo);
+        }
+
+        template<typename CARGO1, typename CARGO2, typename CARGO3>
+        void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
+        {
+            Repeat<NUM - 1, TEMPLATE, PARAM>()(cargo1, cargo2, cargo3);
+            TEMPLATE<PARAM, NUM - 1>()(cargo1, cargo2, cargo3);
+        }
+    };
+
+    template<template<class C, int I> class TEMPLATE, class PARAM>
+    class Repeat<0, TEMPLATE, PARAM>
+    {
+    public:
+        void operator()() const
+        {}
+
+        template<typename CARGO>
+        void operator()(const CARGO& cargo) const
+        {}
+
+        template<typename CARGO1, typename CARGO2, typename CARGO3>
+        void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
+        {}
+    };
+
+
     /**
      * The classic Moore neighborhood contains all cells whose spatial
      * distance to the orign (i.e. the current cell) -- as measured by
