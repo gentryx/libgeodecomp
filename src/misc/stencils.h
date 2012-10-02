@@ -58,6 +58,7 @@ public:
     public:
         static const int VOLUME = Power<RADIUS * 2 + 1, DIM>::VALUE;
 
+        // a list of Classes that derive from FixedCoord and define the stencil's shape
         template<int INDEX>
         class Coords;
     };
@@ -76,6 +77,7 @@ public:
             VonNeumann<DIM - 1, RADIUS>::VOLUME +
             2 * Sum<VonNeumannHelper, RADIUS - 1, DIM - 1>::VALUE;
 
+        // a list of Classes that derive from FixedCoord and define the stencil's shape
         template<int INDEX>
         class Coords;
     };
@@ -101,13 +103,15 @@ public:
     public:
         static const int VOLUME = 1 + 2 * RADIUS * DIM;
 
+        // a list of Classes that derive from FixedCoord and define the stencil's shape
         template<int INDEX>
         class Coords;
     };
 
     /**
      * This is a utility class to aid in adressing all neighboring
-     * cells which are packed in a linear array. Examples:
+     * cells which are packed in a linear array. It's pratically the
+     * opposite of the Stencils member types Coords. Examples:
      *
      * 1D Moore, von Neumann:
      *
@@ -213,6 +217,73 @@ private:
     };
 };
 
+#define ADD_COORD(STENCIL, DIM, RADIUS, INDEX, X, Y, Z)                 \
+    template<>                                                          \
+    template<>                                                          \
+    class Stencils::STENCIL<DIM, RADIUS>::Coords<INDEX> : public FixedCoord<X, Y, Z> \
+    {};    
+
+ADD_COORD(Moore, 1, 1, 0, -1, 0, 0);
+ADD_COORD(Moore, 1, 1, 1,  0, 0, 0);
+ADD_COORD(Moore, 1, 1, 2,  1, 0, 0);
+
+ADD_COORD(Moore, 2, 1, 0, -1, -1, 0);
+ADD_COORD(Moore, 2, 1, 1,  0, -1, 0);
+ADD_COORD(Moore, 2, 1, 2,  1, -1, 0);
+ADD_COORD(Moore, 2, 1, 3, -1,  0, 0);
+ADD_COORD(Moore, 2, 1, 4,  0,  0, 0);
+ADD_COORD(Moore, 2, 1, 5,  1,  0, 0);
+ADD_COORD(Moore, 2, 1, 6, -1,  1, 0);
+ADD_COORD(Moore, 2, 1, 7,  0,  1, 0);
+ADD_COORD(Moore, 2, 1, 8,  1,  1, 0);
+
+ADD_COORD(Moore, 3, 1, 0, -1, -1, -1);
+ADD_COORD(Moore, 3, 1, 1,  0, -1, -1);
+ADD_COORD(Moore, 3, 1, 2,  1, -1, -1);
+ADD_COORD(Moore, 3, 1, 3, -1,  0, -1);
+ADD_COORD(Moore, 3, 1, 4,  0,  0, -1);
+ADD_COORD(Moore, 3, 1, 5,  1,  0, -1);
+ADD_COORD(Moore, 3, 1, 6, -1,  1, -1);
+ADD_COORD(Moore, 3, 1, 7,  0,  1, -1);
+ADD_COORD(Moore, 3, 1, 8,  1,  1, -1);
+ADD_COORD(Moore, 3, 1, 9,  -1, -1, 0);
+ADD_COORD(Moore, 3, 1, 10,  0, -1, 0);
+ADD_COORD(Moore, 3, 1, 11,  1, -1, 0);
+ADD_COORD(Moore, 3, 1, 12, -1,  0, 0);
+ADD_COORD(Moore, 3, 1, 13,  0,  0, 0);
+ADD_COORD(Moore, 3, 1, 14,  1,  0, 0);
+ADD_COORD(Moore, 3, 1, 15, -1,  1, 0);
+ADD_COORD(Moore, 3, 1, 16,  0,  1, 0);
+ADD_COORD(Moore, 3, 1, 17,  1,  1, 0);
+ADD_COORD(Moore, 3, 1, 18, -1, -1, 1);
+ADD_COORD(Moore, 3, 1, 19,  0, -1, 1);
+ADD_COORD(Moore, 3, 1, 20,  1, -1, 1);
+ADD_COORD(Moore, 3, 1, 21, -1,  0, 1);
+ADD_COORD(Moore, 3, 1, 22,  0,  0, 1);
+ADD_COORD(Moore, 3, 1, 23,  1,  0, 1);
+ADD_COORD(Moore, 3, 1, 24, -1,  1, 1);
+ADD_COORD(Moore, 3, 1, 25,  0,  1, 1);
+ADD_COORD(Moore, 3, 1, 26,  1,  1, 1);
+
+ADD_COORD(VonNeumann, 1, 1, 0, -1, 0, 0);
+ADD_COORD(VonNeumann, 1, 1, 1,  0, 0, 0);
+ADD_COORD(VonNeumann, 1, 1, 2,  1, 0, 0);
+
+ADD_COORD(VonNeumann, 2, 1, 0,  0, -1, 0);
+ADD_COORD(VonNeumann, 2, 1, 1, -1,  0, 0);
+ADD_COORD(VonNeumann, 2, 1, 2,  0,  0, 0);
+ADD_COORD(VonNeumann, 2, 1, 3,  1,  0, 0);
+ADD_COORD(VonNeumann, 2, 1, 4,  0,  1, 0);
+
+ADD_COORD(VonNeumann, 3, 1, 0,  0,  0, -1);
+ADD_COORD(VonNeumann, 3, 1, 1,  0, -1,  0);
+ADD_COORD(VonNeumann, 3, 1, 2, -1,  0,  0);
+ADD_COORD(VonNeumann, 3, 1, 3,  0,  0,  0);
+ADD_COORD(VonNeumann, 3, 1, 4,  1,  0,  0);
+ADD_COORD(VonNeumann, 3, 1, 5,  0,  1,  0);
+ADD_COORD(VonNeumann, 3, 1, 6,  0,  0,  1);
+
+// fixme: add coordinates for wider stencil radii
 }
 
 #endif
