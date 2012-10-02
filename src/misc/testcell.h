@@ -72,8 +72,10 @@ class TestCell
     friend class TestCellTest;
 
 public:
-    typedef typename Stencils::Moore<DIM, 1> Stencil;
+    typedef STENCIL Stencil;
     typedef typename TestCellHelpers::TestCellTopology<DIM>::Topology Topology;
+
+    static const int DIMENSIONS = DIM;
 
     static inline unsigned nanoSteps() 
     { 

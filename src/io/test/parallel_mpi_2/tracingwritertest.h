@@ -17,7 +17,7 @@ public:
     void setUp()
     {
         simulator = new StripingSimulator<TestCell<2> >(
-            new TestInitializer<2>(),
+            new TestInitializer<TestCell<2> >(),
             MPILayer().rank() ? 0 : new NoOpBalancer(), 
             1000);
     }

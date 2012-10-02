@@ -35,10 +35,11 @@ public:
     static const int maxSteps = 21;
 };
 
-template<int DIM>
-class TestInitializer : public Initializer<TestCell<DIM> >
+template<class TEST_CELL>
+class TestInitializer : public Initializer<TEST_CELL>
 {
 public:
+    static const int DIM = TEST_CELL::DIMENSIONS;
 
     TestInitializer(
         const Coord<DIM>& dim = TestInitializerHelper<DIM>::getDimensions(),
@@ -49,16 +50,16 @@ public:
         step1(startStep)
     {}
 
-    virtual void grid(GridBase<TestCell<DIM>, DIM> *ret)
+    virtual void grid(GridBase<TEST_CELL, DIM> *ret)
     {
         CoordBox<DIM> rect = ret->boundingBox();
-        unsigned cycle = startStep() * TestCell<DIM>::nanoSteps();
+        unsigned cycle = startStep() * TEST_CELL::nanoSteps();
         for (typename CoordBox<DIM>::Iterator i = rect.begin(); i != rect.end(); ++i) {
-            Coord<DIM> coord = TestCell<DIM>::Topology::normalize(*i, dimensions);
+            Coord<DIM> coord = TEST_CELL::Topology::normalize(*i, dimensions);
             double index = 1 + CoordToIndex<DIM>()(coord, dimensions);
-            ret->at(*i) = TestCell<DIM>(coord, dimensions, cycle, index);
+            ret->at(*i) = TEST_CELL(coord, dimensions, cycle, index);
         }
-        ret->atEdge() = TestCell<DIM>(Coord<DIM>::diagonal(-1), dimensions);
+        ret->atEdge() = TEST_CELL(Coord<DIM>::diagonal(-1), dimensions);
         ret->atEdge().isEdgeCell = true;
     }
 

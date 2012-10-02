@@ -162,11 +162,11 @@ public:
     void setUp() 
     {
         balancer = new NoOpBalancer;
-        init = new TestInitializer<2>();
+        init = new TestInitializer<TestCell<2> >();
         referenceSim = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<2>());
+            new TestInitializer<TestCell<2> >());
         testSim = new StripingSimulator<TestCell<2> >(
-            new TestInitializer<2>(), balancer);
+            new TestInitializer<TestCell<2> >(), balancer);
     }
 
     void tearDown()
@@ -179,10 +179,10 @@ public:
     void testBadInit()
     {
         TS_ASSERT_THROWS(StripingSimulator<TestCell<2> > foo(
-                             new TestInitializer<2>(), 0, 1), 
+                             new TestInitializer<TestCell<2> >(), 0, 1), 
                          std::invalid_argument);
         TS_ASSERT_THROWS(StripingSimulator<TestCell<2> > foo(
-                             new TestInitializer<2>(), 0, 0),
+                             new TestInitializer<TestCell<2> >(), 0, 0),
                          std::invalid_argument);
     }
 
@@ -191,7 +191,7 @@ public:
         MockBalancer::events = "";
         {
             StripingSimulator<TestCell<2> > foo(
-                new TestInitializer<2>(), new MockBalancer()); 
+                new TestInitializer<TestCell<2> >(), new MockBalancer()); 
         }
         TS_ASSERT_EQUALS("deleted\n", MockBalancer::events);
     }
@@ -320,21 +320,21 @@ public:
     void testBadBalancerSum()
     {
         StripingSimulator<TestCell<2> > s(
-            new TestInitializer<2>(), new BadBalancerSum);
+            new TestInitializer<TestCell<2> >(), new BadBalancerSum);
         TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument);
     }
 
     void testBadBalancerNum()
     {    
         StripingSimulator<TestCell<2> > s(
-            new TestInitializer<2>(), new BadBalancerNum);
+            new TestInitializer<TestCell<2> >(), new BadBalancerNum);
         TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument);
     }
 
     void test3D()
     {
         StripingSimulator<TestCell<3> > s(
-            new TestInitializer<3>(), 
+            new TestInitializer<TestCell<3> >(), 
             new NoOpBalancer());
 
         s.run();

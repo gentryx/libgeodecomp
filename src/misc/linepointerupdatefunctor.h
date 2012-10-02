@@ -121,7 +121,7 @@ public:
         for (x += 1; x < streak.endX - 1; ++x) {
             newLine[x].update(hood, 0);
         }
-            
+
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
         newLine[x].update(hoodEast, 0);
     }

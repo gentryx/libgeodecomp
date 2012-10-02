@@ -58,11 +58,11 @@ public:
         maxSteps = 50;
         firstStep = 20;
         firstCycle = firstStep * TestCell<2>::nanoSteps();
-        init = new TestInitializer<2>(
+        init = new TestInitializer<TestCell<2> >(
             Coord<2>(width, height), maxSteps, firstStep);
 
         referenceSim = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<2>(
+            new TestInitializer<TestCell<2> >(
                 Coord<2>(width, height), maxSteps, firstStep));
         LoadBalancer *balancer = rank == 0? new NoOpBalancer : 0;
         testSim = new StripingSimulator<TestCell<2> >(init, balancer);
@@ -325,7 +325,7 @@ public:
     {        
         LoadBalancer *balancer = rank? 0 : new RandomBalancer;
         StripingSimulator<TestCell<2> > localTestSim(
-            new TestInitializer<2>(
+            new TestInitializer<TestCell<2> >(
                 Coord<2>(width, height), maxSteps, firstStep), 
             balancer, 
             balanceEveryN);
@@ -364,7 +364,7 @@ public:
         LoadBalancer *balancer = rank? 0 : new CheckBalancer;
         unsigned balanceEveryN = 2;
         StripingSimulator<TestCell<2> > testSim(
-            new TestInitializer<2>(),
+            new TestInitializer<TestCell<2> >(),
             balancer, 
             balanceEveryN);
         testSim.run();
@@ -374,11 +374,11 @@ public:
     {
         if (rank == 0) {
             TS_ASSERT_THROWS(
-                StripingSimulator<TestCell<2> > s(new TestInitializer<2>(), 0),
+                StripingSimulator<TestCell<2> > s(new TestInitializer<TestCell<2> >(), 0),
                 std::invalid_argument);
         } else {
             TS_ASSERT_THROWS(
-                StripingSimulator<TestCell<2> > s(new TestInitializer<2>(), 
+                StripingSimulator<TestCell<2> > s(new TestInitializer<TestCell<2> >(), 
                                                   new NoOpBalancer),
                 std::invalid_argument);
         }
@@ -387,7 +387,7 @@ public:
     void test3Dsimple()
     {
         StripingSimulator<TestCell<3> > s(
-            new TestInitializer<3>(), 
+            new TestInitializer<TestCell<3> >(), 
             rank? 0 : new NoOpBalancer());
 
         s.run();
@@ -396,7 +396,7 @@ public:
     void test3Dadvanced()
     {
         StripingSimulator<TestCell<3> > s(
-            new TestInitializer<3>(), 
+            new TestInitializer<TestCell<3> >(), 
             rank? 0 : new RandomBalancer());
 
         s.run();

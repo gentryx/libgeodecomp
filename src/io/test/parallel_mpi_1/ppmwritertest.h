@@ -21,7 +21,7 @@ public:
     {
         _tempFile = TempFile::serial("libGeoDecompTempfile");
         _simulator = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<2>(Coord<2>(10, 11)));
+            new TestInitializer<TestCell<2> >(Coord<2>(10, 11)));
     }
 
 

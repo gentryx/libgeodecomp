@@ -139,7 +139,7 @@ public:
         typedef Grid<TestCell<2>, TestCell<2>::Topology> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
-        TestInitializer<2> init(dim);
+        TestInitializer<TestCell<2> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
         CoordBox<2> box = gridOld.boundingBox();
@@ -176,7 +176,7 @@ public:
         typedef Grid<TestCell<3>, TestCell<3>::Topology> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
-        TestInitializer<3> init(dim);
+        TestInitializer<TestCell<3> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
         CoordBox<3> box = gridOld.boundingBox();

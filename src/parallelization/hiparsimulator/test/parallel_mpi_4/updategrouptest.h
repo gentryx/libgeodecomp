@@ -30,7 +30,7 @@ public:
         weights = genWeights(dimensions.x(), dimensions.y(), MPILayer().size());
         partition = new MyPartition(Coord<2>(), dimensions, 0, weights);
         ghostZoneWidth = 9;
-        init = new TestInitializer<2>(dimensions);
+        init = new TestInitializer<TestCell<2> >(dimensions);
         updateGroup.reset(
             new MyUpdateGroup(
                 partition,

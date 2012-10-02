@@ -19,7 +19,7 @@ public:
     {
         simulator.reset(
             new SerialSimulator<TestCell<2> >(
-                new TestInitializer<2>(
+                new TestInitializer<TestCell<2> >(
                     Coord<2>(10, 20),
                     34,
                     10)));
