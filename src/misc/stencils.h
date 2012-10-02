@@ -111,10 +111,11 @@ public:
      * distance to the orign (i.e. the current cell) -- as measured by
      * the maximum norm -- is smaller or equal to RADIUS.
      */
-    template<int DIM, int RADIUS>
+    template<int DIMENSIONS, int RADIUS>
     class Moore
     {
     public:
+        static const int DIM = DIMENSIONS;
         static const int VOLUME = Power<RADIUS * 2 + 1, DIM>::VALUE;
 
         // a list of Classes that derive from FixedCoord and define the stencil's shape
@@ -128,10 +129,11 @@ public:
      * equal to 1. It replaces the maximum norm with the Manhattan
      * distance.
      */
-    template<int DIM, int RADIUS>
+    template<int DIMENSIONS, int RADIUS>
     class VonNeumann
     {
     public:
+        static const int DIM = DIMENSIONS;
         static const int VOLUME = 
             VonNeumann<DIM - 1, RADIUS>::VOLUME +
             2 * Sum<VonNeumannHelper, RADIUS - 1, DIM - 1>::VALUE;
@@ -156,10 +158,11 @@ public:
      * complicated, but formally correct way to describe an
      * n-dimensional cross.)
      */
-    template<int DIM, int RADIUS>
+    template<int DIMENSIONS, int RADIUS>
     class Cross
     {
     public:
+        static const int DIM = DIMENSIONS;
         static const int VOLUME = 1 + 2 * RADIUS * DIM;
 
         // a list of Classes that derive from FixedCoord and define the stencil's shape
