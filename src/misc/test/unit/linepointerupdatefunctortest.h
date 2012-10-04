@@ -47,9 +47,9 @@ public:
             }
                                      
             int cycle = init.startStep() * TestCellType::nanoSteps() + s;
-            TS_ASSERT_TEST_GRID(GridType, gridOld, cycle);
+            TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;
-            TS_ASSERT_TEST_GRID(GridType, gridNew, cycle);
+            TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
 
             std::swap(gridOld, gridNew);
         }
