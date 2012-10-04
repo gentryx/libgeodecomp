@@ -2,6 +2,7 @@
 #include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
+#include <libgeodecomp/misc/apis.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/grid.h>
@@ -548,7 +549,10 @@ private:
 class JacobiCellClassic
 {
 public:
+    typedef Stencils::Moore<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
+    class API : public APIs::Base
+    {};
 
     static int nanoSteps()
     {
@@ -647,6 +651,8 @@ class JacobiCellFixedHood
 public:
     typedef Stencils::Moore<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
+    class API : public APIs::Fixed
+    {};
 
     JacobiCellFixedHood(double t = 0) :
         temp(t)
@@ -744,7 +750,9 @@ class JacobiCellStreakUpdate
 {
 public:
     typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
+    typedef Topologies::Torus<3>::Topology Topology;
+    class API : public APIs::Fixed, public APIs::Line
+    {};
 
     JacobiCellStreakUpdate(double t = 0) :
         temp(t)
@@ -768,7 +776,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateStreak(JacobiCellStreakUpdate *target, const NEIGHBORHOOD& hood, int /* nanoStep */, int *x, int endX)
+    static void updateLine(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -776,14 +784,14 @@ public:
         }
 
         __m128d oneSeventh = _mm_set_pd(1.0/7.0, 1.0/7.0);
-        __m128d same1 = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()]);
-        __m128d odds0 = _mm_loadu_pd(&hood[FixedCoord<-1, 0, 0>()]);
+        __m128d same1 = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()].temp);
+        __m128d odds0 = _mm_loadu_pd(&hood[FixedCoord<-1, 0, 0>()].temp);
 
         for (; (*x) < (endX - 7); (*x) += 8) {
-            __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()]);
-            __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()]);
-            __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()]);
-            __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()]);
+            __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
+            __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
+            __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
+            __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()].temp);
 
             // shuffle values obtain left/right neighbors
             __m128d odds1 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
@@ -792,10 +800,10 @@ public:
             __m128d odds4 = _mm_shuffle_pd(same4, same5, (1 << 0) | (0 << 2));
 
             // load south neighbors
-            __m128d buf0 =  _mm_load_pd(&hood[FixedCoord< 0, 0, -1>()]);
-            __m128d buf1 =  _mm_load_pd(&hood[FixedCoord< 2, 0, -1>()]);
-            __m128d buf2 =  _mm_load_pd(&hood[FixedCoord< 4, 0, -1>()]);
-            __m128d buf3 =  _mm_load_pd(&hood[FixedCoord< 6, 0, -1>()]);
+            __m128d buf0 =  _mm_load_pd(&hood[FixedCoord< 0, 0, -1>()].temp);
+            __m128d buf1 =  _mm_load_pd(&hood[FixedCoord< 2, 0, -1>()].temp);
+            __m128d buf2 =  _mm_load_pd(&hood[FixedCoord< 4, 0, -1>()].temp);
+            __m128d buf3 =  _mm_load_pd(&hood[FixedCoord< 6, 0, -1>()].temp);
 
             // add left neighbors
             same1 = _mm_add_pd(same1, odds0);
@@ -810,10 +818,10 @@ public:
             same4 = _mm_add_pd(same4, odds4);
 
             // load top neighbors
-            odds0 = _mm_load_pd(&hood[FixedCoord< 0, -1, 0>()]);
-            odds1 = _mm_load_pd(&hood[FixedCoord< 2, -1, 0>()]);
-            odds2 = _mm_load_pd(&hood[FixedCoord< 4, -1, 0>()]);
-            odds3 = _mm_load_pd(&hood[FixedCoord< 6, -1, 0>()]);
+            odds0 = _mm_load_pd(&hood[FixedCoord< 0, -1, 0>()].temp);
+            odds1 = _mm_load_pd(&hood[FixedCoord< 2, -1, 0>()].temp);
+            odds2 = _mm_load_pd(&hood[FixedCoord< 4, -1, 0>()].temp);
+            odds3 = _mm_load_pd(&hood[FixedCoord< 6, -1, 0>()].temp);
 
             // add south neighbors
             same1 = _mm_add_pd(same1, buf0);
@@ -822,10 +830,10 @@ public:
             same4 = _mm_add_pd(same4, buf3);
 
             // load bottom neighbors
-            buf0 =  _mm_load_pd(&hood[FixedCoord< 0, 1, 0>()]);
-            buf1 =  _mm_load_pd(&hood[FixedCoord< 2, 1, 0>()]);
-            buf2 =  _mm_load_pd(&hood[FixedCoord< 4, 1, 0>()]);
-            buf3 =  _mm_load_pd(&hood[FixedCoord< 6, 1, 0>()]);
+            buf0 =  _mm_load_pd(&hood[FixedCoord< 0, 1, 0>()].temp);
+            buf1 =  _mm_load_pd(&hood[FixedCoord< 2, 1, 0>()].temp);
+            buf2 =  _mm_load_pd(&hood[FixedCoord< 4, 1, 0>()].temp);
+            buf3 =  _mm_load_pd(&hood[FixedCoord< 6, 1, 0>()].temp);
 
             // add top neighbors
             same1 = _mm_add_pd(same1, odds0);
@@ -834,10 +842,10 @@ public:
             same4 = _mm_add_pd(same4, odds3);
 
             // load north neighbors
-            odds0 = _mm_load_pd(&hood[FixedCoord< 0, 0, 1>()]);
-            odds1 = _mm_load_pd(&hood[FixedCoord< 2, 0, 1>()]);
-            odds2 = _mm_load_pd(&hood[FixedCoord< 4, 0, 1>()]);
-            odds3 = _mm_load_pd(&hood[FixedCoord< 6, 0, 1>()]);
+            odds0 = _mm_load_pd(&hood[FixedCoord< 0, 0, 1>()].temp);
+            odds1 = _mm_load_pd(&hood[FixedCoord< 2, 0, 1>()].temp);
+            odds2 = _mm_load_pd(&hood[FixedCoord< 4, 0, 1>()].temp);
+            odds3 = _mm_load_pd(&hood[FixedCoord< 6, 0, 1>()].temp);
 
             // add bottom neighbors
             same1 = _mm_add_pd(same1, buf0);

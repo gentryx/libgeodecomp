@@ -119,13 +119,25 @@ public:
         newLine[x].update(hoodWest, nanoStep);
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-
-        for (x += 1; x < streak.endX - 1; ++x) {
-            newLine[x].update(hood, nanoStep);
-        }
-
+        updateMain(newLine, &x, (long)(streak.endX - 1), hood, nanoStep, typename CELL::API());
+        
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
         newLine[x].update(hoodEast, nanoStep);
+    }
+
+private:
+    template<typename NEIGHBORHOOD>
+    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APIs::Base)
+    {
+        for ((*x) += 1; (*x) < endX; ++(*x)) {
+            newLine[(*x)].update(hood, nanoStep);
+        }
+    }
+
+    template<typename NEIGHBORHOOD>
+    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APIs::Line)
+    {
+        CELL::updateLine(newLine, x, endX, hood, nanoStep);
     }
 };
 
