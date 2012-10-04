@@ -94,7 +94,7 @@
         }                                                               \
     }
 
-#define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE)         \
+#define TS_ASSERT_TEST_GRID2(_GRID_TYPE, _GRID, _EXPECTED_CYCLE, TYPENAME) \
     {                                                                   \
         const _GRID_TYPE& assertGrid = _GRID;                           \
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
@@ -111,7 +111,7 @@
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
         CoordBox<_GRID_TYPE::DIM> box = assertGrid.boundingBox();       \
-        for (typename CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
+        for (CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
             bool flagValid   = assertGrid.at(*i).valid();               \
             bool flagEdge    = (assertGrid.at(*i).isEdgeCell == false); \
             bool flagCounter = (assertGrid.at(*i).cycleCounter == expectedCycle); \
@@ -130,6 +130,9 @@
             std::cout << "message: " << message.str();                  \
         }                                                               \
     } 
+
+#define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE) \
+    TS_ASSERT_TEST_GRID2(_GRID_TYPE, _GRID, _EXPECTED_CYCLE, )
 
 #define TS_ASSERT_TEST_GRID_REGION(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE) \
     {                                                                   \
