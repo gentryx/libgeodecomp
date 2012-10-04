@@ -111,7 +111,7 @@
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
         CoordBox<_GRID_TYPE::DIM> box = assertGrid.boundingBox();       \
-        for (CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
+        for (TYPENAME CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
             bool flagValid   = assertGrid.at(*i).valid();               \
             bool flagEdge    = (assertGrid.at(*i).isEdgeCell == false); \
             bool flagCounter = (assertGrid.at(*i).cycleCounter == expectedCycle); \
