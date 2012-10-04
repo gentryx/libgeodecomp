@@ -610,7 +610,7 @@ public:
         long long tBegin= Chronometer::timeUSec();
 
         for (int t = 0; t < maxT; ++t) {
-            for (typename CoordBox<3>::Iterator i = coords.begin();
+            for (CoordBox<3>::Iterator i = coords.begin();
                  i != coords.end();
                  ++i) {
                 CoordMap<JacobiCellClassic, GridType> neighborhood = 
@@ -713,7 +713,7 @@ public:
         long long tBegin= Chronometer::timeUSec();
 
         for (int t = 0; t < maxT; ++t) {
-            for (typename CoordBox<3>::Iterator i = lineStarts.begin();
+            for (CoordBox<3>::Iterator i = lineStarts.begin();
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
@@ -918,7 +918,7 @@ public:
         long long tBegin= Chronometer::timeUSec();
 
         for (int t = 0; t < maxT; ++t) {
-            for (typename CoordBox<3>::Iterator i = lineStarts.begin();
+            for (CoordBox<3>::Iterator i = lineStarts.begin();
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
