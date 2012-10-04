@@ -507,10 +507,10 @@ private:
             same4 = _mm_add_pd(same4, odds3);
 
             // scale by 1/7
-            same1 = _mm_add_pd(same1, oneSeventh);
-            same2 = _mm_add_pd(same2, oneSeventh);
-            same3 = _mm_add_pd(same3, oneSeventh);
-            same4 = _mm_add_pd(same4, oneSeventh);
+            same1 = _mm_mul_pd(same1, oneSeventh);
+            same2 = _mm_mul_pd(same2, oneSeventh);
+            same3 = _mm_mul_pd(same3, oneSeventh);
+            same4 = _mm_mul_pd(same4, oneSeventh);
 
             // store results
             _mm_store_pd(target + x + 0, same1);
@@ -750,7 +750,8 @@ class JacobiCellStreakUpdate
 {
 public:
     typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
+    typedef Topologies::Cube<3>::Topology Topology;
+  
     class API : public APIs::Fixed, public APIs::Line
     {};
 
@@ -800,10 +801,10 @@ public:
             __m128d odds4 = _mm_shuffle_pd(same4, same5, (1 << 0) | (0 << 2));
 
             // load south neighbors
-            __m128d buf0 =  _mm_load_pd(&hood[FixedCoord< 0, 0, -1>()].temp);
-            __m128d buf1 =  _mm_load_pd(&hood[FixedCoord< 2, 0, -1>()].temp);
-            __m128d buf2 =  _mm_load_pd(&hood[FixedCoord< 4, 0, -1>()].temp);
-            __m128d buf3 =  _mm_load_pd(&hood[FixedCoord< 6, 0, -1>()].temp);
+            __m128d buf0 =  load<0>(hood, FixedCoord< 0, 0, -1>());
+            __m128d buf1 =  load<2>(hood, FixedCoord< 0, 0, -1>());
+            __m128d buf2 =  load<4>(hood, FixedCoord< 0, 0, -1>());
+            __m128d buf3 =  load<6>(hood, FixedCoord< 0, 0, -1>());
 
             // add left neighbors
             same1 = _mm_add_pd(same1, odds0);
@@ -818,10 +819,10 @@ public:
             same4 = _mm_add_pd(same4, odds4);
 
             // load top neighbors
-            odds0 = _mm_load_pd(&hood[FixedCoord< 0, -1, 0>()].temp);
-            odds1 = _mm_load_pd(&hood[FixedCoord< 2, -1, 0>()].temp);
-            odds2 = _mm_load_pd(&hood[FixedCoord< 4, -1, 0>()].temp);
-            odds3 = _mm_load_pd(&hood[FixedCoord< 6, -1, 0>()].temp);
+            odds0 = load<0>(hood, FixedCoord< 0, -1, 0>());
+            odds1 = load<2>(hood, FixedCoord< 0, -1, 0>());
+            odds2 = load<4>(hood, FixedCoord< 0, -1, 0>());
+            odds3 = load<6>(hood, FixedCoord< 0, -1, 0>());
 
             // add south neighbors
             same1 = _mm_add_pd(same1, buf0);
@@ -830,10 +831,10 @@ public:
             same4 = _mm_add_pd(same4, buf3);
 
             // load bottom neighbors
-            buf0 =  _mm_load_pd(&hood[FixedCoord< 0, 1, 0>()].temp);
-            buf1 =  _mm_load_pd(&hood[FixedCoord< 2, 1, 0>()].temp);
-            buf2 =  _mm_load_pd(&hood[FixedCoord< 4, 1, 0>()].temp);
-            buf3 =  _mm_load_pd(&hood[FixedCoord< 6, 1, 0>()].temp);
+            buf0 =  load<0>(hood, FixedCoord< 0, 1, 0>());
+            buf1 =  load<2>(hood, FixedCoord< 0, 1, 0>());
+            buf2 =  load<4>(hood, FixedCoord< 0, 1, 0>());
+            buf3 =  load<6>(hood, FixedCoord< 0, 1, 0>());
 
             // add top neighbors
             same1 = _mm_add_pd(same1, odds0);
@@ -842,10 +843,10 @@ public:
             same4 = _mm_add_pd(same4, odds3);
 
             // load north neighbors
-            odds0 = _mm_load_pd(&hood[FixedCoord< 0, 0, 1>()].temp);
-            odds1 = _mm_load_pd(&hood[FixedCoord< 2, 0, 1>()].temp);
-            odds2 = _mm_load_pd(&hood[FixedCoord< 4, 0, 1>()].temp);
-            odds3 = _mm_load_pd(&hood[FixedCoord< 6, 0, 1>()].temp);
+            odds0 = load<0>(hood, FixedCoord< 0, 0, 1>());
+            odds1 = load<2>(hood, FixedCoord< 0, 0, 1>());
+            odds2 = load<4>(hood, FixedCoord< 0, 0, 1>());
+            odds3 = load<6>(hood, FixedCoord< 0, 0, 1>());
 
             // add bottom neighbors
             same1 = _mm_add_pd(same1, buf0);
@@ -860,10 +861,10 @@ public:
             same4 = _mm_add_pd(same4, odds3);
 
             // scale by 1/7
-            same1 = _mm_add_pd(same1, oneSeventh);
-            same2 = _mm_add_pd(same2, oneSeventh);
-            same3 = _mm_add_pd(same3, oneSeventh);
-            same4 = _mm_add_pd(same4, oneSeventh);
+            same1 = _mm_mul_pd(same1, oneSeventh);
+            same2 = _mm_mul_pd(same2, oneSeventh);
+            same3 = _mm_mul_pd(same3, oneSeventh);
+            same4 = _mm_mul_pd(same4, oneSeventh);
 
             // store results
             _mm_store_pd(&target[*x + 0].temp, same1);
@@ -878,6 +879,24 @@ public:
         for (; *x < endX; ++(*x)) {
             target[*x].update(hood, 0);
         }
+    }
+
+    template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
+    static __m128d load(const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
+    {
+        return load<OFFSET>(&hood[coord].temp, hood.arity(coord));
+    }
+
+    template<int OFFSET>
+    static __m128d load(const double *p, VectorArithmetics::Vector)
+    {
+        return _mm_load_pd(p + OFFSET);
+    }
+
+    template<int OFFSET>
+    static __m128d load(const double *p, VectorArithmetics::Scalar)
+    {
+        return _mm_set_pd(*p, *p);
     }
 
     double temp;
