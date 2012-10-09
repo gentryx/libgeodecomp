@@ -3,7 +3,7 @@ Typemaps::generateMapKLASS_NAME() {
     char fakeObject[sizeof(KLASS)];
     KLASS *obj = (KLASS*)fakeObject;
 
-    int count = NUM_MEMBERS;
+    const int count = NUM_MEMBERS;
     int lengths[count];
 
     // sort addresses in ascending order
