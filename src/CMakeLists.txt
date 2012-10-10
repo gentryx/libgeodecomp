@@ -68,6 +68,11 @@ if(SUPPORTS_MARCH_NATIVE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
+set(AMD64_LINUX false)
+if (MACHINE_ARCH MATCHES "x86_64")
+  set(AMD64_LINUX true)
+endif()
+
 #============= CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
@@ -90,6 +95,8 @@ add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL device
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
 
 add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
+
+add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
