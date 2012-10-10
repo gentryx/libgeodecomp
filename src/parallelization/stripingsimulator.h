@@ -15,7 +15,7 @@
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
-class DefaultUpdateFunctor
+class StripingSimulatorUpdateFunctor
 {
 public: 
     typedef typename CELL_TYPE::Topology Topology;
@@ -35,83 +35,6 @@ public:
         }
     }
 };
-
-template<typename CELL_TYPE>
-class StreakUpdateFunctor
-{
-public: 
-    typedef typename CELL_TYPE::Topology Topology;
-
-    template<int DIM, typename GRID_TYPE>
-    void operator()(
-        const Streak<DIM>& streak, 
-        GRID_TYPE *curGrid, 
-        GRID_TYPE *newGrid,
-        const unsigned& nanoStep)
-    {
-        // fixme: this is bad...
-        if (streak.origin.y() == 0   ||
-            streak.origin.z() == 0   || 
-            streak.origin.y() == 255 ||
-            streak.origin.z() == 255)
-            return;
-        Streak<DIM> s = streak;
-        Streak<DIM> tmpStreak = streak;
-
-        // peel the first 1-2 iterations
-        // fixme: this loop peeling at the start and end needs
-        // rework. move to cell?
-        if (streak.origin.x() & 1) {
-            s.origin.x() += 1;
-            tmpStreak.endX = tmpStreak.origin.x() + 1;
-        } else {
-            s.origin.x() += 2;
-            tmpStreak.endX = tmpStreak.origin.x() + 2;
-        }
-        DefaultUpdateFunctor<CELL_TYPE>()(
-            tmpStreak,
-            curGrid,
-            newGrid,
-            nanoStep);
-
-        int remainder = s.endX - s.origin.x();
-        // "& -8" sets the three LSB to 0, thus always returning a
-        // multiple of 8. subtract 1 in order to always peel one
-        // iteration at the end.
-        int length = (remainder - 1) & -8;
-        CELL_TYPE *target = &((*newGrid)[s.origin + Coord<3>(0,  0,  0)]);
-
-        CELL_TYPE *right  = &((*curGrid)[s.origin + Coord<3>(0,  0, -1)]);
-        CELL_TYPE *top    = &((*curGrid)[s.origin + Coord<3>(0, -1,  0)]);
-        CELL_TYPE *center = &((*curGrid)[s.origin + Coord<3>(0,  0,  0)]);
-        CELL_TYPE *bottom = &((*curGrid)[s.origin + Coord<3>(0,  1,  0)]);
-        CELL_TYPE *left   = &((*curGrid)[s.origin + Coord<3>(0,  0,  1)]);
-
-        CELL_TYPE::update(
-            target,
-            right,
-            top,
-            center,
-            bottom,
-            left,
-            length,
-            nanoStep);
-
-        // fixme: this loop peeling at the start and end needs
-        // rework. move to cell?
-        tmpStreak.origin.x() = s.origin.x() + length;
-        tmpStreak.endX = streak.endX;
-        // DefaultUpdateFunctor<CELL_TYPE>()(
-        //     tmpStreak,
-        //     curGrid,
-        //     newGrid,
-        //     nanoStep);
-    }
-};
-
-template<typename CELL_TYPE>
-class UpdateFunctor : public DefaultUpdateFunctor<CELL_TYPE>
-{};
 
 /**
  * This class aims at providing a very simple, but working parallel
@@ -371,7 +294,7 @@ private:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); 
              ++i) {
-            UpdateFunctor<CELL_TYPE>()(
+            StripingSimulatorUpdateFunctor<CELL_TYPE>()(
                 *i,
                 curStripe,
                 newStripe,
