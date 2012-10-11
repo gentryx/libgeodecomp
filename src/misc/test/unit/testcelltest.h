@@ -11,7 +11,7 @@ namespace LibGeoDecomp {
 class TestCellTest : public CxxTest::TestSuite 
 {
 private:
-    typedef TestCell<2, TestCellNoOutput> TestCellType;
+    typedef TestCell<2, Stencils::Moore<2, 1>, TestCellHelpers::NoOutput> TestCellType;
     Grid<TestCellType> grid;
     int width;
     int height;
@@ -24,10 +24,12 @@ public:
         grid = Grid<TestCellType >(Coord<2>(width, height));
         grid[Coord<2>(-1, -1)] = TestCellType(Coord<2>(-1, -1), 
                                           Coord<2>(width, height));
-        for (int x = 0; x < width; x++) 
-            for (int y = 0; y < height; y++) 
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 grid[Coord<2>(x, y)] = 
                     TestCellType(Coord<2>(x, y), Coord<2>(width, height), 0);
+            }
+        }
     }
 
     void tearDown()
@@ -91,6 +93,11 @@ public:
         grid[1][0] = TestCellType();
         update();
         TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[1][0].isValid);
+        TS_ASSERT(!grid[2][0].isValid);
+        TS_ASSERT(!grid[0][1].isValid);
+        TS_ASSERT(!grid[1][1].isValid);
+        TS_ASSERT(!grid[2][1].isValid);
     }
 
     void testUpdateBadCycle()
@@ -114,7 +121,7 @@ public:
         TS_ASSERT(!grid[0][0].isValid);
     }
 
-    typedef TestCell<3, TestCellNoOutput> TestCell3D;
+    typedef TestCell<3, Stencils::Moore<3, 1>, TestCellHelpers::NoOutput> TestCell3D;
     typedef Grid<TestCell3D, TestCell3D::Topology> Grid3D;
 
     void test3D1()

@@ -47,7 +47,7 @@ Typemaps::generateMapLibGeoDecomp_Coord_1_() {
     char fakeObject[sizeof(LibGeoDecomp::Coord<1 >)];
     LibGeoDecomp::Coord<1 > *obj = (LibGeoDecomp::Coord<1 >*)fakeObject;
 
-    int count = 1;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -84,7 +84,7 @@ Typemaps::generateMapLibGeoDecomp_Coord_3_() {
     char fakeObject[sizeof(LibGeoDecomp::Coord<3 >)];
     LibGeoDecomp::Coord<3 > *obj = (LibGeoDecomp::Coord<3 >*)fakeObject;
 
-    int count = 1;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -121,7 +121,7 @@ Typemaps::generateMapLibGeoDecomp_SimpleCell() {
     char fakeObject[sizeof(LibGeoDecomp::SimpleCell)];
     LibGeoDecomp::SimpleCell *obj = (LibGeoDecomp::SimpleCell*)fakeObject;
 
-    int count = 1;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -158,7 +158,7 @@ Typemaps::generateMapLibGeoDecomp_Coord_2_() {
     char fakeObject[sizeof(LibGeoDecomp::Coord<2 >)];
     LibGeoDecomp::Coord<2 > *obj = (LibGeoDecomp::Coord<2 >*)fakeObject;
 
-    int count = 1;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -195,7 +195,7 @@ Typemaps::generateMapLibGeoDecomp_Streak_1_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<1 >)];
     LibGeoDecomp::Streak<1 > *obj = (LibGeoDecomp::Streak<1 >*)fakeObject;
 
-    int count = 2;
+    const int count = 2;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -233,7 +233,7 @@ Typemaps::generateMapLibGeoDecomp_Streak_2_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<2 >)];
     LibGeoDecomp::Streak<2 > *obj = (LibGeoDecomp::Streak<2 >*)fakeObject;
 
-    int count = 2;
+    const int count = 2;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -271,7 +271,7 @@ Typemaps::generateMapLibGeoDecomp_Streak_3_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<3 >)];
     LibGeoDecomp::Streak<3 > *obj = (LibGeoDecomp::Streak<3 >*)fakeObject;
 
-    int count = 2;
+    const int count = 2;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -309,7 +309,7 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_1_() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBox<1 >)];
     LibGeoDecomp::CoordBox<1 > *obj = (LibGeoDecomp::CoordBox<1 >*)fakeObject;
 
-    int count = 2;
+    const int count = 2;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -347,7 +347,7 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_2_() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBox<2 >)];
     LibGeoDecomp::CoordBox<2 > *obj = (LibGeoDecomp::CoordBox<2 >*)fakeObject;
 
-    int count = 2;
+    const int count = 2;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -385,7 +385,7 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_3_() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBox<3 >)];
     LibGeoDecomp::CoordBox<3 > *obj = (LibGeoDecomp::CoordBox<3 >*)fakeObject;
 
-    int count = 2;
+    const int count = 2;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -423,7 +423,7 @@ Typemaps::generateMapLibGeoDecomp_StreakMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::StreakMPIDatatypeHelper)];
     LibGeoDecomp::StreakMPIDatatypeHelper *obj = (LibGeoDecomp::StreakMPIDatatypeHelper*)fakeObject;
 
-    int count = 3;
+    const int count = 3;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -462,7 +462,7 @@ Typemaps::generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBoxMPIDatatypeHelper)];
     LibGeoDecomp::CoordBoxMPIDatatypeHelper *obj = (LibGeoDecomp::CoordBoxMPIDatatypeHelper*)fakeObject;
 
-    int count = 3;
+    const int count = 3;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -501,7 +501,7 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
     char fakeObject[sizeof(LibGeoDecomp::TestCell<1 >)];
     LibGeoDecomp::TestCell<1 > *obj = (LibGeoDecomp::TestCell<1 >*)fakeObject;
 
-    int count = 6;
+    const int count = 6;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -543,7 +543,7 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
     char fakeObject[sizeof(LibGeoDecomp::TestCell<2 >)];
     LibGeoDecomp::TestCell<2 > *obj = (LibGeoDecomp::TestCell<2 >*)fakeObject;
 
-    int count = 6;
+    const int count = 6;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -585,7 +585,7 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
     char fakeObject[sizeof(LibGeoDecomp::TestCell<3 >)];
     LibGeoDecomp::TestCell<3 > *obj = (LibGeoDecomp::TestCell<3 >*)fakeObject;
 
-    int count = 6;
+    const int count = 6;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -627,7 +627,7 @@ Typemaps::generateMapLibGeoDecomp_TestCellMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::TestCellMPIDatatypeHelper)];
     LibGeoDecomp::TestCellMPIDatatypeHelper *obj = (LibGeoDecomp::TestCellMPIDatatypeHelper*)fakeObject;
 
-    int count = 3;
+    const int count = 3;
     int lengths[count];
 
     // sort addresses in ascending order

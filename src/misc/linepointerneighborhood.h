@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/misc/vectorarithmetics.h>
 
 namespace LibGeoDecomp {
 
@@ -16,6 +17,9 @@ public:
     class West
     {
     public:
+        void arity(West) const
+        {}
+
         void access(West) const
         {}
     };
@@ -24,6 +28,51 @@ public:
     class West<CELL, STENCIL, true>
     {
     public:
+        VectorArithmetics::Scalar arity(FixedCoord<-1, -1, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1,  0, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1,  1, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1, -1,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1,  0,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1,  1,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1, -1,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1,  0,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord<-1,  1,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
         const CELL& access(FixedCoord<-1, -1, -1>, CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1, -1, -1>::VALUE][0];
@@ -77,6 +126,9 @@ public:
     class East
     {
     public:
+        void arity(East) const
+        {}
+
         void access(East) const
         {}
     };
@@ -85,6 +137,51 @@ public:
     class East<CELL, STENCIL, true>
     {
     public:
+        VectorArithmetics::Scalar arity(FixedCoord< 1, -1, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1,  0, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1,  1, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1, -1,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1,  0,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1,  1,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1, -1,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1,  0,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        VectorArithmetics::Scalar arity(FixedCoord< 1,  1,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
         const CELL& access(FixedCoord< 1, -1, -1>, CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1, -1, -1>::VALUE][0];
@@ -138,6 +235,9 @@ public:
     class Top
     {
     public:
+        void arity(Top) const
+        {}
+
         void access(Top) const
         {}
     };
@@ -146,6 +246,24 @@ public:
     class Top<CELL, STENCIL, true>
     {
     public:
+        template<int X>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  -1, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        template<int X>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  -1,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        template<int X>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  -1,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
         template<int X>
         const CELL& access(FixedCoord< X, -1, -1>, CELL **pointers) const
         {
@@ -172,6 +290,9 @@ public:
     class Bottom
     {
     public:
+        void arity(Bottom) const
+        {}
+
         void access(Bottom) const
         {}
     };
@@ -180,6 +301,24 @@ public:
     class Bottom<CELL, STENCIL, true>
     {
     public:
+        template<int X>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  1, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        template<int X>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  1,  0>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
+        template<int X>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  1,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
         template<int X>
         const CELL& access(FixedCoord< X,  1, -1>, CELL **pointers) const
         {
@@ -206,6 +345,9 @@ public:
     class North
     {
     public:
+        void arity(North) const
+        {}
+
         void access(North) const
         {}
     };
@@ -214,6 +356,12 @@ public:
     class North<CELL, STENCIL, true>
     {
     public:
+        template<int X, int Y>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  Y,  1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
         template<int X, int Y>
         const CELL& access(FixedCoord< X,  Y,  1>, CELL **pointers) const
         {
@@ -228,6 +376,9 @@ public:
     class South
     {
     public:
+        void arity(South) const
+        {}
+
         void access(South) const
         {}
     };
@@ -236,6 +387,12 @@ public:
     class South<CELL, STENCIL, true>
     {
     public:
+        template<int X, int Y>
+        VectorArithmetics::Scalar arity(FixedCoord< X,  Y, -1>) const
+        {
+            return VectorArithmetics::Scalar();
+        }
+
         template<int X, int Y>
         const CELL& access(FixedCoord< X,  Y, -1>, CELL **pointers) const
         {
@@ -276,6 +433,13 @@ class LinePointerNeighborhood :
     public LinePointerNeighborhoodHelper::South< CELL, STENCIL, BOUNDARY_SOUTH>
 {
 public:
+    using LinePointerNeighborhoodHelper::West<  CELL, STENCIL, BOUNDARY_WEST  >::arity;
+    using LinePointerNeighborhoodHelper::East<  CELL, STENCIL, BOUNDARY_EAST  >::arity;
+    using LinePointerNeighborhoodHelper::Top<   CELL, STENCIL, BOUNDARY_TOP   >::arity;
+    using LinePointerNeighborhoodHelper::Bottom<CELL, STENCIL, BOUNDARY_BOTTOM>::arity;
+    using LinePointerNeighborhoodHelper::North< CELL, STENCIL, BOUNDARY_NORTH >::arity;
+    using LinePointerNeighborhoodHelper::South< CELL, STENCIL, BOUNDARY_SOUTH >::arity;
+
     using LinePointerNeighborhoodHelper::West<  CELL, STENCIL, BOUNDARY_WEST  >::access;
     using LinePointerNeighborhoodHelper::East<  CELL, STENCIL, BOUNDARY_EAST  >::access;
     using LinePointerNeighborhoodHelper::Top<   CELL, STENCIL, BOUNDARY_TOP   >::access;
@@ -287,6 +451,12 @@ public:
         lines(_lines),
         offset(_offset)
     {}
+
+    template<int X, int Y, int Z>
+    VectorArithmetics::Vector arity(FixedCoord< X,  Y,  Z>) const
+    {
+        return VectorArithmetics::Vector();
+    }
 
     template<int X, int Y, int Z>
     const CELL& access(FixedCoord<X, Y, Z>, CELL **lines) const

@@ -34,7 +34,7 @@ public:
 
     void testBasic() 
     {
-        TestInitializer<3> *init = new TestInitializer<3>();
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
         StripingSimulator<TestCell<3> > simTest(init, balancer);
@@ -46,7 +46,7 @@ public:
         simTest.run();
 
         if (MPILayer().rank() == 0) {
-            TestInitializer<3> *init2 = new TestInitializer<3>();
+            TestInitializer<TestCell<3> > *init2 = new TestInitializer<TestCell<3> >();
 
             SerialSimulator<TestCell<3> > simReference(init2);
             MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(

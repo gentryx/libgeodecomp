@@ -38,6 +38,10 @@ public:
         }
     }
 
+    // tests of other assemblies intentionally left out as the tests
+    // would only clone LinePointerAssembly's behavior. Functionality
+    // is covered in LinePointerUpdateFunctor's tests.
+
 private:
     template<class GRID_TYPE>
     void fillGrid(GRID_TYPE *grid)

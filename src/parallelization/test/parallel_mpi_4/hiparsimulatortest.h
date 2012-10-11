@@ -30,7 +30,7 @@ public:
         maxSteps = 100;
         firstStep = 20;
         firstCycle = firstStep * TestCell<2>::nanoSteps();
-        TestInitializer<2> *init = new TestInitializer<2>(
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(
             dim, maxSteps, firstStep);
 
         outputPeriod = 4;

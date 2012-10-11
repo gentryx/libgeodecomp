@@ -5,7 +5,7 @@
 
 namespace LibGeoDecomp {
 
-class MockInitializer : public TestInitializer<2>
+class MockInitializer : public TestInitializer<TestCell<2> >
 {
 public:
     MockInitializer(const std::string& configString = "") 

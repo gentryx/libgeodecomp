@@ -35,7 +35,7 @@ public:
     {
         tempFile = TempFile::parallel("libGeoDecompTempfile");
         simulator = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<2>(Coord<2>(2, 3)));
+            new TestInitializer<TestCell<2> >(Coord<2>(2, 3)));
     }
 
     void tearDown() {

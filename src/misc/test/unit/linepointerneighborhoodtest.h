@@ -139,7 +139,7 @@ public:
         typedef Grid<TestCell<2>, TestCell<2>::Topology> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
-        TestInitializer<2> init(dim);
+        TestInitializer<TestCell<2> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
         CoordBox<2> box = gridOld.boundingBox();
@@ -160,7 +160,7 @@ public:
                 &gridOld[Coord<2>(c.x() + 0, c.y() + 1)],
                 &gridOld[Coord<2>(endX,      c.y() + 1)]
             };
-            LinePointerUpdateFunctor<TestCell<2> >()(Streak<2>(c, endX), box, pointers, &gridNew[c]);
+            LinePointerUpdateFunctor<TestCell<2> >()(Streak<2>(c, endX), box, pointers, &gridNew[c], 0);
 
         }
 
@@ -176,7 +176,7 @@ public:
         typedef Grid<TestCell<3>, TestCell<3>::Topology> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
-        TestInitializer<3> init(dim);
+        TestInitializer<TestCell<3> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
         CoordBox<3> box = gridOld.boundingBox();
@@ -218,7 +218,7 @@ public:
                     &gridOld[Coord<3>(c.x() + 0, c.y() + 1, c.z() + 1)],
                     &gridOld[Coord<3>(endX,      c.y() + 1, c.z() + 1)]
                 };
-                LinePointerUpdateFunctor<TestCell<3> >()(Streak<3>(c, endX), box, pointers, &gridNew[c]);
+                LinePointerUpdateFunctor<TestCell<3> >()(Streak<3>(c, endX), box, pointers, &gridNew[c], 0);
             }
         }
 

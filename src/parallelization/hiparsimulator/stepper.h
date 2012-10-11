@@ -44,6 +44,9 @@ public:
         initializer(_initializer)
     {}
 
+    virtual ~Stepper()
+    {}
+
     virtual void update(int nanoSteps) = 0;
 
     virtual const GridType& grid() const = 0;

@@ -61,6 +61,8 @@ public:
         using SpaceFillingCurve<DIM>::Iterator::origin;
         using SpaceFillingCurve<DIM>::Iterator::sublevelState;
 
+        static const int NUM_QUADRANTS = 1 << DIM;
+
         inline Iterator(
             const Coord<DIM>& origin, 
             const Coord<DIM>& dimensions, 
@@ -189,18 +191,13 @@ public:
             cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
         }
 
-        static inline int numQuadrants()
-        {
-            return 1 << DIM;
-        }
-
         inline void digDownRecursion(const unsigned& offset, Square currentSquare)
         {
             const Coord<DIM>& dimensions = currentSquare.dimensions; 
             Coord<DIM> halfDimensions = dimensions / 2;
             Coord<DIM> remainingDimensions = dimensions - halfDimensions;
 
-            int numQuadrants = ZCurvePartition<DIM>::Iterator::numQuadrants();
+            const int numQuadrants = ZCurvePartition<DIM>::Iterator::NUM_QUADRANTS;
             Coord<DIM> quadrantDims[numQuadrants];
 
             for (int i = 0; i < numQuadrants; ++i) {
@@ -273,7 +270,7 @@ public:
             // std::cout << "digUpDown()\n";
             while (!squareStack.empty() && 
                    (squareStack.back().quadrant == 
-                    (ZCurvePartition<DIM>::Iterator::numQuadrants() - 1))) {
+                    (ZCurvePartition<DIM>::Iterator::NUM_QUADRANTS - 1))) {
                 // std::cout << " " << squareStack.back().origin << "\n"
                 //           << " " << squareStack.back().dimensions << "\n"
                 //           << " " << squareStack.back().quadrant << "\n\n";

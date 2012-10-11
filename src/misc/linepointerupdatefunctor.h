@@ -49,7 +49,8 @@ public:
         const Streak<DIM>& streak,
         const CoordBox<DIM>& box,
         CELL **pointers,
-        CELL *newLine)
+        CELL *newLine,
+        int nanoStep)
     {
         typedef typename CELL::Topology Topology;
         const Coord<DIM>& c = streak.origin;
@@ -57,36 +58,36 @@ public:
         if ((CUR_DIM == 2) && (HIGH == true)) {
             if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
-                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true          >()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true          >()(streak, box, pointers, newLine, nanoStep);
             } else {
-                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false         >()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false         >()(streak, box, pointers, newLine, nanoStep);
             }
         }
             
         if ((CUR_DIM == 2) && (HIGH == false)) {
             if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
                 (c[CUR_DIM] == box.origin[CUR_DIM])) {
-                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,           BOUNDARY_NORTH>()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,           BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
-                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, false,          BOUNDARY_NORTH>()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, false,          BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
             
         if ((CUR_DIM == 1) && (HIGH == true)) {
             if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
-                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, true,            BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, true,            BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
-                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, false,           BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, false,           BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
             
         if ((CUR_DIM == 1) && (HIGH == false)) {
             if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
                 (c[CUR_DIM] == box.origin[CUR_DIM])) {
-                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, true,         BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, true,         BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
-                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, false,        BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine);
+                LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, false,        BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
             
@@ -101,7 +102,8 @@ public:
         const Streak<DIM>& streak,
         const CoordBox<DIM>& box,
         CELL **pointers,
-        CELL *newLine)
+        CELL *newLine,
+        int nanoStep)
     {
         typedef typename CELL::Stencil Stencil;
         
@@ -109,21 +111,33 @@ public:
             
         if (streak.endX == (streak.origin.x() + 1)) {
             LinePointerNeighborhood<CELL, Stencil, true, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-            newLine[x].update(hood, 0);
+            newLine[x].update(hood, nanoStep);
             return;
         }
 
         LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
-        newLine[x].update(hoodWest, 0);
+        newLine[x].update(hoodWest, nanoStep);
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-
-        for (x += 1; x < streak.endX - 1; ++x) {
-            newLine[x].update(hood, 0);
-        }
-            
+        updateMain(newLine, &x, (long)(streak.endX - 1), hood, nanoStep, typename CELL::API());
+        
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
-        newLine[x].update(hoodEast, 0);
+        newLine[x].update(hoodEast, nanoStep);
+    }
+
+private:
+    template<typename NEIGHBORHOOD>
+    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APIs::Base)
+    {
+        for ((*x) += 1; (*x) < endX; ++(*x)) {
+            newLine[(*x)].update(hood, nanoStep);
+        }
+    }
+
+    template<typename NEIGHBORHOOD>
+    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APIs::Line)
+    {
+        CELL::updateLine(newLine, x, endX, hood, nanoStep);
     }
 };
 
