@@ -51,7 +51,7 @@ public:
     {
         // Init simulation area
         ghostZoneWidth = 3;
-        init.reset(new TestInitializer<2>(Coord<2>(17, 12)));
+        init.reset(new TestInitializer<TestCell<2> >(Coord<2>(17, 12)));
         CoordBox<2> rect = init->gridBox();
 
 
@@ -91,7 +91,7 @@ public:
 
 private:
     int ghostZoneWidth;
-    boost::shared_ptr<TestInitializer<2> > init;
+    boost::shared_ptr<TestInitializer<TestCell<2> > > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
     boost::shared_ptr<MyStepper > stepper;
 

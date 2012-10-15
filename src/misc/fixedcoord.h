@@ -11,6 +11,10 @@ namespace LibGeoDecomp {
 template<int DIM_X=0, int DIM_Y=0, int DIM_Z=0>
 class FixedCoord
 {
+public:
+    static const int X = DIM_X;
+    static const int Y = DIM_Y;
+    static const int Z = DIM_Z;
 };
 
 }

@@ -123,21 +123,6 @@ public:
     double temp;
 };
 
-//fixme: rework this interface
-namespace LibGeoDecomp {
-
-template<>
-class UpdateFunctor<Cell> : public StreakUpdateFunctor<Cell>
-{};
-
-}
-
-//LIBGEODECOMP_HAS_STREAK_UPDATE
-
-// template<>
-// class ProvidesStreakUpdate<Cell> : public boost::true_type 
-// {};
-
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:

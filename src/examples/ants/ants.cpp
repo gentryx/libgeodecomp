@@ -22,7 +22,7 @@ class Cell
 public:
     typedef Topologies::Cube<2>::Topology Topology;
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
-    static const double  PI = 3.14159265;
+    static const double  PI;
 
     static inline unsigned nanoSteps() 
     { 
@@ -142,6 +142,8 @@ private:
     }
 
 };
+
+const double Cell::PI = 3.14159265;
 
 class CellToColor
 {

@@ -32,7 +32,7 @@ public:
         weights << dimensions.prod();
         partition = new MyPartition(Coord<3>(), dimensions, 0, weights);
         ghostZoneWidth = 10;
-        init = new TestInitializer<3>(dimensions);
+        init = new TestInitializer<TestCell<3> >(dimensions);
         updateGroup.reset(
             new MyUpdateGroup(
                 partition,

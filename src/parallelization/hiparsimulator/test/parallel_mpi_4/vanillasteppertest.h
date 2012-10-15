@@ -70,7 +70,7 @@ public:
         // Init utility classes
         ghostZoneWidth = 4;
         Coord<3> gridDim(55, 47, 31);
-        init.reset(new TestInitializer<3>(gridDim));
+        init.reset(new TestInitializer<TestCell<3> >(gridDim));
         CoordBox<3> box = init->gridBox();
 
         SuperVector<long> weights;
@@ -229,7 +229,7 @@ public:
 
 private:
     int ghostZoneWidth;
-    boost::shared_ptr<TestInitializer<3> > init;
+    boost::shared_ptr<TestInitializer<TestCell<3> > > init;
     boost::shared_ptr<MyPartitionManager> partitionManager;
     boost::shared_ptr<MyStepper> stepper;
     MPILayer mpiLayer;

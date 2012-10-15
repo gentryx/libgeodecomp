@@ -22,8 +22,8 @@ public:
 
     void setUp() 
     {
-        init.reset(new TestInitializer<2>());
-        simulator.reset(new SerialSimulator<TestCell<2> >(new TestInitializer<2>()));
+        init.reset(new TestInitializer<TestCell<2> >());
+        simulator.reset(new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >()));
     }
     
     void tearDown()
@@ -122,7 +122,7 @@ public:
 
     void test3D()
     {
-        SerialSimulator<TestCell<3> > sim(new TestInitializer<3>());
+        SerialSimulator<TestCell<3> > sim(new TestInitializer<TestCell<3> >());
         TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(), 0);
 
         sim.step();

@@ -55,7 +55,7 @@ public:
         Coord<3> dimensions;
         
         if (rank == 0) {
-            TestInitializer<3> *init = new TestInitializer<3>();
+            TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
             dimensions = init->gridDimensions();
             SerialSimulator<TestCell<3> > referenceSim(init);
             new MPIIOWriter<TestCell<3> >(

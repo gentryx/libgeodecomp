@@ -55,7 +55,7 @@ public:
 
     void testBasic()
     {
-        TestInitializer<3> *init = new TestInitializer<3>();
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
         Coord<3> dimensions(init->gridDimensions());
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;

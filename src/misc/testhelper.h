@@ -21,25 +21,25 @@
  * This macro differs from TS_ASSERT_DELTA in that the error margin is relative
  * rather than absolute
  */
-#define TSM_ASSERT_ROUGHLY_EQUALS_DOUBLE(msg, va, vb, accuracy)                          \
-{                                                                                        \
-    double tsa_comp1_a = va;                                                             \
-    double tsa_comp1_b = vb;                                                             \
-    double tsa_delta = std::max(fabs(tsa_comp1_a), fabs(tsa_comp1_b)) * accuracy;        \
-    TSM_ASSERT_DELTA(msg, tsa_comp1_a, tsa_comp1_b, tsa_delta);                          \
-} while (0)
+#define TSM_ASSERT_ROUGHLY_EQUALS_DOUBLE(msg, va, vb, accuracy)         \
+    {                                                                   \
+        double tsa_comp1_a = va;                                        \
+        double tsa_comp1_b = vb;                                        \
+        double tsa_delta = std::max(fabs(tsa_comp1_a), fabs(tsa_comp1_b)) * accuracy; \
+        TSM_ASSERT_DELTA(msg, tsa_comp1_a, tsa_comp1_b, tsa_delta);     \
+    }
 
 
-#define TSM_ASSERT_EQUALS_DOUBLE(msg, va, vb)                                            \
-{                                                                                        \
-    TSM_ASSERT_ROUGHLY_EQUALS_DOUBLE(msg, va, vb, 2.0e-13);                              \
-} while (0)
+#define TSM_ASSERT_EQUALS_DOUBLE(msg, va, vb)                           \
+    {                                                                   \
+        TSM_ASSERT_ROUGHLY_EQUALS_DOUBLE(msg, va, vb, 2.0e-13);         \
+    }
 
 
-#define TS_ASSERT_EQUALS_DOUBLE(va, vb)                                                  \
-{                                                                                        \
-    TSM_ASSERT_EQUALS_DOUBLE("", va, vb);                                                \
-} while (0)
+#define TS_ASSERT_EQUALS_DOUBLE(va, vb)                                 \
+    {                                                                   \
+        TSM_ASSERT_EQUALS_DOUBLE("", va, vb);                           \
+    }
 
 
 #define TS_ASSERT_EQUALS_DOUBLE_VEC(va, vb)                             \
@@ -50,7 +50,7 @@
         for (unsigned i = 0; i < tsa_comp2_b.size(); i++) {             \
             TS_ASSERT_EQUALS_DOUBLE(tsa_comp2_a[i], tsa_comp2_b[i]);    \
         }                                                               \
-    } while (0)
+    }
 
 
 #define TS_ASSERT_FILE(filename)                                        \
@@ -58,14 +58,14 @@
         boost::filesystem::path path(filename);                         \
         TSM_ASSERT("File " + filename + " should exist, but doesn't",   \
                    boost::filesystem::exists(path));                    \
-    } while (0)
+    }
 
 #define TS_ASSERT_NO_FILE(filename)                                     \
     {                                                                   \
         boost::filesystem::path path(filename);                         \
         TSM_ASSERT("File " + filename + " should not exist, but does",  \
                    !boost::filesystem::exists(path));                   \
-    } while (0)
+    }
 
 #define TS_ASSERT_FILE_CONTENTS_EQUAL(_filename1, _filename2)           \
     {                                                                   \
@@ -92,9 +92,9 @@
         if (in2.get(ch2)) {                                             \
             TSM_ASSERT("File lengths differ", false);                   \
         }                                                               \
-    } while(0)
+    }
 
-#define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE)         \
+#define TS_ASSERT_TEST_GRID2(_GRID_TYPE, _GRID, _EXPECTED_CYCLE, TYPENAME) \
     {                                                                   \
         const _GRID_TYPE& assertGrid = _GRID;                           \
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
@@ -111,20 +111,28 @@
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
         CoordBox<_GRID_TYPE::DIM> box = assertGrid.boundingBox();       \
-        for (CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
-            bool flag = assertGrid.at(*i).valid();                      \
-            flag &= (assertGrid.at(*i).isEdgeCell == false);            \
-            flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
-            TS_ASSERT(flag);                                            \
+        for (TYPENAME CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
+            bool flagValid   = assertGrid.at(*i).valid();               \
+            bool flagEdge    = (assertGrid.at(*i).isEdgeCell == false); \
+            bool flagCounter = (assertGrid.at(*i).cycleCounter == expectedCycle); \
+            message << "actual: " << (assertGrid.at(*i).cycleCounter) << " expected: " << expectedCycle << "\n"; \
+            TS_ASSERT(flagValid);                                       \
+            TS_ASSERT(flagEdge);                                        \
+            TS_ASSERT(flagCounter);                                     \
+            bool flag = flagValid && flagEdge && flagCounter;           \
             ollKorrect &= flag;                                         \
             if (!flag) {                                                \
                 message << "TS_ASSERT_TEST_GRID failed at Coord " << *i << "\n"; \
             }                                                           \
         }                                                               \
                                                                         \
-        if (!ollKorrect)                                                \
+        if (!ollKorrect) {                                              \
             std::cout << "message: " << message.str();                  \
-    } while(0)
+        }                                                               \
+    } 
+
+#define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE) \
+    TS_ASSERT_TEST_GRID2(_GRID_TYPE, _GRID, _EXPECTED_CYCLE, )
 
 #define TS_ASSERT_TEST_GRID_REGION(_GRID_TYPE, _GRID, _REGION, _EXPECTED_CYCLE) \
     {                                                                   \
@@ -146,6 +154,6 @@
             if (!flag)                                                  \
                 message << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
         }                                                               \
-    } while(0)
+    }
 
 #endif

@@ -12,14 +12,14 @@ namespace LibGeoDecomp {
 class TestTestInitializer : public CxxTest::TestSuite 
 {
 private:
-    TestInitializer<2> init;
+    TestInitializer<TestCell<2> > init;
     unsigned startCycle;
 
 public:
 
     void setUp()
     {
-        init = TestInitializer<2>(Coord<2>(10, 11), 12, 9);
+        init = TestInitializer<TestCell<2> >(Coord<2>(10, 11), 12, 9);
         startCycle = 9 * TestCell<2>::nanoSteps();
     }
 
@@ -61,7 +61,7 @@ public:
         unsigned width = 23;
         unsigned height = 32;
         Initializer<TestCell<2> > *init = 
-            new TestInitializer<2>(Coord<2>(width, height));
+            new TestInitializer<TestCell<2> >(Coord<2>(width, height));
         Grid<TestCell<2> > gridOld(Coord<2>(width, height));
         init->grid(&gridOld);
         delete init;

@@ -16,7 +16,7 @@ public:
     void setUp()
     {
         simulator = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<2>());
+            new TestInitializer<TestCell<2> >());
     }
 
 

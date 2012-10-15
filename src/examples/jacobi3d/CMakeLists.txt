@@ -3,7 +3,7 @@ set(RELATIVE_PATH "")
 include(auto.cmake)
 
 if(FEATURE_MPI)
-  if(MACHINE_ARCH MATCHES "x86_64")
+  if(FEATURE_INTRINSICS)
     add_executable(jacobi3d ${SOURCES})
     target_link_libraries(jacobi3d ${LOCAL_LIBGEODECOMP_LINK_LIB})
   endif()

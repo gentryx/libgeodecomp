@@ -16,7 +16,7 @@ public:
     typedef DistributedSimulator<TestCell<2> > ParentType;
     typedef ParentType::GridType GridType;
 
-    MockSim(TestInitializer<2> *init) : 
+    MockSim(TestInitializer<TestCell<2> > *init) : 
         DistributedSimulator<TestCell<2> >(init)
     {}
     
@@ -59,7 +59,7 @@ public:
     void setUp()
     {
         dim = Coord<2>(10, 13);
-        init = new TestInitializer<2>(dim);
+        init = new TestInitializer<TestCell<2> >(dim);
         sim.reset(new MockSim(init));
         writer = new ParallelMemoryWriter<TestCell<2> >(&*sim);
     }
@@ -124,7 +124,7 @@ private:
     Coord<2> dim;
     boost::shared_ptr<MockSim> sim;
     ParallelMemoryWriter<TestCell<2> > *writer;
-    TestInitializer<2> *init;
+    TestInitializer<TestCell<2> > *init;
 };
 
 }

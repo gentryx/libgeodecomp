@@ -31,7 +31,7 @@ public:
         dim = Coord<2>(width, height);
         maxSteps = 200;
         firstStep = 20;
-        TestInitializer<2> *init = new TestInitializer<2>(
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(
             dim, maxSteps, firstStep);
         
         outputPeriod = 1;

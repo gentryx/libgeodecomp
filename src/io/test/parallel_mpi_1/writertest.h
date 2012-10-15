@@ -32,7 +32,7 @@ private:
 public:
     void setUp()
     {
-        _sim = new SerialSimulator<TestCell<2> >(new TestInitializer<2>());
+        _sim = new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >());
     }
 
     void tearDown()
