@@ -746,6 +746,25 @@ public:
     }
 };
 
+class QuadM128
+{
+public:
+    __m128d a;
+    __m128d b;
+    __m128d c;
+    __m128d d;
+};
+
+class PentaM128
+{
+public:
+    __m128d a;
+    __m128d b;
+    __m128d c;
+    __m128d d;
+    __m128d e;
+};
+
 class JacobiCellStreakUpdate
 {
 public:
@@ -785,38 +804,45 @@ public:
         }
 
         __m128d oneSeventh = _mm_set_pd(1.0/7.0, 1.0/7.0);
-        __m128d same1 = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()].temp);
+
+        PentaM128 same;
+        // PentaM128 odds;
+
+        same.a = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()].temp);
         __m128d odds0 = _mm_loadu_pd(&hood[FixedCoord<-1, 0, 0>()].temp);
 
         for (; (*x) < (endX - 7); (*x) += 8) {
-            __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
-            __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
-            __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
-            __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()].temp);
+            load(&same, hood, FixedCoord<0, 0, 0>());
+            // __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
+            // __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
+            // __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
+            // __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()].temp);
 
             // shuffle values obtain left/right neighbors
-            __m128d odds1 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
-            __m128d odds2 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
-            __m128d odds3 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
-            __m128d odds4 = _mm_shuffle_pd(same4, same5, (1 << 0) | (0 << 2));
+            __m128d odds1 = _mm_shuffle_pd(same.a, same.b, (1 << 0) | (0 << 2));
+            __m128d odds2 = _mm_shuffle_pd(same.b, same.c, (1 << 0) | (0 << 2));
+            __m128d odds3 = _mm_shuffle_pd(same.c, same.d, (1 << 0) | (0 << 2));
+            __m128d odds4 = _mm_shuffle_pd(same.d, same.e, (1 << 0) | (0 << 2));
 
             // load south neighbors
-            __m128d buf0 =  load<0>(hood, FixedCoord< 0, 0, -1>());
-            __m128d buf1 =  load<2>(hood, FixedCoord< 0, 0, -1>());
-            __m128d buf2 =  load<4>(hood, FixedCoord< 0, 0, -1>());
-            __m128d buf3 =  load<6>(hood, FixedCoord< 0, 0, -1>());
+            QuadM128 buf;
+            load(&buf, hood, FixedCoord<0, 0, -1>());
+            // __m128d buf0 =  load<0>(hood, FixedCoord< 0, 0, -1>());
+            // __m128d buf1 =  load<2>(hood, FixedCoord< 0, 0, -1>());
+            // __m128d buf2 =  load<4>(hood, FixedCoord< 0, 0, -1>());
+            // __m128d buf3 =  load<6>(hood, FixedCoord< 0, 0, -1>());
 
             // add left neighbors
-            same1 = _mm_add_pd(same1, odds0);
-            same2 = _mm_add_pd(same2, odds1);
-            same3 = _mm_add_pd(same3, odds2);
-            same4 = _mm_add_pd(same4, odds3);
+            same.a = _mm_add_pd(same.a, odds0);
+            same.b = _mm_add_pd(same.b, odds1);
+            same.c = _mm_add_pd(same.c, odds2);
+            same.d = _mm_add_pd(same.d, odds3);
 
             // add right neighbors
-            same1 = _mm_add_pd(same1, odds1);
-            same2 = _mm_add_pd(same2, odds2);
-            same3 = _mm_add_pd(same3, odds3);
-            same4 = _mm_add_pd(same4, odds4);
+            same.a = _mm_add_pd(same.a, odds1);
+            same.b = _mm_add_pd(same.b, odds2);
+            same.c = _mm_add_pd(same.c, odds3);
+            same.d = _mm_add_pd(same.d, odds4);
 
             // load top neighbors
             odds0 = load<0>(hood, FixedCoord< 0, -1, 0>());
@@ -825,22 +851,23 @@ public:
             odds3 = load<6>(hood, FixedCoord< 0, -1, 0>());
 
             // add south neighbors
-            same1 = _mm_add_pd(same1, buf0);
-            same2 = _mm_add_pd(same2, buf1);
-            same3 = _mm_add_pd(same3, buf2);
-            same4 = _mm_add_pd(same4, buf3);
+            same.a = _mm_add_pd(same.a, buf.a);
+            same.b = _mm_add_pd(same.b, buf.b);
+            same.c = _mm_add_pd(same.c, buf.c);
+            same.d = _mm_add_pd(same.d, buf.d);
 
             // load bottom neighbors
-            buf0 =  load<0>(hood, FixedCoord< 0, 1, 0>());
-            buf1 =  load<2>(hood, FixedCoord< 0, 1, 0>());
-            buf2 =  load<4>(hood, FixedCoord< 0, 1, 0>());
-            buf3 =  load<6>(hood, FixedCoord< 0, 1, 0>());
+            load(&buf, hood, FixedCoord<0, 1, 0>());
+            // buf0 =  load<0>(hood, FixedCoord< 0, 1, 0>());
+            // buf1 =  load<2>(hood, FixedCoord< 0, 1, 0>());
+            // buf2 =  load<4>(hood, FixedCoord< 0, 1, 0>());
+            // buf3 =  load<6>(hood, FixedCoord< 0, 1, 0>());
 
             // add top neighbors
-            same1 = _mm_add_pd(same1, odds0);
-            same2 = _mm_add_pd(same2, odds1);
-            same3 = _mm_add_pd(same3, odds2);
-            same4 = _mm_add_pd(same4, odds3);
+            same.a = _mm_add_pd(same.a, odds0);
+            same.b = _mm_add_pd(same.b, odds1);
+            same.c = _mm_add_pd(same.c, odds2);
+            same.d = _mm_add_pd(same.d, odds3);
 
             // load north neighbors
             odds0 = load<0>(hood, FixedCoord< 0, 0, 1>());
@@ -849,36 +876,54 @@ public:
             odds3 = load<6>(hood, FixedCoord< 0, 0, 1>());
 
             // add bottom neighbors
-            same1 = _mm_add_pd(same1, buf0);
-            same2 = _mm_add_pd(same2, buf1);
-            same3 = _mm_add_pd(same3, buf2);
-            same4 = _mm_add_pd(same4, buf3);
+            same.a = _mm_add_pd(same.a, buf.a);
+            same.b = _mm_add_pd(same.b, buf.b);
+            same.c = _mm_add_pd(same.c, buf.c);
+            same.d = _mm_add_pd(same.d, buf.d);
 
             // add north neighbors
-            same1 = _mm_add_pd(same1, odds0);
-            same2 = _mm_add_pd(same2, odds1);
-            same3 = _mm_add_pd(same3, odds2);
-            same4 = _mm_add_pd(same4, odds3);
+            same.a = _mm_add_pd(same.a, odds0);
+            same.b = _mm_add_pd(same.b, odds1);
+            same.c = _mm_add_pd(same.c, odds2);
+            same.d = _mm_add_pd(same.d, odds3);
 
             // scale by 1/7
-            same1 = _mm_mul_pd(same1, oneSeventh);
-            same2 = _mm_mul_pd(same2, oneSeventh);
-            same3 = _mm_mul_pd(same3, oneSeventh);
-            same4 = _mm_mul_pd(same4, oneSeventh);
+            same.a = _mm_mul_pd(same.a, oneSeventh);
+            same.b = _mm_mul_pd(same.b, oneSeventh);
+            same.c = _mm_mul_pd(same.c, oneSeventh);
+            same.d = _mm_mul_pd(same.d, oneSeventh);
 
             // store results
-            _mm_store_pd(&target[*x + 0].temp, same1);
-            _mm_store_pd(&target[*x + 2].temp, same2);
-            _mm_store_pd(&target[*x + 4].temp, same3);
-            _mm_store_pd(&target[*x + 6].temp, same4);
+            _mm_store_pd(&target[*x + 0].temp, same.a);
+            _mm_store_pd(&target[*x + 2].temp, same.b);
+            _mm_store_pd(&target[*x + 4].temp, same.c);
+            _mm_store_pd(&target[*x + 6].temp, same.d);
 
             odds0 = odds4;
-            same1 = same5;
+            same.a = same.e;
         }
 
         for (; *x < endX; ++(*x)) {
             target[*x].update(hood, 0);
         }
+    }
+
+    template<typename NEIGHBORHOOD, int X, int Y, int Z>
+    static void load(QuadM128 *q, const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
+    {
+        q->a = load<0>(hood, coord);
+        q->b = load<2>(hood, coord);
+        q->c = load<4>(hood, coord);
+        q->d = load<6>(hood, coord);
+    }
+
+    template<typename NEIGHBORHOOD, int X, int Y, int Z>
+    static void load(PentaM128 *q, const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
+    {
+        q->b = load<2>(hood, coord);
+        q->c = load<4>(hood, coord);
+        q->d = load<6>(hood, coord);
+        q->e = load<8>(hood, coord);
     }
 
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
