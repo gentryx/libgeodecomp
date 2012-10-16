@@ -84,7 +84,7 @@ add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, R
 
 add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
 
-add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for Windows builds" "SHARED" false)
+add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
 
 add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
 
@@ -99,6 +99,8 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
+
+add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
 
 print_options()
 dump_config("config.h")
