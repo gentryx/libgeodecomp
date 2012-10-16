@@ -93,15 +93,16 @@ public:
     void testFileOpenError()
     {
         std::string path("/non/existent/path/prefix");
+        std::string expectedErrorMessage("Could not open file " + path);
         ASCIIWriter<TestCell<2>, TestValueSelector> *writer = 
             new ASCIIWriter<TestCell<2>, TestValueSelector>(path, simulator);
         TS_ASSERT_THROWS_ASSERT(
             writer->initialized(),
             FileOpenException& exception, 
             TS_ASSERT_SAME_DATA(
-                path.c_str(), 
-                exception.file().c_str(), 
-                path.length()));
+                expectedErrorMessage.c_str(), 
+                exception.what(), 
+                expectedErrorMessage.length()));
     }
 
 private:

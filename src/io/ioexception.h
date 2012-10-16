@@ -15,57 +15,14 @@ class IOException : public std::runtime_error
 public:
     /**
      * Initializes a new IOException object which means that an error described
-     * by @a msg occured during the processing of @a file, resulting in an OS
-     * error described by @a error (usually from 'errno'). If @a error is left
-     * out, no OS error code will be displayed. The @a fatal flag indicates if
-     * this error is regarded as reason for program termination.
+     * by @a message occured.
      */
-    IOException(std::string msg, 
-                std::string file, 
-                int error = 0, 
-                bool fatal = true) :
-        std::runtime_error(msg), 
-        myFile(file), 
-        myError(error), 
-        myFatal(fatal) 
+    IOException(std::string message) :
+        std::runtime_error(message) 
     {}
 
     virtual ~IOException() throw ()
     {}
-    
-    virtual std::string file()
-    {
-        return myFile;
-    }
-
-
-    virtual int error()
-    {
-        return myError;
-    }
-
-
-    virtual bool fatal()
-    {
-        return myFatal;
-    }
-
-    /**
-     * Generate a human readable error description suitable for stderr output.
-     */
-    virtual std::string toString()
-    {
-        std::string out(std::string(what()) + " `" + myFile + "'");
-        if (myError != 0) {
-            out += std::string(": ") + strerror(myError);
-        }
-        return out;
-    }
-
-private:
-    std::string myFile;
-    int myError;
-    bool myFatal;
 };
 
 
@@ -76,8 +33,8 @@ class FileOpenException : public IOException
 {
 public:
     FileOpenException(
-        std::string msg, std::string file, int error = 0, bool fatal = true) : 
-        IOException(msg, file, error, fatal) 
+        std::string file) : 
+        IOException("Could not open file " + file) 
     {}
 };
 
@@ -89,8 +46,8 @@ class FileWriteException : public IOException
 {
 public:
     FileWriteException(
-        std::string msg, std::string file, int error = 0, bool fatal = true) : 
-        IOException(msg, file, error, fatal) 
+        std::string file) : 
+        IOException("Could not write file " + file) 
     {}
 };
 
@@ -102,8 +59,8 @@ class FileReadException : public IOException
 {
 public:
     FileReadException(
-        std::string msg, std::string file, int error = 0, bool fatal = true) : 
-        IOException(msg, file, error, fatal) 
+        std::string file) : 
+        IOException("Could not read file " + file) 
     {}
 };
 

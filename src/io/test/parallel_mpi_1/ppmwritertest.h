@@ -91,15 +91,17 @@ public:
     void testFileOpenError()
     {
         std::string path("/non/existent/path/prefix");
+        std::string expectedErrorMessage("Could not open file " + path);
+        std::cout << "expecting »" << expectedErrorMessage << "«\n";
         PPMWriter<TestCell<2>, TestPlotter> *writer = 
             new PPMWriter<TestCell<2>, TestPlotter>(path, _simulator);
         TS_ASSERT_THROWS_ASSERT(
             writer->initialized(),
-            FileOpenException &e, 
+            FileOpenException &exception,
             TS_ASSERT_SAME_DATA(
-                path.c_str(), 
-                e.file().c_str(), 
-                path.length()));
+                expectedErrorMessage.c_str(), 
+                exception.what(), 
+                expectedErrorMessage.length()));
     }
 
 private:
