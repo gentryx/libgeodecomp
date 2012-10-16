@@ -64,7 +64,6 @@ class PPMWriter : public Writer<CELL_TYPE>
                  << sim->getStep() << ".ppm";
         std::ofstream outfile(filename.str().c_str());
         if (!outfile) {
-            std::cout << "throwing »" << FileOpenException(filename.str()).what() << "«\n";
             throw FileOpenException(filename.str());
         }
 
