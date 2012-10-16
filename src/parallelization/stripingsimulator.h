@@ -220,15 +220,16 @@ private:
 
         double ratio = chrono.nextCycle();
         LoadVec loads = mpilayer.gather(ratio, 0);
+        WeightVec newPartitionsSendBuffer;
 
         if (mpilayer.rank() == 0) {
             WeightVec oldWorkloads = partitionsToWorkloads(partitions);
             WeightVec newWorkloads = balancer->balance(oldWorkloads, loads);
             validateLoads(newWorkloads, oldWorkloads);
-            WeightVec newPartitions = workloadsToPartitions(newWorkloads);
-            
+            newPartitionsSendBuffer = workloadsToPartitions(newWorkloads);
+    
             for (unsigned i = 0; i < mpilayer.size(); i++) {
-                mpilayer.sendVec(&newPartitions, i, BALANCELOADS);
+                mpilayer.sendVec(&newPartitionsSendBuffer, i, BALANCELOADS);
             }
         }
 
@@ -236,7 +237,7 @@ private:
         WeightVec newPartitions(partitions.size());
         mpilayer.recvVec(&newPartitions, 0, BALANCELOADS);
         mpilayer.wait(BALANCELOADS);
-        
+
         redistributeGrid(oldPartitions, newPartitions);
     }
 
