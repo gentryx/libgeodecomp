@@ -452,6 +452,13 @@ public:
         offset(_offset)
     {}
 
+    /**
+     * returns whether the data to be accessed via [] will be
+     * contiguous in memory, meaning that multiple elements may be
+     * loaded at once via vector, or if it is just a scalar variable
+     * which needs to be broadcast to all elements of a vector
+     * register (as it may happen for the edge cell of a grid).
+     */
     template<int X, int Y, int Z>
     VectorArithmetics::Vector arity(FixedCoord< X,  Y,  Z>) const
     {
