@@ -108,12 +108,12 @@ public:
         std::sort(begin(), end());
     }
 
-    T& max()
+    T& (max)()
     {
         return *(std::max_element(begin(), end()));
     }
 
-    const T& max() const
+    const T& (max)() const
     {
         return *(std::max_element(begin(), end()));
     }

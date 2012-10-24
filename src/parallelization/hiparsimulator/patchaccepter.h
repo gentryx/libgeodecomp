@@ -44,10 +44,10 @@ protected:
     bool checkNanoStepPut(const long& nanoStep) const
     {
         if (requestedNanoSteps.empty() || 
-            nanoStep < requestedNanoSteps.min())
+            nanoStep < (requestedNanoSteps.min)())
             return false;
-        if (nanoStep > requestedNanoSteps.min()) {
-            std::cout << "got: " << nanoStep << " expected " << requestedNanoSteps.min() << "\n";
+        if (nanoStep > (requestedNanoSteps.min)()) {
+            std::cout << "got: " << nanoStep << " expected " << (requestedNanoSteps.min)() << "\n";
             throw std::logic_error("expected nano step was left out");
         }
         return true;

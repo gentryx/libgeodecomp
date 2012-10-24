@@ -29,11 +29,11 @@ public:
                 (*offset)[INDEX] = 0;
             }
             (*dimensions)[INDEX] = 
-                std::min(enlargedWidth, simulationArea.dimensions[INDEX]);
+                (std::min)(enlargedWidth, simulationArea.dimensions[INDEX]);
         } else {
             (*offset)[INDEX] = 
-                std::max(0, ownBoundingBox.origin[INDEX] - ghostZoneWidth);
-            int end = std::min(simulationArea.origin[INDEX] + 
+                (std::max)(0, ownBoundingBox.origin[INDEX] - ghostZoneWidth);
+            int end = (std::min)(simulationArea.origin[INDEX] + 
                                simulationArea.dimensions[INDEX],
                                ownBoundingBox.origin[INDEX] + 
                                ownBoundingBox.dimensions[INDEX] + 

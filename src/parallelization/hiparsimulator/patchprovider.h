@@ -36,11 +36,11 @@ protected:
     {
         if (storedNanoSteps.empty())
             throw std::logic_error("no nano step available");
-        if (storedNanoSteps.min() != nanoStep) 
+        if ((storedNanoSteps.min)() != nanoStep) 
             throw std::logic_error(
                 std::string(
                     "requested time step doesn't match expected nano step.") 
-                + " expected: " + StringConv::itoa(storedNanoSteps.min()) 
+                + " expected: " + StringConv::itoa((storedNanoSteps.min)()) 
                 + " is: " + StringConv::itoa(nanoStep));
     }
 };
