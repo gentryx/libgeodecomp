@@ -672,7 +672,7 @@ public:
                 hood[FixedCoord<0,  0,  0>()].temp +
                 hood[FixedCoord<1,  0,  0>()].temp +
                 hood[FixedCoord<0,  1,  0>()].temp +
-                hood[FixedCoord<1,  0,  1>()].temp) * (1.0 / 7.0);
+                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
     }
 
     double temp;
