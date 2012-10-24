@@ -26,8 +26,13 @@ public:
         SuperVector<typename GRID_TYPE::CellType> *vec,
         const Region<GRID_TYPE::DIM>& region)
     {
-        typename GRID_TYPE::CellType *dest = &(*vec)[0];
+        if (vec->size() != std::size_t(region.size()))
+            throw std::logic_error("region doesn't match vector size");
 
+        if(vec->size() == 0) return;
+
+        typename GRID_TYPE::CellType *dest = &(*vec)[0];
+        
         for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             const typename GRID_TYPE::CellType *start = &grid[i->origin];
