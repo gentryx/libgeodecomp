@@ -33,7 +33,7 @@ public:
 
     /**
      * indicates that the model may not only update a single cell, but
-     * a linear sequence cells within the grid.
+     * a linear sequence cells within the grid. 
      */
     class Line : public Base
     {

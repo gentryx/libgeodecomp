@@ -89,7 +89,7 @@ public:
      * returns a map that is referenced by relative coordinates from the
      * originating coordinate coord.
      */
-    inline MyCoordMap getNeighborhood(const Coord<DIM>& center)
+    inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
     {
         return MyCoordMap(center, this);
     }
