@@ -1,7 +1,9 @@
 #ifndef _libgeodecomp_misc_linepointerupdatefunctor_h_
 #define _libgeodecomp_misc_linepointerupdatefunctor_h_
 
+#include <libgeodecomp/misc/apis.h>
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/linepointerneighborhood.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/streak.h>
@@ -48,7 +50,7 @@ public:
     void operator()(
         const Streak<DIM>& streak,
         const CoordBox<DIM>& box,
-        CELL **pointers,
+        const CELL **pointers,
         CELL *newLine,
         int nanoStep)
     {
@@ -101,7 +103,7 @@ public:
     void operator()(
         const Streak<DIM>& streak,
         const CoordBox<DIM>& box,
-        CELL **pointers,
+        const CELL **pointers,
         CELL *newLine,
         int nanoStep)
     {

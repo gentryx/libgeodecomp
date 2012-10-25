@@ -73,47 +73,47 @@ public:
             return VectorArithmetics::Scalar();
         }
 
-        const CELL& access(FixedCoord<-1, -1, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1, -1, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1, -1, -1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1,  0, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1,  0, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1,  0, -1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1,  1, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1,  1, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1,  1, -1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1, -1,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1, -1,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1, -1,  0>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1,  0,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1,  0,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1,  0,  0>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1,  1,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1,  1,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1,  1,  0>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1, -1,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1, -1,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1, -1,  1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1,  0,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1,  0,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1,  0,  1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord<-1,  1,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord<-1,  1,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL, -1,  1,  1>::VALUE][0];
         }
@@ -182,47 +182,47 @@ public:
             return VectorArithmetics::Scalar();
         }
 
-        const CELL& access(FixedCoord< 1, -1, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1, -1, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1, -1, -1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1,  0, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1,  0, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1,  0, -1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1,  1, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1,  1, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1,  1, -1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1, -1,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1, -1,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1, -1,  0>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1,  0,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1,  0,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1,  0,  0>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1,  1,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1,  1,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1,  1,  0>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1, -1,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1, -1,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1, -1,  1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1,  0,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1,  0,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1,  0,  1>::VALUE][0];
         }
 
-        const CELL& access(FixedCoord< 1,  1,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord< 1,  1,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  1,  1,  1>::VALUE][0];
         }
@@ -265,19 +265,19 @@ public:
         }
 
         template<int X>
-        const CELL& access(FixedCoord< X, -1, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord< X, -1, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0, -1, -1>::VALUE][0];
         }
 
         template<int X>
-        const CELL& access(FixedCoord< X, -1,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord< X, -1,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0, -1,  0>::VALUE][0];
         }
 
         template<int X>
-        const CELL& access(FixedCoord< X, -1,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord< X, -1,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0, -1,  1>::VALUE][0];
         }
@@ -320,19 +320,19 @@ public:
         }
 
         template<int X>
-        const CELL& access(FixedCoord< X,  1, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord< X,  1, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0,  1, -1>::VALUE][0];
         }
 
         template<int X>
-        const CELL& access(FixedCoord< X,  1,  0>, CELL **pointers) const
+        const CELL& access(FixedCoord< X,  1,  0>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0,  1,  0>::VALUE][0];
         }
 
         template<int X>
-        const CELL& access(FixedCoord< X,  1,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord< X,  1,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0,  1,  1>::VALUE][0];
         }
@@ -363,7 +363,7 @@ public:
         }
 
         template<int X, int Y>
-        const CELL& access(FixedCoord< X,  Y,  1>, CELL **pointers) const
+        const CELL& access(FixedCoord< X,  Y,  1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0,  Y,  1>::VALUE][0];
         }
@@ -394,7 +394,7 @@ public:
         }
 
         template<int X, int Y>
-        const CELL& access(FixedCoord< X,  Y, -1>, CELL **pointers) const
+        const CELL& access(FixedCoord< X,  Y, -1>, const CELL **pointers) const
         {
             return pointers[Stencils::OffsetHelper<STENCIL,  0,  Y, -1>::VALUE][0];
         }
@@ -447,7 +447,7 @@ public:
     using LinePointerNeighborhoodHelper::North< CELL, STENCIL, BOUNDARY_NORTH >::access;
     using LinePointerNeighborhoodHelper::South< CELL, STENCIL, BOUNDARY_SOUTH >::access;
 
-    LinePointerNeighborhood(CELL **_lines, long *_offset) :
+    LinePointerNeighborhood(const CELL **_lines, long *_offset) :
         lines(_lines),
         offset(_offset)
     {}
@@ -466,7 +466,7 @@ public:
     }
 
     template<int X, int Y, int Z>
-    const CELL& access(FixedCoord<X, Y, Z>, CELL **lines) const
+    const CELL& access(FixedCoord<X, Y, Z>, const CELL **lines) const
     {
         return lines[Stencils::OffsetHelper<STENCIL, 0,  Y,  Z>::VALUE][X + *offset];
     }
@@ -478,7 +478,7 @@ public:
     }
 
 private:
-    CELL **lines;
+    const CELL **lines;
     long *offset;
 };
 

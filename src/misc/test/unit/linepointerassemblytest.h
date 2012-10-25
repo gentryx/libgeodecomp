@@ -31,7 +31,7 @@ public:
             &grid[last     + Coord<2>( 1,  1)]
         };
 
-        int *actual[9];
+        const int *actual[9];
         LinePointerAssembly<Stencils::Moore<2, 1> >()(actual, s, grid);
         for (int i = 0; i < 9; ++i) {
             TS_ASSERT_EQUALS(actual[i], expected[i]);
