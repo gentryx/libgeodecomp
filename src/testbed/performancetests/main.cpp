@@ -10,6 +10,7 @@
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
@@ -616,11 +617,6 @@ public:
                 CoordMap<JacobiCellClassic, GridType> neighborhood = 
                 gridOld->getNeighborhood(*i);
                 (*gridNew)[*i].update(neighborhood, 0);
-                // Streak<3> streak(*i, dim.x());
-                // TestCellType *pointers[JacobiCellClassic::Stencil::VOLUME];
-                // LinePointerAssembly<JacobiCellClassic::Stencil>()(pointers, streak, gridA);
-                // LinePointerUpdateFunctor<TestCellType>()(
-                //     streak, gridBox, pointers, &gridNew[streak.origin], s);
             }
 
             std::swap(gridOld, gridNew);
@@ -693,7 +689,7 @@ public:
 
     std::string species()
     {
-        return "gold";
+        return "silver";
     }
 
     double performance(const Coord<3>& dim)
@@ -962,7 +958,7 @@ public:
 
     std::string species()
     {
-        return "platinum";
+        return "gold";
     }
 
     double performance(const Coord<3>& dim)
@@ -987,9 +983,74 @@ public:
                  ++i) {
                 Streak<3> streak(*i, dim.x());
                 const JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, gridA);
+                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, *gridOld);
                 LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
                     streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
+            }
+
+            std::swap(gridOld, gridNew);
+        }
+
+        long long tEnd = Chronometer::timeUSec();
+
+        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        double updates = 1.0 * maxT * dim.prod();
+        double seconds = (tEnd - tBegin) * 10e-6;
+        double gLUPS = 10e-9 * updates / seconds;
+
+        return gLUPS;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+};
+
+class Jacobi3DStreakUpdateFunctor
+{
+public:
+    std::string order()
+    {
+        return "CPU";
+    }
+
+    std::string family()
+    {
+        return "Jacobi3D";
+    }
+
+    std::string species()
+    {
+        return "platinum";
+    }
+
+    double performance(const Coord<3>& dim)
+    {
+        typedef Grid<JacobiCellStreakUpdate, JacobiCellStreakUpdate::Topology> GridType;
+        GridType gridA(dim, 1.0);
+        GridType gridB(dim, 2.0);
+        GridType *gridOld = &gridA;
+        GridType *gridNew = &gridB;
+
+        int maxT = 20;
+
+        CoordBox<3> gridBox = gridA.boundingBox();
+        CoordBox<3> lineStarts = gridA.boundingBox();
+        lineStarts.dimensions.x() = 1;
+
+        long long tBegin= Chronometer::timeUSec();
+
+        for (int t = 0; t < maxT; ++t) {
+            for (CoordBox<3>::Iterator i = lineStarts.begin();
+                 i != lineStarts.end();
+                 ++i) {
+                Streak<3> streak(*i, dim.x());
+                UpdateFunctor<JacobiCellStreakUpdate>()(streak, *gridOld, gridNew, 0);
             }
 
             std::swap(gridOld, gridNew);
@@ -1117,6 +1178,10 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DStreakUpdate(), sizes[i]);
+    }
+
+    for (int i = 0; i < sizes.size(); ++i) {
+        evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
     }
 
     return 0;
