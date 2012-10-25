@@ -2,6 +2,7 @@
 #define _libgeodecomp_parallelization_serialsimulator_h_
 
 #include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 
 namespace LibGeoDecomp {
@@ -18,7 +19,7 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    static const int DIMENSIONS = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIMENSIONS;
 
     /**
      * creates a SerialSimulator with the given @a initializer.
@@ -26,17 +27,17 @@ public:
     SerialSimulator(Initializer<CELL_TYPE> *_initializer) : 
         MonolithicSimulator<CELL_TYPE>(_initializer)
     {
-        Coord<DIMENSIONS> dim = initializer->gridBox().dimensions;
+        Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
         newGrid = new GridType(dim);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
-        CoordBox<DIMENSIONS> box = curGrid->boundingBox();
+        CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
         box.dimensions.x() = 1;
-        for(typename CoordBox<DIMENSIONS>::Iterator i = box.begin(); i != box.end(); ++i) {
-            simArea << Streak<DIMENSIONS>(*i, endX);
+        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            simArea << Streak<DIM>(*i, endX);
         }
     }
 
@@ -109,16 +110,16 @@ protected:
 
     GridType *curGrid;
     GridType *newGrid;
-    Region<DIMENSIONS> simArea;
+    Region<DIM> simArea;
 
     void nanoStep(const unsigned& nanoStep)
     {
-        CoordBox<DIMENSIONS> box = curGrid->boundingBox();
-
-        for(typename CoordBox<DIMENSIONS>::Iterator i = box.begin(); i != box.end(); ++i) {
-            CoordMap<CELL_TYPE, GridType> neighborhood = 
-                curGrid->getNeighborhood(*i);
-            (*newGrid)[*i].update(neighborhood, nanoStep);
+        CoordBox<DIM> box = curGrid->boundingBox();
+        int endX = box.origin.x() + box.dimensions.x();
+        box.dimensions.x() = 1;
+        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            Streak<DIM> streak(*i, endX);
+            UpdateFunctor<CELL_TYPE>()(streak, *curGrid, newGrid, nanoStep);
         }
 
         std::swap(curGrid, newGrid);

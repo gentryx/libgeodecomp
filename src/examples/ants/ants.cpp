@@ -20,7 +20,11 @@ class Cell
 {
     friend class CellToColor;
 public:
+    typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
+    class API : public APIs::Base
+    {};
+
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
     static const double  PI;
 

@@ -12,7 +12,12 @@ using namespace LibGeoDecomp;
 class BuggyCell
 {
 public:
+    typedef Stencils::VonNeumann<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
+
+    class API : public APIs::Base
+    {};
+
     friend class BuggyCellToColor;
 
     static int nanoSteps()

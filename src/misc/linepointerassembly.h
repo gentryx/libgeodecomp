@@ -81,7 +81,7 @@ public:
     template<int X, int Y, int Z>
     Coord<3> operator()(Streak<3> streak, FixedCoord<X, Y, Z>)
     {
-        return Coord<2>(CalcXCoord<X>()(streak), 
+        return Coord<3>(CalcXCoord<X>()(streak), 
                         streak.origin.y() + Y,
                         streak.origin.z() + Z);
     }

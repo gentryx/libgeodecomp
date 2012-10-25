@@ -13,9 +13,13 @@ class CircleCell
 {
     friend class CellToColor;
 public:   
+    typedef Stencils::VonNeumann<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
     enum State {LIQUID, SOLIDIFYING, SOLID};
     typedef std::pair<double, double> DPair;
+
+    class API : public APIs::Base
+    {};
 
     static inline unsigned nanoSteps() 
     { 

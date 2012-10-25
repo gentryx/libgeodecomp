@@ -2,6 +2,7 @@
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
@@ -54,8 +55,9 @@ public:
 
     inline virtual void update(int nanoSteps) 
     {
-        for (int i = 0; i < nanoSteps; ++i)
+        for (int i = 0; i < nanoSteps; ++i) {
             update();
+        }
     }
 
     inline virtual std::pair<int, int> currentStep() const
@@ -82,11 +84,14 @@ private:
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
-        // fixme: honor streak updaters here, akin to StripingSimulator
-        for (typename Region<DIM>::Iterator i = region.begin(); 
-             i != region.end(); 
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
+             i != region.endStreak(); 
              ++i) {
-            (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), curNanoStep);
+            UpdateFunctor<CELL_TYPE>()(
+                *i,
+                *oldGrid,
+                &*newGrid,
+                curNanoStep);
         }
         std::swap(oldGrid, newGrid);
 
@@ -199,12 +204,16 @@ private:
 
         for (int t = 0; t < ghostZoneWidth(); ++t) {
             const Region<DIM>& region = partitionManager->rim(t + 1);
-            for (typename Region<DIM>::Iterator i = region.begin(); 
-                 i != region.end(); 
+            for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
+                 i != region.endStreak(); 
                  ++i) {
-                (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), 
-                                      curNanoStep);
+                UpdateFunctor<CELL_TYPE>()(
+                    *i,
+                    *oldGrid,
+                    &*newGrid,
+                    curNanoStep);
             }
+
             ++curNanoStep;
             if (curNanoStep == CELL_TYPE::nanoSteps()) {
                 curNanoStep = 0;

@@ -2,7 +2,9 @@
 #define _libgeodecomp_examples_flowingcanvas_canvascell_h_
 
 #include <stdio.h>
+#include <libgeodecomp/misc/apis.h>
 #include <libgeodecomp/misc/floatcoord.h>
+#include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/topologies.h>
 
 #ifndef __host__
@@ -53,8 +55,12 @@ public:
 
     static const int MAX_PARTICLES = 10;
     static const int MAX_SPAWN_COUNTDOWN = 60;
+
+    typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
-    
+    class API : public APIs::Base
+    {};
+
     __host__ __device__
     static inline unsigned nanoSteps()
     {

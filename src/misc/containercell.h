@@ -1,9 +1,11 @@
 #ifndef _libgeodecomp_misc_containercell_h_
 #define _libgeodecomp_misc_containercell_h_
 
+#include <libgeodecomp/misc/apis.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/neighborhoodadapter.h>
+#include <libgeodecomp/misc/stencils.h>
 
 namespace LibGeoDecomp {
 
@@ -16,6 +18,11 @@ public:
     typedef KEY Key;
     typedef TOPOLOGY Topology;
     typedef Cargo* Iterator;
+    typedef Stencils::Moore<Topology::DIMENSIONS, 1> Stencil;
+
+    class API : public APIs::Base
+    {};
+
 
     inline static int nanoSteps()
     {
