@@ -717,7 +717,7 @@ public:
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
-                JacobiCellFixedHood *pointers[JacobiCellFixedHood::Stencil::VOLUME];
+                const JacobiCellFixedHood *pointers[JacobiCellFixedHood::Stencil::VOLUME];
                 LinePointerAssembly<JacobiCellFixedHood::Stencil>()(pointers, streak, gridA);
                 LinePointerUpdateFunctor<JacobiCellFixedHood>()(
                     streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
@@ -986,7 +986,7 @@ public:
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
-                JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
+                const JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
                 LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, gridA);
                 LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
                     streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);

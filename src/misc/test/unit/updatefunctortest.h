@@ -31,7 +31,6 @@ public:
     {
         log << "BasicCell::update(nanoStep = " << nanoStep << ")\n";
     }
-
 };
 
 class LineUpdateCell
