@@ -1,9 +1,7 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
+#include <libgeodecomp/misc/updatefunctortestbase.h>
 
 using namespace LibGeoDecomp; 
 
@@ -14,65 +12,46 @@ class LinePointerUpdateFunctorTest : public CxxTest::TestSuite
 public:
 
     template<class STENCIL>
-    void checkStencil(int steps)
+    class UpdateFunctorTestHelper : public UpdateFunctorTestBase<STENCIL>
     {
+    public:
+        using UpdateFunctorTestBase<STENCIL>::DIM;
+        typedef typename UpdateFunctorTestBase<STENCIL>::TestCellType TestCellType;
+        typedef typename UpdateFunctorTestBase<STENCIL>::GridType GridType;
         typedef STENCIL Stencil;
-        const int DIM = Stencil::DIM;
-        typedef TestCell<DIM, Stencil> TestCellType;
-        typedef Grid<TestCellType, typename TestCellType::Topology> GridType;
 
-        Coord<DIM> dim;
-        for (int d = 0; d < DIM; ++d) {
-            dim[d] = (d + 1) * 5;
+        virtual void callFunctor(
+            const Streak<DIM>& streak,
+            const GridType& gridOld,
+            GridType *gridNew,
+            unsigned nanoStep) 
+        {
+            CoordBox<DIM> gridBox = gridOld.boundingBox();
+            const TestCellType *pointers[Stencil::VOLUME];
+            LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
+            LinePointerUpdateFunctor<TestCellType>()(
+                streak, gridBox, pointers, &(*gridNew)[streak.origin], nanoStep);
         }
-
-        CoordBox<DIM> gridBox(Coord<DIM>(), dim);
-        TestInitializer<TestCellType> init(dim);
-        GridType gridOld(dim);
-        init.grid(&gridOld);
-        GridType gridNew = gridOld;
-        
-        CoordBox<DIM> lineStarts = gridOld.boundingBox();
-        lineStarts.dimensions.x() = 1;
-
-        for (int s = 0; s < steps; ++s) {
-            for (typename CoordBox<DIM>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<DIM> streak(*i, dim.x());
-                TestCellType *pointers[Stencil::VOLUME];
-                LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
-                LinePointerUpdateFunctor<TestCellType>()(
-                    streak, gridBox, pointers, &gridNew[streak.origin], s);
-            }
-                                     
-            int cycle = init.startStep() * TestCellType::nanoSteps() + s;
-            TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
-            cycle += 1;
-            TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
-
-            std::swap(gridOld, gridNew);
-        }
-    }
+    };
 
     void testMoore2D()
     {
-        checkStencil<Stencils::Moore<2, 1> >(3);
+        UpdateFunctorTestHelper<Stencils::Moore<2, 1> >().checkStencil(3);
     }
 
     void testMoore3D()
     {
-        checkStencil<Stencils::Moore<3, 1> >(3);
+        UpdateFunctorTestHelper<Stencils::Moore<3, 1> >().checkStencil(3);
     }
 
     void testVonNeumann2D()
     {
-        checkStencil<Stencils::VonNeumann<2, 1> >(3);
+        UpdateFunctorTestHelper<Stencils::VonNeumann<2, 1> >().checkStencil(3);
     }
 
     void testVonNeumann3D()
     {
-        checkStencil<Stencils::VonNeumann<3, 1> >(3);
+        UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().checkStencil(3);
     }
 };
 
