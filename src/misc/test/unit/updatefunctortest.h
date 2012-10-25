@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/misc/updatefunctortestbase.h>
 
 using namespace LibGeoDecomp; 
 
@@ -116,6 +117,26 @@ public:
 class UpdateFunctorTest : public CxxTest::TestSuite 
 {
 public:
+    template<class STENCIL>
+    class UpdateFunctorTestHelper : public UpdateFunctorTestBase<STENCIL>
+    {
+    public:
+        using UpdateFunctorTestBase<STENCIL>::DIM;
+        typedef typename UpdateFunctorTestBase<STENCIL>::TestCellType TestCellType;
+        typedef typename UpdateFunctorTestBase<STENCIL>::GridType GridType;
+        typedef STENCIL Stencil;
+
+        virtual void callFunctor(
+            const Streak<DIM>& streak,
+            const GridType& gridOld,
+            GridType *gridNew,
+            unsigned nanoStep) 
+        {
+            UpdateFunctor<TestCellType>()(
+                streak, gridOld, gridNew, nanoStep);
+        }
+    };
+
     void testSelector()
     {
         checkSelector<BasicCell>(
@@ -126,6 +147,26 @@ public:
             "FixedCell::update(nanoStep = 0)\n", 8);
         checkSelector<FixedLineUpdateCell>(
             "FixedLineUpdateCell::update(nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 2, endX = 9, nanoStep = 0)\nFixedLineUpdateCell::update(nanoStep = 0)\n", 1);
+    }
+
+    void testMoore2D()
+    {
+        UpdateFunctorTestHelper<Stencils::Moore<2, 1> >().checkStencil(3);
+    }
+
+    void testMoore3D()
+    {
+        UpdateFunctorTestHelper<Stencils::Moore<3, 1> >().checkStencil(3);
+    }
+
+    void testVonNeumann2D()
+    {
+        UpdateFunctorTestHelper<Stencils::VonNeumann<2, 1> >().checkStencil(3);
+    }
+
+    void testVonNeumann3D()
+    {
+        UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().checkStencil(3);
     }
 
 private:
