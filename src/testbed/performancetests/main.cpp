@@ -2,6 +2,7 @@
 #include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
+#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apis.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
@@ -11,6 +12,7 @@
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
@@ -547,10 +549,24 @@ private:
 
 };
 
+template<typename CELL>
+class NoOpInitializer : public SimpleInitializer<CELL>
+{
+public:
+    NoOpInitializer(
+        const Coord<3>& dimensions,
+        const unsigned& steps) :
+        SimpleInitializer<CELL>(dimensions, steps)
+    {}
+    
+    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) 
+    {}
+};
+
 class JacobiCellClassic
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
     class API : public APIs::Base
     {};
@@ -573,7 +589,7 @@ public:
                 hood[Coord<3>( 0,  0,  0)].temp +
                 hood[Coord<3>( 1,  0,  0)].temp +
                 hood[Coord<3>( 0,  1,  0)].temp +
-                hood[Coord<3>( 1,  0,  1)].temp) * (1.0 / 7.0);
+                hood[Coord<3>( 0,  0,  1)].temp) * (1.0 / 7.0);
     }
 
     double temp;
@@ -599,32 +615,15 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellClassic, JacobiCellClassic::Topology> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
-        GridType *gridOld = &gridA;
-        GridType *gridNew = &gridB;
-
         int maxT = 5;
-        CoordBox<3> coords = gridOld->boundingBox();
+        SerialSimulator<JacobiCellClassic> sim(
+            new NoOpInitializer<JacobiCellClassic>(dim, maxT));
 
         long long tBegin= Chronometer::timeUSec();
-
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = coords.begin();
-                 i != coords.end();
-                 ++i) {
-                CoordMap<JacobiCellClassic, GridType> neighborhood = 
-                gridOld->getNeighborhood(*i);
-                (*gridNew)[*i].update(neighborhood, 0);
-            }
-
-            std::swap(gridOld, gridNew);
-        }
-
+        sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -645,7 +644,7 @@ public:
 class JacobiCellFixedHood
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
     class API : public APIs::Fixed
     {};
@@ -662,13 +661,13 @@ public:
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
-        temp = (hood[FixedCoord<0,  0, -1>()].temp +
-                hood[FixedCoord<0, -1,  0>()].temp +
-                hood[FixedCoord<1,  0,  0>()].temp +
-                hood[FixedCoord<0,  0,  0>()].temp +
-                hood[FixedCoord<1,  0,  0>()].temp +
-                hood[FixedCoord<0,  1,  0>()].temp +
-                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
+        temp = (hood[FixedCoord< 0,  0, -1>()].temp +
+                hood[FixedCoord< 0, -1,  0>()].temp +
+                hood[FixedCoord<-1,  0,  0>()].temp +
+                hood[FixedCoord< 0,  0,  0>()].temp +
+                hood[FixedCoord< 1,  0,  0>()].temp +
+                hood[FixedCoord< 0,  1,  0>()].temp +
+                hood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 7.0);
     }
 
     double temp;
@@ -694,37 +693,16 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellFixedHood, JacobiCellFixedHood::Topology> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
-        GridType *gridOld = &gridA;
-        GridType *gridNew = &gridB;
-
         int maxT = 20;
 
-        CoordBox<3> gridBox = gridA.boundingBox();
-        CoordBox<3> lineStarts = gridA.boundingBox();
-        lineStarts.dimensions.x() = 1;
+        SerialSimulator<JacobiCellFixedHood> sim(
+            new NoOpInitializer<JacobiCellFixedHood>(dim, maxT));
 
         long long tBegin= Chronometer::timeUSec();
-
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<3> streak(*i, dim.x());
-                const JacobiCellFixedHood *pointers[JacobiCellFixedHood::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellFixedHood::Stencil>()(pointers, streak, gridA);
-                LinePointerUpdateFunctor<JacobiCellFixedHood>()(
-                    streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
-            }
-
-            std::swap(gridOld, gridNew);
-        }
-
+        sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -764,7 +742,7 @@ public:
 class JacobiCellStreakUpdate
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
   
     class API : public APIs::Fixed, public APIs::Line
@@ -788,7 +766,7 @@ public:
                 hood[FixedCoord<0,  0,  0>()].temp +
                 hood[FixedCoord<1,  0,  0>()].temp +
                 hood[FixedCoord<0,  1,  0>()].temp +
-                hood[FixedCoord<1,  0,  1>()].temp) * (1.0 / 7.0);
+                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
     }
 
     template<typename NEIGHBORHOOD>
@@ -1031,34 +1009,15 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellStreakUpdate, JacobiCellStreakUpdate::Topology> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
-        GridType *gridOld = &gridA;
-        GridType *gridNew = &gridB;
-
         int maxT = 20;
-
-        CoordBox<3> gridBox = gridA.boundingBox();
-        CoordBox<3> lineStarts = gridA.boundingBox();
-        lineStarts.dimensions.x() = 1;
+        SerialSimulator<JacobiCellStreakUpdate> sim(
+            new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
 
         long long tBegin= Chronometer::timeUSec();
-
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<3> streak(*i, dim.x());
-                UpdateFunctor<JacobiCellStreakUpdate>()(streak, *gridOld, gridNew, 0);
-            }
-
-            std::swap(gridOld, gridNew);
-        }
-
+        sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
