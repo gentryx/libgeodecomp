@@ -52,10 +52,14 @@ public:
         initGrids();
     }
 
-    inline virtual void update(int nanoSteps) 
+    //template <typename F>
+    inline void update(int nanoSteps)//, F f) 
     {
         for (int i = 0; i < nanoSteps; ++i)
+        {
             update();
+            //f();
+        }
     }
 
     inline virtual std::pair<int, int> currentStep() const
@@ -64,6 +68,11 @@ public:
     }
 
     inline virtual const GridType& grid() const
+    {
+        return *oldGrid;
+    }
+
+    inline GridType& grid()
     {
         return *oldGrid;
     }

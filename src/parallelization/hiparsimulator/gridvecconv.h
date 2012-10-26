@@ -51,7 +51,7 @@ public:
         if (vec.size() != std::size_t(region.size()))
             throw std::logic_error("region doesn't match vector size");
         
-        if(vec->size() == 0) return;
+        if(vec.size() == 0) return;
 
         const typename GRID_TYPE::CellType *source = &vec[0];
         for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
