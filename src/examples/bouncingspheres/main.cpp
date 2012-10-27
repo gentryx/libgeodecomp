@@ -139,7 +139,7 @@ public:
     typedef Stencils::Moore<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :

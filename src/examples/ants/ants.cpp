@@ -4,7 +4,6 @@
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/tracingwriter.h>
 
-
 using namespace LibGeoDecomp;
 
 Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
@@ -22,7 +21,7 @@ class Cell
 public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};

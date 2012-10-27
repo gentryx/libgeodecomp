@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <iostream>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/misc/apis.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/grid.h>
@@ -568,7 +568,7 @@ class JacobiCellClassic
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     static int nanoSteps()
@@ -646,7 +646,7 @@ class JacobiCellFixedHood
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
-    class API : public APIs::Fixed
+    class API : public CellAPITraits::Fixed
     {};
 
     JacobiCellFixedHood(double t = 0) :
@@ -745,7 +745,7 @@ public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
   
-    class API : public APIs::Fixed, public APIs::Line
+    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
     JacobiCellStreakUpdate(double t = 0) :

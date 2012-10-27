@@ -2,7 +2,7 @@
 #define _libgeodecomp_examples_flowingcanvas_canvascell_h_
 
 #include <stdio.h>
-#include <libgeodecomp/misc/apis.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/topologies.h>
@@ -58,7 +58,7 @@ public:
 
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     __host__ __device__

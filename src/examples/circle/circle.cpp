@@ -18,7 +18,7 @@ public:
     enum State {LIQUID, SOLIDIFYING, SOLID};
     typedef std::pair<double, double> DPair;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     static inline unsigned nanoSteps() 

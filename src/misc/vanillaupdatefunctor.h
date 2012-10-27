@@ -1,8 +1,6 @@
 #ifndef _libgeodecomp_misc_vanillaupdatefunctor_h_
 #define _libgeodecomp_misc_vanillaupdatefunctor_h_
 
-#include <libgeodecomp/misc/apis.h>
-
 namespace LibGeoDecomp {
 
 /**

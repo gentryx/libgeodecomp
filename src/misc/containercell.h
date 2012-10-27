@@ -1,7 +1,7 @@
 #ifndef _libgeodecomp_misc_containercell_h_
 #define _libgeodecomp_misc_containercell_h_
 
-#include <libgeodecomp/misc/apis.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/neighborhoodadapter.h>
@@ -20,7 +20,7 @@ public:
     typedef Cargo* Iterator;
     typedef Stencils::Moore<Topology::DIMENSIONS, 1> Stencil;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
 

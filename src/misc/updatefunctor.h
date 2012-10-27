@@ -22,7 +22,7 @@ public:
         const GRID& gridOld,
         GRID *gridNew,
         unsigned nanoStep,
-        APIs::Fixed,
+        CellAPITraits::Fixed,
         UPDATE_POLICY) 
     {
         const CELL *pointers[Stencil::VOLUME];
@@ -37,8 +37,8 @@ public:
         const GRID& gridOld,
         GRID *gridNew,
         unsigned nanoStep,
-        APIs::Base, 
-        APIs::Base) 
+        CellAPITraits::Base, 
+        CellAPITraits::Base) 
     {
         VanillaUpdateFunctor<CELL>()(streak, gridOld, gridNew, nanoStep);
     }

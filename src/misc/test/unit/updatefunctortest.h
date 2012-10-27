@@ -1,6 +1,7 @@
 #include <sstream>
 #include <vector>
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/updatefunctor.h>
@@ -18,7 +19,7 @@ public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Torus<2>::Topology Topology;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     static int nanoSteps()
@@ -39,7 +40,7 @@ public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Torus<2>::Topology Topology;
 
-    class API : public APIs::Line
+    class API : public CellAPITraits::Line
     {};
 
     static int nanoSteps()
@@ -69,7 +70,7 @@ public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Torus<2>::Topology Topology;
 
-    class API : public APIs::Fixed
+    class API : public CellAPITraits::Fixed
     {};
 
     static int nanoSteps()
@@ -91,7 +92,7 @@ public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Torus<2>::Topology Topology;
 
-    class API : public APIs::Fixed, public APIs::Line
+    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
     static int nanoSteps()

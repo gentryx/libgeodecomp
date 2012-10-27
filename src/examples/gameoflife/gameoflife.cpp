@@ -27,7 +27,7 @@ public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     static inline unsigned nanoSteps() 

@@ -15,7 +15,7 @@ public:
     typedef Stencils::VonNeumann<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     friend class BuggyCellToColor;

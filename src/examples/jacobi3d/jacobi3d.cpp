@@ -16,7 +16,7 @@ public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
 
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     static inline unsigned nanoSteps() 

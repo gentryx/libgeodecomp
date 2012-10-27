@@ -2,7 +2,7 @@
 #define _libgeodecomp_misc_testcell_h_
 
 #include <iostream>
-#include <libgeodecomp/misc/apis.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/coordmap.h>
@@ -74,7 +74,7 @@ class TestCell
 
 public:
     typedef STENCIL Stencil;
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
     typedef typename TestCellHelpers::TestCellTopology<DIM>::Topology Topology;
 
