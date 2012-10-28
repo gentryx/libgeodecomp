@@ -1,9 +1,9 @@
 #ifndef _libgeodecomp_misc_soaaccessor_h_
 #define _libgeodecomp_misc_soaaccessor_h_
 
-// fixme: check for boost pp in configure
 #include <boost/preprocessor/seq.hpp>
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/misc/fixedcoord.h>
 
 namespace LibGeoDecomp {
@@ -21,15 +21,6 @@ class Offset<CELL, 0>
 };
 
 }
-
-// fixme: ugly hack for compatibility with non-cuda builds
-#ifndef __host__
-#define __host__
-#endif 
-
-#ifndef __device__
-#define __device__
-#endif 
 
 #define DEFINE_FIELD_OFFSET(r, CELL_TYPE, t)                            \
     namespace SoAHelpers {                                              \

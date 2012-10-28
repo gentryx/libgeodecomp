@@ -2,6 +2,7 @@
 #include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
@@ -10,6 +11,7 @@
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/misc/soaaccessor.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
@@ -1076,72 +1078,93 @@ void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
               << std::setw( 8) << benchmark.unit() <<  "\n";
 }
 
+#ifdef LIBGEODECOMP_FEATURE_CUDA
+void cudaTests(std::string revision, bool quick, int cudaDevice);
+#endif
+
 int main(int argc, char **argv)
 {
-    if (argc != 2) {
-        std::cerr << "usage: " << argv[0] << " REVISION\n";
+    if ((argc < 3) || (argc > 4)) {
+        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
         return 1;
     }
 
-    revision = argv[1];
+    bool quick = false;
+    int revIndex = 1;
+    if (argc == 4) {
+        if ((std::string(argv[1]) == "-q") ||
+            (std::string(argv[1]) == "--quick")) {
+            quick = true;
+        }
+        revIndex = 2;
+    }
+    revision = argv[revIndex];
+    std::stringstream s;
+    s << argv[revIndex + 1];
+    int cudaDevice;
+    s >> cudaDevice;
 
     std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family          ; species ; dimensions              ; perf        ; unit\n";
 
-    evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
-    evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
-    evaluate(RegionInsert(), Coord<3>(2048, 2048, 2048));
+    // evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
+    // evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
+    // evaluate(RegionInsert(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
-    evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
-    evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
+    // evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
+    // evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
+    // evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
+    // evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
+    // evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
+    // evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
+    // evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
+    // evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
+    // evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
+    // evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
+    // evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
+    // evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
-    SuperVector<Coord<3> > sizes;
-    sizes << Coord<3>(22, 22, 22)
-          << Coord<3>(64, 64, 64)
-          << Coord<3>(68, 68, 68)
-          << Coord<3>(106, 106, 106)
-          << Coord<3>(128, 128, 128)
-          << Coord<3>(150, 150, 150)
-          << Coord<3>(512, 512, 32)
-          << Coord<3>(518, 518, 32)
-          << Coord<3>(1024, 1024, 32)
-          << Coord<3>(1026, 1026, 32);
+    // SuperVector<Coord<3> > sizes;
+    // sizes << Coord<3>(22, 22, 22)
+    //       << Coord<3>(64, 64, 64)
+    //       << Coord<3>(68, 68, 68)
+    //       << Coord<3>(106, 106, 106)
+    //       << Coord<3>(128, 128, 128)
+    //       << Coord<3>(150, 150, 150)
+    //       << Coord<3>(512, 512, 32)
+    //       << Coord<3>(518, 518, 32)
+    //       << Coord<3>(1024, 1024, 32)
+    //       << Coord<3>(1026, 1026, 32);
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DVanilla(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DVanilla(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DSSE(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DSSE(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DClassic(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DClassic(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DFixedHood(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DFixedHood(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdate(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DStreakUpdate(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
+    // }
+
+#ifdef LIBGEODECOMP_FEATURE_CUDA
+    cudaTests(revision, quick, cudaDevice);
+#endif
 
     return 0;
 }
