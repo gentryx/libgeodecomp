@@ -22,9 +22,6 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
-template<int DIM, typename MATRIX_TYPE, typename CELL_TYPE>
-class GridFiller;
-
 /**
  * A multi-dimensional regular grid
  */
@@ -55,14 +52,19 @@ public:
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > MyCoordMap;
 
     explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
-         const CELL_TYPE& _defaultCell=CELL_TYPE(),
+         const CELL_TYPE& defaultCell=CELL_TYPE(),
          const CELL_TYPE& _edgeCell=CELL_TYPE()) :
         dimensions(dim),
         cellMatrix(dim.toExtents()),
         edgeCell(_edgeCell)
     {
-        GridFiller<DIM, CellMatrix, CELL_TYPE>()(
-            &cellMatrix, _defaultCell);
+        CoordBox<DIM> lineStarts(Coord<DIM>(), dim);
+        lineStarts.dimensions.x() = 1;
+        for (typename CoordBox<DIM>::Iterator i = lineStarts.begin(); i != lineStarts.end(); ++i) {
+            CELL_TYPE *start = &(*this)[*i];
+            CELL_TYPE *end   = start + dim.x();
+            std::fill(start, end, defaultCell);
+        }
     }
 
     Grid& operator=(const Grid& other)
@@ -270,50 +272,6 @@ private:
     
 };
 
-template<typename MATRIX_TYPE, typename CELL_TYPE>
-class GridFiller<1, MATRIX_TYPE, CELL_TYPE>
-{
-public:
-
-    void operator()(MATRIX_TYPE  *mat, const CELL_TYPE& cell) const
-    {
-        std::fill(mat->begin(), mat->end(), cell);
-    }
-};
-
-template<typename MATRIX_TYPE, typename CELL_TYPE>
-class GridFiller<2, MATRIX_TYPE, CELL_TYPE>
-{
-public:
-
-    void operator()(MATRIX_TYPE *mat, const CELL_TYPE& cell) const
-    {
-        for (typename MATRIX_TYPE::iterator i = mat->begin();
-             i != mat->end(); 
-             i++) {
-            std::fill(i->begin(), i->end(), cell);
-        }
-    }
-};
-
-template<typename MATRIX_TYPE, typename CELL_TYPE>
-class GridFiller<3, MATRIX_TYPE, CELL_TYPE>
-{
-public:
-
-    void operator()(MATRIX_TYPE *mat, const CELL_TYPE& cell) const
-    {
-        for (int z = 0; z < (*mat).size(); ++z) {
-            for (int y = 0; y < (*mat)[z].size(); ++y) {
-                int size = (*mat)[z][y].size();
-                CELL_TYPE *start = &(*mat)[z][y][0];
-                CELL_TYPE *end = start + size;
-                std::fill(start, end, cell);
-            }
-        }
-    }
-};
-
 }
 
 template<typename _CharT, typename _Traits, typename _CellT, typename _TopologyT>
@@ -324,6 +282,5 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
     __os << grid.toString();
     return __os;
 }
-
 
 #endif
