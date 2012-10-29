@@ -5,8 +5,6 @@
 #include <stdexcept>
 #include <libgeodecomp/config.h>
 
-#ifndef LIBGEODECOMP_FEATURE_CUDA
-
 #ifndef __host__
 #define __host__
 #endif 
@@ -14,8 +12,6 @@
 #ifndef __device__
 #define __device__
 #endif 
-
-#endif
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
 
