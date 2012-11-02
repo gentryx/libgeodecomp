@@ -30,7 +30,15 @@ public:
             throw std::logic_error("region doesn't match vector size");
 
         if(vec->size() == 0) return;
+        
+        typename SuperVector<typename GRID_TYPE::CellType>::iterator source = vec->begin();
+        for(typename Region<GRID_TYPE::DIM>::Iterator i = region.begin(); i != region.end(); ++i)
+        {
+            *source = grid[*i];
+            ++source;
+        }
 
+        /*
         typename GRID_TYPE::CellType *dest = &(*vec)[0];
         
         for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
@@ -39,6 +47,7 @@ public:
             std::copy(start, start + i->length(), dest);
             dest += i->length();
         }
+        */
 
     }
 
@@ -53,15 +62,23 @@ public:
         
         if(vec.size() == 0) return;
 
+        typename SuperVector<typename GRID_TYPE::CellType>::const_iterator source = vec.begin();
+        for(typename Region<GRID_TYPE::DIM>::Iterator i = region.begin(); i != region.end(); ++i)
+        {
+            (*grid)[*i] = *source;
+            ++source;
+        }
+        /*
         const typename GRID_TYPE::CellType *source = &vec[0];
         for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); ++i) {
             unsigned length = i->length();
             const typename GRID_TYPE::CellType *end = source + length;
             typename GRID_TYPE::CellType *dest = &(*grid)[i->origin];
-            std::copy(source, end, dest);
+            std::copy(source, ++end, --dest);
             source = end;
         }
+        */
     }
 };
 

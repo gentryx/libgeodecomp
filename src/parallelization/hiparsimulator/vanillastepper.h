@@ -77,6 +77,16 @@ public:
         return *oldGrid;
     }
 
+    inline GridType& old_Grid()
+    {
+        return *oldGrid;
+    }
+    
+    inline GridType& new_Grid()
+    {
+        return *newGrid;
+    }
+
 private:
     int curStep;
     int curNanoStep;
@@ -180,6 +190,7 @@ private:
         updateGhost();
     }
     
+public:
     /**
      * computes the next ghost zone at time "t_1 = globalNanoStep() +
      * ghostZoneWidth()". Expects that oldGrid has its kernel and its
@@ -237,6 +248,7 @@ private:
         restoreRim(true);
         restoreKernel();
     }
+private:
 
     inline const unsigned& ghostZoneWidth() const
     {
