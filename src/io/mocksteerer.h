@@ -13,7 +13,7 @@ public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
 
-    MockSteerer(const unsigned& _period, std::ostringstream *eventsBuffer)  :
+    MockSteerer(const unsigned& _period, std::stringstream *eventsBuffer)  :
         Steerer<CELL_TYPE>(_period),
         eventsBuf(eventsBuffer)
     { 
@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    std::ostringstream *eventsBuf;
+    std::stringstream *eventsBuf;
 };
 
 }

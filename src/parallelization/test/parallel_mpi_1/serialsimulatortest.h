@@ -140,9 +140,9 @@ public:
 
     void testSteererCallback()
     {
-        std::ostringstream events;
+        std::stringstream events;
         simulator->addSteerer(new SteererType(5, &events));
-        std::ostringstream expected;
+        std::stringstream expected;
         expected << "created, period = 5\n";
         TS_ASSERT_EQUALS(events.str(), expected.str());
 

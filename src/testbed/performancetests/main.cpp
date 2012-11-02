@@ -1126,17 +1126,17 @@ int main(int argc, char **argv)
     // evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
     // evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
-    // SuperVector<Coord<3> > sizes;
-    // sizes << Coord<3>(22, 22, 22)
-    //       << Coord<3>(64, 64, 64)
-    //       << Coord<3>(68, 68, 68)
-    //       << Coord<3>(106, 106, 106)
-    //       << Coord<3>(128, 128, 128)
-    //       << Coord<3>(150, 150, 150)
-    //       << Coord<3>(512, 512, 32)
-    //       << Coord<3>(518, 518, 32)
-    //       << Coord<3>(1024, 1024, 32)
-    //       << Coord<3>(1026, 1026, 32);
+    SuperVector<Coord<3> > sizes;
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128)
+          << Coord<3>(150, 150, 150)
+          << Coord<3>(512, 512, 32)
+          << Coord<3>(518, 518, 32)
+          << Coord<3>(1024, 1024, 32)
+          << Coord<3>(1026, 1026, 32);
 
     // for (int i = 0; i < sizes.size(); ++i) {
     //     evaluate(Jacobi3DVanilla(), sizes[i]);
@@ -1146,9 +1146,9 @@ int main(int argc, char **argv)
     //     evaluate(Jacobi3DSSE(), sizes[i]);
     // }
 
-    // for (int i = 0; i < sizes.size(); ++i) {
-    //     evaluate(Jacobi3DClassic(), sizes[i]);
-    // }
+    for (int i = 0; i < sizes.size(); ++i) {
+        evaluate(Jacobi3DClassic(), sizes[i]);
+    }
 
     // for (int i = 0; i < sizes.size(); ++i) {
     //     evaluate(Jacobi3DFixedHood(), sizes[i]);
@@ -1163,7 +1163,7 @@ int main(int argc, char **argv)
     // }
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
-    cudaTests(revision, quick, cudaDevice);
+    // cudaTests(revision, quick, cudaDevice);
 #endif
 
     return 0;

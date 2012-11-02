@@ -173,6 +173,10 @@ public:
             const long& nanoStep,
             const bool& remove=true) 
         {
+            if (storedNanoSteps.empty() || (nanoStep < storedNanoSteps.min())) {
+                return;
+            }
+
             checkNanoStepGet(nanoStep);
             wait();
             GridVecConv::vectorToGrid(buffer, grid, region);

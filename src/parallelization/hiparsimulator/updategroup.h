@@ -34,6 +34,7 @@ public:
     typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
     typedef typename MyPartitionManager::RegionVecMap RegionVecMap;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
+    typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
     UpdateGroup(
         Partition<DIM> *partition, 
@@ -42,6 +43,8 @@ public:
         Initializer<CELL_TYPE> *_initializer,
         PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
+        PatchProviderVec patchProvidersGhost=PatchProviderVec(),
+        PatchProviderVec patchProvidersInner=PatchProviderVec(),
         const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
         ghostZoneWidth(_ghostZoneWidth),
@@ -62,7 +65,6 @@ public:
         partitionManager->resetGhostZones(boundingBoxes);
         long firstSyncPoint =  
             initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
-
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
@@ -91,7 +93,8 @@ public:
         stepper.reset(new STEPPER(
                           partitionManager, 
                           initializer,
-                          patchAcceptersGhost + ghostZoneAccepterLinks,
+                          patchAcceptersGhost + 
+                          ghostZoneAccepterLinks,
                           patchAcceptersInner));
 
         // the ghostzone receivers may be safely added after
@@ -115,6 +118,18 @@ public:
                     PatchLink<GridType>::ENDLESS, 
                     ghostZoneWidth);
             }
+        }
+
+        for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
+             i != patchProvidersGhost.end(); 
+             ++i) {
+            addPatchProvider(*i, Stepper<CELL_TYPE>::GHOST);
+        }
+
+        for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
+             i != patchProvidersInner.end(); 
+             ++i) {
+            addPatchProvider(*i, Stepper<CELL_TYPE>::INNER_SET);
         }
     }
 

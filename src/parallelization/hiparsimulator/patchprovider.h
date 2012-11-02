@@ -34,8 +34,9 @@ protected:
 
     void checkNanoStepGet(const long& nanoStep) const
     {
-        if (storedNanoSteps.empty())
+        if (storedNanoSteps.empty()) {
             throw std::logic_error("no nano step available");
+        }
         if (storedNanoSteps.min() != nanoStep) 
             throw std::logic_error(
                 std::string(

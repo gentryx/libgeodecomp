@@ -386,14 +386,29 @@ public:
     }
 };
 
+template<int DIM_X, int DIM_Y, int DIM_Z>
+class RTMSoA
+{
+public:
+    static void run(dim3 dimGrid, dim3 dimBlock, int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
+    {
+        updateRTMSoA<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, gridOld, gridNew);
+    }
+};
+
+template<int DIM_X, int DIM_Y, int DIM_Z>
+class RTMClassic
+{
+public:
+    static void run(dim3 dimGrid, dim3 dimBlock, int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
+    {
+        updateRTMClassic<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, gridOld, gridNew);
+    }
+};
+
 template<template<int A, int B, int C> class KERNEL, int DIM_X, int DIM_Y, int DIM_Z> 
 double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats) 
 {
-    if ((dimX > (DIM_X - 4)) || (dimY > (DIM_Y - 4)) || (dimZ > (DIM_Z - 4))) {
-        // fixme
-        // throw std::runtime_error("dim error");
-    }
-
     int index = 0;
     // int size = DIM_X * DIM_Y * DIM_Z;
     int size = DIM_X * DIM_Y * DIM_Z * 20;
@@ -453,12 +468,13 @@ void benchmark(int dim)
 #define CASE(DIM, ADD)                                                  \
     if (dim <= DIM) {                                                   \
         std::cout << dim << " "                                         \
-                  << benchmarkCUDA<LBMClassic, DIM + ADD, DIM, 256 + 64>(   \
+                  << benchmarkCUDA<LBMSoA, DIM + ADD, DIM, 256 + 64>(   \
                       dim, dim, 256 + 32 - 4, 20) << "\n";              \
         return;                                                         \
     }
 
-                  // << benchmarkCUDA<LBMSoA, DIM + ADD, DIM, 256 + 64>(   \
+                  // << benchmarkCUDA<KERNEL, DIM + ADD, DIM, 256 + 64>(   \
+
 
     // CASE(32,  12);
     // CASE(64,  12);

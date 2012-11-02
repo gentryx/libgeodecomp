@@ -105,8 +105,6 @@ private:
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
         
         if (validGhostZoneWidth == 0) {
-            notifyPatchProviders(
-                partitionManager->rim(0), ParentType::GHOST, globalNanoStep());
             updateGhost();
             resetValidGhostZoneWidth();
         }
@@ -203,6 +201,9 @@ private:
         int curGlobalNanoStep = globalNanoStep();
 
         for (int t = 0; t < ghostZoneWidth(); ++t) {
+            notifyPatchProviders(
+                partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
+
             const Region<DIM>& region = partitionManager->rim(t + 1);
             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
                  i != region.endStreak(); 

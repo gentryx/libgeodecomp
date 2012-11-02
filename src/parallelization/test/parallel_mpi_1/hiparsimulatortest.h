@@ -2,6 +2,7 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
+#include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
@@ -23,6 +24,7 @@ public:
     // fixme: rename types a la "MyFoobar" to "FoobarType"
     typedef HiParSimulator<TestCell<2>, StripingPartition<2> > SimulatorType;
     typedef ParallelMemoryWriter<TestCell<2> > MemoryWriterType;
+    typedef MockSteerer<TestCell<2> > SteererType;
 
     void setUp()
     {
@@ -93,6 +95,23 @@ public:
                 globalNanoStep);
             TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
         }
+    }
+
+    void testSteererCallback()
+    {
+        std::stringstream events;
+        s->addSteerer(new SteererType(5, &events));
+        s->run();
+        s.reset();        
+
+        std::stringstream expected;
+        expected << "created, period = 5\n";
+        for (int i = 20; i <= 200; i += 5) {
+            expected << "nextStep(" << i << ")\n";
+        }
+        expected << "deleted\n";
+
+        TS_ASSERT_EQUALS(events.str(), expected.str());
     }
 
 private:
