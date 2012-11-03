@@ -21,6 +21,7 @@ namespace HiParSimulator {
 template<class CELL_TYPE, class STEPPER=VanillaStepper<CELL_TYPE> >
 class UpdateGroup
 {
+    friend class HiParSimulatorTest;
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 public:
@@ -120,6 +121,8 @@ public:
             }
         }
 
+        // add external PatchProviders last to allow them to override
+        // the local ghost zone providers (a.k.a. PatchLink::Source).
         for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
              i != patchProvidersGhost.end(); 
              ++i) {
