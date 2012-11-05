@@ -2,6 +2,7 @@
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
