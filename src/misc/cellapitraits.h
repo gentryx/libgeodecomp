@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_apis_h_
-#define _libgeodecomp_misc_apis_h_
+#ifndef _libgeodecomp_misc_cellapitraits_h_
+#define _libgeodecomp_misc_cellapitraits_h_
 
 namespace LibGeoDecomp {
 
@@ -11,7 +11,7 @@ namespace LibGeoDecomp {
  * models (e.g. when the relative coordinates for neighbor accesses
  * are not known at compile time).
  */
-class APIs
+class CellAPITraits
 {
 public:
     /**
@@ -33,7 +33,7 @@ public:
 
     /**
      * indicates that the model may not only update a single cell, but
-     * a linear sequence cells within the grid.
+     * a linear sequence cells within the grid. 
      */
     class Line : public Base
     {

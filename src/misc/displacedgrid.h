@@ -147,7 +147,7 @@ public:
         return CoordBox<DIM>(origin, delegate.getDimensions());
     }
 
-    inline MyCoordMap getNeighborhood(const Coord<DIM>& center)
+    inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
     {
         Coord<DIM> relativeCoord = center - origin;
         if (TOPOLOGICALLY_CORRECT) 

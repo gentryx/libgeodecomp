@@ -1,16 +1,14 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/linepointerassembly.h>
-#include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/updatefunctortestbase.h>
+#include <libgeodecomp/misc/vanillaupdatefunctor.h>
 
 using namespace LibGeoDecomp; 
 
 namespace LibGeoDecomp {
 
-class LinePointerUpdateFunctorTest : public CxxTest::TestSuite 
+class VanillaUpdateFunctorTest : public CxxTest::TestSuite
 {
 public:
-
     template<class STENCIL>
     class UpdateFunctorTestHelper : public UpdateFunctorTestBase<STENCIL>
     {
@@ -26,11 +24,8 @@ public:
             GridType *gridNew,
             unsigned nanoStep) 
         {
-            CoordBox<DIM> gridBox = gridOld.boundingBox();
-            const TestCellType *pointers[Stencil::VOLUME];
-            LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
-            LinePointerUpdateFunctor<TestCellType>()(
-                streak, gridBox, pointers, &(*gridNew)[streak.origin], nanoStep);
+            VanillaUpdateFunctor<TestCellType>()(
+                streak, gridOld, gridNew, nanoStep);
         }
     };
 

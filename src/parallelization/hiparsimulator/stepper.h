@@ -36,6 +36,7 @@ public:
     typedef std::deque<PatchProviderPtr> PatchProviderList;
     typedef std::deque<PatchAccepterPtr> PatchAccepterList;
     typedef SuperVector<PatchAccepterPtr> PatchAccepterVec;
+    typedef SuperVector<PatchProviderPtr> PatchProviderVec;
 
     inline Stepper(
         const boost::shared_ptr<MyPartitionManager>& _partitionManager,

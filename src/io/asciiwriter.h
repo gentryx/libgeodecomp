@@ -64,8 +64,7 @@ public:
                  << sim->getStep() << ".ascii";
         std::ofstream outfile(filename.str().c_str());
         if (!outfile) {
-            throw FileOpenException("Cannot open output file", 
-                                    filename.str(), errno);
+            throw FileOpenException(filename.str());
         }
 
         CoordBox<DIM> box = grid->boundingBox();
@@ -81,8 +80,7 @@ public:
         }
 
         if (!outfile.good()) {
-            throw FileWriteException("Cannot write to output file",
-                                     filename.str(), errno);
+            throw FileWriteException(filename.str());
         }
         outfile.close();
     }

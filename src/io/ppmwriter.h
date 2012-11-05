@@ -54,9 +54,7 @@ class PPMWriter : public Writer<CELL_TYPE>
 
     void writeStep()
     {
-        writePPM(
-            _gridPlotter.plotGrid(
-                *sim->getGrid()));
+        writePPM(_gridPlotter.plotGrid(*sim->getGrid()));
     }
 
     void writePPM(Image img)
@@ -65,9 +63,9 @@ class PPMWriter : public Writer<CELL_TYPE>
         filename << prefix << "." << std::setfill('0') << std::setw(4)
                  << sim->getStep() << ".ppm";
         std::ofstream outfile(filename.str().c_str());
-        if (!outfile) 
-            throw FileOpenException("Cannot open output file", 
-                                    filename.str(), errno);
+        if (!outfile) {
+            throw FileOpenException(filename.str());
+        }
 
         // header first:
         outfile << "P6 " << img.getDimensions().x() 
@@ -81,9 +79,9 @@ class PPMWriter : public Writer<CELL_TYPE>
                         << (char)rgb.blue();
             }
         }
-        if (!outfile.good()) 
-            throw FileWriteException("Cannot write to output file",
-                                     filename.str(), errno);
+        if (!outfile.good()) {
+            throw FileWriteException(filename.str());
+        }
         outfile.close();
     }
 };

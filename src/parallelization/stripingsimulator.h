@@ -9,32 +9,11 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
 namespace LibGeoDecomp {
-
-template<typename CELL_TYPE>
-class StripingSimulatorUpdateFunctor
-{
-public: 
-    typedef typename CELL_TYPE::Topology Topology;
-
-    template<int DIM, typename GRID_TYPE>
-    void operator()(
-        const Streak<DIM>& streak, 
-        GRID_TYPE *curGrid, 
-        GRID_TYPE *newGrid,
-        const unsigned& nanoStep)
-    {
-        Coord<DIM> c = streak.origin;
-        for (; c.x() < streak.endX; ++c.x()) {
-            CoordMap<CELL_TYPE, Grid<CELL_TYPE, Topology> >  n  = 
-                curGrid->getNeighborhood(c);
-            (*newGrid)[c].update(n, nanoStep);
-        }
-    }
-};
 
 /**
  * This class aims at providing a very simple, but working parallel
@@ -220,15 +199,16 @@ private:
 
         double ratio = chrono.nextCycle();
         LoadVec loads = mpilayer.gather(ratio, 0);
+        WeightVec newPartitionsSendBuffer;
 
         if (mpilayer.rank() == 0) {
             WeightVec oldWorkloads = partitionsToWorkloads(partitions);
             WeightVec newWorkloads = balancer->balance(oldWorkloads, loads);
             validateLoads(newWorkloads, oldWorkloads);
-            WeightVec newPartitions = workloadsToPartitions(newWorkloads);
-            
+            newPartitionsSendBuffer = workloadsToPartitions(newWorkloads);
+    
             for (unsigned i = 0; i < mpilayer.size(); i++) {
-                mpilayer.sendVec(&newPartitions, i, BALANCELOADS);
+                mpilayer.sendVec(&newPartitionsSendBuffer, i, BALANCELOADS);
             }
         }
 
@@ -236,7 +216,7 @@ private:
         WeightVec newPartitions(partitions.size());
         mpilayer.recvVec(&newPartitions, 0, BALANCELOADS);
         mpilayer.wait(BALANCELOADS);
-        
+
         redistributeGrid(oldPartitions, newPartitions);
     }
 
@@ -294,9 +274,9 @@ private:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
              i != region.endStreak(); 
              ++i) {
-            StripingSimulatorUpdateFunctor<CELL_TYPE>()(
+            UpdateFunctor<CELL_TYPE>()(
                 *i,
-                curStripe,
+                *curStripe,
                 newStripe,
                 nanoStep);
         }

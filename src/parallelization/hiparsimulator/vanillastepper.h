@@ -52,13 +52,11 @@ public:
         initGrids();
     }
 
-    //template <typename F>
-    inline void update(int nanoSteps)//, F f) 
+    inline void update(int nanoSteps) 
     {
         for (int i = 0; i < nanoSteps; ++i)
         {
             update();
-            //f();
         }
     }
 
@@ -101,11 +99,14 @@ private:
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
-        // fixme: honor streak updaters here, akin to StripingSimulator
-        for (typename Region<DIM>::Iterator i = region.begin(); 
-             i != region.end(); 
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
+             i != region.endStreak(); 
              ++i) {
-            (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), curNanoStep);
+            UpdateFunctor<CELL_TYPE>()(
+                *i,
+                *oldGrid,
+                &*newGrid,
+                curNanoStep);
         }
         std::swap(oldGrid, newGrid);
         
@@ -220,11 +221,14 @@ public:
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             const Region<DIM>& region = partitionManager->rim(t + 1);
-            for (typename Region<DIM>::Iterator i = region.begin(); 
-                 i != region.end(); 
+            for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
+                 i != region.endStreak(); 
                  ++i) {
-                (*newGrid)[*i].update(oldGrid->getNeighborhood(*i), 
-                                      curNanoStep);
+                UpdateFunctor<CELL_TYPE>()(
+                    *i,
+                    *oldGrid,
+                    &*newGrid,
+                    curNanoStep);
             }
             ++curNanoStep;
             if (std::size_t(curNanoStep) == CELL_TYPE::nanoSteps()) {

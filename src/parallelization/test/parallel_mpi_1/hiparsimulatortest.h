@@ -2,7 +2,9 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
+#include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -20,9 +22,12 @@ namespace HiParSimulator {
 class HiParSimulatorTest : public CxxTest::TestSuite
 {
 public:
+    typedef GridBase<TestCell<2>, 2> GridBaseType;
     // fixme: rename types a la "MyFoobar" to "FoobarType"
     typedef HiParSimulator<TestCell<2>, StripingPartition<2> > SimulatorType;
     typedef ParallelMemoryWriter<TestCell<2> > MemoryWriterType;
+    typedef MockSteerer<TestCell<2> > MockSteererType;
+    typedef TestSteerer<2 > TestSteererType;
 
     void setUp()
     {
@@ -93,6 +98,40 @@ public:
                 globalNanoStep);
             TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
         }
+    }
+
+    void testSteererCallback()
+    {
+        std::stringstream events;
+        s->addSteerer(new MockSteererType(5, &events));
+        s->run();
+        s.reset();        
+
+        std::stringstream expected;
+        expected << "created, period = 5\n";
+        for (int i = 25; i <= 200; i += 5) {
+            expected << "nextStep(" << i << ")\n";
+            expected << "nextStep(" << i << ")\n";
+        }
+        expected << "deleted\n";
+
+        TS_ASSERT_EQUALS(events.str(), expected.str());
+    }
+
+    void testSteererFunctionality()
+    {
+        s->addSteerer(new TestSteererType(5, 25, 4711 * 27));
+        s->run();
+
+        const Region<2> *region = &s->updateGroup->partitionManager->ownRegion();
+        const GridBaseType *grid = &s->updateGroup->grid();
+        int cycle = 200 * 27 + 4711 * 27;
+
+        TS_ASSERT_TEST_GRID_REGION(
+            GridBaseType, 
+            *grid, 
+            *region, 
+            cycle);
     }
 
 private:

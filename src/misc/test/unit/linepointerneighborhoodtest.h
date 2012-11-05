@@ -22,7 +22,7 @@ public:
         long x = 0;
 
         Coord<2> c(1, 3);
-        int *pointers[] = {
+        const int *pointers[] = {
             &grid[c + Coord<2>(-1, -1)],
             &grid[c + Coord<2>( 0, -1)],
             &grid[c + Coord<2>( 1, -1)],
@@ -65,7 +65,7 @@ public:
         long x = 0;
         
         Coord<2> c(0, 3);
-        int *pointers[] = {
+        const int *pointers[] = {
             &grid[Coord<2>(c.x() - 1, c.y() - 1)],
             &grid[Coord<2>(c.x() + 0, c.y() - 1)],
             &grid[Coord<2>(endX,      c.y() - 1)],
@@ -149,7 +149,7 @@ public:
 
         for (int y = 0; y < dim.y(); ++y) {
             Coord<2> c(0, y);
-            TestCell<2> *pointers[] = {
+            const TestCell<2> *pointers[] = {
                 &gridOld[Coord<2>(c.x() - 1, c.y() - 1)],
                 &gridOld[Coord<2>(c.x() + 0, c.y() - 1)],
                 &gridOld[Coord<2>(endX,      c.y() - 1)],
@@ -187,7 +187,7 @@ public:
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
                 Coord<3> c(0, y, z);
-                TestCell<3> *pointers[] = {
+                const TestCell<3> *pointers[] = {
                     &gridOld[Coord<3>(c.x() - 1, c.y() - 1, c.z() - 1)],
                     &gridOld[Coord<3>(c.x() + 0, c.y() - 1, c.z() - 1)],
                     &gridOld[Coord<3>(endX,      c.y() - 1, c.z() - 1)],

@@ -81,7 +81,7 @@ public:
     template<int X, int Y, int Z>
     Coord<3> operator()(Streak<3> streak, FixedCoord<X, Y, Z>)
     {
-        return Coord<2>(CalcXCoord<X>()(streak), 
+        return Coord<3>(CalcXCoord<X>()(streak), 
                         streak.origin.y() + Y,
                         streak.origin.z() + Z);
     }
@@ -117,7 +117,7 @@ class LinePointerAssembly<Stencils::Moore<2, 1> >
 {
 public:
     template<typename CELL, typename GRID>
-    void operator()(CELL *pointers[9], const Streak<2>& streak, GRID& grid)
+    void operator()(const CELL *pointers[9], const Streak<2>& streak, GRID& grid)
     {
         Stencils::Repeat<Stencils::Moore<2, 1>::VOLUME, 
                          LinePointerAssemblyHelpers::CopyCellPointer, 
@@ -130,7 +130,7 @@ class LinePointerAssembly<Stencils::Moore<3, 1> >
 {
 public:
     template<typename CELL, typename GRID>
-    void operator()(CELL *pointers[27], const Streak<3>& streak, GRID& grid)
+    void operator()(const CELL *pointers[27], const Streak<3>& streak, GRID& grid)
     {
         pointers[ 0] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() - 1, streak.origin.z() - 1)];
         pointers[ 1] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() - 1, streak.origin.z() - 1)];
@@ -169,7 +169,7 @@ class LinePointerAssembly<Stencils::VonNeumann<2, 1> >
 {
 public:
     template<typename CELL, typename GRID>
-    void operator()(CELL *pointers[5], const Streak<2>& streak, GRID& grid)
+    void operator()(const CELL *pointers[5], const Streak<2>& streak, GRID& grid)
     {
         pointers[0] = &grid[Coord<2>(streak.origin.x() + 0, streak.origin.y() - 1)];
         pointers[1] = &grid[Coord<2>(streak.origin.x() - 1, streak.origin.y() + 0)];
@@ -184,7 +184,7 @@ class LinePointerAssembly<Stencils::VonNeumann<3, 1> >
 {
 public:
     template<typename CELL, typename GRID>
-    void operator()(CELL *pointers[7], const Streak<3>& streak, GRID& grid)
+    void operator()(const CELL *pointers[7], const Streak<3>& streak, GRID& grid)
     {
         pointers[ 0] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() - 1)];
         pointers[ 1] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() - 1, streak.origin.z() + 0)];

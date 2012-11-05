@@ -2,14 +2,19 @@
 #include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
-#include <libgeodecomp/misc/apis.h>
+#include <libgeodecomp/config.h>
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/misc/soaaccessor.h>
 #include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
@@ -546,12 +551,26 @@ private:
 
 };
 
+template<typename CELL>
+class NoOpInitializer : public SimpleInitializer<CELL>
+{
+public:
+    NoOpInitializer(
+        const Coord<3>& dimensions,
+        const unsigned& steps) :
+        SimpleInitializer<CELL>(dimensions, steps)
+    {}
+    
+    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) 
+    {}
+};
+
 class JacobiCellClassic
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
-    class API : public APIs::Base
+    class API : public CellAPITraits::Base
     {};
 
     static int nanoSteps()
@@ -572,7 +591,7 @@ public:
                 hood[Coord<3>( 0,  0,  0)].temp +
                 hood[Coord<3>( 1,  0,  0)].temp +
                 hood[Coord<3>( 0,  1,  0)].temp +
-                hood[Coord<3>( 1,  0,  1)].temp) * (1.0 / 7.0);
+                hood[Coord<3>( 0,  0,  1)].temp) * (1.0 / 7.0);
     }
 
     double temp;
@@ -598,37 +617,15 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellClassic, JacobiCellClassic::Topology> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
-        GridType *gridOld = &gridA;
-        GridType *gridNew = &gridB;
-
         int maxT = 5;
-        CoordBox<3> coords = gridOld->boundingBox();
+        SerialSimulator<JacobiCellClassic> sim(
+            new NoOpInitializer<JacobiCellClassic>(dim, maxT));
 
         long long tBegin= Chronometer::timeUSec();
-
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = coords.begin();
-                 i != coords.end();
-                 ++i) {
-                CoordMap<JacobiCellClassic, GridType> neighborhood = 
-                gridOld->getNeighborhood(*i);
-                (*gridNew)[*i].update(neighborhood, 0);
-                // Streak<3> streak(*i, dim.x());
-                // TestCellType *pointers[JacobiCellClassic::Stencil::VOLUME];
-                // LinePointerAssembly<JacobiCellClassic::Stencil>()(pointers, streak, gridA);
-                // LinePointerUpdateFunctor<TestCellType>()(
-                //     streak, gridBox, pointers, &gridNew[streak.origin], s);
-            }
-
-            std::swap(gridOld, gridNew);
-        }
-
+        sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -649,9 +646,9 @@ public:
 class JacobiCellFixedHood
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
-    class API : public APIs::Fixed
+    class API : public CellAPITraits::Fixed
     {};
 
     JacobiCellFixedHood(double t = 0) :
@@ -666,13 +663,13 @@ public:
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
-        temp = (hood[FixedCoord<0,  0, -1>()].temp +
-                hood[FixedCoord<0, -1,  0>()].temp +
-                hood[FixedCoord<1,  0,  0>()].temp +
-                hood[FixedCoord<0,  0,  0>()].temp +
-                hood[FixedCoord<1,  0,  0>()].temp +
-                hood[FixedCoord<0,  1,  0>()].temp +
-                hood[FixedCoord<1,  0,  1>()].temp) * (1.0 / 7.0);
+        temp = (hood[FixedCoord< 0,  0, -1>()].temp +
+                hood[FixedCoord< 0, -1,  0>()].temp +
+                hood[FixedCoord<-1,  0,  0>()].temp +
+                hood[FixedCoord< 0,  0,  0>()].temp +
+                hood[FixedCoord< 1,  0,  0>()].temp +
+                hood[FixedCoord< 0,  1,  0>()].temp +
+                hood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 7.0);
     }
 
     double temp;
@@ -693,42 +690,21 @@ public:
 
     std::string species()
     {
-        return "gold";
+        return "silver";
     }
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellFixedHood, JacobiCellFixedHood::Topology> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
-        GridType *gridOld = &gridA;
-        GridType *gridNew = &gridB;
-
         int maxT = 20;
 
-        CoordBox<3> gridBox = gridA.boundingBox();
-        CoordBox<3> lineStarts = gridA.boundingBox();
-        lineStarts.dimensions.x() = 1;
+        SerialSimulator<JacobiCellFixedHood> sim(
+            new NoOpInitializer<JacobiCellFixedHood>(dim, maxT));
 
         long long tBegin= Chronometer::timeUSec();
-
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<3> streak(*i, dim.x());
-                JacobiCellFixedHood *pointers[JacobiCellFixedHood::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellFixedHood::Stencil>()(pointers, streak, gridA);
-                LinePointerUpdateFunctor<JacobiCellFixedHood>()(
-                    streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
-            }
-
-            std::swap(gridOld, gridNew);
-        }
-
+        sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -746,13 +722,32 @@ public:
     }
 };
 
+class QuadM128
+{
+public:
+    __m128d a;
+    __m128d b;
+    __m128d c;
+    __m128d d;
+};
+
+class PentaM128
+{
+public:
+    __m128d a;
+    __m128d b;
+    __m128d c;
+    __m128d d;
+    __m128d e;
+};
+
 class JacobiCellStreakUpdate
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
   
-    class API : public APIs::Fixed, public APIs::Line
+    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
@@ -773,7 +768,7 @@ public:
                 hood[FixedCoord<0,  0,  0>()].temp +
                 hood[FixedCoord<1,  0,  0>()].temp +
                 hood[FixedCoord<0,  1,  0>()].temp +
-                hood[FixedCoord<1,  0,  1>()].temp) * (1.0 / 7.0);
+                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
     }
 
     template<typename NEIGHBORHOOD>
@@ -785,38 +780,45 @@ public:
         }
 
         __m128d oneSeventh = _mm_set_pd(1.0/7.0, 1.0/7.0);
-        __m128d same1 = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()].temp);
+
+        PentaM128 same;
+        // PentaM128 odds;
+
+        same.a = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()].temp);
         __m128d odds0 = _mm_loadu_pd(&hood[FixedCoord<-1, 0, 0>()].temp);
 
         for (; (*x) < (endX - 7); (*x) += 8) {
-            __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
-            __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
-            __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
-            __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()].temp);
+            load(&same, hood, FixedCoord<0, 0, 0>());
+            // __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
+            // __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
+            // __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
+            // __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()].temp);
 
             // shuffle values obtain left/right neighbors
-            __m128d odds1 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
-            __m128d odds2 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
-            __m128d odds3 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
-            __m128d odds4 = _mm_shuffle_pd(same4, same5, (1 << 0) | (0 << 2));
+            __m128d odds1 = _mm_shuffle_pd(same.a, same.b, (1 << 0) | (0 << 2));
+            __m128d odds2 = _mm_shuffle_pd(same.b, same.c, (1 << 0) | (0 << 2));
+            __m128d odds3 = _mm_shuffle_pd(same.c, same.d, (1 << 0) | (0 << 2));
+            __m128d odds4 = _mm_shuffle_pd(same.d, same.e, (1 << 0) | (0 << 2));
 
             // load south neighbors
-            __m128d buf0 =  load<0>(hood, FixedCoord< 0, 0, -1>());
-            __m128d buf1 =  load<2>(hood, FixedCoord< 0, 0, -1>());
-            __m128d buf2 =  load<4>(hood, FixedCoord< 0, 0, -1>());
-            __m128d buf3 =  load<6>(hood, FixedCoord< 0, 0, -1>());
+            QuadM128 buf;
+            load(&buf, hood, FixedCoord<0, 0, -1>());
+            // __m128d buf0 =  load<0>(hood, FixedCoord< 0, 0, -1>());
+            // __m128d buf1 =  load<2>(hood, FixedCoord< 0, 0, -1>());
+            // __m128d buf2 =  load<4>(hood, FixedCoord< 0, 0, -1>());
+            // __m128d buf3 =  load<6>(hood, FixedCoord< 0, 0, -1>());
 
             // add left neighbors
-            same1 = _mm_add_pd(same1, odds0);
-            same2 = _mm_add_pd(same2, odds1);
-            same3 = _mm_add_pd(same3, odds2);
-            same4 = _mm_add_pd(same4, odds3);
+            same.a = _mm_add_pd(same.a, odds0);
+            same.b = _mm_add_pd(same.b, odds1);
+            same.c = _mm_add_pd(same.c, odds2);
+            same.d = _mm_add_pd(same.d, odds3);
 
             // add right neighbors
-            same1 = _mm_add_pd(same1, odds1);
-            same2 = _mm_add_pd(same2, odds2);
-            same3 = _mm_add_pd(same3, odds3);
-            same4 = _mm_add_pd(same4, odds4);
+            same.a = _mm_add_pd(same.a, odds1);
+            same.b = _mm_add_pd(same.b, odds2);
+            same.c = _mm_add_pd(same.c, odds3);
+            same.d = _mm_add_pd(same.d, odds4);
 
             // load top neighbors
             odds0 = load<0>(hood, FixedCoord< 0, -1, 0>());
@@ -825,22 +827,23 @@ public:
             odds3 = load<6>(hood, FixedCoord< 0, -1, 0>());
 
             // add south neighbors
-            same1 = _mm_add_pd(same1, buf0);
-            same2 = _mm_add_pd(same2, buf1);
-            same3 = _mm_add_pd(same3, buf2);
-            same4 = _mm_add_pd(same4, buf3);
+            same.a = _mm_add_pd(same.a, buf.a);
+            same.b = _mm_add_pd(same.b, buf.b);
+            same.c = _mm_add_pd(same.c, buf.c);
+            same.d = _mm_add_pd(same.d, buf.d);
 
             // load bottom neighbors
-            buf0 =  load<0>(hood, FixedCoord< 0, 1, 0>());
-            buf1 =  load<2>(hood, FixedCoord< 0, 1, 0>());
-            buf2 =  load<4>(hood, FixedCoord< 0, 1, 0>());
-            buf3 =  load<6>(hood, FixedCoord< 0, 1, 0>());
+            load(&buf, hood, FixedCoord<0, 1, 0>());
+            // buf0 =  load<0>(hood, FixedCoord< 0, 1, 0>());
+            // buf1 =  load<2>(hood, FixedCoord< 0, 1, 0>());
+            // buf2 =  load<4>(hood, FixedCoord< 0, 1, 0>());
+            // buf3 =  load<6>(hood, FixedCoord< 0, 1, 0>());
 
             // add top neighbors
-            same1 = _mm_add_pd(same1, odds0);
-            same2 = _mm_add_pd(same2, odds1);
-            same3 = _mm_add_pd(same3, odds2);
-            same4 = _mm_add_pd(same4, odds3);
+            same.a = _mm_add_pd(same.a, odds0);
+            same.b = _mm_add_pd(same.b, odds1);
+            same.c = _mm_add_pd(same.c, odds2);
+            same.d = _mm_add_pd(same.d, odds3);
 
             // load north neighbors
             odds0 = load<0>(hood, FixedCoord< 0, 0, 1>());
@@ -849,36 +852,54 @@ public:
             odds3 = load<6>(hood, FixedCoord< 0, 0, 1>());
 
             // add bottom neighbors
-            same1 = _mm_add_pd(same1, buf0);
-            same2 = _mm_add_pd(same2, buf1);
-            same3 = _mm_add_pd(same3, buf2);
-            same4 = _mm_add_pd(same4, buf3);
+            same.a = _mm_add_pd(same.a, buf.a);
+            same.b = _mm_add_pd(same.b, buf.b);
+            same.c = _mm_add_pd(same.c, buf.c);
+            same.d = _mm_add_pd(same.d, buf.d);
 
             // add north neighbors
-            same1 = _mm_add_pd(same1, odds0);
-            same2 = _mm_add_pd(same2, odds1);
-            same3 = _mm_add_pd(same3, odds2);
-            same4 = _mm_add_pd(same4, odds3);
+            same.a = _mm_add_pd(same.a, odds0);
+            same.b = _mm_add_pd(same.b, odds1);
+            same.c = _mm_add_pd(same.c, odds2);
+            same.d = _mm_add_pd(same.d, odds3);
 
             // scale by 1/7
-            same1 = _mm_mul_pd(same1, oneSeventh);
-            same2 = _mm_mul_pd(same2, oneSeventh);
-            same3 = _mm_mul_pd(same3, oneSeventh);
-            same4 = _mm_mul_pd(same4, oneSeventh);
+            same.a = _mm_mul_pd(same.a, oneSeventh);
+            same.b = _mm_mul_pd(same.b, oneSeventh);
+            same.c = _mm_mul_pd(same.c, oneSeventh);
+            same.d = _mm_mul_pd(same.d, oneSeventh);
 
             // store results
-            _mm_store_pd(&target[*x + 0].temp, same1);
-            _mm_store_pd(&target[*x + 2].temp, same2);
-            _mm_store_pd(&target[*x + 4].temp, same3);
-            _mm_store_pd(&target[*x + 6].temp, same4);
+            _mm_store_pd(&target[*x + 0].temp, same.a);
+            _mm_store_pd(&target[*x + 2].temp, same.b);
+            _mm_store_pd(&target[*x + 4].temp, same.c);
+            _mm_store_pd(&target[*x + 6].temp, same.d);
 
             odds0 = odds4;
-            same1 = same5;
+            same.a = same.e;
         }
 
         for (; *x < endX; ++(*x)) {
             target[*x].update(hood, 0);
         }
+    }
+
+    template<typename NEIGHBORHOOD, int X, int Y, int Z>
+    static void load(QuadM128 *q, const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
+    {
+        q->a = load<0>(hood, coord);
+        q->b = load<2>(hood, coord);
+        q->c = load<4>(hood, coord);
+        q->d = load<6>(hood, coord);
+    }
+
+    template<typename NEIGHBORHOOD, int X, int Y, int Z>
+    static void load(PentaM128 *q, const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
+    {
+        q->b = load<2>(hood, coord);
+        q->c = load<4>(hood, coord);
+        q->d = load<6>(hood, coord);
+        q->e = load<8>(hood, coord);
     }
 
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
@@ -917,7 +938,7 @@ public:
 
     std::string species()
     {
-        return "platinum";
+        return "gold";
     }
 
     double performance(const Coord<3>& dim)
@@ -941,8 +962,8 @@ public:
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
-                JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, gridA);
+                const JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
+                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, *gridOld);
                 LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
                     streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
             }
@@ -953,6 +974,52 @@ public:
         long long tEnd = Chronometer::timeUSec();
 
         if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        double updates = 1.0 * maxT * dim.prod();
+        double seconds = (tEnd - tBegin) * 10e-6;
+        double gLUPS = 10e-9 * updates / seconds;
+
+        return gLUPS;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+};
+
+class Jacobi3DStreakUpdateFunctor
+{
+public:
+    std::string order()
+    {
+        return "CPU";
+    }
+
+    std::string family()
+    {
+        return "Jacobi3D";
+    }
+
+    std::string species()
+    {
+        return "platinum";
+    }
+
+    double performance(const Coord<3>& dim)
+    {
+        int maxT = 20;
+        SerialSimulator<JacobiCellStreakUpdate> sim(
+            new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
+
+        long long tBegin= Chronometer::timeUSec();
+        sim.run();
+        long long tEnd = Chronometer::timeUSec();
+
+        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -1011,36 +1078,53 @@ void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
               << std::setw( 8) << benchmark.unit() <<  "\n";
 }
 
+#ifdef LIBGEODECOMP_FEATURE_CUDA
+void cudaTests(std::string revision, bool quick, int cudaDevice);
+#endif
+
 int main(int argc, char **argv)
 {
-    if (argc != 2) {
-        std::cerr << "usage: " << argv[0] << " REVISION\n";
+    if ((argc < 3) || (argc > 4)) {
+        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
         return 1;
     }
 
-    revision = argv[1];
+    bool quick = false;
+    int revIndex = 1;
+    if (argc == 4) {
+        if ((std::string(argv[1]) == "-q") ||
+            (std::string(argv[1]) == "--quick")) {
+            quick = true;
+        }
+        revIndex = 2;
+    }
+    revision = argv[revIndex];
+    std::stringstream s;
+    s << argv[revIndex + 1];
+    int cudaDevice;
+    s >> cudaDevice;
 
     std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family          ; species ; dimensions              ; perf        ; unit\n";
 
-    evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
-    evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
-    evaluate(RegionInsert(), Coord<3>(2048, 2048, 2048));
+    // evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
+    // evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
+    // evaluate(RegionInsert(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
-    evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
-    evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
+    // evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
+    // evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
+    // evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
+    // evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
+    // evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
+    // evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
+    // evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
+    // evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
+    // evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
+    // evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
+    // evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
+    // evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
     SuperVector<Coord<3> > sizes;
     sizes << Coord<3>(22, 22, 22)
@@ -1054,25 +1138,33 @@ int main(int argc, char **argv)
           << Coord<3>(1024, 1024, 32)
           << Coord<3>(1026, 1026, 32);
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DVanilla(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DVanilla(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DSSE(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DSSE(), sizes[i]);
+    // }
 
     for (int i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DClassic(), sizes[i]);
     }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DFixedHood(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DFixedHood(), sizes[i]);
+    // }
 
-    for (int i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdate(), sizes[i]);
-    }
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DStreakUpdate(), sizes[i]);
+    // }
+
+    // for (int i = 0; i < sizes.size(); ++i) {
+    //     evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
+    // }
+
+#ifdef LIBGEODECOMP_FEATURE_CUDA
+    // cudaTests(revision, quick, cudaDevice);
+#endif
 
     return 0;
 }

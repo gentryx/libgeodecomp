@@ -17,7 +17,7 @@ string(REGEX MATCH "^unit" is_unit_test ${DIRNAME})
 set(allowed_test false)
 if (is_unit_test)
   set(allowed_test true)
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ./test)
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${UNITEXEC} ./test")
 endif(is_unit_test)
 
 if (is_mpi_test AND FEATURE_MPI)

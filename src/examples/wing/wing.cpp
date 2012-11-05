@@ -81,7 +81,11 @@ double LENGTHS[] =
 class Cell
 {
 public:
+    typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
+
+    class API : public CellAPITraits::Base
+    {};
 
     static int nanoSteps()
     {

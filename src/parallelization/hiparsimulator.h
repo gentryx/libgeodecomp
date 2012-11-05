@@ -11,6 +11,7 @@
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
+#include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
         
 namespace LibGeoDecomp {
@@ -42,6 +43,7 @@ public:
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, PARTITION> ParallelWriterAdapterType;
+    typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
     static const int DIM = Topology::DIMENSIONS;
 
     inline HiParSimulator(
@@ -103,6 +105,21 @@ public:
         }
     }
 
+    virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
+    {
+        boost::shared_ptr<Steerer<CELL_TYPE> > steererPointer(steerer);
+        steerers << steererPointer;
+
+        // two adapters needed, just as for the writers
+        typename UpdateGroupType::PatchProviderPtr adapterGhost(
+            new SteererAdapterType(steererPointer));
+        typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
+            new SteererAdapterType(steererPointer));
+
+        steererAdaptersGhost.push_back(adapterGhost);
+        steererAdaptersInner.push_back(adapterInnerSet);
+    }
+
     virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         DistributedSimulator<CELL_TYPE>::registerWriter(writer);
@@ -129,6 +146,7 @@ public:
 
 private:
     using DistributedSimulator<CELL_TYPE>::initializer;
+    using DistributedSimulator<CELL_TYPE>::steerers;
     using DistributedSimulator<CELL_TYPE>::writers;
 
     boost::shared_ptr<LoadBalancer> balancer;
@@ -139,6 +157,8 @@ private:
     MPI::Comm *communicator;
     MPI::Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
+    typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
+    typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
     const GridType *currentGrid;
@@ -199,6 +219,8 @@ private:
                 initializer,
                 writerAdaptersGhost,
                 writerAdaptersInner,
+                steererAdaptersGhost,
+                steererAdaptersInner,
                 cellMPIDatatype,
                 communicator));
 

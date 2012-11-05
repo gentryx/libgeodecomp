@@ -35,7 +35,7 @@ public:
         if (step != eventStep) {
             return;
         }
-        
+
         for (typename Region<DIM>::Iterator i = validRegion.begin();
              i != validRegion.end();
              ++i) {

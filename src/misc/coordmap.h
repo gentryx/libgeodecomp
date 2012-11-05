@@ -19,7 +19,7 @@ class CoordMap
 public:
     const static int DIM = GRID_TYPE::DIM;
 
-    inline CoordMap(const Coord<DIM>& origin, GRID_TYPE *grid) :
+    inline CoordMap(const Coord<DIM>& origin, const GRID_TYPE *grid) :
         _origin(origin), _grid(grid) {};
 
     /**
@@ -47,7 +47,7 @@ public:
 
 private:
     Coord<DIM> _origin;
-    GRID_TYPE *_grid;
+    const GRID_TYPE *_grid;
 };
 
 };

@@ -21,7 +21,8 @@ std::string TempFile::serial(const std::string& prefix)
 #ifdef __WIN32__
         std::string name = getenv("TMP");
 #else
-        std::string name = "/tmp";
+        const char* tempDir = getenv("TMPDIR");
+        std::string name = tempDir? tempDir : "/tmp";
 #endif
         boost::filesystem::path path(name);
         unsigned r = Random::gen_u();
