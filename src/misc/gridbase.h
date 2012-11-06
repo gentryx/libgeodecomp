@@ -15,6 +15,7 @@ template<typename CELL, int DIMENSIONS>
 class GridBase
 {
 public:
+    typedef CELL CellType;
     const static int DIM = DIMENSIONS;
 
     virtual ~GridBase()

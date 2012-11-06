@@ -37,6 +37,12 @@ public:
     {
         return period;
     }
+    
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & period;
+    }
 
 protected:
     unsigned period;

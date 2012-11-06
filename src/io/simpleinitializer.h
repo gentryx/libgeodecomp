@@ -38,6 +38,8 @@ public:
     void serialize(Archive & ar, unsigned)
     {
         ar & boost::serialization::base_object<Initializer<CELL_TYPE> >(*this);
+        ar & dimensions;
+        ar & steps;
     }
 
 protected:

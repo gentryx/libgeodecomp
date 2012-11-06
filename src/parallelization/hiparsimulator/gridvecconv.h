@@ -51,21 +51,21 @@ public:
 
     }
 
-    template<typename GRID_TYPE>
+    template<typename VEC_TYPE, typename GRID_TYPE, typename REGION_TYPE>
     static void vectorToGrid(
-        const SuperVector<typename GRID_TYPE::CellType>& vec, 
+        const VEC_TYPE& vec, 
         GRID_TYPE *grid, 
-        const Region<GRID_TYPE::DIM>& region)
+        const REGION_TYPE& region)
     {
         if (vec.size() != std::size_t(region.size()))
             throw std::logic_error("region doesn't match vector size");
         
         if(vec.size() == 0) return;
 
-        typename SuperVector<typename GRID_TYPE::CellType>::const_iterator source = vec.begin();
-        for(typename Region<GRID_TYPE::DIM>::Iterator i = region.begin(); i != region.end(); ++i)
+        typename VEC_TYPE::const_iterator source = vec.begin();
+        for(typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i)
         {
-            (*grid)[*i] = *source;
+            grid->at(*i) = *source;
             ++source;
         }
         /*
