@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/region.h>
+#include <boost/serialization/base_object.hpp>
 
 namespace LibGeoDecomp {
 
