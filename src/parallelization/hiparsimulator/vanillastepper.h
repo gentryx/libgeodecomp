@@ -122,8 +122,6 @@ private:
 
         
         if (validGhostZoneWidth == 0) {
-            notifyPatchProviders(
-                partitionManager->rim(0), ParentType::GHOST, globalNanoStep());
             updateGhost();
             resetValidGhostZoneWidth();
         }
@@ -221,6 +219,9 @@ public:
         int curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
+            notifyPatchProviders(
+                partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
+
             const Region<DIM>& region = partitionManager->rim(t + 1);
             for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
                  i != region.endStreak(); 
@@ -231,6 +232,7 @@ public:
                     &*newGrid,
                     curNanoStep);
             }
+
             ++curNanoStep;
             if (std::size_t(curNanoStep) == CELL_TYPE::nanoSteps()) {
                 curNanoStep = 0;
