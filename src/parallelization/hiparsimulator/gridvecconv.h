@@ -44,8 +44,9 @@ public:
         GRID_TYPE *grid, 
         const Region<GRID_TYPE::DIM>& region)
     {
-        if (vec.size() != region.size())
+        if (vec.size() != region.size()) {
             throw std::logic_error("region doesn't match vector size");
+        }
 
         const typename GRID_TYPE::CellType *source = &vec[0];
         for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak(); 
