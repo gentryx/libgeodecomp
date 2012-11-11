@@ -574,7 +574,6 @@ public:
         for (int dim = 0; dim < DIM; ++dim) {
             buf << "indices[" << dim << "] = " 
                 << indices[dim] << "\n";
-            std::cout << "  " << dim << " -> " << (indices[dim].begin() == indices[dim].end()) << "\n";
         }
         buf << ")\n";
 
