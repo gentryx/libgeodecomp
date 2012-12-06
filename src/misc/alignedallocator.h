@@ -1,7 +1,7 @@
 #ifndef _libgeodecomp_misc_alignedallocator_h_
 #define _libgeodecomp_misc_alignedallocator_h_
 
-#include <malloc.h>
+#include <stdlib.h>
 
 namespace LibGeoDecomp {
 
