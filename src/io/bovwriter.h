@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
  */
 template<typename CELL_TYPE, typename SELECTOR_TYPE>
 class BOVWriter : public ParallelWriter<CELL_TYPE>
-{    
+{
 public:
     friend class BOVWriterTest;
 

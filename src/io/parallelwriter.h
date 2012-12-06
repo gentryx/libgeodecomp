@@ -34,7 +34,7 @@ public:
     ParallelWriter(
         const std::string& _prefix, 
         DistributedSimulator<CELL_TYPE> *_distSim, 
-        const unsigned& _period = 1): 
+        const unsigned& _period = 1) : 
         prefix(_prefix), distSim(_distSim), period(_period)
     {
         if (prefix == "") 

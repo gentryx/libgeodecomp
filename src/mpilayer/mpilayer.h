@@ -323,8 +323,9 @@ public:
     {
         SuperVector<int> displacements(size());
         displacements[0] = 0;
-        for (int i = 0; i < size() - 1; ++i)
+        for (int i = 0; i < size() - 1; ++i) {
             displacements[i + 1] = displacements[i] + lengths[i];
+        }
         comm->Allgatherv(source, lengths[rank()], datatype, &(target->front()), &(lengths.front()), &(displacements.front()), datatype);
     }
 
@@ -341,6 +342,34 @@ public:
         } else {
             return SuperVector<T>();
         }
+    }
+
+    // fixme: needs test
+    template<typename T>
+    inline void gatherV(
+        const T *source, 
+        const int num,
+        const SuperVector<int>& lengths,
+        const unsigned& root, 
+        SuperVector<T> *target, 
+        const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
+    {
+        SuperVector<int> displacements(size());
+        if (rank() == root) {
+            displacements[0] = 0;
+            for (int i = 0; i < size() - 1; ++i) {
+                displacements[i + 1] = displacements[i] + lengths[i];
+            }
+        }
+
+        // std::cout << "num[" << rank() << "]: " << num << "\n";
+        // std::cout << "lengths[" << rank() << "]: " << lengths << "\n";
+        // std::cout << "displacements[" << rank() << "]: " << displacements << "\n";
+        // std::cout << "targetsize[" << rank() << "]: " << target->size() << "\n";
+
+        comm->Gatherv(source, num, datatype, 
+                      &(*target)[0], &lengths[0], &displacements[0], datatype, 
+                      root);
     }
 
     /**

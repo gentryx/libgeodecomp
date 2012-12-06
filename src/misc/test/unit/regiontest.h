@@ -316,6 +316,23 @@ public:
         TS_ASSERT_EQUALS(actual, expected);
     }
 
+    void testEmptyStreakIteration()
+    {
+        Region<2> region1;
+        Region<2> region2;
+        Region<2> region;
+ 
+        region1 << Streak<2>(Coord<2>(0, 0), 10);
+        region2 << Streak<2>(Coord<2>(0, 5), 10);
+        region = region1 & region2;
+
+        for (Region<2>::StreakIterator i = region.beginStreak();
+             i != region.endStreak(); 
+             ++i) {
+            TS_FAIL("loop should not execute!");
+        }
+    }
+
     void testUnorderedInsert()
     {
         c << Coord<2>(7, 8);
