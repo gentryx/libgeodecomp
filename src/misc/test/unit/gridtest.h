@@ -107,67 +107,6 @@ public:
         TS_ASSERT_EQUALS(a, b);
     }
     
-    void testDiffDimensions()
-    {
-        int width = testGrid->getDimensions().x();
-        int height = testGrid->getDimensions().y();
-
-        TS_ASSERT_EQUALS(testGrid->diff(Grid<TestCell<2> >(*testGrid)), "");
-
-        int newWidth = width + 5;
-        int newHeight = 11;
-        std::ostringstream message;
-        message << "dimensions mismatch (is (" 
-                << CoordBox<2>(Coord<2>(),
-                               Coord<2>(width, height))
-                << "), got (" 
-                << CoordBox<2>(Coord<2>(),
-                               Coord<2>(newWidth, newHeight))
-                << "))";
-        
-        TS_ASSERT_EQUALS(testGrid->diff(
-                             Grid<TestCell<2> >(Coord<2>(newWidth, newHeight))), 
-                         message.str());
-    }
-
-    void testDiffCells()
-    {
-        Grid<TestCell<2> > other(*testGrid);
-        Coord<2> changedCoord1(1, 2);
-        Coord<2> changedCoord2(0, 4);
-        other[changedCoord1].testValue += 1;
-        other[changedCoord2].testValue -= 1;
-
-        std::ostringstream message;
-        message << "cell differences:\n\n" << 
-            "at coordinate " << changedCoord1 << "\n" << 
-            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-            (*testGrid)[changedCoord1] <<
-            "========================================\n" <<
-            other[changedCoord1] <<
-            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
-        message << 
-            "at coordinate " << changedCoord2 << "\n" << 
-            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-            (*testGrid)[changedCoord2] <<
-            "========================================\n" <<
-            other[changedCoord2] <<
-            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-
-        TS_ASSERT_EQUALS(testGrid->diff(other), message.str());
-    }
-
-    void testDiffEdgeCell()
-    {
-        Grid<int> muh(Coord<2>(10, 10));
-        Grid<int> kuh(muh);
-        muh[Coord<2>(-1, -1)] = 47;
-        kuh[Coord<2>(-1, -1)] = 11;
-
-        std::string message =  "cell differences:\n\nedge cell differs (self (47), other (11))\n";
-        TS_ASSERT_EQUALS(message, muh.diff(kuh));
-    }
-
     void testCopyConstructor()
     {
         Grid<int> *a1 = new Grid<int>(Coord<2>(200, 100));

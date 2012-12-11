@@ -246,8 +246,7 @@ public:
             CoordBox<2>(Coord<2>(0, s), Coord<2>(width, e - s)));
         init->grid(&expectedStripe);
         Grid<TestCell<2> > actualStripe = *testSim->curStripe->vanillaGrid();
-        TSM_ASSERT_EQUALS(actualStripe.diff(*expectedStripe.vanillaGrid()).c_str(), 
-                          actualStripe, *expectedStripe.vanillaGrid());
+        TS_ASSERT_EQUALS(actualStripe, *expectedStripe.vanillaGrid());
     }
 
     void checkRunWithDifferentPartitions(NoOpBalancer::WeightVec weights2)
