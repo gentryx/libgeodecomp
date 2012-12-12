@@ -79,6 +79,7 @@ private:
         const Region<DIM> *region;
         distSim->getGridFragment(&grid, &region);
 
+        // fixme: can't we just use paste() here and delete pasteGridBase from DisplacedGrid entirely?
         grids[step].pasteGridBase(*grid, *region);
         grids[step].atEdge() = grid->atEdge();
 

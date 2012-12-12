@@ -43,6 +43,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::writers;
     using DistributedSimulator<CELL_TYPE>::stepNum;
+    using DistributedSimulator<CELL_TYPE>::steerers;
 
     StripingSimulator(
         Initializer<CELL_TYPE> *_initializer, 
@@ -95,6 +96,16 @@ public:
     virtual void step()
     {   
         balanceLoad();
+
+        // notify all registered Steerers
+        waitForGhostRegions();
+        for(unsigned i = 0; i < steerers.size(); ++i) {
+            if (stepNum % steerers[i]->getPeriod() == 0) {
+                steerers[i]->nextStep(curStripe, outerGhostRegion, stepNum);
+                steerers[i]->nextStep(curStripe, region, stepNum);
+            }
+        }
+
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
         }
@@ -163,6 +174,7 @@ private:
     Region<DIM> innerLowerGhostRegion;
     Region<DIM> outerUpperGhostRegion;
     Region<DIM> outerLowerGhostRegion;
+    Region<DIM> outerGhostRegion;
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
@@ -359,6 +371,7 @@ private:
         innerLowerGhostRegion = fillRegion(endRow - ghostHeightLower, endRow);
         outerUpperGhostRegion = fillRegion(startRow - ghostHeightUpper, startRow);
         outerLowerGhostRegion = fillRegion(endRow, endRow + ghostHeightLower);
+        outerGhostRegion = outerUpperGhostRegion + outerLowerGhostRegion;
     }
 
     /**

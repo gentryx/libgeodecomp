@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 #include <libgeodecomp/misc/testhelper.h>
@@ -34,6 +35,7 @@ class ParallelStripingSimulatorTest : public CxxTest::TestSuite
 {
 private:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
+    typedef TestSteerer<2 > TestSteererType;
 
     MonolithicSimulator<TestCell<2> > *referenceSim;
     StripingSimulator<TestCell<2> > *testSim;
@@ -400,6 +402,23 @@ public:
             rank? 0 : new RandomBalancer());
 
         s.run();
+    }
+
+    void testSteererFunctionality()
+    {
+        testSim->addSteerer(new TestSteererType(5, 25, 4711 * 27));
+        testSim->run();
+
+        const Region<2> *region;
+        const GridBaseType *grid;
+        testSim->getGridFragment(&grid, &region);
+        int cycle = 50 * 27 + 4711 * 27;
+
+        TS_ASSERT_TEST_GRID_REGION(
+            GridBaseType, 
+            *grid, 
+            *region, 
+            cycle);
     }
 
 private:
