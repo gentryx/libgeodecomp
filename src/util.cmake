@@ -54,11 +54,11 @@ function(generate_sourcelists relative_dir)
     endforeach(i)
 
     if(STRIPPED_SOURCES)
-      list(SORT STRIPPED_SOURCES ${STRIPPED_SOURCES})
+      list(SORT STRIPPED_SOURCES)
     endif(STRIPPED_SOURCES)
     
     if(STRIPPED_HEADERS)
-      list(SORT STRIPPED_HEADERS ${STRIPPED_HEADERS})
+      list(SORT STRIPPED_HEADERS)
     endif(STRIPPED_HEADERS)
 
     set(MY_AUTO "set(SOURCES \${SOURCES}\n")
