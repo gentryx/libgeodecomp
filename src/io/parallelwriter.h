@@ -37,12 +37,15 @@ public:
         const unsigned& _period = 1) : 
         prefix(_prefix), distSim(_distSim), period(_period)
     {
-        if (prefix == "") 
+        if (prefix == "") {
             throw std::invalid_argument("empty prefixes are forbidden");
-        if (period == 0) 
+        }
+        if (period == 0) {
             throw std::invalid_argument("period must be positive");
-        if (distSim)
+        }
+        if (distSim) {
             distSim->registerWriter(this);
+        }
     }
 
     virtual ~ParallelWriter() {};    
@@ -84,6 +87,6 @@ protected:
     unsigned period;
 };
 
-};
+}
 
 #endif

@@ -49,8 +49,9 @@ public:
 
     void tearDown()
     {
-        for (int i = 0; i < files.size(); ++i)          
+        for (int i = 0; i < files.size(); ++i) {
             boost::filesystem::remove(files[i]);
+        }
     }
 
     void testBasic()
