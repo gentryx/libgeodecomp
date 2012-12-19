@@ -1,7 +1,7 @@
 generate_sourcelists("./")
 add_subdirectory(ants)
 add_subdirectory(bouncingspheres)
-add_subdirectory(chromotography)
+add_subdirectory(chromatography)
 add_subdirectory(circle)
 add_subdirectory(gameoflife)
 add_subdirectory(hardwarefluke)
