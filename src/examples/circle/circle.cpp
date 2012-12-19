@@ -41,7 +41,7 @@ public:
     void update(const COORD_MAP& neighborhood, const unsigned&)
     {
         *this = neighborhood[Coord<2>(0, 0)];
-        switch(state) {
+        switch (state) {
         case LIQUID:
             updateLiquid(neighborhood);
             return;

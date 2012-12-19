@@ -207,7 +207,7 @@ public:
             // is the accumulated size of the first three quarters.
             unsigned accuSizes[4];
             accuSizes[0] = 0;
-            switch(form) {
+            switch (form) {
             case ENUM_PREFIX LL_TO_LR:
                 accuSizes[1] = lowerLeftQuarterSize;
                 accuSizes[2] = leftHalfSize;

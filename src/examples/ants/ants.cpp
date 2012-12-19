@@ -153,7 +153,7 @@ class CellToColor
 public:
     Color operator()(const Cell& cell)
     {
-        switch(cell.state) {
+        switch (cell.state) {
         case Cell::EMPTY:
             return Color::BLACK;
         case Cell::FOOD:

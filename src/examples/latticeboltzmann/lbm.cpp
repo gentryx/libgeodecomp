@@ -67,7 +67,7 @@ public:
     {
         *this = neighborhood[FixedCoord<0, 0>()];
 
-        switch(state) {
+        switch (state) {
         case LIQUID:
             updateFluid(neighborhood);
             break;
