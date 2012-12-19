@@ -142,15 +142,12 @@ public:
         TS_ASSERT_EQUALS(referenceSim->getStep(), 
                          testSim->getStep());
         
-        const Region<2> *region;
-        const GridBaseType *grid;
         int cycle = firstCycle;
 
-        testSim->getGridFragment(&grid, &region);
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe, 
+            testSim->region, 
             cycle);
 
         for (int i = 0; i < 40; i++) {
@@ -161,11 +158,10 @@ public:
             TS_ASSERT_EQUALS(referenceSim->getStep(), 
                              testSim->getStep());
 
-            testSim->getGridFragment(&grid, &region);
             TS_ASSERT_TEST_GRID_REGION(
                 GridBaseType, 
-                *grid, 
-                *region, 
+                *testSim->curStripe, 
+                testSim->region, 
                 cycle);
         }
     }
@@ -179,13 +175,12 @@ public:
 
         const Region<2> *region;
         const GridBaseType *grid;
-        testSim->getGridFragment(&grid, &region);
         int cycle = maxSteps * TestCell<2>::nanoSteps();
 
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe, 
+            testSim->region, 
             cycle);
     }
     
@@ -266,12 +261,11 @@ public:
         const Region<2> *region;
         const GridBaseType *grid;
         int cycle = maxSteps * TestCell<2>::nanoSteps();
-        testSim->getGridFragment(&grid, &region);
 
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe, 
+            testSim->region, 
             cycle);
         TS_ASSERT_EQUALS(testSim->partitions, weights2);
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
@@ -415,13 +409,12 @@ public:
 
         const Region<2> *region;
         const GridBaseType *grid;
-        testSim->getGridFragment(&grid, &region);
         int cycle = 50 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe,
+            testSim->region,
             cycle);
     }
 

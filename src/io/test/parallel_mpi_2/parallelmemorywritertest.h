@@ -20,13 +20,6 @@ public:
         DistributedSimulator<TestCell<2> >(init)
     {}
     
-    virtual void getGridFragment(
-        const GridType **grid, 
-        const Region<2> **validRegion) 
-    {
-        // intentionally left blank
-    }
-
     void setStep(const unsigned& step)
     {
         stepNum = step;

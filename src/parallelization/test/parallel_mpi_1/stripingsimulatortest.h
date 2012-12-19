@@ -14,7 +14,9 @@ using namespace LibGeoDecomp;
 namespace LibGeoDecomp {
 
 class BadBalancerSum : public LoadBalancer {
-    virtual NoOpBalancer::WeightVec balance(const NoOpBalancer::WeightVec& currentLoads, const NoOpBalancer::LoadVec&) {
+    virtual NoOpBalancer::WeightVec balance(
+        const NoOpBalancer::WeightVec& currentLoads, 
+        const NoOpBalancer::LoadVec&) {
         NoOpBalancer::WeightVec ret = currentLoads;
         ret[0]++;
         return ret;
@@ -22,7 +24,9 @@ class BadBalancerSum : public LoadBalancer {
 };
 
 class BadBalancerNum : public LoadBalancer {
-    virtual NoOpBalancer::WeightVec balance(const NoOpBalancer::WeightVec& currentLoads, const NoOpBalancer::LoadVec&) {
+    virtual NoOpBalancer::WeightVec balance(
+        const NoOpBalancer::WeightVec& currentLoads, 
+        const NoOpBalancer::LoadVec&) {
         NoOpBalancer::WeightVec ret = currentLoads;
         ret.push_back(45);
         return ret;
@@ -111,24 +115,19 @@ public:
 
     void testStep()
     {
-        const GridBaseType *grid;
-        const Region<2> *region;
-        
-        testSim->getGridFragment(&grid, &region);
         TS_ASSERT_EQUALS(referenceSim->getStep(), 
                          testSim->getStep());
-        TS_ASSERT(*(referenceSim->getGrid()) == *grid);
+        TS_ASSERT(*(referenceSim->getGrid()) == *testSim->curStripe);
 
         for (int i = 0; i < 50; i++) {
             referenceSim->step();
             testSim->step();
-            testSim->getGridFragment(&grid, &region);
             TS_ASSERT_EQUALS(referenceSim->getStep(), 
                              testSim->getStep());
             TS_ASSERT_EQUALS(referenceSim->getGrid()->getDimensions(), 
-                             grid->boundingBox().dimensions);
-            TS_ASSERT(*referenceSim->getGrid() == *grid);
-            TS_ASSERT_TEST_GRID(GridBaseType, *grid, 
+                             testSim->curStripe->getDimensions());
+            TS_ASSERT(*referenceSim->getGrid() == *testSim->curStripe);
+            TS_ASSERT_TEST_GRID(GridBaseType, *testSim->curStripe, 
                                 (i + 1) * TestCell<2>::nanoSteps());
         }        
     }
@@ -143,27 +142,19 @@ public:
     {
         testSim->run();
         referenceSim->run();
-        const GridBaseType *grid;
-        const Region<2> *region;
-        testSim->getGridFragment(&grid, &region);
         Grid<TestCell<2> > refGrid = *referenceSim->getGrid();
 
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
-        TS_ASSERT(refGrid == *grid);
+        TS_ASSERT(refGrid == *testSim->curStripe);
     }
 
     void testRunMustResetGridPriorToSimulation()
     {
-        const Region<2> *r;
-        const GridBaseType *g;
+        testSim->run();
+        int cycle1 = testSim->curStripe->at(Coord<2>(4, 4)).cycleCounter;
 
         testSim->run();
-        testSim->getGridFragment(&g, &r);
-        int cycle1 = g->at(Coord<2>(4, 4)).cycleCounter;
-
-        testSim->run();
-        testSim->getGridFragment(&g, &r);
-        int cycle2 = g->at(Coord<2>(4, 4)).cycleCounter;
+        int cycle2 = testSim->curStripe->at(Coord<2>(4, 4)).cycleCounter;
 
         TS_ASSERT_EQUALS(cycle1, cycle2);
     }

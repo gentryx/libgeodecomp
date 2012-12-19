@@ -130,14 +130,6 @@ public:
         handleOutput(WRITER_ALL_DONE);
     }
 
-    virtual void getGridFragment(
-        const GridBase<CELL_TYPE, DIM> **grid, 
-        const Region<DIM> **validRegion)
-    {
-        *grid = curStripe;
-        *validRegion = &region;
-    }
-
     inline const unsigned& getLoadBalancingPeriod() const
     {
         return loadBalancingPeriod;

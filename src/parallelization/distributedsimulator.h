@@ -24,15 +24,6 @@ public:
         Simulator<CELL_TYPE>(_initializer)
     {}
 
-    // fixme: this method is no longer required. purge it.
-    /**
-     * Returns the fragment of the current grid, which is available to
-     * the current instance.
-     */
-    virtual void getGridFragment(
-        const GridType **grid, 
-        const Region<Topology::DIMENSIONS> **validRegion) = 0;
-
     /**
      * register @a writer which will observe the simulation. The
      * DistributedSimulator will assume that it now owns the

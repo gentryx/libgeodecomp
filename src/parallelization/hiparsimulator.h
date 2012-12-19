@@ -76,13 +76,6 @@ public:
         nanoStep(CELL_TYPE::nanoSteps());
     }
 
-    virtual void getGridFragment(
-        const GridType **grid, 
-        const Region<DIM> **validRegion) 
-    {
-        throw std::logic_error("getGridFragment() not applicable to HiParSimulator");
-    }
-
     virtual unsigned getStep() const 
     {
         if (updateGroup) {
