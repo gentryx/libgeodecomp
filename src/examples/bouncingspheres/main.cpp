@@ -206,10 +206,13 @@ private:
             ++i;
         }
 
-        for (int i = 0; i < numSpheres; ++i)
+        for (int i = 0; i < numSpheres; ++i) {
             spheres[i].update(origin, hoodS, numS, hoodB, numB);
-        for (int i = 0; i < numBoundaries; ++i)
+        }
+
+        for (int i = 0; i < numBoundaries; ++i) {
             boundaries[i].update(hoodS, numS);
+        }
     }
 
     template<typename COORD_MAP>
@@ -238,53 +241,37 @@ void Boundary::update(
 {
     glow -= DELTA_T * 0.04;
 
-    if (glow < 0)
+    if (glow < 0) {
         glow = 0;
+    }
 
-    for (int i = 0; i < 27; ++i) 
-        for (int j = 0; j < numSpheres[i]; ++j) 
-            if (neighborSpheres[i][j].force(*this) != FloatCoord<3>())
+    for (int i = 0; i < 27; ++i) {
+        for (int j = 0; j < numSpheres[i]; ++j) {
+            if (neighborSpheres[i][j].force(*this) != FloatCoord<3>()) {
                 glow = 1;
+            }
+        }
+    }
 }
 
 class GasWriter : public Writer<Container>
 {
 public:
     GasWriter(
-        const std::string& _prefix,
-        MonolithicSimulator<Container> *_sim,
-        const unsigned _period = 1) :
-        Writer<Container>(_prefix, _sim, _period)
+        const std::string& prefix,
+        const unsigned period = 1) :
+        Writer<Container>(prefix, period)
     {}
 
-    virtual void initialized()
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
     {
-        writeStep();
-    }
-
-    virtual void stepFinished()
-    {        
-        writeStep();
-    }
-
-    virtual void allDone()
-    {
-        writeStep();
-    }
-
-private:
-    using Writer<Container>::sim;
-    using Writer<Container>::period;
-    using Writer<Container>::prefix;
-
-    void writeStep()
-    {
-        if (sim->getStep() % period != 0)
+        if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
+        }
 
         std::stringstream filename;
         filename << prefix << "_" << std::setfill('0') << std::setw(6) 
-                 << sim->getStep() << ".pov";
+                 << step << ".pov";
         std::ofstream file(filename.str().c_str());
 
         file << "#include \"colors.inc\"\n"
@@ -300,17 +287,23 @@ private:
              << "} \n"
              << "light_source { <20, 30, -30> color White}\n\n";
 
-        CoordBox<3> box = sim->getGrid()->boundingBox();
+        CoordBox<3> box = grid.boundingBox();
         for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            const Container& container = (*sim->getGrid())[*j];
+            const Container& container = grid[*j];
 
-            for (int i = 0; i < container.numSpheres; ++i) 
+            for (int i = 0; i < container.numSpheres; ++i) {
                 file << sphereToPOV(container.spheres[i]);
+            }
             
-            for (int i = 0; i < container.numBoundaries; ++i) 
+            for (int i = 0; i < container.numBoundaries; ++i) {
                 file << boundaryToPOV(container.boundaries[i]);
+            }
         }
     }
+
+private:
+    using Writer<Container>::period;
+    using Writer<Container>::prefix;
 
     std::string sphereToPOV(const Sphere& ball)
     {
@@ -328,8 +321,9 @@ private:
 
     std::string boundaryToPOV(const Boundary& tile)
     {
-        if (tile.glow == 0)
+        if (tile.glow == 0) {
             return "";
+        }
 
         FloatCoord<3> diag(BOUNDARY_DIM * 0.5,
                            BOUNDARY_DIM * 0.5,
@@ -405,28 +399,33 @@ public:
             // to overly reduncant code.
             
             // left boundary
-            if (j->x() == 0)
+            if (j->x() == 0) {
                 addBoundary(&container, center, FloatCoord<3>(1, 0, 0));
+            }
 
             // right boundary
             if (j->x() == (box.dimensions[0] - 1))
                 addBoundary(&container, center, FloatCoord<3>(-1, 0, 0));
 
             // lower boundary
-            if (j->y() == 0)
+            if (j->y() == 0) {
                 addBoundary(&container, center, FloatCoord<3>(0, 1, 0));
+            }
 
             // upper boundary
-            if (j->y() == (box.dimensions[1] - 1))
+            if (j->y() == (box.dimensions[1] - 1)) {
                 addBoundary(&container, center, FloatCoord<3>(0, -1, 0));
+            }
 
             // front boundary
-            if (j->z() == 0)
+            if (j->z() == 0) {
                 addBoundary(&container, center, FloatCoord<3>(0, 0, 1));
+            }
 
             // rear boundary
-            if (j->z() == (box.dimensions[2] - 1))
+            if (j->z() == (box.dimensions[2] - 1)) {
                 addBoundary(&container, center, FloatCoord<3>(0, 0, -1));
+            }
 
             target->at(*j) = container;
         }
@@ -450,10 +449,10 @@ int main(int argc, char **argv)
         new GasInitializer(
             Coord<3>(10, 10, 10), 
             40000));
-    new GasWriter(
-        "sim",
-        &sim,
-        200);
+    sim.addWriter(
+        new GasWriter(
+            "sim",
+            200));
                            
     sim.run();
 

@@ -158,14 +158,18 @@ public:
 void runSimulation()
 {
     int outputFrequency = 1;
-    SerialSimulator<CircleCell> sim(new CircleCellInitializer());
-    new PPMWriter<CircleCell, SimpleCellPlotter<CircleCell, CellToColor> >(
-        "./circle", 
-        &sim,
-        outputFrequency,
-        8,
-        8);
-    new TracingWriter<CircleCell>(&sim, 1);
+    CircleCellInitializer *init = new CircleCellInitializer();
+    SerialSimulator<CircleCell> sim(init);
+    sim.addWriter(
+        new PPMWriter<CircleCell, SimpleCellPlotter<CircleCell, CellToColor> >(
+            "./circle", 
+            outputFrequency,
+            8,
+            8));
+    sim.addWriter(
+        new TracingWriter<CircleCell>(
+            1, 
+            init->maxSteps()));
 
     sim.run();
 }

@@ -149,24 +149,22 @@ public:
 void runSimulation()
 {
     int outputFrequency = 1;
-
+    CellInitializer *init = new CellInitializer();
+    
     StripingSimulator<ConwayCell> sim(
-        new CellInitializer(),
+        init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()), 
         10, 
         MPI::BOOL); 
-    new BOVWriter<ConwayCell, StateSelector>("game", &sim, outputFrequency);
 
-    // SerialSimulator<ConwayCell> sim(
-    //     new CellInitializer());
-    // new PPMWriter<ConwayCell, SimpleCellPlotter<ConwayCell, CellToColor> >(
-    //     "./gameoflife", 
-    //     &sim,
-    //     outputFrequency,
-    //     12,
-    //     12);
-
-    new TracingWriter<ConwayCell>(&sim, 1);
+    sim.addWriter(
+        new BOVWriter<ConwayCell, StateSelector>(
+            "game", 
+            outputFrequency));
+    sim.addWriter(
+        new TracingWriter<ConwayCell>(
+            1,
+            init->maxSteps()));
 
     sim.run();
 }

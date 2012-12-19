@@ -490,18 +490,38 @@ int main(int argc, char *argv[])
     objType.Commit();
 
     {
+        AeroInitializer *init = new AeroInitializer(
+            Coord<2>(MAX_X, MAX_Y), 
+            100000);
+
         StripingSimulator<Cell> sim(
-            new AeroInitializer(
-                Coord<2>(MAX_X, MAX_Y), 
-                100000),
+            init,
             MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
             1000, 
             objType); 
-        new ParallelMPIIOWriter<Cell>("snapshot", &sim, 6000, MPI::COMM_WORLD, objType);
-        new BOVWriter<Cell, QuantitySelector>("wing.quantity", &sim, 50);
-        new BOVWriter<Cell, VelocitySelector>("wing.velocity", &sim, 50);
-        if (MPILayer().rank() == 0)
-            new TracingWriter<Cell>(&sim, 200);
+
+        sim.addWriter(
+            new ParallelMPIIOWriter<Cell>(
+                "snapshot", 
+                6000, 
+                init->maxSteps(), 
+                MPI::COMM_WORLD, 
+                objType));
+
+        sim.addWriter(
+            new BOVWriter<Cell, QuantitySelector>(
+                "wing.quantity", 50));
+
+        sim.addWriter(
+            new BOVWriter<Cell, VelocitySelector>(
+                "wing.velocity", 50));
+
+        if (MPILayer().rank() == 0) {
+            sim.addWriter(
+                new TracingWriter<Cell>(
+                    200, init->maxSteps()));
+        }
+
         sim.run();
     }
     

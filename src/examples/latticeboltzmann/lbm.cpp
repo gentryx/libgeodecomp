@@ -346,17 +346,25 @@ void runSimulation()
     objType.Commit();
 
     int outputFrequency = 1000;
+    CellInitializer *init = new CellInitializer(Coord<3>(400, 400, 400), 2000000);
+
     StripingSimulator<Cell> sim(
-        new CellInitializer(Coord<3>(400, 400, 400), 2000000),
+        init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
         1000000,
         objType);
 
-    new BOVWriter<Cell, DensitySelector>("lbm.density", &sim, outputFrequency);
-    new BOVWriter<Cell, VelocitySelector>("lbm.velocity", &sim, outputFrequency);
+    sim.addWriter(
+        new BOVWriter<Cell, DensitySelector>("lbm.density", outputFrequency));
+    sim.addWriter(
+        new BOVWriter<Cell, VelocitySelector>("lbm.velocity", outputFrequency));
 
-    if (MPILayer().rank() == 0)
-        new TracingWriter<Cell>(&sim, 20);
+    if (MPILayer().rank() == 0) {
+        sim.addWriter(
+            new TracingWriter<Cell>(
+                20, 
+                init->maxSteps()));
+    }
 
     sim.run();
 }

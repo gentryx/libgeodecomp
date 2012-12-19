@@ -78,15 +78,18 @@ void runSimulation()
     int outputFrequency = 100;
     int factor = pow(MPILayer().size(), 1.0 / 3.0);
 
+    CellInitializer *init = new CellInitializer(factor);
+    
     HiParSimulator::HiParSimulator<Cell, HiParSimulator::RecursiveBisectionPartition<3> > sim(
-        new CellInitializer(factor),
+        init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
         1000,
         1, 
         MPI::DOUBLE);
 
     if (MPILayer().rank() == 0) {
-        new TracingWriter<Cell>(&sim, outputFrequency);
+        sim.addWriter(
+            new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
     }
 
     sim.run();

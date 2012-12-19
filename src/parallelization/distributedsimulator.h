@@ -24,6 +24,7 @@ public:
         Simulator<CELL_TYPE>(_initializer)
     {}
 
+    // fixme: this method is no longer required. purge it.
     /**
      * Returns the fragment of the current grid, which is available to
      * the current instance.
