@@ -207,41 +207,6 @@ public:
         return dimensions;
     }
   
-    inline std::string diff(const Grid& other) const
-    {
-        if (boundingBox() != other.boundingBox()) {
-            std::ostringstream message;
-            message << 
-                "dimensions mismatch (is (" << boundingBox() << 
-                "), got (" << other.boundingBox() << "))";
-            return message.str();
-        }
-
-        std::ostringstream message;
-        if (edgeCell != other.edgeCell) {
-            message << "\nedge cell differs (self (" << edgeCell 
-                    << "), other (" << other.edgeCell << "))\n";
-        }
-
-        CoordBox<DIM> box = boundingBox();
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            if ((*this)[*i] != other[*i]) {
-                message << "\nat coordinate " << *i << "\n" <<
-                    "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-                    (*this)[*i] <<
-                    "========================================\n" <<
-                    other[*i] << 
-                    ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-            }
-        }
-
-        if (message.str() != "") 
-            return "cell differences:\n" + message.str();
-        else 
-            return "";
-    }
-
-
     inline std::string toString() const
     {
         std::ostringstream message;
@@ -262,7 +227,6 @@ public:
     {
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
     }
-
 
 private:
     Coord<DIM> dimensions;
