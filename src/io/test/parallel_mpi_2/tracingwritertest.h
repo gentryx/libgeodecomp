@@ -31,7 +31,10 @@ public:
     void testOutputToStream()
     {
         std::ostringstream output;
-        new TracingWriter<TestCell<2> >(simulator, 1, output);
+        simulator->addWriter(
+            new TracingWriter<TestCell<2> >(
+                1, simulator->getInitializer()->maxSteps(), output));
+
         simulator->run();
 
         // collect some substrings we expect the output to contain

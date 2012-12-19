@@ -46,8 +46,10 @@ public:
                     new MockBalancer(), 
                     loadBalancingPeriod, 
                     ghostZoneWidth));
-        mockWriter = new MockWriter(&*s);
-        memoryWriter = new MemoryWriterType(&*s, outputPeriod);
+        mockWriter = new MockWriter();
+        memoryWriter = new MemoryWriterType(outputPeriod);
+        s->addWriter(mockWriter);
+        s->addWriter(memoryWriter);
     }
 
     void tearDown()

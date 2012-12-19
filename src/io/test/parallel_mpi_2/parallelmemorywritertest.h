@@ -24,16 +24,7 @@ public:
         const GridType **grid, 
         const Region<2> **validRegion) 
     {
-        *grid = myGrid;
-        *validRegion = myRegion;
-    }
-
-    void setGridFragment(        
-        const GridType *newGrid, 
-        const Region<2> *newValidRegion) 
-    {
-        myGrid = newGrid;
-        myRegion = newValidRegion;
+        // intentionally left blank
     }
 
     void setStep(const unsigned& step)
@@ -46,9 +37,6 @@ public:
 
     virtual void run() 
     {}
-
-    const GridType *myGrid;
-    const Region<2> *myRegion;
 };
 
 class ParallelMemoryWriterTest :  public CxxTest::TestSuite 
@@ -61,7 +49,8 @@ public:
         dim = Coord<2>(10, 13);
         init = new TestInitializer<TestCell<2> >(dim);
         sim.reset(new MockSim(init));
-        writer = new ParallelMemoryWriter<TestCell<2> >(&*sim);
+        writer = new ParallelMemoryWriter<TestCell<2> >();
+        sim->addWriter(writer);
     }
 
     void tearDown()
@@ -87,8 +76,13 @@ public:
 
         for (int i = 0; i < 2; ++i) {
             int index = MPILayer().rank() * 2 + i;
-            sim->setGridFragment(&grid, &stripes[index]);
-            writer->stepFinished();        
+            writer->stepFinished(
+                grid, 
+                stripes[index], 
+                grid.getDimensions(), 
+                sim->getStep(), 
+                WRITER_STEP_FINISHED, 
+                true); 
         }
 
         TS_ASSERT_EQUALS(writer->getGrid(  0).getDimensions(), dim);
@@ -103,8 +97,13 @@ public:
 
         for (int i = 0; i < 2; ++i) {
             int index = MPILayer().rank() + i * 2;
-            sim->setGridFragment(&grid, &stripes[index]);
-            writer->stepFinished();        
+            writer->stepFinished(
+                grid, 
+                stripes[index], 
+                grid.getDimensions(), 
+                sim->getStep(), 
+                WRITER_STEP_FINISHED, 
+                true); 
         }
 
         TS_ASSERT_EQUALS(writer->getGrids()[  0].getDimensions(), dim);

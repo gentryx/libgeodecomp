@@ -77,15 +77,17 @@ public:
     
     void testRegisterWriter()
     {
-        MockWriter *w = new MockWriter(&*simulator);
+        MockWriter *w = new MockWriter();
+        simulator->addWriter(w);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
-        TS_ASSERT_EQUALS((unsigned)1, writers.size());
+        TS_ASSERT_EQUALS(1, writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
     }
 
     void testSerialSimulatorShouldCallBackWriter()
     {
-        MockWriter *w = new MockWriter(&*simulator, 3);
+        MockWriter *w = new MockWriter(3);
+        simulator->addWriter(w);
         simulator->run();
         
         std::string expectedEvents = "initialized()\n";
@@ -100,16 +102,21 @@ public:
 
     void testRunMustResetGridPriorToSimulation()
     {
-        MockWriter *eventWriter1 = new MockWriter(&*simulator);
+        MockWriter *eventWriter1 = new MockWriter();
         MemoryWriter<TestCell<2> > *gridWriter1 = 
-            new MemoryWriter<TestCell<2> >(&*simulator);
+            new MemoryWriter<TestCell<2> >();
+        simulator->addWriter(eventWriter1);
+        simulator->addWriter(gridWriter1);
+
         simulator->run();
         std::string events1 = eventWriter1->events();
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
-        MockWriter *eventWriter2 = new MockWriter(&*simulator);
+        MockWriter *eventWriter2 = new MockWriter();
         MemoryWriter<TestCell<2> > *gridWriter2 = 
-            new MemoryWriter<TestCell<2> >(&*simulator);
+            new MemoryWriter<TestCell<2> >();
+        simulator->addWriter(eventWriter2);
+        simulator->addWriter(gridWriter2);
         simulator->run();
         std::string events2 = eventWriter2->events();
         std::vector<Grid<TestCell<2> > > grids2 = gridWriter2->getGrids();

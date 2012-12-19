@@ -50,7 +50,8 @@ public:
 
     void testWriteASCII()
     {
-        new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, simulator);
+        simulator->addWriter(
+            new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile));
         simulator->run();
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
@@ -74,15 +75,17 @@ public:
 
     void testWriteASCIIEveryN()
     {
-        int everyN = 2;
-        new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, simulator, everyN);
+        int period = 2;
+        simulator->addWriter(
+            new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, period));
+        
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
             filename << tempFile << "." << std::setfill('0') << std::setw(4)
                      << i << ".ascii";
-            if (i % everyN == 0) {
+            if (i % period == 0) {
                 TS_ASSERT_FILE(filename.str());
             } else {
                 TS_ASSERT_NO_FILE(filename.str());
@@ -92,12 +95,13 @@ public:
 
     void testFileOpenError()
     {
-        std::string path("/non/existent/path/prefix");
+        std::string path("/non/existent/path/prefix2");
         std::string expectedErrorMessage("Could not open file " + path);
         ASCIIWriter<TestCell<2>, TestValueSelector> *writer = 
-            new ASCIIWriter<TestCell<2>, TestValueSelector>(path, simulator);
+            new ASCIIWriter<TestCell<2>, TestValueSelector>(path);
+        simulator->addWriter(writer);
         TS_ASSERT_THROWS_ASSERT(
-            writer->initialized(),
+            writer->stepFinished(*simulator->getGrid(), simulator->getStep(), WRITER_INITIALIZED),
             FileOpenException& exception, 
             TS_ASSERT_SAME_DATA(
                 expectedErrorMessage.c_str(), 

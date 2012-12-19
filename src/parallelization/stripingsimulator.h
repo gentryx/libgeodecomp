@@ -101,8 +101,7 @@ public:
         waitForGhostRegions();
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(curStripe, outerGhostRegion, stepNum);
-                steerers[i]->nextStep(curStripe, region, stepNum);
+                steerers[i]->nextStep(curStripe, regionWithOuterGhosts, stepNum);
             }
         }
 
@@ -110,7 +109,8 @@ public:
             nanoStep(i);
         }
         stepNum++;    
-        handleOutput();
+
+        handleOutput(WRITER_STEP_FINISHED);
     }
 
     /**
@@ -121,17 +121,13 @@ public:
         initSimulation();
 
         stepNum = initializer->startStep();
-        for (unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->initialized();
-        }
+        handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
             step();
         }
     
-        for (unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->allDone();        
-        }
+        handleOutput(WRITER_ALL_DONE);
     }
 
     virtual void getGridFragment(
@@ -174,7 +170,7 @@ private:
     Region<DIM> innerLowerGhostRegion;
     Region<DIM> outerUpperGhostRegion;
     Region<DIM> outerLowerGhostRegion;
-    Region<DIM> outerGhostRegion;
+    Region<DIM> regionWithOuterGhosts;
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
@@ -255,10 +251,16 @@ private:
         mpilayer.wait(GHOSTREGION_BETA);
     }
 
-    void handleOutput()
+    void handleOutput(WriterEvent event)
     {
         for(unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->stepFinished();
+            writers[i]->stepFinished(
+                *curStripe,
+                region,
+                gridDimensions(),
+                this->getStep(),
+                event, 
+                true);
         }
     }
 
@@ -371,7 +373,7 @@ private:
         innerLowerGhostRegion = fillRegion(endRow - ghostHeightLower, endRow);
         outerUpperGhostRegion = fillRegion(startRow - ghostHeightUpper, startRow);
         outerLowerGhostRegion = fillRegion(endRow, endRow + ghostHeightLower);
-        outerGhostRegion = outerUpperGhostRegion + outerLowerGhostRegion;
+        regionWithOuterGhosts = outerUpperGhostRegion + region + outerLowerGhostRegion;
     }
 
     /**

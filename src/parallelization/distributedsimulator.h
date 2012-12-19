@@ -39,7 +39,7 @@ public:
      *
      * fixme: replace @a by \a and @return by \returns ...
      */
-    virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
+    virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         writers << boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer);
     }

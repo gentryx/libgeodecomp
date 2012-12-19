@@ -3,7 +3,6 @@
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supervector.h>
-#include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
@@ -17,50 +16,34 @@ class MemoryWriter : public Writer<CELL_TYPE>
 {
 
 public:
-    typedef typename Simulator<CELL_TYPE>::GridType GridType;
-
+    typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
-    using Writer<CELL_TYPE>::sim;
 
-    MemoryWriter(MonolithicSimulator<CELL_TYPE>* sim, int period = 1) : 
-        Writer<CELL_TYPE>("foobar", sim, period) 
+    MemoryWriter(unsigned period = 1) : 
+        Writer<CELL_TYPE>("foobar", period) 
     {}
     
-    void initialized()
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
     {
-        saveGrid(); 
-    }
-
-    void stepFinished()
-    {
-        if ((sim->getStep() % period) == 0) {
-            saveGrid();
+        if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
+            return;
         }
+
+        grids.push_back(grid);
     }
-    
+        
     GridType& getGrid(int i)
     {
         return grids[i];
     }
 
-    void allDone() 
-    { 
-        saveGrid(); 
-    }
-    
     SuperVector<GridType> getGrids()
     {
         return grids;
     }
 
 private:
-
     SuperVector<GridType> grids;
-
-    void saveGrid()
-    {
-        grids.push_back(*(sim->getGrid()));
-    }
 };
 
 }

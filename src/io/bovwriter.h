@@ -27,71 +27,48 @@ public:
 
     static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
 
-    using ParallelWriter<CELL_TYPE>::distSim;
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;
 
     BOVWriter(
         const std::string& prefix, 
-        DistributedSimulator<CELL_TYPE> *sim, 
-        const unsigned& period, 
+        const unsigned period, 
         const Coord<3>& brickletDim = Coord<3>(),
         const MPI::Intracomm& communicator = MPI::COMM_WORLD,
         MPI::Datatype mpiDatatype = Typemaps::lookup<VariableType>()) :
-        ParallelWriter<CELL_TYPE>(prefix, sim, period),
+        ParallelWriter<CELL_TYPE>(prefix, period),
+        brickletDim(brickletDim),
         comm(communicator),
         datatype(mpiDatatype)
+    {}
+
+    virtual void stepFinished(
+        const typename ParallelWriter<CELL_TYPE>::GridType& grid, 
+        const Region<Topology::DIMENSIONS>& validRegion, 
+        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        unsigned step, 
+        WriterEvent event, 
+        bool lastCall)
     {
-        // BOV only accepts 3D data, so we'll have to inflate 1D and
-        // 2D dimensions.
-        Coord<DIM> c = distSim->getInitializer()->gridDimensions();
-        Coord<3> initDim = Coord<3>::diagonal(1);
-        for (int i = 0; i < DIM; ++i) {
-            initDim[i] = c[i]; 
+        if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
+            return;
         }
-        bricDim = (brickletDim == Coord<3>()) ? initDim : brickletDim;
+    
+        writeHeader(step, globalDimensions);
+        writeRegion(step, globalDimensions, grid, validRegion);
     }
 
-    virtual void initialized() 
-    {
-        writeGrid();
-    }
-
-    virtual void stepFinished()
-    {
-        if ((distSim->getStep() % period) == 0) {
-            writeGrid();
-        }
-    }
-
-    virtual void allDone()
-    {
-        writeGrid();
-    }
 
 private:
+    Coord<3> brickletDim;
     MPI::Intracomm comm;
     MPI::Datatype datatype;
-    Coord<3> bricDim;
 
     std::string filename(const unsigned& step, const std::string& suffix) const 
     {
         std::ostringstream buf;
         buf << prefix << "." << std::setfill('0') << std::setw(5) << step << "." << suffix;
         return buf.str();
-    }
-
-    void writeGrid()
-    {
-        const Region<DIM> *region;
-        const typename DistributedSimulator<CELL_TYPE>::GridType *grid;
-        distSim->getGridFragment(&grid, &region);
-        unsigned step = distSim->getStep();
-        Coord<DIM> dimensions = 
-            distSim->getInitializer()->gridDimensions();
-
-        writeHeader(step, dimensions);
-        writeRegion(step, dimensions, grid, *region);
     }
 
     void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
@@ -102,11 +79,13 @@ private:
         if (comm.Get_rank() == 0) {
             // BOV only accepts 3D data, so we'll have to inflate 1D
             // and 2D dimensions.
-            Coord<DIM> c = distSim->getInitializer()->gridDimensions();
+            Coord<DIM> c = dimensions;
             Coord<3> bovDim = Coord<3>::diagonal(1);
             for (int i = 0; i < DIM; ++i) {
                 bovDim[i] = c[i]; 
             }
+
+            Coord<3> bricDim = (brickletDim == Coord<3>()) ? bovDim : brickletDim;
 
             std::ostringstream buf;
             buf << "TIME: " << step << "\n"
@@ -134,7 +113,7 @@ private:
     void writeRegion(
         const unsigned& step, 
         const Coord<DIM>& dimensions, 
-        GRID_TYPE *grid, 
+        const GRID_TYPE& grid, 
         const Region<DIM>& region)
     {
         MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
@@ -162,7 +141,7 @@ private:
             }
 
             for (int i = 0; i < effectiveLength; i += dataComponents) {
-                SELECTOR_TYPE()(grid->at(walker), &buffer[i]);
+                SELECTOR_TYPE()(grid.at(walker), &buffer[i]);
                 walker.x()++;
             }
             file.Write(&buffer[0], effectiveLength, datatype);

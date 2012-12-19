@@ -191,8 +191,11 @@ public:
     
     void checkRunAndWriterInteraction(int everyN)
     {
-        MockWriter *expectedCalls = new MockWriter(referenceSim);
-        MockWriter *actualCalls = new MockWriter(testSim);
+        MockWriter *expectedCalls = new MockWriter();
+        MockWriter *actualCalls = new MockWriter();
+
+        referenceSim->addWriter(expectedCalls);
+        testSim->addWriter(actualCalls);
 
         testSim->run();
         referenceSim->run();
@@ -332,8 +335,10 @@ public:
             balancer, 
             balanceEveryN);
 
-        MockWriter *expectedCalls = new MockWriter(referenceSim);
-        MockWriter *actualCalls = new MockWriter(&localTestSim);
+        MockWriter *expectedCalls = new MockWriter();
+        MockWriter *actualCalls = new MockWriter();
+        referenceSim->addWriter(expectedCalls);
+        localTestSim.addWriter(actualCalls);
 
         localTestSim.run();
         referenceSim->run();

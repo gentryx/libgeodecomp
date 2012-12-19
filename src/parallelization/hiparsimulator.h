@@ -23,7 +23,7 @@ typedef SuperMap<long, EventSet> EventMap;
 
 inline std::string eventToStr(const EventPoint& event) 
 {
-    switch(event) {
+    switch (event) {
     case LOAD_BALANCING:
         return "LOAD_BALANCING";
     case END:
@@ -80,20 +80,7 @@ public:
         const GridType **grid, 
         const Region<DIM> **validRegion) 
     {
-        *grid = currentGrid;
-        *validRegion = currentValidRegion;
-    }
-
-    /**
-     * Since HiParSimulator doesn't store any Grid fragments on its
-     * own, external objects need to configure the pointers.
-     */
-    virtual void setGridFragment(
-        const GridType *grid,
-        const Region<DIM> *validRegion)
-    {
-        currentGrid = grid;
-        currentValidRegion = validRegion;
+        throw std::logic_error("getGridFragment() not applicable to HiParSimulator");
     }
 
     virtual unsigned getStep() const 
@@ -120,9 +107,9 @@ public:
         steererAdaptersInner.push_back(adapterInnerSet);
     }
 
-    virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
+    virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
-        DistributedSimulator<CELL_TYPE>::registerWriter(writer);
+        DistributedSimulator<CELL_TYPE>::addWriter(writer);
 
         // we need two adapters as each ParallelWriter needs to be
         // notified twice: once for the (inner) ghost zone, and once
@@ -132,13 +119,17 @@ public:
                 this,
                 writers.back(),
                 initializer->startStep(),
-                initializer->maxSteps()));
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
                 this, 
                 writers.back(),
                 initializer->startStep(),
-                initializer->maxSteps()));
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                true));
 
         writerAdaptersGhost.push_back(adapterGhost);
         writerAdaptersInner.push_back(adapterInnerSet);
@@ -161,8 +152,6 @@ private:
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
-    const GridType *currentGrid;
-    const Region<DIM> *currentValidRegion;
 
     SuperVector<long> initialWeights(const long& items, const long& size) const
     {    

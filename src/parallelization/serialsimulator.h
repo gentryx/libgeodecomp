@@ -68,7 +68,10 @@ public:
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {
             if (stepNum % writers[i]->getPeriod() == 0) {
-                writers[i]->stepFinished();
+                writers[i]->stepFinished(
+                    *getGrid(),
+                    getStep(),
+                    WRITER_STEP_FINISHED);
             }
         }
     }
@@ -81,7 +84,10 @@ public:
         initializer->grid(curGrid);
         stepNum = 0;
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->initialized();
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_INITIALIZED);
         }
 
         for (stepNum = initializer->startStep(); 
@@ -90,7 +96,10 @@ public:
         }
 
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->allDone();        
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_ALL_DONE);
         }
     }
 
@@ -107,6 +116,7 @@ protected:
     using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
     using MonolithicSimulator<CELL_TYPE>::writers;
+    using MonolithicSimulator<CELL_TYPE>::getStep;
 
     GridType *curGrid;
     GridType *newGrid;
