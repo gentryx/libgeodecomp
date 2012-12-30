@@ -86,7 +86,7 @@ private:
     unsigned step1;
 };
 
-};
+}
 
 #endif
 #endif

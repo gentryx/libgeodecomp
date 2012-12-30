@@ -28,32 +28,38 @@ public:
             CoordBox<2>(Coord<2>(40, 60), Coord<2>( 30,  30)), -5);
 
         Region<2> innerSquare;
-        for (int i = 70; i < 80; ++i)
-            innerSquare << Streak<2>(Coord<2>(50, i), 60);
         Region<2> outerSquare;
-        for (int i = 60; i < 90; ++i)
+        for (int i = 70; i < 80; ++i) {
+            innerSquare << Streak<2>(Coord<2>(50, i), 60);
+        }
+        for (int i = 60; i < 90; ++i) {
             outerSquare << Streak<2>(Coord<2>(40, i), 70);
+        }
+
         Region<2> outerRing = outerSquare - innerSquare;
 
-        for (Region<2>::Iterator i = outerSquare.begin(); 
-             i != outerSquare.end(); ++i) 
+        for (Region<2>::Iterator i = outerSquare.begin(); i != outerSquare.end(); ++i) {
             TS_ASSERT_EQUALS(-1.23, target[*i]);
+        }
 
         target.paste(source, innerSquare);
-        for (Region<2>::Iterator i = outerRing.begin(); 
-             i != outerRing.end(); ++i)
+
+        for (Region<2>::Iterator i = outerRing.begin(); i != outerRing.end(); ++i) {
             TS_ASSERT_EQUALS(-1.23, target[*i]);
-        for (Region<2>::Iterator i = innerSquare.begin(); 
-             i != innerSquare.end(); ++i)
+        }
+        for (Region<2>::Iterator i = innerSquare.begin(); i != innerSquare.end(); ++i) {
             TS_ASSERT_EQUALS(47.11, target[*i]);
+        }
 
         target2.pasteGridBase(target, outerRing);
-        for (Region<2>::Iterator i = outerRing.begin(); 
-             i != outerRing.end(); ++i)
+
+        for (Region<2>::Iterator i = outerRing.begin(); i != outerRing.end(); ++i) {
             TS_ASSERT_EQUALS(-1.23, target2[*i]);
-        for (Region<2>::Iterator i = innerSquare.begin(); 
-             i != innerSquare.end(); ++i)
+        }
+
+        for (Region<2>::Iterator i = innerSquare.begin(); i != innerSquare.end(); ++i) {
             TS_ASSERT_EQUALS(-5, target2[*i]);
+        }
     }
 
     void testResize()

@@ -37,7 +37,7 @@ public:
         return grids[i];
     }
 
-    SuperVector<GridType> getGrids()
+    SuperVector<GridType>& getGrids()
     {
         return grids;
     }
