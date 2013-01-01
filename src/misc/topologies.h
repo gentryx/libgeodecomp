@@ -125,7 +125,15 @@ public:
             const COORD& coord, 
             const COORD& dimensions) const
         {
-            return (dimensions[DIM] + coord[DIM]) % dimensions[DIM];
+            if (coord[DIM] < 0) {
+                return coord[DIM] + dimensions[DIM];
+            }
+
+            if (coord[DIM] >= dimensions[DIM]) {
+                return coord[DIM] - dimensions[DIM];
+            }
+
+            return coord[DIM];
         }
     };
 
