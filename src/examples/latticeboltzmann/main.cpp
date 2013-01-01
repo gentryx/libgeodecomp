@@ -13,7 +13,6 @@
 
 using namespace LibGeoDecomp;
 
-//fixme: rename this to lid driven cavity?
 class Cell
 {
 public:
@@ -57,8 +56,9 @@ public:
         state(s)
     {
         comp[C] = v;
-        for (int i = 1; i < 19; ++i)
+        for (int i = 1; i < 19; ++i) {
             comp[i] = 0.0;
+        }
         density = 1.0;
     }  
 
