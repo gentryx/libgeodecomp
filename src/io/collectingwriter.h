@@ -28,11 +28,13 @@ public:
         Writer<CELL_TYPE> *writer,
         const unsigned period = 1,
         const int root = 0,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) : 
+        MPI::Comm *communicator = &MPI::COMM_WORLD,
+        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) : 
         ParallelWriter<CELL_TYPE>("foo",  period),
         writer(writer),
         mpiLayer(communicator),
-        root(root)
+        root(root),
+        datatype(mpiDatatype)
     {
         if ((mpiLayer.rank() != root) && (writer != 0)) {
             throw std::invalid_argument("can't call back a writer on a node other than the root");
@@ -71,7 +73,7 @@ public:
                         recvRegion, 
                         sender, 
                         MPILayer::PARALLEL_MEMORY_WRITER, 
-                        Typemaps::lookup<CELL_TYPE>());                    
+                        datatype);                    
                 }
                 if (mpiLayer.rank() == sender) {
                     if (sender == mpiLayer.rank()) {
@@ -81,7 +83,7 @@ public:
                             validRegion, 
                             root, 
                             MPILayer::PARALLEL_MEMORY_WRITER, 
-                            Typemaps::lookup<CELL_TYPE>());
+                            datatype);
                     }
                 }
             }
@@ -99,6 +101,7 @@ private:
     MPILayer mpiLayer;
     int root;
     StorageGridType globalGrid;    
+    MPI::Datatype datatype;
 };
 
 }
