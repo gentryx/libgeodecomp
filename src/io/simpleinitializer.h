@@ -37,6 +37,6 @@ protected:
     unsigned steps;
 };
 
-};
+}
 
 #endif
