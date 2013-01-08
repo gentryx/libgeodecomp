@@ -41,8 +41,10 @@ public:
         // deallocation, we store it directly in front of the aligned
         // array's start. Ugly, but it works.
         char *chunk = std::allocator<char>().allocate(upsize(n));
-        if (chunk == 0)
+        if (chunk == 0) {
             return (pointer)chunk;
+        }
+
         size_type offset = (size_type)chunk % ALIGNMENT;
         size_type correction = ALIGNMENT - offset;
         if (correction < sizeof(char*))
@@ -54,8 +56,10 @@ public:
 
     void deallocate(pointer p, size_type n)
     {
-        if (p == 0)
+        if (p == 0) {
             return;
+        }
+
         char *actual;
         // retrieve the original pointer which sits in front of its
         // aligned brother
