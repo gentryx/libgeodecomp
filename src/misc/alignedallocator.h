@@ -1,7 +1,11 @@
 #ifndef _libgeodecomp_misc_alignedallocator_h_
 #define _libgeodecomp_misc_alignedallocator_h_
 
+#ifdef __APPLE__
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 
 namespace LibGeoDecomp {
 
