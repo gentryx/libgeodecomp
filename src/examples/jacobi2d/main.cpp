@@ -26,7 +26,8 @@ public:
         return 1; 
     }
 
-    inline Cell(const double& v=0) : temp(v)
+    inline Cell(const double& v = 0) : 
+        temp(v)
     {}  
 
     template<typename COORD_MAP>
@@ -57,8 +58,9 @@ public:
         for (int y = 0; y < 250; ++y) {
             for (int x = 0; x < 250; ++x) {
                 Coord<2> c(x + offsetX, y + offsetY);
-                if (rect.inBounds(c))
+                if (rect.inBounds(c)) {
                     ret->at(c) = Cell(0.99999999999);
+                }
             }
         }
     }
@@ -68,16 +70,21 @@ class CellToColor {
 public:
     Color operator()(const Cell& cell)
     {
-        if (cell.temp < 0)
+        if (cell.temp < 0) {
             return Color(0, 0, 0);
-        if (cell.temp < 0.25)
+        }
+        if (cell.temp < 0.25) {
             return Color(0, (cell.temp - 0.0) * 1020, 255);
-        if (cell.temp < 0.50)
+        }
+        if (cell.temp < 0.50) {
             return Color(0, 255, 255 - (cell.temp - 0.25) * 1020);
-        if (cell.temp < 0.75)
+        }
+        if (cell.temp < 0.75) {
             return Color((cell.temp - 0.5) * 1020, 255, 0);
-        if (cell.temp < 1.00)
+        }
+        if (cell.temp < 1.00) {
             return Color(255, 255 - (cell.temp - 0.75) * 1020, 0);
+        }
         return Color(255, 255, 255);
     }
 };
