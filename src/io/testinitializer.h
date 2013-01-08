@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef _libgeodecomp_io_testinitializer_h_
 #define _libgeodecomp_io_testinitializer_h_
 
@@ -88,5 +86,4 @@ private:
 
 }
 
-#endif
 #endif
