@@ -1,9 +1,89 @@
+#include <cmath>
 #include <emmintrin.h>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
 
 using namespace LibGeoDecomp;
+
+class JacobiCellSimple
+{
+public:
+    typedef Stencils::VonNeumann<3, 1> Stencil;
+    typedef Topologies::Cube<3>::Topology Topology;
+  
+    class API : public CellAPITraits::Fixed
+    {};
+
+    JacobiCellSimple(double t = 0) :
+        temp(t)
+    {}
+
+    static int nanoSteps()
+    {
+        return 1;
+    }
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
+    {
+        temp = (hood[FixedCoord<0,  0, -1>()].temp +
+                hood[FixedCoord<0, -1,  0>()].temp +
+                hood[FixedCoord<1,  0,  0>()].temp +
+                hood[FixedCoord<0,  0,  0>()].temp +
+                hood[FixedCoord<1,  0,  0>()].temp +
+                hood[FixedCoord<0,  1,  0>()].temp +
+                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
+    }
+
+    double temp;
+};
+
+class JacobiCellMagic
+{
+public:
+    typedef Stencils::VonNeumann<3, 1> Stencil;
+    typedef Topologies::Cube<3>::Topology Topology;
+  
+    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    {};
+
+    JacobiCellMagic(double t = 0) :
+        temp(t)
+    {}
+
+    static int nanoSteps()
+    {
+        return 1;
+    }
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
+    {
+        temp = (hood[FixedCoord<0,  0, -1>()].temp +
+                hood[FixedCoord<0, -1,  0>()].temp +
+                hood[FixedCoord<1,  0,  0>()].temp +
+                hood[FixedCoord<0,  0,  0>()].temp +
+                hood[FixedCoord<1,  0,  0>()].temp +
+                hood[FixedCoord<0,  1,  0>()].temp +
+                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
+    }
+
+    template<typename NEIGHBORHOOD>
+    static void updateLine(JacobiCellMagic *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    {
+        for (; *x < endX; ++*x) {
+            target[*x].update(hood, 0);
+        }
+    }
+
+    double temp;
+};
 
 class QuadM128
 {
@@ -206,54 +286,86 @@ public:
     double temp;
 };
 
-int main(int argc, char **argv)
+template<class CELL>
+class MonoInitializer : public SimpleInitializer<CELL>
 {
-    std::cout << "gogogo\n";
+public:
+    MonoInitializer(const Coord<3>& dim, int steps) : SimpleInitializer<CELL>(dim, steps)
+    {}
 
-    Coord<3> dim(128, 128, 128);
-
+    virtual void grid(GridBase<CELL, 3> *ret)
     {
-        typedef Grid<JacobiCellStreakUpdate, JacobiCellStreakUpdate::Topology> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
-        GridType *gridOld = &gridA;
-        GridType *gridNew = &gridB;
+        CoordBox<3> box = ret->boundingBox();
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            ret->at(*i) = CELL(1.0);
+        }
+        ret->atEdge() = CELL(0.0);
+    }
+};
 
-        int maxT = 2000;
+template<class CELL>
+double singleBenchmark(Coord<3> dim)
+{
+    int repeats = 50.0 * 1000 * 1000 / dim.prod();
+    repeats = std::max(repeats, 10);
 
-        CoordBox<3> gridBox = gridA.boundingBox();
-        CoordBox<3> lineStarts = gridA.boundingBox();
-        lineStarts.dimensions.x() = 1;
+    SerialSimulator<CELL> sim(
+        new MonoInitializer<CELL>(dim, repeats));
+    // sim.addWriter(new TracingWriter<CELL>(500, repeats));
 
-        long long tBegin= Chronometer::timeUSec();
+    long long tBegin= Chronometer::timeUSec();
+    sim.run();
+    long long tEnd = Chronometer::timeUSec();
 
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<3> streak(*i, dim.x());
-                const JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, *gridOld);
-                LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
-                    streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
-            }
+    if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        std::cout << "this statement just serves to prevent the compiler from"
+                  << "optimizing away the loops above\n";
+    }
+    
+    double updates = 1.0 * repeats * (dim - Coord<3>::diagonal(2)).prod();
+    double seconds = (tEnd - tBegin) * 10e-6;
+    double glups = 10e-9 * updates / seconds;
+    
+    return glups;
+}
 
-            std::swap(gridOld, gridNew);
+template<class CELL>
+void benchmark(std::string name)
+{
+    std::cout << "Benchmarking " << name << "\n";
+
+    std::stringstream fileName;
+    fileName << "data." << name << ".txt";
+    std::ofstream outfile(fileName.str().c_str());
+    outfile << "# BENCHMARK_ID MAXTRIX_SIZE GLUPS\n";
+    
+    int maxI = 24;
+
+    for (int i = 0; i < maxI; ++i) {
+        int dim = std::pow(2, 4 + 0.25 * i);
+        if (dim % 2) {
+            ++dim;
         }
 
-        long long tEnd = Chronometer::timeUSec();
+        double glups = singleBenchmark<CELL>(Coord<3>::diagonal(dim));
+        outfile << dim << " " << glups << "\n";
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
-            std::cout << "this statement just serves to prevent the compiler from"
-                      << "optimizing away the loops above\n";
+        int percent = 100 * i / (maxI - 1);
+        std::cout << std::setw(3) << percent << "%, dim = " << std::setw(3) << dim << ", " << glups << " GLUPS ";
+        for (int dots = 0; dots < i; ++dots) {
+            std::cout << ".";
         }
-
-        double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
-        double gLUPS = 10e-9 * updates / seconds;
-
-        std::cout << "GLUPS: " << gLUPS << "\n";
+        std::cout.flush();
+        std::cout << "\r";
     }
 
+    std::cout << "\n";
+}
+
+int main(int argc, char **argv)
+{
+    benchmark<JacobiCellSimple      >("JacobiCellSimple");
+    benchmark<JacobiCellMagic       >("JacobiCellMagic");
+    benchmark<JacobiCellStreakUpdate>("JacobiCellStreakUpdate");
     return 0;
 }
