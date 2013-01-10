@@ -7,7 +7,6 @@
 #include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/image.h>
-#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
