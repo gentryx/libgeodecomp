@@ -58,7 +58,7 @@ __global__ void updateRTMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
     double c3 = hoody(0, 0,  1);
 
 #pragma unroll 10
-    for (z; z < (dimZ - 2); ++z) {
+    for (; z < (dimZ - 2); ++z) {
         double c4 = hoody(0, 0, 2);
 
         gridNew[z * dimX * dimY + y * dimX + x] =
@@ -121,7 +121,7 @@ __global__ void updateLBMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
     int z = 2;
     
 #pragma unroll 10
-    for (z; z < (dimZ - 2); z += 1) {
+    for (; z < (dimZ - 2); z += 1) {
 
 #define SQR(X) ((X)*(X))
         const double omega = 1.0/1.7;
@@ -468,12 +468,13 @@ void benchmark(int dim)
 #define CASE(DIM, ADD)                                                  \
     if (dim <= DIM) {                                                   \
         std::cout << dim << " "                                         \
-                  << benchmarkCUDA<LBMSoA, DIM + ADD, DIM, 256 + 64>(   \
+                  << benchmarkCUDA<RTMClassic, DIM + ADD, DIM, 256 + 64>( \
                       dim, dim, 256 + 32 - 4, 20) << "\n";              \
         return;                                                         \
     }
 
-                  // << benchmarkCUDA<KERNEL, DIM + ADD, DIM, 256 + 64>(   \
+                                    // << benchmarkCUDA<LBMSoA, DIM + ADD, DIM, 256 + 64>(   \
+// << benchmarkCUDA<KERNEL, DIM + ADD, DIM, 256 + 64>(   \
 
 
     // CASE(32,  12);

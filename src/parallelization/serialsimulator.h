@@ -8,15 +8,14 @@
 namespace LibGeoDecomp {
 
 /**
- * Implements the Simulator functionality by running all calculations
- * sequencially in a single process.
+ * SerialSimulator is the simplest implementation of the simulator
+ * concept.
  */
 template<typename CELL_TYPE>
 class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
-    friend class SerialSimulatorTest;
-    friend class PPMWriterTest;
 public:
+    friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIMENSIONS;
