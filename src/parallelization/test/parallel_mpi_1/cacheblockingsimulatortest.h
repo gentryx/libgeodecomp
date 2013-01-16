@@ -87,7 +87,7 @@ public:
         pipelinedUpdate(13, 13, 3, 5, gridSource, gridBuffer, gridTarget);
     }
 
-    void pipelinedUpdate(int sourceZ, int localZ, int firstStage, int lastStage,
+    void pipelinedUpdate(int globalIndex, int localIndex, int firstStage, int lastStage,
                          SuperVector<Line>& gridSource,
                          SuperVector<Line>& gridBuffer,
                          SuperVector<Line>& gridTarget)
@@ -96,10 +96,10 @@ public:
             std::string source = (i == 0)                    ? "source" : "buffer";
             std::string target = (i == (pipelineLength - 1)) ? "target" : "buffer";
 
-            int sourceIndex = (i == 0)                    ? sourceZ                  : 
-                                                            normalizeLocalZ(localZ + 2 - 3 * i);
-            int targetIndex = (i == (pipelineLength - 1)) ? sourceZ - pipelineLength + 1 : 
-                                                            normalizeLocalZ(localZ + 0 - 3 * i);
+            int sourceIndex = (i == 0)                    ? globalIndex                : 
+                                                            normalizeIndex(localIndex + 2 - 3 * i);
+            int targetIndex = (i == (pipelineLength - 1)) ? globalIndex - pipelineLength + 1 : 
+                                                            normalizeIndex(localIndex + 0 - 3 * i);
 
             std::cout << "update(grid: " 
                       << source << "[" << std::setw(2) << sourceIndex << "] -> " 
@@ -116,7 +116,7 @@ public:
                 gridNew = &gridTarget;
             }
             
-            if ((sourceZ >= gridSource.size()) && (i == firstStage)) {
+            if ((globalIndex >= gridSource.size()) && (i == firstStage)) {
                 (*gridNew)[targetIndex] = Line(-1, "X");
             } else {
                 (*gridNew)[targetIndex] = Line((*gridOld)[sourceIndex].offset, i + 1);
@@ -131,9 +131,9 @@ public:
         std::cout << "\n";
     }
 
-    int normalizeLocalZ(int localZ)
+    int normalizeIndex(int localIndex)
     {
-        return (localZ + bufferSize()) % bufferSize();
+        return (localIndex + bufferSize()) % bufferSize();
     }
 
     int bufferSize()
