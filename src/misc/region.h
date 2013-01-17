@@ -359,15 +359,17 @@ public:
 
     inline const CoordBox<DIM>& boundingBox() const
     {
-        if (geometryCacheTainted)
+        if (geometryCacheTainted) {
             resetGeometryCache();
+        }
         return myBoundingBox;
     }
 
     inline const long& size() const
     {
-        if (geometryCacheTainted)
+        if (geometryCacheTainted) {
             resetGeometryCache();
+        }
         return mySize;
     }
 
@@ -624,7 +626,7 @@ private:
             Coord<DIM> max = someStreak.origin;
 
             mySize = 0;
-            for (StreakIterator i = beginStreak(); 
+            for (StreakIterator i = beginStreak();
                  i != endStreak(); ++i) {
                 Coord<DIM> left = i->origin;
                 Coord<DIM> right = i->origin;
