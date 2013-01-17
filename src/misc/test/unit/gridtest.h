@@ -225,6 +225,52 @@ public:
         TS_ASSERT_EQUALS(fooBar[Coord<2>(-1, -1)], 10);
     }
 
+    void testFill2D()
+    {
+        CoordBox<2> insert(Coord<2>(10, 20), Coord<2>(4, 7));
+        Coord<2> dim(40, 70);
+
+        Grid<int> g(dim, -1);
+        g.fill(insert, 2);
+
+
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                Coord<2> c = Coord<2>(x, y);
+                int expected = -1;
+                if (insert.inBounds(c)) {
+                    expected = 2;
+                }
+                
+                TS_ASSERT_EQUALS(expected, g[c]);
+            }
+        }
+    }
+
+    void testFill3D()
+    {
+        CoordBox<3> insert(Coord<3>(10, 20, 15), Coord<3>(4, 7, 5));
+        Coord<3> dim(40, 70, 30);
+
+        Grid<int, Topologies::Cube<3>::Topology> g(dim, -1);
+        g.fill(insert, 2);
+
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c = Coord<3>(x, y, z);
+                    int expected = -1;
+                    if (insert.inBounds(c)) {
+                        expected = 2;
+                    }
+                
+                    TS_ASSERT_EQUALS(expected, g[c]);
+                }
+            }
+        }
+    }
+
     void testDefaultTopology()
     {
         Grid<int> g(Coord<2>(3, 4), 10, 11);
@@ -249,9 +295,11 @@ public:
     void testTorusTopology()
     {
         Grid<int, Topologies::Torus<2>::Topology> g(Coord<2>(3, 4), 0, -1);
-        for (int y = 0; y < 4; ++y)
-            for (int x = 0; x < 3; ++x)
+        for (int y = 0; y < 4; ++y) {
+            for (int x = 0; x < 3; ++x) {
                 g[Coord<2>(x, y)] = y * 10 + x;
+            }
+        }
 
         // in-bounds accesses
         TS_ASSERT_EQUALS(g[Coord<2>( 0,  0)],  0);
@@ -273,10 +321,13 @@ public:
         Grid<int, Topologies::Cube<3>::Topology> g(dim, 47, 11);
         TS_ASSERT_EQUALS(g[Coord<3>(-1, 0, 0)],  11);
 
-        for (int z=0; z < dim.z(); ++z)
-            for (int y=0; y < dim.y(); ++y)
-                for (int x=0; x < dim.x(); ++x) 
+        for (int z=0; z < dim.z(); ++z) {
+            for (int y=0; y < dim.y(); ++y) {
+                for (int x=0; x < dim.x(); ++x)  {
                     TS_ASSERT_EQUALS(g[Coord<3>(x, y, z)], 47);
+                }
+            }
+        }
     }
 
     void testCompare()

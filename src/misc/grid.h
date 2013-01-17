@@ -22,6 +22,61 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
+namespace GridHelpers {
+
+template<int DIM>
+class FillCoordBox;
+
+template<>
+class FillCoordBox<1>
+{
+public:
+    template<typename GRID, typename CELL>
+    void operator()(const Coord<1>& origin, const Coord<1>& dim, GRID *grid, const CELL& cell)
+    {
+        CELL *cursor = &(*grid)[origin];
+        std::fill(cursor, cursor + dim.x(), cell);
+    }
+};
+
+template<>
+class FillCoordBox<2>
+{
+public:
+    template<typename GRID, typename CELL>
+    void operator()(const Coord<2>& origin, const Coord<2>& dim, GRID *grid, const CELL& cell)
+    {
+        int maxY = origin.y() + dim.y();
+        Coord<2> c = origin;
+        for (; c.y() < maxY; ++c.y()) {
+            CELL *cursor = &(*grid)[c];
+            std::fill(cursor, cursor + dim.x(), cell);
+        }
+    }
+};
+
+template<>
+class FillCoordBox<3>
+{
+public:
+    template<typename GRID, typename CELL>
+    void operator()(const Coord<3>& origin, const Coord<3>& dim, GRID *grid, const CELL& cell)
+    {
+        int maxY = origin.y() + dim.y();
+        int maxZ = origin.z() + dim.z();
+        Coord<3> c = origin;
+
+        for (; c.z() < maxZ; ++c.z()) {
+            for (c.y() = origin.y(); c.y() < maxY; ++c.y()) {
+                CELL *cursor = &(*grid)[c];
+                std::fill(cursor, cursor + dim.x(), cell);
+            }
+        }
+    }
+};
+
+}
+
 /**
  * A multi-dimensional regular grid
  */
@@ -200,6 +255,11 @@ public:
     virtual const CELL_TYPE& atEdge() const
     {
         return getEdgeCell();
+    }
+
+    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
+    {
+        GridHelpers::FillCoordBox<DIM>()(box.origin, box.dimensions, this, cell);
     }
 
     inline const Coord<DIM>& getDimensions() const
