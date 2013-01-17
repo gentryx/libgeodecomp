@@ -80,6 +80,11 @@ public:
         return delegate.getEdgeCell();
     }
 
+    inline void setOrigin(const Coord<DIM>& newOrigin) 
+    {
+        origin = newOrigin;
+    }
+
     inline void resize(const CoordBox<DIM>& box)
     {
         delegate.resize(box.dimensions);
@@ -114,10 +119,15 @@ public:
     {
         return getEdgeCell();
     }
-
+    
     virtual const CELL_TYPE& atEdge() const
     {
         return getEdgeCell();
+    }
+
+    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
+    {
+        delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
     }
 
     template<typename GRID_TYPE>

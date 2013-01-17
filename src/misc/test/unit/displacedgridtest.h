@@ -62,6 +62,24 @@ public:
         }
     }
 
+    void testSetOrigin()
+    {
+        DisplacedGrid<int> grid(CoordBox<2>(Coord<2>(10, 20), Coord<2>(2, 3)));
+
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 2; ++x) {
+                grid[Coord<2>(x + 10, y + 20)] = x * 10 + y;
+            }
+        }
+        
+        grid.setOrigin(Coord<2>(0, 50));
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 2; ++x) {
+                TS_ASSERT_EQUALS(grid[Coord<2>(x + 0, y + 50)],  x * 10 + y);
+            }
+        }
+    }
+
     void testResize()
     {
         CoordBox<3> oldBox(Coord<3>(1, 1, 2), Coord<3>(3, 4, 2));
@@ -80,6 +98,34 @@ public:
         TS_ASSERT_EQUALS(27, grid[Coord<3>(4, 4, 4)]);
         TS_ASSERT_EQUALS(1,  grid[Coord<3>(6, 6, 6)]);
         TS_ASSERT_EQUALS(newBox, grid.boundingBox());
+    }
+
+    void testFill3D()
+    {
+        CoordBox<3> insert(Coord<3>(10, 20, 15), Coord<3>(4, 7, 5));
+        Coord<3> origin(10, 10, 10);
+        Coord<3> dim(40, 70, 30);
+
+        DisplacedGrid<int, Topologies::Cube<3>::Topology> g(CoordBox<3>(origin, dim), -1);
+        g.fill(insert, 2);
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c = Coord<3>(x, y, z) + origin;
+                    int expected = -1;
+                    if (insert.inBounds(c)) {
+                        expected = 2;
+                    }
+                
+                    if (expected != g[c]) {
+                        std::cout << c << " expected: " << expected << " actual: " << g[c] << "\n";
+
+                    }
+                    // TS_ASSERT_EQUALS(expected, g[c]);
+                }
+            }
+        }
     }
 
     void testTopologicalNormalizationWithTorus()
