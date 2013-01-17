@@ -282,6 +282,7 @@ private:
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
+                i->origin,
                 *curStripe,
                 newStripe,
                 nanoStep);

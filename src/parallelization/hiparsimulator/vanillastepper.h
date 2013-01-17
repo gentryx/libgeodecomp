@@ -89,6 +89,7 @@ private:
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
+                i->origin,
                 *oldGrid,
                 &*newGrid,
                 curNanoStep);
@@ -210,6 +211,7 @@ private:
                  ++i) {
                 UpdateFunctor<CELL_TYPE>()(
                     *i,
+                    i->origin,
                     *oldGrid,
                     &*newGrid,
                     curNanoStep);

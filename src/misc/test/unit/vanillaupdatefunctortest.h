@@ -25,7 +25,7 @@ public:
             unsigned nanoStep) 
         {
             VanillaUpdateFunctor<TestCellType>()(
-                streak, gridOld, gridNew, nanoStep);
+                streak, streak.origin, gridOld, gridNew, nanoStep);
         }
     };
 

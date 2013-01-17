@@ -133,7 +133,7 @@ public:
             unsigned nanoStep) 
         {
             UpdateFunctor<TestCellType>()(
-                streak, gridOld, gridNew, nanoStep);
+                streak, streak.origin, gridOld, gridNew, nanoStep);
         }
     };
 
@@ -180,7 +180,7 @@ private:
         Grid<CELL> gridOld(dim);
         Grid<CELL> gridNew(dim);
 
-        UpdateFunctor<CELL>()(streak, gridOld, &gridNew, nanoStep);
+        UpdateFunctor<CELL>()(streak, streak.origin, gridOld, &gridNew, nanoStep);
 
         std::vector<char> message(1024 * 16, 0);
         log.read(&message[0], 1024 * 16);

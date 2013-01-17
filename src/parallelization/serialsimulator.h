@@ -23,8 +23,8 @@ public:
     /**
      * creates a SerialSimulator with the given @a initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *_initializer) : 
-        MonolithicSimulator<CELL_TYPE>(_initializer)
+    SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
+        MonolithicSimulator<CELL_TYPE>(initializer)
     {
         Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
@@ -128,7 +128,7 @@ protected:
         box.dimensions.x() = 1;
         for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             Streak<DIM> streak(*i, endX);
-            UpdateFunctor<CELL_TYPE>()(streak, *curGrid, newGrid, nanoStep);
+            UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
 
         std::swap(curGrid, newGrid);

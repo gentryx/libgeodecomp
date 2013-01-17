@@ -17,13 +17,17 @@ public:
     template<typename GRID>
     void operator()(
         const Streak<DIM>& streak,
+        const Coord<DIM>& targetOrigin,
         const GRID& gridOld,
         GRID *gridNew,
         unsigned nanoStep) 
     {
-        Coord<DIM> c = streak.origin;
-        for (; c.x() < streak.endX; ++c.x()) {
-            (*gridNew)[c].update(gridOld.getNeighborhood(c), nanoStep);
+        Coord<DIM> sourceCoord = streak.origin;
+        Coord<DIM> targetCoord = targetOrigin;
+
+        for (; sourceCoord.x() < streak.endX; ++sourceCoord.x()) {
+            (*gridNew)[targetCoord].update(gridOld.getNeighborhood(sourceCoord), nanoStep);
+            ++targetCoord.x();
         }
     }
 };
