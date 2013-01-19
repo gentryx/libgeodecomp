@@ -31,9 +31,9 @@ public:
 
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
-        const CELL_TYPE &_defaultCell=CELL_TYPE(),
+        const CELL_TYPE &defaultCell=CELL_TYPE(),
         const Coord<DIM>& topologicalDimensions=Coord<DIM>()) :
-        delegate(box.dimensions, _defaultCell),
+        delegate(box.dimensions, defaultCell, defaultCell),
         origin(box.origin),
         topoDimensions(topologicalDimensions)
     { }

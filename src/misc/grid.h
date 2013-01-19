@@ -108,10 +108,10 @@ public:
 
     explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
          const CELL_TYPE& defaultCell=CELL_TYPE(),
-         const CELL_TYPE& _edgeCell=CELL_TYPE()) :
+         const CELL_TYPE& edgeCell=CELL_TYPE()) :
         dimensions(dim),
         cellMatrix(dim.toExtents()),
-        edgeCell(_edgeCell)
+        edgeCell(edgeCell)
     {
         CoordBox<DIM> lineStarts(Coord<DIM>(), dim);
         lineStarts.dimensions.x() = 1;
