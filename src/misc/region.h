@@ -260,7 +260,7 @@ public:
             return !(*this == other);
         }
 
-        inline const Streak<DIM> operator*() const
+        inline const Streak<DIM>& operator*() const
         {
             return streak;
         }
