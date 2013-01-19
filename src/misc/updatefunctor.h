@@ -16,12 +16,12 @@ public:
     typedef typename CELL::Stencil Stencil;
     static const int DIM = CELL::Topology::DIMENSIONS;
  
-    template<typename GRID, typename UPDATE_POLICY>
+    template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
     void operator()(
         const Streak<DIM>& streak,
         const Coord<DIM>& targetOrigin,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep,
         CellAPITraits::Fixed,
         UPDATE_POLICY) 
@@ -32,12 +32,12 @@ public:
             streak, gridOld.boundingBox(), pointers, &(*gridNew)[targetOrigin], nanoStep);
     }
 
-    template<typename GRID>
+    template<typename GRID1, typename GRID2>
     void operator()(
         const Streak<DIM>& streak,
         const Coord<DIM>& targetOrigin,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep,
         CellAPITraits::Base, 
         CellAPITraits::Base) 

@@ -14,12 +14,12 @@ class VanillaUpdateFunctor
 public:
     static const int DIM = CELL::Topology::DIMENSIONS;
 
-    template<typename GRID>
+    template<typename GRID1, typename GRID2>
     void operator()(
         const Streak<DIM>& streak,
         const Coord<DIM>& targetOrigin,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep) 
     {
         Coord<DIM> sourceCoord = streak.origin;
