@@ -201,7 +201,7 @@ public:
         if (!other.isValid) {
             OUTPUT() << "Update Error for " << toString() << ":\n"
                      << "Invalid Neighbor at " << relativeLoc << ":\n" 
-                     << other.toString() << "\n"
+                     << other.toString()
                      << "--------------" << "\n";
             return false;
         }
