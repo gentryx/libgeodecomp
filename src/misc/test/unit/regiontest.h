@@ -288,6 +288,98 @@ public:
         TS_ASSERT_EQUALS(r.indices[2].size(), 3);
     }
 
+    void testInsertVsOperator()
+    {
+        Region<2> a;
+        Region<2> b;
+        TS_ASSERT_EQUALS(a, b);
+
+        a << Coord<2>(1, 2)
+          << Coord<2>(1, 4);
+        b.insert(Coord<2>(1, 2));
+        b.insert(Coord<2>(1, 4));
+        TS_ASSERT_EQUALS(a, b);
+    }
+
+    void testContains()
+    {
+        Region<2> r1;
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(-1, -1);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(-1, 0);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(1, 0);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(0, 0);
+        TS_ASSERT_EQUALS(true,  r1.contains(Streak<2>(Coord<2>(0, 0), 1)));
+
+        Region<2> r2;
+        r2 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(true,  r2.contains(Streak<2>(Coord<2>(1, 1), 2)));
+
+        Region<3> r3;
+        TS_ASSERT_EQUALS(false, r3.contains(Streak<3>(Coord<3>(1, 2, 3), 2)));
+        r3 << Coord<3>(1, 2, 3);
+        TS_ASSERT_EQUALS(true,  r3.contains(Streak<3>(Coord<3>(1, 2, 3), 2)));
+    }
+
+    void testContainsCoord()
+    {
+        Region<2> r1;
+        TS_ASSERT_EQUALS(false, r1.contains(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(false, r1.contains(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(-1, -1);
+        TS_ASSERT_EQUALS(false, r1.contains(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(-1, 0);
+        TS_ASSERT_EQUALS(false, r1.contains(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(1, 0);
+        TS_ASSERT_EQUALS(false, r1.contains(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(0, 0);
+        TS_ASSERT_EQUALS(true,  r1.contains(Coord<2>(0, 0)));
+
+        Region<2> r2;
+        r2 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(true,  r2.contains(Coord<2>(1, 1)));
+
+        Region<3> r3;
+        TS_ASSERT_EQUALS(false, r3.contains(Coord<3>(1, 2, 3)));
+        r3 << Coord<3>(1, 2, 3);
+        TS_ASSERT_EQUALS(true,  r3.contains(Coord<3>(1, 2, 3)));
+    }
+
+    void testContainsStreak()
+    {
+        Region<2> r1;
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(3, 1), 5)));
+        
+        r1 << Coord<2>(2, 1);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(3, 1), 5)));
+        
+        r1 << Coord<2>(3, 1);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(3, 1), 5)));
+
+        r1 << Coord<2>(5, 1);
+        TS_ASSERT_EQUALS(false, r1.contains(Streak<2>(Coord<2>(3, 1), 5)));
+
+        r1 << Coord<2>(4, 1);
+        TS_ASSERT_EQUALS(true,  r1.contains(Streak<2>(Coord<2>(3, 1), 5)));
+        TS_ASSERT_EQUALS(true,  r1.contains(Streak<2>(Coord<2>(3, 1), 6)));
+    }
+
     void testStreakIteration()
     {
         SuperVector<Streak<2> > actual, expected;
