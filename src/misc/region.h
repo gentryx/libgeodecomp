@@ -450,12 +450,12 @@ public:
         return true;
     }
 
-    bool contains(const Streak<DIM>& s)
+    bool count(const Streak<DIM>& s) const
     {
         return RegionLookupHelper<DIM - 1>()(*this, s);
     }
 
-    bool contains(const Coord<DIM>& c)
+    bool count(const Coord<DIM>& c) const
     {
         return RegionLookupHelper<DIM - 1>()(*this, Streak<DIM>(c, c[0] + 1));
     }
