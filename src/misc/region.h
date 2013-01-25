@@ -363,15 +363,17 @@ public:
 
     inline const CoordBox<DIM>& boundingBox() const
     {
-        if (geometryCacheTainted)
+        if (geometryCacheTainted) {
             resetGeometryCache();
+        }
         return myBoundingBox;
     }
 
     inline const long& size() const
     {
-        if (geometryCacheTainted)
+        if (geometryCacheTainted) {
             resetGeometryCache();
+        }
         return mySize;
     }
 
