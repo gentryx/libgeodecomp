@@ -200,8 +200,9 @@ public:
     inline bool operator==(const Grid& other) const
     {
         if (boundingBox() == CoordBox<DIM>() && 
-            other.boundingBox() == CoordBox<DIM>())
+            other.boundingBox() == CoordBox<DIM>()) {
             return true;
+        }
 
         return 
             (edgeCell   == other.edgeCell) && 
@@ -210,11 +211,13 @@ public:
 
     inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
     {
-        if (boundingBox() != other.boundingBox())
+        if (boundingBox() != other.boundingBox()) {
             return false;
+        }
 
-        if (edgeCell != other.atEdge())
+        if (edgeCell != other.atEdge()) {
             return false;
+        }
 
         CoordBox<DIM> box = boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -270,9 +273,9 @@ public:
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "Grid\n"
-                << "boundingBox: " << boundingBox() 
-                << "edgeCell:\n"
+        message << "Grid<" << DIM << ">(\n"
+                << "boundingBox: " << boundingBox()  << "\n"
+                << "edgeCell:\n" 
                 << edgeCell << "\n";
 
         CoordBox<DIM> box = boundingBox();
@@ -280,6 +283,7 @@ public:
             message << "Coord" << *i << ":\n" << (*this)[*i] << "\n";
         }
 
+        message << ")";
         return message.str();
     }
 
@@ -291,9 +295,7 @@ public:
 private:
     Coord<DIM> dimensions;
     CellMatrix cellMatrix;
-    // This dummy stores the constant edge constraint
     CELL_TYPE edgeCell;
-    
 };
 
 }

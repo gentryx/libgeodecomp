@@ -155,6 +155,7 @@ public:
             CoordBox<2>(Coord<2>(-3, -2), 
                         Coord<2>(8, 6)), 
             -2,
+            -2,
             Coord<2>(15, 10));
 
         for (int y = -2; y < 4; ++y) 

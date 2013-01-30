@@ -153,8 +153,8 @@ private:
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
 
-        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
-        newGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
+        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         initializer->grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();

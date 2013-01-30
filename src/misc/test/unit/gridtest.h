@@ -190,9 +190,8 @@ public:
         fooBar[Coord<2>( 1,  0)] = 19;
         fooBar[Coord<2>( 2,  1)] = 81;
         std::string expected = 
-            "Grid\n"
-            "boundingBox: origin: (0, 0)\n"
-            "dimensions: (3, 2)\n"
+            "Grid<2>(\n"
+            "boundingBox: CoordBox<2>(origin: (0, 0), dimensions: (3, 2))\n"
             "edgeCell:\n"
             "2701\n"
             "Coord(0, 0):\n"
@@ -206,7 +205,8 @@ public:
             "Coord(1, 1):\n"
             "4711\n"
             "Coord(2, 1):\n"
-            "81\n";
+            "81\n"
+            ")";
         TS_ASSERT_EQUALS(fooBar.toString(), expected);        
     }
 

@@ -28,7 +28,7 @@ public:
             Coord<2>(16, 16));
         std::string buf;
 
-
+        sim.buffer.atEdge() = sim.curGrid->atEdge();
         sim.buffer.fill(sim.buffer.boundingBox(), sim.curGrid->getEdgeCell());
 
         printState(sim);
