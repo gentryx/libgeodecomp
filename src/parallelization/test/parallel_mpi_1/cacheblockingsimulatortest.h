@@ -5,6 +5,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/supervector.h>
 #include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 
 using namespace LibGeoDecomp; 
@@ -16,83 +17,96 @@ class CacheBlockingSimulatorTest : public CxxTest::TestSuite
 public:
     typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Cube<3>::Topology> MyTestCell;
 
-    void testBasic()
+    void setUp()
     {
-        
-        CacheBlockingSimulator<MyTestCell> sim(
-            new TestInitializer<MyTestCell>(
-                Coord<3>(40, 1, 10), 
-                10000,
-                0),
-            5, 
-            Coord<2>(16, 16));
-        std::string buf;
-
-        sim.buffer.atEdge() = sim.curGrid->atEdge();
-        sim.buffer.fill(sim.buffer.boundingBox(), sim.curGrid->getEdgeCell());
-
-        printState(sim);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 0, 0, 0, 1);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 1, 1, 0, 1);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 2, 2, 0, 2);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 3, 3, 0, 2);
-        printState(sim);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 4, 4, 0, 3);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 5, 5, 0, 3);
-        printState(sim);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 6, 6, 0, 4);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 7, 7, 0, 4);
-        printState(sim);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 8, 8, 0, 5);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 9, 9, 0, 5);
-        printState(sim);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 10, 10, 0, 5);
-        printState(sim);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 11, 11, 1, 5);
-        printState(sim);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 12, 12, 1, 5);
-        printState(sim);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 13, 13, 2, 5);
-        printState(sim);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 14, 14, 2, 5);
-        printState(sim);
-
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 15, 15, 3, 5);
-        printState(sim);
-        sim.pipelinedUpdate(Coord<2>(0, 0), 16, 16, 3, 5);
-        printState(sim);
-
-        sim.pipelinedUpdate(Coord<2>(0, 0), 17, 17, 4, 5);
-        printState(sim);
-
-        // sim.pipelinedUpdate(Coord<2>(0, 0), 12, 12, 2, 5);
-        // printState(sim);
-
-        // for (int z = 0; z < 20; ++z) {
-        //     int lastStage = std::min(5, z);
-        //     sim.pipelinedUpdate(Coord<2>(1, 1), z, z, 0, lastStage);
-        // }
-        // // std::cin >> buf;
     }
 
-
-    void printState(const CacheBlockingSimulator<MyTestCell>& sim)
+    void tearDown()
     {
-        return;
+        delete sim;
+    }
 
+    void testPipelinedUpdate()
+    {
+        init(Coord<3>(40, 1, 20));
+
+        sim->buffer.atEdge() = sim->curGrid->atEdge();
+        sim->buffer.fill(sim->buffer.boundingBox(), sim->curGrid->getEdgeCell());
+        sim->fixBufferOrigin(Coord<2>(0, 0));
+        int i = 0;
+
+        for (; i < 2 * pipelineLength - 2; ++i) {
+            // printState(sim);
+            int lastStage = (i >> 1) + 1;
+            sim->pipelinedUpdate(Coord<2>(0, 0), i, i, 0, lastStage);
+        } 
+
+        for (; i < dim.z(); ++i) {
+            // printState(sim);
+            sim->pipelinedUpdate(Coord<2>(0, 0), i, i, 0, pipelineLength);
+        }
+        for (; i < (dim.z() + 2 * pipelineLength - 2); ++i) {
+            // printState(sim);
+            int firstStage = (i - dim.z() + 1) >> 1 ;
+            sim->pipelinedUpdate(Coord<2>(0, 0), i, i, firstStage, pipelineLength);            
+        }
+    }
+
+    void testUpdateWavefront()
+    {
+        init(Coord<3>(40, 30, 20));
+
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 0);
+        sim->updateWavefront(Coord<2>(0, 0));
+        sim->updateWavefront(Coord<2>(1, 0));
+        sim->updateWavefront(Coord<2>(2, 0));
+
+        sim->updateWavefront(Coord<2>(0, 1));
+        sim->updateWavefront(Coord<2>(1, 1));
+        sim->updateWavefront(Coord<2>(2, 1));
+
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->newGrid), pipelineLength);
+    }
+
+    void testHop()
+    {
+        init(Coord<3>(40, 30, 20));
+
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  0);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  5);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 10);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 15);
+    }
+    
+private:
+    int pipelineLength;
+    Coord<3> dim;
+    CacheBlockingSimulator<MyTestCell> *sim;
+
+    void init(const Coord<3> gridDim)
+    {
+        pipelineLength = 5;
+        dim = gridDim;
+        sim = new CacheBlockingSimulator<MyTestCell>(
+            new TestInitializer<MyTestCell>(
+                dim, 
+                10000,
+                0),
+            pipelineLength, 
+            Coord<2>(16, 16));
+    }
+
+    void printState()
+    {
         std::cout << "curGrid:\n";
-        printGrid(*sim.curGrid);
+        printGrid(*(sim->curGrid));
         std::cout << "buffer:\n";
-        printGrid(sim.buffer);
+        printGrid(sim->buffer);
         std::cout << "newGrid:\n";
-        printGrid(*sim.newGrid);
+        printGrid(*(sim->newGrid));
         std::cout << "\n";
     }
 

@@ -43,7 +43,7 @@ public:
             bufferDim[i] = wavefrontDim[i] + 2 * pipelineLength - 2;
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
-        buffer = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell());
+        buffer = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
 
         generateFrames();
         nanoStep = 0;
@@ -84,6 +84,7 @@ private:
     int pipelineLength;
     Coord<DIM - 1> wavefrontDim;
     Grid<WavefrontFrames> frames;
+    unsigned stepCounter;
     unsigned nanoStep;
 
     void generateFrames()
@@ -147,14 +148,51 @@ private:
         return ret;
     }
 
-    void pipelinedUpdate(
-        const Coord<DIM - 1>& frameCoord, 
-        int globalIndex, 
-        int localIndex, 
-        int firstStage, 
-        int lastStage)
+    void hop()
     {
-        // fixme: do this before z-loop
+        CoordBox<DIM - 1> frameBox = frames.boundingBox();
+        for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin(); 
+             waveIter != frameBox.end(); 
+             ++waveIter) {
+            updateWavefront(*waveIter);
+        }
+
+        std::swap(curGrid, newGrid);
+        int curNanoStep = nanoStep + pipelineLength;
+        stepCounter += curNanoStep / CELL::nanoSteps();
+        nanoStep = curNanoStep % CELL::nanoSteps();
+    }
+
+    void updateWavefront(const Coord<DIM - 1>& wavefrontCoord)
+    {
+        buffer.atEdge() = curGrid->atEdge();
+        buffer.fill(buffer.boundingBox(), curGrid->getEdgeCell());
+        fixBufferOrigin(wavefrontCoord);
+
+        int index = 0;
+        CoordBox<DIM> boundingBox = curGrid->boundingBox();
+        int maxIndex = boundingBox.origin[DIM - 1] + boundingBox.dimensions[DIM - 1];
+
+        // fill pipeline
+        for (; index < 2 * pipelineLength - 2; ++index) {
+            int lastStage = (index >> 1) + 1;
+            pipelinedUpdate(wavefrontCoord, index, index, 0, lastStage);
+        } 
+
+        // normal operation
+        for (; index < maxIndex; ++index) {
+            pipelinedUpdate(wavefrontCoord, index, index, 0, pipelineLength);
+        }
+
+        // let pipeline drain
+        for (; index < (maxIndex + 2 * pipelineLength - 2); ++index) {
+            int firstStage = (index - maxIndex + 1) >> 1 ;
+            pipelinedUpdate(wavefrontCoord, index, index, firstStage, pipelineLength);            
+        }
+    }
+
+    void fixBufferOrigin(const Coord<DIM - 1>& frameCoord)
+    {
         Coord<DIM> bufferOrigin;
         // fixme: wrong on boundary with Torus topology
         for (int d = 0; d < (DIM - 1); ++d) {
@@ -162,7 +200,15 @@ private:
         }
         bufferOrigin[DIM - 1] = 0;
         buffer.setOrigin(bufferOrigin);
+    }
 
+    void pipelinedUpdate(
+        const Coord<DIM - 1>& frameCoord, 
+        int globalIndex, 
+        int localIndex, 
+        int firstStage, 
+        int lastStage)
+    {
         for (int i = firstStage; i < lastStage; ++i) {
             bool firstIteration = (i == 0);
             bool lastIteration =  (i == (pipelineLength - 1));
@@ -181,19 +227,18 @@ private:
             //           << target << "[" << std::setw(2) << targetIndex << "], time: " 
             //           << i << " -> " << (i + 1) << ", currentGlobalIndex: " 
             //           << currentGlobalIndex << ")\n";
-            
+
             if ( firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, newGrid, curNanoStep);
             }
             if ( firstIteration && !lastIteration) { 
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, &buffer, curNanoStep);
-            }
-            
+            }            
             if (!firstIteration &&  lastIteration) {
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer, newGrid, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   newGrid, curNanoStep);
             }
             if (!firstIteration && !lastIteration) {
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer, &buffer, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   &buffer, curNanoStep);
             }
         }
     }
@@ -214,7 +259,6 @@ private:
             Coord<DIM> fillDim = buffer.getDimensions();
             fillDim[DIM - 1] = 1;
 
-            // std::cout << "flushing " << CoordBox<DIM>(fillOrigin, fillDim);
             buffer.fill(CoordBox<DIM>(fillOrigin, fillDim), buffer.getEdgeCell());
         } else {
             for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak(); 
@@ -223,7 +267,6 @@ private:
                 Coord<DIM> targetCoord  = iter->origin;
                 sourceStreak.origin[DIM - 1] = sourceIndex;
                 targetCoord[DIM - 1] = targetIndex;
-                // fixme: fix nanostep
                 UpdateFunctor<CELL>()(sourceStreak, targetCoord, sourceGrid, targetGrid, curNanoStep);
             }
             // std::cout << "  frame: " << updateFrame.boundingBox();
