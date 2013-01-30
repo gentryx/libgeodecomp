@@ -21,6 +21,59 @@ using namespace LibGeoDecomp;
 
 std::string revision;
 
+class RegionCount
+{
+public:
+    std::string order()
+    {
+        return "CPU";
+    }
+
+    std::string family()
+    {
+        return "RegionCount";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(const Coord<3>& dim)
+    {
+        int sum = 0;
+        Region<3> r;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                r << Streak<3>(Coord<3>(0, y, z), dim.x());
+            }
+        }
+
+        long long tStart = Chronometer::timeUSec();
+
+        for (int z = 0; z < dim.z(); z += 4) {
+            for (int y = 0; y < dim.y(); y += 4) {
+                for (int x = 0; x < dim.x(); x += 4) {
+                    sum += r.count(Coord<3>(x, y, z));
+                }
+            }
+        }
+
+        long long tEnd = Chronometer::timeUSec();
+
+        if (sum == 31) {
+            std::cout << "pure debug statement to prevent the compiler from optimizing away the previous loop";
+        }
+
+        return (tEnd - tStart) * 0.000001;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
 class RegionInsert
 {
 public:
@@ -1377,6 +1430,10 @@ int main(int argc, char **argv)
     s >> cudaDevice;
 
     std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family          ; species ; dimensions              ; perf        ; unit\n";
+
+    evaluate(RegionCount(), Coord<3>( 128,  128,  128));
+    evaluate(RegionCount(), Coord<3>( 512,  512,  512));
+    evaluate(RegionCount(), Coord<3>(2048, 2048, 2048));
 
     evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
     evaluate(RegionInsert(), Coord<3>( 512,  512,  512));

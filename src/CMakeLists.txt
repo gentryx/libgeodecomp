@@ -177,6 +177,7 @@ generate_sourcelists("./")
 #============= TOP-LEVEL TARGETS ==================================
 add_custom_target(test echo "Tests passed.")
 add_custom_target(code_generation ALL echo "Code generation done.")
+add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
 
 #============= INSTALLER STUFF ====================================
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})

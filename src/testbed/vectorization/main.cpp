@@ -206,6 +206,127 @@ public:
     double temp;
 };
 
+class JacobiCellStraightforwardNT
+{
+public:
+    typedef Stencils::VonNeumann<3, 1> Stencil;
+    typedef Topologies::Torus<3>::Topology Topology;
+  
+    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    {};
+
+    JacobiCellStraightforwardNT(double t = 0) :
+        temp(t)
+    {}
+
+    static int nanoSteps()
+    {
+        return 1;
+    }
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
+    {
+        temp = (hood[FixedCoord<0,  0, -1>()].temp +
+                hood[FixedCoord<0, -1,  0>()].temp +
+                hood[FixedCoord<1,  0,  0>()].temp +
+                hood[FixedCoord<0,  0,  0>()].temp +
+                hood[FixedCoord<1,  0,  0>()].temp +
+                hood[FixedCoord<0,  1,  0>()].temp +
+                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
+    }
+
+    template<typename NEIGHBORHOOD>
+    static void updateLine(JacobiCellStraightforwardNT *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    {
+        if (((*x) % 2) == 1) {
+            target[*x].update(hood, 0);
+            ++(*x);
+        }
+
+        __m128d oneSeventh = _mm_set_pd(1.0/7.0, 1.0/7.0);
+
+        for (; (*x) < (endX - 8); (*x) += 8) {
+            __m128d accu0 = _mm_load_pd(&hood[FixedCoord< 0, 0, 0>()].temp);
+            __m128d accu1 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
+            __m128d accu2 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
+            __m128d accu3 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
+
+            __m128d buff0 = _mm_loadu_pd(&hood[FixedCoord<-1, 0, 0>()].temp);
+            __m128d buff1 = _mm_loadu_pd(&hood[FixedCoord< 1, 0, 0>()].temp);
+            __m128d buff2 = _mm_loadu_pd(&hood[FixedCoord< 3, 0, 0>()].temp);
+            __m128d buff3 = _mm_loadu_pd(&hood[FixedCoord< 5, 0, 0>()].temp);
+            accu0 = _mm_add_pd(accu0, buff0);
+            accu1 = _mm_add_pd(accu1, buff1);
+            accu2 = _mm_add_pd(accu2, buff2);
+            accu3 = _mm_add_pd(accu3, buff3);
+
+            buff0 = _mm_loadu_pd(&hood[FixedCoord< 1, 0, 0>()].temp);
+            buff1 = _mm_loadu_pd(&hood[FixedCoord< 3, 0, 0>()].temp);
+            buff2 = _mm_loadu_pd(&hood[FixedCoord< 5, 0, 0>()].temp);
+            buff3 = _mm_loadu_pd(&hood[FixedCoord< 7, 0, 0>()].temp);
+            accu0 = _mm_add_pd(accu0, buff0);
+            accu1 = _mm_add_pd(accu1, buff1);
+            accu2 = _mm_add_pd(accu2, buff2);
+            accu3 = _mm_add_pd(accu3, buff3);
+
+            buff0 = _mm_load_pd(&hood[FixedCoord< 0, -1, 0>()].temp);
+            buff1 = _mm_load_pd(&hood[FixedCoord< 2, -1, 0>()].temp);
+            buff2 = _mm_load_pd(&hood[FixedCoord< 4, -1, 0>()].temp);
+            buff3 = _mm_load_pd(&hood[FixedCoord< 6, -1, 0>()].temp);
+            accu0 = _mm_add_pd(accu0, buff0);
+            accu1 = _mm_add_pd(accu1, buff1);
+            accu2 = _mm_add_pd(accu2, buff2);
+            accu3 = _mm_add_pd(accu3, buff3);
+
+            buff0 = _mm_load_pd(&hood[FixedCoord< 0,  1, 0>()].temp);
+            buff1 = _mm_load_pd(&hood[FixedCoord< 2,  1, 0>()].temp);
+            buff2 = _mm_load_pd(&hood[FixedCoord< 4,  1, 0>()].temp);
+            buff3 = _mm_load_pd(&hood[FixedCoord< 6,  1, 0>()].temp);
+            accu0 = _mm_add_pd(accu0, buff0);
+            accu1 = _mm_add_pd(accu1, buff1);
+            accu2 = _mm_add_pd(accu2, buff2);
+            accu3 = _mm_add_pd(accu3, buff3);
+
+            buff0 = _mm_load_pd(&hood[FixedCoord< 0, 0, -1>()].temp);
+            buff1 = _mm_load_pd(&hood[FixedCoord< 2, 0, -1>()].temp);
+            buff2 = _mm_load_pd(&hood[FixedCoord< 4, 0, -1>()].temp);
+            buff3 = _mm_load_pd(&hood[FixedCoord< 6, 0, -1>()].temp);
+            accu0 = _mm_add_pd(accu0, buff0);
+            accu1 = _mm_add_pd(accu1, buff1);
+            accu2 = _mm_add_pd(accu2, buff2);
+            accu3 = _mm_add_pd(accu3, buff3);
+
+            buff0 = _mm_load_pd(&hood[FixedCoord< 0, 0, 1>()].temp);
+            buff1 = _mm_load_pd(&hood[FixedCoord< 2, 0, 1>()].temp);
+            buff2 = _mm_load_pd(&hood[FixedCoord< 4, 0, 1>()].temp);
+            buff3 = _mm_load_pd(&hood[FixedCoord< 6, 0, 1>()].temp);
+            accu0 = _mm_add_pd(accu0, buff0);
+            accu1 = _mm_add_pd(accu1, buff1);
+            accu2 = _mm_add_pd(accu2, buff2);
+            accu3 = _mm_add_pd(accu3, buff3);
+
+            accu0 = _mm_mul_pd(accu0, oneSeventh);
+            accu1 = _mm_mul_pd(accu1, oneSeventh);
+            accu2 = _mm_mul_pd(accu2, oneSeventh);
+            accu3 = _mm_mul_pd(accu3, oneSeventh);
+
+            _mm_stream_pd(&target[*x + 0].temp, accu0);
+            _mm_stream_pd(&target[*x + 2].temp, accu1);
+            _mm_stream_pd(&target[*x + 4].temp, accu2);
+            _mm_stream_pd(&target[*x + 6].temp, accu3);
+        }
+
+        for (; *x < endX; ++(*x)) {
+            target[*x].update(hood, 0);
+        }
+
+
+    }
+
+    double temp;
+};
+
 class QuadM128
 {
 public:
@@ -485,9 +606,10 @@ void benchmark(std::string name)
 
 int main(int argc, char **argv)
 {
-    benchmark<JacobiCellSimple         >("JacobiCellSimple");
-    benchmark<JacobiCellMagic          >("JacobiCellMagic");
-    benchmark<JacobiCellStraightforward>("JacobiCellStraightforward");
-    benchmark<JacobiCellStreakUpdate   >("JacobiCellStreakUpdate");
+    benchmark<JacobiCellSimple           >("JacobiCellSimple");
+    benchmark<JacobiCellMagic            >("JacobiCellMagic");
+    benchmark<JacobiCellStraightforward  >("JacobiCellStraightforward");
+    benchmark<JacobiCellStraightforwardNT>("JacobiCellStraightforwardNT");
+    benchmark<JacobiCellStreakUpdate     >("JacobiCellStreakUpdate");
     return 0;
 }
