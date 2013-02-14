@@ -20,78 +20,49 @@ class ParallelMemoryWriter : public ParallelWriter<CELL_TYPE>
 public:
     static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
     typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
-    typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
+    typedef typename ParallelWriter<CELL_TYPE>::GridType WriterGridType;
     typedef SuperMap<unsigned, GridType> GridMap;
-
-    using ParallelWriter<CELL_TYPE>::distSim;
     using ParallelWriter<CELL_TYPE>::period;
 
     ParallelMemoryWriter(
-        DistributedSimulator<CELL_TYPE>* sim, 
         int period = 1,
         MPI::Comm *communicator = &MPI::COMM_WORLD) : 
-        ParallelWriter<CELL_TYPE>("foobar", sim, period),
-        boundingBox(distSim->getInitializer()->gridBox()),
+        ParallelWriter<CELL_TYPE>("foobar", period),
         mpiLayer(communicator, MPILayer::PARALLEL_MEMORY_WRITER)
     {}
-    
-    void initialized()
-    {
-        saveGrid(); 
-    }
 
-    void stepFinished()
+    virtual void stepFinished(
+        const WriterGridType& grid, 
+        const Region<DIM>& validRegion, 
+        const Coord<DIM>& globalDimensions,
+        unsigned step, 
+        WriterEvent event, 
+        bool lastCall) 
     {
-        if ((distSim->getStep() % period) == 0) {
-            saveGrid();
-        }
-    }
-    
-    GridType& getGrid(int i)
-    {
-        return grids[i];
-    }
-
-    void allDone() 
-    { 
-        saveGrid(); 
-    }
-    
-    SuperMap<unsigned, GridType> getGrids()
-    {
-        return grids;
-    }
-
-private:
-    CoordBox<DIM> boundingBox;
-    SuperMap<unsigned, GridType> grids;
-    MPILayer mpiLayer;
-
-    void saveGrid()
-    {
-        unsigned step = distSim->getStep();
-
-        if (grids[step].boundingBox() != boundingBox) {
-            grids[step].resize(boundingBox);
+        if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
+            return;
         }
 
-        const SimulatorGridType *grid;
-        const Region<DIM> *region;
-        distSim->getGridFragment(&grid, &region);
+        if (grids[step].getDimensions() != globalDimensions) {
+            grids[step].resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
+        }
 
-        grids[step].pasteGridBase(*grid, *region);
-        grids[step].atEdge() = grid->atEdge();
+        // fixme: can't we just use paste() here and delete pasteGridBase from DisplacedGrid entirely?
+        grids[step].pasteGridBase(grid, validRegion);
+        grids[step].atEdge() = grid.atEdge();
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
             for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
+                // fixme: do we really need this barrier?
                 mpiLayer.barrier();
 
+                // fixme: "extract method" refactoring for clarity
                 if (sender != receiver) {
                     if (sender == mpiLayer.rank()) {
-                        mpiLayer.sendRegion(*region, receiver);
+                        mpiLayer.sendRegion(validRegion, receiver);
                         mpiLayer.sendUnregisteredRegion(
-                            grid, 
-                            *region, 
+                            &grid, 
+                            validRegion, 
                             receiver, 
                             MPILayer::PARALLEL_MEMORY_WRITER, 
                             Typemaps::lookup<CELL_TYPE>());
@@ -110,6 +81,21 @@ private:
             }
         }
     }
+    
+    GridType& getGrid(int i)
+    {
+        return grids[i];
+    }
+
+    SuperMap<unsigned, GridType> getGrids()
+    {
+        return grids;
+    }
+
+private:
+    SuperMap<unsigned, GridType> grids;
+    MPILayer mpiLayer;
+
 };
 
 }

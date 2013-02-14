@@ -108,19 +108,24 @@ public:
 void runSimulation()
 {
     int outputFrequency = 1;
-    SerialSimulator<BuggyCell> sim(new BuggyCellInitializer("pic9_evil_smiley.ppm"));
-    new PPMWriter<BuggyCell, SimpleCellPlotter<BuggyCell, BuggyCellToColor> >(
-        "./smiley", 
-        &sim,
-        outputFrequency,
-        8,
-        8);
-    new TracingWriter<BuggyCell>(&sim, outputFrequency);
+    BuggyCellInitializer *init = new BuggyCellInitializer("pic9_evil_smiley.ppm");
+    SerialSimulator<BuggyCell> sim(init);
+
+    sim.addWriter(
+        new PPMWriter<BuggyCell, SimpleCellPlotter<BuggyCell, BuggyCellToColor> >(
+            "./smiley", 
+            outputFrequency,
+            8,
+            8));
+    sim.addWriter(
+        new TracingWriter<BuggyCell>(
+            outputFrequency, 
+            init->maxSteps()));
 
     sim.run();
 }
 
-int main(int, char *[])
+int main(int argc, char **argv)
 {
     runSimulation();
     return 0;

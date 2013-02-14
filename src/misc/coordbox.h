@@ -66,8 +66,8 @@ public:
     std::string toString() const
     {
         std::ostringstream temp;
-        temp << "origin: " << origin << "\n"
-             << "dimensions: " << dimensions << "\n";
+        temp << "CoordBox<" << DIM << ">(origin: " << origin << ", "
+             << "dimensions: " << dimensions << ")";
         return temp.str();
     }
 

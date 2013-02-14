@@ -153,7 +153,7 @@ class CellToColor
 public:
     Color operator()(const Cell& cell)
     {
-        switch(cell.state) {
+        switch (cell.state) {
         case Cell::EMPTY:
             return Color::BLACK;
         case Cell::FOOD:
@@ -204,32 +204,32 @@ private:
 class AntTracer : public TracingWriter<Cell>
 {
 public:
-    using TracingWriter<Cell>::sim;
-
     AntTracer(
-        MonolithicSimulator<Cell> *sim,
-        const int& period) :
-        TracingWriter<Cell>(sim, period)
+        const unsigned period,
+        const unsigned maxSteps ) :
+        TracingWriter<Cell>(period, maxSteps)
     {}
 
-    virtual void stepFinished()
+    virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event) 
     {
-        TracingWriter<Cell>::stepFinished();
+        TracingWriter<Cell>::stepFinished(grid, step, event);
 
-        if ((sim->getStep() % ParallelWriter<Cell>::period) != 0) return;
+        if ((step % ParallelWriter<Cell>::period) != 0) {
+            return;
+        }
 
-        const Grid<Cell> *grid = sim->getGrid();
         int numAnts = 0;
         int numFood = 0;
         
-        for(unsigned y = 0; y < grid->getDimensions().y(); ++y) {
-            for(unsigned x = 0; x < grid->getDimensions().x(); ++x) {
-                if ((*grid)[Coord<2>(x, y)].isAnt())
+        for(unsigned y = 0; y < grid.getDimensions().y(); ++y) {
+            for(unsigned x = 0; x < grid.getDimensions().x(); ++x) {
+                if (grid[Coord<2>(x, y)].isAnt())
                     ++numAnts;
-                if ((*grid)[Coord<2>(x, y)].containsFood())
+                if (grid[Coord<2>(x, y)].containsFood())
                     ++numFood;
             }
         }
+
         std::cout << "  numAnts: " << numAnts << "\n"
                   << "  numFood: " << numFood << "\n";
     }
@@ -239,19 +239,23 @@ void runSimulation()
 {
     srand(1234);
     int outputFrequency = 1;
-    SerialSimulator<Cell> sim(new CellInitializer());
-    new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-        "./ants", 
-        &sim,
-        outputFrequency,
-        8,
-        8);
-    new AntTracer(&sim, outputFrequency);
+    CellInitializer *init = new CellInitializer();
+    SerialSimulator<Cell> sim(init);
+    sim.addWriter(
+        new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+            "./ants", 
+            outputFrequency,
+            8,
+            8));
+    sim.addWriter(
+        new AntTracer(
+            outputFrequency,
+            init->maxSteps()));
 
     sim.run();
 }
 
-int main(int, char *[])
+int main(int argc, char **argv)
 {
     runSimulation();
     return 0;

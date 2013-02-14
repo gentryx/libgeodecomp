@@ -151,8 +151,9 @@
             flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
             TS_ASSERT(flag);                                            \
             ollKorrect &= flag;                                         \
-            if (!flag)                                                  \
+            if (!flag) {                                                \
                 message << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
+            }                                                           \
         }                                                               \
     }
 

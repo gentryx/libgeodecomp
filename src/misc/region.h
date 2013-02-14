@@ -181,6 +181,9 @@ public:
 };
 
 template<int DIM> 
+class RegionLookupHelper;
+
+template<int DIM> 
 class RegionInsertHelper;
 
 template<int DIM> 
@@ -195,6 +198,7 @@ class RegionRemoveHelper;
 template<int DIM>
 class Region
 {
+    template<int MY_DIM> friend class RegionLookupHelper;
     template<int MY_DIM> friend class RegionInsertHelper;
     template<int MY_DIM> friend class RegionRemoveHelper;
     friend class RegionTest;
@@ -260,7 +264,7 @@ public:
             return !(*this == other);
         }
 
-        inline const Streak<DIM> operator*() const
+        inline const Streak<DIM>& operator*() const
         {
             return streak;
         }
@@ -359,15 +363,17 @@ public:
 
     inline const CoordBox<DIM>& boundingBox() const
     {
-        if (geometryCacheTainted)
+        if (geometryCacheTainted) {
             resetGeometryCache();
+        }
         return myBoundingBox;
     }
 
     inline const long& size() const
     {
-        if (geometryCacheTainted)
+        if (geometryCacheTainted) {
             resetGeometryCache();
+        }
         return mySize;
     }
 
@@ -433,7 +439,7 @@ public:
         }
 
         return ret;
-    }
+    } 
        
     inline bool operator==(const Region<DIM>& other) const
     {
@@ -444,6 +450,22 @@ public:
         }
             
         return true;
+    }
+
+    bool count(const Streak<DIM>& s) const
+    {
+        return RegionLookupHelper<DIM - 1>()(*this, s);
+    }
+
+    bool count(const Coord<DIM>& c) const
+    {
+        return RegionLookupHelper<DIM - 1>()(*this, Streak<DIM>(c, c[0] + 1));
+    }
+
+    template<typename ADDEND>
+    inline void insert(const ADDEND& a)
+    {
+        *this << a;
     }
 
     inline Region& operator<<(const Streak<DIM>& s)
@@ -633,7 +655,7 @@ private:
             Coord<DIM> max = someStreak.origin;
 
             mySize = 0;
-            for (StreakIterator i = beginStreak(); 
+            for (StreakIterator i = beginStreak();
                  i != endStreak(); ++i) {
                 Coord<DIM> left = i->origin;
                 Coord<DIM> right = i->origin;
@@ -722,6 +744,95 @@ private:
         }
     }
 };
+
+template<int DIM>
+class RegionLookupHelper : public RegionCommonHelper
+{
+public:
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
+    {
+        const VecType& indices = region.indices[DIM];
+        return (*this)(region, s, 0, indices.size());
+    }
+
+    template<int MY_DIM>
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, const int& end)
+    {
+        int c = s.origin[DIM];
+        const VecType& indices = region.indices[DIM];
+
+        VecType::const_iterator i = 
+            std::upper_bound(
+                indices.begin() + start, 
+                indices.begin() + end, 
+                IntPair(c, 0), 
+                RegionCommonHelper::pairCompareFirst);
+
+        int nextLevelStart = 0;
+        int nextLevelEnd = 0;
+
+        if (i != (indices.begin() + start)) {
+            VecType::const_iterator entry = i;
+            --entry;
+
+            // recurse if found
+            if (entry->first == c) {
+                nextLevelStart = entry->second;
+                nextLevelEnd = region.indices[DIM - 1].size();
+                if (i != indices.end()) {
+                    nextLevelEnd = i->second;
+                }
+
+                return RegionLookupHelper<DIM-1>()(
+                    region,
+                    s,
+                    nextLevelStart, 
+                    nextLevelEnd);
+            } 
+        }
+
+        return false;
+    }
+};
+
+// unify insert/lookup/remove helpers?
+template<>
+class RegionLookupHelper<0> : public RegionCommonHelper
+{
+public:
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
+    {
+        IntPair curStreak(s.origin.x(), s.endX);
+        const VecType& indices = region.indices[0];
+
+        VecType::const_iterator cursor = 
+            std::upper_bound(indices.begin() + start, indices.begin() + end, 
+                             curStreak, RegionCommonHelper::pairCompareFirst);
+        // This will yield the streak AFTER the current origin
+        // c. We can't really use lower_bound() as this doesn't
+        // replace the < operator by >= but rather by <=, which is
+        // IMO really sick...
+        if (cursor != (indices.begin() + start)) {
+            // ...so we revert to landing one past the streak we're
+            // searching and moving back afterwards:
+            cursor--;
+        }
+
+        return (cursor->first <= s.origin[0]) && (cursor->second >= s.endX);
+    }
+
+};
+
+// fixme check that all helpers are declared inline
+// move all helpers to dedicated namespace
 
 template<int DIM>
 class RegionInsertHelper : public RegionCommonHelper

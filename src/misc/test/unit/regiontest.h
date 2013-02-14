@@ -288,6 +288,98 @@ public:
         TS_ASSERT_EQUALS(r.indices[2].size(), 3);
     }
 
+    void testInsertVsOperator()
+    {
+        Region<2> a;
+        Region<2> b;
+        TS_ASSERT_EQUALS(a, b);
+
+        a << Coord<2>(1, 2)
+          << Coord<2>(1, 4);
+        b.insert(Coord<2>(1, 2));
+        b.insert(Coord<2>(1, 4));
+        TS_ASSERT_EQUALS(a, b);
+    }
+
+    void testCount()
+    {
+        Region<2> r1;
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(-1, -1);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(-1, 0);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(1, 0);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
+
+        r1 << Coord<2>(0, 0);
+        TS_ASSERT_EQUALS(1, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
+
+        Region<2> r2;
+        r2 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(1, r2.count(Streak<2>(Coord<2>(1, 1), 2)));
+
+        Region<3> r3;
+        TS_ASSERT_EQUALS(0, r3.count(Streak<3>(Coord<3>(1, 2, 3), 2)));
+        r3 << Coord<3>(1, 2, 3);
+        TS_ASSERT_EQUALS(1, r3.count(Streak<3>(Coord<3>(1, 2, 3), 2)));
+    }
+
+    void testCountCoord()
+    {
+        Region<2> r1;
+        TS_ASSERT_EQUALS(0, r1.count(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(0, r1.count(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(-1, -1);
+        TS_ASSERT_EQUALS(0, r1.count(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(-1, 0);
+        TS_ASSERT_EQUALS(0, r1.count(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(1, 0);
+        TS_ASSERT_EQUALS(0, r1.count(Coord<2>(0, 0)));
+
+        r1 << Coord<2>(0, 0);
+        TS_ASSERT_EQUALS(1, r1.count(Coord<2>(0, 0)));
+
+        Region<2> r2;
+        r2 << Coord<2>(1, 1);
+        TS_ASSERT_EQUALS(1, r2.count(Coord<2>(1, 1)));
+
+        Region<3> r3;
+        TS_ASSERT_EQUALS(0, r3.count(Coord<3>(1, 2, 3)));
+        r3 << Coord<3>(1, 2, 3);
+        TS_ASSERT_EQUALS(1, r3.count(Coord<3>(1, 2, 3)));
+    }
+
+    void testCountStreak()
+    {
+        Region<2> r1;
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
+        
+        r1 << Coord<2>(2, 1);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
+        
+        r1 << Coord<2>(3, 1);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
+
+        r1 << Coord<2>(5, 1);
+        TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
+
+        r1 << Coord<2>(4, 1);
+        TS_ASSERT_EQUALS(1, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
+        TS_ASSERT_EQUALS(1, r1.count(Streak<2>(Coord<2>(3, 1), 6)));
+    }
+
     void testStreakIteration()
     {
         SuperVector<Streak<2> > actual, expected;
@@ -314,6 +406,23 @@ public:
             Streak<2>(Coord<2>(10, 20), 30),
             Streak<2>(Coord<2>( 5, 30), 60);
         TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testEmptyStreakIteration()
+    {
+        Region<2> region1;
+        Region<2> region2;
+        Region<2> region;
+ 
+        region1 << Streak<2>(Coord<2>(0, 0), 10);
+        region2 << Streak<2>(Coord<2>(0, 5), 10);
+        region = region1 & region2;
+
+        for (Region<2>::StreakIterator i = region.beginStreak();
+             i != region.endStreak(); 
+             ++i) {
+            TS_FAIL("loop should not execute!");
+        }
     }
 
     void testUnorderedInsert()

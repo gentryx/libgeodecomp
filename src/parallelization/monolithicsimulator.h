@@ -33,7 +33,7 @@ public:
      * MonolithicSimulator will assume that it now owns the Writer, so
      * it'll delete it upon destruction.
      */
-    virtual void registerWriter(Writer<CELL_TYPE> *writer)
+    virtual void addWriter(Writer<CELL_TYPE> *writer)
     {
         writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
     }

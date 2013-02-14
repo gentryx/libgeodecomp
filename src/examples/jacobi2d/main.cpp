@@ -3,8 +3,9 @@
  * add a PPMWriter for output.
  */
 #include <libgeodecomp/io/simpleinitializer.h>
-// #include <libgeodecomp/io/ppmwriter.h>
-// #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp;
@@ -25,7 +26,8 @@ public:
         return 1; 
     }
 
-    inline Cell(const double& v=0) : temp(v)
+    inline Cell(const double& v = 0) : 
+        temp(v)
     {}  
 
     template<typename COORD_MAP>
@@ -44,7 +46,7 @@ public:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    CellInitializer() : SimpleInitializer<Cell>(Coord<2>(4096, 4096), 100)
+    CellInitializer() : SimpleInitializer<Cell>(Coord<2>(512, 512), 100)
     {}
 
     virtual void grid(GridBase<Cell, 2> *ret) const
@@ -56,44 +58,50 @@ public:
         for (int y = 0; y < 250; ++y) {
             for (int x = 0; x < 250; ++x) {
                 Coord<2> c(x + offsetX, y + offsetY);
-                if (rect.inBounds(c))
+                if (rect.inBounds(c)) {
                     ret->at(c) = Cell(0.99999999999);
+                }
             }
         }
     }
 };
 
-// fixme
-// class CellToColor {
-// public:
-//     Color operator()(const Cell& cell)
-//     {
-//         if (cell.temp < 0)
-//             return Color(0, 0, 0);
-//         if (cell.temp < 0.25)
-//             return Color(0, (cell.temp - 0.0) * 1020, 255);
-//         if (cell.temp < 0.50)
-//             return Color(0, 255, 255 - (cell.temp - 0.25) * 1020);
-//         if (cell.temp < 0.75)
-//             return Color((cell.temp - 0.5) * 1020, 255, 0);
-//         if (cell.temp < 1.00)
-//             return Color(255, 255 - (cell.temp - 0.75) * 1020, 0);
-//         return Color(255, 255, 255);
-//     }
-// };
+class CellToColor {
+public:
+    Color operator()(const Cell& cell)
+    {
+        if (cell.temp < 0) {
+            return Color(0, 0, 0);
+        }
+        if (cell.temp < 0.25) {
+            return Color(0, (cell.temp - 0.0) * 1020, 255);
+        }
+        if (cell.temp < 0.50) {
+            return Color(0, 255, 255 - (cell.temp - 0.25) * 1020);
+        }
+        if (cell.temp < 0.75) {
+            return Color((cell.temp - 0.5) * 1020, 255, 0);
+        }
+        if (cell.temp < 1.00) {
+            return Color(255, 255 - (cell.temp - 0.75) * 1020, 0);
+        }
+        return Color(255, 255, 255);
+    }
+};
 
 void runSimulation()
 {
     SerialSimulator<Cell> 
         sim(new CellInitializer());
-    // fixme
-    // new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+
+    int outputFrequency = 1;
+    // sim.addWriter(
+    //     new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
     //         "./jacobi", 
-    //         &sim,
     //         outputFrequency,
     //         1,
-    //         1);
-    // new TracingWriter<Cell>(&sim, outputFrequency);
+    //         1));
+    sim.addWriter(new TracingWriter<Cell>(outputFrequency, 100));
 
     sim.run();
 }

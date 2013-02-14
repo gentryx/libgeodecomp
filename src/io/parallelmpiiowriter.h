@@ -14,41 +14,50 @@ class ParallelMPIIOWriter : public ParallelWriter<CELL_TYPE>
 {    
 public:
     friend class ParallelMPIIOWriterTest;
-
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
-
-    using ParallelWriter<CELL_TYPE>::distSim;
-    using ParallelWriter<CELL_TYPE>::period;
-    using ParallelWriter<CELL_TYPE>::prefix;
+    typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
+    typedef typename CELL_TYPE::Topology Topology;
+    static const int DIM = Topology::DIMENSIONS;
 
     ParallelMPIIOWriter(
         const std::string& prefix, 
-        DistributedSimulator<CELL_TYPE> *sim, 
-        const unsigned& period, 
+        const unsigned period, 
+        const unsigned maxSteps,
         const MPI::Intracomm& communicator = MPI::COMM_WORLD,
         MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
-        ParallelWriter<CELL_TYPE>(prefix, sim, period),
+        ParallelWriter<CELL_TYPE>(prefix, period),
+        maxSteps(maxSteps),
         comm(communicator),
         datatype(mpiDatatype)
     {}
 
-    virtual void initialized() 
+    virtual void stepFinished(
+        const GridType& grid, 
+        const Region<Topology::DIMENSIONS>& validRegion, 
+        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        unsigned step, 
+        WriterEvent event, 
+        bool lastCall) 
     {
-        writeGrid();
-    }
+        if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
+            return;
+        }
 
-    virtual void stepFinished()
-    {
-        if ((distSim->getStep() % period) == 0) 
-            writeGrid();
-    }
-
-    virtual void allDone()
-    {
-        writeGrid();
+        MPIIO<CELL_TYPE>::writeRegion(
+            grid, 
+            globalDimensions,
+            step,
+            maxSteps,
+            filename(step),
+            validRegion,
+            datatype,
+            comm);
     }
 
 private:
+    using ParallelWriter<CELL_TYPE>::period;
+    using ParallelWriter<CELL_TYPE>::prefix;
+
+    unsigned maxSteps;
     MPI::Intracomm comm;
     MPI::Datatype datatype;
 
@@ -57,24 +66,6 @@ private:
         std::ostringstream buf;
         buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";
         return buf.str();
-    }
-
-    void writeGrid()
-    {
-        const Region<DIM> *region;
-        const typename DistributedSimulator<CELL_TYPE>::GridType *grid;
-        distSim->getGridFragment(&grid, &region);
-        unsigned step = distSim->getStep();
-
-        MPIIO<CELL_TYPE>::writeRegion(
-            *grid, 
-            distSim->getInitializer()->gridDimensions(),
-            step,
-            distSim->getInitializer()->maxSteps(),
-            filename(step),
-            *region,
-            datatype,
-            comm);
     }
 };
 

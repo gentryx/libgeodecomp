@@ -1,7 +1,6 @@
 #ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 #define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
 
-#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
@@ -105,6 +104,7 @@ private:
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
+                i->origin,
                 *oldGrid,
                 &*newGrid,
                 curNanoStep);
@@ -169,8 +169,8 @@ private:
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
 
-        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
-        newGrid.reset(new GridType(gridBox, CELL_TYPE(), topoDim));
+        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         initializer->grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
@@ -228,6 +228,7 @@ public:
                  ++i) {
                 UpdateFunctor<CELL_TYPE>()(
                     *i,
+                    i->origin,
                     *oldGrid,
                     &*newGrid,
                     curNanoStep);

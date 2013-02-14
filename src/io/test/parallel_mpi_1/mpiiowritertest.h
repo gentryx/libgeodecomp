@@ -34,9 +34,11 @@ public:
         SerialSimulator<TestCell<3> > sim(init);
         MPIIOWriter<TestCell<3> > *writer = new MPIIOWriter<TestCell<3> >(
             "testmpiiowriter",   
-            &sim,
-            4);
-        MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(&sim, 4);
+            4,
+            init->maxSteps());
+        MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(4);
+        sim.addWriter(writer);
+        sim.addWriter(memoryWriter);
 
         sim.run();
 

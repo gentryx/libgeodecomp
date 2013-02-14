@@ -31,9 +31,10 @@ public:
 
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
-        const CELL_TYPE &_defaultCell=CELL_TYPE(),
+        const CELL_TYPE &defaultCell=CELL_TYPE(),
+        const CELL_TYPE &edgeCell=CELL_TYPE(),
         const Coord<DIM>& topologicalDimensions=Coord<DIM>()) :
-        delegate(box.dimensions, _defaultCell),
+        delegate(box.dimensions, defaultCell, edgeCell),
         origin(box.origin),
         topoDimensions(topologicalDimensions)
     { }
@@ -80,6 +81,11 @@ public:
         return delegate.getEdgeCell();
     }
 
+    inline void setOrigin(const Coord<DIM>& newOrigin) 
+    {
+        origin = newOrigin;
+    }
+
     inline void resize(const CoordBox<DIM>& box)
     {
         delegate.resize(box.dimensions);
@@ -114,10 +120,15 @@ public:
     {
         return getEdgeCell();
     }
-
+    
     virtual const CELL_TYPE& atEdge() const
     {
         return getEdgeCell();
+    }
+
+    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
+    {
+        delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
     }
 
     template<typename GRID_TYPE>
@@ -169,10 +180,11 @@ public:
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "DisplacedGrid\n"
+        message << "DisplacedGrid<" << DIM << ">(\n"
                 << "  origin: " << origin << "\n"
                 << "  delegate:\n"
-                << delegate;
+                << delegate
+                << ")";
         return message.str();
     }
 

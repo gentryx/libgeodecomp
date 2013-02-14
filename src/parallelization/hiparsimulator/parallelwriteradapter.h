@@ -25,14 +25,18 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
         Simulator * _sim,
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
         const long& firstStep,
-        const long& lastStep) :
-        writer(_writer),
-        sim(_sim),
+        const long& lastStep,
+        Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions,
+        bool lastCall) :
+        sim(sim),
+        writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
-        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps())
+        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
+        globalGridDimensions(globalGridDimensions),
+        lastCall(lastCall)
     {
         reload(firstNanoStep);
         reload(lastNanoStep);
@@ -48,26 +52,31 @@ public:
         }
         requestedNanoSteps.erase_min();
 
+        WriterEvent event = WRITER_STEP_FINISHED;
         if (nanoStep == firstNanoStep) {
-            writer->initialized(grid, validRegion);
-        } else {
-            if (nanoStep == lastNanoStep) {
-                writer->allDone(grid, validRegion);
-            } else {
-                writer->stepFinished(grid, validRegion, nanoStep);
-            }
+            event = WRITER_INITIALIZED;
+        }
+        if (nanoStep == lastNanoStep) {
+            event = WRITER_ALL_DONE;
         }
 
-        // delete the pointers from the Simulator to prevent accesses
-        // to stale pointers:
+        writer->stepFinished(
+            grid, 
+            validRegion, 
+            globalGridDimensions, 
+            nanoStep / CELL_TYPE::nanoSteps(), 
+            event, 
+            lastCall);
         reload();
     }
 
 private:
-    boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
     Simulator * sim;
+    boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
     long firstNanoStep;
     long lastNanoStep;
+    bool lastCall;
+    Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions;
 
     long nextOutputStep(const long& step)
     {

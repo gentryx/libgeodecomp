@@ -1,0 +1,32 @@
+#!/usr/bin/ruby
+require 'pp'
+
+data_sets = []
+
+Dir.glob("data.*.txt").each do |filename|
+  filename =~ /data\.(.+)\.txt/
+  kernel_name = $1
+  data_sets << [filename, kernel_name]
+end
+
+gnuplot_commands = <<EOF
+set terminal png
+set output 'plot.png'
+set xlabel 'Array Elements'
+set ylabel 'GLUPS'
+set logscale x
+set xtics ('16' 16, '32' 32, '64' 64, '128' 128, '256' 256, '512' 512, '1k' 1024)
+set xrange [16:1024]
+set yrange [0:1]
+EOF
+
+plots = data_sets.map do |set|
+  "'#{set[0]}' using 1:2 title '#{set[1]}' with linespoints"
+end
+
+gnuplot_commands = gnuplot_commands + "plot" + plots.join(", ")
+
+system "gnuplot <<EOF
+#{gnuplot_commands}
+EOF"
+puts 

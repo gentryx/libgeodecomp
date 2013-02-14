@@ -13,7 +13,6 @@
 
 using namespace LibGeoDecomp;
 
-//fixme: rename this to lid driven cavity?
 class Cell
 {
 public:
@@ -57,8 +56,9 @@ public:
         state(s)
     {
         comp[C] = v;
-        for (int i = 1; i < 19; ++i)
+        for (int i = 1; i < 19; ++i) {
             comp[i] = 0.0;
+        }
         density = 1.0;
     }  
 
@@ -67,7 +67,7 @@ public:
     {
         *this = neighborhood[FixedCoord<0, 0>()];
 
-        switch(state) {
+        switch (state) {
         case LIQUID:
             updateFluid(neighborhood);
             break;
@@ -346,17 +346,25 @@ void runSimulation()
     objType.Commit();
 
     int outputFrequency = 1000;
+    CellInitializer *init = new CellInitializer(Coord<3>(400, 400, 400), 2000000);
+
     StripingSimulator<Cell> sim(
-        new CellInitializer(Coord<3>(400, 400, 400), 2000000),
+        init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
         1000000,
         objType);
 
-    new BOVWriter<Cell, DensitySelector>("lbm.density", &sim, outputFrequency);
-    new BOVWriter<Cell, VelocitySelector>("lbm.velocity", &sim, outputFrequency);
+    sim.addWriter(
+        new BOVWriter<Cell, DensitySelector>("lbm.density", outputFrequency));
+    sim.addWriter(
+        new BOVWriter<Cell, VelocitySelector>("lbm.velocity", outputFrequency));
 
-    if (MPILayer().rank() == 0)
-        new TracingWriter<Cell>(&sim, 20);
+    if (MPILayer().rank() == 0) {
+        sim.addWriter(
+            new TracingWriter<Cell>(
+                20, 
+                init->maxSteps()));
+    }
 
     sim.run();
 }

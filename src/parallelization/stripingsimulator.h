@@ -43,6 +43,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::writers;
     using DistributedSimulator<CELL_TYPE>::stepNum;
+    using DistributedSimulator<CELL_TYPE>::steerers;
 
     StripingSimulator(
         Initializer<CELL_TYPE> *_initializer, 
@@ -95,11 +96,21 @@ public:
     virtual void step()
     {   
         balanceLoad();
+
+        // notify all registered Steerers
+        waitForGhostRegions();
+        for(unsigned i = 0; i < steerers.size(); ++i) {
+            if (stepNum % steerers[i]->getPeriod() == 0) {
+                steerers[i]->nextStep(curStripe, regionWithOuterGhosts, stepNum);
+            }
+        }
+
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
         }
         stepNum++;    
-        handleOutput();
+
+        handleOutput(WRITER_STEP_FINISHED);
     }
 
     /**
@@ -110,25 +121,13 @@ public:
         initSimulation();
 
         stepNum = initializer->startStep();
-        for (unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->initialized();
-        }
+        handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
             step();
         }
     
-        for (unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->allDone();        
-        }
-    }
-
-    virtual void getGridFragment(
-        const GridBase<CELL_TYPE, DIM> **grid, 
-        const Region<DIM> **validRegion)
-    {
-        *grid = curStripe;
-        *validRegion = &region;
+        handleOutput(WRITER_ALL_DONE);
     }
 
     inline const unsigned& getLoadBalancingPeriod() const
@@ -163,6 +162,7 @@ private:
     Region<DIM> innerLowerGhostRegion;
     Region<DIM> outerUpperGhostRegion;
     Region<DIM> outerLowerGhostRegion;
+    Region<DIM> regionWithOuterGhosts;
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
@@ -243,10 +243,16 @@ private:
         mpilayer.wait(GHOSTREGION_BETA);
     }
 
-    void handleOutput()
+    void handleOutput(WriterEvent event)
     {
         for(unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->stepFinished();
+            writers[i]->stepFinished(
+                *curStripe,
+                region,
+                gridDimensions(),
+                this->getStep(),
+                event, 
+                true);
         }
     }
 
@@ -276,6 +282,7 @@ private:
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
+                i->origin,
                 *curStripe,
                 newStripe,
                 nanoStep);
@@ -359,6 +366,7 @@ private:
         innerLowerGhostRegion = fillRegion(endRow - ghostHeightLower, endRow);
         outerUpperGhostRegion = fillRegion(startRow - ghostHeightUpper, startRow);
         outerLowerGhostRegion = fillRegion(endRow, endRow + ghostHeightLower);
+        regionWithOuterGhosts = outerUpperGhostRegion + region + outerLowerGhostRegion;
     }
 
     /**

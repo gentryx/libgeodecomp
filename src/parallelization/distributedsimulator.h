@@ -25,21 +25,13 @@ public:
     {}
 
     /**
-     * Returns the fragment of the current grid, which is available to
-     * the current instance.
-     */
-    virtual void getGridFragment(
-        const GridType **grid, 
-        const Region<Topology::DIMENSIONS> **validRegion) = 0;
-
-    /**
      * register @a writer which will observe the simulation. The
      * DistributedSimulator will assume that it now owns the
      * ParallelWriter, so it'll delete it upon destruction.
      *
      * fixme: replace @a by \a and @return by \returns ...
      */
-    virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
+    virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         writers << boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer);
     }

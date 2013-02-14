@@ -14,7 +14,7 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
 
-    Steerer(const unsigned& _period) :
+    Steerer(const unsigned _period) :
         period(_period)
     {}
 

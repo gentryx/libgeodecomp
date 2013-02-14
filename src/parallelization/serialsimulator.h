@@ -8,15 +8,14 @@
 namespace LibGeoDecomp {
 
 /**
- * Implements the Simulator functionality by running all calculations
- * sequencially in a single process.
+ * SerialSimulator is the simplest implementation of the simulator
+ * concept.
  */
 template<typename CELL_TYPE>
 class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
-    friend class SerialSimulatorTest;
-    friend class PPMWriterTest;
 public:
+    friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIMENSIONS;
@@ -24,8 +23,8 @@ public:
     /**
      * creates a SerialSimulator with the given @a initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *_initializer) : 
-        MonolithicSimulator<CELL_TYPE>(_initializer)
+    SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
+        MonolithicSimulator<CELL_TYPE>(initializer)
     {
         Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
@@ -68,7 +67,10 @@ public:
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {
             if (stepNum % writers[i]->getPeriod() == 0) {
-                writers[i]->stepFinished();
+                writers[i]->stepFinished(
+                    *getGrid(),
+                    getStep(),
+                    WRITER_STEP_FINISHED);
             }
         }
     }
@@ -81,7 +83,10 @@ public:
         initializer->grid(curGrid);
         stepNum = 0;
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->initialized();
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_INITIALIZED);
         }
 
         for (stepNum = initializer->startStep(); 
@@ -90,7 +95,10 @@ public:
         }
 
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->allDone();        
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_ALL_DONE);
         }
     }
 
@@ -107,6 +115,7 @@ protected:
     using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
     using MonolithicSimulator<CELL_TYPE>::writers;
+    using MonolithicSimulator<CELL_TYPE>::getStep;
 
     GridType *curGrid;
     GridType *newGrid;
@@ -119,7 +128,7 @@ protected:
         box.dimensions.x() = 1;
         for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             Streak<DIM> streak(*i, endX);
-            UpdateFunctor<CELL_TYPE>()(streak, *curGrid, newGrid, nanoStep);
+            UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
 
         std::swap(curGrid, newGrid);

@@ -107,67 +107,6 @@ public:
         TS_ASSERT_EQUALS(a, b);
     }
     
-    void testDiffDimensions()
-    {
-        int width = testGrid->getDimensions().x();
-        int height = testGrid->getDimensions().y();
-
-        TS_ASSERT_EQUALS(testGrid->diff(Grid<TestCell<2> >(*testGrid)), "");
-
-        int newWidth = width + 5;
-        int newHeight = 11;
-        std::ostringstream message;
-        message << "dimensions mismatch (is (" 
-                << CoordBox<2>(Coord<2>(),
-                               Coord<2>(width, height))
-                << "), got (" 
-                << CoordBox<2>(Coord<2>(),
-                               Coord<2>(newWidth, newHeight))
-                << "))";
-        
-        TS_ASSERT_EQUALS(testGrid->diff(
-                             Grid<TestCell<2> >(Coord<2>(newWidth, newHeight))), 
-                         message.str());
-    }
-
-    void testDiffCells()
-    {
-        Grid<TestCell<2> > other(*testGrid);
-        Coord<2> changedCoord1(1, 2);
-        Coord<2> changedCoord2(0, 4);
-        other[changedCoord1].testValue += 1;
-        other[changedCoord2].testValue -= 1;
-
-        std::ostringstream message;
-        message << "cell differences:\n\n" << 
-            "at coordinate " << changedCoord1 << "\n" << 
-            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-            (*testGrid)[changedCoord1] <<
-            "========================================\n" <<
-            other[changedCoord1] <<
-            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
-        message << 
-            "at coordinate " << changedCoord2 << "\n" << 
-            "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-            (*testGrid)[changedCoord2] <<
-            "========================================\n" <<
-            other[changedCoord2] <<
-            ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-
-        TS_ASSERT_EQUALS(testGrid->diff(other), message.str());
-    }
-
-    void testDiffEdgeCell()
-    {
-        Grid<int> muh(Coord<2>(10, 10));
-        Grid<int> kuh(muh);
-        muh[Coord<2>(-1, -1)] = 47;
-        kuh[Coord<2>(-1, -1)] = 11;
-
-        std::string message =  "cell differences:\n\nedge cell differs (self (47), other (11))\n";
-        TS_ASSERT_EQUALS(message, muh.diff(kuh));
-    }
-
     void testCopyConstructor()
     {
         Grid<int> *a1 = new Grid<int>(Coord<2>(200, 100));
@@ -251,9 +190,8 @@ public:
         fooBar[Coord<2>( 1,  0)] = 19;
         fooBar[Coord<2>( 2,  1)] = 81;
         std::string expected = 
-            "Grid\n"
-            "boundingBox: origin: (0, 0)\n"
-            "dimensions: (3, 2)\n"
+            "Grid<2>(\n"
+            "boundingBox: CoordBox<2>(origin: (0, 0), dimensions: (3, 2))\n"
             "edgeCell:\n"
             "2701\n"
             "Coord(0, 0):\n"
@@ -267,7 +205,8 @@ public:
             "Coord(1, 1):\n"
             "4711\n"
             "Coord(2, 1):\n"
-            "81\n";
+            "81\n"
+            ")";
         TS_ASSERT_EQUALS(fooBar.toString(), expected);        
     }
 
@@ -284,6 +223,52 @@ public:
         fooBar.edgeCell = 10;
         TS_ASSERT_EQUALS(fooBar.edgeCell, 10);
         TS_ASSERT_EQUALS(fooBar[Coord<2>(-1, -1)], 10);
+    }
+
+    void testFill2D()
+    {
+        CoordBox<2> insert(Coord<2>(10, 20), Coord<2>(4, 7));
+        Coord<2> dim(40, 70);
+
+        Grid<int> g(dim, -1);
+        g.fill(insert, 2);
+
+
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                Coord<2> c = Coord<2>(x, y);
+                int expected = -1;
+                if (insert.inBounds(c)) {
+                    expected = 2;
+                }
+                
+                TS_ASSERT_EQUALS(expected, g[c]);
+            }
+        }
+    }
+
+    void testFill3D()
+    {
+        CoordBox<3> insert(Coord<3>(10, 20, 15), Coord<3>(4, 7, 5));
+        Coord<3> dim(40, 70, 30);
+
+        Grid<int, Topologies::Cube<3>::Topology> g(dim, -1);
+        g.fill(insert, 2);
+
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c = Coord<3>(x, y, z);
+                    int expected = -1;
+                    if (insert.inBounds(c)) {
+                        expected = 2;
+                    }
+                
+                    TS_ASSERT_EQUALS(expected, g[c]);
+                }
+            }
+        }
     }
 
     void testDefaultTopology()
@@ -310,9 +295,11 @@ public:
     void testTorusTopology()
     {
         Grid<int, Topologies::Torus<2>::Topology> g(Coord<2>(3, 4), 0, -1);
-        for (int y = 0; y < 4; ++y)
-            for (int x = 0; x < 3; ++x)
+        for (int y = 0; y < 4; ++y) {
+            for (int x = 0; x < 3; ++x) {
                 g[Coord<2>(x, y)] = y * 10 + x;
+            }
+        }
 
         // in-bounds accesses
         TS_ASSERT_EQUALS(g[Coord<2>( 0,  0)],  0);
@@ -334,10 +321,13 @@ public:
         Grid<int, Topologies::Cube<3>::Topology> g(dim, 47, 11);
         TS_ASSERT_EQUALS(g[Coord<3>(-1, 0, 0)],  11);
 
-        for (int z=0; z < dim.z(); ++z)
-            for (int y=0; y < dim.y(); ++y)
-                for (int x=0; x < dim.x(); ++x) 
+        for (int z=0; z < dim.z(); ++z) {
+            for (int y=0; y < dim.y(); ++y) {
+                for (int x=0; x < dim.x(); ++x)  {
                     TS_ASSERT_EQUALS(g[Coord<3>(x, y, z)], 47);
+                }
+            }
+        }
     }
 
     void testCompare()
