@@ -33,6 +33,7 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
     typedef Region<Topology::DIMENSIONS> RegionType;
+    typedef Coord<Topology::DIMENSIONS> CoordType;
 
     /**
      * is the equivalent to Writer().

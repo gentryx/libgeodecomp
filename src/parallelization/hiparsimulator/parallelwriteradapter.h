@@ -35,8 +35,8 @@ public:
         writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
-        globalGridDimensions(globalGridDimensions),
-        lastCall(lastCall)
+        lastCall(lastCall),
+        globalGridDimensions(globalGridDimensions)
     {
         reload(firstNanoStep);
         reload(lastNanoStep);
