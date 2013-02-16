@@ -43,6 +43,14 @@ public:
         a.clear();
         TS_ASSERT_EQUALS(0, a.size());
     }
+
+    void testDeleteWithConstPointer()
+    {
+        FixedArray<int, 20> a;
+        a << 123;
+        const int *p = &a[0];
+        a.erase(p);
+    }
 };
 
 }
