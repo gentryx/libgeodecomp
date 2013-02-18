@@ -31,8 +31,8 @@ public:
         const long& lastStep,
         Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions,
         bool lastCall) :
-        sim(sim),
-        writer(writer),
+        sim(_sim),
+        writer(_writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
         lastCall(lastCall),
