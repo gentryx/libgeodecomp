@@ -189,11 +189,6 @@ class TestMPIParser < Test::Unit::TestCase
       "Coord<3 >" => coord3_spec
     }
 
-    puts "expected_resolved:"
-    pp expected_resolved
-    puts "resolved_classes:"
-    pp resolved_classes
-
     assert_equal(expected_resolved, resolved_classes)
   end
 

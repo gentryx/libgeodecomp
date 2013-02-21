@@ -21,6 +21,7 @@ require 'logger'
 require 'set'
 require 'datatype'
 require 'pp'
+require 'stringio'
 
 # This class is responsible for extracting all the information we need
 # from Doxygen's XML output.
@@ -37,7 +38,7 @@ class MPIParser
   def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="")
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
-    @log.level = Logger::DEBUG
+    @log.level = Logger::WARN
 
     class_files = Dir.glob("#{@path}/*.xml")
     @xml_docs = { }
@@ -54,8 +55,9 @@ class MPIParser
       klass = parse_class_name(doc.elements[xpath].text)
       @filename_cache[klass] = filename
     end
-    puts "filename_cache: "
-    pp @filename_cache
+    
+    @log.debug "filename_cache: "
+    @log.debug pp(@filename_cache)
 
     @datatype_map = Datatype.new
     @datatype_map.merge!(map_enums)
@@ -65,12 +67,18 @@ class MPIParser
     @all_classes = classes_to_be_serialized 
   end
 
+  def pp(object)
+    buffer = StringIO.new
+    PP.pp(object, buffer)
+    return buffer.string
+  end
+
   # tries to resolve all datatypes given in classes to MPI type. For
   # those classes, whose MPI type could not be found in @datatype_map,
   # it'll try to create a new MPI type map specification.
   def resolve_forest(classes)
-    puts "resolve_forest()"
-    pp classes
+    @log.info "resolve_forest()"
+    @log.debug pp(classes)
 
     classes = classes.sort
     resolved_classes = { }
@@ -79,9 +87,8 @@ class MPIParser
     @type_hierarchy_closure = @type_hierarchy_closure.union(classes)
 
     while classes.any?
-      puts "  classes:"
-      print "  "
-      pp classes
+      @log.debug "  classes:"
+      @log.debug pp(classes)
 
       num_unresolved = classes.size
 
@@ -117,7 +124,7 @@ class MPIParser
   end
 
   def used_template_parameters(klass)
-    @log.debug "used_template_parameters(#{klass})"
+    @log.info "used_template_parameters(#{klass})"
     params = []
     klass =~ /^(#@namespace::|)(.+)/
     class_name = $2
@@ -127,9 +134,9 @@ class MPIParser
       members = get_members(c)
 
       members.each do |name, spec|
-        puts "  - name: #{name}"
-        puts "    spec: "
-        pp spec
+        @log.debug "  - name: #{name}"
+        @log.debug "    spec: "
+        @log.debug pp(spec)
 
         if spec[:type] =~ /^(#@namespace::|)#{class_name}<(.+)>/
           # this will fail for constructs like Foo<Bar<int,int>,int>
@@ -145,10 +152,10 @@ class MPIParser
       end
     end
 
+    ret = params.sort.uniq
     @log.debug "used_template_parameters returns"
-    pp params.sort.uniq
-
-    return params.sort.uniq
+    @log.debug pp(ret)
+    return ret
   end
 
   def map_template_parameters(members, template_params, values)
@@ -181,18 +188,18 @@ class MPIParser
 
       template_params = template_parameters(klass)
 
-      puts "----------------------------------"
-      puts "resolve_class(#{klass})"
-      puts "members"
-      pp members
-      puts "parents"
-      pp parents
-      puts "resolved_classes #{resolved_classes.size}"
-      pp resolved_classes
-      puts "template_params"
-      pp template_params
-      puts "----------------------------------"
-      puts
+      @log.debug "----------------------------------"
+      @log.info  "resolve_class(#{klass})"
+      @log.debug "members"
+      @log.debug pp(members)
+      @log.debug "parents"
+      @log.debug pp(parents)
+      @log.debug "resolved_classes #{resolved_classes.size}"
+      @log.debug pp(resolved_classes)
+      @log.debug "template_params"
+      @log.debug pp(template_params)
+      @log.debug "----------------------------------"
+      @log.debug ""
 
       if template_params.empty?
         resolve_class_simple(klass, members, parents,
@@ -202,9 +209,8 @@ class MPIParser
       else
         used_params = used_template_parameters(klass)
 
-        puts "used_params"
-        pp used_params
-        puts
+        @log.debug "used_params"
+        @log.debug pp(used_params)
 
         used_params.each do |values|
           new_members = 
@@ -219,11 +225,10 @@ class MPIParser
 
       classes.delete(klass)
     rescue Exception => e
-      puts "failed with"
-      pp e
-      puts e.backtrace
+      @log.debug "failed with"
+      @log.debug pp(e)
+      @log.debug e.backtrace
     end
-    # puts
   end
 
   def prune_unresolvable_members(members)
@@ -279,13 +284,15 @@ class MPIParser
 
   # returns an array containing all parent classes.
   def get_parents(klass)
+    @log.info "get_parents(#{klass}"
+
     filename = class_to_filename(klass)
     doc = @xml_docs[filename]
     xpath = "doxygen/compounddef/basecompoundref"
     parents = []
     doc.elements.each(xpath) do |member| 
       stripped_member = member.text.gsub(/<\s*/, "<")
-      puts "get_parents(#{klass} yields »#{stripped_member}«"
+      @log.debug "  »#{stripped_member}«"
       parents.push stripped_member
     end   
     return parents
@@ -347,11 +354,9 @@ class MPIParser
   # is liable for extracting member information from the belonging XML node.
   def parse_member(member)
     name = member.elements["name"].text
-    @log.debug("parse_member(#{name})")
-    puts "---------member"
-    p member
-    pp member
-    puts member
+    @log.info  "parse_member(#{name})"
+    @log.debug "---------member"
+    @log.debug member
 
     spec = { 
       :type => extract_type(member),
@@ -439,12 +444,8 @@ class MPIParser
       @log.debug "  elem: #{elem}"
 
       elem.each do |elem|
-      # node = elem.find do |elem| 
-        puts "    elemelem: #{elem}"
-        puts "    elemelem.class: #{elem.class}"
         if elem.class == REXML::Element
           refid = elem.attributes["refid"]
-          puts "    refid: #{refid}"
           cardinality = refid unless refid.nil?
         end
       end
@@ -533,7 +534,7 @@ class MPIParser
   end
 
   def find_header_simple(klass)
-    puts "find_header_simple(#{klass})"
+    @log.info "find_header_simple(#{klass})"
 
     filename = class_to_filename(klass)
     doc = @xml_docs[filename]
@@ -541,7 +542,7 @@ class MPIParser
 
     doc.elements.each(xpath) do |member|
       header = member.attributes["file"]
-      puts "  header: #{header}"
+      @log.debug "  header: #{header}"
       return header if header
     end   
 
