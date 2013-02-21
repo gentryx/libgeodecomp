@@ -17,6 +17,7 @@
 # 02110-1301 USA.
 
 require 'rexml/document'
+require 'logger'
 require 'set'
 require 'datatype'
 require 'pp'
@@ -35,6 +36,8 @@ class MPIParser
   # parameters. Yeah, it's complicated.
   def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="")
     @path, @sloppy, @namespace = path, sloppy, namespace
+    @log = Logger.new(STDOUT)
+    @log.level = Logger::DEBUG
 
     class_files = Dir.glob("#{@path}/*.xml")
     @xml_docs = { }
@@ -51,6 +54,8 @@ class MPIParser
       klass = parse_class_name(doc.elements[xpath].text)
       @filename_cache[klass] = filename
     end
+    puts "filename_cache: "
+    pp @filename_cache
 
     @datatype_map = Datatype.new
     @datatype_map.merge!(map_enums)
@@ -64,6 +69,9 @@ class MPIParser
   # those classes, whose MPI type could not be found in @datatype_map,
   # it'll try to create a new MPI type map specification.
   def resolve_forest(classes)
+    puts "resolve_forest()"
+    pp classes
+
     classes = classes.sort
     resolved_classes = { }
     resolved_parents = { }
@@ -71,9 +79,9 @@ class MPIParser
     @type_hierarchy_closure = @type_hierarchy_closure.union(classes)
 
     while classes.any?
-      # puts "  classes:"
-      # print "  "
-      # pp classes
+      puts "  classes:"
+      print "  "
+      pp classes
 
       num_unresolved = classes.size
 
@@ -109,7 +117,7 @@ class MPIParser
   end
 
   def used_template_parameters(klass)
-    # puts "used_template_parameters(#{klass})"
+    @log.debug "used_template_parameters(#{klass})"
     params = []
     klass =~ /^(#@namespace::|)(.+)/
     class_name = $2
@@ -119,6 +127,10 @@ class MPIParser
       members = get_members(c)
 
       members.each do |name, spec|
+        puts "  - name: #{name}"
+        puts "    spec: "
+        pp spec
+
         if spec[:type] =~ /^(#@namespace::|)#{class_name}<(.+)>/
           # this will fail for constructs like Foo<Bar<int,int>,int>
           values = $2.split(",")
@@ -132,6 +144,9 @@ class MPIParser
         end
       end
     end
+
+    @log.debug "used_template_parameters returns"
+    pp params.sort.uniq
 
     return params.sort.uniq
   end
@@ -166,18 +181,18 @@ class MPIParser
 
       template_params = template_parameters(klass)
 
-      # puts "----------------------------------"
-      # puts "resolve_class(#{klass})"
-      # puts "members"
-      # pp members
-      # puts "parents"
-      # pp parents
-      # puts "resolved_classes"
-      # pp resolved_classes
-      # puts "template_params"
-      # pp template_params
-      # puts "----------------------------------"
-      # puts
+      puts "----------------------------------"
+      puts "resolve_class(#{klass})"
+      puts "members"
+      pp members
+      puts "parents"
+      pp parents
+      puts "resolved_classes #{resolved_classes.size}"
+      pp resolved_classes
+      puts "template_params"
+      pp template_params
+      puts "----------------------------------"
+      puts
 
       if template_params.empty?
         resolve_class_simple(klass, members, parents,
@@ -187,9 +202,9 @@ class MPIParser
       else
         used_params = used_template_parameters(klass)
 
-        # puts "used_params"
-        # pp used_params
-        # puts
+        puts "used_params"
+        pp used_params
+        puts
 
         used_params.each do |values|
           new_members = 
@@ -204,9 +219,9 @@ class MPIParser
 
       classes.delete(klass)
     rescue Exception => e
-      # puts "failed with"
-      # pp e
-      # puts e.backtrace
+      puts "failed with"
+      pp e
+      puts e.backtrace
     end
     # puts
   end
@@ -226,6 +241,8 @@ class MPIParser
   def resolve_class_simple(klass, members, parents, classes,
                            resolved_classes, resolved_parents,
                            topological_class_sortation)
+    @log.debug("resolve_class_simple(#{klass})")
+
     actual_members = prune_unresolvable_members(members)
     member_map  = map_types_to_MPI_Datatypes(actual_members)
     parents_map = map_parent_types_to_MPI_Datatypes(parents)
@@ -249,6 +266,7 @@ class MPIParser
   # returns a map consisting of all member variables listed in the
   # class' doxygen .xml file. 
   def get_members(klass) 
+    @log.debug "get_members(#{klass})"
     members = { }
 
     sweep_all_members(klass) do |member| 
@@ -266,7 +284,9 @@ class MPIParser
     xpath = "doxygen/compounddef/basecompoundref"
     parents = []
     doc.elements.each(xpath) do |member| 
-      parents.push member.text
+      stripped_member = member.text.gsub(/<\s*/, "<")
+      puts "get_parents(#{klass} yields »#{stripped_member}«"
+      parents.push stripped_member
     end   
     return parents
   end
@@ -327,6 +347,11 @@ class MPIParser
   # is liable for extracting member information from the belonging XML node.
   def parse_member(member)
     name = member.elements["name"].text
+    @log.debug("parse_member(#{name})")
+    puts "---------member"
+    p member
+    pp member
+    puts member
 
     spec = { 
       :type => extract_type(member),
@@ -336,11 +361,27 @@ class MPIParser
   end
 
   def extract_type(member)
-    type_elem = member.elements["type"]
-    raw_type = 
-      (type_elem.elements["ref"].nil? ? "" : type_elem.elements["ref"].text) +
-      (type_elem.has_text? ? type_elem.text : "")
-    return parse_class_name(raw_type)
+    definition = member.elements.each("definition") do |definition|
+      definition = definition.text
+      definition.gsub!(/&lt;/, "<")
+      definition.gsub!(/&gt;/, ">")
+
+      index = 0
+      depth = 0
+
+      definition.size.times do |i|
+        index = i
+        char = definition[i..i]
+        break if (char == " ") && (depth == 0)
+        depth += 1 if char == "<"
+        depth -= 1 if char == ">"
+      end
+
+      definition = definition[0...index]
+      return parse_class_name(definition)
+    end
+
+    raise "could not extract type"
   end
 
   # gathers the cardinality for a member. It distinguishes simple
@@ -348,6 +389,8 @@ class MPIParser
   # Cannot handle arrays with non-symbolic width (e.g. "int bar[69]"),
   # and I refuse an implementation until we have a use case for that.
   def resolve_cardinality(member)
+    @log.debug "resolve_cardinality(#{member})"
+
     argsString = member.elements["argsstring"]
 
     # easy case: non-array member
@@ -357,6 +400,7 @@ class MPIParser
     # numeric constant as array size:
     return $1.to_i if argsString.text =~ /\[(\d+)\]/
     # gotta search a little longer for symbolic sizes:
+    @log.debug "  non-trivial cardinality"
     member_id = member.attributes["id"]
     cardinality_id = resolve_cardinality_id(member_id)
     return resolve_cardinality_declaration(cardinality_id)
@@ -367,25 +411,43 @@ class MPIParser
   # "classXXX.xml" lacks such a reference ID. Nevertheless, we can dig
   # for it in the files "XXX_8h.xml".
   def resolve_cardinality_id(member_id)
-    unless member_id =~ /class(.+)_.+/
+    @log.debug "resolve_cardinality_id(#{member_id})"
+
+    unless member_id =~ /class#{@namespace}(_1_1)*(.+)_.+/
       raise "illegal member ID"
     end
 
-    klass = $1.downcase
+    klass = $2.downcase
     filename = "#{@path}/#{klass}_8h.xml"
 
+    @log.debug "opening #{filename}, namespace: #{@namespace}"
     doc = @xml_docs[filename]
 
     codeline = nil
     doc.elements.each("doxygen/compounddef/programlisting/codeline") do |line|
-      codeline = line if line.attributes["refid"] == member_id        
+      @log.debug "  codeline #{line}"
+      if line.attributes["refid"] == member_id        
+        codeline = line 
+        break
+      end
     end
+
+    @log.debug "selected codeline: #{codeline}"
 
     cardinality = nil
     codeline.elements.each("highlight") do |elem|
-      node = elem.find { |elem| elem == "[" }
-      next unless node
-      cardinality = node.next_sibling_node.attributes["refid"]
+      @log.debug "  elem: #{elem}"
+
+      elem.each do |elem|
+      # node = elem.find do |elem| 
+        puts "    elemelem: #{elem}"
+        puts "    elemelem.class: #{elem.class}"
+        if elem.class == REXML::Element
+          refid = elem.attributes["refid"]
+          puts "    refid: #{refid}"
+          cardinality = refid unless refid.nil?
+        end
+      end
     end
 
     throw "failed to find cardinality for member_id #{member_id}" unless cardinality
@@ -395,6 +457,8 @@ class MPIParser
   # uses the ID to identify the bit of code that makes up the
   # cardinality of an array.
   def resolve_cardinality_declaration(cardinality_id)
+    @log.debug "resolve_cardinality_declaration(#{cardinality_id})"
+
     sweep_all_classes do |klass, member|
       if member.attributes["id"] == cardinality_id
         name = member.elements["name"].text
@@ -443,7 +507,10 @@ class MPIParser
 
   # iterates though all members of klass class that are instance specific variables.
   def sweep_all_members(klass, kind="variable")
+    @log.debug "sweep_all_members(#{klass})"
     filename = class_to_filename(klass)
+    @log.debug "  filename = #{filename}"
+
     doc = @xml_docs[filename]
     xpath = "doxygen/compounddef/sectiondef/memberdef[@kind='#{kind}'][@static='no']"
 
@@ -466,10 +533,18 @@ class MPIParser
   end
 
   def find_header_simple(klass)
-    sweep_all_members(klass) do |member|
-      header = member.elements["location"].attributes["file"]
+    puts "find_header_simple(#{klass})"
+
+    filename = class_to_filename(klass)
+    doc = @xml_docs[filename]
+    xpath = "doxygen/compounddef/location"
+
+    doc.elements.each(xpath) do |member|
+      header = member.attributes["file"]
+      puts "  header: #{header}"
       return header if header
-    end
+    end   
+
     raise "no header found for class #{klass}"
   end
 
