@@ -40,6 +40,9 @@
     <xsd:attribute name="id" type="xsd:string" />
     <xsd:attribute name="kind" type="DoxCompoundKind" />
     <xsd:attribute name="prot" type="DoxProtectionKind" />
+    <xsd:attribute name="final" type="DoxBool" use="optional"/>
+    <xsd:attribute name="sealed" type="DoxBool" use="optional"/>
+    <xsd:attribute name="abstract" type="DoxBool" use="optional"/>
   </xsd:complexType>
 
   <xsd:complexType name="listofallmembersType">
@@ -59,7 +62,7 @@
     <xsd:attribute name="ambiguityscope" type="xsd:string" />
   </xsd:complexType>
 
-  <xsd:complexType name="compoundRefType" mixed="true">
+  <xsd:complexType name="compoundRefType">
     <xsd:simpleContent>
       <xsd:extension base="xsd:string">
         <xsd:attribute name="refid" type="xsd:string" use="optional" />
@@ -69,7 +72,7 @@
     </xsd:simpleContent>
   </xsd:complexType>
 
-  <xsd:complexType name="reimplementType" mixed="true">
+  <xsd:complexType name="reimplementType">
     <xsd:simpleContent>
       <xsd:extension base="xsd:string">
         <xsd:attribute name="refid" type="xsd:string" />
@@ -77,7 +80,7 @@
     </xsd:simpleContent>
   </xsd:complexType>
 
-  <xsd:complexType name="incType" mixed="true">
+  <xsd:complexType name="incType">
     <xsd:simpleContent>
       <xsd:extension base="xsd:string">
         <xsd:attribute name="refid" type="xsd:string" />
@@ -86,7 +89,7 @@
     </xsd:simpleContent>
   </xsd:complexType>
 
-  <xsd:complexType name="refType" mixed="true">
+  <xsd:complexType name="refType">
     <xsd:simpleContent>
       <xsd:extension base="xsd:string">
         <xsd:attribute name="refid" type="xsd:string" />
@@ -95,7 +98,7 @@
     </xsd:simpleContent>
   </xsd:complexType>
 
-  <xsd:complexType name="refTextType" mixed="true">
+  <xsd:complexType name="refTextType">
     <xsd:simpleContent>
       <xsd:extension base="xsd:string">
        <xsd:attribute name="refid" type="xsd:string" />
@@ -365,6 +368,9 @@
       <xsd:element name="center" type="docMarkupType" />
       <xsd:element name="small" type="docMarkupType" />
       <xsd:element name="htmlonly" type="xsd:string" />
+      <xsd:element name="manonly" type="xsd:string" />
+      <xsd:element name="xmlonly" type="xsd:string" />
+      <xsd:element name="rtfonly" type="xsd:string" />
       <xsd:element name="latexonly" type="xsd:string" />
       <xsd:element name="dot" type="xsd:string" />
       <xsd:element name="anchor" type="docAnchorType" />
@@ -389,6 +395,75 @@
       <xsd:element name="ring" type="docCharType" />
       <xsd:element name="szlig" type="docEmptyType" />
       <xsd:element name="nonbreakablespace" type="docEmptyType" />
+      <xsd:element name="aelig" type="docEmptyType" />
+      <xsd:element name="AElig" type="docEmptyType" />
+      <xsd:element name="Gamma" type="docEmptyType" />
+      <xsd:element name="Delta" type="docEmptyType" />
+      <xsd:element name="Theta" type="docEmptyType" />
+      <xsd:element name="Lambda" type="docEmptyType" />
+      <xsd:element name="Xi" type="docEmptyType" />
+      <xsd:element name="Pi" type="docEmptyType" />
+      <xsd:element name="Sigma" type="docEmptyType" />
+      <xsd:element name="Upsilon" type="docEmptyType" />
+      <xsd:element name="Phi" type="docEmptyType" />
+      <xsd:element name="Psi" type="docEmptyType" />
+      <xsd:element name="Omega" type="docEmptyType" />
+      <xsd:element name="alpha" type="docEmptyType" />
+      <xsd:element name="beta" type="docEmptyType" />
+      <xsd:element name="gamma" type="docEmptyType" />
+      <xsd:element name="delta" type="docEmptyType" />
+      <xsd:element name="epsilon" type="docEmptyType" />
+      <xsd:element name="zeta" type="docEmptyType" />
+      <xsd:element name="eta" type="docEmptyType" />
+      <xsd:element name="theta" type="docEmptyType" />
+      <xsd:element name="iota" type="docEmptyType" />
+      <xsd:element name="kappa" type="docEmptyType" />
+      <xsd:element name="lambda" type="docEmptyType" />
+      <xsd:element name="mu" type="docEmptyType" />
+      <xsd:element name="nu" type="docEmptyType" />
+      <xsd:element name="xi" type="docEmptyType" />
+      <xsd:element name="pi" type="docEmptyType" />
+      <xsd:element name="rho" type="docEmptyType" />
+      <xsd:element name="sigma" type="docEmptyType" />
+      <xsd:element name="tau" type="docEmptyType" />
+      <xsd:element name="upsilon" type="docEmptyType" />
+      <xsd:element name="phi" type="docEmptyType" />
+      <xsd:element name="chi" type="docEmptyType" />
+      <xsd:element name="psi" type="docEmptyType" />
+      <xsd:element name="omega" type="docEmptyType" />
+      <xsd:element name="sigmaf" type="docEmptyType" />
+      <xsd:element name="sect" type="docEmptyType" />
+      <xsd:element name="deg" type="docEmptyType" />
+      <xsd:element name="prime" type="docEmptyType" />
+      <xsd:element name="Prime" type="docEmptyType" />
+      <xsd:element name="infin" type="docEmptyType" />
+      <xsd:element name="empty" type="docEmptyType" />
+      <xsd:element name="plusmn" type="docEmptyType" />
+      <xsd:element name="times" type="docEmptyType" />
+      <xsd:element name="minus" type="docEmptyType" />
+      <xsd:element name="sdot" type="docEmptyType" />
+      <xsd:element name="part" type="docEmptyType" />
+      <xsd:element name="nabla" type="docEmptyType" />
+      <xsd:element name="radic" type="docEmptyType" />
+      <xsd:element name="perp" type="docEmptyType" />
+      <xsd:element name="sum" type="docEmptyType" />
+      <xsd:element name="int" type="docEmptyType" />
+      <xsd:element name="prod" type="docEmptyType" />
+      <xsd:element name="sim" type="docEmptyType" />
+      <xsd:element name="asymp" type="docEmptyType" />
+      <xsd:element name="ne" type="docEmptyType" />
+      <xsd:element name="equiv" type="docEmptyType" />
+      <xsd:element name="prop" type="docEmptyType" />
+      <xsd:element name="le" type="docEmptyType" />
+      <xsd:element name="ge" type="docEmptyType" />
+      <xsd:element name="larr" type="docEmptyType" />
+      <xsd:element name="rarr" type="docEmptyType" />
+      <xsd:element name="isin" type="docEmptyType" />
+      <xsd:element name="notin" type="docEmptyType" />
+      <xsd:element name="lceil" type="docEmptyType" />
+      <xsd:element name="rceil" type="docEmptyType" />
+      <xsd:element name="lfloor" type="docEmptyType" />
+      <xsd:element name="rfloor" type="docEmptyType" />
     </xsd:choice>
   </xsd:group>
 
@@ -419,6 +494,7 @@
       <xsd:element name="parameterlist" type="docParamListType" />
       <xsd:element name="xrefsect" type="docXRefSectType" />
       <xsd:element name="copydoc" type="docCopyType" />
+      <xsd:element name="blockquote" type="docBlockQuoteType" />
     </xsd:choice>
   </xsd:group>
 
@@ -577,7 +653,14 @@
 
   <xsd:complexType name="docParamNameList">
     <xsd:sequence>
+      <xsd:element name="parametertype" type="docParamType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="parametername" type="docParamName" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="docParamType" mixed="true">
+    <xsd:sequence>
+      <xsd:element name="ref" type="refTextType" minOccurs="0" maxOccurs="1" />
     </xsd:sequence>
   </xsd:complexType>
 
@@ -603,6 +686,12 @@
       <xsd:element name="internal" type="docInternalType" minOccurs="0" />
     </xsd:sequence>
     <xsd:attribute name="link" type="xsd:string" /> 
+  </xsd:complexType>
+
+  <xsd:complexType name="docBlockQuoteType">
+    <xsd:sequence>
+      <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
   </xsd:complexType>
 
   <xsd:complexType name="docCharType">
@@ -757,6 +846,7 @@
       <xsd:enumeration value="warning" />
       <xsd:enumeration value="pre" />
       <xsd:enumeration value="post" />
+      <xsd:enumeration value="copyright" />
       <xsd:enumeration value="invariant" />
       <xsd:enumeration value="remark" />
       <xsd:enumeration value="attention" />
@@ -807,6 +897,9 @@
       <xsd:enumeration value="retain"/>
       <xsd:enumeration value="copy"/>
       <xsd:enumeration value="assign"/>
+      <xsd:enumeration value="weak"/>
+      <xsd:enumeration value="strong"/>
+      <xsd:enumeration value="unretained"/>
     </xsd:restriction>
   </xsd:simpleType>
 

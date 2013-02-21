@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.6.3">
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.3.1">
   <compound refid="classBMW" kind="class"><name>BMW</name>
     <member refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kind="variable"><name>price</name></member>
@@ -21,6 +21,8 @@
     <member refid="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" kind="variable"><name>echo</name></member>
     <member refid="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" kind="variable"><name>size</name></member>
     <member refid="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" kind="variable"><name>spareWheel</name></member>
+  </compound>
+  <compound refid="classCoord" kind="class"><name>Coord</name>
   </compound>
   <compound refid="classCoord_3_012_01_4" kind="class"><name>Coord&lt; 2 &gt;</name>
     <member refid="classCoord_3_012_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
@@ -123,6 +125,6 @@
   </compound>
   <compound refid="wheel_8h" kind="file"><name>wheel.h</name>
   </compound>
-  <compound refid="dir_f1e3d554da75903c386950a9779f8401" kind="dir"><name>src/</name>
+  <compound refid="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir"><name>src</name>
   </compound>
 </doxygenindex>
