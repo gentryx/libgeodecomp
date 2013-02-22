@@ -148,7 +148,7 @@ public:
  * The MPI typemap generator need to find out for which template
  * parameter values it should generate typemaps. It does so by
  * scanning all class members. Therefore this dummy class forces the
- * typemap generator to create MPI datatypes for CoordBoxs with the
+ * typemap generator to create MPI datatypes for CoordBox with the
  * dimensions as specified below.
  */
 class CoordBoxMPIDatatypeHelper
