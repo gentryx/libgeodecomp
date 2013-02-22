@@ -28,6 +28,8 @@ require 'stringio'
 class MPIParser
   attr_accessor :datatype_map
   attr_accessor :type_hierarchy_closure
+  attr_accessor :log
+  attr_accessor :filename_cache
 
   # All doxygen xml files are expected in path, setting sloppy to true
   # will allow you to create partial typemaps (which simply ignore
@@ -139,7 +141,7 @@ class MPIParser
         @log.debug pp(spec)
 
         if spec[:type] =~ /^(#@namespace::|)#{class_name}<(.+)>/
-          # this will fail for constructs like Foo<Bar<int,int>,int>
+          # fixme: this will fail for constructs like Foo<Bar<int,int>,int>
           values = $2.split(",")
           values.map! { |v| v.strip }
 
@@ -169,7 +171,8 @@ class MPIParser
       new_spec = spec.clone
 
       param_map.each do |param, val|
-        new_spec[:type] = new_spec[:type].gsub(/#{param}/, val)
+        new_spec[:type       ] = new_spec[:type       ].gsub(/#{param}/, val)
+        new_spec[:cardinality] = new_spec[:cardinality].gsub(/#{param}/, val) if new_spec[:cardinality].class != Fixnum
       end
 
       new_members[name] = new_spec
@@ -356,7 +359,7 @@ class MPIParser
     name = member.elements["name"].text
     @log.info  "parse_member(#{name})"
     @log.debug "---------member"
-    @log.debug member
+    @log.debug member.to_s
 
     spec = { 
       :type => extract_type(member),
@@ -398,7 +401,7 @@ class MPIParser
 
     argsString = member.elements["argsstring"]
 
-    # easy case: non-array member
+    # easy case: bnon-array member
     return 1 unless argsString.has_text?
     # more difficult: array members...
     raise "illegal cardinality" unless argsString.text =~ /\[(.+)\]/ 
@@ -411,21 +414,29 @@ class MPIParser
     return resolve_cardinality_declaration(cardinality_id)
   end
 
+  def member_id_to_8h_file(member_id)
+    member_id =~ /(class.+)_([^_]+)/
+    filename = "#{@path}/#{$1}.xml"
+    doc = @xml_docs[filename]
+    doc.elements.each("doxygen/compounddef/includes") do |inc|
+      eight_h_file = "#{@path}/#{inc.attributes["refid"]}.xml"
+      return eight_h_file
+    end
+
+    raise "could not find _8h file"
+  end
+
   # Doxygen assigns items an ID. The cardinality of an array member is
   # an item. Unfortunately Doxygen's XML output in files named
   # "classXXX.xml" lacks such a reference ID. Nevertheless, we can dig
   # for it in the files "XXX_8h.xml".
   def resolve_cardinality_id(member_id)
-    @log.debug "resolve_cardinality_id(#{member_id})"
+    @log.info "resolve_cardinality_id(#{member_id})"
 
-    unless member_id =~ /class#{@namespace}(_1_1)*(.+)_.+/
-      raise "illegal member ID"
-    end
-
-    klass = $2.downcase
-    filename = "#{@path}/#{klass}_8h.xml"
+    filename = member_id_to_8h_file(member_id)
 
     @log.debug "opening #{filename}, namespace: #{@namespace}"
+    @log.debug pp member_id
     doc = @xml_docs[filename]
 
     codeline = nil
@@ -458,12 +469,31 @@ class MPIParser
   # uses the ID to identify the bit of code that makes up the
   # cardinality of an array.
   def resolve_cardinality_declaration(cardinality_id)
-    @log.debug "resolve_cardinality_declaration(#{cardinality_id})"
+    @log.info "resolve_cardinality_declaration(#{cardinality_id})"
 
     sweep_all_classes do |klass, member|
       if member.attributes["id"] == cardinality_id
         name = member.elements["name"].text
-        return "#{klass}::#{name}"
+        is_static = member.attributes["static"]
+
+        @log.debug "  is_static: #{is_static}"
+        @log.debug "  member:"
+        @log.debug member.to_s
+
+        # We need to distinguish between template parameters (e.g.
+        # FloatCoord.vec) or numerical constants (e.g. Car.wheels).
+        # The current solution is cheesy: if the cardinality is static
+        # then we assume it to be a static const var, otherwise a
+        # template parameter.
+        if (is_static == "yes")
+          ret = "#{klass}::#{name}"
+        else
+          member.elements["argsstring"].text =~ /\[(.+)\]/
+          ret = $1
+        end
+
+        @log.debug "  returning #{ret}"
+        return ret
       end      
     end
 
