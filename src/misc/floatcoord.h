@@ -12,7 +12,7 @@ namespace LibGeoDecomp {
  * A real valued coordinate class. Can also be seen as a short,
  * fixed-size vector.
  */
-template<int>
+template<int DIM>
 class FloatCoord;
 
 template<>
