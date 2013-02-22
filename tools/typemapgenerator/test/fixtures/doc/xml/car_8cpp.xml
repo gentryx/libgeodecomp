@@ -1,49 +1,49 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
   <compounddef id="car_8cpp" kind="file">
     <compoundname>car.cpp</compoundname>
     <includes refid="car_8h" local="yes">car.h</includes>
     <incdepgraph>
-      <node id="9">
-        <label>car.h</label>
-        <link refid="car_8h"/>
-        <childnode refid="10" relation="include">
-        </childnode>
+      <node id="13">
+        <label>mech.h</label>
+        <link refid="mech_8h"/>
         <childnode refid="11" relation="include">
-        </childnode>
-        <childnode refid="12" relation="include">
         </childnode>
       </node>
       <node id="12">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
+      <node id="14">
         <label>wheel.h</label>
         <link refid="wheel_8h"/>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="11">
+        <label>car.h</label>
+        <link refid="car_8h"/>
+        <childnode refid="12" relation="include">
+        </childnode>
         <childnode refid="13" relation="include">
         </childnode>
         <childnode refid="14" relation="include">
         </childnode>
       </node>
-      <node id="10">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
-      </node>
-      <node id="8">
-        <label>src/car.cpp</label>
-        <link refid="car.cpp"/>
-        <childnode refid="9" relation="include">
-        </childnode>
-      </node>
-      <node id="14">
-        <label>rim.h</label>
-        <link refid="rim_8h"/>
-      </node>
-      <node id="13">
+      <node id="15">
         <label>tire.h</label>
         <link refid="tire_8h"/>
       </node>
-      <node id="11">
-        <label>mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="9" relation="include">
+      <node id="16">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="10">
+        <label>src/car.cpp</label>
+        <link refid="car.cpp"/>
+        <childnode refid="11" relation="include">
         </childnode>
       </node>
     </incdepgraph>
@@ -58,6 +58,6 @@
 <codeline lineno="4"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="classMech" kindref="compound">Mech</ref>(100,<sp/>100,<sp/>100);</highlight></codeline>
 <codeline lineno="5"><highlight class="normal">}</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/car.cpp"/>
+    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/car.cpp"/>
   </compounddef>
 </doxygen>

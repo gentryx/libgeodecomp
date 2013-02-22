@@ -80,9 +80,9 @@ public:
         elements = 0;
     }
 
-    void erase(T *elem)
+    void erase(const T *elem)
     {
-        for (T *i = elem; i != end(); ++i) {
+        for (T *i = const_cast<T*>(elem); i != end(); ++i) {
             *i = *(i + 1);
         }
 

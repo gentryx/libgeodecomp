@@ -1,66 +1,64 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
   <compounddef id="rim_8h" kind="file">
     <compoundname>rim.h</compoundname>
     <includedby refid="wheel_8h" local="yes">src/wheel.h</includedby>
     <invincdepgraph>
-      <node id="93">
-        <label>src/car.h</label>
-        <link refid="car_8h"/>
-        <childnode refid="94" relation="include">
+      <node id="104">
+        <label>src/mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="101" relation="include">
         </childnode>
-        <childnode refid="95" relation="include">
-        </childnode>
-        <childnode refid="96" relation="include">
-        </childnode>
-        <childnode refid="97" relation="include">
-        </childnode>
-        <childnode refid="98" relation="include">
+        <childnode refid="105" relation="include">
         </childnode>
       </node>
-      <node id="97">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
-        <childnode refid="97" relation="include">
-        </childnode>
-      </node>
-      <node id="92">
+      <node id="100">
         <label>src/wheel.h</label>
         <link refid="wheel_8h"/>
-        <childnode refid="93" relation="include">
+        <childnode refid="101" relation="include">
         </childnode>
       </node>
-      <node id="95">
-        <label>src/car.cpp</label>
-        <link refid="car_8cpp"/>
-      </node>
-      <node id="94">
-        <label>src/bmw.h</label>
-        <link refid="bmw_8h"/>
-        <childnode refid="94" relation="include">
-        </childnode>
-      </node>
-      <node id="99">
+      <node id="105">
         <label>src/mech.cpp</label>
         <link refid="mech_8cpp"/>
       </node>
-      <node id="91">
-        <label>src/rim.h</label>
-        <link refid="rim.h"/>
-        <childnode refid="92" relation="include">
+      <node id="101">
+        <label>src/car.h</label>
+        <link refid="car_8h"/>
+        <childnode refid="102" relation="include">
+        </childnode>
+        <childnode refid="104" relation="include">
+        </childnode>
+        <childnode refid="106" relation="include">
+        </childnode>
+        <childnode refid="107" relation="include">
+        </childnode>
+        <childnode refid="103" relation="include">
         </childnode>
       </node>
-      <node id="96">
+      <node id="102">
+        <label>src/bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="103" relation="include">
+        </childnode>
+      </node>
+      <node id="107">
         <label>src/carcontainer.h</label>
         <link refid="carcontainer_8h"/>
       </node>
-      <node id="98">
-        <label>src/mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="93" relation="include">
+      <node id="99">
+        <label>src/rim.h</label>
+        <link refid="rim.h"/>
+        <childnode refid="100" relation="include">
         </childnode>
-        <childnode refid="99" relation="include">
-        </childnode>
+      </node>
+      <node id="106">
+        <label>src/car.cpp</label>
+        <link refid="car_8cpp"/>
+      </node>
+      <node id="103">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
       </node>
     </invincdepgraph>
     <innerclass refid="classRim" prot="public">Rim</innerclass>
@@ -81,6 +79,6 @@
 <codeline lineno="10"><highlight class="normal"></highlight></codeline>
 <codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/rim.h"/>
+    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/rim.h"/>
   </compounddef>
 </doxygen>

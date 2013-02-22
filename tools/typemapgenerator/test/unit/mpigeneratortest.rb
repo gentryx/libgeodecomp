@@ -100,8 +100,4 @@ class TestMPIGenerator < Test::Unit::TestCase
     assert_match(/^namespace FooBar \{/, actual_source)
     assert_match(/^namespace FooBar \{/, actual_header)
   end
-
-
-
-
 end
