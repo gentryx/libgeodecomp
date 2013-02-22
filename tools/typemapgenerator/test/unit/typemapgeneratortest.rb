@@ -50,7 +50,6 @@ class TestTypeParser < Test::Unit::TestCase
                                               "./",
                                               true)
     assert_equal(expected, actual)
-    puts actual
   end
 
   def test_find_classes_to_be_serialized

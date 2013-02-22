@@ -80,7 +80,10 @@ opts = OptionParser.new do |o|
        "encapsulate code in #ifdef(MACRO), #endif guards") do |macro|
     options[:macro_guard] = macro
   end
-  
+  o.on("-p", "--profile",
+       "profile execution") do 
+    options[:profiling] = true
+  end
 end
 
 opts.parse!(ARGV)
@@ -164,6 +167,11 @@ if options[:scan]
   exit(0)
 end
 
+if options[:profiling]
+  require 'ruby-prof'
+  RubyProf.start
+end
+
 output_path = Pathname.new(ARGV[1] || "./")
 header, source = 
   TypemapGenerator.generate_forest(xml_path, basedir, 
@@ -174,3 +182,8 @@ header, source =
                                    options[:macro_guard])
 File.open(output_path + "typemaps.h",  "w").write(header)
 File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)
+
+if options[:profiling]
+  profile = RubyProf.stop
+  RubyProf::FlatPrinter.new(profile).print(STDOUT)
+end

@@ -41,6 +41,7 @@ class MPIParser
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
+    @member_cache = {}
 
     class_files = Dir.glob("#{@path}/*.xml")
     @xml_docs = { }
@@ -275,6 +276,10 @@ class MPIParser
   # class' doxygen .xml file. 
   def get_members(klass) 
     @log.debug "get_members(#{klass})"
+
+    entry = @member_cache[klass]
+    return entry unless entry.nil?
+
     members = { }
 
     sweep_all_members(klass) do |member| 
@@ -282,6 +287,7 @@ class MPIParser
       members[klass] = spec
     end
 
+    @member_cache[klass] = members
     return members
   end
 
@@ -401,7 +407,7 @@ class MPIParser
 
     argsString = member.elements["argsstring"]
 
-    # easy case: bnon-array member
+    # easy case: non-array member
     return 1 unless argsString.has_text?
     # more difficult: array members...
     raise "illegal cardinality" unless argsString.text =~ /\[(.+)\]/ 
