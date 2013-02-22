@@ -3,9 +3,8 @@
 
 #include <cmath>
 #include <sstream>
-#include <boost/array.hpp>
-
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/floatcoordbase.h>
 
 namespace LibGeoDecomp {
 
@@ -13,42 +12,15 @@ namespace LibGeoDecomp {
  * A real valued coordinate class. Can also be seen as a short,
  * fixed-size vector.
  */
-template<int DIM>
-class FloatCoordBase 
-{
-public:
-    inline
-    std::string toString() const
-    {
-        std::stringstream s;
-        s << "(";
-        for (int i = 0; i < DIM - 1; ++i)
-            s << c[i] << ", ";
-        s << c[DIM - 1] << ")";
-        return s.str();
-    }
-
-    inline double& operator[](const int i)
-    {
-        return c[i];
-    }
-
-    inline const double& operator[](const int i) const
-    {
-        return c[i];
-    }
-
-protected:
-    boost::array<double, DIM> c;
-};
-
-template<int DIM>
+template<int>
 class FloatCoord;
 
 template<>
 class FloatCoord<1> : public FloatCoordBase<1>
 {
+    friend class Typemaps;
 public:
+
     explicit
     inline
     FloatCoord(const double x = 0) 
@@ -129,8 +101,8 @@ public:
 template<>
 class FloatCoord<2> : public FloatCoordBase<2>
 {
+    friend class Typemaps;
 public:
-
     explicit
     inline
     FloatCoord(
@@ -221,8 +193,8 @@ public:
 template<>
 class FloatCoord<3> : public FloatCoordBase<3>
 {
+    friend class Typemaps;
 public:
-
     explicit
     inline
     FloatCoord(
@@ -317,6 +289,21 @@ public:
     {
         return !(*this == a);
     }
+};
+
+/**
+ * The MPI typemap generator need to find out for which template
+ * parameter values it should generate typemaps. It does so by
+ * scanning all class members. Therefore this dummy class forces the
+ * typemap generator to create MPI datatypes for FloatCoord with the
+ * dimensions as specified below.
+ */
+class FloatCoordMPIDatatypeHelper
+{
+    friend class Typemaps;
+    FloatCoord<1> a;
+    FloatCoord<2> b;
+    FloatCoord<3> c;
 };
 
 }
