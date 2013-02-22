@@ -29,6 +29,8 @@ class TestTypeParser < Test::Unit::TestCase
                 "CoordContainer",
                 "CoordContainerContainer",
                 "Dummy",
+                "FloatCoord",
+                "FloatCoordTypemapsHelper",
                 "Rim",
                 "Engine",
                 "Tire",
@@ -48,6 +50,7 @@ class TestTypeParser < Test::Unit::TestCase
                                               "./",
                                               true)
     assert_equal(expected, actual)
+    puts actual
   end
 
   def test_find_classes_to_be_serialized
@@ -55,6 +58,7 @@ class TestTypeParser < Test::Unit::TestCase
       ["fixtures/src/coordcontainercontainer.h",
        "fixtures/src/coordcontainer.h",
        "fixtures/src/coord.h",
+       "fixtures/src/floatcoordbase.h",
        "fixtures/src/pair.h",
        "fixtures/src/rim.h",
        "fixtures/src/carcontainer.h",
