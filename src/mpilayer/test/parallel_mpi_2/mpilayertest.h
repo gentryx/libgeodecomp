@@ -123,7 +123,7 @@ public:
             c = FloatCoord<3>(layer.rank(), 2.0, 3.0);
             layer.send(&c, 1);
         } else {
-            layer.recv(&c, 1);
+            layer.recv(&c, 0);
         }
 
         layer.waitAll();
