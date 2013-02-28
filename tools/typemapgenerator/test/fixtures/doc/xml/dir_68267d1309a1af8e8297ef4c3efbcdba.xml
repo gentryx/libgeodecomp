@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir">
+    <compoundname>src</compoundname>
+    <innerfile refid="bmw_8h">bmw.h</innerfile>
+    <innerfile refid="car_8cpp">car.cpp</innerfile>
+    <innerfile refid="car_8h">car.h</innerfile>
+    <innerfile refid="carcontainer_8h">carcontainer.h</innerfile>
+    <innerfile refid="coord_8h">coord.h</innerfile>
+    <innerfile refid="coordcontainer_8h">coordcontainer.h</innerfile>
+    <innerfile refid="coordcontainercontainer_8h">coordcontainercontainer.h</innerfile>
+    <innerfile refid="engine_8h">engine.h</innerfile>
+    <innerfile refid="floatcoordbase_8h">floatcoordbase.h</innerfile>
+    <innerfile refid="luxury_8h">luxury.h</innerfile>
+    <innerfile refid="main_8cpp">main.cpp</innerfile>
+    <innerfile refid="mech_8cpp">mech.cpp</innerfile>
+    <innerfile refid="mech_8h">mech.h</innerfile>
+    <innerfile refid="pair_8h">pair.h</innerfile>
+    <innerfile refid="rim_8h">rim.h</innerfile>
+    <innerfile refid="tire_8h">tire.h</innerfile>
+    <innerfile refid="wheel_8h">wheel.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/"/>
+  </compounddef>
+</doxygen>

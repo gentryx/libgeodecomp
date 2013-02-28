@@ -6,24 +6,6 @@
     <includedby refid="car_8h" local="yes">src/car.h</includedby>
     <includedby refid="mech_8cpp" local="yes">src/mech.cpp</includedby>
     <incdepgraph>
-      <node id="82">
-        <label>src/mech.h</label>
-        <link refid="mech.h"/>
-        <childnode refid="83" relation="include">
-        </childnode>
-      </node>
-      <node id="84">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
-      </node>
-      <node id="85">
-        <label>wheel.h</label>
-        <link refid="wheel_8h"/>
-        <childnode refid="86" relation="include">
-        </childnode>
-        <childnode refid="87" relation="include">
-        </childnode>
-      </node>
       <node id="83">
         <label>car.h</label>
         <link refid="car_8h"/>
@@ -34,28 +16,34 @@
         <childnode refid="85" relation="include">
         </childnode>
       </node>
-      <node id="86">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
+      <node id="85">
+        <label>wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="86" relation="include">
+        </childnode>
+        <childnode refid="87" relation="include">
+        </childnode>
+      </node>
+      <node id="82">
+        <label>src/mech.h</label>
+        <link refid="mech.h"/>
+        <childnode refid="83" relation="include">
+        </childnode>
       </node>
       <node id="87">
         <label>rim.h</label>
         <link refid="rim_8h"/>
       </node>
+      <node id="86">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="84">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
     </incdepgraph>
     <invincdepgraph>
-      <node id="88">
-        <label>src/mech.h</label>
-        <link refid="mech.h"/>
-        <childnode refid="89" relation="include">
-        </childnode>
-        <childnode refid="94" relation="include">
-        </childnode>
-      </node>
-      <node id="94">
-        <label>src/mech.cpp</label>
-        <link refid="mech_8cpp"/>
-      </node>
       <node id="89">
         <label>src/car.h</label>
         <link refid="car_8h"/>
@@ -70,23 +58,35 @@
         <childnode refid="91" relation="include">
         </childnode>
       </node>
-      <node id="90">
-        <label>src/bmw.h</label>
-        <link refid="bmw_8h"/>
-        <childnode refid="91" relation="include">
-        </childnode>
+      <node id="91">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
       </node>
       <node id="93">
         <label>src/carcontainer.h</label>
         <link refid="carcontainer_8h"/>
       </node>
+      <node id="94">
+        <label>src/mech.cpp</label>
+        <link refid="mech_8cpp"/>
+      </node>
+      <node id="88">
+        <label>src/mech.h</label>
+        <link refid="mech.h"/>
+        <childnode refid="89" relation="include">
+        </childnode>
+        <childnode refid="94" relation="include">
+        </childnode>
+      </node>
       <node id="92">
         <label>src/car.cpp</label>
         <link refid="car_8cpp"/>
       </node>
-      <node id="91">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
+      <node id="90">
+        <label>src/bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="91" relation="include">
+        </childnode>
       </node>
     </invincdepgraph>
     <innerclass refid="classMech" prot="public">Mech</innerclass>
@@ -115,6 +115,6 @@
 <codeline lineno="18"><highlight class="normal"></highlight></codeline>
 <codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/mech.h"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h"/>
   </compounddef>
 </doxygen>

@@ -15,7 +15,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" line="9" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="9" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="9" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="9" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
@@ -30,7 +30,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" line="10" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="10" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="10" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="10" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classWheel_1ab06f8ebfea44fd279b081980f7e24594" prot="private" static="no" mutable="no">
         <type><ref refid="classRim" kindref="compound">Rim</ref></type>
@@ -43,7 +43,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" line="11" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="11" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -70,7 +70,7 @@
         <link refid="classRim"/>
       </node>
     </collaborationgraph>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" line="8" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="7" bodyend="12"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="8" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="7" bodyend="12"/>
     <listofallmembers>
       <member refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" prot="private" virt="non-virtual"><scope>Wheel</scope><name>rim</name></member>
       <member refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" prot="private" virt="non-virtual"><scope>Wheel</scope><name>tire</name></member>

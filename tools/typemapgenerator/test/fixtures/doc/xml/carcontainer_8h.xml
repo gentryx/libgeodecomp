@@ -4,24 +4,6 @@
     <compoundname>carcontainer.h</compoundname>
     <includes refid="car_8h" local="yes">car.h</includes>
     <incdepgraph>
-      <node id="34">
-        <label>mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="32" relation="include">
-        </childnode>
-      </node>
-      <node id="33">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
-      </node>
-      <node id="35">
-        <label>wheel.h</label>
-        <link refid="wheel_8h"/>
-        <childnode refid="36" relation="include">
-        </childnode>
-        <childnode refid="37" relation="include">
-        </childnode>
-      </node>
       <node id="32">
         <label>car.h</label>
         <link refid="car_8h"/>
@@ -32,19 +14,37 @@
         <childnode refid="35" relation="include">
         </childnode>
       </node>
-      <node id="36">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
-      </node>
       <node id="31">
         <label>src/carcontainer.h</label>
         <link refid="carcontainer.h"/>
         <childnode refid="32" relation="include">
         </childnode>
       </node>
+      <node id="35">
+        <label>wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="36" relation="include">
+        </childnode>
+        <childnode refid="37" relation="include">
+        </childnode>
+      </node>
+      <node id="34">
+        <label>mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="32" relation="include">
+        </childnode>
+      </node>
       <node id="37">
         <label>rim.h</label>
         <link refid="rim_8h"/>
+      </node>
+      <node id="36">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="33">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
       </node>
     </incdepgraph>
     <innerclass refid="classCarContainer" prot="public">CarContainer</innerclass>
@@ -73,6 +73,6 @@
 <codeline lineno="23"><highlight class="normal"></highlight></codeline>
 <codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/carcontainer.h"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/carcontainer.h"/>
   </compounddef>
 </doxygen>

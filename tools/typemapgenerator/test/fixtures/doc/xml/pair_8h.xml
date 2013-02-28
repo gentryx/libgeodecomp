@@ -4,15 +4,15 @@
     <compoundname>pair.h</compoundname>
     <includes refid="coord_8h" local="yes">coord.h</includes>
     <incdepgraph>
-      <node id="96">
-        <label>coord.h</label>
-        <link refid="coord_8h"/>
-      </node>
       <node id="95">
         <label>src/pair.h</label>
         <link refid="pair.h"/>
         <childnode refid="96" relation="include">
         </childnode>
+      </node>
+      <node id="96">
+        <label>coord.h</label>
+        <link refid="coord_8h"/>
       </node>
     </incdepgraph>
     <innerclass refid="classCoordPair" prot="public">CoordPair</innerclass>
@@ -47,6 +47,6 @@
 <codeline lineno="23"><highlight class="normal"></highlight></codeline>
 <codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/pair.h"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h"/>
   </compounddef>
 </doxygen>
