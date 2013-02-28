@@ -41,6 +41,7 @@ class MPIParser
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
+    # @log.level = Logger::DEBUG
     @member_cache = {}
 
     class_files = Dir.glob("#{@path}/*.xml")

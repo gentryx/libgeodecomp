@@ -47,7 +47,9 @@ class MPIGenerator
 
     ret.gsub!(/KLASS_NAME/, simple_name(klass))
     ret.gsub!(/KLASS/, klass)
-    ret.gsub!(/NUM_MEMBERS/, members.size.to_s)
+    num_members = members.size
+    num_members += parents.size unless parents.nil?
+    ret.gsub!(/NUM_MEMBERS/, num_members.to_s)
 
     member_specs1 = members.map do |name, properties|
       "        MemberSpec(MPI::Get_address(&obj->#{name}), #{properties[:type]}, #{properties[:cardinality]})"

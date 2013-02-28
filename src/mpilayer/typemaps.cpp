@@ -314,7 +314,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_1_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoord<1 >)];
     LibGeoDecomp::FloatCoord<1 > *obj = (LibGeoDecomp::FloatCoord<1 >*)fakeObject;
 
-    const int count = 0;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -351,7 +351,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_3_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoord<3 >)];
     LibGeoDecomp::FloatCoord<3 > *obj = (LibGeoDecomp::FloatCoord<3 >*)fakeObject;
 
-    const int count = 0;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
@@ -616,7 +616,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_2_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoord<2 >)];
     LibGeoDecomp::FloatCoord<2 > *obj = (LibGeoDecomp::FloatCoord<2 >*)fakeObject;
 
-    const int count = 0;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
