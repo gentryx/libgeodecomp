@@ -40,6 +40,7 @@ public:
         const int& deviceID=0) :
         ParentType(_partitionManager, _initializer)
     {
+        /*
         std::vector<cl::Platform> platforms;
         cl::Platform::get(&platforms);
         std::vector<cl::Device> devices;
@@ -83,6 +84,7 @@ public:
         // curStep = initializer().startStep();
         // curNanoStep = 0;
         // initGrids();
+        */
     }
 
     inline virtual std::pair<int, int> currentStep() const

@@ -179,7 +179,7 @@ public:
         SimpleInitializer<Cell>(_dim, _steps)
     {}
 
-    virtual void grid(GridBase<Cell, 2> *ret) const
+    virtual void grid(GridBase<Cell, 2> *ret)
     {
         ret->atEdge() = Cell(Cell::BARRIER);
         int numAnts =  100;

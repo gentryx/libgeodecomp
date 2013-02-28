@@ -28,6 +28,8 @@ public:
     {
         if (vec->size() != std::size_t(region.size()))
             throw std::logic_error("region doesn't match vector size");
+        
+        if(vec->size() == 0) return;
 
         typename GRID_TYPE::CellType *dest = &(*vec)[0];
         

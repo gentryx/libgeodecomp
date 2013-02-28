@@ -70,21 +70,6 @@ public:
         return *oldGrid;
     }
 
-    inline GridType& grid()
-    {
-        return *oldGrid;
-    }
-
-    inline GridType& old_Grid()
-    {
-        return *oldGrid;
-    }
-    
-    inline GridType& new_Grid()
-    {
-        return *newGrid;
-    }
-
 private:
     int curStep;
     int curNanoStep;

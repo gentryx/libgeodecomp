@@ -48,7 +48,7 @@ public:
     virtual ~Stepper()
     {}
 
-    //virtual void update(int nanoSteps) = 0;
+    virtual void update(int nanoSteps) = 0;
 
     virtual const GridType& grid() const = 0;
 
@@ -69,11 +69,6 @@ public:
         const PatchType& patchType)
     {
         patchAccepters[patchType].push_back(patchAccepter);
-    }
-
-    MyPartitionManager * partMan()
-    {
-        return partitionManager.get();
     }
 
 protected:

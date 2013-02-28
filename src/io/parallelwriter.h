@@ -31,7 +31,7 @@ class ParallelWriter
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
+    typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIMENSIONS> RegionType;
     typedef Coord<Topology::DIMENSIONS> CoordType;
 

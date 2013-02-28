@@ -49,7 +49,7 @@ public:
     CellInitializer() : SimpleInitializer<Cell>(Coord<2>(512, 512), 100)
     {}
 
-    virtual void grid(GridBase<Cell, 2> *ret) const
+    virtual void grid(GridBase<Cell, 2> *ret)
     {
         CoordBox<2> rect = ret->boundingBox();
         int offsetX = 10;

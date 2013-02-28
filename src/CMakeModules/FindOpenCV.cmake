@@ -50,8 +50,6 @@
 
 find_path(OpenCV_DIR "OpenCVConfig.cmake" /usr/share/OpenCV DOC "Root directory of OpenCV")
 
-message("${OpenCV_DIR}")
-
 ##====================================================
 ## Find OpenCV libraries
 ##----------------------------------------------------

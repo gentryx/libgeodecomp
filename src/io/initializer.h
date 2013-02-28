@@ -16,12 +16,12 @@ public:
     /**
      * initializes all cells of the grid at @a target 
      */
-    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) const =0;
+    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) =0;
 
     virtual ~Initializer() 
     {}
 
-    virtual CoordBox<DIMENSIONS> gridBox() const
+    virtual CoordBox<DIMENSIONS> gridBox()
     {
         return CoordBox<DIMENSIONS>(Coord<DIMENSIONS>(), gridDimensions());
     }

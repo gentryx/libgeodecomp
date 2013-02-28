@@ -365,7 +365,7 @@ public:
         SimpleInitializer<Container>(dimensions, steps)
     {}
 
-    virtual void grid(GridBase<Container, 3> *target) const
+    virtual void grid(GridBase<Container, 3> *target) 
     {
         CoordBox<3> box = target->boundingBox();
 
@@ -433,9 +433,9 @@ public:
 
 private:
     void addBoundary(
-        Container * container,
+        Container *container,
         const FloatCoord<3>& containerCenter, 
-        const FloatCoord<3>& normal) const
+        const FloatCoord<3>& normal)
     {
         FloatCoord<3> boundaryCenter = containerCenter - normal * (CONTAINER_DIM * 0.5);
         container->addBoundary(Boundary(boundaryCenter, normal));
