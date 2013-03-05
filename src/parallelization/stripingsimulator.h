@@ -108,7 +108,7 @@ public:
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
         }
-        stepNum++;    
+        ++stepNum;
 
         handleOutput(WRITER_STEP_FINISHED);
     }
@@ -119,8 +119,6 @@ public:
     virtual void run()
     {
         initSimulation();
-
-        stepNum = initializer->startStep();
         handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
@@ -381,7 +379,7 @@ private:
         newStripe->resize(box);
         initializer->grid(curStripe);
         newStripe->getEdgeCell() = curStripe->getEdgeCell();
-        stepNum = 0;
+        stepNum = initializer->startStep();
     }
 
     /**
