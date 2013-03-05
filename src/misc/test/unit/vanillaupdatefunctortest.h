@@ -32,21 +32,25 @@ public:
     void testMoore2D()
     {
         UpdateFunctorTestHelper<Stencils::Moore<2, 1> >().testSimple(3);
+        UpdateFunctorTestHelper<Stencils::Moore<2, 1> >().testSplittedTraversal(3);
     }
 
     void testMoore3D()
     {
         UpdateFunctorTestHelper<Stencils::Moore<3, 1> >().testSimple(3);
+        UpdateFunctorTestHelper<Stencils::Moore<3, 1> >().testSplittedTraversal(3);
     }
 
     void testVonNeumann2D()
     {
         UpdateFunctorTestHelper<Stencils::VonNeumann<2, 1> >().testSimple(3);
+        UpdateFunctorTestHelper<Stencils::VonNeumann<2, 1> >().testSplittedTraversal(3);
     }
 
     void testVonNeumann3D()
     {
         UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().testSimple(3);
+        UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().testSplittedTraversal(3);
     }
 };
 
