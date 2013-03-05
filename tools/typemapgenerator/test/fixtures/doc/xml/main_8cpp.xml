@@ -8,28 +8,6 @@
     <includes refid="bmw_8h" local="yes">bmw.h</includes>
     <includes local="yes">typemaps.h</includes>
     <incdepgraph>
-      <node id="66">
-        <label>mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="64" relation="include">
-        </childnode>
-      </node>
-      <node id="65">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
-      </node>
-      <node id="67">
-        <label>wheel.h</label>
-        <link refid="wheel_8h"/>
-        <childnode refid="68" relation="include">
-        </childnode>
-        <childnode refid="69" relation="include">
-        </childnode>
-      </node>
-      <node id="71">
-        <label>luxury.h</label>
-        <link refid="luxury_8h"/>
-      </node>
       <node id="64">
         <label>car.h</label>
         <link refid="car_8h"/>
@@ -39,31 +17,6 @@
         </childnode>
         <childnode refid="67" relation="include">
         </childnode>
-      </node>
-      <node id="70">
-        <label>bmw.h</label>
-        <link refid="bmw_8h"/>
-        <childnode refid="64" relation="include">
-        </childnode>
-        <childnode refid="71" relation="include">
-        </childnode>
-      </node>
-      <node id="68">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
-      </node>
-      <node id="62">
-        <label>iostream</label>
-      </node>
-      <node id="69">
-        <label>rim.h</label>
-        <link refid="rim_8h"/>
-      </node>
-      <node id="63">
-        <label>mpi.h</label>
-      </node>
-      <node id="72">
-        <label>typemaps.h</label>
       </node>
       <node id="61">
         <label>src/main.cpp</label>
@@ -77,6 +30,53 @@
         <childnode refid="70" relation="include">
         </childnode>
         <childnode refid="72" relation="include">
+        </childnode>
+      </node>
+      <node id="67">
+        <label>wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="68" relation="include">
+        </childnode>
+        <childnode refid="69" relation="include">
+        </childnode>
+      </node>
+      <node id="66">
+        <label>mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="64" relation="include">
+        </childnode>
+      </node>
+      <node id="69">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="62">
+        <label>iostream</label>
+      </node>
+      <node id="68">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="63">
+        <label>mpi.h</label>
+      </node>
+      <node id="71">
+        <label>luxury.h</label>
+        <link refid="luxury_8h"/>
+      </node>
+      <node id="65">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
+      <node id="72">
+        <label>typemaps.h</label>
+      </node>
+      <node id="70">
+        <label>bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="64" relation="include">
+        </childnode>
+        <childnode refid="71" relation="include">
         </childnode>
       </node>
     </incdepgraph>
@@ -101,7 +101,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/main.cpp" line="13" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/main.cpp" bodystart="12" bodyend="32"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/main.cpp" line="13" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/main.cpp" bodystart="12" bodyend="32"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -137,6 +137,6 @@
 <codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>0;</highlight></codeline>
 <codeline lineno="32"><highlight class="normal">}</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/main.cpp"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/main.cpp"/>
   </compounddef>
 </doxygen>

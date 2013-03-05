@@ -151,7 +151,6 @@ private:
         Coord<DIM> topoDim = initializer->gridDimensions();
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
-
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         initializer->grid(&*oldGrid);
@@ -231,8 +230,9 @@ private:
         curStep = oldStep;
 
         saveRim(curGlobalNanoStep);
-        if (ghostZoneWidth() % 2)
+        if (ghostZoneWidth() % 2) {
             std::swap(oldGrid, newGrid);
+        }
 
         // 3: restore grid for kernel update
         restoreRim(true);

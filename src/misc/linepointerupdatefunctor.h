@@ -109,19 +109,20 @@ public:
     {
         typedef typename CELL::Stencil Stencil;
         
-        long x = streak.origin.x();
-            
+        long x = 0;
+        long endX = streak.endX - streak.origin.x();
+
         if (streak.endX == (streak.origin.x() + 1)) {
             LinePointerNeighborhood<CELL, Stencil, true, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
             newLine[x].update(hood, nanoStep);
             return;
         }
-
+        
         LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
         newLine[x].update(hoodWest, nanoStep);
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-        updateMain(newLine, &x, (long)(streak.endX - 1), hood, nanoStep, typename CELL::API());
+        updateMain(newLine, &x, (long)(endX - 1), hood, nanoStep, typename CELL::API());
         
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
         newLine[x].update(hoodEast, nanoStep);

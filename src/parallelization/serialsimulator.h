@@ -26,6 +26,7 @@ public:
     SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
+        stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
         newGrid = new GridType(dim);
@@ -81,7 +82,8 @@ public:
     virtual void run()
     {
         initializer->grid(curGrid);
-        stepNum = 0;
+        stepNum = initializer->startStep();
+
         for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->stepFinished(
                 *getGrid(),
@@ -89,8 +91,7 @@ public:
                 WRITER_INITIALIZED);
         }
 
-        for (stepNum = initializer->startStep(); 
-             stepNum < initializer->maxSteps();) {
+        for (; stepNum < initializer->maxSteps();) {
             step();
         }
 

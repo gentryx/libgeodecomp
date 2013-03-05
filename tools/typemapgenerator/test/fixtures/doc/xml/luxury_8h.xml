@@ -4,6 +4,10 @@
     <compoundname>luxury.h</compoundname>
     <includedby refid="bmw_8h" local="yes">src/bmw.h</includedby>
     <invincdepgraph>
+      <node id="60">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
       <node id="58">
         <label>src/luxury.h</label>
         <link refid="luxury.h"/>
@@ -15,10 +19,6 @@
         <link refid="bmw_8h"/>
         <childnode refid="60" relation="include">
         </childnode>
-      </node>
-      <node id="60">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
       </node>
     </invincdepgraph>
     <innerclass refid="classLuxury" prot="public">Luxury</innerclass>
@@ -39,6 +39,6 @@
 <codeline lineno="10"><highlight class="normal"></highlight></codeline>
 <codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h"/>
   </compounddef>
 </doxygen>

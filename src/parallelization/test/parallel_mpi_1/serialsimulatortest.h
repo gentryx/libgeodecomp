@@ -19,11 +19,15 @@ class SerialSimulatorTest : public CxxTest::TestSuite
 {
 public:
     typedef MockSteerer<TestCell<2> > SteererType;
-
+ 
     void setUp() 
     {
-        init.reset(new TestInitializer<TestCell<2> >());
-        simulator.reset(new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >()));
+        dim = Coord<2>(17, 12);
+        maxSteps = 21;
+        startStep = 13;
+
+        init.reset(createInitializer());
+        simulator.reset(new SerialSimulator<TestCell<2> >(createInitializer()));
     }
     
     void tearDown()
@@ -38,18 +42,18 @@ public:
                          (unsigned)17);
         TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(), 
                          (unsigned)12);
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *simulator->getGrid(), 0);
+        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *simulator->getGrid(), startStep * TestCell<2>::nanoSteps());
     }
 
     void testStep()
     {
-        TS_ASSERT_EQUALS(0, (int)simulator->getStep());
+        TS_ASSERT_EQUALS(startStep, (int)simulator->getStep());
 
         simulator->step();
         const Grid<TestCell<2> > *grid = simulator->getGrid();
         TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *grid, 
-                            TestCell<2>::nanoSteps());
-        TS_ASSERT_EQUALS(1, (int)simulator->getStep());
+                            (startStep + 1) * TestCell<2>::nanoSteps());
+        TS_ASSERT_EQUALS(startStep + 1, (int)simulator->getStep());
     }
     
     void testRun()
@@ -91,7 +95,7 @@ public:
         simulator->run();
         
         std::string expectedEvents = "initialized()\n";
-        for (unsigned i = 3; i <= init->maxSteps(); i += 3) {
+        for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
             expectedEvents += 
                 "stepFinished(step=" + StringConv::itoa(i) + ")\n"; 
         }
@@ -154,7 +158,11 @@ public:
         TS_ASSERT_EQUALS(events.str(), expected.str());
 
         simulator->run();
-        for (int i = 0; i < init->maxSteps(); i += 5) {
+        int i = startStep;
+        if (i % 5) {
+            i += 5 - (i % 5);
+        }
+        for (; i < maxSteps; i += 5) {
             expected << "nextStep(" << i << ")\n";
         }
         expected << "deleted\n";
@@ -166,6 +174,14 @@ public:
 private:
     boost::shared_ptr<SerialSimulator<TestCell<2> > > simulator;
     boost::shared_ptr<Initializer<TestCell<2> > > init;
+    unsigned maxSteps;
+    unsigned startStep;
+    Coord<2> dim;
+
+    Initializer<TestCell<2> > *createInitializer()
+    {
+        return new TestInitializer<TestCell<2> >(dim, maxSteps, startStep);
+    }
 };
 
 }
