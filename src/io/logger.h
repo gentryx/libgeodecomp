@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_logger_h_
-#define _libgeodecomp_misc_logger_h_
+#ifndef _libgeodecomp_io_logger_h_
+#define _libgeodecomp_io_logger_h_
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
