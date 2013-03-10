@@ -1,6 +1,7 @@
-#ifndef _libgeodecomp_parallelization_serialsimulator_h_
-#define _libgeodecomp_parallelization_serialsimulator_h_
+#ifndef _libgeodecomp_parallelization_cacheblockingsimulator_h_
+#define _libgeodecomp_parallelization_cacheblockingsimulator_h_
 
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
@@ -62,13 +63,33 @@ public:
 
     virtual void run()
     {
-        // fixme
+        initializer->grid(curGrid);
+        stepNum = initializer->startStep();
+        nanoStep = 0;
+
+        for(unsigned i = 0; i < writers.size(); ++i) {
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_INITIALIZED);
+        }
+
+        for (stepNum = initializer->startStep(); 
+             stepNum < initializer->maxSteps();) {
+            hop();
+        }
+
+        for(unsigned i = 0; i < writers.size(); ++i) {
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_ALL_DONE);
+        }
     }
 
     virtual const GridType *getGrid()
     {
-        // fixme
-        return 0;
+        return curGrid;
     }
 
 private:
@@ -84,7 +105,6 @@ private:
     int pipelineLength;
     Coord<DIM - 1> wavefrontDim;
     Grid<WavefrontFrames> frames;
-    unsigned stepCounter;
     unsigned nanoStep;
 
     void generateFrames()
@@ -130,11 +150,13 @@ private:
                 1, gridDim, Topologies::Cube<3>::Topology());
         }
 
-        WavefrontFrames ret(gridDim[DIM - 1], SuperVector<Region<DIM> >(pipelineLength));
+        int wavefrontLength = gridDim[DIM - 1] + 1;
+        WavefrontFrames ret(wavefrontLength, SuperVector<Region<DIM> >(pipelineLength));
 
-        for (int index = index; index < gridDim[DIM - 1]; ++index) {
+        for (int index = index; index < wavefrontLength; ++index) {
             Coord<DIM> maskOrigin;
             maskOrigin[DIM - 1] = index;
+            Topology::normalize(maskOrigin, initializer->gridDimensions());
             Coord<DIM> maskDim = gridDim;
             maskDim[DIM - 1] = 1;
             
@@ -159,12 +181,13 @@ private:
 
         std::swap(curGrid, newGrid);
         int curNanoStep = nanoStep + pipelineLength;
-        stepCounter += curNanoStep / CELL::nanoSteps();
+        stepNum += curNanoStep / CELL::nanoSteps();
         nanoStep = curNanoStep % CELL::nanoSteps();
     }
 
     void updateWavefront(const Coord<DIM - 1>& wavefrontCoord)
-    {
+    {  
+        LOG(INFO, "wavefrontCoord(" << wavefrontCoord << ")");
         buffer.atEdge() = curGrid->atEdge();
         buffer.fill(buffer.boundingBox(), curGrid->getEdgeCell());
         fixBufferOrigin(wavefrontCoord);
@@ -209,6 +232,8 @@ private:
         int firstStage, 
         int lastStage)
     {
+        LOG(DEBUG, "  pipelinedUpdate(frameCoord = " << frameCoord << ", globalIndex = " << globalIndex << ", localIndex = " << localIndex << ", firstStage = " << firstStage << ", lastStage = " << lastStage << ")");
+
         for (int i = firstStage; i < lastStage; ++i) {
             bool firstIteration = (i == 0);
             bool lastIteration =  (i == (pipelineLength - 1));
@@ -217,26 +242,22 @@ private:
                 (currentGlobalIndex >= newGrid->getDimensions()[DIM - 1]);
             int sourceIndex = firstIteration ? currentGlobalIndex : normalizeIndex(localIndex + 2 - 4 * i);
             int targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
+  
             const Region<DIM>& updateFrame = frames[frameCoord][globalIndex - 2 * i][i];
             unsigned curNanoStep = (nanoStep + i) % CELL::nanoSteps();
-
-            std::string source = firstIteration ? "source" : "buffer";
-            std::string target = lastIteration  ? "target" : "buffer";
-            // std::cout << "update(grid: " 
-            //           << source << "[" << std::setw(2) << sourceIndex << "] -> " 
-            //           << target << "[" << std::setw(2) << targetIndex << "], time: " 
-            //           << i << " -> " << (i + 1) << ", currentGlobalIndex: " 
-            //           << currentGlobalIndex << ")\n";
 
             if ( firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, newGrid, curNanoStep);
             }
+
             if ( firstIteration && !lastIteration) { 
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, &buffer, curNanoStep);
             }            
+
             if (!firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   newGrid, curNanoStep);
             }
+
             if (!firstIteration && !lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   &buffer, curNanoStep);
             }
@@ -253,7 +274,10 @@ private:
         GRID2 *targetGrid,
         unsigned curNanoStep)
     {
+        LOG(DEBUG, "    frameUpdate(" << updateFrame.boundingBox() << ", " << sourceIndex << ", " << targetIndex <<  ")");
+
         if (needsFlushing) {
+            // fixme: only works with cube topologies
             Coord<DIM> fillOrigin = buffer.getOrigin();
             fillOrigin[DIM - 1] = targetIndex;
             Coord<DIM> fillDim = buffer.getDimensions();
@@ -269,35 +293,11 @@ private:
                 targetCoord[DIM - 1] = targetIndex;
                 UpdateFunctor<CELL>()(sourceStreak, targetCoord, sourceGrid, targetGrid, curNanoStep);
             }
-            // std::cout << "  frame: " << updateFrame.boundingBox();
-            // std::cout << "  sourceStreak: " << sourceStreak << "\n";
-            // std::cout << "  targetStreak: " << targetStreak << "\n";
         }
-        // std::cout << "  bufferOrigin: " << buffer.getOrigin() << "\n";
-            
-        // SuperVector<Line> *gridOld = &gridBuffer;
-        // if (i == 0) {
-        //     gridOld = &gridSource;
-        // }
+     }
 
-        // SuperVector<Line> *gridNew = &gridBuffer;
-        // if (i == (pipelineLength - 1)) {
-        //     gridNew = &gridTarget;
-        // }
-            
-        // if ((globalIndex >= gridSource.size()) && (i == firstStage)) {
-        //     (*gridNew)[targetIndex] = Line(-1, "X");
-        // } else {
-        //     (*gridNew)[targetIndex] = Line((*gridOld)[sourceIndex].offset, i + 1);
-        // }
-
-        // printGrid("source", gridSource);
-        // printGrid("buffer", gridBuffer);
-        // printGrid("target", gridTarget);
-        // std::cout << "\n";
-    }
-
-    // normalize via topology, if at all?
+    // wraps the index (for 3D this will be the Z coordinate) around
+    // the buffer's dimension
     int normalizeIndex(int localIndex)
     {
         int bufferSize = buffer.getDimensions()[DIM - 1];

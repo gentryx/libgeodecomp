@@ -23,7 +23,7 @@ public:
 
     void tearDown()
     {
-        delete sim;
+        sim.reset();
     }
 
     void testPipelinedUpdate()
@@ -36,18 +36,14 @@ public:
         int i = 0;
 
         for (; i < 2 * pipelineLength - 2; ++i) {
-            // printState(sim);
             int lastStage = (i >> 1) + 1;
             sim->pipelinedUpdate(Coord<2>(0, 0), i, i, 0, lastStage);
-        } 
-
+        }
         for (; i < dim.z(); ++i) {
-            // printState(sim);
             sim->pipelinedUpdate(Coord<2>(0, 0), i, i, 0, pipelineLength);
         }
         for (; i < (dim.z() + 2 * pipelineLength - 2); ++i) {
-            // printState(sim);
-            int firstStage = (i - dim.z() + 1) >> 1 ;
+            int firstStage = ((i - dim.z() + 1) >> 1);
             sim->pipelinedUpdate(Coord<2>(0, 0), i, i, firstStage, pipelineLength);            
         }
     }
@@ -68,7 +64,7 @@ public:
         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->newGrid), pipelineLength);
     }
 
-    void testHop()
+    void testHop1()
     {
         init(Coord<3>(40, 30, 20));
 
@@ -80,53 +76,49 @@ public:
         sim->hop();
         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 15);
     }
+
+    void testHop2()
+    {
+        init(Coord<3>(40, 30, 20), 7);
+
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  0);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  7);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 14);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 21);
+    }
+
+    void testHop3()
+    {
+        init(Coord<3>(40, 30, 20), 1);
+
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  0);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  1);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  2);
+        sim->hop();
+        TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  3);
+    }
     
 private:
     int pipelineLength;
     Coord<3> dim;
-    CacheBlockingSimulator<MyTestCell> *sim;
+    boost::shared_ptr<CacheBlockingSimulator<MyTestCell> > sim;
 
-    void init(const Coord<3> gridDim)
+    void init(const Coord<3>& gridDim, int newPipelineLength = 5, const Coord<2> wavefrontDim = Coord<2>(16, 16))
     {
-        pipelineLength = 5;
+        pipelineLength = newPipelineLength;
         dim = gridDim;
-        sim = new CacheBlockingSimulator<MyTestCell>(
-            new TestInitializer<MyTestCell>(
-                dim, 
-                10000,
-                0),
-            pipelineLength, 
-            Coord<2>(16, 16));
-    }
-
-    void printState()
-    {
-        std::cout << "curGrid:\n";
-        printGrid(*(sim->curGrid));
-        std::cout << "buffer:\n";
-        printGrid(sim->buffer);
-        std::cout << "newGrid:\n";
-        printGrid(*(sim->newGrid));
-        std::cout << "\n";
-    }
-
-    template<typename GRID>
-    void printGrid(GRID grid)
-    {
-        Coord<3> dim = grid.getDimensions();
-        for (int z = 0; z < dim.z(); ++z) {
-            std::cout << std::setw(3) << z << " " 
-                      << std::setw(3) << grid[Coord<3>(5, 0, z)].pos.z() << "  ";
-            for (int x = 0; x < dim.x(); ++x) {        
-                MyTestCell c = grid[Coord<3>(x, 0, z)];
-                if (c.isEdgeCell) {
-                    std::cout << "X"; 
-                } else {
-                    std::cout << c.cycleCounter;
-                }
-            }
-            std::cout << "\n";
-        }
+        sim.reset(new CacheBlockingSimulator<MyTestCell>(
+                      new TestInitializer<MyTestCell>(
+                          dim, 
+                          10000,
+                          0),
+                      pipelineLength, 
+                      wavefrontDim));
     }
 };
 
