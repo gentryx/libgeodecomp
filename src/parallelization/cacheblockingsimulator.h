@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <omp.h>
 
 namespace LibGeoDecomp {
 
@@ -44,7 +45,9 @@ public:
             bufferDim[i] = wavefrontDim[i] + 2 * pipelineLength - 2;
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
-        buffer = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
+        for (int i = 0; i < 4; ++i) {
+            buffers[i] = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
+        }
 
         generateFrames();
         nanoStep = 0;
@@ -101,7 +104,7 @@ private:
     
     GridType *curGrid;
     GridType *newGrid;
-    BufferType buffer;
+    BufferType buffers[4];
     int pipelineLength;
     Coord<DIM - 1> wavefrontDim;
     Grid<WavefrontFrames> frames;
@@ -173,10 +176,17 @@ private:
     void hop()
     {
         CoordBox<DIM - 1> frameBox = frames.boundingBox();
-        for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin(); 
-             waveIter != frameBox.end(); 
-             ++waveIter) {
-            updateWavefront(*waveIter);
+        // for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin(); 
+        //      waveIter != frameBox.end(); 
+        //      ++waveIter) {
+        //     updateWavefront(*waveIter);
+        // }
+
+#pragma omp parallel for
+        for (int y = 0; y < frameBox.dimensions.y(); ++y) {
+            for (int x = 0; x < frameBox.dimensions.x(); ++x) {
+                updateWavefront(&buffers[omp_get_thread_num()], Coord<2>(x, y));
+            }
         }
 
         std::swap(curGrid, newGrid);
@@ -185,12 +195,12 @@ private:
         nanoStep = curNanoStep % CELL::nanoSteps();
     }
 
-    void updateWavefront(const Coord<DIM - 1>& wavefrontCoord)
+    void updateWavefront(BufferType *buffer, const Coord<DIM - 1>& wavefrontCoord)
     {  
         LOG(INFO, "wavefrontCoord(" << wavefrontCoord << ")");
-        buffer.atEdge() = curGrid->atEdge();
-        buffer.fill(buffer.boundingBox(), curGrid->getEdgeCell());
-        fixBufferOrigin(wavefrontCoord);
+        buffer->atEdge() = curGrid->atEdge();
+        buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
+        fixBufferOrigin(buffer, wavefrontCoord);
 
         int index = 0;
         CoordBox<DIM> boundingBox = curGrid->boundingBox();
@@ -199,22 +209,22 @@ private:
         // fill pipeline
         for (; index < 2 * pipelineLength - 2; ++index) {
             int lastStage = (index >> 1) + 1;
-            pipelinedUpdate(wavefrontCoord, index, index, 0, lastStage);
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, 0, lastStage);
         } 
 
         // normal operation
         for (; index < maxIndex; ++index) {
-            pipelinedUpdate(wavefrontCoord, index, index, 0, pipelineLength);
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, 0, pipelineLength);
         }
 
         // let pipeline drain
         for (; index < (maxIndex + 2 * pipelineLength - 2); ++index) {
             int firstStage = (index - maxIndex + 1) >> 1 ;
-            pipelinedUpdate(wavefrontCoord, index, index, firstStage, pipelineLength);            
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, firstStage, pipelineLength);            
         }
     }
 
-    void fixBufferOrigin(const Coord<DIM - 1>& frameCoord)
+    void fixBufferOrigin(BufferType *buffer, const Coord<DIM - 1>& frameCoord)
     {
         Coord<DIM> bufferOrigin;
         // fixme: wrong on boundary with Torus topology
@@ -222,10 +232,11 @@ private:
             bufferOrigin[d] = std::max(0, frameCoord[d] * wavefrontDim[d] - pipelineLength + 1);
         }
         bufferOrigin[DIM - 1] = 0;
-        buffer.setOrigin(bufferOrigin);
+        buffer->setOrigin(bufferOrigin);
     }
 
     void pipelinedUpdate(
+        BufferType *buffer,
         const Coord<DIM - 1>& frameCoord, 
         int globalIndex, 
         int localIndex, 
@@ -251,15 +262,15 @@ private:
             }
 
             if ( firstIteration && !lastIteration) { 
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, &buffer, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, buffer,  curNanoStep);
             }            
 
             if (!firstIteration &&  lastIteration) {
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   newGrid, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *buffer,  newGrid, curNanoStep);
             }
 
             if (!firstIteration && !lastIteration) {
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   &buffer, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *buffer,  buffer,  curNanoStep);
             }
         }
     }
@@ -278,12 +289,12 @@ private:
 
         if (needsFlushing) {
             // fixme: only works with cube topologies
-            Coord<DIM> fillOrigin = buffer.getOrigin();
+            Coord<DIM> fillOrigin = buffers[omp_get_thread_num()].getOrigin();
             fillOrigin[DIM - 1] = targetIndex;
-            Coord<DIM> fillDim = buffer.getDimensions();
+            Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
             fillDim[DIM - 1] = 1;
 
-            buffer.fill(CoordBox<DIM>(fillOrigin, fillDim), buffer.getEdgeCell());
+            buffers[omp_get_thread_num()].fill(CoordBox<DIM>(fillOrigin, fillDim), buffers[omp_get_thread_num()].getEdgeCell());
         } else {
             for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak(); 
                  iter != updateFrame.endStreak(); ++iter) {
@@ -300,7 +311,7 @@ private:
     // the buffer's dimension
     int normalizeIndex(int localIndex)
     {
-        int bufferSize = buffer.getDimensions()[DIM - 1];
+        int bufferSize = buffers[0].getDimensions()[DIM - 1];
         return (localIndex + bufferSize) % bufferSize;
     }
 };

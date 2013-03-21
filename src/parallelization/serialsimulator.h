@@ -33,6 +33,8 @@ public:
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
+        // fixme: need library support for iterating through linestarts
+        // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
         box.dimensions.x() = 1;
@@ -127,10 +129,21 @@ protected:
         CoordBox<DIM> box = curGrid->boundingBox();
         int endX = box.origin.x() + box.dimensions.x();
         box.dimensions.x() = 1;
-        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            Streak<DIM> streak(*i, endX);
+
+#pragma omp parallel for
+        for (int z = 0; z < box.dimensions.z(); ++z) {
+        for (int y = 0; y < box.dimensions.y(); ++y) {
+        Streak<DIM> streak(Coord<3>(0, y, z), endX);
             UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
+
+    }
+    
+
+        // for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+        //     Streak<DIM> streak(*i, endX);
+        //     UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
+        // }
 
         std::swap(curGrid, newGrid);
     }
