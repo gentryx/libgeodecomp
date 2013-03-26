@@ -130,20 +130,10 @@ protected:
         int endX = box.origin.x() + box.dimensions.x();
         box.dimensions.x() = 1;
 
-#pragma omp parallel for
-        for (int z = 0; z < box.dimensions.z(); ++z) {
-        for (int y = 0; y < box.dimensions.y(); ++y) {
-        Streak<DIM> streak(Coord<3>(0, y, z), endX);
+        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            Streak<DIM> streak(*i, endX);
             UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
-
-    }
-    
-
-        // for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-        //     Streak<DIM> streak(*i, endX);
-        //     UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
-        // }
 
         std::swap(curGrid, newGrid);
     }
