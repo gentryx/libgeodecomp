@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_zcurvepartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_zcurvepartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_ZCURVEPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_ZCURVEPARTITION_H
 
 #include <bitset>
 #include <boost/multi_array.hpp>

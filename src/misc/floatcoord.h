@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_floatcoord_h_
-#define _libgeodecomp_misc_floatcoord_h_
+#ifndef LIBGEODECOMP_MISC_FLOATCOORD_H
+#define LIBGEODECOMP_MISC_FLOATCOORD_H
 
 #include <cmath>
 #include <sstream>

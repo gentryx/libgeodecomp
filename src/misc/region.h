@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_region_h_
-#define _libgeodecomp_misc_region_h_
+#ifndef LIBGEODECOMP_MISC_REGION_H
+#define LIBGEODECOMP_MISC_REGION_H
 
 #include <algorithm>
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_cudasimulator_h_
-#define _libgeodecomp_parallelization_cudasimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
 
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/misc/grid.h>

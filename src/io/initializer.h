@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_initializer_h_
-#define _libgeodecomp_io_initializer_h_
+#ifndef LIBGEODECOMP_IO_INITIALIZER_H
+#define LIBGEODECOMP_IO_INITIALIZER_H
 
 #include <libgeodecomp/misc/gridbase.h>
 

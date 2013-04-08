@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_cacheblockingsimulator_h_
-#define _libgeodecomp_parallelization_cacheblockingsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
 
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/displacedgrid.h>

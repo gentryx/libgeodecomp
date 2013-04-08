@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_ppmwriter_h_
-#define _libgeodecomp_io_ppmwriter_h_
+#ifndef LIBGEODECOMP_IO_PPMWRITER_H
+#define LIBGEODECOMP_IO_PPMWRITER_H
 
 #include <cerrno>
 #include <fstream>

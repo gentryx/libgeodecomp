@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_simplecellinitializer_h_
-#define _libgeodecomp_io_simplecellinitializer_h_
+#ifndef LIBGEODECOMP_IO_SIMPLECELLINITIALIZER_H
+#define LIBGEODECOMP_IO_SIMPLECELLINITIALIZER_H
 
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/grid.h>

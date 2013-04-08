@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_tracingwriter_h_
-#define _libgeodecomp_io_tracingwriter_h_
+#ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
+#define LIBGEODECOMP_IO_TRACINGWRITER_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>

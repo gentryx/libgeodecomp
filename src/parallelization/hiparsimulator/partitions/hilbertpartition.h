@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hilbertpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_hilbertpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HILBERTPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HILBERTPARTITION_H
 
 // ugly hack to circumvent CodeGear quirks
 #ifdef __CODEGEARC__

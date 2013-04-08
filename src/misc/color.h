@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_color_h_
-#define _libgeodecomp_io_color_h_
+#ifndef LIBGEODECOMP_IO_COLOR_H
+#define LIBGEODECOMP_IO_COLOR_H
 
 #include <sstream>
 

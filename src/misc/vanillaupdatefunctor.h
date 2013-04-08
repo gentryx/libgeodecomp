@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_vanillaupdatefunctor_h_
-#define _libgeodecomp_misc_vanillaupdatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_VANILLAUPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_VANILLAUPDATEFUNCTOR_H
 
 namespace LibGeoDecomp {
 

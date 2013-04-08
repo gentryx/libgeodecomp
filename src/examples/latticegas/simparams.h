@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_simparams_h_
-#define _libgeodecomp_examples_latticegas_simparams_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_SIMPARAMS_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_SIMPARAMS_H
 
 class SimParams
 {

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_simpleinitializer_h_
-#define _libgeodecomp_io_simpleinitializer_h_
+#ifndef LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
+#define LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
 

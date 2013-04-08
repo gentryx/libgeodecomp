@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_testinitializer_h_
-#define _libgeodecomp_io_testinitializer_h_
+#ifndef LIBGEODECOMP_IO_TESTINITIALIZER_H
+#define LIBGEODECOMP_IO_TESTINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/testcell.h>

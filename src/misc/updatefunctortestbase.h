@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_updatefunctortestbase_h_
-#define _libgeodecomp_misc_updatefunctortestbase_h_
+#ifndef LIBGEODECOMP_MISC_UPDATEFUNCTORTESTBASE_H
+#define LIBGEODECOMP_MISC_UPDATEFUNCTORTESTBASE_H
 
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/grid.h>

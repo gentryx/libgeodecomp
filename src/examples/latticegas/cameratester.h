@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_cameratester_h_
-#define _libgeodecomp_examples_latticegas_cameratester_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_CAMERATESTER_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_CAMERATESTER_H
 
 #include <cerrno>
 #include <fstream>

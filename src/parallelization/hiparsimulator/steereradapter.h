@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_steereradapter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_steereradapter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEERERADAPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEERERADAPTER_H
 
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>

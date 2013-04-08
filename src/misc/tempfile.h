@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_tempfile_h_
-#define _libgeodecomp_misc_tempfile_h_
+#ifndef LIBGEODECOMP_MISC_TEMPFILE_H
+#define LIBGEODECOMP_MISC_TEMPFILE_H
 
 #include <string>
 

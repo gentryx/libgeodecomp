@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_collectingwriter_h_
-#define _libgeodecomp_io_collectingwriter_h_
+#ifndef LIBGEODECOMP_IO_COLLECTINGWRITER_H
+#define LIBGEODECOMP_IO_COLLECTINGWRITER_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>

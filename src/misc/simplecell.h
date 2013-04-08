@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_simplecell_h_
-#define _libgeodecomp_misc_simplecell_h_
+#ifndef LIBGEODECOMP_MISC_SIMPLECELL_H
+#define LIBGEODECOMP_MISC_SIMPLECELL_H
 
 #include <libgeodecomp/misc/coordmap.h>
 #include <libgeodecomp/misc/typetraits.h>

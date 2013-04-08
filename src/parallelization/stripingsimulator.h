@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_stripingsimulator_h_
-#define _libgeodecomp_parallelization_stripingsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_STRIPINGSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_STRIPINGSIMULATOR_H
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>

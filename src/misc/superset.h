@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_superset_h_
-#define _libgeodecomp_misc_superset_h_
+#ifndef LIBGEODECOMP_MISC_SUPERSET_H
+#define LIBGEODECOMP_MISC_SUPERSET_H
 
 #include <algorithm>
 #include <iterator>

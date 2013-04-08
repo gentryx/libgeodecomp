@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_steerer_h_
-#define _libgeodecomp_io_steerer_h_
+#ifndef LIBGEODECOMP_IO_STEERER_H
+#define LIBGEODECOMP_IO_STEERER_H
 
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/region.h>

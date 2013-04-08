@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_meshlessadapter_h_
-#define _libgeodecomp_misc_meshlessadapter_h_
+#ifndef LIBGEODECOMP_MISC_MESHLESSADAPTER_H
+#define LIBGEODECOMP_MISC_MESHLESSADAPTER_H
 
 #include <list>
 #include <set>

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_stepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_stepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEPPER_H
 
 #include <boost/shared_ptr.hpp>
 #include <deque>

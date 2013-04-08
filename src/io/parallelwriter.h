@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_parallelwriter_h_
-#define _libgeodecomp_io_parallelwriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELWRITER_H
+#define LIBGEODECOMP_IO_PARALLELWRITER_H
 
 #include <string>
 #include <stdexcept>

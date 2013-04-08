@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_libgeodecomp_h_
-#define _libgeodecomp_libgeodecomp_h_
+#ifndef LIBGEODECOMP_LIBGEODECOMP_H
+#define LIBGEODECOMP_LIBGEODECOMP_H
 
 #include <libgeodecomp/config.h>
 

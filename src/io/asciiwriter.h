@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_asciiwriter_h_
-#define _libgeodecomp_io_asciiwriter_h_
+#ifndef LIBGEODECOMP_IO_ASCIIWRITER_H
+#define LIBGEODECOMP_IO_ASCIIWRITER_H
 
 #include <string>
 #include <cerrno>

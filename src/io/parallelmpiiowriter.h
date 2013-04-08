@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_parallelmpiiowriter_h_
-#define _libgeodecomp_io_parallelmpiiowriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
+#define LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>

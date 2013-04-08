@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testhelper_h_
-#define _libgeodecomp_misc_testhelper_h_
+#ifndef LIBGEODECOMP_MISC_TESTHELPER_H
+#define LIBGEODECOMP_MISC_TESTHELPER_H
 
 #ifdef __CODEGEARC__
 #include <math.h>

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_linepointerassembly_h_
-#define _libgeodecomp_misc_linepointerassembly_h_
+#ifndef LIBGEODECOMP_MISC_LINEPOINTERASSEMBLY_H
+#define LIBGEODECOMP_MISC_LINEPOINTERASSEMBLY_H
 
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/streak.h>

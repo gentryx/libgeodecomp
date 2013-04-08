@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_displacedgrid_h_
-#define _libgeodecomp_misc_displacedgrid_h_
+#ifndef LIBGEODECOMP_MISC_DISPLACEDGRID_H
+#define LIBGEODECOMP_MISC_DISPLACEDGRID_H
 
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/grid.h>

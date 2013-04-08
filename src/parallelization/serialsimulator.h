@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_serialsimulator_h_
-#define _libgeodecomp_parallelization_serialsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>

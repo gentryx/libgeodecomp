@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_bovwriter_h_
-#define _libgeodecomp_io_bovwriter_h_
+#ifndef LIBGEODECOMP_IO_BOVWRITER_H
+#define LIBGEODECOMP_IO_BOVWRITER_H
 
 #include <iomanip>
 

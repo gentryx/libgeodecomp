@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_multicorestepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_multicorestepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MULTICORESTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MULTICORESTEPPER_H
 
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>

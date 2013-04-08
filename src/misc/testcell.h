@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testcell_h_
-#define _libgeodecomp_misc_testcell_h_
+#ifndef LIBGEODECOMP_MISC_TESTCELL_H
+#define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
 #include <libgeodecomp/misc/cellapitraits.h>

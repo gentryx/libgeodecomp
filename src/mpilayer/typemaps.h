@@ -1,7 +1,7 @@
 #include<libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_typemaps_h_
-#define _libgeodecomp_typemaps_h_
+#ifndef LIBGEODECOMP_TYPEMAPS_H
+#define LIBGEODECOMP_TYPEMAPS_H
 
 #include <mpi.h>
 #include <complex>

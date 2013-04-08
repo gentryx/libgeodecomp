@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_mocksteerer_h_
-#define _libgeodecomp_io_mocksteerer_h_
+#ifndef LIBGEODECOMP_IO_MOCKSTEERER_H
+#define LIBGEODECOMP_IO_MOCKSTEERER_H
 
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>

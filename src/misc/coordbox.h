@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_coordbox_h_
-#define _libgeodecomp_misc_coordbox_h_
+#ifndef LIBGEODECOMP_MISC_COORDBOX_H
+#define LIBGEODECOMP_MISC_COORDBOX_H
 
 #include <iostream>
 #include <stdexcept>

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_linepointerneighborhood_h_
-#define _libgeodecomp_misc_linepointerneighborhood_h_
+#ifndef LIBGEODECOMP_MISC_LINEPOINTERNEIGHBORHOOD_H
+#define LIBGEODECOMP_MISC_LINEPOINTERNEIGHBORHOOD_H
 
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/stencils.h>

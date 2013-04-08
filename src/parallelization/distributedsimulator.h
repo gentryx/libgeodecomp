@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_distributedsimulator_h_
-#define _libgeodecomp_parallelization_distributedsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/displacedgrid.h>

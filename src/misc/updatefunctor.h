@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_updatefunctor_h_
-#define _libgeodecomp_misc_updatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_linepointerupdatefunctor_h_
-#define _libgeodecomp_misc_linepointerupdatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_LINEPOINTERUPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_LINEPOINTERUPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/coord.h>

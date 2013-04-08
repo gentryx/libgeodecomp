@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_cudastepper_fixme_h_
-#define _libgeodecomp_parallelization_hiparsimulator_cudastepper_fixme_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_FIXME_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_FIXME_H
 
 #include <cuda.h>
  

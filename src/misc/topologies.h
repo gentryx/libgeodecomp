@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_topologies_h_
-#define _libgeodecomp_misc_topologies_h_
+#ifndef LIBGEODECOMP_MISC_TOPOLOGIES_H
+#define LIBGEODECOMP_MISC_TOPOLOGIES_H
 
 #include <stdexcept>
 #include <iostream>

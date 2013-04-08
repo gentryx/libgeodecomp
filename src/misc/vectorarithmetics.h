@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_vectorarithmetics_h_
-#define _libgeodecomp_misc_vectorarithmetics_h_
+#ifndef LIBGEODECOMP_MISC_VECTORARITHMETICS_H
+#define LIBGEODECOMP_MISC_VECTORARITHMETICS_H
 
 // fixme: only enable SSE/AVX stuff if enabled in config.h
 
