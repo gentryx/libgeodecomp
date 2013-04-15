@@ -1,3 +1,5 @@
+/* vim:set expandtab:tabstop=4:shiftwidth=4:softtabstop=0: */
+
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
 
