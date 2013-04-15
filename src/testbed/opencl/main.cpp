@@ -3,6 +3,8 @@
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
 
+#include <CL/cl.hpp>
+
 using namespace LibGeoDecomp;
 
 class Cell
