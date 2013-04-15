@@ -5,9 +5,180 @@
 #include <iostream>
 #include <libgeodecomp/misc/coord.h>
 
-namespace LibGeoDecomp
-{
+namespace LibGeoDecomp {
 
+namespace TopologiesHelpers {
+
+template<int DIM, class TOPOLOGY>
+class WrapsAxis;
+
+template<class TOPOLOGY>
+class WrapsAxis<0, TOPOLOGY>
+{
+public:
+    static const bool VALUE = TOPOLOGY::WRAP_AXIS0;
+};
+
+template<class TOPOLOGY>
+class WrapsAxis<1, TOPOLOGY>
+{
+public:
+    static const bool VALUE = TOPOLOGY::WRAP_AXIS1;
+};
+
+template<class TOPOLOGY>
+class WrapsAxis<2, TOPOLOGY>
+{
+public:
+    static const bool VALUE = TOPOLOGY::WRAP_AXIS2;
+};
+
+template<class TOPOLOGY>
+class NormalizeEdges
+{
+public:
+    Coord<3> operator()(const Coord<1>& coord, const Coord<1>& dim)
+    {
+        return Coord<1>(
+            wrap(coord[0], dim[0]));
+    }
+
+    Coord<3> operator()(const Coord<2>& coord, const Coord<2>& dim)
+    {
+        return Coord<3>(
+            wrap(coord[0], dim[0]),
+            wrap(coord[1], dim[1]));
+    }
+
+    Coord<3> operator()(const Coord<3>& coord, const Coord<3>& dim)
+    {
+        return Coord<3>(
+            wrap(coord[0], dim[0]),
+            wrap(coord[1], dim[1]),
+            wrap(coord[2], dim[2]));
+    }
+
+private:
+    int wrap(int x, int dim)
+    {
+        return (x + dim) % dim;
+    }
+};
+
+template<class TOPOLOGY>
+class OutOfBounds
+{
+public:
+    bool operator()(const Coord<1> coord, const Coord<1> dim)
+    {
+        return 
+            ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0])));
+    }
+
+    bool operator()(const Coord<2> coord, const Coord<2> dim)
+    {
+        return 
+            ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0]))) ||
+            ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
+    }
+
+    bool operator()(const Coord<3> coord, const Coord<3> dim)
+    {
+        return 
+            ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0]))) ||
+            ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1]))) ||
+            ((!WrapsAxis<2, TOPOLOGY>::VALUE) && ((coord[2] < 0) || (coord[2] >= dim[2])));
+    }
+};
+
+template<class TOPOLOGY>
+class NormalizeCoord
+{
+public:
+    template<int DIM>
+    Coord<DIM> operator()(const Coord<DIM>& coord, const Coord<DIM>& dim)
+    {
+        if (OutOfBounds<TOPOLOGY>()(coord, dim)) {
+            return Coord<DIM>::diagonal(-1);
+        }
+
+        return NormalizeEdges<TOPOLOGY>()(coord, dim);
+    }
+};
+
+template<int DIMENSIONS, bool WRAP_DIM0, bool WRAP_DIM1, bool WRAP_DIM2>
+class RawTopology
+{
+public:
+    const static int DIM = DIMENSIONS;
+    const static bool WRAP_AXIS0 = WRAP_DIM0;
+    const static bool WRAP_AXIS1 = WRAP_DIM1;
+    const static bool WRAP_AXIS2 = WRAP_DIM2;
+
+    template<typename STORAGE, typename VALUE>
+    static void access(STORAGE& storage, VALUE *value, const Coord<1>& coord)
+    {
+        *value = (*storage)[coord.x()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    static void access(const STORAGE& storage, const VALUE *value, const Coord<1>& coord)
+    {
+        *value = (*storage)[coord.x()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    static void access(STORAGE& storage, VALUE *value, const Coord<2>& coord)
+    {
+        *value = (*storage)[coord.x()][coord.y()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    static void access(const STORAGE& storage, const VALUE *value, const Coord<2>& coord)
+    {
+        *value = (*storage)[coord.x()][coord.y()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    static void access(STORAGE& storage, VALUE *value, const Coord<3>& coord)
+    {
+        *value = (*storage)[coord.x()][coord.y()][coord.z()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    static void access(const STORAGE& storage, const VALUE *value, const Coord<3>& coord)
+    {
+        *value = (*storage)[coord.x()][coord.y()][coord.z()];
+    }
+};
+
+template<int DIMENSIONS, bool WRAP_DIM0, bool WRAP_DIM1, bool WRAP_DIM2>
+class NewTopology
+{
+public:
+    typedef RawTopology<DIMENSIONS, WRAP_DIM0, WRAP_DIM1, WRAP_DIM2> MyRawTopology;
+    static const int DIM = DIMENSIONS;
+
+    template<typename GRID, int DIM>
+    static inline const typename GRID::CellType& locate(
+        const GRID& grid, 
+        const Coord<DIM>& coord)
+    {
+        const Coord<DIM>& dim = grid.getDimensions();
+        if (OutOfBounds<MyRawTopology>()(coord, dim)) {
+            return grid.getEdgeCell();
+        }
+
+        typename GRID::CellType *ret;
+        MyRawTopology::access(grid, NormalizeEdges<MyRawTopology>()(coord, ret, dim));
+        return *ret;
+    }
+
+};
+
+}
+
+// fixme: kill this
 template<int DIM, class TOPOLOGY>
 class WrapsAxisHelper
 {
@@ -16,6 +187,7 @@ public:
     static const bool VALUE = WrapsAxisHelper<DIM - 1, ParentTopology>::VALUE;
 };
 
+// fixme: kill this
 template<class TOPOLOGY>
 class WrapsAxisHelper<0, TOPOLOGY>
 {
@@ -28,6 +200,7 @@ public:
  * features. Meant as an efficient alternative to
  * ZeroDimensional::wrapsAxis().
  */
+// fixme: kill this
 template<int DIM, class TOPOLOGY>
 class WrapsAxis
 {
@@ -41,6 +214,7 @@ public:
  * in order to map neighboring coordinates correctly on the borders of
  * the grid.
  */
+// fixme: kill this
 template<int DIM, int DIMINDEX>
 class CoordNormalizer
 {
@@ -75,6 +249,7 @@ private:
     Coord<DIM> edge;
 };
 
+// fixme: kill this
 template<int DIM>
 class CoordNormalizer<DIM, 1>
 {
@@ -111,12 +286,18 @@ private:
 class Topologies
 {
 public:
+
+
+
+    // fixme: kill this
     template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES>
     class NDimensional;
 
+    // fixme: kill this
     template<bool WRAP_EDGES, int DIMENSION, typename COORD> 
     class NormalizeCoordElement;
 
+    // fixme: kill this
     template<int DIM, typename COORD> 
     class NormalizeCoordElement<true, DIM, COORD>
     {
@@ -133,6 +314,7 @@ public:
         }
     };
 
+    // fixme: kill this
     template<int DIM, typename COORD> 
     class NormalizeCoordElement<false, DIM, COORD>
     {
@@ -145,9 +327,11 @@ public:
         }
     };
 
+    // fixme: kill this
     template<bool WRAP_EDGES, int DIM, typename COORD> 
     class IsOutOfBounds;
 
+    // fixme: kill this
     template<int DIM, typename COORD> 
     class IsOutOfBounds<true, DIM, COORD>
     {
@@ -160,6 +344,7 @@ public:
         }
     };
 
+    // fixme: kill this
     template<int DIM, typename COORD> 
     class IsOutOfBounds<false, DIM, COORD>
     {
@@ -174,6 +359,7 @@ public:
         }
     };
 
+    // fixme: kill this
     template<int DIM, typename COORD, typename TOPOLOGY>
     class IsOutOfBoundsHelper
     {
@@ -192,8 +378,10 @@ public:
         
     };
 
+    // fixme: kill this
     class ZeroDimensional;
 
+    // fixme: kill this
     template<int DIM, typename COORD>
     class IsOutOfBoundsHelper<DIM, COORD, ZeroDimensional>
     {
@@ -229,6 +417,7 @@ public:
         typedef NDimensional<ParentTopology, true> Topology;
     };
 
+    // fixme: kill this
     class ZeroDimensional
     {
     public:
@@ -240,6 +429,7 @@ public:
         }
     };
 
+    // fixme: kill this
     template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES_FLAG>
     class NDimensional
     {

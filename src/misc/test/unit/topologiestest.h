@@ -10,6 +10,53 @@ namespace LibGeoDecomp {
 class TopologiesTest : public CxxTest::TestSuite 
 {
 public:
+    void testNormalizeCoordAndOutOfBoundsAndNormalizeEdges()
+    {
+        typedef TopologiesHelpers::RawTopology<3, false, false, false> Topo1;
+        typedef TopologiesHelpers::RawTopology<3, true,  false, false> Topo2;
+        typedef TopologiesHelpers::RawTopology<3, true,  true,  true > Topo3;
+
+        Coord<3> c;
+        Coord<3> d;
+        Coord<3> dim(10, 20, 30);
+
+        c = Coord<3>(1, 5, 7);
+        d = TopologiesHelpers::NormalizeCoord<Topo1>()(c, dim);
+        TS_ASSERT_EQUALS(c, d);
+
+        c = Coord<3>(10, 10, 10);
+        d = TopologiesHelpers::NormalizeCoord<Topo1>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>::diagonal(-1), d);
+
+        c = Coord<3>( 5, -1, 10);
+        d = TopologiesHelpers::NormalizeCoord<Topo1>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>::diagonal(-1), d);
+
+        c = Coord<3>( 5,  5, 30);
+        d = TopologiesHelpers::NormalizeCoord<Topo1>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>::diagonal(-1), d);
+
+        c = Coord<3>(1, 5, 7);
+        d = TopologiesHelpers::NormalizeCoord<Topo2>()(c, dim);
+        TS_ASSERT_EQUALS(c, d);
+
+        c = Coord<3>(-1, 5, 7);
+        d = TopologiesHelpers::NormalizeCoord<Topo2>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>(9, 5, 7), d);
+
+        c = Coord<3>(1, -5, 7);
+        d = TopologiesHelpers::NormalizeCoord<Topo2>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>::diagonal(-1), d);
+
+        c = Coord<3>(-5, -5, -5);
+        d = TopologiesHelpers::NormalizeCoord<Topo3>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>(5, 15, 25), d);
+
+        c = Coord<3>(5, 5, 5);
+        d = TopologiesHelpers::NormalizeCoord<Topo3>()(c, dim);
+        TS_ASSERT_EQUALS(Coord<3>(5, 5, 5), d);
+    }
+
     void testWrapsAxisClass()
     {
         typedef Topologies::Cube<2>::Topology Cube2;
