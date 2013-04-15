@@ -6,7 +6,7 @@ class MPIGenerator
   def initialize(template_path="./", namespace=nil, macro_guard=nil)
     @path = Pathname.new(template_path)
     if namespace
-      @namespace_guard = namespace.downcase + "_"
+      @namespace_guard = namespace.upcase + "_"
       @namespace_begin = "namespace #{namespace} {\n"
       @namespace_end = "};\n"
     else
