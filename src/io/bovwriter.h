@@ -25,7 +25,7 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
 
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;
@@ -44,8 +44,8 @@ public:
 
     virtual void stepFinished(
         const typename ParallelWriter<CELL_TYPE>::GridType& grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
-        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        const Region<Topology::DIM>& validRegion, 
+        const Coord<Topology::DIM>& globalDimensions,
         unsigned step, 
         WriterEvent event, 
         bool lastCall)

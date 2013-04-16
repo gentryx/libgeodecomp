@@ -18,7 +18,7 @@ public:
     friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     /**
      * creates a SerialSimulator with the given @a initializer.

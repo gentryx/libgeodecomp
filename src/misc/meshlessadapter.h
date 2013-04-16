@@ -20,7 +20,7 @@ class MeshlessAdapter
 {
 public:
     friend class MeshlessAdapterTest;
-    static const int DIM = TOPOLOGY::DIMENSIONS;
+    static const int DIM = TOPOLOGY::DIM;
     static const int MAX_SIZE = 300000;
 
     typedef std::list<std::pair<FloatCoord<DIM>, int> > CoordList;

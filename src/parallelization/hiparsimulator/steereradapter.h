@@ -11,7 +11,7 @@ template<typename GRID_TYPE, typename CELL_TYPE>
 class SteererAdapter : public PatchProvider<GRID_TYPE>
 {
 public:
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     SteererAdapter(
         boost::shared_ptr<Steerer<CELL_TYPE> > _steerer) :

@@ -14,7 +14,7 @@ class Selector
 {
 public:
     typedef typename CELL::Stencil Stencil;
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
  
     template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
     void operator()(
@@ -58,7 +58,7 @@ template<typename CELL>
 class UpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
 
     template<typename GRID1, typename GRID2>
     void operator()(

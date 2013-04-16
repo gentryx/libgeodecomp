@@ -27,7 +27,7 @@ public:
 
     virtual void nextStep(
         GridType *grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
+        const Region<Topology::DIM>& validRegion, 
         const unsigned& step) 
     {
         (*eventsBuf) << "nextStep(" << step << ")\n";

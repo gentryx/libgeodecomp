@@ -31,7 +31,8 @@ public:
     typedef LoadBalancer::LoadVec LoadVec;
     typedef typename CELL_TYPE::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
+    static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
     enum WaitTags {
         GENERAL, 
@@ -400,7 +401,7 @@ private:
             ghostHeightUpper = 0;
             ghostHeightLower = 0;
         } else {
-            if (Topology::WRAP_EDGES) {
+            if (WRAP_EDGES) {
                 ghostHeightUpper = 1;
                 ghostHeightLower = 1;
             } else {
@@ -428,7 +429,7 @@ private:
     {
         int lowerNeighbor;
 
-        if (Topology::WRAP_EDGES) {
+        if (WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
             while (lowerNeighbor != mpilayer.rank() && 
@@ -449,7 +450,7 @@ private:
     {
         int upperNeighbor;
 
-        if (Topology::WRAP_EDGES) {
+        if (WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
             while (upperNeighbor != mpilayer.rank() && 

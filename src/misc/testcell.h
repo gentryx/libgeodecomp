@@ -124,9 +124,7 @@ public:
 
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, Topology>()(
-                c, dimensions.dimensions);
+        return !Topology::isOutOfBounds(c, dimensions.dimensions);
     }
 
     bool operator==(const TestCell& other) const

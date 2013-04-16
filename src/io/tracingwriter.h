@@ -18,7 +18,7 @@ public:
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     TracingWriter(
         const unsigned period, 

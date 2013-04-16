@@ -65,8 +65,9 @@ public:
             for (int y = 0; y < size; ++y) {
                 for (int x = 0; x < size; ++x) {
                     Coord<3> c = offset + Coord<3>(x, y, z);
-                    if (box.inBounds(c))
+                    if (box.inBounds(c)) {
                         ret->at(c) = Cell(0.99999999999);
+                    }
                 }
             }
         }

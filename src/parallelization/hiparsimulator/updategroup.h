@@ -25,7 +25,7 @@ class UpdateGroup
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;

@@ -18,7 +18,7 @@ class ParallelMemoryWriter : public ParallelWriter<CELL_TYPE>
 {
 
 public:
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
     typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType WriterGridType;
     typedef SuperMap<unsigned, GridType> GridMap;

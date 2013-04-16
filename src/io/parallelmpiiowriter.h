@@ -16,7 +16,7 @@ public:
     friend class ParallelMPIIOWriterTest;
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
     typedef typename CELL_TYPE::Topology Topology;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     ParallelMPIIOWriter(
         const std::string& prefix, 
@@ -32,8 +32,8 @@ public:
 
     virtual void stepFinished(
         const GridType& grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
-        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        const Region<Topology::DIM>& validRegion, 
+        const Coord<Topology::DIM>& globalDimensions,
         unsigned step, 
         WriterEvent event, 
         bool lastCall) 

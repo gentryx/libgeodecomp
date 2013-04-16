@@ -15,7 +15,7 @@ class VanillaStepper : public Stepper<CELL_TYPE>
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;

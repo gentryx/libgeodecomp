@@ -22,7 +22,7 @@ class OpenCLStepper : public Stepper<CELL_TYPE>
 {
     friend class OpenCLStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;

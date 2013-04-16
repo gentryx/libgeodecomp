@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <list>
 #include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/topologies.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/spacefillingcurve.h>
 
@@ -22,9 +23,9 @@ public:
     const static int DIM = DIMENSIONS;
 
     typedef SuperVector<Coord<DIM> > CoordVector;
-    typedef boost::shared_ptr<boost::multi_array<CoordVector, DIM> > Cache;
+    typedef Grid<CoordVector, typename Topologies::Cube<DIM>::Topology> GridType;
+    typedef boost::shared_ptr<GridType> Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
-    typedef typename Topology::template LocateHelper<DIM, CoordVector> LocateHelper;
   
     class Square
     {
@@ -179,12 +180,7 @@ public:
             const unsigned& offset)
         {
             sublevelState = CACHED;
-            CoordVector& coords = 
-                LocateHelper()(
-                    *ZCurvePartition<DIM>::coordsCache,
-                    dimensions,
-                    maxCachedDimensions);
-
+            CoordVector& coords = (*ZCurvePartition<DIM>::coordsCache)[dimensions];
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
@@ -343,8 +339,7 @@ public:
         // DIM^2 is a trick to keep the cache small if DIM is large.
         Coord<DIM> maxDim = Coord<DIM>::diagonal(68 / DIM / DIM);
         ZCurvePartition<DIM>::coordsCache.reset(
-            new boost::multi_array<CoordVector, DIM>(
-                maxDim.toExtents()));
+            Grid<CoordVector, Topologies::Cube<DIM> >(maxDim));
 
         CoordBox<DIM> box(Coord<DIM>(), maxDim);
         for (typename CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
@@ -352,13 +347,10 @@ public:
             if (!hasTrivialDimensions(dim)) {
                 CoordVector coords;
                 Iterator end(Coord<DIM>());
-                for (Iterator i(Coord<DIM>(), dim, 0); i != end; ++i)
+                for (Iterator i(Coord<DIM>(), dim, 0); i != end; ++i) {
                     coords.push_back(*i);
-
-                LocateHelper()(
-                    *ZCurvePartition<DIM>::coordsCache,
-                    dim,
-                    maxDim) = coords;
+                }
+                (*coordsCache)[dim] = coords;
             }
         }
 

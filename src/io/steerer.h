@@ -11,7 +11,7 @@ class Steerer
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
+    typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
 
     Steerer(const unsigned _period) :
         period(_period)
@@ -30,7 +30,7 @@ public:
      */
     virtual void nextStep(
         GridType *grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
+        const Region<Topology::DIM>& validRegion, 
         const unsigned& step) =0;
 
     const unsigned& getPeriod() const

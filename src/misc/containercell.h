@@ -18,7 +18,7 @@ public:
     typedef KEY Key;
     typedef TOPOLOGY Topology;
     typedef Cargo* Iterator;
-    typedef Stencils::Moore<Topology::DIMENSIONS, 1> Stencil;
+    typedef Stencils::Moore<Topology::DIM, 1> Stencil;
 
     class API : public CellAPITraits::Base
     {};
@@ -29,7 +29,7 @@ public:
         return Cargo::nanoSteps();
     }
 
-    const static int DIM = Topology::DIMENSIONS;
+    const static int DIM = Topology::DIM;
     const static int MAX_SIZE = SIZE;
 
     inline ContainerCell() : 

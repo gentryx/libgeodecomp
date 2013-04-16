@@ -18,7 +18,7 @@ public:
 
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     MPIIOWriter(
         const std::string& prefix,

@@ -20,7 +20,7 @@ public:
     typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     using ParallelWriter<CELL_TYPE>::distSim;
 

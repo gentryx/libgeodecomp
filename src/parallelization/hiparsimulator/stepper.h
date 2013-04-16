@@ -27,7 +27,7 @@ class Stepper
 public:
     enum PatchType {GHOST=0, INNER_SET=1};
     typedef typename CELL_TYPE::Topology Topology;
-    const static int DIM = Topology::DIMENSIONS;
+    const static int DIM = Topology::DIM;
 
     typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
     typedef PartitionManager<DIM, Topology> MyPartitionManager;

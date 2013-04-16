@@ -30,14 +30,14 @@ public:
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
         const long& firstStep,
         const long& lastStep,
-        Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions,
+        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
         bool lastCall) :
         sim(sim),
         writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
-        globalGridDimensions(globalGridDimensions),
-        lastCall(lastCall)
+        lastCall(lastCall),
+        globalGridDimensions(globalGridDimensions)
     {
         reload(firstNanoStep);
         reload(lastNanoStep);
@@ -78,7 +78,7 @@ private:
     long firstNanoStep;
     long lastNanoStep;
     bool lastCall;
-    Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions;
+    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 
     long nextOutputStep(const long& step)
     {

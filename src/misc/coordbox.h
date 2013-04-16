@@ -58,9 +58,7 @@ public:
     inline bool inBounds(const Coord<DIM>& coord) const
     {
         Coord<DIM> relativeCoord = coord - origin;
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, typename Topologies::Cube<DIM>::Topology>()(
-                relativeCoord, dimensions);
+        return !Topologies::Cube<DIM>::Topology::isOutOfBounds(relativeCoord, dimensions);
     }
 
     std::string toString() const

@@ -44,7 +44,7 @@ public:
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, PARTITION> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     inline HiParSimulator(
         Initializer<CELL_TYPE> *_initializer,

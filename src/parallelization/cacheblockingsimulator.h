@@ -20,7 +20,7 @@ class CacheBlockingSimulator : public MonolithicSimulator<CELL>
 public:
     friend class CacheBlockingSimulatorTest;
     typedef typename CELL::Topology Topology;
-    typedef typename Topologies::NDimensional<Topologies::NDimensional<Topologies::NDimensional<Topologies::ZeroDimensional, Topology::ParentTopology::ParentTopology::WRAP_EDGES>, Topology::ParentTopology::WRAP_EDGES>, true> BufferTopology;
+    typedef typename TopologiesHelpers::Topology<3, Topology::template WrapsAxis<0>::VALUE, Topology::template WrapsAxis<1>::VALUE, true> BufferTopology;
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef SuperVector<SuperVector<Region<3> > > WavefrontFrames;

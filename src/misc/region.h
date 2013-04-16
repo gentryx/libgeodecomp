@@ -429,7 +429,7 @@ public:
 
             for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
                 Streak<DIM> newStreak(*i, endX);
-                if (TOPOLOGY::wrapsAxis(0)) {
+                if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
                     splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
                     normalizeStreak<TOPOLOGY>(

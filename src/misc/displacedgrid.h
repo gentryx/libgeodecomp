@@ -18,10 +18,10 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, 
          typename TOPOLOGY=Topologies::Cube<2>::Topology, 
          bool TOPOLOGICALLY_CORRECT=false>
-class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
+class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
 public:
-    const static int DIM = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIM;
 
     typedef CELL_TYPE CellType;
     typedef TOPOLOGY Topology;
