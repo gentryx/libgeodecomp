@@ -39,7 +39,6 @@ public:
         topoDimensions(topologicalDimensions)
     { }
 
-
     DisplacedGrid(const Delegate& _grid,
                   const Coord<DIM>& _origin=Coord<DIM>()) :
         delegate(_grid),
