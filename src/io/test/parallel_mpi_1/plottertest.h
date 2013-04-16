@@ -1,23 +1,24 @@
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/plotter.h>
-#include <libgeodecomp/misc/simplecell.h>
+#include <libgeodecomp/misc/testcell.h>
 
 using namespace LibGeoDecomp; 
 
 namespace LibGeoDecomp {
 
-class SimpleCellPlotter
+class TestCellPlotter
 {
 public:
     inline void plotCell(
-        const SimpleCell& c, 
+        const TestCell<2>& c, 
         Image *img, 
         const Coord<2>& upperLeft, 
         const unsigned& width, 
         const unsigned& height) const
     {
-        img->fillBox(upperLeft, width, height, Color(47, 11, c.val));
+        int value = 1 + c.pos.x() + c.pos.y() * c.dimensions.x();
+        img->fillBox(upperLeft, width, height, Color(47, 11, value));
     }
 };
 
@@ -27,15 +28,15 @@ class PlotterTest : public CxxTest::TestSuite
 private:
     unsigned width;
     unsigned height;
-    Plotter<SimpleCell, SimpleCellPlotter> *plotter;   
-    SimpleCellPlotter simplePlotter;
+    Plotter<TestCell<2>, TestCellPlotter> *plotter;   
+    TestCellPlotter simplePlotter;
 
 public:
     void setUp()
     {
         width = 10;
         height = 24;
-        plotter = new Plotter<SimpleCell, SimpleCellPlotter>(&simplePlotter, width, height);
+        plotter = new Plotter<TestCell<2>, TestCellPlotter>(&simplePlotter, width, height);
     }
 
 
@@ -52,7 +53,7 @@ public:
         unsigned expectedDimX = gridDimX * width;
         unsigned expectedDimY = gridDimY * height;
 
-        Grid<SimpleCell> testGrid(Coord<2>(gridDimX, gridDimY));
+        Grid<TestCell<2> > testGrid(Coord<2>(gridDimX, gridDimY));
         Image result = plotter->plotGrid(testGrid);
 
         TS_ASSERT_EQUALS(result.getDimensions().x(),  expectedDimX);
@@ -67,7 +68,7 @@ public:
         unsigned expectedDimX = gridDimX * width;
         unsigned expectedDimY = gridDimY * height;
 
-        Grid<SimpleCell> testGrid(Coord<2>(gridDimX, gridDimY));
+        Grid<TestCell<2> > testGrid(Coord<2>(gridDimX, gridDimY));
         testGrid[Coord<2>(0, 0)] =  33;
         testGrid[Coord<2>(1, 0)] =  66;
         testGrid[Coord<2>(0, 1)] = 100;
@@ -88,30 +89,6 @@ public:
             }
         }
             
-        // simplePlotter.plotCell(testGrid[Coord<2>(0, 2)], 
-        //             &f, Coord<2>(0, 0), width, height);
-        // expected.paste(Coord<2>(0 * width, 0 * height), f);
-
-        // simplePlotter.plotCell(testGrid[Coord<2>(1, 2)], 
-        //             &f, Coord<2>(0, 0), width, height);
-        // expected.paste(Coord<2>(1 * width, 0 * height), f);
-
-        // simplePlotter.plotCell(testGrid[Coord<2>(0, 1)], 
-        //             &f, Coord<2>(0, 0), width, height);
-        // expected.paste(Coord<2>(0 * width, 1 * height), f);
-
-        // simplePlotter.plotCell(testGrid[Coord<2>(1, 1)], 
-        //             &f, Coord<2>(0, 0), width, height);
-        // expected.paste(Coord<2>(1 * width, 1 * height), f);
-
-        // simplePlotter.plotCell(testGrid[Coord<2>(0, 0)], 
-        //             &f, Coord<2>(0, 0), width, height);
-        // expected.paste(Coord<2>(0 * width, 2 * height), f);
-
-        // simplePlotter.plotCell(testGrid[Coord<2>(1, 0)], 
-        //             &f, Coord<2>(0, 0), width, height);
-        // expected.paste(Coord<2>(1 * width, 2 * height), f);
-        
         TS_ASSERT_EQUALS(expected, result);
     }
 
@@ -119,7 +96,7 @@ public:
 
     void testPlotGridInViewportUpperLeft()
     {
-        Grid<SimpleCell> testGrid(Coord<2>(2, 3));
+        Grid<TestCell<2> > testGrid(Coord<2>(2, 3));
         testGrid[Coord<2>(0, 0)] =  33;
         testGrid[Coord<2>(1, 0)] =  66;
         testGrid[Coord<2>(0, 1)] = 100;
@@ -161,7 +138,7 @@ public:
     
     void testPlotGridInViewportLarge() 
     {
-        Grid<SimpleCell> testGrid(Coord<2>(2000, 2000));
+        Grid<TestCell<2> > testGrid(Coord<2>(2000, 2000));
         int t1 = time(0);
         Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(500, 500), 
                                               1000, 1000);
