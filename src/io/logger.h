@@ -1,10 +1,9 @@
 #ifndef LIBGEODECOMP_IO_LOGGER_H
 #define LIBGEODECOMP_IO_LOGGER_H
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <libgeodecomp/config.h>
 
-// fixme: configure this via "configure"
-#define LIBGEODECOMP_FEATURE_DEBUG_LEVEL 0
 namespace LibGeoDecomp {
 
 /**
@@ -24,13 +23,13 @@ public:
 
 }
 
-#if LIBGEODECOMP_FEATURE_DEBUG_LEVEL < 0
+#if LIBGEODECOMP_DEBUG_LEVEL < 0
 #define LOG(LEVEL, MESSAGE) 
 #endif
 
-#if LIBGEODECOMP_FEATURE_DEBUG_LEVEL >= 0
+#if LIBGEODECOMP_DEBUG_LEVEL >= 0
 #define LOG(LEVEL, MESSAGE)                                             \
-    if (LibGeoDecomp::Logger::LEVEL <= LIBGEODECOMP_FEATURE_DEBUG_LEVEL) { \
+    if (LibGeoDecomp::Logger::LEVEL <= LIBGEODECOMP_DEBUG_LEVEL) { \
         std::cout << #LEVEL[0] << ", ["                                 \
                   << boost::posix_time::to_iso_string(boost::posix_time::second_clock::local_time()) \
                   << "] " << std::right                                 \

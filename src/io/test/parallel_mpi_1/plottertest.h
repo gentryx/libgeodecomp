@@ -17,7 +17,7 @@ public:
         const unsigned& width, 
         const unsigned& height) const
     {
-        int value = 1 + c.pos.x() + c.pos.y() * c.dimensions.x();
+        int value = 1 + c.pos.x() + c.pos.y() * c.dimensions.dimensions.x();
         img->fillBox(upperLeft, width, height, Color(47, 11, value));
     }
 };
@@ -69,12 +69,12 @@ public:
         unsigned expectedDimY = gridDimY * height;
 
         Grid<TestCell<2> > testGrid(Coord<2>(gridDimX, gridDimY));
-        testGrid[Coord<2>(0, 0)] =  33;
-        testGrid[Coord<2>(1, 0)] =  66;
-        testGrid[Coord<2>(0, 1)] = 100;
-        testGrid[Coord<2>(1, 1)] = 133;
-        testGrid[Coord<2>(0, 2)] = 166;
-        testGrid[Coord<2>(1, 2)] = 200;
+        testGrid[Coord<2>(0, 0)].testValue = 33;
+        testGrid[Coord<2>(1, 0)].testValue =  66;
+        testGrid[Coord<2>(0, 1)].testValue = 100;
+        testGrid[Coord<2>(1, 1)].testValue = 133;
+        testGrid[Coord<2>(0, 2)].testValue = 166;
+        testGrid[Coord<2>(1, 2)].testValue = 200;
 
         Image result = plotter->plotGrid(testGrid);
         
@@ -97,12 +97,12 @@ public:
     void testPlotGridInViewportUpperLeft()
     {
         Grid<TestCell<2> > testGrid(Coord<2>(2, 3));
-        testGrid[Coord<2>(0, 0)] =  33;
-        testGrid[Coord<2>(1, 0)] =  66;
-        testGrid[Coord<2>(0, 1)] = 100;
-        testGrid[Coord<2>(1, 1)] = 133;
-        testGrid[Coord<2>(0, 2)] = 166;
-        testGrid[Coord<2>(1, 2)] = 200;
+        testGrid[Coord<2>(0, 0)].testValue =  33;
+        testGrid[Coord<2>(1, 0)].testValue =  66;
+        testGrid[Coord<2>(0, 1)].testValue = 100;
+        testGrid[Coord<2>(1, 1)].testValue = 133;
+        testGrid[Coord<2>(0, 2)].testValue = 166;
+        testGrid[Coord<2>(1, 2)].testValue = 200;
         Image uncut = plotter->plotGrid(testGrid);
 
         int x = 15;

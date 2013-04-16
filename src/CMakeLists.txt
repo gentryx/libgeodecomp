@@ -98,6 +98,8 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
+add_config_option(LIBGEODECOMP_DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
+
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
 add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
