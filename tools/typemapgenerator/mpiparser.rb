@@ -76,10 +76,13 @@ class MPIParser
     while classes.any?
       @log.debug "  classes:"
       @log.debug pp(classes)
-
+      @log.debug "  resolved_classes:"
+      @log.debug pp(resolved_classes)
       num_unresolved = classes.size
+      # this temporary clone is required to avoid interference with deleted elements
+      temp_classes = classes.clone
 
-      classes.each do |klass|
+      temp_classes.each do |klass|
         resolve_class(klass, classes,
                       resolved_classes, resolved_parents,
                       topological_class_sortation)
@@ -578,7 +581,7 @@ class MPIParser
         ret.add klass
       end      
     end
-
+    
     return ret
   end
 
