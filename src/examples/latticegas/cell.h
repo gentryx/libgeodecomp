@@ -444,7 +444,7 @@ private:
         }
         {
             // b
-            Pattern p[0];
+            Pattern p[1];
             p[0](UL, UL);
             p[0](R,  R);
             p[0](LL, LL);
