@@ -57,7 +57,12 @@ class Color
         return rgb == com.rgb;;
     }
 
-    std::string toString()
+    bool operator!=(const Color& com) const
+    {
+        return !(*this == com);
+    }
+
+    std::string toString() const
     {
         std::ostringstream tmp;
         tmp << "Color(" << (int)red() << ", " << (int)green() << ", " << (int)blue() << ")";
@@ -65,6 +70,15 @@ class Color
     }
 };
 
-};
+}
+
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const LibGeoDecomp::Color& color)
+{
+    __os << color.toString();
+    return __os;
+}
 
 #endif
