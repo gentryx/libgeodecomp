@@ -76,7 +76,10 @@ public:
         return step1; 
     }
 
-    std::string dump() { return "foo"; }    
+    std::string dump() 
+    { 
+        return "foo"; 
+    }    
 
 private:
     Coord<DIM> dimensions;
