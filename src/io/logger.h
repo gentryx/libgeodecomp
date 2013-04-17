@@ -29,7 +29,7 @@ public:
 
 #if LIBGEODECOMP_DEBUG_LEVEL >= 0
 #define LOG(LEVEL, MESSAGE)                                             \
-    if (LibGeoDecomp::Logger::LEVEL <= LIBGEODECOMP_DEBUG_LEVEL) { \
+    if (LibGeoDecomp::Logger::LEVEL <= LIBGEODECOMP_DEBUG_LEVEL) {      \
         std::cout << #LEVEL[0] << ", ["                                 \
                   << boost::posix_time::to_iso_string(boost::posix_time::second_clock::local_time()) \
                   << "] " << std::right                                 \

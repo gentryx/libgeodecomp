@@ -98,7 +98,8 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
-add_config_option(LIBGEODECOMP_DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
+# setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
+add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
