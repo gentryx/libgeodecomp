@@ -15,8 +15,6 @@ if(NOT DEFINED BOOST_ROOT)
     set(BOOST_ROOT "$ENV{BOOST_LIBDIR}/../")
     set(Boost_LIBRARY_DIRS "$ENV{BOOST_LIBDIR}")
     set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
-  else()
-    set(BOOST_ROOT "/opt/boost")
   endif()
 endif()
 
@@ -89,6 +87,8 @@ add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Sug
 add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
 
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
+
+add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." ${MPI_FOUND} true)
 
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
