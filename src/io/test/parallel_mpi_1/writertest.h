@@ -13,42 +13,43 @@ template<typename CELL_TYPE>
 class HollowWriter : public Writer<CELL_TYPE>
 {
 public:
-    HollowWriter(const std::string& prefix, 
-                 MonolithicSimulator<CELL_TYPE> *sim, 
-                 unsigned everyN = 1) : 
-        Writer<CELL_TYPE>(prefix, sim, everyN) {}
+    typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    virtual void initialized() {}
-    virtual void stepFinished() {}
-    virtual void allDone() {}
+    HollowWriter(const std::string& prefix, 
+                 unsigned period = 1) : 
+        Writer<CELL_TYPE>(prefix, period) 
+    {}
+
+    virtual void stepFinished(const GridType&, unsigned, WriterEvent) 
+    {}
 };
 
 
 class WriterTest : public CxxTest::TestSuite 
 {
 private:
-    MonolithicSimulator<TestCell<2> > *_sim;
+    MonolithicSimulator<TestCell<2> > *sim;
 
 public:
     void setUp()
     {
-        _sim = new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >());
+        sim = new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >());
     }
 
     void tearDown()
     {
-        delete _sim;
+        delete sim;
     }
 
-    void testEveryNMustBePositive()
+    void testPeriodMustBePositive()
     {
-        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("foobar", _sim, 0), 
+        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("foobar", 0), 
                          std::invalid_argument);
     }
 
     void testPrefixShouldNotBeEmpty()
     {
-        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("", _sim, 1), 
+        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("", 1), 
                          std::invalid_argument);
     }
 };

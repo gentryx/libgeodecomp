@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_grid_h_
-#define _libgeodecomp_misc_grid_h_
+#ifndef LIBGEODECOMP_MISC_GRID_H
+#define LIBGEODECOMP_MISC_GRID_H
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)
@@ -22,17 +22,72 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
+namespace GridHelpers {
+
+template<int DIM>
+class FillCoordBox;
+
+template<>
+class FillCoordBox<1>
+{
+public:
+    template<typename GRID, typename CELL>
+    void operator()(const Coord<1>& origin, const Coord<1>& dim, GRID *grid, const CELL& cell)
+    {
+        CELL *cursor = &(*grid)[origin];
+        std::fill(cursor, cursor + dim.x(), cell);
+    }
+};
+
+template<>
+class FillCoordBox<2>
+{
+public:
+    template<typename GRID, typename CELL>
+    void operator()(const Coord<2>& origin, const Coord<2>& dim, GRID *grid, const CELL& cell)
+    {
+        int maxY = origin.y() + dim.y();
+        Coord<2> c = origin;
+        for (; c.y() < maxY; ++c.y()) {
+            CELL *cursor = &(*grid)[c];
+            std::fill(cursor, cursor + dim.x(), cell);
+        }
+    }
+};
+
+template<>
+class FillCoordBox<3>
+{
+public:
+    template<typename GRID, typename CELL>
+    void operator()(const Coord<3>& origin, const Coord<3>& dim, GRID *grid, const CELL& cell)
+    {
+        int maxY = origin.y() + dim.y();
+        int maxZ = origin.z() + dim.z();
+        Coord<3> c = origin;
+
+        for (; c.z() < maxZ; ++c.z()) {
+            for (c.y() = origin.y(); c.y() < maxY; ++c.y()) {
+                CELL *cursor = &(*grid)[c];
+                std::fill(cursor, cursor + dim.x(), cell);
+            }
+        }
+    }
+};
+
+}
+
 /**
  * A multi-dimensional regular grid
  */
 template<typename CELL_TYPE, typename TOPOLOGY=Topologies::Cube<2>::Topology>
-class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
+class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
     friend class GridTest;
     friend class ParallelStripingSimulatorTest;
     
 public:
-    const static int DIM = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIM;
 
 #ifndef __CODEGEARC__
     typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIM - 1> SliceRef;
@@ -53,10 +108,10 @@ public:
 
     explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
          const CELL_TYPE& defaultCell=CELL_TYPE(),
-         const CELL_TYPE& _edgeCell=CELL_TYPE()) :
+         const CELL_TYPE& edgeCell=CELL_TYPE()) :
         dimensions(dim),
         cellMatrix(dim.toExtents()),
-        edgeCell(_edgeCell)
+        edgeCell(edgeCell)
     {
         CoordBox<DIM> lineStarts(Coord<DIM>(), dim);
         lineStarts.dimensions.x() = 1;
@@ -145,21 +200,24 @@ public:
     inline bool operator==(const Grid& other) const
     {
         if (boundingBox() == CoordBox<DIM>() && 
-            other.boundingBox() == CoordBox<DIM>())
+            other.boundingBox() == CoordBox<DIM>()) {
             return true;
+        }
 
         return 
             (edgeCell   == other.edgeCell) && 
             (cellMatrix == other.cellMatrix);
     }
 
-    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
     {
-        if (boundingBox() != other.boundingBox())
+        if (boundingBox() != other.boundingBox()) {
             return false;
+        }
 
-        if (edgeCell != other.atEdge())
+        if (edgeCell != other.atEdge()) {
             return false;
+        }
 
         CoordBox<DIM> box = boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -176,7 +234,7 @@ public:
         return !(*this == other);
     }
 
-    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
     {
         return !(*this == other);
     }
@@ -202,52 +260,22 @@ public:
         return getEdgeCell();
     }
 
+    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
+    {
+        GridHelpers::FillCoordBox<DIM>()(box.origin, box.dimensions, this, cell);
+    }
+
     inline const Coord<DIM>& getDimensions() const
     {
         return dimensions;
     }
   
-    inline std::string diff(const Grid& other) const
-    {
-        if (boundingBox() != other.boundingBox()) {
-            std::ostringstream message;
-            message << 
-                "dimensions mismatch (is (" << boundingBox() << 
-                "), got (" << other.boundingBox() << "))";
-            return message.str();
-        }
-
-        std::ostringstream message;
-        if (edgeCell != other.edgeCell) {
-            message << "\nedge cell differs (self (" << edgeCell 
-                    << "), other (" << other.edgeCell << "))\n";
-        }
-
-        CoordBox<DIM> box = boundingBox();
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            if ((*this)[*i] != other[*i]) {
-                message << "\nat coordinate " << *i << "\n" <<
-                    "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n" <<
-                    (*this)[*i] <<
-                    "========================================\n" <<
-                    other[*i] << 
-                    ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-            }
-        }
-
-        if (message.str() != "") 
-            return "cell differences:\n" + message.str();
-        else 
-            return "";
-    }
-
-
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "Grid\n"
-                << "boundingBox: " << boundingBox() 
-                << "edgeCell:\n"
+        message << "Grid<" << DIM << ">(\n"
+                << "boundingBox: " << boundingBox()  << "\n"
+                << "edgeCell:\n" 
                 << edgeCell << "\n";
 
         CoordBox<DIM> box = boundingBox();
@@ -255,6 +283,7 @@ public:
             message << "Coord" << *i << ":\n" << (*this)[*i] << "\n";
         }
 
+        message << ")";
         return message.str();
     }
 
@@ -263,13 +292,10 @@ public:
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
     }
 
-
 private:
     Coord<DIM> dimensions;
     CellMatrix cellMatrix;
-    // This dummy stores the constant edge constraint
     CELL_TYPE edgeCell;
-    
 };
 
 }

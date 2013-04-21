@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_mockwriter_h_
-#define _libgeodecomp_io_mockwriter_h_
+#ifndef LIBGEODECOMP_IO_MOCKWRITER_H
+#define LIBGEODECOMP_IO_MOCKWRITER_H
 
 #include <sstream>
 
@@ -14,17 +14,9 @@ class MockWriter : public Writer<TestCell<2> >, public ParallelWriter<TestCell<2
 public:
     static std::string staticEvents;
 
-    using Writer<TestCell<2> >::sim;
-    using ParallelWriter<TestCell<2> >::distSim;
-
-    MockWriter(MonolithicSimulator<TestCell<2> > *sim, const unsigned& _period=1) : 
-        Writer<TestCell<2> >("foobar", sim, _period),
-        ParallelWriter<TestCell<2> >("foobar", 0, _period) 
-    {}
-
-    MockWriter(DistributedSimulator<TestCell<2> > *sim, const unsigned& _period=1) : 
-        Writer<TestCell<2> >("foobar", 0, _period), 
-        ParallelWriter<TestCell<2> >("foobar", sim, _period) 
+    MockWriter(const unsigned& period=1) : 
+        Writer<TestCell<2> >("foobar", period),
+        ParallelWriter<TestCell<2> >("foobar", period) 
     {}
 
     ~MockWriter() 
@@ -32,26 +24,23 @@ public:
         staticEvents += "deleted\n"; 
     }
 
-    void initialized() 
+    void stepFinished(
+        const Writer<TestCell<2> >::GridType& grid, 
+        unsigned step, 
+        WriterEvent event) 
     { 
-        myEvents << "initialized()\n"; 
+        stepFinished(step, event);
     }
 
-    void stepFinished() 
-    { 
-        unsigned step;
-        if (sim != 0) {
-            step = sim->getStep();
-        } else {
-            step = distSim->getStep();
-        }
-
-        myEvents << "stepFinished(step=" << step << ")\n"; 
-    }
-
-    void allDone() 
-    { 
-        myEvents << "allDone()\n"; 
+    void stepFinished(
+        const ParallelWriter<TestCell<2> >::GridType& grid, 
+        const Region<2>& validRegion, 
+        const Coord<2>& globalDimensions,
+        unsigned step, 
+        WriterEvent event, 
+        bool lastCall) 
+    {
+        stepFinished(step, event);
     }
 
     std::string events() 
@@ -61,6 +50,23 @@ public:
 
 private:
     std::ostringstream myEvents;
+
+    void stepFinished(unsigned step, WriterEvent event)
+    {
+        switch (event) {
+        case WRITER_INITIALIZED:
+            myEvents << "initialized()\n";
+            break;
+        case WRITER_STEP_FINISHED:
+            myEvents << "stepFinished(step=" << step << ")\n"; 
+            break;
+        case WRITER_ALL_DONE:
+            myEvents << "allDone()\n";
+            break;
+        default:
+            myEvents << "unknown event\n";
+        }
+    }
 };
 
 }

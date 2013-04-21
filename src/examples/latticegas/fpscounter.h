@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_framecounter_h_
-#define _libgeodecomp_examples_latticegas_framecounter_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_FRAMECOUNTER_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_FRAMECOUNTER_H
 
 #include <libgeodecomp/misc/chronometer.h>
 

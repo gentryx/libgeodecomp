@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_distributedsimulator_h_
-#define _libgeodecomp_parallelization_distributedsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/displacedgrid.h>
@@ -17,20 +17,12 @@ class DistributedSimulator : public Simulator<CELL_TYPE>
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
+    typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef SuperVector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
 
     inline DistributedSimulator(Initializer<CELL_TYPE> *_initializer) : 
         Simulator<CELL_TYPE>(_initializer)
     {}
-
-    /**
-     * Returns the fragment of the current grid, which is available to
-     * the current instance.
-     */
-    virtual void getGridFragment(
-        const GridType **grid, 
-        const Region<Topology::DIMENSIONS> **validRegion) = 0;
 
     /**
      * register @a writer which will observe the simulation. The
@@ -39,7 +31,7 @@ public:
      *
      * fixme: replace @a by \a and @return by \returns ...
      */
-    virtual void registerWriter(ParallelWriter<CELL_TYPE> *writer)
+    virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         writers << boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer);
     }

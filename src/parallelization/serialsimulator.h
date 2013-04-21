@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_serialsimulator_h_
-#define _libgeodecomp_parallelization_serialsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
@@ -8,31 +8,33 @@
 namespace LibGeoDecomp {
 
 /**
- * Implements the Simulator functionality by running all calculations
- * sequencially in a single process.
+ * SerialSimulator is the simplest implementation of the simulator
+ * concept.
  */
 template<typename CELL_TYPE>
 class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
-    friend class SerialSimulatorTest;
-    friend class PPMWriterTest;
 public:
+    friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     /**
      * creates a SerialSimulator with the given @a initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *_initializer) : 
-        MonolithicSimulator<CELL_TYPE>(_initializer)
+    SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
+        MonolithicSimulator<CELL_TYPE>(initializer)
     {
+        stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
         newGrid = new GridType(dim);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
+        // fixme: need library support for iterating through linestarts
+        // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
         box.dimensions.x() = 1;
@@ -68,7 +70,10 @@ public:
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {
             if (stepNum % writers[i]->getPeriod() == 0) {
-                writers[i]->stepFinished();
+                writers[i]->stepFinished(
+                    *getGrid(),
+                    getStep(),
+                    WRITER_STEP_FINISHED);
             }
         }
     }
@@ -79,18 +84,24 @@ public:
     virtual void run()
     {
         initializer->grid(curGrid);
-        stepNum = 0;
+        stepNum = initializer->startStep();
+
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->initialized();
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_INITIALIZED);
         }
 
-        for (stepNum = initializer->startStep(); 
-             stepNum < initializer->maxSteps();) {
+        for (; stepNum < initializer->maxSteps();) {
             step();
         }
 
         for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->allDone();        
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_ALL_DONE);
         }
     }
 
@@ -107,6 +118,7 @@ protected:
     using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
     using MonolithicSimulator<CELL_TYPE>::writers;
+    using MonolithicSimulator<CELL_TYPE>::getStep;
 
     GridType *curGrid;
     GridType *newGrid;
@@ -117,9 +129,10 @@ protected:
         CoordBox<DIM> box = curGrid->boundingBox();
         int endX = box.origin.x() + box.dimensions.x();
         box.dimensions.x() = 1;
+
         for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             Streak<DIM> streak(*i, endX);
-            UpdateFunctor<CELL_TYPE>()(streak, *curGrid, newGrid, nanoStep);
+            UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
 
         std::swap(curGrid, newGrid);

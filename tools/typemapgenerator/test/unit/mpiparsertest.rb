@@ -1,20 +1,3 @@
-# Copyright (C) 2006,2007 Andreas Schaefer <gentryx@gmx.de>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301 USA.
-
 require 'test/unit'
 require 'timeout'
 require 'mpiparser'
@@ -37,6 +20,7 @@ class TestMPIParser < Test::Unit::TestCase
         :cardinality => 1
       }
     }
+
     assert_equal(expected, members)
   end
 
@@ -62,6 +46,19 @@ class TestMPIParser < Test::Unit::TestCase
       }
 
     }
+
+    assert_equal(expected, members)
+  end
+
+  def test_get_members_from_floatcoord
+    members = @parser.get_members("FloatCoord")
+    expected = {
+      "vec" => {
+        :type => "float",
+        :cardinality => "DIMENSIONS"
+      }
+    }
+
     assert_equal(expected, members)
   end
 
@@ -142,17 +139,26 @@ class TestMPIParser < Test::Unit::TestCase
   def test_template_parameters
     assert_equal(%w(A B), @parser.template_parameters("CoordPair"))
     assert_equal([], @parser.template_parameters("Car"))
+    assert(%w(DIMENSIONS), @parser.template_parameters("FloatCoord"))
   end
 
-  def test_used_template_parameters
+  def test_used_template_parameters1
     expected = [["Coord<3 >", "Coord<2 >"],
                 ["int", "double"],
                 ["int", "int"]]
     assert_equal(expected, @parser.used_template_parameters("CoordPair"))
+  end
 
+  def test_used_template_parameters2
     expected = [["1"], ["2"], ["3"], ["4"]]
     assert_equal(expected.to_set,
                  @parser.used_template_parameters("CoordContainer").to_set)
+  end
+
+  def test_used_template_parameters3
+    expected = [["1"], ["2"], ["4"]]
+    assert_equal(expected.to_set,
+                 @parser.used_template_parameters("FloatCoord").to_set)
   end
 
   def test_resolve_class_with_fixed_template_parameters
@@ -220,7 +226,6 @@ class TestMPIParser < Test::Unit::TestCase
                           resolved_classes, 
                           resolved_parents, 
                           topological_class_sortation)
-
 
     expected1 = {
       "a" => { :type=>"MPI::COORD_3_", :cardinality=>1},
@@ -398,10 +403,8 @@ class TestMPIParser < Test::Unit::TestCase
   end
 
   def test_find_classes_to_be_serialized
-
     expected_classes = ["Coord<2 >", "Coord<3 >"] + 
-      %w{CoordContainer CoordContainerContainer CoordPair Dummy Engine
-    BMW Car Wheel Rim Tire CarContainer Luxury}
+      %w{CoordContainer FloatCoord FloatCoordTypemapsHelper CoordContainerContainer CoordPair Dummy Engine BMW Car Wheel Rim Tire CarContainer Luxury}
     expected_classes = expected_classes.to_set
 
     assert_equal(expected_classes, @parser.find_classes_to_be_serialized) 

@@ -1,8 +1,9 @@
-#ifndef _libgeodecomp_io_parallelwriter_h_
-#define _libgeodecomp_io_parallelwriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELWRITER_H
+#define LIBGEODECOMP_IO_PARALLELWRITER_H
 
 #include <string>
 #include <stdexcept>
+#include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
 namespace LibGeoDecomp {
@@ -27,46 +28,47 @@ template<typename CELL_TYPE>
 class ParallelWriter
 {
 public:
+    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
 
     /**
      * is the equivalent to Writer().
      */
     ParallelWriter(
-        const std::string& _prefix, 
-        DistributedSimulator<CELL_TYPE> *_distSim, 
-        const unsigned& _period = 1) : 
-        prefix(_prefix), distSim(_distSim), period(_period)
+        const std::string& prefix, 
+        const unsigned& period = 1) : 
+        prefix(prefix), 
+        period(period)
     {
-        if (prefix == "") 
+        if (prefix == "") {
             throw std::invalid_argument("empty prefixes are forbidden");
-        if (period == 0) 
+        }
+
+        if (period == 0) {
             throw std::invalid_argument("period must be positive");
-        if (distSim)
-            distSim->registerWriter(this);
+        }
     }
 
-    virtual ~ParallelWriter() {};    
+    virtual ~ParallelWriter() 
+    {};    
 
     /**
-     * is equivalent to Writer::initialized()
+     * is called back from \a sim after each simulation step. event
+     * specifies the phase in which the simulation is currently in.
+     * This may be used for instance to open/close files at the
+     * beginning/end of the simulation. lastCall is set to true if
+     * this is the final invocation for this step -- handy if the
+     * simulator needs to call the writer multiple times for different
+     * parts of the grid (e.g. for the ghost zones and then again for
+     * the interior of the domain).
      */
-    virtual void initialized() = 0;
-
-    /**
-     * is similar to Writer::stepFinished() BUT this function may be
-     * called multiple times per timestep. This is because simulators
-     * will typically update the ghost zones before they update the
-     * inner sets of their domain. Calling stepFinished() for each
-     * updated region simplifies their design and avoids buffering.
-     * The simulator will provide the ParallelWriter with which region
-     * of the grid needs to be output.
-     */
-    virtual void stepFinished() = 0;
-
-    /**
-     * is equivalent to Writer::addDone()
-     */
-    virtual void allDone() = 0;
+    virtual void stepFinished(
+        const GridType& grid, 
+        const Region<Topology::DIM>& validRegion, 
+        const Coord<Topology::DIM>& globalDimensions,
+        unsigned step, 
+        WriterEvent event, 
+        bool lastCall) = 0;
 
     const unsigned& getPeriod() const
     {
@@ -84,6 +86,6 @@ protected:
     unsigned period;
 };
 
-};
+}
 
 #endif

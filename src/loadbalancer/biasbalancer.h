@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_loadbalancer_biasbalancer_h_
-#define _libgeodecomp_loadbalancer_biasbalancer_h_
+#ifndef LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
+#define LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
 
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>

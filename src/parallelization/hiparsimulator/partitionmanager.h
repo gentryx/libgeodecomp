@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitionmanager_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitionmanager_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONMANAGER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONMANAGER_H
 // fixme: fix _hiparsimulator prefix in header guards, in this file and others
 
 #include <boost/shared_ptr.hpp>

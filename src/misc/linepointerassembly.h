@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_linepointerassembly_h_
-#define _libgeodecomp_misc_linepointerassembly_h_
+#ifndef LIBGEODECOMP_MISC_LINEPOINTERASSEMBLY_H
+#define LIBGEODECOMP_MISC_LINEPOINTERASSEMBLY_H
 
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/streak.h>
@@ -110,92 +110,16 @@ public:
  */
 template<class STENCIL>
 class LinePointerAssembly
-{};
-
-template<>
-class LinePointerAssembly<Stencils::Moore<2, 1> >
 {
 public:
     template<typename CELL, typename GRID>
-    void operator()(const CELL *pointers[9], const Streak<2>& streak, GRID& grid)
+    void operator()(const CELL *pointers[STENCIL::VOLUME], const Streak<STENCIL::DIM>& streak, GRID& grid)
     {
-        Stencils::Repeat<Stencils::Moore<2, 1>::VOLUME, 
+        Stencils::Repeat<STENCIL::VOLUME, 
                          LinePointerAssemblyHelpers::CopyCellPointer, 
-                         Stencils::Moore<2, 1> >()(pointers, streak, &grid);
+                         STENCIL>()(pointers, streak, &grid);
     }
 };
-
-template<>
-class LinePointerAssembly<Stencils::Moore<3, 1> >
-{
-public:
-    template<typename CELL, typename GRID>
-    void operator()(const CELL *pointers[27], const Streak<3>& streak, GRID& grid)
-    {
-        pointers[ 0] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() - 1, streak.origin.z() - 1)];
-        pointers[ 1] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() - 1, streak.origin.z() - 1)];
-        pointers[ 2] = &grid[Coord<3>(streak.endX,           streak.origin.y() - 1, streak.origin.z() - 1)];
-        pointers[ 3] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 0, streak.origin.z() - 1)];
-        pointers[ 4] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() - 1)];
-        pointers[ 5] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 0, streak.origin.z() - 1)];
-        pointers[ 6] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 1, streak.origin.z() - 1)];
-        pointers[ 7] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 1, streak.origin.z() - 1)];
-        pointers[ 8] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 1, streak.origin.z() - 1)];
-
-        pointers[ 9] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() - 1, streak.origin.z() + 0)];
-        pointers[10] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() - 1, streak.origin.z() + 0)];
-        pointers[11] = &grid[Coord<3>(streak.endX,           streak.origin.y() - 1, streak.origin.z() + 0)];
-        pointers[12] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 0, streak.origin.z() + 0)];
-        pointers[13] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() + 0)];
-        pointers[14] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 0, streak.origin.z() + 0)];
-        pointers[15] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 1, streak.origin.z() + 0)];
-        pointers[16] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 1, streak.origin.z() + 0)];
-        pointers[17] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 1, streak.origin.z() + 0)];
-
-        pointers[18] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() - 1, streak.origin.z() + 1)];
-        pointers[19] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() - 1, streak.origin.z() + 1)];
-        pointers[20] = &grid[Coord<3>(streak.endX,           streak.origin.y() - 1, streak.origin.z() + 1)];
-        pointers[21] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 0, streak.origin.z() + 1)];
-        pointers[22] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() + 1)];
-        pointers[23] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 0, streak.origin.z() + 1)];
-        pointers[24] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 1, streak.origin.z() + 1)];
-        pointers[25] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 1, streak.origin.z() + 1)];
-        pointers[26] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 1, streak.origin.z() + 1)];
-    }
-};
-
-template<>
-class LinePointerAssembly<Stencils::VonNeumann<2, 1> >
-{
-public:
-    template<typename CELL, typename GRID>
-    void operator()(const CELL *pointers[5], const Streak<2>& streak, GRID& grid)
-    {
-        pointers[0] = &grid[Coord<2>(streak.origin.x() + 0, streak.origin.y() - 1)];
-        pointers[1] = &grid[Coord<2>(streak.origin.x() - 1, streak.origin.y() + 0)];
-        pointers[2] = &grid[Coord<2>(streak.origin.x() + 0, streak.origin.y() + 0)];
-        pointers[3] = &grid[Coord<2>(streak.endX,           streak.origin.y() + 0)];
-        pointers[4] = &grid[Coord<2>(streak.origin.x() + 0, streak.origin.y() + 1)];
-    }
-};
-
-template<>
-class LinePointerAssembly<Stencils::VonNeumann<3, 1> >
-{
-public:
-    template<typename CELL, typename GRID>
-    void operator()(const CELL *pointers[7], const Streak<3>& streak, GRID& grid)
-    {
-        pointers[ 0] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() - 1)];
-        pointers[ 1] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() - 1, streak.origin.z() + 0)];
-        pointers[ 2] = &grid[Coord<3>(streak.origin.x() - 1, streak.origin.y() + 0, streak.origin.z() + 0)];
-        pointers[ 3] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() + 0)];
-        pointers[ 4] = &grid[Coord<3>(streak.endX,           streak.origin.y() + 0, streak.origin.z() + 0)];
-        pointers[ 5] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 1, streak.origin.z() + 0)];
-        pointers[ 6] = &grid[Coord<3>(streak.origin.x() + 0, streak.origin.y() + 0, streak.origin.z() + 1)];
-    }
-};
-
 
 }
 

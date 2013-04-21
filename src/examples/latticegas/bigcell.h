@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_bigcell_h_
-#define _libgeodecomp_examples_latticegas_bigcell_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_BIGCELL_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_BIGCELL_H
 
 #include <libgeodecomp/examples/latticegas/cell.h>
 

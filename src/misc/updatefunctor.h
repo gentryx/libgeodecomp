@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_updatefunctor_h_
-#define _libgeodecomp_misc_updatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
@@ -14,13 +14,14 @@ class Selector
 {
 public:
     typedef typename CELL::Stencil Stencil;
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
  
-    template<typename GRID, typename UPDATE_POLICY>
+    template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
     void operator()(
         const Streak<DIM>& streak,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const Coord<DIM>& targetOrigin,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep,
         CellAPITraits::Fixed,
         UPDATE_POLICY) 
@@ -28,19 +29,20 @@ public:
         const CELL *pointers[Stencil::VOLUME];
         LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
         LinePointerUpdateFunctor<CELL>()(
-            streak, gridOld.boundingBox(), pointers, &(*gridNew)[streak.origin], nanoStep);
+            streak, gridOld.boundingBox(), pointers, &(*gridNew)[targetOrigin], nanoStep);
     }
 
-    template<typename GRID>
+    template<typename GRID1, typename GRID2>
     void operator()(
         const Streak<DIM>& streak,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const Coord<DIM>& targetOrigin,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep,
         CellAPITraits::Base, 
         CellAPITraits::Base) 
     {
-        VanillaUpdateFunctor<CELL>()(streak, gridOld, gridNew, nanoStep);
+        VanillaUpdateFunctor<CELL>()(streak, targetOrigin, gridOld, gridNew, nanoStep);
     }
 };
 
@@ -56,17 +58,18 @@ template<typename CELL>
 class UpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
 
-    template<typename GRID>
+    template<typename GRID1, typename GRID2>
     void operator()(
-        const Streak<DIM>& streak,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const Streak<DIM>& sourceStreak,
+        const Coord<DIM>& targetCoord,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep) 
     {
         UpdateFunctorHelpers::Selector<CELL>()(
-            streak, gridOld, gridNew, nanoStep, typename CELL::API(), typename CELL::API());
+            sourceStreak, targetCoord, gridOld, gridNew, nanoStep, typename CELL::API(), typename CELL::API());
     }
 
 };

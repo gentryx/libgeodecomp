@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_mockpatchaccepter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_mockpatchaccepter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MOCKPATCHACCEPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MOCKPATCHACCEPTER_H
 
 #include <deque>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>

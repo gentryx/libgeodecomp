@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testcell_h_
-#define _libgeodecomp_misc_testcell_h_
+#ifndef LIBGEODECOMP_MISC_TESTCELL_H
+#define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
 #include <libgeodecomp/misc/cellapitraits.h>
@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
 namespace TestCellHelpers {
 
 template<int DIM>
-class TestCellTopology
+class MyTopology
 {
 public:
     typedef typename Topologies::Cube<DIM>::Topology Topology;
@@ -21,7 +21,7 @@ public:
 
 // make the 3D TestCell use a torus topology for a change...
 template<>
-class TestCellTopology<3>
+class MyTopology<3>
 {
 public:
     typedef Topologies::Torus<3>::Topology Topology;
@@ -66,7 +66,10 @@ public:
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
-template<int DIM, class STENCIL=Stencils::Moore<DIM, 1>, class OUTPUT=TestCellHelpers::StdOutput>
+template<int DIM, 
+         class STENCIL=Stencils::Moore<DIM, 1>, 
+         class TOPOLOGY=typename TestCellHelpers::MyTopology<DIM>::Topology, 
+         class OUTPUT=TestCellHelpers::StdOutput>
 class TestCell
 {
     friend class Typemaps;
@@ -76,8 +79,7 @@ public:
     typedef STENCIL Stencil;
     class API : public CellAPITraits::Base
     {};
-    typedef typename TestCellHelpers::TestCellTopology<DIM>::Topology Topology;
-
+    typedef TOPOLOGY Topology;
     static const int DIMENSIONS = DIM;
 
     static inline unsigned nanoSteps() 
@@ -122,9 +124,7 @@ public:
 
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, Topology>()(
-                c, dimensions.dimensions);
+        return !Topology::isOutOfBounds(c, dimensions.dimensions);
     }
 
     bool operator==(const TestCell& other) const
@@ -199,7 +199,7 @@ public:
         if (!other.isValid) {
             OUTPUT() << "Update Error for " << toString() << ":\n"
                      << "Invalid Neighbor at " << relativeLoc << ":\n" 
-                     << other.toString() << "\n"
+                     << other.toString()
                      << "--------------" << "\n";
             return false;
         }

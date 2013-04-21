@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_gridbase_h_
-#define _libgeodecomp_misc_gridbase_h_
+#ifndef LIBGEODECOMP_MISC_GRIDBASE_H
+#define LIBGEODECOMP_MISC_GRIDBASE_H
 
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>

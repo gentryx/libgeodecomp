@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_patchaccepter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_patchaccepter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHACCEPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHACCEPTER_H
 
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/superset.h>

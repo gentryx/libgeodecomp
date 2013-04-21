@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_writer_h_
-#define _libgeodecomp_io_writer_h_
+#ifndef LIBGEODECOMP_IO_WRITER_H
+#define LIBGEODECOMP_IO_WRITER_H
 
 #include <string>
 #include <stdexcept>
@@ -9,6 +9,12 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
 class MonolithicSimulator;
+
+enum WriterEvent {
+    WRITER_INITIALIZED,
+    WRITER_STEP_FINISHED,
+    WRITER_ALL_DONE
+};
 
 /**
  * Writer and ParallelWriter are the superclasses for all output
@@ -21,8 +27,8 @@ template<typename CELL_TYPE>
 class Writer
 {
     friend class WriterTest;
-
 public:
+    typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
 
     /**
      * initializes a writer using \param _prefix which subclasses may
@@ -33,43 +39,29 @@ public:
      * new(), unless _sim is 0.
      */
     Writer(
-        const std::string& _prefix, 
-        MonolithicSimulator<CELL_TYPE> *_sim, 
-        const unsigned& _period = 1) : 
-        prefix(_prefix), 
-        sim(_sim), 
-        period(_period)
+        const std::string& prefix, 
+        const unsigned period = 1) : 
+        prefix(prefix), 
+        period(period)
     {
         if (prefix == "") {
             throw std::invalid_argument("empty prefixes are forbidden");
         }
+
         if (period == 0) {
             throw std::invalid_argument("period must be positive");
-        }
-        if (sim) {
-            sim->registerWriter(this);
         }
     }
 
     virtual ~Writer() {};    
 
     /**
-     * is called back from \a sim after the initialization phase is
-     * finished. This may be useful to e.g. open files.
+     * is called back from \a sim after each simulation step. event
+     * specifies the phase in which the simulation is currently in.
+     * This may be used for instance to open/close files at the
+     * beginning/end of the simulation.
      */
-    virtual void initialized() = 0;
-
-    /**
-     * is called back from \a sim after each simulation step.
-     */
-    virtual void stepFinished() = 0;
-
-    /**
-     * is called back from \a sim at the end of the whole simulation.
-     * The Writer may close open files or do any other finalization
-     * routine.
-     */
-    virtual void allDone() = 0;
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) = 0;
 
     const unsigned& getPeriod() const
     {
@@ -83,7 +75,6 @@ public:
 
 protected:
     std::string prefix;
-    MonolithicSimulator<CELL_TYPE> *sim;
     unsigned period;
 };
 

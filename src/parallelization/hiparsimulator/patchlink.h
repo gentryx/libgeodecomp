@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_hiparsimulator_patchlink_h_
-#define _libgeodecomp_parallelization_hiparsimulator_patchlink_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHLINK_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHLINK_H
 
 #include <deque>
 #include <libgeodecomp/mpilayer/mpilayer.h>

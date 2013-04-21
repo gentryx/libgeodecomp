@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_hiparsimulator_updategroup_h_
-#define _libgeodecomp_parallelization_hiparsimulator_updategroup_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
@@ -25,7 +25,7 @@ class UpdateGroup
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;

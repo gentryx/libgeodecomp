@@ -11,7 +11,7 @@ namespace LibGeoDecomp {
 class TestCellTest : public CxxTest::TestSuite 
 {
 private:
-    typedef TestCell<2, Stencils::Moore<2, 1>, TestCellHelpers::NoOutput> TestCellType;
+    typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::NoOutput> TestCellType;
     Grid<TestCellType> grid;
     int width;
     int height;
@@ -121,7 +121,7 @@ public:
         TS_ASSERT(!grid[0][0].isValid);
     }
 
-    typedef TestCell<3, Stencils::Moore<3, 1>, TestCellHelpers::NoOutput> TestCell3D;
+    typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, TestCellHelpers::NoOutput> TestCell3D;
     typedef Grid<TestCell3D, TestCell3D::Topology> Grid3D;
 
     void test3D1()

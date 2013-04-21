@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_cell_h_
-#define _libgeodecomp_examples_latticegas_cell_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_CELL_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_CELL_H
 
 #include <cstdlib>
 #include <cstdio>
@@ -444,7 +444,7 @@ private:
         }
         {
             // b
-            Pattern p[0];
+            Pattern p[1];
             p[0](UL, UL);
             p[0](R,  R);
             p[0](LL, LL);

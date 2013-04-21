@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_soaaccessor_h_
-#define _libgeodecomp_misc_soaaccessor_h_
+#ifndef LIBGEODECOMP_MISC_SOAACCESSOR_H
+#define LIBGEODECOMP_MISC_SOAACCESSOR_H
 
 #include <boost/preprocessor/seq.hpp>
 #include <libgeodecomp/misc/coord.h>

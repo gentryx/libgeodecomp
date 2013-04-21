@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_mpiioinitializer_h_
-#define _libgeodecomp_io_mpiioinitializer_h_
+#ifndef LIBGEODECOMP_IO_MPIIOINITIALIZER_H
+#define LIBGEODECOMP_IO_MPIIOINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/mpiio.h>
@@ -13,7 +13,7 @@ template<typename CELL_TYPE>
 class MPIIOInitializer : public Initializer<CELL_TYPE>
 {    
 public:
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     MPIIOInitializer(
         const std::string& filename, 

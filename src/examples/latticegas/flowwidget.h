@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_flowwidget_h_
-#define _libgeodecomp_examples_latticegas_flowwidget_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_FLOWWIDGET_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_FLOWWIDGET_H
 
 #include <fstream>
 #include <iomanip>

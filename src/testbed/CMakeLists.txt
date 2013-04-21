@@ -1,8 +1,11 @@
 generate_sourcelists("./")
 
 add_subdirectory(boostmpi)
+add_subdirectory(cactusinterfacing)
 add_subdirectory(performancetests)
+add_subdirectory(opencl)
 add_subdirectory(reversetimemigration)
+add_subdirectory(vectorization)
 add_subdirectory(wavefront)
 
 set(RELATIVE_PATH "")

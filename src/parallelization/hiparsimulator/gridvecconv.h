@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_hiparsimulator_gridvecconv_h_
-#define _libgeodecomp_parallelization_hiparsimulator_gridvecconv_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_GRIDVECCONV_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_GRIDVECCONV_H
 
 #include <libgeodecomp/misc/region.h>
 

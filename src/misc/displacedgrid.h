@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_displacedgrid_h_
-#define _libgeodecomp_misc_displacedgrid_h_
+#ifndef LIBGEODECOMP_MISC_DISPLACEDGRID_H
+#define LIBGEODECOMP_MISC_DISPLACEDGRID_H
 
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/grid.h>
@@ -18,10 +18,10 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, 
          typename TOPOLOGY=Topologies::Cube<2>::Topology, 
          bool TOPOLOGICALLY_CORRECT=false>
-class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
+class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
 public:
-    const static int DIM = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIM;
 
     typedef CELL_TYPE CellType;
     typedef TOPOLOGY Topology;
@@ -31,13 +31,13 @@ public:
 
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
-        const CELL_TYPE &_defaultCell=CELL_TYPE(),
+        const CELL_TYPE &defaultCell=CELL_TYPE(),
+        const CELL_TYPE &edgeCell=CELL_TYPE(),
         const Coord<DIM>& topologicalDimensions=Coord<DIM>()) :
-        delegate(box.dimensions, _defaultCell),
+        delegate(box.dimensions, defaultCell, edgeCell),
         origin(box.origin),
         topoDimensions(topologicalDimensions)
     { }
-
 
     DisplacedGrid(const Delegate& _grid,
                   const Coord<DIM>& _origin=Coord<DIM>()) :
@@ -80,6 +80,11 @@ public:
         return delegate.getEdgeCell();
     }
 
+    inline void setOrigin(const Coord<DIM>& newOrigin) 
+    {
+        origin = newOrigin;
+    }
+
     inline void resize(const CoordBox<DIM>& box)
     {
         delegate.resize(box.dimensions);
@@ -114,10 +119,15 @@ public:
     {
         return getEdgeCell();
     }
-
+    
     virtual const CELL_TYPE& atEdge() const
     {
         return getEdgeCell();
+    }
+
+    void fill(const CoordBox<DIM>& box, const CELL_TYPE& cell)
+    {
+        delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
     }
 
     template<typename GRID_TYPE>
@@ -169,10 +179,11 @@ public:
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "DisplacedGrid\n"
+        message << "DisplacedGrid<" << DIM << ">(\n"
                 << "  origin: " << origin << "\n"
                 << "  delegate:\n"
-                << delegate;
+                << delegate
+                << ")";
         return message.str();
     }
 

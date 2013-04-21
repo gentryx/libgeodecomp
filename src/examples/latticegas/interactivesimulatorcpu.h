@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_interactivesimulatorcpu_h_
-#define _libgeodecomp_examples_latticegas_interactivesimulatorcpu_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_INTERACTIVESIMULATORCPU_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_INTERACTIVESIMULATORCPU_H
 
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
 

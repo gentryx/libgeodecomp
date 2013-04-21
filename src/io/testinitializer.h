@@ -1,7 +1,5 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_testinitializer_h_
-#define _libgeodecomp_io_testinitializer_h_
+#ifndef LIBGEODECOMP_IO_TESTINITIALIZER_H
+#define LIBGEODECOMP_IO_TESTINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -78,7 +76,10 @@ public:
         return step1; 
     }
 
-    std::string dump() { return "foo"; }    
+    std::string dump() 
+    { 
+        return "foo"; 
+    }    
 
 private:
     Coord<DIM> dimensions;
@@ -86,7 +87,6 @@ private:
     unsigned step1;
 };
 
-};
+}
 
-#endif
 #endif

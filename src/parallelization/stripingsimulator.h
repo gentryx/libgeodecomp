@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_stripingsimulator_h_
-#define _libgeodecomp_parallelization_stripingsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_STRIPINGSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_STRIPINGSIMULATOR_H
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -31,7 +31,8 @@ public:
     typedef LoadBalancer::LoadVec LoadVec;
     typedef typename CELL_TYPE::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
+    static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
     enum WaitTags {
         GENERAL, 
@@ -43,6 +44,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::writers;
     using DistributedSimulator<CELL_TYPE>::stepNum;
+    using DistributedSimulator<CELL_TYPE>::steerers;
 
     StripingSimulator(
         Initializer<CELL_TYPE> *_initializer, 
@@ -95,11 +97,21 @@ public:
     virtual void step()
     {   
         balanceLoad();
+
+        // notify all registered Steerers
+        waitForGhostRegions();
+        for(unsigned i = 0; i < steerers.size(); ++i) {
+            if (stepNum % steerers[i]->getPeriod() == 0) {
+                steerers[i]->nextStep(curStripe, regionWithOuterGhosts, stepNum);
+            }
+        }
+
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
         }
-        stepNum++;    
-        handleOutput();
+        ++stepNum;
+
+        handleOutput(WRITER_STEP_FINISHED);
     }
 
     /**
@@ -108,27 +120,13 @@ public:
     virtual void run()
     {
         initSimulation();
-
-        stepNum = initializer->startStep();
-        for (unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->initialized();
-        }
+        handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
             step();
         }
     
-        for (unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->allDone();        
-        }
-    }
-
-    virtual void getGridFragment(
-        const GridBase<CELL_TYPE, DIM> **grid, 
-        const Region<DIM> **validRegion)
-    {
-        *grid = curStripe;
-        *validRegion = &region;
+        handleOutput(WRITER_ALL_DONE);
     }
 
     inline const unsigned& getLoadBalancingPeriod() const
@@ -163,6 +161,7 @@ private:
     Region<DIM> innerLowerGhostRegion;
     Region<DIM> outerUpperGhostRegion;
     Region<DIM> outerLowerGhostRegion;
+    Region<DIM> regionWithOuterGhosts;
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
@@ -243,10 +242,16 @@ private:
         mpilayer.wait(GHOSTREGION_BETA);
     }
 
-    void handleOutput()
+    void handleOutput(WriterEvent event)
     {
         for(unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->stepFinished();
+            writers[i]->stepFinished(
+                *curStripe,
+                region,
+                gridDimensions(),
+                this->getStep(),
+                event, 
+                true);
         }
     }
 
@@ -276,6 +281,7 @@ private:
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
+                i->origin,
                 *curStripe,
                 newStripe,
                 nanoStep);
@@ -359,6 +365,7 @@ private:
         innerLowerGhostRegion = fillRegion(endRow - ghostHeightLower, endRow);
         outerUpperGhostRegion = fillRegion(startRow - ghostHeightUpper, startRow);
         outerLowerGhostRegion = fillRegion(endRow, endRow + ghostHeightLower);
+        regionWithOuterGhosts = outerUpperGhostRegion + region + outerLowerGhostRegion;
     }
 
     /**
@@ -373,7 +380,7 @@ private:
         newStripe->resize(box);
         initializer->grid(curStripe);
         newStripe->getEdgeCell() = curStripe->getEdgeCell();
-        stepNum = 0;
+        stepNum = initializer->startStep();
     }
 
     /**
@@ -394,7 +401,7 @@ private:
             ghostHeightUpper = 0;
             ghostHeightLower = 0;
         } else {
-            if (Topology::WRAP_EDGES) {
+            if (WRAP_EDGES) {
                 ghostHeightUpper = 1;
                 ghostHeightLower = 1;
             } else {
@@ -422,7 +429,7 @@ private:
     {
         int lowerNeighbor;
 
-        if (Topology::WRAP_EDGES) {
+        if (WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
             while (lowerNeighbor != mpilayer.rank() && 
@@ -443,7 +450,7 @@ private:
     {
         int upperNeighbor;
 
-        if (Topology::WRAP_EDGES) {
+        if (WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
             while (upperNeighbor != mpilayer.rank() && 

@@ -58,11 +58,13 @@ public:
             TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
             dimensions = init->gridDimensions();
             SerialSimulator<TestCell<3> > referenceSim(init);
-            new MPIIOWriter<TestCell<3> >(
-                "testmpiioinitializer1_",   
-                &referenceSim,
-                4,
-                MPI::COMM_SELF);
+            referenceSim.addWriter(
+                new MPIIOWriter<TestCell<3> >(
+                    "testmpiioinitializer1_",   
+                    4,
+                    init->maxSteps(),
+                    MPI::COMM_SELF));
+
             referenceSim.run();
         }
 
@@ -72,11 +74,13 @@ public:
         MPIIOInitializer<TestCell<3> > *init = 
             new MPIIOInitializer<TestCell<3> >(snapshotFile);
         StripingSimulator<TestCell<3> > sim(init, balancer);
-        new ParallelMPIIOWriter<TestCell<3> >(
-            "testmpiioinitializer2_",   
-            &sim,
-            4,
-            MPI::COMM_SELF);
+        sim.addWriter(
+            new ParallelMPIIOWriter<TestCell<3> >(
+                "testmpiioinitializer2_",   
+                4,
+                init->maxSteps(),
+                MPI::COMM_SELF));
+
         sim.run();
         MPILayer().barrier();
 

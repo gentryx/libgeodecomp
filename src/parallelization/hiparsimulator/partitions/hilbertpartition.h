@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hilbertpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_hilbertpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HILBERTPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HILBERTPARTITION_H
 
 // ugly hack to circumvent CodeGear quirks
 #ifdef __CODEGEARC__
@@ -207,7 +207,7 @@ public:
             // is the accumulated size of the first three quarters.
             unsigned accuSizes[4];
             accuSizes[0] = 0;
-            switch(form) {
+            switch (form) {
             case ENUM_PREFIX LL_TO_LR:
                 accuSizes[1] = lowerLeftQuarterSize;
                 accuSizes[2] = leftHalfSize;

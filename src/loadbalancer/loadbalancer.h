@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_loadbalancer_loadbalancer_h_
-#define _libgeodecomp_loadbalancer_loadbalancer_h_
+#ifndef LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
+#define LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
 
 #include <libgeodecomp/misc/supervector.h>
 

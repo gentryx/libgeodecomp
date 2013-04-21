@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HINDEXINGPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HINDEXINGPARTITION_H
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/multi_array.hpp>
@@ -432,12 +432,12 @@ public:
             const int& x, 
             const int& y) 
         {
-            switch(curCounter) {
+            switch (curCounter) {
             case 0:
                 return Coord<2>(0, 0);
             case 1:
             case 3:
-                switch(curType) {
+                switch (curType) {
                 case 0:
                     return Coord<2>(leftHalf,   -lowerHalf);
                 case 1:
@@ -448,7 +448,7 @@ public:
                     return Coord<2>(-rightHalf, upperHalf);
                 }
             case 2:
-                switch(curType) {
+                switch (curType) {
                 case 0:
                     return Coord<2>(0, -y);
                 case 1:
@@ -459,7 +459,7 @@ public:
                     return Coord<2>(0, y);
                 }
             case 4: // end:
-                switch(curType) {
+                switch (curType) {
                 case 0:
                     return Coord<2>( x, -y);
                 case 1:

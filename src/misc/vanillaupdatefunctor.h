@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_vanillaupdatefunctor_h_
-#define _libgeodecomp_misc_vanillaupdatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_VANILLAUPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_VANILLAUPDATEFUNCTOR_H
 
 namespace LibGeoDecomp {
 
@@ -12,18 +12,22 @@ template<typename CELL>
 class VanillaUpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
 
-    template<typename GRID>
+    template<typename GRID1, typename GRID2>
     void operator()(
         const Streak<DIM>& streak,
-        const GRID& gridOld,
-        GRID *gridNew,
+        const Coord<DIM>& targetOrigin,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
         unsigned nanoStep) 
     {
-        Coord<DIM> c = streak.origin;
-        for (; c.x() < streak.endX; ++c.x()) {
-            (*gridNew)[c].update(gridOld.getNeighborhood(c), nanoStep);
+        Coord<DIM> sourceCoord = streak.origin;
+        Coord<DIM> targetCoord = targetOrigin;
+
+        for (; sourceCoord.x() < streak.endX; ++sourceCoord.x()) {
+            (*gridNew)[targetCoord].update(gridOld.getNeighborhood(sourceCoord), nanoStep);
+            ++targetCoord.x();
         }
     }
 };

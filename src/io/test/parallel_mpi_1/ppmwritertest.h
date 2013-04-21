@@ -19,17 +19,17 @@ public:
 
     void setUp()
     {
-        _tempFile = TempFile::serial("libGeoDecompTempfile");
-        _simulator = new SerialSimulator<TestCell<2> >(
+        tempFile = TempFile::serial("libGeoDecompTempfile");
+        simulator = new SerialSimulator<TestCell<2> >(
             new TestInitializer<TestCell<2> >(Coord<2>(10, 11)));
     }
 
 
     void tearDown() {
-        delete _simulator;
+        delete simulator;
         for (int i = 0; i < 100; i++) {
             std::ostringstream f;
-            f << _tempFile << "." 
+            f << tempFile << "." 
               << std::setw(4) << std::setfill('0') << i << ".ppm";
             remove(f.str().c_str());
         }
@@ -38,16 +38,17 @@ public:
 
     void testWritePPM()
     {
-        new PPMWriter<TestCell<2>, TestPlotter>(_tempFile, _simulator);
-        _simulator->run();
+        simulator->addWriter(new PPMWriter<TestCell<2>, TestPlotter>(tempFile));
+        simulator->run();
+
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
-            filename << _tempFile << "." << std::setfill('0') << std::setw(4)
+            filename << tempFile << "." << std::setfill('0') << std::setw(4)
                      << i << ".ppm";
             TS_ASSERT_FILE(filename.str());
         }
 
-        std::string firstFile = _tempFile + ".0000.ppm";
+        std::string firstFile = tempFile + ".0000.ppm";
         std::ifstream infile(firstFile.c_str());
 
         std::vector<char> expected;
@@ -69,17 +70,17 @@ public:
         TS_ASSERT_EQUALS(content, expected);
     }
 
-
-    void testWritePPMEveryN()
+    void testWritePPMPeriod()
     {
-        int everyN = 2;
-        new PPMWriter<TestCell<2>, TestPlotter>(_tempFile, _simulator, everyN);
-        _simulator->run();
+        int period = 2;
+        simulator->addWriter(new PPMWriter<TestCell<2>, TestPlotter>(tempFile, period));
+        simulator->run();
+
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
-            filename << _tempFile << "." << std::setfill('0') << std::setw(4)
+            filename << tempFile << "." << std::setfill('0') << std::setw(4)
                      << i << ".ppm";
-            if (i % everyN == 0) {
+            if (i % period == 0) {
                 TS_ASSERT_FILE(filename.str());
             } else {
                 TS_ASSERT_NO_FILE(filename.str());
@@ -87,16 +88,17 @@ public:
         }
     }
 
-
     void testFileOpenError()
     {
-        std::string path("/non/existent/path/prefix");
+        std::string path("/non/existent/path/prefix1");
         std::string expectedErrorMessage("Could not open file " + path);
-        std::cout << "expecting »" << expectedErrorMessage << "«\n";
         PPMWriter<TestCell<2>, TestPlotter> *writer = 
-            new PPMWriter<TestCell<2>, TestPlotter>(path, _simulator);
+            new PPMWriter<TestCell<2>, TestPlotter>(path);
         TS_ASSERT_THROWS_ASSERT(
-            writer->initialized(),
+            writer->stepFinished(
+                *simulator->getGrid(), 
+                simulator->getStep(), 
+                WRITER_INITIALIZED),
             FileOpenException &exception,
             TS_ASSERT_SAME_DATA(
                 expectedErrorMessage.c_str(), 
@@ -105,8 +107,8 @@ public:
     }
 
 private:
-    std::string _tempFile;
-    MonolithicSimulator<TestCell<2> > *_simulator;
+    std::string tempFile;
+    MonolithicSimulator<TestCell<2> > *simulator;
 };
 
 }

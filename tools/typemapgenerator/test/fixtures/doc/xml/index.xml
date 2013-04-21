@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.6.3">
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.3.1">
   <compound refid="classBMW" kind="class"><name>BMW</name>
     <member refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kind="variable"><name>price</name></member>
@@ -21,6 +21,8 @@
     <member refid="classCarContainer_1aa816b8ffbcf63c127ff1dbe275afdbde" kind="variable"><name>echo</name></member>
     <member refid="classCarContainer_1a5a1c51795b1ac59ec78748238a10c403" kind="variable"><name>size</name></member>
     <member refid="classCarContainer_1a0a539b36fd21ec720dd5d4466ded13e9" kind="variable"><name>spareWheel</name></member>
+  </compound>
+  <compound refid="classCoord" kind="class"><name>Coord</name>
   </compound>
   <compound refid="classCoord_3_012_01_4" kind="class"><name>Coord&lt; 2 &gt;</name>
     <member refid="classCoord_3_012_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
@@ -65,6 +67,16 @@
     <member refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" kind="variable"><name>fuel</name></member>
     <member refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" kind="variable"><name>gearRatios</name></member>
   </compound>
+  <compound refid="classFloatCoord" kind="class"><name>FloatCoord</name>
+    <member refid="classFloatCoord_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classFloatCoord_1a1f112ae8e2ccc30d8fe4e1101229164d" kind="variable"><name>vec</name></member>
+  </compound>
+  <compound refid="classFloatCoordTypemapsHelper" kind="class"><name>FloatCoordTypemapsHelper</name>
+    <member refid="classFloatCoordTypemapsHelper_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classFloatCoordTypemapsHelper_1aeea6f2857d50f9a50e947a94a496364e" kind="variable"><name>pA</name></member>
+    <member refid="classFloatCoordTypemapsHelper_1ae015781e3d331f35b1104e57b02b6d9e" kind="variable"><name>pB</name></member>
+    <member refid="classFloatCoordTypemapsHelper_1a4348e974d6e694d18311f6faab7d9398" kind="variable"><name>pC</name></member>
+  </compound>
   <compound refid="classLuxury" kind="class"><name>Luxury</name>
     <member refid="classLuxury_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classLuxury_1a1b98504fe4a14567b66939a31ca20ab9" kind="variable"><name>sort</name></member>
@@ -106,6 +118,8 @@
   </compound>
   <compound refid="engine_8h" kind="file"><name>engine.h</name>
   </compound>
+  <compound refid="floatcoordbase_8h" kind="file"><name>floatcoordbase.h</name>
+  </compound>
   <compound refid="luxury_8h" kind="file"><name>luxury.h</name>
   </compound>
   <compound refid="main_8cpp" kind="file"><name>main.cpp</name>
@@ -123,6 +137,6 @@
   </compound>
   <compound refid="wheel_8h" kind="file"><name>wheel.h</name>
   </compound>
-  <compound refid="dir_f1e3d554da75903c386950a9779f8401" kind="dir"><name>src/</name>
+  <compound refid="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir"><name>src</name>
   </compound>
 </doxygenindex>

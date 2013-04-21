@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_simpleinitializer_h_
-#define _libgeodecomp_io_simpleinitializer_h_
+#ifndef LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
+#define LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
 
@@ -9,15 +9,15 @@ template<typename CELL_TYPE>
 class SimpleInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    const static int DIMENSIONS = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     SimpleInitializer(
-        const Coord<DIMENSIONS>& _dimensions,
+        const Coord<DIM>& _dimensions,
         const unsigned& _steps = 300) :
         dimensions(_dimensions), steps(_steps)
     {}
 
-    Coord<DIMENSIONS> gridDimensions() const
+    Coord<DIM> gridDimensions() const
     {
         return dimensions;
     }
@@ -33,10 +33,10 @@ public:
     }
 
 protected:
-    Coord<DIMENSIONS> dimensions;
+    Coord<DIM> dimensions;
     unsigned steps;
 };
 
-};
+}
 
 #endif

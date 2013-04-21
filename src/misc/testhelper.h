@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testhelper_h_
-#define _libgeodecomp_misc_testhelper_h_
+#ifndef LIBGEODECOMP_MISC_TESTHELPER_H
+#define LIBGEODECOMP_MISC_TESTHELPER_H
 
 #ifdef __CODEGEARC__
 #include <math.h>
@@ -151,8 +151,9 @@
             flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
             TS_ASSERT(flag);                                            \
             ollKorrect &= flag;                                         \
-            if (!flag)                                                  \
+            if (!flag) {                                                \
                 message << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
+            }                                                           \
         }                                                               \
     }
 

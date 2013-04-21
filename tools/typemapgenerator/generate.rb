@@ -1,22 +1,4 @@
 #!/usr/bin/ruby
-
-# Copyright (C) 2006,2007 Andreas Schaefer <gentryx@gmx.de>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301 USA.
-
 require 'fileutils'
 require 'pathname'
 require 'optparse'
@@ -80,7 +62,10 @@ opts = OptionParser.new do |o|
        "encapsulate code in #ifdef(MACRO), #endif guards") do |macro|
     options[:macro_guard] = macro
   end
-  
+  o.on("-p", "--profile",
+       "profile execution") do 
+    options[:profiling] = true
+  end
 end
 
 opts.parse!(ARGV)
@@ -164,6 +149,11 @@ if options[:scan]
   exit(0)
 end
 
+if options[:profiling]
+  require 'ruby-prof'
+  RubyProf.start
+end
+
 output_path = Pathname.new(ARGV[1] || "./")
 header, source = 
   TypemapGenerator.generate_forest(xml_path, basedir, 
@@ -174,3 +164,8 @@ header, source =
                                    options[:macro_guard])
 File.open(output_path + "typemaps.h",  "w").write(header)
 File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)
+
+if options[:profiling]
+  profile = RubyProf.stop
+  RubyProf::FlatPrinter.new(profile).print(STDOUT)
+end

@@ -19,11 +19,15 @@ class SerialSimulatorTest : public CxxTest::TestSuite
 {
 public:
     typedef MockSteerer<TestCell<2> > SteererType;
-
+ 
     void setUp() 
     {
-        init.reset(new TestInitializer<TestCell<2> >());
-        simulator.reset(new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >()));
+        dim = Coord<2>(17, 12);
+        maxSteps = 21;
+        startStep = 13;
+
+        init.reset(createInitializer());
+        simulator.reset(new SerialSimulator<TestCell<2> >(createInitializer()));
     }
     
     void tearDown()
@@ -38,18 +42,18 @@ public:
                          (unsigned)17);
         TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(), 
                          (unsigned)12);
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *simulator->getGrid(), 0);
+        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *simulator->getGrid(), startStep * TestCell<2>::nanoSteps());
     }
 
     void testStep()
     {
-        TS_ASSERT_EQUALS(0, (int)simulator->getStep());
+        TS_ASSERT_EQUALS(startStep, (int)simulator->getStep());
 
         simulator->step();
         const Grid<TestCell<2> > *grid = simulator->getGrid();
         TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *grid, 
-                            TestCell<2>::nanoSteps());
-        TS_ASSERT_EQUALS(1, (int)simulator->getStep());
+                            (startStep + 1) * TestCell<2>::nanoSteps());
+        TS_ASSERT_EQUALS(startStep + 1, (int)simulator->getStep());
     }
     
     void testRun()
@@ -77,19 +81,21 @@ public:
     
     void testRegisterWriter()
     {
-        MockWriter *w = new MockWriter(&*simulator);
+        MockWriter *w = new MockWriter();
+        simulator->addWriter(w);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
-        TS_ASSERT_EQUALS((unsigned)1, writers.size());
+        TS_ASSERT_EQUALS(1, writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
     }
 
     void testSerialSimulatorShouldCallBackWriter()
     {
-        MockWriter *w = new MockWriter(&*simulator, 3);
+        MockWriter *w = new MockWriter(3);
+        simulator->addWriter(w);
         simulator->run();
         
         std::string expectedEvents = "initialized()\n";
-        for (unsigned i = 3; i <= init->maxSteps(); i += 3) {
+        for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
             expectedEvents += 
                 "stepFinished(step=" + StringConv::itoa(i) + ")\n"; 
         }
@@ -100,16 +106,21 @@ public:
 
     void testRunMustResetGridPriorToSimulation()
     {
-        MockWriter *eventWriter1 = new MockWriter(&*simulator);
+        MockWriter *eventWriter1 = new MockWriter();
         MemoryWriter<TestCell<2> > *gridWriter1 = 
-            new MemoryWriter<TestCell<2> >(&*simulator);
+            new MemoryWriter<TestCell<2> >();
+        simulator->addWriter(eventWriter1);
+        simulator->addWriter(gridWriter1);
+
         simulator->run();
         std::string events1 = eventWriter1->events();
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
-        MockWriter *eventWriter2 = new MockWriter(&*simulator);
+        MockWriter *eventWriter2 = new MockWriter();
         MemoryWriter<TestCell<2> > *gridWriter2 = 
-            new MemoryWriter<TestCell<2> >(&*simulator);
+            new MemoryWriter<TestCell<2> >();
+        simulator->addWriter(eventWriter2);
+        simulator->addWriter(gridWriter2);
         simulator->run();
         std::string events2 = eventWriter2->events();
         std::vector<Grid<TestCell<2> > > grids2 = gridWriter2->getGrids();
@@ -147,7 +158,11 @@ public:
         TS_ASSERT_EQUALS(events.str(), expected.str());
 
         simulator->run();
-        for (int i = 0; i < init->maxSteps(); i += 5) {
+        int i = startStep;
+        if (i % 5) {
+            i += 5 - (i % 5);
+        }
+        for (; i < maxSteps; i += 5) {
             expected << "nextStep(" << i << ")\n";
         }
         expected << "deleted\n";
@@ -159,6 +174,14 @@ public:
 private:
     boost::shared_ptr<SerialSimulator<TestCell<2> > > simulator;
     boost::shared_ptr<Initializer<TestCell<2> > > init;
+    unsigned maxSteps;
+    unsigned startStep;
+    Coord<2> dim;
+
+    Initializer<TestCell<2> > *createInitializer()
+    {
+        return new TestInitializer<TestCell<2> >(dim, maxSteps, startStep);
+    }
 };
 
 }

@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 #include <libgeodecomp/misc/testhelper.h>
@@ -34,6 +35,7 @@ class ParallelStripingSimulatorTest : public CxxTest::TestSuite
 {
 private:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
+    typedef TestSteerer<2 > TestSteererType;
 
     MonolithicSimulator<TestCell<2> > *referenceSim;
     StripingSimulator<TestCell<2> > *testSim;
@@ -140,15 +142,12 @@ public:
         TS_ASSERT_EQUALS(referenceSim->getStep(), 
                          testSim->getStep());
         
-        const Region<2> *region;
-        const GridBaseType *grid;
         int cycle = firstCycle;
 
-        testSim->getGridFragment(&grid, &region);
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe, 
+            testSim->region, 
             cycle);
 
         for (int i = 0; i < 40; i++) {
@@ -159,11 +158,10 @@ public:
             TS_ASSERT_EQUALS(referenceSim->getStep(), 
                              testSim->getStep());
 
-            testSim->getGridFragment(&grid, &region);
             TS_ASSERT_TEST_GRID_REGION(
                 GridBaseType, 
-                *grid, 
-                *region, 
+                *testSim->curStripe, 
+                testSim->region, 
                 cycle);
         }
     }
@@ -175,22 +173,21 @@ public:
 
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
 
-        const Region<2> *region;
-        const GridBaseType *grid;
-        testSim->getGridFragment(&grid, &region);
         int cycle = maxSteps * TestCell<2>::nanoSteps();
-
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe, 
+            testSim->region, 
             cycle);
     }
     
     void checkRunAndWriterInteraction(int everyN)
     {
-        MockWriter *expectedCalls = new MockWriter(referenceSim);
-        MockWriter *actualCalls = new MockWriter(testSim);
+        MockWriter *expectedCalls = new MockWriter();
+        MockWriter *actualCalls = new MockWriter();
+
+        referenceSim->addWriter(expectedCalls);
+        testSim->addWriter(actualCalls);
 
         testSim->run();
         referenceSim->run();
@@ -246,8 +243,7 @@ public:
             CoordBox<2>(Coord<2>(0, s), Coord<2>(width, e - s)));
         init->grid(&expectedStripe);
         Grid<TestCell<2> > actualStripe = *testSim->curStripe->vanillaGrid();
-        TSM_ASSERT_EQUALS(actualStripe.diff(*expectedStripe.vanillaGrid()).c_str(), 
-                          actualStripe, *expectedStripe.vanillaGrid());
+        TS_ASSERT_EQUALS(actualStripe, *expectedStripe.vanillaGrid());
     }
 
     void checkRunWithDifferentPartitions(NoOpBalancer::WeightVec weights2)
@@ -259,15 +255,12 @@ public:
         testSim->run();
         referenceSim->run();
 
-        const Region<2> *region;
-        const GridBaseType *grid;
         int cycle = maxSteps * TestCell<2>::nanoSteps();
-        testSim->getGridFragment(&grid, &region);
 
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
-            *grid, 
-            *region, 
+            *testSim->curStripe, 
+            testSim->region, 
             cycle);
         TS_ASSERT_EQUALS(testSim->partitions, weights2);
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
@@ -330,8 +323,10 @@ public:
             balancer, 
             balanceEveryN);
 
-        MockWriter *expectedCalls = new MockWriter(referenceSim);
-        MockWriter *actualCalls = new MockWriter(&localTestSim);
+        MockWriter *expectedCalls = new MockWriter();
+        MockWriter *actualCalls = new MockWriter();
+        referenceSim->addWriter(expectedCalls);
+        localTestSim.addWriter(actualCalls);
 
         localTestSim.run();
         referenceSim->run();
@@ -400,6 +395,20 @@ public:
             rank? 0 : new RandomBalancer());
 
         s.run();
+    }
+
+    void testSteererFunctionality()
+    {
+        testSim->addSteerer(new TestSteererType(5, 25, 4711 * 27));
+        testSim->run();
+
+        int cycle = 50 * 27 + 4711 * 27;
+
+        TS_ASSERT_TEST_GRID_REGION(
+            GridBaseType, 
+            *testSim->curStripe,
+            testSim->region,
+            cycle);
     }
 
 private:

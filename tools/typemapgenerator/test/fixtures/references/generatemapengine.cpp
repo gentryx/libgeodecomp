@@ -3,7 +3,7 @@ Typemaps::generateMapEngine() {
     char fakeObject[sizeof(Engine)];
     Engine *obj = (Engine*)fakeObject;
 
-    int count = 3;
+    const int count = 3;
     int lengths[count];
 
     // sort addresses in ascending order

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_spacefillingcurve_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_spacefillingcurve_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_SPACEFILLINGCURVE_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_SPACEFILLINGCURVE_H
 
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/region.h>

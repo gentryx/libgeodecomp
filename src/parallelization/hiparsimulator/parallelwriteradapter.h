@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_parallelwriteradapter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_parallelwriteradapter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
@@ -26,14 +26,18 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        HiParSimulatorType *_sim,
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
+        HiParSimulatorType *sim,
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
         const long& firstStep,
-        const long& lastStep) :
-        sim(_sim),
-        writer(_writer),
+        const long& lastStep,
+        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
+        bool lastCall) :
+        sim(sim),
+        writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
-        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps())
+        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
+        lastCall(lastCall),
+        globalGridDimensions(globalGridDimensions)
     {
         reload(firstNanoStep);
         reload(lastNanoStep);
@@ -47,24 +51,24 @@ public:
         if (!checkNanoStepPut(nanoStep)) {
             return;
         }
+
         requestedNanoSteps.erase_min();
 
-        sim->setGridFragment(&grid, &validRegion);
-
+        WriterEvent event = WRITER_STEP_FINISHED;
         if (nanoStep == firstNanoStep) {
-            writer->initialized();
-        } else {
-            if (nanoStep == lastNanoStep) {
-                writer->allDone();
-            } else {
-                writer->stepFinished();
-            }
+            event = WRITER_INITIALIZED;
+        }
+        if (nanoStep == lastNanoStep) {
+            event = WRITER_ALL_DONE;
         }
 
-        // delete the pointers from the Simulator to prevent accesses
-        // to stale pointers:
-        sim->setGridFragment(0, 0);
-
+        writer->stepFinished(
+            grid, 
+            validRegion, 
+            globalGridDimensions, 
+            nanoStep / CELL_TYPE::nanoSteps(), 
+            event, 
+            lastCall);
         reload();
     }
 
@@ -73,6 +77,8 @@ private:
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
     long firstNanoStep;
     long lastNanoStep;
+    bool lastCall;
+    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 
     long nextOutputStep(const long& step)
     {

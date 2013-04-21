@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_coordbox_h_
-#define _libgeodecomp_misc_coordbox_h_
+#ifndef LIBGEODECOMP_MISC_COORDBOX_H
+#define LIBGEODECOMP_MISC_COORDBOX_H
 
 #include <iostream>
 #include <stdexcept>
@@ -58,16 +58,14 @@ public:
     inline bool inBounds(const Coord<DIM>& coord) const
     {
         Coord<DIM> relativeCoord = coord - origin;
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, typename Topologies::Cube<DIM>::Topology>()(
-                relativeCoord, dimensions);
+        return !Topologies::Cube<DIM>::Topology::isOutOfBounds(relativeCoord, dimensions);
     }
 
     std::string toString() const
     {
         std::ostringstream temp;
-        temp << "origin: " << origin << "\n"
-             << "dimensions: " << dimensions << "\n";
+        temp << "CoordBox<" << DIM << ">(origin: " << origin << ", "
+             << "dimensions: " << dimensions << ")";
         return temp.str();
     }
 
@@ -148,7 +146,7 @@ public:
  * The MPI typemap generator need to find out for which template
  * parameter values it should generate typemaps. It does so by
  * scanning all class members. Therefore this dummy class forces the
- * typemap generator to create MPI datatypes for CoordBoxs with the
+ * typemap generator to create MPI datatypes for CoordBox with the
  * dimensions as specified below.
  */
 class CoordBoxMPIDatatypeHelper

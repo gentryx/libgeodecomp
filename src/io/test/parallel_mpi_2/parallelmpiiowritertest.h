@@ -40,8 +40,9 @@ public:
         StripingSimulator<TestCell<3> > simTest(init, balancer);
         ParallelMPIIOWriter<TestCell<3> > *writer = new ParallelMPIIOWriter<TestCell<3> >(
             "testmpiiowriter",   
-            &simTest,
-            4);
+            4,
+            init->maxSteps());
+        simTest.addWriter(writer);
 
         simTest.run();
 
@@ -49,8 +50,8 @@ public:
             TestInitializer<TestCell<3> > *init2 = new TestInitializer<TestCell<3> >();
 
             SerialSimulator<TestCell<3> > simReference(init2);
-            MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(
-                &simReference, 4);
+            MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(4);
+            simReference.addWriter(memoryWriter);
 
             simReference.run();
 

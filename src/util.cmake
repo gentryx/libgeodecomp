@@ -5,11 +5,12 @@ function(print_options)
 endfunction(print_options)
 
 function(dump_config outfile)
-  file(WRITE "${outfile}.new" "#ifndef _libgeodecomp_config_h_\n\n${CONFIG_HEADER}\n#endif\n")
+  set(CONTENT "#ifndef LIBGEODECOMP_CONFIG_H\n\n${CONFIG_HEADER}\n#endif\n")
+  file(WRITE "${outfile}.new" "${CONTENT}")
 
   execute_process(COMMAND cmake -E compare_files "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}" "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}.new" RESULT_VARIABLE res)
   if(res GREATER 0)
-    file(WRITE "${outfile}" "#ifndef _libgeodecomp_config_h_\n\n${CONFIG_HEADER}\n#endif\n")
+    file(WRITE "${outfile}" "${CONTENT}")
   endif()
   
   file(REMOVE "${outfile}.new")
@@ -54,11 +55,11 @@ function(generate_sourcelists relative_dir)
     endforeach(i)
 
     if(STRIPPED_SOURCES)
-      list(SORT STRIPPED_SOURCES ${STRIPPED_SOURCES})
+      list(SORT STRIPPED_SOURCES)
     endif(STRIPPED_SOURCES)
     
     if(STRIPPED_HEADERS)
-      list(SORT STRIPPED_HEADERS ${STRIPPED_HEADERS})
+      list(SORT STRIPPED_HEADERS)
     endif(STRIPPED_HEADERS)
 
     set(MY_AUTO "set(SOURCES \${SOURCES}\n")

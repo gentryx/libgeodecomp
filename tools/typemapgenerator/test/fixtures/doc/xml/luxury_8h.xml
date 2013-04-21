@@ -1,19 +1,23 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.6.3">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
   <compounddef id="luxury_8h" kind="file">
     <compoundname>luxury.h</compoundname>
-    <includedby refid="main_8cpp" local="yes">src/main.cpp</includedby>
+    <includedby refid="bmw_8h" local="yes">src/bmw.h</includedby>
     <invincdepgraph>
-      <node id="54">
+      <node id="60">
         <label>src/main.cpp</label>
         <link refid="main_8cpp"/>
-        <childnode refid="54" relation="include">
-        </childnode>
       </node>
-      <node id="53">
+      <node id="58">
         <label>src/luxury.h</label>
         <link refid="luxury.h"/>
-        <childnode refid="54" relation="include">
+        <childnode refid="59" relation="include">
+        </childnode>
+      </node>
+      <node id="59">
+        <label>src/bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="60" relation="include">
         </childnode>
       </node>
     </invincdepgraph>
@@ -35,6 +39,6 @@
 <codeline lineno="10"><highlight class="normal"></highlight></codeline>
 <codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/lib/typemapgenerator/test/fixtures/src/luxury.h"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h"/>
   </compounddef>
 </doxygen>

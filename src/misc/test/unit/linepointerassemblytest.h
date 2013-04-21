@@ -15,8 +15,6 @@ public:
         Grid<int> grid(dim, 4711, -1);
         fillGrid(&grid);
 
-        long x = 0;
-
         Streak<2> s(Coord<2>(1, 3), 5);
         Coord<2> last(s.endX - 1, s.origin.y());
         int *expected[] = {

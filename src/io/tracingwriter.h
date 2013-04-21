@@ -1,8 +1,9 @@
-#ifndef _libgeodecomp_io_tracingwriter_h_
-#define _libgeodecomp_io_tracingwriter_h_
+#ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
+#define LIBGEODECOMP_IO_TRACINGWRITER_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
+#include <stdexcept>
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
@@ -12,67 +13,76 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
-public:
+public:   
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
+    typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
+    typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
-    using Writer<CELL_TYPE>::sim;
-    using ParallelWriter<CELL_TYPE>::distSim;
-
-    TracingWriter(MonolithicSimulator<CELL_TYPE> *sim, 
-                  const unsigned& period = 1, 
-                  std::ostream& _stream = std::cout) :
-        Writer<CELL_TYPE>("foo", sim, period), 
-        ParallelWriter<CELL_TYPE>("foo", 0, period), 
-        stream(_stream),
-        lastStep(0)
+    TracingWriter(
+        const unsigned period, 
+        const unsigned maxSteps,
+        std::ostream& stream = std::cout) :
+        Writer<CELL_TYPE>("foo", period), 
+        ParallelWriter<CELL_TYPE>("foo", period), 
+        stream(stream),
+        lastStep(0),
+        maxSteps(maxSteps)
     {}
 
-    TracingWriter(DistributedSimulator<CELL_TYPE> *sim, 
-                  const unsigned& period = 1, 
-                  std::ostream& _stream = std::cout) :
-        Writer<CELL_TYPE>("foo", 0, period), 
-        ParallelWriter<CELL_TYPE>("foo", sim, period), 
-        stream(_stream),
-        lastStep(0)
-    {}
-
-    virtual void initialized()
+    virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event) 
     {
-        startTime = currentTime();
-        stream << "TracingWriter::initialized()\n";
-        printTime();
-        if (sim) {
-            lastStep = sim->getStep();
-        } else {
-            lastStep = distSim->getStep();
+        stepFinished(step, grid.getDimensions(), event);
+    }
+
+    virtual void stepFinished(
+        const ParallelWriterGridType& grid, 
+        const Region<DIM>& validRegion, 
+        const Coord<DIM>& globalDimensions,
+        unsigned step, 
+        WriterEvent event, 
+        bool lastCall) 
+    {
+        if (lastCall) {
+            stepFinished(step, globalDimensions, event);
         }
     }
 
-    virtual void stepFinished()
+private:
+    std::ostream& stream;
+    Time startTime;
+    unsigned lastStep;
+    unsigned maxSteps;
+
+    void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)
     {
-        unsigned step;
-        unsigned maxSteps;
-        Coord<CELL_TYPE::Topology::DIMENSIONS> coordBox;
+        Duration delta;
 
-        if (sim) {
-            step     = sim->getStep();
-            maxSteps = sim->getInitializer()->maxSteps();
-            coordBox = sim->getInitializer()->gridDimensions();
-        } else {
-            step     = distSim->getStep();
-            maxSteps = distSim->getInitializer()->maxSteps();
-            coordBox = distSim->getInitializer()->gridDimensions();
+        switch (event) {
+        case WRITER_INITIALIZED:
+            startTime = currentTime();
+            stream << "TracingWriter::initialized()\n";
+            printTime();
+            lastStep = step;
+            break;
+        case WRITER_STEP_FINISHED:
+            normalStepFinished(step, globalDimensions);
+            break;
+        case WRITER_ALL_DONE:
+            delta = currentTime() - startTime;
+            stream << "TracingWriter::allDone()\n"
+                   << "  total time: " << boost::posix_time::to_simple_string(delta) << "\n";
+            printTime();    
+            break;
+        default:
+            throw std::invalid_argument("unknown event");
+            break;
         }
+    }
 
-        // we need to check this as stepFinished may be called
-        // multiple times per time step (see
-        // ParallelWriter::stepFinished() )
-        if (lastStep == step) {
-            return;
-        }
-        lastStep = step;
-
+    void normalStepFinished(unsigned step, const Coord<DIM>& globalDimensions)
+    {
         if (step % Writer<CELL_TYPE>::period != 0) {
             return;
         }
@@ -82,7 +92,7 @@ public:
         Duration remaining = delta * (maxSteps - step) / step;
         Time eta = now + remaining;
 
-        double updates = 1.0 * step * CELL_TYPE::nanoSteps() * coordBox.prod();
+        double updates = 1.0 * step * CELL_TYPE::nanoSteps() * globalDimensions.prod();
         double seconds = delta.total_microseconds() / 1000.0 / 1000.0;
         double glups = updates / seconds / 1000.0 / 1000.0 / 1000.0;
         double bandwidth = glups * 2 * sizeof(CELL_TYPE);
@@ -98,20 +108,6 @@ public:
                << "  effective memory bandwidth " << bandwidth << " GB/s\n";
         printTime();
     }
-
-    virtual void allDone()
-    {
-        Duration delta = currentTime() - startTime;
-        stream << "TracingWriter::allDone()\n"
-                << "  total time: " << boost::posix_time::to_simple_string(delta) << "\n";
-        printTime();    
-    }
-
-
-private:
-    std::ostream& stream;
-    Time startTime;
-    unsigned lastStep;
 
     void printTime() const
     {

@@ -1,8 +1,8 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
 
-#ifndef _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
 
 #ifndef __CL_ENABLE_EXCEPTIONS
 #define __CL_ENABLE_EXCEPTIONS
@@ -22,7 +22,7 @@ class OpenCLStepper : public Stepper<CELL_TYPE>
 {
     friend class OpenCLStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;

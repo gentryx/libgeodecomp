@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_plotter_h_
-#define _libgeodecomp_io_plotter_h_
+#ifndef LIBGEODECOMP_IO_PLOTTER_H
+#define LIBGEODECOMP_IO_PLOTTER_H
 
 #include <algorithm>
 #ifdef __CODEGEARC__
