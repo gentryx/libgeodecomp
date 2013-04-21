@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_parallelmemorywriter_h_
-#define _libgeodecomp_io_parallelmemorywriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELMEMORYWRITER_H
+#define LIBGEODECOMP_IO_PARALLELMEMORYWRITER_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -18,7 +18,7 @@ class ParallelMemoryWriter : public ParallelWriter<CELL_TYPE>
 {
 
 public:
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
     typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType WriterGridType;
     typedef SuperMap<unsigned, GridType> GridMap;

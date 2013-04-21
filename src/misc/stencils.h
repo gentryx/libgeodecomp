@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_stencils_h_
-#define _libgeodecomp_misc_stencils_h_
+#ifndef LIBGEODECOMP_MISC_STENCILS_H
+#define LIBGEODECOMP_MISC_STENCILS_H
 
 #include <libgeodecomp/misc/coord.h>
 

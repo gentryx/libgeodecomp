@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_distributedsimulator_h_
-#define _libgeodecomp_parallelization_distributedsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/displacedgrid.h>
@@ -17,7 +17,7 @@ class DistributedSimulator : public Simulator<CELL_TYPE>
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef GridBase<CELL_TYPE, Topology::DIMENSIONS> GridType;
+    typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef SuperVector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
 
     inline DistributedSimulator(Initializer<CELL_TYPE> *_initializer) : 

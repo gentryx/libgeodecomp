@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_monolithicsimulator_h_
-#define _libgeodecomp_parallelization_monolithicsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_MONOLITHICSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_MONOLITHICSIMULATOR_H
 
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/region.h>

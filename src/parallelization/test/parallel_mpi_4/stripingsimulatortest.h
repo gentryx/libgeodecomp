@@ -173,10 +173,7 @@ public:
 
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
 
-        const Region<2> *region;
-        const GridBaseType *grid;
         int cycle = maxSteps * TestCell<2>::nanoSteps();
-
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType, 
             *testSim->curStripe, 
@@ -258,8 +255,6 @@ public:
         testSim->run();
         referenceSim->run();
 
-        const Region<2> *region;
-        const GridBaseType *grid;
         int cycle = maxSteps * TestCell<2>::nanoSteps();
 
         TS_ASSERT_TEST_GRID_REGION(
@@ -407,8 +402,6 @@ public:
         testSim->addSteerer(new TestSteererType(5, 25, 4711 * 27));
         testSim->run();
 
-        const Region<2> *region;
-        const GridBaseType *grid;
         int cycle = 50 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(

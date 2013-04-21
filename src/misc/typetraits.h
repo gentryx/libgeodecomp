@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_typetraits_h_
-#define _libgeodecomp_misc_typetraits_h_
+#ifndef LIBGEODECOMP_MISC_TYPETRAITS_H
+#define LIBGEODECOMP_MISC_TYPETRAITS_H
 
 #include <boost/type_traits.hpp>
 

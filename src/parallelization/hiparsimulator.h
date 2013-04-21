@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_hiparsimulator_h_
-#define _libgeodecomp_parallelization_hiparsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_H
 
 #include <cmath>
 #include <stdexcept>
@@ -44,7 +44,7 @@ public:
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, PARTITION> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     inline HiParSimulator(
         Initializer<CELL_TYPE> *_initializer,

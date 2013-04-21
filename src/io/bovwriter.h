@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_bovwriter_h_
-#define _libgeodecomp_io_bovwriter_h_
+#ifndef LIBGEODECOMP_IO_BOVWRITER_H
+#define LIBGEODECOMP_IO_BOVWRITER_H
 
 #include <iomanip>
 
@@ -25,7 +25,7 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
 
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;
@@ -44,8 +44,8 @@ public:
 
     virtual void stepFinished(
         const typename ParallelWriter<CELL_TYPE>::GridType& grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
-        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        const Region<Topology::DIM>& validRegion, 
+        const Coord<Topology::DIM>& globalDimensions,
         unsigned step, 
         WriterEvent event, 
         bool lastCall)

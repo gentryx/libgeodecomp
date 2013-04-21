@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_teststeerer_h_
-#define _libgeodecomp_io_teststeerer_h_
+#ifndef LIBGEODECOMP_IO_TESTSTEERER_H
+#define LIBGEODECOMP_IO_TESTSTEERER_H
 
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>

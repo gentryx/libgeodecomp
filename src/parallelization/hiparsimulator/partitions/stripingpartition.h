@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_stripingpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_stripingpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_STRIPINGPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_STRIPINGPARTITION_H
 
 #include <sstream>
 #include <libgeodecomp/misc/coord.h>

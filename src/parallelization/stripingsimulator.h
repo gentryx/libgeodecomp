@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_stripingsimulator_h_
-#define _libgeodecomp_parallelization_stripingsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_STRIPINGSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_STRIPINGSIMULATOR_H
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -31,7 +31,8 @@ public:
     typedef LoadBalancer::LoadVec LoadVec;
     typedef typename CELL_TYPE::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
+    static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
     enum WaitTags {
         GENERAL, 
@@ -108,7 +109,7 @@ public:
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
         }
-        stepNum++;    
+        ++stepNum;
 
         handleOutput(WRITER_STEP_FINISHED);
     }
@@ -119,8 +120,6 @@ public:
     virtual void run()
     {
         initSimulation();
-
-        stepNum = initializer->startStep();
         handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
@@ -381,7 +380,7 @@ private:
         newStripe->resize(box);
         initializer->grid(curStripe);
         newStripe->getEdgeCell() = curStripe->getEdgeCell();
-        stepNum = 0;
+        stepNum = initializer->startStep();
     }
 
     /**
@@ -402,7 +401,7 @@ private:
             ghostHeightUpper = 0;
             ghostHeightLower = 0;
         } else {
-            if (Topology::WRAP_EDGES) {
+            if (WRAP_EDGES) {
                 ghostHeightUpper = 1;
                 ghostHeightLower = 1;
             } else {
@@ -430,7 +429,7 @@ private:
     {
         int lowerNeighbor;
 
-        if (Topology::WRAP_EDGES) {
+        if (WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
             while (lowerNeighbor != mpilayer.rank() && 
@@ -451,7 +450,7 @@ private:
     {
         int upperNeighbor;
 
-        if (Topology::WRAP_EDGES) {
+        if (WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
             while (upperNeighbor != mpilayer.rank() && 

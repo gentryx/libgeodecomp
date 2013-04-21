@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
 
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
@@ -15,7 +15,7 @@ class VanillaStepper : public Stepper<CELL_TYPE>
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
@@ -151,7 +151,6 @@ private:
         Coord<DIM> topoDim = initializer->gridDimensions();
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
-
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         initializer->grid(&*oldGrid);
@@ -231,8 +230,9 @@ private:
         curStep = oldStep;
 
         saveRim(curGlobalNanoStep);
-        if (ghostZoneWidth() % 2)
+        if (ghostZoneWidth() % 2) {
             std::swap(oldGrid, newGrid);
+        }
 
         // 3: restore grid for kernel update
         restoreRim(true);

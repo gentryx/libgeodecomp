@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_writer_h_
-#define _libgeodecomp_io_writer_h_
+#ifndef LIBGEODECOMP_IO_WRITER_H
+#define LIBGEODECOMP_IO_WRITER_H
 
 #include <string>
 #include <stdexcept>

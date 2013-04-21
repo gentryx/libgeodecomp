@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_simulator_h_
-#define _libgeodecomp_parallelization_simulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_SIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_SIMULATOR_H
 
 #include <vector>
 #include <boost/shared_ptr.hpp>

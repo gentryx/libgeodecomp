@@ -65,12 +65,15 @@ public:
         const int *numBoundaries)
     {
         for (int i = 0; i < 27; ++i) {
-            for (int j = 0; j < numSpheres[i]; ++j) 
-                if (neighborSpheres[i][j].id != id)
-
+            for (int j = 0; j < numSpheres[i]; ++j) {
+                if (neighborSpheres[i][j].id != id) {
                     vel += force(neighborSpheres[i][j]) * DELTA_T;
-            for (int j = 0; j < numBoundaries[i]; ++j)
+                }
+            }
+
+            for (int j = 0; j < numBoundaries[i]; ++j) {
                 vel += force(neighborBoundaries[i][j]) * DELTA_T;
+            }
         }
         pos += vel * DELTA_T;
 

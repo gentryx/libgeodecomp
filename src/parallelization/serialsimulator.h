@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_serialsimulator_h_
-#define _libgeodecomp_parallelization_serialsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
@@ -18,7 +18,7 @@ public:
     friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     /**
      * creates a SerialSimulator with the given @a initializer.
@@ -26,12 +26,15 @@ public:
     SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
+        stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
         newGrid = new GridType(dim);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
+        // fixme: need library support for iterating through linestarts
+        // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
         box.dimensions.x() = 1;
@@ -81,7 +84,8 @@ public:
     virtual void run()
     {
         initializer->grid(curGrid);
-        stepNum = 0;
+        stepNum = initializer->startStep();
+
         for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->stepFinished(
                 *getGrid(),
@@ -89,8 +93,7 @@ public:
                 WRITER_INITIALIZED);
         }
 
-        for (stepNum = initializer->startStep(); 
-             stepNum < initializer->maxSteps();) {
+        for (; stepNum < initializer->maxSteps();) {
             step();
         }
 
@@ -126,6 +129,7 @@ protected:
         CoordBox<DIM> box = curGrid->boundingBox();
         int endX = box.origin.x() + box.dimensions.x();
         box.dimensions.x() = 1;
+
         for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             Streak<DIM> streak(*i, endX);
             UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);

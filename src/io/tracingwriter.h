@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_tracingwriter_h_
-#define _libgeodecomp_io_tracingwriter_h_
+#ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
+#define LIBGEODECOMP_IO_TRACINGWRITER_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
@@ -18,7 +18,7 @@ public:
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     TracingWriter(
         const unsigned period, 

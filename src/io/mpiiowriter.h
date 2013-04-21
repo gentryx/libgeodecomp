@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_mpiiowriter_h_
-#define _libgeodecomp_io_mpiiowriter_h_
+#ifndef LIBGEODECOMP_IO_MPIIOWRITER_H
+#define LIBGEODECOMP_IO_MPIIOWRITER_H
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/writer.h>
@@ -18,7 +18,7 @@ public:
 
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     MPIIOWriter(
         const std::string& prefix,

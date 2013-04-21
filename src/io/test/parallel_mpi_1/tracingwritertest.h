@@ -20,7 +20,8 @@ public:
     }
 
 
-    void tearDown() {
+    void tearDown() 
+    {
         delete simulator;
     }
 

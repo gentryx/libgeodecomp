@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_mocksteerer_h_
-#define _libgeodecomp_io_mocksteerer_h_
+#ifndef LIBGEODECOMP_IO_MOCKSTEERER_H
+#define LIBGEODECOMP_IO_MOCKSTEERER_H
 
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>
@@ -27,7 +27,7 @@ public:
 
     virtual void nextStep(
         GridType *grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
+        const Region<Topology::DIM>& validRegion, 
         const unsigned& step) 
     {
         (*eventsBuf) << "nextStep(" << step << ")\n";

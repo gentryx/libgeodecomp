@@ -15,8 +15,6 @@ if(NOT DEFINED BOOST_ROOT)
     set(BOOST_ROOT "$ENV{BOOST_LIBDIR}/../")
     set(Boost_LIBRARY_DIRS "$ENV{BOOST_LIBDIR}")
     set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
-  else()
-    set(BOOST_ROOT "/opt/boost")
   endif()
 endif()
 
@@ -90,6 +88,8 @@ add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" $
 
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
+add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." ${MPI_FOUND} true)
+
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
@@ -97,6 +97,9 @@ add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI"
 add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+
+# setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
+add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
@@ -111,7 +114,7 @@ set(PACKAGE_NAME libgeodecomp)
 set(CMAKE_C_FLAGS   "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
-set(PACKAGE_VERSION "0.1.0")
+set(PACKAGE_VERSION "0.2.0")
 set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_grid_h_
-#define _libgeodecomp_misc_grid_h_
+#ifndef LIBGEODECOMP_MISC_GRID_H
+#define LIBGEODECOMP_MISC_GRID_H
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)
@@ -81,13 +81,13 @@ public:
  * A multi-dimensional regular grid
  */
 template<typename CELL_TYPE, typename TOPOLOGY=Topologies::Cube<2>::Topology>
-class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
+class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
     friend class GridTest;
     friend class ParallelStripingSimulatorTest;
     
 public:
-    const static int DIM = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIM;
 
 #ifndef __CODEGEARC__
     typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIM - 1> SliceRef;
@@ -209,7 +209,7 @@ public:
             (cellMatrix == other.cellMatrix);
     }
 
-    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
     {
         if (boundingBox() != other.boundingBox()) {
             return false;
@@ -234,7 +234,7 @@ public:
         return !(*this == other);
     }
 
-    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
     {
         return !(*this == other);
     }

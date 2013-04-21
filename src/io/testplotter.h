@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_testplotter_h_
-#define _libgeodecomp_io_testplotter_h_
+#ifndef LIBGEODECOMP_IO_TESTPLOTTER_H
+#define LIBGEODECOMP_IO_TESTPLOTTER_H
 
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/io/image.h>

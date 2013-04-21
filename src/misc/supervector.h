@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_supervector_h_
-#define _libgeodecomp_misc_supervector_h_
+#ifndef LIBGEODECOMP_MISC_SUPERVECTOR_H
+#define LIBGEODECOMP_MISC_SUPERVECTOR_H
 
 #include <algorithm>
 #include <iterator>

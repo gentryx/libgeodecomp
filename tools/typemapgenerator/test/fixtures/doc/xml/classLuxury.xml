@@ -16,7 +16,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h" line="6" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h" bodystart="6" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h" line="6" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h" bodystart="6" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-attrib">
@@ -31,7 +31,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h" line="8" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h" bodystart="8" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h" line="8" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h" bodystart="8" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -50,7 +50,7 @@
         </childnode>
       </node>
     </inheritancegraph>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h" line="5" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/luxury.h" bodystart="4" bodyend="9"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h" line="5" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/luxury.h" bodystart="4" bodyend="9"/>
     <listofallmembers>
       <member refid="classLuxury_1a1b98504fe4a14567b66939a31ca20ab9" prot="public" virt="non-virtual"><scope>Luxury</scope><name>sort</name></member>
       <member refid="classLuxury_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Luxury</scope><name>Typemaps</name></member>

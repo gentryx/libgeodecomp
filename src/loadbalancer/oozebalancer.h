@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_loadbalancer_oozebalancer_h_
-#define _libgeodecomp_loadbalancer_oozebalancer_h_
+#ifndef LIBGEODECOMP_LOADBALANCER_OOZEBALANCER_H
+#define LIBGEODECOMP_LOADBALANCER_OOZEBALANCER_H
 
 #include <cmath>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>

@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_mpilayer_mpilayer_h_
-#define _libgeodecomp_mpilayer_mpilayer_h_
+#ifndef LIBGEODECOMP_MPILAYER_MPILAYER_H
+#define LIBGEODECOMP_MPILAYER_MPILAYER_H
 
 #include <mpi.h>
 #include <map>

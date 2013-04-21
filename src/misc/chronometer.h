@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_chronometer_h_
-#define _libgeodecomp_parallelization_chronometer_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
+#define LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
 
 #include <stdexcept>
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_testbed_reversetimemigration_config_h_
-#define _libgeodecomp_testbed_reversetimemigration_config_h_
+#ifndef LIBGEODECOMP_TESTBED_REVERSETIMEMIGRATION_CONFIG_H
+#define LIBGEODECOMP_TESTBED_REVERSETIMEMIGRATION_CONFIG_H
 
 #define DIM_X 1070
 #define DIM_Y 256

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_region_h_
-#define _libgeodecomp_misc_region_h_
+#ifndef LIBGEODECOMP_MISC_REGION_H
+#define LIBGEODECOMP_MISC_REGION_H
 
 #include <algorithm>
 
@@ -429,7 +429,7 @@ public:
 
             for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
                 Streak<DIM> newStreak(*i, endX);
-                if (TOPOLOGY::wrapsAxis(0)) {
+                if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
                     splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
                     normalizeStreak<TOPOLOGY>(

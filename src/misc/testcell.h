@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testcell_h_
-#define _libgeodecomp_misc_testcell_h_
+#ifndef LIBGEODECOMP_MISC_TESTCELL_H
+#define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
 #include <libgeodecomp/misc/cellapitraits.h>
@@ -124,9 +124,7 @@ public:
 
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, Topology>()(
-                c, dimensions.dimensions);
+        return !Topology::isOutOfBounds(c, dimensions.dimensions);
     }
 
     bool operator==(const TestCell& other) const

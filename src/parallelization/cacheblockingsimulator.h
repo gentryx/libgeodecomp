@@ -1,9 +1,11 @@
-#ifndef _libgeodecomp_parallelization_serialsimulator_h_
-#define _libgeodecomp_parallelization_serialsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
 
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <omp.h>
 
 namespace LibGeoDecomp {
 
@@ -18,7 +20,7 @@ class CacheBlockingSimulator : public MonolithicSimulator<CELL>
 public:
     friend class CacheBlockingSimulatorTest;
     typedef typename CELL::Topology Topology;
-    typedef typename Topologies::NDimensional<Topologies::NDimensional<Topologies::NDimensional<Topologies::ZeroDimensional, Topology::ParentTopology::ParentTopology::WRAP_EDGES>, Topology::ParentTopology::WRAP_EDGES>, true> BufferTopology;
+    typedef typename TopologiesHelpers::Topology<3, Topology::template WrapsAxis<0>::VALUE, Topology::template WrapsAxis<1>::VALUE, true> BufferTopology;
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef SuperVector<SuperVector<Region<3> > > WavefrontFrames;
@@ -43,7 +45,9 @@ public:
             bufferDim[i] = wavefrontDim[i] + 2 * pipelineLength - 2;
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
-        buffer = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
+        for (int i = 0; i < 4; ++i) {
+            buffers[i] = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
+        }
 
         generateFrames();
         nanoStep = 0;
@@ -62,13 +66,33 @@ public:
 
     virtual void run()
     {
-        // fixme
+        initializer->grid(curGrid);
+        stepNum = initializer->startStep();
+        nanoStep = 0;
+
+        for(unsigned i = 0; i < writers.size(); ++i) {
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_INITIALIZED);
+        }
+
+        for (stepNum = initializer->startStep(); 
+             stepNum < initializer->maxSteps();) {
+            hop();
+        }
+
+        for(unsigned i = 0; i < writers.size(); ++i) {
+            writers[i]->stepFinished(
+                *getGrid(),
+                getStep(),
+                WRITER_ALL_DONE);
+        }
     }
 
     virtual const GridType *getGrid()
     {
-        // fixme
-        return 0;
+        return curGrid;
     }
 
 private:
@@ -80,11 +104,10 @@ private:
     
     GridType *curGrid;
     GridType *newGrid;
-    BufferType buffer;
+    BufferType buffers[4];
     int pipelineLength;
     Coord<DIM - 1> wavefrontDim;
     Grid<WavefrontFrames> frames;
-    unsigned stepCounter;
     unsigned nanoStep;
 
     void generateFrames()
@@ -130,11 +153,13 @@ private:
                 1, gridDim, Topologies::Cube<3>::Topology());
         }
 
-        WavefrontFrames ret(gridDim[DIM - 1], SuperVector<Region<DIM> >(pipelineLength));
+        int wavefrontLength = gridDim[DIM - 1] + 1;
+        WavefrontFrames ret(wavefrontLength, SuperVector<Region<DIM> >(pipelineLength));
 
-        for (int index = index; index < gridDim[DIM - 1]; ++index) {
+        for (int index = index; index < wavefrontLength; ++index) {
             Coord<DIM> maskOrigin;
             maskOrigin[DIM - 1] = index;
+            Topology::normalize(maskOrigin, initializer->gridDimensions());
             Coord<DIM> maskDim = gridDim;
             maskDim[DIM - 1] = 1;
             
@@ -151,23 +176,31 @@ private:
     void hop()
     {
         CoordBox<DIM - 1> frameBox = frames.boundingBox();
-        for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin(); 
-             waveIter != frameBox.end(); 
-             ++waveIter) {
-            updateWavefront(*waveIter);
+        // for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin(); 
+        //      waveIter != frameBox.end(); 
+        //      ++waveIter) {
+        //     updateWavefront(*waveIter);
+        // }
+
+#pragma omp parallel for
+        for (int y = 0; y < frameBox.dimensions.y(); ++y) {
+            for (int x = 0; x < frameBox.dimensions.x(); ++x) {
+                updateWavefront(&buffers[omp_get_thread_num()], Coord<2>(x, y));
+            }
         }
 
         std::swap(curGrid, newGrid);
         int curNanoStep = nanoStep + pipelineLength;
-        stepCounter += curNanoStep / CELL::nanoSteps();
+        stepNum += curNanoStep / CELL::nanoSteps();
         nanoStep = curNanoStep % CELL::nanoSteps();
     }
 
-    void updateWavefront(const Coord<DIM - 1>& wavefrontCoord)
-    {
-        buffer.atEdge() = curGrid->atEdge();
-        buffer.fill(buffer.boundingBox(), curGrid->getEdgeCell());
-        fixBufferOrigin(wavefrontCoord);
+    void updateWavefront(BufferType *buffer, const Coord<DIM - 1>& wavefrontCoord)
+    {  
+        LOG(INFO, "wavefrontCoord(" << wavefrontCoord << ")");
+        buffer->atEdge() = curGrid->atEdge();
+        buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
+        fixBufferOrigin(buffer, wavefrontCoord);
 
         int index = 0;
         CoordBox<DIM> boundingBox = curGrid->boundingBox();
@@ -176,22 +209,22 @@ private:
         // fill pipeline
         for (; index < 2 * pipelineLength - 2; ++index) {
             int lastStage = (index >> 1) + 1;
-            pipelinedUpdate(wavefrontCoord, index, index, 0, lastStage);
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, 0, lastStage);
         } 
 
         // normal operation
         for (; index < maxIndex; ++index) {
-            pipelinedUpdate(wavefrontCoord, index, index, 0, pipelineLength);
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, 0, pipelineLength);
         }
 
         // let pipeline drain
         for (; index < (maxIndex + 2 * pipelineLength - 2); ++index) {
             int firstStage = (index - maxIndex + 1) >> 1 ;
-            pipelinedUpdate(wavefrontCoord, index, index, firstStage, pipelineLength);            
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, firstStage, pipelineLength);            
         }
     }
 
-    void fixBufferOrigin(const Coord<DIM - 1>& frameCoord)
+    void fixBufferOrigin(BufferType *buffer, const Coord<DIM - 1>& frameCoord)
     {
         Coord<DIM> bufferOrigin;
         // fixme: wrong on boundary with Torus topology
@@ -199,16 +232,19 @@ private:
             bufferOrigin[d] = std::max(0, frameCoord[d] * wavefrontDim[d] - pipelineLength + 1);
         }
         bufferOrigin[DIM - 1] = 0;
-        buffer.setOrigin(bufferOrigin);
+        buffer->setOrigin(bufferOrigin);
     }
 
     void pipelinedUpdate(
+        BufferType *buffer,
         const Coord<DIM - 1>& frameCoord, 
         int globalIndex, 
         int localIndex, 
         int firstStage, 
         int lastStage)
     {
+        LOG(DEBUG, "  pipelinedUpdate(frameCoord = " << frameCoord << ", globalIndex = " << globalIndex << ", localIndex = " << localIndex << ", firstStage = " << firstStage << ", lastStage = " << lastStage << ")");
+
         for (int i = firstStage; i < lastStage; ++i) {
             bool firstIteration = (i == 0);
             bool lastIteration =  (i == (pipelineLength - 1));
@@ -217,28 +253,24 @@ private:
                 (currentGlobalIndex >= newGrid->getDimensions()[DIM - 1]);
             int sourceIndex = firstIteration ? currentGlobalIndex : normalizeIndex(localIndex + 2 - 4 * i);
             int targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
+  
             const Region<DIM>& updateFrame = frames[frameCoord][globalIndex - 2 * i][i];
             unsigned curNanoStep = (nanoStep + i) % CELL::nanoSteps();
-
-            std::string source = firstIteration ? "source" : "buffer";
-            std::string target = lastIteration  ? "target" : "buffer";
-            // std::cout << "update(grid: " 
-            //           << source << "[" << std::setw(2) << sourceIndex << "] -> " 
-            //           << target << "[" << std::setw(2) << targetIndex << "], time: " 
-            //           << i << " -> " << (i + 1) << ", currentGlobalIndex: " 
-            //           << currentGlobalIndex << ")\n";
 
             if ( firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, newGrid, curNanoStep);
             }
+
             if ( firstIteration && !lastIteration) { 
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, &buffer, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, buffer,  curNanoStep);
             }            
+
             if (!firstIteration &&  lastIteration) {
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   newGrid, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *buffer,  newGrid, curNanoStep);
             }
+
             if (!firstIteration && !lastIteration) {
-                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, buffer,   &buffer, curNanoStep);
+                frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *buffer,  buffer,  curNanoStep);
             }
         }
     }
@@ -253,13 +285,16 @@ private:
         GRID2 *targetGrid,
         unsigned curNanoStep)
     {
+        LOG(DEBUG, "    frameUpdate(" << updateFrame.boundingBox() << ", " << sourceIndex << ", " << targetIndex <<  ")");
+
         if (needsFlushing) {
-            Coord<DIM> fillOrigin = buffer.getOrigin();
+            // fixme: only works with cube topologies
+            Coord<DIM> fillOrigin = buffers[omp_get_thread_num()].getOrigin();
             fillOrigin[DIM - 1] = targetIndex;
-            Coord<DIM> fillDim = buffer.getDimensions();
+            Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
             fillDim[DIM - 1] = 1;
 
-            buffer.fill(CoordBox<DIM>(fillOrigin, fillDim), buffer.getEdgeCell());
+            buffers[omp_get_thread_num()].fill(CoordBox<DIM>(fillOrigin, fillDim), buffers[omp_get_thread_num()].getEdgeCell());
         } else {
             for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak(); 
                  iter != updateFrame.endStreak(); ++iter) {
@@ -269,38 +304,14 @@ private:
                 targetCoord[DIM - 1] = targetIndex;
                 UpdateFunctor<CELL>()(sourceStreak, targetCoord, sourceGrid, targetGrid, curNanoStep);
             }
-            // std::cout << "  frame: " << updateFrame.boundingBox();
-            // std::cout << "  sourceStreak: " << sourceStreak << "\n";
-            // std::cout << "  targetStreak: " << targetStreak << "\n";
         }
-        // std::cout << "  bufferOrigin: " << buffer.getOrigin() << "\n";
-            
-        // SuperVector<Line> *gridOld = &gridBuffer;
-        // if (i == 0) {
-        //     gridOld = &gridSource;
-        // }
+     }
 
-        // SuperVector<Line> *gridNew = &gridBuffer;
-        // if (i == (pipelineLength - 1)) {
-        //     gridNew = &gridTarget;
-        // }
-            
-        // if ((globalIndex >= gridSource.size()) && (i == firstStage)) {
-        //     (*gridNew)[targetIndex] = Line(-1, "X");
-        // } else {
-        //     (*gridNew)[targetIndex] = Line((*gridOld)[sourceIndex].offset, i + 1);
-        // }
-
-        // printGrid("source", gridSource);
-        // printGrid("buffer", gridBuffer);
-        // printGrid("target", gridTarget);
-        // std::cout << "\n";
-    }
-
-    // normalize via topology, if at all?
+    // wraps the index (for 3D this will be the Z coordinate) around
+    // the buffer's dimension
     int normalizeIndex(int localIndex)
     {
-        int bufferSize = buffer.getDimensions()[DIM - 1];
+        int bufferSize = buffers[0].getDimensions()[DIM - 1];
         return (localIndex + bufferSize) % bufferSize;
     }
 };

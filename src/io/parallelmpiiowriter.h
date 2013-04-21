@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_parallelmpiiowriter_h_
-#define _libgeodecomp_io_parallelmpiiowriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
+#define LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
@@ -16,7 +16,7 @@ public:
     friend class ParallelMPIIOWriterTest;
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
     typedef typename CELL_TYPE::Topology Topology;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     ParallelMPIIOWriter(
         const std::string& prefix, 
@@ -32,8 +32,8 @@ public:
 
     virtual void stepFinished(
         const GridType& grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
-        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        const Region<Topology::DIM>& validRegion, 
+        const Coord<Topology::DIM>& globalDimensions,
         unsigned step, 
         WriterEvent event, 
         bool lastCall) 

@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_mpiio_h_
-#define _libgeodecomp_io_mpiio_h_
+#ifndef LIBGEODECOMP_IO_MPIIO_H
+#define LIBGEODECOMP_IO_MPIIO_H
 
 #include <mpi.h>
 
@@ -95,9 +95,7 @@ public:
             // the coords need to be normalized because on torus
             // topologies the coordnates may exceed the bounding box
             // (especially negative coordnates may occurr).
-            Coord<DIM> coord;
-            CoordNormalizer<DIM, DIM> normalizer(&coord, dimensions);
-            TOPOLOGY::locate(normalizer, i->origin);
+            Coord<DIM> coord = TOPOLOGY::normalize(i->origin, dimensions);
             file.Seek(offset(headerLength, coord, dimensions, cellLength), 
                       MPI_SEEK_SET);
             int length = i->endX - i->origin.x();

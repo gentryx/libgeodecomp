@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_cudautil_h_
-#define _libgeodecomp_misc_cudautil_h_
+#ifndef LIBGEODECOMP_MISC_CUDAUTIL_H
+#define LIBGEODECOMP_MISC_CUDAUTIL_H
 
 #include <iostream>
 #include <stdexcept>

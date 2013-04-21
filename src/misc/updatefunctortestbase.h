@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_updatefunctortestbase_h_
-#define _libgeodecomp_misc_updatefunctortestbase_h_
+#ifndef LIBGEODECOMP_MISC_UPDATEFUNCTORTESTBASE_H
+#define LIBGEODECOMP_MISC_UPDATEFUNCTORTESTBASE_H
 
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/grid.h>
@@ -19,12 +19,11 @@ public:
     virtual ~UpdateFunctorTestBase()
     {}
 
-    void checkStencil(int steps)
+    void testSimple(int steps)
     {
-
         Coord<DIM> dim;
         for (int d = 0; d < DIM; ++d) {
-            dim[d] = (d + 1) * 5;
+            dim[d] = d * 5 + 10;
         }
 
         TestInitializer<TestCellType> init(dim);
@@ -40,8 +39,46 @@ public:
                  i != lineStarts.end();
                  ++i) {
                 Streak<DIM> streak(*i, dim.x());
-
                 callFunctor(streak, gridOld, &gridNew, s);
+            }
+                                     
+            int cycle = init.startStep() * TestCellType::nanoSteps() + s;
+            TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
+            cycle += 1;
+            TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
+
+            std::swap(gridOld, gridNew);
+        }
+    }
+
+    void testSplittedTraversal(int steps)
+    {
+        Coord<DIM> dim;
+        for (int d = 0; d < DIM; ++d) {
+            dim[d] = d * 5 + 10;
+        }
+
+        TestInitializer<TestCellType> init(dim);
+        GridType gridOld(dim);
+        init.grid(&gridOld);
+        GridType gridNew = gridOld;
+        int halfWidth = dim.x() / 2;
+        
+        CoordBox<DIM> lineStarts = gridOld.boundingBox();
+        lineStarts.dimensions.x() = 1;
+
+        for (int s = 0; s < steps; ++s) {
+            for (typename CoordBox<DIM>::Iterator i = lineStarts.begin();
+                 i != lineStarts.end();
+                 ++i) {
+                Coord<DIM> origin1 = *i;
+                Coord<DIM> origin2 = *i;
+                origin2.x() = halfWidth;
+                Streak<DIM> s1(origin1, halfWidth);
+                Streak<DIM> s2(origin2, dim.x());
+
+                callFunctor(s2, gridOld, &gridNew, s);
+                callFunctor(s1, gridOld, &gridNew, s);
             }
                                      
             int cycle = init.startStep() * TestCellType::nanoSteps() + s;

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HINDEXINGPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HINDEXINGPARTITION_H
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/multi_array.hpp>

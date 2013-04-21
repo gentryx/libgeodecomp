@@ -1,12 +1,12 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_offsethelper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_offsethelper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OFFSETHELPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OFFSETHELPER_H
 
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/coordbox.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: needs test
 template<int INDEX, int DIM, typename TOPOLOGY>
 class OffsetHelper
 {
@@ -19,7 +19,7 @@ public:
         const int& ghostZoneWidth)
     {
         (*offset)[INDEX] = 0;
-        if (TOPOLOGY::WRAP_EDGES) {
+        if (TOPOLOGY::template WrapsAxis<INDEX>::VALUE) {
             int enlargedWidth = 
                 ownBoundingBox.dimensions[INDEX] + 2 * ghostZoneWidth;
             if (enlargedWidth < simulationArea.dimensions[INDEX]) {
@@ -41,7 +41,7 @@ public:
             (*dimensions)[INDEX] = end - (*offset)[INDEX];
         } 
 
-        OffsetHelper<INDEX - 1, DIM, typename TOPOLOGY::ParentTopology>()(
+        OffsetHelper<INDEX - 1, DIM, TOPOLOGY>()(
             offset, 
             dimensions, 
             ownBoundingBox, 

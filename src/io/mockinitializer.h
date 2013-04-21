@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_mockinitializer_h_
-#define _libgeodecomp_io_mockinitializer_h_
+#ifndef LIBGEODECOMP_IO_MOCKINITIALIZER_H
+#define LIBGEODECOMP_IO_MOCKINITIALIZER_H
 
 #include <libgeodecomp/io/testinitializer.h>
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_memorywriter_h_
-#define _libgeodecomp_io_memorywriter_h_
+#ifndef LIBGEODECOMP_IO_MEMORYWRITER_H
+#define LIBGEODECOMP_IO_MEMORYWRITER_H
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supervector.h>

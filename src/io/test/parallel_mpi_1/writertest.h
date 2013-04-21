@@ -17,7 +17,8 @@ public:
 
     HollowWriter(const std::string& prefix, 
                  unsigned period = 1) : 
-        Writer<CELL_TYPE>(prefix, period) {}
+        Writer<CELL_TYPE>(prefix, period) 
+    {}
 
     virtual void stepFinished(const GridType&, unsigned, WriterEvent) 
     {}

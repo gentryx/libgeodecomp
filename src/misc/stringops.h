@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_stringops_h_
-#define _libgeodecomp_misc_stringops_h_
+#ifndef LIBGEODECOMP_MISC_STRINGOPS_H
+#define LIBGEODECOMP_MISC_STRINGOPS_H
 
 #include <sstream>
 

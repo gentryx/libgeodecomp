@@ -42,7 +42,7 @@ public:
 
         if (MPILayer().rank() == 0) {
             int size = writer->getGrids().size();
-            unsigned cycle;
+            unsigned cycle = 0;
 
             for (int i = 0; i < (size - 1); ++i) {
                 cycle = TestCell<3>::nanoSteps() * i;

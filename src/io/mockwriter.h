@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_mockwriter_h_
-#define _libgeodecomp_io_mockwriter_h_
+#ifndef LIBGEODECOMP_IO_MOCKWRITER_H
+#define LIBGEODECOMP_IO_MOCKWRITER_H
 
 #include <sstream>
 

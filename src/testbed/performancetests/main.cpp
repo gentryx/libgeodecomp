@@ -614,7 +614,7 @@ public:
         SimpleInitializer<CELL>(dimensions, steps)
     {}
     
-    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) 
+    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target) 
     {}
 };
 

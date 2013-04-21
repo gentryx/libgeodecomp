@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_parallelwriter_h_
-#define _libgeodecomp_io_parallelwriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELWRITER_H
+#define LIBGEODECOMP_IO_PARALLELWRITER_H
 
 #include <string>
 #include <stdexcept>
@@ -64,8 +64,8 @@ public:
      */
     virtual void stepFinished(
         const GridType& grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
-        const Coord<Topology::DIMENSIONS>& globalDimensions,
+        const Region<Topology::DIM>& validRegion, 
+        const Coord<Topology::DIM>& globalDimensions,
         unsigned step, 
         WriterEvent event, 
         bool lastCall) = 0;

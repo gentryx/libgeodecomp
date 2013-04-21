@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_stepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_stepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEPPER_H
 
 #include <boost/shared_ptr.hpp>
 #include <deque>
@@ -27,7 +27,7 @@ class Stepper
 public:
     enum PatchType {GHOST=0, INNER_SET=1};
     typedef typename CELL_TYPE::Topology Topology;
-    const static int DIM = Topology::DIMENSIONS;
+    const static int DIM = Topology::DIM;
 
     typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
     typedef PartitionManager<DIM, Topology> MyPartitionManager;

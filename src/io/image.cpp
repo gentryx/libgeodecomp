@@ -26,11 +26,13 @@ void copy(const Coord<2>& upperLeftSource,
             Coord<2> cSource = uls + Coord<2>(x, y);
 
             // skip off-screen target coords
-            if (! targetRect.inBounds(cTarget)) continue;
-            if (! sourceRect.inBounds(cSource)) {
+            if (!targetRect.inBounds(cTarget)) {
+                continue;
+            }
+            if (!sourceRect.inBounds(cSource)) {
                 throw std::invalid_argument(
-                        "Source coordinate " + cSource.toString() + 
-                        " is not within " + sourceRect.toString());
+                    "Source coordinate " + cSource.toString() + 
+                    " is not within " + sourceRect.toString());
             }
 
             (*target)[cTarget.y()][cTarget.x()] = 

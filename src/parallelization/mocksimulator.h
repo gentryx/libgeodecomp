@@ -1,8 +1,9 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_mocksimulator_h_
-#define _libgeodecomp_parallelization_mocksimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_MOCKSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_MOCKSIMULATOR_H
 
+#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 
@@ -21,7 +22,7 @@ public:
     static std::string events;
 };
 
-};
+}
 
 #endif
 #endif
