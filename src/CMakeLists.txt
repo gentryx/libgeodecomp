@@ -263,7 +263,7 @@ endif()
 
 #============= INSTALLER CONFIG ===================================
 install(TARGETS geodecomp DESTINATION lib)
-install(FILES config.h DESTINATION include/${PACKAGE_NAME})
+install(FILES config.h libgeodecomp.h DESTINATION include/${PACKAGE_NAME})
 
 # install all headers
 foreach(dir ${LIBDIRS})
