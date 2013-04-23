@@ -88,7 +88,7 @@ add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" $
 
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
-add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." ${MPI_FOUND} true)
+add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." false true)
 
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
