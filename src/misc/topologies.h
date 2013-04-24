@@ -59,9 +59,16 @@ public:
     }
 
 private:
-    int wrap(int x, int dim)
+    inline int wrap(int x, int dim)
     {
-        return (x + dim) % dim;
+        if (x < 0) {
+            return (x + dim) % dim;
+        }
+        if (x >= dim) {
+            return x % dim;
+        }
+
+        return x;
     }
 };
 
