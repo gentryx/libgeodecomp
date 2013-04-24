@@ -24,7 +24,7 @@ public:
 }
 
 #if LIBGEODECOMP_DEBUG_LEVEL < 0
-#define LOG(LEVEL, MESSAGE) 
+#define LOG(LEVEL, MESSAGE)
 #endif
 
 #if LIBGEODECOMP_DEBUG_LEVEL >= 0

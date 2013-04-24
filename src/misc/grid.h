@@ -85,7 +85,7 @@ class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
     friend class GridTest;
     friend class ParallelStripingSimulatorTest;
-    
+
 public:
     const static int DIM = TOPOLOGY::DIM;
 
@@ -141,7 +141,7 @@ public:
         dimensions = newDim;
         cellMatrix.resize(newDim.toExtents());
     }
-    
+
     /**
      * returns a map that is referenced by relative coordinates from the
      * originating coordinate coord.
@@ -161,7 +161,7 @@ public:
         return edgeCell;
     }
 
-    inline CELL_TYPE *baseAddress() 
+    inline CELL_TYPE *baseAddress()
     {
         return &(*this)[Coord<DIM>()];
     }
@@ -192,20 +192,20 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
-    inline SliceRef operator[](const Index y) 
+    inline SliceRef operator[](const Index y)
     {
         return cellMatrix[y];
     }
 
     inline bool operator==(const Grid& other) const
     {
-        if (boundingBox() == CoordBox<DIM>() && 
+        if (boundingBox() == CoordBox<DIM>() &&
             other.boundingBox() == CoordBox<DIM>()) {
             return true;
         }
 
-        return 
-            (edgeCell   == other.edgeCell) && 
+        return
+            (edgeCell   == other.edgeCell) &&
             (cellMatrix == other.cellMatrix);
     }
 
@@ -269,13 +269,13 @@ public:
     {
         return dimensions;
     }
-  
+
     inline std::string toString() const
     {
         std::ostringstream message;
         message << "Grid<" << DIM << ">(\n"
                 << "boundingBox: " << boundingBox()  << "\n"
-                << "edgeCell:\n" 
+                << "edgeCell:\n"
                 << edgeCell << "\n";
 
         CoordBox<DIM> box = boundingBox();
