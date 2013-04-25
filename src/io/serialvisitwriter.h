@@ -58,29 +58,29 @@ void ControlCommandCallback(const char *cmd,
     template<typename CELL, int INDEX>
     class DataSelector;
 
-#define DEFINE_DATASELECTOR(CELL, INDEX, MEMBER_TYPE, MEMBER_NAME)          \
-    namespace LibGeoDecomp{                                                 \
-        template<>                                                          \
-        class DataSelector<CELL, INDEX>                       \
-        {                                                                   \
-        public:                                                             \
-            typedef MEMBER_TYPE type;                                       \
-            MEMBER_TYPE getValue(CELL object)                               \
-            {                                                               \
-                return object.MEMBER_NAME;                                  \
-            }                                                               \
-                                                                            \
-            std::string getName()                                           \
-            {                                                               \
-                return #MEMBER_NAME;                                        \
-            }                                                               \
-                                                                            \
-            static int getSize()                                            \
-            {                                                               \
-                return sizeof(MEMBER_TYPE);                                 \
-            }                                                               \
-        };                                                                  \
-    }                                                                       \
+#define DEFINE_DATASELECTOR(CELL, INDEX, MEMBER_TYPE, MEMBER_NAME)      \
+    namespace LibGeoDecomp {                                            \
+    template<>                                                          \
+    class DataSelector<CELL, INDEX>                                     \
+    {                                                                   \
+    public:                                                             \
+        typedef MEMBER_TYPE type;                                       \
+        MEMBER_TYPE getValue(CELL object)                               \
+        {                                                               \
+            return object.MEMBER_NAME;                                  \
+        }                                                               \
+                                                                        \
+        std::string getName()                                           \
+        {                                                               \
+            return #MEMBER_NAME;                                        \
+        }                                                               \
+                                                                        \
+        static int getSize()                                            \
+        {                                                               \
+            return sizeof(MEMBER_TYPE);                                 \
+        }                                                               \
+    };                                                                  \
+    }                                                                   \
 
 template < typename CELL_TYPE, int NUM >
 class SerialVisitWriter:public Writer < CELL_TYPE >
@@ -88,11 +88,10 @@ class SerialVisitWriter:public Writer < CELL_TYPE >
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
+    //fixme:
     typedef SerialVisitWriter<CELL_TYPE, NUM> SVW;
-    static const int DIMENSIONS = Topology::DIMENSIONS;
+    static const int DIMENSIONS = Topology::DIM;
 
-
-    using Writer<CELL_TYPE>::sim;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
@@ -100,11 +99,10 @@ public:
      * constructor
      */
     SerialVisitWriter(const std::string & _prefix,
-               MonolithicSimulator < CELL_TYPE > *_sim,
                int _numVars,
                const unsigned &_period = 1)
-               : Writer < CELL_TYPE > (_prefix, _sim, _period),
-               numVars(_numVars)
+               : Writer < CELL_TYPE > (_prefix, _period),
+                 numVars(_numVars)
     {
         runMode = 0;
         blocking = 0;
@@ -119,7 +117,7 @@ public:
     {
         values = new void*[numVars];
 
-        unsigned size = sim->getGrid()->boundingBox().size();
+        unsigned size = tempGrid->boundingBox().size();
         SelectorAction<CELL_TYPE, NUM>()(size, values);
 
         for(int i=0; i < numVars; ++i)
@@ -147,35 +145,39 @@ public:
 
         checkVisitState();
     }
-
-    /**
-     *
-     */
-    virtual void stepFinished()
+   
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
     {
-        std::cout << "finished step: " << sim->getStep() << std::endl;
+        // saving this pointer is evil, but required during VisIt's callback.
+        tempGrid = &grid;
+        tempStep = step;
+        
+        //fixme: switch/case statement here
+        if (event == WRITER_INITIALIZED) {
+            initialized();
+        } else if (event == WRITER_STEP_FINISHED) {
+            std::cout << "finished step: " << step << std::endl;
+            // fixme: move this after period handling?
+            VisItTimeStepChanged();
 
-        VisItTimeStepChanged();
+            if ((step % period) == 0) {
+                VisItUpdatePlots();
+            }
 
-        if ((sim->getStep() % period) == 0)
-        {
-            VisItUpdatePlots();
+            if (error != 0) {
+                return;
+            }
+
+            checkVisitState();
+            
+        } else if (event == WRITER_ALL_DONE) {
+            allDone();
         }
-
-        if (error != 0)
-        {
-            return;
-        }
-
-        checkVisitState();
     }
 
-    /**
-     *
-     */
     virtual void allDone()
     {
-        //TODO: fix free
+        //fixme: fix free
         //free(this->values);
     }
 
@@ -219,6 +221,8 @@ private:
     int dataNumber;
     int numVars;
     void **values;
+    const GridType *tempGrid;
+    int tempStep;
     std::map<std::string, int> variableMap;
 
     /**
@@ -283,11 +287,11 @@ private:
                     VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
                     if (DIMENSIONS == 2)
                     {
-                        VisItSetGetMesh(SimGetMesh2D, (void *)&this->sim->getGrid()->getDimensions());
+                        VisItSetGetMesh(SimGetMesh2D, (void *)&tempGrid->getDimensions());
                     }
                     else
                     {
-                        VisItSetGetMesh(SimGetMesh3D, (void *)&this->sim->getGrid()->getDimensions());
+                        VisItSetGetMesh(SimGetMesh3D, (void *)&tempGrid->getDimensions());
                     }
 
                     VisItSetGetVariable(wrapper, reinterpret_cast<void*>(this));
@@ -349,12 +353,10 @@ private:
     class VisitData2
     {
     public:
-        static visit_handle SimGetVariable
-                (int domain, const char *name, SVW *sim_data)
+        static visit_handle SimGetVariable(int domain, const char *name, SVW *sim_data)
         {
             visit_handle h = VISIT_INVALID_HANDLE;
-            const GridType *grid = sim_data->sim->getGrid();
-            CoordBox<DIMENSIONS> box = grid->boundingBox();
+            CoordBox<DIMENSIONS> box = sim_data->tempGrid->boundingBox();
             unsigned int size = box.size();
 
             if(VisIt_VariableData_alloc(&h) == VISIT_OKAY)
@@ -489,7 +491,7 @@ private:
             {
                 VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
             }
-            VisIt_SimulationMetaData_setCycleTime(md, sim_data->sim->getStep(), 0);
+            VisIt_SimulationMetaData_setCycleTime(md, sim_data->tempStep, 0);
 
             visit_handle m1 = VISIT_INVALID_HANDLE;
             visit_handle vmd = VISIT_INVALID_HANDLE;
