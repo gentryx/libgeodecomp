@@ -26,6 +26,7 @@ find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
 find_package(Qt4)
+find_package(VisIt)
 
 if(NOT DEFINED QT4_FOUND)
   set(QT4_FOUND false)
@@ -98,6 +99,8 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
+add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
+
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
 add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
@@ -156,6 +159,10 @@ endif()
 
 if(FEATURE_QT AND NOT QT4_FOUND)
   message(FATAL_ERROR "FEATURE_QT selected, but could not find QT4")
+endif()
+
+if(FEATURE_VISIT)
+  include_directories(${VisIt_INCLUDE_DIRS})
 endif()
 
 if(WIN32)
@@ -259,6 +266,9 @@ if(FEATURE_MPI)
 endif()
 if(FEATURE_OPENCL)
   target_link_libraries(geodecomp OpenCL)
+endif()
+if(FEATURE_VISIT)
+  target_link_libraries(geodecomp ${VisIt_LIBRARIES} dl)
 endif()
 
 #============= INSTALLER CONFIG ===================================
