@@ -76,7 +76,8 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
     /**
      *
      */
-    virtual ~RemoteSteerer() {
+    virtual ~RemoteSteerer()
+    {
         delete server;
         if (defaultData != NULL) {
             delete defaultData;
@@ -89,7 +90,8 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
     /**
      *
      */
-    static CommandServer::functionMap* getDefaultMap() {
+    static CommandServer::functionMap* getDefaultMap() 
+    {
         CommandServer::functionMap* defaultMap = new CommandServer::functionMap();
         (*defaultMap)["help"] = helpFunction;
         (*defaultMap)["get"] = getFunction;
@@ -145,7 +147,8 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
      */
     static void getFunction(std::vector<std::string> stringVec,
                             CommandServer::Session *session,
-                            void *data) {
+                            void *data) 
+    {
         SteererData<CELL_TYPE> *sdata = (SteererData<CELL_TYPE>*) data;
         int x = 0;
         int y = 0;

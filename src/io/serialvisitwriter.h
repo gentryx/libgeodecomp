@@ -145,13 +145,12 @@ public:
 
         checkVisitState();
     }
-   
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
     {
         // saving this pointer is evil, but required during VisIt's callback.
         tempGrid = &grid;
         tempStep = step;
-        
+
         //fixme: switch/case statement here
         if (event == WRITER_INITIALIZED) {
             initialized();
@@ -169,7 +168,7 @@ public:
             }
 
             checkVisitState();
-            
+
         } else if (event == WRITER_ALL_DONE) {
             allDone();
         }
