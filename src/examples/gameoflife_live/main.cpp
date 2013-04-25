@@ -5,10 +5,10 @@
 #include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/serialvisitwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/io/visitwriter.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -115,8 +115,11 @@ public:
     }
 };
 
-DEFINE_DATASELECTOR(ConwayCell, 0, char, alive);
-DEFINE_DATASELECTOR(ConwayCell, 1, int, count);
+// DEFINE_DATASELECTOR(ConwayCell, 0, char, alive);
+// DEFINE_DATASELECTOR(ConwayCell, 1, int, count);
+
+DEFINE_DATAACCESSOR(ConwayCell, char, alive);
+DEFINE_DATAACCESSOR(ConwayCell, int, count);
 
 void runSimulation()
 {
@@ -124,11 +127,16 @@ void runSimulation()
 
     SerialSimulator<ConwayCell> sim(
         new CellInitializer());
-        new SerialVisitWriter<ConwayCell, 2>(
-        "./gameoflife_live",
-        &sim,
-        2,
-        outputFrequency);
+
+    DataAccessor<ConwayCell> *accessors[] = {new aliveDataAccessor() };
+
+    sim.addWriter(
+        new VisitWriter<ConwayCell>(
+            "./gameoflife_live",
+            accessors,
+            1,
+            outputFrequency,
+            0));
 
     sim.run();
 }
