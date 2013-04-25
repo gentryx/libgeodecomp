@@ -256,7 +256,7 @@ static int mystrtoi(const char *ptr) {
  */
 template<typename CELL_TYPE>
 static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>&,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
             const unsigned&,
             CommandServer::Session*,
             void *);
@@ -266,7 +266,7 @@ static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType*,
  */
 template<typename CELL_TYPE>
 static void executeSetRequests(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>&,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
             const unsigned&,
             CommandServer::Session*,
             void *);
@@ -278,7 +278,7 @@ template<typename CELL_TYPE, typename DATATYPE>
 class SteererControl {
   public:
     virtual void operator()(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>&,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
             const unsigned&, MessageBuffer*, void*,
             const MPI::Intracomm&, bool) = 0;
 };
@@ -290,7 +290,7 @@ template<typename CELL_TYPE, typename DATATYPE>
 class ExtendedSteererControlStub : SteererControl<CELL_TYPE, DATATYPE>{
   public:
     void operator()(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
             const unsigned& step,
             MessageBuffer* session,
             void *data,
@@ -308,7 +308,7 @@ template<typename CELL_TYPE, typename DATATYPE = SteererData<CELL_TYPE>,
 class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>{
   public:
     void operator()(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
             const unsigned& step,
             MessageBuffer* session,
             void *data,
@@ -369,7 +369,7 @@ class Request<T, CELL_TYPE,2> {
      *
      */
     static bool validateCoords(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
             const int x, const int y, const int z) {
         return validRegion.boundingBox().inBounds(Coord<2>(x, y));
     }
@@ -421,7 +421,7 @@ class Request<T, CELL_TYPE, 3> {
      *
      */
     static bool validateCoords(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
             const int x, const int y, const int z) {
         return validRegion.boundingBox().inBounds(Coord<3>(x, y, z));
     }
@@ -468,11 +468,11 @@ class Request<T, CELL_TYPE, 3> {
  */
 template<typename CELL_TYPE>
 static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
             const unsigned& step,
             MessageBuffer* session,
             void *data) {
-    static const int DIM = Steerer<CELL_TYPE>::Topology::DIMENSIONS;
+    static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
     SteererData<CELL_TYPE>* sdata = (SteererData<CELL_TYPE>*) data;
 
     for (int j = 0; j < sdata->getX.size(); ++j) {
@@ -563,11 +563,11 @@ static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType *grid,
  */
 template<typename CELL_TYPE>
 static void executeSetRequests(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
             const unsigned& step,
             MessageBuffer* session,
             void *data) {
-    static const int DIM = Steerer<CELL_TYPE>::Topology::DIMENSIONS;
+    static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
     SteererData<CELL_TYPE>* sdata = (SteererData<CELL_TYPE>*) data;
 
     for (int j = 0; j < sdata->setX.size(); ++j) {

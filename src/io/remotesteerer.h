@@ -104,7 +104,7 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
      */
     virtual void nextStep(
             GridType *grid,
-            const Region<Topology::DIMENSIONS>& validRegion,
+            const Region<Topology::DIM>& validRegion,
             const unsigned& step) {
         RemoteSteererHelper::MessageBuffer* msgBuffer;
         if (comm.Get_rank() == 0) {

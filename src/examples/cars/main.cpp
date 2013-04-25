@@ -175,7 +175,7 @@ struct mySteererData : SteererData<Cell> {
 class MyControl : SteererControl<Cell, mySteererData> {
   public:
     void operator()(typename Steerer<Cell>::GridType *grid,
-            const Region<Steerer<Cell>::Topology::DIMENSIONS>& validRegion,
+            const Region<Steerer<Cell>::Topology::DIM>& validRegion,
             const unsigned& step,
             RemoteSteererHelper::MessageBuffer* session,
             void *data,

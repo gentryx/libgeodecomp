@@ -62,7 +62,7 @@ class VisitWriter:public Writer < CELL_TYPE > {
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     typedef VisitWriter<CELL_TYPE, MESH_TYPE> SVW;
-    static const int DIMENSIONS = Topology::DIMENSIONS;
+    static const int DIMENSIONS = Topology::DIM;
 
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
@@ -88,7 +88,8 @@ class VisitWriter:public Writer < CELL_TYPE > {
      *
      */
     virtual void stepFinished(
-            const GridType& _grid, unsigned _step, WriterEvent _event) {
+            const GridType& _grid, unsigned _step, WriterEvent _event) 
+    {
         grid = &_grid;
         step = _step;
 
