@@ -5,12 +5,14 @@
 #include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/visitwriter.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
+#include <libgeodecomp/misc/commandserver.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
@@ -121,22 +123,89 @@ public:
 DEFINE_DATAACCESSOR(ConwayCell, char, alive);
 DEFINE_DATAACCESSOR(ConwayCell, int, count);
 
+struct mySteererData : SteererData<ConwayCell>
+{
+    mySteererData(DataAccessor<ConwayCell>** _dataAccessors, int _numVars) :
+            SteererData(_dataAccessors, _numVars)
+    {
+    }
+    boost::mutex size_mutex;
+};
+
+template<typename CELL_TYPE, typename DATATYPE>
+class myControl : RemoteSteererHelper::SteererControl<CELL_TYPE, DATATYPE>
+{
+public:
+    virtual void operator()(typename Steerer<CELL_TYPE>::GridType*,
+            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+            const unsigned&, MessageBuffer *session,
+            void *data,
+            const MPI::Intracomm&, bool)
+    {
+        mySteererData *sdata = (mySteererData*) data;
+        if (sdata->size_mutex.try_lock())
+        {
+            std::string msg = "size: ";
+            msg += boost::to_string(validRegion.size()) + "\n";
+            session->sendMessage(msg);
+        }
+    }
+};
+
+static void sizeFunction(std::vector<std::string> stringVec,
+        CommandServer::Session *session,
+        void *data)
+{
+    mySteererData *sdata = (mySteererData*) data;
+    std::string help_msg = "    Usage: size\n";
+    help_msg += "          get the size of the region\n";
+    if (stringVec.size() > 1) {
+        session->sendMessage(help_msg);
+        return;
+    }
+    sdata->size_mutex.unlock();
+}
+
 void runSimulation()
 {
     int outputFrequency = 10;
 
+    DataAccessor<ConwayCell> *vars[3];
+    vars[0] = new aliveDataAccessor();
+    vars[1] = new countDataAccessor();
+
     SerialSimulator<ConwayCell> sim(
         new CellInitializer());
 
-    DataAccessor<ConwayCell> *accessors[] = {new aliveDataAccessor() };
+    DataAccessor<ConwayCell> *accessors[] = {
+        new aliveDataAccessor(),
+        new countDataAccessor()
+    };
 
     sim.addWriter(
         new VisitWriter<ConwayCell>(
             "./gameoflife_live",
             accessors,
-            1,
+            2,
             outputFrequency,
             0));
+
+    /*
+     * ---------------------------------------------
+     * extend default remote steerer commands part 2
+     * ---------------------------------------------
+     */
+    CommandServer::functionMap* fmap = RemoteSteerer<ConwayCell>
+            ::getDefaultMap();
+    (*fmap)["size"] = sizeFunction;
+
+    mySteererData *myData = new mySteererData(vars, 2);
+
+    Steerer<ConwayCell>* steerer = new RemoteSteerer<ConwayCell,
+                                                     DefaultSteererControl<ConwayCell, mySteererData, myControl<ConwayCell, SteererData<ConwayCell> > > >
+                                                     (1, 1234, vars, 2, fmap, myData);
+
+    sim.addSteerer(steerer);
 
     sim.run();
 }

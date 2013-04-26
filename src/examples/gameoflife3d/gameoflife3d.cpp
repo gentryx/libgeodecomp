@@ -1,8 +1,8 @@
+#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/serialvisitwriter.h>
+#include <libgeodecomp/io/visitwriter.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <boost/assign/std/vector.hpp>
-#include <libgeodecomp/io/remotesteerer.h>
 
 #include <libgeodecomp/misc/grid.h>
 
@@ -95,7 +95,7 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(ConwayCell, int, alive)
+DEFINE_DATAACCESSOR(ConwayCell, char, alive)
 
 void runSimulation()
 {
@@ -103,21 +103,19 @@ void runSimulation()
 
     SerialSimulator<ConwayCell> sim(new CellInitializer());
 
-    DataAccessor<ConwayCell> *vars[1];
-    vars[0] = new aliveDataAccessor();
+    DataAccessor<ConwayCell> *accessors[] = {
+        new aliveDataAccessor()
+    };
 
-    SerialVisitWriter<ConwayCell, PointMesh<ConwayCell> >* writer =
-            new SerialVisitWriter<ConwayCell, PointMesh<ConwayCell> >(
-                "./gameoflife3d",
-                vars,
-                1,
-                outputFrequency
-            );
+    sim.addWriter(
+        new VisitWriter<ConwayCell>(
+            "./gameoflife_live",
+            accessors,
+            1,
+            outputFrequency,
+            0));
 
-    Steerer<ConwayCell>* steerer = new RemoteSteerer<ConwayCell, 3>
-            (1, 1234, vars, 1);
-
-    sim.addWriter(writer);
+    Steerer<ConwayCell> *steerer = new RemoteSteerer<ConwayCell>(1, 1234, accessors, 1);
     sim.addSteerer(steerer);
 
     sim.run();
@@ -125,6 +123,11 @@ void runSimulation()
 
 int main(int argc, char *argv[])
 {
+    MPI_Init(&argc, &argv);
+    LibGeoDecomp::Typemaps::initializeMaps();
+
     runSimulation();
+
+    MPI_Finalize();
     return 0;
 }

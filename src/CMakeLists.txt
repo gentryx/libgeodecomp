@@ -19,7 +19,7 @@ if(NOT DEFINED BOOST_ROOT)
 endif()
 
 detect_distro()
-find_package(Boost REQUIRED date_time filesystem system)
+find_package(Boost REQUIRED date_time filesystem system thread)
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)

@@ -2,6 +2,7 @@
 #define _libgeodecomp_misc_remotesteererhelper_h_
 
 #include <libgeodecomp/misc/commandserver.h>
+#include <libgeodecomp/misc/dataaccessor.h>
 
 #include <sstream>
 #include <mpi.h>
