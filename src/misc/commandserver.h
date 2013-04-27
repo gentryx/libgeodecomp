@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_commandserver_h_
-#define _libgeodecomp_misc_commandserver_h_
+#ifndef LIBGEODECOMP_MISC_COMMANDSERVER_H
+#define LIBGEODECOMP_MISC_COMMANDSERVER_H
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>

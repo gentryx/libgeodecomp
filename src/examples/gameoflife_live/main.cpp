@@ -117,9 +117,6 @@ public:
     }
 };
 
-// DEFINE_DATASELECTOR(ConwayCell, 0, char, alive);
-// DEFINE_DATASELECTOR(ConwayCell, 1, int, count);
-
 DEFINE_DATAACCESSOR(ConwayCell, char, alive);
 DEFINE_DATAACCESSOR(ConwayCell, int, count);
 
@@ -152,6 +149,7 @@ public:
     }
 };
 
+// fixme: replace static functions with fuctors
 static void sizeFunction(std::vector<std::string> stringVec,
         CommandServer::Session *session,
         void *data)
@@ -201,10 +199,14 @@ void runSimulation()
 
     mySteererData *myData = new mySteererData(vars, 2);
 
-    Steerer<ConwayCell>* steerer = new RemoteSteerer<ConwayCell,
-                                                     DefaultSteererControl<ConwayCell, mySteererData, myControl<ConwayCell, SteererData<ConwayCell> > > >
-                                                     (1, 1234, vars, 2, fmap, myData);
-
+    // fixme: class names must start with capitals
+    // fixme: too long template instantiation
+    Steerer<ConwayCell>* steerer =
+        new RemoteSteerer<ConwayCell,
+                          DefaultSteererControl<
+                              ConwayCell, mySteererData, myControl<
+                                  ConwayCell, SteererData<ConwayCell> > > >(
+                                      1, 1234, vars, 2, fmap, myData);
     sim.addSteerer(steerer);
 
     sim.run();

@@ -1,13 +1,13 @@
 #include <mpi.h>
 
 #include <boost/assign/std/vector.hpp>
+#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/visitwriter.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/misc/dataaccessor.h>
-#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/misc/remotesteererhelper.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/mpilayer/typemaps.h>
 
 using namespace LibGeoDecomp;
@@ -19,43 +19,36 @@ enum State {
     BLOCK = 1
 };
 
-/*
- *
- */
-class Cell {
-  public:
-    /*
-     *
-     */
+class Cell
+{
+public:
+    friend class CellInitializer;
+    friend class borderDataAccessor;
+    friend class directionDataAccessor;
+    friend class rateDataAccessor;
+
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
 
-    /*
-     *
-     */
-    class API : public CellAPITraits::Base {};
+    class API : public CellAPITraits::Base
+    {};
 
-    /*
-     *
-     */
-    static inline unsigned nanoSteps() {
+    static inline unsigned nanoSteps()
+    {
         return 2;
     }
 
-    /*
-     *
-     */
-    Cell(const int& _direction = FREE, const int& _border = 0, const int _rate = 5) :
-        direction(_direction),
-        border(_border),
-        rate(_rate) {
-    }
+    Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
+        direction(direction),
+        border(border),
+        rate(rate)
+    {}
 
-    /*
-     *
-     */
-    void update(const CoordMap<Cell>& neighborhood, const unsigned& nanoStep) {
+    // fixme: shorten by decomposition
+    void update(const CoordMap<Cell>& neighborhood, const unsigned& nanoStep)
+    {
         *this = neighborhood[Coord<2>(0, 0)];
+
         if (nanoStep == 0) {
             if ((direction == FREE) && (neighborhood[Coord<2>(0, 1)].direction == SOUTH)) {
                 direction = SOUTH;
@@ -109,32 +102,24 @@ class Cell {
         }
     }
 
-    /*
-     *
-     */
+private:
     int direction;
     int border;
     int rate;
 };
 
-/*
- *
- */
-class CellInitializer : public SimpleInitializer<Cell> {
-  public:
-    /*
-     *
-     */
-    CellInitializer() : SimpleInitializer<Cell>(Coord<2>(90, 90), 10000) {}
+class CellInitializer : public SimpleInitializer<Cell>
+{
+public:
+    CellInitializer() :
+        SimpleInitializer<Cell>(Coord<2>(90, 90), 10000)
+    {}
 
-    /*
-     *
-     */
-    virtual void grid(GridBase<Cell, 2> *ret) {
+    virtual void grid(GridBase<Cell, 2> *ret)
+    {
         for (int i = 1; i < 90; ++i) {
-           ret->at(Coord<2>(i, 89)) = Cell(0, 1);
+            ret->at(Coord<2>(i, 89)) = Cell(0, 1);
         }
-
 
         for (int j = 0; j < 89; ++j) {
             for (int i = 0; i < 90; ++i) {
@@ -164,23 +149,29 @@ DEFINE_DATAACCESSOR(Cell, int, border)
 DEFINE_DATAACCESSOR(Cell, int, direction)
 DEFINE_DATAACCESSOR(Cell, int, rate)
 
-struct mySteererData : SteererData<Cell> {
-    mySteererData(DataAccessor<Cell>** _dataAccessors, int _numVars) :
-            SteererData(_dataAccessors, _numVars, MPI::COMM_WORLD) {
+struct mySteererData : SteererData<Cell>
+{
+    mySteererData(DataAccessor<Cell>** dataAccessors, int numVars) :
+        SteererData(dataAccessors, numVars, MPI::COMM_WORLD)
+    {
         getstep_mutex.lock();
     }
+
     boost::mutex getstep_mutex;
 };
 
-class MyControl : SteererControl<Cell, mySteererData> {
-  public:
-    void operator()(typename Steerer<Cell>::GridType *grid,
-            const Region<Steerer<Cell>::Topology::DIM>& validRegion,
-            const unsigned& step,
-            RemoteSteererHelper::MessageBuffer* session,
-            void *data,
-            const MPI::Intracomm& _comm,
-            bool _changed = true) {
+class MyControl : SteererControl<Cell, mySteererData>
+{
+public:
+    void operator()(
+        typename Steerer<Cell>::GridType *grid,
+        const Region<Steerer<Cell>::Topology::DIM>& validRegion,
+        const unsigned& step,
+        RemoteSteererHelper::MessageBuffer* session,
+        void *data,
+        const MPI::Intracomm& _comm,
+        bool _changed = true)
+    {
         mySteererData* sdata = (mySteererData*) data;
         if (sdata->getstep_mutex.try_lock()) {
             std::string msg = "current step: ";
@@ -190,9 +181,11 @@ class MyControl : SteererControl<Cell, mySteererData> {
     }
 };
 
-static void getStepFunction(std::vector<std::string> stringVec,
-        CommandServer::Session *session,
-        void *data) {
+static void getStepFunction(
+    std::vector<std::string> stringVec,
+    CommandServer::Session *session,
+    void *data)
+{
     mySteererData* sdata = (mySteererData*) data;
     std::string help_msg = "    Usage: getstep\n";
     help_msg += "          get the size of the region\n";
@@ -207,9 +200,12 @@ static void getStepFunction(std::vector<std::string> stringVec,
     sdata->getstep_mutex.unlock();
 }
 
-static void setRateFunction(std::vector<std::string> stringVec,
-        CommandServer::Session *session,
-        void *data) {
+// fixme: shorten function by decomposition
+static void setRateFunction(
+    std::vector<std::string> stringVec,
+    CommandServer::Session *session,
+    void *data)
+{
     std::string help_msg = "    Usage: setrate <direction> <probability>\n";
     help_msg += "          sets the probability of a new car for the given direction\n";
     help_msg += "          directions: east and south\n";
@@ -265,10 +261,9 @@ static void setRateFunction(std::vector<std::string> stringVec,
     session->sendMessage(msg);
 }
 
-/*
- *
- */
-void runSimulation() {
+void runSimulation()
+{
+    // fixme: use vectors and boost:shared_ptr
     DataAccessor<Cell> *vars[3];
     vars[0] = new borderDataAccessor();
     vars[1] = new directionDataAccessor();
@@ -302,10 +297,8 @@ void runSimulation() {
     }
 }
 
-/*
- *
- */
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) 
+{
     MPI::Init(argc, argv);
     srand((unsigned)time(0));
     runSimulation();

@@ -1,13 +1,12 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_remotesteerer_h_
-#define _libgeodecomp_io_remotesteerer_h_
+#ifndef LIBGEODECOMP_IO_REMOTESTEERER_H
+#define LIBGEODECOMP_IO_REMOTESTEERER_H
 
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/misc/commandserver.h>
 #include <libgeodecomp/misc/remotesteererhelper.h>
 #include <libgeodecomp/mpilayer/typemaps.h>
-
 #include <mpi.h>
 
 namespace LibGeoDecomp {

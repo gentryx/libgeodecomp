@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_remotesteererhelper_h_
-#define _libgeodecomp_misc_remotesteererhelper_h_
+#ifndef LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
+#define LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
 
 #include <libgeodecomp/misc/commandserver.h>
 #include <libgeodecomp/misc/dataaccessor.h>
@@ -11,20 +11,23 @@ namespace LibGeoDecomp {
 
 namespace RemoteSteererHelper {
 
+// fixme: move this to remotesteerer
+// fixme: make this a class
+// fixme: use MPILayer
 /*
  *  exchange data between nextStep an command functions
  */
 template<typename CELL_TYPE>
-struct SteererData {
-  public:
-    /*
-     *
-     */
-    SteererData(DataAccessor<CELL_TYPE>** _dataAccessors, int _numVars,
-                const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
-            dataAccessors(_dataAccessors),
-            numVars(_numVars),
-            comm(_comm) {
+struct SteererData
+{
+public:
+    SteererData(
+        DataAccessor<CELL_TYPE>** _dataAccessors, int _numVars,
+        const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
+        dataAccessors(_dataAccessors),
+        numVars(_numVars),
+        comm(_comm)
+    {
         finishMutex.lock();
         waitMutex.lock();
     }
@@ -46,7 +49,8 @@ struct SteererData {
     /*
      * broadcast exchange data from root to the other processes
      */
-    void broadcastSteererData() {
+    void broadcastSteererData()
+    {
         if (comm.Get_rank() != 0) {
             getX.clear();
             getY.clear();
@@ -71,7 +75,8 @@ struct SteererData {
     /*
      *
      */
-    void broadcastIntVector(std::vector<int>* vec) {
+    void broadcastIntVector(std::vector<int> *vec)
+    {
         int size = 0;
         int* intBuffer;
         if (comm.Get_rank() == 0) {
@@ -91,7 +96,8 @@ struct SteererData {
     /*
      *
      */
-    void broadcastStringVector(std::vector<std::string>* vec) {
+    void broadcastStringVector(std::vector<std::string> *vec)
+    {
         int vectorSize = 0;
         int stringSize = 0;
         char* charBuffer;
@@ -122,19 +128,22 @@ struct SteererData {
  * processes without direct access to the CommandServer Session buffer
  * their messages and root will collect and send them to the client
  */
-class MessageBuffer {
-  public:
+class MessageBuffer
+{
+public:
     /*
      *
      */
-    MessageBuffer (MPI::Intracomm& _comm, CommandServer::Session *_session) :
-            comm(_comm), session(_session) {
-    }
+    MessageBuffer(MPI::Intracomm& comm, CommandServer::Session *session) :
+        comm(comm),
+        session(session)
+    {}
 
     /*
      *
      */
-    void sendMessage (std::string msg) {
+    void sendMessage(std::string msg)
+    {
         if (comm.Get_rank() == 0) {
             session->sendMessage("thread 0: " + msg);
         }
@@ -143,16 +152,15 @@ class MessageBuffer {
         }
     }
 
-    /*
-     *
-     */
-    void collectMessages () {
+    void collectMessages()
+    {
         int vectorSize = 0;
         int stringSize = 0;
         int msgCount[comm.Get_size()];
         if (comm.Get_rank() == 0) {
             comm.Gather(&vectorSize, 1, MPI::INT, msgCount, 1, MPI::INT, 0);
 
+            // fixme: early return/continue
             for (int i = 1; i < comm.Get_size(); ++i) {
                 if (msgCount[i] > 0) {
                     for (int j = 0; j < msgCount[i]; ++j) {
@@ -171,6 +179,7 @@ class MessageBuffer {
             }
         }
         else {
+            // fixme: decompose
             vectorSize = msgBuffer.size();
             comm.Gather(&vectorSize, 1, MPI::INT, msgCount, 1, MPI::INT, 0);
 
@@ -186,19 +195,14 @@ class MessageBuffer {
         }
     }
 
-  private:
-    /*
-     *
-     */
+private:
     std::vector<std::string> msgBuffer;
     MPI::Intracomm& comm;
     CommandServer::Session *session;
 };
 
-/*
- *
- */
-static double mystrtod(const char *ptr) {
+static double mystrtod(const char *ptr)
+{
     errno = 0;
     double val = 0;
     char *endptr;
@@ -209,10 +213,8 @@ static double mystrtod(const char *ptr) {
     return val;
 }
 
-/*
- *
- */
-static float mystrtof(const char *ptr) {
+static float mystrtof(const char *ptr)
+{
     errno = 0;
     float val = 0;
     char *endptr;
@@ -223,10 +225,8 @@ static float mystrtof(const char *ptr) {
     return val;
 }
 
-/*
- *
- */
-static long mystrtol(const char *ptr) {
+static long mystrtol(const char *ptr)
+{
     errno = 0;
     long val = 0;
     char *endptr;
@@ -237,10 +237,9 @@ static long mystrtol(const char *ptr) {
     return val;
 }
 
-/*
- *
- */
-static int mystrtoi(const char *ptr) {
+// fixme: replace this with library code
+static int mystrtoi(const char *ptr)
+{
     errno = 0;
     long val = 0;
     char *endptr;
@@ -251,89 +250,85 @@ static int mystrtoi(const char *ptr) {
     return static_cast<int>(val);
 }
 
-
-/*
- *
- */
 template<typename CELL_TYPE>
-static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
-            const unsigned&,
-            CommandServer::Session*,
-            void *);
+static void executeGetRequests(
+    typename Steerer<CELL_TYPE>::GridType*,
+    const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
+    const unsigned&,
+    CommandServer::Session*,
+    void *);
 
-/*
- *
- */
 template<typename CELL_TYPE>
-static void executeSetRequests(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
-            const unsigned&,
-            CommandServer::Session*,
-            void *);
+static void executeSetRequests(
+    typename Steerer<CELL_TYPE>::GridType*,
+    const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
+    const unsigned&,
+    CommandServer::Session*,
+    void *);
 
-/*
- *
- */
+// fixme: move this to dedicated file
 template<typename CELL_TYPE, typename DATATYPE>
-class SteererControl {
+class SteererControl
+{
   public:
-    virtual void operator()(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
-            const unsigned&, MessageBuffer*, void*,
-            const MPI::Intracomm&, bool) = 0;
+    virtual void operator()(
+        typename Steerer<CELL_TYPE>::GridType*,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
+        const unsigned&, MessageBuffer*, void*,
+        const MPI::Intracomm&, bool) = 0;
 };
 
-/*
- *
- */
 template<typename CELL_TYPE, typename DATATYPE>
-class ExtendedSteererControlStub : SteererControl<CELL_TYPE, DATATYPE>{
-  public:
-    void operator()(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const unsigned& step,
-            MessageBuffer* session,
-            void *data,
-            const MPI::Intracomm& _comm,
-            bool _changed = false) {
+class ExtendedSteererControlStub : SteererControl<CELL_TYPE, DATATYPE>
+{
+public:
+    void operator()(
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+        const unsigned& step,
+        MessageBuffer *session,
+        void *data,
+        const MPI::Intracomm& comm,
+        bool changed = false) 
+    {
         // do nothing, it's a stub
     }
 };
 
-/*
- *
- */
 template<typename CELL_TYPE, typename DATATYPE = SteererData<CELL_TYPE>,
          typename EXTENDED = ExtendedSteererControlStub<CELL_TYPE, DATATYPE> >
-class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>{
-  public:
-    void operator()(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const unsigned& step,
-            MessageBuffer* session,
-            void *data,
-            const MPI::Intracomm& _comm,
-            bool _changed = false) {
-        DATATYPE* sdata = (DATATYPE*) data;
+class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>
+{
+public:
+    void operator()(
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+        const unsigned& step,
+        MessageBuffer* session,
+        void *data,
+        const MPI::Intracomm& comm,
+        bool _changed = false)
+    {
+        // fixme: bad variable name
+        DATATYPE *sdata = (DATATYPE*) data;
 
         bool newcommands = false;
-        if (_comm.Get_rank() == 0) {
+        if (comm.Get_rank() == 0) {
             if (sdata->finishMutex.try_lock()) {
                 newcommands = true;
             }
         }
 
-        if (_comm.Get_size() > 1) {
-            _comm.Bcast(&newcommands, 1, MPI::BOOL, 0);
+        if (comm.Get_size() > 1) {
+            comm.Bcast(&newcommands, 1, MPI::BOOL, 0);
         }
 
         if (newcommands) {
-            if (_comm.Get_size() > 1) {
+            if (comm.Get_size() > 1) {
                 sdata->broadcastSteererData();
             }
 
-            EXTENDED()(grid, validRegion, step, session, data, _comm, true);
+            EXTENDED()(grid, validRegion, step, session, data, comm, true);
 
             if (sdata->setX.size() > 0) {
                 executeSetRequests<CELL_TYPE>(
@@ -345,7 +340,7 @@ class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>{
                         grid, validRegion, step, session, data);
             }
 
-            if (_comm.Get_rank() == 0) {
+            if (comm.Get_rank() == 0) {
                 sdata->waitMutex.unlock();
             }
         }
@@ -353,6 +348,7 @@ class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>{
 };
 
 
+// fixme: move to dedicated file
 /*
  * wrapper class for requests to cell variables and
  * partial specialized for dimensions
@@ -360,40 +356,44 @@ class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>{
 template<typename T, typename CELL_TYPE, int DIM>
 class Request;
 
-/*
- *
- */
 template<typename T, typename CELL_TYPE>
-class Request<T, CELL_TYPE,2> {
-  public:
-    /*
-     *
-     */
-    static bool validateCoords(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const int x, const int y, const int z) {
+class Request<T, CELL_TYPE,2> 
+{
+public:
+    static bool validateCoords(
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+        const int x, const int y, const int z)
+    {
         return validRegion.boundingBox().inBounds(Coord<2>(x, y));
     }
 
     /*
      *
      */
-    static int associateAccessor (DataAccessor<CELL_TYPE>** dataAccessors,
-                           int num, std::string name) {
+    static int associateAccessor (
+        DataAccessor<CELL_TYPE>** dataAccessors,
+        int num, std::string name)
+    {
         for (int i = 0; i < num; ++i) {
             if ((dataAccessors[i]->getName()).compare(name) == 0) {
                 return i;
             }
         }
+
         return -1;
     }
 
     /*
      *
      */
-    static T valueRequest(DataAccessor<CELL_TYPE>* dataAccessor,
-            typename Steerer<CELL_TYPE>::GridType *grid,
-            const int x, const int y, const int z) {
+    static T valueRequest(
+        DataAccessor<CELL_TYPE>* dataAccessor,
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const int x,
+        const int y,
+        const int z)
+    {
         T value;
         value = 0;
         dataAccessor->getFunction(grid->at(Coord<2>(x, y)),
@@ -401,81 +401,89 @@ class Request<T, CELL_TYPE,2> {
         return value;
     }
 
-    /*
-     *
-     */
-    static void mutationRequest(DataAccessor<CELL_TYPE>* dataAccessor,
-            typename Steerer<CELL_TYPE>::GridType *grid,
-            const int x, const int y, const int z, T value) {
-        dataAccessor->setFunction(&(grid->at(Coord<2>(x, y))),
-                                  reinterpret_cast<void*>(&value));
+    static void mutationRequest(
+        DataAccessor<CELL_TYPE>* dataAccessor,
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const int x,
+        const int y,
+        const int z,
+        T value)
+    {
+        dataAccessor->setFunction(
+            &(grid->at(Coord<2>(x, y))),
+            reinterpret_cast<void*>(&value));
     }
 };
 
-/*
- *
- */
 template<typename T, typename CELL_TYPE>
-class Request<T, CELL_TYPE, 3> {
+class Request<T, CELL_TYPE, 3>
+{
   public:
-    /*
-     *
-     */
-    static bool validateCoords(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const int x, const int y, const int z) {
+    static bool validateCoords(
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+        const int x,
+        const int y,
+        const int z)
+    {
         return validRegion.boundingBox().inBounds(Coord<3>(x, y, z));
     }
 
-    /*
-     *
-     */
-    static int associateAccessor (DataAccessor<CELL_TYPE>** dataAccessors,
-                           int num, std::string name) {
+    static int associateAccessor(
+        DataAccessor<CELL_TYPE> **dataAccessors,
+        int num,
+        std::string name)
+    {
         for (int i = 0; i < num; ++i) {
             if ((dataAccessors[i]->getName()).compare(name) == 0) {
                 return i;
             }
         }
+
         return -1;
     }
 
-    /*
-     *
-     */
-    static T valueRequest(DataAccessor<CELL_TYPE>* dataAccessor,
-            typename Steerer<CELL_TYPE>::GridType *grid,
-            const int x, const int y, const int z) {
+    static T valueRequest(
+        DataAccessor<CELL_TYPE>* dataAccessor,
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const int x,
+        const int y,
+        const int z)
+    {
         T value;
         value = 0;
-        dataAccessor->getFunction(grid->at(Coord<3>(x, y, z)),
-                                  reinterpret_cast<void*>(&value));
+        dataAccessor->getFunction(
+            grid->at(Coord<3>(x, y, z)),
+            reinterpret_cast<void*>(&value));
         return value;
     }
 
-    /*
-     *
-     */
-    static void mutationRequest(DataAccessor<CELL_TYPE>* dataAccessor,
-            typename Steerer<CELL_TYPE>::GridType *grid,
-            const int x, const int y, const int z, T value) {
-        dataAccessor->setFunction(&(grid->at(Coord<3>(x, y, z))),
-                                  reinterpret_cast<void*>(&value));
+    static void mutationRequest(
+        DataAccessor<CELL_TYPE>* dataAccessor,
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const int x,
+        const int y,
+        const int z,
+        T value)
+    {
+        dataAccessor->setFunction(
+            &(grid->at(Coord<3>(x, y, z))),
+            reinterpret_cast<void*>(&value));
     }
 };
 
-/*
- *
- */
 template<typename CELL_TYPE>
-static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const unsigned& step,
-            MessageBuffer* session,
-            void *data) {
+static void executeGetRequests(
+    typename Steerer<CELL_TYPE>::GridType *grid,
+    const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+    const unsigned& step,
+    MessageBuffer *session,
+    void *data)
+{
     static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
     SteererData<CELL_TYPE>* sdata = (SteererData<CELL_TYPE>*) data;
 
+    // fixme: function too long
     for (int j = 0; j < sdata->getX.size(); ++j) {
         if ((DIM == 3) && (sdata->getZ[j] < 0)) {
             session->sendMessage("3 dimensional coords needed\n");
@@ -559,18 +567,18 @@ static void executeGetRequests(typename Steerer<CELL_TYPE>::GridType *grid,
     sdata->getZ.clear();
 }
 
-/*
- *
- */
 template<typename CELL_TYPE>
-static void executeSetRequests(typename Steerer<CELL_TYPE>::GridType *grid,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const unsigned& step,
-            MessageBuffer* session,
-            void *data) {
+static void executeSetRequests(
+    typename Steerer<CELL_TYPE>::GridType *grid,
+    const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+    const unsigned& step,
+    MessageBuffer* session,
+    void *data) 
+{
     static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
     SteererData<CELL_TYPE>* sdata = (SteererData<CELL_TYPE>*) data;
 
+    // fixme: function too long
     for (int j = 0; j < sdata->setX.size(); ++j) {
         int accessor;
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_dataaccessor_h_
-#define _libgeodecomp_misc_dataaccessor_h_
+#ifndef LIBGEODECOMP_MISC_DATAACCESSOR_H
+#define LIBGEODECOMP_MISC_DATAACCESSOR_H
 
 #include <boost/algorithm/string/case_conv.hpp>
 
@@ -12,6 +12,7 @@ namespace LibGeoDecomp
  * generated in simulation
  */
 template<typename CELL_TYPE>
+// fixme: unify this with BOVWriter infrastucture
 class DataAccessor
 {
 public:
