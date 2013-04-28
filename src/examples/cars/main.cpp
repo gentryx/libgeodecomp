@@ -149,9 +149,9 @@ DEFINE_DATAACCESSOR(Cell, int, border)
 DEFINE_DATAACCESSOR(Cell, int, direction)
 DEFINE_DATAACCESSOR(Cell, int, rate)
 
-struct mySteererData : SteererData<Cell>
+class MySteererData : public SteererData<Cell>
 {
-    mySteererData(DataAccessor<Cell>** dataAccessors, int numVars) :
+    MySteererData(DataAccessor<Cell>** dataAccessors, int numVars) :
         SteererData(dataAccessors, numVars, MPI::COMM_WORLD)
     {
         getstep_mutex.lock();
@@ -160,7 +160,7 @@ struct mySteererData : SteererData<Cell>
     boost::mutex getstep_mutex;
 };
 
-class MyControl : SteererControl<Cell, mySteererData>
+class MyControl : SteererControl<Cell, MySteererData>
 {
 public:
     void operator()(
@@ -172,7 +172,7 @@ public:
         const MPI::Intracomm& _comm,
         bool _changed = true)
     {
-        mySteererData* sdata = (mySteererData*) data;
+        MySteererData* sdata = (MySteererData*) data;
         if (sdata->getstep_mutex.try_lock()) {
             std::string msg = "current step: ";
             msg += boost::to_string(step) + "\n";
@@ -186,7 +186,7 @@ static void getStepFunction(
     CommandServer::Session *session,
     void *data)
 {
-    mySteererData* sdata = (mySteererData*) data;
+    MySteererData* sdata = (MySteererData*) data;
     std::string help_msg = "    Usage: getstep\n";
     help_msg += "          get the size of the region\n";
     if (stringVec.size() > 1) {
@@ -279,14 +279,14 @@ void runSimulation()
             1,
             10000));
 
-    mySteererData* myData = new mySteererData(vars, 3);
+    MySteererData *myData = new MySteererData(vars, 3);
 
     CommandServer::functionMap* fmap = RemoteSteerer<Cell>::getDefaultMap();
     (*fmap)["getstep"] = getStepFunction;
     (*fmap)["setrate"] = setRateFunction;
 
-    Steerer<Cell>* steerer = new RemoteSteerer <Cell, mySteererData,
-        DefaultSteererControl<Cell, mySteererData, MyControl> >(
+    Steerer<Cell>* steerer = new RemoteSteerer <Cell, MySteererData,
+        DefaultSteererControl<Cell, MySteererData, MyControl> >(
         1, 1234, vars, 3, fmap, (void*)myData, MPI::COMM_WORLD);
     sim.addSteerer(steerer);
 
@@ -297,7 +297,7 @@ void runSimulation()
     }
 }
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
     MPI::Init(argc, argv);
     srand((unsigned)time(0));
