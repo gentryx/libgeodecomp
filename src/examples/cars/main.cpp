@@ -151,6 +151,7 @@ DEFINE_DATAACCESSOR(Cell, int, rate)
 
 class MySteererData : public SteererData<Cell>
 {
+public:
     MySteererData(DataAccessor<Cell>** dataAccessors, int numVars) :
         SteererData<Cell>(dataAccessors, numVars, MPI::COMM_WORLD)
     {
@@ -164,7 +165,7 @@ class MyControl : SteererControl<Cell, MySteererData>
 {
 public:
     void operator()(
-        typename Steerer<Cell>::GridType *grid,
+        Steerer<Cell>::GridType *grid,
         const Region<Steerer<Cell>::Topology::DIM>& validRegion,
         const unsigned& step,
         RemoteSteererHelper::MessageBuffer* session,
