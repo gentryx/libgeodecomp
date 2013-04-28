@@ -122,7 +122,7 @@ DEFINE_DATAACCESSOR(ConwayCell, int, count);
 
 class MySteererData : public SteererData<ConwayCell>
 {
-    mySteererData(DataAccessor<ConwayCell> **dataAccessors, int numVars) :
+    MySteererData(DataAccessor<ConwayCell> **dataAccessors, int numVars) :
         SteererData(dataAccessors, numVars)
     {
     }
