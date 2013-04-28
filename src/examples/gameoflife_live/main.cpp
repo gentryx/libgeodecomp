@@ -122,10 +122,11 @@ DEFINE_DATAACCESSOR(ConwayCell, int, count);
 
 class MySteererData : public SteererData<ConwayCell>
 {
+public:
     MySteererData(DataAccessor<ConwayCell> **dataAccessors, int numVars) :
         SteererData<ConwayCell>(dataAccessors, numVars)
-    {
-    }
+    {}
+
     boost::mutex size_mutex;
 };
 
