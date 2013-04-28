@@ -120,17 +120,17 @@ public:
 DEFINE_DATAACCESSOR(ConwayCell, char, alive);
 DEFINE_DATAACCESSOR(ConwayCell, int, count);
 
-struct mySteererData : SteererData<ConwayCell>
+class MySteererData : public SteererData<ConwayCell>
 {
-    mySteererData(DataAccessor<ConwayCell>** _dataAccessors, int _numVars) :
-            SteererData(_dataAccessors, _numVars)
+    mySteererData(DataAccessor<ConwayCell> **dataAccessors, int numVars) :
+        SteererData(dataAccessors, numVars)
     {
     }
     boost::mutex size_mutex;
 };
 
 template<typename CELL_TYPE, typename DATATYPE>
-class myControl : RemoteSteererHelper::SteererControl<CELL_TYPE, DATATYPE>
+class MyControl : RemoteSteererHelper::SteererControl<CELL_TYPE, DATATYPE>
 {
 public:
     virtual void operator()(typename Steerer<CELL_TYPE>::GridType*,
@@ -139,7 +139,7 @@ public:
             void *data,
             const MPI::Intracomm&, bool)
     {
-        mySteererData *sdata = (mySteererData*) data;
+        MySteererData *sdata = (MySteererData*)data;
         if (sdata->size_mutex.try_lock())
         {
             std::string msg = "size: ";
@@ -154,7 +154,7 @@ static void sizeFunction(std::vector<std::string> stringVec,
         CommandServer::Session *session,
         void *data)
 {
-    mySteererData *sdata = (mySteererData*) data;
+    MySteererData *sdata = (MySteererData*)data;
     std::string help_msg = "    Usage: size\n";
     help_msg += "          get the size of the region\n";
     if (stringVec.size() > 1) {
@@ -197,14 +197,14 @@ void runSimulation()
             ::getDefaultMap();
     (*fmap)["size"] = sizeFunction;
 
-    mySteererData *myData = new mySteererData(vars, 2);
+    MySteererData *myData = new MySteererData(vars, 2);
 
     // fixme: class names must start with capitals
     // fixme: too long template instantiation
     Steerer<ConwayCell>* steerer =
         new RemoteSteerer<ConwayCell,
                           DefaultSteererControl<
-                              ConwayCell, mySteererData, myControl<
+                              ConwayCell, MySteererData, MyControl<
                                   ConwayCell, SteererData<ConwayCell> > > >(
                                       1, 1234, vars, 2, fmap, myData);
     sim.addSteerer(steerer);

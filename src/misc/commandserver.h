@@ -19,46 +19,36 @@ namespace LibGeoDecomp {
  * a server, which can be reached by tcp(nc, telnet, ...)
  * executes methods, which are bind to a command
  */
-class CommandServer {
-  public:
+class CommandServer
+{
+public:
     /**
      *
      */
     class Session;
 
-    /**
-     *
-     */
+    // fixme: TypeName, not typeName
     typedef boost::shared_ptr<tcp::socket> socketPtr;
     typedef std::vector<std::string> stringVec;
     typedef std::map<std::string, void(*)(stringVec, Session*, void*)> functionMap;
 
-    /**
-     *
-     */
-    static void splitString(std::string input, stringVec& output, std::string s) {
+    static void splitString(std::string input, stringVec& output, std::string s)
+    {
         boost::split(output, input,
                      boost::is_any_of(s), boost::token_compress_on);
     }
 
-    /*
-     *
-     */
-    class Session{
-      public:
-        /*
-         *
-         */
+    class Session
+    {
+    public:
         Session (socketPtr _socket, functionMap _commandMap, void* _userData) :
             socket(_socket),
             commandMap(_commandMap),
             userData(_userData) {
         }
 
-        /**
-         *
-         */
-        size_t sendMessage(std::string message) {
+        size_t sendMessage(std::string message)
+        {
             size_t bytes;
             boost::system::error_code ec;
             bytes = boost::asio::write(*socket, boost::asio::buffer(message),
@@ -69,10 +59,8 @@ class CommandServer {
             return bytes;
         }
 
-        /**
-         *
-         */
-        void runSession () {
+        void runSession ()
+        {
             for (;;) {
                 boost::array<char, MAXLENGTH> buf;
                 boost::system::error_code ec;
@@ -80,7 +68,8 @@ class CommandServer {
                 stringVec lines;
                 stringVec parameter;
                 std::string message;
-                typename functionMap::iterator it;
+
+                functionMap::iterator it;
 
                 size_t length = socket->read_some(boost::asio::buffer(buf), ec);
                 if (ec == boost::asio::error::eof) {
@@ -117,65 +106,47 @@ class CommandServer {
             }
         }
 
-        /*
-         *
-         */
-        functionMap getMap() {
+        functionMap getMap()
+        {
             return commandMap;
         }
 
-  private:
-        /**
-         *
-         */
+    private:
         socketPtr socket;
         functionMap commandMap;
         void *userData;
     };
 
-    /*
-     *
-     */
-    class Server {
-  public:
-        /*
-         *
-         */
-        Server (int _port, functionMap* _commandMap, void* _userData) :
-            port(_port),
-            commandMap(*_commandMap),
-            userData(_userData) {
-        }
+    class Server
+    {
+    public:
+        // fixme: why pointer here?
+        Server(int port, functionMap *commandMap, void *userData) :
+            port(port),
+            commandMap(*commandMap),
+            userData(userData)
+        {}
 
-        /**
-         *
-         */
-        int startServer() {
+        int startServer()
+        {
+            // fixme: camecase for members
             server_thread = boost::shared_ptr<boost::thread>
                 (new boost::thread(&Server::runServer, this));
 
             return 0;
         }
 
-        /*
-         *
-         */
-        Session* session;
+        Session *session;
 
   private:
-        /**
-         *
-         */
         int port;
         boost::shared_ptr<boost::thread> server_thread;
         socketPtr socket;
         functionMap commandMap;
         void *userData;
 
-        /**
-         *
-         */
-        int runServer() {
+        int runServer()
+        {
             try {
                 boost::asio::io_service io_service;
                 tcp::acceptor acc(io_service, tcp::endpoint(tcp::v4(), port));
@@ -202,13 +173,10 @@ class CommandServer {
                 return 1;
             }
         }
-
     };
 
-    /**
-     *
-     */
-    static void printError(boost::system::error_code& ec) {
+    static void printError(boost::system::error_code& ec)
+    {
         std::cerr << "error: " << ec.message() << std::endl;
     }
 
