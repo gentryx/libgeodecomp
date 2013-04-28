@@ -152,7 +152,7 @@ DEFINE_DATAACCESSOR(Cell, int, rate)
 class MySteererData : public SteererData<Cell>
 {
     MySteererData(DataAccessor<Cell>** dataAccessors, int numVars) :
-        SteererData(dataAccessors, numVars, MPI::COMM_WORLD)
+        SteererData<Cell>(dataAccessors, numVars, MPI::COMM_WORLD)
     {
         getstep_mutex.lock();
     }
