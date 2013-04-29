@@ -101,6 +101,23 @@ public:
         box(box),
         hostGrid(box)
     {
+       std::vector<cl::Platform> platforms;
+       cl::Platform::get ( &platforms );
+
+       std::cerr << "# of Platforms: " << platforms.size() << std::endl;
+
+       for ( auto & platform : platforms )
+           std::cerr << platform;
+
+       std::vector<cl::Device> devices;
+
+       platforms[0].getDevices ( CL_DEVICE_TYPE_ALL, &devices );
+
+       std::cerr << "# of Devices: " << devices.size() << std::endl;
+
+       for ( auto & device : devices )
+           std::cerr << device;
+
         // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
         // todo: specify OpenCL platform, device via constructor
     }
