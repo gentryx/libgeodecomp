@@ -119,6 +119,13 @@ public:
            std::cerr << device;
 
         // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
+
+       std::cerr << "x: " << hostGrid.getDimensions().x() << std::endl;
+       std::cerr << "y: " << hostGrid.getDimensions().y() << std::endl;
+       std::cerr << "z: " << hostGrid.getDimensions().z() << std::endl;
+       std::cerr << "prod: " << hostGrid.getDimensions().prod() << std::endl;
+       std::cerr << "sizeof ( CELL ): " << sizeof ( CELL ) << std::endl;
+
         // todo: specify OpenCL platform, device via constructor
     }
 
