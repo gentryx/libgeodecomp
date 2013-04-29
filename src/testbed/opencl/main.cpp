@@ -18,6 +18,50 @@ std::ostream& operator<< ( std::ostream& o, cl::Platform p ) {
     return o;
 }
 
+std::ostream& operator<< ( std::ostream& o, cl::Device d ) {
+    o << "CL_DEVICE_EXTENSIONS\t\t\t= "
+      << d.getInfo<CL_DEVICE_EXTENSIONS>()                << std::endl
+      << "CL_DEVICE_GLOBAL_MEM_SIZE\t\t= "
+      << d.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>()           << std::endl
+      << "CL_DEVICE_LOCAL_MEM_SIZE\t\t= "
+      << d.getInfo<CL_DEVICE_LOCAL_MEM_SIZE>()            << std::endl
+      << "CL_DEVICE_MAX_CLOCK_FREQUENCY\t\t= "
+      << d.getInfo<CL_DEVICE_MAX_CLOCK_FREQUENCY>()       << std::endl
+      << "CL_DEVICE_MAX_COMPUTE_UNITS\t\t= "
+      << d.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>()         << std::endl
+      << "CL_DEVICE_MAX_CONSTANT_ARGS\t\t= "
+      << d.getInfo<CL_DEVICE_MAX_CONSTANT_ARGS>()         << std::endl
+      << "CL_DEVICE_MAX_MEM_ALLOC_SIZE\t\t= "
+      << d.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()        << std::endl
+      << "CL_DEVICE_MAX_PARAMETER_SIZE\t\t= "
+      << d.getInfo<CL_DEVICE_MAX_PARAMETER_SIZE>()        << std::endl
+      << "CL_DEVICE_MAX_WORK_GROUP_SIZE\t\t= "
+      << d.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()       << std::endl
+      << "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS\t= "
+      << d.getInfo<CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS>()  << std::endl
+      << "CL_DEVICE_MAX_WORK_ITEM_SIZES\t\t= ";
+
+    std::vector<size_t> wis = d.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
+    std::vector<size_t>::iterator it = wis.begin();
+
+    o << "[";
+    while ( it != wis.end() ) o << *it << ( ++it != wis.end() ? ", " : "" );
+    o << "]"                                              << std::endl;
+
+    o << "CL_DEVICE_NAME\t\t\t\t= "
+      << d.getInfo<CL_DEVICE_NAME>()                      << std::endl
+      << "CL_DEVICE_VENDOR\t\t\t= "
+      << d.getInfo<CL_DEVICE_VENDOR>()                    << std::endl
+      << "CL_DEVICE_VERSION\t\t\t= "
+      << d.getInfo<CL_DEVICE_VERSION>()                   << std::endl
+      << "CL_DRIVER_VERSION\t\t\t= "
+      << d.getInfo<CL_DRIVER_VERSION>()                   << std::endl
+      << "CL_DEVICE_EXTENSIONS\t\t\t= "
+      << d.getInfo<CL_DEVICE_EXTENSIONS>();
+
+    return o;
+}
+
 class Cell
 {
 public:
