@@ -7,6 +7,17 @@
 
 using namespace LibGeoDecomp;
 
+std::ostream& operator<< ( std::ostream& o, cl::Platform p ) {
+    o << "CL_PLATFORM_VERSION\t= "     << p.getInfo<CL_PLATFORM_VERSION>()
+      << std::endl
+      << "CL_PLATFORM_NAME\t= "        << p.getInfo<CL_PLATFORM_NAME>()
+      << std::endl
+      << "CL_PLATFORM_VENDOR\t= "      << p.getInfo<CL_PLATFORM_VENDOR>()
+      << std::endl
+      << "CL_PLATFORM_EXTENSIONS\t= "  << p.getInfo<CL_PLATFORM_EXTENSIONS>();
+    return o;
+}
+
 class Cell
 {
 public:
