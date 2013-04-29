@@ -149,8 +149,9 @@ public:
 private:
     CoordBox<DIM> box;
     GridType hostGrid;
-    // fixme deviceGridOld;
-    // fixme deviceGridNew;
+
+    cl::Buffer deviceGridOld;
+    cl::Buffer deviceGridNew;
 };
 
 int main(int argc, char **argv)
