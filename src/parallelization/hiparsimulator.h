@@ -13,7 +13,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
-        
+
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
@@ -21,7 +21,7 @@ enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
 typedef SuperMap<long, EventSet> EventMap;
 
-inline std::string eventToStr(const EventPoint& event) 
+inline std::string eventToStr(const EventPoint& event)
 {
     switch (event) {
     case LOAD_BALANCING:
@@ -47,20 +47,19 @@ public:
     static const int DIM = Topology::DIM;
 
     inline HiParSimulator(
-        Initializer<CELL_TYPE> *_initializer,
-        LoadBalancer *_balancer = 0,
-        const unsigned& _loadBalancingPeriod = 1,
-        const unsigned &_ghostZoneWidth = 1,
-        const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *_communicator = &MPI::COMM_WORLD) : 
-        ParentType(_initializer),
-        balancer(_balancer),
-        loadBalancingPeriod(_loadBalancingPeriod * CELL_TYPE::nanoSteps()),
-        ghostZoneWidth(_ghostZoneWidth),
-        communicator(_communicator),
-        cellMPIDatatype(_cellMPIDatatype)
-    {
-    }   
+        Initializer<CELL_TYPE> *initializer,
+        LoadBalancer *balancer = 0,
+        const unsigned& loadBalancingPeriod = 1,
+        const unsigned &ghostZoneWidth = 1,
+        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
+        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        ParentType(initializer),
+        balancer(balancer),
+        loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
+        ghostZoneWidth(ghostZoneWidth),
+        communicator(communicator),
+        cellMPIDatatype(cellMPIDatatype)
+    {}
 
     inline void run()
     {
@@ -76,7 +75,7 @@ public:
         nanoStep(CELL_TYPE::nanoSteps());
     }
 
-    virtual unsigned getStep() const 
+    virtual unsigned getStep() const
     {
         if (updateGroup) {
             return updateGroup->currentStep().first;
@@ -117,7 +116,7 @@ public:
                 false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
-                this, 
+                this,
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
@@ -147,7 +146,7 @@ private:
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
 
     SuperVector<long> initialWeights(const long& items, const long& size) const
-    {    
+    {
         SuperVector<long> ret(size);
         long lastPos = 0;
 
@@ -184,7 +183,7 @@ private:
     inline void initSimulation()
     {
         if (updateGroup) {
-            return; 
+            return;
         }
 
         CoordBox<DIM> box = initializer->gridBox();
@@ -192,10 +191,10 @@ private:
         updateGroup.reset(
             new UpdateGroupType(
                 new PARTITION(
-                    box.origin, 
-                    box.dimensions, 
+                    box.origin,
+                    box.dimensions,
                     0,
-                    initialWeights(box.dimensions.prod(), communicator->Get_size())), 
+                    initialWeights(box.dimensions.prod(), communicator->Get_size())),
                 box,
                 ghostZoneWidth,
                 initializer,

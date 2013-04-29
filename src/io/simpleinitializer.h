@@ -12,9 +12,10 @@ public:
     const static int DIM = CELL_TYPE::Topology::DIM;
 
     SimpleInitializer(
-        const Coord<DIM>& _dimensions,
-        const unsigned& _steps = 300) :
-        dimensions(_dimensions), steps(_steps)
+        const Coord<DIM>& dimensions,
+        const unsigned steps = 300) :
+        dimensions(dimensions),
+        steps(steps)
     {}
 
     Coord<DIM> gridDimensions() const

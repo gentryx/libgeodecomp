@@ -41,23 +41,14 @@
 
 namespace LibGeoDecomp {
 
-/*
- *
- */
 class RectilinearMesh;
 
-/**
- *
- */
-template < typename CELL_TYPE >
+template<typename CELL_TYPE>
 void ControlCommandCallback(const char *cmd,
                             const char *args, void *cbdata);
 
-/**
- *
- */
-template <typename CELL_TYPE , typename MESH_TYPE = RectilinearMesh >
-class VisitWriter:public Writer < CELL_TYPE > 
+template<typename CELL_TYPE , typename MESH_TYPE=RectilinearMesh>
+class VisitWriter : public Writer<CELL_TYPE>
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;

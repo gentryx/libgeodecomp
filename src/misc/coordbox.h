@@ -12,17 +12,17 @@ template<int DIM>
 class CoordBoxSequence;
 
 template<int DIM>
-class CoordBox 
+class CoordBox
 {
     friend class Typemaps;
 
-public:    
+public:
     class Iterator;
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
-    
-    explicit CoordBox(const Coord<DIM>& origin_ = Coord<DIM>(), 
+
+    explicit CoordBox(const Coord<DIM>& origin_ = Coord<DIM>(),
                       const Coord<DIM>& dimensions_ = Coord<DIM>()) :
         origin(origin_),
         dimensions(dimensions_)

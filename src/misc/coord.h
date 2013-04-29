@@ -31,25 +31,25 @@ public:
         return Coord<1>(nx);
     }
 
-    inline explicit Coord(const int& nx=0) 
+    inline explicit Coord(const int& nx=0)
     {
         c[0] = nx;
     }
 
     template<int X, int Y, int Z>
-    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/) 
+    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
     }
 
-    int& x() 
-    { 
-        return c[0]; 
+    int& x()
+    {
+        return c[0];
     }
 
     const int& x() const
-    { 
-        return c[0]; 
+    {
+        return c[0];
     }
 
     inline int& operator[](const int& i)
@@ -127,12 +127,12 @@ public:
         return x();
     }
 
-    inline Coord<1> max(const Coord<1>& other) const 
+    inline Coord<1> max(const Coord<1>& other) const
     {
         return Coord<1>(std::max(x(), other.x()));
     }
 
-    inline Coord<1> min(const Coord<1>& other) const 
+    inline Coord<1> min(const Coord<1>& other) const
     {
         return Coord<1>(std::min(x(), other.x()));
     }
@@ -164,37 +164,37 @@ public:
         return Coord<2>(nx, nx);
     }
 
-    inline explicit Coord(const int& nx=0, const int& ny=0) 
+    inline explicit Coord(const int& nx=0, const int& ny=0)
     {
         c[0] = nx;
         c[1] = ny;
     }
 
     template<int X, int Y, int Z>
-    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/) 
+    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
         c[1] = Y;
     }
 
-    int& x() 
-    { 
-        return c[0]; 
+    int& x()
+    {
+        return c[0];
     }
 
     const int& x() const
-    { 
-        return c[0]; 
+    {
+        return c[0];
     }
 
-    int& y() 
-    { 
-        return c[1]; 
+    int& y()
+    {
+        return c[1];
     }
 
     const int& y() const
-    { 
-        return c[1]; 
+    {
+        return c[1];
     }
 
     inline int& operator[](const int& i)
@@ -221,7 +221,7 @@ public:
     {
         return (x() < comp.x()) || ((x() == comp.x()) && (y() < comp.y()));
     }
-  
+
     inline Coord operator+(const Coord& addend) const
     {
         return Coord(x() + addend.x(), y() + addend.y());
@@ -274,14 +274,14 @@ public:
         return x() + y();
     }
 
-    inline Coord<2> max(const Coord<2>& other) const 
+    inline Coord<2> max(const Coord<2>& other) const
     {
         return Coord<2>(
             std::max(x(), other.x()),
             std::max(y(), other.y()));
     }
 
-    inline Coord<2> min(const Coord<2>& other) const 
+    inline Coord<2> min(const Coord<2>& other) const
     {
         return Coord<2>(
             std::min(x(), other.x()),
@@ -315,7 +315,7 @@ public:
         return Coord<3>(nx, nx, nx);
     }
 
-    inline explicit Coord(const int& nx=0, const int& ny=0, const int& nz=0) 
+    inline explicit Coord(const int& nx=0, const int& ny=0, const int& nz=0)
     {
         c[0] = nx;
         c[1] = ny;
@@ -323,41 +323,41 @@ public:
     }
 
     template<int X, int Y, int Z>
-    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/) 
+    inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
         c[1] = Y;
         c[2] = Z;
     }
 
-    int& x() 
-    { 
-        return c[0]; 
+    int& x()
+    {
+        return c[0];
     }
 
     const int& x() const
-    { 
-        return c[0]; 
+    {
+        return c[0];
     }
 
-    int& y() 
-    { 
-        return c[1]; 
+    int& y()
+    {
+        return c[1];
     }
 
     const int& y() const
-    { 
-        return c[1]; 
+    {
+        return c[1];
     }
 
-    int& z() 
-    { 
-        return c[2]; 
+    int& z()
+    {
+        return c[2];
     }
 
     const int& z() const
-    { 
-        return c[2]; 
+    {
+        return c[2];
     }
 
     inline int& operator[](const int& i)
@@ -382,12 +382,12 @@ public:
 
     inline bool operator<(const Coord& comp) const
     {
-        return 
-            (x() < comp.x()) || 
-            ((x() == comp.x()) && (y() < comp.y())) || 
+        return
+            (x() < comp.x()) ||
+            ((x() == comp.x()) && (y() < comp.y())) ||
             ((x() == comp.x()) && (y() == comp.y()) && (z() < comp.z()));
     }
-  
+
     inline Coord operator+(const Coord& addend) const
     {
         return Coord(x() + addend.x(), y() + addend.y(), z() + addend.z());
@@ -442,7 +442,7 @@ public:
         return x() + y() + z();
     }
 
-    inline Coord<3> max(const Coord<3>& other) const 
+    inline Coord<3> max(const Coord<3>& other) const
     {
         return Coord<3>(
             std::max(x(), other.x()),
@@ -450,7 +450,7 @@ public:
             std::max(z(), other.z()));
     }
 
-    inline Coord<3> min(const Coord<3>& other) const 
+    inline Coord<3> min(const Coord<3>& other) const
     {
         return Coord<3>(
             std::min(x(), other.x()),
@@ -546,9 +546,9 @@ class CoordToIndex<3>
 public:
     long long operator()(const Coord<3>& c, const Coord<3>& dim)
     {
-        return 
-            ((long long)c.z()) * dim.x() * dim.y() + 
-            ((long long)c.y()) * dim.x() + 
+        return
+            ((long long)c.z()) * dim.x() * dim.y() +
+            ((long long)c.y()) * dim.x() +
             c.x();
     }
 };
