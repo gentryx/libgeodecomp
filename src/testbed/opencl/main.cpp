@@ -133,6 +133,21 @@ class MyFutureOpenCLStepper
     std::cerr << "prod: " << hostGrid.getDimensions().prod() << std::endl;
     std::cerr << "sizeof ( CELL ): " << sizeof ( CELL ) << std::endl;
 
+    // create device buffer
+    deviceGridNew = cl::Buffer
+      ( context
+      , CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR
+      , hostGrid.getDimensions().prod() * sizeof ( CELL )
+      , hostGrid.baseAddress()
+      );
+
+    deviceGridOld = cl::Buffer
+      ( context
+      , CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR
+      , hostGrid.getDimensions().prod() * sizeof ( CELL )
+      , hostGrid.baseAddress()
+      );
+
     // todo: specify OpenCL platform, device via constructor
   }
 
