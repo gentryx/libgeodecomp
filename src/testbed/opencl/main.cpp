@@ -120,6 +120,10 @@ class MyFutureOpenCLStepper
     for ( auto & device : devices )
       std::cerr << device;
 
+    context = cl::Context ( { devices[0] } );
+
+    cmdq = cl::CommandQueue ( context, devices[0] );
+
     // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
 
 
@@ -153,6 +157,8 @@ class MyFutureOpenCLStepper
     CoordBox<DIM> box;
     GridType hostGrid;
 
+    cl::Context context;
+    cl::CommandQueue cmdq;
     cl::Buffer deviceGridOld;
     cl::Buffer deviceGridNew;
 };
