@@ -26,18 +26,18 @@ public:
 
     ParallelMemoryWriter(
         int period = 1,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) : 
-        ParallelWriter<CELL_TYPE>("foobar", period),
+        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        ParallelWriter<CELL_TYPE>("", period),
         mpiLayer(communicator, MPILayer::PARALLEL_MEMORY_WRITER)
     {}
 
     virtual void stepFinished(
-        const WriterGridType& grid, 
-        const Region<DIM>& validRegion, 
+        const WriterGridType& grid,
+        const Region<DIM>& validRegion,
         const Coord<DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
-        bool lastCall) 
+        unsigned step,
+        WriterEvent event,
+        bool lastCall)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
@@ -61,27 +61,27 @@ public:
                     if (sender == mpiLayer.rank()) {
                         mpiLayer.sendRegion(validRegion, receiver);
                         mpiLayer.sendUnregisteredRegion(
-                            &grid, 
-                            validRegion, 
-                            receiver, 
-                            MPILayer::PARALLEL_MEMORY_WRITER, 
+                            &grid,
+                            validRegion,
+                            receiver,
+                            MPILayer::PARALLEL_MEMORY_WRITER,
                             Typemaps::lookup<CELL_TYPE>());
                     }
                     if (receiver == mpiLayer.rank()) {
                         Region<DIM> recvRegion;
                         mpiLayer.recvRegion(&recvRegion, sender);
                         mpiLayer.recvUnregisteredRegion(
-                            &grids[step], 
-                            recvRegion, 
-                            sender, 
-                            MPILayer::PARALLEL_MEMORY_WRITER, 
-                            Typemaps::lookup<CELL_TYPE>());                    
+                            &grids[step],
+                            recvRegion,
+                            sender,
+                            MPILayer::PARALLEL_MEMORY_WRITER,
+                            Typemaps::lookup<CELL_TYPE>());
                     }
                 }
             }
         }
     }
-    
+
     GridType& getGrid(int i)
     {
         return grids[i];

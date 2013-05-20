@@ -57,17 +57,15 @@ public:
     static const int DIMENSIONS = Topology::DIM;
 
     using Writer<CELL_TYPE>::period;
-    using Writer<CELL_TYPE>::prefix;
 
     // fixme: rename to VisItWriter
     // fixme: needs test
     VisitWriter(
-        const std::string & _prefix,
         DataAccessor<CELL_TYPE> **dataAccessors,
         int numVars,
-        const unsigned& period = 1,
-        const int & runMode = 0) :
-        Writer < CELL_TYPE > (prefix, period),
+        const unsigned& period=1,
+        const int& runMode=0) :
+        Writer<CELL_TYPE>("", period),
         runMode(runMode),
         numVars(numVars),
         dataAccessors(dataAccessors)

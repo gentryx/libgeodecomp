@@ -11,7 +11,7 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
 class ParallelMPIIOWriter : public ParallelWriter<CELL_TYPE>
-{    
+{
 public:
     friend class ParallelMPIIOWriterTest;
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
@@ -19,8 +19,8 @@ public:
     static const int DIM = Topology::DIM;
 
     ParallelMPIIOWriter(
-        const std::string& prefix, 
-        const unsigned period, 
+        const std::string& prefix,
+        const unsigned period,
         const unsigned maxSteps,
         const MPI::Intracomm& communicator = MPI::COMM_WORLD,
         MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
@@ -31,19 +31,19 @@ public:
     {}
 
     virtual void stepFinished(
-        const GridType& grid, 
-        const Region<Topology::DIM>& validRegion, 
+        const GridType& grid,
+        const Region<Topology::DIM>& validRegion,
         const Coord<Topology::DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
-        bool lastCall) 
+        unsigned step,
+        WriterEvent event,
+        bool lastCall)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
         }
 
         MPIIO<CELL_TYPE>::writeRegion(
-            grid, 
+            grid,
             globalDimensions,
             step,
             maxSteps,
@@ -61,7 +61,7 @@ private:
     MPI::Intracomm comm;
     MPI::Datatype datatype;
 
-    std::string filename(const unsigned& step) const 
+    std::string filename(const unsigned& step) const
     {
         std::ostringstream buf;
         buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";
