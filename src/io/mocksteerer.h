@@ -13,22 +13,22 @@ public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
 
-    MockSteerer(const unsigned& _period, std::stringstream *eventsBuffer)  :
-        Steerer<CELL_TYPE>(_period),
+    MockSteerer(const unsigned& period, std::stringstream *eventsBuffer)  :
+        Steerer<CELL_TYPE>(period),
         eventsBuf(eventsBuffer)
-    { 
-        (*eventsBuf) << "created, period = " << _period << "\n";
+    {
+        (*eventsBuf) << "created, period = " << period << "\n";
     }
 
-    virtual ~MockSteerer() 
-    { 
-        (*eventsBuf) << "deleted\n"; 
+    virtual ~MockSteerer()
+    {
+        (*eventsBuf) << "deleted\n";
     }
 
     virtual void nextStep(
-        GridType *grid, 
-        const Region<Topology::DIM>& validRegion, 
-        const unsigned& step) 
+        GridType *grid,
+        const Region<Topology::DIM>& validRegion,
+        unsigned step)
     {
         (*eventsBuf) << "nextStep(" << step << ")\n";
     }

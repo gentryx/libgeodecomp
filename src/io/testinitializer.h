@@ -61,25 +61,25 @@ public:
         ret->atEdge().isEdgeCell = true;
     }
 
-    Coord<DIM> gridDimensions() const 
-    { 
-        return dimensions; 
+    Coord<DIM> gridDimensions() const
+    {
+        return dimensions;
     }
 
-    unsigned maxSteps() const 
-    { 
-        return maximumSteps; 
+    unsigned maxSteps() const
+    {
+        return maximumSteps;
     }
 
-    unsigned startStep() const 
-    { 
-        return step1; 
+    unsigned startStep() const
+    {
+        return step1;
     }
 
-    std::string dump() 
-    { 
-        return "foo"; 
-    }    
+    std::string dump()
+    {
+        return "foo";
+    }
 
 private:
     Coord<DIM> dimensions;
