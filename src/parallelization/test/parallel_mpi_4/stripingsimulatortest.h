@@ -116,15 +116,17 @@ public:
         Region<2> regions[4];
         layer.sendRegion(testSim->region, 0);
         if (rank == 0) {
-            for (int i = 0; i < 4; ++i) 
+            for (int i = 0; i < 4; ++i) {
                 layer.recvRegion(&regions[i], i);
+            }
         }
         layer.waitAll();
 
         if (rank == 0) {
             Region<2> whole;
-            for (int i = 0; i < 4; ++i) 
+            for (int i = 0; i < 4; ++i) {
                 whole += regions[i];
+            }
 
             Region<2> expected;
             CoordBox<2> box = init->gridBox();
@@ -139,15 +141,15 @@ public:
 
     void testStep()
     {
-        TS_ASSERT_EQUALS(referenceSim->getStep(), 
+        TS_ASSERT_EQUALS(referenceSim->getStep(),
                          testSim->getStep());
-        
+
         int cycle = firstCycle;
 
         TS_ASSERT_TEST_GRID_REGION(
-            GridBaseType, 
-            *testSim->curStripe, 
-            testSim->region, 
+            GridBaseType,
+            *testSim->curStripe,
+            testSim->region,
             cycle);
 
         for (int i = 0; i < 40; i++) {
@@ -155,13 +157,13 @@ public:
             testSim->step();
             cycle += TestCell<2>::nanoSteps();
 
-            TS_ASSERT_EQUALS(referenceSim->getStep(), 
+            TS_ASSERT_EQUALS(referenceSim->getStep(),
                              testSim->getStep());
 
             TS_ASSERT_TEST_GRID_REGION(
-                GridBaseType, 
-                *testSim->curStripe, 
-                testSim->region, 
+                GridBaseType,
+                *testSim->curStripe,
+                testSim->region,
                 cycle);
         }
     }
@@ -175,12 +177,12 @@ public:
 
         int cycle = maxSteps * TestCell<2>::nanoSteps();
         TS_ASSERT_TEST_GRID_REGION(
-            GridBaseType, 
-            *testSim->curStripe, 
-            testSim->region, 
+            GridBaseType,
+            *testSim->curStripe,
+            testSim->region,
             cycle);
     }
-    
+
     void checkRunAndWriterInteraction(int everyN)
     {
         MockWriter *expectedCalls = new MockWriter();
@@ -192,7 +194,7 @@ public:
         testSim->run();
         referenceSim->run();
 
-        TS_ASSERT_EQUALS(expectedCalls->events(), actualCalls->events()); 
+        TS_ASSERT_EQUALS(expectedCalls->events(), actualCalls->events());
     }
 
     void testEveryN1()
@@ -216,7 +218,7 @@ public:
         TS_ASSERT_EQUALS(testSim->ghostHeightLower, (unsigned)0);
         TS_ASSERT_EQUALS(testSim->ghostHeightUpper, (unsigned)0);
         if (rank == 0) {
-            TS_ASSERT_EQUALS(testSim->curStripe->getDimensions(), 
+            TS_ASSERT_EQUALS(testSim->curStripe->getDimensions(),
                              init->gridDimensions());
             Grid<TestCell<2> > expected(init->gridBox().dimensions);
             init->grid(&expected);
@@ -258,9 +260,9 @@ public:
         int cycle = maxSteps * TestCell<2>::nanoSteps();
 
         TS_ASSERT_TEST_GRID_REGION(
-            GridBaseType, 
-            *testSim->curStripe, 
-            testSim->region, 
+            GridBaseType,
+            *testSim->curStripe,
+            testSim->region,
             cycle);
         TS_ASSERT_EQUALS(testSim->partitions, weights2);
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
@@ -284,7 +286,7 @@ public:
         NoOpBalancer::WeightVec weights2 = toWeirdoPartitions(weights1);
 
         testSim->redistributeGrid(weights1, weights2);
-        
+
         TS_ASSERT_EQUALS(testSim->partitions, weights2);
         switch (rank) {
         case 0:
@@ -310,17 +312,17 @@ public:
             TS_ASSERT_EQUALS((int)testSim->ghostHeightLower, 0);
             TS_ASSERT_EQUALS((int)testSim->curStripe->getDimensions().y(), 3);
             TS_ASSERT_EQUALS((int)testSim->newStripe->getDimensions().y(), 3);
-            break;           
+            break;
         }
     }
 
     void checkLoadBalancingRealistically(unsigned balanceEveryN)
-    {        
+    {
         LoadBalancer *balancer = rank? 0 : new RandomBalancer;
         StripingSimulator<TestCell<2> > localTestSim(
             new TestInitializer<TestCell<2> >(
-                Coord<2>(width, height), maxSteps, firstStep), 
-            balancer, 
+                Coord<2>(width, height), maxSteps, firstStep),
+            balancer,
             balanceEveryN);
 
         MockWriter *expectedCalls = new MockWriter();
@@ -331,7 +333,7 @@ public:
         localTestSim.run();
         referenceSim->run();
 
-        TS_ASSERT_EQUALS(expectedCalls->events(), actualCalls->events()); 
+        TS_ASSERT_EQUALS(expectedCalls->events(), actualCalls->events());
     }
 
     void testBalanceLoad1()
@@ -360,7 +362,7 @@ public:
         unsigned balanceEveryN = 2;
         StripingSimulator<TestCell<2> > testSim(
             new TestInitializer<TestCell<2> >(),
-            balancer, 
+            balancer,
             balanceEveryN);
         testSim.run();
     }
@@ -379,10 +381,30 @@ public:
         }
     }
 
+    void testWriterInvocation()
+    {
+        unsigned period = 4;
+        SuperVector<unsigned> expectedSteps;
+        SuperVector<WriterEvent> expectedEvents;
+        expectedSteps << 13
+                      << 16
+                      << 20
+                      << 21;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+
+        sim->addWriter(new TestWriter(period, expectedSteps, expectedEvents));
+        sim->run();
+    }
+
+
+
     void test3Dsimple()
     {
         StripingSimulator<TestCell<3> > s(
-            new TestInitializer<TestCell<3> >(), 
+            new TestInitializer<TestCell<3> >(),
             rank? 0 : new NoOpBalancer());
 
         s.run();
@@ -391,7 +413,7 @@ public:
     void test3Dadvanced()
     {
         StripingSimulator<TestCell<3> > s(
-            new TestInitializer<TestCell<3> >(), 
+            new TestInitializer<TestCell<3> >(),
             rank? 0 : new RandomBalancer());
 
         s.run();
@@ -405,7 +427,7 @@ public:
         int cycle = 50 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(
-            GridBaseType, 
+            GridBaseType,
             *testSim->curStripe,
             testSim->region,
             cycle);
@@ -414,7 +436,7 @@ public:
 private:
 
     // just a boring partition: everything on _one_ node
-    NoOpBalancer::WeightVec toMonoPartitions(NoOpBalancer::WeightVec weights1) 
+    NoOpBalancer::WeightVec toMonoPartitions(NoOpBalancer::WeightVec weights1)
     {
         NoOpBalancer::WeightVec weights2(5);
         weights2[0] = 0;

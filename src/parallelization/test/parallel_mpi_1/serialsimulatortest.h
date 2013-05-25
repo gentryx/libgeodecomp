@@ -67,6 +67,7 @@ public:
             init->maxSteps() * TestCell<2>::nanoSteps());
     }
 
+    // fixme: use unified test suite like this test for all simulators?
     void testWriterInvocation()
     {
         unsigned period = 4;
