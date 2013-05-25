@@ -54,7 +54,11 @@ public:
         TS_ASSERT_EQUALS(expectedStep, step);
         TS_ASSERT_EQUALS(expectedEvent, event);
 
+        // ensure setRegion() has actually been called
+        TS_ASSERT(!region.empty());
         // ensure validRegion is a subset of what was specified via setRegion()
+        if (!(validRegion - region).empty())
+            std::cout << "deltaRegion: " << (validRegion - region) << "\n";
         TS_ASSERT((validRegion - region).empty());
         // check that all parts of the specified region were actually consumed
         if (lastCall) {

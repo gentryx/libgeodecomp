@@ -10,11 +10,11 @@
 
 #include <libgeodecomp/misc/random.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class ParallelMPIIOWriterTest : public CxxTest::TestSuite 
+class ParallelMPIIOWriterTest : public CxxTest::TestSuite
 {
 public:
 
@@ -32,14 +32,14 @@ public:
         }
     }
 
-    void testBasic() 
+    void testBasic()
     {
         TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
         StripingSimulator<TestCell<3> > simTest(init, balancer);
         ParallelMPIIOWriter<TestCell<3> > *writer = new ParallelMPIIOWriter<TestCell<3> >(
-            "testmpiiowriter",   
+            "testmpiiowriter",
             4,
             init->maxSteps());
         simTest.addWriter(writer);

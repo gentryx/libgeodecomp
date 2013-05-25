@@ -7,28 +7,28 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class CollectingWriterTest : public CxxTest::TestSuite 
+class CollectingWriterTest : public CxxTest::TestSuite
 {
 public:
     void setUp()
-    {  
+    {
         TestInitializer<TestCell<3> > *init = getInit();
         Coord<3> dimensions(init->gridDimensions());
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
         sim.reset(new StripingSimulator<TestCell<3> >(init, balancer));
-        
+
         if (MPILayer().rank() == 0) {
             writer = new MemoryWriter<TestCell<3> >(1);
         } else {
             writer = 0;
         }
 
-        sim->addWriter(new CollectingWriter<TestCell<3> >(writer)); 
+        sim->addWriter(new CollectingWriter<TestCell<3> >(writer));
     }
 
     void tearDown()
@@ -36,7 +36,7 @@ public:
         sim.reset();
     }
 
-    void testBasic() 
+    void testBasic()
     {
         sim->run();
 

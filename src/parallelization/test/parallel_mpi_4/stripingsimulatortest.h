@@ -51,7 +51,7 @@ private:
     MPILayer layer;
 
 public:
-    void setUp() 
+    void setUp()
     {
         rank = layer.rank();
         size = layer.size();
@@ -387,10 +387,10 @@ public:
         // unsigned period = 4;
         // SuperVector<unsigned> expectedSteps;
         // SuperVector<WriterEvent> expectedEvents;
-        // expectedSteps << 13
-        //               << 16
-        //               << 20
-        //               << 21;
+        // expectedSteps << 20
+        //               << 24
+        //               << 28
+        //               << 32;
         // expectedEvents << WRITER_INITIALIZED
         //                << WRITER_STEP_FINISHED
         //                << WRITER_STEP_FINISHED
