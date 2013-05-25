@@ -376,7 +376,7 @@ public:
                 std::invalid_argument);
         } else {
             TS_ASSERT_THROWS(
-                StripingSimulator<TestCell<2> > s(new TestInitializer<TestCell<2> >(), 
+                StripingSimulator<TestCell<2> > s(new TestInitializer<TestCell<2> >(),
                                                   new NoOpBalancer),
                 std::invalid_argument);
         }
@@ -384,20 +384,30 @@ public:
 
     void testParallelWriterInvocation()
     {
-        // unsigned period = 4;
-        // SuperVector<unsigned> expectedSteps;
-        // SuperVector<WriterEvent> expectedEvents;
-        // expectedSteps << 20
-        //               << 24
-        //               << 28
-        //               << 32;
-        // expectedEvents << WRITER_INITIALIZED
-        //                << WRITER_STEP_FINISHED
-        //                << WRITER_STEP_FINISHED
-        //                << WRITER_ALL_DONE;
+        unsigned period = 4;
+        SuperVector<unsigned> expectedSteps;
+        SuperVector<WriterEvent> expectedEvents;
+        expectedSteps << 20
+                      << 24
+                      << 28
+                      << 32
+                      << 36
+                      << 40
+                      << 44
+                      << 48
+                      << 50;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
 
-        // testSim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
-        // testSim->run();
+        testSim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
+        testSim->run();
     }
 
     void test3Dsimple()
