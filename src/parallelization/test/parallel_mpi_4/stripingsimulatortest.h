@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
@@ -10,7 +11,7 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -18,7 +19,7 @@ class CheckBalancer : public LoadBalancer
 {
 public:
     virtual NoOpBalancer::WeightVec balance(
-        const NoOpBalancer::WeightVec& weights, 
+        const NoOpBalancer::WeightVec& weights,
         const NoOpBalancer::LoadVec& relativeLoads)
     {
         for (unsigned i = 0; i < relativeLoads.size(); i++) {
@@ -381,25 +382,23 @@ public:
         }
     }
 
-    void testWriterInvocation()
+    void testParallelWriterInvocation()
     {
-        unsigned period = 4;
-        SuperVector<unsigned> expectedSteps;
-        SuperVector<WriterEvent> expectedEvents;
-        expectedSteps << 13
-                      << 16
-                      << 20
-                      << 21;
-        expectedEvents << WRITER_INITIALIZED
-                       << WRITER_STEP_FINISHED
-                       << WRITER_STEP_FINISHED
-                       << WRITER_ALL_DONE;
+        // unsigned period = 4;
+        // SuperVector<unsigned> expectedSteps;
+        // SuperVector<WriterEvent> expectedEvents;
+        // expectedSteps << 13
+        //               << 16
+        //               << 20
+        //               << 21;
+        // expectedEvents << WRITER_INITIALIZED
+        //                << WRITER_STEP_FINISHED
+        //                << WRITER_STEP_FINISHED
+        //                << WRITER_ALL_DONE;
 
-        sim->addWriter(new TestWriter(period, expectedSteps, expectedEvents));
-        sim->run();
+        // testSim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
+        // testSim->run();
     }
-
-
 
     void test3Dsimple()
     {
