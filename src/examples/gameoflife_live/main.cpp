@@ -183,7 +183,6 @@ void runSimulation()
 
     sim.addWriter(
         new VisitWriter<ConwayCell>(
-            "./gameoflife_live",
             accessors,
             2,
             outputFrequency,
@@ -194,9 +193,8 @@ void runSimulation()
      * extend default remote steerer commands part 2
      * ---------------------------------------------
      */
-    CommandServer::functionMap* fmap = RemoteSteerer<ConwayCell>
-            ::getDefaultMap();
-    (*fmap)["size"] = sizeFunction;
+    CommandServer::FunctionMap functionMap = RemoteSteerer<ConwayCell>::getDefaultMap();
+    functionMap["size"] = sizeFunction;
 
     MySteererData *myData = new MySteererData(vars, 2);
 
@@ -207,7 +205,7 @@ void runSimulation()
                           DefaultSteererControl<
                               ConwayCell, MySteererData, MyControl<
                                   ConwayCell, SteererData<ConwayCell> > > >(
-                                      1, 1234, vars, 2, fmap, myData);
+                                      1, 1234, vars, 2, functionMap, myData);
     sim.addSteerer(steerer);
 
     sim.run();

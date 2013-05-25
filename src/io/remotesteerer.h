@@ -13,42 +13,40 @@ namespace LibGeoDecomp {
 
 using namespace RemoteSteererHelper;
 
-/*
- *
- */
 template<typename CELL_TYPE, typename DATATYPE = SteererData<CELL_TYPE>,
          typename CONTROL = DefaultSteererControl<CELL_TYPE> >
-class RemoteSteerer : public Steerer<CELL_TYPE> {
-  public:
-    /**
-     *
-     */
+class RemoteSteerer : public Steerer<CELL_TYPE>
+{
+public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
 
     /**
      * if you use this constructor, you should also use your own SteererControl
      */
-    RemoteSteerer(const unsigned& _period, int _port,
-                  CommandServer::functionMap* _commandMap,
-                  void* _userData = NULL,
-                  const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
-            Steerer<CELL_TYPE>(_period),
-            userData(_userData),
-            comm(_comm) {
+    RemoteSteerer(
+        const unsigned& period,
+        int port,
+        CommandServer::FunctionMap commandMap,
+        void *userData = 0,
+        const MPI::Intracomm& comm = MPI::COMM_WORLD) :
+        Steerer<CELL_TYPE>(period),
+        userData(userData),
+        comm(comm)
+    {
         if (comm.Get_rank() == 0) {
-            server = new CommandServer::Server(_port, _commandMap, _userData);
+            server = new CommandServer::Server(port, commandMap, userData);
             server->startServer();
         }
     }
 
     /**
-     * constructer for a steerer with default comammands
+     * constructor for a steerer with default comammands
      */
     RemoteSteerer(const unsigned& _period, int _port,
                   DataAccessor<CELL_TYPE>** _dataAccessors,
                   int _numVars,
-                  CommandServer::functionMap* _commandMap = NULL,
+                  CommandServer::FunctionMap _commandMap = getDefaultMap(),
                   void* _userData = NULL,
                   const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
             Steerer<CELL_TYPE>(_period),
@@ -62,19 +60,12 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
             defaultData = new SteererData<CELL_TYPE>(_dataAccessors, _numVars);
             userData = reinterpret_cast<void*>(defaultData);
         }
-        if (_commandMap == NULL) {
-            defaultMap = getDefaultMap();
-            _commandMap = defaultMap;
-        }
         if (comm.Get_rank() == 0) {
             server = new CommandServer::Server(_port, _commandMap, userData);
             server->startServer();
         }
     }
 
-    /**
-     *
-     */
     virtual ~RemoteSteerer()
     {
         delete server;
@@ -86,28 +77,22 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
         }
     }
 
-    /**
-     *
-     */
-    static CommandServer::functionMap* getDefaultMap() 
+    static CommandServer::FunctionMap getDefaultMap()
     {
-        CommandServer::functionMap* defaultMap = new CommandServer::functionMap();
-        (*defaultMap)["help"] = helpFunction;
-        (*defaultMap)["get"] = getFunction;
-        (*defaultMap)["set"] = setFunction;
-        (*defaultMap)["finish"] = finishFunction;
+        CommandServer::FunctionMap defaultMap;
+        defaultMap["help"] = helpFunction;
+        defaultMap["get"] = getFunction;
+        defaultMap["set"] = setFunction;
+        defaultMap["finish"] = finishFunction;
 
         return defaultMap;
     }
 
-    /**
-     *
-     */
     virtual void nextStep(
             GridType *grid,
             const Region<Topology::DIM>& validRegion,
-            const unsigned& step) {
-        RemoteSteererHelper::MessageBuffer* msgBuffer;
+            unsigned step) {
+        RemoteSteererHelper::MessageBuffer *msgBuffer;
         if (comm.Get_rank() == 0) {
             msgBuffer = new RemoteSteererHelper::MessageBuffer(comm, server->session);
         }
@@ -121,14 +106,11 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
         delete msgBuffer;
     }
 
-    /**
-     *
-     */
     static void helpFunction(std::vector<std::string> stringVec,
                             CommandServer::Session *session,
                             void *data) {
-        CommandServer::functionMap commandMap = session->getMap();
-        for (CommandServer::functionMap::iterator it = commandMap.begin();
+        CommandServer::FunctionMap commandMap = session->getMap();
+        for (CommandServer::FunctionMap::iterator it = commandMap.begin();
              it != commandMap.end(); ++ it) {
             std::string command = (*it).first;
             if (command.compare("help") != 0) {
@@ -176,9 +158,6 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
         sdata->getZ.push_back(z);
     }
 
-    /**
-     *
-     */
     static void setFunction(std::vector<std::string> stringVec,
                             CommandServer::Session *session,
                             void *data) {
@@ -241,10 +220,10 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
      */
     DataAccessor<CELL_TYPE> **dataAccessors;
     int numVars;
-    CommandServer::Server* server;
+    CommandServer::Server *server;
     void *userData;
-    SteererData<CELL_TYPE>* defaultData;
-    CommandServer::functionMap* defaultMap;
+    SteererData<CELL_TYPE> *defaultData;
+    CommandServer::FunctionMap *defaultMap;
     MPI::Intracomm comm;
 };
 

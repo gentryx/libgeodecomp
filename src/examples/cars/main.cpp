@@ -111,8 +111,8 @@ private:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    CellInitializer() :
-        SimpleInitializer<Cell>(Coord<2>(90, 90), 10000)
+    CellInitializer(int maxSteps) :
+        SimpleInitializer<Cell>(Coord<2>(90, 90), maxSteps)
     {}
 
     virtual void grid(GridBase<Cell, 2> *ret)
@@ -269,26 +269,23 @@ void runSimulation()
     vars[0] = new borderDataAccessor();
     vars[1] = new directionDataAccessor();
     vars[2] = new rateDataAccessor();
+    int maxSteps = 1000000;
 
-    SerialSimulator<Cell> sim(new CellInitializer());
+    SerialSimulator<Cell> sim(new CellInitializer(maxSteps));
 
-    sim.addWriter(
-        new VisitWriter<Cell>("./cars", vars, 3, 1, VISIT_SIMMODE_STOPPED));
+    sim.addWriter(new VisitWriter<Cell>(vars, 3, 1, VISIT_SIMMODE_STOPPED));
 
-    sim.addWriter(
-        new TracingWriter<Cell>(
-            1,
-            10000));
+    sim.addWriter(new TracingWriter<Cell>(1, maxSteps));
 
     MySteererData *myData = new MySteererData(vars, 3);
 
-    CommandServer::functionMap* fmap = RemoteSteerer<Cell>::getDefaultMap();
-    (*fmap)["getstep"] = getStepFunction;
-    (*fmap)["setrate"] = setRateFunction;
+    CommandServer::FunctionMap functionMap = RemoteSteerer<Cell>::getDefaultMap();
+    functionMap["getstep"] = getStepFunction;
+    functionMap["setrate"] = setRateFunction;
 
     Steerer<Cell>* steerer = new RemoteSteerer <Cell, MySteererData,
         DefaultSteererControl<Cell, MySteererData, MyControl> >(
-        1, 1234, vars, 3, fmap, (void*)myData, MPI::COMM_WORLD);
+        1, 1234, vars, 3, functionMap, (void*)myData, MPI::COMM_WORLD);
     sim.addSteerer(steerer);
 
     sim.run();

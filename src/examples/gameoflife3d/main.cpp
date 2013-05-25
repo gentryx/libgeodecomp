@@ -109,7 +109,6 @@ void runSimulation()
 
     sim.addWriter(
         new VisitWriter<ConwayCell>(
-            "./gameoflife_live",
             accessors,
             1,
             outputFrequency,
