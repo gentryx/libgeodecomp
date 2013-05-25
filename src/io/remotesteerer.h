@@ -13,63 +13,35 @@ namespace LibGeoDecomp {
 
 using namespace RemoteSteererHelper;
 
-/*
- *
+/**
+ * The RemoteSteerer allows the user to control a parallel simulation
+ * from a single network connection.
  */
-template<typename CELL_TYPE, typename DATATYPE = SteererData<CELL_TYPE>,
-         typename CONTROL = DefaultSteererControl<CELL_TYPE> >
-class RemoteSteerer : public Steerer<CELL_TYPE> {
-  public:
-    /**
-     *
-     */
+template<typename CELL_TYPE,
+         typename DATATYPE=SteererData<CELL_TYPE>,
+         typename CONTROL=DefaultSteererControl<CELL_TYPE> >
+class RemoteSteerer : public Steerer<CELL_TYPE>
+{
+public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
 
-    /**
-     * if you use this constructor, you should also use your own SteererControl
-     */
-    RemoteSteerer(const unsigned& _period, int _port,
-                  CommandServer::functionMap* _commandMap,
-                  void* _userData = NULL,
-                  const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
-            Steerer<CELL_TYPE>(_period),
-            userData(_userData),
-            comm(_comm) {
-        if (comm.Get_rank() == 0) {
-            server = new CommandServer::Server(_port, _commandMap, _userData);
-            server->startServer();
+    RemoteSteerer(
+        const unsigned& period,
+        int port,
+        CommandServer::functionMap *commandMap = getDefaultMap(),
+        void *userData = 0,
+        const MPI::Intracomm& comm = MPI::COMM_WORLD) :
+        Steerer<CELL_TYPE>(period),
+        userData(userData),
+        comm(comm)
+    {
+        if (comm.Get_rank() != 0) {
+            return;
         }
-    }
 
-    /**
-     * constructer for a steerer with default comammands
-     */
-    RemoteSteerer(const unsigned& _period, int _port,
-                  DataAccessor<CELL_TYPE>** _dataAccessors,
-                  int _numVars,
-                  CommandServer::functionMap* _commandMap = NULL,
-                  void* _userData = NULL,
-                  const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
-            Steerer<CELL_TYPE>(_period),
-            dataAccessors(_dataAccessors),
-            numVars(_numVars),
-            userData(_userData),
-            defaultData(NULL),
-            defaultMap(NULL),
-            comm(_comm) {
-        if (_userData == NULL) {
-            defaultData = new SteererData<CELL_TYPE>(_dataAccessors, _numVars);
-            userData = reinterpret_cast<void*>(defaultData);
-        }
-        if (_commandMap == NULL) {
-            defaultMap = getDefaultMap();
-            _commandMap = defaultMap;
-        }
-        if (comm.Get_rank() == 0) {
-            server = new CommandServer::Server(_port, _commandMap, userData);
-            server->startServer();
-        }
+        server = new CommandServer::Server(port, commandMap, userData);
+        server->startServer();
     }
 
     /**
@@ -78,26 +50,6 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
     virtual ~RemoteSteerer()
     {
         delete server;
-        if (defaultData != NULL) {
-            delete defaultData;
-        }
-        if (defaultMap != NULL) {
-            delete defaultMap;
-        }
-    }
-
-    /**
-     *
-     */
-    static CommandServer::functionMap* getDefaultMap() 
-    {
-        CommandServer::functionMap* defaultMap = new CommandServer::functionMap();
-        (*defaultMap)["help"] = helpFunction;
-        (*defaultMap)["get"] = getFunction;
-        (*defaultMap)["set"] = setFunction;
-        (*defaultMap)["finish"] = finishFunction;
-
-        return defaultMap;
     }
 
     /**
@@ -236,16 +188,20 @@ class RemoteSteerer : public Steerer<CELL_TYPE> {
     }
 
   private:
-    /**
-     *
-     */
-    DataAccessor<CELL_TYPE> **dataAccessors;
-    int numVars;
-    CommandServer::Server* server;
+    CommandServer::Server *server;
     void *userData;
-    SteererData<CELL_TYPE>* defaultData;
-    CommandServer::functionMap* defaultMap;
     MPI::Intracomm comm;
+
+    static CommandServer::functionMap *getDefaultMap()
+    {
+        CommandServer::functionMap* defaultMap = new CommandServer::functionMap();
+        (*defaultMap)["help"] = helpFunction;
+        (*defaultMap)["get"] = getFunction;
+        (*defaultMap)["set"] = setFunction;
+        (*defaultMap)["finish"] = finishFunction;
+
+        return defaultMap;
+    }
 };
 
 }

@@ -52,7 +52,7 @@ public:
         initGrids();
     }
 
-    inline virtual void update(int nanoSteps) 
+    inline virtual void update(int nanoSteps)
     {
         for (int i = 0; i < nanoSteps; ++i) {
             update();
@@ -103,7 +103,7 @@ private:
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
-        
+
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();

@@ -53,7 +53,7 @@ public:
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
         }
-    
+
         writeHeader(step, globalDimensions);
         writeRegion(step, globalDimensions, grid, validRegion);
     }
@@ -111,9 +111,9 @@ private:
 
     template<typename GRID_TYPE>
     void writeRegion(
-        const unsigned& step, 
-        const Coord<DIM>& dimensions, 
-        const GRID_TYPE& grid, 
+        const unsigned& step,
+        const Coord<DIM>& dimensions,
+        const GRID_TYPE& grid,
         const Region<DIM>& region)
     {
         MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
@@ -129,13 +129,13 @@ private:
             // (especially negative coordnates may occurr).
             Coord<DIM> coord = Topology::normalize(i->origin, dimensions);
             int dataComponents = SELECTOR_TYPE::dataComponents();
-            MPI::Offset index = 
+            MPI::Offset index =
                 CoordToIndex<DIM>()(coord, dimensions) * varLength * dataComponents;
             file.Seek(index, MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
             int effectiveLength = length * dataComponents;
             Coord<DIM> walker = i->origin;
-            
+
             if (buffer.size() != effectiveLength) {
                 buffer = SuperVector<VariableType>(effectiveLength);
             }

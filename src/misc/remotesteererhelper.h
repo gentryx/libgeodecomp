@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
 #define LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
 
+#include <libgeodecomp/io/steererdata.h>
 #include <libgeodecomp/misc/commandserver.h>
 #include <libgeodecomp/misc/dataaccessor.h>
 
@@ -11,123 +12,11 @@ namespace LibGeoDecomp {
 
 namespace RemoteSteererHelper {
 
-// fixme: move this to remotesteerer
-// fixme: make this a class
-// fixme: use MPILayer
-/*
- *  exchange data between nextStep an command functions
- */
-template<typename CELL_TYPE>
-struct SteererData
-{
-public:
-    SteererData(
-        DataAccessor<CELL_TYPE>** _dataAccessors, int _numVars,
-        const MPI::Intracomm& _comm = MPI::COMM_WORLD) :
-        dataAccessors(_dataAccessors),
-        numVars(_numVars),
-        comm(_comm)
-    {
-        finishMutex.lock();
-        waitMutex.lock();
-    }
-
-    boost::mutex finishMutex;
-    boost::mutex waitMutex;
-    std::vector<int> getX;
-    std::vector<int> getY;
-    std::vector<int> getZ;
-    std::vector<int> setX;
-    std::vector<int> setY;
-    std::vector<int> setZ;
-    std::vector<std::string> val;
-    std::vector<std::string> var;
-    DataAccessor<CELL_TYPE>** dataAccessors;
-    int numVars;
-    MPI::Intracomm comm;
-
-    /*
-     * broadcast exchange data from root to the other processes
-     */
-    void broadcastSteererData()
-    {
-        if (comm.Get_rank() != 0) {
-            getX.clear();
-            getY.clear();
-            getZ.clear();
-            setX.clear();
-            setY.clear();
-            setZ.clear();
-            val.clear();
-            var.clear();
-        }
-        broadcastIntVector(&getX);
-        broadcastIntVector(&getY);
-        broadcastIntVector(&getZ);
-        broadcastIntVector(&setX);
-        broadcastIntVector(&setY);
-        broadcastIntVector(&setZ);
-        broadcastStringVector(&val);
-        broadcastStringVector(&var);
-    }
-
-  private:
-    /*
-     *
-     */
-    void broadcastIntVector(std::vector<int> *vec)
-    {
-        int size = 0;
-        int* intBuffer;
-        if (comm.Get_rank() == 0) {
-            size = vec->size();
-            comm.Bcast(&size, 1, MPI::INT, 0);
-            comm.Bcast(&(vec->front()), size, MPI::INT, 0);
-        }
-        else {
-            comm.Bcast(&size, 1, MPI::INT, 0);
-            intBuffer = new int[size];
-            comm.Bcast(intBuffer, size, MPI::INT, 0);
-            vec->insert(vec->begin(), intBuffer, intBuffer + size);
-            delete[] intBuffer;
-        }
-    }
-
-    /*
-     *
-     */
-    void broadcastStringVector(std::vector<std::string> *vec)
-    {
-        int vectorSize = 0;
-        int stringSize = 0;
-        char* charBuffer;
-        if (comm.Get_rank() == 0) {
-            vectorSize = vec->size();
-            comm.Bcast(&vectorSize, 1, MPI::INT, 0);
-            for (int i = 0; i < vectorSize; ++i) {
-                stringSize = vec->at(i).size();
-                comm.Bcast(&stringSize, 1, MPI::INT, 0);
-                char* tmp = const_cast<char*>(vec->at(i).c_str());
-                comm.Bcast(tmp, stringSize, MPI::CHAR, 0);
-            }
-        }
-        else {
-            comm.Bcast(&vectorSize, 1, MPI::INT, 0);
-            for (int i = 0; i < vectorSize; ++i) {
-                comm.Bcast(&stringSize, 1, MPI::INT, 0);
-                charBuffer = new char[stringSize];
-                comm.Bcast(charBuffer, stringSize, MPI::CHAR, 0);
-                vec->push_back(charBuffer);
-                delete[] charBuffer;
-            }
-        }
-    }
-};
-
 /*
  * processes without direct access to the CommandServer Session buffer
  * their messages and root will collect and send them to the client
  */
+// fixme: move to namespace or dedicated file
 class MessageBuffer
 {
 public:
@@ -289,14 +178,15 @@ public:
         MessageBuffer *session,
         void *data,
         const MPI::Intracomm& comm,
-        bool changed = false) 
+        bool changed = false)
     {
         // do nothing, it's a stub
     }
 };
 
-template<typename CELL_TYPE, typename DATATYPE = SteererData<CELL_TYPE>,
-         typename EXTENDED = ExtendedSteererControlStub<CELL_TYPE, DATATYPE> >
+template<typename CELL_TYPE,
+         typename DATATYPE=SteererData<CELL_TYPE>,
+         typename EXTENDED=ExtendedSteererControlStub<CELL_TYPE, DATATYPE> >
 class DefaultSteererControl : SteererControl<CELL_TYPE, DATATYPE>
 {
 public:
@@ -304,10 +194,10 @@ public:
         typename Steerer<CELL_TYPE>::GridType *grid,
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
-        MessageBuffer* session,
+        MessageBuffer *session,
         void *data,
         const MPI::Intracomm& comm,
-        bool _changed = false)
+        bool changed = false)
     {
         // fixme: bad variable name
         DATATYPE *sdata = (DATATYPE*) data;

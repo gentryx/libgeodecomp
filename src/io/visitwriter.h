@@ -18,59 +18,74 @@
  * 3: Console socket input
  */
 
+//fixme:
 #define UNKNOWN_TYPE 1
 #define NO_CWD 2
 
+#include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
-#include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/dataaccessor.h>
+#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/parallelization/simulator.h>
 #include <VisItControlInterface_V2.h>
 #include <VisItDataInterface_V2.h>
 #include <map>
-#include <boost/algorithm/string.hpp>
-#include <libgeodecomp/misc/dataaccessor.h>
 #include <unistd.h>
-
 #include <stdio.h>
-
-#define debugout(string) std::cout << string << std::endl;
 
 namespace LibGeoDecomp {
 
 class RectilinearMesh;
 
-template<typename CELL_TYPE>
-void ControlCommandCallback(const char *cmd,
-                            const char *args, void *cbdata);
-
 template<typename CELL_TYPE , typename MESH_TYPE=RectilinearMesh>
-class VisitWriter : public Writer<CELL_TYPE>
+class VisItWriter;
+
+namespace VisItWriterHelpers {
+
+template<typename CELL_TYPE>
+void ControlCommandCallback(
+    const char *cmd,
+    const char *args,
+    void *data)
+{
+    VisItWriter<CELL_TYPE> *writer = (VisItWriter<CELL_TYPE>*) data;
+
+    if (strcmp(cmd, "halt") == 0) {
+        writer->setRunMode(VISIT_SIMMODE_STOPPED);
+    } else if (strcmp(cmd, "step") == 0) {
+        writer->setRunMode(SIMMODE_STEP);
+    } else if (strcmp(cmd, "run") == 0) {
+        writer->setRunMode(VISIT_SIMMODE_RUNNING);
+    }
+}
+
+}
+
+template<typename CELL_TYPE, typename MESH_TYPE>
+class VisItWriter : public Writer<CELL_TYPE>
 {
 public:
+    typedef SuperVector<boost::shared_ptr<DataAccessor<CELL_TYPE> > > DataAccessorVec;
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    typedef VisitWriter<CELL_TYPE, MESH_TYPE> SVW;
+    typedef VisItWriter<CELL_TYPE, MESH_TYPE> SVW;
     static const int DIMENSIONS = Topology::DIM;
 
     using Writer<CELL_TYPE>::period;
-    using Writer<CELL_TYPE>::prefix;
 
-    // fixme: rename to VisItWriter
     // fixme: needs test
-    VisitWriter(
-        const std::string & _prefix,
-        DataAccessor<CELL_TYPE> **dataAccessors,
-        int numVars,
+    VisItWriter(
+        const std::string & prefix,
         const unsigned& period = 1,
         const int & runMode = 0) :
-        Writer < CELL_TYPE > (prefix, period),
-        runMode(runMode),
-        numVars(numVars),
-        dataAccessors(dataAccessors)
+        Writer<CELL_TYPE>(prefix, period),
+        runMode(runMode)
     {
         // fixme: do this in initializer list
         blocking = 0;
@@ -121,7 +136,7 @@ public:
 
     int getNumVars()
     {
-        return numVars;
+        return dataAccessors.size();
     }
 
     void setError(int e)
@@ -139,6 +154,14 @@ public:
         return grid;
     }
 
+    /**
+     * Adds an accessor which allows the VisItWriter to observer another variable.
+     */
+    void addVariable(DataAccessor<CELL_TYPE> *accessor)
+    {
+        dataAccessors << boost::shared_ptr<DataAccessor<CELL_TYPE> >(accessor);
+    }
+
     // fixme: why not private?
     double *x;
     double *y;
@@ -150,9 +173,8 @@ public:
     int error;
     int runMode;
     int dataNumber;
-    int numVars;
-    DataAccessor<CELL_TYPE> **dataAccessors;
-    void **values;
+    DataAccessorVec dataAccessors;
+    SuperVector<SuperVector<char> > values;
     std::map<std::string, int> variableMap;
     const GridType *grid;
     unsigned step;
@@ -200,7 +222,7 @@ public:
      */
     void initMemory()
     {
-        values = new void*[numVars];
+        values.resize(dataAccessors.size());
 
         for(int i=0; i < numVars; ++i) {
             variableMap[dataAccessors[i]->getName()] = i;
@@ -238,7 +260,6 @@ public:
     void allDone()
     {}
 
-
     /**
      * check if there is input from visit
      */
@@ -267,7 +288,7 @@ public:
 
                     initMemory();
 
-                    VisItSetCommandCallback(ControlCommandCallback<CELL_TYPE>,
+                    VisItSetCommandCallback(VisItWriterHelpers::ControlCommandCallback<CELL_TYPE>,
                             reinterpret_cast<void*>(this));
                     VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
 
@@ -318,6 +339,7 @@ public:
         typedef SetGetVariable<char, SetDataChar> VisitDataChar;
         typedef SetGetVariable<long, SetDataLong> VisitDataLong;
 
+        // fixme: this should be the writer
         SVW *simData = reinterpret_cast<SVW*>(cbdata);
 
         for(int i=0; i < simData->getNumVars(); ++i) {
@@ -376,7 +398,7 @@ public:
         }
     };
 
-    class SetDataDouble 
+    class SetDataDouble
     {
     public:
         void operator()(visit_handle obj, int owner, int ncomps, int ntuples, double *ptr) {
@@ -384,7 +406,7 @@ public:
         }
     };
 
-    class SetDataInt 
+    class SetDataInt
     {
     public:
         void operator()(visit_handle obj, int owner, int ncomps, int ntuples, int  *ptr) {
@@ -393,7 +415,7 @@ public:
     };
 
     // fixme: unify into one class?
-    class SetDataFloat 
+    class SetDataFloat
     {
     public:
         void operator()(visit_handle obj, int owner, int ncomps, int ntuples, float *ptr) {
@@ -401,7 +423,7 @@ public:
         }
     };
 
-    class SetDataChar 
+    class SetDataChar
     {
     public:
         void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, char *ptr) {
@@ -409,7 +431,7 @@ public:
         }
     };
 
-    class SetDataLong 
+    class SetDataLong
     {
     public:
         void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, long *ptr) {
@@ -520,10 +542,11 @@ public:
 
 };
 
-class RectilinearMesh 
+// fixme: move to dedicated file?
+class RectilinearMesh
 {
 public:
-    static int getMeshType() 
+    static int getMeshType()
     {
         return VISIT_MESHTYPE_RECTILINEAR;
     }
@@ -542,8 +565,8 @@ public:
         {
             // fixme: too long
             visit_handle h = VISIT_INVALID_HANDLE;
-            VisitWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
-                    <VisitWriter<CELL, RectilinearMesh >*>(cdata);
+            VisItWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
+                    <VisItWriter<CELL, RectilinearMesh >*>(cdata);
 
             int dim_x = simData->getGrid()->getDimensions().x() + 1;
             int dim_y = simData->getGrid()->getDimensions().y() + 1;
@@ -583,8 +606,8 @@ public:
         static visit_handle SimGetMesh(int domain, const char *name, void *cdata) 
         {
             visit_handle h = VISIT_INVALID_HANDLE;
-            VisitWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
-                    <VisitWriter<CELL, RectilinearMesh >*>(cdata);
+            VisItWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
+                    <VisItWriter<CELL, RectilinearMesh >*>(cdata);
 
             int dim_x = simData->getGrid()->getDimensions().x() + 1;
             int dim_y = simData->getGrid()->getDimensions().y() + 1;
@@ -627,6 +650,7 @@ public:
 /*
  *
  */
+// fixme: move to dedicated file?
 class PointMesh
 {
 public:
@@ -643,8 +667,8 @@ public:
         // fixme: too long
         static visit_handle SimGetMesh(int domain, const char *name, void *cdata) {
             visit_handle h = VISIT_INVALID_HANDLE;
-            VisitWriter<CELL, PointMesh >* simData = reinterpret_cast
-                    <VisitWriter<CELL, PointMesh >*>(cdata);
+            VisItWriter<CELL, PointMesh >* simData = reinterpret_cast
+                    <VisItWriter<CELL, PointMesh >*>(cdata);
 
             int dim_x = simData->getGrid()->getDimensions().x();
             int dim_y = simData->getGrid()->getDimensions().y();
@@ -687,8 +711,8 @@ public:
         static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
         {
             visit_handle h = VISIT_INVALID_HANDLE;
-            VisitWriter<CELL, PointMesh >* simData = reinterpret_cast
-                    <VisitWriter<CELL, PointMesh >*>(cdata);
+            VisItWriter<CELL, PointMesh >* simData = reinterpret_cast
+                    <VisItWriter<CELL, PointMesh >*>(cdata);
 
             unsigned size = simData->getGrid()->boundingBox().size();
 
@@ -726,23 +750,6 @@ public:
         }
     };
 };
-
-// fixme: move to dedicated file?
-template < typename CELL_TYPE >
-void ControlCommandCallback(
-    const char *cmd,
-    const char *args, void *cbdata) 
-{
-    VisitWriter<CELL_TYPE> *simData = (VisitWriter<CELL_TYPE> *) cbdata;
-
-    if (strcmp(cmd, "halt") == 0) {
-        simData->setRunMode(VISIT_SIMMODE_STOPPED);
-    } else if (strcmp(cmd, "step") == 0) {
-        simData->setRunMode(SIMMODE_STEP);
-    } else if (strcmp(cmd, "run") == 0) {
-        simData->setRunMode(VISIT_SIMMODE_RUNNING);
-    }
-}
 
 }
 

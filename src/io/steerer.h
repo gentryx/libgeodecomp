@@ -17,7 +17,7 @@ public:
         period(_period)
     {}
 
-    virtual ~Steerer() 
+    virtual ~Steerer()
     {}
 
     /**
@@ -29,8 +29,8 @@ public:
      * interface of ParallelWriter).
      */
     virtual void nextStep(
-        GridType *grid, 
-        const Region<Topology::DIM>& validRegion, 
+        GridType *grid,
+        const Region<Topology::DIM>& validRegion,
         const unsigned& step) =0;
 
     const unsigned& getPeriod() const

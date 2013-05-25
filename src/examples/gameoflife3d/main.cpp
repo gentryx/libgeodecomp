@@ -108,7 +108,7 @@ void runSimulation()
     };
 
     sim.addWriter(
-        new VisitWriter<ConwayCell>(
+        new VisItWriter<ConwayCell>(
             "./gameoflife_live",
             accessors,
             1,

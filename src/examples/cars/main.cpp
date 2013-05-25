@@ -264,16 +264,13 @@ static void setRateFunction(
 
 void runSimulation()
 {
-    // fixme: use vectors and boost:shared_ptr
-    DataAccessor<Cell> *vars[3];
-    vars[0] = new borderDataAccessor();
-    vars[1] = new directionDataAccessor();
-    vars[2] = new rateDataAccessor();
-
     SerialSimulator<Cell> sim(new CellInitializer());
 
-    sim.addWriter(
-        new VisitWriter<Cell>("./cars", vars, 3, 1, VISIT_SIMMODE_STOPPED));
+    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("./cars", 1, VISIT_SIMMODE_STOPPED);
+    visItWriter.addWriter(new borderDataAccessor());
+    visItWriter.addWriter(new directionDataAccessor());
+    visItWriter.addWriter(new rateDataAccessor());
+    sim.addWriter(visItWriter);
 
     sim.addWriter(
         new TracingWriter<Cell>(
@@ -292,10 +289,6 @@ void runSimulation()
     sim.addSteerer(steerer);
 
     sim.run();
-
-    for (int i = 0; i < 2; ++i) {
-        delete vars[i];
-    }
 }
 
 int main(int argc, char* argv[])

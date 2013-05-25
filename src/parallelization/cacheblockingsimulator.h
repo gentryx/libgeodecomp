@@ -29,7 +29,7 @@ public:
     CacheBlockingSimulator(
         Initializer<CELL> *initializer,
         int pipelineLength,
-        const Coord<DIM - 1>& wavefrontDim) : 
+        const Coord<DIM - 1>& wavefrontDim) :
         MonolithicSimulator<CELL>(initializer),
         pipelineLength(pipelineLength),
         wavefrontDim(wavefrontDim)
@@ -52,7 +52,7 @@ public:
         generateFrames();
         nanoStep = 0;
     }
-    
+
     ~CacheBlockingSimulator()
     {
         delete newGrid;

@@ -169,25 +169,19 @@ void runSimulation()
 {
     int outputFrequency = 10;
 
-    DataAccessor<ConwayCell> *vars[3];
-    vars[0] = new aliveDataAccessor();
-    vars[1] = new countDataAccessor();
-
     SerialSimulator<ConwayCell> sim(
         new CellInitializer());
 
-    DataAccessor<ConwayCell> *accessors[] = {
-        new aliveDataAccessor(),
-        new countDataAccessor()
-    };
 
-    sim.addWriter(
-        new VisitWriter<ConwayCell>(
+    VisItWriter<ConwayCell> *visItWriter =
+        new VisItWriter<ConwayCell>(
             "./gameoflife_live",
-            accessors,
-            2,
             outputFrequency,
-            0));
+            0);
+    visItWriter.addVariable(new aliveDataAccessor());
+    visItWriter.addVariable(new countDataAccessor());
+
+    sim.addWriter(visItWriter);
 
     /*
      * ---------------------------------------------
@@ -198,16 +192,19 @@ void runSimulation()
             ::getDefaultMap();
     (*fmap)["size"] = sizeFunction;
 
-    MySteererData *myData = new MySteererData(vars, 2);
+    MySteererData *myData = new MySteererData();
+    myData.addVariable(new aliveDataAccessor());
+    myData.addVariable(new countDataAccessor());
 
     // fixme: class names must start with capitals
     // fixme: too long template instantiation
-    Steerer<ConwayCell>* steerer =
+
+    Steerer<ConwayCell> *steerer =
         new RemoteSteerer<ConwayCell,
                           DefaultSteererControl<
                               ConwayCell, MySteererData, MyControl<
                                   ConwayCell, SteererData<ConwayCell> > > >(
-                                      1, 1234, vars, 2, fmap, myData);
+                                      1, 1234, fmap, myData);
     sim.addSteerer(steerer);
 
     sim.run();
