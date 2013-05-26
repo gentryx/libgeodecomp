@@ -66,9 +66,9 @@ public:
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
-template<int DIM, 
-         class STENCIL=Stencils::Moore<DIM, 1>, 
-         class TOPOLOGY=typename TestCellHelpers::MyTopology<DIM>::Topology, 
+template<int DIM,
+         class STENCIL=Stencils::Moore<DIM, 1>,
+         class TOPOLOGY=typename TestCellHelpers::MyTopology<DIM>::Topology,
          class OUTPUT=TestCellHelpers::StdOutput>
 class TestCell
 {
@@ -82,9 +82,9 @@ public:
     typedef TOPOLOGY Topology;
     static const int DIMENSIONS = DIM;
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 27; 
+    static inline unsigned nanoSteps()
+    {
+        return 27;
     }
 
     Coord<DIM> pos;
@@ -100,27 +100,30 @@ public:
     }
 
     TestCell() :
-        cycleCounter(0), 
+        cycleCounter(0),
         isEdgeCell(false),
         isValid(false),
         testValue(defaultValue())
     {}
 
     TestCell(
-        const Coord<DIM>& _pos, 
-        const Coord<DIM>& _gridDim,
-        const unsigned& _cycleCounter = 0,
-        const double& _testValue = defaultValue()) :
-        pos(_pos), 
-        dimensions(Coord<DIM>(), _gridDim),
-        cycleCounter(_cycleCounter), 
+        const Coord<DIM>& pos,
+        const Coord<DIM>& gridDim,
+        const unsigned& cycleCounter = 0,
+        const double& testValue = defaultValue()) :
+        pos(pos),
+        dimensions(Coord<DIM>(), gridDim),
+        cycleCounter(cycleCounter),
         isValid(true),
-        testValue(_testValue)
+        testValue(testValue)
     {
         isEdgeCell = !inBounds(pos);
     }
 
-    const bool& valid() const { return isValid; }    
+    const bool& valid() const
+    {
+        return isValid;
+    }
 
     bool inBounds(const Coord<DIM>& c) const
     {
@@ -133,8 +136,8 @@ public:
             && (dimensions == other.dimensions)
             && (cycleCounter == other.cycleCounter)
             && (isEdgeCell == other.isEdgeCell)
-            && (isValid == other.isValid)            
-            && (testValue == other.testValue);            
+            && (isValid == other.isValid)
+            && (testValue == other.testValue);
     }
 
     bool operator!=(const TestCell& other) const

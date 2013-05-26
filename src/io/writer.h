@@ -29,6 +29,7 @@ class Writer
     friend class WriterTest;
 public:
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     /**
      * initializes a writer using \param _prefix which subclasses may
@@ -39,21 +40,29 @@ public:
      * new(), unless _sim is 0.
      */
     Writer(
-        const std::string& prefix, 
-        const unsigned period = 1) : 
-        prefix(prefix), 
+        const std::string& prefix,
+        const unsigned period) :
+        prefix(prefix),
         period(period)
     {
-        if (prefix == "") {
-            throw std::invalid_argument("empty prefixes are forbidden");
-        }
-
         if (period == 0) {
             throw std::invalid_argument("period must be positive");
         }
     }
 
-    virtual ~Writer() {};    
+    virtual ~Writer() {};
+
+    /**
+     * notifies the Writer that the supplied CoordBox is the size of
+     * the simulation space. This fuction will be called once the
+     * grids have been initialized and before the simulation starts.
+     * Writers can use this information to decide on the size of
+     * buffers to allocate or determine file offsets. 
+     */
+    virtual void setSimSpace(const CoordBox<DIM>& newSimSpace)
+    {
+        simSpace = newSimSpace;
+    }
 
     /**
      * is called back from \a sim after each simulation step. event
@@ -74,6 +83,7 @@ public:
     }
 
 protected:
+    CoordBox<DIM> simSpace;
     std::string prefix;
     unsigned period;
 };

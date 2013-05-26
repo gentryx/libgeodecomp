@@ -13,12 +13,25 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
 
-    Steerer(const unsigned _period) :
-        period(_period)
+    Steerer(const unsigned period) :
+        period(period)
     {}
 
     virtual ~Steerer()
     {}
+
+    /**
+     * notifies the Steerer that the supplied region is the domain of
+     * the current process. This fuction will be called once the
+     * domain decomposition has been done. Steerers can use this
+     * information to determine for instance where to forward certain
+     * steering data fragments. validRegion in nextStep() will
+     * generally be a subset of newRegion.
+     */
+    virtual void setRegion(const Region<Topology::DIM>& newRegion)
+    {
+        region = newRegion;
+    }
 
     /**
      * is a callback which gives the Steerer access to a Simulator's
@@ -31,7 +44,7 @@ public:
     virtual void nextStep(
         GridType *grid,
         const Region<Topology::DIM>& validRegion,
-        const unsigned& step) =0;
+        unsigned step) = 0;
 
     const unsigned& getPeriod() const
     {
@@ -39,6 +52,7 @@ public:
     }
 
 protected:
+    Region<Topology::DIM> region;
     unsigned period;
 };
 

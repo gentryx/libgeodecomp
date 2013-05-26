@@ -1,7 +1,11 @@
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_MPI
+
 #ifndef LIBGEODECOMP_IO_STEERERDATA_H
 #define LIBGEODECOMP_IO_STEERERDATA_H
 
 #include <boost/shared_ptr.hpp>
+#include <mpi.h>
 #include <libgeodecomp/misc/dataaccessor.h>
 #include <libgeodecomp/misc/supervector.h>
 
@@ -24,7 +28,7 @@ public:
         waitMutex.lock();
     }
 
-    //
+    // fixme: why public?
     boost::mutex finishMutex;
     boost::mutex waitMutex;
     std::vector<int> getX;
@@ -128,4 +132,5 @@ public:
 
 }
 
+#endif
 #endif

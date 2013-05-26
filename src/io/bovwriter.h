@@ -31,8 +31,8 @@ public:
     using ParallelWriter<CELL_TYPE>::prefix;
 
     BOVWriter(
-        const std::string& prefix, 
-        const unsigned period, 
+        const std::string& prefix,
+        const unsigned period,
         const Coord<3>& brickletDim = Coord<3>(),
         const MPI::Intracomm& communicator = MPI::COMM_WORLD,
         MPI::Datatype mpiDatatype = Typemaps::lookup<VariableType>()) :
@@ -43,11 +43,11 @@ public:
     {}
 
     virtual void stepFinished(
-        const typename ParallelWriter<CELL_TYPE>::GridType& grid, 
-        const Region<Topology::DIM>& validRegion, 
+        const typename ParallelWriter<CELL_TYPE>::GridType& grid,
+        const Region<Topology::DIM>& validRegion,
         const Coord<Topology::DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
+        unsigned step,
+        WriterEvent event,
         bool lastCall)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
@@ -64,7 +64,7 @@ private:
     MPI::Intracomm comm;
     MPI::Datatype datatype;
 
-    std::string filename(const unsigned& step, const std::string& suffix) const 
+    std::string filename(const unsigned& step, const std::string& suffix) const
     {
         std::ostringstream buf;
         buf << prefix << "." << std::setfill('0') << std::setw(5) << step << "." << suffix;
@@ -82,7 +82,7 @@ private:
             Coord<DIM> c = dimensions;
             Coord<3> bovDim = Coord<3>::diagonal(1);
             for (int i = 0; i < DIM; ++i) {
-                bovDim[i] = c[i]; 
+                bovDim[i] = c[i];
             }
 
             Coord<3> bricDim = (brickletDim == Coord<3>()) ? bovDim : brickletDim;
@@ -90,16 +90,16 @@ private:
             std::ostringstream buf;
             buf << "TIME: " << step << "\n"
                 << "DATA_FILE: " << filename(step, "data") << "\n"
-                << "DATA_SIZE: " 
+                << "DATA_SIZE: "
                 << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
                 << "DATA_FORMAT: " << SELECTOR_TYPE::dataFormat() << "\n"
                 << "VARIABLE: " << SELECTOR_TYPE::varName() << "\n"
                 << "DATA_ENDIAN: LITTLE\n"
                 << "BRICK_ORIGIN: 0 0 0\n"
-                << "BRICK_SIZE: " 
+                << "BRICK_SIZE: "
                 << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
                 << "DIVIDE_BRICK: true\n"
-                << "DATA_BRICKLETS: " 
+                << "DATA_BRICKLETS: "
                 << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
                 << "DATA_COMPONENTS: " << SELECTOR_TYPE::dataComponents() << "\n";
             std::string s = buf.str();

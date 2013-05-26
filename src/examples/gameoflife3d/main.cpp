@@ -103,19 +103,16 @@ void runSimulation()
 
     SerialSimulator<ConwayCell> sim(new CellInitializer());
 
-    DataAccessor<ConwayCell> *accessors[] = {
-        new aliveDataAccessor()
-    };
+    VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
+        "gameOfLifeLive",
+        outputFrequency,
+        VISIT_SIMMODE_STOPPED);
+    visItWriter->addVariable(new aliveDataAccessor());
 
-    sim.addWriter(
-        new VisItWriter<ConwayCell>(
-            "./gameoflife_live",
-            accessors,
-            1,
-            outputFrequency,
-            0));
+    sim.addWriter(visItWriter);
 
-    Steerer<ConwayCell> *steerer = new RemoteSteerer<ConwayCell>(1, 1234, accessors, 1);
+    // fixme: add accessor for "alive" flag
+    Steerer<ConwayCell> *steerer = new RemoteSteerer<ConwayCell>(1, 1234);
     sim.addSteerer(steerer);
 
     sim.run();

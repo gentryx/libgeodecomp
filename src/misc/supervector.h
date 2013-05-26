@@ -27,25 +27,32 @@ public:
     typedef typename std::vector<T>::iterator iterator;
     typedef typename std::vector<T>::const_iterator const_iterator;
 
-    inline SuperVector() {}
-    inline SuperVector(int i) : std::vector<T>(i) {}
-    inline SuperVector(int i, T t) : std::vector<T>(i, t) {}
+    inline SuperVector()
+    {}
 
-    /** 
+    inline SuperVector(int i) :
+        std::vector<T>(i)
+    {}
+
+    inline SuperVector(int i, T t) :
+        std::vector<T>(i, t)
+    {}
+
+    /**
      * Deletes items from _self_ that are equal to @param obj
      */
-    inline void del(const T &obj) 
+    inline void del(const T& obj)
     {
         erase(std::remove(begin(), end(), obj), end());
     }
 
     // We have to use the inherited operator by hand, as this requires a cast
-    inline bool operator==(const SuperVector<T> &comp) const 
+    inline bool operator==(const SuperVector<T>& comp) const
     {
         return ((std::vector<T>)*this) == ((std::vector<T>)comp);
     }
 
-    inline std::string toString() const 
+    inline std::string toString() const
     {
         std::ostringstream temp;
         temp << "[";
@@ -77,7 +84,7 @@ public:
         return ret;
     }
 
-    inline void push_front(const T& obj) 
+    inline void push_front(const T& obj)
     {
         insert(begin(), obj);
     }
@@ -89,11 +96,12 @@ public:
         return ret;
     }
 
-    inline T sum() const 
+    inline T sum() const
     {
         T res = 0;
-        for (const_iterator i = begin(); i != end(); i++) 
+        for (const_iterator i = begin(); i != end(); i++) {
             res += *i;
+        }
         return res;
 
     }

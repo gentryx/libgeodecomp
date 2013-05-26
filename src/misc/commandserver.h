@@ -9,8 +9,6 @@
 #include <stdexcept>
 #include <map>
 
-#define MAXLENGTH 1024
-
 using boost::asio::ip::tcp;
 
 namespace LibGeoDecomp {
@@ -19,42 +17,38 @@ namespace LibGeoDecomp {
  * a server, which can be reached by tcp(nc, telnet, ...)
  * executes methods, which are bind to a command
  */
+// fixme: needs test
+// fixme: move to src/io/remotesteerer/commandserver.h
 class CommandServer
 {
 public:
-    /**
-     *
-     */
     class Session;
 
-    // fixme: TypeName, not typeName
-    typedef boost::shared_ptr<tcp::socket> socketPtr;
-    typedef std::vector<std::string> stringVec;
-    typedef std::map<std::string, void(*)(stringVec, Session*, void*)> functionMap;
-
-    static void splitString(std::string input, stringVec& output, std::string s)
-    {
-        boost::split(output, input,
-                     boost::is_any_of(s), boost::token_compress_on);
-    }
+    typedef boost::shared_ptr<tcp::socket> SocketPtr;
+    typedef std::vector<std::string> StringVec;
+    typedef std::map<std::string, void(*)(StringVec, Session*, void*)> FunctionMap;
 
     class Session
     {
     public:
-        Session (socketPtr _socket, functionMap _commandMap, void* _userData) :
-            socket(_socket),
-            commandMap(_commandMap),
-            userData(_userData) {
-        }
+        Session(SocketPtr socket, FunctionMap commandMap, void *userData) :
+            socket(socket),
+            commandMap(commandMap),
+            userData(userData)
+        { }
 
-        size_t sendMessage(std::string message)
+        size_t sendMessage(const std::string& message)
         {
             size_t bytes;
-            boost::system::error_code ec;
-            bytes = boost::asio::write(*socket, boost::asio::buffer(message),
-                                       boost::asio::transfer_all(), ec);
-            if (ec) {
-                printError(ec);
+            boost::system::error_code errorCode;
+            bytes = boost::asio::write(
+                *socket,
+                boost::asio::buffer(message),
+                boost::asio::transfer_all(),
+                errorCode);
+
+            if (errorCode) {
+                printError(errorCode);
             }
             return bytes;
         }
@@ -62,75 +56,89 @@ public:
         void runSession ()
         {
             for (;;) {
-                boost::array<char, MAXLENGTH> buf;
-                boost::system::error_code ec;
-                std::string input;
-                stringVec lines;
-                stringVec parameter;
-                std::string message;
+                // use a buffer of 1024 Bytes
+                boost::array<char, 1024> buf;
+                boost::system::error_code errorCode;
+                size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
 
-                functionMap::iterator it;
-
-                size_t length = socket->read_some(boost::asio::buffer(buf), ec);
-                if (ec == boost::asio::error::eof) {
-                    std::cout << "client closed connection" << std::endl;
-                    return; // Connection closed cleanly by peer.
-                } else if (ec) {
-                    printError(ec);
-                    return;
+                if (length > 0) {
+                    std::string input(buf.data(), length);
+                    handleInput(input);
                 }
 
-                input.assign(buf.data(), length - 1);
-                splitString(input, lines, std::string("\n"));
-                for (stringVec::iterator iter = lines.begin();
-                     iter != lines.end(); ++iter) {
-                    splitString(*iter, parameter, std::string(" "));
-                    switch(parameter.size()) {
-                    case 0:
-                        message = "no command\n";
-                        sendMessage(message);
-                        break;
-                    default:
-                        it = commandMap.find(parameter[0]);
-                        if (it != commandMap.end()) {
-                            //(this->*(commandMap[parameter[0]]))(parameter, this,
-                            //                                    this->userData);
-                            commandMap[parameter[0]](parameter, this, userData);
-                        } else {
-                            message = "command not found: " + parameter[0] + "\n";
-                            message += "try \"help\"\n";
-                            sendMessage(message);
-                        }
-                    }
+                if (errorCode == boost::asio::error::eof) {
+                    std::cout << "client closed connection" << std::endl;
+                    return; // Connection closed cleanly by peer.
+                }
+
+                if (errorCode) {
+                    printError(errorCode);
+                    return;
                 }
             }
         }
 
-        functionMap getMap()
+        FunctionMap getMap()
         {
             return commandMap;
         }
 
     private:
-        socketPtr socket;
-        functionMap commandMap;
+        SocketPtr socket;
+        FunctionMap commandMap;
         void *userData;
+
+        static void splitString(std::string input, StringVec& output, std::string s)
+        {
+            boost::split(output, input,
+                         boost::is_any_of(s), boost::token_compress_on);
+        }
+
+
+        void handleInput(const std::string& input)
+        {
+            StringVec lines;
+            StringVec parameter;
+            std::string message;
+
+            splitString(input, lines, std::string("\n"));
+            for (StringVec::iterator iter = lines.begin();
+                 iter != lines.end(); ++iter) {
+                splitString(*iter, parameter, std::string(" "));
+                switch(parameter.size()) {
+                case 0:
+                    message = "no command\n";
+                    sendMessage(message);
+                    break;
+                default:
+                    FunctionMap::iterator it = commandMap.find(parameter[0]);
+                    if (it != commandMap.end()) {
+                        //(this->*(commandMap[parameter[0]]))(parameter, this,
+                        //                                    this->userData);
+                        commandMap[parameter[0]](parameter, this, userData);
+                    } else {
+                        message = "command not found: " + parameter[0] + "\n";
+                        message += "try \"help\"\n";
+                        sendMessage(message);
+                    }
+                }
+            }
+        }
     };
 
     class Server
     {
     public:
-        // fixme: why pointer here?
-        Server(int port, functionMap *commandMap, void *userData) :
+        Server(int port, FunctionMap commandMap, void *userData) :
             port(port),
-            commandMap(*commandMap),
+            commandMap(commandMap),
             userData(userData)
         {}
 
+        // fixme: move to constructor?
         int startServer()
         {
-            // fixme: camecase for members
-            server_thread = boost::shared_ptr<boost::thread>
+            serverThread = boost::shared_ptr<boost::thread>
                 (new boost::thread(&Server::runServer, this));
 
             return 0;
@@ -140,22 +148,22 @@ public:
 
   private:
         int port;
-        boost::shared_ptr<boost::thread> server_thread;
-        socketPtr socket;
-        functionMap commandMap;
+        boost::shared_ptr<boost::thread> serverThread;
+        SocketPtr socket;
+        FunctionMap commandMap;
         void *userData;
 
         int runServer()
         {
             try {
-                boost::asio::io_service io_service;
-                tcp::acceptor acc(io_service, tcp::endpoint(tcp::v4(), port));
+                boost::asio::io_service ioService;
+                tcp::acceptor acc(ioService, tcp::endpoint(tcp::v4(), port));
                 boost::system::error_code ec;
 
                 std::cout << "Commandserver started" << std::endl;
 
                 for (;;) {
-                    socket = socketPtr(new tcp::socket(io_service));
+                    socket = SocketPtr(new tcp::socket(ioService));
                     acc.accept(*socket, ec);
                     if (ec) {
                         printError(ec);

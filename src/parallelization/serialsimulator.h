@@ -17,13 +17,14 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 public:
     friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
+    typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIM;
 
     /**
      * creates a SerialSimulator with the given @a initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
+    SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
         stepNum = initializer->startStep();
@@ -33,7 +34,6 @@ public:
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
-        // fixme: need library support for iterating through linestarts
         // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
@@ -65,12 +65,12 @@ public:
             nanoStep(i);
         }
 
-        ++stepNum; 
+        ++stepNum;
 
         // call back all registered Writers
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            if (stepNum % writers[i]->getPeriod() == 0) {
-                writers[i]->stepFinished(
+        for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
+            if (stepNum % (*i)->getPeriod() == 0) {
+                (*i)->stepFinished(
                     *getGrid(),
                     getStep(),
                     WRITER_STEP_FINISHED);
@@ -85,9 +85,9 @@ public:
     {
         initializer->grid(curGrid);
         stepNum = initializer->startStep();
-
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->stepFinished(
+        for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
+            (*i)->setSimSpace(curGrid->boundingBox());
+            (*i)->stepFinished(
                 *getGrid(),
                 getStep(),
                 WRITER_INITIALIZED);
@@ -97,8 +97,8 @@ public:
             step();
         }
 
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->stepFinished(
+        for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
+            (*i)->stepFinished(
                 *getGrid(),
                 getStep(),
                 WRITER_ALL_DONE);

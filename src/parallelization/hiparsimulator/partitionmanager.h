@@ -1,8 +1,5 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONMANAGER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONMANAGER_H
-// fixme: fix _hiparsimulator prefix in header guards, in this file and others
 
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/misc/region.h>
@@ -24,22 +21,22 @@ public:
     enum AccessCode {OUTGROUP = -1};
 
     PartitionManager(
-        const CoordBox<DIM>& _simulationArea=CoordBox<DIM>())
+        const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
     {
-        SuperVector<long> weights(1, _simulationArea.size());
-        Partition<DIM> *partition = 
-            new StripingPartition<DIM>(Coord<DIM>(), _simulationArea.dimensions, 0, weights);
-        resetRegions(_simulationArea, partition, 0, 1);
+        SuperVector<long> weights(1, simulationArea.size());
+        Partition<DIM> *partition =
+            new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights);
+        resetRegions(simulationArea, partition, 0, 1);
         resetGhostZones(SuperVector<CoordBox<DIM> >(1));
     }
 
     /**
      * resets the domain decomposition. The simulation space is
-     * described by _simulationArea, the decomposition scheme by
-     * _partition. The ownership of _partition is assumed to be
+     * described by newSimulationArea, the decomposition scheme by
+     * newPartition. The ownership of newPartition is assumed to be
      * transfered to PartitionManager and will be deleted when the
-     * PartitionManager dies. _rank will usually correspond to the MPI
-     * rank and identifies the current process. _ghostZoneWidth
+     * PartitionManager dies. newRank will usually correspond to the
+     * MPI rank and identifies the current process. newGhostZoneWidth
      * specifies after how many steps the halo should be synchronized.
      * Higher values mean that the halo will be wider, which requires
      * fewer synchronizations, but the syncs need to communicate more
@@ -48,15 +45,15 @@ public:
      * accelerators).
      */
     inline void resetRegions(
-        const CoordBox<DIM>& _simulationArea,
-        Partition<DIM> *_partition,
-        const unsigned& _rank,
-        const unsigned& _ghostZoneWidth) 
+        const CoordBox<DIM>& newSimulationArea,
+        Partition<DIM> *newPartition,
+        const unsigned& newRank,
+        const unsigned& newGhostZoneWidth)
     {
-        partition.reset(_partition);
-        simulationArea = _simulationArea;
-        rank = _rank;
-        ghostZoneWidth = _ghostZoneWidth;
+        partition.reset(newPartition);
+        simulationArea = newSimulationArea;
+        rank = newRank;
+        ghostZoneWidth = newGhostZoneWidth;
         regions.clear();
         outerGhostZoneFragments.clear();
         innerGhostZoneFragments.clear();
@@ -64,19 +61,19 @@ public:
     }
 
     inline void resetGhostZones(
-        const SuperVector<CoordBox<DIM> >& _boundingBoxes)
+        const SuperVector<CoordBox<DIM> >& newBoundingBoxes)
     {
-        boundingBoxes = _boundingBoxes;
+        boundingBoxes = newBoundingBoxes;
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();
 
         for (unsigned i = 0; i < boundingBoxes.size(); ++i) {
-            if (i != rank && 
+            if (i != rank &&
                 boundingBoxes[i].intersects(ownBoundingBox) &&
-                (!(getRegion(rank, ghostZoneWidth) & 
+                (!(getRegion(rank, ghostZoneWidth) &
                    getRegion(i,    0)).empty() ||
-                 !(getRegion(i,    ghostZoneWidth) & 
-                   getRegion(rank, 0)).empty())) 
-                intersect(i); 
+                 !(getRegion(i,    ghostZoneWidth) &
+                   getRegion(rank, 0)).empty()))
+                intersect(i);
         }
 
         // outgroup ghost zone fragments are computed a tad generous,
@@ -97,38 +94,38 @@ public:
             SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, outer);
         innerGhostZoneFragments[OUTGROUP] = 
             SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, inner);
-    }        
+    }
 
     inline const RegionVecMap& getOuterGhostZoneFragments() const
     {
         return outerGhostZoneFragments;
     }
-    
+
     inline const RegionVecMap& getInnerGhostZoneFragments() const
     {
         return innerGhostZoneFragments;
     }
-    
+
     inline const Region<DIM>& getInnerOutgroupGhostZoneFragment() const
     {
         return innerGhostZoneFragments[OUTGROUP].back();
     }
-    
+
     inline const Region<DIM>& getOuterOutgroupGhostZoneFragment() const
     {
         return outerGhostZoneFragments[OUTGROUP].back();
     }
 
     inline const Region<DIM>& getRegion(
-        const int& node, 
+        const int& node,
         const unsigned& expansionWidth)
     {
-        if (regions.count(node) == 0) 
+        if (regions.count(node) == 0)
             fillRegion(node);
         return regions[node][expansionWidth];
     }
-    
-    inline const Region<DIM>& ownRegion(const unsigned& expansionWidth = 0) 
+
+    inline const Region<DIM>& ownRegion(const unsigned& expansionWidth = 0)
     {
         return regions[rank][expansionWidth];
     }
@@ -147,7 +144,7 @@ public:
     {
         return ownInnerSets[dist];
     }
-    
+
     inline const SuperVector<CoordBox<DIM> >& getBoundingBoxes() const
     {
         return boundingBoxes;
@@ -253,5 +250,4 @@ private:
 }
 }
 
-#endif
 #endif

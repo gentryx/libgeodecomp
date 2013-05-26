@@ -20,17 +20,11 @@ namespace RemoteSteererHelper {
 class MessageBuffer
 {
 public:
-    /*
-     *
-     */
     MessageBuffer(MPI::Intracomm& comm, CommandServer::Session *session) :
         comm(comm),
         session(session)
     {}
 
-    /*
-     *
-     */
     void sendMessage(std::string msg)
     {
         if (comm.Get_rank() == 0) {
@@ -90,6 +84,7 @@ private:
     CommandServer::Session *session;
 };
 
+// fixme: replace this with library code
 static double mystrtod(const char *ptr)
 {
     errno = 0;
@@ -102,6 +97,7 @@ static double mystrtod(const char *ptr)
     return val;
 }
 
+// fixme: replace this with library code
 static float mystrtof(const char *ptr)
 {
     errno = 0;
@@ -114,6 +110,7 @@ static float mystrtof(const char *ptr)
     return val;
 }
 
+// fixme: replace this with library code
 static long mystrtol(const char *ptr)
 {
     errno = 0;
@@ -141,19 +138,19 @@ static int mystrtoi(const char *ptr)
 
 template<typename CELL_TYPE>
 static void executeGetRequests(
-    typename Steerer<CELL_TYPE>::GridType*,
-    const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
-    const unsigned&,
-    CommandServer::Session*,
-    void *);
+    typename Steerer<CELL_TYPE>::GridType *grid,
+    const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+    const unsigned& step,
+    CommandServer::Session *session,
+    SteererData<CELL_TYPE> *steererData);
 
 template<typename CELL_TYPE>
 static void executeSetRequests(
-    typename Steerer<CELL_TYPE>::GridType*,
-    const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
-    const unsigned&,
-    CommandServer::Session*,
-    void *);
+    typename Steerer<CELL_TYPE>::GridType *grid,
+    const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+    const unsigned& step,
+    CommandServer::Session *session,
+    SteererData<CELL_TYPE> *steererData);
 
 // fixme: move this to dedicated file
 template<typename CELL_TYPE, typename DATATYPE>
@@ -161,10 +158,13 @@ class SteererControl
 {
   public:
     virtual void operator()(
-        typename Steerer<CELL_TYPE>::GridType*,
-        const Region<Steerer<CELL_TYPE>::Topology::DIM>&,
-        const unsigned&, MessageBuffer*, void*,
-        const MPI::Intracomm&, bool) = 0;
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+        const unsigned& step,
+        MessageBuffer *session,
+        DATATYPE *steererData,
+        const MPI::Intracomm& comm,
+        bool changed) = 0;
 };
 
 template<typename CELL_TYPE, typename DATATYPE>
@@ -176,7 +176,7 @@ public:
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
         MessageBuffer *session,
-        void *data,
+        DATATYPE *steererData,
         const MPI::Intracomm& comm,
         bool changed = false)
     {
@@ -195,16 +195,13 @@ public:
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
         MessageBuffer *session,
-        void *data,
+        DATATYPE *steererData,
         const MPI::Intracomm& comm,
         bool changed = false)
     {
-        // fixme: bad variable name
-        DATATYPE *sdata = (DATATYPE*) data;
-
         bool newcommands = false;
         if (comm.Get_rank() == 0) {
-            if (sdata->finishMutex.try_lock()) {
+            if (steererData->finishMutex.try_lock()) {
                 newcommands = true;
             }
         }
@@ -215,23 +212,23 @@ public:
 
         if (newcommands) {
             if (comm.Get_size() > 1) {
-                sdata->broadcastSteererData();
+                steererData->broadcastSteererData();
             }
 
-            EXTENDED()(grid, validRegion, step, session, data, comm, true);
+            EXTENDED()(grid, validRegion, step, session, steererData, comm, true);
 
-            if (sdata->setX.size() > 0) {
+            if (steererData->setX.size() > 0) {
                 executeSetRequests<CELL_TYPE>(
-                        grid, validRegion, step, session, data);
+                        grid, validRegion, step, session, steererData);
             }
 
-            if (sdata->getX.size() > 0) {
+            if (steererData->getX.size() > 0) {
                 executeGetRequests<CELL_TYPE>(
-                        grid, validRegion, step, session, data);
+                        grid, validRegion, step, session, steererData);
             }
 
             if (comm.Get_rank() == 0) {
-                sdata->waitMutex.unlock();
+                steererData->waitMutex.unlock();
             }
         }
     }
@@ -246,8 +243,9 @@ public:
 template<typename T, typename CELL_TYPE, int DIM>
 class Request;
 
+// fixme: unify with 3d implementation
 template<typename T, typename CELL_TYPE>
-class Request<T, CELL_TYPE,2> 
+class Request<T, CELL_TYPE, 2>
 {
 public:
     static bool validateCoords(
@@ -258,15 +256,14 @@ public:
         return validRegion.boundingBox().inBounds(Coord<2>(x, y));
     }
 
-    /*
-     *
-     */
-    static int associateAccessor (
-        DataAccessor<CELL_TYPE>** dataAccessors,
-        int num, std::string name)
+    static int findAccessor(
+        const typename SteererData<CELL_TYPE>::DataAccessorVec& dataAccessors,
+        const std::string& name)
     {
-        for (int i = 0; i < num; ++i) {
-            if ((dataAccessors[i]->getName()).compare(name) == 0) {
+        std::cout << "findAccessor(" << name << ", " << dataAccessors.size() << ")\n";
+        for (int i = 0; i < dataAccessors.size(); ++i) {
+            std::cout << " - checking " << dataAccessors[i]->getName() << " for " << name << "\n";
+            if ((dataAccessors[i]->getName()) == name) {
                 return i;
             }
         }
@@ -274,11 +271,8 @@ public:
         return -1;
     }
 
-    /*
-     *
-     */
     static T valueRequest(
-        DataAccessor<CELL_TYPE>* dataAccessor,
+        DataAccessor<CELL_TYPE>& dataAccessor,
         typename Steerer<CELL_TYPE>::GridType *grid,
         const int x,
         const int y,
@@ -286,20 +280,21 @@ public:
     {
         T value;
         value = 0;
-        dataAccessor->getFunction(grid->at(Coord<2>(x, y)),
-                                  reinterpret_cast<void*>(&value));
+        dataAccessor.getFunction(
+            grid->at(Coord<2>(x, y)),
+            reinterpret_cast<void*>(&value));
         return value;
     }
 
     static void mutationRequest(
-        DataAccessor<CELL_TYPE>* dataAccessor,
+        DataAccessor<CELL_TYPE>& dataAccessor,
         typename Steerer<CELL_TYPE>::GridType *grid,
         const int x,
         const int y,
         const int z,
         T value)
     {
-        dataAccessor->setFunction(
+        dataAccessor.setFunction(
             &(grid->at(Coord<2>(x, y))),
             reinterpret_cast<void*>(&value));
     }
@@ -319,13 +314,13 @@ class Request<T, CELL_TYPE, 3>
         return validRegion.boundingBox().inBounds(Coord<3>(x, y, z));
     }
 
-    static int associateAccessor(
-        DataAccessor<CELL_TYPE> **dataAccessors,
-        int num,
-        std::string name)
+    // fixme: duplication is bad
+    static int findAccessor(
+        const typename SteererData<CELL_TYPE>::DataAccessorVec& dataAccessors,
+        const std::string& name)
     {
-        for (int i = 0; i < num; ++i) {
-            if ((dataAccessors[i]->getName()).compare(name) == 0) {
+        for (int i = 0; i < dataAccessors.size(); ++i) {
+            if ((dataAccessors[i]->getName()) == name) {
                 return i;
             }
         }
@@ -334,7 +329,7 @@ class Request<T, CELL_TYPE, 3>
     }
 
     static T valueRequest(
-        DataAccessor<CELL_TYPE>* dataAccessor,
+        DataAccessor<CELL_TYPE>& dataAccessor,
         typename Steerer<CELL_TYPE>::GridType *grid,
         const int x,
         const int y,
@@ -342,21 +337,21 @@ class Request<T, CELL_TYPE, 3>
     {
         T value;
         value = 0;
-        dataAccessor->getFunction(
+        dataAccessor.getFunction(
             grid->at(Coord<3>(x, y, z)),
             reinterpret_cast<void*>(&value));
         return value;
     }
 
     static void mutationRequest(
-        DataAccessor<CELL_TYPE>* dataAccessor,
+        DataAccessor<CELL_TYPE>& dataAccessor,
         typename Steerer<CELL_TYPE>::GridType *grid,
         const int x,
         const int y,
         const int z,
         T value)
     {
-        dataAccessor->setFunction(
+        dataAccessor.setFunction(
             &(grid->at(Coord<3>(x, y, z))),
             reinterpret_cast<void*>(&value));
     }
@@ -368,93 +363,94 @@ static void executeGetRequests(
     const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
     const unsigned& step,
     MessageBuffer *session,
-    void *data)
+    SteererData<CELL_TYPE> *steererData)
 {
     static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
-    SteererData<CELL_TYPE>* sdata = (SteererData<CELL_TYPE>*) data;
 
     // fixme: function too long
-    for (int j = 0; j < sdata->getX.size(); ++j) {
-        if ((DIM == 3) && (sdata->getZ[j] < 0)) {
+    for (int j = 0; j < steererData->getX.size(); ++j) {
+        if ((DIM == 3) && (steererData->getZ[j] < 0)) {
             session->sendMessage("3 dimensional coords needed\n");
             continue;
         }
-        if ((DIM == 2) && (sdata->getZ[j] > 0)) {
+        if ((DIM == 2) && (steererData->getZ[j] > 0)) {
             session->sendMessage("2 dimensional coords needed\n");
             continue;
         }
         if (!Request<int, CELL_TYPE, DIM>::validateCoords(
-                grid, validRegion, sdata->getX[j],
-                sdata->getY[j], sdata->getZ[j])) {
+                grid, validRegion, steererData->getX[j],
+                steererData->getY[j], steererData->getZ[j])) {
             std::string msg = "no valid coords: ";
-            msg += boost::to_string(sdata->getX[j]) + " ";
-            msg += boost::to_string(sdata->getY[j]);
+            msg += boost::to_string(steererData->getX[j]) + " ";
+            msg += boost::to_string(steererData->getY[j]);
             if (DIM == 3) {
-                msg += " " + boost::to_string(sdata->getZ[j]);
+                msg += " " + boost::to_string(steererData->getZ[j]);
             }
             msg += "\n";
             session->sendMessage(msg);
             continue;
         }
 
-        for (int i = 0; i < sdata->numVars; ++i) {
-            std::string output = sdata->dataAccessors[i]->getName();
-            output += "[" + boost::to_string(sdata->getX[j]) + "][";
-            output += boost::to_string(sdata->getY[j]) + "]";
+        for (int i = 0; i < steererData->dataAccessors.size(); ++i) {
+            std::string output = steererData->dataAccessors[i]->getName();
+            output += "[" + boost::to_string(steererData->getX[j]) + "][";
+            output += boost::to_string(steererData->getY[j]) + "]";
             if (grid->DIM == 3) {
                 output += "[";
-                output += boost::to_string(sdata->getZ[j]) + "]";
+                output += boost::to_string(steererData->getZ[j]) + "]";
             }
             output += " = ";
 
-            if (strcmp("DOUBLE", sdata->dataAccessors[i]->
+            if (strcmp("DOUBLE", steererData->dataAccessors[i]->
                                  getType().c_str()) == 0) {
-                double value = Request<double, CELL_TYPE, DIM>::
-                        valueRequest(
-                            sdata->dataAccessors[i], grid,
-                            sdata->getX[j], sdata->getY[j],
-                            sdata->getZ[j]);
+                double value = Request<double, CELL_TYPE, DIM>::valueRequest(
+                    *steererData->dataAccessors[i],
+                    grid,
+                    steererData->getX[j],
+                    steererData->getY[j],
+                    steererData->getZ[j]);
                 output += boost::to_string(value);
-            } else if (strcmp("INT", sdata->dataAccessors[i]->
-                                   getType().c_str()) == 0) {
-                int value = Request<int, CELL_TYPE, DIM>::
-                        valueRequest(
-                            sdata->dataAccessors[i], grid,
-                            sdata->getX[j], sdata->getY[j],
-                            sdata->getZ[j]);
+            } else if (strcmp("INT", steererData->dataAccessors[i]->getType().c_str()) == 0) {
+                int value = Request<int, CELL_TYPE, DIM>::valueRequest(
+                    *steererData->dataAccessors[i],
+                    grid,
+                    steererData->getX[j],
+                    steererData->getY[j],
+                    steererData->getZ[j]);
                 output += boost::to_string(value);
-            } else if (strcmp("FLOAT", sdata->dataAccessors[i]->
+            } else if (strcmp("FLOAT", steererData->dataAccessors[i]->
                                      getType().c_str()) == 0) {
-                float value = Request<float, CELL_TYPE, DIM>::
-                        valueRequest(
-                            sdata->dataAccessors[i], grid,
-                            sdata->getX[j], sdata->getY[j],
-                            sdata->getZ[j]);
+                float value = Request<float, CELL_TYPE, DIM>::valueRequest(
+                    *steererData->dataAccessors[i],
+                    grid,
+                    steererData->getX[j],
+                    steererData->getY[j],
+                    steererData->getZ[j]);
                 output += boost::to_string(value);
-            } else if (strcmp("CHAR", sdata->dataAccessors[i]->
-                                    getType().c_str()) == 0) {
-                char value = Request<char, CELL_TYPE, DIM>::
-                        valueRequest(
-                            sdata->dataAccessors[i], grid,
-                            sdata->getX[j], sdata->getY[j],
-                            sdata->getZ[j]);
+            } else if (strcmp("CHAR", steererData->dataAccessors[i]->getType().c_str()) == 0) {
+                char value = Request<char, CELL_TYPE, DIM>::valueRequest(
+                    *steererData->dataAccessors[i],
+                    grid,
+                    steererData->getX[j],
+                    steererData->getY[j],
+                    steererData->getZ[j]);
                 output += boost::to_string(value);
-            } else if (strcmp("LONG", sdata->dataAccessors[i]->
-                                    getType().c_str()) == 0) {
-                long value = Request<long, CELL_TYPE, DIM>::
-                        valueRequest(
-                            sdata->dataAccessors[i], grid,
-                            sdata->getX[j], sdata->getY[j],
-                            sdata->getZ[j]);
+            } else if (strcmp("LONG", steererData->dataAccessors[i]->getType().c_str()) == 0) {
+                long value = Request<long, CELL_TYPE, DIM>::valueRequest(
+                    *steererData->dataAccessors[i],
+                    grid,
+                    steererData->getX[j],
+                    steererData->getY[j],
+                    steererData->getZ[j]);
                 output += boost::to_string(value);
             }
             output += "\n";
             session->sendMessage(output);
         }
     }
-    sdata->getX.clear();
-    sdata->getY.clear();
-    sdata->getZ.clear();
+    steererData->getX.clear();
+    steererData->getY.clear();
+    steererData->getZ.clear();
 }
 
 template<typename CELL_TYPE>
@@ -462,135 +458,143 @@ static void executeSetRequests(
     typename Steerer<CELL_TYPE>::GridType *grid,
     const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
     const unsigned& step,
-    MessageBuffer* session,
-    void *data) 
+    MessageBuffer *session,
+    SteererData<CELL_TYPE> *steererData)
 {
     static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
-    SteererData<CELL_TYPE>* sdata = (SteererData<CELL_TYPE>*) data;
 
     // fixme: function too long
-    for (int j = 0; j < sdata->setX.size(); ++j) {
-        int accessor;
-
-        if ((DIM == 3) && (sdata->setZ[j] < 0)) {
+    for (int j = 0; j < steererData->setX.size(); ++j) {
+        if ((DIM == 3) && (steererData->setZ[j] < 0)) {
             session->sendMessage("3 dimensional coords needed\n");
             continue;
         }
         if (!Request<int, CELL_TYPE, DIM>::validateCoords(
-                grid, validRegion, sdata->setX[j],
-                sdata->setY[j], sdata->setZ[j])) {
+                grid, validRegion, steererData->setX[j],
+                steererData->setY[j], steererData->setZ[j])) {
             std::string msg = "no valid coords: ";
-            msg += boost::to_string(sdata->setX[j]) + " ";
-            msg += boost::to_string(sdata->setY[j]);
+            msg += boost::to_string(steererData->setX[j]) + " ";
+            msg += boost::to_string(steererData->setY[j]);
             if (DIM == 3) {
-                msg += " " + boost::to_string(sdata->setZ[j]);
+                msg += " " + boost::to_string(steererData->setZ[j]);
             }
             msg += "\n";
             session->sendMessage(msg);
             continue;
         }
-        accessor = Request<int, CELL_TYPE, DIM>::associateAccessor(
-               sdata->dataAccessors, sdata->numVars, sdata->var[j]);
+        int accessor = Request<int, CELL_TYPE, DIM>::findAccessor(
+            steererData->dataAccessors, steererData->var[j]);
         if (accessor < 0) {
             std::string msg = "no valid variable: ";
-            msg += sdata->var[j] + "\n";
+            msg += steererData->var[j] + "\n";
             session->sendMessage(msg);
             continue;
         }
-        std::string output = sdata->dataAccessors[accessor]->getName();
-        output += " set [" + boost::to_string(sdata->setX[j]) + "][";
-        output += boost::to_string(sdata->setY[j]) + "]";
+        std::string output = steererData->dataAccessors[accessor]->getName();
+        output += " set [" + boost::to_string(steererData->setX[j]) + "][";
+        output += boost::to_string(steererData->setY[j]) + "]";
         if (grid->DIM == 3) {
             output += "[";
-            output += boost::to_string(sdata->setZ[j]) + "]";
+            output += boost::to_string(steererData->setZ[j]) + "]";
         }
         output += " to ";
 
-        if (strcmp("DOUBLE", sdata->dataAccessors[accessor]->
+        if (strcmp("DOUBLE", steererData->dataAccessors[accessor]->
                              getType().c_str()) == 0) {
             double value;
             try {
-                value = mystrtod(sdata->val[j].c_str());
+                value = mystrtod(steererData->val[j].c_str());
             }
             catch (std::exception& e) {
-                std::string msg = "bad value: " + sdata->val[j] + "\n";
+                std::string msg = "bad value: " + steererData->val[j] + "\n";
                 session->sendMessage(msg);
                 continue;
             }
-            Request<double, CELL_TYPE, DIM>::
-                    mutationRequest(
-                        sdata->dataAccessors[accessor], grid,
-                        sdata->setX[j], sdata->setY[j],
-                        sdata->setZ[j], value);
+            Request<double, CELL_TYPE, DIM>::mutationRequest(
+                *steererData->dataAccessors[accessor],
+                grid,
+                steererData->setX[j],
+                steererData->setY[j],
+                steererData->setZ[j],
+                value);
             session->sendMessage(output + boost::to_string(value) + "\n");
-        } else if (strcmp("INT", sdata->dataAccessors[accessor]->
+        } else if (strcmp("INT", steererData->dataAccessors[accessor]->
                                getType().c_str()) == 0) {
             int value;
             try {
-                value = mystrtoi(sdata->val[j].c_str());
+                value = mystrtoi(steererData->val[j].c_str());
             }
             catch (std::exception& e) {
-                std::string msg = "bad value: " + sdata->val[j] + "\n";
+                std::string msg = "bad value: " + steererData->val[j] + "\n";
                 session->sendMessage(msg);
                 continue;
             }
-            Request<int, CELL_TYPE, DIM>::
-                    mutationRequest(
-                        sdata->dataAccessors[accessor], grid,
-                        sdata->setX[j], sdata->setY[j],
-                        sdata->setZ[j], value);
+            Request<int, CELL_TYPE, DIM>::mutationRequest(
+                *steererData->dataAccessors[accessor],
+                grid,
+                steererData->setX[j],
+                steererData->setY[j],
+                steererData->setZ[j],
+                value);
             session->sendMessage(output + boost::to_string(value) + "\n");
-        } else if (strcmp("FLOAT", sdata->dataAccessors[accessor]->
+        } else if (strcmp("FLOAT", steererData->dataAccessors[accessor]->
                                  getType().c_str()) == 0) {
             float value;
             try {
-                value = mystrtof(sdata->val[j].c_str());
+                value = mystrtof(steererData->val[j].c_str());
             }
             catch (std::exception& e) {
-                std::string msg = "bad value: " + sdata->val[j] + "\n";
+                std::string msg = "bad value: " + steererData->val[j] + "\n";
                 session->sendMessage(msg);
                 continue;
             }
-            Request<float, CELL_TYPE, DIM>::
-                    mutationRequest(
-                        sdata->dataAccessors[accessor], grid,
-                        sdata->setX[j], sdata->setY[j],
-                        sdata->setZ[j], value);
+            Request<float, CELL_TYPE, DIM>::mutationRequest(
+                *steererData->dataAccessors[accessor],
+                grid,
+                steererData->setX[j],
+                steererData->setY[j],
+                steererData->setZ[j],
+                value);
             session->sendMessage(output + boost::to_string(value) + "\n");
-        } else if (strcmp("CHAR", sdata->dataAccessors[accessor]->
+        } else if (strcmp("CHAR", steererData->dataAccessors[accessor]->
                                 getType().c_str()) == 0) {
             char value;
-            value = sdata->val[j][0];
-            Request<char, CELL_TYPE, DIM>::
-                    mutationRequest(
-                        sdata->dataAccessors[accessor], grid,
-                        sdata->setX[j], sdata->setY[j],
-                        sdata->setZ[j], value);
+            value = steererData->val[j][0];
+            Request<char, CELL_TYPE, DIM>::mutationRequest(
+                *steererData->dataAccessors[accessor],
+                grid,
+                steererData->setX[j],
+                steererData->setY[j],
+                steererData->setZ[j],
+                value);
             session->sendMessage(output + boost::to_string(value) + "\n");
-        } else if (strcmp("LONG", sdata->dataAccessors[accessor]->
+        } else if (strcmp("LONG", steererData->dataAccessors[accessor]->
                                 getType().c_str()) == 0) {
             long value;
             try {
-                value = mystrtol(sdata->val[j].c_str());
+                value = mystrtol(steererData->val[j].c_str());
             }
             catch (std::exception& e) {
-                std::string msg = "bad value: " + sdata->val[j] + "\n";
+                std::string msg = "bad value: " + steererData->val[j] + "\n";
                 session->sendMessage(msg);
                 continue;
             }
-            Request<long, CELL_TYPE, DIM>::
-                    mutationRequest(
-                        sdata->dataAccessors[accessor], grid,
-                        sdata->setX[j], sdata->setY[j],
-                        sdata->setZ[j], value);
+            Request<long, CELL_TYPE, DIM>::mutationRequest(
+                *steererData->dataAccessors[accessor],
+                grid,
+                steererData->setX[j],
+                steererData->setY[j],
+                steererData->setZ[j],
+                value);
             session->sendMessage(output + boost::to_string(value) + "\n");
         }
     }
-    sdata->setX.clear();
-    sdata->setY.clear();
-    sdata->setZ.clear();
-    sdata->val.clear();
-    sdata->var.clear();
+
+    steererData->setX.clear();
+    steererData->setY.clear();
+    steererData->setZ.clear();
+    steererData->val.clear();
+    steererData->var.clear();
 }
 
 }

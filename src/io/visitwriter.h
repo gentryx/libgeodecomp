@@ -56,6 +56,7 @@ void ControlCommandCallback(
 {
     VisItWriter<CELL_TYPE> *writer = (VisItWriter<CELL_TYPE>*) data;
 
+    // fixme: bad string comparison
     if (strcmp(cmd, "halt") == 0) {
         writer->setRunMode(VISIT_SIMMODE_STOPPED);
     } else if (strcmp(cmd, "step") == 0) {
@@ -78,20 +79,19 @@ public:
     static const int DIMENSIONS = Topology::DIM;
 
     using Writer<CELL_TYPE>::period;
+    using Writer<CELL_TYPE>::prefix;
 
     // fixme: needs test
     VisItWriter(
-        const std::string & prefix,
+        const std::string& prefix,
         const unsigned& period = 1,
-        const int & runMode = 0) :
+        const int& runMode = VISIT_SIMMODE_RUNNING) :
         Writer<CELL_TYPE>(prefix, period),
+        blocking(0),
+        visItState(0),
+        error(0),
         runMode(runMode)
-    {
-        // fixme: do this in initializer list
-        blocking = 0;
-        visitState = 0;
-        error = 0;
-    }
+    {}
 
     // fixme: parameter names shouldn't start with underscore
     virtual void stepFinished(
@@ -169,7 +169,7 @@ public:
 
   private:
     int blocking;
-    int visitState;
+    int visItState;
     int error;
     int runMode;
     int dataNumber;
@@ -179,20 +179,13 @@ public:
     const GridType *grid;
     unsigned step;
 
-    void deleteVarMem(int i)
+    void deleteMemory()
     {
-        if (strcmp("DOUBLE", dataAccessors[i]->getType().c_str()) == 0) {
-            delete [] (reinterpret_cast<double*>(values[i]));
-        } else if (strcmp("INT", dataAccessors[i]->getType().c_str()) == 0) {
-            delete [] (reinterpret_cast<int*>(values[i]));
-        } else if (strcmp("FLOAT", dataAccessors[i]->getType().c_str()) == 0) {
-            delete [] (reinterpret_cast<float*>(values[i]));
-        } else if (strcmp("CHAR", dataAccessors[i]->getType().c_str()) == 0) {
-            delete [] (reinterpret_cast<char*>(values[i]));
-        } else if (strcmp("LONG", dataAccessors[i]->getType().c_str()) == 0) {
-            delete [] (reinterpret_cast<long*>(values[i]));
+        for (int i=0; i < dataAccessors.size(); ++i) {
+            values[i].resize(0);
         }
     }
+
 
     /*
      * get memory where variabledata are stored
@@ -202,18 +195,17 @@ public:
         unsigned int size = getGrid()->boundingBox().size();
 
         if (strcmp("DOUBLE", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i] = new double[size];
+            values[i].resize(size * sizeof(double));
         } else if (strcmp("INT", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i] = new int[size];
+            values[i].resize(size * sizeof(int));
         } else if (strcmp("FLOAT", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i] = new float[size];
+            values[i].resize(size * sizeof(float));
         } else if (strcmp("CHAR", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i] = new char[size];
+            values[i].resize(size * sizeof(char));
         } else if (strcmp("LONG", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i] = new long[size];
+            values[i].resize(size * sizeof(long));
         } else {
-            error = UNKNOWN_TYPE;
-            return;
+            throw std::invalid_argument("unknown variable type");
         }
     }
 
@@ -224,7 +216,7 @@ public:
     {
         values.resize(dataAccessors.size());
 
-        for(int i=0; i < numVars; ++i) {
+        for (int i=0; i < dataAccessors.size(); ++i) {
             variableMap[dataAccessors[i]->getName()] = i;
             initVarMem(i);
             if (error != 0) {
@@ -233,25 +225,19 @@ public:
         }
     }
 
-    /*
-     * delete memory for all variables
-     */
-    void deleteMemory()
-    {
-        for(int i=0; i < numVars; ++i) {
-            deleteVarMem (i);
-        }
-        delete [] values;
-    }
-
     void initialized()
     {
         VisItSetupEnvironment();
         char buffer[1024];
-        if (getcwd(buffer, 1024) == NULL) {
+        if (getcwd(buffer, sizeof(buffer)) == NULL) {
             setError(NO_CWD);
         }
-        VisItInitializeSocketAndDumpSimFile("libgeodecomp", "",
+        std::string filename = "libgeodecomp";
+        if (prefix.length() > 0) {
+            filename += "_";
+            filename += prefix;
+        }
+        VisItInitializeSocketAndDumpSimFile(filename.c_str(), "",
             buffer, NULL, NULL, NULL);
 
         checkVisitState();
@@ -272,16 +258,16 @@ public:
                 break;
             }
             blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
-            visitState = VisItDetectInput(blocking, -1);
-            if (visitState <= -1) {
+            visItState = VisItDetectInput(blocking, -1);
+            if (visItState <= -1) {
                 std::cerr << "Can’t recover from error!" << std::endl;
-                error = visitState;
+                error = visItState;
                 runMode = VISIT_SIMMODE_RUNNING;
                 break;
-            } else if (visitState == 0) {
+            } else if (visItState == 0) {
                 /* There was no input from VisIt, return control to sim. */
                 break;
-            } else if (visitState == 1) {
+            } else if (visItState == 1) {
                 /* VisIt is trying to connect to sim. */
                 if (VisItAttemptToCompleteConnection()) {
                     std::cout << "VisIt connected" << std::endl;
@@ -300,7 +286,7 @@ public:
                     char *visitError = VisItGetLastError();
                     std::cerr << "VisIt did not connect: " << visitError << std::endl;
                 }
-            } else if (visitState == 2) {
+            } else if (visItState == 2) {
                 /* VisIt wants to tell the engine something. */
                 runMode = VISIT_SIMMODE_STOPPED;
                 if (!VisItProcessEngineCommand()) {
@@ -342,7 +328,7 @@ public:
         // fixme: this should be the writer
         SVW *simData = reinterpret_cast<SVW*>(cbdata);
 
-        for(int i=0; i < simData->getNumVars(); ++i) {
+        for (int i=0; i < simData->getNumVars(); ++i) {
             if (strcmp("DOUBLE", simData->dataAccessors[i]->getType().c_str()) == 0) {
                 return VisitDataDouble::SimGetVariable(domain, name, simData);
             } else if (strcmp("INT", simData->dataAccessors[i]->getType().c_str()) == 0) {
@@ -380,9 +366,9 @@ public:
             if(VisIt_VariableData_alloc(&h) == VISIT_OKAY) {
                 if(simData->variableMap.find(name) != simData->variableMap.end()) {
                     int num = simData->variableMap[name];
-                    T *value  = (T *) simData->values[num];
+                    T *value  = (T *) &simData->values[num][0];
                     unsigned j = 0;
-                    for(typename CoordBox<DIMENSIONS>::Iterator i = box.begin();
+                    for (typename CoordBox<DIMENSIONS>::Iterator i = box.begin();
                             i != box.end(); ++i) {
                         simData->dataAccessors[num]->getFunction(
                                 simData->getGrid()->at(*i), reinterpret_cast<void*>(&value[j]));
@@ -401,7 +387,8 @@ public:
     class SetDataDouble
     {
     public:
-        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, double *ptr) {
+        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, double *ptr)
+        {
             VisIt_VariableData_setDataD(obj, owner, ncomps, ntuples, ptr);
         }
     };
@@ -409,7 +396,8 @@ public:
     class SetDataInt
     {
     public:
-        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, int  *ptr) {
+        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, int  *ptr)
+        {
             VisIt_VariableData_setDataI(obj, owner, ncomps, ntuples, ptr);
         }
     };
@@ -418,7 +406,8 @@ public:
     class SetDataFloat
     {
     public:
-        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, float *ptr) {
+        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, float *ptr)
+        {
             VisIt_VariableData_setDataF(obj, owner, ncomps, ntuples, ptr);
         }
     };
@@ -426,7 +415,8 @@ public:
     class SetDataChar
     {
     public:
-        void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, char *ptr) {
+        void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, char *ptr)
+        {
             VisIt_VariableData_setDataC(obj, owner, ncomps, ntuples, ptr);
         }
     };
@@ -434,7 +424,8 @@ public:
     class SetDataLong
     {
     public:
-        void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, long *ptr) {
+        void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, long *ptr)
+        {
             VisIt_VariableData_setDataL(obj, owner, ncomps, ntuples, ptr);
         }
     };
@@ -443,7 +434,8 @@ public:
      * set meta data for visit:
      *      - variable type (only zonal scalar variable at the moment)
      */
-    static visit_handle SimGetMetaData(void *cbdata) {
+    static visit_handle SimGetMetaData(void *cbdata)
+    {
         visit_handle md = VISIT_INVALID_HANDLE;
         SVW *simData = reinterpret_cast<SVW*>(cbdata);
 
@@ -479,7 +471,7 @@ public:
                 }
 
                 /* Add a zonal scalar variable on mesh2d. */
-                for(std::map<std::string, int>::iterator it = simData->variableMap.begin();
+                for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
                     it != simData->variableMap.end(); ++it) {
                     if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
                         VisIt_VariableMetaData_setName(vmd, it->first.c_str());
@@ -511,7 +503,7 @@ public:
                 }
 
                 /* Add a zonal scalar variable on mesh3d. */
-                for(std::map<std::string, int>::iterator it = simData->variableMap.begin();
+                for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
                     it != simData->variableMap.end(); ++it) {
                     if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
                         VisIt_VariableMetaData_setName(vmd, it->first.c_str());
@@ -555,13 +547,13 @@ public:
     class GetMesh;
 
     template<typename CELL>
-    class GetMesh<CELL, 2> 
+    class GetMesh<CELL, 2>
     {
     public:
         static visit_handle SimGetMesh(
-            int domain, 
-            const char *name, 
-            void *cdata) 
+            int domain,
+            const char *name,
+            void *cdata)
         {
             // fixme: too long
             visit_handle h = VISIT_INVALID_HANDLE;
@@ -598,12 +590,12 @@ public:
     };
 
     template<typename CELL>
-    class GetMesh<CELL, 3> 
+    class GetMesh<CELL, 3>
     {
     public:
         // fixme: unify?
         // fixme: too long
-        static visit_handle SimGetMesh(int domain, const char *name, void *cdata) 
+        static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
         {
             visit_handle h = VISIT_INVALID_HANDLE;
             VisItWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
@@ -654,7 +646,8 @@ public:
 class PointMesh
 {
 public:
-    static int getMeshType() {
+    static int getMeshType()
+    {
         return VISIT_MESHTYPE_RECTILINEAR;
     }
 
@@ -662,10 +655,12 @@ public:
     class GetMesh;
 
     template<typename CELL>
-    class GetMesh<CELL, 2> {
+    class GetMesh<CELL, 2>
+    {
     public:
         // fixme: too long
-        static visit_handle SimGetMesh(int domain, const char *name, void *cdata) {
+        static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
+        {
             visit_handle h = VISIT_INVALID_HANDLE;
             VisItWriter<CELL, PointMesh >* simData = reinterpret_cast
                     <VisItWriter<CELL, PointMesh >*>(cdata);
@@ -704,7 +699,7 @@ public:
     };
 
     template<typename CELL>
-    class GetMesh<CELL, 3> 
+    class GetMesh<CELL, 3>
     {
     public:
         // fixme: too long
@@ -728,8 +723,9 @@ public:
                     CoordBox<3> box = simData->getGrid()->boundingBox();
 
                     unsigned j = 0;
-                    for(typename CoordBox<3>::Iterator i = box.begin();
-                            i != box.end(); ++i) {
+                    for (typename CoordBox<3>::Iterator i = box.begin();
+                         i != box.end();
+                         ++i) {
                         simData->x[j] = i->x() * 1.0;
                         simData->y[j] = i->y() * 1.0;
                         simData->z[j] = i->z() * 1.0;

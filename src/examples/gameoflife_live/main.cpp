@@ -123,8 +123,8 @@ DEFINE_DATAACCESSOR(ConwayCell, int, count);
 class MySteererData : public SteererData<ConwayCell>
 {
 public:
-    MySteererData(DataAccessor<ConwayCell> **dataAccessors, int numVars) :
-        SteererData<ConwayCell>(dataAccessors, numVars)
+    MySteererData() :
+        SteererData<ConwayCell>()
     {}
 
     boost::mutex size_mutex;
@@ -134,15 +134,17 @@ template<typename CELL_TYPE, typename DATATYPE>
 class MyControl : RemoteSteererHelper::SteererControl<CELL_TYPE, DATATYPE>
 {
 public:
-    virtual void operator()(typename Steerer<CELL_TYPE>::GridType*,
-            const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-            const unsigned&, MessageBuffer *session,
-            void *data,
-            const MPI::Intracomm&, bool)
+    virtual void operator()(
+        typename Steerer<CELL_TYPE>::GridType *grid,
+        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
+        const unsigned& step,
+        MessageBuffer *session,
+        DATATYPE *data,
+        const MPI::Intracomm& comm,
+        bool changed)
     {
         MySteererData *sdata = (MySteererData*)data;
-        if (sdata->size_mutex.try_lock())
-        {
+        if (sdata->size_mutex.try_lock()) {
             std::string msg = "size: ";
             msg += boost::to_string(validRegion.size()) + "\n";
             session->sendMessage(msg);
@@ -173,13 +175,10 @@ void runSimulation()
         new CellInitializer());
 
 
-    VisItWriter<ConwayCell> *visItWriter =
-        new VisItWriter<ConwayCell>(
-            "./gameoflife_live",
-            outputFrequency,
-            0);
-    visItWriter.addVariable(new aliveDataAccessor());
-    visItWriter.addVariable(new countDataAccessor());
+    VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
+        "gameOfLife", outputFrequency, VISIT_SIMMODE_STOPPED);
+    visItWriter->addVariable(new aliveDataAccessor());
+    visItWriter->addVariable(new countDataAccessor());
 
     sim.addWriter(visItWriter);
 
@@ -188,23 +187,26 @@ void runSimulation()
      * extend default remote steerer commands part 2
      * ---------------------------------------------
      */
-    CommandServer::functionMap* fmap = RemoteSteerer<ConwayCell>
-            ::getDefaultMap();
-    (*fmap)["size"] = sizeFunction;
+    CommandServer::FunctionMap functionMap = RemoteSteerer<ConwayCell>::getDefaultMap();
+    functionMap["size"] = sizeFunction;
 
     MySteererData *myData = new MySteererData();
-    myData.addVariable(new aliveDataAccessor());
-    myData.addVariable(new countDataAccessor());
+    myData->addVariable(new aliveDataAccessor());
+    myData->addVariable(new countDataAccessor());
 
     // fixme: class names must start with capitals
     // fixme: too long template instantiation
 
     Steerer<ConwayCell> *steerer =
         new RemoteSteerer<ConwayCell,
+                          MySteererData,
                           DefaultSteererControl<
                               ConwayCell, MySteererData, MyControl<
                                   ConwayCell, SteererData<ConwayCell> > > >(
-                                      1, 1234, fmap, myData);
+                                      1,
+                                      1234,
+                                      functionMap,
+                                      myData);
     sim.addSteerer(steerer);
 
     sim.run();

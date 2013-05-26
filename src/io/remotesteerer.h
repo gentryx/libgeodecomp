@@ -18,7 +18,7 @@ using namespace RemoteSteererHelper;
  * from a single network connection.
  */
 template<typename CELL_TYPE,
-         typename DATATYPE=SteererData<CELL_TYPE>,
+         typename STEERER_DATA_TYPE=SteererData<CELL_TYPE>,
          typename CONTROL=DefaultSteererControl<CELL_TYPE> >
 class RemoteSteerer : public Steerer<CELL_TYPE>
 {
@@ -29,58 +29,62 @@ public:
     RemoteSteerer(
         const unsigned& period,
         int port,
-        CommandServer::functionMap *commandMap = getDefaultMap(),
-        void *userData = 0,
+        CommandServer::FunctionMap commandMap = getDefaultMap(),
+        STEERER_DATA_TYPE *steererData = 0,
         const MPI::Intracomm& comm = MPI::COMM_WORLD) :
         Steerer<CELL_TYPE>(period),
-        userData(userData),
+        steererData(steererData),
         comm(comm)
     {
         if (comm.Get_rank() != 0) {
             return;
         }
 
-        server = new CommandServer::Server(port, commandMap, userData);
+        std::cout << "RemoteSteerer(), steererData->dataAccessors.size() = " << steererData->dataAccessors.size() << "\n";
+        server = new CommandServer::Server(port, commandMap, steererData);
         server->startServer();
     }
 
-    /**
-     *
-     */
     virtual ~RemoteSteerer()
     {
+        // fixme: avoid delete. do we really need defaultData/Map?
         delete server;
     }
 
-    /**
-     *
-     */
+    static CommandServer::FunctionMap getDefaultMap()
+    {
+        CommandServer::FunctionMap defaultMap;
+        defaultMap["help"] = helpFunction;
+        defaultMap["get"] = getFunction;
+        defaultMap["set"] = setFunction;
+        defaultMap["finish"] = finishFunction;
+
+        return defaultMap;
+    }
+
     virtual void nextStep(
             GridType *grid,
             const Region<Topology::DIM>& validRegion,
-            const unsigned& step) {
-        RemoteSteererHelper::MessageBuffer* msgBuffer;
+            unsigned step) {
+        RemoteSteererHelper::MessageBuffer *msgBuffer;
         if (comm.Get_rank() == 0) {
             msgBuffer = new RemoteSteererHelper::MessageBuffer(comm, server->session);
-        }
-        else {
+        } else {
             msgBuffer = new RemoteSteererHelper::MessageBuffer(comm, NULL);
         }
-        CONTROL()(grid, validRegion, step, msgBuffer, userData, comm);
+        std::cout << "RemoteSteerer::nextStep(), steererData->dataAccessors().size() = " << steererData->dataAccessors.size() << "\n";
+        CONTROL()(grid, validRegion, step, msgBuffer, steererData, comm);
         if (comm.Get_size() > 1) {
             msgBuffer->collectMessages();
         }
         delete msgBuffer;
     }
 
-    /**
-     *
-     */
     static void helpFunction(std::vector<std::string> stringVec,
                             CommandServer::Session *session,
                             void *data) {
-        CommandServer::functionMap commandMap = session->getMap();
-        for (CommandServer::functionMap::iterator it = commandMap.begin();
+        CommandServer::FunctionMap commandMap = session->getMap();
+        for (CommandServer::FunctionMap::iterator it = commandMap.begin();
              it != commandMap.end(); ++ it) {
             std::string command = (*it).first;
             if (command.compare("help") != 0) {
@@ -100,7 +104,7 @@ public:
                             CommandServer::Session *session,
                             void *data) 
     {
-        SteererData<CELL_TYPE> *sdata = (SteererData<CELL_TYPE>*) data;
+        STEERER_DATA_TYPE *sdata = (STEERER_DATA_TYPE*) data;
         int x = 0;
         int y = 0;
         int z = -1;
@@ -128,13 +132,10 @@ public:
         sdata->getZ.push_back(z);
     }
 
-    /**
-     *
-     */
     static void setFunction(std::vector<std::string> stringVec,
                             CommandServer::Session *session,
                             void *data) {
-        SteererData<CELL_TYPE> *sdata = (SteererData<CELL_TYPE>*) data;
+        STEERER_DATA_TYPE *sdata = (STEERER_DATA_TYPE*) data;
         int x = 0;
         int y = 0;
         int z = -1;
@@ -168,13 +169,10 @@ public:
         sdata->var.push_back(var);
     }
 
-    /**
-     *
-     */
     static void finishFunction(std::vector<std::string> stringVec,
                             CommandServer::Session *session,
                             void *data) {
-        SteererData<CELL_TYPE> *sdata = (SteererData<CELL_TYPE>*) data;
+        STEERER_DATA_TYPE *sdata = (STEERER_DATA_TYPE*) data;
         std::string helpMsg = "    Usage: finish\n";
         helpMsg += "          sets lock and waits until a step is finished\n";
         helpMsg += "          has to be used to start default set and get operations\n";
@@ -187,21 +185,12 @@ public:
         sdata->waitMutex.lock();
     }
 
-  private:
+private:
     CommandServer::Server *server;
-    void *userData;
+    // fixme: use shared_ptr here and in command server
+    STEERER_DATA_TYPE *steererData;
     MPI::Intracomm comm;
 
-    static CommandServer::functionMap *getDefaultMap()
-    {
-        CommandServer::functionMap* defaultMap = new CommandServer::functionMap();
-        (*defaultMap)["help"] = helpFunction;
-        (*defaultMap)["get"] = getFunction;
-        (*defaultMap)["set"] = setFunction;
-        (*defaultMap)["finish"] = finishFunction;
-
-        return defaultMap;
-    }
 };
 
 }

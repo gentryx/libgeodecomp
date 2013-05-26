@@ -111,8 +111,8 @@ private:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    CellInitializer() :
-        SimpleInitializer<Cell>(Coord<2>(90, 90), 10000)
+    CellInitializer(int maxSteps) :
+        SimpleInitializer<Cell>(Coord<2>(90, 90), maxSteps)
     {}
 
     virtual void grid(GridBase<Cell, 2> *ret)
@@ -152,9 +152,10 @@ DEFINE_DATAACCESSOR(Cell, int, rate)
 class MySteererData : public SteererData<Cell>
 {
 public:
-    MySteererData(DataAccessor<Cell>** dataAccessors, int numVars) :
-        SteererData<Cell>(dataAccessors, numVars, MPI::COMM_WORLD)
+    MySteererData(const MPI::Intracomm& comm = MPI::COMM_WORLD) :
+        SteererData<Cell>(comm)
     {
+        // fixme: rename to getStepMutex
         getstep_mutex.lock();
     }
 
@@ -168,13 +169,12 @@ public:
         Steerer<Cell>::GridType *grid,
         const Region<Steerer<Cell>::Topology::DIM>& validRegion,
         const unsigned& step,
-        RemoteSteererHelper::MessageBuffer* session,
-        void *data,
-        const MPI::Intracomm& _comm,
-        bool _changed = true)
+        RemoteSteererHelper::MessageBuffer *session,
+        MySteererData *steererData,
+        const MPI::Intracomm& comm,
+        bool changed = true)
     {
-        MySteererData* sdata = (MySteererData*) data;
-        if (sdata->getstep_mutex.try_lock()) {
+        if (steererData->getstep_mutex.try_lock()) {
             std::string msg = "current step: ";
             msg += boost::to_string(step) + "\n";
             session->sendMessage(msg);
@@ -264,28 +264,33 @@ static void setRateFunction(
 
 void runSimulation()
 {
-    SerialSimulator<Cell> sim(new CellInitializer());
+    int maxSteps = 1000000;
+    SerialSimulator<Cell> sim(new CellInitializer(maxSteps));
 
-    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("./cars", 1, VISIT_SIMMODE_STOPPED);
-    visItWriter.addWriter(new borderDataAccessor());
-    visItWriter.addWriter(new directionDataAccessor());
-    visItWriter.addWriter(new rateDataAccessor());
+    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("cars", 1, VISIT_SIMMODE_STOPPED);
+    visItWriter->addVariable(new borderDataAccessor());
+    visItWriter->addVariable(new directionDataAccessor());
+    visItWriter->addVariable(new rateDataAccessor());
     sim.addWriter(visItWriter);
 
-    sim.addWriter(
-        new TracingWriter<Cell>(
-            1,
-            10000));
+    sim.addWriter(new TracingWriter<Cell>(1, maxSteps));
 
-    MySteererData *myData = new MySteererData(vars, 3);
+    MySteererData *myData = new MySteererData();
+    myData->addVariable(new borderDataAccessor());
+    myData->addVariable(new directionDataAccessor());
+    myData->addVariable(new rateDataAccessor());
 
-    CommandServer::functionMap* fmap = RemoteSteerer<Cell>::getDefaultMap();
-    (*fmap)["getstep"] = getStepFunction;
-    (*fmap)["setrate"] = setRateFunction;
+    CommandServer::FunctionMap functionMap = RemoteSteerer<Cell>::getDefaultMap();
+    functionMap["getstep"] = getStepFunction;
+    functionMap["setrate"] = setRateFunction;
 
-    Steerer<Cell>* steerer = new RemoteSteerer <Cell, MySteererData,
-        DefaultSteererControl<Cell, MySteererData, MyControl> >(
-        1, 1234, vars, 3, fmap, (void*)myData, MPI::COMM_WORLD);
+    Steerer<Cell>* steerer =
+        new RemoteSteerer<Cell, MySteererData, DefaultSteererControl<Cell, MySteererData, MyControl> >(
+        1,
+        1234,
+        functionMap,
+        myData,
+        MPI::COMM_WORLD);
     sim.addSteerer(steerer);
 
     sim.run();

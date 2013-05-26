@@ -23,10 +23,10 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class StripingSimulator : public DistributedSimulator<CELL_TYPE>
 {
-    friend class StripingSimulatorTest;
-    friend class ParallelStripingSimulatorTest;
 
 public:
+    friend class StripingSimulatorTest;
+    friend class ParallelStripingSimulatorTest;
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
     typedef typename CELL_TYPE::Topology Topology;
@@ -35,43 +35,44 @@ public:
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
     enum WaitTags {
-        GENERAL, 
-        BALANCELOADS, 
+        GENERAL,
+        BALANCELOADS,
         GHOSTREGION_ALPHA,
         GHOSTREGION_BETA
     };
 
     using DistributedSimulator<CELL_TYPE>::initializer;
-    using DistributedSimulator<CELL_TYPE>::writers;
-    using DistributedSimulator<CELL_TYPE>::stepNum;
+    using DistributedSimulator<CELL_TYPE>::getStep;
     using DistributedSimulator<CELL_TYPE>::steerers;
+    using DistributedSimulator<CELL_TYPE>::stepNum;
+    using DistributedSimulator<CELL_TYPE>::writers;
 
     StripingSimulator(
-        Initializer<CELL_TYPE> *_initializer, 
+        Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
-        const unsigned& _loadBalancingPeriod = 1,
-        const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()): 
-        DistributedSimulator<CELL_TYPE>(_initializer),
+        const unsigned& loadBalancingPeriod = 1,
+        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()):
+        DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
-        loadBalancingPeriod(_loadBalancingPeriod),
-        cellMPIDatatype(_cellMPIDatatype)
+        loadBalancingPeriod(loadBalancingPeriod),
+        cellMPIDatatype(cellMPIDatatype)
     {
-        if (_loadBalancingPeriod  < 1) {
+        if (loadBalancingPeriod  < 1) {
             throw std::invalid_argument(
-                "loadBalancingPeriod ( " + StringConv::itoa(loadBalancingPeriod) + 
+                "loadBalancingPeriod ( " + StringConv::itoa(loadBalancingPeriod) +
                 ") must be positive");
         }
-        
+
         // node 0 needs a (central) LoadBalancer...
         if (mpilayer.rank() == 0 && balancer == 0) {
             throw std::invalid_argument(
-                "Rank " + StringConv::itoa(mpilayer.rank()) + 
+                "Rank " + StringConv::itoa(mpilayer.rank()) +
                 "(Root) needs a non-empty LoadBalancer");
         }
         // ...while the others shouldn't have one (they rely on the central one).
         if (mpilayer.rank() != 0 && balancer != 0) {
             throw std::invalid_argument(
-                "Rank " + StringConv::itoa(mpilayer.rank()) + 
+                "Rank " + StringConv::itoa(mpilayer.rank()) +
                 "(Non-Root) needs an empty LoadBalancer");
         }
 
@@ -95,7 +96,7 @@ public:
      * performs a single simulation step.
      */
     virtual void step()
-    {   
+    {
         balanceLoad();
 
         // notify all registered Steerers
@@ -120,12 +121,13 @@ public:
     virtual void run()
     {
         initSimulation();
+        setWriterRegions();
         handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
             step();
         }
-    
+
         handleOutput(WRITER_ALL_DONE);
     }
 
@@ -138,17 +140,14 @@ private:
     MPILayer mpilayer;
     boost::shared_ptr<LoadBalancer> balancer;
     /**
-     * we need to distinguish four types of rims: 
-     *   - the inner rim is sent to neighboring nodes (and lies whithin our own 
-     *     stripe)
-     *   - the outer rim is received from them (and is appended beneath/above 
-     *     our stripe)
-     *   - the lower rim is located at the lower edge of our stripe (where the 
-     *     absolute value of the y-coordinates are higher),
-     *   - the upper rim conversely is at the upper edge (smaller coordinate 
-     *     values) 
+     * we need to distinguish four types of rims:
+     *   - the inner rim is sent to neighboring nodes (and lies whithin our own stripe)
+     *   - the outer rim is received from them (and is appended beneath/above our stripe)
+     *   - the lower rim is located at the lower edge of our stripe (where the absolute
+     *     value of the y-coordinates are higher),
+     *   - the upper rim conversely is at the upper edge (smaller coordinate values)
      *
-     * we assume the inner and outer rims to be of the same size. "rim" is the 
+     * we assume the inner and outer rims to be of the same size. "rim" is the
      * same as "ghost" and "ghost region".
      */
     unsigned ghostHeightLower;
@@ -178,7 +177,7 @@ private:
      * responsible, "partition()[i + 1] - 1" is the last one.
      */
     WeightVec partition(unsigned gridHeight, unsigned size) const
-    {    
+    {
         WeightVec ret(size + 1);
         for (unsigned i = 0; i < size; i++) {
             ret[i] = gridHeight * i / size;
@@ -188,7 +187,7 @@ private:
     }
 
     /**
-     * the methods below are just used to structurize the step() method. 
+     * the methods below are just used to structurize the step() method.
      */
     void balanceLoad()
     {
@@ -205,7 +204,7 @@ private:
             WeightVec newWorkloads = balancer->balance(oldWorkloads, loads);
             validateLoads(newWorkloads, oldWorkloads);
             newPartitionsSendBuffer = workloadsToPartitions(newWorkloads);
-    
+
             for (unsigned i = 0; i < mpilayer.size(); i++) {
                 mpilayer.sendVec(&newPartitionsSendBuffer, i, BALANCELOADS);
             }
@@ -242,16 +241,26 @@ private:
         mpilayer.wait(GHOSTREGION_BETA);
     }
 
+    void setWriterRegions()
+    {
+        for(unsigned i = 0; i < writers.size(); i++) {
+            writers[i]->setRegion(region);
+        }
+    }
+
     void handleOutput(WriterEvent event)
     {
         for(unsigned i = 0; i < writers.size(); i++) {
-            writers[i]->stepFinished(
-                *curStripe,
-                region,
-                gridDimensions(),
-                this->getStep(),
-                event, 
-                true);
+            if ((event != WRITER_STEP_FINISHED) ||
+                ((getStep() % writers[i]->getPeriod()) == 0)) {
+                writers[i]->stepFinished(
+                    *curStripe,
+                    region,
+                    gridDimensions(),
+                    getStep(),
+                    event,
+                    true);
+            }
         }
     }
 
@@ -259,9 +268,9 @@ private:
      * returns a bounding box with the same dimensions as the whole
      * grid, but the most significant dimension (z in the 3d case or y
      * in the 2d case) runs from start to end.
-     */ 
+     */
     CoordBox<DIM> boundingBox(
-        const unsigned& start, 
+        const unsigned& start,
         const unsigned& end)
     {
         int height = std::max((int)(end - start), 0);
@@ -276,8 +285,8 @@ private:
     void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
     {
         chrono.tic();
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
-             i != region.endStreak(); 
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
@@ -291,7 +300,7 @@ private:
     }
 
     /**
-     * the methods below are just used to structurize the nanoStep() method. 
+     * the methods below are just used to structurize the nanoStep() method.
      */
     void updateInnerGhostRegion(const unsigned& nanoStep)
     {
@@ -300,23 +309,23 @@ private:
     }
 
     void recvOuterGhostRegion(GridType *stripe)
-    {    
+    {
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
-        if (upperNeighborRank != -1) { 
+        if (upperNeighborRank != -1) {
             mpilayer.recvUnregisteredRegion(
-                stripe, 
-                outerUpperGhostRegion, 
-                upperNeighborRank, 
+                stripe,
+                outerUpperGhostRegion,
+                upperNeighborRank,
                 GHOSTREGION_ALPHA,
                 cellMPIDatatype);
         }
         if (lowerNeighborRank != -1) {
             mpilayer.recvUnregisteredRegion(
-                stripe, 
-                outerLowerGhostRegion, 
-                lowerNeighborRank, 
+                stripe,
+                outerLowerGhostRegion,
+                lowerNeighborRank,
                 GHOSTREGION_BETA,
                 cellMPIDatatype);
         }
@@ -329,17 +338,17 @@ private:
 
         if (upperNeighborRank != -1) {
             mpilayer.sendUnregisteredRegion(
-                stripe, 
-                innerUpperGhostRegion, 
-                upperNeighborRank, 
+                stripe,
+                innerUpperGhostRegion,
+                upperNeighborRank,
                 GHOSTREGION_BETA,
                 cellMPIDatatype);
         }
         if (lowerNeighborRank != -1) {
             mpilayer.sendUnregisteredRegion(
-                stripe, 
-                innerLowerGhostRegion, 
-                lowerNeighborRank, 
+                stripe,
+                innerLowerGhostRegion,
+                lowerNeighborRank,
                 GHOSTREGION_ALPHA,
                 cellMPIDatatype);
         }
@@ -347,7 +356,7 @@ private:
 
     void updateInside(const unsigned& nanoStep)
     {
-        updateRegion(innerRegion,  nanoStep);
+        updateRegion(innerRegion, nanoStep);
     }
 
     Region<DIM> fillRegion(const int& startRow, const int& endRow)
@@ -391,10 +400,10 @@ private:
      */
     CoordBox<DIM> adaptDimensions(const WeightVec& newPartitions)
     {
-        unsigned startRow = 
+        unsigned startRow =
             newPartitions[mpilayer.rank()    ];
-        unsigned endRow =   
-            newPartitions[mpilayer.rank() + 1];    
+        unsigned endRow =
+            newPartitions[mpilayer.rank() + 1];
 
         // no need for ghostzones if zero-height stripe
         if (startRow == endRow) {
@@ -420,7 +429,7 @@ private:
         partitions = newPartitions;
 
         CoordBox<DIM> box = boundingBox(
-            startRow - ghostHeightUpper, 
+            startRow - ghostHeightUpper,
             endRow   + ghostHeightLower);
         return box;
     }
@@ -432,12 +441,12 @@ private:
         if (WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
-            while (lowerNeighbor != mpilayer.rank() && 
+            while (lowerNeighbor != mpilayer.rank() &&
                    partitions[lowerNeighbor] == partitions[lowerNeighbor + 1])
                 lowerNeighbor = (size + lowerNeighbor + 1) % size;
         } else {
              lowerNeighbor = mpilayer.rank() + 1;
-            while (lowerNeighbor != mpilayer.size() && 
+            while (lowerNeighbor != mpilayer.size() &&
                    partitions[lowerNeighbor] == partitions[lowerNeighbor + 1])
                 lowerNeighbor++;
             if (lowerNeighbor == mpilayer.size())
@@ -453,16 +462,16 @@ private:
         if (WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
-            while (upperNeighbor != mpilayer.rank() && 
+            while (upperNeighbor != mpilayer.rank() &&
                    partitions[upperNeighbor] == partitions[upperNeighbor + 1])
-                upperNeighbor = (size + upperNeighbor - 1) % size;   
+                upperNeighbor = (size + upperNeighbor - 1) % size;
         } else {
             upperNeighbor = mpilayer.rank() - 1;
-            while (upperNeighbor >= 0 && 
+            while (upperNeighbor >= 0 &&
                    partitions[upperNeighbor] == partitions[upperNeighbor + 1])
-                upperNeighbor--;   
+                --upperNeighbor;
         }
-        
+
         return upperNeighbor;
     }
 
@@ -485,7 +494,7 @@ private:
         return ret;
     }
 
-    void redistributeGrid(const WeightVec& oldPartitions, 
+    void redistributeGrid(const WeightVec& oldPartitions,
                           const WeightVec& newPartitions)
     {
         waitForGhostRegions();
@@ -496,7 +505,7 @@ private:
         newStripe->resize(box);
 
         // collect newStripe from others
-        unsigned newStartRow = 
+        unsigned newStartRow =
             newPartitions[mpilayer.rank()    ];
         unsigned newEndRow =
             newPartitions[mpilayer.rank() + 1];
@@ -519,10 +528,10 @@ private:
         }
 
         // send curStripe to others
-        unsigned oldStartRow = 
+        unsigned oldStartRow =
             oldPartitions[mpilayer.rank()    ];
-        unsigned oldEndRow =   
-            oldPartitions[mpilayer.rank() + 1];    
+        unsigned oldEndRow =
+            oldPartitions[mpilayer.rank() + 1];
         for (int i = 0; i < newPartitions.size(); ++i) {
             unsigned targetStartRow = newPartitions[i];
             unsigned targetEndRow   = newPartitions[i + 1];
@@ -540,7 +549,7 @@ private:
                     cellMPIDatatype);
             }
         }
-    
+
         mpilayer.wait(BALANCELOADS);
 
         curStripe->resize(box);
@@ -555,7 +564,7 @@ private:
      */
     void validateLoads(const WeightVec& newLoads, const WeightVec& oldLoads) const
     {
-        if (newLoads.size() != oldLoads.size() || 
+        if (newLoads.size() != oldLoads.size() ||
             newLoads.sum() != oldLoads.sum()) {
             throw std::invalid_argument(
                     "newLoads and oldLoads do not maintain invariance");

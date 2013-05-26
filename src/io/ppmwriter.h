@@ -14,15 +14,15 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename CELL_PLOTTER>
 class PPMWriter : public Writer<CELL_TYPE>
-{    
- public:
+{
+public:
     friend class PPMWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
     PPMWriter(
-        const std::string& prefix, 
+        const std::string& prefix,
         const unsigned period = 1,
         const unsigned dimX = 20,
         const unsigned dimY = 20) :
@@ -31,7 +31,7 @@ class PPMWriter : public Writer<CELL_TYPE>
         gridPlotter(&cellPlotter, dimX, dimY)
     {}
 
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
@@ -55,15 +55,15 @@ class PPMWriter : public Writer<CELL_TYPE>
         }
 
         // header first:
-        outfile << "P6 " << img.getDimensions().x() 
+        outfile << "P6 " << img.getDimensions().x()
                 << " "   << img.getDimensions().y() << " 255\n";
 
         // body second:
         for (unsigned y = 0; y < img.getDimensions().y(); ++y) {
             for (unsigned x = 0; x < img.getDimensions().x(); ++x) {
                 const Color& rgb = img[y][x];
-                outfile << (char)rgb.red() 
-                        << (char)rgb.green() 
+                outfile << (char)rgb.red()
+                        << (char)rgb.green()
                         << (char)rgb.blue();
             }
         }

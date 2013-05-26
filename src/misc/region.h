@@ -23,7 +23,7 @@ public:
         if (a[DIM] != b[DIM]) {
             return false;
         }
-        
+
         return StreakIteratorCompareIterators<DIM - 1>()(a, b);
     }
 };
@@ -34,7 +34,7 @@ class StreakIteratorCompareIterators<0>
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
         return a[0] == b[0];
@@ -47,7 +47,7 @@ class StreakIteratorInitBegin
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
@@ -66,7 +66,7 @@ class StreakIteratorInitBegin<0>
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
@@ -85,7 +85,7 @@ class StreakIteratorInitEnd
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
@@ -126,7 +126,7 @@ protected:
             return;
         }
 
-        for (VecType::iterator incrementer = start; 
+        for (VecType::iterator incrementer = start;
              incrementer != end; ++incrementer) {
             incrementer->second += inserts;
         }

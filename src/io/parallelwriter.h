@@ -15,9 +15,9 @@ class DistributedSimulator;
  * ParallelWriter is the parent class for all parallel IO. Its being
  * used with ParallelSimulator, which contrasts it from Writer. Just
  * like writer, it defines a number of callbacks which are invoked by
- * the simulator. Also, ParallelWriter registers at the 
+ * the simulator. Also, ParallelWriter registers at the
  * DistributedSimulator, which will delete it upon its destruction.
- * Never allocate a ParallelWriter on the stack! 
+ * Never allocate a ParallelWriter on the stack!
  *
  * A conceptual difference from Writer should be noted: multiple
  * ParallelWriter objects of the same type will exists, typically one
@@ -35,22 +35,31 @@ public:
      * is the equivalent to Writer().
      */
     ParallelWriter(
-        const std::string& prefix, 
-        const unsigned& period = 1) : 
-        prefix(prefix), 
+        const std::string& prefix,
+        const unsigned& period) :
+        prefix(prefix),
         period(period)
     {
-        if (prefix == "") {
-            throw std::invalid_argument("empty prefixes are forbidden");
-        }
-
         if (period == 0) {
             throw std::invalid_argument("period must be positive");
         }
     }
 
-    virtual ~ParallelWriter() 
-    {};    
+    virtual ~ParallelWriter()
+    {};
+
+    /**
+     * notifies the ParallelWriter that the supplied region is the
+     * domain of the current process. This fuction will be called once
+     * the domain decomposition has been done. Writers can use this
+     * information to decide on the size of buffers to allocate or
+     * determine file offsets. validRegion in stepFinished() will
+     * always be a subset of newRegion.
+     */
+    virtual void setRegion(const Region<Topology::DIM>& newRegion)
+    {
+        region = newRegion;
+    }
 
     /**
      * is called back from \a sim after each simulation step. event
@@ -63,11 +72,11 @@ public:
      * the interior of the domain).
      */
     virtual void stepFinished(
-        const GridType& grid, 
-        const Region<Topology::DIM>& validRegion, 
+        const GridType& grid,
+        const Region<Topology::DIM>& validRegion,
         const Coord<Topology::DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
+        unsigned step,
+        WriterEvent event,
         bool lastCall) = 0;
 
     const unsigned& getPeriod() const
@@ -81,6 +90,7 @@ public:
     }
 
 protected:
+    Region<Topology::DIM> region;
     std::string prefix;
     DistributedSimulator<CELL_TYPE> *distSim;
     unsigned period;

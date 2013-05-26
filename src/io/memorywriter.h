@@ -19,11 +19,11 @@ public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
 
-    MemoryWriter(unsigned period = 1) : 
-        Writer<CELL_TYPE>("foobar", period) 
+    MemoryWriter(unsigned period = 1) :
+        Writer<CELL_TYPE>("", period)
     {}
-    
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
+
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
@@ -31,7 +31,7 @@ public:
 
         grids.push_back(grid);
     }
-        
+
     GridType& getGrid(int i)
     {
         return grids[i];

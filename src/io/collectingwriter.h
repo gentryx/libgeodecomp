@@ -29,8 +29,8 @@ public:
         const unsigned period = 1,
         const int root = 0,
         MPI::Comm *communicator = &MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) : 
-        ParallelWriter<CELL_TYPE>("foo",  period),
+        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        ParallelWriter<CELL_TYPE>("",  period),
         writer(writer),
         mpiLayer(communicator),
         root(root),
@@ -46,12 +46,12 @@ public:
     }
 
     virtual void stepFinished(
-        const SimulatorGridType& grid, 
-        const Region<DIM>& validRegion, 
+        const SimulatorGridType& grid,
+        const Region<DIM>& validRegion,
         const Coord<DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
-        bool lastCall) 
+        unsigned step,
+        WriterEvent event,
+        bool lastCall)
     {
         if (mpiLayer.rank() == root) {
             if (globalGrid.boundingBox().dimensions != globalDimensions) {
