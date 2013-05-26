@@ -5,9 +5,9 @@
 #define LIBGEODECOMP_IO_STEERERDATA_H
 
 #include <boost/shared_ptr.hpp>
-#include <mpi.h>
 #include <libgeodecomp/misc/dataaccessor.h>
 #include <libgeodecomp/misc/supervector.h>
+#include <mpi.h>
 
 namespace LibGeoDecomp {
 

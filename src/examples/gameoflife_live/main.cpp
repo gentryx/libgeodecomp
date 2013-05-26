@@ -1,4 +1,3 @@
-#include <libgeodecomp/config.h>
 #include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/mpilayer/typemaps.h>
 #include <libgeodecomp/io/bovwriter.h>
@@ -10,9 +9,9 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/visitwriter.h>
+#include <libgeodecomp/io/remotesteerer/commandserver.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/misc/commandserver.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
@@ -37,18 +36,17 @@ public:
     ConwayCell(const bool& _alive = false) :
         alive(_alive)
     {
-        if(alive)
-            count = 1;
-        else
-            count = 0;
+        count = alive? 1 : 0;
     }
 
     int countLivingNeighbors(const CoordMap<ConwayCell>& neighborhood)
     {
         int ret = 0;
-        for (int y = -1; y < 2; ++y)
-            for (int x = -1; x < 2; ++x)
+        for (int y = -1; y < 2; ++y) {
+            for (int x = -1; x < 2; ++x) {
                 ret += neighborhood[Coord<2>(x, y)].alive;
+            }
+        }
         ret -= neighborhood[Coord<2>(0, 0)].alive;
         return ret;
     }

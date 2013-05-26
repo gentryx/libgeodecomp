@@ -1,5 +1,6 @@
 #ifndef LIBGEODECOMP_MISC_COMMANDSERVER_H
 #define LIBGEODECOMP_MISC_COMMANDSERVER_H
+
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
@@ -9,9 +10,9 @@
 #include <stdexcept>
 #include <map>
 
-using boost::asio::ip::tcp;
-
 namespace LibGeoDecomp {
+
+using boost::asio::ip::tcp;
 
 /*
  * a server, which can be reached by tcp(nc, telnet, ...)
@@ -23,6 +24,7 @@ class CommandServer
 {
 public:
     class Session;
+
 
     typedef boost::shared_ptr<tcp::socket> SocketPtr;
     typedef std::vector<std::string> StringVec;

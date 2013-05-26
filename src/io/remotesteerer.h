@@ -4,8 +4,8 @@
 #define LIBGEODECOMP_IO_REMOTESTEERER_H
 
 #include <libgeodecomp/io/steerer.h>
-#include <libgeodecomp/misc/commandserver.h>
-#include <libgeodecomp/misc/remotesteererhelper.h>
+#include <libgeodecomp/io/remotesteerer/commandserver.h>
+#include <libgeodecomp/io/remotesteerer/remotesteererhelper.h>
 #include <libgeodecomp/mpilayer/typemaps.h>
 #include <mpi.h>
 

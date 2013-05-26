@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
 #define LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
 
-#include <libgeodecomp/io/steererdata.h>
-#include <libgeodecomp/misc/commandserver.h>
+#include <libgeodecomp/io/remotesteerer/steererdata.h>
+#include <libgeodecomp/io/remotesteerer/commandserver.h>
 #include <libgeodecomp/misc/dataaccessor.h>
 
 #include <sstream>

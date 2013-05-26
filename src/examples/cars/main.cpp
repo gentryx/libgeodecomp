@@ -1,12 +1,11 @@
 #include <mpi.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/visitwriter.h>
+#include <libgeodecomp/io/remotesteerer/remotesteererhelper.h>
 #include <libgeodecomp/misc/dataaccessor.h>
-#include <libgeodecomp/misc/remotesteererhelper.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/mpilayer/typemaps.h>
 
