@@ -588,13 +588,13 @@ public:
         std::copy(beginStreak(), endStreak(), ret.begin());
         return ret;
     }
-    
+
     inline std::string toString() const
     {
         std::ostringstream buf;
         buf << "Region(\n";
         for (int dim = 0; dim < DIM; ++dim) {
-            buf << "indices[" << dim << "] = " 
+            buf << "indices[" << dim << "] = "
                 << indices[dim] << "\n";
         }
         buf << ")\n";

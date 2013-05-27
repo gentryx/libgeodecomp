@@ -17,7 +17,7 @@ std::string operator+(const std::string& a, const std::string& b)
 
 namespace LibGeoDecomp {
 
-class StringConv
+class StringOps
 {
 public:
     static std::string itoa(int i)
@@ -34,5 +34,5 @@ public:
 };
 
 }
- 
+
 #endif

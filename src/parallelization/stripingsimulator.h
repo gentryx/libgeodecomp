@@ -59,20 +59,20 @@ public:
     {
         if (loadBalancingPeriod  < 1) {
             throw std::invalid_argument(
-                "loadBalancingPeriod ( " + StringConv::itoa(loadBalancingPeriod) +
+                "loadBalancingPeriod ( " + StringOps::itoa(loadBalancingPeriod) +
                 ") must be positive");
         }
 
         // node 0 needs a (central) LoadBalancer...
         if (mpilayer.rank() == 0 && balancer == 0) {
             throw std::invalid_argument(
-                "Rank " + StringConv::itoa(mpilayer.rank()) +
+                "Rank " + StringOps::itoa(mpilayer.rank()) +
                 "(Root) needs a non-empty LoadBalancer");
         }
         // ...while the others shouldn't have one (they rely on the central one).
         if (mpilayer.rank() != 0 && balancer != 0) {
             throw std::invalid_argument(
-                "Rank " + StringConv::itoa(mpilayer.rank()) +
+                "Rank " + StringOps::itoa(mpilayer.rank()) +
                 "(Non-Root) needs an empty LoadBalancer");
         }
 

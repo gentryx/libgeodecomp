@@ -75,8 +75,8 @@ public:
         return inBounds(maxOrigin) && other.inBounds(maxOrigin);
     }
 
-    inline unsigned size() const 
-    { 
+    inline unsigned size() const
+    {
         return dimensions.prod();
     }
 
@@ -84,12 +84,12 @@ public:
     {
     public:
         inline Iterator(
-            const Coord<DIM>& _origin, 
-            const Coord<DIM>& start, 
+            const Coord<DIM>& origin,
+            const Coord<DIM>& start,
             const Coord<DIM>& dimensions) :
             cursor(start),
-            origin(_origin),
-            end(_origin + dimensions)
+            origin(origin),
+            end(origin + dimensions)
         {}
 
         inline bool operator==(const Iterator& other) const
@@ -107,14 +107,15 @@ public:
             return cursor;
         }
 
-        inline const Coord<DIM>* operator->() const 
+        inline const Coord<DIM>* operator->() const
         {
             return &cursor;
         }
-        
+
         inline Iterator& operator++()
         {
             int i;
+
             for (i = 0; i < DIM - 1; ++i) {
                 if (++cursor[i] == end[i]) {
                     cursor[i] = origin[i];
@@ -134,7 +135,7 @@ public:
             buffer << "StripingPartition::Iterator(" << cursor << ", " << end << ")";
             return buffer.str();
         }
-            
+
     private:
         Coord<DIM> cursor;
         Coord<DIM> origin;

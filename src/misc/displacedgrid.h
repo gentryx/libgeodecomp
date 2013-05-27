@@ -15,8 +15,8 @@ namespace LibGeoDecomp {
  * access. Useful for writing topology agnostic code that should work
  * an a torus, too.
  */
-template<typename CELL_TYPE, 
-         typename TOPOLOGY=Topologies::Cube<2>::Topology, 
+template<typename CELL_TYPE,
+         typename TOPOLOGY=Topologies::Cube<2>::Topology,
          bool TOPOLOGICALLY_CORRECT=false>
 class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
@@ -160,9 +160,9 @@ public:
     inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
     {
         Coord<DIM> relativeCoord = center - origin;
-        if (TOPOLOGICALLY_CORRECT) 
-            relativeCoord = 
-                Topology::normalize(relativeCoord, topoDimensions);
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
         return MyCoordMap(relativeCoord, &delegate);
     }
 
@@ -171,7 +171,7 @@ public:
         return &delegate;
     }
 
-    inline Delegate *vanillaGrid() 
+    inline Delegate *vanillaGrid()
     {
         return &delegate;
     }

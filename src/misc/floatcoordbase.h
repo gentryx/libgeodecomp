@@ -4,7 +4,7 @@
 namespace LibGeoDecomp {
 
 template<int DIM>
-class FloatCoordBase 
+class FloatCoordBase
 {
     friend class Typemaps;
 public:

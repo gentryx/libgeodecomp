@@ -116,8 +116,7 @@ public:
 
         std::string expectedEvents = "initialized()\n";
         for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
-            expectedEvents +=
-                "stepFinished(step=" + StringConv::itoa(i) + ")\n";
+            expectedEvents += "stepFinished(step=" + StringOps::itoa(i) + ")\n";
         }
         expectedEvents += "allDone()\n";
 

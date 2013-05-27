@@ -36,7 +36,7 @@ public:
         return (*((std::map<Key, Value>*)this))[key];
     }
 
-    inline std::string toString() const 
+    inline std::string toString() const
     {
         std::ostringstream temp;
         temp << "{";

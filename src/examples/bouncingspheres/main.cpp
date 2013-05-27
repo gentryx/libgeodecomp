@@ -22,9 +22,9 @@ class Boundary
 public:
     friend class Sphere;
     friend class GasWriter;
-    
+
     Boundary(
-        const FloatCoord<3>& myCenter = FloatCoord<3>(), 
+        const FloatCoord<3>& myCenter = FloatCoord<3>(),
         const FloatCoord<3>& myNormal = FloatCoord<3>()) :
         center(myCenter),
         normal(myNormal),
@@ -32,7 +32,7 @@ public:
     {}
 
     void update(
-        const Sphere **neighborSpheres, 
+        const Sphere **neighborSpheres,
         const int *numSpheres);
 
 private:
@@ -50,7 +50,7 @@ public:
 
     Sphere(
         const int& myID = 0,
-        const FloatCoord<3>& myPos = FloatCoord<3>(), 
+        const FloatCoord<3>& myPos = FloatCoord<3>(),
         const FloatCoord<3>& myVel = FloatCoord<3>()) :
         id(myID),
         pos(myPos),
@@ -312,7 +312,7 @@ private:
     {
         std::stringstream buf;
         buf << "sphere {\n"
-            << "  <" << ball.pos[0] << ", " << ball.pos[1] << ", " 
+            << "  <" << ball.pos[0] << ", " << ball.pos[1] << ", "
             << ball.pos[2] << ">, " << SPHERE_RADIUS << "\n"
             << "  texture {\n"
             << "    pigment {color White}\n"
@@ -334,22 +334,23 @@ private:
         FloatCoord<3> corner1 = tile.center - diag;
         FloatCoord<3> corner2 = tile.center + diag;
         double factor = 0.4;
-        if (tile.normal.sum() < 0) 
+        if (tile.normal.sum() < 0) {
             factor = -factor;
+        }
         corner1 += tile.normal * BOUNDARY_DIM * factor;
         corner2 -= tile.normal * BOUNDARY_DIM * factor;
- 
+
         double transmit = 1.0 - tile.glow * 0.3;
         double ior = 1.0 + tile.glow * 0.5;
 
         std::stringstream buf;
         buf << "box {\n"
-            << "  <" <<  corner1[0] 
-            << ", "  <<  corner1[1] 
-            << ", "  <<  corner1[2] 
+            << "  <" <<  corner1[0]
+            << ", "  <<  corner1[1]
+            << ", "  <<  corner1[2]
             << ">, <" << corner2[0]
-            << ", "  <<  corner2[1] 
-            << ", "  <<  corner2[2] 
+            << ", "  <<  corner2[1]
+            << ", "  <<  corner2[2]
             << ">\n"
             << "  texture {\n"
             << "    pigment {color Blue transmit " << transmit << "}\n"
@@ -364,11 +365,11 @@ private:
 class GasInitializer : public SimpleInitializer<Container>
 {
 public:
-    GasInitializer(const Coord<3>& dimensions, const unsigned& steps) : 
+    GasInitializer(const Coord<3>& dimensions, const unsigned& steps) :
         SimpleInitializer<Container>(dimensions, steps)
     {}
 
-    virtual void grid(GridBase<Container, 3> *target) 
+    virtual void grid(GridBase<Container, 3> *target)
     {
         CoordBox<3> box = target->boundingBox();
 
@@ -380,10 +381,10 @@ public:
             double pseudo_rand1 = (j->sum() * 11 % 16 - 8) / 256.0;
             double pseudo_rand2 = (j->sum() * 31 % 16 - 8) / 256.0;
             double pseudo_rand3 = (j->sum() * 41 % 16 - 8) / 256.0;
-            
+
             FloatCoord<3> center(
-                (j->x() + 0.5) * CONTAINER_DIM, 
-                (j->y() + 0.5) * CONTAINER_DIM, 
+                (j->x() + 0.5) * CONTAINER_DIM,
+                (j->y() + 0.5) * CONTAINER_DIM,
                 (j->z() + 0.5) * CONTAINER_DIM);
 
             Container container(FloatCoord<3>(*j) * CONTAINER_DIM);
@@ -396,11 +397,11 @@ public:
                         pseudo_rand1,
                         pseudo_rand2,
                         pseudo_rand3)));
-            
+
             // Bounday elements should align centered to the outsides
             // of the cells. I prefer this slightly complicated code
             // to overly reduncant code.
-            
+
             // left boundary
             if (j->x() == 0) {
                 addBoundary(&container, center, FloatCoord<3>(1, 0, 0));
@@ -437,7 +438,7 @@ public:
 private:
     void addBoundary(
         Container *container,
-        const FloatCoord<3>& containerCenter, 
+        const FloatCoord<3>& containerCenter,
         const FloatCoord<3>& normal)
     {
         FloatCoord<3> boundaryCenter = containerCenter - normal * (CONTAINER_DIM * 0.5);
@@ -450,13 +451,13 @@ int main(int argc, char **argv)
 {
     SerialSimulator<Container> sim(
         new GasInitializer(
-            Coord<3>(10, 10, 10), 
+            Coord<3>(10, 10, 10),
             40000));
     sim.addWriter(
         new GasWriter(
             "sim",
             200));
-                           
+
     sim.run();
 
     return 0;
