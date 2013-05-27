@@ -4,11 +4,11 @@
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
 #include <cerrno>
 #include <stdexcept>
 #include <map>
+#include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
 
@@ -75,7 +75,6 @@ private:
     void runSession ()
     {
         for (;;) {
-            // use a buffer of 1024 Bytes
             boost::array<char, 1024> buf;
             boost::system::error_code errorCode;
             size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
@@ -97,37 +96,25 @@ private:
         }
     }
 
-    // fixme: move to string helper class?
-    static void splitString(std::string input, StringVec& output, std::string s)
-    {
-        boost::split(output, input,
-                     boost::is_any_of(s), boost::token_compress_on);
-    }
-
     void handleInput(const std::string& input)
     {
-        StringVec lines;
-        StringVec parameter;
-        std::string message;
+        StringOps::StringVec lines = StringOps::tokenize(input, "\n");
+        for (StringOps::StringVec::iterator iter = lines.begin();
+             iter != lines.end();
+             ++iter) {
+            StringOps::StringVec parameters = StringOps::tokenize(*iter, " ");
 
-        splitString(input, lines, std::string("\n"));
-        for (StringVec::iterator iter = lines.begin();
-             iter != lines.end(); ++iter) {
-            splitString(*iter, parameter, std::string(" "));
-            switch(parameter.size()) {
-            case 0:
-                message = "no command\n";
+            if (parameters.size() > 0) {
+                sendMessage("no command\n");
+            }
+
+            FunctionMap::iterator it = commandMap.find(parameters[0]);
+            if (it != commandMap.end()) {
+                commandMap[parameters[0]](parameters, this, userData);
+            } else {
+                std::string message = "command not found: " + parameters[0] + "\n";
+                message += "try \"help\"\n";
                 sendMessage(message);
-                break;
-            default:
-                FunctionMap::iterator it = commandMap.find(parameter[0]);
-                if (it != commandMap.end()) {
-                    commandMap[parameter[0]](parameter, this, userData);
-                } else {
-                    message = "command not found: " + parameter[0] + "\n";
-                    message += "try \"help\"\n";
-                    sendMessage(message);
-                }
             }
         }
     }

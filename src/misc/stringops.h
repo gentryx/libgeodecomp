@@ -1,7 +1,9 @@
 #ifndef LIBGEODECOMP_MISC_STRINGOPS_H
 #define LIBGEODECOMP_MISC_STRINGOPS_H
 
+#include <boost/algorithm/string.hpp>
 #include <sstream>
+#include <libgeodecomp/misc/supervector.h>
 
 // sad but true: CodeGear's C++ compiler has troubles with the +
 // operator for strings.
@@ -20,16 +22,28 @@ namespace LibGeoDecomp {
 class StringOps
 {
 public:
+    typedef SuperVector<std::string> StringVec;
+
     static std::string itoa(int i)
     {
-        std::stringstream z;
-        z << i;
-        return z.str();
+        std::stringstream buf;
+        buf << i;
+        return buf.str();
     }
 
-    static int atoi(std::string s)
+    static int atoi(const std::string& s)
     {
-        return atoi(s.c_str());
+        std::stringstream buf(s);
+        int ret;
+        buf >> ret;
+        return ret;
+    }
+
+    static StringVec tokenize(const std::string& string, const std::string& delimiters)
+    {
+        StringVec ret;
+        boost::split(ret, string, boost::is_any_of(delimiters), boost::token_compress_on);
+        return ret;
     }
 };
 
