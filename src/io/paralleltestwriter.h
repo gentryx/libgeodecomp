@@ -15,7 +15,7 @@ namespace LibGeoDecomp {
 class ParallelTestWriter : public ParallelWriter<TestCell<2> >
 {
 public:
-    typedef typename ParallelWriter<TestCell<2> >::GridType GridType;
+    typedef ParallelWriter<TestCell<2> >::GridType GridType;
     using ParallelWriter<TestCell<2> >::region;
 
     ParallelTestWriter(
