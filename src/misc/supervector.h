@@ -38,6 +38,11 @@ public:
         std::vector<T>(i, t)
     {}
 
+    template<typename ITERATOR>
+    inline SuperVector(ITERATOR start, ITERATOR end) :
+        std::vector<T>(start, end)
+    {}
+
     /**
      * Deletes items from _self_ that are equal to @param obj
      */
