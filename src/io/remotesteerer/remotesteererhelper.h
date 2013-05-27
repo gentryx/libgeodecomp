@@ -1,88 +1,16 @@
-#ifndef LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
-#define LIBGEODECOMP_MISC_REMOTESTEERERHELPER_H
+#ifndef LIBGEODECOMP_IO_REMOTESTEERER_REMOTESTEERERHELPER_H
+#define LIBGEODECOMP_IO_REMOTESTEERER_REMOTESTEERERHELPER_H
 
 #include <libgeodecomp/io/remotesteerer/steererdata.h>
 #include <libgeodecomp/io/remotesteerer/commandserver.h>
+#include <libgeodecomp/io/remotesteerer/commandserverproxy.h>
 #include <libgeodecomp/misc/dataaccessor.h>
 
 #include <sstream>
-#include <mpi.h>
 
 namespace LibGeoDecomp {
 
-namespace RemoteSteererHelper {
-
-/*
- * processes without direct access to the CommandServer Session buffer
- * their messages and root will collect and send them to the client
- */
-// fixme: move to namespace or dedicated file
-class MessageBuffer
-{
-public:
-    MessageBuffer(MPI::Intracomm& comm, CommandServer::Session *session) :
-        comm(comm),
-        session(session)
-    {}
-
-    void sendMessage(std::string msg)
-    {
-        if (comm.Get_rank() == 0) {
-            session->sendMessage("thread 0: " + msg);
-        }
-        else {
-            msgBuffer.push_back(msg);
-        }
-    }
-
-    void collectMessages()
-    {
-        int vectorSize = 0;
-        int stringSize = 0;
-        int msgCount[comm.Get_size()];
-        if (comm.Get_rank() == 0) {
-            comm.Gather(&vectorSize, 1, MPI::INT, msgCount, 1, MPI::INT, 0);
-
-            // fixme: early return/continue
-            for (int i = 1; i < comm.Get_size(); ++i) {
-                if (msgCount[i] > 0) {
-                    for (int j = 0; j < msgCount[i]; ++j) {
-                        comm.Recv(&stringSize, 1, MPI::INT, i, 1);
-                        char charBuffer[stringSize + 1];
-                        charBuffer[stringSize] = '\0';
-                        comm.Recv(charBuffer, stringSize, MPI::CHAR, i, 2);
-                        std::string thread = "thread ";
-                        std::stringstream ss;
-                        ss << i;
-                        thread += ss.str();
-                        thread += ": ";
-                        session->sendMessage(thread + std::string(charBuffer));
-                    }
-                }
-            }
-        }
-        else {
-            // fixme: decompose
-            vectorSize = msgBuffer.size();
-            comm.Gather(&vectorSize, 1, MPI::INT, msgCount, 1, MPI::INT, 0);
-
-            if (vectorSize > 0) {
-                for (int i = 0; i < vectorSize; ++i) {
-                    stringSize = msgBuffer.at(i).size();
-                    comm.Send(&stringSize, 1, MPI::INT, 0, 1);
-                    char* tmp = const_cast<char*>(msgBuffer.at(i).c_str());
-                    comm.Send(tmp, stringSize, MPI::CHAR, 0, 2);
-                }
-                msgBuffer.clear();
-            }
-        }
-    }
-
-private:
-    std::vector<std::string> msgBuffer;
-    MPI::Intracomm& comm;
-    CommandServer::Session *session;
-};
+namespace RemoteSteererHelpers {
 
 // fixme: replace this with library code
 static double mystrtod(const char *ptr)
@@ -141,7 +69,7 @@ static void executeGetRequests(
     typename Steerer<CELL_TYPE>::GridType *grid,
     const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
     const unsigned& step,
-    CommandServer::Session *session,
+    CommandServerProxy *proxy,
     SteererData<CELL_TYPE> *steererData);
 
 template<typename CELL_TYPE>
@@ -149,7 +77,7 @@ static void executeSetRequests(
     typename Steerer<CELL_TYPE>::GridType *grid,
     const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
     const unsigned& step,
-    CommandServer::Session *session,
+    CommandServerProxy *proxy,
     SteererData<CELL_TYPE> *steererData);
 
 // fixme: move this to dedicated file
@@ -161,7 +89,7 @@ class SteererControl
         typename Steerer<CELL_TYPE>::GridType *grid,
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
-        MessageBuffer *session,
+        CommandServerProxy *proxy,
         DATATYPE *steererData,
         const MPI::Intracomm& comm,
         bool changed) = 0;
@@ -175,7 +103,7 @@ public:
         typename Steerer<CELL_TYPE>::GridType *grid,
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
-        MessageBuffer *session,
+        CommandServerProxy *proxy,
         DATATYPE *steererData,
         const MPI::Intracomm& comm,
         bool changed = false)
@@ -194,7 +122,7 @@ public:
         typename Steerer<CELL_TYPE>::GridType *grid,
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
-        MessageBuffer *session,
+        CommandServerProxy *proxy,
         DATATYPE *steererData,
         const MPI::Intracomm& comm,
         bool changed = false)
@@ -215,16 +143,16 @@ public:
                 steererData->broadcastSteererData();
             }
 
-            EXTENDED()(grid, validRegion, step, session, steererData, comm, true);
+            EXTENDED()(grid, validRegion, step, proxy, steererData, comm, true);
 
             if (steererData->setX.size() > 0) {
                 executeSetRequests<CELL_TYPE>(
-                        grid, validRegion, step, session, steererData);
+                        grid, validRegion, step, proxy, steererData);
             }
 
             if (steererData->getX.size() > 0) {
                 executeGetRequests<CELL_TYPE>(
-                        grid, validRegion, step, session, steererData);
+                        grid, validRegion, step, proxy, steererData);
             }
 
             if (comm.Get_rank() == 0) {
@@ -362,7 +290,7 @@ static void executeGetRequests(
     typename Steerer<CELL_TYPE>::GridType *grid,
     const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
     const unsigned& step,
-    MessageBuffer *session,
+    CommandServerProxy *proxy,
     SteererData<CELL_TYPE> *steererData)
 {
     static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
@@ -370,11 +298,11 @@ static void executeGetRequests(
     // fixme: function too long
     for (int j = 0; j < steererData->getX.size(); ++j) {
         if ((DIM == 3) && (steererData->getZ[j] < 0)) {
-            session->sendMessage("3 dimensional coords needed\n");
+            proxy->sendMessage("3 dimensional coords needed\n");
             continue;
         }
         if ((DIM == 2) && (steererData->getZ[j] > 0)) {
-            session->sendMessage("2 dimensional coords needed\n");
+            proxy->sendMessage("2 dimensional coords needed\n");
             continue;
         }
         if (!Request<int, CELL_TYPE, DIM>::validateCoords(
@@ -387,7 +315,7 @@ static void executeGetRequests(
                 msg += " " + boost::to_string(steererData->getZ[j]);
             }
             msg += "\n";
-            session->sendMessage(msg);
+            proxy->sendMessage(msg);
             continue;
         }
 
@@ -445,7 +373,7 @@ static void executeGetRequests(
                 output += boost::to_string(value);
             }
             output += "\n";
-            session->sendMessage(output);
+            proxy->sendMessage(output);
         }
     }
     steererData->getX.clear();
@@ -458,7 +386,7 @@ static void executeSetRequests(
     typename Steerer<CELL_TYPE>::GridType *grid,
     const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
     const unsigned& step,
-    MessageBuffer *session,
+    CommandServerProxy *proxy,
     SteererData<CELL_TYPE> *steererData)
 {
     static const int DIM = Steerer<CELL_TYPE>::Topology::DIM;
@@ -466,7 +394,7 @@ static void executeSetRequests(
     // fixme: function too long
     for (int j = 0; j < steererData->setX.size(); ++j) {
         if ((DIM == 3) && (steererData->setZ[j] < 0)) {
-            session->sendMessage("3 dimensional coords needed\n");
+            proxy->sendMessage("3 dimensional coords needed\n");
             continue;
         }
         if (!Request<int, CELL_TYPE, DIM>::validateCoords(
@@ -479,7 +407,7 @@ static void executeSetRequests(
                 msg += " " + boost::to_string(steererData->setZ[j]);
             }
             msg += "\n";
-            session->sendMessage(msg);
+            proxy->sendMessage(msg);
             continue;
         }
         int accessor = Request<int, CELL_TYPE, DIM>::findAccessor(
@@ -487,7 +415,7 @@ static void executeSetRequests(
         if (accessor < 0) {
             std::string msg = "no valid variable: ";
             msg += steererData->var[j] + "\n";
-            session->sendMessage(msg);
+            proxy->sendMessage(msg);
             continue;
         }
         std::string output = steererData->dataAccessors[accessor]->getName();
@@ -507,7 +435,7 @@ static void executeSetRequests(
             }
             catch (std::exception& e) {
                 std::string msg = "bad value: " + steererData->val[j] + "\n";
-                session->sendMessage(msg);
+                proxy->sendMessage(msg);
                 continue;
             }
             Request<double, CELL_TYPE, DIM>::mutationRequest(
@@ -517,7 +445,7 @@ static void executeSetRequests(
                 steererData->setY[j],
                 steererData->setZ[j],
                 value);
-            session->sendMessage(output + boost::to_string(value) + "\n");
+            proxy->sendMessage(output + boost::to_string(value) + "\n");
         } else if (strcmp("INT", steererData->dataAccessors[accessor]->
                                getType().c_str()) == 0) {
             int value;
@@ -526,7 +454,7 @@ static void executeSetRequests(
             }
             catch (std::exception& e) {
                 std::string msg = "bad value: " + steererData->val[j] + "\n";
-                session->sendMessage(msg);
+                proxy->sendMessage(msg);
                 continue;
             }
             Request<int, CELL_TYPE, DIM>::mutationRequest(
@@ -536,7 +464,7 @@ static void executeSetRequests(
                 steererData->setY[j],
                 steererData->setZ[j],
                 value);
-            session->sendMessage(output + boost::to_string(value) + "\n");
+            proxy->sendMessage(output + boost::to_string(value) + "\n");
         } else if (strcmp("FLOAT", steererData->dataAccessors[accessor]->
                                  getType().c_str()) == 0) {
             float value;
@@ -545,7 +473,7 @@ static void executeSetRequests(
             }
             catch (std::exception& e) {
                 std::string msg = "bad value: " + steererData->val[j] + "\n";
-                session->sendMessage(msg);
+                proxy->sendMessage(msg);
                 continue;
             }
             Request<float, CELL_TYPE, DIM>::mutationRequest(
@@ -555,7 +483,7 @@ static void executeSetRequests(
                 steererData->setY[j],
                 steererData->setZ[j],
                 value);
-            session->sendMessage(output + boost::to_string(value) + "\n");
+            proxy->sendMessage(output + boost::to_string(value) + "\n");
         } else if (strcmp("CHAR", steererData->dataAccessors[accessor]->
                                 getType().c_str()) == 0) {
             char value;
@@ -567,7 +495,7 @@ static void executeSetRequests(
                 steererData->setY[j],
                 steererData->setZ[j],
                 value);
-            session->sendMessage(output + boost::to_string(value) + "\n");
+            proxy->sendMessage(output + boost::to_string(value) + "\n");
         } else if (strcmp("LONG", steererData->dataAccessors[accessor]->
                                 getType().c_str()) == 0) {
             long value;
@@ -576,7 +504,7 @@ static void executeSetRequests(
             }
             catch (std::exception& e) {
                 std::string msg = "bad value: " + steererData->val[j] + "\n";
-                session->sendMessage(msg);
+                proxy->sendMessage(msg);
                 continue;
             }
             Request<long, CELL_TYPE, DIM>::mutationRequest(
@@ -586,7 +514,7 @@ static void executeSetRequests(
                 steererData->setY[j],
                 steererData->setZ[j],
                 value);
-            session->sendMessage(output + boost::to_string(value) + "\n");
+            proxy->sendMessage(output + boost::to_string(value) + "\n");
         }
     }
 

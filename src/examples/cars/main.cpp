@@ -168,7 +168,7 @@ public:
         Steerer<Cell>::GridType *grid,
         const Region<Steerer<Cell>::Topology::DIM>& validRegion,
         const unsigned& step,
-        RemoteSteererHelper::MessageBuffer *session,
+        RemoteSteererHelpers::CommandServerProxy *proxy,
         MySteererData *steererData,
         const MPI::Intracomm& comm,
         bool changed = true)
@@ -176,34 +176,35 @@ public:
         if (steererData->getstep_mutex.try_lock()) {
             std::string msg = "current step: ";
             msg += boost::to_string(step) + "\n";
-            session->sendMessage(msg);
+            proxy->sendMessage(msg);
         }
     }
 };
 
 static void getStepFunction(
     std::vector<std::string> stringVec,
-    CommandServer::Session *session,
+    RemoteSteererHelpers::CommandServer *server,
     void *data)
 {
+    // fixme: avoid casts like this
     MySteererData* sdata = (MySteererData*) data;
     std::string help_msg = "    Usage: getstep\n";
     help_msg += "          get the size of the region\n";
     if (stringVec.size() > 1) {
         if (stringVec.at(1).compare("help") == 0) {
-            session->sendMessage(help_msg);
+            server->sendMessage(help_msg);
             return;
         }
     }
     std::string msg = "send step request\n";
-    session->sendMessage(msg);
+    server->sendMessage(msg);
     sdata->getstep_mutex.unlock();
 }
 
 // fixme: shorten function by decomposition
 static void setRateFunction(
     std::vector<std::string> stringVec,
-    CommandServer::Session *session,
+    RemoteSteererHelpers::CommandServer *server,
     void *data)
 {
     std::string help_msg = "    Usage: setrate <direction> <probability>\n";
@@ -213,7 +214,7 @@ static void setRateFunction(
     std::cout << "called setRateFunction" << std::endl;
     if (stringVec.size() != 3) {
         std::cout << "wrong number" << std::endl;
-        session->sendMessage(help_msg);
+        server->sendMessage(help_msg);
         return;
     }
     int value;
@@ -222,13 +223,13 @@ static void setRateFunction(
     }
     catch (std::exception& e) {
         std::cout << "toi fehler" << std::endl;
-        session->sendMessage(help_msg);
+        server->sendMessage(help_msg);
         return;
     }
     if ((value < 0) || (value > 100)) {
         std::cout << "range fehler" << std::endl;
-        session->sendMessage(help_msg);
-        session->sendMessage(help_msg);
+        server->sendMessage(help_msg);
+        server->sendMessage(help_msg);
         return;
     }
     if (stringVec.at(1).compare("east") == 0) {
@@ -239,7 +240,7 @@ static void setRateFunction(
             newCommandVec.push_back(stringVec.at(2));
             newCommandVec.push_back("0");
             newCommandVec.push_back(boost::to_string(i));
-            RemoteSteerer<Cell>::setFunction(newCommandVec, session, data);
+            RemoteSteerer<Cell>::setFunction(newCommandVec, server, data);
         }
     } else if (stringVec.at(1).compare("south") == 0) {
         for (int i = 1; i < 90; ++i) {
@@ -249,16 +250,16 @@ static void setRateFunction(
             newCommandVec.push_back(stringVec.at(2));
             newCommandVec.push_back(boost::to_string(i));
             newCommandVec.push_back("89");
-            RemoteSteerer<Cell>::setFunction(newCommandVec, session, data);
+            RemoteSteerer<Cell>::setFunction(newCommandVec, server, data);
         }
     } else {
         std::cout << "direction falsch" << std::endl;
-        session->sendMessage(help_msg);
+        server->sendMessage(help_msg);
         return;
     }
     std::string msg = "send setrate request\n";
     std::cout << "setrate finish" << std::endl;
-    session->sendMessage(msg);
+    server->sendMessage(msg);
 }
 
 void runSimulation()

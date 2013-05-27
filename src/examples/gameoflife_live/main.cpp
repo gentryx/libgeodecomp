@@ -129,14 +129,14 @@ public:
 };
 
 template<typename CELL_TYPE, typename DATATYPE>
-class MyControl : RemoteSteererHelper::SteererControl<CELL_TYPE, DATATYPE>
+class MyControl : RemoteSteererHelpers::SteererControl<CELL_TYPE, DATATYPE>
 {
 public:
     virtual void operator()(
         typename Steerer<CELL_TYPE>::GridType *grid,
         const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
         const unsigned& step,
-        MessageBuffer *session,
+        CommandServerProxy *proxy,
         DATATYPE *data,
         const MPI::Intracomm& comm,
         bool changed)
@@ -145,21 +145,21 @@ public:
         if (sdata->size_mutex.try_lock()) {
             std::string msg = "size: ";
             msg += boost::to_string(validRegion.size()) + "\n";
-            session->sendMessage(msg);
+            proxy->sendMessage(msg);
         }
     }
 };
 
 // fixme: replace static functions with fuctors
 static void sizeFunction(std::vector<std::string> stringVec,
-        CommandServer::Session *session,
+        CommandServer *server,
         void *data)
 {
     MySteererData *sdata = (MySteererData*)data;
     std::string help_msg = "    Usage: size\n";
     help_msg += "          get the size of the region\n";
     if (stringVec.size() > 1) {
-        session->sendMessage(help_msg);
+        server->sendMessage(help_msg);
         return;
     }
     sdata->size_mutex.unlock();

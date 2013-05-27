@@ -11,7 +11,8 @@
 
 namespace LibGeoDecomp {
 
-using namespace RemoteSteererHelper;
+// fixme: remove this?
+using namespace RemoteSteererHelpers;
 
 /**
  * The RemoteSteerer allows the user to control a parallel simulation
@@ -33,15 +34,17 @@ public:
         STEERER_DATA_TYPE *steererData = 0,
         const MPI::Intracomm& comm = MPI::COMM_WORLD) :
         Steerer<CELL_TYPE>(period),
+        server(0),
         steererData(steererData),
         comm(comm)
     {
+        // fixme: use mpilayer here?
         if (comm.Get_rank() != 0) {
             return;
         }
 
-        server = new CommandServer::Server(port, commandMap, steererData);
-        server->startServer();
+        // only listen on rank 0:
+        server = new CommandServer(port, commandMap, steererData);
     }
 
     virtual ~RemoteSteerer()
@@ -64,44 +67,44 @@ public:
     virtual void nextStep(
             GridType *grid,
             const Region<Topology::DIM>& validRegion,
-            unsigned step) {
-        RemoteSteererHelper::MessageBuffer *msgBuffer;
-        if (comm.Get_rank() == 0) {
-            msgBuffer = new RemoteSteererHelper::MessageBuffer(comm, server->session);
-        } else {
-            msgBuffer = new RemoteSteererHelper::MessageBuffer(comm, NULL);
-        }
+            unsigned step)
+    {
+        CommandServerProxy proxy(comm, server);
+
         // fixme: get rid of CONTROL?
-        CONTROL()(grid, validRegion, step, msgBuffer, steererData, comm);
+        CONTROL()(grid, validRegion, step, &proxy, steererData, comm);
+        // fixme: why not do this always?
         if (comm.Get_size() > 1) {
-            msgBuffer->collectMessages();
+            proxy.collectMessages();
         }
-        delete msgBuffer;
     }
 
-    static void helpFunction(std::vector<std::string> stringVec,
-                            CommandServer::Session *session,
-                            void *data) {
-        CommandServer::FunctionMap commandMap = session->getMap();
-        for (CommandServer::FunctionMap::iterator it = commandMap.begin();
-             it != commandMap.end(); ++ it) {
-            std::string command = (*it).first;
+    static void helpFunction(
+        std::vector<std::string> stringVec,
+        CommandServer *commandServer,
+        void *data)
+    {
+        CommandServer::FunctionMap commandMap = commandServer->getMap();
+
+        for (CommandServer::FunctionMap::const_iterator i = commandMap.begin();
+             i != commandMap.end();
+             ++i) {
+            std::string command = i->first;
             if (command.compare("help") != 0) {
-                session->sendMessage(command + ":\n");
+                commandServer->sendMessage(command + ":\n");
                 std::vector<std::string> parameter;
-                parameter.push_back((*it).first);
+                parameter.push_back(i->first);
                 parameter.push_back("help");
-                (it->second)(parameter, session, data);
+                i->second(parameter, commandServer, data);
             }
         }
     }
 
-    /**
-     *
-     */
+    // fixme: use functors for callbacks
+    // fixme: if these are issued by clients, why not use member functions?
     static void getFunction(std::vector<std::string> stringVec,
-                            CommandServer::Session *session,
-                            void *data) 
+                            CommandServer *server,
+                            void *data)
     {
         STEERER_DATA_TYPE *sdata = (STEERER_DATA_TYPE*) data;
         int x = 0;
@@ -113,7 +116,7 @@ public:
         helpMsg += "          for execution use finish\n";
         try {
             if (stringVec.at(1).compare("help") == 0) {
-                session->sendMessage(helpMsg);
+                server->sendMessage(helpMsg);
                 return;
             }
             x = mystrtoi(stringVec.at(1).c_str());
@@ -123,7 +126,7 @@ public:
             }
         }
         catch (std::exception& e) {
-            session->sendMessage(helpMsg);
+            server->sendMessage(helpMsg);
             return;
         }
         sdata->getX.push_back(x);
@@ -132,8 +135,9 @@ public:
     }
 
     static void setFunction(std::vector<std::string> stringVec,
-                            CommandServer::Session *session,
-                            void *data) {
+                            CommandServer *server,
+                            void *data)
+    {
         STEERER_DATA_TYPE *sdata = (STEERER_DATA_TYPE*) data;
         int x = 0;
         int y = 0;
@@ -146,7 +150,7 @@ public:
         helpMsg += "          for execution use finish\n";
         try {
             if (stringVec.at(1).compare("help") == 0) {
-                session->sendMessage(helpMsg);
+                server->sendMessage(helpMsg);
                 return;
             }
             var = stringVec.at(1);
@@ -158,7 +162,7 @@ public:
             }
         }
         catch (std::exception& e) {
-            session->sendMessage(helpMsg);
+            server->sendMessage(helpMsg);
             return;
         }
         sdata->setX.push_back(x);
@@ -169,23 +173,24 @@ public:
     }
 
     static void finishFunction(std::vector<std::string> stringVec,
-                            CommandServer::Session *session,
-                            void *data) {
+                            CommandServer *server,
+                            void *data)
+    {
         STEERER_DATA_TYPE *sdata = (STEERER_DATA_TYPE*) data;
         std::string helpMsg = "    Usage: finish\n";
         helpMsg += "          sets lock and waits until a step is finished\n";
         helpMsg += "          has to be used to start default set and get operations\n";
         if (stringVec.size() > 1) {
-            session->sendMessage(helpMsg);
+            server->sendMessage(helpMsg);
             return;
         }
-        session->sendMessage("waiting until next step finished ...\n");
+        server->sendMessage("waiting until next step finished ...\n");
         sdata->finishMutex.unlock();
         sdata->waitMutex.lock();
     }
 
 private:
-    CommandServer::Server *server;
+    CommandServer *server;
     // fixme: use shared_ptr here and in command server
     STEERER_DATA_TYPE *steererData;
     MPI::Intracomm comm;
