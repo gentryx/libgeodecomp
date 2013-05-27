@@ -40,7 +40,6 @@ public:
             return;
         }
 
-        std::cout << "RemoteSteerer(), steererData->dataAccessors.size() = " << steererData->dataAccessors.size() << "\n";
         server = new CommandServer::Server(port, commandMap, steererData);
         server->startServer();
     }
@@ -72,7 +71,7 @@ public:
         } else {
             msgBuffer = new RemoteSteererHelper::MessageBuffer(comm, NULL);
         }
-        std::cout << "RemoteSteerer::nextStep(), steererData->dataAccessors().size() = " << steererData->dataAccessors.size() << "\n";
+        // fixme: get rid of CONTROL?
         CONTROL()(grid, validRegion, step, msgBuffer, steererData, comm);
         if (comm.Get_size() > 1) {
             msgBuffer->collectMessages();

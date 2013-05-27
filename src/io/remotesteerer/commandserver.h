@@ -19,12 +19,10 @@ using boost::asio::ip::tcp;
  * executes methods, which are bind to a command
  */
 // fixme: needs test
-// fixme: move to src/io/remotesteerer/commandserver.h
 class CommandServer
 {
 public:
     class Session;
-
 
     typedef boost::shared_ptr<tcp::socket> SocketPtr;
     typedef std::vector<std::string> StringVec;
@@ -96,7 +94,6 @@ public:
                          boost::is_any_of(s), boost::token_compress_on);
         }
 
-
         void handleInput(const std::string& input)
         {
             StringVec lines;
@@ -115,8 +112,6 @@ public:
                 default:
                     FunctionMap::iterator it = commandMap.find(parameter[0]);
                     if (it != commandMap.end()) {
-                        //(this->*(commandMap[parameter[0]]))(parameter, this,
-                        //                                    this->userData);
                         commandMap[parameter[0]](parameter, this, userData);
                     } else {
                         message = "command not found: " + parameter[0] + "\n";
@@ -140,15 +135,14 @@ public:
         // fixme: move to constructor?
         int startServer()
         {
-            serverThread = boost::shared_ptr<boost::thread>
-                (new boost::thread(&Server::runServer, this));
+            serverThread = boost::shared_ptr<boost::thread>(new boost::thread(&Server::runServer, this));
 
             return 0;
         }
 
         Session *session;
 
-  private:
+    private:
         int port;
         boost::shared_ptr<boost::thread> serverThread;
         SocketPtr socket;
@@ -189,7 +183,6 @@ public:
     {
         std::cerr << "error: " << ec.message() << std::endl;
     }
-
 };
 
 }

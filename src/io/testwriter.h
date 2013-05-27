@@ -15,7 +15,7 @@ namespace LibGeoDecomp {
 class TestWriter : public Writer<TestCell<2> >
 {
 public:
-    typedef typename Writer<TestCell<2> >::GridType GridType;
+    typedef Writer<TestCell<2> >::GridType GridType;
 
     TestWriter(
         const unsigned& period,
