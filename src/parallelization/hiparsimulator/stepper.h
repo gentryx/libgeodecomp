@@ -30,7 +30,7 @@ public:
     const static int DIM = Topology::DIM;
 
     typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
-    typedef PartitionManager<DIM, Topology> MyPartitionManager;
+    typedef PartitionManager<DIM, Topology> PartitionManagerType;
     typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
     typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;
@@ -39,10 +39,10 @@ public:
     typedef SuperVector<PatchProviderPtr> PatchProviderVec;
 
     inline Stepper(
-        const boost::shared_ptr<MyPartitionManager>& _partitionManager,
-        Initializer<CELL_TYPE> *_initializer) :
-        partitionManager(_partitionManager),
-        initializer(_initializer)
+        const boost::shared_ptr<PartitionManagerType>& partitionManager,
+        Initializer<CELL_TYPE> *initializer) :
+        partitionManager(partitionManager),
+        initializer(initializer)
     {}
 
     virtual ~Stepper()
@@ -58,21 +58,21 @@ public:
     virtual std::pair<int, int> currentStep() const = 0;
 
     void addPatchProvider(
-        const PatchProviderPtr& patchProvider, 
+        const PatchProviderPtr& patchProvider,
         const PatchType& patchType)
     {
         patchProviders[patchType].push_back(patchProvider);
     }
 
     void addPatchAccepter(
-        const PatchAccepterPtr& patchAccepter, 
+        const PatchAccepterPtr& patchAccepter,
         const PatchType& patchType)
     {
         patchAccepters[patchType].push_back(patchAccepter);
     }
 
 protected:
-    boost::shared_ptr<MyPartitionManager> partitionManager;
+    boost::shared_ptr<PartitionManagerType> partitionManager;
     // fixme: replace this by a shared_ptr, refactor all calls to
     // stepper constructors which look like VanillaStepper(... &*init);
     Initializer<CELL_TYPE> *initializer;
@@ -86,7 +86,7 @@ protected:
      */
     inline void guessOffset(Coord<DIM> *offset, Coord<DIM> *dimensions)
     {
-        const CoordBox<DIM>& boundingBox = 
+        const CoordBox<DIM>& boundingBox =
             partitionManager->ownRegion().boundingBox();
         OffsetHelper<DIM - 1, DIM, Topology>()(
             offset,

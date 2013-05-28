@@ -8,12 +8,13 @@
 
 namespace LibGeoDecomp {
 
+// fixme: needs test, move to dedicated namespace?
 template<class CELL_TYPE>
-class MyHood
+class HoodType
 {
 public:
     __device__
-    MyHood(int *index, dim3 *gridDim, CELL_TYPE *grid) :
+    HoodType(int *index, dim3 *gridDim, CELL_TYPE *grid) :
         index(index),
         gridDim(gridDim),
         grid(grid)
@@ -25,7 +26,7 @@ public:
     {
         return grid[*index + (Z * gridDim->x * gridDim->y) + (Y * gridDim->x) + X];
     }
-    
+
 private:
     int *index;
     dim3 *gridDim;
@@ -41,21 +42,20 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, dim3 gridDim, int dimZ)
     int z = blockIdx.z * blockDim.z + threadIdx.z;
     int minZ = (z + 0) * dimZ;
     int maxZ = (z + 1) * dimZ;
-    int index = 
+    int index =
         z * gridDim.y * gridDim.x +
-        y * gridDim.y + 
+        y * gridDim.y +
         x;
 
     if ((x > gridDim.x) || (y > gridDim.y)) {
         return;
     }
 
-    MyHood<CELL_TYPE> hood(&index, &gridDim, gridOld);
+    HoodType<CELL_TYPE> hood(&index, &gridDim, gridOld);
 
     for (int myZ = (minZ + 1); myZ < (maxZ - 1); ++myZ) {
         index += gridDim.x * gridDim.y;
         gridNew[index].update(hood, 0);
-        // gridNew[index] = gridOld[index];
     }
 }
 
@@ -74,7 +74,7 @@ public:
     /**
      * creates a CudaSimulator with the given @a initializer.
      */
-    CudaSimulator(Initializer<CELL_TYPE> *initializer) : 
+    CudaSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
         stepNum = initializer->startStep();
@@ -108,8 +108,8 @@ public:
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
         }
-        
-        ++stepNum; 
+
+        ++stepNum;
 
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {

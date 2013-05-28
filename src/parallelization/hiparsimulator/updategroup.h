@@ -32,29 +32,29 @@ public:
     typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-    typedef typename MyPartitionManager::RegionVecMap RegionVecMap;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
     UpdateGroup(
-        Partition<DIM> *partition, 
-        const CoordBox<DIM>& box, 
-        const unsigned& _ghostZoneWidth,
-        Initializer<CELL_TYPE> *_initializer,
+        Partition<DIM> *partition,
+        const CoordBox<DIM>& box,
+        const unsigned& ghostZoneWidth,
+        Initializer<CELL_TYPE> *initializer,
         PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost=PatchProviderVec(),
         PatchProviderVec patchProvidersInner=PatchProviderVec(),
-        const MPI::Datatype& _cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD) : 
-        ghostZoneWidth(_ghostZoneWidth),
-        initializer(_initializer),
+        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
+        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        ghostZoneWidth(ghostZoneWidth),
+        initializer(initializer),
         mpiLayer(communicator),
-        cellMPIDatatype(_cellMPIDatatype),
+        cellMPIDatatype(cellMPIDatatype),
         rank(mpiLayer.rank())
     {
-        partitionManager.reset(new MyPartitionManager());
+        partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
             box,
             partition,
@@ -64,7 +64,7 @@ public:
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
-        long firstSyncPoint =  
+        long firstSyncPoint =
             initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
@@ -76,25 +76,25 @@ public:
             if (!i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
                     new typename PatchLink<GridType>::Accepter(
-                        i->second.back(), 
-                        i->first, 
+                        i->second.back(),
+                        i->first,
                         MPILayer::PATCH_LINK,
-                        cellMPIDatatype, 
+                        cellMPIDatatype,
                         mpiLayer.getCommunicator()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
 
                 link->charge(
-                    firstSyncPoint, 
-                    PatchLink<GridType>::ENDLESS, 
+                    firstSyncPoint,
+                    PatchLink<GridType>::ENDLESS,
                     ghostZoneWidth);
             }
         }
 
         stepper.reset(new STEPPER(
-                          partitionManager, 
+                          partitionManager,
                           initializer,
-                          patchAcceptersGhost + 
+                          patchAcceptersGhost +
                           ghostZoneAccepterLinks,
                           patchAcceptersInner));
 
@@ -106,17 +106,17 @@ public:
             if (!i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
                     new typename PatchLink<GridType>::Provider(
-                        i->second.back(), 
+                        i->second.back(),
                         i->first,
                         MPILayer::PATCH_LINK,
-                        cellMPIDatatype, 
+                        cellMPIDatatype,
                         mpiLayer.getCommunicator()));
                 addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
                 patchLinks << link;
-         
+
                 link->charge(
-                    firstSyncPoint, 
-                    PatchLink<GridType>::ENDLESS, 
+                    firstSyncPoint,
+                    PatchLink<GridType>::ENDLESS,
                     ghostZoneWidth);
             }
         }
@@ -124,13 +124,13 @@ public:
         // add external PatchProviders last to allow them to override
         // the local ghost zone providers (a.k.a. PatchLink::Source).
         for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
-             i != patchProvidersGhost.end(); 
+             i != patchProvidersGhost.end();
              ++i) {
             addPatchProvider(*i, Stepper<CELL_TYPE>::GHOST);
         }
 
         for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
-             i != patchProvidersInner.end(); 
+             i != patchProvidersInner.end();
              ++i) {
             addPatchProvider(*i, Stepper<CELL_TYPE>::INNER_SET);
         }
@@ -140,20 +140,20 @@ public:
     { }
 
     void addPatchProvider(
-        const PatchProviderPtr& patchProvider, 
+        const PatchProviderPtr& patchProvider,
         const PatchType& patchType)
     {
         stepper->addPatchProvider(patchProvider, patchType);
     }
 
     void addPatchAccepter(
-        const PatchAccepterPtr& patchAccepter, 
+        const PatchAccepterPtr& patchAccepter,
         const PatchType& patchType)
     {
         stepper->addPatchAccepter(patchAccepter, patchType);
     }
-    
-    inline void update(int nanoSteps) 
+
+    inline void update(int nanoSteps)
     {
         stepper->update(nanoSteps);
     }
@@ -175,7 +175,7 @@ public:
 
 private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
-    boost::shared_ptr<MyPartitionManager> partitionManager;
+    boost::shared_ptr<PartitionManagerType> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;
     Initializer<CELL_TYPE> *initializer;

@@ -27,7 +27,7 @@ public:
     typedef TOPOLOGY Topology;
     typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
-    typedef CoordMap<CELL_TYPE, Delegate> MyCoordMap;
+    typedef CoordMap<CELL_TYPE, Delegate> CoordMapType;
 
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
@@ -157,13 +157,13 @@ public:
         return CoordBox<DIM>(origin, delegate.getDimensions());
     }
 
-    inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
+    inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
     {
         Coord<DIM> relativeCoord = center - origin;
         if (TOPOLOGICALLY_CORRECT) {
             relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
         }
-        return MyCoordMap(relativeCoord, &delegate);
+        return CoordMapType(relativeCoord, &delegate);
     }
 
     inline const Delegate *vanillaGrid() const

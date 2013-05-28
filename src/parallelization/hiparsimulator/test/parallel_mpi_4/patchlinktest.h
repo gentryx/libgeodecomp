@@ -4,8 +4,8 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -14,8 +14,8 @@ class PatchLinkTest : public CxxTest::TestSuite
 {
 public:
     typedef Grid<int> GridType;
-    typedef PatchLink<GridType>::Accepter MyPatchAccepter;
-    typedef PatchLink<GridType>::Provider MyPatchProvider;
+    typedef PatchLink<GridType>::Accepter PatchAccepterType;
+    typedef PatchLink<GridType>::Provider PatchProviderType;
 
     void setUp()
     {
@@ -29,7 +29,7 @@ public:
         zeroGrid  = GridType(Coord<2>(7, 5), 0);
         boundingBox.clear();
         boundingBox << CoordBox<2>(Coord<2>(0, 0), Coord<2>(7, 5));
-            
+
         sendGrid1 = markGrid(region1, mpiLayer.rank());
         sendGrid2 = markGrid(region2, mpiLayer.rank());
 
@@ -42,7 +42,7 @@ public:
         pro.reset();
     }
 
-    void testBasic() 
+    void testBasic()
     {
         int nanoStep = 0;
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
@@ -51,9 +51,9 @@ public:
                     Region<2>& region  = sender % 2 ? region2 : region1;
                     GridType& sendGrid = sender % 2 ? sendGrid2 : sendGrid1;
                     long nanoStep = sender * receiver + 4711;
-                    
+
                     if (sender == mpiLayer.rank()) {
-                        acc.reset(new MyPatchAccepter(
+                        acc.reset(new PatchAccepterType(
                                       region,
                                       receiver,
                                       tag,
@@ -65,7 +65,7 @@ public:
                     }
 
                     if (receiver == mpiLayer.rank()) {
-                        pro.reset(new MyPatchProvider(
+                        pro.reset(new PatchProviderType(
                                       region,
                                       sender,
                                       tag,
@@ -86,22 +86,22 @@ public:
         }
     }
 
-    void testMultiple() 
+    void testMultiple()
     {
-        SuperVector<MyPatchAccepter> accepters;
-        SuperVector<MyPatchProvider> providers;
+        SuperVector<PatchAccepterType> accepters;
+        SuperVector<PatchProviderType> providers;
         int stride = 4;
         int maxNanoSteps = 31;
 
         for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
-                accepters << MyPatchAccepter(
+                accepters << PatchAccepterType(
                     region1,
                     i,
                     genTag(mpiLayer.rank(), i),
                     MPI::INT);
-                
-                providers << MyPatchProvider(
+
+                providers << PatchProviderType(
                     region1,
                     i,
                     genTag(i, mpiLayer.rank()),
@@ -116,8 +116,8 @@ public:
 
         for (int nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
-        
-            for (int i = 0; i < mpiLayer.size() - 1; ++i) 
+
+            for (int i = 0; i < mpiLayer.size() - 1; ++i)
                 accepters[i].put(mySendGrid, boundingBox, nanoStep);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
@@ -131,22 +131,22 @@ public:
         }
     }
 
-    void testMultiple2() 
+    void testMultiple2()
     {
-        SuperVector<MyPatchAccepter> accepters;
-        SuperVector<MyPatchProvider> providers;
+        SuperVector<PatchAccepterType> accepters;
+        SuperVector<PatchProviderType> providers;
         int stride = 4;
         int maxNanoSteps = 100;
 
         for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
-                accepters << MyPatchAccepter(
+                accepters << PatchAccepterType(
                     region1,
                     i,
                     genTag(mpiLayer.rank(), i),
                     MPI::INT);
-                
-                providers << MyPatchProvider(
+
+                providers << PatchProviderType(
                     region1,
                     i,
                     genTag(i, mpiLayer.rank()),
@@ -161,8 +161,8 @@ public:
 
         for (int nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
-        
-            for (int i = 0; i < mpiLayer.size() - 1; ++i) 
+
+            for (int i = 0; i < mpiLayer.size() - 1; ++i)
                 accepters[i].put(mySendGrid, boundingBox, nanoStep);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
@@ -195,8 +195,8 @@ private:
     Region<2> region1;
     Region<2> region2;
 
-    boost::shared_ptr<MyPatchAccepter> acc;
-    boost::shared_ptr<MyPatchProvider> pro;
+    boost::shared_ptr<PatchAccepterType> acc;
+    boost::shared_ptr<PatchProviderType> pro;
 
     GridType markGrid(const Region<2>& region, const int& id)
     {

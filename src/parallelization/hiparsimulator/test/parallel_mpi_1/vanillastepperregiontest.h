@@ -6,8 +6,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -20,9 +20,9 @@ class MockPatchBuffer : public PatchBuffer<GRID_TYPE1, GRID_TYPE2>
 public:
 
     virtual void get(
-        GRID_TYPE2& destinationGrid, 
-        const Region<2>& patchRegion, 
-        const unsigned& nanoStep) 
+        GRID_TYPE2& destinationGrid,
+        const Region<2>& patchRegion,
+        const unsigned& nanoStep)
     {
         events.push_back(Event(patchRegion, nanoStep));
         PatchBuffer<GRID_TYPE1, GRID_TYPE2>::get(
@@ -44,8 +44,8 @@ private:
 class VanillaStepperRegionTest : public CxxTest::TestSuite
 {
 public:
-    typedef VanillaStepper<TestCell<2> > MyStepper;
-    typedef MyStepper::GridType GridType;
+    typedef VanillaStepper<TestCell<2> > StepperType;
+    typedef StepperType::GridType GridType;
 
     void setUp()
     {
@@ -61,7 +61,7 @@ public:
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];
-        Partition<2> *partition = 
+        Partition<2> *partition =
             new StripingPartition<2>(Coord<2>(0, 0), rect.dimensions, 0, weights);
 
         // Feed the partition into the partition manager
@@ -77,7 +77,7 @@ public:
         partitionManager->resetGhostZones(boundingBoxes);
 
         // The Unit Under Test: the stepper
-        stepper.reset(new MyStepper(partitionManager, &*init));
+        stepper.reset(new StepperType(partitionManager, &*init));
     }
 
     void testUpdate()
@@ -93,15 +93,15 @@ private:
     int ghostZoneWidth;
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
-    boost::shared_ptr<MyStepper > stepper;
+    boost::shared_ptr<StepperType> stepper;
 
     void checkInnerSet(
-        const unsigned& shrink, 
+        const unsigned& shrink,
         const unsigned& expectedStep)
     {
         TS_ASSERT_TEST_GRID_REGION(
-            GridType, 
-            stepper->grid(), 
+            GridType,
+            stepper->grid(),
             partitionManager->innerSet(shrink),
             expectedStep);
     }

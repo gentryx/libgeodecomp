@@ -10,8 +10,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
 
 using namespace boost::assign;
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -19,10 +19,10 @@ namespace HiParSimulator {
 class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
-    typedef ZCurvePartition<3> MyPartition;
-    typedef VanillaStepper<TestCell<3> > MyStepper;
-    typedef UpdateGroup<TestCell<3>, MyStepper> MyUpdateGroup;
-    typedef MyStepper::GridType GridType;
+    typedef ZCurvePartition<3> PartitionType;
+    typedef VanillaStepper<TestCell<3> > StepperType;
+    typedef UpdateGroup<TestCell<3>, StepperType> UpdateGroupType;
+    typedef StepperType::GridType GridType;
 
     void setUp()
     {
@@ -30,11 +30,11 @@ public:
         dimensions = Coord<3>(28, 50, 32);
         weights.clear();
         weights << dimensions.prod();
-        partition = new MyPartition(Coord<3>(), dimensions, 0, weights);
+        partition = new PartitionType(Coord<3>(), dimensions, 0, weights);
         ghostZoneWidth = 10;
         init = new TestInitializer<TestCell<3> >(dimensions);
         updateGroup.reset(
-            new MyUpdateGroup(
+            new UpdateGroupType(
                 partition,
                 CoordBox<3>(Coord<3>(), dimensions),
                 ghostZoneWidth,
@@ -43,9 +43,9 @@ public:
         mockPatchAccepter->pushRequest(5);
         mockPatchAccepter->pushRequest(7);
         mockPatchAccepter->pushRequest(8);
-        updateGroup->addPatchAccepter(mockPatchAccepter, MyStepper::INNER_SET);
+        updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
     }
-                              
+
     void tearDown()
     {
         delete init;
@@ -68,7 +68,7 @@ private:
     unsigned rank;
     Coord<3> dimensions;
     SuperVector<long> weights;
-    MyPartition *partition;
+    PartitionType *partition;
     unsigned ghostZoneWidth;
     Initializer<TestCell<3> > *init;
     boost::shared_ptr<UpdateGroup<TestCell<3> > > updateGroup;

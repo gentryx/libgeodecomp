@@ -5,8 +5,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/mockpatchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -15,7 +15,7 @@ class VanillaStepperBasicTest : public CxxTest::TestSuite
 {
 public:
     typedef DisplacedGrid<TestCell<2>, Topologies::Cube<2>::Topology, true> GridType;
-    typedef VanillaStepper<TestCell<2> > MyStepper;
+    typedef VanillaStepper<TestCell<2> > StepperType;
 
     void setUp()
     {
@@ -26,12 +26,12 @@ public:
         patchAccepter->pushRequest(2);
         patchAccepter->pushRequest(10);
         patchAccepter->pushRequest(13);
-   
+
         partitionManager.reset(new PartitionManager<2>(rect));
         stepper.reset(
-            new MyStepper(partitionManager, &*init));
+            new StepperType(partitionManager, &*init));
 
-        stepper->addPatchAccepter(patchAccepter, MyStepper::GHOST);
+        stepper->addPatchAccepter(patchAccepter, StepperType::GHOST);
     }
 
     void testUpdate()
@@ -61,7 +61,7 @@ public:
 private:
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
-    boost::shared_ptr<MyStepper> stepper;
+    boost::shared_ptr<StepperType> stepper;
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };
 

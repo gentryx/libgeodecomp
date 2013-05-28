@@ -84,12 +84,12 @@ public:
         area(0),
         numNeighbors(0),
         shapeSize(0)
-    { 
+    {
         for (int i = 0; i < SUBSTANCES; ++i) {
             quantities[i] = 0;
             ratios[i] = 0;
         }
-            
+
         std::copy(_influxes, _influxes + SUBSTANCES, influxes);
     }
 
@@ -122,8 +122,8 @@ public:
                 const Coord<2>& dir = -borderDirections[i];
                 double length = 1.0 / sqrt(dir.x() * dir.x() +
                                            dir.y() * dir.y());
-                double fluxFlow = (dir.x() * velocityX + 
-                                   dir.y() * velocityY) * 
+                double fluxFlow = (dir.x() * velocityX +
+                                   dir.y() * velocityY) *
                     length * pressure * borderLengths[i] * FLOW_DIFFUSION;
                 double fluxPressure = 0;
                 if (pressure > other.pressure)
@@ -135,12 +135,12 @@ public:
             }
         }
 
-        if (totalFlux > mass) 
+        if (totalFlux > mass)
             throw std::logic_error("unstable");
 
         if (mass > 0) {
             double factor = (mass - totalFlux) / mass;
-            for (int i = 0; i < SUBSTANCES; ++i) 
+            for (int i = 0; i < SUBSTANCES; ++i)
                 quantities[i] *= factor;
         }
     }
@@ -155,7 +155,7 @@ public:
 
         double mass = getMass();
         double fluxes[SUBSTANCES];
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             fluxes[i] = 0;
         double fluxVelocityX = 0;
         double fluxVelocityY = 0;
@@ -166,18 +166,18 @@ public:
                 const Coord<2>& dir = borderDirections[i];
                 double length = 1.0 / sqrt(dir.x() * dir.x() +
                                            dir.y() * dir.y());
-            
+
                 for (int j = 0; j < other.numNeighbors; ++j) {
                     if (other.neighborIDs[j] == id) {
                         double otherMass = other.getMass();
                         if (otherMass > 0) {
-                            double fluxCoefficient = 
+                            double fluxCoefficient =
                                 (other.fluxesPressure[j] + other.fluxesFlow[j]) / otherMass;
-                            for (int i = 0; i < SUBSTANCES; ++i) 
+                            for (int i = 0; i < SUBSTANCES; ++i)
                                 fluxes[i] += fluxCoefficient * other.quantities[i];
                             fluxVelocityX += other.fluxesFlow[j] * other.velocityX;
                             fluxVelocityY += other.fluxesFlow[j] * other.velocityY;
-                            double pressureCoefficient = 
+                            double pressureCoefficient =
                                 other.fluxesPressure[j] * length * PRESSURE_SPEED;
                             fluxVelocityX += dir.x() * pressureCoefficient;
                             fluxVelocityY += dir.y() * pressureCoefficient;
@@ -189,24 +189,24 @@ public:
         }
 
         double newMass = mass;
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             newMass += fluxes[i];
         double scale = VELOCITY_MOD[state] / newMass;
         velocityX = (mass * velocityX + fluxVelocityX) * scale;
         velocityY = (mass * velocityY + fluxVelocityY) * scale;
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             quantities[i] += fluxes[i] + influxes[i];
-        
+
         mass = getMass();
         if (mass > 0) {
             double fluxCoefficient = 1.0 - efflux / mass;
-            for (int i = 0; i < SUBSTANCES; ++i) 
+            for (int i = 0; i < SUBSTANCES; ++i)
                 quantities[i] *= fluxCoefficient;
         }
 
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             quantities[i] = std::max(0.0, quantities[i]);
-        
+
         handleAbsorbtion();
         updatePressures();
     }
@@ -222,11 +222,11 @@ public:
         double fillLevel = absorbedVolume / area;
         double freeLevel = 1 - fillLevel;
         double substancePressures[SUBSTANCES];
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             substancePressures[i] = ratios[i] * pressure;
 
         double absorbtions[SUBSTANCES];
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             absorbtions[i] = area * freeLevel * substancePressures[i] * ABSORBTION_RATES[i];
         for (int i = 0; i < SUBSTANCES; ++i) {
             absorbtions[i] = std::min(absorbtions[i], quantities[i]);
@@ -249,13 +249,13 @@ public:
     {
         double mass = getMass();
         pressure = mass / area;
-        for (int i = 0; i < SUBSTANCES; ++i) 
+        for (int i = 0; i < SUBSTANCES; ++i)
             ratios[i] = quantities[i] / mass;
     }
 
     void pushNeighbor(
-        const ID& id, 
-        const double& length, 
+        const ID& id,
+        const double& length,
         const Coord<2>& dir)
     {
         if (numNeighbors >= MAX_NEIGHBORS) {
@@ -307,11 +307,11 @@ public:
 
     typedef Topologies::Cube<2>::Topology Topology;
     typedef Grid<ContainerCell, Topology> GridType;
-    typedef CoordMap<ContainerCell, GridType> MyCoordMap;
+    typedef CoordMap<ContainerCell, GridType> CoordMapType;
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 2; 
+    static inline unsigned nanoSteps()
+    {
+        return 2;
     }
 
     ContainerCell() :
@@ -332,7 +332,7 @@ public:
         return *this;
     }
 
-    void update(const MyCoordMap& neighborhood, const unsigned& nanoStep)
+    void update(const CoordMapType& neighborhood, const unsigned& nanoStep)
     {
         neighbors = &neighborhood;
         for (int i = 0; i < numCells; ++i)
@@ -342,7 +342,7 @@ public:
     Coord<2> coord;
     Cell cells[MAX_CELLS];
     int numCells;
-    const MyCoordMap *neighbors;
+    const CoordMapType *neighbors;
 };
 
 class Equation
@@ -369,9 +369,9 @@ public:
 class Element
 {
 public:
-    Element(const Coord<2> _center = Coord<2>(1, 1), const ID& _id=ID()) :
-        center(_center),
-        id(_id)
+    Element(const Coord<2> center = Coord<2>(1, 1), const ID& id=ID()) :
+        center(center),
+        id(id)
     {
         limits << Equation(Coord<2>(center.x(), 0),     Coord<2>(0, 1))
                << Equation(Coord<2>(0, center.y()),     Coord<2>(1, 0))
@@ -394,14 +394,14 @@ public:
                 deleteSet.insert(i);
             }
 
-            for (int j = 0; j < limits.size(); ++j) 
+            for (int j = 0; j < limits.size(); ++j)
                 if (i != j) {
                     // parallel lines, deleting...
                     if (cutPoint(limits[i], limits[j]) == FarAway) {
-                        if (limits[i].dir * limits[j].dir > 0) { 
-                            int dist1 = (center - limits[i].base) * 
+                        if (limits[i].dir * limits[j].dir > 0) {
+                            int dist1 = (center - limits[i].base) *
                                 limits[i].dir;
-                            int dist2 = (center - limits[j].base) * 
+                            int dist2 = (center - limits[j].base) *
                                 limits[i].dir;
                             if (dist2 >= dist1) {
                                 deleteSet.insert(j);
@@ -410,10 +410,10 @@ public:
                     }
                 }
         }
-        
+
         SuperVector<Equation> newLimits;
-        for (int i = 0; i < limits.size(); ++i) 
-            if (!deleteSet.count(i)) 
+        for (int i = 0; i < limits.size(); ++i)
+            if (!deleteSet.count(i))
                 newLimits << limits[i];
         limits = newLimits;
 
@@ -447,7 +447,7 @@ public:
                     int offset = 2 * i;
                     Coord<2> delta = cut - limits[i].base;
                     Coord<2> turnedDir = turnLeft90(limits[i].dir);
-                    double distance =  
+                    double distance =
                         1.0 * delta.x() * turnedDir.x() +
                         1.0 * delta.y() * turnedDir.y();
 
@@ -459,7 +459,7 @@ public:
                     }
 
                     delta = buf[offset] - limits[i].base;
-                    double referenceDist =  
+                    double referenceDist =
                         1.0 * delta.x() * turnedDir.x() +
                         1.0 * delta.y() * turnedDir.y();
                     bool flag = false;
@@ -472,7 +472,7 @@ public:
                     if (cut == FarAway)
                         flag = false;
 
-                    if (flag) 
+                    if (flag)
                         buf[offset] = cut;
                 }
             }
@@ -485,9 +485,11 @@ public:
     {
         SuperVector<Coord<2> > cutPoints = generateCutPoints();
 
-        for (int i = 0; i < cutPoints.size(); ++i) 
-            if (cutPoints[i] == FarAway) 
+        for (int i = 0; i < cutPoints.size(); ++i) {
+            if (cutPoints[i] == FarAway) {
                 throw std::logic_error("invalid cut point");
+            }
+        }
 
         SuperMap<double, Coord<2> > points;
         for (int i = 0; i < cutPoints.size(); ++i) {
@@ -501,17 +503,19 @@ public:
         }
 
         SuperVector<Coord<2> > res;
-        for (SuperMap<double, Coord<2> >::iterator i = points.begin(); 
-             i != points.end(); ++i)
+        for (SuperMap<double, Coord<2> >::iterator i = points.begin();
+             i != points.end(); ++i) {
             res << i->second;
+        }
 
-        if (res.size() < 3) 
+        if (res.size() < 3) {
             throw std::logic_error("cycle too short");
+        }
 
         return res;
     }
 
-    bool includes(const Coord<2>& c) 
+    bool includes(const Coord<2>& c)
     {
         for (int i = 0; i < limits.size(); ++i)
             if (!limits[i].includes(c))
@@ -519,7 +523,7 @@ public:
         return true;
     }
 
-    void updateGeometryData() 
+    void updateGeometryData()
     {
         SuperVector<Coord<2> > cutPoints = generateCutPoints();
 
@@ -541,8 +545,9 @@ public:
         for (int i = 0; i < SAMPLES; ++i) {
             Coord<2> p = Coord<2>(rand() % delta.x(),
                                   rand() % delta.y()) + min;
-            if (includes(p))
+            if (includes(p)) {
                 ++hits;
+            }
         }
         area = 1.0 * hits / SAMPLES * delta.prod();
 
@@ -590,9 +595,10 @@ private:
     Coord<2> cutPoint(Equation eq1, Equation eq2)
     {
         if (eq1.dir.y() == 0) {
-            if (eq2.dir.y() == 0)
+            if (eq2.dir.y() == 0) {
                 // throw std::invalid_argument("both lines are vertical")
                 return FarAway;
+            }
             std::swap(eq1, eq2);
         }
 
@@ -619,9 +625,10 @@ private:
         if ((x < (-10 * MAX_X)) ||
             (x > ( 10 * MAX_X)) ||
             (y < (-10 * MAX_Y)) ||
-            (y > ( 10 * MAX_Y)))
+            (y > ( 10 * MAX_Y))) {
             return FarAway;
-            
+        }
+
         return Coord<2>(x, y);
     }
 };
@@ -642,9 +649,9 @@ class ChromoInitializer : public LibGeoDecomp::SimpleInitializer<ContainerCell>
 {
 public:
     ChromoInitializer(
-        const Coord<2>& _dim,
-        const unsigned& _steps) :
-        SimpleInitializer<ContainerCell>(_dim, _steps)
+        const Coord<2>& dim,
+        const unsigned& steps) :
+        SimpleInitializer<ContainerCell>(dim, steps)
     {}
 
     virtual void grid(GridBase<ContainerCell, 2> *ret)
@@ -669,7 +676,7 @@ private:
         Coord<2> cellDim(ceil(1.0 * MAX_X / CELL_SPACING),
                          ceil(1.0 * MAX_Y / CELL_SPACING));
         Grid<ContainerCell> grid(cellDim);
-        
+
 #if SETUP==NOZZLE
         addInletOutlet(&grid);
         addNozzle(&grid);
@@ -752,7 +759,7 @@ private:
     {
         int spacing = 1.3 * ELEMENT_SPACING;
 
-        for (double radius = 0; radius < maxRadius; radius += spacing) 
+        for (double radius = 0; radius < maxRadius; radius += spacing)
             addCircle(grid, centerX, centerY, radius, COAL);
     }
 
@@ -801,9 +808,9 @@ private:
         while(x < MAX_X*0.5) {
             int x1 = x;
             int x2 = MAX_X - x;
-            
+
             /**
-             * the barrier consists of 4 layers of cells: 
+             * the barrier consists of 4 layers of cells:
              *
              *  . liquid
              *  = solid
@@ -814,7 +821,7 @@ private:
              * are placed in the barrier, makin it leak. The liquid
              * cells ensure that the barrier's surface is smoooth.
              */
-            
+
             int y1 = y - 2 * spacing;
             int y2 = y - 1 * spacing;
             int y3 = y + 0 * spacing;
@@ -835,7 +842,7 @@ private:
         }
     }
 
-    bool checkForCollision(const Grid<ContainerCell>& grid, 
+    bool checkForCollision(const Grid<ContainerCell>& grid,
                            const Coord<2>& center)
     {
         Coord<2> containerCoord = pointToContainerCoord(center);
@@ -847,40 +854,40 @@ private:
                                                       Coord<2>(x, y)];
                 for (int j = 0; j < container.numCells; ++j) {
                     Coord<2> delta = center - container.cells[j].center;
-                    if ((delta * delta) < (ELEMENT_SPACING * ELEMENT_SPACING)) 
+                    if ((delta * delta) < (ELEMENT_SPACING * ELEMENT_SPACING))
                         flag = false;
                 }
             }
         }
-        
+
         return flag;
     }
 
-    void addFluxCell(Grid<ContainerCell> *grid, 
+    void addFluxCell(Grid<ContainerCell> *grid,
                      const int& x,
                      const int& y,
-                     const double influxes[SUBSTANCES], 
+                     const double influxes[SUBSTANCES],
                      const double& efflux)
     {
         addCell(grid, Coord<2>(x, y), influxes, efflux, LIQUID);
     }
 
 
-    void addLiquidCell(Grid<ContainerCell> *grid, 
+    void addLiquidCell(Grid<ContainerCell> *grid,
                        const int& x,
                        const int& y)
     {
         addCell(grid, Coord<2>(x, y), ZERO_INFLUXES, 0, LIQUID);
     }
 
-    void addSolidCell(Grid<ContainerCell> *grid, 
+    void addSolidCell(Grid<ContainerCell> *grid,
                       const int& x,
                       const int& y)
     {
         addCell(grid, Coord<2>(x, y), ZERO_INFLUXES, 0, SOLID);
     }
 
-    void addCell(Grid<ContainerCell> *grid, 
+    void addCell(Grid<ContainerCell> *grid,
                  const Coord<2>& center,
                  const double influxes[SUBSTANCES],
                  const double& efflux,
@@ -897,8 +904,8 @@ private:
             return;
 
         if (numCells < ContainerCell::MAX_CELLS)
-            (*grid)[containerCoord] << 
-                Cell(center, 
+            (*grid)[containerCoord] <<
+                Cell(center,
                      ID(containerCoord, numCells),
                      influxes,
                      efflux,
@@ -926,11 +933,11 @@ private:
                     for (int x = -1; x < 2; ++x) {
                         ContainerCell& container = (*grid)[containerCoord +
                                                            Coord<2>(x, y)];
-                        for (int j = 0; j < container.numCells; ++j) 
+                        for (int j = 0; j < container.numCells; ++j)
                             if (cell.center != container.cells[j].center)
                                 e << container.cells[j];
                     }
-                }            
+                }
 
                 e.updateGeometryData();
                 cell.area = e.getArea();
@@ -940,9 +947,9 @@ private:
                 cell.updatePressures();
                 cell.setShape(e.getShape());
 
-                for (SuperVector<Equation>::const_iterator l = 
-                         e.getLimits().begin(); 
-                     l != e.getLimits().end(); ++l) 
+                for (SuperVector<Equation>::const_iterator l =
+                         e.getLimits().begin();
+                     l != e.getLimits().end(); ++l)
                     if (l->neighborID.container != FarAway)
                         cell.pushNeighbor(l->neighborID, l->length, l->dir);
 
@@ -968,19 +975,19 @@ public:
         Writer<ContainerCell>("chromo", _sim, _period)
     {}
 
-    virtual void initialized() 
+    virtual void initialized()
     {
         output(*sim->getGrid(), sim->getStep());
     }
 
-    virtual void stepFinished() 
+    virtual void stepFinished()
     {
         if (sim->getStep() % period == 0) {
             output(*sim->getGrid(), sim->getStep());
         }
     }
 
-    virtual void allDone() 
+    virtual void allDone()
     {
         output(*sim->getGrid(), sim->getStep());
     }
@@ -1054,13 +1061,13 @@ private:
         int numZones = shapeSizes.size();
         int numListedNodes = nodes.size();
 
-        DBPutZonelist2(dbfile, "zonelist", numZones, dim, 
-                       &nodes[0], numListedNodes, 
+        DBPutZonelist2(dbfile, "zonelist", numZones, dim,
+                       &nodes[0], numListedNodes,
                        1, 0, 0,
                        &shapeTypes[0], &shapeSizes[0], &shapeCounts[0],
                        numShapeTypes, NULL);
-        DBPutUcdmesh(dbfile, "elements", dim, NULL, 
-                     coords, numNodes, numZones, 
+        DBPutUcdmesh(dbfile, "elements", dim, NULL,
+                     coords, numNodes, numZones,
                      "zonelist", NULL, DB_FLOAT, NULL);
     }
 
@@ -1097,7 +1104,7 @@ private:
             DBPutUcdvar1(dbfile, NAME, "elements", &buf[0], n,          \
                          NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);        \
         }
-        
+
         WRITE_SCALAR(area, "area");
         WRITE_SCALAR(absorbedVolume, "absorbedVolume");
         WRITE_SCALAR(pressure, "pressure");
@@ -1107,7 +1114,7 @@ private:
 
         SuperVector<double> velocityX;
         SuperVector<double> velocityY;
-        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) { 
+        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             const ContainerCell& container = grid[*iter];
 
             for (int i = 0; i < container.numCells; ++i) {
@@ -1133,7 +1140,7 @@ private:
         writeSuperGrid(dbfile, grid, n);
         writeVars(dbfile, grid, n);
 
-        DBClose(dbfile);    
+        DBClose(dbfile);
     }
 };
 
@@ -1142,8 +1149,8 @@ int main(int argc, char *argv[])
 {
     SerialSimulator<ContainerCell> sim(
         new ChromoInitializer(
-            Coord<2>(ceil(1.0 * MAX_X / CELL_SPACING), 
-                     ceil(1.0 * MAX_Y / CELL_SPACING)), 
+            Coord<2>(ceil(1.0 * MAX_X / CELL_SPACING),
+                     ceil(1.0 * MAX_Y / CELL_SPACING)),
             300000));
     new ChromoWriter(&sim, 100);
     new TracingWriter<ContainerCell>(&sim, 100);
