@@ -145,6 +145,7 @@ public:
         for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
              i != patchProvidersInner.end();
              ++i) {
+            // fixme: shouldn't this fail for the steerer?
             (*i)->setRegion(partitionManager->ownRegion());
             addPatchProvider(*i, Stepper<CELL_TYPE>::INNER_SET);
         }
