@@ -53,18 +53,6 @@ public:
     virtual ~Writer() {};
 
     /**
-     * notifies the Writer that the supplied CoordBox is the size of
-     * the simulation space. This fuction will be called once the
-     * grids have been initialized and before the simulation starts.
-     * Writers can use this information to decide on the size of
-     * buffers to allocate or determine file offsets. 
-     */
-    virtual void setSimSpace(const CoordBox<DIM>& newSimSpace)
-    {
-        simSpace = newSimSpace;
-    }
-
-    /**
      * is called back from \a sim after each simulation step. event
      * specifies the phase in which the simulation is currently in.
      * This may be used for instance to open/close files at the
@@ -83,7 +71,6 @@ public:
     }
 
 protected:
-    CoordBox<DIM> simSpace;
     std::string prefix;
     unsigned period;
 };
