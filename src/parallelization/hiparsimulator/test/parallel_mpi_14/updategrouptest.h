@@ -12,8 +12,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
 
 using namespace boost::assign;
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -26,21 +26,21 @@ namespace HiParSimulator {
 //         r(region)
 //     {}
 
-//     inline Region::Iterator begin(const unsigned&) const 
+//     inline Region::Iterator begin(const unsigned&) const
 //     {
 //         return r->begin();
 //     }
-        
+
 //     inline Region::Iterator end(const unsigned&) const
 //     {
 //         return r->end();
 //     }
 
-//     inline Region::StreakIterator beginStreak(const unsigned&) const 
+//     inline Region::StreakIterator beginStreak(const unsigned&) const
 //     {
 //         return r->beginStreak();
 //     }
-        
+
 //     inline Region::StreakIterator endStreak(const unsigned&) const
 //     {
 //         return r->endStreak();
@@ -73,7 +73,7 @@ public:
     //     firstStep = 20;
     //     firstNanoStep = 18;
     //     firstCycle = firstStep * TestCell::nanoSteps() + firstNanoStep;
-    //     init.reset(new TestInitializer(buildTestInit()));        
+    //     init.reset(new TestInitializer(buildTestInit()));
 
 
     //     // Rank tree structure: (goal)
@@ -81,7 +81,7 @@ public:
     //     //  level2        0-----2---------12
     //     //                |     |          |
     //     //  level1 (a-c)  0   1-2-11      12-13
-    //     //                      |              
+    //     //                      |
     //     //  level0              2-3-4-5-6-7-8-9-10
     //     //
 
@@ -90,7 +90,7 @@ public:
 
     //     SuperVector<int> level1aRanks;
     //     level1aRanks += 0;
-        
+
     //     SuperVector<int> level1bRanks;
     //     level1bRanks += 1, 2, 11;
 
@@ -122,7 +122,7 @@ public:
 
     //     if (level2Ranks.contains(rank)) {
     //         patchBuffer.reset(new PatchBuffer<
-    //                           DisplacedGrid<TestCell>, 
+    //                           DisplacedGrid<TestCell>,
     //                           DisplacedGrid<TestCell>,
     //                           TestCell>());
 
@@ -133,7 +133,7 @@ public:
     //                 offset,
     //                 CoordRectangle(Coord(0, 0), dimensions),
     //                 level2GhostZoneWidth,
-    //                 &*init,
+    //                 init,
     //                 0,
     //                 0,
     //                 &level2MPIComm));
@@ -151,7 +151,7 @@ public:
     //                 newOffset,
     //                 CoordRectangle(Coord(0, 0), dimensions),
     //                 level0GhostZoneWidth,
-    //                 &*init,
+    //                 init,
     //                 &*patchBuffer,
     //                 0,
     //                 &MPI::COMM_SELF));
@@ -164,7 +164,7 @@ public:
     //                 newOffset,
     //                 CoordRectangle(Coord(0, 0), dimensions),
     //                 level2GhostZoneWidth,
-    //                 &*init,
+    //                 init,
     //                 0,
     //                 &*patchBuffer,
     //                 &MPI::COMM_SELF));
@@ -212,13 +212,13 @@ public:
 //                 level2Group->getGrid()->paste(*level0Group->getGrid(),                level2GhostZoneResolution->fromHost);
 
 // //                 //             DisplacedGrid<TestCell> level2GhostZone(level2CoordinationGroup->partitionManager.ownExpandedRegion().boundingBox());
-            
+
 
 // //                 //             DisplacedGrid<TestCell> patch(level2Group->partitionManager.getOuterOutgroupGhostZoneFragment().boundingBox());
 // //                 //             patch.paste(*level0Group->getGrid(), level2GhostZoneResolution->fromMaster());
-                
+
 //                 long long end = Chronometer::timeUSec();
-//                 if (rank == 0) 
+//                 if (rank == 0)
 //                     std::cout << "time: " << (end-start) << "\n";
 
 
@@ -232,10 +232,10 @@ public:
 // //     //         int jumpLength = clusterGhostZoneWidth;
 // //     //         int numJumps = 5;
 
-// //     //         for (int jump = 0; jump < numJumps; ++jump) 
+// //     //         for (int jump = 0; jump < numJumps; ++jump)
 // //     //             clusterGhostZoneGroup->nanoStep(jumpLength, jumpLength);
 
-// //     // //         for (int jump = 0; jump < numJumps; ++jump) 
+// //     // //         for (int jump = 0; jump < numJumps; ++jump)
 // //     //         simulationAreaGroup->nanoStep(4, 4);
 
 // //     // fixme: check events on mockpatchprovider/accepter
@@ -249,7 +249,7 @@ public:
 //     boost::shared_ptr<UpdateGroup<TestCell, Partition> > level2Group; // meta cluster level
 //     boost::shared_ptr<UpdateGroup<TestCell, Partition> > level2CoordinationGroup;
 //     boost::shared_ptr<
-//         PatchBuffer<DisplacedGrid<TestCell>, 
+//         PatchBuffer<DisplacedGrid<TestCell>,
 //                     DisplacedGrid<TestCell>,
 //                     TestCell> > patchBuffer;
 //     boost::shared_ptr<GhostZoneResolution> level2GhostZoneResolution;
@@ -276,7 +276,7 @@ public:
 //     unsigned firstStep;
 //     unsigned firstNanoStep;
 //     unsigned firstCycle;
-    
+
 //     TestInitializer buildTestInit()
 //     {
 //         return TestInitializer(dimensions.x, dimensions.y, maxSteps, firstStep, firstNanoStep);
@@ -290,7 +290,7 @@ public:
 //     void genLevel2WeightsAndOffset(SuperVector<unsigned> *weights, unsigned *offset)
 //     {
 //         weights->clear();
-//         *weights += 
+//         *weights +=
 //             totalSize() / 9,
 //             7 * totalSize() / 12;
 //         fillinRemainder(weights, totalSize());
@@ -355,7 +355,7 @@ public:
 //     {
 //         vec->push_back(size - vec->sum());
 //     }
-    
+
 };
 
 }

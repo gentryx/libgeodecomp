@@ -19,10 +19,9 @@ public:
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<
-        DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-    typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
-    typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
+    typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     using Stepper<CELL_TYPE>::addPatchAccepter;
@@ -33,8 +32,8 @@ public:
     using Stepper<CELL_TYPE>::partitionManager;
 
     inline VanillaStepper(
-        boost::shared_ptr<MyPartitionManager> partitionManager,
-        Initializer<CELL_TYPE> *initializer,
+        boost::shared_ptr<PartitionManagerType> partitionManager,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
         ParentType(partitionManager, initializer)
@@ -76,8 +75,8 @@ private:
     int validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
-    MyPatchBuffer2 rimBuffer;
-    MyPatchBuffer1 kernelBuffer;
+    PatchBufferType2 rimBuffer;
+    PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
 
     inline void update()
@@ -167,8 +166,8 @@ private:
             ParentType::INNER_SET,
             globalNanoStep());
 
-        kernelBuffer = MyPatchBuffer1(partitionManager->getVolatileKernel());
-        rimBuffer = MyPatchBuffer2(rim());
+        kernelBuffer = PatchBufferType1(partitionManager->getVolatileKernel());
+        rimBuffer = PatchBufferType2(rim());
         saveRim(globalNanoStep());
         updateGhost();
     }

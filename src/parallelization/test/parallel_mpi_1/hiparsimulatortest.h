@@ -23,7 +23,6 @@ class HiParSimulatorTest : public CxxTest::TestSuite
 {
 public:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
-    // fixme: rename types a la "MyFoobar" to "FoobarType"
     typedef HiParSimulator<TestCell<2>, StripingPartition<2> > SimulatorType;
     typedef ParallelMemoryWriter<TestCell<2> > MemoryWriterType;
     typedef MockSteerer<TestCell<2> > MockSteererType;

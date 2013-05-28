@@ -16,7 +16,7 @@ class MulticoreStepperTest : public CxxTest::TestSuite
 public:
 
     typedef DisplacedGrid<TestCell<3>, TestCell<3>::Topology, true> GridType;
-    typedef MulticoreStepper<TestCell<3> > MyStepper;
+    typedef MulticoreStepper<TestCell<3> > StepperType;
 
     void setUp()
     {
@@ -30,9 +30,9 @@ public:
 
         partitionManager.reset(new PartitionManager<2>(rect));
         // stepper.reset(
-        //     new MyStepper(partitionManager, init));
+        //     new StepperType(partitionManager, init));
 
-        // stepper->addPatchAccepter(patchAccepter, MyStepper::GHOST);
+        // stepper->addPatchAccepter(patchAccepter, StepperType::GHOST);
     }
 
     void testFoo()
@@ -43,7 +43,7 @@ public:
 private:
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
     boost::shared_ptr<PartitionManager<2> > partitionManager;
-    boost::shared_ptr<MyStepper> stepper;
+    boost::shared_ptr<StepperType> stepper;
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };
 

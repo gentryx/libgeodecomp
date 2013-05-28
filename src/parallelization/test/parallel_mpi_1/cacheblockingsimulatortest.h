@@ -8,14 +8,14 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class CacheBlockingSimulatorTest : public CxxTest::TestSuite 
+class CacheBlockingSimulatorTest : public CxxTest::TestSuite
 {
 public:
-    typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Cube<3>::Topology> MyTestCell;
+    typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Cube<3>::Topology> TestCellType;
 
     void setUp()
     {
@@ -44,7 +44,7 @@ public:
 //         }
 //         for (; i < (dim.z() + 2 * pipelineLength - 2); ++i) {
 //             int firstStage = ((i - dim.z() + 1) >> 1);
-//             sim->pipelinedUpdate(Coord<2>(0, 0), i, i, firstStage, pipelineLength);            
+//             sim->pipelinedUpdate(Coord<2>(0, 0), i, i, firstStage, pipelineLength);
 //         }
 //     }
 
@@ -52,7 +52,7 @@ public:
 //     {
 //         init(Coord<3>(40, 30, 20));
 
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 0);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid), 0);
 //         sim->updateWavefront(Coord<2>(0, 0));
 //         sim->updateWavefront(Coord<2>(1, 0));
 //         sim->updateWavefront(Coord<2>(2, 0));
@@ -61,63 +61,63 @@ public:
 //         sim->updateWavefront(Coord<2>(1, 1));
 //         sim->updateWavefront(Coord<2>(2, 1));
 
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->newGrid), pipelineLength);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->newGrid), pipelineLength);
 //     }
 
 //     void testHop1()
 //     {
 //         init(Coord<3>(40, 30, 20));
 
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  0);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  0);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  5);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  5);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 10);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid), 10);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 15);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid), 15);
 //     }
 
 //     void testHop2()
 //     {
 //         init(Coord<3>(40, 30, 20), 7);
 
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  0);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  0);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  7);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  7);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 14);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid), 14);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid), 21);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid), 21);
 //     }
 
 //     void testHop3()
 //     {
 //         init(Coord<3>(40, 30, 20), 1);
 
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  0);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  0);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  1);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  1);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  2);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  2);
 //         sim->hop();
-//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<MyTestCell>::GridType, *(sim->curGrid),  3);
+//         TS_ASSERT_TEST_GRID(CacheBlockingSimulator<TestCellType>::GridType, *(sim->curGrid),  3);
 //     }
-    
+
 // private:
 //     int pipelineLength;
 //     Coord<3> dim;
-//     boost::shared_ptr<CacheBlockingSimulator<MyTestCell> > sim;
+//     boost::shared_ptr<CacheBlockingSimulator<TestCellType> > sim;
 
 //     void init(const Coord<3>& gridDim, int newPipelineLength = 5, const Coord<2> wavefrontDim = Coord<2>(16, 16))
 //     {
 //         pipelineLength = newPipelineLength;
 //         dim = gridDim;
-//         sim.reset(new CacheBlockingSimulator<MyTestCell>(
-//                       new TestInitializer<MyTestCell>(
-//                           dim, 
+//         sim.reset(new CacheBlockingSimulator<TestCellType>(
+//                       new TestInitializer<TestCellType>(
+//                           dim,
 //                           10000,
 //                           0),
-//                       pipelineLength, 
+//                       pipelineLength,
 //                       wavefrontDim));
     }
 };

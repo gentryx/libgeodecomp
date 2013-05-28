@@ -23,6 +23,11 @@ public:
 
     virtual ~PatchProvider() {};
 
+    virtual void setRegion(const Region<DIM>& region)
+    {
+        // empty as most implementations won't need it anyway.
+    }
+
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,

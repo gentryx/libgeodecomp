@@ -32,16 +32,16 @@ public:
     typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-    typedef typename MyPartitionManager::RegionVecMap RegionVecMap;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
     UpdateGroup(
-        Partition<DIM> *partition,
+        boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
         const unsigned& ghostZoneWidth,
-        Initializer<CELL_TYPE> *initializer,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost=PatchProviderVec(),
@@ -54,7 +54,7 @@ public:
         cellMPIDatatype(cellMPIDatatype),
         rank(mpiLayer.rank())
     {
-        partitionManager.reset(new MyPartitionManager());
+        partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
             box,
             partition,
@@ -145,14 +145,13 @@ public:
         for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
              i != patchProvidersInner.end();
              ++i) {
-            // fixme: shouldn't this fail for the steerer?
             (*i)->setRegion(partitionManager->ownRegion());
             addPatchProvider(*i, Stepper<CELL_TYPE>::INNER_SET);
         }
     }
 
     virtual ~UpdateGroup()
-    { }
+    {}
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,
@@ -190,10 +189,10 @@ public:
 
 private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
-    boost::shared_ptr<MyPartitionManager> partitionManager;
+    boost::shared_ptr<PartitionManagerType> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;
-    Initializer<CELL_TYPE> *initializer;
+    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     MPILayer mpiLayer;
     MPI::Datatype cellMPIDatatype;
     unsigned rank;

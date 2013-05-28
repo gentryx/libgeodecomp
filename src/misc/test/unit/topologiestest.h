@@ -3,11 +3,11 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/grid.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TopologiesTest : public CxxTest::TestSuite 
+class TopologiesTest : public CxxTest::TestSuite
 {
 public:
     void testNormalizeCoordAndOutOfBoundsAndNormalizeEdges()
@@ -63,7 +63,7 @@ public:
         typedef Topologies::Cube<3>::Topology Cube3;
         typedef Topologies::Torus<2>::Topology Torus2;
         typedef Topologies::Torus<3>::Topology Torus3;
-        typedef TopologiesHelpers::Topology<2, true, false> MyTopo;
+        typedef TopologiesHelpers::Topology<2, true, false> TopoType;
 
         TS_ASSERT_EQUALS((Cube2::WrapsAxis<0>::VALUE), false);
         TS_ASSERT_EQUALS((Cube2::WrapsAxis<1>::VALUE), false);
@@ -79,11 +79,11 @@ public:
         TS_ASSERT_EQUALS((Torus3::WrapsAxis<1>::VALUE), true);
         TS_ASSERT_EQUALS((Torus3::WrapsAxis<2>::VALUE), true);
 
-        TS_ASSERT_EQUALS((MyTopo::WrapsAxis<0>::VALUE), true);
-        TS_ASSERT_EQUALS((MyTopo::WrapsAxis<1>::VALUE), false);
+        TS_ASSERT_EQUALS((TopoType::WrapsAxis<0>::VALUE), true);
+        TS_ASSERT_EQUALS((TopoType::WrapsAxis<1>::VALUE), false);
 
-        TS_ASSERT_EQUALS((MyTopo::WrapsAxis<0>::VALUE), MyTopo::wrapsAxis(0));
-        TS_ASSERT_EQUALS((MyTopo::WrapsAxis<1>::VALUE), MyTopo::wrapsAxis(1));
+        TS_ASSERT_EQUALS((TopoType::WrapsAxis<0>::VALUE), TopoType::wrapsAxis(0));
+        TS_ASSERT_EQUALS((TopoType::WrapsAxis<1>::VALUE), TopoType::wrapsAxis(1));
     }
 
     void testIsOutOfBoundsCube2D()
@@ -242,17 +242,17 @@ public:
         TS_ASSERT_EQUALS(true, Topologies::Torus<3>::Topology::wrapsAxis(1));
         TS_ASSERT_EQUALS(true, Topologies::Torus<3>::Topology::wrapsAxis(2));
 
-        typedef TopologiesHelpers::Topology<2, true, false> MyTopo;
-        TS_ASSERT_EQUALS(true,  MyTopo::wrapsAxis(0));
-        TS_ASSERT_EQUALS(false, MyTopo::wrapsAxis(1));
+        typedef TopologiesHelpers::Topology<2, true, false> TopoType;
+        TS_ASSERT_EQUALS(true,  TopoType::wrapsAxis(0));
+        TS_ASSERT_EQUALS(false, TopoType::wrapsAxis(1));
 
-        Grid<int, MyTopo> grid(Coord<2>(7, 9), 0, -1);
+        Grid<int, TopoType> grid(Coord<2>(7, 9), 0, -1);
         for (int y = 0; y < 9; ++y) {
             for (int x = 0; x < 7; ++x) {
                 grid[Coord<2>(x, y)] = y * 10 + x;
             }
         }
-         
+
         TS_ASSERT_EQUALS(56, grid[Coord<2>(-1, 5)]);
         TS_ASSERT_EQUALS(50, grid[Coord<2>(7, 5)]);
 
