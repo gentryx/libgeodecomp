@@ -9,13 +9,14 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class BadBalancerSum : public LoadBalancer {
+class BadBalancerSum : public LoadBalancer
+{
     virtual NoOpBalancer::WeightVec balance(
-        const NoOpBalancer::WeightVec& currentLoads, 
+        const NoOpBalancer::WeightVec& currentLoads,
         const NoOpBalancer::LoadVec&) {
         NoOpBalancer::WeightVec ret = currentLoads;
         ret[0]++;
@@ -23,9 +24,10 @@ class BadBalancerSum : public LoadBalancer {
     }
 };
 
-class BadBalancerNum : public LoadBalancer {
+class BadBalancerNum : public LoadBalancer
+{
     virtual NoOpBalancer::WeightVec balance(
-        const NoOpBalancer::WeightVec& currentLoads, 
+        const NoOpBalancer::WeightVec& currentLoads,
         const NoOpBalancer::LoadVec&) {
         NoOpBalancer::WeightVec ret = currentLoads;
         ret.push_back(45);
@@ -38,7 +40,7 @@ class StripingSimulatorTest : public CxxTest::TestSuite
 public:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
 
-    void setUp() 
+    void setUp()
     {
         balancer = new NoOpBalancer;
         init = new TestInitializer<TestCell<2> >();
@@ -58,7 +60,7 @@ public:
     void testBadInit()
     {
         TS_ASSERT_THROWS(StripingSimulator<TestCell<2> > foo(
-                             new TestInitializer<TestCell<2> >(), 0, 1), 
+                             new TestInitializer<TestCell<2> >(), 0, 1),
                          std::invalid_argument);
         TS_ASSERT_THROWS(StripingSimulator<TestCell<2> > foo(
                              new TestInitializer<TestCell<2> >(), 0, 0),
@@ -70,7 +72,7 @@ public:
         MockBalancer::events = "";
         {
             StripingSimulator<TestCell<2> > foo(
-                new TestInitializer<TestCell<2> >(), new MockBalancer()); 
+                new TestInitializer<TestCell<2> >(), new MockBalancer());
         }
         TS_ASSERT_EQUALS("deleted\n", MockBalancer::events);
     }
@@ -84,7 +86,7 @@ public:
         expected[0] = 0;
         expected[1] = 27;
         TS_ASSERT_EQUALS(actual, expected);
-        
+
         size = 2;
         actual = testSim->partition(gridWidth, size);
         expected = NoOpBalancer::WeightVec(3);
@@ -101,7 +103,7 @@ public:
         expected[2] = 18;
         expected[3] = 27;
         TS_ASSERT_EQUALS(actual, expected);
-        
+
         size = 4;
         actual = testSim->partition(gridWidth, size);
         expected = NoOpBalancer::WeightVec(5);
@@ -115,26 +117,26 @@ public:
 
     void testStep()
     {
-        TS_ASSERT_EQUALS(referenceSim->getStep(), 
+        TS_ASSERT_EQUALS(referenceSim->getStep(),
                          testSim->getStep());
         TS_ASSERT(*(referenceSim->getGrid()) == *testSim->curStripe);
 
         for (int i = 0; i < 50; i++) {
             referenceSim->step();
             testSim->step();
-            TS_ASSERT_EQUALS(referenceSim->getStep(), 
+            TS_ASSERT_EQUALS(referenceSim->getStep(),
                              testSim->getStep());
-            TS_ASSERT_EQUALS(referenceSim->getGrid()->getDimensions(), 
+            TS_ASSERT_EQUALS(referenceSim->getGrid()->getDimensions(),
                              testSim->curStripe->getDimensions());
             TS_ASSERT(*referenceSim->getGrid() == *testSim->curStripe);
-            TS_ASSERT_TEST_GRID(GridBaseType, *testSim->curStripe, 
+            TS_ASSERT_TEST_GRID(GridBaseType, *testSim->curStripe,
                                 (i + 1) * TestCell<2>::nanoSteps());
-        }        
+        }
     }
 
     void testStripeWidth()
     {
-        TS_ASSERT_EQUALS(testSim->curStripe->getDimensions().x(), 
+        TS_ASSERT_EQUALS(testSim->curStripe->getDimensions().x(),
                          init->gridDimensions().x());
     }
 
@@ -176,10 +178,10 @@ public:
         workloads[3] =  9;
         workloads[4] = 70;
 
-        TS_ASSERT_EQUALS(testSim->partitionsToWorkloads(partitions), 
+        TS_ASSERT_EQUALS(testSim->partitionsToWorkloads(partitions),
                          workloads);
 
-        TS_ASSERT_EQUALS(testSim->workloadsToPartitions(workloads), 
+        TS_ASSERT_EQUALS(testSim->workloadsToPartitions(workloads),
                          partitions);
     }
 
@@ -191,7 +193,7 @@ public:
     }
 
     void testBadBalancerNum()
-    {    
+    {
         StripingSimulator<TestCell<2> > s(
             new TestInitializer<TestCell<2> >(), new BadBalancerNum());
         TS_ASSERT_THROWS(s.balanceLoad(), std::invalid_argument);
@@ -200,7 +202,7 @@ public:
     void test3D()
     {
         StripingSimulator<TestCell<3> > s(
-            new TestInitializer<TestCell<3> >(), 
+            new TestInitializer<TestCell<3> >(),
             new NoOpBalancer());
 
         s.run();

@@ -12,9 +12,9 @@
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
-using namespace boost::assign; 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace boost::assign;
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -38,7 +38,7 @@ public:
         firstStep = 20;
         TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(
             dim, maxSteps, firstStep);
-        
+
         outputPeriod = 1;
         loadBalancingPeriod = 31;
         ghostzZoneWidth = 10;
@@ -52,7 +52,7 @@ public:
 
     void tearDown()
     {
-        s.reset();        
+        s.reset();
     }
 
     void testStep()
@@ -62,7 +62,7 @@ public:
         std::string expectedEvents = "initialized()\ninitialized()\nstepFinished(step=21)\nstepFinished(step=21)\n";
 
         TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
-        
+
         SuperVector<unsigned> actualSteps;
         SuperVector<unsigned> expectedSteps;
         expectedSteps += 20, 21;
@@ -95,8 +95,8 @@ public:
             int globalNanoStep = t * TestCell<2>::nanoSteps();
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
-                MemoryWriterType::GridType, 
-                grids[t], 
+                MemoryWriterType::GridType,
+                grids[t],
                 globalNanoStep);
             TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
         }
@@ -107,7 +107,7 @@ public:
         std::stringstream events;
         s->addSteerer(new MockSteererType(5, &events));
         s->run();
-        s.reset();        
+        s.reset();
 
         std::stringstream expected;
         expected << "created, period = 5\n";
@@ -130,9 +130,9 @@ public:
         int cycle = 200 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(
-            GridBaseType, 
-            *grid, 
-            *region, 
+            GridBaseType,
+            *grid,
+            *region,
             cycle);
     }
 

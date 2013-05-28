@@ -5,8 +5,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/mockpatchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/multicorestepper.h>
 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -27,7 +27,7 @@ public:
         patchAccepter->pushRequest(2);
         patchAccepter->pushRequest(10);
         patchAccepter->pushRequest(13);
-   
+
         partitionManager.reset(new PartitionManager<2>(rect));
         // stepper.reset(
         //     new MyStepper(partitionManager, init));
