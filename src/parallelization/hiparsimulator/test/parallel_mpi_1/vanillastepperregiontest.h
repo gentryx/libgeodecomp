@@ -54,15 +54,14 @@ public:
         init.reset(new TestInitializer<TestCell<2> >(Coord<2>(17, 12)));
         CoordBox<2> rect = init->gridBox();
 
-
         // Set up a striping partition. We'll take rank 1, placing us
         // between the two others 0 and 2.
         SuperVector<long> weights(3);
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];
-        Partition<2> *partition =
-            new StripingPartition<2>(Coord<2>(0, 0), rect.dimensions, 0, weights);
+        boost::shared_ptr<Partition<2> > partition(
+            new StripingPartition<2>(Coord<2>(0, 0), rect.dimensions, 0, weights));
 
         // Feed the partition into the partition manager
         partitionManager.reset(new PartitionManager<2>());
@@ -77,7 +76,7 @@ public:
         partitionManager->resetGhostZones(boundingBoxes);
 
         // The Unit Under Test: the stepper
-        stepper.reset(new StepperType(partitionManager, &*init));
+        stepper.reset(new StepperType(partitionManager, init));
     }
 
     void testUpdate()

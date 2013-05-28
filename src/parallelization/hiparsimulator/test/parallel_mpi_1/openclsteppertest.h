@@ -44,7 +44,7 @@ public:
 
     void setUp()
     {
-        init = new CellInitializer(Coord<3>(128, 128, 128));
+        init.reset(new CellInitializer(Coord<3>(128, 128, 128)));
         CoordBox<3> rect = init->gridBox();
 
         partitionManager.reset(new PartitionManager<3>(rect));
@@ -53,9 +53,7 @@ public:
     }
 
     void tearDown()
-    {
-        delete init;
-    }
+    {}
 #endif
 
     void testBasic()
@@ -67,7 +65,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
 private:
-    CellInitializer *init;
+    boost::shared_ptr<CellInitializer> init;
     boost::shared_ptr<PartitionManager<3> > partitionManager;
     boost::shared_ptr<StepperType> stepper;
 #endif

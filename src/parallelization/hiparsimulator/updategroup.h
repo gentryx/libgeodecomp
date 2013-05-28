@@ -38,10 +38,10 @@ public:
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
     UpdateGroup(
-        Partition<DIM> *partition,
+        boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
         const unsigned& ghostZoneWidth,
-        Initializer<CELL_TYPE> *initializer,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost=PatchProviderVec(),
@@ -93,7 +93,7 @@ public:
 
         stepper.reset(new STEPPER(
                           partitionManager,
-                          initializer,
+                          this->initializer,
                           patchAcceptersGhost +
                           ghostZoneAccepterLinks,
                           patchAcceptersInner));
@@ -137,7 +137,7 @@ public:
     }
 
     virtual ~UpdateGroup()
-    { }
+    {}
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,
@@ -178,7 +178,7 @@ private:
     boost::shared_ptr<PartitionManagerType> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;
-    Initializer<CELL_TYPE> *initializer;
+    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     MPILayer mpiLayer;
     MPI::Datatype cellMPIDatatype;
     unsigned rank;

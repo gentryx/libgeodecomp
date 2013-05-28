@@ -40,8 +40,8 @@ public:
         SuperVector<long> weights;
         weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
-        Partition<3> *partition =
-            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights);
+        boost::shared_ptr<Partition<3> > partition(
+            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
         partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
@@ -51,11 +51,12 @@ public:
             ghostZoneWidth);
 
         SuperVector<CoordBox<3> > boundingBoxes;
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i) {
             boundingBoxes << partitionManager->getRegion(i, 0).boundingBox();
+        }
         partitionManager->resetGhostZones(boundingBoxes);
 
-        stepper.reset(new StepperType(partitionManager, &*init));
+        stepper.reset(new StepperType(partitionManager, init));
 
         // verify that the grids got set up properly
         Coord<3> expectedOffset;

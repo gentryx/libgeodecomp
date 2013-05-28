@@ -26,15 +26,13 @@ public:
      * assumed to belong to the Simulator, which means that it'll
      * delete the @a _initializer at the end of its lifetime.
      */
-    inline Simulator(Initializer<CELL_TYPE> *_initializer) :
+    inline Simulator(Initializer<CELL_TYPE> *initializer) :
         stepNum(0),
-        initializer(_initializer)
+        initializer(initializer)
     {}
 
     inline virtual ~Simulator()
-    {
-        delete initializer;
-    }
+    {}
 
     /**
      * performs a single simulation step.
@@ -54,7 +52,7 @@ public:
         return stepNum;
     }
 
-    virtual Initializer<CELL_TYPE> *getInitializer() const
+    virtual boost::shared_ptr<Initializer<CELL_TYPE> > getInitializer() const
     {
         return initializer;
     }
@@ -72,7 +70,7 @@ public:
 
 protected:
     unsigned stepNum;
-    Initializer<CELL_TYPE> *initializer;
+    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     SteererVector steerers;
 };
 

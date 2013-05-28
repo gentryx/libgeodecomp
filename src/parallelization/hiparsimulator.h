@@ -188,13 +188,16 @@ private:
 
         CoordBox<DIM> box = initializer->gridBox();
 
+        boost::shared_ptr<PARTITION> partition(
+            new PARTITION(
+                box.origin,
+                box.dimensions,
+                0,
+                initialWeights(box.dimensions.prod(), communicator->Get_size())));
+
         updateGroup.reset(
             new UpdateGroupType(
-                new PARTITION(
-                    box.origin,
-                    box.dimensions,
-                    0,
-                    initialWeights(box.dimensions.prod(), communicator->Get_size())),
+                partition,
                 box,
                 ghostZoneWidth,
                 initializer,
@@ -216,7 +219,7 @@ private:
         events.clear();
         long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
         events[lastNanoStep] << END;
-        
+
         insertNextLoadBalancingEvent();
     }
 
@@ -277,7 +280,7 @@ private:
 
             int size = communicator->Get_size();
             LoadBalancer::LoadVec loads(size, 1.0);
-            LoadBalancer::WeightVec newWeights = 
+            LoadBalancer::WeightVec newWeights =
                 balancer->balance(updateGroup->getWeights(), loads);
             // fixme: actually balance the load!
         }

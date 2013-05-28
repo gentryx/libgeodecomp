@@ -28,9 +28,9 @@ public:
         rank = MPILayer().rank();
         dimensions = Coord<2>(231, 350);
         weights = genWeights(dimensions.x(), dimensions.y(), MPILayer().size());
-        partition = new PartitionType(Coord<2>(), dimensions, 0, weights);
+        partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         ghostZoneWidth = 9;
-        init = new TestInitializer<TestCell<2> >(dimensions);
+        init.reset(new TestInitializer<TestCell<2> >(dimensions));
         updateGroup.reset(
             new UpdateGroupType(
                 partition,
@@ -50,7 +50,6 @@ public:
 
     void tearDown()
     {
-        delete init;
         updateGroup.reset();
     }
 
@@ -66,9 +65,9 @@ private:
     unsigned rank;
     Coord<2> dimensions;
     SuperVector<long> weights;
-    PartitionType *partition;
     unsigned ghostZoneWidth;
-    Initializer<TestCell<2> > *init;
+    boost::shared_ptr<PartitionType> partition;
+    boost::shared_ptr<Initializer<TestCell<2> > > init;
     boost::shared_ptr<UpdateGroup<TestCell<2> > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 

@@ -33,7 +33,7 @@ public:
 
     inline VanillaStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
-        Initializer<CELL_TYPE> *initializer,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
         ParentType(partitionManager, initializer)
