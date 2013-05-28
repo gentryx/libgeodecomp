@@ -16,6 +16,7 @@ class TestSteerer : public Steerer<TestCell<DIM> >
 {
 public:
     typedef typename Steerer<TestCell<DIM> >::GridType GridType;
+    using Steerer<TestCell<DIM> >::region;
 
     TestSteerer(
         const unsigned& period,
@@ -23,7 +24,8 @@ public:
         const unsigned& cycleOffset)  :
         Steerer<TestCell<DIM> >(period),
         eventStep(eventStep),
-        cycleOffset(cycleOffset)
+        cycleOffset(cycleOffset),
+        lastStep(-1)
     {}
 
     virtual void nextStep(
@@ -31,6 +33,10 @@ public:
         const Region<DIM>& validRegion,
         unsigned step)
     {
+        // ensure setRegion() has actually been called
+        TS_ASSERT(!region.empty());
+        // fixme: extend this test according to paralleltestwriter
+
         if (step != eventStep) {
             return;
         }
@@ -46,6 +52,7 @@ public:
 private:
     unsigned eventStep;
     unsigned cycleOffset;
+    int lastStep;
 };
 
 }

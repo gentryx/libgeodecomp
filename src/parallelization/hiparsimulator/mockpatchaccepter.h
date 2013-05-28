@@ -15,14 +15,14 @@ public:
     const static int DIM = GRID_TYPE::DIM;
 
     virtual void put(
-        const GRID_TYPE& /*grid*/, 
-        const Region<DIM>& /*validRegion*/, 
-        const long& nanoStep) 
+        const GRID_TYPE& /*grid*/,
+        const Region<DIM>& /*validRegion*/,
+        const long& nanoStep)
     {
         offeredNanoSteps.push_back(nanoStep);
         requestedNanoSteps.pop_front();
     }
-    
+
     virtual long nextRequiredNanoStep() const
     {
         if (requestedNanoSteps.empty()) {
