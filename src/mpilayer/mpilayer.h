@@ -42,9 +42,9 @@ public:
 
     typedef std::map<int, std::vector<MPI::Request> > RequestsMap;
 
-    MPILayer(MPI::Comm *c = &MPI::COMM_WORLD, int _tag = 0) :
+    MPILayer(MPI::Comm *c = &MPI::COMM_WORLD, int tag = 0) :
         comm(c),
-        tag(_tag)
+        tag(tag)
     {}
 
     virtual ~MPILayer()
@@ -55,8 +55,8 @@ public:
     template<typename T>
     inline void send(
         const T *c,
-        const int& dest,
-        const int& num = 1,
+        int dest,
+        int num = 1,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         send(c, dest, num, tag, datatype);
@@ -65,9 +65,9 @@ public:
     template<typename T>
     inline void send(
         const T *c,
-        const int& dest,
-        const int& num,
-        const int& tag,
+        int dest,
+        int num,
+        int tag,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Isend(c, num, datatype, dest, tag);
@@ -77,8 +77,8 @@ public:
     template<typename T>
     inline void recv(
         T *c,
-        const int& src,
-        const int& num = 1,
+        int src,
+        int num = 1,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         recv(c, src, num, tag, datatype);
@@ -87,9 +87,9 @@ public:
     template<typename T>
     inline void recv(
         T *c,
-        const int& src,
-        const int& num,
-        const int& tag,
+        int src,
+        int num,
+        int tag,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Irecv(c, num, datatype, src, tag);
@@ -105,7 +105,7 @@ public:
         }
     }
 
-    void cancel(const int& waitTag)
+    void cancel(int waitTag)
     {
         std::vector<MPI::Request>& requestVec = requests[waitTag];
         for (std::vector<MPI::Request>::iterator i = requestVec.begin();
@@ -131,7 +131,7 @@ public:
      * waits until those communication requests tagged with @a waitTag
      * are finished.
      */
-    void wait(const int& waitTag)
+    void wait(int waitTag)
     {
         std::vector<MPI::Request>& requestVec = requests[waitTag];
         MPI::Request::Waitall(requestVec.size(), &requestVec[0]);
@@ -147,7 +147,7 @@ public:
         }
     }
 
-    void test(const int& testTag)
+    void test(int testTag)
     {
         std::vector<MPI::Request>& requestVec = requests[testTag];
         MPI::Request::Testall(requestVec.size(), &requestVec[0]);
@@ -182,8 +182,8 @@ public:
     template<typename T>
     void sendVec(
         const SuperVector<T> *vec,
-        const int& dest,
-        const int& waitTag = 0,
+        int dest,
+        int waitTag = 0,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Isend(
@@ -198,8 +198,8 @@ public:
     template<typename T>
     void recvVec(
         SuperVector<T> *vec,
-        const int& src,
-        const int& waitTag = 0,
+        int src,
+        int waitTag = 0,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Irecv(
@@ -215,7 +215,7 @@ public:
      * Sends a region object synchronously to another node.
      */
     template<int DIM>
-    void sendRegion(const Region<DIM>& region, const int& dest)
+    void sendRegion(const Region<DIM>& region, int dest)
     {
         unsigned numStreaks = region.numStreaks();
         MPI::Request req = comm->Isend(&numStreaks, 1, MPI::UNSIGNED, dest, tag);
@@ -228,7 +228,7 @@ public:
      * Receives a region object from another node, also synchronously.
      */
     template<int DIM>
-    void recvRegion(Region<DIM> *region, const int& src)
+    void recvRegion(Region<DIM> *region, int src)
     {
         unsigned numStreaks;
         comm->Recv(&numStreaks, 1, MPI::UNSIGNED, src, tag);
@@ -243,7 +243,7 @@ public:
      * Region by value.
      */
     template<int DIM>
-    Region<DIM> recvRegion(const int& src)
+    Region<DIM> recvRegion(int src)
     {
         Region<DIM> ret;
         recvRegion(&ret, src);
@@ -253,8 +253,8 @@ public:
     template<typename GRID_TYPE, int DIM>
     void recvUnregisteredRegion(GRID_TYPE *stripe,
                                 const Region<DIM>& region,
-                                const int& src,
-                                const int& tag,
+                                int src,
+                                int tag,
                                 const MPI::Datatype& datatype)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
@@ -265,8 +265,8 @@ public:
     template<typename GRID_TYPE, int DIM>
     void sendUnregisteredRegion(GRID_TYPE *stripe,
                                 const Region<DIM>& region,
-                                const int& dest,
-                                const int& tag,
+                                int dest,
+                                int tag,
                                 const MPI::Datatype& datatype)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
@@ -288,7 +288,7 @@ public:
     inline void allGather(
         const T *source,
         T *target,
-        const int& num,
+        const int num,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         comm->Allgather(source, num, datatype, target, num, datatype);
