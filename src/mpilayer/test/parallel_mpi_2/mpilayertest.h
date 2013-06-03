@@ -6,7 +6,7 @@
 #include <libgeodecomp/mpilayer/mpilayer.h>
 
 using namespace boost::assign;
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -65,11 +65,21 @@ public:
         unsigned root = 0;
         unsigned expected = 42;
         unsigned actual = 23;
-        unsigned source;
-        if (layer.rank() == root) source = expected;
-        else source = 0;
+        unsigned source = (layer.rank() == root)? expected : 0;
+
         actual = layer.broadcast(source, root);
         TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testBroadcast2()
+    {
+        MPILayer layer;
+        unsigned root = 0;
+        std::string expected = "hello world";
+        std::string buffer = (layer.rank() == root)? expected : std::string(expected.size(), 'X');
+
+        layer.broadcast(&buffer[0], buffer.size(), root);
+        TS_ASSERT_EQUALS(expected, buffer);
     }
 
     void testBroadcastVector()
@@ -82,7 +92,7 @@ public:
         SuperVector<double> source;
 
         if (layer.rank() == root) {
-            source = expected; 
+            source = expected;
         } else {
             source = SuperVector<double>();
         }
@@ -129,7 +139,7 @@ public:
         layer.waitAll();
         TS_ASSERT_EQUALS(c, FloatCoord<3>(0.0, 2.0, 3.0));
     }
-    
+
     void testSendRecvRegion()
     {
         MPILayer layer;
@@ -144,7 +154,7 @@ public:
             Region<2> b;
             layer.recvRegion(&b, 0);
             TS_ASSERT_EQUALS(a, b);
-        }        
+        }
     }
 
     void testAllGatherAgain()
@@ -175,7 +185,7 @@ public:
         expected += 1, 2, 3, 4, 5, 6, 7, 8;
         TS_ASSERT_EQUALS(expected, target);
     }
-    
+
     void testAllGatherV2()
     {
         MPILayer layer;
@@ -191,6 +201,32 @@ public:
         SuperVector<unsigned> expected;
         expected += 1, 2, 3, 4, 5, 6, 7, 8;
         TS_ASSERT_EQUALS(expected, target);
+    }
+
+    void testGatherV()
+    {
+        MPILayer layer;
+        int data[] = {1, 2, 3, 4};
+        if (layer.rank() == 1) {
+            data[0] = 47;
+            data[1] = 11;
+        }
+
+        SuperVector<int> target(5);
+        SuperVector<int> lengths;
+        lengths << 3
+                << 2;
+        layer.gatherV(data, lengths[layer.rank()], lengths, 0, &target[0]);
+
+        if (layer.rank() == 0) {
+            SuperVector<int> expected;
+            expected << 1
+                     << 2
+                     << 3
+                     << 47
+                     << 11;
+            TS_ASSERT_EQUALS(expected, target);
+        }
     }
 
     void testCancel()
