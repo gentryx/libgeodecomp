@@ -41,10 +41,6 @@ public:
         expectedEvents.erase(expectedEvents.begin());
         TS_ASSERT_EQUALS(expectedStep, step);
         TS_ASSERT_EQUALS(expectedEvent, event);
-
-        // ensures setSimSpace() was called before stepFinished()
-        TS_ASSERT_DIFFERS(simSpace.dimensions, Coord<2>());
-        TS_ASSERT_EQUALS(simSpace.dimensions, grid.getDimensions());
     }
 
 private:

@@ -86,7 +86,6 @@ public:
         initializer->grid(curGrid);
         stepNum = initializer->startStep();
         for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
-            (*i)->setSimSpace(curGrid->boundingBox());
             (*i)->stepFinished(
                 *getGrid(),
                 getStep(),
