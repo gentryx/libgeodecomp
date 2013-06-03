@@ -37,7 +37,6 @@ public:
         bool lastCall)
     {
         if (lastStep != step) {
-            // step should only change if lastCall has been set before
             TS_ASSERT(unaccountedRegion.empty());
             unaccountedRegion = region;
         }

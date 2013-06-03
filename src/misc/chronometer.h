@@ -53,9 +53,9 @@ public:
     static long long timeUSec();
 
 private:
-    long long _cycleStart;
-    long long _workIntervalStart;
-    long long _workLength;
+    long long cycleStart;
+    long long workIntervalStart;
+    long long workLength;
 
     /**
      * @returns a timestamp from a high resolution timer. There are no

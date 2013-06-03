@@ -6,16 +6,16 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TestSteererTest : public CxxTest::TestSuite 
+class TestSteererTest : public CxxTest::TestSuite
 {
 public:
     typedef TestSteerer<2> SteererType;
 
-    void setUp() 
+    void setUp()
     {
         simulator.reset(
             new SerialSimulator<TestCell<2> >(
@@ -25,7 +25,7 @@ public:
                     10)));
         simulator->addSteerer(new SteererType(5, 15, 4 * 27));
     }
-    
+
     void tearDown()
     {
         simulator.reset();
@@ -35,10 +35,10 @@ public:
     {
         simulator->run();
 
-        TS_ASSERT_TEST_GRID(SerialSimulator<TestCell<2> >::GridType, 
+        TS_ASSERT_TEST_GRID(SerialSimulator<TestCell<2> >::GridType,
                             *simulator->getGrid(),
                             (34 + 4) * 27);
-                            
+
     }
 
 private:

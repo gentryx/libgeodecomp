@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <libgeodecomp/misc/chronometer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -12,17 +12,15 @@ private:
     Chronometer *c;
 
 public:
-    void setUp() 
+    void setUp()
     {
         c = new Chronometer();
     }
 
-    
     void tearDown()
     {
         delete c;
     }
-
 
     void testTimeConsecutive()
     {
@@ -30,7 +28,6 @@ public:
             TS_ASSERT(c->time() <= c->time());
         }
     }
-
 
     void testTimeOverflow()
     {
@@ -44,19 +41,16 @@ public:
         }
     }
 
-
     void testMustCallTic()
     {
         TS_ASSERT_THROWS(c->toc(), std::logic_error);
     }
 
-
     void testWorkRatio1()
     {
-        c->_cycleStart -= 1; // avoidCyclelength of 0 due to low resolution
+        c->cycleStart -= 1; // avoidCyclelength of 0 due to low resolution
         TS_ASSERT_EQUALS(0, c->nextCycle());
     }
-
 
     void testWorkRatio2()
     {
@@ -66,7 +60,6 @@ public:
         usleep(600000);
         TS_ASSERT_DELTA(1.0/3.0, c->nextCycle(), 0.2);
     }
-
 
     void testWorkRatio3()
     {
@@ -82,4 +75,4 @@ public:
     }
 };
 
-};
+}

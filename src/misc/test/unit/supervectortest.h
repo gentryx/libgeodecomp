@@ -80,7 +80,7 @@ public:
         s += 12, 43, -9, -8, 15;
         TS_ASSERT_EQUALS(53, s.sum());
     }
-    
+
     void testAppend()
     {
         SuperVector<int> a;
