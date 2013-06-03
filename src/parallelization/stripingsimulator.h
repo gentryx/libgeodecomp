@@ -121,7 +121,7 @@ public:
     virtual void run()
     {
         initSimulation();
-        setWriterRegions();
+        setIORegions();
         handleOutput(WRITER_INITIALIZED);
 
         while (stepNum < initializer->maxSteps()) {
@@ -241,10 +241,14 @@ private:
         mpilayer.wait(GHOSTREGION_BETA);
     }
 
-    void setWriterRegions()
+    void setIORegions()
     {
         for(unsigned i = 0; i < writers.size(); i++) {
             writers[i]->setRegion(region);
+        }
+
+        for(unsigned i = 0; i < steerers.size(); i++) {
+            steerers[i]->setRegion(region);
         }
     }
 
