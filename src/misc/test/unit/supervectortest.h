@@ -62,6 +62,28 @@ public:
         deleteChecker(16);
     }
 
+    void testPop()
+    {
+        SuperVector<int> stack;
+        stack << 1
+              << 2
+              << 3;
+        TS_ASSERT_EQUALS(3, stack.pop());
+        TS_ASSERT_EQUALS(2, stack.pop());
+        TS_ASSERT_EQUALS(1, stack.pop());
+    }
+
+    void testPopFront()
+    {
+        SuperVector<int> stack;
+        stack << 1
+              << 2
+              << 3;
+        TS_ASSERT_EQUALS(1, stack.pop_front());
+        TS_ASSERT_EQUALS(2, stack.pop_front());
+        TS_ASSERT_EQUALS(3, stack.pop_front());
+    }
+
     void testPushFront()
     {
         SuperVector<int> a;

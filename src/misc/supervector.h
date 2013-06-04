@@ -21,6 +21,7 @@ public:
     using std::vector<T, Allocator>::insert;
     using std::vector<T, Allocator>::end;
     using std::vector<T, Allocator>::erase;
+    using std::vector<T, Allocator>::front;
     using std::vector<T, Allocator>::pop_back;
     using std::vector<T, Allocator>::push_back;
 
@@ -92,6 +93,13 @@ public:
     inline void push_front(const T& obj)
     {
         insert(begin(), obj);
+    }
+
+    inline T pop_front()
+    {
+        T ret = front();
+        erase(begin());
+        return ret;
     }
 
     inline T pop()
