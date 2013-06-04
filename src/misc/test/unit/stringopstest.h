@@ -44,6 +44,17 @@ public:
         TS_ASSERT_EQUALS(expected1, StringOps::tokenize(message, "_"));
         TS_ASSERT_EQUALS(expected2, StringOps::tokenize(message, "_ "));
     }
+
+    void testJoin()
+    {
+        StringOps::StringVec tokens;
+        tokens << "a"
+               << "bb"
+               << "ccc";
+        TS_ASSERT_EQUALS("a--bb--ccc", StringOps::join(tokens, "+-");
+        TS_ASSERT_EQUALS("a bb ccc", StringOps::join(tokens, " ");
+        TS_ASSERT_EQUALS("abbccc", StringOps::join(tokens, "");
+    }
 };
 
 }

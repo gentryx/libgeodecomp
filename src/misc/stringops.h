@@ -45,6 +45,20 @@ public:
         boost::split(ret, string, boost::is_any_of(delimiters), boost::token_compress_on);
         return ret;
     }
+
+    static std::string join(const StringVec& tokens, const std::string& delimiter)
+    {
+        std::stringstream buf;
+
+        for (StringVec::const_iterator i = tokens.begin(); i != tokens.end(); ++i) {
+            if (i != tokens.begin()) {
+                buf << delimiter;
+            }
+            buf << *i;
+        }
+
+        return buf.str();
+    }
 };
 
 }
