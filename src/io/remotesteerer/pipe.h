@@ -45,9 +45,22 @@ public:
         steeringFeedback << feedback;
     }
 
-    /**
-     *
-     */
+    StringVec retrieveSteeringRequests()
+    {
+        boost::lock_guard<boost::mutex> lock(mutex);
+        StringVec requests;
+        std::swap(requests, steeringRequests);
+        return requests;
+    }
+
+    StringVec retrieveSteeringFeedback()
+    {
+        boost::lock_guard<boost::mutex> lock(mutex);
+        StringVec feedback;
+        std::swap(feedback, steeringFeedback);
+        return feedback;
+    }
+
     void sync()
     {
         boost::lock_guard<boost::mutex> lock(mutex);
@@ -95,7 +108,8 @@ private:
     }
 
     /**
-     * Will move 
+     * Will move steering requests from the compute nodes to the root
+     * where it can then be forwarded to the user.
      */
     void moveSteeringFeedbackToRoot()
     {

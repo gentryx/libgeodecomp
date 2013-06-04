@@ -28,6 +28,9 @@ public:
 
         TS_ASSERT_EQUALS(pipe.steeringRequests[0], "set heat 0.1 100 120 110");
         TS_ASSERT_EQUALS(pipe.steeringRequests[1], "set flow 6.9 100 120 110");
+
+        TS_ASSERT_EQUALS(pipe.retrieveSteeringRequests().size(), 2);
+        TS_ASSERT_EQUALS(pipe.steeringRequests.size(), 0);
     }
 
     void testSyncSteeringFeedback()
@@ -44,6 +47,9 @@ public:
         pipe.sync();
         int expectedSize = (mpiLayer.rank() == 0)? 9 : 0;
         TS_ASSERT_EQUALS(pipe.steeringFeedback.size(), expectedSize);
+
+        TS_ASSERT_EQUALS(pipe.retrieveSteeringFeedback().size(), expectedSize);
+        TS_ASSERT_EQUALS(pipe.steeringFeedback.size(), 0);
     }
 };
 
