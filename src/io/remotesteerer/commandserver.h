@@ -56,12 +56,50 @@ public:
         bool *continueFlag;
     };
 
+    /**
+     * This Action is helpful if a given user command has to be
+     * executed by a Handler on the simulation node (i.e. all commands
+     * which work on grid data).
+     */
+    class PassThroughAction : public Action<CELL_TYPE>
+    {
+    public:
+        using Action<CELL_TYPE>::key;
+
+        PassThroughAction(const std::string& helpMessage, const std::string& key) :
+            Action<CELL_TYPE>(helpMessage, key)
+        {}
+
+        void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
+        {
+            pipe.addSteeringRequest(key() + " " + StringOps::join(parameters, " "));
+        }
+    };
+
+    class GetAction : public PassThroughAction
+    {
+    public:
+        GetAction() :
+            PassThroughAction("usage: \"get X Y [Z] MEMBER\", will return member MEMBER of cell at grid coordinate (X, Y, Z) if the model is 3D, or (X, Y) in the 2D case", "get")
+        {}
+    };
+
+    class SetAction : public PassThroughAction
+    {
+    public:
+        SetAction() :
+            PassThroughAction("usage: \"get X Y [Z] MEMBER VALUE\", will set member MEMBER of cell at grid coordinate (X, Y, Z) (if the model is 3D, or (X, Y) in the 2D case) to value VALUE", "set")
+        {}
+    };
+
     CommandServer(int port, boost::shared_ptr<Pipe> pipe) :
         port(port),
         pipe(pipe),
         serverThread(&CommandServer::runServer, this)
     {
         addAction(new QuitAction(&continueFlag));
+        addAction(new SetAction);
+        addAction(new GetAction);
 
         // The thread may take a while to start up. We need to wait
         // here so we don't try to clean up in the d-tor before the
@@ -190,7 +228,7 @@ private:
 
             bool commandFound = false;
             for (typename ActionVec::iterator i = actions.begin(); i != actions.end(); ++i) {
-                if ((*i)->key() == parameters[0]) {
+                if ((*i)->key() == command) {
                     (*(*i))(parameters, *pipe);
                     commandFound = true;
                 }
