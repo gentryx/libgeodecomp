@@ -1,13 +1,14 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/io/remotesteerer/action.h>
-#include <libgeodecomp/io/remotesteerer/pipe.h>
+#include <libgeodecomp/io/remotesteerer/commandserver.h>
 
 using namespace LibGeoDecomp;
 using namespace LibGeoDecomp::RemoteSteererHelpers;
 
 namespace LibGeoDecomp {
 
-class ActionTest : public CxxTest::TestSuite
+namespace RemoteSteererHelpers {
+
+class CommandServerTest : public CxxTest::TestSuite
 {
 public:
     class MockAction : public Action<int>
@@ -19,26 +20,24 @@ public:
 
         virtual void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
         {
+            std::cout << "GALACTICA";
             pipe.addSteeringFeedback("MockAction mocks you!");
         }
     };
 
     void testBasic()
     {
-        Pipe pipe;
-        MockAction action;
-
-        TS_ASSERT_EQUALS("this is but a dummy action", action.helpMessage());
-        TS_ASSERT_EQUALS("mock", action.key());
-        StringOps::StringVec parameters;
-        parameters << "mock"
-                   << "arg0"
-                   << "arg1";
-        action(parameters, pipe);
-        StringOps::StringVec feedback = pipe.retrieveSteeringFeedback();
+        boost::shared_ptr<Pipe> pipe(new Pipe);
+        {
+            CommandServer<int> server(47110, pipe);
+            server.addAction(new MockAction());
+            CommandServer<int>::sendCommand("mock 1 2 3", "127.0.0.1", 47110);
+        }
+        StringOps::StringVec feedback = pipe->retrieveSteeringFeedback();
         TS_ASSERT_EQUALS(feedback.size(), 1);
         TS_ASSERT_EQUALS(feedback[0], "MockAction mocks you!");
     }
 };
 
+}
 }

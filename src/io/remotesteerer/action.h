@@ -2,7 +2,6 @@
 #define LIBGEODECOMP_IO_REMOTESTEERER_ACTION_H
 
 #include <libgeodecomp/io/remotesteerer/pipe.h>
-#include <libgeodecomp/io/remotesteerer/steererdata.h>
 
 namespace LibGeoDecomp {
 
@@ -27,7 +26,7 @@ public:
         myKey(myKey)
     {}
 
-    virtual void operator()(const StringOps::StringVec& parameters, Pipe *pipe) = 0;
+    virtual void operator()(const StringOps::StringVec& parameters, Pipe& pipe) = 0;
 
     virtual std::string helpMessage()
     {

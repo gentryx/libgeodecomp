@@ -1,13 +1,16 @@
-#ifndef LIBGEODECOMP_MISC_COMMANDSERVER_H
-#define LIBGEODECOMP_MISC_COMMANDSERVER_H
+#ifndef LIBGEODECOMP_IO_REMOTESTEERER_COMMANDSERVER_H
+#define LIBGEODECOMP_IO_REMOTESTEERER_COMMANDSERVER_H
 
-#include <iostream>
-#include <string>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cerrno>
+#include <iostream>
+#include <string>
 #include <stdexcept>
 #include <map>
+#include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/io/remotesteerer/action.h>
 #include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
@@ -16,63 +19,132 @@ namespace RemoteSteererHelpers {
 
 using boost::asio::ip::tcp;
 
-/*
- * a server, which can be reached by tcp(nc, telnet, ...)
- * executes methods, which are bind to a command
+/**
+ * A server which can be reached by TCP (nc, telnet, ...). Its purpose
+ * is to do connection handling and parsing of incoming user commands.
+ * Action objects can be bound to certain commands and will be
+ * invoked. This allows a flexible extension of the CommandServer's
+ * functionality by composition, without having to resort to inheritance.
  */
-// fixme: needs test
+template<typename CELL_TYPE>
 class CommandServer
 {
 public:
-    typedef boost::shared_ptr<tcp::socket> SocketPtr;
-    typedef std::vector<std::string> StringVec;
-    // fixme: no void pointers!
-    typedef std::map<std::string, void(*)(StringVec, CommandServer*, void*)> FunctionMap;
+    typedef StringOps::StringVec StringVec;
+    typedef SuperVector<boost::shared_ptr<Action<CELL_TYPE> > > ActionVec;
 
-    CommandServer(int port, const FunctionMap& commandMap, void *userData) :
+    /**
+     * This helper class lets us and the user safely close the
+     * CommandServer's network service, which is nice as it is using
+     * blocking IO and it's a major PITA to cancel that.
+     */
+    class QuitAction : public Action<CELL_TYPE>
+    {
+    public:
+        QuitAction(bool *continueFlag) :
+            Action<CELL_TYPE>("Terminates the CommandServer and closes its socket.", "quit"),
+            continueFlag(continueFlag)
+        {}
+
+        void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
+        {
+            LOG(Logger::INFO, "QuitAction called");
+            *continueFlag = false;
+        }
+
+    private:
+        bool *continueFlag;
+    };
+
+    CommandServer(int port, boost::shared_ptr<Pipe> pipe) :
         port(port),
-        commandMap(commandMap),
-        userData(userData),
+        pipe(pipe),
         serverThread(&CommandServer::runServer, this)
-    {}
+    {
+        addAction(new QuitAction(&continueFlag));
+
+        // The thread may take a while to start up. We need to wait
+        // here so we don't try to clean up in the d-tor before the
+        // thread has created anything.
+        boost::unique_lock<boost::mutex> lock(mutex);
+        while(!acceptor) {
+            threadCreationVar.wait(lock);
+        }
+    }
 
     ~CommandServer()
     {
-        // fixme:
-        // socket.close();
-        // serverThread.join();
+        signalClose();
+        LOG(Logger::DEBUG, "CommandServer waiting for network thread");
+        serverThread.join();
     }
 
-    // fixme: only needed by help function, get rid of this
-    FunctionMap getMap()
-    {
-        return commandMap;
-    }
-
-    size_t sendMessage(const std::string& message)
+    /**
+     * Sends a message back to the end user. This is the primary way
+     * for (user-defined) Actions to give feedback.
+     */
+    void sendMessage(const std::string& message)
     {
         boost::system::error_code errorCode;
-        size_t bytes = boost::asio::write(
+        boost::asio::write(
             *socket,
             boost::asio::buffer(message),
             boost::asio::transfer_all(),
             errorCode);
 
         if (errorCode) {
-            printError(errorCode);
+            LOG(Logger::WARN, "CommandServer::sendMessage encountered " << errorCode.message());
         }
-        return bytes;
+    }
+
+    /**
+     * A convenience method to send a string to a CommandServer
+     * listeting on the given host/port combination.
+     */
+    static void sendCommand(const std::string& command, const std::string& host, int port)
+    {
+        boost::asio::io_service ioService;
+        tcp::resolver resolver(ioService);
+        tcp::resolver::query query(host, StringOps::itoa(port));
+        tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+        tcp::socket socket(ioService);
+        boost::asio::connect(socket, endpointIterator);
+        boost::system::error_code errorCode;
+
+        boost::asio::write(
+            socket,
+            boost::asio::buffer(command),
+            boost::asio::transfer_all(),
+            errorCode);
+
+        if (errorCode) {
+            LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
+        }
+    }
+
+    /**
+     * Register a server-side callback for handling user input. The
+     * CommandServer will assume ownership of the action and free its
+     * memory upon destruction.
+     */
+    void addAction(Action<CELL_TYPE> *action)
+    {
+        actions << boost::shared_ptr<Action<CELL_TYPE> >(action);
     }
 
 private:
     int port;
-    SocketPtr socket;
-    FunctionMap commandMap;
-    // fixme: no void pointers
-    void *userData;
+    boost::shared_ptr<Pipe> pipe;
+    boost::asio::io_service ioService;
+    boost::shared_ptr<tcp::acceptor> acceptor;
+    boost::shared_ptr<tcp::socket> socket;
     boost::thread serverThread;
+    boost::condition_variable threadCreationVar;
+    boost::mutex mutex;
+    ActionVec actions;
+    bool continueFlag;
 
-    void runSession ()
+    void runSession()
     {
         for (;;) {
             boost::array<char, 1024> buf;
@@ -85,12 +157,15 @@ private:
             }
 
             if (errorCode == boost::asio::error::eof) {
-                std::cout << "client closed connection" << std::endl;
-                return; // Connection closed cleanly by peer.
+                LOG(Logger::INFO, "CommandServer::runSession(): client closed connection");
+                return;
             }
 
             if (errorCode) {
-                printError(errorCode);
+                LOG(Logger::WARN, "CommandServer::runSession encountered " << errorCode.message());
+            }
+
+            if (!socket->is_open()) {
                 return;
             }
         }
@@ -98,22 +173,34 @@ private:
 
     void handleInput(const std::string& input)
     {
+        LOG(Logger::DEBUG, "Logger::handleInput(" << input << ")");
+
         StringOps::StringVec lines = StringOps::tokenize(input, "\n");
         for (StringOps::StringVec::iterator iter = lines.begin();
              iter != lines.end();
              ++iter) {
             StringOps::StringVec parameters = StringOps::tokenize(*iter, " ");
 
-            if (parameters.size() > 0) {
-                sendMessage("no command\n");
+            if (parameters.size() == 0) {
+                sendMessage("no command given\n");
+                continue;
             }
 
-            FunctionMap::iterator it = commandMap.find(parameters[0]);
-            if (it != commandMap.end()) {
-                commandMap[parameters[0]](parameters, this, userData);
-            } else {
-                std::string message = "command not found: " + parameters[0] + "\n";
-                message += "try \"help\"\n";
+            std::string command = parameters.pop_front();
+
+            bool commandFound = false;
+            for (typename ActionVec::iterator i = actions.begin(); i != actions.end(); ++i) {
+                if ((*i)->key() == parameters[0]) {
+                    (*(*i))(parameters, *pipe);
+                    commandFound = true;
+                }
+            }
+
+            if (!commandFound) {
+                std::string message = "command not found: " + parameters[0];
+                LOG(Logger::WARN, message);
+
+                message += "\ntry \"help\"\n";
                 sendMessage(message);
             }
         }
@@ -122,36 +209,41 @@ private:
     int runServer()
     {
         try {
-            boost::asio::io_service ioService;
-            tcp::acceptor acc(ioService, tcp::endpoint(tcp::v4(), port));
-            boost::system::error_code ec;
+            // Thread-aware initialization, allows c-tor to exit safely.
+            {
+                boost::unique_lock<boost::mutex> lock(mutex);
+                acceptor.reset(new tcp::acceptor(ioService, tcp::endpoint(tcp::v4(), port)));
+            }
+            threadCreationVar.notify_one();
 
-            std::cout << "Commandserver started" << std::endl;
+            boost::system::error_code errorCode;
+            continueFlag = true;
 
-            for (;;) {
-                socket = SocketPtr(new tcp::socket(ioService));
-                acc.accept(*socket, ec);
-                if (ec) {
-                    printError(ec);
+            while (continueFlag) {
+                LOG(Logger::DEBUG, "CommandServer waiting for new connection");
+                socket.reset(new tcp::socket(ioService));
+                acceptor->accept(*socket, errorCode);
+
+                if (errorCode) {
+                    LOG(Logger::WARN, "CommandServer::runServer() encountered " << errorCode.message());
                 } else {
-                    std::cout << "client connected" << std::endl;
+                    LOG(Logger::INFO, "CommandServer: client connected");
                     runSession();
                 }
             }
         }
         catch (std::exception& e) {
-            // fixme: use logger here
-            std::cerr << "Exception: " << e.what() << "\n";
+            LOG(Logger::FATAL, "CommandServer::runServer() caught exception " << e.what() << ", exiting");
             return 1;
         }
+
+        return 0;
     }
 
-    // fixme: kill this
-    static void printError(boost::system::error_code& ec)
+    void signalClose()
     {
-        std::cerr << "error: " << ec.message() << std::endl;
+        sendCommand("quit", "127.0.0.1", port);
     }
-
 };
 
 
