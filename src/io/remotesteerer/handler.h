@@ -26,7 +26,9 @@ public:
 
     /**
      * Hanlde command specified by parameters; returns true if command
-     * was processes, false if command should be requeued.
+     * was processed, false if command should be requeued. This is
+     * useful if for instance not all relevant cells were available in
+     * validRegion.
      */
     virtual bool operator()(const StringOps::StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion) = 0;
 

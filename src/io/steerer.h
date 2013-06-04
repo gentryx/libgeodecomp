@@ -44,6 +44,7 @@ public:
     virtual void nextStep(
         GridType *grid,
         const Region<Topology::DIM>& validRegion,
+        // fixme: add parameters globalDimensions, step, and lastCall as in Steerer
         unsigned step) = 0;
 
     const unsigned& getPeriod() const
