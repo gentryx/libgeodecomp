@@ -42,8 +42,16 @@ public:
 
     typedef std::map<int, std::vector<MPI::Request> > RequestsMap;
 
-    MPILayer(MPI::Comm *c = &MPI::COMM_WORLD, int tag = 0) :
-        comm(c),
+    // fixme: use call by value for all communicators
+    // fixme: use MPI C bindings only
+    // fixme: replace all Intercomm by Comm
+    /**
+     * Sets up a new MPILayer. communicator will be used as a scope
+     * for all MPI functions, tag will be the default tag passed to
+     * all point-to-point communication functions.
+     */
+    MPILayer(MPI::Comm *communicator = &MPI::COMM_WORLD, int tag = 0) :
+        comm(communicator),
         tag(tag)
     {}
 
