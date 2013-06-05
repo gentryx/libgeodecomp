@@ -19,6 +19,7 @@ class Handler
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
+    typedef StringOps::StringVec StringVec;
 
     Handler(const std::string& myKey) :
         myKey(myKey)
@@ -30,7 +31,7 @@ public:
      * useful if for instance not all relevant cells were available in
      * validRegion.
      */
-    virtual bool operator()(const StringOps::StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion) = 0;
+    virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion, unsigned step) = 0;
 
     virtual std::string key()
     {

@@ -26,7 +26,7 @@ public:
         myKey(myKey)
     {}
 
-    virtual void operator()(const StringOps::StringVec& parameters, Pipe& pipe) = 0;
+    virtual void operator()(const StringVec& parameters, Pipe& pipe) = 0;
 
     virtual std::string helpMessage()
     {
