@@ -51,9 +51,9 @@ public:
         tokens << "a"
                << "bb"
                << "ccc";
-        TS_ASSERT_EQUALS("a--bb--ccc", StringOps::join(tokens, "+-");
-        TS_ASSERT_EQUALS("a bb ccc", StringOps::join(tokens, " ");
-        TS_ASSERT_EQUALS("abbccc", StringOps::join(tokens, "");
+        TS_ASSERT_EQUALS("a--bb--ccc", StringOps::join(tokens, "--"));
+        TS_ASSERT_EQUALS("a bb ccc", StringOps::join(tokens, " "));
+        TS_ASSERT_EQUALS("abbccc", StringOps::join(tokens, ""));
     }
 };
 
