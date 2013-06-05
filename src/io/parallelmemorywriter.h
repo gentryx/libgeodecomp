@@ -53,9 +53,6 @@ public:
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
             for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
-                // fixme: do we really need this barrier?
-                mpiLayer.barrier();
-
                 // fixme: "extract method" refactoring for clarity
                 if (sender != receiver) {
                     if (sender == mpiLayer.rank()) {
@@ -80,6 +77,8 @@ public:
                 }
             }
         }
+
+        mpiLayer.waitAll();
     }
 
     GridType& getGrid(int i)
