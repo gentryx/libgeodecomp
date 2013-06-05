@@ -33,8 +33,8 @@ public:
         return 1;
     }
 
-    ConwayCell(const bool& _alive = false) :
-        alive(_alive)
+    ConwayCell(const bool& alive = false) :
+        alive(alive)
     {
         count = alive? 1 : 0;
     }
@@ -93,77 +93,32 @@ public:
         //          xx
         //           x   xxx
         startCells +=
-            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71), 
-            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71), 
+            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71),
+            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71),
             Coord<2>(61, 69);
 
         // ...and an Acorn pattern:
-        //        x 
+        //        x
         //          x
         //       xx  xxx
         startCells +=
             Coord<2>(111, 30),
             Coord<2>(113, 31),
-            Coord<2>(110, 32), Coord<2>(111, 32), 
+            Coord<2>(110, 32), Coord<2>(111, 32),
             Coord<2>(113, 32), Coord<2>(114, 32), Coord<2>(115, 32);
 
         for (SuperVector<Coord<2> >::iterator i = startCells.begin();
              i != startCells.end();
-             ++i) 
-            if (rect.inBounds(*i))
+             ++i) {
+            if (rect.inBounds(*i)) {
                 ret->at(*i - rect.origin) = ConwayCell(true);
+            }
+        }
     }
 };
 
 DEFINE_DATAACCESSOR(ConwayCell, char, alive);
 DEFINE_DATAACCESSOR(ConwayCell, int, count);
-
-class MySteererData : public SteererData<ConwayCell>
-{
-public:
-    MySteererData() :
-        SteererData<ConwayCell>()
-    {}
-
-    boost::mutex size_mutex;
-};
-
-template<typename CELL_TYPE, typename DATATYPE>
-class MyControl : RemoteSteererHelpers::SteererControl<CELL_TYPE, DATATYPE>
-{
-public:
-    virtual void operator()(
-        typename Steerer<CELL_TYPE>::GridType *grid,
-        const Region<Steerer<CELL_TYPE>::Topology::DIM>& validRegion,
-        const unsigned& step,
-        CommandServerProxy *proxy,
-        DATATYPE *data,
-        const MPI::Intracomm& comm,
-        bool changed)
-    {
-        MySteererData *sdata = (MySteererData*)data;
-        if (sdata->size_mutex.try_lock()) {
-            std::string msg = "size: ";
-            msg += boost::to_string(validRegion.size()) + "\n";
-            proxy->sendMessage(msg);
-        }
-    }
-};
-
-// fixme: replace static functions with fuctors
-static void sizeFunction(std::vector<std::string> stringVec,
-        CommandServer *server,
-        void *data)
-{
-    MySteererData *sdata = (MySteererData*)data;
-    std::string help_msg = "    Usage: size\n";
-    help_msg += "          get the size of the region\n";
-    if (stringVec.size() > 1) {
-        server->sendMessage(help_msg);
-        return;
-    }
-    sdata->size_mutex.unlock();
-}
 
 void runSimulation()
 {
@@ -180,32 +135,29 @@ void runSimulation()
 
     sim.addWriter(visItWriter);
 
-    /*
-     * ---------------------------------------------
-     * extend default remote steerer commands part 2
-     * ---------------------------------------------
-     */
-    CommandServer::FunctionMap functionMap = RemoteSteerer<ConwayCell>::getDefaultMap();
-    functionMap["size"] = sizeFunction;
+    // /*
+    //  * ---------------------------------------------
+    //  * extend default remote steerer commands part 2
+    //  * ---------------------------------------------
+    //  */
+    // CommandServer<ConwayCell>::FunctionMap functionMap = RemoteSteerer<ConwayCell>::getDefaultMap();
+    // // fixme: reenable this
+    // // functionMap["size"] = sizeFunction;
 
-    MySteererData *myData = new MySteererData();
-    myData->addVariable(new aliveDataAccessor());
-    myData->addVariable(new countDataAccessor());
+    // SteererData<ConwayCell> *myData = new SteererData<ConwayCell>();
+    // myData->addVariable(new aliveDataAccessor());
+    // myData->addVariable(new countDataAccessor());
 
     // fixme: class names must start with capitals
     // fixme: too long template instantiation
 
-    Steerer<ConwayCell> *steerer =
-        new RemoteSteerer<ConwayCell,
-                          MySteererData,
-                          DefaultSteererControl<
-                              ConwayCell, MySteererData, MyControl<
-                                  ConwayCell, SteererData<ConwayCell> > > >(
-                                      1,
-                                      1234,
-                                      functionMap,
-                                      myData);
-    sim.addSteerer(steerer);
+    // Steerer<ConwayCell> *steerer =
+    //     new RemoteSteerer<ConwayCell>(
+    //         1,
+    //         1234,
+    //         functionMap,
+    //         myData);
+    // sim.addSteerer(steerer);
 
     sim.run();
 }

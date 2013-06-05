@@ -27,8 +27,10 @@ public:
     typedef StringOps::StringVec StringVec;
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
-    Pipe(MPI::Comm *c = &MPI::COMM_WORLD, int root = 0) :
-        mpiLayer(c),
+    Pipe(
+        int root = 0,
+        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        mpiLayer(communicator),
         root(root)
     {}
 #endif

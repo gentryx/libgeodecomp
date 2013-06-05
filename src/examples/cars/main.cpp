@@ -4,7 +4,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/visitwriter.h>
-#include <libgeodecomp/io/remotesteerer/remotesteererhelper.h>
+#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/misc/dataaccessor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/mpilayer/typemaps.h>
@@ -148,119 +148,82 @@ DEFINE_DATAACCESSOR(Cell, int, border)
 DEFINE_DATAACCESSOR(Cell, int, direction)
 DEFINE_DATAACCESSOR(Cell, int, rate)
 
-class MySteererData : public SteererData<Cell>
-{
-public:
-    MySteererData(const MPI::Intracomm& comm = MPI::COMM_WORLD) :
-        SteererData<Cell>(comm)
-    {
-        // fixme: rename to getStepMutex
-        getstep_mutex.lock();
-    }
-
-    boost::mutex getstep_mutex;
-};
-
-class MyControl : SteererControl<Cell, MySteererData>
-{
-public:
-    void operator()(
-        Steerer<Cell>::GridType *grid,
-        const Region<Steerer<Cell>::Topology::DIM>& validRegion,
-        const unsigned& step,
-        RemoteSteererHelpers::CommandServerProxy *proxy,
-        MySteererData *steererData,
-        const MPI::Intracomm& comm,
-        bool changed = true)
-    {
-        if (steererData->getstep_mutex.try_lock()) {
-            std::string msg = "current step: ";
-            msg += boost::to_string(step) + "\n";
-            proxy->sendMessage(msg);
-        }
-    }
-};
-
-static void getStepFunction(
-    std::vector<std::string> stringVec,
-    RemoteSteererHelpers::CommandServer *server,
-    void *data)
-{
-    // fixme: avoid casts like this
-    MySteererData* sdata = (MySteererData*) data;
-    std::string help_msg = "    Usage: getstep\n";
-    help_msg += "          get the size of the region\n";
-    if (stringVec.size() > 1) {
-        if (stringVec.at(1).compare("help") == 0) {
-            server->sendMessage(help_msg);
-            return;
-        }
-    }
-    std::string msg = "send step request\n";
-    server->sendMessage(msg);
-    sdata->getstep_mutex.unlock();
-}
+// fixme: does this even do anything?
+// static void getStepFunction(
+//     std::vector<std::string> stringVec,
+//     RemoteSteererHelpers::CommandServer<Cell> *server)
+// {
+//     std::string helpMessage = "    Usage: getstep\n";
+//     helpMessage += "          get the size of the region\n";
+//     if (stringVec.size() > 1) {
+//         if (stringVec.at(1).compare("help") == 0) {
+//             server->sendMessage(helpMessage);
+//             return;
+//         }
+//     }
+//     std::string msg = "send step request\n";
+//     server->sendMessage(msg);
+// }
 
 // fixme: shorten function by decomposition
-static void setRateFunction(
-    std::vector<std::string> stringVec,
-    RemoteSteererHelpers::CommandServer *server,
-    void *data)
-{
-    std::string help_msg = "    Usage: setrate <direction> <probability>\n";
-    help_msg += "          sets the probability of a new car for the given direction\n";
-    help_msg += "          directions: east and south\n";
-    help_msg += "          probability: int between 0 and 100\n";
-    std::cout << "called setRateFunction" << std::endl;
-    if (stringVec.size() != 3) {
-        std::cout << "wrong number" << std::endl;
-        server->sendMessage(help_msg);
-        return;
-    }
-    int value;
-    try {
-        value = mystrtoi(stringVec.at(2).c_str());
-    }
-    catch (std::exception& e) {
-        std::cout << "toi fehler" << std::endl;
-        server->sendMessage(help_msg);
-        return;
-    }
-    if ((value < 0) || (value > 100)) {
-        std::cout << "range fehler" << std::endl;
-        server->sendMessage(help_msg);
-        server->sendMessage(help_msg);
-        return;
-    }
-    if (stringVec.at(1).compare("east") == 0) {
-        for (int i = 0; i < 89; ++i) {
-            std::vector<std::string> newCommandVec;
-            newCommandVec.push_back("set");
-            newCommandVec.push_back("rate");
-            newCommandVec.push_back(stringVec.at(2));
-            newCommandVec.push_back("0");
-            newCommandVec.push_back(boost::to_string(i));
-            RemoteSteerer<Cell>::setFunction(newCommandVec, server, data);
-        }
-    } else if (stringVec.at(1).compare("south") == 0) {
-        for (int i = 1; i < 90; ++i) {
-            std::vector<std::string> newCommandVec;
-            newCommandVec.push_back("set");
-            newCommandVec.push_back("rate");
-            newCommandVec.push_back(stringVec.at(2));
-            newCommandVec.push_back(boost::to_string(i));
-            newCommandVec.push_back("89");
-            RemoteSteerer<Cell>::setFunction(newCommandVec, server, data);
-        }
-    } else {
-        std::cout << "direction falsch" << std::endl;
-        server->sendMessage(help_msg);
-        return;
-    }
-    std::string msg = "send setrate request\n";
-    std::cout << "setrate finish" << std::endl;
-    server->sendMessage(msg);
-}
+// static void setRateFunction(
+//     std::vector<std::string> stringVec,
+//     RemoteSteererHelpers::CommandServer<Cell> *server)
+// {
+//     std::string helpMessage = "    Usage: setrate <direction> <probability>\n";
+//     helpMessage += "          sets the probability of a new car for the given direction\n";
+//     helpMessage += "          directions: east and south\n";
+//     helpMessage += "          probability: int between 0 and 100\n";
+//     std::cout << "called setRateFunction" << std::endl;
+//     if (stringVec.size() != 3) {
+//         std::cout << "wrong number" << std::endl;
+//         server->sendMessage(helpMessage);
+//         return;
+//     }
+//     int value;
+//     try {
+//         value = mystrtoi(stringVec.at(2).c_str());
+//     }
+//     catch (std::exception& e) {
+//         std::cout << "toi fehler" << std::endl;
+//         server->sendMessage(helpMessage);
+//         return;
+//     }
+//     if ((value < 0) || (value > 100)) {
+//         std::cout << "range fehler" << std::endl;
+//         server->sendMessage(helpMessage);
+//         server->sendMessage(helpMessage);
+//         return;
+//     }
+//     if (stringVec.at(1).compare("east") == 0) {
+//         for (int i = 0; i < 89; ++i) {
+//             std::vector<std::string> newCommandVec;
+//             newCommandVec.push_back("set");
+//             newCommandVec.push_back("rate");
+//             newCommandVec.push_back(stringVec.at(2));
+//             newCommandVec.push_back("0");
+//             newCommandVec.push_back(boost::to_string(i));
+//             RemoteSteerer<Cell>::setFunction(newCommandVec, server);
+//         }
+//     } else if (stringVec.at(1).compare("south") == 0) {
+//         for (int i = 1; i < 90; ++i) {
+//             std::vector<std::string> newCommandVec;
+//             newCommandVec.push_back("set");
+//             newCommandVec.push_back("rate");
+//             newCommandVec.push_back(stringVec.at(2));
+//             newCommandVec.push_back(boost::to_string(i));
+//             newCommandVec.push_back("89");
+//             RemoteSteerer<Cell>::setFunction(newCommandVec, server);
+//         }
+//     } else {
+//         std::cout << "direction falsch" << std::endl;
+//         server->sendMessage(helpMessage);
+//         return;
+//     }
+//     std::string msg = "send setrate request\n";
+//     std::cout << "setrate finish" << std::endl;
+//     server->sendMessage(msg);
+// }
 
 void runSimulation()
 {
@@ -275,23 +238,24 @@ void runSimulation()
 
     sim.addWriter(new TracingWriter<Cell>(1, maxSteps));
 
-    MySteererData *myData = new MySteererData();
-    myData->addVariable(new borderDataAccessor());
-    myData->addVariable(new directionDataAccessor());
-    myData->addVariable(new rateDataAccessor());
+    // SteererData<Cell> *myData = new SteererData<Cell>();
+    // myData->addVariable(new borderDataAccessor());
+    // myData->addVariable(new directionDataAccessor());
+    // myData->addVariable(new rateDataAccessor());
 
-    CommandServer::FunctionMap functionMap = RemoteSteerer<Cell>::getDefaultMap();
-    functionMap["getstep"] = getStepFunction;
-    functionMap["setrate"] = setRateFunction;
+    // CommandServer<Cell>::FunctionMap functionMap = RemoteSteerer<Cell>::getDefaultMap();
+    // fixme: reactivate these
+    // functionMap["getstep"] = getStepFunction;
+    // functionMap["setrate"] = setRateFunction;
 
-    Steerer<Cell>* steerer =
-        new RemoteSteerer<Cell, MySteererData, DefaultSteererControl<Cell, MySteererData, MyControl> >(
-        1,
-        1234,
-        functionMap,
-        myData,
-        MPI::COMM_WORLD);
-    sim.addSteerer(steerer);
+    // Steerer<Cell> *steerer =
+    //     new RemoteSteerer<Cell>(
+    //     1,
+    //     1234,
+    //     functionMap,
+    //     myData,
+    //     MPI::COMM_WORLD);
+    // sim.addSteerer(steerer);
 
     sim.run();
 }
