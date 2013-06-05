@@ -9,6 +9,7 @@
 #include <string>
 #include <stdexcept>
 #include <map>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/remotesteerer/action.h>
 #include <libgeodecomp/misc/stringops.h>
@@ -31,7 +32,7 @@ class CommandServer
 {
 public:
     typedef StringOps::StringVec StringVec;
-    typedef SuperVector<boost::shared_ptr<Action<CELL_TYPE> > > ActionVec;
+    typedef SuperMap<std::string, boost::shared_ptr<Action<CELL_TYPE> > > ActionMap;
 
     /**
      * This helper class lets us and the user safely close the
@@ -92,7 +93,9 @@ public:
         {}
     };
 
-    CommandServer(int port, boost::shared_ptr<Pipe> pipe) :
+    CommandServer(
+        int port,
+        boost::shared_ptr<Pipe> pipe) :
         port(port),
         pipe(pipe),
         serverThread(&CommandServer::runServer, this)
@@ -139,7 +142,7 @@ public:
      * A convenience method to send a string to a CommandServer
      * listeting on the given host/port combination.
      */
-    static void sendCommand(const std::string& command, const std::string& host, int port)
+    static void sendCommand(const std::string& command, int port, const std::string& host = "127.0.0.1")
     {
         boost::asio::io_service ioService;
         tcp::resolver resolver(ioService);
@@ -167,7 +170,7 @@ public:
      */
     void addAction(Action<CELL_TYPE> *action)
     {
-        actions << boost::shared_ptr<Action<CELL_TYPE> >(action);
+        actions[action->key()] = boost::shared_ptr<Action<CELL_TYPE> >(action);
     }
 
 private:
@@ -179,7 +182,7 @@ private:
     boost::thread serverThread;
     boost::condition_variable threadCreationVar;
     boost::mutex mutex;
-    ActionVec actions;
+    ActionMap actions;
     bool continueFlag;
 
     void runSession()
@@ -226,21 +229,15 @@ private:
 
             std::string command = parameters.pop_front();
 
-            bool commandFound = false;
-            for (typename ActionVec::iterator i = actions.begin(); i != actions.end(); ++i) {
-                if ((*i)->key() == command) {
-                    (*(*i))(parameters, *pipe);
-                    commandFound = true;
-                }
-            }
-
-            if (!commandFound) {
-                std::string message = "command not found: " + parameters[0];
+            if (actions.count(command) == 0) {
+                std::string message = "command not found: " + command;
                 LOG(Logger::WARN, message);
 
                 message += "\ntry \"help\"\n";
                 sendMessage(message);
             }
+
+            (*actions[command])(parameters, *pipe);
         }
     }
 
@@ -280,7 +277,7 @@ private:
 
     void signalClose()
     {
-        sendCommand("quit", "127.0.0.1", port);
+        sendCommand("quit", port);
     }
 };
 
