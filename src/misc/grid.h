@@ -104,7 +104,7 @@ public:
 
     typedef TOPOLOGY Topology;
     typedef CELL_TYPE CellType;
-    typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > MyCoordMap;
+    typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
 
     explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
          const CELL_TYPE& defaultCell=CELL_TYPE(),
@@ -146,9 +146,9 @@ public:
      * returns a map that is referenced by relative coordinates from the
      * originating coordinate coord.
      */
-    inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
+    inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
     {
-        return MyCoordMap(center, this);
+        return CoordMapType(center, this);
     }
 
     inline CELL_TYPE& getEdgeCell()

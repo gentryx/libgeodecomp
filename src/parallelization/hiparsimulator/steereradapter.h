@@ -14,15 +14,20 @@ public:
     static const int DIM = CELL_TYPE::Topology::DIM;
 
     SteererAdapter(
-        boost::shared_ptr<Steerer<CELL_TYPE> > _steerer) :
-        steerer(_steerer)
+        boost::shared_ptr<Steerer<CELL_TYPE> > steerer) :
+        steerer(steerer)
     {}
 
+    virtual void setRegion(const Region<DIM>& region)
+    {
+        steerer->setRegion(region);
+    }
+
     virtual void get(
-        GRID_TYPE *destinationGrid, 
-        const Region<DIM>& patchableRegion, 
+        GRID_TYPE *destinationGrid,
+        const Region<DIM>& patchableRegion,
         const long& globalNanoStep,
-        const bool& remove=true) 
+        const bool& remove = true)
     {
         int nanoStep = globalNanoStep % CELL_TYPE::nanoSteps();
         if (nanoStep != 0) {
@@ -36,7 +41,7 @@ public:
 
         steerer->nextStep(destinationGrid, patchableRegion, step);
     }
-    
+
 private:
     boost::shared_ptr<Steerer<CELL_TYPE> > steerer;
 

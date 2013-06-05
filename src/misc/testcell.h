@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
 namespace TestCellHelpers {
 
 template<int DIM>
-class MyTopology
+class TopologyType
 {
 public:
     typedef typename Topologies::Cube<DIM>::Topology Topology;
@@ -21,7 +21,7 @@ public:
 
 // make the 3D TestCell use a torus topology for a change...
 template<>
-class MyTopology<3>
+class TopologyType<3>
 {
 public:
     typedef Topologies::Torus<3>::Topology Topology;
@@ -68,7 +68,7 @@ public:
  */
 template<int DIM,
          class STENCIL=Stencils::Moore<DIM, 1>,
-         class TOPOLOGY=typename TestCellHelpers::MyTopology<DIM>::Topology,
+         class TOPOLOGY=typename TestCellHelpers::TopologyType<DIM>::Topology,
          class OUTPUT=TestCellHelpers::StdOutput>
 class TestCell
 {

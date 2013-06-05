@@ -43,10 +43,15 @@ public:
         reload(lastNanoStep);
     }
 
+    virtual void setRegion(const Region<GRID_TYPE::DIM>& region)
+    {
+        writer->setRegion(region);
+    }
+
     virtual void put(
-        const GRID_TYPE& grid, 
-        const Region<GRID_TYPE::DIM>& validRegion, 
-        const long& nanoStep) 
+        const GRID_TYPE& grid,
+        const Region<GRID_TYPE::DIM>& validRegion,
+        const long& nanoStep)
     {
         if (!checkNanoStepPut(nanoStep)) {
             return;
@@ -63,11 +68,11 @@ public:
         }
 
         writer->stepFinished(
-            grid, 
-            validRegion, 
-            globalGridDimensions, 
-            nanoStep / CELL_TYPE::nanoSteps(), 
-            event, 
+            grid,
+            validRegion,
+            globalGridDimensions,
+            nanoStep / CELL_TYPE::nanoSteps(),
+            event,
             lastCall);
         reload();
     }
@@ -97,7 +102,7 @@ private:
     {
         pushRequest(nextNanoStep);
     }
- 
+
 };
 
 }

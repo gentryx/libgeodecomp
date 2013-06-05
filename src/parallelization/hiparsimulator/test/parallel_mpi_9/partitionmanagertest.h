@@ -10,7 +10,7 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class PartitionManagerTest : public CxxTest::TestSuite 
+class PartitionManagerTest : public CxxTest::TestSuite
 {
 public:
     void setUp()
@@ -31,7 +31,7 @@ public:
         // sanity check
         TS_ASSERT_EQUALS(weights.sum() + offset, dimensions.prod());
 
-        partition = new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights);
+        partition.reset(new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights));
         manager.resetRegions(
             CoordBox<2>(Coord<2>(), dimensions),
             partition,
@@ -67,9 +67,9 @@ public:
                 if (i == layer.rank() + 1)
                     std::swap(outerFragments, innerFragments);
 
-                TS_ASSERT_EQUALS(outerFragments, 
+                TS_ASSERT_EQUALS(outerFragments,
                                  manager.getOuterGhostZoneFragments()[i]);
-                TS_ASSERT_EQUALS(innerFragments, 
+                TS_ASSERT_EQUALS(innerFragments,
                                  manager.getInnerGhostZoneFragments()[i]);
             } else {
                 TS_ASSERT_EQUALS(
@@ -87,7 +87,7 @@ public:
         unsigned startLine = startingLine(layer.rank());
         unsigned endLine   = startingLine(layer.rank() + 1);
         TS_ASSERT_EQUALS(fillLines(startLine, endLine), manager.ownRegion());
-        
+
         startLine = startingLine(layer.rank()) - ghostZoneWidth;
         endLine   = startingLine(layer.rank() + 1) + ghostZoneWidth;
         if (layer.rank() == layer.size() - 1)
@@ -118,7 +118,7 @@ public:
         for (int i = 0; i <= ghostZoneWidth; ++i) {
             unsigned startLine = startingLine(layer.rank()) + i;
             unsigned endLine   = startingLine(layer.rank() + 1) - i;
-            if (layer.rank() == layer.size() - 1) 
+            if (layer.rank() == layer.size() - 1)
                 endLine += i;
             TS_ASSERT_EQUALS(fillLines(startLine, endLine), manager.innerSet(i));
         }
@@ -142,16 +142,16 @@ public:
     void testVolatileKernel()
     {
         Region<2> expected;
-        unsigned startLine = 
+        unsigned startLine =
             startingLine(layer.rank()) + ghostZoneWidth;
-        unsigned endLine   = 
+        unsigned endLine   =
             startingLine(layer.rank()) + ghostZoneWidth * 2 - 1;
         expected += fillLines(startLine, endLine);
 
         if (layer.rank() != layer.size() - 1) {
-            unsigned startLine = 
+            unsigned startLine =
                 startingLine(layer.rank() + 1) - ghostZoneWidth * 2 + 1;
-            unsigned endLine   = 
+            unsigned endLine   =
                 startingLine(layer.rank() + 1) - ghostZoneWidth;
             expected += fillLines(startLine, endLine);
         }
@@ -162,7 +162,7 @@ public:
 private:
     MPILayer layer;
     PartitionManager<2> manager;
-    StripingPartition<2> *partition;
+    boost::shared_ptr<StripingPartition<2> > partition;
     Coord<2> dimensions;
     SuperVector<long> weights;
     unsigned offset;

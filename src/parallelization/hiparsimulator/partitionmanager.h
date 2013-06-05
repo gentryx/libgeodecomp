@@ -24,8 +24,8 @@ public:
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
     {
         SuperVector<long> weights(1, simulationArea.size());
-        Partition<DIM> *partition =
-            new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights);
+        boost::shared_ptr<Partition<DIM> > partition(
+            new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights));
         resetRegions(simulationArea, partition, 0, 1);
         resetGhostZones(SuperVector<CoordBox<DIM> >(1));
     }
@@ -33,24 +33,22 @@ public:
     /**
      * resets the domain decomposition. The simulation space is
      * described by newSimulationArea, the decomposition scheme by
-     * newPartition. The ownership of newPartition is assumed to be
-     * transfered to PartitionManager and will be deleted when the
-     * PartitionManager dies. newRank will usually correspond to the
-     * MPI rank and identifies the current process. newGhostZoneWidth
-     * specifies after how many steps the halo should be synchronized.
-     * Higher values mean that the halo will be wider, which requires
-     * fewer synchronizations, but the syncs need to communicate more
-     * data. This is primarily to combat high latency datapaths (e.g.
+     * newPartition. newRank will usually correspond to the MPI rank
+     * and identifies the current process. newGhostZoneWidth specifies
+     * after how many steps the halo should be synchronized. Higher
+     * values mean that the halo will be wider, which requires fewer
+     * synchronizations, but the syncs need to communicate more data.
+     * This is primarily to combat high latency datapaths (e.g.
      * network latency or if the data needs to go to remote
      * accelerators).
      */
     inline void resetRegions(
         const CoordBox<DIM>& newSimulationArea,
-        Partition<DIM> *newPartition,
+        boost::shared_ptr<Partition<DIM> > newPartition,
         const unsigned& newRank,
         const unsigned& newGhostZoneWidth)
     {
-        partition.reset(newPartition);
+        partition = newPartition;
         simulationArea = newSimulationArea;
         rank = newRank;
         ghostZoneWidth = newGhostZoneWidth;
@@ -90,9 +88,9 @@ public:
              ++i)
             if (i->first != OUTGROUP)
                 inner -= i->second.back();
-        outerGhostZoneFragments[OUTGROUP] = 
+        outerGhostZoneFragments[OUTGROUP] =
             SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, outer);
-        innerGhostZoneFragments[OUTGROUP] = 
+        innerGhostZoneFragments[OUTGROUP] =
             SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, inner);
     }
 
@@ -169,7 +167,7 @@ public:
     {
         return partition->getWeights();
     }
-    
+
 private:
     boost::shared_ptr<Partition<DIM> > partition;
     CoordBox<DIM> simulationArea;
@@ -193,7 +191,7 @@ private:
             Region<DIM> expanded;
             const Region<DIM>& reg = regionExpansion[i - 1];
             expanded = reg.expandWithTopology(
-                1, 
+                1,
                 simulationArea.dimensions,
                 Topology());
             regionExpansion[i] = expanded;
@@ -205,13 +203,13 @@ private:
         fillRegion(rank);
         Region<DIM> surface(
             ownRegion().expandWithTopology(
-                1, simulationArea.dimensions, Topology()) - 
+                1, simulationArea.dimensions, Topology()) -
             ownRegion());
         Region<DIM> kernel(
-            ownRegion() - 
+            ownRegion() -
             surface.expandWithTopology(
-                getGhostZoneWidth(), 
-                simulationArea.dimensions, 
+                getGhostZoneWidth(),
+                simulationArea.dimensions,
                 Topology()));
         outerRim = ownExpandedRegion() - ownRegion();
         ownRims.resize(getGhostZoneWidth() + 1);
@@ -234,7 +232,7 @@ private:
         volatileKernel = ownInnerSets.back() & rim(1) ;
     }
 
-    inline void intersect(const unsigned& node) 
+    inline void intersect(const unsigned& node)
     {
         SuperVector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
         SuperVector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];

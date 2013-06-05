@@ -38,7 +38,7 @@ public:
         CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
         box.dimensions.x() = 1;
-        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             simArea << Streak<DIM>(*i, endX);
         }
     }
@@ -55,7 +55,7 @@ public:
     virtual void step()
     {
         // notify all registered Steerers
-        for(unsigned i = 0; i < steerers.size(); ++i) {
+        for (unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
                 steerers[i]->nextStep(curGrid, simArea, stepNum);
             }
@@ -67,15 +67,7 @@ public:
 
         ++stepNum;
 
-        // call back all registered Writers
-        for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
-            if (stepNum % (*i)->getPeriod() == 0) {
-                (*i)->stepFinished(
-                    *getGrid(),
-                    getStep(),
-                    WRITER_STEP_FINISHED);
-            }
-        }
+        handleOutput(WRITER_STEP_FINISHED);
     }
 
     /**
@@ -85,23 +77,14 @@ public:
     {
         initializer->grid(curGrid);
         stepNum = initializer->startStep();
-        for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
-            (*i)->stepFinished(
-                *getGrid(),
-                getStep(),
-                WRITER_INITIALIZED);
-        }
+        setIORegions();
+        handleOutput(WRITER_INITIALIZED);
 
         for (; stepNum < initializer->maxSteps();) {
             step();
         }
 
-        for(typename WriterVector::iterator i = writers.begin(); i != writers.end(); ++i) {
-            (*i)->stepFinished(
-                *getGrid(),
-                getStep(),
-                WRITER_ALL_DONE);
-        }
+        handleOutput(WRITER_ALL_DONE);
     }
 
     /**
@@ -129,12 +112,32 @@ protected:
         int endX = box.origin.x() + box.dimensions.x();
         box.dimensions.x() = 1;
 
-        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             Streak<DIM> streak(*i, endX);
             UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
 
         std::swap(curGrid, newGrid);
+    }
+
+    void handleOutput(WriterEvent event)
+    {
+        for (unsigned i = 0; i < writers.size(); i++) {
+            if ((event != WRITER_STEP_FINISHED) ||
+                ((getStep() % writers[i]->getPeriod()) == 0)) {
+                writers[i]->stepFinished(
+                    *curGrid,
+                    getStep(),
+                    event);
+            }
+        }
+    }
+
+    void setIORegions()
+    {
+        for (unsigned i = 0; i < steerers.size(); i++) {
+            steerers[i]->setRegion(simArea);
+        }
     }
 };
 

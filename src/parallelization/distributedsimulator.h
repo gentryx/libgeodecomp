@@ -9,7 +9,7 @@
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
-class ParallelWriter; 
+class ParallelWriter;
 
 // fixme: add short doxygen doc for every class
 template<typename CELL_TYPE>
@@ -20,8 +20,8 @@ public:
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef SuperVector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
 
-    inline DistributedSimulator(Initializer<CELL_TYPE> *_initializer) : 
-        Simulator<CELL_TYPE>(_initializer)
+    inline DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
+        Simulator<CELL_TYPE>(initializer)
     {}
 
     /**
