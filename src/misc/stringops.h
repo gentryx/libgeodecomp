@@ -43,6 +43,8 @@ public:
     {
         StringVec ret;
         boost::split(ret, string, boost::is_any_of(delimiters), boost::token_compress_on);
+        ret.del("");
+
         return ret;
     }
 
