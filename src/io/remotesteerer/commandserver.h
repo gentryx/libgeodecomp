@@ -144,6 +144,11 @@ public:
      */
     static void sendCommand(const std::string& command, int port, const std::string& host = "127.0.0.1")
     {
+        sendCommandWithFeedback(command, 0, port, host);
+    }
+
+    static StringVec sendCommandWithFeedback(const std::string& command, int feedbackLines, int port, const std::string& host = "127.0.0.1")
+    {
         boost::asio::io_service ioService;
         tcp::resolver resolver(ioService);
         tcp::resolver::query query(host, StringOps::itoa(port));
@@ -161,6 +166,27 @@ public:
         if (errorCode) {
             LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
         }
+
+        StringVec ret;
+
+        for (int i = 0; i < feedbackLines; ++i) {
+            boost::asio::streambuf buf;
+            boost::system::error_code errorCode;
+
+            LOG(Logger::DEBUG, "CommandServer::sendCommandWithFeedback() reading line");
+
+            size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
+            if (errorCode) {
+                LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
+            }
+
+            std::istream lineBuf(&buf);
+            std::string line(length, 'X');
+            lineBuf.read(&line[0], length);
+            ret << line;
+        }
+
+        return ret;
     }
 
     /**
@@ -235,9 +261,9 @@ private:
 
                 message += "\ntry \"help\"\n";
                 sendMessage(message);
+            } else {
+                (*actions[command])(parameters, *pipe);
             }
-
-            (*actions[command])(parameters, *pipe);
         }
     }
 

@@ -24,9 +24,18 @@ public:
         }
     };
 
+    void setUp()
+    {
+        pipe.reset(new Pipe);
+    }
+
+    void tearDown()
+    {
+        pipe.reset();
+    }
+
     void testActionInvocationAndFeedback()
     {
-        boost::shared_ptr<Pipe> pipe(new Pipe);
         {
             CommandServer<int> server(47110, pipe);
             server.addAction(new MockAction());
@@ -36,6 +45,20 @@ public:
         TS_ASSERT_EQUALS(feedback.size(), 1);
         TS_ASSERT_EQUALS(feedback[0], "MockAction mocks you!");
     }
+
+    void testInvalidCommand()
+    {
+        {
+            CommandServer<int> server(47110, pipe);
+            StringOps::StringVec feedback = CommandServer<int>::sendCommandWithFeedback("blah", 1, 47110);
+
+            TS_ASSERT_EQUALS(feedback.size(), 1);
+            TS_ASSERT_EQUALS(feedback[0], "command not found: blah\n");
+        }
+    }
+
+private:
+    boost::shared_ptr<Pipe> pipe;
 };
 
 }
