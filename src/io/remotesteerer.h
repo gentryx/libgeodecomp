@@ -96,6 +96,11 @@ public:
         CommandServer<CELL_TYPE>::sendCommand(command, port);
     }
 
+    StringVec sendCommandWithFeedback(const std::string& command, int feedbackLines)
+    {
+        return CommandServer<CELL_TYPE>::sendCommandWithFeedback(command, feedbackLines, port);
+    }
+
 private:
     HandlerMap handlers;
     int port;

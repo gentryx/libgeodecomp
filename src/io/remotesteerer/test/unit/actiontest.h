@@ -15,7 +15,7 @@ public:
     {
     public:
         MockAction() :
-            RemoteSteererHelpers::Action<int>("this is but a dummy action", "mock")
+            RemoteSteererHelpers::Action<int>("mock", "this is but a dummy action")
         {}
 
         virtual void operator()(const StringOps::StringVec& parameters, Pipe& pipe)

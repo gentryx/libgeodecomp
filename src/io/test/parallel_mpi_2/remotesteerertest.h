@@ -19,8 +19,8 @@ public:
 
         FlushAction() :
             Action<TestCell<2> >(
-                "Usage: \"flush VALUE TIME\"\nWill add VALUE to all TestCell.testValue at time step TIME",
-                "flush")
+                "flush",
+                "Usage: \"flush VALUE TIME\"\nWill add VALUE to all TestCell.testValue at time step TIME")
         {}
 
         virtual void operator()(const StringVec& parameters, Pipe& pipe)
@@ -116,11 +116,6 @@ public:
         TS_ASSERT_EQUALS(writer->getGrid(10)[Coord<2>(4, 3)].testValue, 65.0 + 1234);
     }
 
-    void testGet()
-    {
-        sim->run();
-    }
-
 private:
     MPILayer mpiLayer;
     boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
@@ -129,7 +124,8 @@ private:
     // fixme: test set/get
     // fixme: test remotesteerer with 1 proc
     // fixme: add help function
-    // fixme: test unknown action/handler
+    // fixme: move stringvec to dedicated class
+    // fixme: test unknown handler
     // fixme: fix stuff in parallememorywriter
     // fixme: refactor steerer interface
     // fixme: fix cars example

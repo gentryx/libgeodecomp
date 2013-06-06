@@ -43,7 +43,7 @@ public:
     {
     public:
         QuitAction(bool *continueFlag) :
-            Action<CELL_TYPE>("Terminates the CommandServer and closes its socket.", "quit"),
+            Action<CELL_TYPE>("quit", "Terminates the CommandServer and closes its socket."),
             continueFlag(continueFlag)
         {}
 
@@ -67,8 +67,8 @@ public:
     public:
         using Action<CELL_TYPE>::key;
 
-        PassThroughAction(const std::string& helpMessage, const std::string& key) :
-            Action<CELL_TYPE>(helpMessage, key)
+        PassThroughAction(const std::string& key, const std::string& helpMessage) :
+            Action<CELL_TYPE>(key, helpMessage)
         {}
 
         void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
@@ -81,7 +81,7 @@ public:
     {
     public:
         GetAction() :
-            PassThroughAction("usage: \"get X Y [Z] MEMBER\", will return member MEMBER of cell at grid coordinate (X, Y, Z) if the model is 3D, or (X, Y) in the 2D case", "get")
+            PassThroughAction("get", "usage: \"get X Y [Z] MEMBER\", will return member MEMBER of cell at grid coordinate (X, Y, Z) if the model is 3D, or (X, Y) in the 2D case")
         {}
     };
 
@@ -89,7 +89,7 @@ public:
     {
     public:
         SetAction() :
-            PassThroughAction("usage: \"get X Y [Z] MEMBER VALUE\", will set member MEMBER of cell at grid coordinate (X, Y, Z) (if the model is 3D, or (X, Y) in the 2D case) to value VALUE", "set")
+            PassThroughAction("set", "usage: \"get X Y [Z] MEMBER VALUE\", will set member MEMBER of cell at grid coordinate (X, Y, Z) (if the model is 3D, or (X, Y) in the 2D case) to value VALUE")
         {}
     };
 
@@ -246,7 +246,7 @@ private:
         for (StringOps::StringVec::iterator iter = lines.begin();
              iter != lines.end();
              ++iter) {
-            StringOps::StringVec parameters = StringOps::tokenize(*iter, " ");
+            StringOps::StringVec parameters = StringOps::tokenize(*iter, " \n\r");
 
             if (parameters.size() == 0) {
                 sendMessage("no command given\n");
@@ -254,7 +254,6 @@ private:
             }
 
             std::string command = parameters.pop_front();
-
             if (actions.count(command) == 0) {
                 std::string message = "command not found: " + command;
                 LOG(Logger::WARN, message);

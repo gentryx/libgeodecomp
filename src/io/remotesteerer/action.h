@@ -21,9 +21,9 @@ class Action
 public:
     typedef StringOps::StringVec StringVec;
 
-    Action(const std::string& myHelpMessage, const std::string& myKey) :
-        myHelpMessage(myHelpMessage),
-        myKey(myKey)
+    Action(const std::string& myKey, const std::string& myHelpMessage) :
+        myKey(myKey),
+        myHelpMessage(myHelpMessage)
     {}
 
     virtual void operator()(const StringVec& parameters, Pipe& pipe) = 0;
@@ -44,8 +44,8 @@ public:
     }
 
 private:
-    std::string myHelpMessage;
     std::string myKey;
+    std::string myHelpMessage;
 };
 
 }
