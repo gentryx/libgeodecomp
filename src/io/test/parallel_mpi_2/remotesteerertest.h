@@ -18,7 +18,7 @@ public:
         using Action<TestCell<2> >::StringVec;
 
         FlushAction() :
-            Action(
+            Action<TestCell<2> >(
                 "Usage: \"flush VALUE TIME\"\nWill add VALUE to all TestCell.testValue at time step TIME",
                 "flush")
         {}
@@ -62,31 +62,39 @@ public:
 
     };
 
-    void testBasic()
+    void setUp()
     {
-        MPILayer mpiLayer;
-
         unsigned steererPeriod = 3;
         unsigned writerPeriod = 2;
         int port = 47110;
         int maxSteps = 30;
 
-        StripingSimulator<TestCell<2> > sim(
-            new TestInitializer<TestCell<2> >(Coord<2>(20, 10), maxSteps),
-            mpiLayer.rank() ? 0 : new NoOpBalancer,
-            10000000);
+        sim.reset(new StripingSimulator<TestCell<2> >(
+                      new TestInitializer<TestCell<2> >(Coord<2>(20, 10), maxSteps),
+                      mpiLayer.rank() ? 0 : new NoOpBalancer,
+                      10000000));
 
-        RemoteSteerer<TestCell<2> > *steerer = new RemoteSteerer<TestCell<2> >(steererPeriod, port);
+        steerer = new RemoteSteerer<TestCell<2> >(steererPeriod, port);
         steerer->addHandler(new FlushHandler);
+
+        writer = new ParallelMemoryWriter<TestCell<2> >(writerPeriod);
+        sim->addSteerer(steerer);
+        sim->addWriter(writer);
+    }
+
+    void tearDown()
+    {
+        sim.reset();
+    }
+
+    void testBasic()
+    {
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
             steerer->sendCommand("flush 1234 9");
         }
 
-        ParallelMemoryWriter<TestCell<2> > *writer = new ParallelMemoryWriter<TestCell<2> >(writerPeriod);
-        sim.addSteerer(steerer);
-        sim.addWriter(writer);
-        sim.run();
+        sim->run();
 
         TS_ASSERT_EQUALS(writer->getGrids().size(), 16);
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(3, 3)].testValue, 64.0);
@@ -108,6 +116,16 @@ public:
         TS_ASSERT_EQUALS(writer->getGrid(10)[Coord<2>(4, 3)].testValue, 65.0 + 1234);
     }
 
+    void testGet()
+    {
+        sim->run();
+    }
+
+private:
+    MPILayer mpiLayer;
+    boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
+    RemoteSteerer<TestCell<2> > *steerer;
+    ParallelMemoryWriter<TestCell<2> > *writer;
     // fixme: test set/get
     // fixme: test remotesteerer with 1 proc
     // fixme: add help function
