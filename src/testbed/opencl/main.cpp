@@ -126,6 +126,7 @@ class MyFutureOpenCLStepper
 
     std::cerr << "# of Devices: " << devices.size() << std::endl;
     for (auto & device : devices) { std::cerr << device; }
+    std::cerr << std::endl;
 
     context = cl::Context({ devices[0] });
 
