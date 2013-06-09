@@ -57,8 +57,6 @@ std::ostream& operator<<(std::ostream& o, cl::Device d) {
   }
   o << "]" << std::endl;
 
-
-
   o << "CL_DEVICE_NAME\t\t\t\t= "
     << d.getInfo<CL_DEVICE_NAME>()                      << std::endl
     << "CL_DEVICE_VENDOR\t\t\t= "
@@ -131,9 +129,6 @@ class MyFutureOpenCLStepper
     cmdq = cl::CommandQueue(context, devices[0]);
 
     // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
-    // cl::Context context ( std::vector<cl::Device>(1, device) );
-
-    // cl::CommandQueue cmdq ( context, device );
 
     size_t offset  = 0;
     size_t size    = hostGrid.getDimensions().prod() * sizeof(CELL);
@@ -175,35 +170,7 @@ class MyFutureOpenCLStepper
 
     cl::Kernel kernel(program, "add");
 
-    // cmdq.enqueueNDRangeKernel(kernel, cl::NullRange
-    // // global:
-    // // describes the number of global work-items in will execute the
-    // // kernel function. The total number of global work-items is computed as
-    // // global_work_size[0] * ... * global_work_size[work_dim - 1].
-    // // global size must be a multiple of the local size
-    // // (page 23 in lecture2.pdf)
-                              // , cl::NDRange ( ( bufSize + workgroupSize - 1 )
-                                            // / workgroupSize * workgroupSize
-                                            // )
-    // // local:
-    // // describes the number of work-items that make up a work-group (also
-    // // referred to as the size of the work-group) that will execute the kernel
-    // // specified by kernel.
-                              // , cl::NDRange ( workgroupSize )
-                              // );
-
-
     cmdq.finish();
-
-    // for (auto & coord : box) {
-      // std::cerr << "Update: " << coord << std::endl;
-      // hostGrid[coord].update(hostGrid.getNeighborhood(coord), 0);
-    // }
-
-    // for (auto & coord : box) {
-      // std::cerr << "Result: " << hostGrid[coord].temp << std::endl;
-    // }
-
   }
 
   void regionToVec(const Region<DIM>& region, SuperVector<int> *coordsX, SuperVector<int> *coordsY, SuperVector<int> *coordsZ)
@@ -238,39 +205,6 @@ int main(int argc, char **argv)
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
 
   MyFutureOpenCLStepper<Cell> stepper(box, "test.cl");
-
-  // MyFutureOpenCLStepper<Cell> stepper(
-      // CoordBox<3>(
-        // Coord<3>(10, 10, 10),
-        // Coord<3>(20, 30, 40)));
-
-  // Cell cell;
-
-  // std::cout << "test: " << sizeof(stepper) << "\n";
-  // std::cout << "================================================================================" << std::endl;
-
-  // Region<2> foo;
-
-  // for ( int x = 0; x < 3; ++x )
-    // for ( int y = 0; y < 3; ++y )
-      // foo << Coord<2>( y, x );
-
-  // std::cerr << foo << std::endl;
-
-  // for ( auto & mehh : foo )
-    // std::cerr << "mehh: " << mehh << std::endl;
-
-  // foo.clear();
-  // foo << Coord<2>( 1, 1 );
-  // std::cerr << foo << std::endl;
-  // foo << Coord<2>( 2, 2 );
-  // std::cerr << foo << std::endl;
-  // foo << Coord<2>( 10, 10 );//, 20, 20);
-  // // std::cerr << foo << std::endl;
-  // // foo << Coord<3>(30);//, 30, 30);
-  // std::cerr << foo << std::endl;
-  // SuperVector<int> x, y, z;
-  // // stepper.regionToVec( foo, &x, &y, &z );
 
   return 0;
 }
