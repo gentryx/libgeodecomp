@@ -111,6 +111,7 @@ class MyFutureOpenCLStepper
     const static int DIM = Topology::DIM;
 
     MyFutureOpenCLStepper(const CoordBox<DIM> box,
+                          size_t platform_id, size_t device_id,
                           const std::string & kernel_file) :
       box(box),
       hostGrid(box)
@@ -121,16 +122,20 @@ class MyFutureOpenCLStepper
     std::cerr << "# of Platforms: " << platforms.size() << std::endl;
     for (auto & platform : platforms) { std::cerr << platform; }
 
+    const cl::Platform & platform = platforms[platform_id];
+
     std::vector<cl::Device> devices;
-    platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
+    platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
     std::cerr << "# of Devices: " << devices.size() << std::endl;
     for (auto & device : devices) { std::cerr << device; }
     std::cerr << std::endl;
 
-    context = cl::Context({ devices[0] });
+    const cl::Device & device = devices[device_id];
 
-    cmdq = cl::CommandQueue(context, devices[0]);
+    context = cl::Context({ device });
+
+    cmdq = cl::CommandQueue(context, device);
 
     // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
 
@@ -172,7 +177,7 @@ class MyFutureOpenCLStepper
     cl::Program program(context, kernel_sources);
 
     try {
-      program.build(std::vector<cl::Device>(1, devices[0]));
+      program.build(std::vector<cl::Device>(1, device));
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
@@ -180,7 +185,7 @@ class MyFutureOpenCLStepper
                 << " (" << error.err() << ")"
                 << std::endl
                 << "Build Log:" << std::endl
-                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]);
+                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
     }
 
     cl::Kernel kernel(program, "test");
@@ -237,8 +242,9 @@ class MyFutureOpenCLStepper
 int main(int argc, char **argv)
 {
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
-  if (argc == 2) {
-    MyFutureOpenCLStepper<Cell> stepper(box, argv[1]);
+  if (argc == 4) {
+    MyFutureOpenCLStepper<Cell> stepper(box, strtol(argv[1], NULL, 10),
+                                        strtol(argv[2], NULL, 10), argv[3]);
   }
 
   return 0;
