@@ -142,9 +142,13 @@ class MyFutureOpenCLStepper
 
     } catch (...) {}
 
+    // std::string kernel_source_code("#pragma OPENCL EXTENSION cl_intel_printf:");
+    std::string kernel_source_code("#pragma OPENCL EXTENSION all:");
+    kernel_source_code + "enable";
+
     std::ifstream kernel_source_file(kernel_file.c_str());
 
-    std::string kernel_source_code(
+    kernel_source_code + std::string(
         std::istreambuf_iterator<char>(kernel_source_file),
         (std::istreambuf_iterator<char>()));
 
