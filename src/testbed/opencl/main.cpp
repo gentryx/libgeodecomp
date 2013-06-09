@@ -4,6 +4,7 @@
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
 
+#define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
 using namespace LibGeoDecomp;
