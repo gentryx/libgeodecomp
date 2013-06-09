@@ -41,14 +41,23 @@ std::ostream& operator<< ( std::ostream& o, cl::Device d ) {
     << d.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()       << std::endl
     << "CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS\t= "
     << d.getInfo<CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS>()  << std::endl
-    << "CL_DEVICE_MAX_WORK_ITEM_SIZES\t\t= ";
+    ;
 
-  std::vector<size_t> wis = d.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
-  std::vector<size_t>::iterator it = wis.begin();
+  o << "CL_DEVICE_EXECUTION_CAPABILITIES\t= [";
+  unsigned int ecs = d.getInfo<CL_DEVICE_EXECUTION_CAPABILITIES>();
+    if (ecs & CL_EXEC_KERNEL)        { o << "CL_EXEC_KERNEL"; }
+    if (ecs & CL_EXEC_NATIVE_KERNEL) { o << ", CL_EXEC_NATIVE_KERNEL"; }
+  o << "]" << std::endl;
 
-  o << "[";
-  while ( it != wis.end() ) o << *it << ( ++it != wis.end() ? ", " : "" );
-  o << "]"                                              << std::endl;
+  o << "CL_DEVICE_MAX_WORK_ITEM_SIZES\t\t= ";
+  auto wiss = d.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
+  o << wiss.size() << ") [";
+  for (auto wis = wiss.begin(); wis != wiss.end(); ) {
+    o << *wis << (++wis != wiss.end() ? ", " : "");
+  }
+  o << "]" << std::endl;
+
+
 
   o << "CL_DEVICE_NAME\t\t\t\t= "
     << d.getInfo<CL_DEVICE_NAME>()                      << std::endl
