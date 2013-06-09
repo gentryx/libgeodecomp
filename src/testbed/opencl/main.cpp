@@ -109,7 +109,8 @@ class MyFutureOpenCLStepper
     typedef DisplacedGrid<CELL, Topology>  GridType;
     const static int DIM = Topology::DIM;
 
-    MyFutureOpenCLStepper(const CoordBox<DIM> box) :
+    MyFutureOpenCLStepper(const CoordBox<DIM> box,
+                          const std::string & kernel_file) :
       box(box),
       hostGrid(box)
   {
@@ -136,30 +137,86 @@ class MyFutureOpenCLStepper
     cmdq = cl::CommandQueue ( context, devices[0] );
 
     // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
+    // cl::Context context ( std::vector<cl::Device>(1, device) );
 
+    // cl::CommandQueue cmdq ( context, device );
 
     std::cerr << "x: " << hostGrid.getDimensions().x() << std::endl;
     std::cerr << "y: " << hostGrid.getDimensions().y() << std::endl;
     std::cerr << "z: " << hostGrid.getDimensions().z() << std::endl;
     std::cerr << "prod: " << hostGrid.getDimensions().prod() << std::endl;
+    std::cerr << "baseAddress: " << hostGrid.baseAddress() << std::endl;
     std::cerr << "sizeof ( CELL ): " << sizeof ( CELL ) << std::endl;
 
-    // create device buffer
-    deviceGridNew = cl::Buffer
-      ( context
-      , CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR
-      , hostGrid.getDimensions().prod() * sizeof ( CELL )
-      , hostGrid.baseAddress()
-      );
+    size_t offset  = 0;
+    size_t size    = hostGrid.getDimensions().prod() * sizeof(CELL);
+    cl_mem_flags flags    = CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR;
+    CELL * address        = hostGrid.baseAddress();
 
-    deviceGridOld = cl::Buffer
-      ( context
-      , CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR
-      , hostGrid.getDimensions().prod() * sizeof ( CELL )
-      , hostGrid.baseAddress()
-      );
+    try {
+      deviceGridNew = cl::Buffer(context, flags, size, address);
+      deviceGridOld = cl::Buffer(context, flags, size, address);
+      cmdq.enqueueWriteBuffer(deviceGridNew, CL_TRUE, offset, size, address);
 
-    // todo: specify OpenCL platform, device via constructor
+    } catch (...) {}
+
+    std::ifstream kernel_source_file(kernel_file.c_str());
+
+    std::string kernel_source_code(
+        std::istreambuf_iterator<char>(kernel_source_file),
+        (std::istreambuf_iterator<char>()));
+
+    kernel_source_file.close();
+
+    cl::Program::Sources kernel_sources(1,
+        std::make_pair(kernel_source_code.c_str(),
+                       kernel_source_code.length() + 1));
+
+    cl::Program program(context, kernel_sources);
+
+    try {
+      program.build(std::vector<cl::Device>(1, devices[0]));
+
+    } catch (cl::Error & error) {
+      // std::cerr << "Error: " << error.what() << ": "
+                // <<  getErrorDesc(error.err())
+                // << " (" << error.err() << ")"
+                // << std::endl
+                // << "Build Log:" << std::endl
+                // << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+    }
+
+    cl::Kernel kernel(program, "add");
+
+    // cmdq.enqueueNDRangeKernel(kernel, cl::NullRange
+    // // global:
+    // // describes the number of global work-items in will execute the
+    // // kernel function. The total number of global work-items is computed as
+    // // global_work_size[0] * ... * global_work_size[work_dim - 1].
+    // // global size must be a multiple of the local size
+    // // (page 23 in lecture2.pdf)
+                              // , cl::NDRange ( ( bufSize + workgroupSize - 1 )
+                                            // / workgroupSize * workgroupSize
+                                            // )
+    // // local:
+    // // describes the number of work-items that make up a work-group (also
+    // // referred to as the size of the work-group) that will execute the kernel
+    // // specified by kernel.
+                              // , cl::NDRange ( workgroupSize )
+                              // );
+
+
+    cmdq.finish();
+
+    // for (auto & coord : box) {
+      // std::cerr << "Update: " << coord << std::endl;
+      // hostGrid[coord].update(hostGrid.getNeighborhood(coord), 0);
+    // }
+
+    // for (auto & coord : box) {
+      // std::cerr << "Result: " << hostGrid[coord].temp << std::endl;
+    // }
+
   }
 
   void regionToVec(const Region<DIM>& region, SuperVector<int> *coordsX, SuperVector<int> *coordsY, SuperVector<int> *coordsZ)
@@ -191,11 +248,9 @@ class MyFutureOpenCLStepper
 
 int main(int argc, char **argv)
 {
-  MyFutureOpenCLStepper<Cell> stepper(
-      CoordBox<3>(
-        Coord<3>(10, 10, 10),
-        Coord<3>(20, 30, 40)));
-  std::cout << "test: " << sizeof(stepper) << "\n";
+  auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
+
+  MyFutureOpenCLStepper<Cell> stepper(box, "test.cl");
 
   return 0;
 }
