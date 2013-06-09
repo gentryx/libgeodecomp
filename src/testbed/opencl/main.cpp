@@ -165,7 +165,7 @@ class MyFutureOpenCLStepper
 
     } catch (...) {}
 
-    cl::Kernel kernel(program, "add");
+    cl::Kernel kernel(program, "test");
 
     // cmdq.enqueueNDRangeKernel(kernel, cl::NullRange
     // // global:
