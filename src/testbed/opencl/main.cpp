@@ -107,7 +107,8 @@ class MyFutureOpenCLStepper
     typedef DisplacedGrid<CELL, Topology>  GridType;
     const static int DIM = Topology::DIM;
 
-    MyFutureOpenCLStepper(const CoordBox<DIM> box) :
+    MyFutureOpenCLStepper(const CoordBox<DIM> box,
+                          const std::string & kernel_file) :
       box(box),
       hostGrid(box)
   {
@@ -140,6 +141,45 @@ class MyFutureOpenCLStepper
       cmdq.enqueueWriteBuffer(deviceGridNew, CL_TRUE, offset, size, address);
 
     } catch (...) {}
+
+    std::ifstream kernel_source_file(kernel_file.c_str());
+
+    std::string kernel_source_code(
+        std::istreambuf_iterator<char>(kernel_source_file),
+        (std::istreambuf_iterator<char>()));
+
+    kernel_source_file.close();
+
+    cl::Program::Sources kernel_sources(1,
+        std::make_pair(kernel_source_code.c_str(),
+                       kernel_source_code.length() + 1));
+
+    cl::Program program(context, kernel_sources);
+
+    try {
+      program.build(std::vector<cl::Device>(1, devices[0]));
+
+    } catch (...) {}
+
+    cl::Kernel kernel(program, "add");
+
+    // cmdq.enqueueNDRangeKernel(kernel, cl::NullRange
+    // // global:
+    // // describes the number of global work-items in will execute the
+    // // kernel function. The total number of global work-items is computed as
+    // // global_work_size[0] * ... * global_work_size[work_dim - 1].
+    // // global size must be a multiple of the local size
+    // // (page 23 in lecture2.pdf)
+                              // , cl::NDRange ( ( bufSize + workgroupSize - 1 )
+                                            // / workgroupSize * workgroupSize
+                                            // )
+    // // local:
+    // // describes the number of work-items that make up a work-group (also
+    // // referred to as the size of the work-group) that will execute the kernel
+    // // specified by kernel.
+                              // , cl::NDRange ( workgroupSize )
+                              // );
+
 
     cmdq.finish();
   }
@@ -174,8 +214,7 @@ class MyFutureOpenCLStepper
 int main(int argc, char **argv)
 {
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
-
-  MyFutureOpenCLStepper<Cell> stepper(box);
+  MyFutureOpenCLStepper<Cell> stepper(box, "test.cl");
 
   return 0;
 }
