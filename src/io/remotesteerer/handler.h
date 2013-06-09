@@ -19,7 +19,6 @@ class Handler
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
-    typedef StringOps::StringVec StringVec;
 
     Handler(const std::string& myKey) :
         myKey(myKey)

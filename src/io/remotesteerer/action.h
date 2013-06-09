@@ -19,8 +19,6 @@ template<typename CELL_TYPE>
 class Action
 {
 public:
-    typedef StringOps::StringVec StringVec;
-
     Action(const std::string& myKey, const std::string& myHelpMessage) :
         myKey(myKey),
         myHelpMessage(myHelpMessage)

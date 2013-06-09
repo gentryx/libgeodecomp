@@ -3,7 +3,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <sstream>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stringvec.h>
 
 // sad but true: CodeGear's C++ compiler has troubles with the +
 // operator for strings.
@@ -22,7 +22,6 @@ namespace LibGeoDecomp {
 class StringOps
 {
 public:
-    typedef SuperVector<std::string> StringVec;
 
     static std::string itoa(int i)
     {

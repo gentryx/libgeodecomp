@@ -35,7 +35,6 @@ template<typename CELL_TYPE>
 class RemoteSteerer : public Steerer<CELL_TYPE>
 {
 public:
-    typedef StringOps::StringVec StringVec;
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
     typedef SuperMap<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;

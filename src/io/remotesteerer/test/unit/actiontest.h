@@ -18,7 +18,7 @@ public:
             RemoteSteererHelpers::Action<int>("mock", "this is but a dummy action")
         {}
 
-        virtual void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
+        virtual void operator()(const StringVec& parameters, Pipe& pipe)
         {
             pipe.addSteeringFeedback("MockAction mocks you! " + parameters[0]);
         }
@@ -31,11 +31,11 @@ public:
 
         TS_ASSERT_EQUALS("this is but a dummy action", action.helpMessage());
         TS_ASSERT_EQUALS("mock", action.key());
-        StringOps::StringVec parameters;
+        StringVec parameters;
         parameters << "arrrr"
                    << "matey";
         action(parameters, pipe);
-        StringOps::StringVec feedback = pipe.retrieveSteeringFeedback();
+        StringVec feedback = pipe.retrieveSteeringFeedback();
         TS_ASSERT_EQUALS(feedback.size(), 1);
         TS_ASSERT_EQUALS(feedback[0], "MockAction mocks you! arrrr");
     }

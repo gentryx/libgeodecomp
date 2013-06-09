@@ -15,8 +15,6 @@ public:
     class FlushAction : public Action<TestCell<2> >
     {
     public:
-        using Action<TestCell<2> >::StringVec;
-
         FlushAction() :
             Action<TestCell<2> >(
                 "flush",
@@ -32,13 +30,11 @@ public:
     class FlushHandler : public Handler<TestCell<2> >
     {
     public:
-        using Handler<TestCell<2> >::StringVec;
-
         FlushHandler() :
             Handler<TestCell<2> >("flush")
         {}
 
-        virtual bool operator()(const StringOps::StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion, unsigned step)
+        virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion, unsigned step)
         {
             std::stringstream buf;
             buf << parameters[0] << " " << parameters[1];
@@ -115,6 +111,45 @@ public:
         TS_ASSERT_EQUALS(writer->getGrid(10)[Coord<2>(3, 3)].testValue, 64.0 + 1234);
         TS_ASSERT_EQUALS(writer->getGrid(10)[Coord<2>(4, 3)].testValue, 65.0 + 1234);
     }
+
+    void testInvalidHandler()
+    {
+        // boost::shared_ptr<SteeringInteractor> interactor;
+
+        if (mpiLayer.rank() == 0) {
+            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("nonExistentHandler", "blah"));
+            StringVec res;
+
+            // interactor.reset(new SteeringInteractor);
+            // Wrapper<SteeringInteractor> wrapper(interactor);
+            // boost::thread interactorThread(wrapper);
+            // interactor->waitForStartup();
+            // std::cout << "waiting for join\n";
+            // interactorThread.join();
+            // std::cout << "party on, wayne!\n";
+
+            // res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 1);
+            // TS_ASSERT_EQUALS(res.size(), 1);
+            // TS_ASSERT_EQUALS(res[0], "command not found: nonExistentAction\n");
+            // std::cout << "sending nonexistendhandler\n";
+            // res = steerer->sendCommandWithFeedback("nonExistentHandler 1 2 3", 1);
+            // std::cout << "blah\n";
+            // TS_ASSERT_EQUALS(res.size(), 1);
+            // TS_ASSERT_EQUALS(res[0], "handler not found: nonExistentHandler\n");
+        }
+
+        // std::cout << "sleeping\n";
+        // sleep(10);
+        // sim->run();
+    }
+
+    void testGetSet()
+    {
+        // std::cout << "sleeping\n";
+        // sleep(10);
+        // sim->run();
+    }
+
 
 private:
     MPILayer mpiLayer;

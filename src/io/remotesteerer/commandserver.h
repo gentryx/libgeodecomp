@@ -31,7 +31,6 @@ template<typename CELL_TYPE>
 class CommandServer
 {
 public:
-    typedef StringOps::StringVec StringVec;
     typedef SuperMap<std::string, boost::shared_ptr<Action<CELL_TYPE> > > ActionMap;
 
     /**
@@ -47,7 +46,7 @@ public:
             continueFlag(continueFlag)
         {}
 
-        void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
+        void operator()(const StringVec& parameters, Pipe& pipe)
         {
             LOG(Logger::INFO, "QuitAction called");
             *continueFlag = false;
@@ -71,7 +70,7 @@ public:
             Action<CELL_TYPE>(key, helpMessage)
         {}
 
-        void operator()(const StringOps::StringVec& parameters, Pipe& pipe)
+        void operator()(const StringVec& parameters, Pipe& pipe)
         {
             pipe.addSteeringRequest(key() + " " + StringOps::join(parameters, " "));
         }
@@ -242,11 +241,11 @@ private:
     {
         LOG(Logger::DEBUG, "Logger::handleInput(" << input << ")");
 
-        StringOps::StringVec lines = StringOps::tokenize(input, "\n");
-        for (StringOps::StringVec::iterator iter = lines.begin();
+        StringVec lines = StringOps::tokenize(input, "\n");
+        for (StringVec::iterator iter = lines.begin();
              iter != lines.end();
              ++iter) {
-            StringOps::StringVec parameters = StringOps::tokenize(*iter, " \n\r");
+            StringVec parameters = StringOps::tokenize(*iter, " \n\r");
 
             if (parameters.size() == 0) {
                 sendMessage("no command given\n");

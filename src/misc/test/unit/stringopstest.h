@@ -27,9 +27,9 @@ public:
     {
         std::string message = "abc_123_andi ist so toll";
 
-        StringOps::StringVec expected1;
-        StringOps::StringVec expected2;
-        StringOps::StringVec expected3;
+        StringVec expected1;
+        StringVec expected2;
+        StringVec expected3;
 
         expected1 << "abc"
                   << "123"
@@ -44,13 +44,13 @@ public:
 
         TS_ASSERT_EQUALS(expected1, StringOps::tokenize(message, "_"));
         TS_ASSERT_EQUALS(expected2, StringOps::tokenize(message, "_ "));
-        StringOps::StringVec tokens = StringOps::tokenize("\n", " \n");
+        StringVec tokens = StringOps::tokenize("\n", " \n");
         TS_ASSERT_EQUALS(expected3, StringOps::tokenize("\n", " \n"));
     }
 
     void testJoin()
     {
-        StringOps::StringVec tokens;
+        StringVec tokens;
         tokens << "a"
                << "bb"
                << "ccc";

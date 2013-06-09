@@ -24,7 +24,6 @@ class Pipe
 {
 public:
     friend class PipeTest;
-    typedef StringOps::StringVec StringVec;
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     Pipe(
