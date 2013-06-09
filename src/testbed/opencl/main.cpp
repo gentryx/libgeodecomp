@@ -118,19 +118,13 @@ class MyFutureOpenCLStepper
     cl::Platform::get ( &platforms );
 
     std::cerr << "# of Platforms: " << platforms.size() << std::endl;
-
-    // for ( auto platform = platforms.begin(); platform != platforms.end(); ++platform )
-    for ( auto & platform : platforms )
-      std::cerr << platform;
+    for (auto & platform : platforms) { std::cerr << platform; }
 
     std::vector<cl::Device> devices;
-
-    platforms[0].getDevices ( CL_DEVICE_TYPE_ALL, &devices );
+    platforms[0].getDevices (CL_DEVICE_TYPE_ALL, &devices);
 
     std::cerr << "# of Devices: " << devices.size() << std::endl;
-
-    for ( auto & device : devices )
-      std::cerr << device;
+    for (auto & device : devices) { std::cerr << device; }
 
     context = cl::Context ( { devices[0] } );
 
