@@ -1,6 +1,5 @@
 /* vim:set expandtab tabstop=2 shiftwidth=2 softtabstop=2: */
 
-#include <fstream>
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
 
@@ -107,8 +106,7 @@ class MyFutureOpenCLStepper
     typedef DisplacedGrid<CELL, Topology>  GridType;
     const static int DIM = Topology::DIM;
 
-    MyFutureOpenCLStepper(const CoordBox<DIM> box,
-                          const std::string & kernel_file) :
+    MyFutureOpenCLStepper(const CoordBox<DIM> box) :
       box(box),
       hostGrid(box)
   {
@@ -141,34 +139,6 @@ class MyFutureOpenCLStepper
       cmdq.enqueueWriteBuffer(deviceGridNew, CL_TRUE, offset, size, address);
 
     } catch (...) {}
-
-    std::ifstream kernel_source_file(kernel_file.c_str());
-
-    std::string kernel_source_code(
-        std::istreambuf_iterator<char>(kernel_source_file),
-        (std::istreambuf_iterator<char>()));
-
-    kernel_source_file.close();
-
-    cl::Program::Sources kernel_sources(1,
-        std::make_pair(kernel_source_code.c_str(),
-                       kernel_source_code.length() + 1));
-
-    cl::Program program(context, kernel_sources);
-
-    try {
-      program.build(std::vector<cl::Device>(1, devices[0]));
-
-    } catch (cl::Error & error) {
-      // std::cerr << "Error: " << error.what() << ": "
-                // <<  getErrorDesc(error.err())
-                // << " (" << error.err() << ")"
-                // << std::endl
-                // << "Build Log:" << std::endl
-                // << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
-    }
-
-    cl::Kernel kernel(program, "add");
 
     cmdq.finish();
   }
@@ -204,7 +174,7 @@ int main(int argc, char **argv)
 {
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
 
-  MyFutureOpenCLStepper<Cell> stepper(box, "test.cl");
+  MyFutureOpenCLStepper<Cell> stepper(box);
 
   return 0;
 }
