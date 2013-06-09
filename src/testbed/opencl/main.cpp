@@ -202,6 +202,7 @@ class MyFutureOpenCLStepper
                               // , cl::NDRange ( workgroupSize )
                               // );
 
+    cmdq.enqueueTask(kernel);
 
     cmdq.finish();
   }
