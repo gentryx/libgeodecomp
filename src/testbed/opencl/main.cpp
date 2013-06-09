@@ -9,7 +9,7 @@
 
 using namespace LibGeoDecomp;
 
-std::ostream& operator<< ( std::ostream& o, cl::Platform p ) {
+std::ostream& operator<<(std::ostream& o, cl::Platform p) {
   o << "CL_PLATFORM_VERSION\t= "     << p.getInfo<CL_PLATFORM_VERSION>()
     << std::endl
     << "CL_PLATFORM_NAME\t= "        << p.getInfo<CL_PLATFORM_NAME>()
@@ -20,7 +20,7 @@ std::ostream& operator<< ( std::ostream& o, cl::Platform p ) {
   return o;
 }
 
-std::ostream& operator<< ( std::ostream& o, cl::Device d ) {
+std::ostream& operator<<(std::ostream& o, cl::Device d) {
   o << "CL_DEVICE_EXTENSIONS\t\t\t= "
     << d.getInfo<CL_DEVICE_EXTENSIONS>()                << std::endl
     << "CL_DEVICE_GLOBAL_MEM_SIZE\t\t= "
@@ -115,20 +115,20 @@ class MyFutureOpenCLStepper
       hostGrid(box)
   {
     std::vector<cl::Platform> platforms;
-    cl::Platform::get ( &platforms );
+    cl::Platform::get(&platforms);
 
     std::cerr << "# of Platforms: " << platforms.size() << std::endl;
     for (auto & platform : platforms) { std::cerr << platform; }
 
     std::vector<cl::Device> devices;
-    platforms[0].getDevices (CL_DEVICE_TYPE_ALL, &devices);
+    platforms[0].getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
     std::cerr << "# of Devices: " << devices.size() << std::endl;
     for (auto & device : devices) { std::cerr << device; }
 
-    context = cl::Context ( { devices[0] } );
+    context = cl::Context({ devices[0] });
 
-    cmdq = cl::CommandQueue ( context, devices[0] );
+    cmdq = cl::CommandQueue(context, devices[0]);
 
     // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
     // cl::Context context ( std::vector<cl::Device>(1, device) );
