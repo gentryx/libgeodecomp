@@ -237,7 +237,9 @@ class MyFutureOpenCLStepper
 int main(int argc, char **argv)
 {
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
-  MyFutureOpenCLStepper<Cell> stepper(box, "test.cl");
+  if (argc == 2) {
+    MyFutureOpenCLStepper<Cell> stepper(box, argv[1]);
+  }
 
   return 0;
 }
