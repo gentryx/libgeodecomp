@@ -252,5 +252,38 @@ int main(int argc, char **argv)
 
   MyFutureOpenCLStepper<Cell> stepper(box, "test.cl");
 
+  // MyFutureOpenCLStepper<Cell> stepper(
+      // CoordBox<3>(
+        // Coord<3>(10, 10, 10),
+        // Coord<3>(20, 30, 40)));
+
+  // Cell cell;
+
+  // std::cout << "test: " << sizeof(stepper) << "\n";
+  // std::cout << "================================================================================" << std::endl;
+
+  // Region<2> foo;
+
+  // for ( int x = 0; x < 3; ++x )
+    // for ( int y = 0; y < 3; ++y )
+      // foo << Coord<2>( y, x );
+
+  // std::cerr << foo << std::endl;
+
+  // for ( auto & mehh : foo )
+    // std::cerr << "mehh: " << mehh << std::endl;
+
+  // foo.clear();
+  // foo << Coord<2>( 1, 1 );
+  // std::cerr << foo << std::endl;
+  // foo << Coord<2>( 2, 2 );
+  // std::cerr << foo << std::endl;
+  // foo << Coord<2>( 10, 10 );//, 20, 20);
+  // // std::cerr << foo << std::endl;
+  // // foo << Coord<3>(30);//, 30, 30);
+  // std::cerr << foo << std::endl;
+  // SuperVector<int> x, y, z;
+  // // stepper.regionToVec( foo, &x, &y, &z );
+
   return 0;
 }
