@@ -135,13 +135,6 @@ class MyFutureOpenCLStepper
 
     // cl::CommandQueue cmdq ( context, device );
 
-    std::cerr << "x: " << hostGrid.getDimensions().x() << std::endl;
-    std::cerr << "y: " << hostGrid.getDimensions().y() << std::endl;
-    std::cerr << "z: " << hostGrid.getDimensions().z() << std::endl;
-    std::cerr << "prod: " << hostGrid.getDimensions().prod() << std::endl;
-    std::cerr << "baseAddress: " << hostGrid.baseAddress() << std::endl;
-    std::cerr << "sizeof ( CELL ): " << sizeof ( CELL ) << std::endl;
-
     size_t offset  = 0;
     size_t size    = hostGrid.getDimensions().prod() * sizeof(CELL);
     cl_mem_flags flags    = CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR;
