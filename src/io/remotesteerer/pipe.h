@@ -4,6 +4,7 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 
@@ -36,18 +37,21 @@ public:
 
     void addSteeringRequest(const std::string& request)
     {
+        LOG(DEBUG, "Pipe::addSteeringRequest(" << request << ")");
         boost::lock_guard<boost::mutex> lock(mutex);
         steeringRequests << request;
     }
 
     void addSteeringFeedback(const std::string& feedback)
     {
+        LOG(DEBUG, "Pipe::addSteeringFeedback(" << feedback << ")");
         boost::lock_guard<boost::mutex> lock(mutex);
         steeringFeedback << feedback;
     }
 
     StringVec retrieveSteeringRequests()
     {
+        LOG(DEBUG, "Pipe::retrieveSteeringRequests()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec requests;
         std::swap(requests, steeringRequests);
@@ -56,6 +60,7 @@ public:
 
     StringVec retrieveSteeringFeedback()
     {
+        LOG(DEBUG, "Pipe::retrieveSteeringFeedback()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec feedback;
         std::swap(feedback, steeringFeedback);
@@ -64,6 +69,7 @@ public:
 
     void sync()
     {
+        LOG(DEBUG, "Pipe::sync()");
         boost::lock_guard<boost::mutex> lock(mutex);
 
 #ifdef LIBGEODECOMP_FEATURE_MPI

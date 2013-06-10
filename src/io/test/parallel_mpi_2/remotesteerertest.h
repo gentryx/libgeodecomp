@@ -1,7 +1,9 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
@@ -85,12 +87,15 @@ public:
 
     void testBasic()
     {
+        LOG(DEBUG, "bongoA " << MPILayer().rank() << ")");
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
             steerer->sendCommand("flush 1234 9");
         }
 
+        LOG(DEBUG, "bongoB " << MPILayer().rank() << ")");
         sim->run();
+        LOG(DEBUG, "bongoC " << MPILayer().rank() << ")");
 
         TS_ASSERT_EQUALS(writer->getGrids().size(), 16);
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(3, 3)].testValue, 64.0);
