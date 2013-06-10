@@ -37,14 +37,14 @@ public:
         std::string line(length, 'X');
         lineBuf.read(&line[0], length);
 
-        // write back some feedpack
+        // write back some feedback
         boost::asio::write(
             socket,
             boost::asio::buffer(expectedFeedback[0]),
             boost::asio::transfer_all(),
             errorCode);
 
-        // check the resupts
+        // check the results
         StringVec tokens = StringOps::tokenize(line, " \r\n");
         StringVec expected;
         expected << "command"

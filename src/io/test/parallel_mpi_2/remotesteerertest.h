@@ -62,7 +62,7 @@ public:
     {
         unsigned steererPeriod = 3;
         unsigned writerPeriod = 2;
-        int port = 47110;
+        int port = 47112;
         int maxSteps = 30;
 
         sim.reset(new StripingSimulator<TestCell<2> >(

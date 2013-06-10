@@ -39,10 +39,10 @@ public:
         topoDimensions(topologicalDimensions)
     { }
 
-    DisplacedGrid(const Delegate& _grid,
-                  const Coord<DIM>& _origin=Coord<DIM>()) :
-        delegate(_grid),
-        origin(_origin)
+    DisplacedGrid(const Delegate& grid,
+                  const Coord<DIM>& origin=Coord<DIM>()) :
+        delegate(grid),
+        origin(origin)
     {}
 
     inline const Coord<DIM>& topologicalDimensions() const
@@ -80,7 +80,7 @@ public:
         return delegate.getEdgeCell();
     }
 
-    inline void setOrigin(const Coord<DIM>& newOrigin) 
+    inline void setOrigin(const Coord<DIM>& newOrigin)
     {
         origin = newOrigin;
     }
@@ -119,7 +119,7 @@ public:
     {
         return getEdgeCell();
     }
-    
+
     virtual const CELL_TYPE& atEdge() const
     {
         return getEdgeCell();
