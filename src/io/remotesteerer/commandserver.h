@@ -50,7 +50,7 @@ public:
 
         void operator()(const StringVec& parameters, Pipe& pipe)
         {
-            LOG(Logger::INFO, "QuitAction called");
+            LOG(INFO, "QuitAction called");
             *continueFlag = false;
         }
 
@@ -117,7 +117,7 @@ public:
     ~CommandServer()
     {
         signalClose();
-        LOG(Logger::DEBUG, "CommandServer waiting for network thread");
+        LOG(DEBUG, "CommandServer waiting for network thread");
         serverThread.join();
     }
 
@@ -135,7 +135,7 @@ public:
             errorCode);
 
         if (errorCode) {
-            LOG(Logger::WARN, "CommandServer::sendMessage encountered " << errorCode.message());
+            LOG(WARN, "CommandServer::sendMessage encountered " << errorCode.message());
         }
     }
 
@@ -150,6 +150,7 @@ public:
 
     static StringVec sendCommandWithFeedback(const std::string& command, int feedbackLines, int port, const std::string& host = "127.0.0.1")
     {
+        LOG(DEBUG, "CommandServer::sendCommandWithFeedback(" << command << ", port = " << port << ", host = " << host << ")");
         boost::asio::io_service ioService;
         tcp::resolver resolver(ioService);
         tcp::resolver::query query(host, StringOps::itoa(port));
@@ -165,7 +166,7 @@ public:
             errorCode);
 
         if (errorCode) {
-            LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
+            LOG(WARN, "error while writing to socket: " << errorCode.message());
         }
 
         StringVec ret;
@@ -174,11 +175,11 @@ public:
             boost::asio::streambuf buf;
             boost::system::error_code errorCode;
 
-            LOG(Logger::DEBUG, "CommandServer::sendCommandWithFeedback() reading line");
+            LOG(DEBUG, "CommandServer::sendCommandWithFeedback() reading line");
 
             size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
             if (errorCode) {
-                LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
+                LOG(WARN, "error while writing to socket: " << errorCode.message());
             }
 
             std::istream lineBuf(&buf);
@@ -225,12 +226,12 @@ private:
             }
 
             if (errorCode == boost::asio::error::eof) {
-                LOG(Logger::INFO, "CommandServer::runSession(): client closed connection");
+                LOG(INFO, "CommandServer::runSession(): client closed connection");
                 return;
             }
 
             if (errorCode) {
-                LOG(Logger::WARN, "CommandServer::runSession encountered " << errorCode.message());
+                LOG(WARN, "CommandServer::runSession encountered " << errorCode.message());
             }
 
             if (!socket->is_open()) {
@@ -241,7 +242,7 @@ private:
 
     void handleInput(const std::string& input)
     {
-        LOG(Logger::DEBUG, "Logger::handleInput(" << input << ")");
+        LOG(DEBUG, "CommandServer::handleInput(" << input << ")");
 
         StringVec lines = StringOps::tokenize(input, "\n");
         for (StringVec::iterator iter = lines.begin();
@@ -257,7 +258,7 @@ private:
             std::string command = parameters.pop_front();
             if (actions.count(command) == 0) {
                 std::string message = "command not found: " + command;
-                LOG(Logger::WARN, message);
+                LOG(WARN, message);
 
                 message += "\ntry \"help\"\n";
                 sendMessage(message);
@@ -281,20 +282,20 @@ private:
             continueFlag = true;
 
             while (continueFlag) {
-                LOG(Logger::DEBUG, "CommandServer waiting for new connection");
+                LOG(DEBUG, "CommandServer waiting for new connection");
                 socket.reset(new tcp::socket(ioService));
                 acceptor->accept(*socket, errorCode);
 
                 if (errorCode) {
-                    LOG(Logger::WARN, "CommandServer::runServer() encountered " << errorCode.message());
+                    LOG(WARN, "CommandServer::runServer() encountered " << errorCode.message());
                 } else {
-                    LOG(Logger::INFO, "CommandServer: client connected");
+                    LOG(INFO, "CommandServer: client connected");
                     runSession();
                 }
             }
         }
         catch (std::exception& e) {
-            LOG(Logger::FATAL, "CommandServer::runServer() caught exception " << e.what() << ", exiting");
+            LOG(FATAL, "CommandServer::runServer() caught exception " << e.what() << ", exiting");
             return 1;
         }
 
