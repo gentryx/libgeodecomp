@@ -1,5 +1,8 @@
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_THREADS
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
+
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
@@ -14,10 +17,10 @@ namespace RemoteSteererHelpers {
 using boost::asio::ip::tcp;
 
 /**
- * This class can be used to encapsulate asynchronous communication
- * with a RemoteSteerer's CommandServer. This is useful for instance
- * for writing unit tests where manually creating and syncing a thread
- * is tedious.
+ * This class can be used to encapsulate synchronous/asynchronous
+ * communication with a RemoteSteerer's CommandServer. This is useful
+ * for instance for writing unit tests where manually creating sockets
+ * and syncing a thread is tedious.
  */
 template<typename CELL_TYPE>
 class Interactor
@@ -163,3 +166,5 @@ private:
 }
 
 #endif
+#endif
+

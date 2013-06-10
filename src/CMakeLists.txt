@@ -101,6 +101,8 @@ add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require
 
 add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
+add_config_option(FEATURE_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
 add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
