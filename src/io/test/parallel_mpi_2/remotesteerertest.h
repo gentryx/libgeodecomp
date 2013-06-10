@@ -26,6 +26,7 @@ public:
         virtual void operator()(const StringVec& parameters, Pipe& pipe)
         {
             pipe.addSteeringRequest("flush " + parameters[0] + " " + parameters[1]);
+            pipe.addSteeringFeedback("flush received");
         }
     };
 
@@ -90,7 +91,9 @@ public:
         LOG(DEBUG, "bongoA " << MPILayer().rank() << ")");
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
-            steerer->sendCommand("flush 1234 9");
+            StringVec feedback = steerer->sendCommandWithFeedback("flush 1234 9", 1);
+            TS_ASSERT_EQUALS(1, feedback.size());
+            TS_ASSERT_EQUALS("flush received", feedback[0]);
         }
 
         LOG(DEBUG, "bongoB " << MPILayer().rank() << ")");

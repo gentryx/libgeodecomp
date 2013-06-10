@@ -37,12 +37,9 @@ public:
     void testActionInvocationAndFeedback()
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
-        {
-            CommandServer<int> server(47110, pipe);
-            server.addAction(new MockAction());
-            CommandServer<int>::sendCommand("mock 1 2 3", 47110);
-        }
-        StringVec feedback = pipe->retrieveSteeringFeedback();
+        CommandServer<int> server(47110, pipe);
+        server.addAction(new MockAction());
+        StringVec feedback = CommandServer<int>::sendCommandWithFeedback("mock 1 2 3", 1, 47110);
         TS_ASSERT_EQUALS(feedback.size(), 1);
         TS_ASSERT_EQUALS(feedback[0], "MockAction mocks you!");
 #endif
@@ -55,7 +52,7 @@ public:
         StringVec feedback = CommandServer<int>::sendCommandWithFeedback("blah", 1, 47110);
 
         TS_ASSERT_EQUALS(feedback.size(), 1);
-        TS_ASSERT_EQUALS(feedback[0], "command not found: blah\n");
+        TS_ASSERT_EQUALS(feedback[0], "command not found: blah");
 #endif
     }
 

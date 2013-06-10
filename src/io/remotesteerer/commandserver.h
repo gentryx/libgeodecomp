@@ -182,6 +182,11 @@ public:
                 LOG(WARN, "error while writing to socket: " << errorCode.message());
             }
 
+            // purge \n at end of line
+            if (length) {
+                length -= 1;
+            }
+
             std::istream lineBuf(&buf);
             std::string line(length, 'X');
             lineBuf.read(&line[0], length);
@@ -236,6 +241,13 @@ private:
 
             if (!socket->is_open()) {
                 return;
+            }
+
+            StringVec feedback = pipe->retrieveSteeringFeedback();
+            for (StringVec::iterator i = feedback.begin();
+                 i != feedback.end();
+                 ++i) {
+                sendMessage(*i + "\n");
             }
         }
     }

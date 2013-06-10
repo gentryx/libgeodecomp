@@ -142,7 +142,6 @@ private:
         SuperVector<char> globalBuffer(charsPerNode.sum());
         mpiLayer.gatherV(&localBuffer[0], localBuffer.size(), charsPerNode, root, &globalBuffer[0]);
 
-
         // reconstruct strings:
         int cursor = 0;
         steeringFeedback.resize(0);
