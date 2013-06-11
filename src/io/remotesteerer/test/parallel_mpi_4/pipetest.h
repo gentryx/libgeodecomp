@@ -1,3 +1,4 @@
+#include <boost/thread.hpp>
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -47,10 +48,44 @@ public:
 
         pipe.sync();
         int expectedSize = (mpiLayer.rank() == 0)? 9 : 0;
-        TS_ASSERT_EQUALS(pipe.steeringFeedback.size(), expectedSize);
-
+        TS_ASSERT_EQUALS(pipe.steeringFeedback.size(),           expectedSize);
+        TS_ASSERT_EQUALS(pipe.copySteeringFeedback().size(),     expectedSize);
         TS_ASSERT_EQUALS(pipe.retrieveSteeringFeedback().size(), expectedSize);
         TS_ASSERT_EQUALS(pipe.steeringFeedback.size(), 0);
+    }
+
+    class Runner
+    {
+    public:
+        Runner(Pipe *pipe) :
+            pipe(pipe)
+        {}
+
+        int operator()()
+        {
+            sleep(2);
+            pipe->addSteeringFeedback("bingobongo\n");
+            return 0;
+        }
+    private:
+        Pipe *pipe;
+    };
+
+    void testWaitForFeedback()
+    {
+        MPILayer mpiLayer;
+        Pipe pipe;
+
+        if (mpiLayer.rank() == 0) {
+            boost::thread myThread((Runner(&pipe)));
+            pipe.waitForFeedback();
+            StringVec actual = pipe.retrieveSteeringFeedback();
+            StringVec expected;
+            expected << "bingobongo\n";
+            TS_ASSERT_EQUALS(actual, expected);
+
+            myThread.join();
+        }
     }
 };
 

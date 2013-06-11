@@ -1,8 +1,9 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_PIPE_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_PIPE_H
 
-#include <boost/thread/locks.hpp>
+#include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/stringops.h>
@@ -45,8 +46,11 @@ public:
     void addSteeringFeedback(const std::string& feedback)
     {
         LOG(DEBUG, "Pipe::addSteeringFeedback(" << feedback << ")");
-        boost::lock_guard<boost::mutex> lock(mutex);
-        steeringFeedback << feedback;
+        {
+            boost::lock_guard<boost::mutex> lock(mutex);
+            steeringFeedback << feedback;
+        }
+        signal.notify_one();
     }
 
     StringVec retrieveSteeringRequests()
@@ -67,6 +71,14 @@ public:
         return feedback;
     }
 
+    StringVec copySteeringFeedback()
+    {
+        LOG(DEBUG, "Pipe::copySteeringFeedback()");
+        boost::lock_guard<boost::mutex> lock(mutex);
+        StringVec feedback = steeringFeedback;
+        return feedback;
+    }
+
     void sync()
     {
         LOG(DEBUG, "Pipe::sync()");
@@ -78,8 +90,19 @@ public:
 #endif
     }
 
+    void waitForFeedback()
+    {
+        LOG(DEBUG, "Pipe::waitForFeedback()");
+        boost::unique_lock<boost::mutex> lock(mutex);
+
+        while (steeringFeedback.size() == 0) {
+            signal.wait(lock);
+        }
+    }
+
 private:
     boost::mutex mutex;
+    boost::condition_variable signal;
     StringVec steeringRequests;
     StringVec steeringFeedback;
 
