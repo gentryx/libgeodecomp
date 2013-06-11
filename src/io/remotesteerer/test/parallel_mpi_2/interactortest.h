@@ -54,7 +54,7 @@ public:
             mpiLayer.barrier();
 
             // start the interactor and wait until it has sent its commands
-            Interactor<int> interactor("command blah\n", 1, true, port);
+            Interactor interactor("command blah\n", 1, true, port);
             interactor.waitForStartup();
 
             // check the results

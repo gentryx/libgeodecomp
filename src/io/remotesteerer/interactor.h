@@ -20,7 +20,6 @@ using boost::asio::ip::tcp;
  * for instance for writing unit tests where manually creating sockets
  * and syncing a thread is tedious.
  */
-template<typename CELL_TYPE>
 class Interactor
 {
 public:
@@ -43,7 +42,7 @@ public:
         // are set in advance. But this is crucial as otherwise the
         // results of the thread might be overwritten.
         if (threaded) {
-            thread = boost::thread(ThreadWrapper<Interactor<CELL_TYPE> >(this));
+            thread = boost::thread(ThreadWrapper<Interactor>(this));
         }
     }
 
