@@ -208,6 +208,19 @@ class MyFutureOpenCLStepper
                           hostGrid.getDimensions().y(),
                           hostGrid.getDimensions().z() };
 
+      kernel.setArg(0, cl_size);
+      kernel.setArg(1, cl_points);
+      kernel.setArg(2, cl_input);
+      kernel.setArg(3, cl_output);
+
+      cmdq.enqueueNDRangeKernel(kernel,
+                                cl::NullRange,
+                                cl::NDRange(points.size()),
+                                cl::NullRange
+                               );
+
+      cmdq.finish();
+
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
                 << get_error_description(error.err())
@@ -233,10 +246,6 @@ class MyFutureOpenCLStepper
     // // specified by kernel.
                               // , cl::NDRange ( workgroupSize )
                               // );
-
-    cmdq.enqueueTask(kernel);
-
-    cmdq.finish();
   }
 
   void regionToVec(const Region<DIM>& region, SuperVector<int> *coordsX, SuperVector<int> *coordsY, SuperVector<int> *coordsZ)
