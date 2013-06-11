@@ -1,6 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/remotesteerer/commandserver.h>
 
+using namespace LibGeoDecomp;
+using namespace LibGeoDecomp::RemoteSteererHelpers;
+
 namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {
