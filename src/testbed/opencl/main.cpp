@@ -228,6 +228,7 @@ class MyFutureOpenCLStepper
                 << std::endl
                 << "Build Log:" << std::endl
                 << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+      exit(EXIT_FAILURE);
     }
 
     // cmdq.enqueueNDRangeKernel(kernel, cl::NullRange
