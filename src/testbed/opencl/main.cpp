@@ -111,6 +111,7 @@ class MyFutureOpenCLStepper
 
     MyFutureOpenCLStepper(const CoordBox<DIM> box,
                           size_t platform_id, size_t device_id,
+                          const std::string & kernel_name,
                           const std::string & kernel_file) :
       box(box),
       hostGrid(box)
@@ -178,6 +179,7 @@ class MyFutureOpenCLStepper
     try {
       program.build(std::vector<cl::Device>(1, device));
 
+      cl::Kernel kernel(program, kernel_name.c_str());
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
                 << get_error_description(error.err())
@@ -186,8 +188,6 @@ class MyFutureOpenCLStepper
                 << "Build Log:" << std::endl
                 << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
     }
-
-    cl::Kernel kernel(program, "test");
 
     // cmdq.enqueueNDRangeKernel(kernel, cl::NullRange
     // // global:
@@ -241,9 +241,12 @@ class MyFutureOpenCLStepper
 int main(int argc, char **argv)
 {
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
-  if (argc == 4) {
-    MyFutureOpenCLStepper<Cell> stepper(box, strtol(argv[1], NULL, 10),
-                                        strtol(argv[2], NULL, 10), argv[3]);
+  if (argc == 5) {
+    MyFutureOpenCLStepper<Cell> stepper(box,
+                                        strtol(argv[1], NULL, 10),
+                                        strtol(argv[2], NULL, 10),
+                                        argv[3],
+                                        argv[4]);
   }
 
   return 0;
