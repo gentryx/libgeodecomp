@@ -173,7 +173,7 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
-# LIBDIRS is used to find source files and headers 
+# LIBDIRS is used to find source files and headers
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
