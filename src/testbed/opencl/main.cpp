@@ -137,19 +137,13 @@ class MyFutureOpenCLStepper
 
     cmdq = cl::CommandQueue(context, device);
 
-    std::vector<cl_int3> points;
-    for (auto & p : box) { points.push_back({ p.x(), p.y(), p.z() }); }
 
-    size_t offset  = 0;
-    size_t size    = hostGrid.getDimensions().prod() * sizeof(CELL);
-    cl_mem_flags flags    = CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR;
-    CELL * address        = hostGrid.baseAddress();
-    cl::Buffer cl_points;
+    size_t size = hostGrid.getDimensions().prod();
+    double * in_address = new double[size];
+
+    cl::Buffer cl_points, cl_input, cl_output;
 
     try {
-      deviceGridNew = cl::Buffer(context, flags, size, address);
-      deviceGridOld = cl::Buffer(context, flags, size, address);
-      cmdq.enqueueWriteBuffer(deviceGridNew, CL_TRUE, offset, size, address);
       cl_points = cl::Buffer(context,
                              CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                              points.size() * sizeof(cl_int3),
@@ -158,6 +152,14 @@ class MyFutureOpenCLStepper
       cmdq.enqueueWriteBuffer(cl_points, CL_TRUE, 0,
                               points.size(), points.data());
 
+      cl_input = cl::Buffer(context,
+                            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                            size * sizeof(double),
+                            in_address);
+
+      cmdq.enqueueWriteBuffer(cl_input, CL_TRUE, 0, size, in_address);
+
+      cl_output = cl::Buffer(context, CL_MEM_WRITE_ONLY, size);
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
