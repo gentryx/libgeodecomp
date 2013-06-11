@@ -52,9 +52,8 @@ std::ostream& operator<<(std::ostream& o, cl::Device d) {
     if (ecs & CL_EXEC_NATIVE_KERNEL) { o << ", CL_EXEC_NATIVE_KERNEL"; }
   o << "]" << std::endl;
 
-  o << "CL_DEVICE_MAX_WORK_ITEM_SIZES\t\t= ";
+  o << "CL_DEVICE_MAX_WORK_ITEM_SIZES\t\t= [";
   auto wiss = d.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
-  o << wiss.size() << ") [";
   for (auto wis = wiss.begin(); wis != wiss.end(); ) {
     o << *wis << (++wis != wiss.end() ? ", " : "");
   }
