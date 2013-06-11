@@ -1,4 +1,5 @@
 #include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_THREADS
 #ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_H
@@ -109,5 +110,6 @@ private:
 
 }
 
+#endif
 #endif
 #endif

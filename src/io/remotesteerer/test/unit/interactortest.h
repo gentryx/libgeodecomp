@@ -1,9 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/remotesteerer/interactor.h>
 
-using namespace LibGeoDecomp;
-using namespace LibGeoDecomp::RemoteSteererHelpers;
-
 namespace LibGeoDecomp {
 
 namespace RemoteSteererHelpers {
@@ -13,7 +10,6 @@ class InteractorTest : public CxxTest::TestSuite
 public:
     void testThreaded()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
         int port = 47111;
         StringVec expectedFeedback;
         expectedFeedback << "bingo bongo\n";
@@ -52,7 +48,6 @@ public:
         TS_ASSERT_EQUALS(tokens, expected);
         interactor.waitForCompletion();
         TS_ASSERT_EQUALS(interactor.feedback(), expectedFeedback);
-#endif
     }
 };
 

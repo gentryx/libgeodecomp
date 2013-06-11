@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/remotesteerer.h>
@@ -14,6 +15,7 @@ namespace LibGeoDecomp {
 class RemoteSteererTest : public CxxTest::TestSuite
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_THREADS
     class FlushAction : public Action<TestCell<2> >
     {
     public:
@@ -60,9 +62,11 @@ public:
         }
 
     };
+#endif
 
     void setUp()
     {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
         unsigned steererPeriod = 3;
         unsigned writerPeriod = 2;
         int port = 47112;
@@ -79,16 +83,19 @@ public:
         writer = new ParallelMemoryWriter<TestCell<2> >(writerPeriod);
         sim->addSteerer(steerer);
         sim->addWriter(writer);
+#endif
     }
 
     void tearDown()
     {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
         sim.reset();
+#endif
     }
 
     void testBasic()
     {
-        LOG(DEBUG, "bongoA " << MPILayer().rank() << ")");
+#ifdef LIBGEODECOMP_FEATURE_THREADS
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
             StringVec feedback = steerer->sendCommandWithFeedback("flush 1234 9", 1);
@@ -96,9 +103,7 @@ public:
             TS_ASSERT_EQUALS("flush received", feedback[0]);
         }
 
-        LOG(DEBUG, "bongoB " << MPILayer().rank() << ")");
         sim->run();
-        LOG(DEBUG, "bongoC " << MPILayer().rank() << ")");
 
         TS_ASSERT_EQUALS(writer->getGrids().size(), 16);
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(3, 3)].testValue, 64.0);
@@ -118,10 +123,12 @@ public:
 
         TS_ASSERT_EQUALS(writer->getGrid(10)[Coord<2>(3, 3)].testValue, 64.0 + 1234);
         TS_ASSERT_EQUALS(writer->getGrid(10)[Coord<2>(4, 3)].testValue, 65.0 + 1234);
+#endif
     }
 
     void testInvalidHandler()
     {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
         // boost::shared_ptr<SteeringInteractor> interactor;
 
         if (mpiLayer.rank() == 0) {
@@ -149,17 +156,21 @@ public:
         // std::cout << "sleeping\n";
         // sleep(10);
         // sim->run();
+#endif
     }
 
     void testGetSet()
     {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
         // std::cout << "sleeping\n";
         // sleep(10);
         // sim->run();
+#endif
     }
 
 
 private:
+#ifdef LIBGEODECOMP_FEATURE_THREADS
     MPILayer mpiLayer;
     boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
     RemoteSteerer<TestCell<2> > *steerer;
@@ -174,6 +185,7 @@ private:
     // fixme: fix cars example
     // fixme: fix gameoflive_life example
     // fixme: fix communicator handling in mpilayer
+#endif
 };
 
 }

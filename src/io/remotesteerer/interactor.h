@@ -1,5 +1,3 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_THREADS
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 
@@ -165,6 +163,5 @@ private:
 
 }
 
-#endif
 #endif
 
