@@ -122,7 +122,7 @@ public:
                         std::cout << c << " expected: " << expected << " actual: " << g[c] << "\n";
 
                     }
-                    // TS_ASSERT_EQUALS(expected, g[c]);
+                    TS_ASSERT_EQUALS(expected, g[c]);
                 }
             }
         }
