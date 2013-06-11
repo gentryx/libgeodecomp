@@ -177,13 +177,21 @@ class MyFutureOpenCLStepper
     kernel_source_code.append("enable");
     kernel_source_code.append("\n");
 
-    std::ifstream kernel_source_file(kernel_file.c_str());
+    try {
+      std::ifstream kernel_stream;
+      kernel_stream.exceptions(std::ios::failbit | std::ios::badbit);
+      kernel_stream.open(kernel_file.c_str());
 
-    kernel_source_code.append(std::string(
-        std::istreambuf_iterator<char>(kernel_source_file),
-        (std::istreambuf_iterator<char>())));
+      kernel_source_code.append(std::istreambuf_iterator<char>(kernel_stream),
+                                std::istreambuf_iterator<char>());
 
-    kernel_source_file.close();
+      kernel_stream.close();
+    } catch (std::exception & error) {
+      std::cerr << "Error while trying to access \""
+                << kernel_file << "\":" << std::endl
+                << error.what() << std::endl;
+      exit(EXIT_FAILURE);
+    }
 
     cl::Program::Sources kernel_sources(1,
         std::make_pair(kernel_source_code.c_str(),
