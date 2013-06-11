@@ -52,32 +52,36 @@ public:
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
             for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
-                // fixme: "extract method" refactoring for clarity
                 if (sender != receiver) {
-                    if (sender == mpiLayer.rank()) {
-                        mpiLayer.sendRegion(validRegion, receiver);
-                        mpiLayer.sendUnregisteredRegion(
-                            &grid,
-                            validRegion,
-                            receiver,
-                            MPILayer::PARALLEL_MEMORY_WRITER,
-                            Typemaps::lookup<CELL_TYPE>());
-                    }
-                    if (receiver == mpiLayer.rank()) {
-                        Region<DIM> recvRegion;
-                        mpiLayer.recvRegion(&recvRegion, sender);
-                        mpiLayer.recvUnregisteredRegion(
-                            &grids[step],
-                            recvRegion,
-                            sender,
-                            MPILayer::PARALLEL_MEMORY_WRITER,
-                            Typemaps::lookup<CELL_TYPE>());
-                    }
+                    sendRecvGrid(sender, receiver, grid, validRegion, step);
                 }
             }
         }
 
         mpiLayer.waitAll();
+    }
+
+    void sendRecvGrid(int sender, int receiver, const WriterGridType& grid, const Region<DIM>& validRegion, int step)
+    {
+        if (sender == mpiLayer.rank()) {
+            mpiLayer.sendRegion(validRegion, receiver);
+            mpiLayer.sendUnregisteredRegion(
+                &grid,
+                validRegion,
+                receiver,
+                MPILayer::PARALLEL_MEMORY_WRITER,
+                Typemaps::lookup<CELL_TYPE>());
+        }
+        if (receiver == mpiLayer.rank()) {
+            Region<DIM> recvRegion;
+            mpiLayer.recvRegion(&recvRegion, sender);
+            mpiLayer.recvUnregisteredRegion(
+                &grids[step],
+                recvRegion,
+                sender,
+                MPILayer::PARALLEL_MEMORY_WRITER,
+                Typemaps::lookup<CELL_TYPE>());
+        }
     }
 
     GridType& getGrid(int i)

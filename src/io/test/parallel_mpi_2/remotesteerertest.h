@@ -184,7 +184,6 @@ private:
     // fixme: test set/get
     // fixme: test remotesteerer with 1 proc
     // fixme: add help function
-    // fixme: fix stuff in parallememorywriter
     // fixme: refactor steerer interface
     // fixme: fix cars example
     // fixme: fix gameoflive_life example
