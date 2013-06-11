@@ -137,17 +137,27 @@ class MyFutureOpenCLStepper
 
     cmdq = cl::CommandQueue(context, device);
 
-    // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
+    std::vector<cl_int3> points;
+    for (auto & p : box) { points.push_back({ p.x(), p.y(), p.z() }); }
 
     size_t offset  = 0;
     size_t size    = hostGrid.getDimensions().prod() * sizeof(CELL);
     cl_mem_flags flags    = CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR;
     CELL * address        = hostGrid.baseAddress();
+    cl::Buffer cl_points;
 
     try {
       deviceGridNew = cl::Buffer(context, flags, size, address);
       deviceGridOld = cl::Buffer(context, flags, size, address);
       cmdq.enqueueWriteBuffer(deviceGridNew, CL_TRUE, offset, size, address);
+      cl_points = cl::Buffer(context,
+                             CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                             points.size() * sizeof(cl_int3),
+                             points.data());
+
+      cmdq.enqueueWriteBuffer(cl_points, CL_TRUE, 0,
+                              points.size(), points.data());
+
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
