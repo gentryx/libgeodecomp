@@ -92,6 +92,21 @@ public:
         {}
     };
 
+    class WaitAction : public Action<CELL_TYPE>
+    {
+    public:
+        WaitAction() :
+            Action<CELL_TYPE>("wait", "usage: \"wait\", will wait until feedback from the simulation has been received")
+        {}
+
+        void operator()(const StringVec& parameters, Pipe& pipe)
+        {
+            std::cout << "WaitAction is waiting for feedback\n";
+            pipe.waitForFeedback();
+            std::cout << "WaitAction got feedback\n";
+        }
+    };
+
     CommandServer(
         int port,
         boost::shared_ptr<Pipe> pipe) :
@@ -102,6 +117,7 @@ public:
         addAction(new QuitAction(&continueFlag));
         addAction(new SetAction);
         addAction(new GetAction);
+        addAction(new WaitAction);
 
         // The thread may take a while to start up. We need to wait
         // here so we don't try to clean up in the d-tor before the
@@ -292,7 +308,7 @@ private:
             continueFlag = true;
 
             while (continueFlag) {
-                LOG(DEBUG, "CommandServer waiting for new connection");
+                LOG(DEBUG, "CommandServer: waiting for new connection");
                 socket.reset(new tcp::socket(ioService));
                 acceptor->accept(*socket, errorCode);
 
@@ -301,6 +317,7 @@ private:
                 } else {
                     LOG(INFO, "CommandServer: client connected");
                     runSession();
+                    LOG(INFO, "CommandServer: client disconnected");
                 }
             }
         }

@@ -68,15 +68,17 @@ public:
             StringVec parameters = StringOps::tokenize(*i, " ");
             std::string command = parameters.pop_front();
 
-            if (handlers.count(command) > 0) {
-                int handled = (*handlers[command])(parameters, *pipe, grid, validRegion, step);
-                if (!handled) {
-                    pipe->addSteeringRequest(*i);
-                } else {
-                    std::string message = "handler not found: " + command;
-                    LOG(Logger::WARN, message);
-                    pipe->addSteeringFeedback(message);
-                }
+            if (handlers.count(command) == 0) {
+                std::string message = "handler not found: " + command;
+                LOG(Logger::WARN, message);
+                pipe->addSteeringFeedback(message);
+                continue;
+            }
+
+            int handled = (*handlers[command])(parameters, *pipe, grid, validRegion, step);
+            // we may have to requeue requrests which could not yet be handled
+            if (!handled) {
+                pipe->addSteeringRequest(*i);
             }
         }
     }

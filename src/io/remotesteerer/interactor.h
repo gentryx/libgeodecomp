@@ -1,7 +1,6 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 
-
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
@@ -118,6 +117,7 @@ private:
             std::istream lineBuf(&buf);
             std::string line(length, 'X');
             lineBuf.read(&line[0], length);
+            line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
             feedbackBuffer << line;
         }
 
@@ -163,4 +163,3 @@ private:
 }
 
 #endif
-

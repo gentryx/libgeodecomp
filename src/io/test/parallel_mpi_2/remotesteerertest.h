@@ -4,6 +4,7 @@
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/remotesteerer/interactor.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
@@ -11,6 +12,7 @@
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
+
 
 class RemoteSteererTest : public CxxTest::TestSuite
 {
@@ -69,7 +71,7 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_THREADS
         unsigned steererPeriod = 3;
         unsigned writerPeriod = 2;
-        int port = 47112;
+        port = 47112;
         int maxSteps = 30;
 
         sim.reset(new StripingSimulator<TestCell<2> >(
@@ -126,36 +128,39 @@ public:
 #endif
     }
 
+    void testNonExistentAction()
+    {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
+        if (mpiLayer.rank() == 0) {
+            StringVec res;
+            res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 1);
+
+            TS_ASSERT_EQUALS(res.size(), 1);
+            TS_ASSERT_EQUALS(res[0], "command not found: nonExistentAction");
+        }
+#endif
+    }
+
     void testInvalidHandler()
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
-        // boost::shared_ptr<SteeringInteractor> interactor;
+        boost::shared_ptr<Interactor> interactor;
 
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("nonExistentHandler", "blah"));
-            StringVec res;
-
-            // interactor.reset(new SteeringInteractor);
-            // Wrapper<SteeringInteractor> wrapper(interactor);
-            // boost::thread interactorThread(wrapper);
-            // interactor->waitForStartup();
-            // std::cout << "waiting for join\n";
-            // interactorThread.join();
-            // std::cout << "party on, wayne!\n";
-
-            // res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 1);
-            // TS_ASSERT_EQUALS(res.size(), 1);
-            // TS_ASSERT_EQUALS(res[0], "command not found: nonExistentAction\n");
-            // std::cout << "sending nonexistendhandler\n";
-            // res = steerer->sendCommandWithFeedback("nonExistentHandler 1 2 3", 1);
-            // std::cout << "blah\n";
-            // TS_ASSERT_EQUALS(res.size(), 1);
-            // TS_ASSERT_EQUALS(res[0], "handler not found: nonExistentHandler\n");
+            interactor.reset(new Interactor("nonExistentHandler bongo\nwait\n", 1, true, port));
+            interactor->waitForStartup();
         }
 
-        // std::cout << "sleeping\n";
-        // sleep(10);
-        // sim->run();
+        sim->run();
+
+        if (mpiLayer.rank() == 0) {
+            interactor->waitForCompletion();
+            StringVec expected;
+            expected << "handler not found: nonExistentHandler";
+
+            TS_ASSERT_EQUALS(interactor->feedback(), expected);
+        }
 #endif
     }
 
@@ -175,6 +180,7 @@ private:
     boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
     RemoteSteerer<TestCell<2> > *steerer;
     ParallelMemoryWriter<TestCell<2> > *writer;
+    int port;
     // fixme: test set/get
     // fixme: test remotesteerer with 1 proc
     // fixme: add help function
@@ -185,6 +191,7 @@ private:
     // fixme: fix cars example
     // fixme: fix gameoflive_life example
     // fixme: fix communicator handling in mpilayer
+    // fixme: test requeueing of unhandled requests
 #endif
 };
 

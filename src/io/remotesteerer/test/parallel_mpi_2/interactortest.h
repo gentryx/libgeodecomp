@@ -17,7 +17,7 @@ public:
         MPILayer mpiLayer;
         int port = 47111;
         StringVec expectedFeedback;
-        expectedFeedback << "bingo bongo\n";
+        expectedFeedback << "bingo bongo";
 
         if (mpiLayer.rank() == 0) {
             // listen on port "port"
@@ -40,7 +40,7 @@ public:
             // write back some feedback
             boost::asio::write(
                 socket,
-                boost::asio::buffer(expectedFeedback[0]),
+                boost::asio::buffer("bingo bongo\n"),
                 boost::asio::transfer_all(),
                 errorCode);
 
