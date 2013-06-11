@@ -203,6 +203,11 @@ class MyFutureOpenCLStepper
       program.build(std::vector<cl::Device>(1, device));
 
       cl::Kernel kernel(program, kernel_name.c_str());
+
+      cl_int3 cl_size = { hostGrid.getDimensions().x(),
+                          hostGrid.getDimensions().y(),
+                          hostGrid.getDimensions().z() };
+
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
                 << get_error_description(error.err())
