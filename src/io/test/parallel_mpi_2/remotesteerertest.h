@@ -184,8 +184,6 @@ private:
     // fixme: test set/get
     // fixme: test remotesteerer with 1 proc
     // fixme: add help function
-    // fixme: move stringvec to dedicated class
-    // fixme: test unknown handler
     // fixme: fix stuff in parallememorywriter
     // fixme: refactor steerer interface
     // fixme: fix cars example
