@@ -141,6 +141,8 @@ class MyFutureOpenCLStepper
     size_t size = hostGrid.getDimensions().prod();
     double * in_address = new double[size];
 
+    for (int i = 0; i < size; ++i) { in_address[i] = i; }
+
     cl::Buffer cl_points, cl_input, cl_output;
 
     try {
