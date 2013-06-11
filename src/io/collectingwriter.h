@@ -58,7 +58,7 @@ public:
                 globalGrid.resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
             }
 
-            globalGrid.pasteGridBase(grid, validRegion);
+            globalGrid.paste(grid, validRegion);
             globalGrid.atEdge() = grid.atEdge();
         }
 
@@ -69,20 +69,20 @@ public:
                     Region<DIM> recvRegion;
                     mpiLayer.recvRegion(&recvRegion, sender);
                     mpiLayer.recvUnregisteredRegion(
-                        &globalGrid, 
-                        recvRegion, 
-                        sender, 
-                        MPILayer::PARALLEL_MEMORY_WRITER, 
-                        datatype);                    
+                        &globalGrid,
+                        recvRegion,
+                        sender,
+                        MPILayer::PARALLEL_MEMORY_WRITER,
+                        datatype);
                 }
                 if (mpiLayer.rank() == sender) {
                     if (sender == mpiLayer.rank()) {
                         mpiLayer.sendRegion(validRegion, root);
                         mpiLayer.sendUnregisteredRegion(
-                            &grid, 
-                            validRegion, 
-                            root, 
-                            MPILayer::PARALLEL_MEMORY_WRITER, 
+                            &grid,
+                            validRegion,
+                            root,
+                            MPILayer::PARALLEL_MEMORY_WRITER,
                             datatype);
                     }
                 }
@@ -100,7 +100,7 @@ private:
     boost::shared_ptr<Writer<CELL_TYPE> > writer;
     MPILayer mpiLayer;
     int root;
-    StorageGridType globalGrid;    
+    StorageGridType globalGrid;
     MPI::Datatype datatype;
 };
 

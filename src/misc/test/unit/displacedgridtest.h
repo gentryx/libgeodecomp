@@ -1,14 +1,14 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
 class DisplacedGridTest : public CxxTest::TestSuite
 {
 public:
-    
+
     void testBox()
     {
         CoordBox<2> rect(Coord<2>(10, 11), Coord<2>(12, 13));
@@ -51,7 +51,7 @@ public:
             TS_ASSERT_EQUALS(47.11, target[*i]);
         }
 
-        target2.pasteGridBase(target, outerRing);
+        target2.paste(target, outerRing);
 
         for (Region<2>::Iterator i = outerRing.begin(); i != outerRing.end(); ++i) {
             TS_ASSERT_EQUALS(-1.23, target2[*i]);
@@ -71,7 +71,7 @@ public:
                 grid[Coord<2>(x + 10, y + 20)] = x * 10 + y;
             }
         }
-        
+
         grid.setOrigin(Coord<2>(0, 50));
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 2; ++x) {
@@ -117,7 +117,7 @@ public:
                     if (insert.inBounds(c)) {
                         expected = 2;
                     }
-                
+
                     if (expected != g[c]) {
                         std::cout << c << " expected: " << expected << " actual: " << g[c] << "\n";
 
@@ -152,13 +152,13 @@ public:
          */
 
         DisplacedGrid<int, Topologies::Torus<2>::Topology, true> grid(
-            CoordBox<2>(Coord<2>(-3, -2), 
-                        Coord<2>(8, 6)), 
+            CoordBox<2>(Coord<2>(-3, -2),
+                        Coord<2>(8, 6)),
             -2,
             -2,
             Coord<2>(15, 10));
 
-        for (int y = -2; y < 4; ++y) 
+        for (int y = -2; y < 4; ++y)
             for (int x = -3; x < 5; ++x)
                 grid[Coord<2>(x, y)] = (y+3) * 10 + (x+3);
 

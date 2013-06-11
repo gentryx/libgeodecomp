@@ -47,8 +47,7 @@ public:
             grids[step].resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
         }
 
-        // fixme: can't we just use paste() here and delete pasteGridBase from DisplacedGrid entirely?
-        grids[step].pasteGridBase(grid, validRegion);
+        grids[step].paste(grid, validRegion);
         grids[step].atEdge() = grid.atEdge();
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {

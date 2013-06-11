@@ -130,20 +130,11 @@ public:
         delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
     }
 
-    template<typename GRID_TYPE>
-    inline void paste(const GRID_TYPE& grid, const Region<DIM>& region)
-    {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            const CELL_TYPE *start = &grid[i->origin];
-            std::copy(start, start + i->length(), &(*this)[i->origin]);
-        }
-    }
-
-    inline void pasteGridBase(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
+    inline void paste(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             const CELL_TYPE *start = &grid.at(i->origin);
-            std::copy(start, start + i->length(), &(*this)[i->origin]);
+            std::copy(start, start + i->length(), &at(i->origin));
         }
     }
 
