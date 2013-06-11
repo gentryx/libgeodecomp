@@ -168,6 +168,7 @@ class MyFutureOpenCLStepper
                 << get_error_description(error.err())
                 << " (" << error.err() << ")"
                 << std::endl;
+      exit(EXIT_FAILURE);
     }
 
     // std::string kernel_source_code("#pragma OPENCL EXTENSION cl_intel_printf:");
