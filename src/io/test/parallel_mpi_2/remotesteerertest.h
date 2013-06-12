@@ -2,12 +2,14 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
+#ifdef LIBGEODECOMP_FEATURE_THREADS
 #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/remotesteerer/interactor.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+#endif
 
 using namespace LibGeoDecomp;
 
