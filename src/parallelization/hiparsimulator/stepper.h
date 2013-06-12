@@ -5,12 +5,11 @@
 #include <deque>
 
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
-#include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/typetraits.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
