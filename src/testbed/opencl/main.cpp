@@ -117,6 +117,7 @@ class MyFutureOpenCLStepper {
     const static int DIM = Topology::DIM;
 
     MyFutureOpenCLStepper(const CoordBox<DIM> box,
+                          size_t num_neighbors, size_t num_updates,
                           size_t platform_id, size_t device_id,
                           const std::string & kernel_name,
                           const std::string & kernel_file) :
@@ -287,11 +288,15 @@ int main(int argc, char **argv)
 {
   auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
   if (argc == 5) {
-    MyFutureOpenCLStepper<Cell> stepper(box,
-                                        strtol(argv[1], NULL, 10),
-                                        strtol(argv[2], NULL, 10),
-                                        argv[3],
-                                        argv[4]);
+    // coordbox,
+    // num_neighbors, num_updates,
+    // platform_id, device_id,
+    // user_code_kernel_name, user_code_file
+    MyFutureOpenCLStepper<DummyCell> stepper(box, 1, 1,
+                                             strtol(argv[1], NULL, 10),
+                                             strtol(argv[2], NULL, 10),
+                                             argv[3],
+                                             argv[4]);
   }
 
   return 0;
