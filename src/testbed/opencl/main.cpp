@@ -141,6 +141,13 @@ class MyFutureOpenCLStepper {
     coords.indices_size = hostGrid.getDimensions().prod()
                         * (1 + 2 * num_neighbors);
 
+    std::vector<cl_int3> points;
+    for (auto & p : box) { points.push_back({ p.x(), p.y() }); }
+
+    size_t size = hostGrid.getDimensions().prod();
+    double * input = new double[size];
+    for (int i = 0; i < size; ++i) { input[i] = i; }
+
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
@@ -162,14 +169,6 @@ class MyFutureOpenCLStepper {
 
     cmdq = cl::CommandQueue(context, device);
 
-    std::vector<cl_int3> points;
-    for (auto & p : box) { points.push_back({ p.x(), p.y() }); }
-
-    size_t size = hostGrid.getDimensions().prod();
-    double * in_address = new double[size];
-
-    for (int i = 0; i < size; ++i) { in_address[i] = i; }
-
     cl::Buffer cl_coords, cl_points, cl_indices, cl_input, cl_output;
 
     try {
@@ -190,7 +189,7 @@ class MyFutureOpenCLStepper {
       cl_input = cl::Buffer(context,
                             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                             size * sizeof(double),
-                            in_address);
+                            input);
 
 
       cl_output = cl::Buffer(context, CL_MEM_READ_WRITE, size * sizeof(double));
