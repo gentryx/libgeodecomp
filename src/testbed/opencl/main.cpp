@@ -99,9 +99,16 @@ class Cell
     double temp;
 };
 
+class DummyCell {
+  public:
+    typedef Topologies::Cube<2>::Topology Topology;
+    static inline unsigned nanoSteps() { return 1; }
+    template<typename COORD_MAP>
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+};
+
 template<typename CELL>
-class MyFutureOpenCLStepper
-{
+class MyFutureOpenCLStepper {
   public:
     const static int DIM = CELL::Topology::DIM;
 
