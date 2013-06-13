@@ -10,9 +10,9 @@
 using namespace LibGeoDecomp;
 
 typedef struct {
-  cl_int    num_neighbors;
+  cl_int    num_points;
+  cl_int    neighbors_per_point;
   cl_int3   points_size;
-  cl_int    indices_size;
   cl_int3 * points;
   cl_int  * indices;
 } coords_ctx;
@@ -133,13 +133,13 @@ class MyFutureOpenCLStepper {
       hostGrid(box)
   {
     coords_ctx coords;
-    coords.points_size = { hostGrid.getDimensions().x(),
-                           hostGrid.getDimensions().y() };
 
-    coords.num_neighbors = num_neighbors;
-    // 1 * ^= all points; 2 ^= +n, -n
-    coords.indices_size = hostGrid.getDimensions().prod()
-                        * (1 + 2 * num_neighbors);
+    coords.num_points = hostGrid.getDimensions().prod();
+    coords.neighbors_per_point = num_neighbors;
+    coords.points_size = { hostGrid.getDimensions().x(),
+                           hostGrid.getDimensions().y(),
+                           0 };
+                           // hostGrid.getDimensions().z() };
 
     std::vector<cl_int3> points;
     for (auto & p : box) { points.push_back({ p.x(), p.y() }); }
