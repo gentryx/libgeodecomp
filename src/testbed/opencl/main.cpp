@@ -208,6 +208,7 @@ class MyFutureOpenCLStepper {
     pre_code_txt.append("enable");
     pre_code_txt.append("\n");
 
+    std::string init_code_txt(pre_code_txt);
     std::string user_code_txt(pre_code_txt);
 
     try {
@@ -221,13 +222,18 @@ class MyFutureOpenCLStepper {
       kernel_stream.close();
 
       user_code_txt.append(coords_ctx_txt);
+      init_code_txt.append(coords_ctx_txt);
 
       kernel_stream.open(user_code_file.c_str());
       user_code_txt.append(std::istreambuf_iterator<char>(kernel_stream),
                                 std::istreambuf_iterator<char>());
       kernel_stream.close();
 
+      kernel_stream.open(init_code_file);
+      init_code_txt.append(std::istreambuf_iterator<char>(kernel_stream),
+                              std::istreambuf_iterator<char>());
       kernel_stream.close();
+
     } catch (std::exception & error) {
       std::cerr << "Error while trying to access \""
                 << user_code_file << "\":" << std::endl
@@ -235,17 +241,34 @@ class MyFutureOpenCLStepper {
       exit(EXIT_FAILURE);
     }
 
+    cl::Program init_code_program(context,
+        { std::make_pair(init_code_txt.c_str(), init_code_txt.length() + 1) });
 
     cl::Program user_code_program(context,
         { std::make_pair(user_code_txt.c_str(), user_code_txt.length() + 1) });
 
     try {
+      init_code_program.build(std::vector<cl::Device>(1, device));
       user_code_program.build(std::vector<cl::Device>(1, device));
 
+      cl::Kernel mem_hook_up_kernel(init_code_program, "mem_hook_up");
+      cl::Kernel compute_boundaries_kernel(init_code_program,
+                                           "compute_boundaries");
       cl::Kernel user_code_kernel(user_code_program,
                                   user_code_kernel_name.c_str());
 
+      int arg_counter = 0;
+      mem_hook_up_kernel.setArg(arg_counter++, cl_coords);
+      mem_hook_up_kernel.setArg(arg_counter++, cl_points);
+      mem_hook_up_kernel.setArg(arg_counter++, cl_indices);
+      cmdq.enqueueTask(mem_hook_up_kernel);
 
+      arg_counter = 0;
+      compute_boundaries_kernel.setArg(arg_counter++, cl_coords);
+      cmdq.enqueueNDRangeKernel(compute_boundaries_kernel,
+                                cl::NullRange,
+                                cl::NDRange(points.size()),
+                                cl::NullRange);
       cl_int3 cl_size = { hostGrid.getDimensions().x(),
                           hostGrid.getDimensions().y(),
                           hostGrid.getDimensions().z() };
@@ -269,7 +292,9 @@ class MyFutureOpenCLStepper {
                 << " (" << error.err() << ")"
                 << std::endl
                 << "Build Log for user code:" << std::endl
-                << user_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+                << user_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)
+                << "Build Log for init code:" << std::endl
+                << init_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
       exit(EXIT_FAILURE);
     }
 
@@ -312,6 +337,7 @@ class MyFutureOpenCLStepper {
     CoordBox<DIM> box;
     GridType hostGrid;
 
+    const std::string init_code_file = "./init_code.cl";
     const std::string coords_ctx_file = "./coords_ctx.cl";
 
     cl::Context context;
