@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_initializer_h_
-#define _libgeodecomp_io_initializer_h_
+#ifndef LIBGEODECOMP_IO_INITIALIZER_H
+#define LIBGEODECOMP_IO_INITIALIZER_H
 
 #include <libgeodecomp/misc/gridbase.h>
 
@@ -11,22 +11,22 @@ template<typename CELL>
 class Initializer
 {
 public:
-    static const int DIMENSIONS = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
 
     /**
      * initializes all cells of the grid at @a target 
      */
-    virtual void grid(GridBase<CELL, CELL::Topology::DIMENSIONS> *target) =0;
+    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target) =0;
 
     virtual ~Initializer() 
     {}
 
-    virtual CoordBox<DIMENSIONS> gridBox()
+    virtual CoordBox<DIM> gridBox()
     {
-        return CoordBox<DIMENSIONS>(Coord<DIMENSIONS>(), gridDimensions());
+        return CoordBox<DIM>(Coord<DIM>(), gridDimensions());
     }
 
-    virtual Coord<DIMENSIONS> gridDimensions() const = 0;
+    virtual Coord<DIM> gridDimensions() const = 0;
     virtual unsigned maxSteps() const = 0;
     virtual unsigned startStep() const = 0;
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_testinitializer_h_
-#define _libgeodecomp_io_testinitializer_h_
+#ifndef LIBGEODECOMP_IO_TESTINITIALIZER_H
+#define LIBGEODECOMP_IO_TESTINITIALIZER_H
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -61,22 +61,25 @@ public:
         ret->atEdge().isEdgeCell = true;
     }
 
-    Coord<DIM> gridDimensions() const 
-    { 
-        return dimensions; 
+    Coord<DIM> gridDimensions() const
+    {
+        return dimensions;
     }
 
-    unsigned maxSteps() const 
-    { 
-        return maximumSteps; 
+    unsigned maxSteps() const
+    {
+        return maximumSteps;
     }
 
-    unsigned startStep() const 
-    { 
-        return step1; 
+    unsigned startStep() const
+    {
+        return step1;
     }
 
-    std::string dump() { return "foo"; }    
+    std::string dump()
+    {
+        return "foo";
+    }
 
 private:
     Coord<DIM> dimensions;

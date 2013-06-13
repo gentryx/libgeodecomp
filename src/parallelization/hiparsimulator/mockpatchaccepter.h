@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_mockpatchaccepter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_mockpatchaccepter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MOCKPATCHACCEPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_MOCKPATCHACCEPTER_H
 
 #include <deque>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
@@ -15,14 +15,14 @@ public:
     const static int DIM = GRID_TYPE::DIM;
 
     virtual void put(
-        const GRID_TYPE& /*grid*/, 
-        const Region<DIM>& /*validRegion*/, 
-        const long& nanoStep) 
+        const GRID_TYPE& /*grid*/,
+        const Region<DIM>& /*validRegion*/,
+        const long& nanoStep)
     {
         offeredNanoSteps.push_back(nanoStep);
         requestedNanoSteps.pop_front();
     }
-    
+
     virtual long nextRequiredNanoStep() const
     {
         if (requestedNanoSteps.empty()) {

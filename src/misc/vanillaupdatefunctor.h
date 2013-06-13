@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_vanillaupdatefunctor_h_
-#define _libgeodecomp_misc_vanillaupdatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_VANILLAUPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_VANILLAUPDATEFUNCTOR_H
 
 namespace LibGeoDecomp {
 
@@ -12,7 +12,7 @@ template<typename CELL>
 class VanillaUpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
 
     template<typename GRID1, typename GRID2>
     void operator()(

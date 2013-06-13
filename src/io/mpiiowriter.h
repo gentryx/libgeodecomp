@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_mpiiowriter_h_
-#define _libgeodecomp_io_mpiiowriter_h_
+#ifndef LIBGEODECOMP_IO_MPIIOWRITER_H
+#define LIBGEODECOMP_IO_MPIIOWRITER_H
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/writer.h>
@@ -11,18 +11,18 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
 class MPIIOWriter : public Writer<CELL_TYPE>
-{    
+{
 public:
     friend class MPIIOWriterTest;
     friend class MPIIOInitializerTest;
 
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     MPIIOWriter(
         const std::string& prefix,
-        const unsigned period, 
+        const unsigned period,
         const unsigned maxSteps,
         const MPI::Intracomm& communicator = MPI::COMM_WORLD,
         MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
@@ -32,7 +32,7 @@ public:
         datatype(mpiDatatype)
     {}
 
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
@@ -40,9 +40,9 @@ public:
 
         Region<DIM> region;
         region << grid.boundingBox();
-        
+
         MPIIO<CELL_TYPE>::writeRegion(
-            grid, 
+            grid,
             grid.getDimensions(),
             step,
             maxSteps,
@@ -59,7 +59,7 @@ private:
     MPI::Intracomm comm;
     MPI::Datatype datatype;
 
-    std::string filename(const unsigned& step) const 
+    std::string filename(const unsigned& step) const
     {
         std::ostringstream buf;
         buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";

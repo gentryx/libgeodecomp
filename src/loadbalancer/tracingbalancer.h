@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_loadbalancer_tracingbalancer_h_
-#define _libgeodecomp_loadbalancer_tracingbalancer_h_
+#ifndef LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
+#define LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 
 #include <iostream>
 #include <boost/shared_ptr.hpp>

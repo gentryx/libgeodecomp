@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testcell_h_
-#define _libgeodecomp_misc_testcell_h_
+#ifndef LIBGEODECOMP_MISC_TESTCELL_H
+#define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
 #include <libgeodecomp/misc/cellapitraits.h>
@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
 namespace TestCellHelpers {
 
 template<int DIM>
-class MyTopology
+class TopologyType
 {
 public:
     typedef typename Topologies::Cube<DIM>::Topology Topology;
@@ -21,7 +21,7 @@ public:
 
 // make the 3D TestCell use a torus topology for a change...
 template<>
-class MyTopology<3>
+class TopologyType<3>
 {
 public:
     typedef Topologies::Torus<3>::Topology Topology;
@@ -66,9 +66,9 @@ public:
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
-template<int DIM, 
-         class STENCIL=Stencils::Moore<DIM, 1>, 
-         class TOPOLOGY=typename TestCellHelpers::MyTopology<DIM>::Topology, 
+template<int DIM,
+         class STENCIL=Stencils::Moore<DIM, 1>,
+         class TOPOLOGY=typename TestCellHelpers::TopologyType<DIM>::Topology,
          class OUTPUT=TestCellHelpers::StdOutput>
 class TestCell
 {
@@ -82,9 +82,9 @@ public:
     typedef TOPOLOGY Topology;
     static const int DIMENSIONS = DIM;
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 27; 
+    static inline unsigned nanoSteps()
+    {
+        return 27;
     }
 
     Coord<DIM> pos;
@@ -100,33 +100,34 @@ public:
     }
 
     TestCell() :
-        cycleCounter(0), 
+        cycleCounter(0),
         isEdgeCell(false),
         isValid(false),
         testValue(defaultValue())
     {}
 
     TestCell(
-        const Coord<DIM>& _pos, 
-        const Coord<DIM>& _gridDim,
-        const unsigned& _cycleCounter = 0,
-        const double& _testValue = defaultValue()) :
-        pos(_pos), 
-        dimensions(Coord<DIM>(), _gridDim),
-        cycleCounter(_cycleCounter), 
+        const Coord<DIM>& pos,
+        const Coord<DIM>& gridDim,
+        const unsigned& cycleCounter = 0,
+        const double& testValue = defaultValue()) :
+        pos(pos),
+        dimensions(Coord<DIM>(), gridDim),
+        cycleCounter(cycleCounter),
         isValid(true),
-        testValue(_testValue)
+        testValue(testValue)
     {
         isEdgeCell = !inBounds(pos);
     }
 
-    const bool& valid() const { return isValid; }    
+    const bool& valid() const
+    {
+        return isValid;
+    }
 
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, Topology>()(
-                c, dimensions.dimensions);
+        return !Topology::isOutOfBounds(c, dimensions.dimensions);
     }
 
     bool operator==(const TestCell& other) const
@@ -135,8 +136,8 @@ public:
             && (dimensions == other.dimensions)
             && (cycleCounter == other.cycleCounter)
             && (isEdgeCell == other.isEdgeCell)
-            && (isValid == other.isValid)            
-            && (testValue == other.testValue);            
+            && (isValid == other.isValid)
+            && (testValue == other.testValue);
     }
 
     bool operator!=(const TestCell& other) const
@@ -145,7 +146,7 @@ public:
     }
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) 
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
     {
         // initialize Cell by copying from previous state
         *this = neighborhood[FixedCoord<0, 0, 0>()];
@@ -159,9 +160,9 @@ public:
         Stencils::Repeat<STENCIL::VOLUME,
                          TestCellHelpers::CheckNeighbor,
                          STENCIL>()(&isValid, this, neighborhood);
-    
+
         if (nanoStep >= nanoSteps()) {
-            OUTPUT() << "TestCell error: nanoStep too large: " 
+            OUTPUT() << "TestCell error: nanoStep too large: "
                      << nanoStep << "\n";
             isValid = false;
             return;
@@ -169,8 +170,8 @@ public:
 
         unsigned expectedNanoStep = cycleCounter % nanoSteps();
         if (nanoStep != expectedNanoStep) {
-            OUTPUT() << "TestCell error: nanoStep out of sync. got " 
-                     << nanoStep << " but expected " 
+            OUTPUT() << "TestCell error: nanoStep out of sync. got "
+                     << nanoStep << " but expected "
                      << expectedNanoStep << "\n";
             isValid = false;
             return;
@@ -195,44 +196,44 @@ public:
     // returns true if valid neighbor is found (at the right place, in
     // the same cycle etc.)
     bool checkNeighbor(
-        const TestCell& other, 
+        const TestCell& other,
         const Coord<DIM>& relativeLoc) const
     {
         if (!other.isValid) {
             OUTPUT() << "Update Error for " << toString() << ":\n"
-                     << "Invalid Neighbor at " << relativeLoc << ":\n" 
+                     << "Invalid Neighbor at " << relativeLoc << ":\n"
                      << other.toString()
                      << "--------------" << "\n";
             return false;
         }
         bool otherShouldBeEdge = !inBounds(pos + relativeLoc);
         if (other.isEdgeCell != otherShouldBeEdge) {
-            OUTPUT() << "TestCell error: bad edge cell (expected: " 
-                     << otherShouldBeEdge << ", is: " 
-                     << other.isEdgeCell << " at relative coord " 
+            OUTPUT() << "TestCell error: bad edge cell (expected: "
+                     << otherShouldBeEdge << ", is: "
+                     << other.isEdgeCell << " at relative coord "
                      << relativeLoc << ")\n";
             return false;
-        }        
+        }
         if (!otherShouldBeEdge) {
             if (other.cycleCounter != cycleCounter) {
-                OUTPUT() << "Update Error for TestCell " 
+                OUTPUT() << "Update Error for TestCell "
                          << toString() << ":\n"
-                         << "cycle counter out of sync with neighbor " 
+                         << "cycle counter out of sync with neighbor "
                          << other.toString() << "\n";
                 return false;
             }
             if (other.dimensions != dimensions) {
-                OUTPUT() << "TestCell error: grid dimensions differ. Expected: " 
+                OUTPUT() << "TestCell error: grid dimensions differ. Expected: "
                          << dimensions << ", but got " << other.dimensions << "\n";
                 return false;
             }
 
             Coord<DIM> rawPos = pos + relativeLoc;
-            Coord<DIM> expectedPos = 
+            Coord<DIM> expectedPos =
                 Topology::normalize(rawPos, dimensions.dimensions);
 
             if (other.pos != expectedPos) {
-                OUTPUT() << "TestCell error: other position " 
+                OUTPUT() << "TestCell error: other position "
                          << other.pos
                          << " doesn't match expected "
                          << expectedPos << "\n";
@@ -244,7 +245,7 @@ public:
 
     template<int X, int Y, int Z>
     bool checkNeighbor(
-        const TestCell& other, 
+        const TestCell& other,
         FixedCoord<X, Y, Z> coord) const
     {
         return checkNeighbor(other, Coord<DIM>(coord));

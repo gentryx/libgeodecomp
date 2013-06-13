@@ -1,10 +1,10 @@
-#ifndef _libgeodecomp_misc_floatcoordbase_h_
-#define _libgeodecomp_misc_floatcoordbase_h_
+#ifndef LIBGEODECOMP_MISC_FLOATCOORDBASE_H
+#define LIBGEODECOMP_MISC_FLOATCOORDBASE_H
 
 namespace LibGeoDecomp {
 
 template<int DIM>
-class FloatCoordBase 
+class FloatCoordBase
 {
     friend class Typemaps;
 public:

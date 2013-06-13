@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_ioexception_h_
-#define _libgeodecomp_io_ioexception_h_
+#ifndef LIBGEODECOMP_IO_IOEXCEPTION_H
+#define LIBGEODECOMP_IO_IOEXCEPTION_H
 
 #include <cstring>
 #include <stdexcept>

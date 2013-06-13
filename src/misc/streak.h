@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_streak_h_
-#define _libgeodecomp_misc_streak_h_
+#ifndef LIBGEODECOMP_MISC_STREAK_H
+#define LIBGEODECOMP_MISC_STREAK_H
 
 #include <libgeodecomp/misc/coord.h>
 
@@ -17,10 +17,10 @@ class Streak
     friend class Typemaps;
 public:
     inline explicit Streak(
-        const Coord<DIM>& _origin=Coord<DIM>(), 
-        const int& _endX=0) :
-        origin(_origin), 
-        endX(_endX)
+        const Coord<DIM>& origin=Coord<DIM>(),
+        const int& endX=0) :
+        origin(origin),
+        endX(endX)
     {}
 
     std::string toString() const
@@ -32,13 +32,13 @@ public:
 
     bool operator==(const Streak& other) const
     {
-        return 
-            origin == other.origin && 
+        return
+            origin == other.origin &&
             endX == other.endX;
     }
 
     int length() const
-    { 
+    {
         return endX - origin.x();
     }
 

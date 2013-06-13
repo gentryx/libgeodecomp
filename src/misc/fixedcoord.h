@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_fixedcoord_h_
-#define _libgeodecomp_misc_fixedcoord_h_
+#ifndef LIBGEODECOMP_MISC_FIXEDCOORD_H
+#define LIBGEODECOMP_MISC_FIXEDCOORD_H
 
 namespace LibGeoDecomp {
 

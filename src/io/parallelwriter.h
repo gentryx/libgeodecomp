@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_parallelwriter_h_
-#define _libgeodecomp_io_parallelwriter_h_
+#ifndef LIBGEODECOMP_IO_PARALLELWRITER_H
+#define LIBGEODECOMP_IO_PARALLELWRITER_H
 
 #include <string>
 #include <stdexcept>
@@ -17,9 +17,9 @@ class DistributedSimulator;
  * ParallelWriter is the parent class for all parallel IO. Its being
  * used with ParallelSimulator, which contrasts it from Writer. Just
  * like writer, it defines a number of callbacks which are invoked by
- * the simulator. Also, ParallelWriter registers at the 
+ * the simulator. Also, ParallelWriter registers at the
  * DistributedSimulator, which will delete it upon its destruction.
- * Never allocate a ParallelWriter on the stack! 
+ * Never allocate a ParallelWriter on the stack!
  *
  * A conceptual difference from Writer should be noted: multiple
  * ParallelWriter objects of the same type will exists, typically one
@@ -32,29 +32,38 @@ class ParallelWriter
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
-    typedef Region<Topology::DIMENSIONS> RegionType;
-    typedef Coord<Topology::DIMENSIONS> CoordType;
+    typedef Region<Topology::DIM> RegionType;
+    typedef Coord<Topology::DIM> CoordType;
 
     /**
      * is the equivalent to Writer().
      */
     ParallelWriter(
-        const std::string& prefix, 
-        const unsigned& period = 1) : 
-        prefix(prefix), 
+        const std::string& prefix,
+        const unsigned& period) :
+        prefix(prefix),
         period(period)
     {
-        if (prefix == "") {
-            throw std::invalid_argument("empty prefixes are forbidden");
-        }
-
         if (period == 0) {
             throw std::invalid_argument("period must be positive");
         }
     }
 
-    virtual ~ParallelWriter() 
-    {};    
+    virtual ~ParallelWriter()
+    {};
+
+    /**
+     * notifies the ParallelWriter that the supplied region is the
+     * domain of the current process. This fuction will be called once
+     * the domain decomposition has been done. Writers can use this
+     * information to decide on the size of buffers to allocate or
+     * determine file offsets. validRegion in stepFinished() will
+     * always be a subset of newRegion.
+     */
+    virtual void setRegion(const Region<Topology::DIM>& newRegion)
+    {
+        region = newRegion;
+    }
 
 
     /**
@@ -86,6 +95,7 @@ public:
     }
 
 protected:
+    Region<Topology::DIM> region;
     std::string prefix;
     unsigned period;
 private:
@@ -93,6 +103,7 @@ private:
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
+        ar & region;
         ar & prefix;
         ar & period;
     }

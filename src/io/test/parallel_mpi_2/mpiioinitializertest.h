@@ -12,11 +12,11 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class MPIIOInitializerTest : public CxxTest::TestSuite 
+class MPIIOInitializerTest : public CxxTest::TestSuite
 {
 public:
     SuperVector<std::string> files;
@@ -35,7 +35,7 @@ public:
             }
         }
     }
-    
+
     void testBasic()
     {
         files << "testmpiioinitializer1_00000.mpiio"
@@ -53,14 +53,14 @@ public:
 
         std::string snapshotFile = "testmpiioinitializer1_00008.mpiio";
         Coord<3> dimensions;
-        
+
         if (rank == 0) {
             TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
             dimensions = init->gridDimensions();
             SerialSimulator<TestCell<3> > referenceSim(init);
             referenceSim.addWriter(
                 new MPIIOWriter<TestCell<3> >(
-                    "testmpiioinitializer1_",   
+                    "testmpiioinitializer1_",
                     4,
                     init->maxSteps(),
                     MPI::COMM_SELF));
@@ -69,14 +69,14 @@ public:
         }
 
         MPILayer().barrier();
-        
+
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
-        MPIIOInitializer<TestCell<3> > *init = 
+        MPIIOInitializer<TestCell<3> > *init =
             new MPIIOInitializer<TestCell<3> >(snapshotFile);
         StripingSimulator<TestCell<3> > sim(init, balancer);
         sim.addWriter(
             new ParallelMPIIOWriter<TestCell<3> >(
-                "testmpiioinitializer2_",   
+                "testmpiioinitializer2_",
                 4,
                 init->maxSteps(),
                 MPI::COMM_SELF));

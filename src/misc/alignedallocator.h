@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_alignedallocator_h_
-#define _libgeodecomp_misc_alignedallocator_h_
+#ifndef LIBGEODECOMP_MISC_ALIGNEDALLOCATOR_H
+#define LIBGEODECOMP_MISC_ALIGNEDALLOCATOR_H
 
 #ifdef __APPLE__
 #include <stdlib.h>

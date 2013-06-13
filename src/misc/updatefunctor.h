@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_updatefunctor_h_
-#define _libgeodecomp_misc_updatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
@@ -14,7 +14,7 @@ class Selector
 {
 public:
     typedef typename CELL::Stencil Stencil;
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
  
     template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
     void operator()(
@@ -58,7 +58,7 @@ template<typename CELL>
 class UpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIMENSIONS;
+    static const int DIM = CELL::Topology::DIM;
 
     template<typename GRID1, typename GRID2>
     void operator()(

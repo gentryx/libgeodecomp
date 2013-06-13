@@ -10,15 +10,15 @@ Chronometer::Chronometer()
 
 void Chronometer::tic()
 {
-    _workIntervalStart = time();
+   workIntervalStart = time();
 }
 
 void Chronometer::toc()
 {
-    if (_workIntervalStart == 0) {
-        throw std::logic_error( "Call Chronometer::tic() before calling toc()");
+    if (workIntervalStart == 0) {
+        throw std::logic_error("Call Chronometer::tic() before calling toc()");
     }
-    _workLength += time() - _workIntervalStart;
+   workLength += time() - workIntervalStart;
 }
 
 double Chronometer::nextCycle()
@@ -28,10 +28,10 @@ double Chronometer::nextCycle()
     return ((double)work) / cycle;
 }
 
-void Chronometer::nextCycle(long long *cycleLength, long long *workLength)
+void Chronometer::nextCycle(long long *cycleLength, long long *curWorkLength)
 {
-    *cycleLength = time() - _cycleStart;    
-    *workLength = _workLength;
+    *cycleLength = time() - cycleStart;
+    *curWorkLength = workLength;
     startCycle();
 }
 
@@ -48,9 +48,9 @@ long long Chronometer::timeUSec()
 
 void Chronometer::startCycle()
 {
-    _workLength = 0;
-    _workIntervalStart = 0;
-    _cycleStart = time();    
+   workLength = 0;
+   workIntervalStart = 0;
+   cycleStart = time();
 }
 
-};
+}

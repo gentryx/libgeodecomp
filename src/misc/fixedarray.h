@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_fixedarray_h_
-#define _libgeodecomp_misc_fixedarray_h_
+#ifndef LIBGEODECOMP_MISC_FIXEDARRAY_H
+#define LIBGEODECOMP_MISC_FIXEDARRAY_H
 
 #include <stdexcept>
 

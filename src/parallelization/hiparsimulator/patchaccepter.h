@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_patchaccepter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_patchaccepter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHACCEPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHACCEPTER_H
 
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/superset.h>
@@ -19,17 +19,25 @@ class PatchAccepter
 public:
     const static int DIM = GRID_TYPE::DIM;
 
-    virtual ~PatchAccepter() {};
+    virtual ~PatchAccepter()
+    {}
 
     virtual void put(
-        const GRID_TYPE& grid, 
-        const Region<DIM>& validRegion, 
+        const GRID_TYPE& grid,
+        const Region<DIM>& validRegion,
         const long& nanoStep) = 0;
+
+    virtual void setRegion(const Region<DIM>& region)
+    {
+        // empty as most implementations won't need it anyway.
+    }
 
     virtual long nextRequiredNanoStep() const
     {
-        if (requestedNanoSteps.empty())
+        if (requestedNanoSteps.empty()) {
             return -1;
+        }
+
         return *requestedNanoSteps.begin();
     }
 
@@ -50,6 +58,7 @@ protected:
             std::cout << "got: " << nanoStep << " expected " << (requestedNanoSteps.min)() << "\n";
             throw std::logic_error("expected nano step was left out");
         }
+
         return true;
     }
 };

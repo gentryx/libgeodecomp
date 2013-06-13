@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_parallelwriteradapter_h_
-#define _libgeodecomp_parallelization_hiparsimulator_parallelwriteradapter_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
 //#include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
@@ -29,7 +29,7 @@ public:
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
         const long& firstStep,
         const long& lastStep,
-        Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions,
+        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
         bool lastCall) :
         sim(_sim),
         writer(_writer),
@@ -42,10 +42,15 @@ public:
         reload(lastNanoStep);
     }
 
+    virtual void setRegion(const Region<GRID_TYPE::DIM>& region)
+    {
+        writer->setRegion(region);
+    }
+
     virtual void put(
-        const GRID_TYPE& grid, 
-        const Region<GRID_TYPE::DIM>& validRegion, 
-        const long& nanoStep) 
+        const GRID_TYPE& grid,
+        const Region<GRID_TYPE::DIM>& validRegion,
+        const long& nanoStep)
     {
         if (!checkNanoStepPut(nanoStep)) {
             return;
@@ -61,11 +66,11 @@ public:
         }
 
         writer->stepFinished(
-            grid, 
-            validRegion, 
-            globalGridDimensions, 
-            nanoStep / CELL_TYPE::nanoSteps(), 
-            event, 
+            grid,
+            validRegion,
+            globalGridDimensions,
+            nanoStep / CELL_TYPE::nanoSteps(),
+            event,
             lastCall);
         reload();
     }
@@ -76,7 +81,7 @@ private:
     long firstNanoStep;
     long lastNanoStep;
     bool lastCall;
-    Coord<CELL_TYPE::Topology::DIMENSIONS> globalGridDimensions;
+    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 
     long nextOutputStep(const long& step)
     {
@@ -95,7 +100,7 @@ private:
     {
         pushRequest(nextNanoStep);
     }
- 
+
 };
 
 }

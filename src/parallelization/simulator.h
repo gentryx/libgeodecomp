@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_simulator_h_
-#define _libgeodecomp_parallelization_simulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_SIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_SIMULATOR_H
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -26,15 +26,13 @@ public:
      * assumed to belong to the Simulator, which means that it'll
      * delete the @a _initializer at the end of its lifetime.
      */
-    inline Simulator(Initializer<CELL_TYPE> *_initializer) : 
-        stepNum(0), 
-        initializer(_initializer)
+    inline Simulator(Initializer<CELL_TYPE> *initializer) :
+        stepNum(0),
+        initializer(initializer)
     {}
 
-    inline virtual ~Simulator() 
-    { 
-        delete initializer;
-    }
+    inline virtual ~Simulator()
+    {}
 
     /**
      * performs a single simulation step.
@@ -49,12 +47,12 @@ public:
     /**
      * returns the number of the current logical simulation step.
      */
-    virtual unsigned getStep() const 
-    { 
-        return stepNum; 
+    virtual unsigned getStep() const
+    {
+        return stepNum;
     }
 
-    virtual Initializer<CELL_TYPE> *getInitializer() const
+    virtual boost::shared_ptr<Initializer<CELL_TYPE> > getInitializer() const
     {
         return initializer;
     }
@@ -69,10 +67,10 @@ public:
     {
         steerers << boost::shared_ptr<Steerer<CELL_TYPE> >(steerer);
     }
-    
+
 protected:
     unsigned stepNum;
-    Initializer<CELL_TYPE> *initializer;
+    boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     SteererVector steerers;
 };
 

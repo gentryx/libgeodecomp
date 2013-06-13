@@ -1,21 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2006,2007 Andreas Schaefer <gentryx@gmx.de>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301 USA.
-
 require 'rexml/document'
 require 'logger'
 require 'set'
@@ -41,6 +24,7 @@ class MPIParser
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
+    # @log.level = Logger::DEBUG
     @member_cache = {}
 
     class_files = Dir.glob("#{@path}/*.xml")
@@ -92,10 +76,13 @@ class MPIParser
     while classes.any?
       @log.debug "  classes:"
       @log.debug pp(classes)
-
+      @log.debug "  resolved_classes:"
+      @log.debug pp(resolved_classes)
       num_unresolved = classes.size
+      # this temporary clone is required to avoid interference with deleted elements
+      temp_classes = classes.clone
 
-      classes.each do |klass|
+      temp_classes.each do |klass|
         resolve_class(klass, classes,
                       resolved_classes, resolved_parents,
                       topological_class_sortation)
@@ -594,7 +581,7 @@ class MPIParser
         ret.add klass
       end      
     end
-
+    
     return ret
   end
 

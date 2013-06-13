@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_memorywriter_h_
-#define _libgeodecomp_io_memorywriter_h_
+#ifndef LIBGEODECOMP_IO_MEMORYWRITER_H
+#define LIBGEODECOMP_IO_MEMORYWRITER_H
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supervector.h>
@@ -19,11 +19,11 @@ public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
 
-    MemoryWriter(unsigned period = 1) : 
-        Writer<CELL_TYPE>("foobar", period) 
+    MemoryWriter(unsigned period = 1) :
+        Writer<CELL_TYPE>("", period)
     {}
-    
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
+
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
@@ -31,7 +31,7 @@ public:
 
         grids.push_back(grid);
     }
-        
+
     GridType& getGrid(int i)
     {
         return grids[i];

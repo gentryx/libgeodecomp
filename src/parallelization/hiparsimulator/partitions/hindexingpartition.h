@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_hindexingpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HINDEXINGPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HINDEXINGPARTITION_H
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/multi_array.hpp>
@@ -34,36 +34,36 @@ namespace HiParSimulator {
 
  * (names derrived from direction of vector from Start to End,upper
  * triangles dominate the diagonal)
- * 
+ *
  * triangle types:
- * 
- * 0. upper right (ur) 
- *  
- *       XXX End 
- *       XX 
- *       X 
- *       Start 
- *  
- * 1. upper left (ul) 
- *  
- *   End 
- *       X   
- *       XX  
- *         Start 
- *  
- * 2. lower right (lr) 
- *  
- * Start XXX  
- *        XX 
- *         X 
- *         End 
- *  
- * 3. lower left (ll) 
- *  
- *           Start 
- *         X 
- *        XX 
- *       End 
+ *
+ * 0. upper right (ur)
+ *
+ *       XXX End
+ *       XX
+ *       X
+ *       Start
+ *
+ * 1. upper left (ul)
+ *
+ *   End
+ *       X
+ *       XX
+ *         Start
+ *
+ * 2. lower right (lr)
+ *
+ * Start XXX
+ *        XX
+ *         X
+ *         End
+ *
+ * 3. lower left (ll)
+ *
+ *           Start
+ *         X
+ *        XX
+ *       End
  *
  */
 class HIndexingPartition : public SpaceFillingCurve<2>
@@ -77,27 +77,30 @@ public:
     {
     public:
         Triangle(
-            const unsigned& _type=0, 
-            const Coord<2>& _dimensions=Coord<2>(0, 0), 
-            const Coord<2>& _origin=Coord<2>(0,0), 
-            const unsigned& _counter=0) :
-            counter(_counter), 
-            type(_type), 
-            dimensions(_dimensions), 
-            origin(_origin)
+            const unsigned& type=0,
+            const Coord<2>& dimensions=Coord<2>(0, 0),
+            const Coord<2>& origin=Coord<2>(0, 0),
+            const unsigned& counter=0) :
+            counter(counter),
+            type(type),
+            dimensions(dimensions),
+            origin(origin)
         {}
 
         std::string toString() const
         {
             std::ostringstream o;
-            o << "triangle(origin: " << origin << " dimensions: " << dimensions << " type: " << type << " counter: " << counter << ")\n";
+            o << "triangle(origin: " << origin
+              << " dimensions: " << dimensions
+              << " type: " << type
+              << " counter: " << counter << ")\n";
             return o.str();
         }
 
         unsigned counter;
         unsigned type;
         Coord<2> dimensions;
-        Coord<2> origin;            
+        Coord<2> origin;
     };
 
     // triangle transition table
@@ -105,7 +108,7 @@ public:
     // (type & counter -> next subtype)
     //
     // type enumeration order
-    // ---- ----------------- 
+    // ---- -----------------
     // 0    0120
     // 1    1301
     // 2    2032
@@ -152,7 +155,7 @@ public:
                     *this = Iterator(_origin);
                     break;
                 }
-            } 
+            }
             // move to start
             ++(*this);
         }
@@ -162,12 +165,12 @@ public:
          * of type @a initType.
          */
         inline Iterator(
-            const Coord<2>& _origin, 
-            const unsigned& initType, 
+            const Coord<2>& origin,
+            const unsigned& initType,
             const Coord<2>& dimensions) :
-            SpaceFillingCurve<2>::Iterator(_origin, false)
+            SpaceFillingCurve<2>::Iterator(origin, false)
         {
-            triangleStack.push_back(Triangle(initType, dimensions, origin)); 
+            triangleStack.push_back(Triangle(initType, dimensions, origin));
             digDown();
             // move to start
             ++(*this);
@@ -184,21 +187,24 @@ public:
 
         inline Iterator& operator++()
         {
-            if (endReached) 
+            if (endReached) {
                 return *this;
+            }
             // skip to next triangle
             // (and also skip empty trivial triangles of type 1 and 3)
-            while (sublevelTriangleFinished()) { 
+            while (sublevelTriangleFinished()) {
                 if (triangleStack.empty()) {
                     endReached = true;
                     cursor = origin;
                     return *this;
                 }
-                triangleStack.back().counter++;                
+
+                triangleStack.back().counter++;
                 digUp();
-                if (endReached) 
+                if (endReached) {
                     return *this;
-                digDown();                
+                }
+                digDown();
             }
             nextSublevel();
             return *this;
@@ -219,14 +225,14 @@ public:
          */
         inline void digUp()
         {
-            while (triangleStack.back().counter == 4) {                    
+            while (triangleStack.back().counter == 4) {
                 triangleStack.pop_back();
                 if (triangleStack.empty()) {
                     endReached = true;
                     cursor = origin;
                     return;
                 }
-                    
+
                 triangleStack.back().counter++;
             }
         }
@@ -240,9 +246,9 @@ public:
             for (curTria = triangleStack.pop();
                  !hasTrivialDimensions(curTria.dimensions) && !isCached(curTria.dimensions);
                  nextSubTriangle(&curTria)) {
-                triangleStack.push_back(curTria);                            
+                triangleStack.push_back(curTria);
             }
-                
+
             if (hasTrivialDimensions(curTria.dimensions)) {
                 digDownTrivial(curTria);
             } else {
@@ -282,7 +288,7 @@ public:
          * recursion is necessary to check the resulting sub triangle.
          */
         inline bool traceTriangle(const Triangle& curTria, unsigned *remainder)
-        {            
+        {
             if (!hasTrivialDimensions(curTria.dimensions) && !isCached(curTria.dimensions)) {
                 skipSubTriangles(curTria, remainder);
                 // fixme: refactor skipSubTriangles to return a
@@ -317,7 +323,7 @@ public:
                 } else {
                     triangleStack.push_back(subTria);
                     break;
-                }                        
+                }
             }
         }
 
@@ -330,13 +336,14 @@ public:
             }
         }
 
-        inline void nextTrivial() 
+        inline void nextTrivial()
         {
             if (trivialTriangleCounter++ == 0) {
-                if (trivialTriangleType == 0) 
-                    cursor += Coord<2>(0, -1);                
+                if (trivialTriangleType == 0) {
+                    cursor += Coord<2>(0, -1);
+                }
                 // nothing to do for type 2 as then origin and first
-                // coord match. types 1 and 3 don't occur here.                
+                // coord match. types 1 and 3 don't occur here.
             } else {
                 cursor += trivialTriangleDirection;
             }
@@ -373,7 +380,7 @@ public:
         static inline void nextSubTriangle(Triangle *triangle)
         {
             newOriginAndDimensions(&triangle->origin, &triangle->dimensions, triangle->type, triangle->counter);
-            triangle->type = triangleTransitions[triangle->type][triangle->counter]; 
+            triangle->type = triangleTransitions[triangle->type][triangle->counter];
             triangle->counter = 0;
         }
 
@@ -382,7 +389,7 @@ public:
         //
         // type counter origin         dimensions
         // ---- ------- -------------- -----------------------
-        // 0    0       (0, 0)       
+        // 0    0       (0, 0)
         //      1       (leftHalf, -lowerHalf)
         //      2       (0, -y)
         //      3       (leftHalf, -lowerHalf)
@@ -406,10 +413,10 @@ public:
         //      3       (-rightHalf, upperHalf)
         //      end     (-x, y)
         static inline void newOriginAndDimensions(
-            Coord<2> *curOri, 
-            Coord<2> *curDim, 
-            const int& curType, 
-            const int& curCounter) 
+            Coord<2> *curOri,
+            Coord<2> *curDim,
+            const int& curType,
+            const int& curCounter)
         {
             int leftHalf =  curDim->x() / 2;
             int rightHalf = curDim->x() - leftHalf;
@@ -423,14 +430,14 @@ public:
         }
 
         static inline Coord<2> newOrigin(
-            const int& curType, 
-            const int& curCounter, 
-            const int& leftHalf, 
-            const int& rightHalf, 
-            const int& upperHalf, 
-            const int& lowerHalf, 
-            const int& x, 
-            const int& y) 
+            const int& curType,
+            const int& curCounter,
+            const int& leftHalf,
+            const int& rightHalf,
+            const int& upperHalf,
+            const int& lowerHalf,
+            const int& x,
+            const int& y)
         {
             switch (curCounter) {
             case 0:
@@ -480,7 +487,6 @@ public:
             return t.dimensions;
         }
 
-        // fixme
         static inline unsigned triangleLength(const Triangle& triangle)
         {
             return triangleLength(triangle.dimensions, triangle.type);
@@ -493,13 +499,14 @@ public:
                 if (type == 1 || type == 3) {
                     return 0;
                 } else {
-                    return dimensions.x() * dimensions.y();
-            }                
+                    return dimensions.prod();
+                }
             } else {
                 std::pair<Coord<2>, unsigned> key(dimensions, type);
                 // result already cached?
-                if (triangleLengthCache.count(key)) 
+                if (triangleLengthCache.count(key)) {
                     return triangleLengthCache[key];
+                }
 
                 unsigned ret = 0;
                 Triangle t(type, dimensions);
@@ -511,7 +518,7 @@ public:
                 // speed-up subsequent queries by caching the result
                 triangleLengthCache[key] = ret;
                 return ret;
-            }               
+            }
         }
 
         inline bool isCached(const Coord<2>& dimensions) const
@@ -521,13 +528,13 @@ public:
     };
 
     inline HIndexingPartition(
-        const Coord<2>& _origin=Coord<2>(0, 0), 
-        const Coord<2>& _dimensions=Coord<2>(0, 0),
+        const Coord<2>& origin=Coord<2>(0, 0),
+        const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,
         const SuperVector<long>& weights=SuperVector<long>(2)) :
         SpaceFillingCurve<2>(offset, weights),
-        origin(_origin),              
-        dimensions(_dimensions)
+        origin(origin),
+        dimensions(dimensions)
     {}
 
     inline Iterator begin() const
@@ -540,10 +547,10 @@ public:
         return Iterator(origin);
     }
 
-    inline Region<2> getRegion(const long& node) const 
+    inline Region<2> getRegion(const long& node) const
     {
         return Region<2>(
-            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 0]],
             (*this)[startOffsets[node + 1]]);
     }
 
@@ -558,7 +565,7 @@ private:
     Coord<2> origin;
     Coord<2> dimensions;
 
-    static inline bool fillCaches() 
+    static inline bool fillCaches()
     {
         // store triangles of at most maxDim in size
         Coord<2> maxDim(17, 17);
@@ -573,12 +580,16 @@ private:
                 for (unsigned t = 0; t < 4; t++) {
                     CoordVector coords;
                     Iterator end(Coord<2>(0, 0));
-                    for (Iterator h(Coord<2>(0, 0), t, dimensions); h != end; ++h) 
-                        coords.push_back(*h);                    
+
+                    for (Iterator h(Coord<2>(0, 0), t, dimensions); h != end; ++h) {
+                        coords.push_back(*h);
+                    }
+
                     (*triangleCoordsCache)[dimensions.x()][dimensions.y()][t] = coords;
                 }
             }
-        }        
+        }
+
         maxCachedDimensions = maxDim;
         return true;
     }

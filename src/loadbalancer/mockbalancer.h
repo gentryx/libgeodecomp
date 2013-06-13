@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_loadbalancer_mockbalancer_h_
-#define _libgeodecomp_loadbalancer_mockbalancer_h_
+#ifndef LIBGEODECOMP_LOADBALANCER_MOCKBALANCER_H
+#define LIBGEODECOMP_LOADBALANCER_MOCKBALANCER_H
 
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 

@@ -22,7 +22,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" line="9" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="9" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" line="9" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="9" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
@@ -37,14 +37,14 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" line="11" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" line="11" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" line="8" bodyfile="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="7" bodyend="12"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" line="8" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h" bodystart="7" bodyend="12"/>
     <listofallmembers>
       <member refid="classCoordContainer_1a23e8ba94c4b744137d6df8499016352f" prot="private" virt="non-virtual"><scope>CoordContainer</scope><name>pos</name></member>
       <member refid="classCoordContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>CoordContainer</scope><name>Typemaps</name></member>

@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_io_asciiwriter_h_
-#define _libgeodecomp_io_asciiwriter_h_
+#ifndef LIBGEODECOMP_IO_ASCIIWRITER_H
+#define LIBGEODECOMP_IO_ASCIIWRITER_H
 
 #include <string>
 #include <cerrno>
@@ -20,21 +20,21 @@ namespace LibGeoDecomp {
  */
 template<typename CELL_TYPE, typename ATTRIBUTE_SELECTOR>
 class ASCIIWriter : public Writer<CELL_TYPE>
-{    
+{
 public:
     friend class ASCIIWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
     ASCIIWriter(
-        const std::string& prefix, 
+        const std::string& prefix,
         const unsigned period = 1) :
         Writer<CELL_TYPE>(prefix, period)
     {}
 
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;

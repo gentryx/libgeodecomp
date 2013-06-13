@@ -6,7 +6,7 @@
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -36,7 +36,7 @@ public:
     }
 };
 
-class BOVWriterTest : public CxxTest::TestSuite 
+class BOVWriterTest : public CxxTest::TestSuite
 {
 public:
 
@@ -117,7 +117,7 @@ public:
 
     //         MPI::File file = MPIIO<double, Topologies::Cube<3>::Topology>::openFileForWrite(
     //             "test.bov", MPI::COMM_SELF);
-            
+
     //         Coord<3> bovDim;
     //         bovDim[0] = std::max(1, dimensions[0]);
     //         bovDim[1] = std::max(1, dimensions[1]);
@@ -152,7 +152,7 @@ public:
     // }
 
     Grid<double, Topologies::Cube<3>::Topology> readGrid(
-        std::string filename, 
+        std::string filename,
         Coord<3> dimensions)
     {
         Grid<double, Topologies::Cube<3>::Topology> ret(dimensions);

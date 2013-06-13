@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_serialsimulator_h_
-#define _libgeodecomp_parallelization_serialsimulator_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
@@ -17,25 +17,28 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 public:
     friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
+    typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     /**
      * creates a SerialSimulator with the given @a initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *initializer) : 
+    SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
+        stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
         curGrid = new GridType(dim);
         newGrid = new GridType(dim);
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
+        // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
         unsigned endX = box.dimensions.x();
         box.dimensions.x() = 1;
-        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             simArea << Streak<DIM>(*i, endX);
         }
     }
@@ -52,7 +55,7 @@ public:
     virtual void step()
     {
         // notify all registered Steerers
-        for(unsigned i = 0; i < steerers.size(); ++i) {
+        for (unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
                 steerers[i]->nextStep(curGrid, simArea, stepNum);
             }
@@ -62,17 +65,9 @@ public:
             nanoStep(i);
         }
 
-        ++stepNum; 
+        ++stepNum;
 
-        // call back all registered Writers
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            if (stepNum % writers[i]->getPeriod() == 0) {
-                writers[i]->stepFinished(
-                    *getGrid(),
-                    getStep(),
-                    WRITER_STEP_FINISHED);
-            }
-        }
+        handleOutput(WRITER_STEP_FINISHED);
     }
 
     /**
@@ -81,25 +76,15 @@ public:
     virtual void run()
     {
         initializer->grid(curGrid);
-        stepNum = 0;
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->stepFinished(
-                *getGrid(),
-                getStep(),
-                WRITER_INITIALIZED);
-        }
+        stepNum = initializer->startStep();
+        setIORegions();
+        handleOutput(WRITER_INITIALIZED);
 
-        for (stepNum = initializer->startStep(); 
-             stepNum < initializer->maxSteps();) {
+        for (; stepNum < initializer->maxSteps();) {
             step();
         }
 
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->stepFinished(
-                *getGrid(),
-                getStep(),
-                WRITER_ALL_DONE);
-        }
+        handleOutput(WRITER_ALL_DONE);
     }
 
     /**
@@ -126,12 +111,33 @@ protected:
         CoordBox<DIM> box = curGrid->boundingBox();
         int endX = box.origin.x() + box.dimensions.x();
         box.dimensions.x() = 1;
-        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             Streak<DIM> streak(*i, endX);
             UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
         }
 
         std::swap(curGrid, newGrid);
+    }
+
+    void handleOutput(WriterEvent event)
+    {
+        for (unsigned i = 0; i < writers.size(); i++) {
+            if ((event != WRITER_STEP_FINISHED) ||
+                ((getStep() % writers[i]->getPeriod()) == 0)) {
+                writers[i]->stepFinished(
+                    *curGrid,
+                    getStep(),
+                    event);
+            }
+        }
+    }
+
+    void setIORegions()
+    {
+        for (unsigned i = 0; i < steerers.size(); i++) {
+            steerers[i]->setRegion(simArea);
+        }
     }
 };
 

@@ -1,7 +1,6 @@
-#ifndef _libgeodecomp_io_teststeerer_h_
-#define _libgeodecomp_io_teststeerer_h_
+#ifndef LIBGEODECOMP_IO_TESTSTEERER_H
+#define LIBGEODECOMP_IO_TESTSTEERER_H
 
-#include <sstream>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/misc/testcell.h>
 
@@ -10,28 +9,34 @@ namespace LibGeoDecomp {
 /**
  * The TestSteerer demos how a Steerer can be implemented to modify
  * the grid during the course of the simulation. The idea is to
- * advance the TestCell's cycleCounter at _eventStep by \p _cycleOffset.
+ * advance the cell's cycleCounter at \p eventStep by \p cycleOffset.
  */
 template<int DIM>
 class TestSteerer : public Steerer<TestCell<DIM> >
 {
 public:
     typedef typename Steerer<TestCell<DIM> >::GridType GridType;
+    using Steerer<TestCell<DIM> >::region;
 
     TestSteerer(
-        const unsigned& _period, 
-        const unsigned& _eventStep, 
-        const unsigned& _cycleOffset)  :
-        Steerer<TestCell<DIM> >(_period),
-        eventStep(_eventStep),
-        cycleOffset(_cycleOffset)
+        const unsigned& period,
+        const unsigned& eventStep,
+        const unsigned& cycleOffset)  :
+        Steerer<TestCell<DIM> >(period),
+        eventStep(eventStep),
+        cycleOffset(cycleOffset),
+        lastStep(-1)
     {}
 
     virtual void nextStep(
-        GridType *grid, 
-        const Region<DIM>& validRegion, 
-        const unsigned& step) 
+        GridType *grid,
+        const Region<DIM>& validRegion,
+        unsigned step)
     {
+        // ensure setRegion() has actually been called
+        TS_ASSERT(!region.empty());
+        // fixme: extend this test according to paralleltestwriter
+
         if (step != eventStep) {
             return;
         }
@@ -47,6 +52,7 @@ public:
 private:
     unsigned eventStep;
     unsigned cycleOffset;
+    int lastStep;
 };
 
 }

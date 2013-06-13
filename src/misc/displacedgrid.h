@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_displacedgrid_h_
-#define _libgeodecomp_misc_displacedgrid_h_
+#ifndef LIBGEODECOMP_MISC_DISPLACEDGRID_H
+#define LIBGEODECOMP_MISC_DISPLACEDGRID_H
 
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/grid.h>
@@ -15,19 +15,19 @@ namespace LibGeoDecomp {
  * access. Useful for writing topology agnostic code that should work
  * an a torus, too.
  */
-template<typename CELL_TYPE, 
-         typename TOPOLOGY=Topologies::Cube<2>::Topology, 
+template<typename CELL_TYPE,
+         typename TOPOLOGY=Topologies::Cube<2>::Topology,
          bool TOPOLOGICALLY_CORRECT=false>
-class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
+class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
 public:
-    const static int DIM = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIM;
 
     typedef CELL_TYPE CellType;
     typedef TOPOLOGY Topology;
     typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;
-    typedef CoordMap<CELL_TYPE, Delegate> MyCoordMap;
+    typedef CoordMap<CELL_TYPE, Delegate> CoordMapType;
 
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
@@ -39,11 +39,10 @@ public:
         topoDimensions(topologicalDimensions)
     { }
 
-
-    DisplacedGrid(const Delegate& _grid,
-                  const Coord<DIM>& _origin=Coord<DIM>()) :
-        delegate(_grid),
-        origin(_origin)
+    DisplacedGrid(const Delegate& grid,
+                  const Coord<DIM>& origin=Coord<DIM>()) :
+        delegate(grid),
+        origin(origin)
     {}
 
     inline const Coord<DIM>& topologicalDimensions() const
@@ -81,7 +80,7 @@ public:
         return delegate.getEdgeCell();
     }
 
-    inline void setOrigin(const Coord<DIM>& newOrigin) 
+    inline void setOrigin(const Coord<DIM>& newOrigin)
     {
         origin = newOrigin;
     }
@@ -120,7 +119,7 @@ public:
     {
         return getEdgeCell();
     }
-    
+
     virtual const CELL_TYPE& atEdge() const
     {
         return getEdgeCell();
@@ -131,20 +130,11 @@ public:
         delegate.fill(CoordBox<DIM>(box.origin - origin, box.dimensions), cell);
     }
 
-    template<typename GRID_TYPE>
-    inline void paste(const GRID_TYPE& grid, const Region<DIM>& region)
-    {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            const CELL_TYPE *start = &grid[i->origin];
-            std::copy(start, start + i->length(), &(*this)[i->origin]);
-        }
-    }
-
-    inline void pasteGridBase(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
+    inline void paste(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             const CELL_TYPE *start = &grid.at(i->origin);
-            std::copy(start, start + i->length(), &(*this)[i->origin]);
+            std::copy(start, start + i->length(), &at(i->origin));
         }
     }
 
@@ -158,13 +148,13 @@ public:
         return CoordBox<DIM>(origin, delegate.getDimensions());
     }
 
-    inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
+    inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
     {
         Coord<DIM> relativeCoord = center - origin;
-        if (TOPOLOGICALLY_CORRECT) 
-            relativeCoord = 
-                Topology::normalize(relativeCoord, topoDimensions);
-        return MyCoordMap(relativeCoord, &delegate);
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
+        return CoordMapType(relativeCoord, &delegate);
     }
 
     inline const Delegate *vanillaGrid() const
@@ -172,7 +162,7 @@ public:
         return &delegate;
     }
 
-    inline Delegate *vanillaGrid() 
+    inline Delegate *vanillaGrid()
     {
         return &delegate;
     }

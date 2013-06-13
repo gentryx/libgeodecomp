@@ -106,7 +106,7 @@ void runSimulation()
     sim.run();
 }
 
-int main(int, char *[])
+int main(int argc, char **argv)
 {
     runSimulation();
     return 0;

@@ -1,4 +1,4 @@
-/** 
+/**
  * We need to include typemaps first to avoid problems with Intel
  * MPI's C++ bindings (which may collide with stdio.h's SEEK_SET,
  * SEEK_CUR etc.).
@@ -22,16 +22,16 @@ using namespace LibGeoDecomp;
 
 class ConwayCell
 {
-public:   
+public:
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
 
     class API : public CellAPITraits::Base
     {};
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 1; 
+    static inline unsigned nanoSteps()
+    {
+        return 1;
     }
 
     ConwayCell(const bool& _alive = false) :
@@ -87,24 +87,24 @@ public:
         //          xx
         //           x   xxx
         startCells +=
-            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71), 
-            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71), 
+            Coord<2>(55, 70), Coord<2>(56, 70), Coord<2>(56, 71),
+            Coord<2>(60, 71), Coord<2>(61, 71), Coord<2>(62, 71),
             Coord<2>(61, 69);
-        
+
         // ...and an Acorn pattern:
-        //        x 
+        //        x
         //          x
         //       xx  xxx
         startCells +=
             Coord<2>(111, 30),
             Coord<2>(113, 31),
-            Coord<2>(110, 32), Coord<2>(111, 32), 
+            Coord<2>(110, 32), Coord<2>(111, 32),
             Coord<2>(113, 32), Coord<2>(114, 32), Coord<2>(115, 32);
-        
+
 
         for (SuperVector<Coord<2> >::iterator i = startCells.begin();
              i != startCells.end();
-             ++i) 
+             ++i)
             if (rect.inBounds(*i))
                 ret->at(*i - rect.origin) = ConwayCell(true);
     }
@@ -129,7 +129,7 @@ public:
         *out = in.alive;
     }
 
-    static std::string varName() 
+    static std::string varName()
     {
         return "alive";
     }
@@ -139,7 +139,7 @@ public:
         return 1;
     }
 
-    static std::string dataFormat() 
+    static std::string dataFormat()
     {
         return "DOUBLE";
     }
@@ -149,16 +149,16 @@ void runSimulation()
 {
     int outputFrequency = 1;
     CellInitializer *init = new CellInitializer();
-    
+
     StripingSimulator<ConwayCell> sim(
         init,
-        MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()), 
-        10, 
-        MPI::BOOL); 
+        MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
+        10,
+        MPI::BOOL);
 
     sim.addWriter(
         new BOVWriter<ConwayCell, StateSelector>(
-            "game", 
+            "game",
             outputFrequency));
     sim.addWriter(
         new TracingWriter<ConwayCell>(
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
     Typemaps::initializeMaps();
 
     runSimulation();
-    
-    MPI::Finalize(); 
+
+    MPI::Finalize();
     return 0;
 }

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_mocksteerer_h_
-#define _libgeodecomp_io_mocksteerer_h_
+#ifndef LIBGEODECOMP_IO_MOCKSTEERER_H
+#define LIBGEODECOMP_IO_MOCKSTEERER_H
 
 #include <sstream>
 #include <libgeodecomp/io/steerer.h>
@@ -13,22 +13,22 @@ public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
 
-    MockSteerer(const unsigned& _period, std::stringstream *eventsBuffer)  :
-        Steerer<CELL_TYPE>(_period),
+    MockSteerer(const unsigned& period, std::stringstream *eventsBuffer)  :
+        Steerer<CELL_TYPE>(period),
         eventsBuf(eventsBuffer)
-    { 
-        (*eventsBuf) << "created, period = " << _period << "\n";
+    {
+        (*eventsBuf) << "created, period = " << period << "\n";
     }
 
-    virtual ~MockSteerer() 
-    { 
-        (*eventsBuf) << "deleted\n"; 
+    virtual ~MockSteerer()
+    {
+        (*eventsBuf) << "deleted\n";
     }
 
     virtual void nextStep(
-        GridType *grid, 
-        const Region<Topology::DIMENSIONS>& validRegion, 
-        const unsigned& step) 
+        GridType *grid,
+        const Region<Topology::DIM>& validRegion,
+        unsigned step)
     {
         (*eventsBuf) << "nextStep(" << step << ")\n";
     }

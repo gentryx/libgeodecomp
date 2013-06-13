@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_coordbox_h_
-#define _libgeodecomp_misc_coordbox_h_
+#ifndef LIBGEODECOMP_MISC_COORDBOX_H
+#define LIBGEODECOMP_MISC_COORDBOX_H
 
 #include <iostream>
 #include <stdexcept>
@@ -12,17 +12,17 @@ template<int DIM>
 class CoordBoxSequence;
 
 template<int DIM>
-class CoordBox 
+class CoordBox
 {
     friend class Typemaps;
 
-public:    
+public:
     class Iterator;
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
-    
-    explicit CoordBox(const Coord<DIM>& origin_ = Coord<DIM>(), 
+
+    explicit CoordBox(const Coord<DIM>& origin_ = Coord<DIM>(),
                       const Coord<DIM>& dimensions_ = Coord<DIM>()) :
         origin(origin_),
         dimensions(dimensions_)
@@ -58,9 +58,7 @@ public:
     inline bool inBounds(const Coord<DIM>& coord) const
     {
         Coord<DIM> relativeCoord = coord - origin;
-        return !Topologies::IsOutOfBoundsHelper<
-            DIM - 1, Coord<DIM>, typename Topologies::Cube<DIM>::Topology>()(
-                relativeCoord, dimensions);
+        return !Topologies::Cube<DIM>::Topology::isOutOfBounds(relativeCoord, dimensions);
     }
 
     std::string toString() const
@@ -77,8 +75,8 @@ public:
         return inBounds(maxOrigin) && other.inBounds(maxOrigin);
     }
 
-    inline unsigned size() const 
-    { 
+    inline unsigned size() const
+    {
         return dimensions.prod();
     }
 
@@ -86,12 +84,12 @@ public:
     {
     public:
         inline Iterator(
-            const Coord<DIM>& _origin, 
-            const Coord<DIM>& start, 
+            const Coord<DIM>& origin,
+            const Coord<DIM>& start,
             const Coord<DIM>& dimensions) :
             cursor(start),
-            origin(_origin),
-            end(_origin + dimensions)
+            origin(origin),
+            end(origin + dimensions)
         {}
 
         inline bool operator==(const Iterator& other) const
@@ -109,14 +107,15 @@ public:
             return cursor;
         }
 
-        inline const Coord<DIM>* operator->() const 
+        inline const Coord<DIM>* operator->() const
         {
             return &cursor;
         }
-        
+
         inline Iterator& operator++()
         {
             int i;
+
             for (i = 0; i < DIM - 1; ++i) {
                 if (++cursor[i] == end[i]) {
                     cursor[i] = origin[i];
@@ -136,7 +135,7 @@ public:
             buffer << "StripingPartition::Iterator(" << cursor << ", " << end << ")";
             return buffer.str();
         }
-            
+
     private:
         Coord<DIM> cursor;
         Coord<DIM> origin;
@@ -148,7 +147,7 @@ public:
  * The MPI typemap generator need to find out for which template
  * parameter values it should generate typemaps. It does so by
  * scanning all class members. Therefore this dummy class forces the
- * typemap generator to create MPI datatypes for CoordBoxs with the
+ * typemap generator to create MPI datatypes for CoordBox with the
  * dimensions as specified below.
  */
 class CoordBoxMPIDatatypeHelper

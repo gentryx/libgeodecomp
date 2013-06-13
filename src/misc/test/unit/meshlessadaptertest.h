@@ -2,21 +2,21 @@
 #include <libgeodecomp/misc/meshlessadapter.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class MeshlessAdapterTest : public CxxTest::TestSuite 
+class MeshlessAdapterTest : public CxxTest::TestSuite
 {
 public:
 
     void test1d()
     {
-        typedef MeshlessAdapter<Topologies::Torus<2>::Topology> MyAdapter;
+        typedef MeshlessAdapter<Topologies::Torus<2>::Topology> AdapterType;
 
         FloatCoord<2> dim(6.5, 1);
         double boxSize = 2;
-        MyAdapter adapter(dim, boxSize);
+        AdapterType adapter(dim, boxSize);
 
         // test posToCoord()
         Coord<2> actual;
@@ -30,7 +30,7 @@ public:
         TS_ASSERT_EQUALS(Coord<2>(2, 0), actual);
         actual = adapter.posToCoord(FloatCoord<2>(6.1, 0.5));
         TS_ASSERT_EQUALS(Coord<2>(2, 0), actual);
-        
+
         // test distance2()
         double dist;
         FloatCoord<2> pos1(0.5, 0.5);
@@ -49,21 +49,21 @@ public:
 
         // manhattanDistance()
         int distNY;
-        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4), 
+        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4),
                                            FloatCoord<2>(1.8, 0.9));
         TS_ASSERT_EQUALS(distNY, 0);
-        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4), 
+        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4),
                                            FloatCoord<2>(2.1, 0.9));
         TS_ASSERT_EQUALS(distNY, 1);
-        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4), 
+        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4),
                                            FloatCoord<2>(6.1, 0.9));
         TS_ASSERT_EQUALS(distNY, 1);
 
         // test grid(), insert() and search()
-        MyAdapter::CoordListGrid grid = adapter.grid();
+        AdapterType::CoordListGrid grid = adapter.grid();
         TS_ASSERT_EQUALS(Coord<2>(3, 1), grid.getDimensions());
 
-        for (int i = 0; i < 6; ++i) 
+        for (int i = 0; i < 6; ++i)
             adapter.insert(&grid, FloatCoord<2>(i + 0.5, 0.5), i);
 
         std::set<int> coords;
@@ -79,11 +79,11 @@ public:
 
     void test1dCube()
     {
-        typedef MeshlessAdapter<Topologies::Cube<2>::Topology> MyAdapter;
+        typedef MeshlessAdapter<Topologies::Cube<2>::Topology> AdapterType;
 
         FloatCoord<2> dim(6.5, 1);
         double boxSize = 2;
-        MyAdapter adapter(dim, boxSize);
+        AdapterType adapter(dim, boxSize);
 
         double dist;
         FloatCoord<2> pos1(0.5, 0.5);
@@ -98,30 +98,30 @@ public:
 
         // manhattanDistance()
         int distNY;
-        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4), 
+        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4),
                                            FloatCoord<2>(1.8, 0.9));
         TS_ASSERT_EQUALS(distNY, 0);
-        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4), 
+        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4),
                                            FloatCoord<2>(2.1, 0.9));
         TS_ASSERT_EQUALS(distNY, 1);
-        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4), 
+        distNY = adapter.manhattanDistance(FloatCoord<2>(0.2, 0.4),
                                            FloatCoord<2>(6.1, 0.9));
         TS_ASSERT_EQUALS(distNY, 2);
 
-        
+
     }
 
     void testBoxSizeDetermination()
     {
-        typedef MeshlessAdapter<Topologies::Torus<2>::Topology> MyAdapter;
+        typedef MeshlessAdapter<Topologies::Torus<2>::Topology> AdapterType;
 
         int width = 20;
         FloatCoord<2> dim(width * 0.5, 1);
         double boxSize = 0.5;
-        MyAdapter adapter(dim, boxSize);
+        AdapterType adapter(dim, boxSize);
 
-        MyAdapter::CoordVec positions;
-        MyAdapter::Graph graph;
+        AdapterType::CoordVec positions;
+        AdapterType::Graph graph;
         for (int i = 0; i < width; ++i) {
             positions.push_back(std::make_pair(FloatCoord<2>(i * 0.5, 0.5), i));
             SuperVector<int> neighbors;

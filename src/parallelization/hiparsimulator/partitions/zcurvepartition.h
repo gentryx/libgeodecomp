@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_zcurvepartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_zcurvepartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_ZCURVEPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_ZCURVEPARTITION_H
 
 #include <bitset>
 #include <boost/multi_array.hpp>
@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <list>
 #include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/topologies.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/spacefillingcurve.h>
 
@@ -22,20 +23,20 @@ public:
     const static int DIM = DIMENSIONS;
 
     typedef SuperVector<Coord<DIM> > CoordVector;
-    typedef boost::shared_ptr<boost::multi_array<CoordVector, DIM> > Cache;
+    typedef Grid<CoordVector, typename Topologies::Cube<DIM>::Topology> GridType;
+    typedef boost::shared_ptr<GridType> Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
-    typedef typename Topology::template LocateHelper<DIM, CoordVector> LocateHelper;
-  
+
     class Square
     {
     public:
         inline Square(
-            const Coord<DIM>& _origin, 
-            const Coord<DIM> _dimensions, 
-            const unsigned& _quadrant) :
-            origin(_origin),
-            dimensions(_dimensions),
-            quadrant(_quadrant)
+            const Coord<DIM>& origin,
+            const Coord<DIM> dimensions,
+            const unsigned& quadrant) :
+            origin(origin),
+            dimensions(dimensions),
+            quadrant(quadrant)
         {}
 
         inline std::string toString() const
@@ -64,8 +65,8 @@ public:
         static const int NUM_QUADRANTS = 1 << DIM;
 
         inline Iterator(
-            const Coord<DIM>& origin, 
-            const Coord<DIM>& dimensions, 
+            const Coord<DIM>& origin,
+            const Coord<DIM>& dimensions,
             const unsigned& pos=0) :
             SpaceFillingCurve<DIM>::Iterator(origin, false)
         {
@@ -79,7 +80,6 @@ public:
 
         inline Iterator& operator++()
         {
-            // std::cout << "operator++\n";
             if (endReached)
                 return *this;
             if (sublevelState == TRIVIAL) {
@@ -96,11 +96,9 @@ public:
         Coord<DIM> cachedSquareOrigin;
         Coord<DIM> *cachedSquareCoordsIterator;
         Coord<DIM> *cachedSquareCoordsEnd;
-        
+
         inline void operatorIncTrivial()
         {
-            // std::cout << "operatorIncTrivial, " << trivialSquareCounter << "\n"
-            //           << cursor << "\n";
             if (--trivialSquareCounter > 0) {
                 cursor[trivialSquareDirDim]++;
             } else {
@@ -110,7 +108,6 @@ public:
 
         inline void operatorIncCached()
         {
-            // std::cout << "operatorIncCached\n";
             cachedSquareCoordsIterator++;
             if (cachedSquareCoordsIterator != cachedSquareCoordsEnd) {
                 cursor = cachedSquareOrigin + *cachedSquareCoordsIterator;
@@ -121,70 +118,54 @@ public:
 
         inline void digDown(const unsigned& offset)
         {
-            // std::cout << "digDown(" << offset << ")\n";
             if (squareStack.empty())
                 throw std::logic_error("cannot descend from empty squares stack");
             Square currentSquare = squareStack.back();
             squareStack.pop_back();
             const Coord<DIM>& origin = currentSquare.origin;
-            const Coord<DIM>& dimensions = currentSquare.dimensions; 
-            // std::cout << "digging1\n";
+            const Coord<DIM>& dimensions = currentSquare.dimensions;
 
             if (offset >= dimensions.prod()) {
-                // std::cout << "digging2\n";
                 endReached = true;
                 cursor = origin;
                 return;
             }
             if (hasTrivialDimensions(dimensions)) {
-                // std::cout << "digging3\n";
                 digDownTrivial(origin, dimensions, offset);
             } else if (isCached(dimensions)) {
-                // std::cout << "digging4\n";
                 digDownCached(origin, dimensions, offset);
             } else {
-                // std::cout << "digging5\n";
                 digDownRecursion(offset, currentSquare);
             }
-            // std::cout << "digging6\n";
         }
 
         inline void digDownTrivial(
-            const Coord<DIM>& origin, 
-            const Coord<DIM>& dimensions, 
+            const Coord<DIM>& origin,
+            const Coord<DIM>& dimensions,
             const unsigned& offset)
         {
             sublevelState = TRIVIAL;
             cursor = origin;
 
-            // std::cout << "digDownTrivial()\n"
-            //           << origin << "\n"
-            //           << dimensions << "\n"
-            //           << offset << "\n"
-            //           << "cursor: " << cursor << "\n\n";
-
             trivialSquareDirDim = 0;
-            for (int i = 1; i < DIM; ++i) 
-                if (dimensions[i] > 1) 
+            for (int i = 1; i < DIM; ++i) {
+                if (dimensions[i] > 1) {
                     trivialSquareDirDim = i;
-                
+                }
+            }
+
             trivialSquareCounter = dimensions[trivialSquareDirDim] - offset;
             cursor[trivialSquareDirDim] += offset;
 
         }
 
         inline void digDownCached(
-            const Coord<DIM>& origin, 
-            const Coord<DIM>& dimensions, 
+            const Coord<DIM>& origin,
+            const Coord<DIM>& dimensions,
             const unsigned& offset)
         {
             sublevelState = CACHED;
-            CoordVector& coords = 
-                LocateHelper()(
-                    *ZCurvePartition<DIM>::coordsCache,
-                    dimensions,
-                    maxCachedDimensions);
-
+            CoordVector& coords = (*ZCurvePartition<DIM>::coordsCache)[dimensions];
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
             cachedSquareCoordsEnd      = &coords[0] + coords.size();
@@ -193,7 +174,7 @@ public:
 
         inline void digDownRecursion(const unsigned& offset, Square currentSquare)
         {
-            const Coord<DIM>& dimensions = currentSquare.dimensions; 
+            const Coord<DIM>& dimensions = currentSquare.dimensions;
             Coord<DIM> halfDimensions = dimensions / 2;
             Coord<DIM> remainingDimensions = dimensions - halfDimensions;
 
@@ -219,17 +200,19 @@ public:
 
             unsigned accuSizes[numQuadrants];
             accuSizes[0] = 0;
-            for (int i = 1; i < numQuadrants; ++i) 
+            for (int i = 1; i < numQuadrants; ++i) {
                 accuSizes[i] = accuSizes[i - 1] + quadrantDims[i - 1].prod();
+            }
 
             unsigned pos = offset + accuSizes[currentSquare.quadrant];
             unsigned index = std::upper_bound(
-                accuSizes, 
+                accuSizes,
                 accuSizes + numQuadrants,
                 pos) - accuSizes - 1;
 
-            if (index >= (1 << DIM)) 
+            if (index >= (1 << DIM)) {
                 throw std::logic_error("offset too large?");
+            }
 
             unsigned newOffset = pos - accuSizes[index];
             Coord<DIM> newDimensions = quadrantDims[index];
@@ -237,28 +220,13 @@ public:
 
             std::bitset<DIM> quadrantShift(index);
             for (int d = 0; d < DIM; ++d) {
-                newOrigin[d] = quadrantShift[d]? 
-                    halfDimensions[d] :
-                    0;
+                newOrigin[d] = quadrantShift[d]? halfDimensions[d] : 0;
             }
             newOrigin += currentSquare.origin;
 
-            // std::cout << "digDownRecursion(" << offset
-            //           << ",\n " << currentSquare.origin 
-            //           << ",\n " << currentSquare.dimensions
-            //           << ",\n " << currentSquare.quadrant << ")\n"
-            //           << "newOffset: " << newOffset << "\n"
-            //           << "newOrigin: " << newOrigin << "\n"
-            //           << "newDimensions: " << newDimensions << "\n"
-            //           << "index: " << index << "\n"
-            //           << "pos: " << pos << "\n"
-            //           << "accuSizes[0] " << accuSizes[0] << "\n"
-            //           << "accuSizes[1] " << accuSizes[1] << "\n"
-            //           << "\n";
-
             currentSquare.quadrant = index;
             squareStack.push_back(currentSquare);
-                
+
             Square newSquare(newOrigin, newDimensions, 0);
             squareStack.push_back(newSquare);
 
@@ -267,22 +235,16 @@ public:
 
         inline void digUp()
         {
-            // std::cout << "digUpDown()\n";
-            while (!squareStack.empty() && 
-                   (squareStack.back().quadrant == 
+            while (!squareStack.empty() &&
+                   (squareStack.back().quadrant ==
                     (ZCurvePartition<DIM>::Iterator::NUM_QUADRANTS - 1))) {
-                // std::cout << " " << squareStack.back().origin << "\n"
-                //           << " " << squareStack.back().dimensions << "\n"
-                //           << " " << squareStack.back().quadrant << "\n\n";
                 squareStack.pop_back();
             }
 
             if (squareStack.empty()) {
-                // std::cout << "  empty\n";
                 endReached = true;
                 cursor = origin;
             } else {
-                // std::cout << "  quadrant++\n";
                 squareStack.back().quadrant++;
             }
         }
@@ -306,13 +268,13 @@ public:
     };
 
     inline ZCurvePartition(
-        const Coord<DIM>& _origin=Coord<DIM>(), 
-        const Coord<DIM>& _dimensions=Coord<DIM>(),
+        const Coord<DIM>& origin=Coord<DIM>(),
+        const Coord<DIM>& dimensions=Coord<DIM>(),
         const long& offset=0,
         const SuperVector<long>& weights=SuperVector<long>(2)) :
         SpaceFillingCurve<DIM>(offset, weights),
-        origin(_origin),              
-        dimensions(_dimensions)
+        origin(origin),
+        dimensions(dimensions)
     {}
 
     inline Iterator operator[](const unsigned& i) const
@@ -330,21 +292,20 @@ public:
         return Iterator(origin);
     }
 
-    inline Region<DIM> getRegion(const long& node) const 
+    inline Region<DIM> getRegion(const long& node) const
     {
         return Region<DIM>(
-            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 0]],
             (*this)[startOffsets[node + 1]]);
     }
 
-    static inline bool fillCaches() 
+    static inline bool fillCaches()
     {
         // store squares of at most maxDim in size. the division by
         // DIM^2 is a trick to keep the cache small if DIM is large.
         Coord<DIM> maxDim = Coord<DIM>::diagonal(68 / DIM / DIM);
         ZCurvePartition<DIM>::coordsCache.reset(
-            new boost::multi_array<CoordVector, DIM>(
-                maxDim.toExtents()));
+            Grid<CoordVector, Topologies::Cube<DIM> >(maxDim));
 
         CoordBox<DIM> box(Coord<DIM>(), maxDim);
         for (typename CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
@@ -352,13 +313,10 @@ public:
             if (!hasTrivialDimensions(dim)) {
                 CoordVector coords;
                 Iterator end(Coord<DIM>());
-                for (Iterator i(Coord<DIM>(), dim, 0); i != end; ++i)
+                for (Iterator i(Coord<DIM>(), dim, 0); i != end; ++i) {
                     coords.push_back(*i);
-
-                LocateHelper()(
-                    *ZCurvePartition<DIM>::coordsCache,
-                    dim,
-                    maxDim) = coords;
+                }
+                (*coordsCache)[dim] = coords;
             }
         }
 
@@ -384,8 +342,7 @@ template<int DIM>
 Coord<DIM> ZCurvePartition<DIM>::maxCachedDimensions;
 
 template<int DIM>
-bool ZCurvePartition<DIM>::cachesInitialized = 
-    ZCurvePartition<DIM>::fillCaches();
+bool ZCurvePartition<DIM>::cachesInitialized = ZCurvePartition<DIM>::fillCaches();
 
 }
 }

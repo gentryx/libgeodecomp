@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_random_h_
-#define _libgeodecomp_misc_random_h_
+#ifndef LIBGEODECOMP_MISC_RANDOM_H
+#define LIBGEODECOMP_MISC_RANDOM_H
 
 #include <boost/integer_traits.hpp>
 

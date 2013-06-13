@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_patchprovider_h_
-#define _libgeodecomp_parallelization_hiparsimulator_patchprovider_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHPROVIDER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHPROVIDER_H
 
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/superset.h>
@@ -23,11 +23,16 @@ public:
 
     virtual ~PatchProvider() {};
 
+    virtual void setRegion(const Region<DIM>& region)
+    {
+        // empty as most implementations won't need it anyway.
+    }
+
     virtual void get(
-        GRID_TYPE *destinationGrid, 
-        const Region<DIM>& patchableRegion, 
+        GRID_TYPE *destinationGrid,
+        const Region<DIM>& patchableRegion,
         const long& nanoStep,
-        const bool& remove=true) =0;
+        const bool& remove=true) = 0;
 
 protected:
     SuperSet<long> storedNanoSteps;
@@ -41,8 +46,8 @@ protected:
             throw std::logic_error(
                 std::string(
                     "requested time step doesn't match expected nano step.") 
-                + " expected: " + StringConv::itoa((storedNanoSteps.min)()) 
-                + " is: " + StringConv::itoa(nanoStep));
+                + " expected: " + StringOps::itoa((storedNanoSteps.min)()) 
+                + " is: " + StringOps::itoa(nanoStep));
     }
 };
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITION_H
 
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/supervector.h>

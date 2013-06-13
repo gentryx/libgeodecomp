@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_linepointerupdatefunctor_h_
-#define _libgeodecomp_misc_linepointerupdatefunctor_h_
+#ifndef LIBGEODECOMP_MISC_LINEPOINTERUPDATEFUNCTOR_H
+#define LIBGEODECOMP_MISC_LINEPOINTERUPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/coord.h>
@@ -43,7 +43,7 @@ namespace LibGeoDecomp {
  * constant boundary conditions as periodic boundary conditions would
  * automatically wrap accesses to cells within the grid.
  */
-template<typename CELL, int DIM=CELL::Topology::DIMENSIONS, bool HIGH=true, int CUR_DIM=(DIM - 1), bool BOUNDARY_TOP=false, bool BOUNDARY_BOTTOM=false, bool BOUNDARY_SOUTH=false, bool BOUNDARY_NORTH=false> 
+template<typename CELL, int DIM=CELL::Topology::DIM, bool HIGH=true, int CUR_DIM=(DIM - 1), bool BOUNDARY_TOP=false, bool BOUNDARY_BOTTOM=false, bool BOUNDARY_SOUTH=false, bool BOUNDARY_NORTH=false> 
 class LinePointerUpdateFunctor 
 {
 public:
@@ -58,7 +58,7 @@ public:
         const Coord<DIM>& c = streak.origin;
 
         if ((CUR_DIM == 2) && (HIGH == true)) {
-            if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
                 LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true          >()(streak, box, pointers, newLine, nanoStep);
             } else {
@@ -67,7 +67,7 @@ public:
         }
             
         if ((CUR_DIM == 2) && (HIGH == false)) {
-            if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
                 (c[CUR_DIM] == box.origin[CUR_DIM])) {
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,           BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
@@ -76,7 +76,7 @@ public:
         }
             
         if ((CUR_DIM == 1) && (HIGH == true)) {
-            if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
                 LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, true,            BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
@@ -85,7 +85,7 @@ public:
         }
             
         if ((CUR_DIM == 1) && (HIGH == false)) {
-            if ((!WrapsAxis<CUR_DIM, Topology>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
                 (c[CUR_DIM] == box.origin[CUR_DIM])) {
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, true,         BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
@@ -109,19 +109,20 @@ public:
     {
         typedef typename CELL::Stencil Stencil;
         
-        long x = streak.origin.x();
-            
+        long x = 0;
+        long endX = streak.endX - streak.origin.x();
+
         if (streak.endX == (streak.origin.x() + 1)) {
             LinePointerNeighborhood<CELL, Stencil, true, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
             newLine[x].update(hood, nanoStep);
             return;
         }
-
+        
         LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
         newLine[x].update(hoodWest, nanoStep);
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-        updateMain(newLine, &x, (long)(streak.endX - 1), hood, nanoStep, typename CELL::API());
+        updateMain(newLine, &x, (long)(endX - 1), hood, nanoStep, typename CELL::API());
         
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
         newLine[x].update(hoodEast, nanoStep);

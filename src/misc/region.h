@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_region_h_
-#define _libgeodecomp_misc_region_h_
+#ifndef LIBGEODECOMP_MISC_REGION_H
+#define LIBGEODECOMP_MISC_REGION_H
 
 #include <algorithm>
 
@@ -23,7 +23,7 @@ public:
         if (a[DIM] != b[DIM]) {
             return false;
         }
-        
+
         return StreakIteratorCompareIterators<DIM - 1>()(a, b);
     }
 };
@@ -34,7 +34,7 @@ class StreakIteratorCompareIterators<0>
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
         return a[0] == b[0];
@@ -47,7 +47,7 @@ class StreakIteratorInitBegin
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
@@ -66,7 +66,7 @@ class StreakIteratorInitBegin<0>
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
@@ -85,7 +85,7 @@ class StreakIteratorInitEnd
 public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    
+
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
     {
@@ -126,7 +126,7 @@ protected:
             return;
         }
 
-        for (VecType::iterator incrementer = start; 
+        for (VecType::iterator incrementer = start;
              incrementer != end; ++incrementer) {
             incrementer->second += inserts;
         }
@@ -168,7 +168,7 @@ public:
     template<int MY_DIM>
     static inline bool intersects(const Streak<MY_DIM>& s1, const Streak<MY_DIM>& s2)
     {
-        return ((s1.origin.x() <= s2.origin.x() && s2.origin.x() < s1.endX) || 
+        return ((s1.origin.x() <= s2.origin.x() && s2.origin.x() < s1.endX) ||
                 (s2.origin.x() <= s1.origin.x() && s1.origin.x() < s2.endX));
 
     }
@@ -180,13 +180,13 @@ public:
     }
 };
 
-template<int DIM> 
+template<int DIM>
 class RegionLookupHelper;
 
-template<int DIM> 
+template<int DIM>
 class RegionInsertHelper;
 
-template<int DIM> 
+template<int DIM>
 class RegionRemoveHelper;
 
 /**
@@ -242,7 +242,7 @@ public:
                     return;
                 }
 
-                VecType::const_iterator nextEnd = 
+                VecType::const_iterator nextEnd =
                     region->indices[i - 1].begin() + (iterators[i] + 1)->second;
 
                 if (iterators[i - 1] != nextEnd) {
@@ -285,7 +285,7 @@ public:
         const Region<DIM> *region;
     };
 
-    class Iterator : public std::iterator<std::forward_iterator_tag, 
+    class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const Coord<DIM> >
     {
     public:
@@ -300,8 +300,8 @@ public:
             cursor.x()++;
             if (cursor.x() >= streakIterator->endX) {
                 ++streakIterator;
-                cursor = streakIterator->origin;   
-            }             
+                cursor = streakIterator->origin;
+            }
         }
 
         inline bool operator==(const Iterator& other) const
@@ -309,12 +309,12 @@ public:
             return streakIterator == other.streakIterator &&
                 (streakIterator.endReached() || cursor == other.cursor);
         }
-            
+
         inline bool operator!=(const Iterator& other) const
         {
             return !(*this == other);
         }
-        
+
         inline const Coord<DIM>& operator*() const
         {
             return cursor;
@@ -411,8 +411,8 @@ public:
      */
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
-        const unsigned& width, 
-        const Coord<DIM>& dimensions, 
+        const unsigned& width,
+        const Coord<DIM>& dimensions,
         TOPOLOGY /* unused */) const
     {
         Region ret;
@@ -429,7 +429,7 @@ public:
 
             for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
                 Streak<DIM> newStreak(*i, endX);
-                if (TOPOLOGY::wrapsAxis(0)) {
+                if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
                     splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
                     normalizeStreak<TOPOLOGY>(
@@ -439,8 +439,8 @@ public:
         }
 
         return ret;
-    } 
-       
+    }
+
     inline bool operator==(const Region<DIM>& other) const
     {
         for (int i = 0; i < DIM; ++i) {
@@ -448,7 +448,7 @@ public:
                 return false;
             }
         }
-            
+
         return true;
     }
 
@@ -494,12 +494,12 @@ public:
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             *this << Streak<DIM>(*i, i->x() + width);
         }
-        
+
         return *this;
     }
 
     inline Region& operator>>(const Streak<DIM>& s)
-    { 
+    {
         //ignore 0 length streaks and empty selves
         if (s.endX <= s.origin.x() || empty()) {
             return *this;
@@ -511,37 +511,37 @@ public:
     }
 
     inline Region& operator>>(const Coord<DIM>& c)
-    { 
+    {
         *this >> Streak<DIM>(c, c.x() + 1);
         return *this;
     }
 
-    inline void operator-=(const Region& other) 
+    inline void operator-=(const Region& other)
     {
         for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
             *this >> *i;
         }
     }
-    
+
     inline Region operator-(const Region& other) const
     {
         Region ret(*this);
         ret -= other;
         return ret;
     }
-    
-    inline void operator&=(const Region& other) 
+
+    inline void operator&=(const Region& other)
     {
         Region intersection = other & *this;
         *this = intersection;
     }
-    
+
     inline Region operator&(const Region& other) const
     {
         Region ret;
         StreakIterator myIter = beginStreak();
         StreakIterator otherIter = other.beginStreak();
-        
+
         StreakIterator myEnd = endStreak();
         StreakIterator otherEnd = other.endStreak();
 
@@ -588,13 +588,13 @@ public:
         std::copy(beginStreak(), endStreak(), ret.begin());
         return ret;
     }
-    
+
     inline std::string toString() const
     {
         std::ostringstream buf;
         buf << "Region(\n";
         for (int dim = 0; dim < DIM; ++dim) {
-            buf << "indices[" << dim << "] = " 
+            buf << "indices[" << dim << "] = "
                 << indices[dim] << "\n";
         }
         buf << ")\n";
@@ -624,7 +624,7 @@ public:
     {
         return Iterator(beginStreak());
     }
-    
+
     inline Iterator end() const
     {
         return Iterator(endStreak());
@@ -665,19 +665,19 @@ private:
                 max = (max.max)(right);
                 mySize += i->endX - i->origin.x();
             }
-            myBoundingBox = 
+            myBoundingBox =
                 CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
         }
     }
 
     inline void resetGeometryCache() const
     {
-        determineGeometry();       
+        determineGeometry();
         geometryCacheTainted = false;
     }
 
     inline Streak<DIM> trimStreak(
-        const Streak<DIM>& s, 
+        const Streak<DIM>& s,
         const Coord<DIM>& dimensions) const
     {
         int width = dimensions.x();
@@ -689,9 +689,9 @@ private:
 
     template<typename TOPOLOGY>
     void splitStreak(
-        const Streak<DIM>& streak, 
-        Region *target, 
-        const Coord<DIM>& dimensions) const 
+        const Streak<DIM>& streak,
+        Region *target,
+        const Coord<DIM>& dimensions) const
     {
         int width = dimensions.x();
 
@@ -726,11 +726,11 @@ private:
             normalizeStreak<TOPOLOGY>(section, target, dimensions);
         }
     }
-    
+
     template<typename TOPOLOGY>
     void normalizeStreak(
-        const Streak<DIM>& streak, 
-        Region *target, 
+        const Streak<DIM>& streak,
+        Region *target,
         const Coord<DIM>& dimensions) const
     {
         Streak<DIM> ret;
@@ -765,11 +765,11 @@ public:
         int c = s.origin[DIM];
         const VecType& indices = region.indices[DIM];
 
-        VecType::const_iterator i = 
+        VecType::const_iterator i =
             std::upper_bound(
-                indices.begin() + start, 
-                indices.begin() + end, 
-                IntPair(c, 0), 
+                indices.begin() + start,
+                indices.begin() + end,
+                IntPair(c, 0),
                 RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
@@ -790,9 +790,9 @@ public:
                 return RegionLookupHelper<DIM-1>()(
                     region,
                     s,
-                    nextLevelStart, 
+                    nextLevelStart,
                     nextLevelEnd);
-            } 
+            }
         }
 
         return false;
@@ -813,8 +813,8 @@ public:
         IntPair curStreak(s.origin.x(), s.endX);
         const VecType& indices = region.indices[0];
 
-        VecType::const_iterator cursor = 
-            std::upper_bound(indices.begin() + start, indices.begin() + end, 
+        VecType::const_iterator cursor =
+            std::upper_bound(indices.begin() + start, indices.begin() + end,
                              curStreak, RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
@@ -854,11 +854,11 @@ public:
         int c = s.origin[DIM];
         VecType& indices = region->indices[DIM];
 
-        VecType::iterator i = 
+        VecType::iterator i =
             std::upper_bound(
-                indices.begin() + start, 
-                indices.begin() + end, 
-                IntPair(c, 0), 
+                indices.begin() + start,
+                indices.begin() + end,
+                IntPair(c, 0),
                 RegionCommonHelper::pairCompareFirst);
 
         int nextLevelStart = 0;
@@ -877,23 +877,23 @@ public:
                 }
 
                 int inserts = RegionInsertHelper<DIM - 1>()(
-                    region, 
-                    s, 
+                    region,
+                    s,
                     nextLevelStart,
                     nextLevelEnd);
                 incRemainder(i, indices.end(), inserts);
                 return 0;
             }
-        } 
+        }
 
         if (i != indices.end()) {
             nextLevelStart = i->second;
         } else {
             nextLevelStart = region->indices[DIM - 1].size();
         }
-        
+
         nextLevelEnd = nextLevelStart;
-        
+
         VecType::iterator followingEntries;
 
         if (i == indices.end()) {
@@ -906,7 +906,7 @@ public:
 
         int inserts = RegionInsertHelper<DIM - 1>()(region, s, nextLevelStart, nextLevelEnd);
         incRemainder(followingEntries, indices.end(), inserts);
-        
+
         return 1;
     }
 };
@@ -925,8 +925,8 @@ public:
         IntPair curStreak(s.origin.x(), s.endX);
         VecType& indices = region->indices[0];
 
-        VecType::iterator cursor = 
-            std::upper_bound(indices.begin() + start, indices.begin() + end, 
+        VecType::iterator cursor =
+            std::upper_bound(indices.begin() + start, indices.begin() + end,
                              curStreak, RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
@@ -950,13 +950,13 @@ public:
             } else {
                 cursor++;
             }
-                
-            if ((cursor == (indices.begin() + end)) || 
+
+            if ((cursor == (indices.begin() + end)) ||
                 (!intersectOrTouch(*cursor, curStreak))) {
                 break;
             }
         }
-        
+
         indices.insert(cursor, curStreak);
         return inserts;
     }
@@ -964,11 +964,11 @@ public:
 private:
     inline bool intersectOrTouch(const IntPair& a, const IntPair& b) const
     {
-        return 
-            ((a.first <= b.first && b.first <= a.second) || 
+        return
+            ((a.first <= b.first && b.first <= a.second) ||
              (b.first <= a.first && a.first <= b.second));
     }
-    
+
     inline IntPair fuse(const IntPair& a, const IntPair& b) const
     {
         return IntPair((std::min)(a.first, b.first),
@@ -1000,11 +1000,11 @@ public:
         int c = s.origin[DIM];
         VecType& indices = region->indices[DIM];
 
-        VecType::iterator i = 
+        VecType::iterator i =
             std::upper_bound(
-                indices.begin() + start, 
-                indices.begin() + end, 
-                IntPair(c, 0), 
+                indices.begin() + start,
+                indices.begin() + end,
+                IntPair(c, 0),
                 RegionCommonHelper::pairCompareFirst);
 
         // key is not present, so no need to remove it
@@ -1066,11 +1066,11 @@ public:
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
         // IMO really sick...
-        VecType::iterator cursor = 
+        VecType::iterator cursor =
             std::upper_bound(
-                indices.begin() + start, 
-                indices.begin() + end, 
-                IntPair(c, 0), 
+                indices.begin() + start,
+                indices.begin() + end,
+                IntPair(c, 0),
                 RegionCommonHelper::pairCompareFirst);
         if (cursor != (indices.begin() + start)) {
             // ...so we resort to landing one past the streak we're
@@ -1107,11 +1107,11 @@ public:
 private:
     inline bool intersect(const IntPair& a, const IntPair& b) const
     {
-        return 
-            ((a.first <= b.first && b.first < a.second) || 
+        return
+            ((a.first <= b.first && b.first < a.second) ||
              (b.first <= a.first && a.first < b.second));
     }
-    
+
     inline VecType substract(const IntPair& base, const IntPair& minuend) const
     {
         if (!intersect(base, minuend)) {

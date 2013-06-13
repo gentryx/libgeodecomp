@@ -53,6 +53,7 @@ public:
         simulator->addWriter(
             new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile));
         simulator->run();
+
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
             filename << tempFile << "." << std::setfill('0') << std::setw(4)
@@ -78,7 +79,6 @@ public:
         int period = 2;
         simulator->addWriter(
             new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, period));
-        
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {

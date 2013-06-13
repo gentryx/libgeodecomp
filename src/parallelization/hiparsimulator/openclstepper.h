@@ -1,8 +1,8 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
 
-#ifndef _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_openclstepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
 
 #ifndef __CL_ENABLE_EXCEPTIONS
 #define __CL_ENABLE_EXCEPTIONS
@@ -22,23 +22,23 @@ class OpenCLStepper : public Stepper<CELL_TYPE>
 {
     friend class OpenCLStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager< 
-        DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-  
+    typedef PartitionManager<
+        DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+
     using Stepper<CELL_TYPE>::initializer;
     using Stepper<CELL_TYPE>::partitionManager;
 
     inline OpenCLStepper(
         const std::string& cellSourceFile,
-        boost::shared_ptr<MyPartitionManager> _partitionManager,
-        Initializer<CELL_TYPE> *_initializer,
+        boost::shared_ptr<PartitionManagerType> partitionManager,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const int& platformID=0,
         const int& deviceID=0) :
-        ParentType(_partitionManager, _initializer)
+        ParentType(partitionManager, initializer)
     {
         /*
         std::vector<cl::Platform> platforms;
@@ -49,7 +49,7 @@ public:
         context = cl::Context(devices);
         cmdQueue = cl::CommandQueue(context, usedDevice);
 
-        std::string clSourceString = 
+        std::string clSourceString =
 "#if defined(cl_khr_fp64)\n"
 "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
 "#elif defined(cl_amd_fp64)\n"
@@ -62,8 +62,8 @@ public:
             ;
 
         cl::Program::Sources clSource(
-            1, 
-            std::make_pair(clSourceString.c_str(), 
+            1,
+            std::make_pair(clSourceString.c_str(),
                            clSourceString.size()));
         cl::Program clProgram(context, clSource);
 
@@ -73,7 +73,7 @@ public:
             // Normally we don't catch exceptions, but in this case
             // printing the build log (which might get lost otherwise)
             // is valuable for the user who needs to debug his code.
-            std::cerr << "Build Log: " 
+            std::cerr << "Build Log: "
                       << clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(usedDevice) << "\n";
             throw;
         }
@@ -92,23 +92,23 @@ public:
         return std::make_pair(curStep, curNanoStep);
     }
 
-    inline virtual void update(int nanoSteps) 
+    inline virtual void update(int nanoSteps)
     {
         // fixme: implement me (later)
         try {
             cl::Buffer startCoordsBuffer, endCoordsBuffer;
-        
+
             Coord<DIM> c = initializer->gridDimensions();
             int zDim = c.z();
             int yDim = c.y();
             int xDim = c.x();
-	
+
             int actualX = xDim;
             int actualY = yDim;
-                
+
             std::vector<int> startCoords;
             std::vector<int> endCoords;
-                
+
             genThreadCoords(
                 &startCoords,
                 &endCoords,
@@ -125,18 +125,18 @@ public:
 
             startCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, startCoords.size()*sizeof(int), &startCoords[0]);
             endCoordsBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, endCoords.size()*sizeof(int), &endCoords[0]);
-        
+
             cl::NDRange global(actualX, actualY, zDim);
             //fixme: local range could be chosen dynamically
             cl::NDRange local(16, 16, 1);
-        
+
             cl::KernelFunctor livingKernel = kernel.bind(cmdQueue, global, local);
             livingKernel(inputDeviceGrid, outputDeviceGrid, zDim, yDim, xDim,
                          1, 0, 0, 0,
                          startCoordsBuffer, endCoordsBuffer, actualX, actualY);
             livingKernel.getError();
             cmdQueue.finish();
-        
+
 
         } catch (cl::Error& err) {
             std::cerr << "OpenCL error: " << err.what() << ", " << oclStrerror(err.err()) << std::endl;
@@ -149,7 +149,7 @@ public:
     inline virtual const GridType& grid() const
     {
         cmdQueue.enqueueReadBuffer(
-            outputDeviceGrid, true, 0, 
+            outputDeviceGrid, true, 0,
             hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), hostGrid->baseAddress());
         return *hostGrid;
     }
@@ -164,7 +164,7 @@ private:
     cl::Context context;
     cl::CommandQueue cmdQueue;
     cl::Kernel kernel;
-    
+
     inline void genThreadCoords(std::vector<int> *startCoords,
 			 std::vector<int> *endCoords,
 			 const int& offset_x,
@@ -184,19 +184,19 @@ private:
       int numThreads = actual_x * actual_y * maxZ;
       startCoords->resize(numThreads);
       endCoords->resize(numThreads);
-    
+
       for (int z = 0; z < maxZ; ++z) {
         int startZ = offset_z + z * planes;
-        int endZ = std::min(offset_z + active_z, 
+        int endZ = std::min(offset_z + active_z,
                             startZ + planes);
-        
+
         for (int y = 0; y < actual_y; ++y) {
 	  for (int x = 0; x < actual_x; ++x) {
-	    int threadID = (z * actual_x * actual_y) + (y * actual_x) + x; 
+	    int threadID = (z * actual_x * actual_y) + (y * actual_x) + x;
 	    int myEndZ = endZ;
 	    if (x >= maxX || y >= maxY)
 	      myEndZ = startZ;
-                
+
 	    (*startCoords)[threadID] = startZ;
 	    (*endCoords)[threadID] = myEndZ;
 	  }
@@ -206,21 +206,21 @@ private:
 
     inline void initGrids()
     {
-        const CoordBox<DIM>& gridBox = 
+        const CoordBox<DIM>& gridBox =
             partitionManager->ownRegion().boundingBox();
         hostGrid.reset(new GridType(gridBox, CELL_TYPE()));
         initializer->grid(&*hostGrid);
-        
+
         inputDeviceGrid = cl::Buffer(
-            context, 
-            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
-            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), 
+            context,
+            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE),
             hostGrid->baseAddress());
 	std::vector<CELL_TYPE> zeroMem(hostGrid->getDimensions().prod(), 0);
 	outputDeviceGrid = cl::Buffer(
-            context, 
-            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
-            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE), 
+            context,
+            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+            hostGrid->getDimensions().prod() * sizeof(CELL_TYPE),
             &zeroMem[0]);
     }
 
@@ -254,7 +254,7 @@ private:
 	return "CL_MAP_FAILURE";
       case -13:
 	return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
-      case -14: 
+      case -14:
 	return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
       case -30:
 	return "CL_INVALID_VALUE";

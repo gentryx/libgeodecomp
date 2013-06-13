@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_meshlessadapter_h_
-#define _libgeodecomp_misc_meshlessadapter_h_
+#ifndef LIBGEODECOMP_MISC_MESHLESSADAPTER_H
+#define LIBGEODECOMP_MISC_MESHLESSADAPTER_H
 
 #include <list>
 #include <set>
@@ -20,7 +20,7 @@ class MeshlessAdapter
 {
 public:
     friend class MeshlessAdapterTest;
-    static const int DIM = TOPOLOGY::DIMENSIONS;
+    static const int DIM = TOPOLOGY::DIM;
     static const int MAX_SIZE = 300000;
 
     typedef std::list<std::pair<FloatCoord<DIM>, int> > CoordList;

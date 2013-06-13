@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_flowwidget_h_
-#define _libgeodecomp_examples_latticegas_flowwidget_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_FLOWWIDGET_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_FLOWWIDGET_H
 
 #include <fstream>
 #include <iomanip>
@@ -36,9 +36,10 @@ public:
 public slots:
     void ping()
     {
-        emit updateImage((unsigned*)image.scanLine(0), image.width(), image.height());        
-        if (simParamsHost.dumpFrames) 
+        emit updateImage((unsigned*)image.scanLine(0), image.width(), image.height());
+        if (simParamsHost.dumpFrames) {
             dumpFrame();
+        }
         update();
         incFrames();
     }
@@ -60,9 +61,9 @@ private:
         std::ostringstream filename;
         filename << "snapshot." << std::setfill('0') << std::setw(4) << counter << ".ppm";
         std::ofstream outfile(filename.str().c_str());
-        if (!outfile) 
+        if (!outfile)
             throw std::runtime_error("Cannot open output file");
-        outfile << "P6 " << image.width() 
+        outfile << "P6 " << image.width()
                 << " "   << image.height() << " 255\n";
 
         for (unsigned y = 0; y < image.height(); ++y) {

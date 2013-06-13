@@ -6,8 +6,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/openclstepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/test/parallel_mpi_1/cell.h>
 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -40,22 +40,20 @@ class OpenCLStepperBasicTest : public CxxTest::TestSuite
 {
 public:
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
-    typedef OpenCLStepper<Cell> MyStepper;
+    typedef OpenCLStepper<Cell> StepperType;
 
     void setUp()
     {
-        init = new CellInitializer(Coord<3>(128, 128, 128));
+        init.reset(new CellInitializer(Coord<3>(128, 128, 128)));
         CoordBox<3> rect = init->gridBox();
 
         partitionManager.reset(new PartitionManager<3>(rect));
         stepper.reset(
-            new MyStepper(cellSourceFile, partitionManager, init));
+            new StepperType(cellSourceFile, partitionManager, init));
     }
 
     void tearDown()
-    {
-        delete init;
-    }
+    {}
 #endif
 
     void testBasic()
@@ -67,9 +65,9 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
 private:
-    CellInitializer *init;
+    boost::shared_ptr<CellInitializer> init;
     boost::shared_ptr<PartitionManager<3> > partitionManager;
-    boost::shared_ptr<MyStepper> stepper;
+    boost::shared_ptr<StepperType> stepper;
 #endif
 };
 

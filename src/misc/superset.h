@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_superset_h_
-#define _libgeodecomp_misc_superset_h_
+#ifndef LIBGEODECOMP_MISC_SUPERSET_H
+#define LIBGEODECOMP_MISC_SUPERSET_H
 
 #include <algorithm>
 #include <iterator>
@@ -33,8 +33,9 @@ public:
         for (const_iterator i = begin(); i != end();) {
             temp << *i;
             i++;
-            if (i != end())
+            if (i != end()) {
                 temp << "\n";
+            }
         }
         temp << "}";
         return temp.str();
@@ -55,34 +56,34 @@ public:
         erase(begin());
     }
 
-    inline SuperSet& operator<<(const T& elem) 
+    inline SuperSet& operator<<(const T& elem)
     {
         insert(elem);
         return *this;
     }
 
-    inline SuperSet operator&&(const SuperSet<T>& other) const 
-    {        
+    inline SuperSet operator&&(const SuperSet<T>& other) const
+    {
         SuperSet result;
         std::set_intersection(
-            begin(), end(), 
-            other.begin(), other.end(), 
+            begin(), end(),
+            other.begin(), other.end(),
             std::inserter(result, result.begin()));
         return result;
     }
 
-    inline SuperSet operator||(const SuperSet<T>& other) const 
-    {        
+    inline SuperSet operator||(const SuperSet<T>& other) const
+    {
         SuperSet result;
         std::set_union(
-            begin(), end(), 
-            other.begin(), other.end(), 
+            begin(), end(),
+            other.begin(), other.end(),
             std::inserter(result, result.begin()));
         return result;
     }
 };
 
-};
+}
 
 template<typename _CharT, typename _Traits, typename T>
 std::basic_ostream<_CharT, _Traits>&

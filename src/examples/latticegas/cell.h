@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_cell_h_
-#define _libgeodecomp_examples_latticegas_cell_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_CELL_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_CELL_H
 
 #include <cstdlib>
 #include <cstdio>
@@ -11,7 +11,7 @@ class Cell
 {
 public:
 
-    enum Position { 
+    enum Position {
         UL, // upper left
         UR, // upper right
         L,  // left
@@ -109,7 +109,7 @@ public:
                 return "LR";
             default:
                 return "C";
-            }            
+            }
         }
 
         static Position successor(const Position& pos)
@@ -136,7 +136,7 @@ public:
         {
             return flowState;
         }
-        
+
         std::string toString() const
         {
             std::ostringstream buf;
@@ -154,7 +154,7 @@ public:
         int flowState;
         Position destinations[7];
     };
-    
+
     inline Cell(const State& newState=liquid, const int& k=-1, const int& val=1) :
         state(newState)
     {
@@ -170,15 +170,15 @@ public:
         a = b;
         b = buf;
     }
-    
+
     __device__ __host__ inline const Cell& getNeighbor(
         const int& source,
         const Cell& ulCell,
-        const Cell& urCell, 
-        const Cell& lCell, 
-        const Cell& cCell, 
-        const Cell& rCell, 
-        const Cell& llCell, 
+        const Cell& urCell,
+        const Cell& lCell,
+        const Cell& cCell,
+        const Cell& rCell,
+        const Cell& llCell,
         const Cell& lrCell) const
     {
         switch (source) {
@@ -204,10 +204,10 @@ public:
     __device__ __host__ inline void update(
         SimParams *simParams,
         const int& t,
-        const Cell& ulCell, 
-        const Cell& urCell, 
-        const Cell& lCell, 
-        const Cell& cCell, 
+        const Cell& ulCell,
+        const Cell& urCell,
+        const Cell& lCell,
+        const Cell& cCell,
         const Cell& rCell,
         const Cell& llCell,
         const Cell& lrCell)
@@ -221,7 +221,7 @@ public:
         const char& lr = lrCell[UL];
 
         state = cCell.state;
-        int flowState = 
+        int flowState =
             (not0(ul) << 6) +
             (not0(ur) << 5) +
             (not0(l)  << 4) +
@@ -282,7 +282,7 @@ public:
             cCell.state  == solid1 &&
             rCell.state  == solid1 &&
             llCell.state == solid1 &&
-            lrCell.state == solid1) 
+            lrCell.state == solid1)
             state = solid2;
 
         if (ulCell.state == solid2 &&
@@ -291,7 +291,7 @@ public:
             cCell.state  == solid2 &&
             rCell.state  == solid2 &&
             llCell.state == solid2 &&
-            lrCell.state == solid2) 
+            lrCell.state == solid2)
             state = solid3;
 
         if (ulCell.state == solid3 &&
@@ -305,14 +305,14 @@ public:
 
         int source = 0;
         int target = 0;
-            
+
         while (source < 7 && target < 7) {
             if (particles[source] == 0) {
                 ++source;
                 continue;
             }
 
-            const Cell& targetCell = 
+            const Cell& targetCell =
                 getNeighbor(source, ulCell, urCell, lCell, cCell, rCell, llCell, lrCell);
 
             bool targetValid = false;
@@ -329,21 +329,20 @@ public:
 
             if (particles[target] != 0)
                 targetValid = false;
-            
+
             if (!targetValid) {
                 ++target;
                 continue;
             }
 
-            
             particles[target] = particles[source];
             particles[source] = 0;
             ++source;
             ++target;
         }
-    } 
+    }
 
-    __device__ __host__ inline char& getState() 
+    __device__ __host__ inline char& getState()
     {
         return state;
     }
@@ -361,7 +360,7 @@ public:
     inline std::string toString() const
     {
         std::ostringstream buf;
-        buf << "(" 
+        buf << "("
             << stateToString(state) << ", "
             << particleToString(particles[0]) << ", "
             << particleToString(particles[1]) << ", "
@@ -402,13 +401,13 @@ public:
     {
         for (int i = 0; i < 7; ++i)
             simParamsHost.transportTable[p.getFlowState()][offset][i] = p.getDest(i);
-    } 
-    
+    }
+
     char particles[7];
     char state;
 
 private:
-    static void initTransportTable() 
+    static void initTransportTable()
     {
         Cell::Pattern p;
         p(L, UL);
@@ -424,9 +423,11 @@ private:
         std::cout << "\n" << p.rotate(6).toString() << "\n";
 
         // default: no collision
-        for (int i = 0; i < 128; ++i) 
-            for (int rand = 0; rand < 4; ++rand)
+        for (int i = 0; i < 128; ++i) {
+            for (int rand = 0; rand < 4; ++rand) {
                 fillIn(i, rand, LR, LL, R, C, L, UR, UL);
+            }
+        }
 
         // add patterns according to Fig. 7.2:
         {
@@ -444,7 +445,7 @@ private:
         }
         {
             // b
-            Pattern p[0];
+            Pattern p[1];
             p[0](UL, UL);
             p[0](R,  R);
             p[0](LL, LL);
@@ -492,19 +493,9 @@ private:
             p[0](C,  C);
             addPattern(p, 1);
         }
-        // {
-        //     // fixme
-        //     Pattern p[2];
-        //     p[0](L, UR);
-        //     p[0](C, LR);
-        //     p[1](L, LR);
-        //     p[1](C, UR);
-        //     addPattern(p, 2);
-        // }
-
     }
 
-    static void initPalette() 
+    static void initPalette()
     {
         // unused entries are set to red
         simParamsHost.palette[0][0] = 255;

@@ -10,8 +10,8 @@
 #define GRIDHEIGHT 5
 
 double edge = 0;
-     
-using namespace LibGeoDecomp; 
+
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -24,7 +24,7 @@ namespace LibGeoDecomp {
  *     212 213 214 215
  * y=4 216 217 218 219
  */
-class GridTest : public CxxTest::TestSuite 
+class GridTest : public CxxTest::TestSuite
 {
     Grid<TestCell<2> > *testGrid;
 
@@ -37,7 +37,7 @@ public:
         int num = 200;
         for (unsigned y = 0; y < testGrid->getDimensions().y(); y++) {
             for (unsigned x = 0; x < testGrid->getDimensions().x(); x++) {
-                (*testGrid)[Coord<2>(x, y)] = 
+                (*testGrid)[Coord<2>(x, y)] =
                     TestCell<2>(Coord<2>(x, y), testGrid->getDimensions());
                 (*testGrid)[Coord<2>(x, y)].testValue =  num++;
             }

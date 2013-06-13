@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
-#define _libgeodecomp_parallelization_hiparsimulator_vanillastepper_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
 
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
@@ -15,14 +15,13 @@ class VanillaStepper : public Stepper<CELL_TYPE>
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<
-        DIM, typename CELL_TYPE::Topology> MyPartitionManager;
-    typedef PatchBufferFixed<GridType, GridType, 1> MyPatchBuffer1;
-    typedef PatchBufferFixed<GridType, GridType, 2> MyPatchBuffer2;
+    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
+    typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     using Stepper<CELL_TYPE>::addPatchAccepter;
@@ -33,11 +32,11 @@ public:
     using Stepper<CELL_TYPE>::partitionManager;
 
     inline VanillaStepper(
-        boost::shared_ptr<MyPartitionManager> _partitionManager,
-        Initializer<CELL_TYPE> *_initializer,
+        boost::shared_ptr<PartitionManagerType> partitionManager,
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(_partitionManager, _initializer)
+        ParentType(partitionManager, initializer)
     {
         curStep = initializer->startStep();
         curNanoStep = 0;
@@ -76,16 +75,16 @@ private:
     int validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
-    MyPatchBuffer2 rimBuffer;
-    MyPatchBuffer1 kernelBuffer;
+    PatchBufferType2 rimBuffer;
+    PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
 
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
-             i != region.endStreak(); 
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
              ++i) {
             UpdateFunctor<CELL_TYPE>()(
                 *i,
@@ -105,7 +104,6 @@ private:
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
 
-        
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();
@@ -113,11 +111,11 @@ private:
     }
 
     inline void notifyPatchAccepters(
-        const Region<DIM>& region, 
+        const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         const long& nanoStep)
     {
-        for (typename ParentType::PatchAccepterList::iterator i = 
+        for (typename ParentType::PatchAccepterList::iterator i =
                  patchAccepters[patchType].begin();
              i != patchAccepters[patchType].end();
              ++i) {
@@ -128,11 +126,11 @@ private:
     }
 
     inline void notifyPatchProviders(
-        const Region<DIM>& region, 
+        const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         const long& nanoStep)
     {
-        for (typename ParentType::PatchProviderList::iterator i = 
+        for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
              ++i) {
@@ -153,7 +151,6 @@ private:
         Coord<DIM> topoDim = initializer->gridDimensions();
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
-
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         initializer->grid(&*oldGrid);
@@ -161,21 +158,20 @@ private:
         resetValidGhostZoneWidth();
 
         notifyPatchAccepters(
-            rim(),     
-            ParentType::GHOST,     
+            rim(),
+            ParentType::GHOST,
             globalNanoStep());
         notifyPatchAccepters(
-            partitionManager->innerSet(0), 
-            ParentType::INNER_SET, 
+            partitionManager->innerSet(0),
+            ParentType::INNER_SET,
             globalNanoStep());
 
-        kernelBuffer = MyPatchBuffer1(partitionManager->getVolatileKernel());
-        rimBuffer = MyPatchBuffer2(rim());
+        kernelBuffer = PatchBufferType1(partitionManager->getVolatileKernel());
+        rimBuffer = PatchBufferType2(rim());
         saveRim(globalNanoStep());
         updateGhost();
     }
-    
-public:
+
     /**
      * computes the next ghost zone at time "t_1 = globalNanoStep() +
      * ghostZoneWidth()". Expects that oldGrid has its kernel and its
@@ -185,10 +181,10 @@ public:
      * its whole ownRegion() will be at time t_1 and the rim will be
      * saved to the patchBuffer at "t2 = t1 + ghostZoneWidth()".
      */
-    inline void updateGhost() 
+    inline void updateGhost()
     {
         // fixme: skip all this ghost zone buffering for
-        // ghostZoneWidth == 1?             
+        // ghostZoneWidth == 1?
 
         // 1: Prepare grid. The following update of the ghostzone will
         // destroy parts of the kernel, which is why we'll
@@ -208,8 +204,8 @@ public:
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
 
             const Region<DIM>& region = partitionManager->rim(t + 1);
-            for (typename Region<DIM>::StreakIterator i = region.beginStreak(); 
-                 i != region.endStreak(); 
+            for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+                 i != region.endStreak();
                  ++i) {
                 UpdateFunctor<CELL_TYPE>()(
                     *i,
@@ -234,8 +230,9 @@ public:
         curStep = oldStep;
 
         saveRim(curGlobalNanoStep);
-        if (ghostZoneWidth() % 2)
+        if (ghostZoneWidth() % 2) {
             std::swap(oldGrid, newGrid);
+        }
 
         // 3: restore grid for kernel update
         restoreRim(true);
@@ -247,7 +244,7 @@ private:
     {
         return partitionManager->getGhostZoneWidth();
     }
-    
+
     inline const Region<DIM>& rim() const
     {
         return partitionManager->rim(ghostZoneWidth());
@@ -272,7 +269,7 @@ private:
     inline void saveKernel()
     {
         kernelBuffer.pushRequest(globalNanoStep());
-        kernelBuffer.put(*oldGrid, 
+        kernelBuffer.put(*oldGrid,
                          partitionManager->innerSet(ghostZoneWidth()),
                          globalNanoStep());
     }
@@ -280,9 +277,9 @@ private:
     inline void restoreKernel()
     {
         kernelBuffer.get(
-            &*oldGrid, 
-            partitionManager->getVolatileKernel(), 
-            globalNanoStep(), 
+            &*oldGrid,
+            partitionManager->getVolatileKernel(),
+            globalNanoStep(),
             true);
     }
 };

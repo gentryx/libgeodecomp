@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_loadbalancer_noopbalancer_h_
-#define _libgeodecomp_loadbalancer_noopbalancer_h_
+#ifndef LIBGEODECOMP_LOADBALANCER_NOOPBALANCER_H
+#define LIBGEODECOMP_LOADBALANCER_NOOPBALANCER_H
 
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_framegrabber_h_
-#define _libgeodecomp_examples_latticegas_framegrabber_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_FRAMEGRABBER_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_FRAMEGRABBER_H
 
 #include <iostream>
 #include <stdexcept>

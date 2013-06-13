@@ -1,7 +1,9 @@
-#ifndef _libgeodecomp_misc_stringops_h_
-#define _libgeodecomp_misc_stringops_h_
+#ifndef LIBGEODECOMP_MISC_STRINGOPS_H
+#define LIBGEODECOMP_MISC_STRINGOPS_H
 
+#include <boost/algorithm/string.hpp>
 #include <sstream>
+#include <libgeodecomp/misc/stringvec.h>
 
 // sad but true: CodeGear's C++ compiler has troubles with the +
 // operator for strings.
@@ -17,22 +19,49 @@ std::string operator+(const std::string& a, const std::string& b)
 
 namespace LibGeoDecomp {
 
-class StringConv
+class StringOps
 {
 public:
+
     static std::string itoa(int i)
     {
-        std::stringstream z;
-        z << i;
-        return z.str();
+        std::stringstream buf;
+        buf << i;
+        return buf.str();
     }
 
-    static int atoi(std::string s)
+    static int atoi(const std::string& s)
     {
-        return atoi(s.c_str());
+        std::stringstream buf(s);
+        int ret;
+        buf >> ret;
+        return ret;
+    }
+
+    static StringVec tokenize(const std::string& string, const std::string& delimiters)
+    {
+        StringVec ret;
+        boost::split(ret, string, boost::is_any_of(delimiters), boost::token_compress_on);
+        ret.del("");
+
+        return ret;
+    }
+
+    static std::string join(const StringVec& tokens, const std::string& delimiter)
+    {
+        std::stringstream buf;
+
+        for (StringVec::const_iterator i = tokens.begin(); i != tokens.end(); ++i) {
+            if (i != tokens.begin()) {
+                buf << delimiter;
+            }
+            buf << *i;
+        }
+
+        return buf.str();
     }
 };
 
 }
- 
+
 #endif

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_cellapitraits_h_
-#define _libgeodecomp_misc_cellapitraits_h_
+#ifndef LIBGEODECOMP_MISC_CELLAPITRAITS_H
+#define LIBGEODECOMP_MISC_CELLAPITRAITS_H
 
 namespace LibGeoDecomp {
 

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_simplecellplotter_h_
-#define _libgeodecomp_io_simplecellplotter_h_
+#ifndef LIBGEODECOMP_IO_SIMPLECELLPLOTTER_H
+#define LIBGEODECOMP_IO_SIMPLECELLPLOTTER_H
 
 #include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/initializer.h>

@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_parallelization_hiparsimulator_patchlink_h_
-#define _libgeodecomp_parallelization_hiparsimulator_patchlink_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHLINK_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHLINK_H
 
 #include <deque>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -24,7 +24,7 @@ public:
     const static int DIM = GRID_TYPE::DIM;
     const static int ENDLESS = -1;
 
-    class Link 
+    class Link
     {
     public:
         typedef typename GRID_TYPE::CellType CellType;
@@ -36,15 +36,15 @@ public:
         // of the UpdateGroup in the hierarchy for this or some kind
         // of registry.
         inline Link(
-            const Region<DIM>& _region,
-            const int& _tag,
+            const Region<DIM>& region,
+            const int& tag,
             MPI::Comm *communicator = &MPI::COMM_WORLD) :
             lastNanoStep(0),
             stride(1),
             mpiLayer(communicator),
-            region(_region),
-            buffer(_region.size()),
-            tag(_tag)
+            region(region),
+            buffer(region.size()),
+            tag(tag)
         {}
 
         virtual ~Link()
@@ -52,8 +52,8 @@ public:
             wait();
         }
 
-        virtual void charge(const long& next, const long& last, const long& newStride) 
-        {          
+        virtual void charge(const long& next, const long& last, const long& newStride)
+        {
             lastNanoStep = last;
             stride = newStride;
         }
@@ -77,7 +77,7 @@ public:
         int tag;
     };
 
-    class Accepter : 
+    class Accepter :
         public Link,
         public PatchAccepter<GRID_TYPE>
     {
@@ -98,32 +98,33 @@ public:
             const int& _dest,
             const int& _tag,
             const MPI::Datatype& _cellMPIDatatype,
-            MPI::Comm *communicator = &MPI::COMM_WORLD) : 
+            MPI::Comm *communicator = &MPI::COMM_WORLD) :
             Link(_region, _tag, communicator),
             dest(_dest),
             cellMPIDatatype(_cellMPIDatatype)
         {}
 
-        virtual void charge(const long& next, const long& last, const long& newStride) 
+        virtual void charge(const long& next, const long& last, const long& newStride)
         {
             Link::charge(next, last, newStride);
             pushRequest(next);
         }
 
         virtual void put(
-            const GRID_TYPE& grid, 
-            const Region<DIM>& /*validRegion*/, 
-            const long& nanoStep) 
+            const GRID_TYPE& grid,
+            const Region<DIM>& /*validRegion*/,
+            const long& nanoStep)
         {
-            if (!checkNanoStepPut(nanoStep))
+            if (!checkNanoStepPut(nanoStep)) {
                 return;
+            }
 
             wait();
             GridVecConv::gridToVector(grid, &buffer, region);
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
             long nextNanoStep = requestedNanoSteps.min() + stride;
-            if ((lastNanoStep == ENDLESS) || 
+            if ((lastNanoStep == ENDLESS) ||
                 (nextNanoStep < lastNanoStep)) {
                 requestedNanoSteps << nextNanoStep;
             }
@@ -135,7 +136,7 @@ public:
         MPI::Datatype cellMPIDatatype;
     };
 
-    class Provider : 
+    class Provider :
         public Link,
         public PatchProvider<GRID_TYPE>
     {
@@ -151,27 +152,27 @@ public:
         using PatchProvider<GRID_TYPE>::storedNanoSteps;
 
         inline Provider(
-            const Region<DIM>& _region,
-            const int& _source,
-            const int& _tag,
-            const MPI::Datatype& _cellMPIDatatype,
-            MPI::Comm *communicator = &MPI::COMM_WORLD) : 
-            Link(_region, _tag, communicator),
-            source(_source),
-            cellMPIDatatype(_cellMPIDatatype)
+            const Region<DIM>& region,
+            const int& source,
+            const int& tag,
+            const MPI::Datatype& cellMPIDatatype,
+            MPI::Comm *communicator = &MPI::COMM_WORLD) :
+            Link(region, tag, communicator),
+            source(source),
+            cellMPIDatatype(cellMPIDatatype)
         {}
 
-        virtual void charge(const long& next, const long& last, const long& newStride) 
+        virtual void charge(const long& next, const long& last, const long& newStride)
         {
             Link::charge(next, last, newStride);
             recv(next);
         }
 
         virtual void get(
-            GRID_TYPE *grid, 
-            const Region<DIM>& patchableRegion, 
+            GRID_TYPE *grid,
+            const Region<DIM>& patchableRegion,
             const long& nanoStep,
-            const bool& remove=true) 
+            const bool& remove=true)
         {
             if (storedNanoSteps.empty() || (nanoStep < storedNanoSteps.min())) {
                 return;
@@ -182,7 +183,7 @@ public:
             GridVecConv::vectorToGrid(buffer, grid, region);
 
             long nextNanoStep = storedNanoSteps.min() + stride;
-            if ((lastNanoStep == ENDLESS) || 
+            if ((lastNanoStep == ENDLESS) ||
                 (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
             }

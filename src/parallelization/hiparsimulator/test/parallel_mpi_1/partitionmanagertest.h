@@ -10,7 +10,7 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class PartitionManagerTest : public CxxTest::TestSuite 
+class PartitionManagerTest : public CxxTest::TestSuite
 {
 public:
     void setUp()
@@ -23,7 +23,7 @@ public:
          * the grid should look like this: (line no. at beginning of
          * the rows, n means that the corresponding cell belongs to
          * node n)
-         * 
+         *
          * 08: --------------------
          * 09: --------------------
          * 10: --------000000000000
@@ -45,7 +45,7 @@ public:
          * the outer ghost zone of node 4 and width 3. "." is its
          * inner set, n means the corresponding cell has distance n to
          * the original region.
-         * 
+         *
          * 08: --------------------
          * 09: --------------------
          * 10: -----333333333333333
@@ -60,10 +60,10 @@ public:
          * 19: --------------------
          *
          */
-        partition = new StripingPartition<2>(Coord<2>(), dimensions, offset, weights);
-        boundingBoxes = 
+        partition.reset(new StripingPartition<2>(Coord<2>(), dimensions, offset, weights));
+        boundingBoxes =
             fakeBoundingBoxes(
-                offset, 
+                offset,
                 weights.size(),
                 ghostZoneWidth,
                 weights,
@@ -85,12 +85,13 @@ public:
             // the outer ghost zone. this leaves a fragment of length 22.
             unsigned length = (i != 6)? weights[i] : 23;
             // we're node 4 ourselves, so that non-existent halo can be skipped
-            if (i != 4)
+            if (i != 4) {
                 checkRegion(
-                    partitionManager.getOuterGhostZoneFragments()[i].back(), 
-                    curOffset, 
-                    curOffset + length, 
+                    partitionManager.getOuterGhostZoneFragments()[i].back(),
+                    curOffset,
+                    curOffset + length,
                     partition);
+            }
             curOffset += weights[i];
         }
     }
@@ -98,17 +99,17 @@ public:
     void testResetRegionsAndExtendedRegions()
     {
         for (int i = 0; i <= ghostZoneWidth; ++i) {
-            checkRegion(partitionManager.getRegion(3, i), 
-                        (11 - i) * 20 + 16 - i, 
-                        (13 + i) * 20 +  8 + i, 
+            checkRegion(partitionManager.getRegion(3, i),
+                        (11 - i) * 20 + 16 - i,
+                        (13 + i) * 20 +  8 + i,
                         partition);
-            checkRegion(partitionManager.getRegion(4, i), 
-                        (13 - i) * 20 +  8 - i, 
-                        (14 + i) * 20 + 13 + i, 
+            checkRegion(partitionManager.getRegion(4, i),
+                        (13 - i) * 20 +  8 - i,
+                        (14 + i) * 20 + 13 + i,
                         partition);
-            checkRegion(partitionManager.getRegion(5, i), 
-                        (14 - i) * 20 + 13 - i, 
-                        (16 + i) * 20 + 13 + i, 
+            checkRegion(partitionManager.getRegion(5, i),
+                        (14 - i) * 20 + 13 - i,
+                        (16 + i) * 20 + 13 + i,
                         partition);
         }
     }
@@ -116,9 +117,9 @@ public:
     void testResetRegionsAndOuterAndInnerRims()
     {
         checkRegion(
-            partitionManager.rim(1), 
-            11 * 20 + 6, 
-            16 * 20 + 15, 
+            partitionManager.rim(1),
+            11 * 20 + 6,
+            16 * 20 + 15,
             partition);
     }
 
@@ -145,12 +146,12 @@ public:
         SuperVector<long> weights;
         weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
-        Partition<3> *partition = 
-            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights);
+        boost::shared_ptr<Partition<3> > partition(
+            new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
         PartitionManager<3, Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
-            box, 
+            box,
             partition,
             0,
             ghostZoneWidth);
@@ -160,7 +161,7 @@ public:
             boundingBoxes << partitionManager.getRegion(i, 0).boundingBox();
 
         partitionManager.resetGhostZones(boundingBoxes);
-        
+
         Region<3> expected;
         for (int z = 0; z < 3; ++z) {
             for (int y = 0; y < 47; ++y) {
@@ -198,8 +199,8 @@ public:
         // CoordBox<3> box(Coord<3>(), Coord<3>(4000, 1000, 1000));
         // SuperVector<long> weights;
         // weights += 1000000000, 1000000000, 1000000000, 1000000000;
-        
-        // Partition<3> *partition = 
+
+        // Partition<3> *partition =
         //     new RecursiveBisectionPartition<3>(Coord<3>(), box.dimensions, 0, weights);
         // std::cout << "creating PartitionManager\n";
 
@@ -207,7 +208,7 @@ public:
 
         // std::cout << "resetting regions\n";
         // myPartitionManager.resetRegions(
-        //     box, 
+        //     box,
         //     partition,
         //     0,
         //     ghostZoneWidth);
@@ -230,7 +231,7 @@ public:
 private:
     Coord<2> dimensions;
     unsigned offset;
-    StripingPartition<2> *partition;
+    boost::shared_ptr<StripingPartition<2> > partition;
     SuperVector<long> weights;
     unsigned rank;
     unsigned ghostZoneWidth;
@@ -238,11 +239,11 @@ private:
     PartitionManager<2> partitionManager;
 
     SuperVector<CoordBox<2> > fakeBoundingBoxes(
-        const unsigned& offset, 
+        const unsigned& offset,
         const unsigned& size,
         const unsigned& ghostZoneWidth,
         const SuperVector<long>& weights,
-        const StripingPartition<2> *partition)
+        const boost::shared_ptr<StripingPartition<2> > partition)
     {
         SuperVector<CoordBox<2> > boundingBoxes(size);
         long startOffset = offset;
@@ -251,9 +252,9 @@ private:
         for (unsigned i = 0; i < size; ++i) {
             endOffset += weights[i];
             Region<2> s;
-            
-            for (StripingPartition<2>::Iterator coords = (*partition)[startOffset]; 
-                 coords != (*partition)[endOffset]; 
+
+            for (StripingPartition<2>::Iterator coords = (*partition)[startOffset];
+                 coords != (*partition)[endOffset];
                  ++coords) {
                 s << *coords;
             }
@@ -262,28 +263,28 @@ private:
             boundingBoxes[i] = s.boundingBox();
             startOffset = endOffset;
         }
-        
+
         return boundingBoxes;
     }
 
     template<class PARTITION>
     void checkRegion(
-        const Region<2>& region, 
-        const unsigned& start, 
-        const unsigned& end, 
-        const PARTITION *partition)
-    {        
+        const Region<2>& region,
+        const unsigned& start,
+        const unsigned& end,
+        const boost::shared_ptr<PARTITION> partition)
+    {
         SuperVector<Coord<2> > expected;
         SuperVector<Coord<2> > actual;
-        for (typename PARTITION::Iterator i = (*partition)[start]; 
-             i != (*partition)[end]; 
-             ++i) 
+        for (typename PARTITION::Iterator i = (*partition)[start];
+             i != (*partition)[end];
+             ++i)
             expected += *i;
-        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) 
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i)
             actual += *i;
-            
+
         TS_ASSERT_EQUALS(expected, actual);
-    } 
+    }
 };
 
 }

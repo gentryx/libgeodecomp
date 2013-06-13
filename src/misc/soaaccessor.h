@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_soaaccessor_h_
-#define _libgeodecomp_misc_soaaccessor_h_
+#ifndef LIBGEODECOMP_MISC_SOAACCESSOR_H
+#define LIBGEODECOMP_MISC_SOAACCESSOR_H
 
 #include <boost/preprocessor/seq.hpp>
 #include <libgeodecomp/misc/coord.h>
@@ -31,7 +31,7 @@ class Offset<CELL, 0>
         static const int OFFSET = Offset<CELL_TYPE, r - 2>::OFFSET +    \
             sizeof(BOOST_PP_SEQ_ELEM(0, t));                            \
     };                                                                  \
-    }                                                                   
+    }
 
 #define DECLARE_SOA_MEMBER(MEMBER_INDEX, CELL, MEMBER, CONST)           \
     inline                                                              \
@@ -43,7 +43,7 @@ class Offset<CELL, 0>
             (DIM_X * DIM_Y * DIM_Z) * SoAHelpers::Offset<CELL, MEMBER_INDEX - 2>::OFFSET + \
             *index * sizeof(BOOST_PP_SEQ_ELEM(0, MEMBER)) +             \
             INDEX  * sizeof(BOOST_PP_SEQ_ELEM(0, MEMBER)));             \
-    }                                                                   
+    }
 
 #define DECLARE_SOA_MEMBER_CONST(MEMBER_INDEX, CELL, MEMBER)    \
     DECLARE_SOA_MEMBER(MEMBER_INDEX, CELL, MEMBER, const)
@@ -76,7 +76,7 @@ class SoAAccessor;
     class SoAAccessor<CELL_TYPE, DIM_X, DIM_Y, DIM_Z, INDEX>            \
     {                                                                   \
     public:                                                             \
-        typedef CELL_TYPE MyCell;                                       \
+        typedef CELL_TYPE CellType;                                     \
                                                                         \
         __host__ __device__                                             \
             SoAAccessor(char *_data=0, int *_index=0) :                 \

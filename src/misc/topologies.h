@@ -1,434 +1,275 @@
-#ifndef _libgeodecomp_misc_topologies_h_
-#define _libgeodecomp_misc_topologies_h_
+#ifndef LIBGEODECOMP_MISC_TOPOLOGIES_H
+#define LIBGEODECOMP_MISC_TOPOLOGIES_H
 
 #include <stdexcept>
 #include <iostream>
 #include <libgeodecomp/misc/coord.h>
 
-namespace LibGeoDecomp
-{
+namespace LibGeoDecomp {
+
+namespace TopologiesHelpers {
 
 template<int DIM, class TOPOLOGY>
-class WrapsAxisHelper
+class WrapsAxis;
+
+template<class TOPOLOGY>
+class WrapsAxis<0, TOPOLOGY>
 {
 public:
-    typedef typename TOPOLOGY::ParentTopology ParentTopology;
-    static const bool VALUE = WrapsAxisHelper<DIM - 1, ParentTopology>::VALUE;
+    static const bool VALUE = TOPOLOGY::WRAP_AXIS0;
 };
 
 template<class TOPOLOGY>
-class WrapsAxisHelper<0, TOPOLOGY>
+class WrapsAxis<1, TOPOLOGY>
 {
 public:
-    static const bool VALUE = TOPOLOGY::WRAP_EDGES;
+    static const bool VALUE = TOPOLOGY::WRAP_AXIS1;
 };
 
-/**
- * provides a compile-time random access interface to topology
- * features. Meant as an efficient alternative to
- * ZeroDimensional::wrapsAxis().
- */
-template<int DIM, class TOPOLOGY>
-class WrapsAxis
+template<class TOPOLOGY>
+class WrapsAxis<2, TOPOLOGY>
 {
 public:
-    static const bool VALUE = WrapsAxisHelper<TOPOLOGY::DIMENSIONS - DIM - 1, TOPOLOGY>::VALUE;
-
+    static const bool VALUE = TOPOLOGY::WRAP_AXIS2;
 };
 
-/**
- * This class is a crutch to borrow functionality from the topologies
- * in order to map neighboring coordinates correctly on the borders of
- * the grid.
- */
-template<int DIM, int DIMINDEX>
-class CoordNormalizer
+template<class TOPOLOGY>
+class NormalizeEdges
 {
 public:
-    typedef Coord<DIM> CellType;
-
-    CoordNormalizer(Coord<DIM> *c, Coord<DIM> dim) :
-        target(c),
-        dimensions(dim),
-        edge(Coord<DIM>::diagonal(-1))
-    {}
-
-    const Coord<DIM>& getDimensions() const
+    Coord<1> operator()(const Coord<1>& coord, const Coord<1>& dim)
     {
-        return dimensions;
+        return Coord<1>(
+            wrap(coord[0], dim[0]));
     }
 
-    Coord<DIM>& getEdgeCell() 
+    Coord<2> operator()(const Coord<2>& coord, const Coord<2>& dim)
     {
-        return edge;
+        return Coord<2>(
+            wrap(coord[0], dim[0]),
+            wrap(coord[1], dim[1]));
     }
 
-    CoordNormalizer<DIM, DIMINDEX - 1> operator[](const int& i)
+    Coord<3> operator()(const Coord<3>& coord, const Coord<3>& dim)
     {
-        (*target)[DIMINDEX - 1] = i;
-        return CoordNormalizer<DIM, DIMINDEX - 1>(target, dimensions);
+        return Coord<3>(
+            wrap(coord[0], dim[0]),
+            wrap(coord[1], dim[1]),
+            wrap(coord[2], dim[2]));
     }
 
 private:
-    Coord<DIM> *target;
-    Coord<DIM> dimensions;
-    Coord<DIM> edge;
+    inline int wrap(int x, int dim)
+    {
+        if (x < 0) {
+            return (x + dim) % dim;
+        }
+        if (x >= dim) {
+            return x % dim;
+        }
+
+        return x;
+    }
+};
+
+template<class TOPOLOGY>
+class OutOfBounds
+{
+public:
+    bool operator()(const Coord<1> coord, const Coord<1> dim)
+    {
+        return
+            ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0])));
+    }
+
+    bool operator()(const Coord<2> coord, const Coord<2> dim)
+    {
+        return
+            ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0]))) ||
+            ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
+    }
+
+    bool operator()(const Coord<3> coord, const Coord<3> dim)
+    {
+        return
+            ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0]))) ||
+            ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1]))) ||
+            ((!WrapsAxis<2, TOPOLOGY>::VALUE) && ((coord[2] < 0) || (coord[2] >= dim[2])));
+    }
+};
+
+template<class TOPOLOGY>
+class NormalizeCoord
+{
+public:
+    template<int DIM>
+    Coord<DIM> operator()(const Coord<DIM>& coord, const Coord<DIM>& dim)
+    {
+        if (OutOfBounds<TOPOLOGY>()(coord, dim)) {
+            return Coord<DIM>::diagonal(-1);
+        }
+
+        return NormalizeEdges<TOPOLOGY>()(coord, dim);
+    }
 };
 
 template<int DIM>
-class CoordNormalizer<DIM, 1>
+class Accessor;
+
+template<>
+class Accessor<1>
 {
 public:
-    typedef Coord<DIM> CellType;
-
-    CoordNormalizer(Coord<DIM> *c, Coord<DIM> dim) :
-        target(c),
-        dimensions(dim)
-    {}
-
-    const Coord<DIM>& getDimensions() const
+    template<typename STORAGE, typename VALUE>
+    void operator()(STORAGE& storage, VALUE **value, const Coord<1>& coord) const
     {
-        return dimensions;
+        *value = &storage[coord.x()];
     }
 
-    Coord<DIM>& getEdgeCell() 
+    template<typename STORAGE, typename VALUE>
+    void operator()(const STORAGE& storage, const VALUE **value, const Coord<1>& coord) const
     {
-        return edge;
+        *value = &storage[coord.x()];
     }
-
-    Coord<DIM>& operator[](const int& i)
-    {
-        (*target)[0] = i;
-        return *target;
-    }
-
-private:
-    Coord<DIM> *target;
-    Coord<DIM> dimensions;
-    Coord<DIM> edge;
 };
+
+template<>
+class Accessor<2>
+{
+public:
+    template<typename STORAGE, typename VALUE>
+    void operator()(STORAGE& storage, VALUE **value, const Coord<2>& coord) const
+    {
+        *value = &storage[coord.y()][coord.x()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    void operator()(const STORAGE& storage, const VALUE **value, const Coord<2>& coord) const
+    {
+        *value = &storage[coord.y()][coord.x()];
+    }
+};
+
+template<>
+class Accessor<3>
+{
+public:
+    template<typename STORAGE, typename VALUE>
+    void operator()(STORAGE& storage, VALUE **value, const Coord<3>& coord) const
+    {
+        *value = &storage[coord.z()][coord.y()][coord.x()];
+    }
+
+    template<typename STORAGE, typename VALUE>
+    void operator()(const STORAGE& storage, const VALUE **value, const Coord<3>& coord) const
+    {
+        *value = &storage[coord.z()][coord.y()][coord.x()];
+    }
+};
+
+template<int DIMENSIONS, bool WRAP_DIM0, bool WRAP_DIM1, bool WRAP_DIM2>
+class RawTopology
+{
+public:
+    const static int DIM = DIMENSIONS;
+    const static bool WRAP_AXIS0 = WRAP_DIM0;
+    const static bool WRAP_AXIS1 = WRAP_DIM1;
+    const static bool WRAP_AXIS2 = WRAP_DIM2;
+};
+
+template<int DIMENSIONS, bool WRAP_DIM0=false, bool WRAP_DIM1=false, bool WRAP_DIM2=false>
+class Topology
+{
+public:
+    typedef RawTopology<DIMENSIONS, WRAP_DIM0, WRAP_DIM1, WRAP_DIM2> RawTopologyType;
+    static const int DIM = DIMENSIONS;
+
+    template<typename GRID, int DIM>
+    static inline const typename GRID::CellType& locate(
+        const GRID& grid,
+        const Coord<DIM>& coord)
+    {
+        const Coord<DIM>& dim = grid.getDimensions();
+        if (OutOfBounds<RawTopologyType>()(coord, dim)) {
+            return grid.getEdgeCell();
+        }
+
+        typename GRID::CellType *ret;
+        Accessor<DIM>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, dim));
+        return *ret;
+    }
+
+    template<typename GRID>
+    static inline typename GRID::CellType& locate(
+        GRID& grid,
+        const Coord<DIMENSIONS>& coord)
+    {
+        const Coord<DIMENSIONS>& dim = grid.getDimensions();
+        if (OutOfBounds<RawTopologyType>()(coord, dim)) {
+            return grid.getEdgeCell();
+        }
+
+        typename GRID::CellType *ret;
+        Accessor<DIMENSIONS>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, dim));
+        return *ret;
+    }
+
+    template<int D>
+    class WrapsAxis
+    {
+    public:
+        static const bool VALUE = TopologiesHelpers::WrapsAxis<D, RawTopologyType>::VALUE;
+    };
+
+    static Coord<DIM> normalize(const Coord<DIMENSIONS>& coord, const Coord<DIMENSIONS>& dimensions)
+    {
+        return NormalizeCoord<RawTopologyType>()(coord, dimensions);
+    }
+
+    static bool isOutOfBounds(const Coord<DIM>& coord, const Coord<DIM>& dim)
+    {
+        return TopologiesHelpers::OutOfBounds<RawTopologyType>()(coord, dim);
+    }
+
+    /**
+     * Checks whether the current topoloy uses periodic boundary
+     * conditions on the edges of the given dimendion dim. Only use
+     * this when you need to set dim at runtime. In every other case
+     * WrapsAxis<DIM>::VALUE is the prefered way of checking.
+     */
+    static bool wrapsAxis(const int& dim)
+    {
+        if (dim == 0) {
+            return WrapsAxis<0>::VALUE;
+        }
+        if (dim == 1) {
+            return WrapsAxis<1>::VALUE;
+        }
+
+        return WrapsAxis<2>::VALUE;
+    }
+};
+
+}
 
 class Topologies
 {
 public:
-    template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES>
-    class NDimensional;
-
-    template<bool WRAP_EDGES, int DIMENSION, typename COORD> 
-    class NormalizeCoordElement;
-
-    template<int DIM, typename COORD> 
-    class NormalizeCoordElement<true, DIM, COORD>
+    template<int DIM>
+    class Cube
     {
     public:
-        inline int operator()(
-            const COORD& coord, 
-            const COORD& dimensions) const
-        {
-            if ((coord[DIM] < 0) || (coord[DIM] >= dimensions[DIM])) { 
-                return (dimensions[DIM] + coord[DIM]) % dimensions[DIM];
-            }
-
-            return coord[DIM];
-        }
-    };
-
-    template<int DIM, typename COORD> 
-    class NormalizeCoordElement<false, DIM, COORD>
-    {
-    public:
-        inline int operator()(
-            const COORD& coord, 
-            const COORD& boundingBox) const
-        {
-            return coord[DIM];
-        }
-    };
-
-    template<bool WRAP_EDGES, int DIM, typename COORD> 
-    class IsOutOfBounds;
-
-    template<int DIM, typename COORD> 
-    class IsOutOfBounds<true, DIM, COORD>
-    {
-    public:
-        inline bool operator()(
-            const COORD& coord, 
-            const COORD& boundingBox) const
-        {
-            return false;
-        }
-    };
-
-    template<int DIM, typename COORD> 
-    class IsOutOfBounds<false, DIM, COORD>
-    {
-    public:
-        inline bool operator()(
-            const COORD& coord, 
-            const COORD& boundingBox) const
-        {
-            return 
-                (coord[DIM] < 0) || 
-                (coord[DIM] >= boundingBox[DIM]);
-        }
-    };
-
-    template<int DIM, typename COORD, typename TOPOLOGY>
-    class IsOutOfBoundsHelper
-    {
-    public:
-        inline bool operator()(
-            const COORD& coord, 
-            const COORD& boundingBox) const
-        {
-            return 
-                IsOutOfBounds<TOPOLOGY::WRAP_EDGES, DIM, COORD>()(
-                    coord, boundingBox) ||
-                IsOutOfBoundsHelper<DIM - 1, COORD, 
-                                    typename TOPOLOGY::ParentTopology>()(
-                                        coord, boundingBox);
-        }
-        
-    };
-
-    class ZeroDimensional;
-
-    template<int DIM, typename COORD>
-    class IsOutOfBoundsHelper<DIM, COORD, ZeroDimensional>
-    {
-    public:
-        inline bool operator()(
-            const COORD& coord, 
-            const COORD& boundingBox) const
-        {
-            return false;
-        }
-        
+        typedef TopologiesHelpers::Topology<DIM, false, false, false> Topology;
     };
 
     template<int DIM>
-    class Cube : public Cube<DIM - 1>
-    {
-    private:
-        typedef Cube<DIM - 1> Parent;
-        typedef typename Parent::Topology ParentTopology;
-
-    public:
-        typedef NDimensional<ParentTopology, false> Topology;
-    };
-
-    template<int DIM>
-    class Torus : public Torus<DIM - 1>
-    {
-    private:
-        typedef Torus<DIM - 1> Parent;
-        typedef typename Parent::Topology ParentTopology;
-
-    public:
-        typedef NDimensional<ParentTopology, true> Topology;
-    };
-
-    class ZeroDimensional
+    class Torus
     {
     public:
-        const static int DIMENSIONS = 0;
-
-        static inline bool wrapsAxis(const int& dim)
-        {
-            return false;
-        }
-    };
-
-    template<typename N_MINUS_1_DIMENSIONAL, bool WRAP_EDGES_FLAG>
-    class NDimensional
-    {
-    public:
-        // fixme: rename to DIM
-        const static int DIMENSIONS = N_MINUS_1_DIMENSIONAL::DIMENSIONS + 1;
-        const static bool WRAP_EDGES = WRAP_EDGES_FLAG;
-        typedef N_MINUS_1_DIMENSIONAL ParentTopology;
-
-        /**
-         * This class facilitates the computation of the actual
-         * indices (frame/row/column) and at the same time fetches the
-         * data directly from the grid. Combining these two operations
-         * allows us (together with this template hell) to use the
-         * same code, no matter which topology is being used, while
-         * achieving a zero abstraction penalty.
-         */
-        template<int DIM, typename CELL> 
-        class LocateHelper;
-
-        template<typename CELL> 
-        class LocateHelper<1, CELL>
-        {
-        public:
-            template<typename STORAGE>
-            inline const CELL& operator()(
-                const STORAGE& storage, 
-                const Coord<1>& coord,
-                const Coord<1>& boundingBox) const
-            {
-                return (*this)(
-                    const_cast<STORAGE&>(storage),
-                    coord,
-                    boundingBox);
-            }
-
-            template<typename STORAGE>
-            inline CELL& operator()(
-                STORAGE& storage, 
-                const Coord<1>& coord,
-                const Coord<1>& boundingBox) const
-            {
-                return storage\
-                    [ NormalizeCoordElement<
-                            WRAP_EDGES, 
-                            0,
-                            Coord<1> >()(coord, boundingBox)];
-            }
-        };
-
-        template<typename CELL> 
-        class LocateHelper<2, CELL>
-        {
-        public:
-            template<typename STORAGE>
-            inline const CELL& operator()(
-                const STORAGE& storage, 
-                const Coord<2>& coord,
-                const Coord<2>& boundingBox) const
-            {
-                return (*this)(
-                    const_cast<STORAGE&>(storage),
-                    coord,
-                    boundingBox);
-            }
-
-            template<typename STORAGE>
-            inline CELL& operator()(
-                STORAGE& storage, 
-                const Coord<2>& coord,
-                const Coord<2>& boundingBox) const
-            {
-                return storage\
-                    [ NormalizeCoordElement<
-                            WRAP_EDGES, 
-                            1,
-                            Coord<2> >()(coord, boundingBox)]\
-                    [ NormalizeCoordElement<
-                            ParentTopology::WRAP_EDGES, 
-                            0,
-                            Coord<2> >()(coord, boundingBox)];
-            }
-        };
-
-        template<typename CELL> 
-        class LocateHelper<3, CELL>
-        {
-        public:
-            template<typename STORAGE>
-            inline const CELL& operator()(
-                const STORAGE& storage, 
-                const Coord<3>& coord,
-                const Coord<3>& boundingBox) const
-            {
-                return (*this)(
-                    const_cast<STORAGE&>(storage),
-                    coord,
-                    boundingBox);
-            }
-
-            template<typename STORAGE>
-            inline CELL& operator()(
-                STORAGE& storage, 
-                const Coord<3>& coord,
-                const Coord<3>& boundingBox) const
-            {
-                return storage\
-                    [ NormalizeCoordElement<
-                            WRAP_EDGES, 
-                            2,
-                            Coord<3> >()(coord, boundingBox)
-                     ]\
-                    [ NormalizeCoordElement<
-                            ParentTopology::WRAP_EDGES, 
-                            1,
-                            Coord<3> >()(coord, boundingBox)]\
-                    [ NormalizeCoordElement<
-                            ParentTopology::ParentTopology::WRAP_EDGES, 
-                            0,
-                            Coord<3> >()(coord, boundingBox)];
-            }
-        };
-
-        static Coord<DIMENSIONS> normalize(
-            const Coord<DIMENSIONS>& coord,
-            const Coord<DIMENSIONS>& dimensions)
-        {
-            Coord<DIMENSIONS> res = Coord<DIMENSIONS>::diagonal(-1);
-            CoordNormalizer<DIMENSIONS, DIMENSIONS> normalizer(
-                &res, dimensions);
-            locate(normalizer, coord);
-            return res;
-        }
-
-        template<typename GRID, int DIM>
-        static inline const typename GRID::CellType& locate(
-            const GRID& grid, 
-            const Coord<DIM>& coord) 
-        {
-            if (IsOutOfBoundsHelper<
-                DIM - 1, 
-                Coord<DIM>, 
-                NDimensional >()(coord, grid.getDimensions()))
-                return grid.getEdgeCell();
-
-            return LocateHelper<DIM, typename GRID::CellType>()(
-                grid, coord, grid.getDimensions());
-        }
-
-        template<typename GRID, int DIM>
-        static inline typename GRID::CellType& locate(
-            GRID& grid, 
-            const Coord<DIM>& coord) 
-        {
-            if (IsOutOfBoundsHelper<
-                DIM - 1, 
-                Coord<DIM>, 
-                NDimensional >()(coord, grid.getDimensions()))
-                return grid.getEdgeCell();
-
-            return LocateHelper<DIM, typename GRID::CellType>()(
-                grid, coord, grid.getDimensions());
-        }
-
-        static inline bool wrapsAxis(const int& dim)
-        {
-            if (dim == DIMENSIONS - 1) {
-                return WRAP_EDGES;
-            } else {
-                return ParentTopology::wrapsAxis(dim);
-            }
-        }
+        typedef TopologiesHelpers::Topology<DIM, true, true, true> Topology;
     };
 };
-
-template<>
-class Topologies::Cube<0>
-{
-public:
-    typedef ZeroDimensional Topology;
-};
-
-template<>
-class Topologies::Torus<0>
-{
-public:
-    typedef ZeroDimensional Topology;
-};
-
 
 }
+
 #endif

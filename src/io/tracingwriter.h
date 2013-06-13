@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_tracingwriter_h_
-#define _libgeodecomp_io_tracingwriter_h_
+#ifndef LIBGEODECOMP_IO_TRACINGWRITER_H
+#define LIBGEODECOMP_IO_TRACINGWRITER_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <iostream>
@@ -13,36 +13,36 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
-public:   
+public:
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
-    static const int DIM = CELL_TYPE::Topology::DIMENSIONS;
+    static const int DIM = CELL_TYPE::Topology::DIM;
 
     TracingWriter(
-        const unsigned period, 
+        const unsigned period,
         const unsigned maxSteps,
         std::ostream& stream = std::cout) :
-        Writer<CELL_TYPE>("foo", period), 
-        ParallelWriter<CELL_TYPE>("foo", period), 
+        Writer<CELL_TYPE>("", period),
+        ParallelWriter<CELL_TYPE>("", period),
         stream(stream),
         lastStep(0),
         maxSteps(maxSteps)
     {}
 
-    virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event) 
+    virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
         stepFinished(step, grid.getDimensions(), event);
     }
 
     virtual void stepFinished(
-        const ParallelWriterGridType& grid, 
-        const Region<DIM>& validRegion, 
+        const ParallelWriterGridType& grid,
+        const Region<DIM>& validRegion,
         const Coord<DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
-        bool lastCall) 
+        unsigned step,
+        WriterEvent event,
+        bool lastCall)
     {
         if (lastCall) {
             stepFinished(step, globalDimensions, event);
@@ -73,7 +73,7 @@ private:
             delta = currentTime() - startTime;
             stream << "TracingWriter::allDone()\n"
                    << "  total time: " << boost::posix_time::to_simple_string(delta) << "\n";
-            printTime();    
+            printTime();
             break;
         default:
             throw std::invalid_argument("unknown event");
@@ -100,9 +100,9 @@ private:
         stream << "TracingWriter::stepFinished()\n"
                << "  step: " << step << " of " << maxSteps << "\n"
                << "  elapsed: " << delta << "\n"
-               << "  remaining: " 
+               << "  remaining: "
                << boost::posix_time::to_simple_string(remaining) << "\n"
-               << "  ETA:  " 
+               << "  ETA:  "
                << boost::posix_time::to_simple_string(eta) << "\n"
                << "  speed: " << glups << " GLUPS\n"
                << "  effective memory bandwidth " << bandwidth << " GB/s\n";

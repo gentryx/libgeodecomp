@@ -9,11 +9,11 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class PatchBufferTest : public CxxTest::TestSuite 
+class PatchBufferTest : public CxxTest::TestSuite
 {
 public:
     typedef Grid<int> GridType;
-    typedef PatchBuffer<GridType, GridType> MyPatchBuffer;
+    typedef PatchBuffer<GridType, GridType> PatchBufferType;
 
     void setUp()
     {
@@ -28,7 +28,7 @@ public:
         testGrid3 = GridType(dimensions, 0);
         zeroGrid  = GridType(dimensions, 0);
         validRegion << CoordBox<2>(Coord<2>(0, 0), dimensions);
-        
+
         region0.clear();
         region1.clear();
         region1 << Streak<2>(Coord<2>(2, 2), 4);
@@ -41,10 +41,10 @@ public:
             testGrid1[*i] = i->y() * 10 + i->x();
         for (Region<2>::Iterator i = region2.begin(); i != region2.end(); ++i)
             testGrid2[*i] = i->y() * 10 + i->x();
-        
+
         Region<2>::Iterator j = region1.begin();
-        for (Region<2>::Iterator i = region2.begin(); 
-             i != region2.end(); 
+        for (Region<2>::Iterator i = region2.begin();
+             i != region2.end();
              ++i) {
             testGrid3[*i] = j->y() * 10 + j->x();
             ++j;
@@ -55,16 +55,16 @@ public:
     {
 
         // check that an empty region causes no changes at all
-        MyPatchBuffer patchBuffer(region0);
+        PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);
-        for (int i = 0; i < 4; ++i) 
+        for (int i = 0; i < 4; ++i)
             patchBuffer.put(baseGrid, validRegion, i);
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, 0);
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
 
         // check that we can copy out regions multiple times
-        patchBuffer = MyPatchBuffer(region1);
+        patchBuffer = PatchBufferType(region1);
         patchBuffer.pushRequest(2);
         patchBuffer.pushRequest(3);
         for (int i = 0; i < 4; ++i)

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_patchbufferfixed_h_
-#define _libgeodecomp_parallelization_hiparsimulator_patchbufferfixed_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHBUFFERFIXED_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHBUFFERFIXED_H
 
 #include <libgeodecomp/misc/supervector.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
@@ -14,8 +14,8 @@ namespace HiParSimulator {
  * put().
  */
 template<class GRID_TYPE1, class GRID_TYPE2, int SIZE>
-class PatchBufferFixed : 
-        public PatchAccepter<GRID_TYPE1>, 
+class PatchBufferFixed :
+        public PatchAccepter<GRID_TYPE1>,
         public PatchProvider<GRID_TYPE2>
 {
 public:
@@ -28,17 +28,17 @@ public:
     using PatchProvider<GRID_TYPE2>::checkNanoStepGet;
     using PatchProvider<GRID_TYPE2>::storedNanoSteps;
 
-    PatchBufferFixed(const Region<DIM>& _region=Region<DIM>()) :
-        region(_region),
+    PatchBufferFixed(const Region<DIM>& region=Region<DIM>()) :
+        region(region),
         indexRead(0),
         indexWrite(0),
-        buffer(SIZE, SuperVector<CellType>(_region.size()))
+        buffer(SIZE, SuperVector<CellType>(region.size()))
     {}
 
     virtual void put(
-        const GRID_TYPE1& grid, 
-        const Region<DIM>& /*validRegion*/, 
-        const long& nanoStep) 
+        const GRID_TYPE1& grid,
+        const Region<DIM>& /*validRegion*/,
+        const long& nanoStep)
     {
         // It would be nice to check if validRegion was actually a
         // superset of the region we'll save, but that would be
@@ -57,10 +57,10 @@ public:
     }
 
     virtual void get(
-        GRID_TYPE2 *destinationGrid, 
-        const Region<DIM>& patchableRegion, 
+        GRID_TYPE2 *destinationGrid,
+        const Region<DIM>& patchableRegion,
         const long& nanoStep,
-        const bool& remove=true) 
+        const bool& remove=true)
     {
         checkNanoStepGet(nanoStep);
 

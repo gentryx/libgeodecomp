@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_grid_h_
-#define _libgeodecomp_misc_grid_h_
+#ifndef LIBGEODECOMP_MISC_GRID_H
+#define LIBGEODECOMP_MISC_GRID_H
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)
@@ -81,13 +81,13 @@ public:
  * A multi-dimensional regular grid
  */
 template<typename CELL_TYPE, typename TOPOLOGY=Topologies::Cube<2>::Topology>
-class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>
+class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
     friend class GridTest;
     friend class ParallelStripingSimulatorTest;
-    
+
 public:
-    const static int DIM = TOPOLOGY::DIMENSIONS;
+    const static int DIM = TOPOLOGY::DIM;
 
 #ifndef __CODEGEARC__
     typedef typename boost::detail::multi_array::sub_array<CELL_TYPE, DIM - 1> SliceRef;
@@ -104,7 +104,7 @@ public:
 
     typedef TOPOLOGY Topology;
     typedef CELL_TYPE CellType;
-    typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > MyCoordMap;
+    typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
 
     explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
          const CELL_TYPE& defaultCell=CELL_TYPE(),
@@ -141,14 +141,14 @@ public:
         dimensions = newDim;
         cellMatrix.resize(newDim.toExtents());
     }
-    
+
     /**
      * returns a map that is referenced by relative coordinates from the
      * originating coordinate coord.
      */
-    inline MyCoordMap getNeighborhood(const Coord<DIM>& center) const
+    inline CoordMapType getNeighborhood(const Coord<DIM>& center) const
     {
-        return MyCoordMap(center, this);
+        return CoordMapType(center, this);
     }
 
     inline CELL_TYPE& getEdgeCell()
@@ -161,7 +161,7 @@ public:
         return edgeCell;
     }
 
-    inline CELL_TYPE *baseAddress() 
+    inline CELL_TYPE *baseAddress()
     {
         return &(*this)[Coord<DIM>()];
     }
@@ -192,24 +192,24 @@ public:
     /**
      * WARNING: this operator doesn't honor topology properties
      */
-    inline SliceRef operator[](const Index y) 
+    inline SliceRef operator[](const Index y)
     {
         return cellMatrix[y];
     }
 
     inline bool operator==(const Grid& other) const
     {
-        if (boundingBox() == CoordBox<DIM>() && 
+        if (boundingBox() == CoordBox<DIM>() &&
             other.boundingBox() == CoordBox<DIM>()) {
             return true;
         }
 
-        return 
-            (edgeCell   == other.edgeCell) && 
+        return
+            (edgeCell   == other.edgeCell) &&
             (cellMatrix == other.cellMatrix);
     }
 
-    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    inline bool operator==(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
     {
         if (boundingBox() != other.boundingBox()) {
             return false;
@@ -234,7 +234,7 @@ public:
         return !(*this == other);
     }
 
-    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIMENSIONS>& other) const
+    inline bool operator!=(const GridBase<CELL_TYPE, TOPOLOGY::DIM>& other) const
     {
         return !(*this == other);
     }
@@ -269,13 +269,13 @@ public:
     {
         return dimensions;
     }
-  
+
     inline std::string toString() const
     {
         std::ostringstream message;
         message << "Grid<" << DIM << ">(\n"
                 << "boundingBox: " << boundingBox()  << "\n"
-                << "edgeCell:\n" 
+                << "edgeCell:\n"
                 << edgeCell << "\n";
 
         CoordBox<DIM> box = boundingBox();

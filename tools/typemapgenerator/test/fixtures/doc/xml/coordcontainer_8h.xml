@@ -23,6 +23,6 @@
 <codeline lineno="13"><highlight class="normal"></highlight></codeline>
 <codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp.bitbucket/tools/typemapgenerator/test/fixtures/src/coordcontainer.h"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainer.h"/>
   </compounddef>
 </doxygen>

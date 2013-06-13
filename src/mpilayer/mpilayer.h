@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
-#ifndef _libgeodecomp_mpilayer_mpilayer_h_
-#define _libgeodecomp_mpilayer_mpilayer_h_
+#ifndef LIBGEODECOMP_MPILAYER_MPILAYER_H
+#define LIBGEODECOMP_MPILAYER_MPILAYER_H
 
 #include <mpi.h>
 #include <map>
@@ -17,7 +17,7 @@ namespace LibGeoDecomp {
 /**
  * MPILayer is a wrapper that provides a mostly 1:1 identical access
  * to MPI functions, but with a number of convenient twists, where
- * appropriate. 
+ * appropriate.
  */
 class MPILayer
 {
@@ -36,15 +36,23 @@ public:
     enum Tag {
         // reserve [100, 199], assuming there won't be more than 100
         // links between any two nodes.
-        PATCH_LINK = 100, 
+        PATCH_LINK = 100,
         PARALLEL_MEMORY_WRITER = 200
     };
 
     typedef std::map<int, std::vector<MPI::Request> > RequestsMap;
 
-    MPILayer(MPI::Comm *c = &MPI::COMM_WORLD, int _tag = 0) :
-        comm(c),
-        tag(_tag)
+    // fixme: use call by value for all communicators
+    // fixme: use MPI C bindings only
+    // fixme: replace all Intercomm by Comm
+    /**
+     * Sets up a new MPILayer. communicator will be used as a scope
+     * for all MPI functions, tag will be the default tag passed to
+     * all point-to-point communication functions.
+     */
+    MPILayer(MPI::Comm *communicator = &MPI::COMM_WORLD, int tag = 0) :
+        comm(communicator),
+        tag(tag)
     {}
 
     virtual ~MPILayer()
@@ -54,9 +62,9 @@ public:
 
     template<typename T>
     inline void send(
-        const T *c, 
-        const int& dest, 
-        const int& num = 1,
+        const T *c,
+        int dest,
+        int num = 1,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         send(c, dest, num, tag, datatype);
@@ -64,75 +72,75 @@ public:
 
     template<typename T>
     inline void send(
-        const T *c, 
-        const int& dest, 
-        const int& num,
-        const int& tag,
+        const T *c,
+        int dest,
+        int num,
+        int tag,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Isend(c, num, datatype, dest, tag);
         requests[tag].push_back(req);
     }
-    
+
     template<typename T>
     inline void recv(
-        T *c, 
-        const int& src, 
-        const int& num = 1,
+        T *c,
+        int src,
+        int num = 1,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         recv(c, src, num, tag, datatype);
     }
-    
+
     template<typename T>
     inline void recv(
-        T *c, 
-        const int& src, 
-        const int& num,
-        const int& tag,
+        T *c,
+        int src,
+        int num,
+        int tag,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Irecv(c, num, datatype, src, tag);
-        requests[tag].push_back(req);    
+        requests[tag].push_back(req);
     }
 
     void cancelAll()
     {
-        for (RequestsMap::iterator i = requests.begin(); 
+        for (RequestsMap::iterator i = requests.begin();
              i != requests.end();
-             ++i) {            
+             ++i) {
             cancel(i->first);
         }
     }
 
-    void cancel(const int& waitTag) 
-    { 
+    void cancel(int waitTag)
+    {
         std::vector<MPI::Request>& requestVec = requests[waitTag];
         for (std::vector<MPI::Request>::iterator i = requestVec.begin();
              i != requestVec.end(); ++i) {
             i->MPI::Request::Cancel();
         }
     }
-    
-    /** 
-     * blocks until all asynchronous communications have been 
-     * completed. 
-     */ 
+
+    /**
+     * blocks until all asynchronous communications have been
+     * completed.
+     */
     void waitAll()
     {
-        for (RequestsMap::iterator i = requests.begin(); 
+        for (RequestsMap::iterator i = requests.begin();
              i != requests.end();
-             ++i) {            
+             ++i) {
             wait(i->first);
         }
     }
-    
+
     /**
      * waits until those communication requests tagged with @a waitTag
      * are finished.
      */
-    void wait(const int& waitTag) 
-    { 
+    void wait(int waitTag)
+    {
         std::vector<MPI::Request>& requestVec = requests[waitTag];
         MPI::Request::Waitall(requestVec.size(), &requestVec[0]);
         requestVec.clear();
@@ -140,15 +148,15 @@ public:
 
     void testAll()
     {
-        for (RequestsMap::iterator i = requests.begin(); 
+        for (RequestsMap::iterator i = requests.begin();
              i != requests.end();
-             ++i) {            
+             ++i) {
             test(i->first);
         }
     }
 
-    void test(const int& testTag) 
-    { 
+    void test(int testTag)
+    {
         std::vector<MPI::Request>& requestVec = requests[testTag];
         MPI::Request::Testall(requestVec.size(), &requestVec[0]);
     }
@@ -162,60 +170,60 @@ public:
     {
         return comm;
     }
-    
-    /** 
-     * @return the number of nodes in the communicator. 
-     */ 
+
+    /**
+     * @return the number of nodes in the communicator.
+     */
     unsigned size() const
     {
-        return comm->Get_size(); 
+        return comm->Get_size();
     }
 
-    /** 
-     * @return the id number of the current node. 
-     */ 
+    /**
+     * @return the id number of the current node.
+     */
     unsigned rank() const
     {
-        return comm->Get_rank(); 
-    } 
-    
+        return comm->Get_rank();
+    }
+
     template<typename T>
     void sendVec(
-        const SuperVector<T> *vec, 
-        const int& dest, 
-        const int& waitTag = 0, 
+        const SuperVector<T> *vec,
+        int dest,
+        int waitTag = 0,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Isend(
-            &(const_cast<SuperVector<T>&>(*vec))[0], 
+            &(const_cast<SuperVector<T>&>(*vec))[0],
             vec->size(),
             datatype,
             dest,
             tag);
-        requests[waitTag].push_back(req);    
+        requests[waitTag].push_back(req);
     }
 
     template<typename T>
     void recvVec(
-        SuperVector<T> *vec, 
-        const int& src, 
-        const int& waitTag = 0,
+        SuperVector<T> *vec,
+        int src,
+        int waitTag = 0,
         const MPI::Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI::Request req = comm->Irecv(
-            &(*vec)[0], 
+            &(*vec)[0],
             vec->size(),
             datatype,
             src,
             tag);
-        requests[waitTag].push_back(req);    
+        requests[waitTag].push_back(req);
     }
 
     /**
      * Sends a region object synchronously to another node.
      */
     template<int DIM>
-    void sendRegion(const Region<DIM>& region, const int& dest)
+    void sendRegion(const Region<DIM>& region, int dest)
     {
         unsigned numStreaks = region.numStreaks();
         MPI::Request req = comm->Isend(&numStreaks, 1, MPI::UNSIGNED, dest, tag);
@@ -228,7 +236,7 @@ public:
      * Receives a region object from another node, also synchronously.
      */
     template<int DIM>
-    void recvRegion(Region<DIM> *region, const int& src)
+    void recvRegion(Region<DIM> *region, int src)
     {
         unsigned numStreaks;
         comm->Recv(&numStreaks, 1, MPI::UNSIGNED, src, tag);
@@ -237,13 +245,13 @@ public:
         region->clear();
         region->load(buf.begin(), buf.end());
     }
-    
+
     /**
      * Convenience function that will simply return the received
      * Region by value.
      */
     template<int DIM>
-    Region<DIM> recvRegion(const int& src)
+    Region<DIM> recvRegion(int src)
     {
         Region<DIM> ret;
         recvRegion(&ret, src);
@@ -251,10 +259,10 @@ public:
     }
 
     template<typename GRID_TYPE, int DIM>
-    void recvUnregisteredRegion(GRID_TYPE *stripe, 
-                                const Region<DIM>& region, 
-                                const int& src, 
-                                const int& tag,
+    void recvUnregisteredRegion(GRID_TYPE *stripe,
+                                const Region<DIM>& region,
+                                int src,
+                                int tag,
                                 const MPI::Datatype& datatype)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
@@ -263,20 +271,20 @@ public:
     }
 
     template<typename GRID_TYPE, int DIM>
-    void sendUnregisteredRegion(GRID_TYPE *stripe, 
-                                const Region<DIM>& region, 
-                                const int& dest, 
-                                const int& tag,
+    void sendUnregisteredRegion(GRID_TYPE *stripe,
+                                const Region<DIM>& region,
+                                int dest,
+                                int tag,
                                 const MPI::Datatype& datatype)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             send(&(*stripe).at(i->origin), dest, i->length(), tag, datatype);
         }
     }
-        
+
     template<typename T>
     inline SuperVector<T> allGather(
-        const T& source, 
+        const T& source,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         SuperVector<T> result(size());
@@ -288,16 +296,16 @@ public:
     inline void allGather(
         const T *source,
         T *target,
-        const int& num,
+        const int num,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         comm->Allgather(source, num, datatype, target, num, datatype);
     }
-        
+
     template<typename T>
     inline void allGather(
-        const T& source, 
-        SuperVector<T> *target, 
+        const T& source,
+        SuperVector<T> *target,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         allGather(&source, &(target->front()), 1, datatype);
@@ -305,7 +313,7 @@ public:
 
     template<typename T>
     inline SuperVector<T> allGatherV(
-        const T *source, 
+        const T *source,
         const SuperVector<int>& lengths,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
@@ -316,9 +324,9 @@ public:
 
     template<typename T>
     inline void allGatherV(
-        const T *source, 
+        const T *source,
         const SuperVector<int>& lengths,
-        SuperVector<T> *target, 
+        SuperVector<T> *target,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         SuperVector<int> displacements(size());
@@ -331,8 +339,8 @@ public:
 
     template<typename T>
     inline SuperVector<T> gather(
-        const T& item, 
-        const unsigned& root, 
+        const T& item,
+        const unsigned& root,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         SuperVector<T> result(size());
@@ -344,14 +352,17 @@ public:
         }
     }
 
-    // fixme: needs test
+    /**
+     * Simple wrapper for MPI_Gatherv. lengths is only relevant on
+     * root. Expects that target has sufficient capacity.
+     */
     template<typename T>
     inline void gatherV(
-        const T *source, 
+        const T *source,
         const int num,
         const SuperVector<int>& lengths,
-        const unsigned& root, 
-        SuperVector<T> *target, 
+        const unsigned& root,
+        T *target,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         SuperVector<int> displacements(size());
@@ -362,23 +373,16 @@ public:
             }
         }
 
-        // std::cout << "num[" << rank() << "]: " << num << "\n";
-        // std::cout << "lengths[" << rank() << "]: " << lengths << "\n";
-        // std::cout << "displacements[" << rank() << "]: " << displacements << "\n";
-        // std::cout << "targetsize[" << rank() << "]: " << target->size() << "\n";
-
-        comm->Gatherv(source, num, datatype, 
-                      &(*target)[0], &lengths[0], &displacements[0], datatype, 
-                      root);
+        comm->Gatherv(source, num, datatype, target, &lengths[0], &displacements[0], datatype, root);
     }
 
     /**
-     * scatter static size stuff. (T needs to bring a default constructor)
+     * Broadcasts static size stuff.
      */
     template<typename T>
     inline T broadcast(
-        const T& source, 
-        const unsigned& root, 
+        const T& source,
+        const unsigned& root,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         T buff(source);
@@ -387,30 +391,49 @@ public:
     }
 
     template<typename T>
+    void broadcast(
+        T *buffer,
+        unsigned num,
+        unsigned root,
+        const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
+    {
+        comm->Bcast(buffer, num, datatype, root);
+    }
+
+    template<typename T>
     inline SuperVector<T> broadcastVector(
-        const SuperVector<T>& source, 
+        const SuperVector<T>& source,
         const unsigned& root,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
         unsigned size = source.size();
         size = broadcast(size, root);
         SuperVector<T> buff(size);
-        if (size == 0) return buff;
-        if (rank() == root) buff = source;
+
+        if (size == 0) {
+            return buff;
+        }
+        if (rank() == root) {
+            buff = source;
+        }
+
         comm->Bcast(&(buff.front()), size, datatype, root);
         return buff;
     }
 
     template<typename T>
     inline void broadcastVector(
-        SuperVector<T> *buff, 
+        SuperVector<T> *buffer,
         const unsigned& root,
         const MPI::Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        unsigned size = buff->size();
+        unsigned size = buffer->size();
         size = broadcast(size, root);
-        if (size > 0) 
-            comm->Bcast(&(buff->front()), size, datatype, root);
+        buffer->resize(size);
+
+        if (size > 0) {
+            comm->Bcast(&(buffer->front()), size, datatype, root);
+        }
     }
 
 private:
@@ -445,7 +468,7 @@ private:
     };
 
     template<int DIM>
-    class StreakToLengthTranslatingIterator 
+    class StreakToLengthTranslatingIterator
     {
     public:
         inline StreakToLengthTranslatingIterator(typename Region<DIM>::StreakIterator _iter) :

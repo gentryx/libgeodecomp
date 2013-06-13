@@ -15,8 +15,6 @@ if(NOT DEFINED BOOST_ROOT)
     set(BOOST_ROOT "$ENV{BOOST_LIBDIR}/../")
     set(Boost_LIBRARY_DIRS "$ENV{BOOST_LIBDIR}")
     set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
-  else()
-    set(BOOST_ROOT "/opt/boost")
   endif()
 endif()
 
@@ -28,6 +26,7 @@ find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
 find_package(Qt4)
+find_package(VisIt)
 
 if(NOT DEFINED QT4_FOUND)
   set(QT4_FOUND false)
@@ -101,6 +100,8 @@ add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" $
 
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
+add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." false true)
+
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
@@ -110,6 +111,12 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
 add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} false)
+add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
+
+add_config_option(FEATURE_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+
+# setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
+add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
 add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
@@ -124,7 +131,7 @@ set(PACKAGE_NAME libgeodecomp)
 set(CMAKE_C_FLAGS   "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
 
-set(PACKAGE_VERSION "0.1.0")
+set(PACKAGE_VERSION "0.2.0")
 set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
@@ -171,6 +178,9 @@ endif()
 if(FEATURE_HPX AND NOT HPX_FOUND)
     message(FATAL_ERROR "FEATURE_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
 endif()
+if(FEATURE_VISIT)
+  include_directories(${VisIt_INCLUDE_DIRS})
+endif()
 
 if(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB local_libgeodecomp_lib)
@@ -178,7 +188,7 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
-# LIBDIRS is used to find source files and headers 
+# LIBDIRS is used to find source files and headers
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
@@ -274,10 +284,14 @@ endif()
 if(FEATURE_OPENCL)
   target_link_libraries(geodecomp OpenCL)
 endif()
+if(FEATURE_VISIT)
+  target_link_libraries(geodecomp ${VisIt_LIBRARIES} dl)
+endif()
 
 #============= INSTALLER CONFIG ===================================
 install(TARGETS geodecomp DESTINATION lib)
 install(FILES config.h DESTINATION include/${PACKAGE_NAME})
+install(FILES libgeodecomp.h DESTINATION include)
 
 # install all headers
 foreach(dir ${LIBDIRS})

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_chronometer_h_
-#define _libgeodecomp_parallelization_chronometer_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
+#define LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
 
 #include <stdexcept>
 
@@ -53,9 +53,9 @@ public:
     static long long timeUSec();
 
 private:
-    long long _cycleStart;
-    long long _workIntervalStart;
-    long long _workLength;
+    long long cycleStart;
+    long long workIntervalStart;
+    long long workLength;
 
     /**
      * @returns a timestamp from a high resolution timer. There are no

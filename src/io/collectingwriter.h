@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_io_collectingwriter_h_
-#define _libgeodecomp_io_collectingwriter_h_
+#ifndef LIBGEODECOMP_IO_COLLECTINGWRITER_H
+#define LIBGEODECOMP_IO_COLLECTINGWRITER_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -20,7 +20,7 @@ public:
     typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     using ParallelWriter<CELL_TYPE>::distSim;
 
@@ -29,8 +29,8 @@ public:
         const unsigned period = 1,
         const int root = 0,
         MPI::Comm *communicator = &MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) : 
-        ParallelWriter<CELL_TYPE>("foo",  period),
+        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        ParallelWriter<CELL_TYPE>("",  period),
         writer(writer),
         mpiLayer(communicator),
         root(root),
@@ -46,19 +46,19 @@ public:
     }
 
     virtual void stepFinished(
-        const SimulatorGridType& grid, 
-        const Region<DIM>& validRegion, 
+        const SimulatorGridType& grid,
+        const Region<DIM>& validRegion,
         const Coord<DIM>& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
-        bool lastCall) 
+        unsigned step,
+        WriterEvent event,
+        bool lastCall)
     {
         if (mpiLayer.rank() == root) {
             if (globalGrid.boundingBox().dimensions != globalDimensions) {
                 globalGrid.resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
             }
 
-            globalGrid.pasteGridBase(grid, validRegion);
+            globalGrid.paste(grid, validRegion);
             globalGrid.atEdge() = grid.atEdge();
         }
 
@@ -69,20 +69,20 @@ public:
                     Region<DIM> recvRegion;
                     mpiLayer.recvRegion(&recvRegion, sender);
                     mpiLayer.recvUnregisteredRegion(
-                        &globalGrid, 
-                        recvRegion, 
-                        sender, 
-                        MPILayer::PARALLEL_MEMORY_WRITER, 
-                        datatype);                    
+                        &globalGrid,
+                        recvRegion,
+                        sender,
+                        MPILayer::PARALLEL_MEMORY_WRITER,
+                        datatype);
                 }
                 if (mpiLayer.rank() == sender) {
                     if (sender == mpiLayer.rank()) {
                         mpiLayer.sendRegion(validRegion, root);
                         mpiLayer.sendUnregisteredRegion(
-                            &grid, 
-                            validRegion, 
-                            root, 
-                            MPILayer::PARALLEL_MEMORY_WRITER, 
+                            &grid,
+                            validRegion,
+                            root,
+                            MPILayer::PARALLEL_MEMORY_WRITER,
                             datatype);
                     }
                 }
@@ -100,7 +100,7 @@ private:
     boost::shared_ptr<Writer<CELL_TYPE> > writer;
     MPILayer mpiLayer;
     int root;
-    StorageGridType globalGrid;    
+    StorageGridType globalGrid;
     MPI::Datatype datatype;
 };
 

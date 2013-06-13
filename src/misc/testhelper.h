@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_testhelper_h_
-#define _libgeodecomp_misc_testhelper_h_
+#ifndef LIBGEODECOMP_MISC_TESTHELPER_H
+#define LIBGEODECOMP_MISC_TESTHELPER_H
 
 #ifdef __CODEGEARC__
 #include <math.h>
@@ -81,7 +81,7 @@
         while (in1.get(ch1)) {                                          \
             if (in2.get(ch2)) {                                         \
                 std::string message = "Contents differ at byte " +      \
-                    StringConv::itoa(counter);                          \
+                    StringOps::itoa(counter);                           \
                 TSM_ASSERT_EQUALS(message.c_str(), ch1, ch2);           \
             } else {                                                    \
                 TSM_ASSERT("File lengths differ", false);               \

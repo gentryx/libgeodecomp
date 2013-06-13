@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_examples_latticegas_interactivesimulator_h_
-#define _libgeodecomp_examples_latticegas_interactivesimulator_h_
+#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_INTERACTIVESIMULATOR_H
+#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_INTERACTIVESIMULATOR_H
 
 #include <iostream>
 #include <QObject>

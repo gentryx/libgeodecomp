@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_misc_supermap_h_
-#define _libgeodecomp_misc_supermap_h_
+#ifndef LIBGEODECOMP_MISC_SUPERMAP_H
+#define LIBGEODECOMP_MISC_SUPERMAP_H
 
 #include <iterator>
 #include <map>
@@ -36,7 +36,7 @@ public:
         return (*((std::map<Key, Value>*)this))[key];
     }
 
-    inline std::string toString() const 
+    inline std::string toString() const
     {
         std::ostringstream temp;
         temp << "{";

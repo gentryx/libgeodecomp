@@ -7,11 +7,11 @@
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class MPIIOTest : public CxxTest::TestSuite 
+class MPIIOTest : public CxxTest::TestSuite
 {
 public:
     void testReadWrite()

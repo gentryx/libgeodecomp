@@ -14,8 +14,7 @@ public:
         Image img(width, height);
         TS_ASSERT_EQUALS(img.getDimensions().x(),  width);
         TS_ASSERT_EQUALS(img.getDimensions().y(), height);
-    }
-    
+    }   
 
     void testSlice()
     {
@@ -36,10 +35,9 @@ public:
                 small[y][x] = Color(x+10, y+20, 47);
             }
         }
-        
+   
         TS_ASSERT_EQUALS(small, big.slice(Coord<2>(10, 20), 30, 40));        
     }
-
 
     void testPaste()
     {
@@ -52,7 +50,6 @@ public:
         TS_ASSERT_EQUALS(b, c.slice(10, 0, 30, 20));                  
     }
 
-
     void testPasteOffScreenLeftUpper()
     {
         Image a(10, 20, Color::RED);
@@ -61,7 +58,6 @@ public:
         b.paste(-5, -3, a);
         TS_ASSERT_EQUALS(Image(5, 17, Color::RED), b.slice( 0, 0, 5, 17));
     }
-
 
     void testPasteOffScreenRightLower()
     {
@@ -72,20 +68,17 @@ public:
         TS_ASSERT_EQUALS(Image(3, 15, Color::RED), b.slice(37, 15, 3, 15));
     }
 
-
     void testIllegalSliceUpperLeft()
     {
         Image a(10, 20, Color::RED);
         TS_ASSERT_THROWS(a.slice(Coord<2>(-5, -5), 10, 10), std::invalid_argument);
     }
 
-
     void testIllegalSliceLowerRight()
     {
         Image a(10, 20, Color::RED);
         TS_ASSERT_THROWS(a.slice(Coord<2>(5, 15), 10, 10), std::invalid_argument);
     }
-
 
     void testFillBox()
     {
@@ -99,4 +92,4 @@ public:
     }
 };
 
-};
+}

@@ -1,5 +1,5 @@
-#ifndef _libgeodecomp_parallelization_hiparsimulator_partitions_hilbertpartition_h_
-#define _libgeodecomp_parallelization_hiparsimulator_partitions_hilbertpartition_h_
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HILBERTPARTITION_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONS_HILBERTPARTITION_H
 
 // ugly hack to circumvent CodeGear quirks
 #ifdef __CODEGEARC__
@@ -35,11 +35,11 @@ public:
     class Square
     {
     public:
-        inline Square(const Coord<2>& _origin, const Coord<2> _dimensions, const unsigned& _quadrant, const Form& _form) :
-            origin(_origin),
-            dimensions(_dimensions),
-            quadrant(_quadrant),
-            form(_form)
+        inline Square(const Coord<2>& origin, const Coord<2> dimensions, const unsigned& quadrant, const Form& form) :
+            origin(origin),
+            dimensions(dimensions),
+            quadrant(quadrant),
+            form(form)
         {}
 
         inline std::string toString() const
@@ -64,11 +64,11 @@ public:
         using SpaceFillingCurve<2>::Iterator::sublevelState;
 
         inline Iterator(
-            const Coord<2>& _origin, 
-            const Coord<2>& dimensions, 
-            const unsigned& pos=0, 
+            const Coord<2>& origin,
+            const Coord<2>& dimensions,
+            const unsigned& pos=0,
             const Form& form=ENUM_PREFIX LL_TO_LR) :
-            SpaceFillingCurve<2>::Iterator(_origin, false)
+            SpaceFillingCurve<2>::Iterator(origin, false)
         {
             squareStack.push_back(Square(origin, dimensions, 0, form));
             digDown(pos);
@@ -80,8 +80,9 @@ public:
 
         inline Iterator& operator++()
         {
-            if (endReached)
+            if (endReached) {
                 return *this;
+            }
             if (sublevelState == TRIVIAL) {
                 operatorIncTrivial();
             } else {
@@ -124,18 +125,21 @@ public:
         inline void digUpDown()
         {
             digUp();
-            if (endReached)
+            if (endReached) {
                 return;
+            }
             digDown(0);
         }
 
         inline void digDown(const unsigned& offset)
         {
-            if (squareStack.empty())
+            if (squareStack.empty()) {
                 throw std::logic_error("cannot descend from empty squares stack");
+            }
+
             Square currentSquare = squareStack.pop();
             const Coord<2>& origin = currentSquare.origin;
-            const Coord<2>& dimensions = currentSquare.dimensions; 
+            const Coord<2>& dimensions = currentSquare.dimensions;
             const Form& form = currentSquare.form;
 
             if ((int)offset >= dimensions.x() * dimensions.y()) {
@@ -153,8 +157,8 @@ public:
         }
 
         inline void digDownTrivial(
-            const Coord<2>& origin, 
-            const Coord<2>& dimensions, 
+            const Coord<2>& origin,
+            const Coord<2>& dimensions,
             const unsigned& offset)
         {
             sublevelState = TRIVIAL;
@@ -169,15 +173,15 @@ public:
                 cursor.y() += offset;
             }
         }
-        
+
         inline void digDownCached(
-            const Coord<2>& origin, 
-            const Coord<2>& dimensions, 
-            const unsigned& offset, 
+            const Coord<2>& origin,
+            const Coord<2>& dimensions,
+            const unsigned& offset,
             const Form& form)
         {
             sublevelState = CACHED;
-            SuperVector<Coord<2> > &coords = 
+            SuperVector<Coord<2> > &coords =
                 (*squareCoordsCache)[dimensions.x()][dimensions.y()][form];
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
@@ -186,11 +190,11 @@ public:
         }
 
         inline void digDownRecursion(
-            const unsigned& offset, 
+            const unsigned& offset,
             Square currentSquare)
         {
             const Coord<2>& origin = currentSquare.origin;
-            const Coord<2>& dimensions = currentSquare.dimensions; 
+            const Coord<2>& dimensions = currentSquare.dimensions;
             const Form& form = currentSquare.form;
             Coord<2> halfDimensions = dimensions / 2;
             Coord<2> restDimensions = dimensions - halfDimensions;
@@ -227,11 +231,11 @@ public:
                 accuSizes[1] = upperRightQuarterSize;
                 accuSizes[2] = rightHalfSize;
                 accuSizes[3] = rightHalfSize + lowerLeftQuarterSize;
-                break;                                   
+                break;
             default:
                 throw std::invalid_argument("illegal form");
             };
-                
+
             unsigned newQuarter;
             unsigned pos = offset + accuSizes[currentSquare.quadrant];
             if (pos < accuSizes[2]) {
@@ -268,9 +272,9 @@ public:
                 newDimensions = dimensions - halfDimensions;
                 break;
             };
-                
+
             Form newForm = squareFormTransitions[form][newQuarter];
-            Square newSquare(newOrigin, newDimensions, 0, newForm);                
+            Square newSquare(newOrigin, newDimensions, 0, newForm);
             squareStack.push_back(newSquare);
 
             digDown(newOffset);
@@ -291,19 +295,19 @@ public:
 
         inline bool isCached(const Coord<2>& dimensions) const
         {
-            return (dimensions.x() < maxCachedDimensions.x() && 
+            return (dimensions.x() < maxCachedDimensions.x() &&
                     dimensions.y() < maxCachedDimensions.y());
         }
     };
 
     inline HilbertPartition(
-        const Coord<2>& _origin=Coord<2>(0, 0), 
-        const Coord<2>& _dimensions=Coord<2>(0, 0),
+        const Coord<2>& origin=Coord<2>(0, 0),
+        const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,
         const SuperVector<long>& weights=SuperVector<long>(2)) :
         SpaceFillingCurve<2>(offset, weights),
-        origin(_origin),              
-        dimensions(_dimensions)
+        origin(origin),
+        dimensions(dimensions)
     {}
 
     inline Iterator operator[](const unsigned& i) const
@@ -321,10 +325,10 @@ public:
         return Iterator(origin);
     }
 
-    inline Region<2> getRegion(const long& node) const 
+    inline Region<2> getRegion(const long& node) const
     {
         return Region<2>(
-            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 0]],
             (*this)[startOffsets[node + 1]]);
     }
 
@@ -334,7 +338,7 @@ private:
     Coord<2> origin;
     Coord<2> dimensions;
 
-    static inline bool fillCaches() 
+    static inline bool fillCaches()
     {
         Coord<2> maxDim(17, 17);
         squareCoordsCache.reset(new boost::multi_array<SuperVector<Coord<2> >, 3>(boost::extents[maxDim.x()][maxDim.y()][4]));
@@ -346,12 +350,15 @@ private:
                 for (int f = 0; f < 4; ++f) {
                     SuperVector<Coord<2> > coords;
                     Iterator end(Coord<2>(0, 0));
-                    for (Iterator i(Coord<2>(0, 0), dimensions, 0, (Form)f); i != end; ++i) 
+                    for (Iterator i(Coord<2>(0, 0), dimensions, 0, (Form)f); i != end; ++i) {
                         coords.push_back(*i);
+                    }
+
                     (*squareCoordsCache)[dimensions.x()][dimensions.y()][f] = coords;
                 }
             }
         }
+
         maxCachedDimensions = maxDim;
         return true;
     }

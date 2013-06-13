@@ -6,7 +6,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -18,7 +18,7 @@ public:
     {
         simulator = new StripingSimulator<TestCell<2> >(
             new TestInitializer<TestCell<2> >(),
-            MPILayer().rank() ? 0 : new NoOpBalancer(), 
+            MPILayer().rank() ? 0 : new NoOpBalancer(),
             1000);
     }
 

@@ -5,7 +5,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/writer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -15,16 +15,17 @@ class HollowWriter : public Writer<CELL_TYPE>
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    HollowWriter(const std::string& prefix, 
-                 unsigned period = 1) : 
-        Writer<CELL_TYPE>(prefix, period) {}
+    HollowWriter(const std::string& prefix,
+                 unsigned period = 1) :
+        Writer<CELL_TYPE>(prefix, period)
+    {}
 
-    virtual void stepFinished(const GridType&, unsigned, WriterEvent) 
+    virtual void stepFinished(const GridType&, unsigned, WriterEvent)
     {}
 };
 
 
-class WriterTest : public CxxTest::TestSuite 
+class WriterTest : public CxxTest::TestSuite
 {
 private:
     MonolithicSimulator<TestCell<2> > *sim;
@@ -42,13 +43,7 @@ public:
 
     void testPeriodMustBePositive()
     {
-        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("foobar", 0), 
-                         std::invalid_argument);
-    }
-
-    void testPrefixShouldNotBeEmpty()
-    {
-        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("", 1), 
+        TS_ASSERT_THROWS(HollowWriter<TestCell<2> >("foobar", 0),
                          std::invalid_argument);
     }
 };

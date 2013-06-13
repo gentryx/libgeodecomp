@@ -1,4 +1,4 @@
-/** 
+/**
  * We need to include typemaps first to avoid problems with Intel
  * MPI's C++ bindings (which may collide with stdio.h's SEEK_SET,
  * SEEK_CUR etc.).
@@ -24,9 +24,9 @@ public:
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 1; 
+    static inline unsigned nanoSteps()
+    {
+        return 1;
     }
 
 #define C 0
