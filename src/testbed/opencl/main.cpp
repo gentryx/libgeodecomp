@@ -191,7 +191,7 @@ class MyFutureOpenCLStepper {
 
       cl_indices = cl::Buffer(context,
                               CL_MEM_READ_WRITE,
-                              coords.indices_size * sizeof(cl_int));
+                              coords.num_points * sizeof(cl_int));
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
