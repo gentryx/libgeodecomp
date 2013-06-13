@@ -9,6 +9,14 @@
 
 using namespace LibGeoDecomp;
 
+typedef struct {
+  cl_int    num_neighbors;
+  cl_int3   points_size;
+  cl_int    indices_size;
+  cl_int3 * points;
+  cl_int  * indices;
+} coords_ctx;
+
 std::string
 get_error_description(cl_int error);
 
@@ -124,6 +132,15 @@ class MyFutureOpenCLStepper {
       box(box),
       hostGrid(box)
   {
+    coords_ctx coords;
+    coords.points_size = { hostGrid.getDimensions().x(),
+                           hostGrid.getDimensions().y() };
+
+    coords.num_neighbors = num_neighbors;
+    // 1 * ^= all points; 2 ^= +n, -n
+    coords.indices_size = hostGrid.getDimensions().prod()
+                        * (1 + 2 * num_neighbors);
+
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
@@ -153,14 +170,22 @@ class MyFutureOpenCLStepper {
 
     for (int i = 0; i < size; ++i) { in_address[i] = i; }
 
-    cl::Buffer cl_points, cl_input, cl_output;
+    cl::Buffer cl_coords, cl_points, cl_indices, cl_input, cl_output;
 
     try {
+      cl_coords = cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(coords_ctx));
+
+      cmdq.enqueueWriteBuffer(cl_coords, CL_TRUE, 0,
+                              sizeof(coords_ctx), &coords);
+
       cl_points = cl::Buffer(context,
                              CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                              points.size() * sizeof(cl_int3),
                              points.data());
 
+      cl_indices = cl::Buffer(context,
+                              CL_MEM_READ_WRITE,
+                              coords.indices_size * sizeof(cl_int));
 
       cl_input = cl::Buffer(context,
                             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
@@ -189,6 +214,13 @@ class MyFutureOpenCLStepper {
       std::ifstream kernel_stream;
       kernel_stream.exceptions(std::ios::failbit | std::ios::badbit);
 
+      kernel_stream.open(coords_ctx_file);
+      std::string coords_ctx_txt;
+      coords_ctx_txt.append(std::istreambuf_iterator<char>(kernel_stream),
+                            std::istreambuf_iterator<char>());
+      kernel_stream.close();
+
+      user_code_txt.append(coords_ctx_txt);
 
       kernel_stream.open(user_code_file.c_str());
       user_code_txt.append(std::istreambuf_iterator<char>(kernel_stream),
@@ -279,6 +311,8 @@ class MyFutureOpenCLStepper {
   private:
     CoordBox<DIM> box;
     GridType hostGrid;
+
+    const std::string coords_ctx_file = "./coords_ctx.cl";
 
     cl::Context context;
     cl::CommandQueue cmdq;
