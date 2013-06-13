@@ -145,6 +145,8 @@ class MyFutureOpenCLStepper {
 
     cmdq = cl::CommandQueue(context, device);
 
+    std::vector<cl_int3> points;
+    for (auto & p : box) { points.push_back({ p.x(), p.y() }); }
 
     size_t size = hostGrid.getDimensions().prod();
     double * in_address = new double[size];
@@ -159,8 +161,6 @@ class MyFutureOpenCLStepper {
                              points.size() * sizeof(cl_int3),
                              points.data());
 
-      cmdq.enqueueWriteBuffer(cl_points, CL_TRUE, 0,
-                              points.size(), points.data());
 
       cl_input = cl::Buffer(context,
                             CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
