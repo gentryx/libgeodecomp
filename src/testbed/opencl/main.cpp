@@ -287,8 +287,16 @@ class MyFutureOpenCLStepper {
       }
 
 
+      void * output = cmdq.enqueueMapBuffer(cl_output, CL_TRUE, CL_MAP_READ, 0,
+                                            size * sizeof(double));
 
       cmdq.finish();
+
+      std::cerr << "[" << 0 << "] = " << ((double *)output)[0];
+      for (int i = 1; i < size; ++i) {
+        std::cerr << ", [" << i << "] = " << ((double *)output)[i];
+      }
+      std::cerr << std::endl;
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
