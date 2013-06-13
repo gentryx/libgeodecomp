@@ -360,7 +360,7 @@ class MyFutureOpenCLStepper {
 
 int main(int argc, char **argv)
 {
-  auto box = CoordBox<3>(Coord<3>(1,1,1), Coord<3>(3, 3, 3));
+  auto box = CoordBox<2>(Coord<2>(0,0), Coord<2>(3, 3));
   if (argc == 5) {
     // coordbox,
     // num_neighbors, num_updates,
