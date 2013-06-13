@@ -168,7 +168,7 @@ class MyFutureOpenCLStepper {
                             in_address);
 
 
-      cl_output = cl::Buffer(context, CL_MEM_WRITE_ONLY, size);
+      cl_output = cl::Buffer(context, CL_MEM_READ_WRITE, size * sizeof(double));
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
