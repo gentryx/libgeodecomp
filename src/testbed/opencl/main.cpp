@@ -167,7 +167,6 @@ class MyFutureOpenCLStepper {
                             size * sizeof(double),
                             in_address);
 
-      cmdq.enqueueWriteBuffer(cl_input, CL_TRUE, 0, size, in_address);
 
       cl_output = cl::Buffer(context, CL_MEM_WRITE_ONLY, size);
 
