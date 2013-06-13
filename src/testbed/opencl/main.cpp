@@ -169,13 +169,20 @@ class MyFutureOpenCLStepper {
 
     cmdq = cl::CommandQueue(context, device);
 
-    cl::Buffer cl_coords, cl_points, cl_indices, cl_input, cl_output;
+    cl::Buffer cl_coords, cl_input, cl_output, cl_points, cl_indices;
 
     try {
       cl_coords = cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(coords_ctx));
 
       cmdq.enqueueWriteBuffer(cl_coords, CL_TRUE, 0,
                               sizeof(coords_ctx), &coords);
+
+      cl_input = cl::Buffer(context,
+                            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+                            size * sizeof(double),
+                            input);
+
+      cl_output = cl::Buffer(context, CL_MEM_READ_WRITE, size * sizeof(double));
 
       cl_points = cl::Buffer(context,
                              CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
@@ -185,14 +192,6 @@ class MyFutureOpenCLStepper {
       cl_indices = cl::Buffer(context,
                               CL_MEM_READ_WRITE,
                               coords.indices_size * sizeof(cl_int));
-
-      cl_input = cl::Buffer(context,
-                            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
-                            size * sizeof(double),
-                            input);
-
-
-      cl_output = cl::Buffer(context, CL_MEM_READ_WRITE, size * sizeof(double));
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
