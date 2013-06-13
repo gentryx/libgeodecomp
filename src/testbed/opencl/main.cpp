@@ -163,7 +163,7 @@ class MyFutureOpenCLStepper {
 
 
       cl_input = cl::Buffer(context,
-                            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                             size * sizeof(double),
                             in_address);
 
