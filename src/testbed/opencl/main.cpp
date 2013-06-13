@@ -119,8 +119,8 @@ class MyFutureOpenCLStepper {
     MyFutureOpenCLStepper(const CoordBox<DIM> box,
                           size_t num_neighbors, size_t num_updates,
                           size_t platform_id, size_t device_id,
-                          const std::string & kernel_name,
-                          const std::string & kernel_file) :
+                          const std::string & user_code_kernel_name,
+                          const std::string & user_code_file) :
       box(box),
       hostGrid(box)
   {
@@ -179,38 +179,41 @@ class MyFutureOpenCLStepper {
       exit(EXIT_FAILURE);
     }
 
-    // std::string kernel_source_code("#pragma OPENCL EXTENSION cl_intel_printf:");
-    std::string kernel_source_code;
-    kernel_source_code.append("#pragma OPENCL EXTENSION all:");
-    kernel_source_code.append("enable");
-    kernel_source_code.append("\n");
+    std::string pre_code_txt;
+    pre_code_txt.append("#pragma OPENCL EXTENSION all:");
+    pre_code_txt.append("enable");
+    pre_code_txt.append("\n");
+
+    std::string user_code_txt(pre_code_txt);
 
     try {
       std::ifstream kernel_stream;
       kernel_stream.exceptions(std::ios::failbit | std::ios::badbit);
-      kernel_stream.open(kernel_file.c_str());
 
-      kernel_source_code.append(std::istreambuf_iterator<char>(kernel_stream),
+
+      kernel_stream.open(user_code_file.c_str());
+      user_code_txt.append(std::istreambuf_iterator<char>(kernel_stream),
                                 std::istreambuf_iterator<char>());
+      kernel_stream.close();
 
       kernel_stream.close();
     } catch (std::exception & error) {
       std::cerr << "Error while trying to access \""
-                << kernel_file << "\":" << std::endl
+                << user_code_file << "\":" << std::endl
                 << error.what() << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    cl::Program::Sources kernel_sources(1,
-        std::make_pair(kernel_source_code.c_str(),
-                       kernel_source_code.length() + 1));
 
-    cl::Program program(context, kernel_sources);
+    cl::Program user_code_program(context,
+        { std::make_pair(user_code_txt.c_str(), user_code_txt.length() + 1) });
 
     try {
-      program.build(std::vector<cl::Device>(1, device));
+      user_code_program.build(std::vector<cl::Device>(1, device));
 
-      cl::Kernel kernel(program, kernel_name.c_str());
+      cl::Kernel user_code_kernel(user_code_program,
+                                  user_code_kernel_name.c_str());
+
 
       cl_int3 cl_size = { hostGrid.getDimensions().x(),
                           hostGrid.getDimensions().y(),
@@ -234,8 +237,8 @@ class MyFutureOpenCLStepper {
                 << get_error_description(error.err())
                 << " (" << error.err() << ")"
                 << std::endl
-                << "Build Log:" << std::endl
-                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+                << "Build Log for user code:" << std::endl
+                << user_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
       exit(EXIT_FAILURE);
     }
 
