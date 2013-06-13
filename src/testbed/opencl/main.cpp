@@ -269,20 +269,24 @@ class MyFutureOpenCLStepper {
                                 cl::NullRange,
                                 cl::NDRange(points.size()),
                                 cl::NullRange);
-      cl_int3 cl_size = { hostGrid.getDimensions().x(),
-                          hostGrid.getDimensions().y(),
-                          hostGrid.getDimensions().z() };
 
-      kernel.setArg(0, cl_size);
-      kernel.setArg(1, cl_points);
-      kernel.setArg(2, cl_input);
-      kernel.setArg(3, cl_output);
+      arg_counter = 0;
+      user_code_kernel.setArg(arg_counter++, cl_coords);
 
-      cmdq.enqueueNDRangeKernel(kernel,
-                                cl::NullRange,
-                                cl::NDRange(points.size()),
-                                cl::NullRange
-                               );
+      for (int i = 0; i < num_updates; ++i) {
+        // let's play ping - pong
+        // (http://www.mathematik.uni-dortmund.de/~goeddeke/gpgpu/tutorial.html#feedback2)
+        // 1 + 0 & 1 = 1; 2 - 0 & 1 = 2; 1 + 1 & 1 = 2; 2 - 1 & 1 = 1
+        user_code_kernel.setArg(1 + (i & 1), cl_input);
+        user_code_kernel.setArg(2 - (i & 1), cl_output);
+
+        cmdq.enqueueNDRangeKernel(user_code_kernel,
+                                  cl::NullRange,
+                                  cl::NDRange(points.size()),
+                                  cl::NullRange);
+      }
+
+
 
       cmdq.finish();
 
