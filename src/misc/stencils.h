@@ -36,16 +36,17 @@ private:
     template<int BASE, int EXP>
     class Power;
 
-    template<template<int, int> class ADDEND, int INDEX, int DIM>
-    class Sum;
+    /**
+     * Computes \sigma_{i=0}^{INDEX} ADDEND<i, PARAM2>::VOLUME
+     */
+    template<template<int, int> class ADDEND, int INDEX, int PARAM2>
+    class Sum1;
 
     /**
-     * Required for calculating the volume of a VonNeumann's stencil correctly.
+     * Computes \sigma_{i=0}^{INDEX} ADDEND<PARAM1, i>::VOLUME
      */
-    template<int RADIUS, int DIM>
-    class VonNeumannHelper;
-
-public:
+    template<template<int, int> class ADDEND, int INDEX, int PARAM1>
+    class Sum2;
 
     // Utility class to ease enumeration of statements, e.g. copying
     // of all coords in a stencil. BOOST_PP_REPEAT and friends can't
@@ -106,6 +107,8 @@ public:
     };
 
 
+public:
+
     /**
      * The classic Moore neighborhood contains all cells whose spatial
      * distance to the orign (i.e. the current cell) -- as measured by
@@ -123,6 +126,9 @@ public:
         class Coords;
     };
 
+    template<int DIMENSIONS, int RADIUS>
+    class VonNeumannHelper;
+
     /**
      * The VonNeumann neighborhood is probably as well known as the
      * Moore neighborhood, but most commonly only used with a RADIUS
@@ -134,9 +140,10 @@ public:
     {
     public:
         static const int DIM = DIMENSIONS;
-        static const int VOLUME = 
+        static const int VOLUME =
             VonNeumann<DIM - 1, RADIUS>::VOLUME +
-            2 * Sum<VonNeumannHelper, RADIUS - 1, DIM - 1>::VALUE;
+            2 * Sum2<VonNeumann, DIM - 1, RADIUS>::VALUE -
+            2 * VonNeumann<DIM - 1, RADIUS>::VOLUME;
 
         // a list of Classes that derive from FixedCoord and define the stencil's shape
         template<int INDEX>
@@ -170,6 +177,10 @@ public:
         class Coords;
     };
 
+private:
+    template<int DIM, int RADIUS, int Z_OFFSET>
+    class VonNeumannDimDelta;
+
     /**
      * This is a utility class to aid in adressing all neighboring
      * cells which are packed in a linear array. It's pratically the
@@ -194,7 +205,7 @@ public:
      * {T, W, C, E, B}
      *
      * 3D von Neumann:
-     * 
+     *
      * {S, T, W, C, E, B, N}
      *
      * From these we can deduce the canonical offsets within the array
@@ -221,61 +232,153 @@ public:
     template<typename STENCIL, int X, int Y, int Z>
     class OffsetHelper;
 
-    template<int DIM, int X, int Y, int Z>
-    class OffsetHelper<Moore<DIM, 1>, X, Y, Z>
+    template<int DIM, int RADIUS, int X, int Y, int Z>
+    class OffsetHelper<Moore<DIM, RADIUS>, X, Y, Z>
     {
     public:
-        static const int VALUE = 1 * X + 3 * Y + 9 * Z + Sum<Moore, DIM - 1, 1>::VALUE;
+        static const int VALUE =
+            Power<2 * RADIUS + 1, 0>::VALUE * X +
+            Power<2 * RADIUS + 1, 1>::VALUE * Y +
+            Power<2 * RADIUS + 1, 2>::VALUE * Z +
+            RADIUS * Sum1<Moore, DIM - 1, RADIUS>::VALUE;
     };
 
-    template<int DIM, int X, int Y, int Z>
-    class OffsetHelper<VonNeumann<DIM, 1>, X, Y, Z>
+    template<int DIM, int RADIUS, int X, int Y, int Z>
+    class OffsetHelper<VonNeumann<DIM, RADIUS>, X, Y, Z>
     {
     public:
-        static const int VALUE = 1 * X + 2 * Y + 3 * Z + DIM;
+        static const int VALUE =
+            1 * X +
+            VonNeumannDimDelta<2, RADIUS, Y>::VALUE +
+            VonNeumannDimDelta<3, RADIUS, Z>::VALUE +
+// 2 * Y + 3 * Z + 
+            (VonNeumann<DIM, RADIUS>::VOLUME - 1) / 2;
     };
 
-private:
+    /**
+     * The VonNeumann stencil's diamond shape is sadly more complex
+     * than the Moore stencil. Given a relative coordinate, we need a
+     * way to calculate the index of the corresponding pointer in the
+     * pointer array. This class aids by computing the offset in the
+     * most significant dimension (e.g. the Z dimension for 3D or the
+     * Y dimension for 2D).
+     */
+    template<int DIM, int RADIUS, int Z_OFFSET>
+    class VonNeumannDimDelta
+    {
+    private:
+        static const int DELTA1 =
+            Sum2<VonNeumann, DIM - 1, RADIUS>::VALUE -
+            (VonNeumann<DIM - 1, RADIUS>::VOLUME - 1) / 2;
+        static const int DELTA2 =
+            Sum2<VonNeumann, DIM - 1, RADIUS - Z_OFFSET>::VALUE -
+            (VonNeumann<DIM - 1, RADIUS - Z_OFFSET>::VOLUME - 1) / 2;
+    public:
+        static const int VALUE = DELTA1 - DELTA2;
+    };
+
+    // Problem: we need to distinguish between positive and negative
+    // offsets. Is there no flexible solution for this?
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -1>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 1>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -2>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 2>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -3>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 3>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -4>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 4>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -5>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 5>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -6>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 6>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -7>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 7>::VALUE;
+    };
+
+    template<int DIM, int RADIUS>
+    class VonNeumannDimDelta<DIM, RADIUS, -8>
+    {
+    public:
+        static const int VALUE = -VonNeumannDimDelta<DIM, RADIUS, 8>::VALUE;
+    };
+
     template<int BASE, int EXP>
-    class Power 
+    class Power
     {
     public:
         static const int VALUE = BASE * Power<BASE, EXP - 1>::VALUE;
     };
 
     template<int BASE>
-    class Power<BASE, 0> 
+    class Power<BASE, 0>
     {
     public:
         static const int VALUE = 1;
     };
 
-    template<template<int, int> class ADDEND, int INDEX, int RADIUS>
-    class Sum
+    template<template<int, int> class ADDEND, int INDEX, int PARAM2>
+    class Sum1
     {
     public:
-        static const int VALUE = Sum<ADDEND, INDEX - 1, RADIUS>::VALUE + ADDEND<INDEX, RADIUS>::VOLUME;
+        static const int VALUE =
+            Sum1<ADDEND, INDEX - 1, PARAM2>::VALUE +
+            ADDEND<INDEX, PARAM2>::VOLUME;
     };
 
-    template<template<int, int> class ADDEND, int RADIUS>
-    class Sum<ADDEND, 0, RADIUS>
+    template<template<int, int> class ADDEND, int PARAM2>
+    class Sum1<ADDEND, 0, PARAM2>
     {
     public:
-        static const int VALUE = ADDEND<0, RADIUS>::VOLUME;
+        static const int VALUE = ADDEND<0, PARAM2>::VOLUME;
     };
 
-    template<int RADIUS, int DIM>
-    class VonNeumannHelper
+    template<template<int, int> class ADDEND, int PARAM1, int INDEX>
+    class Sum2
     {
     public:
-        static const int VOLUME = VonNeumann<DIM, RADIUS>::VOLUME;
+        static const int VALUE =
+            Sum2<ADDEND, PARAM1, INDEX - 1>::VALUE +
+            ADDEND<PARAM1, INDEX>::VOLUME;
     };
 
-    template<int DIM>
-    class VonNeumannHelper<0, DIM>
+    template<template<int, int> class ADDEND, int PARAM1>
+    class Sum2<ADDEND, PARAM1, 0>
     {
     public:
-        static const int VOLUME = 1;
+        static const int VALUE = ADDEND<PARAM1, 0>::VOLUME;
     };
 };
 
@@ -283,11 +386,17 @@ private:
     template<>                                                          \
     template<>                                                          \
     class Stencils::STENCIL<DIM, RADIUS>::Coords<INDEX> : public FixedCoord<X, Y, Z> \
-    {};    
+    {};
 
 ADD_COORD(Moore, 1, 1, 0, -1, 0, 0);
 ADD_COORD(Moore, 1, 1, 1,  0, 0, 0);
 ADD_COORD(Moore, 1, 1, 2,  1, 0, 0);
+
+ADD_COORD(Moore, 1, 2, 0, -2, 0, 0);
+ADD_COORD(Moore, 1, 2, 1, -1, 0, 0);
+ADD_COORD(Moore, 1, 2, 2,  0, 0, 0);
+ADD_COORD(Moore, 1, 2, 3,  1, 0, 0);
+ADD_COORD(Moore, 1, 2, 4,  2, 0, 0);
 
 ADD_COORD(Moore, 2, 1, 0, -1, -1, 0);
 ADD_COORD(Moore, 2, 1, 1,  0, -1, 0);
@@ -299,43 +408,89 @@ ADD_COORD(Moore, 2, 1, 6, -1,  1, 0);
 ADD_COORD(Moore, 2, 1, 7,  0,  1, 0);
 ADD_COORD(Moore, 2, 1, 8,  1,  1, 0);
 
-ADD_COORD(Moore, 3, 1, 0, -1, -1, -1);
-ADD_COORD(Moore, 3, 1, 1,  0, -1, -1);
-ADD_COORD(Moore, 3, 1, 2,  1, -1, -1);
-ADD_COORD(Moore, 3, 1, 3, -1,  0, -1);
-ADD_COORD(Moore, 3, 1, 4,  0,  0, -1);
-ADD_COORD(Moore, 3, 1, 5,  1,  0, -1);
-ADD_COORD(Moore, 3, 1, 6, -1,  1, -1);
-ADD_COORD(Moore, 3, 1, 7,  0,  1, -1);
-ADD_COORD(Moore, 3, 1, 8,  1,  1, -1);
-ADD_COORD(Moore, 3, 1, 9,  -1, -1, 0);
-ADD_COORD(Moore, 3, 1, 10,  0, -1, 0);
-ADD_COORD(Moore, 3, 1, 11,  1, -1, 0);
-ADD_COORD(Moore, 3, 1, 12, -1,  0, 0);
-ADD_COORD(Moore, 3, 1, 13,  0,  0, 0);
-ADD_COORD(Moore, 3, 1, 14,  1,  0, 0);
-ADD_COORD(Moore, 3, 1, 15, -1,  1, 0);
-ADD_COORD(Moore, 3, 1, 16,  0,  1, 0);
-ADD_COORD(Moore, 3, 1, 17,  1,  1, 0);
-ADD_COORD(Moore, 3, 1, 18, -1, -1, 1);
-ADD_COORD(Moore, 3, 1, 19,  0, -1, 1);
-ADD_COORD(Moore, 3, 1, 20,  1, -1, 1);
-ADD_COORD(Moore, 3, 1, 21, -1,  0, 1);
-ADD_COORD(Moore, 3, 1, 22,  0,  0, 1);
-ADD_COORD(Moore, 3, 1, 23,  1,  0, 1);
-ADD_COORD(Moore, 3, 1, 24, -1,  1, 1);
-ADD_COORD(Moore, 3, 1, 25,  0,  1, 1);
-ADD_COORD(Moore, 3, 1, 26,  1,  1, 1);
+ADD_COORD(Moore, 2, 2,  0, -2, -2, 0);
+ADD_COORD(Moore, 2, 2,  1, -1, -2, 0);
+ADD_COORD(Moore, 2, 2,  2,  0, -2, 0);
+ADD_COORD(Moore, 2, 2,  3,  1, -2, 0);
+ADD_COORD(Moore, 2, 2,  4,  2, -2, 0);
+ADD_COORD(Moore, 2, 2,  5, -2, -1, 0);
+ADD_COORD(Moore, 2, 2,  6, -1, -1, 0);
+ADD_COORD(Moore, 2, 2,  7,  0, -1, 0);
+ADD_COORD(Moore, 2, 2,  8,  1, -1, 0);
+ADD_COORD(Moore, 2, 2,  9,  2, -1, 0);
+ADD_COORD(Moore, 2, 2, 10, -2,  0, 0);
+ADD_COORD(Moore, 2, 2, 11, -1,  0, 0);
+ADD_COORD(Moore, 2, 2, 12,  0,  0, 0);
+ADD_COORD(Moore, 2, 2, 13,  1,  0, 0);
+ADD_COORD(Moore, 2, 2, 14,  2,  0, 0);
+ADD_COORD(Moore, 2, 2, 15, -2,  1, 0);
+ADD_COORD(Moore, 2, 2, 16, -1,  1, 0);
+ADD_COORD(Moore, 2, 2, 17,  0,  1, 0);
+ADD_COORD(Moore, 2, 2, 18,  1,  1, 0);
+ADD_COORD(Moore, 2, 2, 19,  2,  1, 0);
+ADD_COORD(Moore, 2, 2, 20, -2,  2, 0);
+ADD_COORD(Moore, 2, 2, 21, -1,  2, 0);
+ADD_COORD(Moore, 2, 2, 22,  0,  2, 0);
+ADD_COORD(Moore, 2, 2, 23,  1,  2, 0);
+ADD_COORD(Moore, 2, 2, 24,  2,  2, 0);
+
+ADD_COORD(Moore, 3, 1,  0, -1, -1, -1);
+ADD_COORD(Moore, 3, 1,  1,  0, -1, -1);
+ADD_COORD(Moore, 3, 1,  2,  1, -1, -1);
+ADD_COORD(Moore, 3, 1,  3, -1,  0, -1);
+ADD_COORD(Moore, 3, 1,  4,  0,  0, -1);
+ADD_COORD(Moore, 3, 1,  5,  1,  0, -1);
+ADD_COORD(Moore, 3, 1,  6, -1,  1, -1);
+ADD_COORD(Moore, 3, 1,  7,  0,  1, -1);
+ADD_COORD(Moore, 3, 1,  8,  1,  1, -1);
+ADD_COORD(Moore, 3, 1,  9, -1, -1,  0);
+ADD_COORD(Moore, 3, 1, 10,  0, -1,  0);
+ADD_COORD(Moore, 3, 1, 11,  1, -1,  0);
+ADD_COORD(Moore, 3, 1, 12, -1,  0,  0);
+ADD_COORD(Moore, 3, 1, 13,  0,  0,  0);
+ADD_COORD(Moore, 3, 1, 14,  1,  0,  0);
+ADD_COORD(Moore, 3, 1, 15, -1,  1,  0);
+ADD_COORD(Moore, 3, 1, 16,  0,  1,  0);
+ADD_COORD(Moore, 3, 1, 17,  1,  1,  0);
+ADD_COORD(Moore, 3, 1, 18, -1, -1,  1);
+ADD_COORD(Moore, 3, 1, 19,  0, -1,  1);
+ADD_COORD(Moore, 3, 1, 20,  1, -1,  1);
+ADD_COORD(Moore, 3, 1, 21, -1,  0,  1);
+ADD_COORD(Moore, 3, 1, 22,  0,  0,  1);
+ADD_COORD(Moore, 3, 1, 23,  1,  0,  1);
+ADD_COORD(Moore, 3, 1, 24, -1,  1,  1);
+ADD_COORD(Moore, 3, 1, 25,  0,  1,  1);
+ADD_COORD(Moore, 3, 1, 26,  1,  1,  1);
 
 ADD_COORD(VonNeumann, 1, 1, 0, -1, 0, 0);
 ADD_COORD(VonNeumann, 1, 1, 1,  0, 0, 0);
 ADD_COORD(VonNeumann, 1, 1, 2,  1, 0, 0);
+
+ADD_COORD(VonNeumann, 1, 2, 0, -2, 0, 0);
+ADD_COORD(VonNeumann, 1, 2, 1, -1, 0, 0);
+ADD_COORD(VonNeumann, 1, 2, 2,  0, 0, 0);
+ADD_COORD(VonNeumann, 1, 2, 3,  1, 0, 0);
+ADD_COORD(VonNeumann, 1, 2, 4,  2, 0, 0);
 
 ADD_COORD(VonNeumann, 2, 1, 0,  0, -1, 0);
 ADD_COORD(VonNeumann, 2, 1, 1, -1,  0, 0);
 ADD_COORD(VonNeumann, 2, 1, 2,  0,  0, 0);
 ADD_COORD(VonNeumann, 2, 1, 3,  1,  0, 0);
 ADD_COORD(VonNeumann, 2, 1, 4,  0,  1, 0);
+
+ADD_COORD(VonNeumann, 2, 2,  0,  0, -2, 0);
+ADD_COORD(VonNeumann, 2, 2,  1, -1, -1, 0);
+ADD_COORD(VonNeumann, 2, 2,  2,  0, -1, 0);
+ADD_COORD(VonNeumann, 2, 2,  3,  1, -1, 0);
+ADD_COORD(VonNeumann, 2, 2,  4, -2,  0, 0);
+ADD_COORD(VonNeumann, 2, 2,  5, -1,  0, 0);
+ADD_COORD(VonNeumann, 2, 2,  6,  0,  0, 0);
+ADD_COORD(VonNeumann, 2, 2,  7,  1,  0, 0);
+ADD_COORD(VonNeumann, 2, 2,  9,  2,  0, 0);
+ADD_COORD(VonNeumann, 2, 2, 10, -1,  1, 0);
+ADD_COORD(VonNeumann, 2, 2, 11,  0,  1, 0);
+ADD_COORD(VonNeumann, 2, 2, 12,  1,  1, 0);
+ADD_COORD(VonNeumann, 2, 2, 13,  0,  2, 0);
 
 ADD_COORD(VonNeumann, 3, 1, 0,  0,  0, -1);
 ADD_COORD(VonNeumann, 3, 1, 1,  0, -1,  0);
@@ -345,7 +500,6 @@ ADD_COORD(VonNeumann, 3, 1, 4,  1,  0,  0);
 ADD_COORD(VonNeumann, 3, 1, 5,  0,  1,  0);
 ADD_COORD(VonNeumann, 3, 1, 6,  0,  0,  1);
 
-// fixme: add coordinates for wider stencil radii
 }
 
 #endif
