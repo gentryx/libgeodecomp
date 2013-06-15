@@ -127,7 +127,18 @@ public:
     };
 
     template<int DIMENSIONS, int RADIUS>
-    class VonNeumannHelper;
+    class VonNeumann;
+
+    /**
+     * This helper class exists only to work around a bug in GCC 4.4
+     * with certain recursive templates.
+     */
+    template<int DIMENSIONS, int RADIUS>
+    class VonNeumannHelper
+    {
+    public:
+        static const int VOLUME = VonNeumann<DIMENSIONS, RADIUS>::VOLUME;
+    };
 
     /**
      * The VonNeumann neighborhood is probably as well known as the
@@ -142,7 +153,7 @@ public:
         static const int DIM = DIMENSIONS;
         static const int VOLUME =
             VonNeumann<DIM - 1, RADIUS>::VOLUME +
-            2 * Sum2<VonNeumann, DIM - 1, RADIUS>::VALUE -
+            2 * Sum2<VonNeumannHelper, DIM - 1, RADIUS>::VALUE -
             2 * VonNeumann<DIM - 1, RADIUS>::VOLUME;
 
         // a list of Classes that derive from FixedCoord and define the stencil's shape
