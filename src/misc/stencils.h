@@ -48,6 +48,9 @@ private:
     template<template<int, int> class ADDEND, int INDEX, int PARAM1>
     class Sum2;
 
+    template<int DIM, int RADIUS, int Z_OFFSET>
+    class VonNeumannDimDelta;
+
 public:
     // Utility class to ease enumeration of statements, e.g. copying
     // of all coords in a stencil. BOOST_PP_REPEAT and friends can't
@@ -185,9 +188,6 @@ public:
         template<int INDEX>
         class Coords;
     };
-
-    template<int DIM, int RADIUS, int Z_OFFSET>
-    class VonNeumannDimDelta;
 
     /**
      * This is a utility class to aid in adressing all neighboring
