@@ -48,6 +48,7 @@ private:
     template<template<int, int> class ADDEND, int INDEX, int PARAM1>
     class Sum2;
 
+public:
     // Utility class to ease enumeration of statements, e.g. copying
     // of all coords in a stencil. BOOST_PP_REPEAT and friends can't
     // save us here as they can't handle the case where the number of
@@ -105,9 +106,6 @@ private:
         void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
         {}
     };
-
-
-public:
 
     /**
      * The classic Moore neighborhood contains all cells whose spatial
@@ -188,7 +186,6 @@ public:
         class Coords;
     };
 
-private:
     template<int DIM, int RADIUS, int Z_OFFSET>
     class VonNeumannDimDelta;
 
@@ -266,6 +263,7 @@ private:
             (VonNeumann<DIM, RADIUS>::VOLUME - 1) / 2;
     };
 
+private:
     /**
      * The VonNeumann stencil's diamond shape is sadly more complex
      * than the Moore stencil. Given a relative coordinate, we need a

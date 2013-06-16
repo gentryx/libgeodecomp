@@ -377,7 +377,7 @@ public:
         return mySize;
     }
 
-    inline const unsigned numStreaks() const
+    inline unsigned numStreaks() const
     {
         return indices[0].size();
     }
