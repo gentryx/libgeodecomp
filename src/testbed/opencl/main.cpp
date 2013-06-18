@@ -243,8 +243,7 @@ class MyFutureOpenCLStepper {
       user_code_program.build(std::vector<cl::Device>(1, device));
 
       cl::Kernel mem_hook_up_kernel(init_code_program, "mem_hook_up");
-      cl::Kernel compute_boundaries_kernel(init_code_program,
-                                           "compute_boundaries");
+      cl::Kernel data_init_kernel(init_code_program, "data_init");
       cl::Kernel user_code_kernel(user_code_program,
                                   user_code_kernel_name.c_str());
 
@@ -255,8 +254,8 @@ class MyFutureOpenCLStepper {
       cmdq.enqueueTask(mem_hook_up_kernel);
 
       arg_counter = 0;
-      compute_boundaries_kernel.setArg(arg_counter++, cl_coords);
-      cmdq.enqueueNDRangeKernel(compute_boundaries_kernel,
+      data_init_kernel.setArg(arg_counter++, cl_coords);
+      cmdq.enqueueNDRangeKernel(data_init_kernel,
                                 cl::NullRange,
                                 cl::NDRange(num_points),
                                 cl::NullRange);

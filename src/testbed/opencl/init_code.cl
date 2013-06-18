@@ -12,7 +12,7 @@ mem_hook_up(__global coords_ctx * coords,
 }
 
 __kernel void
-compute_boundaries(__global coords_ctx * coords)
+data_init(__constant coords_ctx * coords)
 {
   uint global_id = get_global_id(0);
   int3 size = coords->points_size;
