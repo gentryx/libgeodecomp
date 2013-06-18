@@ -10,7 +10,6 @@
 using namespace LibGeoDecomp;
 
 typedef struct {
-  cl_int    num_points;
   cl_int3   points_size;
   cl_int3 * points;
   cl_int  * indices;
@@ -133,7 +132,7 @@ class MyFutureOpenCLStepper {
   {
     coords_ctx coords;
 
-    coords.num_points = hostGrid.getDimensions().prod();
+    size_t num_points = hostGrid.getDimensions().prod();
     coords.points_size = { hostGrid.getDimensions().x(),
                            hostGrid.getDimensions().y(),
                            0 };
@@ -187,9 +186,8 @@ class MyFutureOpenCLStepper {
                              points.size() * sizeof(cl_int3),
                              points.data());
 
-      cl_indices = cl::Buffer(context,
-                              CL_MEM_READ_WRITE,
-                              coords.num_points * sizeof(cl_int));
+      cl_indices = cl::Buffer(context, CL_MEM_READ_WRITE,
+                              num_points * sizeof(cl_int));
 
     } catch (cl::Error & error) {
       std::cerr << "Error: " << error.what() << ": "
@@ -201,7 +199,7 @@ class MyFutureOpenCLStepper {
 
     std::stringstream pre_code_ss;
     pre_code_ss << "#define NUM_DIMS " << DIM << "\n"
-                << "#define NUM_POINTS " << coords.num_points << "\n"
+                << "#define NUM_POINTS " << num_points << "\n"
                 ;
 
     std::string init_code_txt(pre_code_ss.str());
@@ -261,7 +259,7 @@ class MyFutureOpenCLStepper {
       compute_boundaries_kernel.setArg(arg_counter++, cl_coords);
       cmdq.enqueueNDRangeKernel(compute_boundaries_kernel,
                                 cl::NullRange,
-                                cl::NDRange(points.size()),
+                                cl::NDRange(num_points),
                                 cl::NullRange);
 
       arg_counter = 0;
@@ -276,7 +274,7 @@ class MyFutureOpenCLStepper {
 
         cmdq.enqueueNDRangeKernel(user_code_kernel,
                                   cl::NullRange,
-                                  cl::NDRange(points.size()),
+                                  cl::NDRange(num_points),
                                   cl::NullRange);
       }
 
