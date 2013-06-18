@@ -15,13 +15,13 @@ mem_hook_up(__global coords_ctx * coords,
 __kernel void
 data_init(__constant coords_ctx * coords)
 {
-  uint global_id = get_global_id(0);
+  size_t gid = get_global_id(0);
   int3 size = coords->points_size;
-  int x = coords->points[global_id].x;
-  int y = coords->points[global_id].y;
-  int z = coords->points[global_id].z;
+  size_t x = coords->points[gid].s0;
+  size_t y = coords->points[gid].s1;
+  size_t z = coords->points[gid].s2;
 
-  coords->indices[global_id] = ((z + size.z) % size.z) * size.x * size.y
-                             + ((y + size.y) % size.y) * size.x
-                             + ((x + size.x) % size.x);
+  coords->indices[gid] = ((z + size.z) % size.z) * size.x * size.y
+                       + ((y + size.y) % size.y) * size.x
+                       + ((x + size.x) % size.x);
 }
