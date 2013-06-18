@@ -5,7 +5,8 @@
 
 __kernel void
 mem_hook_up(__global coords_ctx * coords,
-            __constant int3 * points, __constant int * indices)
+            __constant int3 * points,
+            __global int * indices)
 {
   coords->points = points;
   coords->indices = indices;
