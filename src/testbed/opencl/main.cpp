@@ -215,8 +215,7 @@ class MyFutureOpenCLStepper {
                             std::istreambuf_iterator<char>());
       kernel_stream.close();
 
-
-      kernel_stream.open(user_code_file.c_str());
+      kernel_stream.open(user_code_file);
       user_code_txt.append(std::istreambuf_iterator<char>(kernel_stream),
                                 std::istreambuf_iterator<char>());
       kernel_stream.close();
