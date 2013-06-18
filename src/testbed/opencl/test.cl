@@ -17,26 +17,48 @@ __kernel void stencil_test(__constant coords_ctx * coords,
   out[index] = 2 * in[index];
 }
 
-__kernel void coords_test(__constant coords_ctx * coords,
-                          __constant double * in, __global double * out)
+void
+indices_test_pp(size_t gid, int xo, int yo, int zo, double v)
 {
-  int index = coords->indices[get_global_id(0)];
-  out[index] += in[index];
-  printf("{%u, (%v3d)} ", get_global_id(0), coords->points[get_global_id(0)]);
-  printf("in[%d] = %f\n", index, in[index]);
+  printf("in[%u + ", gid);
+  printf("(%i", xo);
+  printf(", %i", yo);
+  printf(", %i)] = ", zo);
+  printf("%f\n", v);
 }
 
-__kernel void test(int3 base, __constant int3 * points,
-                   __constant double * in, __global double * out)
+__kernel void
+indices_test(__constant coords_ctx * coords,
+             __constant double * in, __global double * out)
 {
-  uint work_dim = get_work_dim();
-  size_t global_id = get_global_id(0);
-  printf("work_dim: %u, ", work_dim);
-  printf("global_id %u, ", global_id);
-  printf("point %v3d, ", points[global_id]);
-  int x = points[global_id].x - 1;
-  int y = points[global_id].y - 1;
-  int z = points[global_id].z - 1;
-  printf(": %f, ", in[z * base.x * base.y + y * base.x + x]);
-  printf("\n");
+  size_t gid = get_global_id(0);
+
+  for (int i = 0; i < 1000 * gid * gid; ++i) {}
+
+  int xo = 0, yo = 0, zo = 0;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = -1, yo = 0, zo = 0;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = 0, yo = -1, zo = 0;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = 0, yo = 0, zo = -1;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = -1, yo = -1, zo = -1;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = 1, yo = 0, zo = 0;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = 0, yo = 1, zo = 0;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = 0, yo = 0, zo = 1;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
+
+  xo = 1, yo = 1, zo = 1;
+  indices_test_pp(gid, xo, yo, zo, in[get_address(coords, (int3)(xo, yo, zo))]);
 }
