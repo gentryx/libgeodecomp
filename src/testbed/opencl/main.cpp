@@ -201,9 +201,13 @@ class MyFutureOpenCLStepper {
       exit(EXIT_FAILURE);
     }
 
+    std::stringstream pre_code_ss;
+    pre_code_ss << "#define NUM_DIMS " << DIM << "\n"
+                << "#define NUM_POINTS " << coords.num_points << "\n"
+                ;
 
-    std::string init_code_txt;
-    std::string user_code_txt;
+    std::string init_code_txt(pre_code_ss.str());
+    std::string user_code_txt(pre_code_ss.str());
 
     try {
       std::ifstream kernel_stream;
