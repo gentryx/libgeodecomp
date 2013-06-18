@@ -202,9 +202,8 @@ class MyFutureOpenCLStepper {
     }
 
     std::string pre_code_txt;
-    pre_code_txt.append("#pragma OPENCL EXTENSION all:");
-    pre_code_txt.append("enable");
-    pre_code_txt.append("\n");
+    pre_code_txt.append("#pragma OPENCL EXTENSION cl_intel_printf: enable\n");
+    pre_code_txt.append("#pragma OPENCL EXTENSION cl_khr_fp64: enable\n");
 
     std::string init_code_txt(pre_code_txt);
     std::string user_code_txt(pre_code_txt);
