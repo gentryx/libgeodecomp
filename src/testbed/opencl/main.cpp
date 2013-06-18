@@ -186,7 +186,7 @@ class MyFutureOpenCLStepper {
                              points.size() * sizeof(cl_int3),
                              points.data());
 
-      cl_indices = cl::Buffer(context, CL_MEM_READ_WRITE,
+      cl_indices = cl::Buffer(context, CL_MEM_READ_ONLY,
                               num_points * sizeof(cl_int));
 
     } catch (cl::Error & error) {
