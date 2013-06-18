@@ -212,14 +212,12 @@ class MyFutureOpenCLStepper {
       std::ifstream kernel_stream;
       kernel_stream.exceptions(std::ios::failbit | std::ios::badbit);
 
-      kernel_stream.open(coords_ctx_file);
+      kernel_stream.open(libgeodecomp_file);
       std::string coords_ctx_txt;
       coords_ctx_txt.append(std::istreambuf_iterator<char>(kernel_stream),
                             std::istreambuf_iterator<char>());
       kernel_stream.close();
 
-      user_code_txt.append(coords_ctx_txt);
-      init_code_txt.append(coords_ctx_txt);
 
       kernel_stream.open(user_code_file.c_str());
       user_code_txt.append(std::istreambuf_iterator<char>(kernel_stream),
@@ -347,7 +345,7 @@ class MyFutureOpenCLStepper {
     GridType hostGrid;
 
     const std::string init_code_file = "./init_code.cl";
-    const std::string coords_ctx_file = "./coords_ctx.cl";
+    const std::string libgeodecomp_file = "./libgeodecomp.cl";
 
     cl::Context context;
     cl::CommandQueue cmdq;

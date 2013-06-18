@@ -1,3 +1,5 @@
+#include "libgeodecomp.cl"
+
 __kernel void stencil_test(__constant coords_ctx * coords,
                            __constant double * in, __global double * out)
 {
