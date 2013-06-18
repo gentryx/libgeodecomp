@@ -1,5 +1,8 @@
 #include "libgeodecomp.cl"
 
+#pragma OPENCL EXTENSION cl_khr_fp64: enable
+#pragma OPENCL EXTENSION cl_intel_printf: enable
+
 __kernel void stencil_test(__constant coords_ctx * coords,
                            __constant double * in, __global double * out)
 {
