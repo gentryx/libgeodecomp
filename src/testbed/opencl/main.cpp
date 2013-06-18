@@ -142,7 +142,7 @@ class MyFutureOpenCLStepper {
                            // hostGrid.getDimensions().z() };
 
     std::vector<cl_int3> points;
-    for (auto & p : box) { points.push_back({ p.x(), p.y() }); }
+    for (auto & p : box) { points.push_back({ p.x(), p.y(), 0 }); }
 
     size_t size = hostGrid.getDimensions().prod();
     double * input = new double[size];
