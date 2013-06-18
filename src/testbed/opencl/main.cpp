@@ -11,7 +11,6 @@ using namespace LibGeoDecomp;
 
 typedef struct {
   cl_int    num_points;
-  cl_int    num_neighbors;
   cl_int3   points_size;
   cl_int3 * points;
   cl_int  * indices;
@@ -135,7 +134,6 @@ class MyFutureOpenCLStepper {
     coords_ctx coords;
 
     coords.num_points = hostGrid.getDimensions().prod();
-    coords.num_neighbors = num_neighbors;
     coords.points_size = { hostGrid.getDimensions().x(),
                            hostGrid.getDimensions().y(),
                            0 };
