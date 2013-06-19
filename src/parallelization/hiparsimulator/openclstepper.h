@@ -87,12 +87,12 @@ public:
         */
     }
 
-    inline virtual std::pair<int, int> currentStep() const
+    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
     {
         return std::make_pair(curStep, curNanoStep);
     }
 
-    inline virtual void update(int nanoSteps)
+    inline virtual void update(std::size_t nanoSteps)
     {
         // fixme: implement me (later)
         try {

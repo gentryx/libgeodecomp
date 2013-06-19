@@ -49,7 +49,7 @@ public:
 
     void tearDown()
     {
-        for (int i = 0; i < files.size(); ++i) {
+        for (std::size_t i = 0; i < files.size(); ++i) {
             boost::filesystem::remove(files[i]);
         }
     }
@@ -84,7 +84,7 @@ public:
                   << "testbovwriter.00020.data"
                   << "testbovwriter.00021.data";
 
-            for (int i = 0; i < files.size(); ++i) {
+            for (std::size_t i = 0; i < files.size(); ++i) {
                 actual = readGrid(files[i], dimensions);
                 TS_ASSERT_EQUALS(actual, expected);
             }

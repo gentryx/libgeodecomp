@@ -6,27 +6,10 @@
 #include <mpi.h>
 #include <complex>
 #include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/coordbox.h>
-#include <libgeodecomp/misc/coordbox.h>
-#include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/floatcoordbase.h>
-#include <libgeodecomp/misc/floatcoordbase.h>
-#include <libgeodecomp/misc/floatcoordbase.h>
-#include <libgeodecomp/misc/floatcoordbase.h>
-#include <libgeodecomp/misc/streak.h>
-#include <libgeodecomp/misc/streak.h>
-#include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/floatcoord.h>
-#include <libgeodecomp/misc/floatcoord.h>
-#include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/floatcoord.h>
 
 namespace MPI {

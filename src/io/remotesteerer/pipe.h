@@ -29,7 +29,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     Pipe(
-        int root = 0,
+        unsigned root = 0,
         MPI::Comm *communicator = &MPI::COMM_WORLD) :
         mpiLayer(communicator),
         root(root)
@@ -38,14 +38,14 @@ public:
 
     void addSteeringRequest(const std::string& request)
     {
-        LOG(DEBUG, "Pipe::addSteeringRequest(" << request << ")");
+        LOG(DBG, "Pipe::addSteeringRequest(" << request << ")");
         boost::lock_guard<boost::mutex> lock(mutex);
         steeringRequests << request;
     }
 
     void addSteeringFeedback(const std::string& feedback)
     {
-        LOG(DEBUG, "Pipe::addSteeringFeedback(" << feedback << ")");
+        LOG(DBG, "Pipe::addSteeringFeedback(" << feedback << ")");
         {
             boost::lock_guard<boost::mutex> lock(mutex);
             steeringFeedback << feedback;
@@ -55,7 +55,7 @@ public:
 
     StringVec retrieveSteeringRequests()
     {
-        LOG(DEBUG, "Pipe::retrieveSteeringRequests()");
+        LOG(DBG, "Pipe::retrieveSteeringRequests()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec requests;
         std::swap(requests, steeringRequests);
@@ -64,7 +64,7 @@ public:
 
     StringVec retrieveSteeringFeedback()
     {
-        LOG(DEBUG, "Pipe::retrieveSteeringFeedback()");
+        LOG(DBG, "Pipe::retrieveSteeringFeedback()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec feedback;
         std::swap(feedback, steeringFeedback);
@@ -73,7 +73,7 @@ public:
 
     StringVec copySteeringFeedback()
     {
-        LOG(DEBUG, "Pipe::copySteeringFeedback()");
+        LOG(DBG, "Pipe::copySteeringFeedback()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec feedback = steeringFeedback;
         return feedback;
@@ -81,7 +81,7 @@ public:
 
     void sync()
     {
-        LOG(DEBUG, "Pipe::sync()");
+        LOG(DBG, "Pipe::sync()");
         boost::lock_guard<boost::mutex> lock(mutex);
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
@@ -92,7 +92,7 @@ public:
 
     void waitForFeedback()
     {
-        LOG(DEBUG, "Pipe::waitForFeedback()");
+        LOG(DBG, "Pipe::waitForFeedback()");
         boost::unique_lock<boost::mutex> lock(mutex);
 
         while (steeringFeedback.size() == 0) {
@@ -108,7 +108,7 @@ private:
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     MPILayer mpiLayer;
-    int root;
+    unsigned root;
 
     void broadcastSteeringRequests()
     {

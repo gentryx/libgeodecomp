@@ -127,11 +127,11 @@ public:
     void testSquareBracketsOperatorSimple()
     {
         Coord<2> dimensions(3, 5);
-        for (unsigned prolog = 0; prolog < (dimensions.x() * dimensions.y()); ++prolog) {
+        for (int prolog = 0; prolog < (dimensions.x() * dimensions.y()); ++prolog) {
             HIndexingPartition h(Coord<2>(10, 20), dimensions);
             HIndexingPartition::Iterator testIter = h[prolog];
             HIndexingPartition::Iterator normalIter = h.begin();
-            for (unsigned i = 0; i < prolog; ++i)
+            for (int i = 0; i < prolog; ++i)
                 ++normalIter;
             while (normalIter != h.end()) {
                 TS_ASSERT_EQUALS(*normalIter, *testIter);
@@ -147,11 +147,11 @@ public:
     {
         Coord<2> dimensions(123, 234);
         // don't check ALL possible skip values, but just some, with special emphasis on the lower ones
-        for (unsigned prolog = 0; prolog <= (dimensions.x() * dimensions.y()); prolog = prolog * 3 + 1) {
+        for (int prolog = 0; prolog <= (dimensions.x() * dimensions.y()); prolog = prolog * 3 + 1) {
             HIndexingPartition h(Coord<2>(10, 20), dimensions);
             HIndexingPartition::Iterator testIter = h[prolog];
             HIndexingPartition::Iterator normalIter = h.begin();
-            for (unsigned i = 0; i < prolog; ++i)
+            for (int i = 0; i < prolog; ++i)
                 ++normalIter;
             while (normalIter != h.end()) {
                 TS_ASSERT_EQUALS(*normalIter, *testIter);

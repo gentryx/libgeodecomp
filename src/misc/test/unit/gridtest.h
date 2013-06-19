@@ -35,8 +35,8 @@ public:
         testGrid = new Grid<TestCell<2> >(Coord<2>(GRIDWIDTH, GRIDHEIGHT));
 
         int num = 200;
-        for (unsigned y = 0; y < testGrid->getDimensions().y(); y++) {
-            for (unsigned x = 0; x < testGrid->getDimensions().x(); x++) {
+        for (int y = 0; y < testGrid->getDimensions().y(); y++) {
+            for (int x = 0; x < testGrid->getDimensions().x(); x++) {
                 (*testGrid)[Coord<2>(x, y)] =
                     TestCell<2>(Coord<2>(x, y), testGrid->getDimensions());
                 (*testGrid)[Coord<2>(x, y)].testValue =  num++;

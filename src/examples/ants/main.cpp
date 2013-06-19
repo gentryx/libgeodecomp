@@ -221,8 +221,8 @@ public:
         int numAnts = 0;
         int numFood = 0;
         
-        for(unsigned y = 0; y < grid.getDimensions().y(); ++y) {
-            for(unsigned x = 0; x < grid.getDimensions().x(); ++x) {
+        for(int y = 0; y < grid.getDimensions().y(); ++y) {
+            for(int x = 0; x < grid.getDimensions().x(); ++x) {
                 if (grid[Coord<2>(x, y)].isAnt())
                     ++numAnts;
                 if (grid[Coord<2>(x, y)].containsFood())

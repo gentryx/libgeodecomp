@@ -243,7 +243,7 @@ private:
         int firstStage, 
         int lastStage)
     {
-        LOG(DEBUG, "  pipelinedUpdate(frameCoord = " << frameCoord << ", globalIndex = " << globalIndex << ", localIndex = " << localIndex << ", firstStage = " << firstStage << ", lastStage = " << lastStage << ")");
+        LOG(DBG, "  pipelinedUpdate(frameCoord = " << frameCoord << ", globalIndex = " << globalIndex << ", localIndex = " << localIndex << ", firstStage = " << firstStage << ", lastStage = " << lastStage << ")");
 
         for (int i = firstStage; i < lastStage; ++i) {
             bool firstIteration = (i == 0);
@@ -285,7 +285,7 @@ private:
         GRID2 *targetGrid,
         unsigned curNanoStep)
     {
-        LOG(DEBUG, "    frameUpdate(" << updateFrame.boundingBox() << ", " << sourceIndex << ", " << targetIndex <<  ")");
+        LOG(DBG, "    frameUpdate(" << updateFrame.boundingBox() << ", " << sourceIndex << ", " << targetIndex <<  ")");
 
         if (needsFlushing) {
             // fixme: only works with cube topologies

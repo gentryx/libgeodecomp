@@ -98,7 +98,7 @@ public:
 
     void testResetRegionsAndExtendedRegions()
     {
-        for (int i = 0; i <= ghostZoneWidth; ++i) {
+        for (unsigned i = 0; i <= ghostZoneWidth; ++i) {
             checkRegion(partitionManager.getRegion(3, i),
                         (11 - i) * 20 + 16 - i,
                         (13 + i) * 20 +  8 + i,

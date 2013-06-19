@@ -78,7 +78,7 @@ private:
     {
         SuperVector<long> ret(size);
         unsigned totalSize = width * height;
-        for (int i = 0; i < ret.size(); ++i)
+        for (std::size_t i = 0; i < ret.size(); ++i)
             ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
         return ret;
     }

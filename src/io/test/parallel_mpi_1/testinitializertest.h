@@ -40,8 +40,8 @@ public:
         TS_ASSERT_TEST_GRID(DisplacedGrid<TestCell<2> >, grid, startCycle);
 
         DisplacedGrid<TestCell<2> > newGrid = grid;
-        for (unsigned x = 1; x < rect.dimensions.x() - 1; x++) {
-            for (unsigned y = 1; y < rect.dimensions.y() - 1; y++) { 
+        for (unsigned x = 1; x < unsigned(rect.dimensions.x() - 1); x++) {
+            for (unsigned y = 1; y < unsigned(rect.dimensions.y() - 1); y++) { 
                 Coord<2> pos(x, y);
                 newGrid[pos + rect.origin].update(
                     CoordMap<TestCell<2> >(pos, grid.vanillaGrid()), 
@@ -49,8 +49,8 @@ public:
             }
         }
 
-        for (unsigned x = 1; x < rect.dimensions.x() - 1; x++) {
-            for (unsigned y = 1; y < rect.dimensions.y() - 1; y++) { 
+        for (unsigned x = 1; x < unsigned(rect.dimensions.x() - 1); x++) {
+            for (unsigned y = 1; y < unsigned(rect.dimensions.y() - 1); y++) { 
                 TS_ASSERT(newGrid[Coord<2>(x, y)].valid());
             }
         }

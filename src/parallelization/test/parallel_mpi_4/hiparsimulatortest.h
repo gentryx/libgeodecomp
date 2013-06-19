@@ -92,8 +92,8 @@ public:
     {
         s->run();
 
-        for (int t = firstStep; t < maxSteps; t += outputPeriod) {
-            int globalNanoStep = t * TestCell<2>::nanoSteps();
+        for (unsigned t = firstStep; t < maxSteps; t += outputPeriod) {
+            unsigned globalNanoStep = t * TestCell<2>::nanoSteps();
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType, 

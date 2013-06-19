@@ -369,7 +369,7 @@ public:
         return myBoundingBox;
     }
 
-    inline const long& size() const
+    inline const std::size_t& size() const
     {
         if (geometryCacheTainted) {
             resetGeometryCache();
@@ -642,7 +642,7 @@ public:
 private:
     VecType indices[DIM];
     mutable CoordBox<DIM> myBoundingBox;
-    mutable long mySize;
+    mutable std::size_t mySize;
     mutable bool geometryCacheTainted;
 
     inline void determineGeometry() const

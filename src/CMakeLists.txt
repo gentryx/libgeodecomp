@@ -19,7 +19,31 @@ if(NOT DEFINED BOOST_ROOT)
 endif()
 
 detect_distro()
-find_package(Boost REQUIRED date_time filesystem system program_options serialization thread chrono)
+
+if(NOT HPX_ROOT)
+    if(NOT $ENV{HPX_ROOT} STREQUAL "")
+        set(HPX_ROOT $ENV{HPX_ROOT})
+    endif()
+endif()
+
+if(HPX_ROOT)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
+    find_package(HPX)
+endif()
+
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(HPX_FOUND)
+    set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
+    include_directories(${HPX_INCLUDE_DIR})
+    link_directories(${HPX_LIBRARY_DIR})
+endif()
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
+
+find_package(Boost REQUIRED date_time filesystem system thread serialization)
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
@@ -44,23 +68,6 @@ if(NOT DEFINED OpenCV_FOUND)
   set(OpenCV_FOUND false)
 endif()
 
-if(NOT HPX_ROOT)
-    if(NOT $ENV{HPX_ROOT} STREQUAL "")
-        set(HPX_ROOT $ENV{HPX_ROOT})
-    endif()
-endif()
-
-if(HPX_ROOT)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
-endif()
-
-find_package(HPX)
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-set(DEFAULT_FLAGS "-Wall -Wno-sign-compare -std=c++0x")
 set(DEFAULT_TYPEMAP_GENERATION false)
 
 if(NOT RELEASE)

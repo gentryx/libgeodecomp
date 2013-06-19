@@ -52,9 +52,9 @@ public:
                 unsigned startLine = startingLine(i);
                 if (i == layer.rank() - 1)
                     startLine = startingLine(i + 1);
-                for (int width = 0; width <= ghostZoneWidth; ++width) {
+                for (unsigned width = 0; width <= ghostZoneWidth; ++width) {
                     Region<2> outerFragment, innerFragment;
-                    for (int g = 0; g < width; ++g) {
+                    for (unsigned g = 0; g < width; ++g) {
                         outerFragment << Streak<2>(
                             Coord<2>(0, startLine - g - 1), dimensions.x());
                         innerFragment << Streak<2>(
@@ -99,7 +99,7 @@ public:
     void testRims()
     {
         TS_ASSERT_EQUALS(ghostZoneWidth + 1, manager.ownRims.size());
-        for (int i = 0; i <= ghostZoneWidth; ++i) {
+        for (unsigned i = 0; i <= ghostZoneWidth; ++i) {
             unsigned startLine = startingLine(layer.rank()) - 1 * ghostZoneWidth + i;
             unsigned endLine   = startingLine(layer.rank()) + 2 * ghostZoneWidth - i;
             Region<2> rim = fillLines(startLine, endLine);
@@ -115,7 +115,7 @@ public:
     void testInnerSets()
     {
         TS_ASSERT_EQUALS(ghostZoneWidth + 1, manager.ownInnerSets.size());
-        for (int i = 0; i <= ghostZoneWidth; ++i) {
+        for (unsigned i = 0; i <= ghostZoneWidth; ++i) {
             unsigned startLine = startingLine(layer.rank()) + i;
             unsigned endLine   = startingLine(layer.rank() + 1) - i;
             if (layer.rank() == layer.size() - 1)
@@ -179,7 +179,7 @@ private:
     Region<2> fillLines(const unsigned& startLine, const unsigned& endLine)
     {
         Region<2> ret;
-        for (int row = startLine; row < endLine; ++row)
+        for (unsigned row = startLine; row < endLine; ++row)
             ret << Streak<2>(Coord<2>(0, row), dimensions.x());
         return ret;
     }

@@ -19,7 +19,7 @@ public:
     using ParallelWriter<TestCell<2> >::region;
 
     ParallelTestWriter(
-        const unsigned& period,
+        const unsigned period,
         const SuperVector<unsigned>& expectedSteps,
         const SuperVector<WriterEvent> expectedEvents)  :
         ParallelWriter<TestCell<2> >("", period),
@@ -70,7 +70,7 @@ public:
 private:
     SuperVector<unsigned> expectedSteps;
     SuperVector<WriterEvent> expectedEvents;
-    int lastStep;
+    unsigned lastStep;
     Region<2> unaccountedRegion;
 };
 

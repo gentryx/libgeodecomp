@@ -131,7 +131,7 @@ public:
     ~CommandServer()
     {
         signalClose();
-        LOG(DEBUG, "CommandServer waiting for network thread");
+        LOG(DBG, "CommandServer waiting for network thread");
         serverThread.join();
     }
 
@@ -164,7 +164,7 @@ public:
 
     static StringVec sendCommandWithFeedback(const std::string& command, int feedbackLines, int port, const std::string& host = "127.0.0.1")
     {
-        LOG(DEBUG, "CommandServer::sendCommandWithFeedback(" << command << ", port = " << port << ", host = " << host << ")");
+        LOG(DBG, "CommandServer::sendCommandWithFeedback(" << command << ", port = " << port << ", host = " << host << ")");
         boost::asio::io_service ioService;
         tcp::resolver resolver(ioService);
         tcp::resolver::query query(host, StringOps::itoa(port));
@@ -189,7 +189,7 @@ public:
             boost::asio::streambuf buf;
             boost::system::error_code errorCode;
 
-            LOG(DEBUG, "CommandServer::sendCommandWithFeedback() reading line");
+            LOG(DBG, "CommandServer::sendCommandWithFeedback() reading line");
 
             size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
             if (errorCode) {
@@ -268,7 +268,7 @@ private:
 
     void handleInput(const std::string& input)
     {
-        LOG(DEBUG, "CommandServer::handleInput(" << input << ")");
+        LOG(DBG, "CommandServer::handleInput(" << input << ")");
 
         StringVec lines = StringOps::tokenize(input, "\n");
         for (StringVec::iterator iter = lines.begin();
@@ -308,7 +308,7 @@ private:
             continueFlag = true;
 
             while (continueFlag) {
-                LOG(DEBUG, "CommandServer: waiting for new connection");
+                LOG(DBG, "CommandServer: waiting for new connection");
                 socket.reset(new tcp::socket(ioService));
                 acceptor->accept(*socket, errorCode);
 
