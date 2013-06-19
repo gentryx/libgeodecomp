@@ -1,7 +1,6 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
-//#include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 
 namespace LibGeoDecomp {
@@ -15,7 +14,7 @@ class HiParSimulator;
  * to a PatchAccepter, so that we can treat IO similarly to sending
  * ghost zones.
  */
-template<typename GRID_TYPE, typename CELL_TYPE, typename Simulator>
+template<typename GRID_TYPE, typename CELL_TYPE, typename SIMULATOR>
 class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
@@ -25,7 +24,7 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        Simulator * _sim,
+        SIMULATOR * _sim,
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
         const long& firstStep,
         const long& lastStep,
@@ -76,7 +75,7 @@ public:
     }
 
 private:
-    Simulator * sim;
+    SIMULATOR * sim;
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
     long firstNanoStep;
     long lastNanoStep;

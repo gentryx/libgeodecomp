@@ -28,7 +28,7 @@ public:
         SuperVector<typename GRID_TYPE::CellType> *vec,
         const Region<GRID_TYPE::DIM>& region)
     {
-        if (vec->size() != std::size_t(region.size())) {
+        if (vec->size() != region.size()) {
             throw std::logic_error("region doesn't match vector size");
         }
 
@@ -52,7 +52,7 @@ public:
         GRID_TYPE *grid,
         const REGION_TYPE& region)
     {
-        if (vec.size() != std::size_t(region.size())) {
+        if (vec.size() != region.size()) {
             throw std::logic_error("region doesn't match vector size");
         }
 
