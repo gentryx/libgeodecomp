@@ -185,7 +185,7 @@ public:
     double performance(const Coord<3>& dim)
     {
         long long tStart = Chronometer::timeUSec();
-        
+
         Coord<3> sum;
 
         for (int z = 0; z < dim.z(); ++z) {
@@ -238,7 +238,7 @@ public:
             }
         }
         long long tStart = Chronometer::timeUSec();
-        
+
         Coord<3> sum;
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
             sum += *i;
@@ -286,7 +286,7 @@ public:
             }
         }
         long long tStart = Chronometer::timeUSec();
-        
+
         Coord<3> sum;
         for (Region<3>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Coord<3> c = i->origin;
@@ -354,7 +354,7 @@ public:
             for (int z = 1; z < (dimZ - 1); ++z) {
                 for (int y = 1; y < (dimY - 1); ++y) {
                     for (int x = 1; x < (dimX - 1); ++x) {
-                        gridNew[z * offsetZ + y * dimY + x] = 
+                        gridNew[z * offsetZ + y * dimY + x] =
                             (gridOld[z * offsetZ + y * dimX + x - offsetZ] +
                              gridOld[z * offsetZ + y * dimX + x - dimX] +
                              gridOld[z * offsetZ + y * dimX + x - 1] +
@@ -442,7 +442,7 @@ public:
                                &gridOld[z * offsetZ + y * dimX + offsetZ],
                                1,
                                dimX - 1);
-                    
+
                 }
             }
         }
@@ -594,9 +594,9 @@ private:
         double *north,
         int x)
     {
-        target[x] = 
-            (south[x] + 
-             top[x] + 
+        target[x] =
+            (south[x] +
+             top[x] +
              same[x - 1] + same[x + 0] + same[x + 1] +
              bottom[x] +
              north[x]) * (1.0 / 7.0);
@@ -613,8 +613,8 @@ public:
         const unsigned& steps) :
         SimpleInitializer<CELL>(dimensions, steps)
     {}
-    
-    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target) 
+
+    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target)
     {}
 };
 
@@ -799,7 +799,7 @@ class JacobiCellStreakUpdate
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
-  
+
     class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
@@ -1101,9 +1101,9 @@ public:
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 1; 
+    static inline unsigned nanoSteps()
+    {
+        return 1;
     }
 
 #define C 0
@@ -1137,7 +1137,7 @@ public:
             comp[i] = 0.0;
         }
         density = 1.0;
-    }  
+    }
 
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
@@ -1167,7 +1167,7 @@ public:
             updateSouthNoSlip(neighborhood);
             break;
         }
-    } 
+    }
 
     template<typename COORD_MAP>
     void updateFluid(const COORD_MAP& neighborhood)
@@ -1194,18 +1194,18 @@ public:
         velZ  = GET_COMP(x,y,z-1,T) + GET_COMP(x,y+1,z-1,TS) +
             GET_COMP(x+1,y,z-1,TW);
 
-        const double rho = 
+        const double rho =
             GET_COMP(x,y,z,C) + GET_COMP(x,y+1,z,S) +
             GET_COMP(x+1,y,z,W) + GET_COMP(x,y,z+1,B) +
             GET_COMP(x+1,y+1,z,SW) + GET_COMP(x,y+1,z+1,BS) +
             GET_COMP(x+1,y,z+1,BW) + velX + velY + velZ;
-        velX  = velX 
-            - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW) 
-            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW) 
+        velX  = velX
+            - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW)
+            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW)
             - GET_COMP(x+1,y,z+1,BW);
         velY  = velY
-            + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S) 
-            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE) 
+            + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S)
+            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE)
             - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
         velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
 
@@ -1245,7 +1245,7 @@ public:
         comp[T]=omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + 1.5*SQR(velZ));
         comp[B]=omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + 1.5*SQR(velZ));
 
-    } 
+    }
 
     template<typename COORD_MAP>
     void updateWestNoSlip(const COORD_MAP& neighborhood)
@@ -1276,7 +1276,7 @@ public:
         comp[BN]=GET_COMP(0,1,-1,TS);
         comp[BS]=GET_COMP(0,-1,-1,TN);
     }
-    
+
     template<typename COORD_MAP>
     void updateBottom(const COORD_MAP& neighborhood)
     {
@@ -1297,7 +1297,7 @@ public:
         comp[TS]=GET_COMP(0,-1,1,BN);
         comp[BS]=GET_COMP(0,-1,-1,TN);
     }
-  
+
     template<typename COORD_MAP>
     void updateSouthNoSlip(const COORD_MAP& neighborhood)
     {
@@ -1388,18 +1388,18 @@ void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
     idLength = fread(&cpuID[0], 1, idLength, output);
     cpuID.resize(idLength - 1);
     pclose(output);
-    
+
 
     std::cout << std::setiosflags(std::ios::left);
-    std::cout << std::setw(18) << revision << "; " 
-              << nowString << " ; " 
-              << std::setw(16) << hostname << "; " 
-              << std::setw(48) << cpuID << "; " 
-              << std::setw( 8) << benchmark.order() <<  "; " 
-              << std::setw(16) << benchmark.family() <<  "; " 
-              << std::setw( 8) << benchmark.species() <<  "; " 
-              << std::setw(24) << dim <<  "; " 
-              << std::setw(12) << benchmark.performance(dim) <<  "; " 
+    std::cout << std::setw(18) << revision << "; "
+              << nowString << " ; "
+              << std::setw(16) << hostname << "; "
+              << std::setw(48) << cpuID << "; "
+              << std::setw( 8) << benchmark.order() <<  "; "
+              << std::setw(16) << benchmark.family() <<  "; "
+              << std::setw( 8) << benchmark.species() <<  "; "
+              << std::setw(24) << dim <<  "; "
+              << std::setw(12) << benchmark.performance(dim) <<  "; "
               << std::setw( 8) << benchmark.unit() <<  "\n";
 }
 
