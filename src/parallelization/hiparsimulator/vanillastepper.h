@@ -51,7 +51,7 @@ public:
         initGrids();
     }
 
-    inline void update(std::size_t nanoSteps) 
+    inline void update(std::size_t nanoSteps)
     {
         for (std::size_t i = 0; i < nanoSteps; ++i)
         {
@@ -94,7 +94,7 @@ private:
                 curNanoStep);
         }
         std::swap(oldGrid, newGrid);
-        
+
         ++curNanoStep;
         if (curNanoStep == CELL_TYPE::nanoSteps()) {
             curNanoStep = 0;
