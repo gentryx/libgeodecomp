@@ -58,8 +58,8 @@ public:
     {}
 
     void update(
-        const FloatCoord<3>& parentOrigin, 
-        const Sphere **neighborSpheres, 
+        const FloatCoord<3>& parentOrigin,
+        const Sphere **neighborSpheres,
         const int *numSpheres,
         const Boundary **neighborBoundaries,
         const int *numBoundaries)
@@ -108,11 +108,11 @@ public:
     {
         FloatCoord<3> ret;
         FloatCoord<3> delta = pos - other.center;
-        double distance = 
-            delta[0] * other.normal[0] + 
-            delta[1] * other.normal[1] + 
+        double distance =
+            delta[0] * other.normal[0] +
+            delta[1] * other.normal[1] +
             delta[2] * other.normal[2];
-        
+
         if (distance < SPHERE_RADIUS) {
             FloatCoord<3> planar = (pos - other.normal * distance) - other.center;
             if ((fabs(planar[0]) < (BOUNDARY_DIM * 0.5)) &&
@@ -233,13 +233,13 @@ private:
                 }
             }
         }
-        
+
     }
-    
+
 };
 
 void Boundary::update(
-    const Sphere **neighborSpheres, 
+    const Sphere **neighborSpheres,
     const int *numSpheres)
 {
     glow -= DELTA_T * 0.04;
@@ -266,14 +266,14 @@ public:
         Writer<Container>(prefix, period)
     {}
 
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event) 
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
         }
 
         std::stringstream filename;
-        filename << prefix << "_" << std::setfill('0') << std::setw(6) 
+        filename << prefix << "_" << std::setfill('0') << std::setw(6)
                  << step << ".pov";
         std::ofstream file(filename.str().c_str());
 
@@ -297,7 +297,7 @@ public:
             for (int i = 0; i < container.numSpheres; ++i) {
                 file << sphereToPOV(container.spheres[i]);
             }
-            
+
             for (int i = 0; i < container.numBoundaries; ++i) {
                 file << boundaryToPOV(container.boundaries[i]);
             }

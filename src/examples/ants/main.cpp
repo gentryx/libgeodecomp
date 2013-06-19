@@ -210,7 +210,7 @@ public:
         TracingWriter<Cell>(period, maxSteps)
     {}
 
-    virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event) 
+    void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event) 
     {
         TracingWriter<Cell>::stepFinished(grid, step, event);
 
