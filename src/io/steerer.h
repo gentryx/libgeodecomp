@@ -56,6 +56,7 @@ public:
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
+        ar & region;
         ar & period;
     }
 
