@@ -15,7 +15,7 @@ add_custom_target(code_generation ALL echo "Code generation done.")
 
 include_directories(${LIBGEODECOMP_SOURCE_DIR})
 
-# LIBDIRS is used to find source files and headers 
+# LIBDIRS is used to find source files and headers
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
@@ -34,7 +34,7 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
-# link all sources 
+# link all sources
 set(SOURCES "")
 foreach(dir ${LIBDIRS})
   set(RELATIVE_PATH ${dir}/)
@@ -77,7 +77,7 @@ foreach(dir ${AUXDIRS})
   include(${dir}/aux.cmake)
 endforeach(dir)
 
-# typemaps generation 
+# typemaps generation
 # fixme: make generation a configurable option (default: off for tarballs, on for checkouts)
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/mpilayer/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/mpilayer/typemaps.cpp"

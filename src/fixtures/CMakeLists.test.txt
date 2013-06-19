@@ -34,7 +34,7 @@ endif()
 
 if(allowed_test AND selected_test)
   set(SOURCES)
-  
+
   foreach(header ${HEADERS})
     if(header MATCHES "test.h")
       # cxxtestgen for test headers...

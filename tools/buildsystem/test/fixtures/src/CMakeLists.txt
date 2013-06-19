@@ -3,7 +3,7 @@ project(DEMO)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_C_COMPILER mpicc)
-set(CMAKE_CXX_COMPILER mpic++) 
+set(CMAKE_CXX_COMPILER mpic++)
 set(CMAKE_CXX_FLAGS "-Wall -Werror")
 include(conf.cmake)
 

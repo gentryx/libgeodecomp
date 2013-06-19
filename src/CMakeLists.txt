@@ -233,7 +233,7 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_NSIS_DISPLAY_NAME ${PACKAGE_NAME})
   # will be shown e.g. in windows' control center package info
   set(CPACK_NSIS_HELP_LINK ${PACKAGE_HOMEPAGE})
-  # will be shown e.g. in windows' control center package info  
+  # will be shown e.g. in windows' control center package info
   set(CPACK_NSIS_URL_INFO_ABOUT ${PACKAGE_HOMEPAGE})
   # will be shown e.g. in windows' control center package info
   set(CPACK_NSIS_CONTACT ${PACKAGE_EMAIL})
@@ -272,7 +272,7 @@ if(WIN32)
   set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/libgeodecomp/geodecomp.lib)
 endif(WIN32)
 
-# link all sources 
+# link all sources
 set(SOURCES "")
 foreach(dir ${LIBDIRS})
   set(RELATIVE_PATH ${dir}/)
@@ -311,7 +311,7 @@ endforeach(dir)
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
 includedir=${CMAKE_INSTALL_PREFIX}/include/libgeodecomp
- 
+
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
@@ -333,7 +333,7 @@ if (GENERATE_TYPEMAPS)
   foreach(i ${ALL_HEADERS})
     set(CANDIDATES "${i}:${CANDIDATES}")
   endforeach(i)
-  
+
   add_custom_command(
     OUTPUT "${CMAKE_BINARY_DIR}/cache"
     COMMAND cp -a "${CMAKE_BINARY_DIR}/last_cache" "${CMAKE_BINARY_DIR}/cache" 2>/dev/null || echo "still ok >/dev/null"
