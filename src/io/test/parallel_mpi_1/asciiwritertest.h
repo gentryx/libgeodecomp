@@ -13,8 +13,8 @@
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/testinitializer.h>
 
-using namespace boost::assign; 
-using namespace LibGeoDecomp; 
+using namespace boost::assign;
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -27,7 +27,7 @@ public:
     }
 };
 
-class ASCIIWriterTest : public CxxTest::TestSuite 
+class ASCIIWriterTest : public CxxTest::TestSuite
 {
 public:
 
@@ -97,15 +97,15 @@ public:
     {
         std::string path("/non/existent/path/prefix2");
         std::string expectedErrorMessage("Could not open file " + path);
-        ASCIIWriter<TestCell<2>, TestValueSelector> *writer = 
+        ASCIIWriter<TestCell<2>, TestValueSelector> *writer =
             new ASCIIWriter<TestCell<2>, TestValueSelector>(path);
         simulator->addWriter(writer);
         TS_ASSERT_THROWS_ASSERT(
             writer->stepFinished(*simulator->getGrid(), simulator->getStep(), WRITER_INITIALIZED),
-            FileOpenException& exception, 
+            FileOpenException& exception,
             TS_ASSERT_SAME_DATA(
-                expectedErrorMessage.c_str(), 
-                exception.what(), 
+                expectedErrorMessage.c_str(),
+                exception.what(),
                 expectedErrorMessage.length()));
     }
 

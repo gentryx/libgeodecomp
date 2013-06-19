@@ -3,11 +3,11 @@
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class FloatCoordTest : public CxxTest::TestSuite 
+class FloatCoordTest : public CxxTest::TestSuite
 {
 public:
     void testDefaultConstructors()
@@ -37,11 +37,11 @@ public:
 
     void testOperatorPlus()
     {
-        TS_ASSERT_EQUALS(FloatCoord<1>(3), 
+        TS_ASSERT_EQUALS(FloatCoord<1>(3),
                          FloatCoord<1>(1) + FloatCoord<1>(2));
-        TS_ASSERT_EQUALS(FloatCoord<2>(4, 6), 
+        TS_ASSERT_EQUALS(FloatCoord<2>(4, 6),
                          FloatCoord<2>(1, 2) + FloatCoord<2>(3, 4));
-        TS_ASSERT_EQUALS(FloatCoord<3>(5, 7, 9), 
+        TS_ASSERT_EQUALS(FloatCoord<3>(5, 7, 9),
                          FloatCoord<3>(1, 2, 3) + FloatCoord<3>(4, 5, 6));
 
         {
@@ -63,11 +63,11 @@ public:
 
     void testOperatorMinus()
     {
-        TS_ASSERT_EQUALS(FloatCoord<1>(-1), 
+        TS_ASSERT_EQUALS(FloatCoord<1>(-1),
                          FloatCoord<1>(1) - FloatCoord<1>(2));
-        TS_ASSERT_EQUALS(FloatCoord<2>(-2, -3), 
+        TS_ASSERT_EQUALS(FloatCoord<2>(-2, -3),
                          FloatCoord<2>(1, 2) - FloatCoord<2>(3, 5));
-        TS_ASSERT_EQUALS(FloatCoord<3>(-7, -3, -4), 
+        TS_ASSERT_EQUALS(FloatCoord<3>(-7, -3, -4),
                          FloatCoord<3>(1, 2, 3) - FloatCoord<3>(8, 5, 7));
 
 

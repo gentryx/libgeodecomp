@@ -7,11 +7,11 @@
 
 #ifndef __host__
 #define __host__
-#endif 
+#endif
 
 #ifndef __device__
 #define __device__
-#endif 
+#endif
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
 

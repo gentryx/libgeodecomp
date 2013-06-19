@@ -8,7 +8,7 @@
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
-class Writer; 
+class Writer;
 
 template<typename CELL_TYPE>
 class Simulator;
@@ -19,7 +19,7 @@ class MonolithicSimulator : public Simulator<CELL_TYPE>
 public:
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
-    inline MonolithicSimulator(Initializer<CELL_TYPE> *_initializer) : 
+    inline MonolithicSimulator(Initializer<CELL_TYPE> *_initializer) :
         Simulator<CELL_TYPE>(_initializer)
     {}
 

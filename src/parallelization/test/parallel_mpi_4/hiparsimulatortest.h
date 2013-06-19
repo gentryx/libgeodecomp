@@ -12,8 +12,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -42,9 +42,9 @@ public:
         loadBalancingPeriod = 31;
         ghostZoneWidth = 10;
         s.reset(new SimulatorType(
-                    init, 
-                    new MockBalancer(), 
-                    loadBalancingPeriod, 
+                    init,
+                    new MockBalancer(),
+                    loadBalancingPeriod,
                     ghostZoneWidth));
         mockWriter = new MockWriter();
         memoryWriter = new MemoryWriterType(outputPeriod);
@@ -81,8 +81,8 @@ public:
             int globalNanoStep = t * TestCell<2>::nanoSteps();
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
-                MemoryWriterType::GridType, 
-                grids[t], 
+                MemoryWriterType::GridType,
+                grids[t],
                 globalNanoStep);
             TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
         }
@@ -96,8 +96,8 @@ public:
             unsigned globalNanoStep = t * TestCell<2>::nanoSteps();
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
-                MemoryWriterType::GridType, 
-                grids[t], 
+                MemoryWriterType::GridType,
+                grids[t],
                 globalNanoStep);
             TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
         }
@@ -117,7 +117,7 @@ public:
         std::stringstream events;
         s->addSteerer(new MockSteererType(5, &events));
         s->run();
-        s.reset();        
+        s.reset();
 
         std::stringstream expected;
         expected << "created, period = 5\n";
@@ -140,9 +140,9 @@ public:
         int cycle = 100 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(
-            GridBaseType, 
-            *grid, 
-            *region, 
+            GridBaseType,
+            *grid,
+            *region,
             cycle);
     }
 

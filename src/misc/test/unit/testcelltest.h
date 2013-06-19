@@ -4,11 +4,11 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TestCellTest : public CxxTest::TestSuite 
+class TestCellTest : public CxxTest::TestSuite
 {
 private:
     typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::NoOutput> TestCellType;
@@ -17,16 +17,16 @@ private:
     int height;
 
 public:
-    void setUp() 
+    void setUp()
     {
         width = 4;
         height = 3;
         grid = Grid<TestCellType >(Coord<2>(width, height));
-        grid[Coord<2>(-1, -1)] = TestCellType(Coord<2>(-1, -1), 
+        grid[Coord<2>(-1, -1)] = TestCellType(Coord<2>(-1, -1),
                                           Coord<2>(width, height));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                grid[Coord<2>(x, y)] = 
+                grid[Coord<2>(x, y)] =
                     TestCellType(Coord<2>(x, y), Coord<2>(width, height), 0);
             }
         }
@@ -45,7 +45,7 @@ public:
     {
         TS_ASSERT_TEST_GRID(Grid<TestCellType>, grid, 0);
     }
-    
+
     void testUpdate()
     {
         TS_ASSERT_TEST_GRID(Grid<TestCellType>, grid, 0);
@@ -82,9 +82,9 @@ public:
 
     void testUpdateBadEdgeCellOuter()
     {
-        grid[Coord<2>(-1, -1)] = 
+        grid[Coord<2>(-1, -1)] =
             TestCellType(Coord<2>(1, 1), Coord<2>(width, height));
-        update();    
+        update();
         TS_ASSERT(!grid[0][0].isValid);
     }
 
@@ -133,11 +133,11 @@ public:
 
         Grid3D gridA(dim);
         Grid3D gridB(dim);
-        gridA.getEdgeCell() = 
+        gridA.getEdgeCell() =
             TestCell3D(Coord<3>::diagonal(-1), dim);
         gridA.getEdgeCell().isEdgeCell = true;
 
-        gridB.getEdgeCell() = 
+        gridB.getEdgeCell() =
             gridA.getEdgeCell();
 
         for (int z = 0; z < dim.z(); ++z) {
@@ -170,7 +170,7 @@ public:
         }
         TS_ASSERT_TEST_GRID(Grid3D, gridA, 2);
     }
- 
+
     void test3D2()
     {
         int width = 4;
@@ -180,10 +180,10 @@ public:
 
         Grid3D gridA(dim);
         Grid3D gridB(dim);
-        gridA.getEdgeCell() = 
+        gridA.getEdgeCell() =
             TestCell3D(Coord<3>::diagonal(-1), dim);
         gridA.getEdgeCell().isEdgeCell = true;
-        gridB.getEdgeCell() = 
+        gridB.getEdgeCell() =
             gridA.getEdgeCell();
 
         for (int z = 0; z < dim.z(); ++z) {
@@ -200,9 +200,9 @@ public:
         // use a wrong z-value to freak out the update step
         int badZ = 2;
         int actualZ = 5;
-        for (int y = 0; y < dim.y(); y++) 
-            for (int x = 0; x < dim.x(); x++) 
-                gridA[Coord<3>(x, y, actualZ)] = 
+        for (int y = 0; y < dim.y(); y++)
+            for (int x = 0; x < dim.x(); x++)
+                gridA[Coord<3>(x, y, actualZ)] =
                     TestCell3D(Coord<3>(x, y, badZ), dim, 0);
 
         for (int z = 0; z < dim.z(); ++z) {
@@ -216,7 +216,7 @@ public:
 
         // verify that cells surrounding the rougue cells have been
         // invalidated:
-        CoordBox<3> box(Coord<3>(0, 0, actualZ - 1), 
+        CoordBox<3> box(Coord<3>(0, 0, actualZ - 1),
                         Coord<3>(dim.x(), dim.y(), 3));
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
             TS_ASSERT(!gridB[*i].valid());

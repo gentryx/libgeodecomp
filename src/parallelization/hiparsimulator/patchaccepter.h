@@ -51,7 +51,7 @@ protected:
 
     bool checkNanoStepPut(const std::size_t nanoStep) const
     {
-        if (requestedNanoSteps.empty() || 
+        if (requestedNanoSteps.empty() ||
             nanoStep < (requestedNanoSteps.min)())
             return false;
         if (nanoStep > (requestedNanoSteps.min)()) {

@@ -113,13 +113,13 @@ void runSimulation()
 
     sim.addWriter(
         new PPMWriter<BuggyCell, SimpleCellPlotter<BuggyCell, BuggyCellToColor> >(
-            "./smiley", 
+            "./smiley",
             outputFrequency,
             8,
             8));
     sim.addWriter(
         new TracingWriter<BuggyCell>(
-            outputFrequency, 
+            outputFrequency,
             init->maxSteps()));
 
     sim.run();

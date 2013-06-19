@@ -2,7 +2,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/coordbox.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 using namespace boost::assign;
 
 namespace LibGeoDecomp {
@@ -75,27 +75,27 @@ public:
         CoordBox<3> rect2(Coord<3>(-2, 3, -4), Coord<3>(5, 7, 8));
         TS_ASSERT_EQUALS(rect2.size(), (unsigned)280);
     }
-    
+
     void testIntersects()
     {
         CoordBox<2> rect(Coord<2>(10, 20), Coord<2>(30, 40));
         TS_ASSERT_EQUALS(
-            true, rect.intersects(CoordBox<2>(Coord<2>(20, 10), 
+            true, rect.intersects(CoordBox<2>(Coord<2>(20, 10),
                                               Coord<2>(10, 60))));
         TS_ASSERT_EQUALS(
-            true, rect.intersects(CoordBox<2>(Coord<2>(20, 30), 
+            true, rect.intersects(CoordBox<2>(Coord<2>(20, 30),
                                               Coord<2>(10, 10))));
         TS_ASSERT_EQUALS(
-            true, rect.intersects(CoordBox<2>(Coord<2>(20, 30), 
+            true, rect.intersects(CoordBox<2>(Coord<2>(20, 30),
                                               Coord<2>(90, 90))));
         TS_ASSERT_EQUALS(
-            false, rect.intersects(CoordBox<2>(Coord<2>(10, 10), 
+            false, rect.intersects(CoordBox<2>(Coord<2>(10, 10),
                                                Coord<2>(10, 10))));
         TS_ASSERT_EQUALS(
-            false, rect.intersects(CoordBox<2>(Coord<2>(40, 20), 
+            false, rect.intersects(CoordBox<2>(Coord<2>(40, 20),
                                                Coord<2>(10, 10))));
         TS_ASSERT_EQUALS(
-            false, rect.intersects(CoordBox<2>(Coord<2>(40, 60), 
+            false, rect.intersects(CoordBox<2>(Coord<2>(40, 60),
                                                Coord<2>(10, 10))));
 
         CoordBox<3> box1(Coord<3>(0, 0, 0), Coord<3>(55, 47, 31));
@@ -115,7 +115,7 @@ public:
              ++i) {
             actual << *i;
         }
-        
+
         TS_ASSERT_EQUALS(expected, actual);
     }
 
@@ -135,7 +135,7 @@ public:
              ++i) {
             actual << *i;
         }
-        
+
         TS_ASSERT_EQUALS(expected, actual);
     }
 
@@ -157,7 +157,7 @@ public:
              ++i) {
             actual << *i;
         }
-        
+
         TS_ASSERT_EQUALS(expected, actual);
     }
 };

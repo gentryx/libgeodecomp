@@ -1,7 +1,7 @@
 #ifndef _tire_h_
 #define _tire_h_
 
-class Tire 
+class Tire
 {
     friend class Typemaps;
 

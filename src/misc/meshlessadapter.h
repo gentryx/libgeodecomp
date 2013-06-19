@@ -16,7 +16,7 @@ namespace LibGeoDecomp {
  * actual cells may be connected by an irregular graph.
  */
 template<class TOPOLOGY=Topologies::Torus<2>::Topology>
-class MeshlessAdapter 
+class MeshlessAdapter
 {
 public:
     friend class MeshlessAdapterTest;
@@ -34,18 +34,18 @@ public:
      * stencil cells will be of size boxSize^DIMENSIONS.
      */
     inline MeshlessAdapter(
-        const FloatCoord<DIM>& _dimensions=FloatCoord<DIM>(), 
+        const FloatCoord<DIM>& _dimensions=FloatCoord<DIM>(),
         const double& _boxSize=1) :
         dimensions(_dimensions)
     {
         resetBoxSize(_boxSize);
     }
-    
+
     inline CoordListGrid grid() const
     {
         return CoordListGrid(discreteDim);
     }
-    
+
     inline Coord<DIM> posToCoord(const FloatCoord<DIM>& pos) const
     {
         Coord<DIM> c;
@@ -103,7 +103,7 @@ public:
     }
 
     double findOptimumBoxSize(
-        const CoordVec& positions, 
+        const CoordVec& positions,
         const Graph& graph)
     {
         double upperBorder = -1;
@@ -111,7 +111,7 @@ public:
 
         Coord<DIM> upperBorderDim;
         Coord<DIM> lowerBorderDim;
-        
+
         // the exponential back-off algorithm allows us to find upper
         // and lower bound for the optimal box size in log time
         if (checkBoxSize(positions, graph)) {
@@ -147,10 +147,10 @@ public:
                 lowerBorderDim = discreteDim;
             }
         }
-      
+
         double maxBoxSize = 0;
         double nextLower = 0;
-        
+
         // the resulting box size may lead to overhangs on the far
         // boundaries which would get added to the nearest container
         // cells. this step enlarges the box size slightly to ensure a
@@ -165,9 +165,9 @@ public:
                 nextLower = dimensions[i] / (upperBorderDim[i] + 1);
             }
         }
-            
+
         resetBoxSize(nextLower);
-        if (checkBoxSize(positions, graph)) 
+        if (checkBoxSize(positions, graph))
             return nextLower;
 
         resetBoxSize(maxBoxSize);
@@ -181,9 +181,9 @@ public:
 
     bool checkBoxSize(const CoordVec& positions, const Graph& graph)
     {
-        for (int i = 0; i < graph.size(); ++i) 
-            for (SuperVector<int>::const_iterator n = graph[i].begin(); 
-                 n != graph[i].end(); ++n) 
+        for (int i = 0; i < graph.size(); ++i)
+            for (SuperVector<int>::const_iterator n = graph[i].begin();
+                 n != graph[i].end(); ++n)
                 if (manhattanDistance(positions[i].first, positions[*n].first) > 1)
                     return false;
 
@@ -256,7 +256,7 @@ private:
             discreteDim[i] = std::max(1.0, std::floor(dimensions[i] * scale));
         }
 
-        if (discreteDim.prod() > MAX_SIZE) 
+        if (discreteDim.prod() > MAX_SIZE)
             throw std::logic_error("too many container cells are required");
     }
 
@@ -303,7 +303,7 @@ private:
         Coord<DIM> coordB = posToCoord(b);
         Coord<DIM> delta = coordA - coordB;
         int maxDist = 0;
-        
+
         for (int i = 0; i < DIM; ++i) {
             int dist = std::abs(delta[i]);
             if (TOPOLOGY::wrapsAxis(i))

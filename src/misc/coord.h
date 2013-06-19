@@ -76,7 +76,7 @@ public:
     {
         return (x() < comp.x());
     }
-  
+
     inline Coord operator+(const Coord& addend) const
     {
         return Coord(x() + addend.x());
@@ -127,12 +127,12 @@ public:
         return x();
     }
 
-    inline Coord<1> (max)(const Coord<1>& other) const 
+    inline Coord<1> (max)(const Coord<1>& other) const
     {
         return Coord<1>((std::max)(x(), other.x()));
     }
 
-    inline Coord<1> (min)(const Coord<1>& other) const 
+    inline Coord<1> (min)(const Coord<1>& other) const
     {
         return Coord<1>((std::min)(x(), other.x()));
     }
@@ -274,14 +274,14 @@ public:
         return x() + y();
     }
 
-    inline Coord<2> (max)(const Coord<2>& other) const 
+    inline Coord<2> (max)(const Coord<2>& other) const
     {
         return Coord<2>(
             (std::max)(x(), other.x()),
             (std::max)(y(), other.y()));
     }
 
-    inline Coord<2> (min)(const Coord<2>& other) const 
+    inline Coord<2> (min)(const Coord<2>& other) const
     {
         return Coord<2>(
             (std::min)(x(), other.x()),
@@ -442,7 +442,7 @@ public:
         return x() + y() + z();
     }
 
-    inline Coord<3> (max)(const Coord<3>& other) const 
+    inline Coord<3> (max)(const Coord<3>& other) const
     {
         return Coord<3>(
             (std::max)(x(), other.x()),
@@ -450,7 +450,7 @@ public:
             (std::max)(z(), other.z()));
     }
 
-    inline Coord<3> (min)(const Coord<3>& other) const 
+    inline Coord<3> (min)(const Coord<3>& other) const
     {
         return Coord<3>(
             (std::min)(x(), other.x()),

@@ -6,11 +6,11 @@
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/tempfile.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class MPIIOTest : public CxxTest::TestSuite 
+class MPIIOTest : public CxxTest::TestSuite
 {
 public:
     void testBasicReadWrite2D()
@@ -31,7 +31,7 @@ public:
             region << Streak<2>(Coord<2>(0, y), width);
         MPIIO<double, Topologies::Cube<2>::Topology>::writeRegion(
             grid1, grid1.getDimensions(), step, maxSteps, filename, region);
-        
+
         Coord<2> dimensions;
         unsigned s;
         unsigned ms;
@@ -69,7 +69,7 @@ public:
 
         MPIIO<double, Topologies::Cube<3>::Topology>::writeRegion(
             grid1, grid1.getDimensions(), step, maxSteps, filename, region);
-        
+
         Coord<3> dimensions;
         unsigned s;
         unsigned ms;
@@ -100,7 +100,7 @@ public:
             for (int y = 0; y < height; ++y)
                 for (int x = 0; x < width; ++x)
                     grid1[Coord<3>(x, y, z)] = z * 100 + y * 10 + x;
-  
+
         Region<3> region;
         for (int z = 0; z < depth; ++z)
             for (int y = 0; y < height; ++y)
@@ -125,7 +125,7 @@ public:
         for (int z = 0; z < depth; ++z) {
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {
-                    double expected = (x < (y + z)) ? 
+                    double expected = (x < (y + z)) ?
                         -1 : (z * 100 + y * 10 + x);
                     TS_ASSERT_EQUALS(expected, grid2[Coord<3>(x, y, z)]);
                 }

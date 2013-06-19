@@ -2,17 +2,17 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/tempfile.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TempFileTest : public CxxTest::TestSuite 
+class TempFileTest : public CxxTest::TestSuite
 {
 public:
 
     void assertNoFile(std::string filename)
     {
-        std::ifstream input(filename.c_str());        
+        std::ifstream input(filename.c_str());
         TSM_ASSERT("File " + filename + " shouldn't exist", !input);
     }
 
@@ -30,7 +30,7 @@ public:
         assertNoFile(filename);
         std::ofstream test(filename.c_str());
         test << "lorem ipsum etc.";
-        test.close();         
+        test.close();
         remove(filename.c_str());
     }
 };

@@ -27,6 +27,6 @@ int main(int argc, char *argv[])
     MPI::Request::Waitall(2, requests);
     std::cout << "done.\n";
 
-    MPI::Finalize(); 
+    MPI::Finalize();
     return 0;
 }

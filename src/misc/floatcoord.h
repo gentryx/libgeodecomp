@@ -23,13 +23,13 @@ public:
 
     explicit
     inline
-    FloatCoord(const double x = 0) 
+    FloatCoord(const double x = 0)
     {
         c[0] = x;
     }
 
     inline
-    FloatCoord(const Coord<1>& p) 
+    FloatCoord(const Coord<1>& p)
     {
         c[0] = p[0];
     }
@@ -37,7 +37,7 @@ public:
     inline
     double length() const
     {
-        return fabs(c[0]); 
+        return fabs(c[0]);
     }
 
     inline
@@ -59,26 +59,26 @@ public:
     }
 
     inline
-    FloatCoord<1>& operator+=(const FloatCoord<1>& a) 
+    FloatCoord<1>& operator+=(const FloatCoord<1>& a)
     {
         c[0] += a.c[0];
         return *this;
     }
 
     inline
-    FloatCoord<1>& operator-=(const FloatCoord<1>& a) 
+    FloatCoord<1>& operator-=(const FloatCoord<1>& a)
     {
         c[0] -= a.c[0];
         return *this;
     }
 
-    inline 
+    inline
     FloatCoord<1> operator*(const double& s) const
     {
         return FloatCoord<1>(c[0] * s);
     }
 
-    inline 
+    inline
     FloatCoord<1>& operator*=(const double s)
     {
         c[0] *= s;
@@ -106,15 +106,15 @@ public:
     explicit
     inline
     FloatCoord(
-        const double x = 0, 
-        const double y = 0) 
+        const double x = 0,
+        const double y = 0)
     {
         c[0] = x;
         c[1] = y;
     }
 
     inline
-    FloatCoord(const Coord<2>& p) 
+    FloatCoord(const Coord<2>& p)
     {
         c[0] = p[0];
         c[1] = p[1];
@@ -123,7 +123,7 @@ public:
     inline
     double length() const
     {
-        return sqrt(c[0] * c[0] + 
+        return sqrt(c[0] * c[0] +
                     c[1] * c[1]);
     }
 
@@ -148,7 +148,7 @@ public:
     }
 
     inline
-    FloatCoord<2>& operator+=(const FloatCoord<2>& a) 
+    FloatCoord<2>& operator+=(const FloatCoord<2>& a)
     {
         c[0] += a.c[0];
         c[1] += a.c[1];
@@ -156,20 +156,20 @@ public:
     }
 
     inline
-    FloatCoord<2>& operator-=(const FloatCoord<2>& a) 
+    FloatCoord<2>& operator-=(const FloatCoord<2>& a)
     {
         c[0] -= a.c[0];
         c[1] -= a.c[1];
         return *this;
     }
 
-    inline 
+    inline
     FloatCoord<2> operator*(const double s) const
     {
         return FloatCoord<2>(c[0] * s, c[1] * s);
     }
 
-    inline 
+    inline
     FloatCoord<2>& operator*=(const double s)
     {
         c[0] *= s;
@@ -198,8 +198,8 @@ public:
     explicit
     inline
     FloatCoord(
-        const double x = 0, 
-        const double y = 0, 
+        const double x = 0,
+        const double y = 0,
         const double z = 0)
     {
         c[0] = x;
@@ -208,7 +208,7 @@ public:
     }
 
     inline
-    FloatCoord(const Coord<3>& p) 
+    FloatCoord(const Coord<3>& p)
     {
         c[0] = p[0];
         c[1] = p[1];
@@ -218,8 +218,8 @@ public:
     inline
     double length() const
     {
-        return sqrt(c[0] * c[0] + 
-                    c[1] * c[1] + 
+        return sqrt(c[0] * c[0] +
+                    c[1] * c[1] +
                     c[2] * c[2]);
     }
 
@@ -246,7 +246,7 @@ public:
     }
 
     inline
-    FloatCoord<3>& operator+=(const FloatCoord<3>& a) 
+    FloatCoord<3>& operator+=(const FloatCoord<3>& a)
     {
         c[0] += a.c[0];
         c[1] += a.c[1];
@@ -255,7 +255,7 @@ public:
     }
 
     inline
-    FloatCoord<3>& operator-=(const FloatCoord<3>& a) 
+    FloatCoord<3>& operator-=(const FloatCoord<3>& a)
     {
         c[0] -= a.c[0];
         c[1] -= a.c[1];
@@ -263,13 +263,13 @@ public:
         return *this;
     }
 
-    inline 
+    inline
     FloatCoord<3> operator*(const double s) const
     {
         return FloatCoord<3>(c[0] * s, c[1] * s, c[2] * s);
     }
 
-    inline 
+    inline
     FloatCoord<3>& operator*=(const double s)
     {
         c[0] *= s;

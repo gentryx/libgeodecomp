@@ -69,7 +69,7 @@ public:
     template<int X, int Y, int Z>
     Coord<2> operator()(Streak<2> streak, FixedCoord<X, Y, Z>)
     {
-        return Coord<2>(CalcXCoord<X>()(streak), 
+        return Coord<2>(CalcXCoord<X>()(streak),
                         streak.origin.y() + Y);
     }
 };
@@ -81,7 +81,7 @@ public:
     template<int X, int Y, int Z>
     Coord<3> operator()(Streak<3> streak, FixedCoord<X, Y, Z>)
     {
-        return Coord<3>(CalcXCoord<X>()(streak), 
+        return Coord<3>(CalcXCoord<X>()(streak),
                         streak.origin.y() + Y,
                         streak.origin.z() + Z);
     }
@@ -115,8 +115,8 @@ public:
     template<typename CELL, typename GRID>
     void operator()(const CELL *pointers[STENCIL::VOLUME], const Streak<STENCIL::DIM>& streak, GRID& grid)
     {
-        Stencils::Repeat<STENCIL::VOLUME, 
-                         LinePointerAssemblyHelpers::CopyCellPointer, 
+        Stencils::Repeat<STENCIL::VOLUME,
+                         LinePointerAssemblyHelpers::CopyCellPointer,
                          STENCIL>()(pointers, streak, &grid);
     }
 };

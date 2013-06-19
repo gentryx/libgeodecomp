@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 

@@ -6,7 +6,7 @@
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
-using namespace HiParSimulator; 
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -27,9 +27,9 @@ public:
         StripingPartition<2>::Iterator end = p.end();
 
         for (StripingPartition<2>::Iterator i = p.begin(); i != end; ++i)
-            actual += *i; 
-            
-        TS_ASSERT_EQUALS(actual, expected);        
+            actual += *i;
+
+        TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testSimple()
@@ -52,10 +52,10 @@ public:
 
     void testNormal()
     {
-        expected += 
-            Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0), 
-            Coord<2>(0, 1), Coord<2>(1, 1), Coord<2>(2, 1), 
-            Coord<2>(0, 2), Coord<2>(1, 2), Coord<2>(2, 2), 
+        expected +=
+            Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0),
+            Coord<2>(0, 1), Coord<2>(1, 1), Coord<2>(2, 1),
+            Coord<2>(0, 2), Coord<2>(1, 2), Coord<2>(2, 2),
             Coord<2>(0, 3), Coord<2>(1, 3), Coord<2>(2, 3);
         check(StripingPartition<2>(Coord<2>(0, 0), Coord<2>(3, 4)), expected);
     }
@@ -100,7 +100,7 @@ public:
 
         TS_ASSERT_EQUALS(expected, actual);
     }
-    
+
 private:
     CoordVector  expected;
 };

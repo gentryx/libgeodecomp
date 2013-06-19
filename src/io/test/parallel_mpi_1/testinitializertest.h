@@ -5,11 +5,11 @@
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TestTestInitializer : public CxxTest::TestSuite 
+class TestTestInitializer : public CxxTest::TestSuite
 {
 private:
     TestInitializer<TestCell<2> > init;
@@ -25,7 +25,7 @@ public:
 
     void testGridRectangle()
     {
-        TS_ASSERT_EQUALS(init.gridBox(), 
+        TS_ASSERT_EQUALS(init.gridBox(),
                          CoordBox<2>(Coord<2>(0, 0), Coord<2>(10, 11)));
     }
 
@@ -41,16 +41,16 @@ public:
 
         DisplacedGrid<TestCell<2> > newGrid = grid;
         for (unsigned x = 1; x < unsigned(rect.dimensions.x() - 1); x++) {
-            for (unsigned y = 1; y < unsigned(rect.dimensions.y() - 1); y++) { 
+            for (unsigned y = 1; y < unsigned(rect.dimensions.y() - 1); y++) {
                 Coord<2> pos(x, y);
                 newGrid[pos + rect.origin].update(
-                    CoordMap<TestCell<2> >(pos, grid.vanillaGrid()), 
+                    CoordMap<TestCell<2> >(pos, grid.vanillaGrid()),
                     startCycle % TestCell<2>::nanoSteps());
             }
         }
 
         for (unsigned x = 1; x < unsigned(rect.dimensions.x() - 1); x++) {
-            for (unsigned y = 1; y < unsigned(rect.dimensions.y() - 1); y++) { 
+            for (unsigned y = 1; y < unsigned(rect.dimensions.y() - 1); y++) {
                 TS_ASSERT(newGrid[Coord<2>(x, y)].valid());
             }
         }
@@ -60,7 +60,7 @@ public:
     {
         unsigned width = 23;
         unsigned height = 32;
-        Initializer<TestCell<2> > *init = 
+        Initializer<TestCell<2> > *init =
             new TestInitializer<TestCell<2> >(Coord<2>(width, height));
         Grid<TestCell<2> > gridOld(Coord<2>(width, height));
         init->grid(&gridOld);
@@ -68,10 +68,10 @@ public:
         Grid<TestCell<2> > gridNew(Coord<2>(width, height));
         TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, gridOld, 0);
 
-        
+
         // update everything...
         for (unsigned x = 0; x < width; x++) {
-            for (unsigned y = 0; y < height; y++) {                
+            for (unsigned y = 0; y < height; y++) {
                 Coord<2> pos(x, y);
                 gridNew[pos].update(CoordMap<TestCell<2> >(pos, &gridOld), 0);
             }
@@ -81,7 +81,7 @@ public:
 
         // ...twice
         for (unsigned x = 0; x < width; x++) {
-            for (unsigned y = 0; y < height; y++) {                
+            for (unsigned y = 0; y < height; y++) {
                 Coord<2> pos(x, y);
                 gridOld[pos].update(CoordMap<TestCell<2> >(pos, &gridNew), 1);
             }

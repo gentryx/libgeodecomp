@@ -2,7 +2,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/ioexception.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 

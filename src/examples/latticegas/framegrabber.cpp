@@ -49,13 +49,13 @@ void FrameGrabber::grab()
                 frame[(y * MAX_X + x) * 3 + 2] = b;
             }
         }
-                
+
         emit newFrame(&frame[0], MAX_X, MAX_Y);
         return;
     }
 
     IplImage *frame = cvQueryFrame((CvCapture*)capture);
-    if (!frame) 
+    if (!frame)
         throw std::runtime_error("could not capture frame");
 
     if (frame->depth != 8)

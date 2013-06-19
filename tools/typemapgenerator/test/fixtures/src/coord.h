@@ -1,7 +1,7 @@
 #ifndef _coord_h_
 #define _coord_h_
 
-template<int DIMENSIONS>  
+template<int DIMENSIONS>
 class Coord;
 
 class Coord<2>

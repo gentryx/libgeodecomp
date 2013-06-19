@@ -13,7 +13,7 @@
 class InteractiveSimulator : public QObject, public QRunnable, protected FPSCounter
 {
     Q_OBJECT
-    
+
 public:
     InteractiveSimulator(QObject *parent) :
         QObject(parent),
@@ -26,7 +26,7 @@ public:
 
     static char pixelToState(unsigned char r, unsigned char g, unsigned char b)
     {
-        float sum = 
+        float sum =
             r * simParamsHost.weightR +
             g * simParamsHost.weightG +
             b * simParamsHost.weightB;
@@ -64,11 +64,11 @@ public slots:
                 states[y * simParamsHost.modelWidth + x] = state;
             }
         }
-        
+
         newCameraFrame.release();
     }
 
-    void renderImage(unsigned *image, unsigned width, unsigned height) 
+    void renderImage(unsigned *image, unsigned width, unsigned height)
     {
         outputFrame = image;
         outputFrameWidth = width;
@@ -77,9 +77,9 @@ public slots:
         newOutputFrameAvailable.acquire(1);
     }
 
-    void step() 
+    void step()
     {
-        if (newCameraFrame.tryAcquire()) 
+        if (newCameraFrame.tryAcquire())
             loadStates();
         if (newOutputFrameRequested.tryAcquire()) {
             renderOutput();
@@ -94,7 +94,7 @@ public slots:
     virtual void loadStates() = 0;
     virtual void renderOutput() = 0;
     virtual void update() = 0;
-    
+
     void info()
     {
         std::cout << "InteractiveSimulator @ " << fps() << " FPS\n\n";

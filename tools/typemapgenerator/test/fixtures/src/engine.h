@@ -1,7 +1,7 @@
 #ifndef _engine_h_
 #define _engine_h_
 
-class Engine 
+class Engine
 {
     friend class Typemaps;
 

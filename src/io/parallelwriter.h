@@ -77,11 +77,11 @@ public:
      * the interior of the domain).
      */
     virtual void stepFinished(
-        const GridType& grid, 
-        const RegionType& validRegion, 
+        const GridType& grid,
+        const RegionType& validRegion,
         const CoordType& globalDimensions,
-        unsigned step, 
-        WriterEvent event, 
+        unsigned step,
+        WriterEvent event,
         bool lastCall) = 0;
 
     const unsigned& getPeriod() const

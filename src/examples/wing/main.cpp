@@ -1,5 +1,5 @@
 #include <cmath>
-/** 
+/**
  * We need to include typemaps first to avoid problems with Intel
  * MPI's C++ bindings (which may collide with stdio.h's SEEK_SET,
  * SEEK_CUR etc.).
@@ -47,13 +47,13 @@ const double DRIVER_VELOCITY_Y = 0.0;
 
 enum State {LIQUID=0, SLIP=1, SOLID=2, CONST=3};
 
-Coord<2> NEIGHBOR_COORDS[] = {Coord<2>(-1, -1), 
-                              Coord<2>( 0, -1), 
-                              Coord<2>( 1, -1), 
-                              Coord<2>(-1,  0), 
-                              Coord<2>( 1,  0), 
-                              Coord<2>(-1,  1), 
-                              Coord<2>( 0,  1), 
+Coord<2> NEIGHBOR_COORDS[] = {Coord<2>(-1, -1),
+                              Coord<2>( 0, -1),
+                              Coord<2>( 1, -1),
+                              Coord<2>(-1,  0),
+                              Coord<2>( 1,  0),
+                              Coord<2>(-1,  1),
+                              Coord<2>( 0,  1),
                               Coord<2>( 1,  1)};
 
 const double DIAG = 0.707107;
@@ -68,14 +68,14 @@ double PERPENDICULAR_DIRS[][2] = {{DIAG, -DIAG},
                                   {-DIAG, DIAG}};
 
 const double INFLUENCE_FACTOR = 0.04;
-double INFLUENCES[] = 
-    {INFLUENCE_FACTOR * FLOW_DIFFUSION, FLOW_DIFFUSION, INFLUENCE_FACTOR * FLOW_DIFFUSION, 
-     FLOW_DIFFUSION, FLOW_DIFFUSION, 
+double INFLUENCES[] =
+    {INFLUENCE_FACTOR * FLOW_DIFFUSION, FLOW_DIFFUSION, INFLUENCE_FACTOR * FLOW_DIFFUSION,
+     FLOW_DIFFUSION, FLOW_DIFFUSION,
      INFLUENCE_FACTOR * FLOW_DIFFUSION, FLOW_DIFFUSION, INFLUENCE_FACTOR * FLOW_DIFFUSION};
 
-double LENGTHS[] = 
-    {DIAG, 1.0, DIAG, 
-     1.0, 1.0, 
+double LENGTHS[] =
+    {DIAG, 1.0, DIAG,
+     1.0, 1.0,
      DIAG, 1.0, DIAG};
 
 class Cell
@@ -113,7 +113,7 @@ public:
         diffuse(neighbors);
     }
 
-    static void flux(const Cell& from, const Cell& to, const int& i, 
+    static void flux(const Cell& from, const Cell& to, const int& i,
                      double *fluxFlow, double *fluxPressure)
     {
         if (from.state == SOLID || to.state == SOLID) {
@@ -124,8 +124,8 @@ public:
 
         const Coord<2>& dir = NEIGHBOR_COORDS[i];
         const double& influence = INFLUENCES[i];
-            
-        *fluxFlow = (dir.x() * from.velocityX + dir.y() * from.velocityY) * 
+
+        *fluxFlow = (dir.x() * from.velocityX + dir.y() * from.velocityY) *
             influence * from.quantity;
         *fluxFlow = std::max(0.0, *fluxFlow);
 
@@ -148,7 +148,7 @@ public:
         const Coord<2>& dir = NEIGHBOR_COORDS[i];
         const Cell& other = neighbors[dir];
         const double& length = LENGTHS[i];
-            
+
         double fluxFlow;
         double fluxPressure;
         flux(other, oldSelf, 7 - i, &fluxFlow, &fluxPressure);
@@ -164,7 +164,7 @@ public:
         double pressureCoefficient = length * PRESSURE_SPEED * fluxPressure;
         // double influxVelocityX;
         // double influxVelocityY;
-        // pruneVelocity(&influxVelocityX, &influxVelocityY, dir, 
+        // pruneVelocity(&influxVelocityX, &influxVelocityY, dir,
         //               other.velocityX, other.velocityY,
         //               PERPENDICULAR_DIRS[i]);
         // *fluxVelocityX += (influxVelocityX - dir.x() * pressureCoefficient) * fluxPressure;
@@ -198,10 +198,10 @@ public:
         double newQuantity = quantity;
         const Cell& oldSelf = neighbors[Coord<2>()];
 
-        for (int i = 0; i < 8; ++i) 
-            addFlowFromNeighbor(oldSelf, i, neighbors, 
+        for (int i = 0; i < 8; ++i)
+            addFlowFromNeighbor(oldSelf, i, neighbors,
                                 &fluxVelocityX, &fluxVelocityY, &newQuantity);
-        
+
         double velocityCoeff = (state == SLIP) ? (1 - FRICTION) : 1.0;
         velocityCoeff /= newQuantity;
         if (state != CONST) {
@@ -209,7 +209,7 @@ public:
             velocityY = (quantity * velocityY + fluxVelocityY) * velocityCoeff;
         }
 
-        for (int i = 0; i < 8; ++i) 
+        for (int i = 0; i < 8; ++i)
             removeFlowToNeighbor(oldSelf, i, neighbors, &newQuantity);
 
         if (newQuantity < 0) {
@@ -228,7 +228,7 @@ public:
                 double fluxVelocityY = 0;
                 double addQuantity = 0;
                 double removeQuantity = 0;
-                addFlowFromNeighbor(oldSelf, i, neighbors, 
+                addFlowFromNeighbor(oldSelf, i, neighbors,
                                     &fluxVelocityX, &fluxVelocityY, &addQuantity);
                 removeFlowToNeighbor(oldSelf, i, neighbors, &removeQuantity);
                 std::cout << "i: " << i << "\n"
@@ -237,7 +237,7 @@ public:
                           << "  addQuantity: " << addQuantity << "\n"
                           << "  removeQuantity: " << removeQuantity << "\n";
             }
-                   
+
             throw std::logic_error("negative quantity, unstable simulation!");
         }
 
@@ -246,16 +246,16 @@ public:
 
     // fixme: remove this
     static void pruneVelocity(
-        double *influxVelocityX, double *influxVelocityY, 
+        double *influxVelocityX, double *influxVelocityY,
         const Coord<2>& dir,
         const double& otherVelocityX, const double& otherVelocityY,
         const double *perpendicularDir)
     {
         double prod = otherVelocityX * dir.x() + otherVelocityY * dir.y();
-            
+
         if (prod > 0) {
-            double prod = 
-                perpendicularDir[0] * otherVelocityX + 
+            double prod =
+                perpendicularDir[0] * otherVelocityX +
                 perpendicularDir[1] * otherVelocityY;
             *influxVelocityX = perpendicularDir[0] * prod;
             *influxVelocityY = perpendicularDir[1] * prod;
@@ -271,7 +271,7 @@ public:
     double velocityY;
 };
 
-class QuantitySelector 
+class QuantitySelector
 {
 public:
     typedef double VariableType;
@@ -297,7 +297,7 @@ public:
     }
 };
 
-class VelocitySelector 
+class VelocitySelector
 {
 public:
     typedef double VariableType;
@@ -335,7 +335,7 @@ public:
         const unsigned& _steps) :
         SimpleInitializer<Cell>(_dim, _steps)
     {}
-    
+
     virtual void grid(GridBase<Cell, 2> *grid)
     {
         CoordBox<2> box = grid->boundingBox();
@@ -419,14 +419,14 @@ public:
         Coord<2> offset = Coord<2>(500, 950);
         // substract inherent offset
         offset -= Coord<2>(150, 100);
-        
+
         // lower left forth circle
         for (int y = 100; y < 140; ++y) {
             for (int x = 150; x < 190; ++x) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c) && 
-                    inCircle(c, Coord<2>(190, 140) + offset, 40)) 
+                if (box.inBounds(c) &&
+                    inCircle(c, Coord<2>(190, 140) + offset, 40))
                     grid->at(c) = Cell(SOLID, 0);
             }
         }
@@ -436,8 +436,8 @@ public:
             for (int x = 150; x < 250; ++x) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c) && 
-                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25)) 
+                if (box.inBounds(c) &&
+                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25))
                     grid->at(c) = Cell(SOLID, 0);
             }
         }
@@ -447,7 +447,7 @@ public:
             for (int x = 190; x < 250; ++x) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c)) 
+                if (box.inBounds(c))
                     grid->at(c) = Cell(SOLID, 0);
             }
         }
@@ -457,8 +457,8 @@ public:
             for (int x = 250; x < 350; ++x) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c) && 
-                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60)) 
+                if (box.inBounds(c) &&
+                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60))
                     grid->at(c) = Cell(SOLID, 0);
             }
         }
@@ -469,7 +469,7 @@ public:
             for (int y = 100; y < maxY; ++y) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c)) 
+                if (box.inBounds(c))
                     grid->at(c) = Cell(SOLID, 0);
             }
         }
@@ -485,27 +485,27 @@ int main(int argc, char *argv[])
     MPI::Datatype memberTypes[] = {MPI::CHAR};
     int lengths[] = {sizeof(Cell)};
     MPI::Datatype objType;
-    objType = 
+    objType =
         MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
     objType.Commit();
 
     {
         AeroInitializer *init = new AeroInitializer(
-            Coord<2>(MAX_X, MAX_Y), 
+            Coord<2>(MAX_X, MAX_Y),
             100000);
 
         StripingSimulator<Cell> sim(
             init,
-            MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()), 
-            1000, 
-            objType); 
+            MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
+            1000,
+            objType);
 
         sim.addWriter(
             new ParallelMPIIOWriter<Cell>(
-                "snapshot", 
-                6000, 
-                init->maxSteps(), 
-                MPI::COMM_WORLD, 
+                "snapshot",
+                6000,
+                init->maxSteps(),
+                MPI::COMM_WORLD,
                 objType));
 
         sim.addWriter(
@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
 
         sim.run();
     }
-    
+
     MPI_Finalize();
     return 0;
 }

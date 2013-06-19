@@ -4,8 +4,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
 
 using namespace boost::assign;
-using namespace LibGeoDecomp; 
-using namespace HiParSimulator; 
+using namespace LibGeoDecomp;
+using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -13,7 +13,7 @@ namespace HiParSimulator {
 class OffsetHelperTest : public CxxTest::TestSuite
 {
 public:
-    void testTorus() 
+    void testTorus()
     {
         Coord<2> offset;
         Coord<2> dimensions;
@@ -29,7 +29,7 @@ public:
         TS_ASSERT_EQUALS(Coord<2>(9, 7), dimensions);
     }
 
-    void testCube() 
+    void testCube()
     {
         Coord<2> offset;
         Coord<2> dimensions;

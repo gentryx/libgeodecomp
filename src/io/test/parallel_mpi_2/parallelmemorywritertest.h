@@ -6,7 +6,7 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -16,26 +16,26 @@ public:
     typedef DistributedSimulator<TestCell<2> > ParentType;
     typedef ParentType::GridType GridType;
 
-    MockSim(TestInitializer<TestCell<2> > *init) : 
+    MockSim(TestInitializer<TestCell<2> > *init) :
         DistributedSimulator<TestCell<2> >(init)
     {}
-    
+
     void setStep(const unsigned& step)
     {
         stepNum = step;
     }
 
-    virtual void step() 
+    virtual void step()
     {}
 
-    virtual void run() 
+    virtual void run()
     {}
 };
 
-class ParallelMemoryWriterTest :  public CxxTest::TestSuite 
+class ParallelMemoryWriterTest :  public CxxTest::TestSuite
 {
 public:
-    typedef DisplacedGrid<TestCell<2>, TestCell<2>::Topology> GridType; 
+    typedef DisplacedGrid<TestCell<2>, TestCell<2>::Topology> GridType;
 
     void setUp()
     {
@@ -70,20 +70,20 @@ public:
         for (int i = 0; i < 2; ++i) {
             int index = MPILayer().rank() * 2 + i;
             writer->stepFinished(
-                grid, 
-                stripes[index], 
-                grid.getDimensions(), 
-                sim->getStep(), 
-                WRITER_STEP_FINISHED, 
-                true); 
+                grid,
+                stripes[index],
+                grid.getDimensions(),
+                sim->getStep(),
+                WRITER_STEP_FINISHED,
+                true);
         }
 
         TS_ASSERT_EQUALS(writer->getGrid(  0).getDimensions(), dim);
         TS_ASSERT_EQUALS(writer->getGrid(123).getDimensions(), Coord<2>());
 
         TS_ASSERT_TEST_GRID(
-            ParallelMemoryWriter<TestCell<2> >::GridType, 
-            writer->getGrid(0), 
+            ParallelMemoryWriter<TestCell<2> >::GridType,
+            writer->getGrid(0),
             0);
 
         sim->setStep(123);
@@ -91,24 +91,24 @@ public:
         for (int i = 0; i < 2; ++i) {
             int index = MPILayer().rank() + i * 2;
             writer->stepFinished(
-                grid, 
-                stripes[index], 
-                grid.getDimensions(), 
-                sim->getStep(), 
-                WRITER_STEP_FINISHED, 
-                true); 
+                grid,
+                stripes[index],
+                grid.getDimensions(),
+                sim->getStep(),
+                WRITER_STEP_FINISHED,
+                true);
         }
 
         TS_ASSERT_EQUALS(writer->getGrids()[  0].getDimensions(), dim);
         TS_ASSERT_EQUALS(writer->getGrids()[123].getDimensions(), dim);
 
         TS_ASSERT_TEST_GRID(
-            ParallelMemoryWriter<TestCell<2> >::GridType, 
-            writer->getGrid(0), 
+            ParallelMemoryWriter<TestCell<2> >::GridType,
+            writer->getGrid(0),
             0);
         TS_ASSERT_TEST_GRID(
-            ParallelMemoryWriter<TestCell<2> >::GridType, 
-            writer->getGrid(123), 
+            ParallelMemoryWriter<TestCell<2> >::GridType,
+            writer->getGrid(123),
             0);
     }
 

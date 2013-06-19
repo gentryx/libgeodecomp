@@ -16,7 +16,7 @@ class JacobiCellSimple
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Torus<3>::Topology Topology;
-  
+
     class API : public CellAPITraits::Fixed
     {};
 
@@ -49,7 +49,7 @@ class JacobiCellMagic
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Torus<3>::Topology Topology;
-  
+
     class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
@@ -90,7 +90,7 @@ class JacobiCellStraightforward
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Torus<3>::Topology Topology;
-  
+
     class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
@@ -211,7 +211,7 @@ class JacobiCellStraightforwardNT
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Torus<3>::Topology Topology;
-  
+
     class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
@@ -351,7 +351,7 @@ class JacobiCellStreakUpdate
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     typedef Topologies::Torus<3>::Topology Topology;
-  
+
     class API : public CellAPITraits::Fixed, public CellAPITraits::Line
     {};
 
@@ -563,11 +563,11 @@ double singleBenchmark(Coord<3> dim)
         std::cout << "this statement just serves to prevent the compiler from"
                   << "optimizing away the loops above\n";
     }
-    
+
     double updates = 1.0 * repeats * (dim - Coord<3>::diagonal(2)).prod();
     double seconds = (tEnd - tBegin) * 10e-6;
     double glups = 10e-9 * updates / seconds;
-    
+
     return glups;
 }
 
@@ -580,7 +580,7 @@ void benchmark(std::string name)
     fileName << "data." << name << ".txt";
     std::ofstream outfile(fileName.str().c_str());
     outfile << "# BENCHMARK_ID MAXTRIX_SIZE GLUPS\n";
-    
+
     int maxI = 24;
 
     for (int i = 0; i < maxI; ++i) {

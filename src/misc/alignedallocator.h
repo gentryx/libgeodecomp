@@ -25,7 +25,7 @@ public:
     {
         return &x;
     }
-    
+
     inline const_pointer address(const_reference x) const
     {
         return &x;
@@ -76,7 +76,7 @@ public:
     {
         std::allocator<T>().construct(p, val);
     }
-    
+
     void destroy(pointer p)
     {
         std::allocator<T>().destroy(p);

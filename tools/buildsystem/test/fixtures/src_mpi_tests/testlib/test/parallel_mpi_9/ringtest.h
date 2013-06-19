@@ -2,10 +2,10 @@
 #include <iostream>
 #include <mpi.h>
 
-class RingTest : public CxxTest::TestSuite 
+class RingTest : public CxxTest::TestSuite
 {
 public:
-    
+
     void testSimple() {
         MPI::Comm& comm = MPI::COMM_WORLD;
         int rank = comm.Get_rank();
@@ -21,7 +21,7 @@ public:
             comm.Recv(&sum, 1, MPI::INT, prev, 4711);
             std::cout << "size is " << size << "\n";
             std::cout << "sum is " << sum << "\n";
-        } else {            
+        } else {
             comm.Recv(&sum, 1, MPI::INT, prev, 4711);
             sum += val;
             comm.Send(&sum, 1, MPI::INT, next, 4711);

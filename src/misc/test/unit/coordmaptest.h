@@ -2,7 +2,7 @@
 #include <libgeodecomp/misc/coordmap.h>
 #include <libgeodecomp/misc/grid.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -23,7 +23,7 @@ public:
 
         Coord<2> origin(5, 7);
         CoordMap<double, Grid<double> > m(origin, &g);
-        
+
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 Coord<2> relCoord(i, j);
@@ -43,7 +43,7 @@ public:
         Coord<2> origin(23, 42);
         CoordMap<double, Grid<double> > map(origin, 0);
         TS_ASSERT_EQUALS(
-                map.toString(), 
+                map.toString(),
                 "CoordMap origin: " + origin.toString() + "\n");
     }
 

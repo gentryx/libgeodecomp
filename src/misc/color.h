@@ -24,8 +24,8 @@ class Color
     inline Color() { *this = Color(0, 0, 0); }
 
     inline Color(
-        const unsigned char& r, 
-        const unsigned char& g, 
+        const unsigned char& r,
+        const unsigned char& g,
         const unsigned char& b)
     {
         rgb = 255;

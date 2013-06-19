@@ -1,5 +1,5 @@
 #include <cmath>
-#include <typeinfo> 
+#include <typeinfo>
 // #include <CL/cl.h>
 #include <iostream>
 #include <emmintrin.h>
@@ -61,7 +61,7 @@ public:
             __m128d same2 = _mm_load_pd(src + x + 4);
             __m128d same3 = _mm_load_pd(src + x + 6);
             __m128d same4 = _mm_load_pd(src + x + 8);
-            
+
             // shuffle values obtain left/right neighbors
             __m128d buff1 = _mm_shuffle_pd(same0, same1, (1 << 0) | (0 << 2));
             __m128d buff2 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
@@ -85,13 +85,13 @@ public:
             same1 = _mm_add_pd(same1, buff2);
             same2 = _mm_add_pd(same2, buff3);
             same3 = _mm_add_pd(same3, buff4);
-    
+
             // load bottom row
             buff0 = _mm_load_pd(src + offset + x + 0);
             buff1 = _mm_load_pd(src + offset + x + 2);
             buff2 = _mm_load_pd(src + offset + x + 4);
             buff3 = _mm_load_pd(src + offset + x + 6);
-        
+
             // add top row
             same0 = _mm_add_pd(same0, temp0);
             same1 = _mm_add_pd(same1, temp1);
@@ -143,11 +143,11 @@ public:
     operator[](Coord<3> coord) const
     {
         return Neighborhood<DIM_X, DIM_Y, DIM_Z>(
-            coefficients, 
+            coefficients,
             source,
             index +
             coord.x() +
-            coord.y() * DIM_X + 
+            coord.y() * DIM_X +
             coord.z() * DIM_X * DIM_Y);
     }
 
@@ -156,9 +156,9 @@ public:
         return source[index + x];
     }
 
-    template<int C> 
+    template<int C>
     const double& coeff(const FixedCoord<C, 0, 0> /*unused*/, const int& x) const
-    { 
+    {
         return coefficients[C * DIM_X * DIM_Y * DIM_Z + index + x];
     }
 
@@ -177,13 +177,13 @@ public:
         source(_source)
     {}
 
-    // template<int X, int Y, int Z, int C> 
+    // template<int X, int Y, int Z, int C>
     // const double& coeff(const int& x) const
     // {
     //     return coefficients[C * DIM_X * DIM_Y * DIM_Z + Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
     // }
 
-    // template<int X, int Y, int Z> 
+    // template<int X, int Y, int Z>
     // const double& src(const int& x) const
     // {
     //     return source[Z * DIM_X * DIM_Y + Y * DIM_X + X + x];
@@ -200,11 +200,11 @@ public:
     operator[](Coord<3> coord) const
     {
         return Neighborhood<DIM_X, DIM_Y, DIM_Z>(
-            coefficients, 
+            coefficients,
             source,
             INDEX +
             coord.x() +
-            coord.y() * DIM_X + 
+            coord.y() * DIM_X +
             coord.z() * DIM_X * DIM_Y);
     }
 
@@ -213,9 +213,9 @@ public:
         return source[INDEX + x];
     }
 
-    template<int C> 
+    template<int C>
     const double& coeff(const FixedCoord<C, 0, 0> /*unused*/, const int& x) const
-    { 
+    {
         return coefficients[C * DIM_X * DIM_Y * DIM_Z + INDEX + x];
     }
 
@@ -255,29 +255,29 @@ public:
                     // Defiant
                     updater.step(
                         FixedNeighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
-                        &newGrid->at(c), 
-                        1, 
+                        &newGrid->at(c),
+                        1,
                         dim[0] - 1);
 
                     // updater.step(
                     //     Neighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
-                    //     &newGrid->at(c), 
-                    //     dim[0], 
-                    //     dim[0] * dim[1], 
-                    //     1, 
+                    //     &newGrid->at(c),
+                    //     dim[0],
+                    //     dim[0] * dim[1],
+                    //     1,
                     //     dim[0] - 1);
-                    
+
                     // for (int i = 0; i < UPDATER::coefficients(); ++i) {
                     //     coefficients[i] = &coeff.at(coeffCoord);
                     //     coeffCoord[DIM - 1] += dim[DIM - 1];
                     // }
                     // updater.step(
-                    //     &coefficients[0], 
-                    //     &oldGrid->at(c), 
-                    //     &newGrid->at(c), 
-                    //     dim[0], 
-                    //     dim[0] * dim[1], 
-                    //     1, 
+                    //     &coefficients[0],
+                    //     &oldGrid->at(c),
+                    //     &newGrid->at(c),
+                    //     dim[0],
+                    //     dim[0] * dim[1],
+                    //     1,
                     //     dim[0] - 1);
 
                     // double *source[9] = {
@@ -301,7 +301,7 @@ public:
         evaluate(dim, repeats, tEnd - tStart);
     }
 
-    void exercise() 
+    void exercise()
     {
         std::cout << "# " << typeid(UPDATER).name() << "\n";
         int lastDim = 0;
@@ -343,7 +343,7 @@ private:
         Coord<DIM> inner = dim;
         for (int i = 0; i < DIM; ++i)
             inner[i] -= 2;
-        double gflops = 1.0 * UPDATER().flops() * inner.prod() * 
+        double gflops = 1.0 * UPDATER().flops() * inner.prod() *
             repeats / 1000 / 1000 / 1000 / seconds;
         std::cout << dim.x() << " " << gflops << "\n";
     }
@@ -389,13 +389,13 @@ public:
            __m128d same2 = _mm_load_pd(src[0] + x + 4);
            __m128d same3 = _mm_load_pd(src[0] + x + 6);
            __m128d same4 = _mm_load_pd(src[0] + x + 8);
-            
+
            // shuffle values obtain left/right neighbors
            __m128d buff1 = _mm_shuffle_pd(same0, same1, (1 << 0) | (0 << 2));
            __m128d buff2 = _mm_shuffle_pd(same1, same2, (1 << 0) | (0 << 2));
            __m128d buff3 = _mm_shuffle_pd(same2, same3, (1 << 0) | (0 << 2));
            __m128d buff4 = _mm_shuffle_pd(same3, same4, (1 << 0) | (0 << 2));
-   
+
            // load top row
            __m128d temp0 = _mm_load_pd(src[T] + x + 0);
            __m128d temp1 = _mm_load_pd(src[T] + x + 2);
@@ -413,13 +413,13 @@ public:
            same1 = _mm_add_pd(same1, buff2);
            same2 = _mm_add_pd(same2, buff3);
            same3 = _mm_add_pd(same3, buff4);
-    
+
            // load bottom row
            buff0 = _mm_load_pd(src[B] + x + 0);
            buff1 = _mm_load_pd(src[B] + x + 2);
            buff2 = _mm_load_pd(src[B] + x + 4);
            buff3 = _mm_load_pd(src[B] + x + 6);
-        
+
            // add top row
            same0 = _mm_add_pd(same0, temp0);
            same1 = _mm_add_pd(same1, temp1);
@@ -437,7 +437,7 @@ public:
            same1 = _mm_add_pd(same1, buff1);
            same2 = _mm_add_pd(same2, buff2);
            same3 = _mm_add_pd(same3, buff3);
-            
+
            // load south row
            buff0 = _mm_load_pd(src[S] + x + 0);
            buff1 = _mm_load_pd(src[S] + x + 2);
@@ -478,7 +478,7 @@ public:
     inline void updateScalar(double *src[9], double *dst, int startX, int endX)
     {
         for (int x = startX; x < endX; ++x) {
-            dst[x] = 
+            dst[x] =
                 (src[S][x] +
                  src[T][x] +
                  src[C][x - 1] +
@@ -507,7 +507,7 @@ public:
     inline void step(double *coeff[7], double *src, double *dst, int offsetY, int offsetZ, int startX, int endX)
     {
         for (int x = startX; x < endX; ++x) {
-            dst[x] = 
+            dst[x] =
                 coeff[0][x] * src[x - offsetZ] +
                 coeff[1][x] * src[x - offsetY] +
                 coeff[2][x] * src[x - 1] +
@@ -544,7 +544,7 @@ public:
 
         __m128d same0 = _mm_load_pd(src + x + 0);
         __m128d neig0 = _mm_loadu_pd(src + x + 1);
-        
+
         int paddedEndX = endX - 7;
         for (; x < paddedEndX; x += 8) {
             __m128d same1 = _mm_load_pd(src + x + 2);
@@ -650,7 +650,7 @@ public:
             same0 = same4;
             neig0 = neig4;
 
-            // dst[x] = 
+            // dst[x] =
             //     coeff[0][x] * src[x - offsetZ] +
             //     coeff[1][x] * src[x - offsetY] +
             //     coeff[2][x] * src[x - 1] +
@@ -680,7 +680,7 @@ public:
     inline void step(double *coeff[13], double *src, double *dst, int offsetY, int offsetZ, int startX, int endX)
     {
         for (int x = startX; x < endX; ++x) {
-            dst[x] = 
+            dst[x] =
                 coeff[ 0][x] * src[x - offsetZ - offsetY] +
                 coeff[ 1][x] * src[x - offsetZ] +
                 coeff[ 2][x] * src[x - offsetZ + offsetY] +
@@ -739,7 +739,7 @@ public:
 
         __m128d same0 = _mm_load_pd(src + x + 0);
         __m128d neig0 = _mm_loadu_pd(src + x + 1);
-        
+
         int paddedEndX = endX - 7;
         for (; x < paddedEndX; x += 8) {
             __m128d same1 = _mm_load_pd(src + x + 2);
@@ -1120,7 +1120,7 @@ public:
             same0 = same4;
             neig0 = neig4;
 
-            // dst[x] = 
+            // dst[x] =
             //     coeff[0][x] * src[x - offsetZ] +
             //     coeff[1][x] * src[x - offsetY] +
             //     coeff[2][x] * src[x - 1] +
@@ -1165,7 +1165,7 @@ public:
 
         __m128d same0 = _mm_load_pd(src + x + 0);
         __m128d neig0 = _mm_loadu_pd(src + x + 1);
-        
+
         int paddedEndX = endX - 7;
         for (; x < paddedEndX; x += 8) {
             __m128d same1 = _mm_load_pd(src + x + 2);
@@ -1535,7 +1535,7 @@ public:
             same0 = same4;
             neig0 = neig4;
 
-            // dst[x] = 
+            // dst[x] =
             //     coeff[0][x] * src[x - offsetZ] +
             //     coeff[1][x] * src[x - offsetY] +
             //     coeff[2][x] * src[x - 1] +
@@ -1950,7 +1950,7 @@ public:
             same0 = same4;
             neig0 = neig4;
 
-            // dst[x] = 
+            // dst[x] =
             //     coeff[0][x] * src[x - offsetZ] +
             //     coeff[1][x] * src[x - offsetY] +
             //     coeff[2][x] * src[x - 1] +
@@ -1967,11 +1967,11 @@ public:
     inline void stepScalar(const NEIGHBORHOOD& hood, double *dst, int offsetY, int offsetZ, int startX, int endX)
     {
         for (int x = startX; x < endX; ++x) {
-            dst[x] = 
+            dst[x] =
                 hood.template coeff<0, 0, 0, 0>(x) * hood.template src<0,    -1, -1>(x) +
                 hood.template coeff<0, 0, 0, 1>(x) * hood.template src<0,     0, -1>(x) +
                 hood.template coeff<0, 0, 0, 2>(x) * hood.template src<0,     1, -1>(x) +
-                hood.template coeff<0, 0, 0, 3>(x) * hood.template src<0,    -1,  0>(x) + 
+                hood.template coeff<0, 0, 0, 3>(x) * hood.template src<0,    -1,  0>(x) +
                 hood.template coeff<0, 0, 0, 4>(x) * hood.template src<0 - 1, 0,  0>(x) +
                 hood.template coeff<0, 0, 0, 5>(x) * hood.template src<0,     0,  0>(x) +
                 hood.template coeff<0, 0, 0, 6>(x) * hood.template src<0 + 1, 0,  0>(x) +
@@ -2417,7 +2417,7 @@ public:
             same0 = same4;
             neig0 = neig4;
 
-            // dst[x] = 
+            // dst[x] =
             //     coeff[0][x] * src[x - offsetZ] +
             //     coeff[1][x] * src[x - offsetY] +
             //     coeff[2][x] * src[x - 1] +
@@ -2434,7 +2434,7 @@ public:
     inline void stepScalar(const NEIGHBORHOOD& hoody, double *dst, int startX, int endX)
     {
         for (int x = startX; x < endX; ++x) {
-            dst[x] = 
+            dst[x] =
                 hood(0, 0, 0).coeff(C00, x) * hood( 0, -1, -1).src(x) +
                 hood(0, 0, 0).coeff(C01, x) * hood( 0,  0, -1).src(x) +
                 hood(0, 0, 0).coeff(C02, x) * hood( 0,  1, -1).src(x) +

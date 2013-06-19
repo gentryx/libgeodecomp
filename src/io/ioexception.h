@@ -18,7 +18,7 @@ public:
      * by @a message occured.
      */
     IOException(std::string message) :
-        std::runtime_error(message) 
+        std::runtime_error(message)
     {}
 
     virtual ~IOException() throw ()
@@ -33,8 +33,8 @@ class FileOpenException : public IOException
 {
 public:
     FileOpenException(
-        std::string file) : 
-        IOException("Could not open file " + file) 
+        std::string file) :
+        IOException("Could not open file " + file)
     {}
 };
 
@@ -46,8 +46,8 @@ class FileWriteException : public IOException
 {
 public:
     FileWriteException(
-        std::string file) : 
-        IOException("Could not write file " + file) 
+        std::string file) :
+        IOException("Could not write file " + file)
     {}
 };
 
@@ -59,8 +59,8 @@ class FileReadException : public IOException
 {
 public:
     FileReadException(
-        std::string file) : 
-        IOException("Could not read file " + file) 
+        std::string file) :
+        IOException("Could not read file " + file)
     {}
 };
 

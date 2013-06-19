@@ -4,7 +4,7 @@
 #include <libgeodecomp/misc/containercell.h>
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -34,7 +34,7 @@ public:
     SuperVector<int> *ids;
 };
 
-class ContainerCellTest : public CxxTest::TestSuite 
+class ContainerCellTest : public CxxTest::TestSuite
 {
 public:
 
@@ -43,7 +43,7 @@ public:
         ContainerCell<MockCell, 5> container;
         SuperVector<int> ids;
         ids << 1 << 2 << 4 << 5 << 6;
-        
+
         container.insert(2, MockCell(2, &ids));
         container.insert(1, MockCell(1, &ids));
         container.insert(6, MockCell(6, &ids));
@@ -65,16 +65,16 @@ public:
         TS_ASSERT_EQUALS(container[ 3], (void*)0);
         TS_ASSERT_EQUALS(container[ 9], (void*)0);
 
-        for (int i = 0; i < 5; ++i) 
+        for (int i = 0; i < 5; ++i)
             TS_ASSERT_EQUALS(container.cells + i, container[ids[i]]);
     }
-    
+
     void testRemove()
     {
         ContainerCell<MockCell, 5> container;
         SuperVector<int> ids;
         ids << 1 << 2 << 6 << 7;
-        
+
         container.insert(2, MockCell(2, &ids));
         container.insert(1, MockCell(1, &ids));
         container.insert(6, MockCell(6, &ids));
@@ -103,7 +103,7 @@ public:
                 }
             }
         }
-                
+
         grid[Coord<2>(0, 0)].update(grid, 0);
 
         for (int y = 0; y < 3; ++y) {

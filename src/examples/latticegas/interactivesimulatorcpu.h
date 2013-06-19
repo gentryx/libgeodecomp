@@ -6,7 +6,7 @@
 class InteractiveSimulatorCPU : public InteractiveSimulator
 {
     Q_OBJECT
-    
+
 public:
     InteractiveSimulatorCPU(QObject *parent);
     virtual ~InteractiveSimulatorCPU();

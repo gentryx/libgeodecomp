@@ -20,7 +20,7 @@ public:
         const Coord<DIM>& targetOrigin,
         const GRID1& gridOld,
         GRID2 *gridNew,
-        unsigned nanoStep) 
+        unsigned nanoStep)
     {
         Coord<DIM> sourceCoord = streak.origin;
         Coord<DIM> targetCoord = targetOrigin;

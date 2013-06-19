@@ -34,7 +34,7 @@ public:
     {
         return 0;
     }
-    
+
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {

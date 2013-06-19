@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/superset.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class SuperSetTest : public CxxTest::TestSuite 
+class SuperSetTest : public CxxTest::TestSuite
 {
 public:
 
@@ -17,11 +17,11 @@ public:
         set.insert(3);
         set << 0
             << -1;
-        TS_ASSERT_EQUALS(set.max(),  3); 
-        TS_ASSERT_EQUALS(set.min(), -1); 
+        TS_ASSERT_EQUALS(set.max(),  3);
+        TS_ASSERT_EQUALS(set.min(), -1);
 
         set.erase_min();
-        TS_ASSERT_EQUALS(set.min(), 0); 
+        TS_ASSERT_EQUALS(set.min(), 0);
     }
 
     void testOperatorAndAnd()

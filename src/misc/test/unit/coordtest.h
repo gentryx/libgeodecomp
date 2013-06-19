@@ -3,11 +3,11 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class CoordTest : public CxxTest::TestSuite 
+class CoordTest : public CxxTest::TestSuite
 {
     Coord<2> *c1;
 
@@ -21,12 +21,12 @@ public:
         }
         return false;
     }
-    
+
     void setUp()
     {
         c1 = new Coord<2>(2, 3);
     }
-    
+
     void tearDown()
     {
         delete c1;
@@ -46,7 +46,7 @@ public:
         TS_ASSERT_EQUALS(Coord<2>(1, 2),    Coord<2>(f));
         TS_ASSERT_EQUALS(Coord<3>(1, 2, 3), Coord<3>(f));
     }
-    
+
     void testEqual()
     {
         Coord<1> b1(47);
@@ -69,7 +69,7 @@ public:
         TS_ASSERT(!(d3 == d2));
         TS_ASSERT_EQUALS(d1, d3);
     }
-    
+
     void testNotEqual()
     {
         Coord<2> c2(2, 3);
@@ -114,16 +114,16 @@ public:
 
         TS_ASSERT(c1 < c2);
         TS_ASSERT(c3 < c1);
-        
+
         Coord<3> c4 = c1 + c3;
         TS_ASSERT_EQUALS(2, c4.x());
         TS_ASSERT_EQUALS(4, c4.y());
         TS_ASSERT_EQUALS(5, c4.z());
-        
+
         Coord<3> c5 = c1;
         c5 += c3;
         TS_ASSERT_EQUALS(c4, c5);
-        
+
         TS_ASSERT(c1 != c3);
 
         Coord<3> c6 = c5;
@@ -150,7 +150,7 @@ public:
     {
         TS_ASSERT_EQUALS(Coord<2>(1, 0).toString(), "(1, 0)");
 
-    }       
+    }
 
     void testOperatorLessLess()
     {
@@ -164,11 +164,11 @@ public:
     {
         Coord<2> c1(5);
         TS_ASSERT_EQUALS(5, c1[0]);
-        
+
         Coord<2> c2(4, 6);
         TS_ASSERT_EQUALS(4, c2[0]);
         TS_ASSERT_EQUALS(6, c2[1]);
-        
+
         Coord<3> c3(1, 7, 9);
         TS_ASSERT_EQUALS(1, c3[0]);
         TS_ASSERT_EQUALS(7, c3[1]);
@@ -217,13 +217,13 @@ public:
     void testCoordToIndex()
     {
         TS_ASSERT_EQUALS(
-            10,      
+            10,
             CoordToIndex<1>()(Coord<1>(10),      Coord<1>(5)));
         TS_ASSERT_EQUALS(
-            (5*7+4), 
+            (5*7+4),
             CoordToIndex<2>()(Coord<2>(4, 5),    Coord<2>(7, 8)));
         TS_ASSERT_EQUALS(
-            (3*7*8+5*7+4), 
+            (3*7*8+5*7+4),
             CoordToIndex<3>()(Coord<3>(4, 5, 3), Coord<3>(7, 8, 4)));
     }
 

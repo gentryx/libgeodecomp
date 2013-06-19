@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/random.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class RandomTest : public CxxTest::TestSuite 
+class RandomTest : public CxxTest::TestSuite
 {
 
 public:

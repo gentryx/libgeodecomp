@@ -10,7 +10,7 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class HilbertPartitionTest : public CxxTest::TestSuite 
+class HilbertPartitionTest : public CxxTest::TestSuite
 {
 public:
     typedef SuperVector<Coord<2> > CoordVector;
@@ -19,22 +19,22 @@ public:
     {
         partition = HilbertPartition(Coord<2>(10, 20), Coord<2>(4, 4));
         expected.clear();
-        expected += 
-            Coord<2>(10, 23), 
-            Coord<2>(11, 23), 
-            Coord<2>(11, 22), 
-            Coord<2>(10, 22), 
-            Coord<2>(10, 21), 
-            Coord<2>(10, 20), 
-            Coord<2>(11, 20), 
-            Coord<2>(11, 21), 
-            Coord<2>(12, 21), 
-            Coord<2>(12, 20), 
-            Coord<2>(13, 20), 
-            Coord<2>(13, 21), 
-            Coord<2>(13, 22), 
-            Coord<2>(12, 22), 
-            Coord<2>(12, 23), 
+        expected +=
+            Coord<2>(10, 23),
+            Coord<2>(11, 23),
+            Coord<2>(11, 22),
+            Coord<2>(10, 22),
+            Coord<2>(10, 21),
+            Coord<2>(10, 20),
+            Coord<2>(11, 20),
+            Coord<2>(11, 21),
+            Coord<2>(12, 21),
+            Coord<2>(12, 20),
+            Coord<2>(13, 20),
+            Coord<2>(13, 21),
+            Coord<2>(13, 22),
+            Coord<2>(12, 22),
+            Coord<2>(12, 23),
             Coord<2>(13, 23);
         actual.clear();
     }
@@ -42,11 +42,11 @@ public:
     void testFillRectangles()
     {
         CoordVector actual;
-        for (int i = 0; i < 16; ++i) 
+        for (int i = 0; i < 16; ++i)
             actual.push_back(
                 *HilbertPartition::Iterator(
-                    Coord<2>(10, 20), 
-                    Coord<2>(4, 4), 
+                    Coord<2>(10, 20),
+                    Coord<2>(4, 4),
                     i));
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -70,7 +70,7 @@ public:
     void testLoop()
     {
         CoordVector actual;
-        for (HilbertPartition::Iterator i = partition.begin(); i != partition.end(); ++i) 
+        for (HilbertPartition::Iterator i = partition.begin(); i != partition.end(); ++i)
             actual.push_back(*i);
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -82,29 +82,29 @@ public:
         // 32b9a
         // 01cde
         expected.clear();
-        expected += 
-            Coord<2>(10, 24), 
-            Coord<2>(11, 24), 
-            Coord<2>(11, 23), 
-            Coord<2>(10, 23), 
-            Coord<2>(10, 22), 
-            Coord<2>(11, 22), 
-            Coord<2>(12, 22), 
-            Coord<2>(13, 22), 
-            Coord<2>(14, 22), 
-            Coord<2>(13, 23), 
-            Coord<2>(14, 23), 
-            Coord<2>(12, 23), 
-            Coord<2>(12, 24), 
-            Coord<2>(13, 24), 
+        expected +=
+            Coord<2>(10, 24),
+            Coord<2>(11, 24),
+            Coord<2>(11, 23),
+            Coord<2>(10, 23),
+            Coord<2>(10, 22),
+            Coord<2>(11, 22),
+            Coord<2>(12, 22),
+            Coord<2>(13, 22),
+            Coord<2>(14, 22),
+            Coord<2>(13, 23),
+            Coord<2>(14, 23),
+            Coord<2>(12, 23),
+            Coord<2>(12, 24),
+            Coord<2>(13, 24),
             Coord<2>(14, 24);
-        for (HilbertPartition::Iterator i = partition.begin(); 
-             i != partition.end(); 
-             ++i) 
+        for (HilbertPartition::Iterator i = partition.begin();
+             i != partition.end();
+             ++i)
             actual.push_back(*i);
         TS_ASSERT_EQUALS(expected, actual);
     }
-    
+
     void testSquareBracketsOperatorVersusIteration()
     {
         Coord<2> offset(10, 20);
@@ -114,8 +114,8 @@ public:
         for (int i = 0; i < (dimensions.x()*dimensions.y()); ++i)
             expected += *partition[i];
         CoordVector actual;
-        for (HilbertPartition::Iterator i = partition.begin(); 
-             i != partition.end(); ++i) 
+        for (HilbertPartition::Iterator i = partition.begin();
+             i != partition.end(); ++i)
             actual.push_back(*i);
         TS_ASSERT_EQUALS(expected, actual);
     }
@@ -131,12 +131,12 @@ public:
                 expectedSorted += Coord<2>(x, y);
         expectedSorted.sort();
         CoordVector actual;
-        for (HilbertPartition::Iterator i = partition.begin(); i != partition.end(); ++i) 
+        for (HilbertPartition::Iterator i = partition.begin(); i != partition.end(); ++i)
             actual.push_back(*i);
         actual.sort();
         TS_ASSERT_EQUALS(expectedSorted, actual);
     }
-    
+
 private:
     HilbertPartition partition;
     CoordVector expected, actual;

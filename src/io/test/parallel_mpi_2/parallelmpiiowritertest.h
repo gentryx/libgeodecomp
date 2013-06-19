@@ -57,7 +57,7 @@ public:
 
             TS_ASSERT_EQUALS("testmpiiowriter01234.mpiio", writer->filename(1234));
 
-            SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected = 
+            SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected =
                 memoryWriter->getGrids();
             SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > actual;
             for (int i = 0; i <= 21; i += (i == 20)? 1 : 4) {

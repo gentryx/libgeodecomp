@@ -3,7 +3,7 @@
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -21,21 +21,21 @@ public:
         _relLoads = TracingBalancer::LoadVec(3);
         _relLoads[0] = 0.2;
         _relLoads[1] = 0.3;
-        _relLoads[2] = 0.4;       
+        _relLoads[2] = 0.4;
     }
 
 
     void testInterfaceToOtherBalancer()
-    {        
+    {
         std::ostringstream output;
         TracingBalancer b(new MockBalancer, output);
-        std::string expected = "balance() " + _loads.toString() + " " + 
+        std::string expected = "balance() " + _loads.toString() + " " +
             _relLoads.toString() + "\n";
         std::string longExpected = expected + expected + expected + expected;
-        
+
         TS_ASSERT_EQUALS("", MockBalancer::events);
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
-        TS_ASSERT_EQUALS(expected, MockBalancer::events);               
+        TS_ASSERT_EQUALS(expected, MockBalancer::events);
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
@@ -47,22 +47,22 @@ public:
     {
         MockBalancer::events = "";
         {
-            TracingBalancer(new MockBalancer()); 
+            TracingBalancer(new MockBalancer());
         }
         TS_ASSERT_EQUALS("deleted\n", MockBalancer::events);
     }
 
 
     void testTrace()
-    {        
+    {
         std::ostringstream output;
         TracingBalancer b(new MockBalancer, output);
-        std::string expected = std::string() + 
-            "TracingBalancer::balance()\n" + 
+        std::string expected = std::string() +
+            "TracingBalancer::balance()\n" +
             "  weights: " + _loads.toString() + "\n" +
             "  relativeLoads: " + _relLoads.toString() + "\n";
         std::string longExpected = expected + expected + expected + expected;
-        
+
         TS_ASSERT_EQUALS("", MockBalancer::events);
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
         TS_ASSERT_EQUALS(expected, output.str());

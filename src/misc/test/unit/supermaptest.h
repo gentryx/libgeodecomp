@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/supermap.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class SuperMapTest : public CxxTest::TestSuite 
+class SuperMapTest : public CxxTest::TestSuite
 {
 public:
     void testOperatorLessLess()

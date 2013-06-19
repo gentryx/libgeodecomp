@@ -14,7 +14,7 @@ public:
     class Vector
     {};
 
-    
+
 };
 
 }

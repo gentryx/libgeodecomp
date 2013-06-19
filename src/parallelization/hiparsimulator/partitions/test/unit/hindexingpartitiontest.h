@@ -11,7 +11,7 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class HIndexingPartitionTest : public CxxTest::TestSuite 
+class HIndexingPartitionTest : public CxxTest::TestSuite
 {
 public:
     typedef SuperVector<Coord<2> > CoordVector;
@@ -24,25 +24,25 @@ public:
         expected[Coord<2>(2, 2)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1), Coord<2>(0, 1);
         expected[Coord<2>(3, 2)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(2, 0), Coord<2>(1, 1), Coord<2>(2, 1), Coord<2>(0, 1);
         expected[Coord<2>(2, 3)] += Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1), Coord<2>(1, 2), Coord<2>(0, 2), Coord<2>(0, 1);
-        expected[Coord<2>(3, 3)] += 
+        expected[Coord<2>(3, 3)] +=
             // 1st half
-            Coord<2>(0, 0), 
-            Coord<2>(1, 0), Coord<2>(2, 0), 
-            Coord<2>(1, 1), Coord<2>(2, 1), Coord<2>(2, 2), 
+            Coord<2>(0, 0),
+            Coord<2>(1, 0), Coord<2>(2, 0),
+            Coord<2>(1, 1), Coord<2>(2, 1), Coord<2>(2, 2),
             // 2nd half
             Coord<2>(1, 2),
             Coord<2>(0, 2), Coord<2>(0, 1);
-        expected[Coord<2>(4, 4)] += 
+        expected[Coord<2>(4, 4)] +=
             // 1st half
-            Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1), 
-            Coord<2>(2, 1), Coord<2>(2, 0), Coord<2>(3, 0), 
-            Coord<2>(3, 1), 
-            Coord<2>(2, 2), Coord<2>(3, 2), Coord<2>(3, 3), 
+            Coord<2>(0, 0), Coord<2>(1, 0), Coord<2>(1, 1),
+            Coord<2>(2, 1), Coord<2>(2, 0), Coord<2>(3, 0),
+            Coord<2>(3, 1),
+            Coord<2>(2, 2), Coord<2>(3, 2), Coord<2>(3, 3),
             // 2nd half
-            Coord<2>(2, 3), 
-            Coord<2>(1, 3), 
-            Coord<2>(0, 3), Coord<2>(0, 2), Coord<2>(1, 2), 
-            Coord<2>(0, 1);                
+            Coord<2>(2, 3),
+            Coord<2>(1, 3),
+            Coord<2>(0, 3), Coord<2>(0, 2), Coord<2>(1, 2),
+            Coord<2>(0, 1);
 
         for (SuperMap<Coord<2>, CoordVector>::iterator i = expected.begin();
              i != expected.end();
@@ -53,9 +53,9 @@ public:
 
             unsigned c = 0;
             HIndexingPartition h(origin, dimension);
-            for (HIndexingPartition::Iterator j = h.begin(); j != h.end(); ++j) 
+            for (HIndexingPartition::Iterator j = h.begin(); j != h.end(); ++j)
                 TS_ASSERT_EQUALS(origin + coords[c++], *j);
-            
+
             TS_ASSERT_EQUALS(coords.size(), c);
         }
     }
@@ -70,8 +70,8 @@ public:
         // e67
         // db8
         // ca9
-        expected += 
-            Coord<2>(10, 20), 
+        expected +=
+            Coord<2>(10, 20),
             Coord<2>(10, 21),
             Coord<2>(11, 21),
             Coord<2>(11, 20),
@@ -86,7 +86,7 @@ public:
             Coord<2>(10, 24),
             Coord<2>(10, 23),
             Coord<2>(10, 22);
-        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i) 
+        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i)
             actual += *i;
         TS_ASSERT_EQUALS(expected, actual);
     }
@@ -119,7 +119,7 @@ public:
         // repetition to check if cache returns correct results
         TS_ASSERT_EQUALS(7, HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 0));
 
-        TS_ASSERT_EQUALS(123 * 456, 
+        TS_ASSERT_EQUALS(123 * 456,
                          HIndexingPartition::Iterator::triangleLength(Coord<2>(123, 456), 0) +
                          HIndexingPartition::Iterator::triangleLength(Coord<2>(123, 456), 3));
     }
@@ -170,15 +170,15 @@ public:
         unsigned end = 47;
 
         HIndexingPartition h(Coord<2>(10, 20), Coord<2>(30, 20));
-        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i) 
+        for (HIndexingPartition::Iterator i = h.begin(); i != h.end(); ++i)
             buffer += *i;
         for (unsigned i = start; i < end; ++i)
             expected += buffer[i];
 
-        for (HIndexingPartition::Iterator i = h[start]; i != h[end]; ++i) 
+        for (HIndexingPartition::Iterator i = h[start]; i != h[end]; ++i)
             actual += *i;
 
-        TS_ASSERT_EQUALS(expected, actual);        
+        TS_ASSERT_EQUALS(expected, actual);
     }
 };
 

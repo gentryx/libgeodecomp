@@ -6,11 +6,11 @@
 #include <libgeodecomp/parallelization/mocksimulator.h>
 #include <libgeodecomp/parallelization/simulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class SimulatorTest : public CxxTest::TestSuite 
+class SimulatorTest : public CxxTest::TestSuite
 {
 public:
     void testDestruction()
@@ -26,7 +26,7 @@ public:
         }
         TS_ASSERT_EQUALS("created, configString: ''\ndeleted\n", MockInitializer::events);
         TS_ASSERT_EQUALS("deleted\n", MockSimulator::events);
-        TS_ASSERT_EQUALS("deleted\ndeleted\ndeleted\n", MockWriter::staticEvents);        
+        TS_ASSERT_EQUALS("deleted\ndeleted\ndeleted\n", MockWriter::staticEvents);
     }
 
 };

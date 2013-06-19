@@ -11,14 +11,14 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
 class MPIIOInitializer : public Initializer<CELL_TYPE>
-{    
+{
 public:
     static const int DIM = CELL_TYPE::Topology::DIM;
 
     MPIIOInitializer(
-        const std::string& filename, 
+        const std::string& filename,
         const MPI::Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>(),
-        const MPI::Intracomm& comm = MPI::COMM_WORLD) : 
+        const MPI::Intracomm& comm = MPI::COMM_WORLD) :
         file(filename),
         datatype(mpiDatatype),
         communicator(comm)
@@ -27,24 +27,24 @@ public:
             &dimensions, &currentStep, &maximumSteps, file, communicator);
     }
 
-    virtual void grid(GridBase<CELL_TYPE, DIM> *target) 
+    virtual void grid(GridBase<CELL_TYPE, DIM> *target)
     {
         Region<DIM> region;
         region << target->boundingBox();
         MPIIO<CELL_TYPE>::readRegion(target, file, region, communicator, datatype);
     }
 
-    virtual Coord<DIM> gridDimensions() const 
+    virtual Coord<DIM> gridDimensions() const
     {
         return dimensions;
     }
 
-    virtual unsigned maxSteps() const 
+    virtual unsigned maxSteps() const
     {
         return maximumSteps;
     }
 
-    virtual unsigned startStep() const 
+    virtual unsigned startStep() const
     {
         return currentStep;
     }

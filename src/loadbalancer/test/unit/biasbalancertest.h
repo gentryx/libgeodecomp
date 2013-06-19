@@ -2,7 +2,7 @@
 #include <libgeodecomp/loadbalancer/biasbalancer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -20,7 +20,7 @@ public:
         _relLoads = BiasBalancer::LoadVec(3);
         _relLoads[0] = 0.2;
         _relLoads[1] = 0.3;
-        _relLoads[2] = 0.4;       
+        _relLoads[2] = 0.4;
     }
 
 
@@ -38,23 +38,23 @@ public:
     {
         MockBalancer::events = "";
         {
-            BiasBalancer(new MockBalancer()); 
+            BiasBalancer(new MockBalancer());
         }
         TS_ASSERT_EQUALS("deleted\n", MockBalancer::events);
     }
 
 
     void testInterfaceToOtherBalancer()
-    {        
+    {
         BiasBalancer b(new MockBalancer);
-        std::string expected = "balance() " + _loads.toString() + " " + 
+        std::string expected = "balance() " + _loads.toString() + " " +
             _relLoads.toString() + "\n";
-        
+
         TS_ASSERT_EQUALS("", MockBalancer::events);
         b.balance(_loads, _relLoads);
         TS_ASSERT_EQUALS("", MockBalancer::events);
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
-        TS_ASSERT_EQUALS(expected, MockBalancer::events);               
+        TS_ASSERT_EQUALS(expected, MockBalancer::events);
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
         TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));

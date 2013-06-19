@@ -16,7 +16,7 @@ public:
     typedef SuperVector<long> LongVec;
 
     inline RecursiveBisectionPartition(
-        const Coord<DIM>& _origin = Coord<DIM>(), 
+        const Coord<DIM>& _origin = Coord<DIM>(),
         const Coord<DIM>& _dimensions = Coord<DIM>(),
         const long& offset = 0,
         const LongVec weights = LongVec(),
@@ -24,13 +24,13 @@ public:
         Partition<DIM>(0, weights),
         origin(_origin),
         dimensions(_dimensions),
-        dimWeights(_dimWeights) 
+        dimWeights(_dimWeights)
     {}
-    
+
     inline Region<DIM> getRegion(const long& i) const
     {
         CoordBox<DIM> cuboid = searchNodeCuboid(
-            startOffsets.begin(), 
+            startOffsets.begin(),
             startOffsets.end() - 1,
             startOffsets.begin() + i,
             CoordBox<DIM>(origin, dimensions));
@@ -66,7 +66,7 @@ private:
         long halfWeight = (*begin + *end) / 2;
 
         LongVec::const_iterator approxMiddle = std::lower_bound(
-            begin, 
+            begin,
             end,
             halfWeight);
         if (*approxMiddle != halfWeight) {
@@ -90,8 +90,8 @@ private:
     }
 
     inline void splitBox(
-        CoordBox<DIM> *newBoxes, 
-        const CoordBox<DIM>& oldBox, 
+        CoordBox<DIM> *newBoxes,
+        const CoordBox<DIM>& oldBox,
         const double& ratio) const
     {
         newBoxes[0] = oldBox;

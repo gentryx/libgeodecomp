@@ -30,7 +30,7 @@ public:
     {}
 
     typedef T* iterator;
-    inline T& operator[](const int& i) 
+    inline T& operator[](const int& i)
     {
         return store[i];
     }
@@ -40,7 +40,7 @@ public:
         return store[i];
     }
 
-    T *begin() 
+    T *begin()
     {
         return store;
     }
@@ -50,7 +50,7 @@ public:
         return store;
     }
 
-    T *end() 
+    T *end()
     {
         return store + elements;
     }

@@ -12,9 +12,9 @@ public:
         b(z)
     {}
 
-    inline bool operator==(const StupidCell& other) 
+    inline bool operator==(const StupidCell& other)
     {
-        return 
+        return
             (c == other.c) &&
             (a == other.a) &&
             (b == other.b);
@@ -27,11 +27,11 @@ public:
 
 LIBGEODECOMP_REGISTER_SOA(StupidCell, ((double)(c))((int)(a))((char)(b)))
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class SoAAccessorTest : public CxxTest::TestSuite 
+class SoAAccessorTest : public CxxTest::TestSuite
 {
 public:
     typedef Grid<StupidCell, Topologies::Cube<3>::Topology> GridType;
@@ -41,7 +41,7 @@ public:
         const int DIM_X = 32;
         const int DIM_Y = 17;
         const int DIM_Z = 43;
-        SuperVector<char> storage(DIM_X * DIM_Y * DIM_Z * 
+        SuperVector<char> storage(DIM_X * DIM_Y * DIM_Z *
                                   (sizeof(double) +
                                    sizeof(int) +
                                    sizeof(char)));

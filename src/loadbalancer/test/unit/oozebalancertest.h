@@ -4,7 +4,7 @@
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -35,11 +35,11 @@ public:
         loads[0] = 4;
         loads[1] = 2;
         loads[2] = 5;
-        
+
         OozeBalancer::LoadVec relLoads(3);
         relLoads[0] = 0.2;
         relLoads[1] = 0.9;
-        relLoads[2] = 1.0;       
+        relLoads[2] = 1.0;
 
         // the total load to distribute is 0.2 + 0.9 + 1.0 = 2.1, per
         // each node 0.7. The first node currently holds 4 items, his
@@ -53,7 +53,7 @@ public:
         expected[1] = 8.0 / 9 + 1.5;
         // the third one is now happy with just 3.5 items left.
         expected[2] = 3.5;
-        
+
         checkExpectedOptimalDistribution(expected, loads, relLoads);
     }
 
@@ -68,7 +68,7 @@ public:
         OozeBalancer::LoadVec relLoads(3);
         relLoads[0] = 0.8;
         relLoads[1] = 0.0;
-        relLoads[2] = 0.0;       
+        relLoads[2] = 0.0;
 
         OozeBalancer::LoadVec expected(3, 100.0 / 3);
         checkExpectedOptimalDistribution(expected, loads, relLoads);
@@ -92,7 +92,7 @@ public:
         //   1/n * \sum relLoads == 1/4 * 5.46 == 1.34
 
         OozeBalancer::LoadVec expected(4);
-        expected[0] = 
+        expected[0] =
             2 +        // both elements from loads[0]          => 0.13 load
             0.492;     // 49.2% of the 1st one in loads[1]     => 1.23 load
                        // -------------------------------------------------
@@ -111,9 +111,9 @@ public:
             3 +        // all three of loads[2]                => 0.21 load
             2;         // both of loads[3]                     => 0.10 load
                        // -------------------------------------------------
-                       //                                         1.36 load        
+                       //                                         1.36 load
 
-        checkExpectedOptimalDistribution(expected, loads, relLoads);        
+        checkExpectedOptimalDistribution(expected, loads, relLoads);
     }
 
 
@@ -138,13 +138,13 @@ public:
      * fast the node itself is @a nodeSpeeds .
      */
     OozeBalancer::LoadVec calcRelLoads(OozeBalancer::WeightVec loads, OozeBalancer::LoadVec itemLoads, OozeBalancer::LoadVec nodeSpeeds)
-    {       
+    {
         OozeBalancer::LoadVec ret(nodeSpeeds.size(), 0);
         unsigned cursor = 0;
         for (unsigned node = 0; node < ret.size(); node++) {
-            for (unsigned i = 0; i < loads[node]; i++) 
+            for (unsigned i = 0; i < loads[node]; i++)
                 ret[node] += itemLoads[cursor++];
-            ret[node] /= nodeSpeeds[node];           
+            ret[node] /= nodeSpeeds[node];
         }
 
         return ret;
@@ -154,10 +154,10 @@ public:
     void checkConvergence(OozeBalancer::WeightVec startLoads, OozeBalancer::LoadVec itemLoads, OozeBalancer::LoadVec nodeSpeeds)
     {
         OozeBalancer b;
-        
+
         OozeBalancer::WeightVec oldLoads = startLoads;
         OozeBalancer::WeightVec newLoads;
-            
+
         for (int i = 0; i < 64; i++) {
             OozeBalancer::LoadVec relLoads = calcRelLoads(oldLoads, itemLoads, nodeSpeeds);
             newLoads = b.balance(oldLoads, relLoads);
@@ -175,19 +175,19 @@ public:
     }
 
 
-    OozeBalancer::LoadVec itemLoads1() 
+    OozeBalancer::LoadVec itemLoads1()
     {
         OozeBalancer::LoadVec itemLoads(1500);
-        for (int i = 0; i < 400; i++) 
+        for (int i = 0; i < 400; i++)
             itemLoads[i] = 0.1;
-        for (int i = 400; i < 1300; i++) 
+        for (int i = 400; i < 1300; i++)
             itemLoads[i] = 1.0;
-        for (int i = 1300; i < 1500; i++) 
+        for (int i = 1300; i < 1500; i++)
             itemLoads[i] = 0.3;
         return itemLoads;
     }
 
-    
+
     OozeBalancer::LoadVec nodeSpeeds1()
     {
         OozeBalancer::LoadVec nodeSpeeds(5);
@@ -242,7 +242,7 @@ public:
         // rounding the 3.4 at position 3 it should take into account
         // the current balance of 0.7 (0.6 - 0.3 + 0.4) and use this
         // to round up.
-        expected[3] = 4; 
+        expected[3] = 4;
         expected[4] = 7;
 
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(tLoads()));
@@ -264,7 +264,7 @@ public:
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(loads));
     }
 
-    
+
     void testLinearCombo()
     {
         OozeBalancer::WeightVec base(5);
@@ -279,17 +279,17 @@ public:
         expected[1] = 8 * 0.9 + 5.7 * 0.1;
         expected[2] = 2 * 0.9 + 9.4 * 0.1;
         expected[3] = 5 * 0.9 + 3.4 * 0.1;
-        expected[4] = 7 * 0.9 + 6.9 * 0.1;            
+        expected[4] = 7 * 0.9 + 6.9 * 0.1;
 
         TS_ASSERT_EQUALS_DOUBLE_VEC(
-            expected, 
+            expected,
             OozeBalancer(0.1).linearCombo(base, tLoads()));
 
     }
 
 
     void testZeroRelativeLoads()
-    {        
+    {
         OozeBalancer::WeightVec loads(5, 100);
         TS_ASSERT_EQUALS(loads, OozeBalancer().balance(loads, OozeBalancer::LoadVec(5, 0)));
     }

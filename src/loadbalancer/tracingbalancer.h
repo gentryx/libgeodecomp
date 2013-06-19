@@ -15,7 +15,7 @@ class TracingBalancer : public LoadBalancer
 {
 public:
     TracingBalancer(LoadBalancer *balancer, std::ostream& stream = std::cout) :
-        _stream(stream) 
+        _stream(stream)
     {
         _balancer.reset(balancer);
     }
@@ -25,7 +25,7 @@ public:
         _stream << "TracingBalancer::balance()\n";
         _stream << "  weights: " << weights << "\n";
         _stream << "  relativeLoads: " << relativeLoads << "\n";
-        
+
         return _balancer->balance(weights, relativeLoads);
     }
 

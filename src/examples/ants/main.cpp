@@ -27,9 +27,9 @@ public:
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
     static const double  PI;
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 3; 
+    static inline unsigned nanoSteps()
+    {
+        return 3;
     }
 
     Cell(State _state=EMPTY) :
@@ -38,7 +38,7 @@ public:
         posY(0),
         dropFood(false)
     {
-        if (isAnt()) 
+        if (isAnt())
             randomTurn();
     }
 
@@ -51,11 +51,11 @@ public:
         if (nanoStep == 0) {
             incoming = 0;
             target = Coord<2>(0, 0);
-            
+
             if (isAnt()) {
                 posX += cos(dir * 2 * PI / 360);
                 posY += sin(dir * 2 * PI / 360);
-            
+
                 target = Coord<2>((int)posX, (int)posY);
 
                 if (target != Coord<2>(0, 0)) {
@@ -72,7 +72,7 @@ public:
                     }
                 }
             }
-        } 
+        }
 
         // count incoming ants
         if (nanoStep == 1) {
@@ -82,7 +82,7 @@ public:
                     ++incoming;
             }
         }
-            
+
         // move
         if (nanoStep == 2) {
             if (incoming == 1) {
@@ -113,7 +113,7 @@ public:
                     }
                 }
             }
-                
+
         }
     }
 
@@ -127,7 +127,7 @@ public:
         return state == FOOD || state == BUSY_ANT;
     }
 
-private: 
+private:
     State state;
     double dir;
     double posX;
@@ -162,7 +162,7 @@ public:
             return Color::BLUE;
         case Cell::BUSY_ANT:
             return Color::MAGENTA;
-        case Cell::BARRIER: 
+        case Cell::BARRIER:
             return Color::GREEN;
         default:
             return Color::WHITE;
@@ -185,10 +185,10 @@ public:
         int numAnts =  100;
         int numFood = 500;
 
-        for (int i = 0; i < numFood; ++i) 
+        for (int i = 0; i < numFood; ++i)
             ret->at(randCoord()) = Cell(Cell::FOOD);
 
-        for (int i = 0; i < numAnts; ++i) 
+        for (int i = 0; i < numAnts; ++i)
             ret->at(randCoord()) = Cell(Cell::IDLE_ANT);
     }
 
@@ -210,7 +210,7 @@ public:
         TracingWriter<Cell>(period, maxSteps)
     {}
 
-    void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event) 
+    void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
         TracingWriter<Cell>::stepFinished(grid, step, event);
 
@@ -220,7 +220,7 @@ public:
 
         int numAnts = 0;
         int numFood = 0;
-        
+
         for(int y = 0; y < grid.getDimensions().y(); ++y) {
             for(int x = 0; x < grid.getDimensions().x(); ++x) {
                 if (grid[Coord<2>(x, y)].isAnt())
@@ -243,7 +243,7 @@ void runSimulation()
     SerialSimulator<Cell> sim(init);
     sim.addWriter(
         new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-            "./ants", 
+            "./ants",
             outputFrequency,
             8,
             8));

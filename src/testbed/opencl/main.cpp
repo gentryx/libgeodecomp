@@ -11,22 +11,22 @@ public:
     class API : public CellAPITraits::Fixed
     {};
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 1; 
+    static inline unsigned nanoSteps()
+    {
+        return 1;
     }
 
     inline explicit Cell(const double& v=0) : temp(v)
-    {}  
+    {}
 
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
     {
-        temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp + 
-                neighborhood[FixedCoord< 0, -1,  0>()].temp + 
-                neighborhood[FixedCoord<-1,  0,  0>()].temp + 
-                neighborhood[FixedCoord< 1,  0,  0>()].temp + 
-                neighborhood[FixedCoord< 0,  1,  0>()].temp + 
+        temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
+                neighborhood[FixedCoord< 0, -1,  0>()].temp +
+                neighborhood[FixedCoord<-1,  0,  0>()].temp +
+                neighborhood[FixedCoord< 1,  0,  0>()].temp +
+                neighborhood[FixedCoord< 0,  1,  0>()].temp +
                 neighborhood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 6.0);
     }
 

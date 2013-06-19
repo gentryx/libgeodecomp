@@ -9,15 +9,15 @@ MockBalancer::MockBalancer()
 
 MockBalancer::~MockBalancer()
 {
-    events += "deleted\n"; 
+    events += "deleted\n";
 }
 
 MockBalancer::WeightVec MockBalancer::balance(
-    const MockBalancer::WeightVec& weights, 
+    const MockBalancer::WeightVec& weights,
     const MockBalancer::LoadVec& relativeLoads)
 {
-    events += "balance() " + weights.toString() + " " + 
-        relativeLoads.toString() + "\n";    
+    events += "balance() " + weights.toString() + " " +
+        relativeLoads.toString() + "\n";
     return weights;
 }
 

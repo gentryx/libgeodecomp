@@ -14,7 +14,7 @@ class Grid;
  * provides access to neighboring cells in a grid via relative coordinates. Slow!
  */
 template<typename CELL_TYPE, typename GRID_TYPE=Grid<CELL_TYPE, Topologies::Cube<2>::Topology> >
-class CoordMap 
+class CoordMap
 {
 public:
     const static int DIM = GRID_TYPE::DIM;

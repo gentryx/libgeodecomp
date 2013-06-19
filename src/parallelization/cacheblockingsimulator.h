@@ -77,7 +77,7 @@ public:
                 WRITER_INITIALIZED);
         }
 
-        for (stepNum = initializer->startStep(); 
+        for (stepNum = initializer->startStep();
              stepNum < initializer->maxSteps();) {
             hop();
         }
@@ -101,7 +101,7 @@ private:
     using MonolithicSimulator<CELL>::stepNum;
     using MonolithicSimulator<CELL>::writers;
     using MonolithicSimulator<CELL>::getStep;
-    
+
     GridType *curGrid;
     GridType *newGrid;
     BufferType buffers[4];
@@ -131,7 +131,7 @@ private:
                              0));
 
             }
-        }                
+        }
     }
 
     WavefrontFrames generateWavefrontFrames(const Coord<DIM> offset)
@@ -147,7 +147,7 @@ private:
         SuperVector<Region<3> > regions(pipelineLength);
         regions[pipelineLength - 1] = region.expandWithTopology(
             0, gridDim, Topologies::Cube<3>::Topology());
-        
+
         for (int i = pipelineLength - 2; i >= 0; --i) {
             regions[i] = regions[i + 1].expandWithTopology(
                 1, gridDim, Topologies::Cube<3>::Topology());
@@ -162,22 +162,22 @@ private:
             Topology::normalize(maskOrigin, initializer->gridDimensions());
             Coord<DIM> maskDim = gridDim;
             maskDim[DIM - 1] = 1;
-            
+
             Region<DIM> mask;
             mask << CoordBox<DIM>(maskOrigin, maskDim);
             for (int i = 0; i < pipelineLength; ++i) {
                 ret[index][i] = regions[i] & mask;
             }
         }
-            
+
         return ret;
     }
 
     void hop()
     {
         CoordBox<DIM - 1> frameBox = frames.boundingBox();
-        // for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin(); 
-        //      waveIter != frameBox.end(); 
+        // for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin();
+        //      waveIter != frameBox.end();
         //      ++waveIter) {
         //     updateWavefront(*waveIter);
         // }
@@ -196,7 +196,7 @@ private:
     }
 
     void updateWavefront(BufferType *buffer, const Coord<DIM - 1>& wavefrontCoord)
-    {  
+    {
         LOG(INFO, "wavefrontCoord(" << wavefrontCoord << ")");
         buffer->atEdge() = curGrid->atEdge();
         buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
@@ -210,7 +210,7 @@ private:
         for (; index < 2 * pipelineLength - 2; ++index) {
             int lastStage = (index >> 1) + 1;
             pipelinedUpdate(buffer, wavefrontCoord, index, index, 0, lastStage);
-        } 
+        }
 
         // normal operation
         for (; index < maxIndex; ++index) {
@@ -220,7 +220,7 @@ private:
         // let pipeline drain
         for (; index < (maxIndex + 2 * pipelineLength - 2); ++index) {
             int firstStage = (index - maxIndex + 1) >> 1 ;
-            pipelinedUpdate(buffer, wavefrontCoord, index, index, firstStage, pipelineLength);            
+            pipelinedUpdate(buffer, wavefrontCoord, index, index, firstStage, pipelineLength);
         }
     }
 
@@ -237,10 +237,10 @@ private:
 
     void pipelinedUpdate(
         BufferType *buffer,
-        const Coord<DIM - 1>& frameCoord, 
-        int globalIndex, 
-        int localIndex, 
-        int firstStage, 
+        const Coord<DIM - 1>& frameCoord,
+        int globalIndex,
+        int localIndex,
+        int firstStage,
         int lastStage)
     {
         LOG(DBG, "  pipelinedUpdate(frameCoord = " << frameCoord << ", globalIndex = " << globalIndex << ", localIndex = " << localIndex << ", firstStage = " << firstStage << ", lastStage = " << lastStage << ")");
@@ -253,7 +253,7 @@ private:
                 (currentGlobalIndex >= newGrid->getDimensions()[DIM - 1]);
             int sourceIndex = firstIteration ? currentGlobalIndex : normalizeIndex(localIndex + 2 - 4 * i);
             int targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
-  
+
             const Region<DIM>& updateFrame = frames[frameCoord][globalIndex - 2 * i][i];
             unsigned curNanoStep = (nanoStep + i) % CELL::nanoSteps();
 
@@ -261,9 +261,9 @@ private:
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, newGrid, curNanoStep);
             }
 
-            if ( firstIteration && !lastIteration) { 
+            if ( firstIteration && !lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, buffer,  curNanoStep);
-            }            
+            }
 
             if (!firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *buffer,  newGrid, curNanoStep);
@@ -296,7 +296,7 @@ private:
 
             buffers[omp_get_thread_num()].fill(CoordBox<DIM>(fillOrigin, fillDim), buffers[omp_get_thread_num()].getEdgeCell());
         } else {
-            for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak(); 
+            for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak();
                  iter != updateFrame.endStreak(); ++iter) {
                 Streak<DIM> sourceStreak = *iter;
                 Coord<DIM> targetCoord  = iter->origin;

@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
  * instances should be optimized away by the compiler.
  */
 template<typename CELL, typename STENCIL>
-class PointerNeighborhood 
+class PointerNeighborhood
 {
 public:
     PointerNeighborhood(CELL **cells) :

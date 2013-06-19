@@ -8,14 +8,14 @@
 
 namespace LibGeoDecomp {
 
-class TestPlotter 
+class TestPlotter
 {
 public:
     void plotCell(
-        const TestCell<2> & cell, 
+        const TestCell<2> & cell,
         Image *image,
-        const Coord<2>& origin, 
-        const unsigned& width, 
+        const Coord<2>& origin,
+        const unsigned& width,
         const unsigned& height)
     {
         Color color((int)cell.testValue, 47, 11);

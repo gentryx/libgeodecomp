@@ -10,7 +10,7 @@ public:
     {
         return cells[y];
     }
-    
+
     __device__ __host__ const Cell& operator[](const int& y) const
     {
         return cells[y];
@@ -18,12 +18,12 @@ public:
 
     __device__  __host__ void update(
         SimParams *simParams,
-        const int& t, 
+        const int& t,
         const BigCell *up, const BigCell *same, const BigCell *down)
     {
         cells[0].update(
             simParams,
-            t, 
+            t,
             up[   0][1],
             up[   1][1],
             same[-1][0],
@@ -34,7 +34,7 @@ public:
 
         cells[1].update(
             simParams,
-            t, 
+            t,
             same[-1][0],
             same[ 0][0],
             same[-1][1],
@@ -42,7 +42,7 @@ public:
             same[ 1][1],
             down[-1][0],
             down[ 0][0]);
-    } 
+    }
 
     // fixme: return two unsigneds here in order to render both cells
     __device__ __host__ unsigned toColor(SimParams *simParams)
@@ -76,7 +76,7 @@ public:
             b = 255;
 
         unsigned a = 0xff;
-        return 
+        return
             (a << 24) +
             (r << 16) +
             (g <<  8) +

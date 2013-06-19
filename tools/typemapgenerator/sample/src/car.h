@@ -7,7 +7,7 @@
 
 class Mech;
 
-class Car 
+class Car
 {
     friend class Typemaps;
 

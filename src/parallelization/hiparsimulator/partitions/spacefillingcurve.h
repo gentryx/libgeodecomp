@@ -21,7 +21,7 @@ public:
         inline Iterator(const Coord<DIM>& _origin, const bool& _endReached) :
             origin(_origin),
             cursor(_origin),
-            endReached(_endReached)            
+            endReached(_endReached)
         {}
 
         inline bool operator==(const Iterator& other) const
