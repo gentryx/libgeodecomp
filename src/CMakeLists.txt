@@ -64,6 +64,9 @@ if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
 endif()
 
+if(NOT DEFINED HPX_FOUND)
+  set(HPX_FOUND false)
+endif()
 if(NOT DEFINED OpenCV_FOUND)
   set(OpenCV_FOUND false)
 endif()
@@ -118,6 +121,7 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
 add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} false)
+
 add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
 add_config_option(FEATURE_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
