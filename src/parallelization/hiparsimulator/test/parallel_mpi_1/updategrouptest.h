@@ -54,11 +54,11 @@ public:
     void testBasic()
     {
         updateGroup->update(10);
-        std::deque<long> expected;
+        std::deque<std::size_t> expected;
         expected.push_back(5);
         expected.push_back(7);
         expected.push_back(8);
-        std::deque<long> actual = mockPatchAccepter->getOfferedNanoSteps();
+        std::deque<std::size_t> actual = mockPatchAccepter->getOfferedNanoSteps();
         TS_ASSERT_EQUALS(actual, expected);
         TS_ASSERT_EQUALS(10, updateGroup->grid()[Coord<3>(1, 2, 3)].cycleCounter);
     }

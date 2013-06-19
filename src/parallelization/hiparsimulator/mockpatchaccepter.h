@@ -17,13 +17,13 @@ public:
     virtual void put(
         const GRID_TYPE& /*grid*/,
         const Region<DIM>& /*validRegion*/,
-        const long& nanoStep)
+        const std::size_t nanoStep)
     {
         offeredNanoSteps.push_back(nanoStep);
         requestedNanoSteps.pop_front();
     }
 
-    virtual long nextRequiredNanoStep() const
+    virtual std::size_t nextRequiredNanoStep() const
     {
         if (requestedNanoSteps.empty()) {
             return -1;
@@ -31,24 +31,24 @@ public:
         return requestedNanoSteps.front();
     }
 
-    void pushRequest(const long& nanoStep)
+    void pushRequest(const std::size_t nanoStep)
     {
         requestedNanoSteps.push_back(nanoStep);
     }
 
-    const std::deque<long>& getRequestedNanoSteps() const
+    const std::deque<std::size_t>& getRequestedNanoSteps() const
     {
         return requestedNanoSteps;
     }
 
-    const std::deque<long>& getOfferedNanoSteps() const
+    const std::deque<std::size_t>& getOfferedNanoSteps() const
     {
         return offeredNanoSteps;
     }
 
 private:
-    std::deque<long> requestedNanoSteps;
-    std::deque<long> offeredNanoSteps;
+    std::deque<std::size_t> requestedNanoSteps;
+    std::deque<std::size_t> offeredNanoSteps;
 };
 
 }

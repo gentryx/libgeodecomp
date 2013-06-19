@@ -37,7 +37,7 @@ public:
         // of registry.
         inline Link(
             const Region<DIM>& region,
-            const int& tag,
+            const int tag,
             MPI::Comm *communicator = &MPI::COMM_WORLD) :
             lastNanoStep(0),
             stride(1),
@@ -52,7 +52,7 @@ public:
             wait();
         }
 
-        virtual void charge(const long& next, const long& last, const long& newStride)
+        virtual void charge(const std::size_t next, const std::size_t last, const long newStride)
         {
             lastNanoStep = last;
             stride = newStride;
@@ -69,7 +69,7 @@ public:
         }
 
     protected:
-        long lastNanoStep;
+        std::size_t lastNanoStep;
         long stride;
         MPILayer mpiLayer;
         Region<DIM> region;
@@ -95,8 +95,8 @@ public:
 
         inline Accepter(
             const Region<DIM>& _region,
-            const int& _dest,
-            const int& _tag,
+            const int _dest,
+            const int _tag,
             const MPI::Datatype& _cellMPIDatatype,
             MPI::Comm *communicator = &MPI::COMM_WORLD) :
             Link(_region, _tag, communicator),
@@ -104,7 +104,7 @@ public:
             cellMPIDatatype(_cellMPIDatatype)
         {}
 
-        virtual void charge(const long& next, const long& last, const long& newStride)
+        virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
         {
             Link::charge(next, last, newStride);
             pushRequest(next);
@@ -113,7 +113,7 @@ public:
         virtual void put(
             const GRID_TYPE& grid,
             const Region<DIM>& /*validRegion*/,
-            const long& nanoStep)
+            const std::size_t nanoStep)
         {
             if (!checkNanoStepPut(nanoStep)) {
                 return;
@@ -123,7 +123,7 @@ public:
             GridVecConv::gridToVector(grid, &buffer, region);
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
-            long nextNanoStep = requestedNanoSteps.min() + stride;
+            std::size_t nextNanoStep = requestedNanoSteps.min() + stride;
             if ((lastNanoStep == ENDLESS) ||
                 (nextNanoStep < lastNanoStep)) {
                 requestedNanoSteps << nextNanoStep;
@@ -162,7 +162,7 @@ public:
             cellMPIDatatype(cellMPIDatatype)
         {}
 
-        virtual void charge(const long& next, const long& last, const long& newStride)
+        virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
         {
             Link::charge(next, last, newStride);
             recv(next);
@@ -171,8 +171,8 @@ public:
         virtual void get(
             GRID_TYPE *grid,
             const Region<DIM>& patchableRegion,
-            const long& nanoStep,
-            const bool& remove=true)
+            const std::size_t nanoStep,
+            const bool remove=true)
         {
             if (storedNanoSteps.empty() || (nanoStep < storedNanoSteps.min())) {
                 return;
@@ -182,7 +182,7 @@ public:
             wait();
             GridVecConv::vectorToGrid(buffer, grid, region);
 
-            long nextNanoStep = storedNanoSteps.min() + stride;
+            std::size_t nextNanoStep = storedNanoSteps.min() + stride;
             if ((lastNanoStep == ENDLESS) ||
                 (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
@@ -190,7 +190,7 @@ public:
             storedNanoSteps.erase_min();
         }
 
-        void recv(const long& nanoStep)
+        void recv(const std::size_t nanoStep)
         {
             storedNanoSteps << nanoStep;
             mpiLayer.recv(&buffer[0], source, buffer.size(), tag, cellMPIDatatype);

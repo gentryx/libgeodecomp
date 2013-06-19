@@ -40,7 +40,7 @@ public:
         expectedNanoSteps.clear();
         expectedNanoSteps += 5, 7, 8, 33, 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
-        for (std::deque<long>::iterator i = expectedNanoSteps.begin();
+        for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
              i != expectedNanoSteps.end();
              ++i) {
             mockPatchAccepter->pushRequest(*i);
@@ -56,12 +56,12 @@ public:
     void testBench()
     {
         updateGroup->update(100);
-        std::deque<long> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();
+        std::deque<std::size_t> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();
         TS_ASSERT_EQUALS(actualNanoSteps, expectedNanoSteps);
     }
 
 private:
-    std::deque<long> expectedNanoSteps;
+    std::deque<std::size_t> expectedNanoSteps;
     unsigned rank;
     Coord<2> dimensions;
     SuperVector<long> weights;

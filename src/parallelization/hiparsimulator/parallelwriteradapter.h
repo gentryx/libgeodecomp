@@ -24,14 +24,14 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        SIMULATOR * _sim,
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > _writer,
-        const long& firstStep,
-        const long& lastStep,
+        SIMULATOR * sim,
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
+        const std::size_t firstStep,
+        const std::size_t lastStep,
         Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
         bool lastCall) :
-        sim(_sim),
-        writer(_writer),
+        sim(sim),
+        writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
         lastCall(lastCall),
@@ -49,7 +49,7 @@ public:
     virtual void put(
         const GRID_TYPE& grid,
         const Region<GRID_TYPE::DIM>& validRegion,
-        const long& nanoStep)
+        const std::size_t nanoStep)
     {
         if (!checkNanoStepPut(nanoStep)) {
             return;
@@ -77,12 +77,12 @@ public:
 private:
     SIMULATOR * sim;
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
-    long firstNanoStep;
-    long lastNanoStep;
+    std::size_t firstNanoStep;
+    std::size_t lastNanoStep;
     bool lastCall;
     Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 
-    long nextOutputStep(const long& step)
+    long nextOutputStep(const std::size_t step)
     {
         long remainder = step % writer->getPeriod();
         long next = step + writer->getPeriod() - remainder;
@@ -95,7 +95,7 @@ private:
         reload(nextNanoStep);
     }
 
-    void reload(const long& nextNanoStep)
+    void reload(const std::size_t nextNanoStep)
     {
         pushRequest(nextNanoStep);
     }

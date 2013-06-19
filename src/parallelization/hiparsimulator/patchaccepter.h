@@ -25,14 +25,14 @@ public:
     virtual void put(
         const GRID_TYPE& grid,
         const Region<DIM>& validRegion,
-        const long& nanoStep) = 0;
+        const std::size_t nanoStep) = 0;
 
     virtual void setRegion(const Region<DIM>& region)
     {
         // empty as most implementations won't need it anyway.
     }
 
-    virtual long nextRequiredNanoStep() const
+    virtual std::size_t nextRequiredNanoStep() const
     {
         if (requestedNanoSteps.empty()) {
             return -1;
@@ -41,15 +41,15 @@ public:
         return *requestedNanoSteps.begin();
     }
 
-    void pushRequest(const long& nanoStep)
+    void pushRequest(const std::size_t nanoStep)
     {
         requestedNanoSteps << nanoStep;
     }
 
 protected:
-    SuperSet<long> requestedNanoSteps;
+    SuperSet<std::size_t> requestedNanoSteps;
 
-    bool checkNanoStepPut(const long& nanoStep) const
+    bool checkNanoStepPut(const std::size_t nanoStep) const
     {
         if (requestedNanoSteps.empty() || 
             nanoStep < (requestedNanoSteps.min)())
