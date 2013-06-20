@@ -9,11 +9,11 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 template<typename CELL_TYPE>
-class VanillaStepper : public Stepper<CELL_TYPE>
+class OpenCLStepper : public Stepper<CELL_TYPE>
 {
-    friend class VanillaStepperRegionTest;
-    friend class VanillaStepperBasicTest;
-    friend class VanillaStepperTest;
+    friend class OpenCLStepperRegionTest;
+    friend class OpenCLStepperBasicTest;
+    friend class OpenCLStepperTest;
 public:
     const static int DIM = CELL_TYPE::Topology::DIM;
 
@@ -31,7 +31,7 @@ public:
     using Stepper<CELL_TYPE>::patchProviders;
     using Stepper<CELL_TYPE>::partitionManager;
 
-    inline VanillaStepper(
+    inline OpenCLStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
