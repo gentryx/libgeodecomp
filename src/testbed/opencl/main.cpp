@@ -3,6 +3,10 @@
 #include <fstream>
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
+#include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/io/testinitializer.h>
+
+#include "openclstepper.h"
 
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
@@ -361,6 +365,16 @@ int main(int argc, char **argv)
                                              strtol(argv[2], NULL, 10),
                                              argv[3],
                                              argv[4]);
+
+    boost::shared_ptr<HiParSimulator::PartitionManager<2>>
+      pmp(new HiParSimulator::PartitionManager<2>());
+
+    boost::shared_ptr<TestInitializer<TestCell<2>>>
+      dcip(new TestInitializer<TestCell<2>>());
+
+    HiParSimulator::OpenCLStepper<TestCell<2>> openclstepper(pmp, dcip);
+    openclstepper.update(1);
+
   }
 
   return 0;
