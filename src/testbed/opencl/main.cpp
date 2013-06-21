@@ -115,9 +115,27 @@ class DummyCell {
     typedef Stencils::VonNeumann<2, 1> Stencil;
     class API : public CellAPITraits::Base {};
     typedef Topologies::Cube<2>::Topology Topology;
+
     static inline unsigned nanoSteps() { return 1; }
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+
+#define MYCELL_STRUCT  \
+    typedef struct {   \
+      double phi;      \
+      double temp;     \
+    } MyCell;
+
+#define STRINGIFY(MYCELL) #MYCELL
+
+    MYCELL_STRUCT
+
+    std::string cell_kernel_file() { return "./mycell_update.cl"; }
+    std::string cell_struct_code() { return STRINGIFY(MYCELL_STRUCT); }
+    MyCell * cell_data() { return &myCellData; }
+
+    MyCell myCellData;
+};
 
 class DummyCellInitializer : public Initializer<DummyCell> {
   public:
