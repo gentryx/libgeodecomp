@@ -118,6 +118,16 @@ class DummyCell {
     static inline unsigned nanoSteps() { return 1; }
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+
+class DummyCellInitializer : public Initializer<DummyCell> {
+  public:
+    static const int DIM = DummyCell::DIMENSIONS;
+
+    DummyCellInitializer() {}
+    void grid(GridBase<DummyCell, DIM> *) {}
+    Coord<DIM> gridDimensions() const { return Coord<DIM>(0,0); }
+    unsigned maxSteps() const { return 0; }
+    unsigned startStep() const { return 0; }
 };
 
 template<typename CELL>
