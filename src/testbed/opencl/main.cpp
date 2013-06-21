@@ -397,13 +397,15 @@ int main(int argc, char **argv)
                                              argv[3],
                                              argv[4]);
 
+    typedef DummyCell MyCell;
+    typedef DummyCellInitializer MyCellInitializer;
+
     boost::shared_ptr<HiParSimulator::PartitionManager<2>>
       pmp(new HiParSimulator::PartitionManager<2>());
 
-    boost::shared_ptr<TestInitializer<TestCell<2>>>
-      dcip(new TestInitializer<TestCell<2>>());
+    boost::shared_ptr<MyCellInitializer> dcip(new MyCellInitializer);
 
-    HiParSimulator::OpenCLStepper<TestCell<2>> openclstepper(pmp, dcip);
+    HiParSimulator::OpenCLStepper<MyCell> openclstepper(pmp, dcip);
     openclstepper.update(1);
 
   }
