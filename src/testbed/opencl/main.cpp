@@ -111,6 +111,9 @@ class Cell
 
 class DummyCell {
   public:
+    static const int DIMENSIONS = 2;
+    typedef Stencils::VonNeumann<2, 1> Stencil;
+    class API : public CellAPITraits::Base {};
     typedef Topologies::Cube<2>::Topology Topology;
     static inline unsigned nanoSteps() { return 1; }
     template<typename COORD_MAP>
