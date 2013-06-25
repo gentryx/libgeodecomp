@@ -44,6 +44,7 @@ public:
         // results of the thread might be overwritten.
         if (threaded) {
             thread = boost::thread(ThreadWrapper<Interactor>(this));
+            waitForStartup();
         }
     }
 
@@ -51,14 +52,6 @@ public:
     {
         if (thread.joinable()) {
             thread.join();
-        }
-    }
-
-    void waitForStartup()
-    {
-        boost::unique_lock<boost::mutex> lock(mutex);
-        while(!started) {
-            signal.wait(lock);
         }
     }
 
@@ -149,6 +142,14 @@ private:
     bool started;
     bool completed;
     boost::thread thread;
+
+    void waitForStartup()
+    {
+        boost::unique_lock<boost::mutex> lock(mutex);
+        while(!started) {
+            signal.wait(lock);
+        }
+    }
 
     void notifyStartup()
     {

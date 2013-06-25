@@ -15,7 +15,7 @@ public:
     void testSerial()
     {
         MPILayer mpiLayer;
-        int port = 47111;
+        int port = 47113;
         StringVec expectedFeedback;
         expectedFeedback << "bingo bongo";
 

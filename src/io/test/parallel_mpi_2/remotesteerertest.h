@@ -169,7 +169,6 @@ public:
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("nonExistentHandler", "blah"));
             interactor.reset(new Interactor("nonExistentHandler bongo\nwait\n", 1, true, port));
-            interactor->waitForStartup();
         }
 
         sim->run();
@@ -226,7 +225,6 @@ public:
         if (mpiLayer.rank() == 1) {
             steerer->addHandler(new EchoHandler());
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
-            interactor->waitForStartup();
         }
 
         // sleep until the request has made it into the pipeline
@@ -260,7 +258,6 @@ public:
         if (mpiLayer.rank() == 0) {
             steerer->addHandler(new EchoHandler());
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
-            interactor->waitForStartup();
         }
 
         // sleep until the request has made it into the pipeline
@@ -289,7 +286,6 @@ public:
 
         if (mpiLayer.rank() == 1) {
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
-            interactor->waitForStartup();
         }
 
         // sleep until the request has made it into the pipeline
@@ -311,31 +307,24 @@ public:
 #endif
     }
 
-//     void testGetSet()
-//     {
-// #ifdef LIBGEODECOMP_FEATURE_THREADS
-//         mpiLayer.barrier();
-//         std::cout << "------------------------------------------------------------------------\n";
-//         boost::shared_ptr<Interactor> interactor;
-//         std::cout << "meatboy1--------------------------------------\n";
-//         if (mpiLayer.rank() == 0) {
-//             steerer->addHandler(new GetHandler<TestCell<2> >());
-//             interactor.reset(new Interactor("get 1 2 masupilami", 2, true, port));
-//         }
-//         std::cout << "meatboy2--------------------------------------\n";
-//         if (interactor) {
-//             interactor->waitForStartup();
-//         }
-//         std::cout << "meatboy3--------------------------------------\n";
-//         sim->run();
-//         std::cout << "meatboy4--------------------------------------\n";
-//         if (interactor) {
-//             interactor->waitForCompletion();
-//             std::cout << "feedback: " << interactor->feedback();
-//         }
-//         std::cout << "meatboy5--------------------------------------\n";
-// #endif
-//     }
+    void testGetSet()
+    {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
+        mpiLayer.barrier();
+        boost::shared_ptr<Interactor> interactor;
+        if (mpiLayer.rank() == 0) {
+            steerer->addHandler(new GetHandler<TestCell<2> >());
+            interactor.reset(new Interactor("get 1 2 masupilami", 2, true, port));
+        }
+
+        sim->run();
+
+        if (interactor) {
+            interactor->waitForCompletion();
+            std::cout << "feedback: " << interactor->feedback();
+        }
+#endif
+    }
 
 private:
 #ifdef LIBGEODECOMP_FEATURE_THREADS
