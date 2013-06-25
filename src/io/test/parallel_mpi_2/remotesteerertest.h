@@ -68,6 +68,24 @@ public:
     };
 #endif
 
+    class EchoHandler : public Handler<TestCell<2> >
+    {
+    public:
+        EchoHandler() :
+           Handler<TestCell<2> >("echo")
+        {}
+
+        virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion, unsigned step)
+        {
+            std::stringstream buf;
+            buf << "echo reply from rank " << MPILayer().rank()
+                << " at time step " << step
+                << " with cargo »" << parameters[0] << "«\n";
+            pipe.addSteeringFeedback(buf.str());
+            return true;
+        }
+    };
+
     void setUp()
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
@@ -166,15 +184,158 @@ public:
 #endif
     }
 
-    void testGetSet()
+    template<typename CELL_TYPE>
+    class GetHandler : public Handler<CELL_TYPE>
+    {
+    public:
+        typedef typename CELL_TYPE::Topology Topology;
+        typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
+        static const int DIM = Topology::DIM;
+
+        GetHandler() :
+            Handler<CELL_TYPE>("get")
+        {}
+
+        virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<DIM>& validRegion, unsigned step)
+        {
+            Coord<DIM> c;
+            int index;
+
+            for (index = 0; index < DIM; ++index) {
+                c[index] = StringOps::atoi(parameters[index]);
+            }
+
+            const std::string& member = parameters[index];
+
+            std::cout << "get " << c << " member: " << member << "\n";
+            pipe.addSteeringFeedback("bingo bongo");
+
+            return true;
+        }
+    };
+
+    void testHandlerNotFound1()
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
-        // std::cout << "sleeping\n";
-        // sleep(10);
-        // sim->run();
+        if (mpiLayer.rank() == 0) {
+            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("echo", "blah"));
+        }
+        mpiLayer.barrier();
+        boost::shared_ptr<Interactor> interactor;
+
+        if (mpiLayer.rank() == 1) {
+            steerer->addHandler(new EchoHandler());
+            interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
+            interactor->waitForStartup();
+        }
+
+        // sleep until the request has made it into the pipeline
+        if (mpiLayer.rank() == 0) {
+            while (steerer->pipe->copySteeringRequests().size() == 0) {
+                usleep(10000);
+            }
+        }
+        mpiLayer.barrier();
+        sim->run();
+
+        if (interactor) {
+            interactor->waitForCompletion();
+            StringVec feedback = interactor->feedback();
+            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback[0], "handler not found: echo");
+            TS_ASSERT_EQUALS(feedback[1], "echo reply from rank 1 at time step 0 with cargo »romeo,tango,yankee,papa,echo«");
+        }
 #endif
     }
 
+    void testHandlerNotFound2()
+    {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
+        if (mpiLayer.rank() == 0) {
+            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("echo", "blah"));
+        }
+        mpiLayer.barrier();
+        boost::shared_ptr<Interactor> interactor;
+
+        if (mpiLayer.rank() == 0) {
+            steerer->addHandler(new EchoHandler());
+            interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
+            interactor->waitForStartup();
+        }
+
+        // sleep until the request has made it into the pipeline
+        usleep(250000);
+        mpiLayer.barrier();
+        sim->run();
+
+        if (interactor) {
+            interactor->waitForCompletion();
+            StringVec feedback = interactor->feedback();
+            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback[1], "handler not found: echo");
+            TS_ASSERT_EQUALS(feedback[0], "echo reply from rank 0 at time step 0 with cargo »romeo,tango,yankee,papa,echo«");
+        }
+#endif
+    }
+
+    void testHandlerNotFound3()
+    {
+#ifdef LIBGEODECOMP_FEATURE_THREADS
+        if (mpiLayer.rank() == 0) {
+            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("echo", "blah"));
+        }
+        mpiLayer.barrier();
+        boost::shared_ptr<Interactor> interactor;
+
+        if (mpiLayer.rank() == 1) {
+            interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
+            interactor->waitForStartup();
+        }
+
+        // sleep until the request has made it into the pipeline
+        if (mpiLayer.rank() == 0) {
+            while (steerer->pipe->copySteeringRequests().size() == 0) {
+                usleep(10000);
+            }
+        }
+        mpiLayer.barrier();
+        sim->run();
+
+        if (interactor) {
+            interactor->waitForCompletion();
+            StringVec feedback = interactor->feedback();
+            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback[0], "handler not found: echo");
+            TS_ASSERT_EQUALS(feedback[1], "handler not found: echo");
+        }
+#endif
+    }
+
+//     void testGetSet()
+//     {
+// #ifdef LIBGEODECOMP_FEATURE_THREADS
+//         mpiLayer.barrier();
+//         std::cout << "------------------------------------------------------------------------\n";
+//         boost::shared_ptr<Interactor> interactor;
+//         std::cout << "meatboy1--------------------------------------\n";
+//         if (mpiLayer.rank() == 0) {
+//             steerer->addHandler(new GetHandler<TestCell<2> >());
+//             interactor.reset(new Interactor("get 1 2 masupilami", 2, true, port));
+//         }
+//         std::cout << "meatboy2--------------------------------------\n";
+//         if (interactor) {
+//             interactor->waitForStartup();
+//         }
+//         std::cout << "meatboy3--------------------------------------\n";
+//         sim->run();
+//         std::cout << "meatboy4--------------------------------------\n";
+//         if (interactor) {
+//             interactor->waitForCompletion();
+//             std::cout << "feedback: " << interactor->feedback();
+//         }
+//         std::cout << "meatboy5--------------------------------------\n";
+// #endif
+//     }
 
 private:
 #ifdef LIBGEODECOMP_FEATURE_THREADS
@@ -191,6 +352,7 @@ private:
     // fixme: fix gameoflive_life example
     // fixme: fix communicator handling in mpilayer
     // fixme: test requeueing of unhandled requests
+    // fixme: add rank to logging output
 #endif
 };
 

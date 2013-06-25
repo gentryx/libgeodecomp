@@ -4,8 +4,10 @@
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <libgeodecomp/io/remotesteerer/commandserver.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/stringvec.h>
+#include <libgeodecomp/misc/stringvec.h>
+#include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
 
@@ -47,7 +49,9 @@ public:
 
     ~Interactor()
     {
-        thread.join();
+        if (thread.joinable()) {
+            thread.join();
+        }
     }
 
     void waitForStartup()
@@ -71,18 +75,6 @@ public:
         return feedbackBuffer;
     }
 
-private:
-    StringVec feedbackBuffer;
-    boost::condition_variable signal;
-    boost::mutex mutex;
-    std::string command;
-    int feedbackLines;
-    int port;
-    std::string host;
-    bool started;
-    bool completed;
-    boost::thread thread;
-
     int operator()()
     {
         boost::asio::io_service ioService;
@@ -95,7 +87,7 @@ private:
 
         boost::asio::write(
             socket,
-            boost::asio::buffer(command),
+            boost::asio::buffer(command + "\n"),
             boost::asio::transfer_all(),
             errorCode);
 
@@ -105,26 +97,58 @@ private:
 
         notifyStartup();
 
-        for (int i = 0; i < feedbackLines; ++i) {
+        for (int i = 0; i < feedbackLines; ) {
+            // periodically wake up CommandServer to cycle events
+            boost::asio::write(
+                socket,
+                boost::asio::buffer("ping\n"),
+                boost::asio::transfer_all(),
+                errorCode);
+            if (errorCode) {
+                LOG(WARN, "Error while pinging " << errorCode);
+            }
+
             boost::asio::streambuf buf;
             boost::system::error_code errorCode;
 
+            LOG(DEBUG, "Interactor::operator() reading...");
             size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
             if (errorCode) {
-                LOG(Logger::WARN, "error while writing to socket: " << errorCode.message());
+                LOG(WARN, "error while reading from socket: " << errorCode.message());
             }
 
             std::istream lineBuf(&buf);
             std::string line(length, 'X');
             lineBuf.read(&line[0], length);
             line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
-            feedbackBuffer << line;
+
+            LOG(DEBUG, "Interactor::operator() read »" << line << "«");
+
+            StringVec tokens = StringOps::tokenize(line, " ");
+            if (tokens[0] != "pong") {
+                feedbackBuffer << line;
+                ++i;
+                // sleeping here just to avoid turning the event loop into a busy wait
+                usleep(10000);
+            }
         }
 
         notifyCompletion();
 
         return 0;
     }
+
+private:
+    StringVec feedbackBuffer;
+    boost::condition_variable signal;
+    boost::mutex mutex;
+    std::string command;
+    int feedbackLines;
+    int port;
+    std::string host;
+    bool started;
+    bool completed;
+    boost::thread thread;
 
     void notifyStartup()
     {

@@ -46,28 +46,36 @@ public:
     void addSteeringFeedback(const std::string& feedback)
     {
         LOG(DEBUG, "Pipe::addSteeringFeedback(" << feedback << ")");
-        {
-            boost::lock_guard<boost::mutex> lock(mutex);
-            steeringFeedback << feedback;
-        }
+        boost::lock_guard<boost::mutex> lock(mutex);
+        steeringFeedback << feedback;
         signal.notify_one();
     }
 
     StringVec retrieveSteeringRequests()
     {
         LOG(DEBUG, "Pipe::retrieveSteeringRequests()");
-        boost::lock_guard<boost::mutex> lock(mutex);
         StringVec requests;
+        boost::lock_guard<boost::mutex> lock(mutex);
         std::swap(requests, steeringRequests);
+        LOG(DEBUG, "  retrieveSteeringRequests yields " << requests.size());
+        return requests;
+    }
+
+    StringVec copySteeringRequests()
+    {
+        LOG(DEBUG, "Pipe::copySteeringRequests()");
+        boost::lock_guard<boost::mutex> lock(mutex);
+        StringVec requests = steeringRequests;
         return requests;
     }
 
     StringVec retrieveSteeringFeedback()
     {
         LOG(DEBUG, "Pipe::retrieveSteeringFeedback()");
-        boost::lock_guard<boost::mutex> lock(mutex);
         StringVec feedback;
+        boost::lock_guard<boost::mutex> lock(mutex);
         std::swap(feedback, steeringFeedback);
+        LOG(DEBUG, "  retrieveSteeringFeedback yields " << feedback.size());
         return feedback;
     }
 
@@ -83,7 +91,6 @@ public:
     {
         LOG(DEBUG, "Pipe::sync()");
         boost::lock_guard<boost::mutex> lock(mutex);
-
 #ifdef LIBGEODECOMP_FEATURE_MPI
         broadcastSteeringRequests();
         moveSteeringFeedbackToRoot();
@@ -112,9 +119,13 @@ private:
 
     void broadcastSteeringRequests()
     {
-        int numRequests = mpiLayer.broadcast(steeringRequests.size(), 0);
+        LOG(DEBUG, "Pipe::broadcastSteeringRequests()");
+
+        int numRequests = mpiLayer.broadcast(steeringRequests.size(), root);
         if (mpiLayer.rank() != root) {
             steeringRequests.resize(numRequests);
+        } else {
+            LOG(DEBUG, "  steeringRequests: " << steeringRequests);
         }
 
         SuperVector<int> requestSizes(numRequests);
@@ -152,6 +163,7 @@ private:
             localBuffer.insert(localBuffer.end(), i->begin(), i->end());
             localLengths << i->size();
         }
+        LOG(DEBUG, "moveSteeringFeedbackToRoot: " << localBuffer << " " << localLengths);
 
         // how many strings are sent per node?
         SuperVector<int> numFeedback = mpiLayer.gather((int)localLengths.size(), root);
@@ -163,6 +175,7 @@ private:
         // gather all messages in a single, giant buffer:
         SuperVector<int> charsPerNode = mpiLayer.gather((int)localBuffer.size(), root);
         SuperVector<char> globalBuffer(charsPerNode.sum());
+
         mpiLayer.gatherV(&localBuffer[0], localBuffer.size(), charsPerNode, root, &globalBuffer[0]);
 
         // reconstruct strings:

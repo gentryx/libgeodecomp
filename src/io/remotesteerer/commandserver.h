@@ -12,6 +12,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/remotesteerer/action.h>
+#include <libgeodecomp/io/remotesteerer/interactor.h>
 #include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
@@ -76,6 +77,38 @@ public:
         }
     };
 
+    /**
+     * This class is just a NOP, which may be used by the client to
+     * retrieve new steering feedback. This can't happen automatically
+     * as the CommandServer's listener thread blocks for input from
+     * the client.
+     */
+    class PingAction : public Action<CELL_TYPE>
+    {
+    public:
+        using Action<CELL_TYPE>::key;
+
+        PingAction() :
+            Action<CELL_TYPE>("ping", "wake the CommandServer, useful to retrieve a new batch of feedback"),
+            c(0)
+        {}
+
+        void operator()(const StringVec& parameters, Pipe& pipe)
+        {
+            // Do only reply if there is no feedback already waiting.
+            // This is useful if the client is using ping to keep us
+            // alive, but can only savely read back one line in
+            // return. In that case this stragety avoids a memory leak
+            // in our write buffer.
+            if (pipe.copySteeringFeedback().size() == 0) {
+                pipe.addSteeringFeedback("pong " + StringOps::itoa(++c));
+            }
+        }
+
+    private:
+        int c;
+    };
+
     class GetAction : public PassThroughAction
     {
     public:
@@ -101,9 +134,7 @@ public:
 
         void operator()(const StringVec& parameters, Pipe& pipe)
         {
-            std::cout << "WaitAction is waiting for feedback\n";
             pipe.waitForFeedback();
-            std::cout << "WaitAction got feedback\n";
         }
     };
 
@@ -118,6 +149,7 @@ public:
         addAction(new SetAction);
         addAction(new GetAction);
         addAction(new WaitAction);
+        addAction(new PingAction);
 
         // The thread may take a while to start up. We need to wait
         // here so we don't try to clean up in the d-tor before the
@@ -141,6 +173,7 @@ public:
      */
     void sendMessage(const std::string& message)
     {
+        LOG(DEBUG, "CommandServer::sendMessage(" << message << ")");
         boost::system::error_code errorCode;
         boost::asio::write(
             *socket,
@@ -165,49 +198,9 @@ public:
     static StringVec sendCommandWithFeedback(const std::string& command, int feedbackLines, int port, const std::string& host = "127.0.0.1")
     {
         LOG(DEBUG, "CommandServer::sendCommandWithFeedback(" << command << ", port = " << port << ", host = " << host << ")");
-        boost::asio::io_service ioService;
-        tcp::resolver resolver(ioService);
-        tcp::resolver::query query(host, StringOps::itoa(port));
-        tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-        tcp::socket socket(ioService);
-        boost::asio::connect(socket, endpointIterator);
-        boost::system::error_code errorCode;
-
-        boost::asio::write(
-            socket,
-            boost::asio::buffer(command),
-            boost::asio::transfer_all(),
-            errorCode);
-
-        if (errorCode) {
-            LOG(WARN, "error while writing to socket: " << errorCode.message());
-        }
-
-        StringVec ret;
-
-        for (int i = 0; i < feedbackLines; ++i) {
-            boost::asio::streambuf buf;
-            boost::system::error_code errorCode;
-
-            LOG(DEBUG, "CommandServer::sendCommandWithFeedback() reading line");
-
-            size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
-            if (errorCode) {
-                LOG(WARN, "error while writing to socket: " << errorCode.message());
-            }
-
-            // purge \n at end of line
-            if (length) {
-                length -= 1;
-            }
-
-            std::istream lineBuf(&buf);
-            std::string line(length, 'X');
-            lineBuf.read(&line[0], length);
-            ret << line;
-        }
-
-        return ret;
+        Interactor interactor(command, feedbackLines, false, port, host);
+        interactor();
+        return interactor.feedback();
     }
 
     /**
@@ -261,6 +254,7 @@ private:
             for (StringVec::iterator i = feedback.begin();
                  i != feedback.end();
                  ++i) {
+                LOG(DEBUG, "CommandServer::runSession sending »" << *i << "«");
                 sendMessage(*i + "\n");
             }
         }
@@ -269,12 +263,19 @@ private:
     void handleInput(const std::string& input)
     {
         LOG(DEBUG, "CommandServer::handleInput(" << input << ")");
-
         StringVec lines = StringOps::tokenize(input, "\n");
+        std::string zeroString("x");
+        zeroString[0] = 0;
+
         for (StringVec::iterator iter = lines.begin();
              iter != lines.end();
              ++iter) {
             StringVec parameters = StringOps::tokenize(*iter, " \n\r");
+
+            if (*iter == zeroString) {
+                // silently ignore strings containing a single 0
+                continue;
+            }
 
             if (parameters.size() == 0) {
                 sendMessage("no command given\n");

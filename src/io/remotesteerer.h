@@ -36,6 +36,7 @@ template<typename CELL_TYPE>
 class RemoteSteerer : public Steerer<CELL_TYPE>
 {
 public:
+    friend class RemoteSteererTest;
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
     typedef SuperMap<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;
