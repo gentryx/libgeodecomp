@@ -70,6 +70,7 @@ public:
 
     int operator()()
     {
+        LOG(DEBUG, "Interactor::operator(" << command << ")");
         boost::asio::io_service ioService;
         tcp::resolver resolver(ioService);
         tcp::resolver::query query(host, StringOps::itoa(port));
@@ -78,9 +79,10 @@ public:
         boost::asio::connect(socket, endpointIterator);
         boost::system::error_code errorCode;
 
+        std::string commandSuffix = "\nwait " + StringOps::itoa(feedbackLines) + "\n";
         boost::asio::write(
             socket,
-            boost::asio::buffer(command + "\n"),
+            boost::asio::buffer(command + commandSuffix),
             boost::asio::transfer_all(),
             errorCode);
 
@@ -90,44 +92,23 @@ public:
 
         notifyStartup();
 
-        for (int i = 0; i < feedbackLines; ) {
-            // periodically wake up CommandServer to cycle events
-            boost::asio::write(
-                socket,
-                boost::asio::buffer("ping\n"),
-                boost::asio::transfer_all(),
-                errorCode);
-            if (errorCode) {
-                LOG(WARN, "Error while pinging " << errorCode);
+        for (;;) {
+            LOG(DEBUG, "Interactor::operator() reading... [" << feedbackBuffer.size() << "/" << feedbackLines << "]");
+            if (feedbackBuffer.size() >= feedbackLines) {
+                break;
             }
 
-            boost::asio::streambuf buf;
+            boost::array<char, 1024> buf;
             boost::system::error_code errorCode;
-
-            LOG(DEBUG, "Interactor::operator() reading...");
-            size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
-            if (errorCode) {
-                LOG(WARN, "error while reading from socket: " << errorCode.message());
-            }
-
-            std::istream lineBuf(&buf);
-            std::string line(length, 'X');
-            lineBuf.read(&line[0], length);
-            line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
-
-            LOG(DEBUG, "Interactor::operator() read »" << line << "«");
-
-            StringVec tokens = StringOps::tokenize(line, " ");
-            if (tokens[0] != "pong") {
-                feedbackBuffer << line;
-                ++i;
-                // sleeping here just to avoid turning the event loop into a busy wait
-                usleep(10000);
-            }
+            size_t length = socket.read_some(boost::asio::buffer(buf), errorCode);
+            std::string input(buf.data(), length);
+            StringVec lines = StringOps::tokenize(input, "\n");
+            handleInput(lines);
         }
 
         notifyCompletion();
 
+        LOG(DEBUG, "Interactor::operator() done");
         return 0;
     }
 
@@ -163,6 +144,26 @@ private:
         boost::unique_lock<boost::mutex> lock(mutex);
         completed = true;
         signal.notify_one();
+    }
+
+    void handleInput(const StringVec& lines)
+    {
+        LOG(DEBUG, "Interactor::handleInput(" << lines << ")");
+        // only add lines which are not equal to "\0"
+        for (int i = 0; i < lines.size(); ++i) {
+            const std::string& line = lines[i];
+            if (line == "") {
+                LOG(WARN, "Interactor rejects empty line as feedback");
+                continue;
+            }
+            if ((line.size() == 1) || (line[0] == 0)) {
+                LOG(WARN, "Interactor rejects null line as feedback");
+                continue;
+            }
+
+            LOG(DEBUG, "Interactor accepted line »" << line << "«");
+            feedbackBuffer << line;
+        }
     }
 
     template<typename DELEGATE>

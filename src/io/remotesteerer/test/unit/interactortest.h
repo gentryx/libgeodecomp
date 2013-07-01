@@ -24,7 +24,6 @@ public:
 
         // start the interactor and wait until it has sent its commands
         Interactor interactor("command blah\n", 1, true, port);
-        interactor.waitForStartup();
 
         // grab the data from the interactor:
         boost::system::error_code errorCode;

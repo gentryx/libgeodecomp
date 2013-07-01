@@ -15,6 +15,7 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+DEFINE_DATAACCESSOR(TestValueAccessor, TestCell<2>, double, testValue);
 
 class RemoteSteererTest : public CxxTest::TestSuite
 {
@@ -153,10 +154,12 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_THREADS
         if (mpiLayer.rank() == 0) {
             StringVec res;
-            res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 1);
+            res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 2);
 
-            TS_ASSERT_EQUALS(res.size(), 1);
+            std::cout << "res: " << res << "\n";
+            TS_ASSERT_EQUALS(res.size(), 2);
             TS_ASSERT_EQUALS(res[0], "command not found: nonExistentAction");
+            TS_ASSERT_EQUALS(res[1], "try \"help\"");
         }
 #endif
     }
@@ -167,57 +170,36 @@ public:
         boost::shared_ptr<Interactor> interactor;
 
         if (mpiLayer.rank() == 0) {
-            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("nonExistentHandler", "blah"));
-            interactor.reset(new Interactor("nonExistentHandler bongo\nwait\n", 1, true, port));
+            steerer->addAction(new PassThroughAction<TestCell<2> >("nonExistentHandler", "blah"));
+            interactor.reset(new Interactor("nonExistentHandler bongo", 2, true, port));
         }
+
+        // sleep until the request has made it into the pipeline
+        if (mpiLayer.rank() == 0) {
+            while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
+                usleep(10000);
+            }
+        }
+        mpiLayer.barrier();
 
         sim->run();
 
         if (mpiLayer.rank() == 0) {
             interactor->waitForCompletion();
             StringVec expected;
-            expected << "handler not found: nonExistentHandler";
+            expected << "handler not found: nonExistentHandler"
+                     << "handler not found: nonExistentHandler";
 
             TS_ASSERT_EQUALS(interactor->feedback(), expected);
         }
 #endif
     }
 
-    template<typename CELL_TYPE>
-    class GetHandler : public Handler<CELL_TYPE>
-    {
-    public:
-        typedef typename CELL_TYPE::Topology Topology;
-        typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
-        static const int DIM = Topology::DIM;
-
-        GetHandler() :
-            Handler<CELL_TYPE>("get")
-        {}
-
-        virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<DIM>& validRegion, unsigned step)
-        {
-            Coord<DIM> c;
-            int index;
-
-            for (index = 0; index < DIM; ++index) {
-                c[index] = StringOps::atoi(parameters[index]);
-            }
-
-            const std::string& member = parameters[index];
-
-            std::cout << "get " << c << " member: " << member << "\n";
-            pipe.addSteeringFeedback("bingo bongo");
-
-            return true;
-        }
-    };
-
     void testHandlerNotFound1()
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
         if (mpiLayer.rank() == 0) {
-            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("echo", "blah"));
+            steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
         mpiLayer.barrier();
         boost::shared_ptr<Interactor> interactor;
@@ -229,7 +211,7 @@ public:
 
         // sleep until the request has made it into the pipeline
         if (mpiLayer.rank() == 0) {
-            while (steerer->pipe->copySteeringRequests().size() == 0) {
+            while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
@@ -250,7 +232,7 @@ public:
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
         if (mpiLayer.rank() == 0) {
-            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("echo", "blah"));
+            steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
         mpiLayer.barrier();
         boost::shared_ptr<Interactor> interactor;
@@ -261,7 +243,11 @@ public:
         }
 
         // sleep until the request has made it into the pipeline
-        usleep(250000);
+        if (mpiLayer.rank() == 0) {
+            while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
+                usleep(10000);
+            }
+        }
         mpiLayer.barrier();
         sim->run();
 
@@ -279,7 +265,7 @@ public:
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
         if (mpiLayer.rank() == 0) {
-            steerer->addAction(new CommandServer<TestCell<2> >::PassThroughAction("echo", "blah"));
+            steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
         mpiLayer.barrier();
         boost::shared_ptr<Interactor> interactor;
@@ -290,7 +276,7 @@ public:
 
         // sleep until the request has made it into the pipeline
         if (mpiLayer.rank() == 0) {
-            while (steerer->pipe->copySteeringRequests().size() == 0) {
+            while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
@@ -310,12 +296,21 @@ public:
     void testGetSet()
     {
 #ifdef LIBGEODECOMP_FEATURE_THREADS
-        mpiLayer.barrier();
+        steerer->addDataAccessor(new TestValueAccessor());
         boost::shared_ptr<Interactor> interactor;
+        mpiLayer.barrier();
+
         if (mpiLayer.rank() == 0) {
-            steerer->addHandler(new GetHandler<TestCell<2> >());
-            interactor.reset(new Interactor("get 1 2 masupilami", 2, true, port));
+            interactor.reset(new Interactor("get_testValue 2 1 3", 2, true, port));
         }
+
+        // sleep until the request has made it into the pipeline
+        if (mpiLayer.rank() == 0) {
+            while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
+                usleep(10000);
+            }
+        }
+        mpiLayer.barrier();
 
         sim->run();
 

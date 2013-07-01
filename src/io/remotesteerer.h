@@ -7,6 +7,7 @@
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/io/remotesteerer/commandserver.h>
 #include <libgeodecomp/io/remotesteerer/handler.h>
+#include <libgeodecomp/io/remotesteerer/gethandler.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 #include <libgeodecomp/mpilayer/typemaps.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
@@ -60,12 +61,14 @@ public:
         const Region<Topology::DIM>& validRegion,
         unsigned step)
     {
+        LOG(DEBUG, "RemoteSteerer::nextStep(step = " << step << ")");
         pipe->sync();
         StringVec steeringRequests = pipe->retrieveSteeringRequests();
 
         for (StringVec::iterator i = steeringRequests.begin();
              i != steeringRequests.end();
              ++i) {
+            LOG(DEBUG, "RemoteSteerer::nextStep(" << *i << ")");
             StringVec parameters = StringOps::tokenize(*i, " ");
             std::string command = parameters.pop_front();
 
@@ -82,6 +85,8 @@ public:
                 pipe->addSteeringRequest(*i);
             }
         }
+
+        pipe->sync();
     }
 
     void addAction(Action<CELL_TYPE> *action)
@@ -92,6 +97,18 @@ public:
     void addHandler(Handler<CELL_TYPE> *handler)
     {
         handlers[handler->key()] = boost::shared_ptr<Handler<CELL_TYPE> >(handler);
+    }
+
+    template<typename MEMBER_TYPE>
+    void addDataAccessor(DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor)
+    {
+        if (commandServer) {
+            GetAction<CELL_TYPE> *action = new GetAction<CELL_TYPE>(accessor->name());
+            addAction(action);
+        }
+
+        boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > accessorPtr(accessor);
+        handlers["get_" + accessor->name()].reset(new GetHandler<CELL_TYPE, MEMBER_TYPE>(accessorPtr));
     }
 
     void sendCommand(const std::string& command)

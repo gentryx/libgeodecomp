@@ -12,7 +12,9 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/remotesteerer/action.h>
+#include <libgeodecomp/io/remotesteerer/getaction.h>
 #include <libgeodecomp/io/remotesteerer/interactor.h>
+#include <libgeodecomp/io/remotesteerer/waitaction.h>
 #include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
@@ -39,6 +41,7 @@ public:
      * CommandServer's network service, which is nice as it is using
      * blocking IO and it's a major PITA to cancel that.
      */
+    // fixme: move to dedicated file
     class QuitAction : public Action<CELL_TYPE>
     {
     public:
@@ -58,31 +61,12 @@ public:
     };
 
     /**
-     * This Action is helpful if a given user command has to be
-     * executed by a Handler on the simulation node (i.e. all commands
-     * which work on grid data).
-     */
-    class PassThroughAction : public Action<CELL_TYPE>
-    {
-    public:
-        using Action<CELL_TYPE>::key;
-
-        PassThroughAction(const std::string& key, const std::string& helpMessage) :
-            Action<CELL_TYPE>(key, helpMessage)
-        {}
-
-        void operator()(const StringVec& parameters, Pipe& pipe)
-        {
-            pipe.addSteeringRequest(key() + " " + StringOps::join(parameters, " "));
-        }
-    };
-
-    /**
      * This class is just a NOP, which may be used by the client to
      * retrieve new steering feedback. This can't happen automatically
      * as the CommandServer's listener thread blocks for input from
      * the client.
      */
+    // fixme: move to dedicated file
     class PingAction : public Action<CELL_TYPE>
     {
     public:
@@ -95,47 +79,18 @@ public:
 
         void operator()(const StringVec& parameters, Pipe& pipe)
         {
-            // Do only reply if there is no feedback already waiting.
-            // This is useful if the client is using ping to keep us
-            // alive, but can only savely read back one line in
-            // return. In that case this stragety avoids a memory leak
-            // in our write buffer.
-            if (pipe.copySteeringFeedback().size() == 0) {
+            // // Do only reply if there is no feedback already waiting.
+            // // This is useful if the client is using ping to keep us
+            // // alive, but can only savely read back one line in
+            // // return. In that case this stragety avoids a memory leak
+            // // in our write buffer.
+            // if (pipe.copySteeringFeedback().size() == 0) {
                 pipe.addSteeringFeedback("pong " + StringOps::itoa(++c));
-            }
+            // }
         }
 
     private:
         int c;
-    };
-
-    class GetAction : public PassThroughAction
-    {
-    public:
-        GetAction() :
-            PassThroughAction("get", "usage: \"get X Y [Z] MEMBER\", will return member MEMBER of cell at grid coordinate (X, Y, Z) if the model is 3D, or (X, Y) in the 2D case")
-        {}
-    };
-
-    class SetAction : public PassThroughAction
-    {
-    public:
-        SetAction() :
-            PassThroughAction("set", "usage: \"get X Y [Z] MEMBER VALUE\", will set member MEMBER of cell at grid coordinate (X, Y, Z) (if the model is 3D, or (X, Y) in the 2D case) to value VALUE")
-        {}
-    };
-
-    class WaitAction : public Action<CELL_TYPE>
-    {
-    public:
-        WaitAction() :
-            Action<CELL_TYPE>("wait", "usage: \"wait\", will wait until feedback from the simulation has been received")
-        {}
-
-        void operator()(const StringVec& parameters, Pipe& pipe)
-        {
-            pipe.waitForFeedback();
-        }
     };
 
     CommandServer(
@@ -146,10 +101,8 @@ public:
         serverThread(&CommandServer::runServer, this)
     {
         addAction(new QuitAction(&continueFlag));
-        addAction(new SetAction);
-        addAction(new GetAction);
-        addAction(new WaitAction);
         addAction(new PingAction);
+        addAction(new WaitAction<CELL_TYPE>);
 
         // The thread may take a while to start up. We need to wait
         // here so we don't try to clean up in the d-tor before the
@@ -230,7 +183,9 @@ private:
         for (;;) {
             boost::array<char, 1024> buf;
             boost::system::error_code errorCode;
+            LOG(DEBUG, "CommandServer::runSession(): reading");
             size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
+            LOG(DEBUG, "CommandServer::runSession(): read " << length << " bytes");
 
             if (length > 0) {
                 std::string input(buf.data(), length);
@@ -278,7 +233,7 @@ private:
             }
 
             if (parameters.size() == 0) {
-                sendMessage("no command given\n");
+                pipe->addSteeringFeedback("no command given");
                 continue;
             }
 
@@ -286,9 +241,8 @@ private:
             if (actions.count(command) == 0) {
                 std::string message = "command not found: " + command;
                 LOG(WARN, message);
-
-                message += "\ntry \"help\"\n";
-                sendMessage(message);
+                pipe->addSteeringFeedback(message);
+                pipe->addSteeringFeedback("try \"help\"");
             } else {
                 (*actions[command])(parameters, *pipe);
             }

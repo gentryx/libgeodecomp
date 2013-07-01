@@ -55,11 +55,12 @@ public:
 
             // start the interactor and wait until it has sent its commands
             Interactor interactor("command blah\n", 1, true, port);
-            interactor.waitForStartup();
 
             // check the results
             interactor.waitForCompletion();
-            TS_ASSERT_EQUALS(interactor.feedback(), expectedFeedback);
+
+            StringVec actualFeedback = interactor.feedback();
+            TS_ASSERT_EQUALS(actualFeedback, expectedFeedback);
         }
     }
 };

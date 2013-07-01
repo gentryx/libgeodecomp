@@ -40,7 +40,7 @@ public:
     {
         LOG(DEBUG, "Pipe::addSteeringRequest(" << request << ")");
         boost::lock_guard<boost::mutex> lock(mutex);
-        steeringRequests << request;
+        steeringRequestsQueue << request;
     }
 
     void addSteeringFeedback(const std::string& feedback)
@@ -58,14 +58,17 @@ public:
         boost::lock_guard<boost::mutex> lock(mutex);
         std::swap(requests, steeringRequests);
         LOG(DEBUG, "  retrieveSteeringRequests yields " << requests.size());
+        if (requests.size() > 0) {
+            LOG(DEBUG, "  steeringRequests: " << requests);
+        }
         return requests;
     }
 
-    StringVec copySteeringRequests()
+    StringVec copySteeringRequestsQueue()
     {
-        LOG(DEBUG, "Pipe::copySteeringRequests()");
+        LOG(DEBUG, "Pipe::copySteeringRequestsQueue()");
         boost::lock_guard<boost::mutex> lock(mutex);
-        StringVec requests = steeringRequests;
+        StringVec requests = steeringRequestsQueue;
         return requests;
     }
 
@@ -76,6 +79,7 @@ public:
         boost::lock_guard<boost::mutex> lock(mutex);
         std::swap(feedback, steeringFeedback);
         LOG(DEBUG, "  retrieveSteeringFeedback yields " << feedback.size());
+        LOG(DEBUG, "  retrieveSteeringFeedback is " << feedback);
         return feedback;
     }
 
@@ -97,19 +101,22 @@ public:
 #endif
     }
 
-    void waitForFeedback()
+    void waitForFeedback(int lines = 1)
     {
-        LOG(DEBUG, "Pipe::waitForFeedback()");
+        LOG(DEBUG, "Pipe::waitForFeedback(" << lines << ")");
         boost::unique_lock<boost::mutex> lock(mutex);
 
-        while (steeringFeedback.size() == 0) {
+        while (steeringFeedback.size() < lines) {
+            LOG(DEBUG, "  still waiting for feedback (" << steeringFeedback.size() << "/" << lines << ")\n");
             signal.wait(lock);
         }
+        LOG(DEBUG, "  feedback acquired");
     }
 
 private:
     boost::mutex mutex;
     boost::condition_variable signal;
+    StringVec steeringRequestsQueue;
     StringVec steeringRequests;
     StringVec steeringFeedback;
 
@@ -121,31 +128,34 @@ private:
     {
         LOG(DEBUG, "Pipe::broadcastSteeringRequests()");
 
-        int numRequests = mpiLayer.broadcast(steeringRequests.size(), root);
+        int numRequests = mpiLayer.broadcast(steeringRequestsQueue.size(), root);
         if (mpiLayer.rank() != root) {
-            steeringRequests.resize(numRequests);
+            steeringRequestsQueue.resize(numRequests);
         } else {
-            LOG(DEBUG, "  steeringRequests: " << steeringRequests);
+            LOG(DEBUG, "  steeringRequestsQueue: " << steeringRequestsQueue);
         }
 
         SuperVector<int> requestSizes(numRequests);
 
         if (mpiLayer.rank() == root) {
             for (int i = 0; i < numRequests; ++i) {
-                requestSizes[i] = steeringRequests[i].size();
+                requestSizes[i] = steeringRequestsQueue[i].size();
             }
         }
 
         mpiLayer.broadcastVector(&requestSizes, root);
         if (mpiLayer.rank() != root) {
             for (int i = 0; i < numRequests; ++i) {
-                steeringRequests[i].resize(requestSizes[i]);
+                steeringRequestsQueue[i].resize(requestSizes[i]);
             }
         }
 
         for (int i = 0; i < numRequests; ++i) {
-            mpiLayer.broadcast(&steeringRequests[i][0], requestSizes[i], root);
+            mpiLayer.broadcast(&steeringRequestsQueue[i][0], requestSizes[i], root);
         }
+        steeringRequests.append(steeringRequestsQueue);
+        steeringRequestsQueue.clear();
+        LOG(DEBUG, "  steeringRequests: " << steeringRequests);
     }
 
     /**
@@ -190,6 +200,9 @@ private:
                                             &globalBuffer[nextCursor]);
             cursor = nextCursor;
         }
+
+        LOG(DEBUG, "  notifying... steeringFeedback.size(" << MPILayer().rank() << ") == " << steeringFeedback.size() << "\n");
+        signal.notify_one();
     }
 #endif
 };
