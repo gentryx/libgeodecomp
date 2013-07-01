@@ -116,7 +116,7 @@ public:
     ~CommandServer()
     {
         signalClose();
-        LOG(DEBUG, "CommandServer waiting for network thread");
+        LOG(DBG, "CommandServer waiting for network thread");
         serverThread.join();
     }
 
@@ -126,7 +126,7 @@ public:
      */
     void sendMessage(const std::string& message)
     {
-        LOG(DEBUG, "CommandServer::sendMessage(" << message << ")");
+        LOG(DBG, "CommandServer::sendMessage(" << message << ")");
         boost::system::error_code errorCode;
         boost::asio::write(
             *socket,
@@ -150,10 +150,53 @@ public:
 
     static StringVec sendCommandWithFeedback(const std::string& command, int feedbackLines, int port, const std::string& host = "127.0.0.1")
     {
-        LOG(DEBUG, "CommandServer::sendCommandWithFeedback(" << command << ", port = " << port << ", host = " << host << ")");
+        LOG(DBG, "CommandServer::sendCommandWithFeedback(" << command << ", port = " << port << ", host = " << host << ")");
         Interactor interactor(command, feedbackLines, false, port, host);
         interactor();
         return interactor.feedback();
+        boost::asio::io_service ioService;
+        tcp::resolver resolver(ioService);
+        tcp::resolver::query query(host, StringOps::itoa(port));
+        tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+        tcp::socket socket(ioService);
+        boost::asio::connect(socket, endpointIterator);
+        boost::system::error_code errorCode;
+
+        boost::asio::write(
+            socket,
+            boost::asio::buffer(command),
+            boost::asio::transfer_all(),
+            errorCode);
+
+        if (errorCode) {
+            LOG(WARN, "error while writing to socket: " << errorCode.message());
+        }
+
+        StringVec ret;
+
+        for (int i = 0; i < feedbackLines; ++i) {
+            boost::asio::streambuf buf;
+            boost::system::error_code errorCode;
+
+            LOG(DBG, "CommandServer::sendCommandWithFeedback() reading line");
+
+            size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
+            if (errorCode) {
+                LOG(WARN, "error while writing to socket: " << errorCode.message());
+            }
+
+            // purge \n at end of line
+            if (length) {
+                length -= 1;
+            }
+
+            std::istream lineBuf(&buf);
+            std::string line(length, 'X');
+            lineBuf.read(&line[0], length);
+            ret << line;
+        }
+
+        return ret;
     }
 
     /**
@@ -183,9 +226,9 @@ private:
         for (;;) {
             boost::array<char, 1024> buf;
             boost::system::error_code errorCode;
-            LOG(DEBUG, "CommandServer::runSession(): reading");
+            LOG(DBG, "CommandServer::runSession(): reading");
             size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
-            LOG(DEBUG, "CommandServer::runSession(): read " << length << " bytes");
+            LOG(DBG, "CommandServer::runSession(): read " << length << " bytes");
 
             if (length > 0) {
                 std::string input(buf.data(), length);
@@ -209,7 +252,7 @@ private:
             for (StringVec::iterator i = feedback.begin();
                  i != feedback.end();
                  ++i) {
-                LOG(DEBUG, "CommandServer::runSession sending »" << *i << "«");
+                LOG(DBG, "CommandServer::runSession sending »" << *i << "«");
                 sendMessage(*i + "\n");
             }
         }
@@ -217,7 +260,7 @@ private:
 
     void handleInput(const std::string& input)
     {
-        LOG(DEBUG, "CommandServer::handleInput(" << input << ")");
+        LOG(DBG, "CommandServer::handleInput(" << input << ")");
         StringVec lines = StringOps::tokenize(input, "\n");
         std::string zeroString("x");
         zeroString[0] = 0;
@@ -263,7 +306,7 @@ private:
             continueFlag = true;
 
             while (continueFlag) {
-                LOG(DEBUG, "CommandServer: waiting for new connection");
+                LOG(DBG, "CommandServer: waiting for new connection");
                 socket.reset(new tcp::socket(ioService));
                 acceptor->accept(*socket, errorCode);
 

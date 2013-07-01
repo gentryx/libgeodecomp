@@ -47,14 +47,14 @@ public:
     virtual ~Stepper()
     {}
 
-    virtual void update(int nanoSteps) = 0;
+    virtual void update(std::size_t nanoSteps) = 0;
 
     virtual const GridType& grid() const = 0;
 
     /**
      * returns current step and nanoStep
      */
-    virtual std::pair<int, int> currentStep() const = 0;
+    virtual std::pair<std::size_t, std::size_t> currentStep() const = 0;
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,

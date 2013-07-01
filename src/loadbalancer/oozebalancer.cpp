@@ -4,7 +4,7 @@
 
 namespace LibGeoDecomp {
 
-OozeBalancer::OozeBalancer(double newLoadWeight) : _newLoadWeight(newLoadWeight) 
+OozeBalancer::OozeBalancer(double newLoadWeight) : _newLoadWeight(newLoadWeight)
 {
     if (newLoadWeight < 0 || newLoadWeight > 1) {
         throw std::invalid_argument(
@@ -14,18 +14,18 @@ OozeBalancer::OozeBalancer(double newLoadWeight) : _newLoadWeight(newLoadWeight)
 
 
 OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
-    const OozeBalancer::WeightVec& weights, 
+    const OozeBalancer::WeightVec& weights,
     const OozeBalancer::LoadVec& relativeLoads) const
 {
     unsigned n = weights.size();
     // calculate approximate load share we want on each node
     double targetLoadPerNode = relativeLoads.sum() / n;
 
-    if (targetLoadPerNode == 0) 
-        return LoadVec(n, weights.sum()/ (double)n);    
+    if (targetLoadPerNode == 0)
+        return LoadVec(n, weights.sum()/ (double)n);
 
     LoadVec ret(n, 0);
-    LoadVec loadPerItem;   
+    LoadVec loadPerItem;
     for (unsigned i = 0; i < n; i++) {
         if (weights[i]) {
             LoadVec add(weights[i], relativeLoads[i] / weights[i]);
@@ -43,7 +43,7 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
         for (unsigned itemC = 0; itemC < loadPerItem.size(); itemC++) {
             // skip already assigned items
             if (remFractPerItem[itemC] == 0) continue;
-            
+
             // can we assign the whole remainder?
             double l = remFractPerItem[itemC] * loadPerItem[itemC];
             if (l <= remLoad) {
@@ -70,15 +70,15 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
 
 
 OozeBalancer::WeightVec OozeBalancer::balance(
-    const OozeBalancer::WeightVec& weights, 
+    const OozeBalancer::WeightVec& weights,
     const OozeBalancer::LoadVec& relativeLoads)
-{    
+{
     LoadVec expectedOptimal = expectedOptimalDistribution(weights, relativeLoads);
     LoadVec newLoads = linearCombo(weights, expectedOptimal);
 
     WeightVec ret = equalize(newLoads);
     if (weights.sum() != ret.sum()) {
-        std::cerr << "OozeBalancer::balance() failed\n"            
+        std::cerr << "OozeBalancer::balance() failed\n"
                   << "  weights.sum() = " << weights.sum() << "\n"
                   << "  ret.sum() = " << ret.sum() << "\n"
                   << "  expectedOptimal.sum() = " << expectedOptimal.sum() << "\n"
@@ -115,9 +115,9 @@ OozeBalancer::WeightVec OozeBalancer::equalize(const LoadVec& loads)
             ret[i]++;
         } else {
             balance += f;
-        }            
+        }
     }
-    
+
     ret.back() = (long)loads.back();
     if (frac(loads.back())  > (0.5 - balance))
         ret.back()++;
@@ -127,12 +127,12 @@ OozeBalancer::WeightVec OozeBalancer::equalize(const LoadVec& loads)
 
 
 OozeBalancer::LoadVec OozeBalancer::linearCombo(
-    const OozeBalancer::WeightVec& oldLoads, 
+    const OozeBalancer::WeightVec& oldLoads,
     const OozeBalancer::LoadVec& newLoads)
 {
     OozeBalancer::LoadVec ret(newLoads.size());
     for (unsigned i = 0; i < ret.size(); i++)
-        ret[i] = newLoads[i] * _newLoadWeight + 
+        ret[i] = newLoads[i] * _newLoadWeight +
             oldLoads[i] * (1 - _newLoadWeight);
     return ret;
 }

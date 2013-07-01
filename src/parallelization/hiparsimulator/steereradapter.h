@@ -26,15 +26,15 @@ public:
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
-        const long& globalNanoStep,
-        const bool& remove = true)
+        const std::size_t globalNanoStep,
+        const bool remove = true)
     {
-        int nanoStep = globalNanoStep % CELL_TYPE::nanoSteps();
+        std::size_t nanoStep = globalNanoStep % CELL_TYPE::nanoSteps();
         if (nanoStep != 0) {
             return;
         }
 
-        long step = globalNanoStep / CELL_TYPE::nanoSteps();
+        std::size_t step = globalNanoStep / CELL_TYPE::nanoSteps();
         if (step % steerer->getPeriod() != 0) {
             return;
         }

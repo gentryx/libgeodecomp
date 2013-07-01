@@ -5,7 +5,7 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -20,7 +20,7 @@ public:
     }
 
 
-    void tearDown() 
+    void tearDown()
     {
         delete simulator;
     }
@@ -29,7 +29,7 @@ public:
     void testOutputToStream()
     {
         std::ostringstream output;
-        simulator->addWriter( 
+        simulator->addWriter(
             new TracingWriter<TestCell<2> >(
                 1, TestInitializer<TestCell<2> >().maxSteps(), output));
         simulator->run();

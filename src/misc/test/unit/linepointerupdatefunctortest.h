@@ -3,11 +3,11 @@
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/updatefunctortestbase.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class LinePointerUpdateFunctorTest : public CxxTest::TestSuite 
+class LinePointerUpdateFunctorTest : public CxxTest::TestSuite
 {
 public:
 
@@ -24,7 +24,7 @@ public:
             const Streak<DIM>& streak,
             const GridType& gridOld,
             GridType *gridNew,
-            unsigned nanoStep) 
+            unsigned nanoStep)
         {
             CoordBox<DIM> gridBox = gridOld.boundingBox();
             const TestCellType *pointers[Stencil::VOLUME];

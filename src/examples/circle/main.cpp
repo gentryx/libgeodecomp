@@ -12,7 +12,7 @@ using namespace LibGeoDecomp;
 class CircleCell
 {
     friend class CellToColor;
-public:   
+public:
     typedef Stencils::VonNeumann<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
     enum State {LIQUID, SOLIDIFYING, SOLID};
@@ -21,9 +21,9 @@ public:
     class API : public CellAPITraits::Base
     {};
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 1; 
+    static inline unsigned nanoSteps()
+    {
+        return 1;
     }
 
     CircleCell() :
@@ -53,7 +53,7 @@ public:
             return;
         }
     }
-    
+
 private:
     State state;
     DPair relativeCenter;
@@ -72,7 +72,7 @@ private:
         for (int y = -1; y < 2; ++y) {
             for (int x = -1; x < 2; ++x) {
                 const CircleCell& neighbor = neighborhood[Coord<2>(x, y)];
-                if (neighbor.state != LIQUID && 
+                if (neighbor.state != LIQUID &&
                     (inCircle(neighbor, Coord<2>(0 - x, 0 - y)) ||
                      inCircle(neighbor, Coord<2>(1 - x, 0 - y)) ||
                      inCircle(neighbor, Coord<2>(0 - x, 1 - y)) ||
@@ -113,7 +113,7 @@ class CircleCellInitializer : public SimpleInitializer<CircleCell>
 {
 public:
     CircleCellInitializer(
-        Coord<2> _dimensions = Coord<2>(100, 100), 
+        Coord<2> _dimensions = Coord<2>(100, 100),
         const unsigned _steps = 300) :
         SimpleInitializer<CircleCell>(_dimensions, _steps)
     {}
@@ -123,22 +123,22 @@ public:
         CoordBox<2> rect = ret->boundingBox();
         std::vector<std::pair<Coord<2>, CircleCell> > seeds(3);
         seeds[0] = std::make_pair(
-            Coord<2>(1 * gridDimensions().x() / 4, 
-                     2 * gridDimensions().y() / 3), 
-            CircleCell(std::make_pair(0.5, 0.5), 0.2)); 
+            Coord<2>(1 * gridDimensions().x() / 4,
+                     2 * gridDimensions().y() / 3),
+            CircleCell(std::make_pair(0.5, 0.5), 0.2));
         seeds[0] = std::make_pair(
-            Coord<2>(3 * gridDimensions().x() / 4, 
-                     2 * gridDimensions().y() / 3), 
-            CircleCell(std::make_pair(0.5, 0.5), 0.2)); 
+            Coord<2>(3 * gridDimensions().x() / 4,
+                     2 * gridDimensions().y() / 3),
+            CircleCell(std::make_pair(0.5, 0.5), 0.2));
         seeds[0] = std::make_pair(
-            Coord<2>(1 * gridDimensions().x() / 2, 
-                     1 * gridDimensions().y() / 3), 
-            CircleCell(std::make_pair(0.5, 0.5), 0.4)); 
+            Coord<2>(1 * gridDimensions().x() / 2,
+                     1 * gridDimensions().y() / 3),
+            CircleCell(std::make_pair(0.5, 0.5), 0.4));
 
-        for (std::vector<std::pair<Coord<2>, CircleCell> >::iterator i = 
-                 seeds.begin(); i != seeds.end(); ++i) 
+        for (std::vector<std::pair<Coord<2>, CircleCell> >::iterator i =
+                 seeds.begin(); i != seeds.end(); ++i)
             if (rect.inBounds(i->first))
-                ret->at(i->first) = i->second;        
+                ret->at(i->first) = i->second;
     }
 };
 
@@ -147,7 +147,7 @@ class CellToColor
 public:
     Color operator()(const CircleCell& cell)
     {
-        if (cell.state == CircleCell::SOLID) 
+        if (cell.state == CircleCell::SOLID)
             return Color::RED;
         if (cell.state == CircleCell::SOLIDIFYING)
             return Color::GREEN;
@@ -162,13 +162,13 @@ void runSimulation()
     SerialSimulator<CircleCell> sim(init);
     sim.addWriter(
         new PPMWriter<CircleCell, SimpleCellPlotter<CircleCell, CellToColor> >(
-            "./circle", 
+            "./circle",
             outputFrequency,
             8,
             8));
     sim.addWriter(
         new TracingWriter<CircleCell>(
-            1, 
+            1,
             init->maxSteps()));
 
     sim.run();

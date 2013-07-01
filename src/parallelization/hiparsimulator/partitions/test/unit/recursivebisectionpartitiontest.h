@@ -11,18 +11,18 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 
-class RecursiveBisectionPartitionTest : public CxxTest::TestSuite 
+class RecursiveBisectionPartitionTest : public CxxTest::TestSuite
 {
 public:
     void testSearchNodeCuboid()
     {
         SuperVector<long> weights;
-        weights += 25, 25; 
+        weights += 25, 25;
 
         checkCuboid(weights, 0, Coord<2>( 0, 0), Coord<2>(15, 20));
         checkCuboid(weights, 1, Coord<2>(15, 0), Coord<2>(15, 20));
 
-        weights += 50; 
+        weights += 50;
 
         checkCuboid(weights, 1, Coord<2>( 0, 10), Coord<2>(15, 10));
         checkCuboid(weights, 2, Coord<2>(15,  0), Coord<2>(15, 20));
@@ -107,14 +107,14 @@ public:
                 CoordBox<2>(origin, dimensions)));
     }
 
-    Region<3> genRegion(int o1, int o2, int o3, int d1, int d2, int d3) 
+    Region<3> genRegion(int o1, int o2, int o3, int d1, int d2, int d3)
     {
         CoordBox<3> box(Coord<3>(o1, o2, o3), Coord<3>(d1, d2, d3));
         Region<3> r;
         r << box;
         return r;
     }
-            
+
 
 };
 

@@ -35,8 +35,8 @@ public:
         testGrid = new Grid<TestCell<2> >(Coord<2>(GRIDWIDTH, GRIDHEIGHT));
 
         int num = 200;
-        for (unsigned y = 0; y < testGrid->getDimensions().y(); y++) {
-            for (unsigned x = 0; x < testGrid->getDimensions().x(); x++) {
+        for (int y = 0; y < testGrid->getDimensions().y(); y++) {
+            for (int x = 0; x < testGrid->getDimensions().x(); x++) {
                 (*testGrid)[Coord<2>(x, y)] =
                     TestCell<2>(Coord<2>(x, y), testGrid->getDimensions());
                 (*testGrid)[Coord<2>(x, y)].testValue =  num++;
@@ -84,13 +84,13 @@ public:
         int height = testGrid->getDimensions().y();
         double deltaTemp = 42.0;
         Coord<2> changedCoord(0, 4);
-        
+
         Grid<TestCell<2> > other(Coord<2>(width, height));
         TS_ASSERT(!other[4][2].isValid);
         for(int x = 0; x < width; x++)
-            for(int y = 0; y < height; y++) 
+            for(int y = 0; y < height; y++)
                 other.cellMatrix[y][x] = testGrid->cellMatrix[y][x];
-        
+
         TS_ASSERT(*testGrid == other);
 
         other[changedCoord].testValue += deltaTemp;
@@ -106,7 +106,7 @@ public:
         Grid<TestCell<2> > b(Coord<2>(0, 0));
         TS_ASSERT_EQUALS(a, b);
     }
-    
+
     void testCopyConstructor()
     {
         Grid<int> *a1 = new Grid<int>(Coord<2>(200, 100));
@@ -137,7 +137,7 @@ public:
         TS_ASSERT_EQUALS(Coord<2>(12, 34), g.getDimensions());
     }
 
-    void testGetNeighborhood() 
+    void testGetNeighborhood()
     {
         CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(1,2));
 
@@ -154,7 +154,7 @@ public:
     {
         CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(1,2));
         /* We need to use absolute coordinates for testGrid, but relative
-         * coordinates for the neighbourhood map "hood" 
+         * coordinates for the neighbourhood map "hood"
          */
 
         TS_ASSERT_EQUALS((*testGrid)[Coord<2>(1,1)], hood[Coord<2>( 0,-1)])
@@ -170,7 +170,7 @@ public:
     {
         CoordMap<TestCell<2> > hood = testGrid->getNeighborhood(Coord<2>(GRIDWIDTH-1, 0));
 
-        TS_ASSERT_EQUALS(hood[Coord<2>( 0, -1)].testValue, 
+        TS_ASSERT_EQUALS(hood[Coord<2>( 0, -1)].testValue,
                          TestCell<2>::defaultValue());
 
         TS_ASSERT_EQUALS(hood[Coord<2>(-1,  0)].testValue, 202);
@@ -189,7 +189,7 @@ public:
         // ...and two others
         fooBar[Coord<2>( 1,  0)] = 19;
         fooBar[Coord<2>( 2,  1)] = 81;
-        std::string expected = 
+        std::string expected =
             "Grid<2>(\n"
             "boundingBox: CoordBox<2>(origin: (0, 0), dimensions: (3, 2))\n"
             "edgeCell:\n"
@@ -207,7 +207,7 @@ public:
             "Coord(2, 1):\n"
             "81\n"
             ")";
-        TS_ASSERT_EQUALS(fooBar.toString(), expected);        
+        TS_ASSERT_EQUALS(fooBar.toString(), expected);
     }
 
     void testEdgeCell()
@@ -241,7 +241,7 @@ public:
                 if (insert.inBounds(c)) {
                     expected = 2;
                 }
-                
+
                 TS_ASSERT_EQUALS(expected, g[c]);
             }
         }
@@ -264,7 +264,7 @@ public:
                     if (insert.inBounds(c)) {
                         expected = 2;
                     }
-                
+
                     TS_ASSERT_EQUALS(expected, g[c]);
                 }
             }

@@ -6,6 +6,8 @@
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
+#include <boost/serialization/base_object.hpp>
+
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
@@ -30,6 +32,8 @@ class ParallelWriter
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
+    typedef Region<Topology::DIM> RegionType;
+    typedef Coord<Topology::DIM> CoordType;
 
     /**
      * is the equivalent to Writer().
@@ -61,6 +65,7 @@ public:
         region = newRegion;
     }
 
+
     /**
      * is called back from \a sim after each simulation step. event
      * specifies the phase in which the simulation is currently in.
@@ -73,8 +78,8 @@ public:
      */
     virtual void stepFinished(
         const GridType& grid,
-        const Region<Topology::DIM>& validRegion,
-        const Coord<Topology::DIM>& globalDimensions,
+        const RegionType& validRegion,
+        const CoordType& globalDimensions,
         unsigned step,
         WriterEvent event,
         bool lastCall) = 0;
@@ -92,8 +97,16 @@ public:
 protected:
     Region<Topology::DIM> region;
     std::string prefix;
-    DistributedSimulator<CELL_TYPE> *distSim;
     unsigned period;
+private:
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & region;
+        ar & prefix;
+        ar & period;
+    }
 };
 
 }

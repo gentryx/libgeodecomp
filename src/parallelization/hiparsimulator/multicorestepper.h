@@ -8,7 +8,7 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 template<typename CELL_TYPE>
-class MulticoreStepper 
+class MulticoreStepper
 // fixme: not enabled yet
 // : public StepperHelper<
 //     DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> >

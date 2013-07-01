@@ -1467,27 +1467,27 @@ int main(int argc, char **argv)
           << Coord<3>(1024, 1024, 32)
           << Coord<3>(1026, 1026, 32);
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DVanilla(), sizes[i]);
     }
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DSSE(), sizes[i]);
     }
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DClassic(), sizes[i]);
     }
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DFixedHood(), sizes[i]);
     }
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DStreakUpdate(), sizes[i]);
     }
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
     }
 
@@ -1499,7 +1499,7 @@ int main(int argc, char **argv)
           << Coord<3>(106, 106, 106)
           << Coord<3>(128, 128, 128);
 
-    for (int i = 0; i < sizes.size(); ++i) {
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(LBMClassic(), sizes[i]);
     }
 

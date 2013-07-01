@@ -4,7 +4,7 @@
 namespace LibGeoDecomp {
 
 RandomBalancer::WeightVec RandomBalancer::balance(
-    const RandomBalancer::WeightVec& weights, 
+    const RandomBalancer::WeightVec& weights,
     const RandomBalancer::LoadVec& /* unused */)
 {
     WeightVec ret(weights.size());
@@ -27,7 +27,7 @@ RandomBalancer::WeightVec RandomBalancer::balance(
         remainder -= ret[i];
     }
     // scatter remainder
-    for (unsigned i = remainder; i > 0; i--) 
+    for (unsigned i = remainder; i > 0; i--)
         ret[Random::gen_u(ret.size())]++;
 
     return ret;

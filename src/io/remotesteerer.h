@@ -45,7 +45,7 @@ public:
     RemoteSteerer(
         unsigned period,
         int port,
-        int root = 0,
+        unsigned root = 0,
         MPI::Comm *communicator = &MPI::COMM_WORLD) :
         Steerer<CELL_TYPE>(period),
         port(port),
@@ -61,14 +61,14 @@ public:
         const Region<Topology::DIM>& validRegion,
         unsigned step)
     {
-        LOG(DEBUG, "RemoteSteerer::nextStep(step = " << step << ")");
+        LOG(DBG, "RemoteSteerer::nextStep(step = " << step << ")");
         pipe->sync();
         StringVec steeringRequests = pipe->retrieveSteeringRequests();
 
         for (StringVec::iterator i = steeringRequests.begin();
              i != steeringRequests.end();
              ++i) {
-            LOG(DEBUG, "RemoteSteerer::nextStep(" << *i << ")");
+            LOG(DBG, "RemoteSteerer::nextStep got" << *i);
             StringVec parameters = StringOps::tokenize(*i, " ");
             std::string command = parameters.pop_front();
 

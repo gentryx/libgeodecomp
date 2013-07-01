@@ -8,12 +8,12 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/testplotter.h>
 
-using namespace boost::assign; 
-using namespace LibGeoDecomp; 
+using namespace boost::assign;
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class PPMWriterTest : public CxxTest::TestSuite 
+class PPMWriterTest : public CxxTest::TestSuite
 {
 public:
 
@@ -29,7 +29,7 @@ public:
         delete simulator;
         for (int i = 0; i < 100; i++) {
             std::ostringstream f;
-            f << tempFile << "." 
+            f << tempFile << "."
               << std::setw(4) << std::setfill('0') << i << ".ppm";
             remove(f.str().c_str());
         }
@@ -53,7 +53,7 @@ public:
 
         std::vector<char> expected;
         expected += 0x50, 0x36, 0x20, // P6_
-            0x32, 0x30, 0x30, 0x20,   // width, 
+            0x32, 0x30, 0x30, 0x20,   // width,
             0x32, 0x32, 0x30, 0x20,   // height,
             0x32, 0x35, 0x35, 0x0a;   // and maxcolor (space separated)
         // each cell gets plotted as a tile. we check the first lines
@@ -64,9 +64,9 @@ public:
             expected += 0x02, 0x2f, 0x0b; // rgb rgb...
 
         std::vector<char> content;
-        for (unsigned i = 0; i < expected.size(); i++) 
+        for (unsigned i = 0; i < expected.size(); i++)
             content.push_back(infile.get());
-    
+
         TS_ASSERT_EQUALS(content, expected);
     }
 
@@ -92,17 +92,17 @@ public:
     {
         std::string path("/non/existent/path/prefix1");
         std::string expectedErrorMessage("Could not open file " + path);
-        PPMWriter<TestCell<2>, TestPlotter> *writer = 
+        PPMWriter<TestCell<2>, TestPlotter> *writer =
             new PPMWriter<TestCell<2>, TestPlotter>(path);
         TS_ASSERT_THROWS_ASSERT(
             writer->stepFinished(
-                *simulator->getGrid(), 
-                simulator->getStep(), 
+                *simulator->getGrid(),
+                simulator->getStep(),
                 WRITER_INITIALIZED),
             FileOpenException &exception,
             TS_ASSERT_SAME_DATA(
-                expectedErrorMessage.c_str(), 
-                exception.what(), 
+                expectedErrorMessage.c_str(),
+                exception.what(),
                 expectedErrorMessage.length()));
     }
 

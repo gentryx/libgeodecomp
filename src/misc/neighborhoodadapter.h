@@ -23,10 +23,10 @@ public:
         neighbors(_neighbors)
     {}
 
-    const Cargo& operator[](const Key& id) 
+    const Cargo& operator[](const Key& id)
     {
         const Cargo *res = (*neighbors)[Coord<DIM>()][id];
-            
+
         if (res) {
             return *res;
         }

@@ -7,7 +7,7 @@
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/misc/updatefunctortestbase.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -60,7 +60,7 @@ public:
     static void updateLine(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
         log << "LineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
-    
+
     }
 };
 
@@ -110,11 +110,11 @@ public:
     static void updateLine(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
         log << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
-    
+
     }
 };
 
-class UpdateFunctorTest : public CxxTest::TestSuite 
+class UpdateFunctorTest : public CxxTest::TestSuite
 {
 public:
     template<class STENCIL>
@@ -130,7 +130,7 @@ public:
             const Streak<DIM>& streak,
             const GridType& gridOld,
             GridType *gridNew,
-            unsigned nanoStep) 
+            unsigned nanoStep)
         {
             UpdateFunctor<TestCellType>()(
                 streak, streak.origin, gridOld, gridNew, nanoStep);

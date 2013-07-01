@@ -14,11 +14,11 @@
 namespace LibGeoDecomp {
 
 template<typename CELL, class CELL_PLOTTER>
-class Plotter 
+class Plotter
 {
 public:
 
-    /** creates new Plotter object. 
+    /** creates new Plotter object.
      * @param cellPlotter ist used to plott a single cell
      * @param width, height see setCellDimensions()
      */
@@ -29,7 +29,7 @@ public:
     }
 
     /**
-     * sets the pixel dimensions of a cell when plotted 
+     * sets the pixel dimensions of a cell when plotted
      */
     void setCellDimensions(const unsigned& width, const unsigned& height)
     {
@@ -44,7 +44,7 @@ public:
     {
         return Coord<2>(_cellWidth, _cellHeight);
     }
-    
+
     Image plotGrid(const Grid<CELL, typename CELL::Topology>& grid) const
     {
         unsigned width = _cellWidth * grid.getDimensions().x();
@@ -54,12 +54,12 @@ public:
 
     /**
      * Plot the Grid in the given viewport. upperLeft, width and
-     * height are pixel coordinates. 
+     * height are pixel coordinates.
      */
     Image plotGridInViewport(
-        const Grid<CELL, typename CELL::Topology>& grid, 
+        const Grid<CELL, typename CELL::Topology>& grid,
         const Coord<2>& upperLeft,
-        const unsigned& width, 
+        const unsigned& width,
         const unsigned& height) const
     {
         Image ret(width, height, Color::BLACK);
@@ -73,17 +73,17 @@ public:
         ex = std::min(ex, (int)grid.getDimensions().x());
         ey = std::min(ey, (int)grid.getDimensions().y());
 
-        for (int y = sy; y < ey; y++) {            
+        for (int y = sy; y < ey; y++) {
             for (int x = sx; x < ex; x++) {
-                Coord<2> relativeUpperLeft = 
-                    Coord<2>(x * _cellWidth, y * _cellHeight) - upperLeft; 
+                Coord<2> relativeUpperLeft =
+                    Coord<2>(x * _cellWidth, y * _cellHeight) - upperLeft;
                 _cellPlotter->plotCell(
-                    grid[Coord<2>(x, y)], 
-                    &ret, 
-                    relativeUpperLeft, 
-                    _cellWidth, 
+                    grid[Coord<2>(x, y)],
+                    &ret,
+                    relativeUpperLeft,
+                    _cellWidth,
                     _cellHeight);
-            }            
+            }
         }
 
         return ret;

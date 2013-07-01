@@ -1,10 +1,10 @@
 #include <libgeodecomp/misc/testhelper.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TestHelperTest : public CxxTest::TestSuite 
+class TestHelperTest : public CxxTest::TestSuite
 {
     std::string testFile;
 

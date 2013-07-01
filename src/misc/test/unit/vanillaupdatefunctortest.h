@@ -2,7 +2,7 @@
 #include <libgeodecomp/misc/updatefunctortestbase.h>
 #include <libgeodecomp/misc/vanillaupdatefunctor.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -22,7 +22,7 @@ public:
             const Streak<DIM>& streak,
             const GridType& gridOld,
             GridType *gridNew,
-            unsigned nanoStep) 
+            unsigned nanoStep)
         {
             VanillaUpdateFunctor<TestCellType>()(
                 streak, streak.origin, gridOld, gridNew, nanoStep);

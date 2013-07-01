@@ -6,11 +6,11 @@
 #include <libgeodecomp/misc/linepointerneighborhood.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class LinePointerNeighborhoodTest : public CxxTest::TestSuite 
+class LinePointerNeighborhoodTest : public CxxTest::TestSuite
 {
 public:
     void testBasic()
@@ -63,7 +63,7 @@ public:
         fillGrid(&grid);
 
         long x = 0;
-        
+
         Coord<2> c(0, 3);
         const int *pointers[] = {
             &grid[Coord<2>(c.x() - 1, c.y() - 1)],
@@ -76,11 +76,11 @@ public:
             &grid[Coord<2>(c.x() + 0, c.y() + 1)],
             &grid[Coord<2>(endX,      c.y() + 1)]
         };
-        
+
         // start at western boundary:
         {
             LinePointerNeighborhood<int, Stencils::Moore<2, 1>, true, false, false, false, false, false> hood(pointers, &x);
-            
+
             TS_ASSERT_EQUALS(-1,   (hood[FixedCoord<-1, -1>()]));
             TS_ASSERT_EQUALS(1020, (hood[FixedCoord< 0, -1>()]));
             TS_ASSERT_EQUALS(1021, (hood[FixedCoord< 1, -1>()]));
@@ -98,7 +98,7 @@ public:
         {
             for (x = 1; x < endX - 1; ++x) {
                 LinePointerNeighborhood<int, Stencils::Moore<2, 1>, false, false, false, false, false, false> hood(pointers, &x);
-            
+
                 TS_ASSERT_EQUALS(1020 + x - 1, (hood[FixedCoord<-1, -1>()]));
                 TS_ASSERT_EQUALS(1020 + x + 0, (hood[FixedCoord< 0, -1>()]));
                 TS_ASSERT_EQUALS(1020 + x + 1, (hood[FixedCoord< 1, -1>()]));

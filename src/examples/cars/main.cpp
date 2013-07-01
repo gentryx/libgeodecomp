@@ -144,9 +144,9 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(Cell, int, border)
-DEFINE_DATAACCESSOR(Cell, int, direction)
-DEFINE_DATAACCESSOR(Cell, int, rate)
+DEFINE_DATAACCESSOR(BorderAccessor,    Cell, int, border)
+DEFINE_DATAACCESSOR(DirectionAccessor, Cell, int, direction)
+DEFINE_DATAACCESSOR(RateAccessor,      Cell, int, rate)
 
 // fixme: does this even do anything?
 // static void getStepFunction(

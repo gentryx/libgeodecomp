@@ -11,14 +11,14 @@ class SimpleCellPlotter
 {
 public:
     void plotCell(
-        const CELL_TYPE& cell, 
+        const CELL_TYPE& cell,
         Image *image,
-        const Coord<2>& origin, 
-        const unsigned& width, 
+        const Coord<2>& origin,
+        const unsigned& width,
         const unsigned& height)
     {
         image->paste(origin, Image(width, height, CELL_TO_COLOR()(cell)));
-    }    
+    }
 };
 
 };

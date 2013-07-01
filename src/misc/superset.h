@@ -41,12 +41,12 @@ public:
         return temp.str();
     }
 
-    inline const T& min() const
+    inline const T& (min)() const
     {
         return *begin();
     }
 
-    inline const T& max() const
+    inline const T& (max)() const
     {
         return *rbegin();
     }

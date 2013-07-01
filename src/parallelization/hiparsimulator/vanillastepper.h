@@ -41,25 +41,25 @@ public:
         curStep = initializer->startStep();
         curNanoStep = 0;
 
-        for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
+        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
             addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
         }
-
-        for (int i = 0; i < innerSetPatchAccepters.size(); ++i) {
+        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
 
         initGrids();
     }
 
-    inline virtual void update(int nanoSteps)
+    inline void update(std::size_t nanoSteps)
     {
-        for (int i = 0; i < nanoSteps; ++i) {
+        for (std::size_t i = 0; i < nanoSteps; ++i)
+        {
             update();
         }
     }
 
-    inline virtual std::pair<int, int> currentStep() const
+    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
     {
         return std::make_pair(curStep, curNanoStep);
     }
@@ -70,9 +70,9 @@ public:
     }
 
 private:
-    int curStep;
-    int curNanoStep;
-    int validGhostZoneWidth;
+    std::size_t curStep;
+    std::size_t curNanoStep;
+    unsigned validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
     PatchBufferType2 rimBuffer;
@@ -113,7 +113,7 @@ private:
     inline void notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
-        const long& nanoStep)
+        std::size_t nanoStep)
     {
         for (typename ParentType::PatchAccepterList::iterator i =
                  patchAccepters[patchType].begin();
@@ -128,7 +128,7 @@ private:
     inline void notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
-        const long& nanoStep)
+        std::size_t nanoStep)
     {
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
@@ -141,7 +141,7 @@ private:
         }
     }
 
-    inline long globalNanoStep() const
+    inline std::size_t globalNanoStep() const
     {
         return curStep * CELL_TYPE::nanoSteps() + curNanoStep;
     }
@@ -195,11 +195,11 @@ private:
         restoreRim(false);
 
         // 2: actual ghostzone update
-        int oldNanoStep = curNanoStep;
-        int oldStep = curStep;
-        int curGlobalNanoStep = globalNanoStep();
+        std::size_t oldNanoStep = curNanoStep;
+        std::size_t oldStep = curStep;
+        std::size_t curGlobalNanoStep = globalNanoStep();
 
-        for (int t = 0; t < ghostZoneWidth(); ++t) {
+        for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
 
@@ -238,8 +238,9 @@ private:
         restoreRim(true);
         restoreKernel();
     }
+private:
 
-    inline const unsigned& ghostZoneWidth() const
+    inline unsigned ghostZoneWidth() const
     {
         return partitionManager->getGhostZoneWidth();
     }
@@ -254,13 +255,13 @@ private:
         validGhostZoneWidth = ghostZoneWidth();
     }
 
-    inline void saveRim(const long& nanoStep)
+    inline void saveRim(std::size_t nanoStep)
     {
         rimBuffer.pushRequest(nanoStep);
         rimBuffer.put(*oldGrid, rim(), nanoStep);
     }
 
-    inline void restoreRim(const bool& remove)
+    inline void restoreRim(bool remove)
     {
         rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
     }

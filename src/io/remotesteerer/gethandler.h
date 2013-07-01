@@ -26,7 +26,7 @@ public:
 
     virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<DIM>& validRegion, unsigned step)
     {
-        LOG(DEBUG, "GetHander::operator()(" << parameters << " step: " << step << ")");
+        LOG(DBG, "GetHander::operator()(" << parameters << " step: " << step << ")");
 
         Coord<DIM> c;
         int index;

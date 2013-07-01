@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_FIXME_H
 
 #include <cuda.h>
- 
+
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
@@ -37,7 +37,7 @@ __global__ void update(double *gridOld, double *gridNew)
         double bottom = gridOld[offset + OFFSET(0,  2, 0)];
         double top    = gridOld[offset + OFFSET(0, -1, 0)];
 
-        gridNew[offset + OFFSET(0, 0, 0)] = 
+        gridNew[offset + OFFSET(0, 0, 0)] =
             0.01 * lineA0 +
             0.02 * lineA1 +
             0.03 * lineA2 +
@@ -51,12 +51,12 @@ __global__ void update(double *gridOld, double *gridNew)
             0.11 * gridOld[offset + OFFSET(-2, 0, 0)] +
             0.12 * gridOld[offset + OFFSET( 1, 0, 0)] +
             0.13 * gridOld[offset + OFFSET( 2, 0, 0)];
-        gridNew[offset + OFFSET(0, 1, 0)] = 
+        gridNew[offset + OFFSET(0, 1, 0)] =
             0.01 * lineB0 +
             0.02 * lineB1 +
             0.03 * lineB2 +
             0.04 * lineB3 +
-            0.05 * lineB4 + 
+            0.05 * lineB4 +
             0.06 * lineA2 +
             0.07 * top +
             0.08 * bottom +
@@ -95,7 +95,7 @@ public:
         cudaMalloc(&devGridNew, bytesize);
         checkForCUDAError();
     }
-    
+
     inline void step()
     {
         dim3 dimBlock(BLOCK_DIM_X, BLOCK_DIM_Y);

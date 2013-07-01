@@ -32,15 +32,15 @@ public:
     const static int DIM = Topology::DIM;
     const static int MAX_SIZE = SIZE;
 
-    inline ContainerCell() : 
+    inline ContainerCell() :
         size(0)
     {}
 
     inline void insert(const Key& id, const Cargo& cell)
     {
         Key *end = ids + size;
-        Key *pos = std::upper_bound(ids, end, id);        
-        
+        Key *pos = std::upper_bound(ids, end, id);
+
         if (pos == end) {
             checkSize();
             cells[size] = cell;
@@ -81,10 +81,10 @@ public:
         return false;
     }
 
-    inline Cargo *operator[](const Key& id) 
+    inline Cargo *operator[](const Key& id)
     {
         Key *end = ids + size;
-        Key *pos = std::upper_bound(ids, end, id);        
+        Key *pos = std::upper_bound(ids, end, id);
         int offset = pos - ids;
 
         if (offset == 0)
@@ -114,7 +114,7 @@ public:
     {
         *this = neighbors[Coord<DIM>()];
         NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
-        for (int i = 0; i < size; ++i) 
+        for (int i = 0; i < size; ++i)
             cells[i].update(adapter, nanoStep);
     }
 
@@ -135,7 +135,7 @@ private:
 
     inline void checkSize() const
     {
-        if (size == MAX_SIZE) 
+        if (size == MAX_SIZE)
             throw std::logic_error("ContainerCell capacity exeeded");
     }
 };

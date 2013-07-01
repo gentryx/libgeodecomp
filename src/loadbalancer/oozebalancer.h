@@ -15,7 +15,7 @@ namespace LibGeoDecomp {
  * is equally fast, that each item (see LoadBalancer) costs about the
  * same time to be computed (this is also false) and that these costs
  * don't change all too much during the runtime (again: plain wrong).
- * 
+ *
  * From all these questionable assumptions a possibly optimal new load
  * distribution is derived but, to keep errors at bounds, the
  * OozeBalancer will return a weighted linear combination of the old
@@ -45,19 +45,19 @@ private:
      * items, that this takes him \f$relativeLoads[n]\f$ time and that
      * all nodes are roughly equally fast, then the optimal
      * distribution \f$dist\f$ can be determined by cutting the
-     * sequence of items into \f$n\f$ subsets \f$s_i\f$ so that 
+     * sequence of items into \f$n\f$ subsets \f$s_i\f$ so that
      *
      * \f[
      * \bigwedge_i \int_{t \in s_i} f(t) dt = l
 
      * \f]
      *
-     * where \f$l\f$ is the target load per node 
+     * where \f$l\f$ is the target load per node
      *
      * \f[
      * l = \frac{1}{n} \sum_{i=0}^{i<n} \cdot \mbox{weights}[i]
      * \f]
-     * 
+     *
      * and \f$f(t)\f$ it the load (or time) necessary to compute item \f$t\f$:
      *
      * \f[
@@ -67,7 +67,7 @@ private:
      * (\f$t\f$ is currently computed on node \f$a\f$.)
      */
     LoadVec expectedOptimalDistribution(
-        const WeightVec& weights, 
+        const WeightVec& weights,
         const LoadVec& relativeLoads) const;
 
 private:

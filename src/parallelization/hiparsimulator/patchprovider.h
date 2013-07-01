@@ -33,21 +33,22 @@ public:
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
-        const long& nanoStep,
-        const bool& remove=true) = 0;
+        const std::size_t nanoStep,
+        const bool remove=true) = 0;
 
 protected:
-    SuperSet<long> storedNanoSteps;
+    SuperSet<std::size_t> storedNanoSteps;
 
-    void checkNanoStepGet(const long& nanoStep) const
+    void checkNanoStepGet(const std::size_t nanoStep) const
     {
         if (storedNanoSteps.empty()) {
             throw std::logic_error("no nano step available");
         }
-        if (storedNanoSteps.min() != nanoStep)
+        if ((storedNanoSteps.min)() != nanoStep)
             throw std::logic_error(
-                std::string("requested time step doesn't match expected nano step.")
-                + " expected: " + StringOps::itoa(storedNanoSteps.min())
+                std::string(
+                    "requested time step doesn't match expected nano step.")
+                + " expected: " + StringOps::itoa((storedNanoSteps.min)())
                 + " is: " + StringOps::itoa(nanoStep));
     }
 };

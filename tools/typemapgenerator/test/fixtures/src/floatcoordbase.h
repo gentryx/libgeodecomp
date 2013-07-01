@@ -1,7 +1,7 @@
 #ifndef _floatcoord_h_
 #define _floatcoord_h_
 
-template<int DIMENSIONS>  
+template<int DIMENSIONS>
 class FloatCoord
 {
     friend class Typemaps;

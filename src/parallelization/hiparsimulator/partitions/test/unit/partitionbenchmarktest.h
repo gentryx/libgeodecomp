@@ -10,11 +10,11 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-class PartitionBenchmarkTest : public CxxTest::TestSuite 
+class PartitionBenchmarkTest : public CxxTest::TestSuite
 {
 public:
-    
-    void testLargeBenchmark() 
+
+    void testLargeBenchmark()
     {
         // fixme: move this to performace tests
 //         benchmark<HIndexingPartition, HIndexingPartition::Iterator>("HIndexing");
@@ -33,13 +33,13 @@ private:
         long long t1 = Chronometer::timeUSec();
         PARTITION h(Coord<2>(100, 200), dim);
         ITERATOR end = h.end();
-        for (ITERATOR i = h.begin(); i != end; ++i) 
+        for (ITERATOR i = h.begin(); i != end; ++i)
             accu += *i;
         long long t2 = Chronometer::timeUSec();
 
         std::cout << "accu == " << accu << "\n";
         double span = (t2-t1) / 1000.0;
-        std::cout << label << ": " << span << "\n";            
+        std::cout << label << ": " << span << "\n";
     }
 
 };

@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/fixedarray.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class FixedArrayTest : public CxxTest::TestSuite 
+class FixedArrayTest : public CxxTest::TestSuite
 {
 public:
 
@@ -32,7 +32,7 @@ public:
 
         FixedArray<int, 10> b;
         TS_ASSERT_THROWS(b.reserve(11), std::out_of_range);
-                         
+
         b.reserve(3);
         TS_ASSERT_EQUALS(3, b.size());
         std::copy(a.begin(), a.end(), b.begin());

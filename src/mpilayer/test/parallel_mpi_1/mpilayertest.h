@@ -4,7 +4,7 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -36,29 +36,29 @@ public:
     void testSendRecvCell()
     {
         MPILayer layer;
-        TestCell<2> sendCell = demoCell(2);  
-        layer.send(&sendCell, 0);        
+        TestCell<2> sendCell = demoCell(2);
+        layer.send(&sendCell, 0);
         TestCell<2> receivedCell;
         layer.recv(&receivedCell, 0);
         layer.waitAll();
         TS_ASSERT_EQUALS(receivedCell, sendCell);
     }
 
-    void testSize() 
-    { 
-        MPILayer layer; 
+    void testSize()
+    {
+        MPILayer layer;
         TS_ASSERT_EQUALS((unsigned)1, layer.size());
-    } 
+    }
 
-    void testRank() 
-    { 
-        MPILayer layer; 
-        TS_ASSERT(layer.rank() < layer.size()); 
-    } 
+    void testRank()
+    {
+        MPILayer layer;
+        TS_ASSERT(layer.rank() < layer.size());
+    }
 
     void testSendRecvVec()
     {
-        MPILayer layer; 
+        MPILayer layer;
         SuperVector<unsigned> actual(5);
         SuperVector<unsigned> expected(5);
         expected[0] = 1;
@@ -66,7 +66,7 @@ public:
         expected[2] = 3;
         expected[3] = 5;
         expected[4] = 8;
-        
+
         layer.sendVec(&actual, 0);
         layer.recvVec(&expected, 0);
         layer.waitAll();

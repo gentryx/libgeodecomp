@@ -3,7 +3,7 @@
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/misc/testcell.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
@@ -11,10 +11,10 @@ class TestCellPlotter
 {
 public:
     inline void plotCell(
-        const TestCell<2>& c, 
-        Image *img, 
-        const Coord<2>& upperLeft, 
-        const unsigned& width, 
+        const TestCell<2>& c,
+        Image *img,
+        const Coord<2>& upperLeft,
+        const unsigned& width,
         const unsigned& height) const
     {
         int value = 1 + c.pos.x() + c.pos.y() * c.dimensions.dimensions.x();
@@ -23,12 +23,12 @@ public:
 };
 
 
-class PlotterTest : public CxxTest::TestSuite 
+class PlotterTest : public CxxTest::TestSuite
 {
 private:
     unsigned width;
     unsigned height;
-    Plotter<TestCell<2>, TestCellPlotter> *plotter;   
+    Plotter<TestCell<2>, TestCellPlotter> *plotter;
     TestCellPlotter simplePlotter;
 
 public:
@@ -43,7 +43,7 @@ public:
     void tearDown()
     {
         delete plotter;
-    }    
+    }
 
 
     void testPlotGridDimensions()
@@ -77,7 +77,7 @@ public:
         testGrid[Coord<2>(1, 2)].testValue = 200;
 
         Image result = plotter->plotGrid(testGrid);
-        
+
         Image expected(expectedDimX, expectedDimY);
 
         Image f(width, height);
@@ -88,7 +88,7 @@ public:
                 expected.paste(Coord<2>(x * width, y * height), f);
             }
         }
-            
+
         TS_ASSERT_EQUALS(expected, result);
     }
 
@@ -115,7 +115,7 @@ public:
         int blackWidth = width - colorWidth;
         int blackHeight = height - colorHeight;
 
-        Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(x, y), 
+        Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(x, y),
                                               width, height);
         /* check dimensions */
         TS_ASSERT_EQUALS(actual.getDimensions().x(), width);
@@ -125,7 +125,7 @@ public:
         TS_ASSERT_EQUALS(actual.slice(Coord<2>(colorWidth, 0), blackWidth, height),
                          Image(blackWidth, height, Color::BLACK));
 
-        /* check lower portion */        
+        /* check lower portion */
         TS_ASSERT_EQUALS(actual.slice(Coord<2>(0, colorHeight), width, blackHeight),
                          Image(width, blackHeight, Color::BLACK));
 
@@ -134,13 +134,13 @@ public:
         Image uncSlice = uncut.slice(Coord<2>(x, y), colorWidth, colorHeight);
         TS_ASSERT_EQUALS(actSlice, uncSlice);
     }
-    
-    
-    void testPlotGridInViewportLarge() 
+
+
+    void testPlotGridInViewportLarge()
     {
         Grid<TestCell<2> > testGrid(Coord<2>(2000, 2000));
         int t1 = time(0);
-        Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(500, 500), 
+        Image actual = plotter->plotGridInViewport(testGrid, Coord<2>(500, 500),
                                               1000, 1000);
         int t2 = time(0);
         int span = t2 - t1;

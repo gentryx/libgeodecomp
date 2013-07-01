@@ -38,7 +38,7 @@ public:
     virtual void put(
         const GRID_TYPE1& grid,
         const Region<DIM>& /*validRegion*/,
-        const long& nanoStep)
+        const std::size_t nanoStep)
     {
         // It would be nice to check if validRegion was actually a
         // superset of the region we'll save, but that would be
@@ -51,16 +51,16 @@ public:
         }
 
         GridVecConv::gridToVector(grid, &buffer[indexWrite], region);
-        storedNanoSteps << requestedNanoSteps.min();
-        requestedNanoSteps.erase_min();
+        storedNanoSteps << (requestedNanoSteps.min)();
+        (requestedNanoSteps.erase_min)();
         inc(&indexWrite);
     }
 
     virtual void get(
         GRID_TYPE2 *destinationGrid,
         const Region<DIM>& patchableRegion,
-        const long& nanoStep,
-        const bool& remove=true)
+        const std::size_t nanoStep,
+        const bool remove=true)
     {
         checkNanoStepGet(nanoStep);
 

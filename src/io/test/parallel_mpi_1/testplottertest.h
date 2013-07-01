@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/testplotter.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TestPlotterTest : public CxxTest::TestSuite 
+class TestPlotterTest : public CxxTest::TestSuite
 {
 public:
     void testPlotCell()
@@ -17,8 +17,8 @@ public:
 
         Image expected(100, 100, Color(100, 100, 100));
         expected.paste(Coord<2>(10, 20), Image(30, 40, Color(65, 47, 11)));
-        
-        TS_ASSERT_EQUALS(is, expected);        
+
+        TS_ASSERT_EQUALS(is, expected);
     }
 };
 

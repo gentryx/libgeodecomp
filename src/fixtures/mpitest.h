@@ -9,7 +9,7 @@
  * OpenMPI can't run multiple MPI::Init() - MPI::Finalize() cycles
  * during one program execution. Therefore this file has to hook these
  * calls into CxxTest's global fixtures (so the get executed exactly
- * once). 
+ * once).
  */
 class MPIGlobalFixture : public CxxTest::GlobalFixture
 {
@@ -17,7 +17,7 @@ class MPIGlobalFixture : public CxxTest::GlobalFixture
     {
         int argc = 0;
         char **argv = 0;
-        MPI::Init(argc, argv);        
+        MPI::Init(argc, argv);
         LibGeoDecomp::Typemaps::initializeMaps();
         return true;
     }
@@ -38,7 +38,7 @@ class MPITest : public CxxTest::TestSuite
 {
 public:
 
-    void testMPIUpAndRunning() 
+    void testMPIUpAndRunning()
     {
         TS_ASSERT_THROWS_NOTHING(  MPI::COMM_WORLD.Get_rank(); );
     }

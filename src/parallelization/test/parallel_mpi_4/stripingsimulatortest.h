@@ -476,11 +476,11 @@ private:
         Grid<TestCell<2> > grid(init->gridBox().dimensions);
         init->grid(&grid);
         for (int y = 0; y < grid.getDimensions().y(); y++) {
-            for (int x = 0; x < grid.getDimensions().x(); x++) 
-                grid[y][x].testValue = foo + y * grid.getDimensions().y() + x; 
+            for (int x = 0; x < grid.getDimensions().x(); x++)
+                grid[y][x].testValue = foo + y * grid.getDimensions().y() + x;
         }
         return grid;
-    }    
+    }
 };
 
 };

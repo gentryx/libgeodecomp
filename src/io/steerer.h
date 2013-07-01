@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/region.h>
+#include <boost/serialization/base_object.hpp>
 
 namespace LibGeoDecomp {
 
@@ -50,6 +51,13 @@ public:
     const unsigned& getPeriod() const
     {
         return period;
+    }
+
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & region;
+        ar & period;
     }
 
 protected:

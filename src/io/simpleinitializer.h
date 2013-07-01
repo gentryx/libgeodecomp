@@ -3,6 +3,8 @@
 
 #include <libgeodecomp/io/initializer.h>
 
+#include <boost/serialization/base_object.hpp>
+
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
@@ -31,6 +33,14 @@ public:
     unsigned startStep() const
     {
         return 0;
+    }
+
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & boost::serialization::base_object<Initializer<CELL_TYPE> >(*this);
+        ar & dimensions;
+        ar & steps;
     }
 
 protected:

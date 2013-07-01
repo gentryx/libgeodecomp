@@ -19,7 +19,31 @@ if(NOT DEFINED BOOST_ROOT)
 endif()
 
 detect_distro()
-find_package(Boost REQUIRED date_time filesystem system thread)
+
+if(NOT HPX_ROOT)
+    if(NOT $ENV{HPX_ROOT} STREQUAL "")
+        set(HPX_ROOT $ENV{HPX_ROOT})
+    endif()
+endif()
+
+if(HPX_ROOT)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
+    find_package(HPX)
+endif()
+
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+if(HPX_FOUND)
+    set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
+    include_directories(${HPX_INCLUDE_DIR})
+    link_directories(${HPX_LIBRARY_DIR})
+endif()
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
+
+find_package(Boost REQUIRED date_time filesystem system thread serialization)
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
@@ -40,15 +64,13 @@ if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
 endif()
 
+if(NOT DEFINED HPX_FOUND)
+  set(HPX_FOUND false)
+endif()
 if(NOT DEFINED OpenCV_FOUND)
   set(OpenCV_FOUND false)
 endif()
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-set(DEFAULT_FLAGS "-Wall -Wno-sign-compare")
 set(DEFAULT_TYPEMAP_GENERATION false)
 
 if(NOT RELEASE)
@@ -71,7 +93,6 @@ set(AMD64_LINUX false)
 if (MACHINE_ARCH MATCHES "x86_64")
   set(AMD64_LINUX true)
 endif()
-
 #============= CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
@@ -98,6 +119,8 @@ add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI"
 add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+
+add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} false)
 
 add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
@@ -163,6 +186,9 @@ if(FEATURE_QT AND NOT QT4_FOUND)
   message(FATAL_ERROR "FEATURE_QT selected, but could not find QT4")
 endif()
 
+if(FEATURE_HPX AND NOT HPX_FOUND)
+    message(FATAL_ERROR "FEATURE_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
+endif()
 if(FEATURE_VISIT)
   include_directories(${VisIt_INCLUDE_DIRS})
 endif()
@@ -211,7 +237,7 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_NSIS_DISPLAY_NAME ${PACKAGE_NAME})
   # will be shown e.g. in windows' control center package info
   set(CPACK_NSIS_HELP_LINK ${PACKAGE_HOMEPAGE})
-  # will be shown e.g. in windows' control center package info  
+  # will be shown e.g. in windows' control center package info
   set(CPACK_NSIS_URL_INFO_ABOUT ${PACKAGE_HOMEPAGE})
   # will be shown e.g. in windows' control center package info
   set(CPACK_NSIS_CONTACT ${PACKAGE_EMAIL})
@@ -250,7 +276,7 @@ if(WIN32)
   set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/libgeodecomp/geodecomp.lib)
 endif(WIN32)
 
-# link all sources 
+# link all sources
 set(SOURCES "")
 foreach(dir ${LIBDIRS})
   set(RELATIVE_PATH ${dir}/)
@@ -289,7 +315,7 @@ endforeach(dir)
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
 includedir=${CMAKE_INSTALL_PREFIX}/include/libgeodecomp
- 
+
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
@@ -311,7 +337,7 @@ if (GENERATE_TYPEMAPS)
   foreach(i ${ALL_HEADERS})
     set(CANDIDATES "${i}:${CANDIDATES}")
   endforeach(i)
-  
+
   add_custom_command(
     OUTPUT "${CMAKE_BINARY_DIR}/cache"
     COMMAND cp -a "${CMAKE_BINARY_DIR}/last_cache" "${CMAKE_BINARY_DIR}/cache" 2>/dev/null || echo "still ok >/dev/null"

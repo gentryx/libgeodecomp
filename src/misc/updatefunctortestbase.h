@@ -30,7 +30,7 @@ public:
         GridType gridOld(dim);
         init.grid(&gridOld);
         GridType gridNew = gridOld;
-        
+
         CoordBox<DIM> lineStarts = gridOld.boundingBox();
         lineStarts.dimensions.x() = 1;
 
@@ -41,7 +41,7 @@ public:
                 Streak<DIM> streak(*i, dim.x());
                 callFunctor(streak, gridOld, &gridNew, s);
             }
-                                     
+
             int cycle = init.startStep() * TestCellType::nanoSteps() + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;
@@ -63,7 +63,7 @@ public:
         init.grid(&gridOld);
         GridType gridNew = gridOld;
         int halfWidth = dim.x() / 2;
-        
+
         CoordBox<DIM> lineStarts = gridOld.boundingBox();
         lineStarts.dimensions.x() = 1;
 
@@ -80,7 +80,7 @@ public:
                 callFunctor(s2, gridOld, &gridNew, s);
                 callFunctor(s1, gridOld, &gridNew, s);
             }
-                                     
+
             int cycle = init.startStep() * TestCellType::nanoSteps() + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;

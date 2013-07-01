@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONMANAGER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITIONMANAGER_H
 
+#include <libgeodecomp/config.h>
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
@@ -45,8 +46,8 @@ public:
     inline void resetRegions(
         const CoordBox<DIM>& newSimulationArea,
         boost::shared_ptr<Partition<DIM> > newPartition,
-        const unsigned& newRank,
-        const unsigned& newGhostZoneWidth)
+        unsigned newRank,
+        unsigned newGhostZoneWidth)
     {
         partition = newPartition;
         simulationArea = newSimulationArea;
@@ -115,30 +116,30 @@ public:
     }
 
     inline const Region<DIM>& getRegion(
-        const int& node,
-        const unsigned& expansionWidth)
+        int node,
+        unsigned expansionWidth)
     {
         if (regions.count(node) == 0)
             fillRegion(node);
         return regions[node][expansionWidth];
     }
 
-    inline const Region<DIM>& ownRegion(const unsigned& expansionWidth = 0)
+    inline const Region<DIM>& ownRegion(unsigned expansionWidth = 0) const
     {
         return regions[rank][expansionWidth];
     }
 
-    inline const Region<DIM>& ownExpandedRegion()
+    inline const Region<DIM>& ownExpandedRegion() const
     {
         return regions[rank].back();
     }
 
-    inline const Region<DIM>& rim(const unsigned& dist) const
+    inline const Region<DIM>& rim(unsigned dist) const
     {
         return ownRims[dist];
     }
 
-    inline const Region<DIM>& innerSet(const unsigned& dist) const
+    inline const Region<DIM>& innerSet(unsigned dist) const
     {
         return ownInnerSets[dist];
     }
@@ -148,7 +149,7 @@ public:
         return boundingBoxes;
     }
 
-    inline const unsigned& getGhostZoneWidth() const
+    inline unsigned getGhostZoneWidth() const
     {
         return ghostZoneWidth;
     }
@@ -182,12 +183,12 @@ private:
     unsigned ghostZoneWidth;
     SuperVector<CoordBox<DIM> > boundingBoxes;
 
-    inline void fillRegion(const unsigned& node)
+    inline void fillRegion(unsigned node)
     {
         SuperVector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
         regionExpansion[0] = partition->getRegion(node);
-        for (int i = 1; i <= getGhostZoneWidth(); ++i) {
+        for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             Region<DIM> expanded;
             const Region<DIM>& reg = regionExpansion[i - 1];
             expanded = reg.expandWithTopology(
@@ -223,7 +224,7 @@ private:
         ownInnerSets.front() = ownRegion();
         Region<DIM> minuend = surface.expandWithTopology(
             1, simulationArea.dimensions, Topology());
-        for (int i = 1; i <= getGhostZoneWidth(); ++i) {
+        for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
             minuend = minuend.expandWithTopology(
                 1, simulationArea.dimensions, Topology());
@@ -232,13 +233,13 @@ private:
         volatileKernel = ownInnerSets.back() & rim(1) ;
     }
 
-    inline void intersect(const unsigned& node)
+    inline void intersect(unsigned node)
     {
         SuperVector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
         SuperVector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];
         outerGhosts.resize(getGhostZoneWidth() + 1);
         innerGhosts.resize(getGhostZoneWidth() + 1);
-        for (int i = 0; i <= getGhostZoneWidth(); ++i) {
+        for (unsigned i = 0; i <= getGhostZoneWidth(); ++i) {
             outerGhosts[i] = getRegion(rank, i) & getRegion(node, 0);
             innerGhosts[i] = getRegion(rank, 0) & getRegion(node, i);
         }

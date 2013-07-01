@@ -14,38 +14,38 @@ public:
     void operator()(
         Coord<DIM> *offset,
         Coord<DIM> *dimensions,
-        const CoordBox<DIM>& ownBoundingBox, 
+        const CoordBox<DIM>& ownBoundingBox,
         const CoordBox<DIM>& simulationArea,
         const int& ghostZoneWidth)
     {
         (*offset)[INDEX] = 0;
         if (TOPOLOGY::template WrapsAxis<INDEX>::VALUE) {
-            int enlargedWidth = 
+            int enlargedWidth =
                 ownBoundingBox.dimensions[INDEX] + 2 * ghostZoneWidth;
             if (enlargedWidth < simulationArea.dimensions[INDEX]) {
-                (*offset)[INDEX] = 
+                (*offset)[INDEX] =
                     ownBoundingBox.origin[INDEX] - ghostZoneWidth;
             } else {
                 (*offset)[INDEX] = 0;
             }
-            (*dimensions)[INDEX] = 
-                std::min(enlargedWidth, simulationArea.dimensions[INDEX]);
+            (*dimensions)[INDEX] =
+                (std::min)(enlargedWidth, simulationArea.dimensions[INDEX]);
         } else {
-            (*offset)[INDEX] = 
-                std::max(0, ownBoundingBox.origin[INDEX] - ghostZoneWidth);
-            int end = std::min(simulationArea.origin[INDEX] + 
+            (*offset)[INDEX] =
+                (std::max)(0, ownBoundingBox.origin[INDEX] - ghostZoneWidth);
+            int end = (std::min)(simulationArea.origin[INDEX] +
                                simulationArea.dimensions[INDEX],
-                               ownBoundingBox.origin[INDEX] + 
-                               ownBoundingBox.dimensions[INDEX] + 
+                               ownBoundingBox.origin[INDEX] +
+                               ownBoundingBox.dimensions[INDEX] +
                                ghostZoneWidth);
             (*dimensions)[INDEX] = end - (*offset)[INDEX];
-        } 
+        }
 
         OffsetHelper<INDEX - 1, DIM, TOPOLOGY>()(
-            offset, 
-            dimensions, 
-            ownBoundingBox, 
-            simulationArea, 
+            offset,
+            dimensions,
+            ownBoundingBox,
+            simulationArea,
             ghostZoneWidth);
     }
 };
@@ -57,7 +57,7 @@ public:
     void operator()(
         Coord<DIM> *offset,
         Coord<DIM> *dimensions,
-        const CoordBox<DIM>& ownBoundingBox, 
+        const CoordBox<DIM>& ownBoundingBox,
         const CoordBox<DIM>& simulationArea,
         const int& ghostZoneWidth)
     {}

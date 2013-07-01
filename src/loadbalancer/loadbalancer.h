@@ -16,8 +16,8 @@ public:
     /**
      * Given the current workload distribution @a weights
      * and the work time / wall clock time ratio @a relativeLoads for
-     * each node, return a new, possibly better distribution "newLoads". 
-     * 
+     * each node, return a new, possibly better distribution "newLoads".
+     *
      * Wall clock time is the sum of the work time and the waiting
      * time during which a node is blocking on communication to other
      * nodes.
@@ -29,7 +29,7 @@ public:
      *
      * \f[
      * \sum_{i=0}^{i<n} \mbox{weights}[i] = \sum_{i=0}^{i<n} \mbox{newLoads}[i] \qquad
-     * \mbox{where:}\quad n = |\mbox{weights}| = |\mbox{newLoads}|   
+     * \mbox{where:}\quad n = |\mbox{weights}| = |\mbox{newLoads}|
      * \f]
      */
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads) = 0;

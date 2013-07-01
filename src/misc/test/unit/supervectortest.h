@@ -138,7 +138,7 @@ public:
     {
         SuperVector<unsigned> v;
         SuperVector<unsigned> w;
-        v += 0, 3, 1, 2; 
+        v += 0, 3, 1, 2;
         w += 0, 1, 2, 3;
         v.sort();
         TS_ASSERT_EQUALS(v, w);
@@ -148,7 +148,7 @@ public:
     {
         SuperVector<unsigned> a;
         a += 0, 3, 1 ,2;
-        TS_ASSERT_EQUALS(a.max(), (unsigned)3); 
+        TS_ASSERT_EQUALS(a.max(), (unsigned)3);
     }
 };
 

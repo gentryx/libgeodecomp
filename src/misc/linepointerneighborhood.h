@@ -413,7 +413,7 @@ public:
  * BOUNDARY_WEST:
  *   X == -1 -> use WEST pointers
  =   X >=  0 -> use center pointers + X
- * 
+ *
  * BOUNDARY_EAST:
  *   X == 1 -> use EAST pointers
  *   X <= 0 -> use center pointers + X
@@ -421,7 +421,7 @@ public:
  * BOUNDARY_TOP:
  *   Y == -1 -> use TOP pointer (don't set this on a torus, as its not needed!)
  *   Y >=  0 -> use center pointers + X
- * 
+ *
  */
 template<typename CELL, class STENCIL, bool BOUNDARY_WEST, bool BOUNDARY_EAST, bool BOUNDARY_TOP, bool BOUNDARY_BOTTOM, bool BOUNDARY_SOUTH, bool BOUNDARY_NORTH>
 class LinePointerNeighborhood :

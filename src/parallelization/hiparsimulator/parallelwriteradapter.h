@@ -1,7 +1,6 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
-#include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 
 namespace LibGeoDecomp {
@@ -15,21 +14,20 @@ class HiParSimulator;
  * to a PatchAccepter, so that we can treat IO similarly to sending
  * ghost zones.
  */
-template<typename GRID_TYPE, typename CELL_TYPE, typename PARTITION>
+template<typename GRID_TYPE, typename CELL_TYPE, typename SIMULATOR>
 class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
-    typedef HiParSimulator<CELL_TYPE, PARTITION> HiParSimulatorType;
 
     using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
     using PatchAccepter<GRID_TYPE>::pushRequest;
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        HiParSimulatorType *sim,
+        SIMULATOR * sim,
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
-        const long& firstStep,
-        const long& lastStep,
+        const std::size_t firstStep,
+        const std::size_t lastStep,
         Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
         bool lastCall) :
         sim(sim),
@@ -51,12 +49,11 @@ public:
     virtual void put(
         const GRID_TYPE& grid,
         const Region<GRID_TYPE::DIM>& validRegion,
-        const long& nanoStep)
+        const std::size_t nanoStep)
     {
         if (!checkNanoStepPut(nanoStep)) {
             return;
         }
-
         requestedNanoSteps.erase_min();
 
         WriterEvent event = WRITER_STEP_FINISHED;
@@ -78,14 +75,14 @@ public:
     }
 
 private:
-    HiParSimulatorType *sim;
+    SIMULATOR * sim;
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
-    long firstNanoStep;
-    long lastNanoStep;
+    std::size_t firstNanoStep;
+    std::size_t lastNanoStep;
     bool lastCall;
     Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 
-    long nextOutputStep(const long& step)
+    long nextOutputStep(const std::size_t step)
     {
         long remainder = step % writer->getPeriod();
         long next = step + writer->getPeriod() - remainder;
@@ -98,7 +95,7 @@ private:
         reload(nextNanoStep);
     }
 
-    void reload(const long& nextNanoStep)
+    void reload(const std::size_t nextNanoStep)
     {
         pushRequest(nextNanoStep);
     }

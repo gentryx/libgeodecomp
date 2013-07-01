@@ -93,8 +93,8 @@ public:
 
         // ensure that the ghostzones we're about to send/receive do
         // actually match
-        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
-            for (int recver = 0; recver < mpiLayer.size(); ++recver) {
+        for (std::size_t sender = 0; sender < mpiLayer.size(); ++sender) {
+            for (std::size_t recver = 0; recver < mpiLayer.size(); ++recver) {
                 if (sender != recver) {
                     if (sender == mpiLayer.rank()) {
                         PartitionManagerType::RegionVecMap m =

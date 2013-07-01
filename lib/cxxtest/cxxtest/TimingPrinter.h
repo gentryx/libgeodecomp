@@ -26,16 +26,16 @@
 #   include <iostream>
 #endif // _CXXTEST_OLD_STD
 
-namespace CxxTest 
+namespace CxxTest
 {
     class TimingPrinter : public ErrorFormatter
     {
     public:
         TimingPrinter( CXXTEST_STD(ostream) &o = CXXTEST_STD(cout),
                 const char *preLine = ":", const char *postLine = "" ) :
-            ErrorFormatter( new Adapter(o), preLine, postLine ) 
+            ErrorFormatter( new Adapter(o), preLine, postLine )
         {
-            CXXTEST_STD(cout) << CXXTEST_STD(setprecision(3)) << 
+            CXXTEST_STD(cout) << CXXTEST_STD(setprecision(3)) <<
                 CXXTEST_STD(fixed);
         }
 

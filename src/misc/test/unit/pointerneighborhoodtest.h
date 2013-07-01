@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/pointerneighborhood.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class PointerNeighborhoodTest : public CxxTest::TestSuite 
+class PointerNeighborhoodTest : public CxxTest::TestSuite
 {
 public:
     void testMoore2D()

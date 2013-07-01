@@ -6,7 +6,7 @@
 class InteractiveSimulatorGPU : public InteractiveSimulator
 {
     Q_OBJECT
-    
+
 public:
     InteractiveSimulatorGPU(QObject *parent);
     virtual ~InteractiveSimulatorGPU();

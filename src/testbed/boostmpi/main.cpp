@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     }
 
     int other = (world.rank()? 0 : 1);
-    
+
     Grid<DemoCell> grid(Coord<2>(20, 10));
     Grid<DemoCell> expected(Coord<2>(20, 10));
     initGrid(&grid, myStartY, myEndY);
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     for (int y = myStartY; y < myEndY; ++y) {
         sendRegion << Streak<2>(Coord<2>(0, y), 20);
     }
-    
+
     if (world.rank() == 0) {
         mpiLayer.sendRegion(sendRegion,  other);
         mpiLayer.recvRegion(&recvRegion, other);
@@ -68,11 +68,11 @@ int main(int argc, char **argv)
         mpiLayer.recvRegion(&recvRegion, other);
         mpiLayer.sendRegion(sendRegion,  other);
     }
-    
+
     // mpiLayer.sendUnregisteredRegion(&grid, sendRegion, other, 0, fixme);
     // mpiLayer.sendUnregisteredRegion(&grid, recvRegion, other, 0, fixme);
     // mpiLayer.waitAll();
-    
+
     if (grid == expected) {
         std::cout << "rank " << world.rank() << " is good\n";
     } else {

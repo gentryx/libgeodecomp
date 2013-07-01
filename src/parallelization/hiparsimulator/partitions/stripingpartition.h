@@ -18,7 +18,7 @@ public:
     typedef typename CoordBox<DIM>::Iterator Iterator;
 
     StripingPartition(
-        const Coord<DIM>& _origin=Coord<DIM>(), 
+        const Coord<DIM>& _origin=Coord<DIM>(),
         const Coord<DIM>& _dimensions=Coord<DIM>(),
         const long& offset=0,
         const SuperVector<long>& weights=SuperVector<long>(2)) :
@@ -34,22 +34,22 @@ public:
         }
     }
 
-    Iterator begin() const 
+    Iterator begin() const
     {
         return Iterator(origin, origin, dimensions);
     }
 
-    Iterator end() const 
+    Iterator end() const
     {
         Coord<DIM> endOffset;
         endOffset[DIM - 1] = dimensions[DIM - 1];
         return Iterator(origin, origin + endOffset, dimensions);
     }
 
-    inline Region<DIM> getRegion(const long& node) const 
+    inline Region<DIM> getRegion(const long& node) const
     {
         return Region<DIM>(
-            (*this)[startOffsets[node + 0]], 
+            (*this)[startOffsets[node + 0]],
             (*this)[startOffsets[node + 1]]);
     }
 

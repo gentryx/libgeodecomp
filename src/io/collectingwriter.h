@@ -22,8 +22,6 @@ public:
 
     static const int DIM = Topology::DIM;
 
-    using ParallelWriter<CELL_TYPE>::distSim;
-
     CollectingWriter(
         Writer<CELL_TYPE> *writer,
         const unsigned period = 1,

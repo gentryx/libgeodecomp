@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/alignedallocator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class AlignedAllocatorTest : public CxxTest::TestSuite 
+class AlignedAllocatorTest : public CxxTest::TestSuite
 {
 public:
 

@@ -70,7 +70,7 @@ public:
 
     int operator()()
     {
-        LOG(DEBUG, "Interactor::operator(" << command << ")");
+        LOG(DBG, "Interactor::operator(" << command << ")");
         boost::asio::io_service ioService;
         tcp::resolver resolver(ioService);
         tcp::resolver::query query(host, StringOps::itoa(port));
@@ -93,7 +93,7 @@ public:
         notifyStartup();
 
         for (;;) {
-            LOG(DEBUG, "Interactor::operator() reading... [" << feedbackBuffer.size() << "/" << feedbackLines << "]");
+            LOG(DBG, "Interactor::operator() reading... [" << feedbackBuffer.size() << "/" << feedbackLines << "]");
             if (feedbackBuffer.size() >= feedbackLines) {
                 break;
             }
@@ -108,7 +108,7 @@ public:
 
         notifyCompletion();
 
-        LOG(DEBUG, "Interactor::operator() done");
+        LOG(DBG, "Interactor::operator() done");
         return 0;
     }
 
@@ -148,7 +148,7 @@ private:
 
     void handleInput(const StringVec& lines)
     {
-        LOG(DEBUG, "Interactor::handleInput(" << lines << ")");
+        LOG(DBG, "Interactor::handleInput(" << lines << ")");
         // only add lines which are not equal to "\0"
         for (int i = 0; i < lines.size(); ++i) {
             const std::string& line = lines[i];
@@ -161,7 +161,7 @@ private:
                 continue;
             }
 
-            LOG(DEBUG, "Interactor accepted line »" << line << "«");
+            LOG(DBG, "Interactor accepted line »" << line << "«");
             feedbackBuffer << line;
         }
     }

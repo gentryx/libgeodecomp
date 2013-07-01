@@ -2,11 +2,11 @@
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/linepointerassembly.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class LinePointerAssemblyTest : public CxxTest::TestSuite 
+class LinePointerAssemblyTest : public CxxTest::TestSuite
 {
 public:
     void testMoore2D()

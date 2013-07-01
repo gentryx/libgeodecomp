@@ -7,11 +7,11 @@
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class MPIIOWriterTest : public CxxTest::TestSuite 
+class MPIIOWriterTest : public CxxTest::TestSuite
 {
 public:
 
@@ -24,7 +24,7 @@ public:
 
     void tearDown()
     {
-        for (int i = 0; i < files.size(); ++i)          
+        for (std::size_t i = 0; i < files.size(); ++i)
             boost::filesystem::remove(files[i]);
     }
 
@@ -33,7 +33,7 @@ public:
         TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
         SerialSimulator<TestCell<3> > sim(init);
         MPIIOWriter<TestCell<3> > *writer = new MPIIOWriter<TestCell<3> >(
-            "testmpiiowriter",   
+            "testmpiiowriter",
             4,
             init->maxSteps());
         MemoryWriter<TestCell<3> > *memoryWriter = new MemoryWriter<TestCell<3> >(4);
@@ -43,8 +43,8 @@ public:
         sim.run();
 
         TS_ASSERT_EQUALS("testmpiiowriter01234.mpiio", writer->filename(1234));
-        
-        SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected = 
+
+        SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected =
             memoryWriter->getGrids();
         SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > actual;
         for (int i = 0; i <= 21; i += (i == 20)? 1 : 4) {
@@ -68,7 +68,7 @@ public:
             TS_ASSERT_EQUALS(maxSteps, 21);
             actual.push_back(buffer);
         }
-        
+
         TS_ASSERT_EQUALS(actual.size(), expected.size());
         TS_ASSERT_EQUALS(actual,        expected);
     }

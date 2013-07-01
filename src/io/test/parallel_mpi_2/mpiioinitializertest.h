@@ -30,7 +30,7 @@ public:
     void tearDown()
     {
         if (rank == 0) {
-            for (int i = 0; i < files.size(); ++i) {
+            for (std::size_t i = 0; i < files.size(); ++i) {
                 boost::filesystem::remove(files[i]);
             }
         }

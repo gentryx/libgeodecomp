@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 
-class EchoTest : public CxxTest::TestSuite 
+class EchoTest : public CxxTest::TestSuite
 {
 public:
-    
-    void testSimple() 
+
+    void testSimple()
     {
     }
 

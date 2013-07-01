@@ -15,7 +15,7 @@ class Selector
 public:
     typedef typename CELL::Stencil Stencil;
     static const int DIM = CELL::Topology::DIM;
- 
+
     template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
     void operator()(
         const Streak<DIM>& streak,
@@ -24,7 +24,7 @@ public:
         GRID2 *gridNew,
         unsigned nanoStep,
         CellAPITraits::Fixed,
-        UPDATE_POLICY) 
+        UPDATE_POLICY)
     {
         const CELL *pointers[Stencil::VOLUME];
         LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
@@ -39,8 +39,8 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Base, 
-        CellAPITraits::Base) 
+        CellAPITraits::Base,
+        CellAPITraits::Base)
     {
         VanillaUpdateFunctor<CELL>()(streak, targetOrigin, gridOld, gridNew, nanoStep);
     }
@@ -66,7 +66,7 @@ public:
         const Coord<DIM>& targetCoord,
         const GRID1& gridOld,
         GRID2 *gridNew,
-        unsigned nanoStep) 
+        unsigned nanoStep)
     {
         UpdateFunctorHelpers::Selector<CELL>()(
             sourceStreak, targetCoord, gridOld, gridNew, nanoStep, typename CELL::API(), typename CELL::API());

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < layer.size(); ++i) {
         std::string name(names + i * MPI::MAX_PROCESSOR_NAME);
-        
+
         int id = hostCount[name];
         hostCount[name]++;
         cudaIDs[i] = id;

@@ -49,7 +49,7 @@ public:
 
     void tearDown()
     {
-        for (int i = 0; i < files.size(); ++i) {
+        for (std::size_t i = 0; i < files.size(); ++i) {
             boost::filesystem::remove(files[i]);
         }
     }
@@ -84,7 +84,7 @@ public:
                   << "testbovwriter.00020.data"
                   << "testbovwriter.00021.data";
 
-            for (int i = 0; i < files.size(); ++i) {
+            for (std::size_t i = 0; i < files.size(); ++i) {
                 actual = readGrid(files[i], dimensions);
                 TS_ASSERT_EQUALS(actual, expected);
             }
@@ -126,16 +126,16 @@ public:
     //         std::ostringstream buf;
     //         buf << "TIME: " << 100 << "\n"
     //             << "DATA_FILE: " << "test.data" << "\n"
-    //             << "DATA_SIZE: " 
+    //             << "DATA_SIZE: "
     //             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
     //             << "DATA_FORMAT: " << "DOUBLE" << "\n"
     //             << "VARIABLE: " << "zc" << "\n"
     //             << "DATA_ENDIAN: LITTLE\n"
     //             << "BRICK_ORIGIN: 0 0 0\n"
-    //             << "BRICK_SIZE: " 
+    //             << "BRICK_SIZE: "
     //             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
     //             << "DIVIDE_BRICK: true\n"
-    //             << "DATA_BRICKLETS: " 
+    //             << "DATA_BRICKLETS: "
     //             << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n";
     //         std::string s = buf.str();
     //         file.Write(s.c_str(), s.length(), MPI::CHAR);

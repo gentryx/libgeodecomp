@@ -129,7 +129,7 @@
         if (!ollKorrect) {                                              \
             std::cout << "message: " << message.str();                  \
         }                                                               \
-    } 
+    }
 
 #define TS_ASSERT_TEST_GRID(_GRID_TYPE, _GRID, _EXPECTED_CYCLE) \
     TS_ASSERT_TEST_GRID2(_GRID_TYPE, _GRID, _EXPECTED_CYCLE, )

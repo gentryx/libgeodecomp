@@ -1,11 +1,11 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/fixedcoord.h>
 
-using namespace LibGeoDecomp; 
+using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class FixedCoordTest : public CxxTest::TestSuite 
+class FixedCoordTest : public CxxTest::TestSuite
 {
 public:
 
@@ -17,7 +17,7 @@ public:
 
 private:
     template<int X, int Y, int Z>
-    int sum(FixedCoord<X, Y, Z>) 
+    int sum(FixedCoord<X, Y, Z>)
     {
         return X + Y + Z;
     }

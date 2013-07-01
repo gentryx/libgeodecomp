@@ -71,7 +71,7 @@ public:
 
     bool intersects(const CoordBox& other) const
     {
-        Coord<DIM> maxOrigin = origin.max(other.origin);
+        Coord<DIM> maxOrigin = (origin.max)(other.origin);
         return inBounds(maxOrigin) && other.inBounds(maxOrigin);
     }
 

@@ -24,7 +24,7 @@ namespace LibGeoDecomp {
  *  78                              9
  *
  * Legend:
- * 
+ *
  * - Streak: X---------->
  * - Pointers:
  *   TW: 1
@@ -43,8 +43,8 @@ namespace LibGeoDecomp {
  * constant boundary conditions as periodic boundary conditions would
  * automatically wrap accesses to cells within the grid.
  */
-template<typename CELL, int DIM=CELL::Topology::DIM, bool HIGH=true, int CUR_DIM=(DIM - 1), bool BOUNDARY_TOP=false, bool BOUNDARY_BOTTOM=false, bool BOUNDARY_SOUTH=false, bool BOUNDARY_NORTH=false> 
-class LinePointerUpdateFunctor 
+template<typename CELL, int DIM=CELL::Topology::DIM, bool HIGH=true, int CUR_DIM=(DIM - 1), bool BOUNDARY_TOP=false, bool BOUNDARY_BOTTOM=false, bool BOUNDARY_SOUTH=false, bool BOUNDARY_NORTH=false>
+class LinePointerUpdateFunctor
 {
 public:
     void operator()(
@@ -58,45 +58,45 @@ public:
         const Coord<DIM>& c = streak.origin;
 
         if ((CUR_DIM == 2) && (HIGH == true)) {
-            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) &&
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
                 LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, true          >()(streak, box, pointers, newLine, nanoStep);
             } else {
                 LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, false         >()(streak, box, pointers, newLine, nanoStep);
             }
         }
-            
+
         if ((CUR_DIM == 2) && (HIGH == false)) {
-            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) &&
                 (c[CUR_DIM] == box.origin[CUR_DIM])) {
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, true,           BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, BOUNDARY_TOP, BOUNDARY_BOTTOM, false,          BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
-            
+
         if ((CUR_DIM == 1) && (HIGH == true)) {
-            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) &&
                 (c[CUR_DIM] == (box.origin[CUR_DIM] + box.dimensions[CUR_DIM] - 1))) {
                 LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, true,            BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
                 LinePointerUpdateFunctor<CELL, DIM, false, CUR_DIM,     BOUNDARY_TOP, false,           BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
-            
+
         if ((CUR_DIM == 1) && (HIGH == false)) {
-            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) && 
+            if ((!Topology::template WrapsAxis<CUR_DIM>::VALUE) &&
                 (c[CUR_DIM] == box.origin[CUR_DIM])) {
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, true,         BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             } else {
                 LinePointerUpdateFunctor<CELL, DIM, true,  CUR_DIM - 1, false,        BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>()(streak, box, pointers, newLine, nanoStep);
             }
         }
-            
+
     }
 };
 
-template<typename CELL, int DIM, bool BOUNDARY_TOP, bool BOUNDARY_BOTTOM, bool BOUNDARY_SOUTH, bool BOUNDARY_NORTH> 
+template<typename CELL, int DIM, bool BOUNDARY_TOP, bool BOUNDARY_BOTTOM, bool BOUNDARY_SOUTH, bool BOUNDARY_NORTH>
 class LinePointerUpdateFunctor<CELL, DIM, true, 0, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>
 {
 public:
@@ -108,7 +108,7 @@ public:
         int nanoStep)
     {
         typedef typename CELL::Stencil Stencil;
-        
+
         long x = 0;
         long endX = streak.endX - streak.origin.x();
 
@@ -117,13 +117,13 @@ public:
             newLine[x].update(hood, nanoStep);
             return;
         }
-        
+
         LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
         newLine[x].update(hoodWest, nanoStep);
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
         updateMain(newLine, &x, (long)(endX - 1), hood, nanoStep, typename CELL::API());
-        
+
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
         newLine[x].update(hoodEast, nanoStep);
     }

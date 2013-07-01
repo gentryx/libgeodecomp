@@ -14,14 +14,14 @@ namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename TOPOLOGY=typename CELL_TYPE::Topology>
 class MPIIO
-{    
+{
 public:
     template<typename GRID_TYPE, int DIM>
     static void readRegion(
-        GRID_TYPE *grid, 
-        const std::string& filename, 
+        GRID_TYPE *grid,
+        const std::string& filename,
         const Region<DIM>& region,
-        const MPI::Intracomm& comm = MPI::COMM_WORLD, 
+        const MPI::Intracomm& comm = MPI::COMM_WORLD,
         const MPI::Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>())
     {
         MPI::File file = openFileForRead(filename, comm);
@@ -42,7 +42,7 @@ public:
             // (especially negative coordnates may occurr).
             Coord<DIM> coord = TOPOLOGY::normalize(i->origin, dimensions);
             file.Seek(
-                offset(headerLength, coord, dimensions, cellLength), 
+                offset(headerLength, coord, dimensions, cellLength),
                 MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
             file.Read(&grid->at(i->origin), length, mpiDatatype);
@@ -68,11 +68,11 @@ public:
 
     template<typename GRID_TYPE, int DIM>
     static void writeRegion(
-        const GRID_TYPE& grid, 
+        const GRID_TYPE& grid,
         const Coord<DIM>& dimensions,
         const unsigned& step,
         const unsigned& maxSteps,
-        const std::string& filename, 
+        const std::string& filename,
         const Region<DIM>& region,
         const MPI::Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>(),
         const MPI::Intracomm& comm = MPI::COMM_WORLD)
@@ -96,7 +96,7 @@ public:
             // topologies the coordnates may exceed the bounding box
             // (especially negative coordnates may occurr).
             Coord<DIM> coord = TOPOLOGY::normalize(i->origin, dimensions);
-            file.Seek(offset(headerLength, coord, dimensions, cellLength), 
+            file.Seek(offset(headerLength, coord, dimensions, cellLength),
                       MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
             file.Write(&grid.at(i->origin), length, mpiDatatype);
@@ -106,7 +106,7 @@ public:
     }
 
     static MPI::File openFileForRead(
-        const std::string& filename, 
+        const std::string& filename,
         const MPI::Intracomm& comm)
     {
         MPI::File file = MPI::File::Open(
@@ -115,10 +115,10 @@ public:
         file.Set_errhandler(MPI::ERRORS_ARE_FATAL);
         return file;
     }
-    
+
 
     static MPI::File openFileForWrite(
-        const std::string& filename, 
+        const std::string& filename,
         const MPI::Intracomm& comm)
     {
         MPI::File file = MPI::File::Open(
@@ -141,7 +141,7 @@ private:
     template<int DIM>
     static MPI::Offset offset(
         const MPI::Offset& headerLength,
-        const Coord<DIM>& c, 
+        const Coord<DIM>& c,
         const Coord<DIM>& dimensions,
         const MPI::Aint& cellLength)
     {
@@ -150,7 +150,7 @@ private:
 
     template<int DIM>
     static void getLengths(
-        MPI::Aint *headerLength, 
+        MPI::Aint *headerLength,
         MPI::Aint *cellLength,
         const MPI::Datatype& mpiDatatype)
     {

@@ -369,7 +369,7 @@ public:
         return myBoundingBox;
     }
 
-    inline const long& size() const
+    inline const std::size_t& size() const
     {
         if (geometryCacheTainted) {
             resetGeometryCache();
@@ -553,8 +553,8 @@ public:
 
             if (RegionIntersectHelper<DIM - 1>::intersects(*myIter, *otherIter)) {
                 Streak<DIM> intersection = *myIter;
-                intersection.origin.x() = std::max(myIter->origin.x(), otherIter->origin.x());
-                intersection.endX = std::min(myIter->endX, otherIter->endX);
+                intersection.origin.x() = (std::max)(myIter->origin.x(), otherIter->origin.x());
+                intersection.endX = (std::min)(myIter->endX, otherIter->endX);
                 ret << intersection;
             }
 
@@ -630,10 +630,19 @@ public:
         return Iterator(endStreak());
     }
 
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & indices;
+        ar & myBoundingBox;
+        ar & mySize;
+        ar & geometryCacheTainted;
+    }
+
 private:
     VecType indices[DIM];
     mutable CoordBox<DIM> myBoundingBox;
-    mutable long mySize;
+    mutable std::size_t mySize;
     mutable bool geometryCacheTainted;
 
     inline void determineGeometry() const
@@ -652,8 +661,8 @@ private:
                 Coord<DIM> right = i->origin;
                 right.x() = i->endX - 1;
 
-                min = min.min(left);
-                max = max.max(right);
+                min = (min.min)(left);
+                max = (max.max)(right);
                 mySize += i->endX - i->origin.x();
             }
             myBoundingBox =
@@ -673,8 +682,8 @@ private:
     {
         int width = dimensions.x();
         Streak<DIM> buf = s;
-        buf.origin.x() = std::max(buf.origin.x(), 0);
-        buf.endX = std::min(width, buf.endX);
+        buf.origin.x() = (std::max)(buf.origin.x(), 0);
+        buf.endX = (std::min)(width, buf.endX);
         return buf;
     }
 
@@ -689,7 +698,7 @@ private:
         int currentX = streak.origin.x();
         if (currentX < 0) {
             Streak<DIM> section = streak;
-            section.endX = std::min(streak.endX, 0);
+            section.endX = (std::min)(streak.endX, 0);
             currentX = section.endX;
 
             // normalize left overhang
@@ -701,7 +710,7 @@ private:
         if (currentX < streak.endX) {
             Streak<DIM> section = streak;
             section.origin.x() = currentX;
-            section.endX = std::min(streak.endX, width);
+            section.endX = (std::min)(streak.endX, width);
             currentX = section.endX;
 
             normalizeStreak<TOPOLOGY>(section, target, dimensions);
@@ -962,8 +971,8 @@ private:
 
     inline IntPair fuse(const IntPair& a, const IntPair& b) const
     {
-        return IntPair(std::min(a.first, b.first),
-                       std::max(a.second, b.second));
+        return IntPair((std::min)(a.first, b.first),
+                       (std::max)(a.second, b.second));
     }
 };
 

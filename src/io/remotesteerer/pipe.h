@@ -29,7 +29,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     Pipe(
-        int root = 0,
+        unsigned root = 0,
         MPI::Comm *communicator = &MPI::COMM_WORLD) :
         mpiLayer(communicator),
         root(root)
@@ -38,14 +38,14 @@ public:
 
     void addSteeringRequest(const std::string& request)
     {
-        LOG(DEBUG, "Pipe::addSteeringRequest(" << request << ")");
+        LOG(DBG, "Pipe::addSteeringRequest(" << request << ")");
         boost::lock_guard<boost::mutex> lock(mutex);
         steeringRequestsQueue << request;
     }
 
     void addSteeringFeedback(const std::string& feedback)
     {
-        LOG(DEBUG, "Pipe::addSteeringFeedback(" << feedback << ")");
+        LOG(DBG, "Pipe::addSteeringFeedback(" << feedback << ")");
         boost::lock_guard<boost::mutex> lock(mutex);
         steeringFeedback << feedback;
         signal.notify_one();
@@ -53,20 +53,20 @@ public:
 
     StringVec retrieveSteeringRequests()
     {
-        LOG(DEBUG, "Pipe::retrieveSteeringRequests()");
+        LOG(DBG, "Pipe::retrieveSteeringRequests()");
         StringVec requests;
         boost::lock_guard<boost::mutex> lock(mutex);
         std::swap(requests, steeringRequests);
-        LOG(DEBUG, "  retrieveSteeringRequests yields " << requests.size());
+        LOG(DBG, "  retrieveSteeringRequests yields " << requests.size());
         if (requests.size() > 0) {
-            LOG(DEBUG, "  steeringRequests: " << requests);
+            LOG(DBG, "  steeringRequests: " << requests);
         }
         return requests;
     }
 
     StringVec copySteeringRequestsQueue()
     {
-        LOG(DEBUG, "Pipe::copySteeringRequestsQueue()");
+        LOG(DBG, "Pipe::copySteeringRequestsQueue()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec requests = steeringRequestsQueue;
         return requests;
@@ -74,18 +74,18 @@ public:
 
     StringVec retrieveSteeringFeedback()
     {
-        LOG(DEBUG, "Pipe::retrieveSteeringFeedback()");
+        LOG(DBG, "Pipe::retrieveSteeringFeedback()");
         StringVec feedback;
         boost::lock_guard<boost::mutex> lock(mutex);
         std::swap(feedback, steeringFeedback);
-        LOG(DEBUG, "  retrieveSteeringFeedback yields " << feedback.size());
-        LOG(DEBUG, "  retrieveSteeringFeedback is " << feedback);
+        LOG(DBG, "  retrieveSteeringFeedback yields " << feedback.size());
+        LOG(DBG, "  retrieveSteeringFeedback is " << feedback);
         return feedback;
     }
 
     StringVec copySteeringFeedback()
     {
-        LOG(DEBUG, "Pipe::copySteeringFeedback()");
+        LOG(DBG, "Pipe::copySteeringFeedback()");
         boost::lock_guard<boost::mutex> lock(mutex);
         StringVec feedback = steeringFeedback;
         return feedback;
@@ -93,7 +93,7 @@ public:
 
     void sync()
     {
-        LOG(DEBUG, "Pipe::sync()");
+        LOG(DBG, "Pipe::sync()");
         boost::lock_guard<boost::mutex> lock(mutex);
 #ifdef LIBGEODECOMP_FEATURE_MPI
         broadcastSteeringRequests();
@@ -103,14 +103,14 @@ public:
 
     void waitForFeedback(int lines = 1)
     {
-        LOG(DEBUG, "Pipe::waitForFeedback(" << lines << ")");
+        LOG(DBG, "Pipe::waitForFeedback(" << lines << ")");
         boost::unique_lock<boost::mutex> lock(mutex);
 
         while (steeringFeedback.size() < lines) {
-            LOG(DEBUG, "  still waiting for feedback (" << steeringFeedback.size() << "/" << lines << ")\n");
+            LOG(DBG, "  still waiting for feedback (" << steeringFeedback.size() << "/" << lines << ")\n");
             signal.wait(lock);
         }
-        LOG(DEBUG, "  feedback acquired");
+        LOG(DBG, "  feedback acquired");
     }
 
 private:
@@ -122,17 +122,17 @@ private:
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     MPILayer mpiLayer;
-    int root;
+    unsigned root;
 
     void broadcastSteeringRequests()
     {
-        LOG(DEBUG, "Pipe::broadcastSteeringRequests()");
+        LOG(DBG, "Pipe::broadcastSteeringRequests()");
 
         int numRequests = mpiLayer.broadcast(steeringRequestsQueue.size(), root);
         if (mpiLayer.rank() != root) {
             steeringRequestsQueue.resize(numRequests);
         } else {
-            LOG(DEBUG, "  steeringRequestsQueue: " << steeringRequestsQueue);
+            LOG(DBG, "  steeringRequestsQueue: " << steeringRequestsQueue);
         }
 
         SuperVector<int> requestSizes(numRequests);
@@ -155,7 +155,7 @@ private:
         }
         steeringRequests.append(steeringRequestsQueue);
         steeringRequestsQueue.clear();
-        LOG(DEBUG, "  steeringRequests: " << steeringRequests);
+        LOG(DBG, "  steeringRequests: " << steeringRequests);
     }
 
     /**
@@ -173,7 +173,7 @@ private:
             localBuffer.insert(localBuffer.end(), i->begin(), i->end());
             localLengths << i->size();
         }
-        LOG(DEBUG, "moveSteeringFeedbackToRoot: " << localBuffer << " " << localLengths);
+        LOG(DBG, "moveSteeringFeedbackToRoot: " << localBuffer << " " << localLengths);
 
         // how many strings are sent per node?
         SuperVector<int> numFeedback = mpiLayer.gather((int)localLengths.size(), root);
@@ -201,7 +201,7 @@ private:
             cursor = nextCursor;
         }
 
-        LOG(DEBUG, "  notifying... steeringFeedback.size(" << MPILayer().rank() << ") == " << steeringFeedback.size() << "\n");
+        LOG(DBG, "  notifying... steeringFeedback.size(" << MPILayer().rank() << ") == " << steeringFeedback.size() << "\n");
         signal.notify_one();
     }
 #endif

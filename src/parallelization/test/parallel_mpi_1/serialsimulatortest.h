@@ -177,7 +177,7 @@ public:
         TS_ASSERT_EQUALS(events.str(), expected.str());
 
         simulator->run();
-        int i = startStep;
+        unsigned i = startStep;
         if (i % 5) {
             i += 5 - (i % 5);
         }

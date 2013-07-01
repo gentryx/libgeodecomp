@@ -42,7 +42,7 @@ public:
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
-    typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, PARTITION> ParallelWriterAdapterType;
+    typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, HiParSimulator> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
     static const int DIM = Topology::DIM;
 

@@ -39,7 +39,7 @@ public:
 
         threads = 512;
     }
-    
+
     unsigned modelWidth;
     unsigned modelHeight;
     unsigned modelSize;

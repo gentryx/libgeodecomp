@@ -30,7 +30,7 @@ public:
 
 private:
 #ifndef __CODEGEARC__
-    static boost::mt19937 rng; 
+    static boost::mt19937 rng;
     static const long long max_rand = boost::integer_traits<unsigned>::const_max;
 #else
     static const long long max_rand = boost::integer_traits<int>::const_max;

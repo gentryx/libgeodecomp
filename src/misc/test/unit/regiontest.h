@@ -10,7 +10,7 @@ using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
 
-class RegionTest : public CxxTest::TestSuite 
+class RegionTest : public CxxTest::TestSuite
 {
 public:
     typedef SuperVector<Coord<2> > CoordVector;
@@ -48,7 +48,7 @@ public:
             "  XXX    XXX   ",
             "  XXX    XXX   ",
             "  XXX    XXX   ",
-            "  XXX    XXX   ";                           
+            "  XXX    XXX   ";
         bigInsertOrdered = transform(s);
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
@@ -58,91 +58,91 @@ public:
     {
         RegionInsertHelper<0> h;
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(10, 30), 
+            true, h.intersectOrTouch(IntPair(10, 30),
                                      IntPair(30, 40)));
         TS_ASSERT_EQUALS(
             true, h.intersectOrTouch(IntPair(30, 40),
                                      IntPair(10, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(10, 40), 
+            true, h.intersectOrTouch(IntPair(10, 40),
                                      IntPair(20, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(20, 30), 
+            true, h.intersectOrTouch(IntPair(20, 30),
                                      IntPair(10, 40)));
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(10, 30), 
+            true, h.intersectOrTouch(IntPair(10, 30),
                                      IntPair(20, 40)));
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(20, 40), 
+            true, h.intersectOrTouch(IntPair(20, 40),
                                      IntPair(10, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(20, 40), 
+            true, h.intersectOrTouch(IntPair(20, 40),
                                      IntPair(30, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersectOrTouch(IntPair(30, 30), 
+            true, h.intersectOrTouch(IntPair(30, 30),
                                      IntPair(20, 40)));
 
         TS_ASSERT_EQUALS(
-            false, h.intersectOrTouch(IntPair(20, 30), 
+            false, h.intersectOrTouch(IntPair(20, 30),
                                       IntPair(40, 50)));
         TS_ASSERT_EQUALS(
-            false, h.intersectOrTouch(IntPair(40, 50), 
+            false, h.intersectOrTouch(IntPair(40, 50),
                                       IntPair(20, 30)));
     }
 
     void testIntersect()
     {
         RegionRemoveHelper<0> h;
-        
+
         TS_ASSERT_EQUALS(
-            false, h.intersect(IntPair(10, 30), 
+            false, h.intersect(IntPair(10, 30),
                                IntPair(30, 40)));
         TS_ASSERT_EQUALS(
-            false, h.intersect(IntPair(30, 40), 
+            false, h.intersect(IntPair(30, 40),
                                IntPair(10, 30)));
 
         TS_ASSERT_EQUALS(
-            true, h.intersect(IntPair(10, 40), 
+            true, h.intersect(IntPair(10, 40),
                               IntPair(20, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersect(IntPair(20, 30), 
+            true, h.intersect(IntPair(20, 30),
                               IntPair(10, 40)));
         TS_ASSERT_EQUALS(
-            true, h.intersect(IntPair(10, 30), 
+            true, h.intersect(IntPair(10, 30),
                               IntPair(20, 40)));
         TS_ASSERT_EQUALS(
-            true, h.intersect(IntPair(20, 40), 
+            true, h.intersect(IntPair(20, 40),
                               IntPair(10, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersect(IntPair(20, 40), 
+            true, h.intersect(IntPair(20, 40),
                               IntPair(30, 30)));
         TS_ASSERT_EQUALS(
-            true, h.intersect(IntPair(30, 30), 
+            true, h.intersect(IntPair(30, 30),
                               IntPair(20, 40)));
 
         TS_ASSERT_EQUALS(
-            false, h.intersect(IntPair(20, 30), 
+            false, h.intersect(IntPair(20, 30),
                                IntPair(40, 50)));
         TS_ASSERT_EQUALS(
-            false, h.intersect(IntPair(40, 50), 
+            false, h.intersect(IntPair(40, 50),
                                IntPair(20, 30)));
     }
 
     void testFuse()
     {
         RegionInsertHelper<0> h;
-        
+
         TS_ASSERT_EQUALS(
             IntPair(10, 30),
-            h.fuse(IntPair(10, 15), 
+            h.fuse(IntPair(10, 15),
                    IntPair(15, 30)));
         TS_ASSERT_EQUALS(
-            IntPair(10, 30), 
-            h.fuse(IntPair(15, 15), 
+            IntPair(10, 30),
+            h.fuse(IntPair(15, 15),
                    IntPair(10, 30)));
         TS_ASSERT_EQUALS(
-            IntPair(10, 30), 
-            h.fuse(IntPair(20, 30), 
+            IntPair(10, 30),
+            h.fuse(IntPair(20, 30),
                    IntPair(10, 25)));
     }
 
@@ -152,25 +152,25 @@ public:
         Region<2>::VecType expected;
 
         TS_ASSERT_EQUALS(
-            expected, h.substract(IntPair(40, 50), 
+            expected, h.substract(IntPair(40, 50),
                            IntPair(20, 60)));
         TS_ASSERT_EQUALS(
-            expected, h.substract(IntPair(40, 50), 
+            expected, h.substract(IntPair(40, 50),
                            IntPair(40, 50)));
-        
+
         expected += IntPair(40, 42);
         TS_ASSERT_EQUALS(
-            expected, h.substract(IntPair(40, 50), 
+            expected, h.substract(IntPair(40, 50),
                            IntPair(42, 60)));
 
         expected += IntPair(49, 50);
         TS_ASSERT_EQUALS(
-            expected, h.substract(IntPair(40, 50), 
+            expected, h.substract(IntPair(40, 50),
                                   IntPair(42, 49)));
 
         expected.erase(expected.begin());
         TS_ASSERT_EQUALS(
-            expected, h.substract(IntPair(40, 50), 
+            expected, h.substract(IntPair(40, 50),
                                   IntPair(30, 49)));
     }
 
@@ -184,7 +184,7 @@ public:
         TS_ASSERT_EQUALS(1, c.indices[1].size());
         TS_ASSERT_EQUALS(2, c.indices[0].size());
     }
- 
+
     void testInsert1b()
     {
         c << Coord<2>(12, 10)
@@ -200,27 +200,27 @@ public:
     void testInsert2()
     {
         CoordVector expected;
-        expected += 
-            Coord<2>(17, 22), 
-            Coord<2>(18, 22), 
-            Coord<2>(20, 11), 
-            Coord<2>(20, 11), 
-            Coord<2>(-100, 33), 
-            Coord<2>(11, 33), 
-            Coord<2>(12, 33), 
-            Coord<2>(10, 33), 
-            Coord<2>(12, 33), 
+        expected +=
+            Coord<2>(17, 22),
+            Coord<2>(18, 22),
+            Coord<2>(20, 11),
+            Coord<2>(20, 11),
+            Coord<2>(-100, 33),
+            Coord<2>(11, 33),
+            Coord<2>(12, 33),
+            Coord<2>(10, 33),
+            Coord<2>(12, 33),
             Coord<2>(20, 33),
-            Coord<2>(49, 11), 
-            Coord<2>(48, 11), 
-            Coord<2>(47, 11), 
+            Coord<2>(49, 11),
             Coord<2>(48, 11),
-            Coord<2>(40, 44), 
-            Coord<2>(43, 44), 
-            Coord<2>(41, 44), 
+            Coord<2>(47, 11),
+            Coord<2>(48, 11),
+            Coord<2>(40, 44),
+            Coord<2>(43, 44),
+            Coord<2>(41, 44),
             Coord<2>(42, 44);
-            
-        for (CoordVector::iterator i = expected.begin(); 
+
+        for (CoordVector::iterator i = expected.begin();
              i != expected.end(); i++) {
             c << *i;
         }
@@ -232,7 +232,7 @@ public:
     void testInsertCoordBox()
     {
         Region<3> expected, actual;
-        
+
         for (int x = 0; x < 10; ++x) {
             for (int y = 5; y < 12; ++y) {
                 for (int z = 3; z < 17; ++z) {
@@ -365,10 +365,10 @@ public:
     {
         Region<2> r1;
         TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
-        
+
         r1 << Coord<2>(2, 1);
         TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
-        
+
         r1 << Coord<2>(3, 1);
         TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(3, 1), 5)));
 
@@ -383,20 +383,20 @@ public:
     void testStreakIteration()
     {
         SuperVector<Streak<2> > actual, expected;
-        for (Region<2>::StreakIterator i = c.beginStreak(); 
+        for (Region<2>::StreakIterator i = c.beginStreak();
              i != c.endStreak(); ++i) {
             actual += *i;
         }
         TS_ASSERT_EQUALS(actual, expected);
 
-        c << Streak<2>(Coord<2>(10, 10), 20) 
+        c << Streak<2>(Coord<2>(10, 10), 20)
           << Streak<2>(Coord<2>(10, 20), 30)
           << Streak<2>(Coord<2>(25, 10), 40)
           << Streak<2>(Coord<2>(15, 30), 30)
           << Streak<2>(Coord<2>(15, 10), 30)
           << Streak<2>(Coord<2>( 5, 30), 60);
 
-        for (Region<2>::StreakIterator i = c.beginStreak(); 
+        for (Region<2>::StreakIterator i = c.beginStreak();
              i != c.endStreak(); ++i) {
             actual += *i;
         }
@@ -413,13 +413,13 @@ public:
         Region<2> region1;
         Region<2> region2;
         Region<2> region;
- 
+
         region1 << Streak<2>(Coord<2>(0, 0), 10);
         region2 << Streak<2>(Coord<2>(0, 5), 10);
         region = region1 & region2;
 
         for (Region<2>::StreakIterator i = region.beginStreak();
-             i != region.endStreak(); 
+             i != region.endStreak();
              ++i) {
             TS_FAIL("loop should not execute!");
         }
@@ -456,9 +456,9 @@ public:
     void testBigInsert()
     {
         CoordVector res;
-        for (CoordVector::iterator i = bigInsertShuffled.begin(); 
+        for (CoordVector::iterator i = bigInsertShuffled.begin();
              i != bigInsertShuffled.end(); i++) {
-            c << *i; 
+            c << *i;
         }
 
         for (Region<2>::Iterator i = c.begin(); i != c.end(); ++i) {
@@ -491,7 +491,7 @@ public:
         TS_ASSERT_EQUALS(26, c.indices[1][18].second);
         TS_ASSERT_EQUALS(28, c.indices[1][19].second);
         TS_ASSERT_EQUALS(30, c.indices[1][20].second);
-    }       
+    }
 
     void testEmpty()
     {
@@ -504,52 +504,52 @@ public:
     void testBoundingBox()
     {
         Region<2> c;
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(0, 0),  Coord<2>(0, 0)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(0, 0),  Coord<2>(0, 0)),
                          c.boundingBox());
 
         c << Coord<2>(4, 8);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(4, 8),  Coord<2>(1, 1)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(4, 8),  Coord<2>(1, 1)),
                          c.boundingBox());
 
         c << Coord<2>(10, 13);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(4, 8),  Coord<2>(7, 6)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(4, 8),  Coord<2>(7, 6)),
                          c.boundingBox());
 
         c << Streak<2>(Coord<2>(2, 3), 20);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(18, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(18, 11)),
                          c.boundingBox());
-        
+
         c << Streak<2>(Coord<2>(5, 5), 30);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(28, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(28, 11)),
                          c.boundingBox());
 
         c >> Streak<2>(Coord<2>(6, 5), 29);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(28, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(28, 11)),
                          c.boundingBox());
 
         c >> Streak<2>(Coord<2>(5, 5), 30);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(18, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(18, 11)),
                          c.boundingBox());
-        
+
         c >> Streak<2>(Coord<2>(500, 500), 1000);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(18, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(2, 3),  Coord<2>(18, 11)),
                          c.boundingBox());
 
         c << Streak<2>(Coord<2>(-5, 33), 95);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 31)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 31)),
                          c.boundingBox());
 
         c << Streak<2>(Coord<2>(-5, 42), 95);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 40)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 40)),
                          c.boundingBox());
 
         c >> Streak<2>(Coord<2>(-10, 42),  20);
         c >> Streak<2>(Coord<2>( 50, 42), 100);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 40)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 40)),
                          c.boundingBox());
 
         c >> Streak<2>(Coord<2>(-5, 42), 95);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 31)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-5, 3), Coord<2>(100, 31)),
                          c.boundingBox());
     }
 
@@ -577,7 +577,7 @@ public:
         //
         c << Coord<2>(2, 2)
           << Coord<2>(5, 6)
-          << Coord<2>(3, 6) 
+          << Coord<2>(3, 6)
           << Coord<2>(4, 6)
           << Coord<2>(6, 6)
           << Coord<2>(2, 6)
@@ -685,7 +685,7 @@ public:
 
         for(int x = 0; x < 5; ++x) {
             for(int y = 5; y < 10; ++y) {
-                expected << Coord<2>(x, y); 
+                expected << Coord<2>(x, y);
             }
         }
 
@@ -736,7 +736,7 @@ public:
         original &= mask;
         TS_ASSERT_EQUALS(original, expected);
     }
-    
+
     void testAndOperator()
     {
         Region<2> original, mask, expected;
@@ -809,7 +809,7 @@ public:
 
         TS_ASSERT_EQUALS(original + addent, expected);
     }
-    
+
     void testEqualsOperator()
     {
         Region<2> a, b;
@@ -821,12 +821,12 @@ public:
         a << Coord<2>(20, 20);
         TS_ASSERT_EQUALS(a, b);
         TS_ASSERT_EQUALS(true, a.geometryCacheTainted);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(10, 10), Coord<2>(11, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(10, 10), Coord<2>(11, 11)),
                          a.boundingBox());
         TS_ASSERT_EQUALS(false, a.geometryCacheTainted);
         TS_ASSERT_EQUALS(true, b.geometryCacheTainted);
         TS_ASSERT_EQUALS(a, b);
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(10, 10), Coord<2>(11, 11)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(10, 10), Coord<2>(11, 11)),
                          b.boundingBox());
         TS_ASSERT_EQUALS(false, b.geometryCacheTainted);
         TS_ASSERT_EQUALS(a, b);
@@ -866,7 +866,7 @@ public:
         TS_ASSERT_EQUALS(4, a.toVector().size());
         SuperVector<Streak<2> > vec = a.toVector();
         TS_ASSERT_EQUALS(a, Region<2>(vec.begin(), vec.end()));
-        a << Streak<2>(Coord<2>(12, 10), 30);        
+        a << Streak<2>(Coord<2>(12, 10), 30);
         TS_ASSERT_EQUALS(2, a.toVector().size());
         vec = a.toVector();
         TS_ASSERT_EQUALS(a, Region<2>(vec.begin(), vec.end()));
@@ -880,7 +880,7 @@ public:
         Region<2> actual(s.begin(), s.end());
         Region<2> expected;
         for (int y = origin.y(); y != (origin.y() + dimensions.y()); ++y) {
-            expected << Streak<2>(Coord<2>(origin.x(), y), 
+            expected << Streak<2>(Coord<2>(origin.x(), y),
                                   origin.x() + dimensions.x());
         }
         TS_ASSERT_EQUALS(actual, expected);
@@ -894,7 +894,7 @@ public:
 
         a.clear();
         TS_ASSERT(a.empty());
-        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(0, 0), Coord<2>(0, 0)), 
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(0, 0), Coord<2>(0, 0)),
                          a.boundingBox());
     }
 
@@ -913,7 +913,7 @@ public:
           << streaks[2]
           << streaks[3]
           << streaks[4];
-        
+
         for (Region<3>::StreakIterator i = a.beginStreak(); i != a.endStreak(); ++i) {
             retrievedStreaks << *i;
         }
@@ -933,7 +933,7 @@ public:
         a << streaks[0]
           << streaks[1]
           << streaks[2];
-        
+
         for (Region<3>::StreakIterator i = a.beginStreak(); i != a.endStreak(); ++i) {
             retrievedStreaks << *i;
         }
@@ -948,7 +948,7 @@ public:
         SuperVector<Streak<3> > retrievedStreaks;
         a << Streak<3>(Coord<3>(10, 10, 10), 20);
         a >> Streak<3>(Coord<3>(15, 10, 10), 16);
-        
+
         for (Region<3>::StreakIterator i = a.beginStreak(); i != a.endStreak(); ++i) {
             retrievedStreaks << *i;
         }
@@ -1015,7 +1015,7 @@ public:
                << Streak<2>(Coord<2>(0, 2), 20);
 
         Region<2> actual = region.expandWithTopology(
-            2, 
+            2,
             Coord<2>(20, 20),
             Topologies::Torus<2>::Topology());
 
@@ -1040,7 +1040,7 @@ public:
                << Streak<2>(Coord<2>(0, 2), 20);
 
         Region<2> actual = region.expandWithTopology(
-            2, 
+            2,
             Coord<2>(20, 20),
             Topologies::Cube<2>::Topology());
 
@@ -1067,9 +1067,9 @@ public:
                     leftCube << c1;
                     rightCube << c2;
                     frontCube << c3;
-                    mergerLR << c1 
+                    mergerLR << c1
                              << c2;
-                    mergerFL << c1 
+                    mergerFL << c1
                              << c3;
                 }
             }
@@ -1095,7 +1095,7 @@ public:
         TS_ASSERT_EQUALS(r.indices[1].size(), 1);
         TS_ASSERT_EQUALS(r.indices[2].size(), 1);
         TS_ASSERT_EQUALS(r.size(), 30);
-        TS_ASSERT_EQUALS(r.boundingBox(), 
+        TS_ASSERT_EQUALS(r.boundingBox(),
                          CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(30, 1, 1)));
 
         r >> Streak<3>(Coord<3>(15, 20, 30), 35);
@@ -1130,7 +1130,7 @@ public:
 
         TS_ASSERT_EQUALS(r.indices[1][0].second, 0);
         TS_ASSERT_EQUALS(r.indices[2][0].second, 0);
-        
+
         r >> Streak<3>(Coord<3>(10, 20, 30), 15);
 
         TS_ASSERT_EQUALS(r.indices[0].size(), 0);
@@ -1216,7 +1216,7 @@ public:
 private:
     Region<2> c;
     CoordVector bigInsertOrdered;
-    CoordVector bigInsertShuffled;        
+    CoordVector bigInsertShuffled;
 
     CoordVector transform(const SuperVector<std::string>& shape)
     {

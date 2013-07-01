@@ -234,8 +234,7 @@ public:
         }
         std::string filename = "libgeodecomp";
         if (prefix.length() > 0) {
-            filename += "_";
-            filename += prefix;
+            filename += "_" + prefix;
         }
         VisItInitializeSocketAndDumpSimFile(filename.c_str(), "",
             buffer, NULL, NULL, NULL);

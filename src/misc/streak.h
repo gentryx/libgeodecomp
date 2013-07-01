@@ -42,6 +42,13 @@ public:
         return endX - origin.x();
     }
 
+    template <typename Archive>
+    void serialize(Archive & ar, unsigned)
+    {
+        ar & origin;
+        ar & endX;
+    }
+
     Coord<DIM> origin;
     int endX;
 };

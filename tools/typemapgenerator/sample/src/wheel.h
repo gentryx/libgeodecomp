@@ -4,7 +4,7 @@
 #include "tire.h"
 #include "rim.h"
 
-class Wheel 
+class Wheel
 {
     friend class Typemaps;
     Tire tire;

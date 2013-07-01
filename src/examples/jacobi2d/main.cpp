@@ -21,22 +21,22 @@ public:
     {};
 
 
-    static inline unsigned nanoSteps() 
-    { 
-        return 1; 
+    static inline unsigned nanoSteps()
+    {
+        return 1;
     }
 
-    inline Cell(const double& v = 0) : 
+    inline Cell(const double& v = 0) :
         temp(v)
-    {}  
+    {}
 
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
     {
-        temp = (neighborhood[Coord<2>( 0, -1)].temp + 
-                neighborhood[Coord<2>(-1,  0)].temp + 
-                neighborhood[Coord<2>( 0,  0)].temp + 
-                neighborhood[Coord<2>( 1,  0)].temp + 
+        temp = (neighborhood[Coord<2>( 0, -1)].temp +
+                neighborhood[Coord<2>(-1,  0)].temp +
+                neighborhood[Coord<2>( 0,  0)].temp +
+                neighborhood[Coord<2>( 1,  0)].temp +
                 neighborhood[Coord<2>( 0,  1)].temp) * (1.0 / 5.0);
     }
 
@@ -91,13 +91,13 @@ public:
 
 void runSimulation()
 {
-    SerialSimulator<Cell> 
+    SerialSimulator<Cell>
         sim(new CellInitializer());
 
     int outputFrequency = 1;
     // sim.addWriter(
     //     new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-    //         "./jacobi", 
+    //         "./jacobi",
     //         outputFrequency,
     //         1,
     //         1));
