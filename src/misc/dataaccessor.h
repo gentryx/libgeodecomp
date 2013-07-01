@@ -10,57 +10,63 @@ namespace LibGeoDecomp {
  * Writer/Steerer classes. DataAccessor usually serves as a base class
  * for a macro-generated specialization (see DEFINE_DATAACCESSOR).
  */
-template<typename CELL_TYPE>
+template<typename CELL_TYPE, typename MEMBER_TYPE>
 // fixme: unify this with BOVWriter infrastucture
 // fixme: move to src/io?
 class DataAccessor
 {
 public:
-    virtual void getFunction(const CELL_TYPE&, void*) = 0;
-    virtual void setFunction(CELL_TYPE*, void*) = 0;
-    virtual size_t memberSize() = 0;
-
     DataAccessor(
         const std::string& variableName,
         const std::string& variableType) :
-        name(variableName),
-        type(boost::algorithm::to_upper_copy(variableType))
+        myName(variableName),
+        myType(boost::algorithm::to_upper_copy(variableType))
     {}
 
     virtual ~DataAccessor()
     {}
 
-    const std::string& getName() const
+    virtual MEMBER_TYPE get(const CELL_TYPE&) = 0;
+    virtual void get(const CELL_TYPE&, void*) = 0;
+    virtual void set(CELL_TYPE*, void*) = 0;
+    virtual size_t memberSize() = 0;
+
+    const std::string& name() const
     {
-        return name;
+        return myName;
     }
 
-    const std::string getType() const
+    const std::string type() const
     {
-        return type;
+        return myType;
     }
 
 private:
-    std::string name;
-    std::string type;
+    std::string myName;
+    std::string myType;
 };
 
-#define DEFINE_DATAACCESSOR(CELL, MEMBER_TYPE, MEMBER_NAME)             \
-    class MEMBER_NAME##DataAccessor : public DataAccessor<CELL>         \
+#define DEFINE_DATAACCESSOR(NAME, CELL, MEMBER_TYPE, MEMBER_NAME)       \
+    class NAME : public DataAccessor<CELL, MEMBER_TYPE>                 \
     {                                                                   \
     public:                                                             \
         typedef MEMBER_TYPE MemberType;                                 \
                                                                         \
-        MEMBER_NAME##DataAccessor() :                                   \
-            DataAccessor<CELL>(#MEMBER_NAME, #MEMBER_TYPE)              \
-            {}                                                          \
+        NAME() :                                                        \
+            DataAccessor<CELL, MEMBER_TYPE>(#MEMBER_NAME, #MEMBER_TYPE) \
+        {}                                                              \
                                                                         \
-        void getFunction(const CELL& in, void *out)                     \
+        MEMBER_TYPE get(const CELL& in)                                 \
+        {                                                               \
+            return in.MEMBER_NAME;                                      \
+        }                                                               \
+                                                                        \
+        void get(const CELL& in, void *out)                             \
         {                                                               \
             *static_cast<MEMBER_TYPE*>(out) = in.MEMBER_NAME;           \
         }                                                               \
                                                                         \
-        void setFunction(CELL *cell, void *value)                       \
+        void set(CELL *cell, void *value)                               \
         {                                                               \
             cell->MEMBER_NAME = *(static_cast<MEMBER_TYPE*>(value));    \
         }                                                               \
