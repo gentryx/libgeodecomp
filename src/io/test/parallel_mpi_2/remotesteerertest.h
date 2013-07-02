@@ -2,13 +2,15 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
-#ifdef LIBGEODECOMP_FEATURE_THREADS
-#include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/io/remotesteerer/interactor.h>
+#include <libgeodecomp/misc/dataaccessor.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+
+#ifdef LIBGEODECOMP_FEATURE_THREADS
+#include <libgeodecomp/io/remotesteerer.h>
+#include <libgeodecomp/io/remotesteerer/interactor.h>
 #endif
 
 using namespace LibGeoDecomp;
@@ -67,7 +69,6 @@ public:
         }
 
     };
-#endif
 
     class EchoHandler : public Handler<TestCell<2> >
     {
@@ -86,6 +87,7 @@ public:
             return true;
         }
     };
+#endif
 
     void setUp()
     {

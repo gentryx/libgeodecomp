@@ -6,7 +6,10 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -30,7 +33,9 @@ template<typename CELL_TYPE>
 class ParallelWriter
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
+#endif
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
