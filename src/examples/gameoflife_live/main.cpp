@@ -117,8 +117,8 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(ConwayCell, char, alive);
-DEFINE_DATAACCESSOR(ConwayCell, int, count);
+DEFINE_DATAACCESSOR(AliveAccessor, ConwayCell, char, alive);
+DEFINE_DATAACCESSOR(CountAccessor, ConwayCell, int, count);
 
 void runSimulation()
 {
@@ -130,8 +130,8 @@ void runSimulation()
 
     VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
         "gameOfLife", outputFrequency, VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new aliveDataAccessor());
-    visItWriter->addVariable(new countDataAccessor());
+    visItWriter->addVariable(new AliveAccessor());
+    visItWriter->addVariable(new CountAccessor());
 
     sim.addWriter(visItWriter);
 

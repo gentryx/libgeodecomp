@@ -22,9 +22,9 @@ class Cell
 {
 public:
     friend class CellInitializer;
-    friend class borderDataAccessor;
-    friend class directionDataAccessor;
-    friend class rateDataAccessor;
+    friend class BorderAccessor;
+    friend class DirectionAccessor;
+    friend class RateAccessor;
 
     typedef Stencils::Moore<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
@@ -231,9 +231,9 @@ void runSimulation()
     SerialSimulator<Cell> sim(new CellInitializer(maxSteps));
 
     VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("cars", 1, VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new borderDataAccessor());
-    visItWriter->addVariable(new directionDataAccessor());
-    visItWriter->addVariable(new rateDataAccessor());
+    visItWriter->addVariable(new BorderAccessor());
+    visItWriter->addVariable(new DirectionAccessor());
+    visItWriter->addVariable(new RateAccessor());
     sim.addWriter(visItWriter);
 
     sim.addWriter(new TracingWriter<Cell>(1, maxSteps));

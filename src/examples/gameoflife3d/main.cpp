@@ -95,7 +95,7 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(ConwayCell, char, alive)
+DEFINE_DATAACCESSOR(AliveAccessor, ConwayCell, char, alive)
 
 void runSimulation()
 {
@@ -107,7 +107,7 @@ void runSimulation()
         "gameOfLifeLive",
         outputFrequency,
         VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new aliveDataAccessor());
+    visItWriter->addVariable(new AliveAccessor());
 
     sim.addWriter(visItWriter);
 
