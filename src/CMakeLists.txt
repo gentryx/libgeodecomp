@@ -40,6 +40,10 @@ if(HPX_FOUND)
     set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
     include_directories(${HPX_INCLUDE_DIR})
     link_directories(${HPX_LIBRARY_DIR})
+    add_definitions(-DHPX_LIMIT=10)
+    set(HPX_FOUND true)
+else()
+    set(HPX_FOUND false)
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
@@ -132,7 +136,7 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
-add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} false)
+add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
 
 add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
@@ -223,8 +227,28 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
+if(FEATURE_HPX)
+  if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
+    set(LOCAL_LIBGEODECOMP_LINK_LIB
+      ${LOCAL_LIBGEODECOMP_LINK_LIB}
+      hpx${HPX_DEBUG_POSTFIX}
+      hpx_serialization${HPX_DEBUG_POSTFIX}
+      hpx_init${HPX_DEBUG_POSTFIX}
+    )
+  else()
+    set(LOCAL_LIBGEODECOMP_LINK_LIB
+      ${LOCAL_LIBGEODECOMP_LINK_LIB}
+      hpx
+      hpx_serialization
+      hpx_init
+    )
+  endif()
+
+  set(LOCAL_LIBGEODECOMP_LINK_LIB ${LOCAL_LIBGEODECOMP_LINK_LIB} ${HPX_LIBRARIES})
+endif()
+
 # LIBDIRS is used to find source files and headers
-set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
+set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions parallelization/hpxsimulator)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
 # linked into the main lib.
@@ -309,6 +333,8 @@ endforeach(dir)
 
 set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
+
+message(${SOURCES})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 target_link_libraries(geodecomp ${Boost_LIBRARIES})

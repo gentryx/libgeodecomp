@@ -6,6 +6,8 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/serialization/vector.hpp>
+
 namespace LibGeoDecomp {
 
 /**
@@ -137,6 +139,12 @@ public:
     const T& (max)() const
     {
         return *(std::max_element(begin(), end()));
+    }
+
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & static_cast<std::vector<T, Allocator>&>(*this);
     }
 };
 

@@ -11,6 +11,8 @@
 #include <boost/serialization/base_object.hpp>
 #endif
 
+#include <cassert>
+
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
@@ -41,6 +43,9 @@ public:
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
 
+    ParallelWriter()
+    {}
+
     /**
      * is the equivalent to Writer().
      */
@@ -57,6 +62,17 @@ public:
 
     virtual ~ParallelWriter()
     {};
+
+    /**
+     * "Virtual Copy constructor"
+     * This function may be called whenever a copy of a writer is needed
+     * instead of a plain pointer copy. Must be implemented by t
+     **/
+    virtual ParallelWriter * clone()
+    {
+        assert(false);
+        return 0;
+    }
 
     /**
      * notifies the ParallelWriter that the supplied region is the
@@ -104,11 +120,11 @@ protected:
     Region<Topology::DIM> region;
     std::string prefix;
     unsigned period;
-private:
+private: 
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    void serialize(Archive & ar, unsigned)
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
     {
         ar & region;
         ar & prefix;

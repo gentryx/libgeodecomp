@@ -59,8 +59,8 @@ public:
                 << " "   << img.getDimensions().y() << " 255\n";
 
         // body second:
-        for (unsigned y = 0; y < img.getDimensions().y(); ++y) {
-            for (unsigned x = 0; x < img.getDimensions().x(); ++x) {
+        for (int y = 0; y < img.getDimensions().y(); ++y) {
+            for (int x = 0; x < img.getDimensions().x(); ++x) {
                 const Color& rgb = img[y][x];
                 outfile << (char)rgb.red()
                         << (char)rgb.green()

@@ -79,6 +79,13 @@ public:
     {
         return dimensions.prod();
     }
+    
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & origin;
+        ar & dimensions;
+    }
 
     class Iterator
     {

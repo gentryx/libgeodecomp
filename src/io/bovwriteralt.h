@@ -1,26 +1,31 @@
 #include <libgeodecomp/config.h>
-#if defined(LIBGEODECOMP_FEATURE_MPI)
-#ifndef LIBGEODECOMP_IO_BOVWRITER_H
-#define LIBGEODECOMP_IO_BOVWRITER_H
+#if defined(LIBGEODECOMP_FEATURE_MPI) || defined(LIBGEODECOMP_FEATURE_HPX)
+#ifndef LIBGEODECOMP_IO_BOVWRITERALT_H
+#define LIBGEODECOMP_IO_BOVWRITERALT_H
 
 #include <iomanip>
 
+#if defined(LIBGEODECOMP_FEATURE_MPI)
 #include <libgeodecomp/io/mpiio.h>
+#endif
 #include <libgeodecomp/io/parallelwriter.h>
+#if defined(LIBGEODECOMP_FEATURE_MPI)
 #include <libgeodecomp/mpilayer/typemaps.h>
+#endif
 
 namespace LibGeoDecomp {
 
 /**
  * writes simulation snapshots compatible with VisIt's Brick of Values
- * (BOV) format using MPI-IO. Uses a selector which maps a cell to a
+ * (BOV) format using one file per partition. Uses a selector which maps a cell to a
  * primitive data type so that it can be fed into VisIt.
  */
+
 template<typename CELL_TYPE, typename SELECTOR_TYPE>
-class BOVWriter : public ParallelWriter<CELL_TYPE>
+class BOVWriterAlt : public ParallelWriter<CELL_TYPE>
 {
 public:
-    friend class BOVWriterTest;
+    friend class BOVWriterAltTest;
 
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
@@ -30,17 +35,21 @@ public:
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;
 
-    BOVWriter(
+    BOVWriterAlt() {}
+
+    BOVWriterAlt(
         const std::string& prefix,
         const unsigned period,
-        const Coord<3>& brickletDim = Coord<3>(),
-        const MPI::Intracomm& communicator = MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<VariableType>()) :
+        const Coord<3>& brickletDim = Coord<3>()) :
         ParallelWriter<CELL_TYPE>(prefix, period),
-        brickletDim(brickletDim),
-        comm(communicator),
-        datatype(mpiDatatype)
+        brickletDim(brickletDim)
     {}
+
+    ParallelWriter<CELL_TYPE> * clone()
+    {
+        return new BOVWriterAlt(this->prefix, this->period, brickletDim);
+    }
+
 
     virtual void stepFinished(
         const typename ParallelWriter<CELL_TYPE>::GridType& grid,
@@ -54,6 +63,22 @@ public:
             return;
         }
 
+        //if(this->region.boundingBox().origin == Coord<2>(0,0))
+        /*
+        {
+            std::cout
+                << "BOVWriter ... "
+                << step << " "
+                << this->region.boundingBox() << " "
+                << validRegion.boundingBox() << " "
+                << (lastCall ? std::string("true") : "false")
+                << "\n";
+        }
+        */
+
+
+        //if(validRegion.boundinBox()
+
         writeHeader(step, globalDimensions);
         writeRegion(step, globalDimensions, grid, validRegion);
     }
@@ -61,8 +86,14 @@ public:
 
 private:
     Coord<3> brickletDim;
-    MPI::Intracomm comm;
-    MPI::Datatype datatype;
+    
+    friend class boost::serialization::access;
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
+        ar & brickletDim;
+    }
 
     std::string filename(const unsigned& step, const std::string& suffix) const
     {
@@ -73,6 +104,7 @@ private:
 
     void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
     {
+        /*
         MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "bov"), comm);
 
@@ -107,6 +139,7 @@ private:
         }
 
         file.Close();
+        */
     }
 
     template<typename GRID_TYPE>
@@ -116,6 +149,7 @@ private:
         const GRID_TYPE& grid,
         const Region<DIM>& region)
     {
+        /*
         MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "data"), comm);
         MPI::Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
@@ -148,6 +182,7 @@ private:
         }
 
         file.Close();
+        */
     }
 };
 

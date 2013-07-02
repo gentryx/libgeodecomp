@@ -61,6 +61,11 @@ public:
         cellMPIDatatype(cellMPIDatatype)
     {}
 
+    std::size_t getRank() const
+    {
+        return communicator->Get_rank();
+    }
+
     inline void run()
     {
         initSimulation();

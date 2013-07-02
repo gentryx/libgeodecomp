@@ -20,6 +20,10 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
     static const int DIM = CELL_TYPE::Topology::DIM;
 
+    TracingWriter()
+      : stream(std::cout)
+    {}
+
     TracingWriter(
         const unsigned period,
         const unsigned maxSteps,
@@ -30,6 +34,12 @@ public:
         lastStep(0),
         maxSteps(maxSteps)
     {}
+
+
+    ParallelWriter<CELL_TYPE> * clone()
+    {
+        return new TracingWriter(Writer<CELL_TYPE>::period, maxSteps);
+    }
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
@@ -54,6 +64,16 @@ private:
     Time startTime;
     unsigned lastStep;
     unsigned maxSteps;
+    
+    friend class boost::serialization::access;
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
+        ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
+        ar & lastStep;
+        ar & maxSteps;
+    }
 
     void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)
     {

@@ -12,6 +12,8 @@
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/supervector.h>
 
+#include <boost/serialization/is_bitwise_serializable.hpp>
+
 namespace LibGeoDecomp {
 
 /**
@@ -149,9 +151,16 @@ public:
         return s.str();
     }
 
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & c;
+    }
+
 private:
     int c[1];
 };
+
 
 template<>
 class Coord<2>
@@ -298,6 +307,12 @@ public:
         std::stringstream s;
         s << "(" << x() << ", " << y() << ")";
         return s.str();
+    }
+
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & c;
     }
 
 private:
@@ -470,6 +485,12 @@ public:
         return s.str();
     }
 
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & c;
+    }
+
 private:
     int c[3];
 };
@@ -554,6 +575,10 @@ public:
 };
 
 }
+
+BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<1>)
+BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<2>)
+BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<3>)
 
 template<typename _CharT, typename _Traits, int DIMENSIONS>
 std::basic_ostream<_CharT, _Traits>&
