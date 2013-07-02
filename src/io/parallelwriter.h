@@ -3,9 +3,9 @@
 
 #include <string>
 #include <stdexcept>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
-
 #include <boost/serialization/base_object.hpp>
 
 namespace LibGeoDecomp {
@@ -30,6 +30,7 @@ template<typename CELL_TYPE>
 class ParallelWriter
 {
 public:
+    friend class boost::serialization::access;
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
@@ -99,7 +100,8 @@ protected:
     std::string prefix;
     unsigned period;
 private:
-    friend class boost::serialization::access;
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
@@ -107,6 +109,7 @@ private:
         ar & prefix;
         ar & period;
     }
+#endif
 };
 
 }

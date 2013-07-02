@@ -43,7 +43,8 @@ if(HPX_FOUND)
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
-find_package(Boost REQUIRED date_time filesystem system thread serialization)
+find_package(Boost REQUIRED date_time filesystem system thread COMPONENTS serialization)
+
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
@@ -67,8 +68,13 @@ endif()
 if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
 endif()
+
 if(NOT DEFINED OpenCV_FOUND)
   set(OpenCV_FOUND false)
+endif()
+
+if(NOT DEFINED Boost_SERIALIZATION_FOUND)
+  set(Boost_SERIALIZATION_FOUND false)
 endif()
 
 set(DEFAULT_TYPEMAP_GENERATION false)
@@ -111,6 +117,8 @@ add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" $
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
 add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." false true)
+
+add_config_option(FEATURE_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
 
@@ -189,6 +197,11 @@ endif()
 if(FEATURE_HPX AND NOT HPX_FOUND)
     message(FATAL_ERROR "FEATURE_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
 endif()
+
+if(FEATURE_HPX AND NOT Boost_SERIALIZATION_FOUND)
+    message(FATAL_ERROR "FEATURE_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
+endif()
+
 if(FEATURE_VISIT)
   include_directories(${VisIt_INCLUDE_DIRS})
 endif()

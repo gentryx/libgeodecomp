@@ -1,9 +1,13 @@
 #ifndef LIBGEODECOMP_IO_STEERER_H
 #define LIBGEODECOMP_IO_STEERER_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/region.h>
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -53,12 +57,14 @@ public:
         return period;
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
         ar & region;
         ar & period;
     }
+#endif
 
 protected:
     Region<Topology::DIM> region;

@@ -2,14 +2,11 @@
 #define LIBGEODECOMP_MISC_FIXEDARRAY_H
 
 #include <stdexcept>
+#include <libgeodecomp/config.h>
 
-namespace boost {
-namespace serialization {
-
-class access;
-
-}
-}
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/serialization/base_object.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -23,7 +20,9 @@ template<typename T, int SIZE>
 class FixedArray
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
+#endif
 
     FixedArray(const int& _elements=0) :
         elements(_elements)
@@ -98,12 +97,14 @@ public:
         elements = num;
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template<class Archive>
     inline void serialize(Archive &archive, const unsigned int version)
     {
         archive & store;
         archive & elements;
     }
+#endif
 
     inline const int& size() const
     {

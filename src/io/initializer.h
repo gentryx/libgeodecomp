@@ -1,9 +1,13 @@
 #ifndef LIBGEODECOMP_IO_INITIALIZER_H
 #define LIBGEODECOMP_IO_INITIALIZER_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/gridbase.h>
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>
+#endif
+
 
 namespace LibGeoDecomp {
 
@@ -11,6 +15,9 @@ template<typename CELL>
 class Initializer
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    friend class boost::serialization::access;
+#endif
     static const int DIM = CELL::Topology::DIM;
 
     /**
@@ -31,10 +38,12 @@ public:
     virtual unsigned startStep() const = 0;
 
 private:
-    friend class boost::serialization::access;
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {}
+#endif
 };
 
 }

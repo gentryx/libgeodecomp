@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_STREAK_H
 #define LIBGEODECOMP_MISC_STREAK_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/coord.h>
 
 namespace LibGeoDecomp {
@@ -42,12 +43,14 @@ public:
         return endX - origin.x();
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
         ar & origin;
         ar & endX;
     }
+#endif
 
     Coord<DIM> origin;
     int endX;

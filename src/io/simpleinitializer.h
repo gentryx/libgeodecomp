@@ -1,9 +1,12 @@
 #ifndef LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
 #define LIBGEODECOMP_IO_SIMPLEINITIALIZER_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/initializer.h>
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -35,6 +38,7 @@ public:
         return 0;
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
@@ -42,6 +46,7 @@ public:
         ar & dimensions;
         ar & steps;
     }
+#endif
 
 protected:
     Coord<DIM> dimensions;

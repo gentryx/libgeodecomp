@@ -630,6 +630,7 @@ public:
         return Iterator(endStreak());
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
     void serialize(Archive & ar, unsigned)
     {
@@ -638,6 +639,7 @@ public:
         ar & mySize;
         ar & geometryCacheTainted;
     }
+#endif
 
 private:
     VecType indices[DIM];
