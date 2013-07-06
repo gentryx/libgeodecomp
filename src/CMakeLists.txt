@@ -42,19 +42,11 @@ if(HPX_FOUND)
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
-find_package(Boost COMPONENTS date_time filesystem system mpi serialization thread)
-
-if(NOT Boost_DATE_TIME_FOUND)
-  message(FATAL_ERROR "Mandatory library Boost.Date_Time not found")
-endif()
-
-if(NOT Boost_FILESYSTEM_FOUND)
-  message(FATAL_ERROR "Mandatory library Boost.Filesystem not found")
-endif()
-
-if(NOT Boost_SYSTEM_FOUND)
-  message(FATAL_ERROR "Mandatory library Boost.System not found")
-endif()
+# mandatory Boost libs go into the first line, optional ones into their own call. This avoids leaving out any available lib during link time.
+find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
+find_package(Boost COMPONENTS mpi)
+find_package(Boost COMPONENTS serialization)
+find_package(Boost COMPONENTS thread)
 
 find_package(CUDA)
 find_package(OpenCL)
