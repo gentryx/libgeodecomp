@@ -31,7 +31,6 @@ if(HPX_ROOT)
   find_package(HPX)
 endif()
 
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
@@ -45,15 +44,15 @@ set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
 find_package(Boost COMPONENTS date_time filesystem system mpi serialization thread)
 
-if(NOT DEFINED Boost_DATE_TIME_FOUND)
+if(NOT Boost_DATE_TIME_FOUND)
   message(FATAL_ERROR "Mandatory library Boost.Date_Time not found")
 endif()
 
-if(NOT DEFINED Boost_FILESYSTEM_FOUND)
+if(NOT Boost_FILESYSTEM_FOUND)
   message(FATAL_ERROR "Mandatory library Boost.Filesystem not found")
 endif()
 
-if(NOT DEFINED Boost_SYSTEM_FOUND)
+if(NOT Boost_SYSTEM_FOUND)
   message(FATAL_ERROR "Mandatory library Boost.System not found")
 endif()
 
