@@ -21,14 +21,14 @@ endif()
 detect_distro()
 
 if(NOT HPX_ROOT)
-    if(NOT $ENV{HPX_ROOT} STREQUAL "")
-        set(HPX_ROOT $ENV{HPX_ROOT})
-    endif()
+  if(NOT $ENV{HPX_ROOT} STREQUAL "")
+    set(HPX_ROOT $ENV{HPX_ROOT})
+  endif()
 endif()
 
 if(HPX_ROOT)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
-    find_package(HPX)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
+  find_package(HPX)
 endif()
 
 
@@ -37,13 +37,25 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(HPX_FOUND)
-    set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
-    include_directories(${HPX_INCLUDE_DIR})
-    link_directories(${HPX_LIBRARY_DIR})
+  set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
+  include_directories(${HPX_INCLUDE_DIR})
+  link_directories(${HPX_LIBRARY_DIR})
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
-find_package(Boost REQUIRED COMPONENTS date_time filesystem system thread)
+find_package(Boost COMPONENTS date_time filesystem system mpi serialization thread)
+
+if(NOT DEFINED Boost_DATE_TIME_FOUND)
+  message(FATAL_ERROR "Mandatory library Boost.Date_Time not found")
+endif()
+
+if(NOT DEFINED Boost_FILESYSTEM_FOUND)
+  message(FATAL_ERROR "Mandatory library Boost.Filesystem not found")
+endif()
+
+if(NOT DEFINED Boost_SYSTEM_FOUND)
+  message(FATAL_ERROR "Mandatory library Boost.System not found")
+endif()
 
 find_package(CUDA)
 find_package(OpenCL)
