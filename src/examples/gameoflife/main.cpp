@@ -34,17 +34,20 @@ public:
         return 1;
     }
 
-    ConwayCell(const bool& _alive = false) :
-        alive(_alive)
+    ConwayCell(bool alive = false) :
+        alive(alive)
     {}
 
     int countLivingNeighbors(const CoordMap<ConwayCell>& neighborhood)
     {
         int ret = 0;
-        for (int y = -1; y < 2; ++y)
-            for (int x = -1; x < 2; ++x)
+        for (int y = -1; y < 2; ++y) {
+            for (int x = -1; x < 2; ++x) {
                 ret += neighborhood[Coord<2>(x, y)].alive;
+            }
+        }
         ret -= neighborhood[Coord<2>(0, 0)].alive;
+
         return ret;
     }
 
@@ -104,9 +107,11 @@ public:
 
         for (SuperVector<Coord<2> >::iterator i = startCells.begin();
              i != startCells.end();
-             ++i)
-            if (rect.inBounds(*i))
-                ret->at(*i - rect.origin) = ConwayCell(true);
+             ++i) {
+            if (rect.inBounds(*i)) {
+                ret->at(*i) = ConwayCell(true);
+            }
+        }
     }
 };
 

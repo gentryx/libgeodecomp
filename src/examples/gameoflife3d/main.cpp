@@ -65,17 +65,12 @@ public:
         CoordBox<3> rect = ret->boundingBox();
         SuperVector<Coord<3> > startCells;
         int tmp;
-        for (int z = 0; z < 20; ++z)
-        {
-            for (int y = 0; y < 20; ++y)
-            {
-                for (int x = 0; x < 20; ++x)
-                {
-                    tmp = ((x+y+z)%2);
-                    if (tmp)
-                    {
-                        if (rect.inBounds(Coord<3>(x, y, z)))
-                        {
+        for (int z = 0; z < 20; ++z) {
+            for (int y = 0; y < 20; ++y) {
+                for (int x = 0; x < 20; ++x) {
+                    tmp = (x+y+z) % 2;
+                    if (tmp) {
+                        if (rect.inBounds(Coord<3>(x, y, z))) {
                             startCells += Coord<3>(x, y, z);
                         }
                     }
@@ -87,10 +82,9 @@ public:
              i != startCells.end();
              ++i)
             {
-            if (rect.inBounds(*i))
-                {
+            if (rect.inBounds(*i)) {
                 ret->at(*i) = ConwayCell(true);
-                }
+            }
         }
     }
 };
@@ -104,15 +98,15 @@ void runSimulation()
     SerialSimulator<ConwayCell> sim(new CellInitializer());
 
     VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
-        "gameOfLifeLive",
+        "gameOfLife3D",
         outputFrequency,
         VISIT_SIMMODE_STOPPED);
     visItWriter->addVariable(new AliveAccessor());
 
     sim.addWriter(visItWriter);
 
-    // fixme: add accessor for "alive" flag
-    Steerer<ConwayCell> *steerer = new RemoteSteerer<ConwayCell>(1, 1234);
+    RemoteSteerer<ConwayCell> *steerer = new RemoteSteerer<ConwayCell>(1, 1234);
+    steerer->addDataAccessor(new AliveAccessor());
     sim.addSteerer(steerer);
 
     sim.run();
