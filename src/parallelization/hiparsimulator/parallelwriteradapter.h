@@ -24,13 +24,11 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        SIMULATOR * sim,
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
         const std::size_t firstStep,
         const std::size_t lastStep,
         Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
         bool lastCall) :
-        sim(sim),
         writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
@@ -77,7 +75,6 @@ public:
     }
 
 private:
-    SIMULATOR * sim;
     boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
     std::size_t firstNanoStep;
     std::size_t lastNanoStep;
