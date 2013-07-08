@@ -24,21 +24,20 @@ public:
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
     ParallelWriterAdapter(
-        SIMULATOR * sim,
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
         const std::size_t firstStep,
         const std::size_t lastStep,
         Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
         bool lastCall) :
-        sim(sim),
         writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
+        stride(writer->getPeriod() * CELL_TYPE::nanoSteps()),
         lastCall(lastCall),
         globalGridDimensions(globalGridDimensions)
     {
-        reload(firstNanoStep);
-        reload(lastNanoStep);
+        pushRequest(firstNanoStep);
+        pushRequest(lastNanoStep);
     }
 
     virtual void setRegion(const Region<GRID_TYPE::DIM>& region)
@@ -54,7 +53,6 @@ public:
         if (!checkNanoStepPut(nanoStep)) {
             return;
         }
-        requestedNanoSteps.erase_min();
 
         WriterEvent event = WRITER_STEP_FINISHED;
         if (nanoStep == firstNanoStep) {
@@ -71,35 +69,18 @@ public:
             nanoStep / CELL_TYPE::nanoSteps(),
             event,
             lastCall);
-        reload();
-    }
-
-private:
-    SIMULATOR * sim;
-    boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
-    std::size_t firstNanoStep;
-    std::size_t lastNanoStep;
-    bool lastCall;
-    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
-
-    long nextOutputStep(const std::size_t step)
-    {
-        long remainder = step % writer->getPeriod();
-        long next = step + writer->getPeriod() - remainder;
-        return next;
-    }
-
-    void reload()
-    {
-        long nextNanoStep = nextOutputStep(sim->getStep()) * CELL_TYPE::nanoSteps();
-        reload(nextNanoStep);
-    }
-
-    void reload(const std::size_t nextNanoStep)
-    {
+        requestedNanoSteps.erase_min();
+        std::size_t nextNanoStep = nanoStep + stride;
         pushRequest(nextNanoStep);
     }
 
+private:
+    boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer;
+    std::size_t firstNanoStep;
+    std::size_t lastNanoStep;
+    std::size_t stride;
+    bool lastCall;
+    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 };
 
 }

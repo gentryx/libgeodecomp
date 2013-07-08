@@ -108,7 +108,6 @@ public:
         // for the inner set.
         typename UpdateGroupType::PatchAccepterPtr adapterGhost(
             new ParallelWriterAdapterType(
-                this,
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
@@ -116,7 +115,6 @@ public:
                 false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
-                this,
                 writers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),

@@ -48,8 +48,10 @@ public:
         TS_ASSERT(!expectedSteps.empty());
         unsigned expectedStep = expectedSteps.front();
         WriterEvent expectedEvent = expectedEvents.front();
-        expectedSteps.erase(expectedSteps.begin());
-        expectedEvents.erase(expectedEvents.begin());
+        if (lastCall) {
+            expectedSteps.erase(expectedSteps.begin());
+            expectedEvents.erase(expectedEvents.begin());
+        }
         TS_ASSERT_EQUALS(expectedStep, step);
         TS_ASSERT_EQUALS(expectedEvent, event);
 
