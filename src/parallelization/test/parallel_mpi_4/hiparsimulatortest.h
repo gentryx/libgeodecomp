@@ -33,7 +33,7 @@ public:
         int width = 131;
         int height = 241;
         dim = Coord<2>(width, height);
-        maxSteps = 100;
+        maxSteps = 101;
         firstStep = 20;
         firstCycle = firstStep * TestCell<2>::nanoSteps();
         TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(
@@ -62,13 +62,13 @@ public:
     {
         sim->step();
         TS_ASSERT_EQUALS((31 - 1)       * 27, sim->timeToNextEvent());
-        TS_ASSERT_EQUALS((100 - 20 - 1) * 27, sim->timeToLastEvent());
+        TS_ASSERT_EQUALS((101 - 20 - 1) * 27, sim->timeToLastEvent());
         sim->step();
         sim->step();
         sim->step();
 
         TS_ASSERT_EQUALS((31 - 4)       * 27, sim->timeToNextEvent());
-        TS_ASSERT_EQUALS((100 - 20 - 4) * 27, sim->timeToLastEvent());
+        TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
         std::stringstream expectedEvents;
         expectedEvents << "initialized()\ninitialized()\n";
@@ -103,6 +103,16 @@ public:
             TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
         }
 
+        // check last step, too
+        unsigned t = maxSteps;
+        unsigned globalNanoStep = t * TestCell<2>::nanoSteps();
+        MemoryWriterType::GridMap grids = memoryWriter->getGrids();
+        TS_ASSERT_TEST_GRID(
+            MemoryWriterType::GridType,
+            grids[t],
+            globalNanoStep);
+        TS_ASSERT_EQUALS(dim, grids[t].getDimensions());
+
         if (MPILayer().rank() == 0) {
             std::string expectedEvents;
             for (int i = 0; i < 2; ++i) {
@@ -122,7 +132,7 @@ public:
 
         std::stringstream expected;
         expected << "created, period = 5\n";
-        for (int i = 25; i <= 100; i += 5) {
+        for (int i = 25; i <= 101; i += 5) {
             expected << "nextStep(" << i << ")\n";
             expected << "nextStep(" << i << ")\n";
         }
@@ -136,9 +146,9 @@ public:
         sim->addSteerer(new TestSteererType(5, 25, 4711 * 27));
         sim->run();
 
-        const Region<2> *region = &sim->updateGroup->partitionManager->ownRegion();
+        const Region<2> *region = &sim->updateGroup->partitionManager->innerSet(ghostZoneWidth);
         const GridBaseType *grid = &sim->updateGroup->grid();
-        int cycle = 100 * 27 + 4711 * 27;
+        int cycle = 101 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType,
@@ -160,8 +170,34 @@ public:
                       << 40
                       << 44
                       << 48
-                      << 50;
+                      << 52
+                      << 56
+                      << 60
+                      << 64
+                      << 68
+                      << 72
+                      << 76
+                      << 80
+                      << 84
+                      << 88
+                      << 92
+                      << 96
+                      << 100
+                      << 101;
         expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
                        << WRITER_STEP_FINISHED
