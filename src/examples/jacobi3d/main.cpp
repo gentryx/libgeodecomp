@@ -1,8 +1,8 @@
 #include <cmath>
 #include <mpi.h>
 
+#include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
@@ -74,6 +74,32 @@ public:
     }
 };
 
+class TemperatureSelector
+{
+public:
+    typedef double VariableType;
+
+    void operator()(const Cell& in, double *out) const
+    {
+        *out = in.temp;
+    }
+
+    static std::string varName()
+    {
+        return "temperature";
+    }
+
+    static int dataComponents()
+    {
+        return 1;
+    }
+
+    static std::string dataFormat()
+    {
+        return "DOUBLE";
+    }
+};
+
 void runSimulation()
 {
     int outputFrequency = 100;
@@ -92,6 +118,11 @@ void runSimulation()
         sim.addWriter(
             new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
     }
+
+    sim.addWriter(
+        new BOVWriter<Cell, TemperatureSelector>(
+            "jacobi3d",
+            outputFrequency));
 
     sim.run();
 }
