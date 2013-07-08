@@ -5,6 +5,7 @@
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
+#include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -41,33 +42,33 @@ public:
         outputPeriod = 4;
         loadBalancingPeriod = 31;
         ghostZoneWidth = 10;
-        s.reset(new SimulatorType(
+        sim.reset(new SimulatorType(
                     init,
                     new MockBalancer(),
                     loadBalancingPeriod,
                     ghostZoneWidth));
         mockWriter = new MockWriter();
         memoryWriter = new MemoryWriterType(outputPeriod);
-        s->addWriter(mockWriter);
-        s->addWriter(memoryWriter);
+        sim->addWriter(mockWriter);
+        sim->addWriter(memoryWriter);
     }
 
     void tearDown()
     {
-        s.reset();
+        sim.reset();
     }
 
     void testStep()
     {
-        s->step();
-        TS_ASSERT_EQUALS((31 - 1)       * 27, s->timeToNextEvent());
-        TS_ASSERT_EQUALS((100 - 20 - 1) * 27, s->timeToLastEvent());
-        s->step();
-        s->step();
-        s->step();
+        sim->step();
+        TS_ASSERT_EQUALS((31 - 1)       * 27, sim->timeToNextEvent());
+        TS_ASSERT_EQUALS((100 - 20 - 1) * 27, sim->timeToLastEvent());
+        sim->step();
+        sim->step();
+        sim->step();
 
-        TS_ASSERT_EQUALS((31 - 4)       * 27, s->timeToNextEvent());
-        TS_ASSERT_EQUALS((100 - 20 - 4) * 27, s->timeToLastEvent());
+        TS_ASSERT_EQUALS((31 - 4)       * 27, sim->timeToNextEvent());
+        TS_ASSERT_EQUALS((100 - 20 - 4) * 27, sim->timeToLastEvent());
 
         std::stringstream expectedEvents;
         expectedEvents << "initialized()\ninitialized()\n";
@@ -90,7 +91,7 @@ public:
 
     void testRun()
     {
-        s->run();
+        sim->run();
 
         for (unsigned t = firstStep; t < maxSteps; t += outputPeriod) {
             unsigned globalNanoStep = t * TestCell<2>::nanoSteps();
@@ -115,9 +116,9 @@ public:
     void testSteererCallback()
     {
         std::stringstream events;
-        s->addSteerer(new MockSteererType(5, &events));
-        s->run();
-        s.reset();
+        sim->addSteerer(new MockSteererType(5, &events));
+        sim->run();
+        sim.reset();
 
         std::stringstream expected;
         expected << "created, period = 5\n";
@@ -132,11 +133,11 @@ public:
 
     void testSteererFunctionality()
     {
-        s->addSteerer(new TestSteererType(5, 25, 4711 * 27));
-        s->run();
+        sim->addSteerer(new TestSteererType(5, 25, 4711 * 27));
+        sim->run();
 
-        const Region<2> *region = &s->updateGroup->partitionManager->ownRegion();
-        const GridBaseType *grid = &s->updateGroup->grid();
+        const Region<2> *region = &sim->updateGroup->partitionManager->ownRegion();
+        const GridBaseType *grid = &sim->updateGroup->grid();
         int cycle = 100 * 27 + 4711 * 27;
 
         TS_ASSERT_TEST_GRID_REGION(
@@ -146,8 +147,36 @@ public:
             cycle);
     }
 
+    void testParallelWriterInvocation()
+    {
+        unsigned period = 4;
+        SuperVector<unsigned> expectedSteps;
+        SuperVector<WriterEvent> expectedEvents;
+        expectedSteps << 20
+                      << 24
+                      << 28
+                      << 32
+                      << 36
+                      << 40
+                      << 44
+                      << 48
+                      << 50;
+        expectedEvents << WRITER_INITIALIZED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_STEP_FINISHED
+                       << WRITER_ALL_DONE;
+
+        sim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
+        sim->run();
+    }
+
 private:
-    boost::shared_ptr<SimulatorType> s;
+    boost::shared_ptr<SimulatorType> sim;
     Coord<2> dim;
     unsigned maxSteps;
     unsigned firstStep;
