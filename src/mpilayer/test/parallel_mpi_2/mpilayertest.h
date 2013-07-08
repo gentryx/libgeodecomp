@@ -16,9 +16,9 @@ public:
     void testAllGather1()
     {
         MPILayer layer;
-        SuperVector<unsigned> expected;
+        SuperVector<int> expected;
         for (unsigned i = 0; i < layer.size(); i++) expected.push_back(i);
-        SuperVector<unsigned> actual = layer.allGather(layer.rank());
+        SuperVector<int> actual = layer.allGather(layer.rank());
         TS_ASSERT_EQUALS(actual, expected);
     }
 
@@ -36,9 +36,9 @@ public:
     void testAllGather3()
     {
         MPILayer layer;
-        SuperVector<unsigned> expected;
+        SuperVector<int> expected;
         for (unsigned i = 0; i < layer.size(); i++) expected.push_back(i);
-        SuperVector<unsigned> actual(layer.size());
+        SuperVector<int> actual(layer.size());
         layer.allGather(layer.rank(), &actual);
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -46,12 +46,12 @@ public:
     void testGather()
     {
         MPILayer layer;
-        unsigned root = 0;
-        SuperVector<unsigned> expected_root;
-        SuperVector<unsigned> expected_slave;
+        int root = 0;
+        SuperVector<int> expected_root;
+        SuperVector<int> expected_slave;
         for (unsigned i = 0; i < layer.size(); i++) expected_root.push_back(i);
 
-        SuperVector<unsigned> actual = layer.gather(layer.rank(), root);
+        SuperVector<int> actual = layer.gather(layer.rank(), root);
         if (layer.rank() == root) {
             TS_ASSERT_EQUALS(actual, expected_root);
         } else {
