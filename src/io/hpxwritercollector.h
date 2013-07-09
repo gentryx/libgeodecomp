@@ -49,7 +49,6 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        std::cout << rank << " " << step << " " << lastCall << "\n";
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
         }
