@@ -40,6 +40,7 @@ public:
         const Coord<2>& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall)
     {
         stepFinished(step, event);

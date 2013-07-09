@@ -37,6 +37,7 @@ public:
         const Coord<DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {

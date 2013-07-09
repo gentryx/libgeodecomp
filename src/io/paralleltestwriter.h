@@ -34,6 +34,7 @@ public:
         const Coord<Topology::DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall)
     {
         if (lastStep != step) {
