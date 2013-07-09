@@ -47,26 +47,28 @@ public:
     HpxWriterSink() {}
 
     HpxWriterSink(
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter,
+        ParallelWriter<CELL_TYPE> * parallelWriter,
         std::size_t numUpdateGroups
     )
     {
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
         thisId
             = hpx::components::new_<ComponentType>(
                 hpx::find_here(),
-                parallelWriter,
+                writer,
                 numUpdateGroups);
     }
 
     HpxWriterSink(
-        boost::shared_ptr<Writer<CELL_TYPE> > serialWriter,
+        Writer<CELL_TYPE> * serialWriter,
         std::size_t numUpdateGroups
     )
     {
+        boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
         thisId
             = hpx::components::new_<ComponentType>(
                 hpx::find_here(),
-                serialWriter,
+                writer,
                 numUpdateGroups);
     }
 

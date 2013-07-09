@@ -56,7 +56,7 @@ public:
 
     void init(
         std::vector<HpxUpdateGroup> const & updateGroups,
-        boost::shared_ptr<LoadBalancer> balancer,
+        //boost::shared_ptr<LoadBalancer> balancer,
         unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
@@ -67,7 +67,7 @@ public:
         hpx::apply<typename ComponentType::InitAction>(
             thisId,
             updateGroups,
-            balancer,
+            //balancer,
             loadBalancingPeriod,
             ghostZoneWidth,
             initializer,

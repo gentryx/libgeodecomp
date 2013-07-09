@@ -1,4 +1,5 @@
 
+#include <libgeodecomp/config.h>
 #include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/image.h>
@@ -67,7 +68,7 @@ public:
 class CellInitializer : public SimpleInitializer<ConwayCell>
 {
 public:
-    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 10)
+    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 800)
     {}
 
     virtual void grid(GridBase<ConwayCell, 2> *ret)

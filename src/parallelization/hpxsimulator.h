@@ -13,67 +13,62 @@
 
 #include <boost/serialization/shared_ptr.hpp>
 
-#define LIBGEDECOMP_REGISTER_HPX_SIMULATOR(CELL_TYPE, PARTITION, TYPE)          \
+#define LIBGEDECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)         \
     typedef                                                                     \
-        LibGeoDecomp::HpxSimulator::Server::HpxUpdateGroup<                     \
-            CELL_TYPE,                                                          \
-            PARTITION,                                                          \
-            LibGeoDecomp::HiParSimulator::VanillaStepper<CELL_TYPE>             \
-        >                                                                       \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE);                                     \
+        SIMULATOR ::UpdateGroupType::ComponentType                              \
+        BOOST_PP_CAT(NAME, UpdateGroupType);                                    \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::InitAction,                         \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _InitAction)           \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitAction)               \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::CurrentStepAction,                  \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _CurrentStepAction)    \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::CurrentStepAction,                 \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), CurrentStepAction)        \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::NanoStepAction,                     \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _NanoStepAction)       \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::BoundingBoxAction,                  \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _BoundingBoxAction)    \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), BoundingBoxAction)        \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::SetOuterGhostZoneAction,            \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _SetOuterGhostZoneAction)\
+        BOOST_PP_CAT(NAME, UpdateGroupType)::SetOuterGhostZoneAction,           \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SetOuterGhostZoneAction)  \
     );                                                                          \
-                                                                                \
+/**/
+
+#define LIBGEDECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                     \
     typedef                                                                     \
         hpx::components::managed_component<                                     \
-            BOOST_PP_CAT(HpxUpdateGroup, TYPE)                                  \
+            BOOST_PP_CAT(NAME, UpdateGroupType)                                 \
         >                                                                       \
-        BOOST_PP_CAT(HpxUpdateGroupComponent, TYPE);                            \
+        BOOST_PP_CAT(NAME, UpdateGroupComponentType);                           \
     HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(                                     \
-        BOOST_PP_CAT(HpxUpdateGroupComponent, TYPE),                            \
-        BOOST_PP_CAT(HpxUpdateGroupComponent, TYPE)                             \
+        BOOST_PP_CAT(NAME, UpdateGroupComponentType),                           \
+        BOOST_PP_CAT(NAME, UpdateGroupComponentType)                            \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::InitAction,                         \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _InitAction)           \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitAction)               \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::CurrentStepAction,                  \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _CurrentStepAction)    \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::CurrentStepAction,                 \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), CurrentStepAction)        \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::NanoStepAction,                     \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _NanoStepAction)       \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::BoundingBoxAction,                  \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _BoundingBoxAction)    \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), BoundingBoxAction)        \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(HpxUpdateGroup, TYPE)::SetOuterGhostZoneAction,            \
-        BOOST_PP_CAT(BOOST_PP_CAT(HpxUpdateGroup, TYPE), _SetOuterGhostZoneAction)\
+        BOOST_PP_CAT(NAME, UpdateGroupType)::SetOuterGhostZoneAction,           \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SetOuterGhostZoneAction)  \
     );                                                                          \
-    typedef                                                                     \
-        LibGeoDecomp::HpxSimulator::HpxSimulator<CELL_TYPE, PARTITION >         \
-        TYPE;                                                                   \
 /**/
 
 namespace LibGeoDecomp {
@@ -189,7 +184,7 @@ private:
         {
             ug.init(
                 updateGroups,
-                balancer,
+                //balancer,
                 loadBalancingPeriod,
                 ghostZoneWidth,
                 initializer,

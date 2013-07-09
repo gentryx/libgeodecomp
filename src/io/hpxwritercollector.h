@@ -7,6 +7,53 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/hpxwritersink.h>
 
+#define LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(TYPE, NAME)      \
+    BOOST_CLASS_EXPORT_KEY2(TYPE, BOOST_PP_STRINGIZE(NAME));                    \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentType::StepFinishedAction,                     \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), StepFinishedAction)          \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentWriterCreateActionType,                       \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), WriterCreateAction)          \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentParallelWriterCreateActionType,               \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ParallelWriterCreateAction)  \
+    )                                                                           \
+/**/
+
+#define LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(TYPE, NAME)                  \
+    BOOST_CLASS_EXPORT_IMPLEMENT(TYPE);                                         \
+    typedef                                                                     \
+        hpx::components::managed_component<                                     \
+            TYPE ::SinkType::ComponentType                                      \
+        >                                                                       \
+        BOOST_PP_CAT(NAME, SinkComponentType);                                  \
+                                                                                \
+    HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(                                     \
+        BOOST_PP_CAT(NAME, SinkComponentType),                                  \
+        BOOST_PP_CAT(NAME, SinkComponentType)                                   \
+    );                                                                          \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentType::StepFinishedAction,                     \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), StepFinishedAction)          \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentWriterCreateActionType,                       \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), WriterCreateAction)          \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentParallelWriterCreateActionType,               \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ParallelWriterCreateAction)  \
+    )                                                                           \
+/**/
+
 namespace LibGeoDecomp {
 
 template <typename CELL_TYPE>
@@ -24,6 +71,8 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
     typedef typename ParallelWriter<CELL_TYPE>::RegionType RegionType;
     typedef typename ParallelWriter<CELL_TYPE>::CoordType CoordType;
+
+    typedef HpxWriterSink<CELL_TYPE> SinkType;
     
     HpxWriterCollector() {}
 
@@ -57,7 +106,7 @@ public:
     }
 
 private:
-    HpxWriterSink<CELL_TYPE> sink;
+    SinkType sink;
 
     template <class ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)

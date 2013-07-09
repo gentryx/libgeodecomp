@@ -102,7 +102,7 @@ public:
     
     void init(
         std::vector<ClientType> const & updateGroups,
-        boost::shared_ptr<LoadBalancer> balancer,
+        //boost::shared_ptr<LoadBalancer> balancer,
         unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
@@ -113,7 +113,7 @@ public:
         this->updateGroups = updateGroups;
         this->initializer = initializer;
         this->loadBalancingPeriod = loadBalancingPeriod;
-        this->balancer = balancer;
+        //this->balancer = balancer;
         setRank();
 
         partitionManager.reset(new PartitionManagerType());
@@ -419,7 +419,7 @@ private:
 
     std::size_t currentNanoStep() const
     {
-        std::pair<std::size_t, std::size_t> now = updateGroups[0].currentStep();
+        std::pair<std::size_t, std::size_t> now = currentStep();
         return now.first * CELL_TYPE::nanoSteps() + now.second;
     }
 
