@@ -6,8 +6,7 @@
 #include <libgeodecomp/mpilayer/typemaps.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/parallelization/stripingsimulator.h>
 
 #include "common.h"
 
@@ -16,7 +15,7 @@ void runSimulation()
     int outputFrequency = 1;
     CellInitializer *init = new CellInitializer();
 
-    HiParSimulator::HiParSimulator<ConwayCell, HiParSimulator::RecursiveBisectionPartition<2> > sim(
+    StripingSimulator<ConwayCell> sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
         10,

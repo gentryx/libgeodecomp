@@ -50,8 +50,8 @@ public:
         grids[step].paste(grid, validRegion);
         grids[step].atEdge() = grid.atEdge();
 
-        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
-            for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
+        for (std::size_t sender = 0; sender < mpiLayer.size(); ++sender) {
+            for (std::size_t receiver = 0; receiver < mpiLayer.size(); ++receiver) {
                 if (sender != receiver) {
                     sendRecvGrid(sender, receiver, grid, validRegion, step);
                 }

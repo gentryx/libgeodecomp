@@ -162,8 +162,9 @@ public:
         for (std::size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
-            for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i)
+            for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
                 accepters[i].put(mySendGrid, boundingBox, nanoStep);
+            }
 
             for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
                 std::size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;

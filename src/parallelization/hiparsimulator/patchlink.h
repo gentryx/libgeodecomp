@@ -22,7 +22,7 @@ class PatchLink
 {
 public:
     const static int DIM = GRID_TYPE::DIM;
-    const static int ENDLESS = -1;
+    const static size_t ENDLESS = -1;
 
     class Link
     {

@@ -118,8 +118,9 @@ public:
 
         inline void digDown(const unsigned& offset)
         {
-            if (squareStack.empty())
+            if (squareStack.empty()) {
                 throw std::logic_error("cannot descend from empty squares stack");
+            }
             Square currentSquare = squareStack.back();
             squareStack.pop_back();
             const Coord<DIM>& origin = currentSquare.origin;

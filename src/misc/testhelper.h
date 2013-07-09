@@ -140,19 +140,29 @@
         Region<_GRID_TYPE::DIM> assertRegion = _REGION;                 \
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
         bool ollKorrect = true;                                         \
-        std::ostringstream message;                                     \
                                                                         \
         ollKorrect &= assertGrid.atEdge().isEdgeCell;                   \
         ollKorrect &= assertGrid.atEdge().valid();                      \
         Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
         for (Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
             bool flag = assertGrid.at(*i).valid();                      \
+            if (!flag) {                                                \
+                std::cout << "TestCell not valid\n";                    \
+            }                                                           \
             flag &= (assertGrid.at(*i).isEdgeCell == false);            \
+            if (!flag) {                                                \
+                std::cout << "TestCell claims to be edge cell\n";       \
+            }                                                           \
             flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
+            if (!flag) {                                                \
+                std::cout << "TestCell cycle counter doesn't match expected value (" \
+                          << assertGrid.at(*i).cycleCounter << " != "   \
+                          << expectedCycle << ")\n";                    \
+            }                                                           \
             TS_ASSERT(flag);                                            \
             ollKorrect &= flag;                                         \
             if (!flag) {                                                \
-                message << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
+                std::cout << "TS_ASSERT_TEST_GRID_REGION failed at Coord " << *i << "\n"; \
             }                                                           \
         }                                                               \
     }
