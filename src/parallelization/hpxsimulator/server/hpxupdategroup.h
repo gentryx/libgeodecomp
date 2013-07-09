@@ -145,7 +145,7 @@ public:
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
         // upon creation and we have to send those over to our neighbors.
-        PatchAccepterVec ghostZoneAccepterLinks;
+        PatchAccepterVec patchAcceptersGhost;
         RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
             if (!i->second.back().empty()) {
@@ -154,7 +154,7 @@ public:
                         i->second.back(),
                         rank,
                         updateGroups[i->first]));
-                ghostZoneAccepterLinks << link;
+                patchAcceptersGhost.push_back(link);
                 patchLinks << link;
 
                 link->charge(
@@ -166,7 +166,6 @@ public:
             }
         }
 
-        PatchAccepterVec patchAcceptersGhost;
         PatchAccepterVec patchAcceptersInner;
 
         // Convert writers to patch accepters
@@ -199,7 +198,7 @@ public:
         stepper.reset(new STEPPER(
                           partitionManager,
                           initializer,
-                          patchAcceptersGhost + ghostZoneAccepterLinks,
+                          patchAcceptersGhost,
                           patchAcceptersInner));
 
         // the ghostzone receivers may be safely added after

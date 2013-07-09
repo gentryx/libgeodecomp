@@ -110,20 +110,6 @@ public:
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
     typedef HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
-    /*
-    typedef
-        LibGeoDecomp::HiParSimulator::ParallelWriterAdapter<
-            typename UpdateGroupType::GridType,
-            CELL_TYPE,
-            HpxSimulator
-        > ParallelWriterAdapterType;
-    typedef
-        LibGeoDecomp::HiParSimulator::SteererAdapter<
-            typename UpdateGroupType::GridType,
-            CELL_TYPE
-        >
-        SteererAdapterType;
-    */
 
     static const int DIM = Topology::DIM;
 
@@ -138,19 +124,26 @@ public:
         overcommitFactor(overcommitFactor),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
-        ghostZoneWidth(ghostZoneWidth)
+        ghostZoneWidth(ghostZoneWidth),
+        updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor)),
+        initialized(false)
     {}
 
     inline void run()
     {
         initSimulation();
+        balanceLoadsTimer.restart();
+        hpx::future<void> balanceLoadsFuture
+            = hpx::async(HPX_STD_BIND(HpxSimulator::balanceLoads, this));
         nanoStep(timeToLastEvent());
+        hpx::wait(balanceLoadsFuture);
     }
 
     inline void step()
     {
         initSimulation();
         nanoStep(CELL_TYPE::nanoSteps());
+        balanceLoads();
     }
 
     virtual unsigned getStep() const
@@ -166,47 +159,16 @@ public:
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
         DistributedSimulator<CELL_TYPE>::addSteerer(steerer);
-
-        /*
-        // two adapters needed, just as for the writers
-        typename UpdateGroupType::PatchProviderPtr adapterGhost(
-            new SteererAdapterType(steererPointer));
-        typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
-            new SteererAdapterType(steererPointer));
-
-        steererAdaptersGhost.push_back(adapterGhost);
-        steererAdaptersInner.push_back(adapterInnerSet);
-        */
     }
 
     virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         DistributedSimulator<CELL_TYPE>::addWriter(writer);
+    }
 
-        // we need two adapters as each ParallelWriter needs to be
-        // notified twice: once for the (inner) ghost zone, and once
-        // for the inner set.
-        /*
-        typename UpdateGroupType::PatchAccepterPtr adapterGhost(
-            new ParallelWriterAdapterType(
-                this,
-                writers.back(),
-                initializer->startStep(),
-                initializer->maxSteps(),
-                initializer->gridDimensions(),
-                false));
-        typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
-            new ParallelWriterAdapterType(
-                this,
-                writers.back(),
-                initializer->startStep(),
-                initializer->maxSteps(),
-                initializer->gridDimensions(),
-                true));
-
-        writerAdaptersGhost.push_back(adapterGhost);
-        writerAdaptersInner.push_back(adapterInnerSet);
-        */
+    std::size_t numUpdateGroups() const
+    {
+        return updateGroups.size();
     }
 
 private:
@@ -215,18 +177,14 @@ private:
     using DistributedSimulator<CELL_TYPE>::writers;
 
     std::size_t overcommitFactor;
+    hpx::util::high_resolution_timer balanceTimer;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     EventMap events;
     HiParSimulator::PartitionManager<DIM, Topology> partitionManager;
     std::vector<UpdateGroupType> updateGroups;
-    /*
-    typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
-    typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
-    typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
-    typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
-    */
+    boost::atomic<bool> initialized;
 
     void nanoStep(long remainingNanoSteps)
     {
@@ -243,21 +201,45 @@ private:
 
     void initSimulation()
     {
-        if(!updateGroups.empty())
+        if(initialized)
         {
             return;
         }
 
-        updateGroups
-            = createUpdateGroups<UpdateGroupType>(
-                overcommitFactor,
+        // TODO: replace with proper broadcast
+        BOOST_FOREACH(UpdateGroupType & ug, updateGroups)
+        {
+            ug.init(
+                updateGroups,
                 ghostZoneWidth,
                 initializer,
                 writers,
                 steerers
             );
+        }
 
         initEvents();
+        initialized = true;
+    }
+
+    void balanceLoads()
+    {
+        double elapsed = balanceLoadsTimer.elapsed();
+        if(elapsed < loadBalancingPeriod) {
+            hpx::this_thread::suspend(boost::posix_time::seconds(loadBalancingPeriod - elapsed));
+        }
+        balanceLoadsTimer.restart();
+
+        // TODO: replace with proper gather.
+        std::vector<hpx::future<ratio> >
+            ratios;
+        ratios.reserve(updateGroups.size());
+
+        BOOST_FOREACH(UpdateGroupType & ug, updateGroups)
+        {
+            ratios.push_back(ug.getRatio());
+        }
+        hpx::wait(ratios);
     }
 
     void initEvents()

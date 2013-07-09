@@ -18,13 +18,13 @@ void runSimulation()
 
     HiParSimulator::HiParSimulator<ConwayCell, HiParSimulator::RecursiveBisectionPartition<2> > sim(
         init,
-        0,//MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
+        MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
         10,
         1,
         MPI::BOOL);
 
     sim.addWriter(
-        new BOVWriterAlt<ConwayCell, StateSelector>(
+        new BOVWriter<ConwayCell, StateSelector>(
             "game",
             outputFrequency));
     /*

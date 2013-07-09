@@ -70,6 +70,7 @@ public:
             globalGridDimensions,
             nanoStep / CELL_TYPE::nanoSteps(),
             event,
+            sim->getRank(),
             lastCall);
         reload();
     }

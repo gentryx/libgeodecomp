@@ -1,6 +1,8 @@
 
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <libgeodecomp/io/hpxwritercollector.h>
+#include <libgeodecomp/io/serialbovwriter.h>
 
 #include <hpx/hpx_init.hpp>
 
@@ -13,10 +15,58 @@ LIBGEDECOMP_REGISTER_HPX_SIMULATOR(
 )
 
 BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
+
 typedef LibGeoDecomp::TracingWriter<ConwayCell> TracingWriterType;
 BOOST_CLASS_EXPORT_GUID(TracingWriterType, "TracingWriterConwayCell");
-typedef LibGeoDecomp::BOVWriterAlt<ConwayCell, StateSelector> BovWriterType;
+
+typedef LibGeoDecomp::HpxWriterCollector<ConwayCell> HpxWriterCollectorType;
+BOOST_CLASS_EXPORT_GUID(HpxWriterCollectorType, "HpxWriterCollectorCell");
+
+typedef LibGeoDecomp::SerialBOVWriter<ConwayCell, StateSelector> BovWriterType;
 BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
+
+typedef LibGeoDecomp::HpxWriterSink<ConwayCell> HpxWriterSinkType;
+
+HPX_REGISTER_ACTION_DECLARATION(
+    HpxWriterSinkType::ComponentType::StepFinishedAction,
+    HpxWriterSinkType_ComponentType_StepFinishedAction_ConwayCell
+)
+
+HPX_REGISTER_ACTION_DECLARATION(
+    HpxWriterSinkType::ComponentWriterCreateActionType,
+    HpxWriterSinkType_ComponentWriterCreateActionType_ConwayCell
+)
+
+HPX_REGISTER_ACTION_DECLARATION(
+    HpxWriterSinkType::ComponentParallelWriterCreateActionType,
+    HpxWriterSinkType_ComponentParallelWriterCreateActionType_ConwayCell
+)
+
+typedef
+    hpx::components::managed_component<
+        HpxWriterSinkType::ComponentType
+    >
+    HpxWriterSinkComponentType;
+    
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(
+    HpxWriterSinkComponentType,
+    HpxWriterSinkComponentType
+);
+
+HPX_REGISTER_ACTION(
+    HpxWriterSinkType::ComponentType::StepFinishedAction,
+    HpxWriterSinkType_ComponentType_StepFinishedAction_ConwayCell
+)
+
+HPX_REGISTER_ACTION(
+    HpxWriterSinkType::ComponentWriterCreateActionType,
+    HpxWriterSinkType_ComponentWriterCreateActionType_ConwayCell
+)
+
+HPX_REGISTER_ACTION(
+    HpxWriterSinkType::ComponentParallelWriterCreateActionType,
+    HpxWriterSinkType_ComponentParallelWriterCreateActionType_ConwayCell
+)
 
 int hpx_main()
 {
@@ -31,16 +81,23 @@ int hpx_main()
             10, // balancingPeriod
             1 // ghostZoneWidth
             );
-        
-        sim.addWriter(
-            new BovWriterType(
-                "game",
-                outputFrequency));
+ 
+        HpxWriterSinkType sink(
+            boost::shared_ptr<BovWriterType>(new BovWriterType("game", outputFrequency)),
+            sim.numUpdateGroups());
 
+        sim.addWriter(
+            new HpxWriterCollectorType(
+                outputFrequency,
+                sink
+            ));
+
+        /*
         sim.addWriter(
             new TracingWriterType(
                 1,
                 init->maxSteps()));
+        */
 
         sim.run();
     }

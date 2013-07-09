@@ -28,13 +28,9 @@ HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
 } // namespace Impl
 
-template <class UPDATEGROUP, class CELL_TYPE, class WRITERS, class STEERERS>
+template <class UPDATEGROUP>
 inline std::vector<UPDATEGROUP> createUpdateGroups(
-    std::size_t overcommitFactor,
-    unsigned ghostZoneWidth,
-    boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-    WRITERS const & writers,
-    STEERERS const & steerers
+    std::size_t overcommitFactor
 )
 {
     hpx::components::component_type type =
@@ -65,17 +61,6 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     BOOST_FOREACH(hpx::id_type id, hpx::util::locality_results(res))
     {
         components.push_back(id);
-    }
-
-    BOOST_FOREACH(UPDATEGROUP & ug, components)
-    {
-        ug.init(
-            components,
-            ghostZoneWidth,
-            initializer,
-            writers,
-            steerers
-        );
     }
 
     return components;

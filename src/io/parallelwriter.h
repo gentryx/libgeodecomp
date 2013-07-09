@@ -104,6 +104,7 @@ public:
         const CoordType& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall) = 0;
 
     const unsigned& getPeriod() const

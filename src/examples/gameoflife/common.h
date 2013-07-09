@@ -1,6 +1,5 @@
 
 #include <boost/assign/std/vector.hpp>
-#include <libgeodecomp/io/bovwriteralt.h>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/ppmwriter.h>
@@ -107,7 +106,7 @@ public:
              i != startCells.end();
              ++i)
             if (rect.inBounds(*i))
-                ret->at(*i - rect.origin) = ConwayCell(true);
+                ret->at(*i) = ConwayCell(true);
     }
 
     template <class ARCHIVE>

@@ -47,7 +47,8 @@ else()
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
-find_package(Boost REQUIRED date_time filesystem system thread COMPONENTS serialization mpi)
+find_package(Boost REQUIRED date_time filesystem system thread)
+find_package(Boost COMPONENTS serialization mpi)
 
 find_package(CUDA)
 find_package(OpenCL)
