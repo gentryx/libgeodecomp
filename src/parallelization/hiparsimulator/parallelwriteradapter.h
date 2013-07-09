@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
+#include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 
 namespace LibGeoDecomp {
@@ -14,7 +15,7 @@ class HiParSimulator;
  * to a PatchAccepter, so that we can treat IO similarly to sending
  * ghost zones.
  */
-template<typename GRID_TYPE, typename CELL_TYPE, typename SIMULATOR>
+template<typename GRID_TYPE, typename CELL_TYPE>
 class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
@@ -28,11 +29,13 @@ public:
         const std::size_t firstStep,
         const std::size_t lastStep,
         Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
+        std::size_t rank,
         bool lastCall) :
         writer(writer),
         firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
         lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
         stride(writer->getPeriod() * CELL_TYPE::nanoSteps()),
+        rank(rank),
         lastCall(lastCall),
         globalGridDimensions(globalGridDimensions)
     {
@@ -68,7 +71,7 @@ public:
             globalGridDimensions,
             nanoStep / CELL_TYPE::nanoSteps(),
             event,
-            sim->getRank(),
+            rank,
             lastCall);
         requestedNanoSteps.erase_min();
         std::size_t nextNanoStep = nanoStep + stride;
@@ -80,6 +83,7 @@ private:
     std::size_t firstNanoStep;
     std::size_t lastNanoStep;
     std::size_t stride;
+    std::size_t rank;
     bool lastCall;
     Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 };

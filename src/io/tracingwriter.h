@@ -14,6 +14,9 @@ template<typename CELL_TYPE>
 class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    friend class boost::serialization::access;
+#endif
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
@@ -66,7 +69,7 @@ private:
     unsigned lastStep;
     unsigned maxSteps;
     
-    friend class boost::serialization::access;
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
@@ -75,6 +78,7 @@ private:
         ar & lastStep;
         ar & maxSteps;
     }
+#endif
 
     void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)
     {

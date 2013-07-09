@@ -3,18 +3,21 @@
 
 #include <string>
 #include <stdexcept>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/serialization/access.hpp>
+#endif
 
 namespace LibGeoDecomp {
-
-template<typename CELL_TYPE>
-class MonolithicSimulator;
 
 enum WriterEvent {
     WRITER_INITIALIZED,
     WRITER_STEP_FINISHED,
     WRITER_ALL_DONE
 };
+
+template <class CELL_TYPE> class MonolithicSimulator;
 
 /**
  * Writer and ParallelWriter are the superclasses for all output
@@ -27,6 +30,9 @@ template<typename CELL_TYPE>
 class Writer
 {
     friend class WriterTest;
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    friend class boost::serialization::access;
+#endif
 public:
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
     const static int DIM = CELL_TYPE::Topology::DIM;
@@ -77,13 +83,14 @@ protected:
     std::string prefix;
     unsigned period;
     
-    friend class boost::serialization::access;
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & prefix;
         ar & period;
     }
+#endif
 };
 
 }

@@ -18,6 +18,22 @@ class HpxUpdateGroup;
 
 namespace Server {
 
+enum EventPoint {LOAD_BALANCING, END};
+typedef SuperSet<EventPoint> EventSet;
+typedef SuperMap<std::size_t, EventSet> EventMap;
+
+inline std::string eventToStr(const EventPoint& event)
+{
+    switch (event) {
+    case LOAD_BALANCING:
+        return "LOAD_BALANCING";
+    case END:
+        return "END";
+    default:
+        return "invalid";
+    }
+}
+
 template <class CELL_TYPE, class PARTITION, class STEPPER>
 class HpxUpdateGroup
   : public hpx::components::managed_component_base<
@@ -73,7 +89,7 @@ public:
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     
     typedef
-        HiParSimulator::ParallelWriterAdapter<GridType, CELL_TYPE, HpxUpdateGroup> 
+        HiParSimulator::ParallelWriterAdapter<GridType, CELL_TYPE> 
         ParallelWriterAdapterType;
     typedef HiParSimulator::SteererAdapter<GridType, CELL_TYPE> SteererAdapterType;
     
@@ -86,6 +102,8 @@ public:
     
     void init(
         std::vector<ClientType> const & updateGroups,
+        boost::shared_ptr<LoadBalancer> balancer,
+        unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         WriterVector const & writers,
@@ -94,6 +112,8 @@ public:
     {
         this->updateGroups = updateGroups;
         this->initializer = initializer;
+        this->loadBalancingPeriod = loadBalancingPeriod;
+        this->balancer = balancer;
         setRank();
 
         partitionManager.reset(new PartitionManagerType());
@@ -173,19 +193,19 @@ public:
         {
             PatchAccepterPtr adapterGhost(
                 new ParallelWriterAdapterType(
-                    this,
                     boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
                     initializer->startStep(),
                     initializer->maxSteps(),
                     initializer->gridDimensions(),
+                    rank,
                     false));
             PatchAccepterPtr adapterInnerSet(
                 new ParallelWriterAdapterType(
-                    this,
                     boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
                     initializer->startStep(),
                     initializer->maxSteps(),
                     initializer->gridDimensions(),
+                    rank,
                     true));
             // notify PatchAccepters of the updategroups region:
             adapterGhost->setRegion(partitionManager->ownRegion());
@@ -242,6 +262,7 @@ public:
         }
 
         initPromise.set_value();
+        initEvents();
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, init, InitAction);
 
@@ -281,7 +302,12 @@ public:
     void nanoStep(std::size_t remainingNanoSteps)
     {
         hpx::wait(initFuture);
-        stepper->update(remainingNanoSteps);
+        while (remainingNanoSteps > 0) {
+            std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
+            stepper->update(hop);
+            handleEvents();
+            remainingNanoSteps -= hop;
+        }
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, nanoStep, NanoStepAction);
 
@@ -318,7 +344,10 @@ private:
     SuperVector<PatchLinkPtr> patchLinks;
     SuperMap<std::size_t, PatchLinkProviderPtr> patchlinkProviderMap;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    boost::shared_ptr<LoadBalancer> balancer;
+    unsigned loadBalancingPeriod;
     std::size_t rank;
+    EventMap events;
 
     hpx::lcos::local::promise<CoordBox<DIM> > boundingBoxPromise;
     hpx::future<CoordBox<DIM> > boundingBoxFuture;
@@ -351,6 +380,61 @@ private:
         }
 
         return ret;
+    }
+    
+    void initEvents()
+    {
+        events.clear();
+        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        events[lastNanoStep] << END;
+        
+        insertNextLoadBalancingEvent();
+    }
+
+    inline void handleEvents()
+    {
+        if (currentNanoStep() > events.begin()->first) {
+            throw std::logic_error("stale event found, should have been handled previously");
+        }
+        if (currentNanoStep() < events.begin()->first) {
+            // don't need to handle future events now
+            return;
+        }
+
+        const EventSet& curEvents = events.begin()->second;
+        for (EventSet::const_iterator i = curEvents.begin(); i != curEvents.end(); ++i) {
+            if (*i == LOAD_BALANCING) {
+                balanceLoad();
+                insertNextLoadBalancingEvent();
+            }
+        }
+        events.erase(events.begin());
+    }
+    
+    inline void insertNextLoadBalancingEvent()
+    {
+        long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
+        events[nextLoadBalancing] << LOAD_BALANCING;
+    }
+
+    std::size_t currentNanoStep() const
+    {
+        std::pair<std::size_t, std::size_t> now = updateGroups[0].currentStep();
+        return now.first * CELL_TYPE::nanoSteps() + now.second;
+    }
+
+    std::size_t timeToNextEvent()
+    {
+        return events.begin()->first - currentNanoStep();
+    }
+
+    std::size_t timeToLastEvent()
+    {
+        return events.rbegin()->first - currentNanoStep();
+    }
+
+    void balanceLoad()
+    {
     }
 };
 

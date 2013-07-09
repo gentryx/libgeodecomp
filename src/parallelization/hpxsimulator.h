@@ -81,22 +81,6 @@ namespace HpxSimulator {
     
 typedef std::pair<std::size_t, std::size_t> StepPairType;
 
-enum EventPoint {LOAD_BALANCING, END};
-typedef SuperSet<EventPoint> EventSet;
-typedef SuperMap<long, EventSet> EventMap;
-
-inline std::string eventToStr(const EventPoint& event)
-{
-    switch (event) {
-    case LOAD_BALANCING:
-        return "LOAD_BALANCING";
-    case END:
-        return "END";
-    default:
-        return "invalid";
-    }
-}
-
 template<
     class CELL_TYPE,
     class PARTITION,
@@ -132,23 +116,19 @@ public:
     inline void run()
     {
         initSimulation();
-        balanceLoadsTimer.restart();
-        hpx::future<void> balanceLoadsFuture
-            = hpx::async(HPX_STD_BIND(HpxSimulator::balanceLoads, this));
-        nanoStep(timeToLastEvent());
-        hpx::wait(balanceLoadsFuture);
+        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        nanoStep(lastNanoStep);
     }
 
     inline void step()
     {
         initSimulation();
         nanoStep(CELL_TYPE::nanoSteps());
-        balanceLoads();
     }
 
     virtual unsigned getStep() const
     {
-        if (!updateGroups.empty()) {
+        if (initialized) {
             return updateGroups[0].currentStep().first;
         } else {
             return initializer->startStep();
@@ -177,11 +157,9 @@ private:
     using DistributedSimulator<CELL_TYPE>::writers;
 
     std::size_t overcommitFactor;
-    hpx::util::high_resolution_timer balanceTimer;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    EventMap events;
     HiParSimulator::PartitionManager<DIM, Topology> partitionManager;
     std::vector<UpdateGroupType> updateGroups;
     boost::atomic<bool> initialized;
@@ -211,59 +189,17 @@ private:
         {
             ug.init(
                 updateGroups,
+                balancer,
+                loadBalancingPeriod,
                 ghostZoneWidth,
                 initializer,
                 writers,
                 steerers
             );
         }
-
-        initEvents();
         initialized = true;
     }
 
-    void balanceLoads()
-    {
-        double elapsed = balanceLoadsTimer.elapsed();
-        if(elapsed < loadBalancingPeriod) {
-            hpx::this_thread::suspend(boost::posix_time::seconds(loadBalancingPeriod - elapsed));
-        }
-        balanceLoadsTimer.restart();
-
-        // TODO: replace with proper gather.
-        std::vector<hpx::future<ratio> >
-            ratios;
-        ratios.reserve(updateGroups.size());
-
-        BOOST_FOREACH(UpdateGroupType & ug, updateGroups)
-        {
-            ratios.push_back(ug.getRatio());
-        }
-        hpx::wait(ratios);
-    }
-
-    void initEvents()
-    {
-        events.clear();
-        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
-        events[lastNanoStep] << END;
-    }
-
-    long currentNanoStep() const
-    {
-        std::pair<long, long> now = updateGroups[0].currentStep();
-        return now.first * CELL_TYPE::nanoSteps() + now.second;
-    }
-
-    long timeToNextEvent()
-    {
-        return events.begin()->first - currentNanoStep();
-    }
-
-    long timeToLastEvent()
-    {
-        return events.rbegin()->first - currentNanoStep();
-    }
 };
 
 }

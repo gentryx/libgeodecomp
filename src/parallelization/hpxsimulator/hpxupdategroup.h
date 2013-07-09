@@ -17,6 +17,8 @@ namespace HpxSimulator {
 template <class CELL_TYPE, class PARTITION, class STEPPER>
 class HpxUpdateGroup
 {
+    friend class boost::serialization::access;
+    friend class Server::HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER>;
 public:
     const static int DIM = CELL_TYPE::Topology::DIM;
     typedef DisplacedGrid<
@@ -54,6 +56,8 @@ public:
 
     void init(
         std::vector<HpxUpdateGroup> const & updateGroups,
+        boost::shared_ptr<LoadBalancer> balancer,
+        unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         WriterVector const & writers,
@@ -63,6 +67,8 @@ public:
         hpx::apply<typename ComponentType::InitAction>(
             thisId,
             updateGroups,
+            balancer,
+            loadBalancingPeriod,
             ghostZoneWidth,
             initializer,
             writers,
@@ -106,9 +112,6 @@ public:
 
 private:
     hpx::naming::id_type thisId;
-
-    friend class boost::serialization::access;
-    friend class Server::HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER>;
 
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)

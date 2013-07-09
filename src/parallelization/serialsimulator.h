@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 
 namespace LibGeoDecomp {

@@ -80,12 +80,14 @@ public:
         return dimensions.prod();
     }
     
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & origin;
         ar & dimensions;
     }
+#endif
 
     class Iterator
     {

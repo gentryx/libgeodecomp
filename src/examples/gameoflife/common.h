@@ -53,13 +53,15 @@ public:
         }
     }
 
+    bool alive;
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <class ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & alive;
     }
-
-    bool alive;
+#endif
 };
 
 class CellInitializer : public SimpleInitializer<ConwayCell>
@@ -111,11 +113,13 @@ public:
         }
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <class ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & boost::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
     }
+#endif
 };
 
 class CellToColor {

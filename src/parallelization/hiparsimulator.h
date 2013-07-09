@@ -42,7 +42,7 @@ public:
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
-    typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE, HiParSimulator> ParallelWriterAdapterType;
+    typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
     static const int DIM = Topology::DIM;
 
@@ -60,11 +60,6 @@ public:
         communicator(communicator),
         cellMPIDatatype(cellMPIDatatype)
     {}
-
-    std::size_t getRank() const
-    {
-        return communicator->Get_rank();
-    }
 
     inline void run()
     {
@@ -117,6 +112,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
+                communicator->Get_rank(),
                 false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
@@ -124,6 +120,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
+                communicator->Get_rank(),
                 true));
 
         writerAdaptersGhost.push_back(adapterGhost);

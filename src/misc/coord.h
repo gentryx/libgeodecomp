@@ -9,10 +9,12 @@
 
 #include <string>
 #include <stdlib.h>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/misc/supervector.h>
-
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -151,11 +153,13 @@ public:
         return s.str();
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & c;
     }
+#endif
 
 private:
     int c[1];
@@ -309,11 +313,13 @@ public:
         return s.str();
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & c;
     }
+#endif
 
 private:
     int c[2];
@@ -485,11 +491,13 @@ public:
         return s.str();
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & c;
     }
+#endif
 
 private:
     int c[3];
@@ -576,9 +584,11 @@ public:
 
 }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<1>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<2>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<3>)
+#endif
 
 template<typename _CharT, typename _Traits, int DIMENSIONS>
 std::basic_ostream<_CharT, _Traits>&

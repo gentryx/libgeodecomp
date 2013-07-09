@@ -6,7 +6,10 @@
 #include <sstream>
 #include <vector>
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/vector.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -141,11 +144,13 @@ public:
         return *(std::max_element(begin(), end()));
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & static_cast<std::vector<T, Allocator>&>(*this);
     }
+#endif
 };
 
 }

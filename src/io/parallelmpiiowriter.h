@@ -36,6 +36,7 @@ public:
         const Coord<Topology::DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
@@ -61,7 +62,7 @@ private:
     MPI::Intracomm comm;
     MPI::Datatype datatype;
 
-    std::string filename(const unsigned& step) const
+    std::string filename(unsigned step) const
     {
         std::ostringstream buf;
         buf << prefix << std::setfill('0') << std::setw(5) << step << ".mpiio";

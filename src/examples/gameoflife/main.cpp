@@ -19,13 +19,13 @@ void runSimulation()
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
         10,
-        1,
         MPI::BOOL);
 
     sim.addWriter(
         new BOVWriter<ConwayCell, StateSelector>(
             "game",
             outputFrequency));
+
     /*
     sim.addWriter(
         new TracingWriter<ConwayCell>(

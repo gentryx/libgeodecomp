@@ -1,17 +1,13 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_MONOLITHICSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_MONOLITHICSIMULATOR_H
 
-#include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/simulator.h>
 
 namespace LibGeoDecomp {
 
-template<typename CELL_TYPE>
-class Writer;
-
-template<typename CELL_TYPE>
-class Simulator;
+template <class CELL_TYPE> class Writer;
 
 template<typename CELL_TYPE>
 class MonolithicSimulator : public Simulator<CELL_TYPE>

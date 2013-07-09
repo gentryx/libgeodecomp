@@ -19,6 +19,9 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename SELECTOR_TYPE>
 class SerialBOVWriter : public Writer<CELL_TYPE>
 {
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    friend class boost::serialization::access;
+#endif
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
@@ -58,13 +61,14 @@ public:
 private:
     Coord<3> brickletDim;
     
-    friend class boost::serialization::access;
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
     {
         ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
         ar & brickletDim;
     }
+#endif
 
     std::string filename(const unsigned& step, std::string const & suffix) const
     {
