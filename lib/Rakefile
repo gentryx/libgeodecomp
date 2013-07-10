@@ -1,9 +1,0 @@
-require 'pathname'
-require 'pp'
-
-ROOTDIR = Pathname.new(File.dirname(__FILE__)).realpath.to_s
-
-task :test do
-  lib_dirs = Dir.glob(ROOTDIR + "/*/")
-  lib_dirs.each { |dir| sh "cd #{dir} && rake test" }
-end
