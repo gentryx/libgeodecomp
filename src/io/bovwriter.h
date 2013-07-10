@@ -1,5 +1,5 @@
 #include <libgeodecomp/config.h>
-#if defined(LIBGEODECOMP_FEATURE_MPI)
+#ifdef LIBGEODECOMP_FEATURE_MPI
 #ifndef LIBGEODECOMP_IO_BOVWRITER_H
 #define LIBGEODECOMP_IO_BOVWRITER_H
 

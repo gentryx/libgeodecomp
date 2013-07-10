@@ -1,14 +1,14 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 
+#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/supervector.h>
-#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/parallelization/simulator.h>
 
 namespace LibGeoDecomp {
 
-template <class CELL_TYPE> class ParallelWriter;
+template<class CELL_TYPE> class ParallelWriter;
 
 // fixme: add short doxygen doc for every class
 template<typename CELL_TYPE>

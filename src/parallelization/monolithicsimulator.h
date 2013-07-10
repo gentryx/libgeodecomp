@@ -7,7 +7,7 @@
 
 namespace LibGeoDecomp {
 
-template <class CELL_TYPE> class Writer;
+template<class CELL_TYPE> class Writer;
 
 template<typename CELL_TYPE>
 class MonolithicSimulator : public Simulator<CELL_TYPE>

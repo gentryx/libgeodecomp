@@ -165,7 +165,6 @@ private:
     int c[1];
 };
 
-
 template<>
 class Coord<2>
 {

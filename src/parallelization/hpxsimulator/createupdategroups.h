@@ -15,7 +15,7 @@
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
-namespace Impl {
+namespace Implementation {
 
 typedef
     std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
@@ -26,7 +26,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
 
 HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
-} // namespace Impl
+} // namespace Implementation
 
 template <class UPDATEGROUP>
 inline std::vector<UPDATEGROUP> createUpdateGroups(
@@ -40,7 +40,7 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
 
     hpx::id_type id = localities[0];
     hpx::future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
-        asyncResult = hpx::async<Impl::CreateUpdateGroupsAction>(
+        asyncResult = hpx::async<Implementation::CreateUpdateGroupsAction>(
             id, boost::move(localities), type, overcommitFactor);
 
     std::vector<UPDATEGROUP> components;
@@ -70,11 +70,11 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
 }
 
 HPX_REGISTER_PLAIN_ACTION_DECLARATION(
-    LibGeoDecomp::HpxSimulator::Impl::CreateUpdateGroupsAction
+    LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsAction
 )
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::HpxSimulator::Impl::CreateUpdateGroupsReturnType,
+    LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsReturnType,
     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
 )
 

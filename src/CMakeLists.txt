@@ -21,14 +21,14 @@ endif()
 detect_distro()
 
 if(NOT HPX_ROOT)
-    if(NOT $ENV{HPX_ROOT} STREQUAL "")
-        set(HPX_ROOT $ENV{HPX_ROOT})
-    endif()
+  if(NOT $ENV{HPX_ROOT} STREQUAL "")
+    set(HPX_ROOT $ENV{HPX_ROOT})
+  endif()
 endif()
 
 if(HPX_ROOT)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
-    find_package(HPX)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
+  find_package(HPX)
 endif()
 
 
@@ -37,13 +37,13 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(HPX_FOUND)
-    set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
-    include_directories(${HPX_INCLUDE_DIR})
-    link_directories(${HPX_LIBRARY_DIR})
-    add_definitions(-DHPX_LIMIT=10)
-    set(HPX_FOUND true)
+  set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
+  include_directories(${HPX_INCLUDE_DIR})
+  link_directories(${HPX_LIBRARY_DIR})
+  add_definitions(-DHPX_LIMIT=10)
+  set(HPX_FOUND true)
 else()
-    set(HPX_FOUND false)
+  set(HPX_FOUND false)
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
@@ -240,23 +240,18 @@ else(WIN32)
 endif(WIN32)
 
 if(FEATURE_HPX)
+  set(HPX_LIB_SUFFIX "")
   if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
-    set(LOCAL_LIBGEODECOMP_LINK_LIB
-      ${LOCAL_LIBGEODECOMP_LINK_LIB}
-      hpx${HPX_DEBUG_POSTFIX}
-      hpx_serialization${HPX_DEBUG_POSTFIX}
-      hpx_init${HPX_DEBUG_POSTFIX}
-    )
-  else()
-    set(LOCAL_LIBGEODECOMP_LINK_LIB
-      ${LOCAL_LIBGEODECOMP_LINK_LIB}
-      hpx
-      hpx_serialization
-      hpx_init
-    )
+    set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
   endif()
 
-  set(LOCAL_LIBGEODECOMP_LINK_LIB ${LOCAL_LIBGEODECOMP_LINK_LIB} ${HPX_LIBRARIES})
+  set(LOCAL_LIBGEODECOMP_LINK_LIB
+    ${LOCAL_LIBGEODECOMP_LINK_LIB}
+    hpx${HPX_LIB_SUFFIX}
+    hpx_serialization${HPX_LIB_SUFFIX}
+    hpx_init${HPX_LIB_SUFFIX}
+    ${HPX_LIBRARIES}
+  )
 endif()
 
 # LIBDIRS is used to find source files and headers
@@ -345,8 +340,6 @@ endforeach(dir)
 
 set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
-
-message(${SOURCES})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 target_link_libraries(geodecomp ${Boost_LIBRARIES})

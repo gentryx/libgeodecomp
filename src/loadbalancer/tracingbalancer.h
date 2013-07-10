@@ -24,9 +24,9 @@ public:
     }
 
     TracingBalancer(LoadBalancer *balancer, std::ostream& stream = std::cout) :
+        balancer(balancer),
         stream(stream)
     {
-        this->balancer.reset(balancer);
     }
 
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads)
@@ -43,8 +43,8 @@ private:
     std::ostream& stream;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<LoadBalancer>(*this);
         ar & balancer;

@@ -7,7 +7,7 @@
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/server/hpxupdategroup.h>
+#include <libgeodecomp/parallelization/hpxsimulator/updategroupserver.h>
 
 #include <hpx/apply.hpp>
 
@@ -15,10 +15,10 @@ namespace LibGeoDecomp {
 namespace HpxSimulator {
 
 template <class CELL_TYPE, class PARTITION, class STEPPER>
-class HpxUpdateGroup
+class UpdateGroup
 {
     friend class boost::serialization::access;
-    friend class Server::HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER>;
+    friend class UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER>;
 public:
     const static int DIM = CELL_TYPE::Topology::DIM;
     typedef DisplacedGrid<
@@ -43,19 +43,19 @@ public:
         typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderVec
         PatchProviderVec;
 
-    typedef Server::HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER> ComponentType;
+    typedef UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> ComponentType;
     
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
-    HpxUpdateGroup()
+    UpdateGroup()
     {}
 
-    HpxUpdateGroup(hpx::id_type thisId)
+    UpdateGroup(hpx::id_type thisId)
       : thisId(thisId)
     {}
 
     void init(
-        std::vector<HpxUpdateGroup> const & updateGroups,
+        std::vector<UpdateGroup> const & updateGroups,
         //boost::shared_ptr<LoadBalancer> balancer,
         unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,

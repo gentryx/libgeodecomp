@@ -9,21 +9,21 @@
 
 #include <boost/serialization/vector.hpp>
 
-typedef LibGeoDecomp::HpxSimulator::Impl::CreateUpdateGroupsAction CreateUpdateGroupsAction;
+typedef LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsAction CreateUpdateGroupsAction;
 
 HPX_REGISTER_PLAIN_ACTION(
-    LibGeoDecomp::HpxSimulator::Impl::CreateUpdateGroupsAction,
-    LibGeoDecomp_HpxSimulator_Impl_CreateUpdateGroupsAction
+    LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsAction,
+    LibGeoDecomp_HpxSimulator_Implementation_CreateUpdateGroupsAction
 );
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE(
-    LibGeoDecomp::HpxSimulator::Impl::CreateUpdateGroupsReturnType,
+    LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsReturnType,
     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
 )
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
-namespace Impl {
+namespace Implementation {
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
 createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, std::size_t overcommitFactor)
@@ -32,7 +32,9 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
     typedef std::pair<std::size_t, std::vector<ValueType> > ResultType;
 
     ResultType res;
-    if(localities.size() == 0) return res;
+    if(localities.size() == 0) {
+        return res;
+    }
 
     hpx::id_type thisLoc = localities[0];
 
@@ -54,8 +56,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
     std::vector<hpx::future<ResultType> > componentsFutures;
     componentsFutures.reserve(2);
 
-    if(localities.size() > 1)
-    {
+    if(localities.size() > 1) {
         std::size_t half = (localities.size() / 2) + 1;
         std::vector<hpx::id_type> locsFirst(localities.begin() + 1, localities.begin() + half);
         std::vector<hpx::id_type> locsSecond(localities.begin() + half, localities.end());
@@ -88,8 +89,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
     );
     res.second.back().gids_ = boost::move(f.move());
 
-    while(!componentsFutures.empty())
-    {
+    while(!componentsFutures.empty()) {
         HPX_STD_TUPLE<int, hpx::future<ResultType> >
             compRes = hpx::wait_any(componentsFutures);
 

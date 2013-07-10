@@ -6,7 +6,7 @@
 
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
-#include <libgeodecomp/parallelization/hpxsimulator/hpxpatchlinks.h>
+#include <libgeodecomp/parallelization/hpxsimulator/patchlink.h>
 
 #include <hpx/include/components.hpp>
 
@@ -14,9 +14,7 @@ namespace LibGeoDecomp {
 namespace HpxSimulator {
 
 template <class CELL_TYPE, class PARTITION, class STEPPER>
-class HpxUpdateGroup;
-
-namespace Server {
+class UpdateGroup;
 
 enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
@@ -35,24 +33,24 @@ inline std::string eventToStr(const EventPoint& event)
 }
 
 template <class CELL_TYPE, class PARTITION, class STEPPER>
-class HpxUpdateGroup
+class UpdateGroupServer
   : public hpx::components::managed_component_base<
-        HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER>
+        UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER>
     >
 {
 public:
     const static int DIM = CELL_TYPE::Topology::DIM;
 
     typedef
-        LibGeoDecomp::HpxSimulator::HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER> ClientType;
+        UpdateGroup<CELL_TYPE, PARTITION, STEPPER> ClientType;
 
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef
-        typename DistributedSimulator<CELL_TYPE>::WriterVector 
+        typename DistributedSimulator<CELL_TYPE>::WriterVector
         WriterVector;
     typedef
-        typename DistributedSimulator<CELL_TYPE>::SteererVector 
+        typename DistributedSimulator<CELL_TYPE>::SteererVector
         SteererVector;
     typedef typename HiParSimulator::Stepper<CELL_TYPE>::PatchType PatchType;
     typedef
@@ -61,8 +59,8 @@ public:
     typedef
         typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterPtr
         PatchAccepterPtr;
-    
-    typedef boost::shared_ptr<typename HpxPatchLink<GridType, ClientType>::Link> PatchLinkPtr;
+
+    typedef boost::shared_ptr<typename PatchLink<GridType, ClientType>::Link> PatchLinkPtr;
 
     typedef
         typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterVec
@@ -72,34 +70,34 @@ public:
         PatchProviderVec;
 
     typedef
-        typename HpxPatchLink<GridType, ClientType>::Provider
+        typename PatchLink<GridType, ClientType>::Provider
         PatchLinkProviderType;
-    
+
     typedef boost::shared_ptr<PatchLinkProviderType> PatchLinkProviderPtr;
 
     typedef
-        typename HpxPatchLink<GridType, ClientType>::Accepter
+        typename PatchLink<GridType, ClientType>::Accepter
         PatchLinkAccepterType;
 
     typedef boost::shared_ptr<PatchLinkAccepterType> PatchLinkAccepterPtr;
-    
+
     typedef
-        HiParSimulator::PartitionManager<DIM, typename CELL_TYPE::Topology> 
+        HiParSimulator::PartitionManager<DIM, typename CELL_TYPE::Topology>
         PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
-    
+
     typedef
-        HiParSimulator::ParallelWriterAdapter<GridType, CELL_TYPE> 
+        HiParSimulator::ParallelWriterAdapter<GridType, CELL_TYPE>
         ParallelWriterAdapterType;
     typedef HiParSimulator::SteererAdapter<GridType, CELL_TYPE> SteererAdapterType;
-    
+
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
-    HpxUpdateGroup()
+    UpdateGroupServer()
       : boundingBoxFuture(boundingBoxPromise.get_future())
       , initFuture(initPromise.get_future())
     {}
-    
+
     void init(
         std::vector<ClientType> const & updateGroups,
         //boost::shared_ptr<LoadBalancer> balancer,
@@ -140,16 +138,14 @@ public:
         // TODO: replace with proper all gather function
         BOOST_FOREACH(ClientType const & ug, updateGroups)
         {
-            if(ug.gid() == this->get_gid())
-            {
+            if(ug.gid() == this->get_gid()) {
                 boundingBoxesFutures << boundingBoxFuture;
             }
-            else
-            {
+            else {
                 boundingBoxesFutures << ug.boundingBox();
             }
         }
-        
+
         SuperVector<CoordBox<DIM> > boundingBoxes;
         boundingBoxes.reserve(numPartitions);
 
@@ -179,7 +175,7 @@ public:
 
                 link->charge(
                     firstSyncPoint,
-                    HpxPatchLink<GridType, ClientType>::ENDLESS,
+                    PatchLink<GridType, ClientType>::ENDLESS,
                     ghostZoneWidth);
 
                 link->setRegion(partitionManager->ownRegion());
@@ -238,7 +234,7 @@ public:
 
                 link->charge(
                     firstSyncPoint,
-                    HpxPatchLink<GridType, ClientType>::ENDLESS,
+                    PatchLink<GridType, ClientType>::ENDLESS,
                     ghostZoneWidth);
 
                 link->setRegion(partitionManager->ownRegion());
@@ -264,7 +260,7 @@ public:
         initPromise.set_value();
         initEvents();
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, init, InitAction);
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, init, InitAction);
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,
@@ -283,16 +279,14 @@ public:
     StepPairType currentStep() const
     {
         hpx::wait(boundingBoxFuture);
-        if(stepper)
-        {
+        if(stepper) {
             return stepper->currentStep();
         }
-        else
-        {
+        else {
             return std::make_pair(initializer->startStep(), 0u);
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, currentStep, CurrentStepAction);
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, currentStep, CurrentStepAction);
 
     std::size_t getStep() const
     {
@@ -309,15 +303,14 @@ public:
             remainingNanoSteps -= hop;
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, nanoStep, NanoStepAction);
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, nanoStep, NanoStepAction);
 
-    //hpx::future<CoordBox<DIM> > boundingBox()
     CoordBox<DIM> boundingBox()
     {
         return boundingBoxFuture.get();
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, boundingBox, BoundingBoxAction);
-    
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, boundingBox, BoundingBoxAction);
+
     void setOuterGhostZone(
         std::size_t srcRank,
         boost::shared_ptr<SuperVector<CELL_TYPE> > buffer,
@@ -330,7 +323,7 @@ public:
 
         patchlinkIter->second->setBuffer(buffer, nanoStep);
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxUpdateGroup, setOuterGhostZone, SetOuterGhostZoneAction);
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
 
     std::size_t getRank() const
     {
@@ -338,7 +331,7 @@ public:
     }
 private:
     std::vector<ClientType> updateGroups;
-    
+
     boost::shared_ptr<HiParSimulator::Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
@@ -358,10 +351,8 @@ private:
     void setRank()
     {
         rank = 0;
-        BOOST_FOREACH(ClientType const & ug, updateGroups)
-        {
-            if(ug.gid() == this->get_gid())
-            {
+        BOOST_FOREACH(ClientType const & ug, updateGroups) {
+            if(ug.gid() == this->get_gid()) {
                 break;
             }
             ++rank;
@@ -381,13 +372,13 @@ private:
 
         return ret;
     }
-    
+
     void initEvents()
     {
         events.clear();
         long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
         events[lastNanoStep] << END;
-        
+
         insertNextLoadBalancingEvent();
     }
 
@@ -410,7 +401,7 @@ private:
         }
         events.erase(events.begin());
     }
-    
+
     inline void insertNextLoadBalancingEvent()
     {
         long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
@@ -438,7 +429,8 @@ private:
     }
 };
 
-}}}
+}
+}
 
 #endif
 #endif

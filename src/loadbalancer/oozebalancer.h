@@ -81,8 +81,8 @@ private:
     LoadVec linearCombo(const WeightVec& oldLoads, const LoadVec& newLoads);
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<LoadBalancer>(*this);
         ar & _newLoadWeight;

@@ -8,7 +8,7 @@
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/parallelization/hpxsimulator/hpxupdategroup.h>
+#include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 #include <libgeodecomp/parallelization/hpxsimulator/createupdategroups.h>
 
 #include <boost/serialization/shared_ptr.hpp>
@@ -73,7 +73,7 @@
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
-    
+
 typedef std::pair<std::size_t, std::size_t> StepPairType;
 
 template<
@@ -87,7 +87,7 @@ class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
-    typedef HpxUpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
+    typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
 
     static const int DIM = Topology::DIM;
@@ -111,7 +111,7 @@ public:
     inline void run()
     {
         initSimulation();
-        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        std::size_t lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
         nanoStep(lastNanoStep);
     }
 
@@ -159,14 +159,13 @@ private:
     std::vector<UpdateGroupType> updateGroups;
     boost::atomic<bool> initialized;
 
-    void nanoStep(long remainingNanoSteps)
+    void nanoStep(std::size_t remainingNanoSteps)
     {
         std::vector<hpx::future<void> >
             nanoSteps;
         nanoSteps.reserve(updateGroups.size());
 
-        BOOST_FOREACH(UpdateGroupType & ug, updateGroups)
-        {
+        BOOST_FOREACH(UpdateGroupType & ug, updateGroups) {
             nanoSteps.push_back(ug.nanoStep(remainingNanoSteps));
         }
         hpx::wait(nanoSteps);
@@ -174,14 +173,12 @@ private:
 
     void initSimulation()
     {
-        if(initialized)
-        {
+        if(initialized) {
             return;
         }
 
         // TODO: replace with proper broadcast
-        BOOST_FOREACH(UpdateGroupType & ug, updateGroups)
-        {
+        BOOST_FOREACH(UpdateGroupType & ug, updateGroups) {
             ug.init(
                 updateGroups,
                 //balancer,

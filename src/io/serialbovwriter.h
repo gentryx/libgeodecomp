@@ -42,7 +42,7 @@ public:
         brickletDim(brickletDim)
     {}
 
-    Writer<CELL_TYPE> * clone()
+    Writer<CELL_TYPE> *clone()
     {
         return new SerialBOVWriter(this->prefix, this->period, brickletDim);
     }
@@ -60,31 +60,31 @@ public:
 
 private:
     Coord<3> brickletDim;
-    
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
         ar & brickletDim;
     }
 #endif
 
-    std::string filename(const unsigned& step, std::string const & suffix) const
+    std::string filename(unsigned step, const std::string& suffix) const
     {
         std::ostringstream buf;
         buf
             << prefix << "."
             << std::setfill('0') << std::setw(5) << step
             << "." << suffix;
-        
+
         return buf.str();
     }
 
-    void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
+    void writeHeader(unsigned step, const Coord<DIM>& dimensions)
     {
         std::ofstream file;
-        
+
         file.open(filename(step, "bov").c_str());
 
         // BOV only accepts 3D data, so we'll have to inflate 1D
@@ -117,11 +117,11 @@ private:
 
     template<typename GRID_TYPE>
     void writeRegion(
-        const unsigned& step,
+        unsigned step,
         const GRID_TYPE& grid)
     {
         std::ofstream file;
-        
+
         file.open(
             filename(step, "data").c_str(), std::ios::binary);
 
@@ -144,10 +144,10 @@ private:
             SELECTOR_TYPE()(grid.at(*i), &buffer[j]);
             j += dataComponents;
         }
-        
+
         file.write(
-            reinterpret_cast<char *>(&buffer[0])
-          , effectiveLength * sizeof(VariableType));
+            reinterpret_cast<char *>(&buffer[0]),
+            effectiveLength * sizeof(VariableType));
 
         file.close();
     }

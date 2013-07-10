@@ -13,8 +13,6 @@
 #include <boost/serialization/base_object.hpp>
 #endif
 
-#include <cassert>
-
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
@@ -72,7 +70,7 @@ public:
      **/
     virtual ParallelWriter * clone()
     {
-        assert(false);
+        throw std::logic_error("clone not implemented");
         return 0;
     }
 
@@ -123,11 +121,11 @@ protected:
     Region<Topology::DIM> region;
     std::string prefix;
     unsigned period;
-private: 
+private:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & region;
         ar & prefix;

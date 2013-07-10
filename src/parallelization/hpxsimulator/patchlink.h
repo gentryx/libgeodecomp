@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
 namespace HpxSimulator {
 
 template <class GRID_TYPE, class UPDATE_GROUP>
-class HpxPatchLink
+class PatchLink
 {
 public:
     const static int DIM = GRID_TYPE::DIM;
@@ -41,7 +41,7 @@ public:
             lastNanoStep = last;
             stride = newStride;
         }
-        
+
     protected:
         std::size_t lastNanoStep;
         long stride;
@@ -61,14 +61,13 @@ public:
     public:
 
         Accepter(
-            Region<DIM> const & region
-          , std::size_t rank
-          , UPDATE_GROUP const & dest
-            )
-          : Link(region)
-          , rank(rank)
-          , dest(dest)
-          , putFuture(hpx::make_ready_future())
+            const Region<DIM>& region,
+            std::size_t rank,
+            const UPDATE_GROUP& dest) :
+            Link(region),
+            rank(rank),
+            dest(dest),
+            putFuture(hpx::make_ready_future())
         {}
 
         void charge(std::size_t next, std::size_t last, std::size_t newStride)
@@ -78,11 +77,11 @@ public:
         }
 
         void put(
-            GRID_TYPE const & grid
-          , Region<DIM> const & /*validRegion*/
-          , const std::size_t nanoStep)
+            const GRID_TYPE& grid,
+            const Region<DIM>&, /*validRegion*/
+            const std::size_t nanoStep)
         {
-            if(!this->checkNanoStepPut(nanoStep)) {
+            if (!this->checkNanoStepPut(nanoStep)) {
                 return;
             }
 
@@ -93,7 +92,7 @@ public:
             putFuture = dest.setOuterGhostZone(rank, buffer, nanoStep);
 
             std::size_t nextNanoStep = (requestedNanoSteps.min)() + stride;
-            if((lastNanoStep == std::size_t(-1)) ||
+            if ((lastNanoStep == std::size_t(-1)) ||
                (nextNanoStep < lastNanoStep)) {
                 requestedNanoSteps << nextNanoStep;
             }
@@ -116,13 +115,11 @@ public:
         using HiParSimulator::PatchProvider<GRID_TYPE>::checkNanoStepGet;
         using HiParSimulator::PatchProvider<GRID_TYPE>::storedNanoSteps;
     public:
-        Provider(
-            Region<DIM> const & region
-        )
-          : Link(region)
-          , bufferFuture(bufferPromise.get_future())
-          , recvFuture(recvPromise.get_future())
-          , getFuture(hpx::lcos::make_ready_future())
+        Provider(const Region<DIM>& region) :
+            Link(region),
+            bufferFuture(bufferPromise.get_future()),
+            recvFuture(recvPromise.get_future()),
+            getFuture(hpx::lcos::make_ready_future())
         {}
 
         void charge(long next, long last, long newStride)
@@ -133,10 +130,10 @@ public:
         }
 
         void get(
-            GRID_TYPE * grid
-          , Region<DIM> const &
-          , const std::size_t nanoStep
-          , const bool remove=true
+            GRID_TYPE *grid,
+            const Region<DIM>&,
+            const std::size_t nanoStep,
+            const bool remove=true
         )
         {
             hpx::wait(getFuture);
@@ -157,7 +154,7 @@ public:
             bufferFuture = bufferPromise.get_future();
             recvPromise.set_value(nanoStep);
         }
-        
+
         void setBuffer(boost::shared_ptr<BufferType> buffer, long nanoStep)
         {
             hpx::wait(recvFuture);
@@ -169,7 +166,7 @@ public:
         }
 
     private:
-        
+
         hpx::lcos::local::promise<boost::shared_ptr<BufferType> > bufferPromise;
         hpx::future<boost::shared_ptr<BufferType> > bufferFuture;
         hpx::lcos::local::promise<long> recvPromise;
@@ -184,7 +181,7 @@ public:
             HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
 
             std::size_t nextNanoStep = (storedNanoSteps.min)() + stride;
-            if((lastNanoStep == std::size_t(-1)) ||
+            if ((lastNanoStep == std::size_t(-1)) ||
                (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
             }

@@ -4,7 +4,7 @@
 #ifndef LIBGEODECOMP_IO_HPXWRITERSINK_H
 #define LIBGEODECOMP_IO_HPXWRITERSINK_H
 
-#include <libgeodecomp/io/server/hpxwritersink.h>
+#include <libgeodecomp/io/hpxwritersinkserver.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
 #include <hpx/hpx_fwd.hpp>
@@ -15,19 +15,19 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
-template <typename CELL_TYPE>
+template<typename CELL_TYPE>
 class HpxWriterSink
 {
 public:
     friend class boost::serialization::access;
 
-    typedef Server::HpxWriterSink<CELL_TYPE> ComponentType;
+    typedef HpxWriterSinkServer<CELL_TYPE> ComponentType;
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
     typedef SuperVector<CELL_TYPE> BufferType;
-    
+
     typedef
         hpx::components::server::create_component_action2<
             ComponentType,
@@ -35,7 +35,7 @@ public:
             std::size_t
         >
         ComponentWriterCreateActionType;
-    
+
     typedef
         hpx::components::server::create_component_action2<
             ComponentType,
@@ -43,11 +43,11 @@ public:
             std::size_t
         >
         ComponentParallelWriterCreateActionType;
-    
+
     HpxWriterSink() {}
 
     HpxWriterSink(
-        ParallelWriter<CELL_TYPE> * parallelWriter,
+        ParallelWriter<CELL_TYPE> *parallelWriter,
         std::size_t numUpdateGroups
     )
     {
@@ -60,7 +60,7 @@ public:
     }
 
     HpxWriterSink(
-        Writer<CELL_TYPE> * serialWriter,
+        Writer<CELL_TYPE> *serialWriter,
         std::size_t numUpdateGroups
     )
     {
@@ -72,7 +72,7 @@ public:
                 numUpdateGroups);
     }
 
-    HpxWriterSink(HpxWriterSink const & sink)
+    HpxWriterSink(const HpxWriterSink& sink)
       : thisId(sink.thisId)
     {}
 
@@ -102,17 +102,17 @@ public:
 
 private:
     hpx::future<hpx::naming::id_type> thisId;
-    
-    template <typename ARCHIVE>
-    void load(ARCHIVE & ar, unsigned)
+
+    template<typename ARCHIVE>
+    void load(ARCHIVE& ar, unsigned)
     {
         hpx::naming::id_type id;
         ar & id;
         thisId = hpx::make_ready_future(id);
     }
 
-    template <typename ARCHIVE>
-    void save(ARCHIVE & ar, unsigned) const
+    template<typename ARCHIVE>
+    void save(ARCHIVE& ar, unsigned) const
     {
         hpx::naming::id_type id(thisId.get());
         ar & id;
