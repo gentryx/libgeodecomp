@@ -3,6 +3,10 @@
 
 #include <libgeodecomp/misc/supervector.h>
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/serialization/base_object.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 class LoadBalancer
@@ -33,6 +37,12 @@ public:
      * \f]
      */
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads) = 0;
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {}
+#endif
 };
 
 }

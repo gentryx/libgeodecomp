@@ -14,11 +14,18 @@ template<typename CELL_TYPE>
 class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
 public:
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    friend class boost::serialization::access;
+#endif
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
     static const int DIM = CELL_TYPE::Topology::DIM;
+
+    TracingWriter()
+      : stream(std::cout)
+    {}
 
     TracingWriter(
         const unsigned period,
@@ -31,6 +38,12 @@ public:
         maxSteps(maxSteps)
     {}
 
+
+    ParallelWriter<CELL_TYPE> * clone()
+    {
+        return new TracingWriter(Writer<CELL_TYPE>::period, maxSteps);
+    }
+
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
         stepFinished(step, grid.getDimensions(), event);
@@ -42,6 +55,7 @@ public:
         const Coord<DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall)
     {
         if (lastCall) {
@@ -54,6 +68,17 @@ private:
     Time startTime;
     unsigned lastStep;
     unsigned maxSteps;
+    
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
+        ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
+        ar & lastStep;
+        ar & maxSteps;
+    }
+#endif
 
     void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)
     {

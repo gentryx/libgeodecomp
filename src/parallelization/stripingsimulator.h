@@ -263,6 +263,7 @@ private:
                     gridDimensions(),
                     getStep(),
                     event,
+                    mpilayer.rank(),
                     true);
             }
         }

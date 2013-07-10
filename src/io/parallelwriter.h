@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
@@ -41,6 +43,9 @@ public:
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
 
+    ParallelWriter()
+    {}
+
     /**
      * is the equivalent to Writer().
      */
@@ -57,6 +62,17 @@ public:
 
     virtual ~ParallelWriter()
     {};
+
+    /**
+     * "Virtual Copy constructor"
+     * This function may be called whenever a copy of a writer is needed
+     * instead of a plain pointer copy. Must be implemented by t
+     **/
+    virtual ParallelWriter * clone()
+    {
+        throw std::logic_error("clone not implemented");
+        return 0;
+    }
 
     /**
      * notifies the ParallelWriter that the supplied region is the
@@ -88,6 +104,7 @@ public:
         const CoordType& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall) = 0;
 
     const unsigned& getPeriod() const
@@ -107,8 +124,8 @@ protected:
 private:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    void serialize(Archive & ar, unsigned)
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & region;
         ar & prefix;

@@ -14,24 +14,42 @@ namespace LibGeoDecomp {
 class TracingBalancer : public LoadBalancer
 {
 public:
-    TracingBalancer(LoadBalancer *balancer, std::ostream& stream = std::cout) :
-        _stream(stream)
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    friend class boost::serialization::access;
+#endif
+
+    TracingBalancer() :
+        stream(std::cout)
     {
-        _balancer.reset(balancer);
+    }
+
+    TracingBalancer(LoadBalancer *balancer, std::ostream& stream = std::cout) :
+        balancer(balancer),
+        stream(stream)
+    {
     }
 
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads)
     {
-        _stream << "TracingBalancer::balance()\n";
-        _stream << "  weights: " << weights << "\n";
-        _stream << "  relativeLoads: " << relativeLoads << "\n";
+        stream << "TracingBalancer::balance()\n";
+        stream << "  weights: " << weights << "\n";
+        stream << "  relativeLoads: " << relativeLoads << "\n";
 
-        return _balancer->balance(weights, relativeLoads);
+        return balancer->balance(weights, relativeLoads);
     }
 
 private:
-    boost::shared_ptr<LoadBalancer> _balancer;
-    std::ostream& _stream;
+    boost::shared_ptr<LoadBalancer> balancer;
+    std::ostream& stream;
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & boost::serialization::base_object<LoadBalancer>(*this);
+        ar & balancer;
+    }
+#endif
 };
 
 }

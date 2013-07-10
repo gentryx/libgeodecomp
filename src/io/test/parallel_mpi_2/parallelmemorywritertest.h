@@ -75,6 +75,7 @@ public:
                 grid.getDimensions(),
                 sim->getStep(),
                 WRITER_STEP_FINISHED,
+                MPILayer().rank(),
                 true);
         }
 
@@ -96,6 +97,7 @@ public:
                 grid.getDimensions(),
                 sim->getStep(),
                 WRITER_STEP_FINISHED,
+                MPILayer().rank(),
                 true);
         }
 

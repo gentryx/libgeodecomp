@@ -8,8 +8,7 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL_TYPE>
-class ParallelWriter;
+template<class CELL_TYPE> class ParallelWriter;
 
 // fixme: add short doxygen doc for every class
 template<typename CELL_TYPE>

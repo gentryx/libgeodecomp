@@ -1,12 +1,10 @@
-/**
- * We need to include typemaps first to avoid problems with Intel
- * MPI's C++ bindings (which may collide with stdio.h's SEEK_SET,
- * SEEK_CUR etc.).
- */
-#include <libgeodecomp/mpilayer/typemaps.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/parallelization/stripingsimulator.h>
+
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <libgeodecomp/io/hpxwritercollector.h>
+#include <libgeodecomp/io/serialbovwriter.h>
+
+#include <hpx/hpx_init.hpp>
 
 #include <libgeodecomp/config.h>
 #include <boost/assign/std/vector.hpp>
@@ -42,8 +40,7 @@ public:
         alive(alive)
     {}
 
-    template<typename COORD_MAP>
-    int countLivingNeighbors(const COORD_MAP& neighborhood)
+    int countLivingNeighbors(const CoordMap<ConwayCell>& neighborhood)
     {
         int ret = 0;
         for (int y = -1; y < 2; ++y) {
@@ -55,8 +52,7 @@ public:
         return ret;
     }
 
-    template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned&)
+    void update(const CoordMap<ConwayCell>& neighborhood, const unsigned&)
     {
         int livingNeighbors = countLivingNeighbors(neighborhood);
         alive = neighborhood[Coord<2>(0, 0)].alive;
@@ -68,6 +64,12 @@ public:
     }
 
     bool alive;
+
+    template <class ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & alive;
+    }
 };
 
 class CellInitializer : public SimpleInitializer<ConwayCell>
@@ -118,6 +120,12 @@ public:
             }
         }
     }
+
+    template <class ARCHIVE>
+    void serialize(ARCHIVE & ar, unsigned)
+    {
+        ar & boost::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
+    }
 };
 
 class CellToColor {
@@ -155,37 +163,73 @@ public:
     }
 };
 
-void runSimulation()
+typedef
+    HpxSimulator::HpxSimulator<ConwayCell, HiParSimulator::RecursiveBisectionPartition<2> >
+    SimulatorType;
+LIBGEDECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
+    SimulatorType,
+    ConwayCellSimulator
+)
+LIBGEDECOMP_REGISTER_HPX_SIMULATOR(
+    SimulatorType,
+    ConwayCellSimulator
+)
+
+BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
+
+typedef LibGeoDecomp::TracingWriter<ConwayCell> TracingWriterType;
+BOOST_CLASS_EXPORT_GUID(TracingWriterType, "TracingWriterConwayCell");
+
+typedef LibGeoDecomp::SerialBOVWriter<ConwayCell, StateSelector> BovWriterType;
+BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
+
+typedef 
+    LibGeoDecomp::HpxWriterCollector<ConwayCell>
+    HpxWriterCollectorType;
+LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
+    HpxWriterCollectorType,
+    ConwayCellWriterCollector
+)
+LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(
+    HpxWriterCollectorType,
+    ConwayCellWriterCollector
+)
+
+int hpx_main()
 {
-    int outputFrequency = 1;
-    CellInitializer *init = new CellInitializer();
+    {
+        int outputFrequency = 1;
+        CellInitializer *init = new CellInitializer();
 
-    StripingSimulator<ConwayCell> sim(
-        init,
-        MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
-        10,
-        MPI::BOOL);
+        SimulatorType sim(
+            init,
+            1, // overcommitFactor
+            new TracingBalancer(new OozeBalancer()),
+            10, // balancingPeriod
+            1 // ghostZoneWidth
+            );
+ 
+        HpxWriterCollectorType::SinkType sink(
+            new BovWriterType("game", outputFrequency),
+            sim.numUpdateGroups());
 
-    sim.addWriter(
-        new BOVWriter<ConwayCell, StateSelector>(
-            "game",
-            outputFrequency));
+        sim.addWriter(
+            new HpxWriterCollectorType(
+                outputFrequency,
+                sink
+            ));
 
-    sim.addWriter(
-        new TracingWriter<ConwayCell>(
-            1,
-            init->maxSteps()));
+        sim.addWriter(
+            new TracingWriterType(
+                1,
+                init->maxSteps()));
 
-    sim.run();
+        sim.run();
+    }
+    return hpx::finalize();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-    MPI::Init(argc, argv);
-    Typemaps::initializeMaps();
-
-    runSimulation();
-
-    MPI::Finalize();
-    return 0;
+    return hpx::init(argc, argv);
 }

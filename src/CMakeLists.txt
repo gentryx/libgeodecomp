@@ -31,6 +31,7 @@ if(HPX_ROOT)
   find_package(HPX)
 endif()
 
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
@@ -39,6 +40,10 @@ if(HPX_FOUND)
   set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
+  add_definitions(-DHPX_LIMIT=10)
+  set(HPX_FOUND true)
+else()
+  set(HPX_FOUND false)
 endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
@@ -143,7 +148,7 @@ add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${Op
 
 add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
-add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} false)
+add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
 
 add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
@@ -234,8 +239,23 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
+if(FEATURE_HPX)
+  set(HPX_LIB_SUFFIX "")
+  if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
+    set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
+  endif()
+
+  set(LOCAL_LIBGEODECOMP_LINK_LIB
+    ${LOCAL_LIBGEODECOMP_LINK_LIB}
+    hpx${HPX_LIB_SUFFIX}
+    hpx_serialization${HPX_LIB_SUFFIX}
+    hpx_init${HPX_LIB_SUFFIX}
+    ${HPX_LIBRARIES}
+  )
+endif()
+
 # LIBDIRS is used to find source files and headers
-set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions)
+set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions parallelization/hpxsimulator)
 # AUXDIRS lists auxiliary directories to be included in the main
 # build. They may for instance include additionally libraries to be
 # linked into the main lib.

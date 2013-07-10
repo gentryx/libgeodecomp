@@ -48,6 +48,7 @@ public:
         const Coord<Topology::DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
+        std::size_t rank,
         bool lastCall)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
@@ -133,14 +134,14 @@ private:
                 CoordToIndex<DIM>()(coord, dimensions) * varLength * dataComponents;
             file.Seek(index, MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
-            int effectiveLength = length * dataComponents;
+            std::size_t effectiveLength = length * dataComponents;
             Coord<DIM> walker = i->origin;
 
             if (buffer.size() != effectiveLength) {
                 buffer = SuperVector<VariableType>(effectiveLength);
             }
 
-            for (int i = 0; i < effectiveLength; i += dataComponents) {
+            for (std::size_t i = 0; i < effectiveLength; i += dataComponents) {
                 SELECTOR_TYPE()(grid.at(walker), &buffer[i]);
                 walker.x()++;
             }

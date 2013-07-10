@@ -20,7 +20,7 @@ public:
 
     friend class BuggyCellToColor;
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
