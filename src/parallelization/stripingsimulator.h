@@ -405,7 +405,7 @@ private:
     }
 
     /**
-     * resets various sizes, heights etc. according to @a
+     * resets various sizes, heights etc. according to
      * newPartitions, returns the new bounding box of the stripes. It
      * doesn't actually resize the stripes since different actions are
      * required during load balancing and initialization.

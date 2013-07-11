@@ -21,7 +21,7 @@ public:
     static const int DIM = CELL::Topology::DIM;
 
     /**
-     * initializes all cells of the grid at @a target
+     * initializes all cells of the grid at target
      */
     virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target) =0;
 
@@ -41,7 +41,7 @@ private:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
-    void serialize(Archive & ar, unsigned)
+    void serialize(Archive& ar, unsigned)
     {}
 #endif
 };

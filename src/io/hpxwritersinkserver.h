@@ -129,7 +129,7 @@ private:
 
     MutexType mtx;
 
-    void notifyWriters(GridType const & grid, unsigned step, WriterEvent event)
+    void notifyWriters(const GridType& grid, unsigned step, WriterEvent event)
     {
         if(!parallelWriter) {
             MutexType::scoped_lock l(mtx);
@@ -137,7 +137,7 @@ private:
 
             RegionInfoIterator it = regionInfoMap.find(step);
             BOOST_ASSERT(it != regionInfoMap.end());
-            BOOST_FOREACH(RegionInfo const & regionInfo, it->second) {
+            BOOST_FOREACH(const RegionInfo& regionInfo, it->second) {
                 parallelWriter->stepFinished(
                     grid,
                     regionInfo.validRegion,

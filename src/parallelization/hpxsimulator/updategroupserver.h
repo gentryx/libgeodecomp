@@ -99,13 +99,13 @@ public:
     {}
 
     void init(
-        std::vector<ClientType> const & updateGroups,
+        const std::vector<ClientType>& updateGroups,
         //boost::shared_ptr<LoadBalancer> balancer,
         unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        WriterVector const & writers,
-        SteererVector const & steerers
+        const WriterVector& writers,
+        const SteererVector& steerers
     )
     {
         this->updateGroups = updateGroups;
@@ -136,12 +136,10 @@ public:
         SuperVector<hpx::future<CoordBox<DIM> > > boundingBoxesFutures;
         boundingBoxesFutures.reserve(numPartitions);
         // TODO: replace with proper all gather function
-        BOOST_FOREACH(ClientType const & ug, updateGroups)
-        {
+        BOOST_FOREACH(const ClientType& ug, updateGroups) {
             if(ug.gid() == this->get_gid()) {
                 boundingBoxesFutures << boundingBoxFuture;
-            }
-            else {
+            } else {
                 boundingBoxesFutures << ug.boundingBox();
             }
         }
@@ -149,8 +147,7 @@ public:
         SuperVector<CoordBox<DIM> > boundingBoxes;
         boundingBoxes.reserve(numPartitions);
 
-        BOOST_FOREACH(hpx::future<CoordBox<DIM> > & f, boundingBoxesFutures)
-        {
+        BOOST_FOREACH(hpx::future<CoordBox<DIM> >& f, boundingBoxesFutures) {
             boundingBoxes << f.get();
         }
         partitionManager->resetGhostZones(boundingBoxes);
@@ -185,8 +182,7 @@ public:
         PatchAccepterVec patchAcceptersInner;
 
         // Convert writers to patch accepters
-        BOOST_FOREACH(typename WriterVector::value_type const & writer, writers)
-        {
+        BOOST_FOREACH(const typename WriterVector::value_type& writer, writers) {
             PatchAccepterPtr adapterGhost(
                 new ParallelWriterAdapterType(
                     boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
@@ -242,8 +238,7 @@ public:
         }
 
         // Convert steerer to patch accepters
-        BOOST_FOREACH(typename SteererVector::value_type const & steerer, steerers)
-        {
+        BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
             // two adapters needed, just as for the writers
             PatchProviderPtr adapterGhost(
                 new SteererAdapterType(steerer));
@@ -351,7 +346,7 @@ private:
     void setRank()
     {
         rank = 0;
-        BOOST_FOREACH(ClientType const & ug, updateGroups) {
+        BOOST_FOREACH(const ClientType& ug, updateGroups) {
             if(ug.gid() == this->get_gid()) {
                 break;
             }

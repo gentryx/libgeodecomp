@@ -18,8 +18,8 @@ public:
     virtual ~LoadBalancer() {}
 
     /**
-     * Given the current workload distribution @a weights
-     * and the work time / wall clock time ratio @a relativeLoads for
+     * Given the current workload distribution weights
+     * and the work time / wall clock time ratio relativeLoads for
      * each node, return a new, possibly better distribution "newLoads".
      *
      * Wall clock time is the sum of the work time and the waiting

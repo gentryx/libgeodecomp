@@ -15,7 +15,7 @@ class IOException : public std::runtime_error
 public:
     /**
      * Initializes a new IOException object which means that an error described
-     * by @a message occured.
+     * by message occured.
      */
     IOException(std::string message) :
         std::runtime_error(message)

@@ -25,7 +25,7 @@ public:
     virtual const typename Simulator<CELL_TYPE>::GridType *getGrid() = 0;
 
     /**
-     * register @a writer which will observe the simulation. The
+     * register  writer which will observe the simulation. The
      * MonolithicSimulator will assume that it now owns the Writer, so
      * it'll delete it upon destruction.
      */

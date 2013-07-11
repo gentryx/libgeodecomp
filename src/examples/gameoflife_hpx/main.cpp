@@ -66,7 +66,7 @@ public:
     bool alive;
 
     template <class ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & alive;
     }
@@ -122,7 +122,7 @@ public:
     }
 
     template <class ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
     }

@@ -130,8 +130,8 @@ public:
     public:
         /**
          * Returns an iterator that will traverse the rectangle
-         * specified by @a _origin and @a dimensions. Traversal will
-         * start at position @a pos according to the SFC
+         * specified by  _origin and @a dimensions. Traversal will
+         * start at position  pos according to the SFC
          * linearization.
          */
         inline Iterator(const Coord<2>& _origin, const Coord<2>& dimensions, const unsigned& pos=0) :
@@ -162,7 +162,7 @@ public:
 
         /**
          * Returns an iterator that will traverse only the rectangle
-         * of type @a initType.
+         * of type  initType.
          */
         inline Iterator(
             const Coord<2>& origin,
@@ -178,7 +178,7 @@ public:
 
         /**
          * Returns an "end" iterator, meaning that the iterator will
-         * be frozen at position @a origin.
+         * be frozen at position  origin.
          */
         inline Iterator(const Coord<2>& _origin) :
             SpaceFillingCurve<2>::Iterator(_origin, true)
@@ -283,8 +283,8 @@ public:
         }
 
         /**
-         * Finds the triangle in @a curTria, in which the coordinate
-         * with position @a remainder is located. Returns true if
+         * Finds the triangle in  curTria, in which the coordinate
+         * with position  remainder is located. Returns true if
          * recursion is necessary to check the resulting sub triangle.
          */
         inline bool traceTriangle(const Triangle& curTria, unsigned *remainder)
@@ -307,8 +307,8 @@ public:
         }
 
         /**
-         * Finds the sub triangle of @a curTria, in which the position
-         * on the SFC @a remainder resides.
+         * Finds the sub triangle of  curTria, in which the position
+         * on the SFC  remainder resides.
          */
         inline void skipSubTriangles(const Triangle& curTria, unsigned *remainder)
         {
