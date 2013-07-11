@@ -183,7 +183,7 @@ BOOST_CLASS_EXPORT_GUID(TracingWriterType, "TracingWriterConwayCell");
 typedef LibGeoDecomp::SerialBOVWriter<ConwayCell, StateSelector> BovWriterType;
 BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
 
-typedef 
+typedef
     LibGeoDecomp::HpxWriterCollector<ConwayCell>
     HpxWriterCollectorType;
 LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
@@ -208,14 +208,13 @@ int hpx_main()
             10, // balancingPeriod
             1 // ghostZoneWidth
             );
- 
+
         HpxWriterCollectorType::SinkType sink(
             new BovWriterType("game", outputFrequency),
             sim.numUpdateGroups());
 
         sim.addWriter(
             new HpxWriterCollectorType(
-                outputFrequency,
                 sink
             ));
 

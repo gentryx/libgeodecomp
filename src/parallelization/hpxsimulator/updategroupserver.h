@@ -296,12 +296,15 @@ public:
     void nanoStep(std::size_t remainingNanoSteps)
     {
         hpx::wait(initFuture);
+        /*
         while (remainingNanoSteps > 0) {
             std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
             stepper->update(hop);
             handleEvents();
             remainingNanoSteps -= hop;
         }
+        */
+        stepper->update(remainingNanoSteps);
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, nanoStep, NanoStepAction);
 

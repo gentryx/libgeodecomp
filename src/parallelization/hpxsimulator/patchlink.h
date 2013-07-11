@@ -117,9 +117,7 @@ public:
     public:
         Provider(const Region<DIM>& region) :
             Link(region),
-            bufferFuture(bufferPromise.get_future()),
-            recvFuture(recvPromise.get_future()),
-            getFuture(hpx::lcos::make_ready_future())
+            recvFuture(recvPromise.get_future())
         {}
 
         void charge(long next, long last, long newStride)
@@ -136,15 +134,17 @@ public:
             const bool remove=true
         )
         {
-            hpx::wait(getFuture);
-            getFuture = hpx::async(
-                HPX_STD_BIND(
-                    &Provider::getAsync,
-                    this,
-                    grid,
-                    nanoStep
-                )
-            );
+            boost::shared_ptr<BufferType> buffer = bufferFuture.get();
+
+            checkNanoStepGet(nanoStep);
+            HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
+
+            std::size_t nextNanoStep = (storedNanoSteps.min)() + stride;
+            if ((lastNanoStep == std::size_t(-1)) ||
+               (nextNanoStep < lastNanoStep)) {
+                recv(nextNanoStep);
+            }
+            storedNanoSteps.erase_min();
         }
 
         void recv(long nanoStep)
@@ -152,6 +152,7 @@ public:
             storedNanoSteps << nanoStep;
             bufferPromise = hpx::lcos::local::promise<boost::shared_ptr<BufferType> >();
             bufferFuture = bufferPromise.get_future();
+            BOOST_ASSERT(!recvPromise.ready());
             recvPromise.set_value(nanoStep);
         }
 
@@ -171,22 +172,6 @@ public:
         hpx::future<boost::shared_ptr<BufferType> > bufferFuture;
         hpx::lcos::local::promise<long> recvPromise;
         hpx::future<long> recvFuture;
-        hpx::future<void> getFuture;
-
-        void getAsync(GRID_TYPE * grid, long nanoStep)
-        {
-            boost::shared_ptr<BufferType> buffer = bufferFuture.get();
-
-            checkNanoStepGet(nanoStep);
-            HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
-
-            std::size_t nextNanoStep = (storedNanoSteps.min)() + stride;
-            if ((lastNanoStep == std::size_t(-1)) ||
-               (nextNanoStep < lastNanoStep)) {
-                recv(nextNanoStep);
-            }
-            storedNanoSteps.erase_min();
-        }
     };
 };
 

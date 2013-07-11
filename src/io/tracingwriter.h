@@ -23,10 +23,6 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
     static const int DIM = CELL_TYPE::Topology::DIM;
 
-    TracingWriter()
-      : stream(std::cout)
-    {}
-
     TracingWriter(
         const unsigned period,
         const unsigned maxSteps,
@@ -68,7 +64,7 @@ private:
     Time startTime;
     unsigned lastStep;
     unsigned maxSteps;
-    
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)
@@ -78,6 +74,10 @@ private:
         ar & lastStep;
         ar & maxSteps;
     }
+
+    TracingWriter()
+      : stream(std::cout)
+    {}
 #endif
 
     void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)

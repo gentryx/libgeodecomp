@@ -43,9 +43,6 @@ public:
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
 
-    ParallelWriter()
-    {}
-
     /**
      * is the equivalent to Writer().
      */
@@ -121,9 +118,14 @@ protected:
     Region<Topology::DIM> region;
     std::string prefix;
     unsigned period;
-private:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+protected:
+    ParallelWriter()
+    {}
+
+private:
+
     template<typename ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {

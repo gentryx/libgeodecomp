@@ -48,8 +48,8 @@ public:
 
     HpxWriterSink(
         ParallelWriter<CELL_TYPE> *parallelWriter,
-        std::size_t numUpdateGroups
-    )
+        std::size_t numUpdateGroups) :
+        period(parallelWriter->getPeriod())
     {
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
         thisId
@@ -61,8 +61,8 @@ public:
 
     HpxWriterSink(
         Writer<CELL_TYPE> *serialWriter,
-        std::size_t numUpdateGroups
-    )
+        std::size_t numUpdateGroups) :
+        period(serialWriter->getPeriod())
     {
         boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
         thisId
@@ -72,8 +72,9 @@ public:
                 numUpdateGroups);
     }
 
-    HpxWriterSink(const HpxWriterSink& sink)
-      : thisId(sink.thisId)
+    HpxWriterSink(const HpxWriterSink& sink) :
+        thisId(sink.thisId),
+        period(sink.period)
     {}
 
     void stepFinished(
@@ -100,14 +101,21 @@ public:
         );
     }
 
+    std::size_t getPeriod() const
+    {
+        return period;
+    }
+
 private:
     hpx::future<hpx::naming::id_type> thisId;
+    std::size_t period;
 
     template<typename ARCHIVE>
     void load(ARCHIVE& ar, unsigned)
     {
         hpx::naming::id_type id;
         ar & id;
+        ar & period;
         thisId = hpx::make_ready_future(id);
     }
 
@@ -116,6 +124,7 @@ private:
     {
         hpx::naming::id_type id(thisId.get());
         ar & id;
+        ar & period;
     }
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()

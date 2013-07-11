@@ -73,22 +73,18 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::CoordType CoordType;
 
     typedef HpxWriterSink<CELL_TYPE> SinkType;
-    
-    HpxWriterCollector() {}
 
-    HpxWriterCollector(
-        unsigned period,
-        HpxWriterSink<CELL_TYPE> const & sink) :
-        ParallelWriter<CELL_TYPE>("", period),
+    HpxWriterCollector(HpxWriterSink<CELL_TYPE> const & sink) :
+        ParallelWriter<CELL_TYPE>("", sink.getPeriod()),
         sink(sink)
     {
     }
 
     ParallelWriter<CELL_TYPE> * clone()
     {
-        return new HpxWriterCollector(period, sink);
+        return new HpxWriterCollector(sink);
     }
-    
+
     void stepFinished(
         const GridType& grid,
         const RegionType& validRegion,
@@ -107,6 +103,8 @@ public:
 
 private:
     SinkType sink;
+
+    HpxWriterCollector() {}
 
     template <class ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)

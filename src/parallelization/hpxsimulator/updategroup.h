@@ -24,10 +24,10 @@ public:
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef
-        typename DistributedSimulator<CELL_TYPE>::WriterVector 
+        typename DistributedSimulator<CELL_TYPE>::WriterVector
         WriterVector;
     typedef
-        typename DistributedSimulator<CELL_TYPE>::SteererVector 
+        typename DistributedSimulator<CELL_TYPE>::SteererVector
         SteererVector;
     typedef typename HiParSimulator::Stepper<CELL_TYPE>::PatchType PatchType;
     typedef
@@ -44,7 +44,7 @@ public:
         PatchProviderVec;
 
     typedef UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> ComponentType;
-    
+
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
     UpdateGroup()

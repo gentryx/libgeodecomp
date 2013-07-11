@@ -131,7 +131,7 @@ private:
 
     void notifyWriters(GridType const & grid, unsigned step, WriterEvent event)
     {
-        if(!parallelWriter) {
+        if(parallelWriter) {
             MutexType::scoped_lock l(mtx);
             typedef typename RegionInfoMapType::iterator RegionInfoIterator;
 
