@@ -23,7 +23,7 @@ public:
     static const int DIM = Topology::DIM;
 
     /**
-     * creates a SerialSimulator with the given @a initializer.
+     * creates a SerialSimulator with the given  initializer.
      */
     SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)

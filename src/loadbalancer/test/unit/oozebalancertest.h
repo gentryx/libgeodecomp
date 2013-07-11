@@ -134,8 +134,8 @@ public:
 
     /**
      * the time one node needs for calculation depends on its share of
-     * items @a loads, how complex each item is @a itemLoads and how
-     * fast the node itself is @a nodeSpeeds .
+     * items  loads, how complex each item is itemLoads and how
+     * fast the node itself is  nodeSpeeds .
      */
     OozeBalancer::LoadVec calcRelLoads(OozeBalancer::WeightVec loads, OozeBalancer::LoadVec itemLoads, OozeBalancer::LoadVec nodeSpeeds)
     {

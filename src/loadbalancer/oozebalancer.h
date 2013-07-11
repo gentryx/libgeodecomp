@@ -32,7 +32,7 @@ class OozeBalancer : public LoadBalancer
 public:
     /**
      * returns a new OozeBalancer instance, whose weighting for new
-     * load distributions is set to @a newLoadWeight . A higher value
+     * load distributions is set to newLoadWeight . A higher value
      * will increase balancing speed (in terms of migrated items per
      * balancing step), but also decrease accuracy (because of
      * unfulfilled preconditions, see above) and vice versa. A

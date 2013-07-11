@@ -136,7 +136,7 @@ public:
     }
 
     /**
-     * waits until those communication requests tagged with @a waitTag
+     * waits until those communication requests tagged with waitTag
      * are finished.
      */
     void wait(int waitTag)
@@ -172,7 +172,7 @@ public:
     }
 
     /**
-     * @return the number of nodes in the communicator.
+     * returns the number of nodes in the communicator.
      */
     int size() const
     {
@@ -180,7 +180,7 @@ public:
     }
 
     /**
-     * @return the id number of the current node.
+     * returns the id number of the current node.
      */
     int rank() const
     {

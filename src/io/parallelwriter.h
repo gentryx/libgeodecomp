@@ -89,7 +89,7 @@ public:
 
 
     /**
-     * is called back from \a sim after each simulation step. event
+     * is called back from sim after each simulation step. event
      * specifies the phase in which the simulation is currently in.
      * This may be used for instance to open/close files at the
      * beginning/end of the simulation. lastCall is set to true if

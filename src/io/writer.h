@@ -41,12 +41,12 @@ public:
     {}
 
     /**
-     * initializes a writer using \param _prefix which subclasses may
-     * use to generate filenames. \param _period should be used by
+     * initializes a writer using prefix which subclasses may
+     * use to generate filenames. period should be used by
      * them to control how many time steps lie between outputs. The
-     * Writer will register at \param _sim which in turn will delete
+     * Writer will register at sim which in turn will delete
      * the Writer. Thus a writer should always be constructed via
-     * new(), unless _sim is 0.
+     * new(), unless sim is 0.
      */
     Writer(
         const std::string& prefix,
@@ -62,7 +62,7 @@ public:
     virtual ~Writer() {};
 
     /**
-     * is called back from \a sim after each simulation step. event
+     * is called back from sim after each simulation step. event
      * specifies the phase in which the simulation is currently in.
      * This may be used for instance to open/close files at the
      * beginning/end of the simulation.
@@ -82,7 +82,7 @@ public:
 protected:
     std::string prefix;
     unsigned period;
-    
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
     void serialize(ARCHIVE & ar, unsigned)

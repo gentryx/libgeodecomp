@@ -24,7 +24,7 @@ public:
     /**
      * Creates the abstract Simulator object. The Initializer is
      * assumed to belong to the Simulator, which means that it'll
-     * delete the @a _initializer at the end of its lifetime.
+     * delete the  initializer at the end of its lifetime.
      */
     inline Simulator(Initializer<CELL_TYPE> *initializer) :
         stepNum(0),

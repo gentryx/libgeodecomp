@@ -40,13 +40,13 @@ public:
 
     /**
      * Reset the start time of the current cycle and flush all the
-     * working times \f$w_i\f$, @returns \f$f\f$.
+     * working times \f$w_i\f$, returns \f$f\f$.
      */
     double nextCycle();
 
     /**
      * Reset the start time of the current cycle and flush all the
-     * woking times \f$w_i\f$, @returns (\f$f\f$,\f$t\f$).
+     * woking times \f$w_i\f$, returns (\f$f\f$,\f$t\f$).
      */
     void nextCycle(long long *cycleLength, long long *workLength);
 
@@ -58,7 +58,7 @@ private:
     long long workLength;
 
     /**
-     * @returns a timestamp from a high resolution timer. There are no
+     * returns a timestamp from a high resolution timer. There are no
      * warranties for this method except that consecutive calls will
      * return strictly monotonic increasing values.
      */
