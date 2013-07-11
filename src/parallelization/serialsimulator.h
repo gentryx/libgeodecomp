@@ -149,7 +149,6 @@ protected:
 
     void setIORegions()
     {
-        // fixme: make paralleltestwriter check for setRegion
         for (unsigned i = 0; i < steerers.size(); i++) {
             steerers[i]->setRegion(simArea);
         }

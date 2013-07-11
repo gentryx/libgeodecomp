@@ -87,7 +87,6 @@ public:
         region = newRegion;
     }
 
-
     /**
      * is called back from sim after each simulation step. event
      * specifies the phase in which the simulation is currently in.
