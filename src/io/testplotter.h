@@ -12,7 +12,7 @@ class TestPlotter
 {
 public:
     void plotCell(
-        const TestCell<2> & cell,
+        const TestCell<2>& cell,
         Image *image,
         const Coord<2>& origin,
         const unsigned& width,

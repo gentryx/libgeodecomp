@@ -73,12 +73,12 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::CoordType CoordType;
 
     typedef HpxWriterSink<CELL_TYPE> SinkType;
-    
+
     HpxWriterCollector() {}
 
     HpxWriterCollector(
         unsigned period,
-        HpxWriterSink<CELL_TYPE> const & sink) :
+        const HpxWriterSink<CELL_TYPE>& sink) :
         ParallelWriter<CELL_TYPE>("", period),
         sink(sink)
     {
@@ -88,7 +88,7 @@ public:
     {
         return new HpxWriterCollector(period, sink);
     }
-    
+
     void stepFinished(
         const GridType& grid,
         const RegionType& validRegion,
@@ -109,7 +109,7 @@ private:
     SinkType sink;
 
     template <class ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
         ar & sink;

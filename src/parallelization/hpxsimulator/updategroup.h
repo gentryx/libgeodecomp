@@ -24,10 +24,10 @@ public:
     typedef DisplacedGrid<
         CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
     typedef
-        typename DistributedSimulator<CELL_TYPE>::WriterVector 
+        typename DistributedSimulator<CELL_TYPE>::WriterVector
         WriterVector;
     typedef
-        typename DistributedSimulator<CELL_TYPE>::SteererVector 
+        typename DistributedSimulator<CELL_TYPE>::SteererVector
         SteererVector;
     typedef typename HiParSimulator::Stepper<CELL_TYPE>::PatchType PatchType;
     typedef
@@ -44,7 +44,7 @@ public:
         PatchProviderVec;
 
     typedef UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> ComponentType;
-    
+
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
     UpdateGroup()
@@ -55,13 +55,13 @@ public:
     {}
 
     void init(
-        std::vector<UpdateGroup> const & updateGroups,
+        const std::vector<UpdateGroup>& updateGroups,
         //boost::shared_ptr<LoadBalancer> balancer,
         unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        WriterVector const & writers,
-        SteererVector const & steerers
+        const WriterVector& writers,
+        const SteererVector& steerers
     )
     {
         hpx::apply<typename ComponentType::InitAction>(
@@ -114,7 +114,7 @@ private:
     hpx::naming::id_type thisId;
 
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & thisId;
     }

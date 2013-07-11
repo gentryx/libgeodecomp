@@ -53,13 +53,11 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
 
     std::vector<hpx::util::locality_result> res;
     res.reserve(result.second.size());
-    BOOST_FOREACH(hpx::util::remote_locality_result const & rl, result.second)
-    {
+    BOOST_FOREACH(const hpx::util::remote_locality_result& rl, result.second) {
         res.push_back(rl);
     }
 
-    BOOST_FOREACH(hpx::id_type id, hpx::util::locality_results(res))
-    {
+    BOOST_FOREACH(hpx::id_type id, hpx::util::locality_results(res)) {
         components.push_back(id);
     }
 
