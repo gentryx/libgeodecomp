@@ -11,10 +11,62 @@
 
 namespace LibGeoDecomp {
 
+namespace MockWriterHelpers {
+    class MockWriterEvent
+    {
+    public:
+        MockWriterEvent(unsigned step, WriterEvent event, size_t rank, bool lastCall) :
+            step(step),
+            event(event),
+            rank(rank),
+            lastCall(lastCall)
+        {}
+
+        bool operator==(const MockWriterEvent& other) const
+        {
+            return
+                (other.step     == step    ) &&
+                (other.event    == event   ) &&
+                (other.rank     == rank    ) &&
+                (other.lastCall == lastCall);
+        }
+
+        std::string toString() const
+        {
+            std::stringstream buf;
+            buf << "MockWriterEvent(" << step << ", ";
+            switch(event) {
+            case WRITER_INITIALIZED:
+                buf << "WRITER_INITIALIZED";
+                break;
+            case WRITER_STEP_FINISHED:
+                buf << "WRITER_STEP_FINISHED";
+                break;
+            case WRITER_ALL_DONE:
+                buf << "WRITER_ALL_DONE";
+                break;
+            default:
+                buf << "unknown event";
+                break;
+            }
+            buf << ", " << rank << ", " << lastCall << ")\n";
+
+            return buf.str();
+        }
+
+        unsigned step;
+        WriterEvent event;
+        size_t rank;
+        bool lastCall;
+    };
+}
+
 class MockWriter : public Writer<TestCell<2> >, public ParallelWriter<TestCell<2> >
 {
 public:
     static std::string staticEvents;
+
+    typedef SuperVector<MockWriterHelpers::MockWriterEvent> EventVec;
 
     MockWriter(const unsigned& period=1) :
         Writer<TestCell<2> >("", period),
@@ -31,7 +83,7 @@ public:
         unsigned step,
         WriterEvent event)
     {
-        stepFinished(step, event);
+        stepFinished(step, event, 0, true);
     }
 
     void stepFinished(
@@ -43,35 +95,33 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        stepFinished(step, event);
+        stepFinished(step, event, rank, lastCall);
     }
 
-    std::string events()
+    EventVec events()
     {
-        return myEvents.str();
+        return myEvents;
     }
 
 private:
-    std::ostringstream myEvents;
+    EventVec myEvents;
 
-    void stepFinished(unsigned step, WriterEvent event)
+    void stepFinished(unsigned step, WriterEvent event, std::size_t rank, bool lastCall)
+
     {
-        switch (event) {
-        case WRITER_INITIALIZED:
-            myEvents << "initialized()\n";
-            break;
-        case WRITER_STEP_FINISHED:
-            myEvents << "stepFinished(step=" << step << ")\n";
-            break;
-        case WRITER_ALL_DONE:
-            myEvents << "allDone()\n";
-            break;
-        default:
-            myEvents << "unknown event\n";
-        }
+        myEvents << MockWriterHelpers::MockWriterEvent(step, event, rank, lastCall);
     }
 };
 
+}
+
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const LibGeoDecomp::MockWriterHelpers::MockWriterEvent& event)
+{
+    __os << event.toString();
+    return __os;
 }
 
 #endif

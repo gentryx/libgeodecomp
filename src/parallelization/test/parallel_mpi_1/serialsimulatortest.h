@@ -67,7 +67,6 @@ public:
             init->maxSteps() * TestCell<2>::nanoSteps());
     }
 
-    // fixme: use unified test suite like this test for all simulators?
     void testWriterInvocation()
     {
         unsigned period = 4;
@@ -86,8 +85,6 @@ public:
         simulator->run();
     }
 
-    //fixme: move those tests converning just the abstract base class
-    //Simulator to unitsimulator.h
     void testDeleteInitializer()
     {
         MockInitializer::events = "";
@@ -114,11 +111,14 @@ public:
         simulator->addWriter(w);
         simulator->run();
 
-        std::string expectedEvents = "initialized()\n";
+        MockWriter::EventVec expectedEvents;
+        expectedEvents << MockWriterHelpers::MockWriterEvent(startStep, WRITER_INITIALIZED, 0, true);
+
         for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
-            expectedEvents += "stepFinished(step=" + StringOps::itoa(i) + ")\n";
+            expectedEvents << MockWriterHelpers::MockWriterEvent(i, WRITER_STEP_FINISHED, 0, true);
         }
-        expectedEvents += "allDone()\n";
+
+        expectedEvents << MockWriterHelpers::MockWriterEvent(init->maxSteps(), WRITER_ALL_DONE, 0, true);
 
         TS_ASSERT_EQUALS(expectedEvents, w->events());
     }
@@ -132,7 +132,7 @@ public:
         simulator->addWriter(gridWriter1);
 
         simulator->run();
-        std::string events1 = eventWriter1->events();
+        MockWriter::EventVec events1 = eventWriter1->events();
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
         MockWriter *eventWriter2 = new MockWriter();
@@ -141,7 +141,7 @@ public:
         simulator->addWriter(eventWriter2);
         simulator->addWriter(gridWriter2);
         simulator->run();
-        std::string events2 = eventWriter2->events();
+        MockWriter::EventVec events2 = eventWriter2->events();
         std::vector<Grid<TestCell<2> > > grids2 = gridWriter2->getGrids();
 
         TS_ASSERT_EQUALS(events1, events2);
@@ -182,7 +182,7 @@ public:
             i += 5 - (i % 5);
         }
         for (; i < maxSteps; i += 5) {
-            expected << "nextStep(" << i << ")\n";
+            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
         }
         expected << "deleted\n";
 

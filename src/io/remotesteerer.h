@@ -41,6 +41,7 @@ public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
     typedef SuperMap<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;
+    static const int DIM = Topology::DIM;
 
     RemoteSteerer(
         unsigned period,
@@ -58,8 +59,12 @@ public:
 
     virtual void nextStep(
         GridType *grid,
-        const Region<Topology::DIM>& validRegion,
-        unsigned step)
+        const Region<DIM>& validRegion,
+        const Coord<DIM>& gridDim,
+        unsigned step,
+        SteererEvent event,
+        std::size_t rank,
+        bool lastCall)
     {
         LOG(DBG, "RemoteSteerer::nextStep(step = " << step << ")");
         pipe->sync();

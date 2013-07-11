@@ -195,7 +195,14 @@ public:
         testSim->run();
         referenceSim->run();
 
-        TS_ASSERT_EQUALS(expectedCalls->events(), actualCalls->events());
+        MockWriter::EventVec expectedEvents = expectedCalls->events();
+        for (MockWriter::EventVec::iterator i = expectedEvents.begin();
+             i != expectedEvents.end();
+             ++i) {
+            i->rank = MPILayer().rank();
+        }
+
+        TS_ASSERT_EQUALS(expectedEvents, actualCalls->events());
     }
 
     void testEveryN1()
@@ -334,7 +341,14 @@ public:
         localTestSim.run();
         referenceSim->run();
 
-        TS_ASSERT_EQUALS(expectedCalls->events(), actualCalls->events());
+        MockWriter::EventVec expectedEvents = expectedCalls->events();
+        for (MockWriter::EventVec::iterator i = expectedEvents.begin();
+             i != expectedEvents.end();
+             ++i) {
+            i->rank = MPILayer().rank();
+        }
+
+        TS_ASSERT_EQUALS(expectedEvents, actualCalls->events());
     }
 
     void testBalanceLoad1()
