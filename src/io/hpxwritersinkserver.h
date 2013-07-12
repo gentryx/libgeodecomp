@@ -35,6 +35,12 @@ public:
     typedef SuperMap<unsigned, SuperVector<RegionInfo> > RegionInfoMapType;
     typedef SuperMap<unsigned, std::size_t> StepCountMapType;
     typedef SuperMap<unsigned, GridType> GridMapType;
+    typedef
+        SuperMap<std::size_t, boost::shared_ptr<ParallelWriter<CELL_TYPE> > >
+        ParallelWritersMap;
+    typedef
+        SuperMap<std::size_t, boost::shared_ptr<Writer<CELL_TYPE> > >
+        SerialWritersMap;
 
     typedef hpx::lcos::local::spinlock MutexType;
 
@@ -44,16 +50,20 @@ public:
     HpxWriterSinkServer(
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter,
         std::size_t numUpdateGroups) :
-        parallelWriter(parallelWriter),
-        numUpdateGroups(numUpdateGroups)
-    {}
+        numUpdateGroups(numUpdateGroups),
+        nextId(0)
+    {
+        connectParallelWriter(parallelWriter);
+    }
 
     HpxWriterSinkServer(
         boost::shared_ptr<Writer<CELL_TYPE> > serialWriter,
         std::size_t numUpdateGroups) :
-        serialWriter(serialWriter),
-        numUpdateGroups(numUpdateGroups)
-    {}
+        numUpdateGroups(numUpdateGroups),
+        nextId(0)
+    {
+        connectSerialWriter(serialWriter);
+    }
 
     void stepFinished(
         const BufferType& buffer,
@@ -118,27 +128,86 @@ public:
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, stepFinished, StepFinishedAction);
 
+    std::size_t connectParallelWriter(
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter)
+    {
+        MutexType::scoped_lock l(mtx);
+        std::size_t id = getNextId();
+        parallelWriters.insert(std::make_pair(id, parallelWriter));
+        return id;
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, connectParallelWriter, ConnectParallelWriterAction);
+
+    std::size_t connectSerialWriter(
+        boost::shared_ptr<Writer<CELL_TYPE> > serialWriter)
+    {
+        MutexType::scoped_lock l(mtx);
+        std::size_t id = getNextId();
+        serialWriters.insert(std::make_pair(id, serialWriter));
+        return id;
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, connectSerialWriter, ConnectSerialWriterAction);
+
+    void disconnectWriter(std::size_t id)
+    {
+        MutexType::scoped_lock l(mtx);
+        {
+            typename ParallelWritersMap::iterator it = parallelWriters.find(id);
+            if(it != parallelWriters.end()) {
+                parallelWriters.erase(it);
+                freeIds.push_back(id);
+                return;
+            }
+        }
+        {
+            typename SerialWritersMap::iterator it = serialWriters.find(id);
+            if(it != serialWriters.end()) {
+                serialWriters.erase(it);
+                freeIds.push_back(id);
+                return;
+            }
+        }
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, disconnectWriter, DisconnectWriterAction);
+
 private:
     GridMapType gridMap;
-    boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter;
-    boost::shared_ptr<Writer<CELL_TYPE> > serialWriter;
+    ParallelWritersMap parallelWriters;
+    SerialWritersMap serialWriters;
     std::size_t numUpdateGroups;
 
     StepCountMapType stepCountMap;
     RegionInfoMapType regionInfoMap;
 
+    std::size_t nextId;
+    SuperVector<std::size_t> freeIds;
+
     MutexType mtx;
+
+    std::size_t getNextId()
+    {
+        std::size_t id = 0;
+        if(!freeIds.empty()) {
+            id = freeIds.back();
+            freeIds.pop_back();
+        }
+        else {
+            id = nextId++;
+        }
+        return id;
+    }
 
     void notifyWriters(GridType const & grid, unsigned step, WriterEvent event)
     {
-        if(parallelWriter) {
+        BOOST_FOREACH(typename ParallelWritersMap::value_type& writer,
+                      parallelWriters) {
             MutexType::scoped_lock l(mtx);
             typedef typename RegionInfoMapType::iterator RegionInfoIterator;
 
             RegionInfoIterator it = regionInfoMap.find(step);
             BOOST_ASSERT(it != regionInfoMap.end());
             BOOST_FOREACH(RegionInfo const & regionInfo, it->second) {
-                parallelWriter->stepFinished(
+                writer.second->stepFinished(
                     grid,
                     regionInfo.validRegion,
                     regionInfo.globalDimensions,
@@ -148,8 +217,9 @@ private:
                 );
             }
         }
-        if(serialWriter) {
-            serialWriter->stepFinished(grid, step, event);
+        BOOST_FOREACH(typename SerialWritersMap::value_type& writer,
+                      serialWriters) {
+            writer.second->stepFinished(grid, step, event);
         }
     }
 

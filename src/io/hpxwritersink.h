@@ -46,9 +46,28 @@ public:
 
     HpxWriterSink() {}
 
+    HpxWriterSink(const std::string& name) : thisId(hpx::naming::invalid_id)
+    {
+        std::size_t retry = 0;
+
+        hpx::naming::id_type id = hpx::naming::invalid_id;
+        while(id == hpx::naming::invalid_id)
+        {
+            hpx::agas::resolve_name(name, id);
+            if(retry > 10)
+            {
+                throw std::logic_error("Can't find the Writer Sink name");
+            }
+            hpx::this_thread::suspend();
+            ++retry;
+        }
+        thisId = hpx::lcos::make_ready_future(id);
+    }
+
     HpxWriterSink(
         ParallelWriter<CELL_TYPE> *parallelWriter,
-        std::size_t numUpdateGroups) :
+        std::size_t numUpdateGroups,
+        const std::string& name = "") :
         period(parallelWriter->getPeriod())
     {
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
@@ -57,11 +76,16 @@ public:
                 hpx::find_here(),
                 writer,
                 numUpdateGroups);
+        if(name != "")
+        {
+            hpx::agas::register_name(name, thisId.get());
+        }
     }
 
     HpxWriterSink(
         Writer<CELL_TYPE> *serialWriter,
-        std::size_t numUpdateGroups) :
+        std::size_t numUpdateGroups,
+        const std::string& name = "") :
         period(serialWriter->getPeriod())
     {
         boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
@@ -70,6 +94,10 @@ public:
                 hpx::find_here(),
                 writer,
                 numUpdateGroups);
+        if(name != "")
+        {
+            hpx::agas::register_name(name, thisId.get());
+        }
     }
 
     HpxWriterSink(const HpxWriterSink& sink) :
@@ -99,6 +127,29 @@ public:
             rank,
             lastCall
         );
+    }
+
+    hpx::future<std::size_t> connectWriter(ParallelWriter<CELL_TYPE> *parallelWriter)
+    {
+        boost::shared_ptr<Writer<CELL_TYPE> > writer(parallelWriter);
+        return
+            hpx::async<typename ComponentType::ConnectParallelWriterAction>(
+                thisId,
+                writer);
+    }
+
+    hpx::future<std::size_t> connectWriter(Writer<CELL_TYPE> *serialWriter)
+    {
+        boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
+        return
+            hpx::async<typename ComponentType::ConnectSerialWriterAction>(
+                thisId,
+                writer);
+    }
+
+    void disconnectWriter(std::size_t id)
+    {
+        typename ComponentType::DisconnectWriterAction()(thisId, id);
     }
 
     std::size_t getPeriod() const
