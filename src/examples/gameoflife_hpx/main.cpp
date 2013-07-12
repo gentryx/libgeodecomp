@@ -166,11 +166,11 @@ public:
 typedef
     HpxSimulator::HpxSimulator<ConwayCell, HiParSimulator::RecursiveBisectionPartition<2> >
     SimulatorType;
-LIBGEDECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
+LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
     SimulatorType,
     ConwayCellSimulator
 )
-LIBGEDECOMP_REGISTER_HPX_SIMULATOR(
+LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
     SimulatorType,
     ConwayCellSimulator
 )
