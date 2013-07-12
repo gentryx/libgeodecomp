@@ -99,58 +99,6 @@ public:
         }
     }
 
-    // fixme: move this somewhere to hiparsimulator/partitions
-    // void testBogus()
-    // {
-    //     Coord<3> offset(0, 0, 0);
-    //     Coord<3> dimensions(200, 200, 200);
-    //     Coord<3> bricDim(25, 25, 25);
-    //     HiParSimulator::ZCurvePartition<3> partition(offset, dimensions);
-    //     Grid<double, Topologies::Cube<3>::Topology> g(dimensions, 1);
-    //     int counter = 0;
-
-    //     if (MPILayer().rank() == 0) {
-    //         for (HiParSimulator::ZCurvePartition<3>::Iterator i = partition.begin();
-    //              i != partition.end();
-    //              ++i)
-    //             g[*i] = 1.0 * (counter++) / dimensions.prod();
-
-    //         MPI::File file = MPIIO<double, Topologies::Cube<3>::Topology>::openFileForWrite(
-    //             "test.bov", MPI::COMM_SELF);
-
-    //         Coord<3> bovDim;
-    //         bovDim[0] = std::max(1, dimensions[0]);
-    //         bovDim[1] = std::max(1, dimensions[1]);
-    //         bovDim[2] = std::max(1, dimensions[2]);
-
-    //         std::ostringstream buf;
-    //         buf << "TIME: " << 100 << "\n"
-    //             << "DATA_FILE: " << "test.data" << "\n"
-    //             << "DATA_SIZE: "
-    //             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
-    //             << "DATA_FORMAT: " << "DOUBLE" << "\n"
-    //             << "VARIABLE: " << "zc" << "\n"
-    //             << "DATA_ENDIAN: LITTLE\n"
-    //             << "BRICK_ORIGIN: 0 0 0\n"
-    //             << "BRICK_SIZE: "
-    //             << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
-    //             << "DIVIDE_BRICK: true\n"
-    //             << "DATA_BRICKLETS: "
-    //             << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n";
-    //         std::string s = buf.str();
-    //         file.Write(s.c_str(), s.length(), MPI::CHAR);
-    //         file.Close();
-
-    //         file = MPIIO<double, Topologies::Cube<3>::Topology>::openFileForWrite(
-    //             "test.data", MPI::COMM_SELF);
-    //         CoordBox<3> box(offset, dimensions);
-    //         for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-    //             file.Write(&g[*i], 1, MPI::DOUBLE);
-    //         }
-    //         file.Close();
-    //     }
-    // }
-
     Grid<double, Topologies::Cube<3>::Topology> readGrid(
         std::string filename,
         Coord<3> dimensions)
