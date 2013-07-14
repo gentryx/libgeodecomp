@@ -48,6 +48,13 @@ public:
     {}
 
     HpxWriterSinkServer(
+        std::size_t numUpdateGroups) :
+        numUpdateGroups(numUpdateGroups),
+        nextId(0)
+    {
+    }
+
+    HpxWriterSinkServer(
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter,
         std::size_t numUpdateGroups) :
         numUpdateGroups(numUpdateGroups),

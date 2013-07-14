@@ -29,6 +29,13 @@ public:
     typedef SuperVector<CELL_TYPE> BufferType;
 
     typedef
+        hpx::components::server::create_component_action1<
+            ComponentType,
+            std::size_t
+        >
+        ComponentCreateActionType;
+
+    typedef
         hpx::components::server::create_component_action2<
             ComponentType,
             boost::shared_ptr<Writer<CELL_TYPE> >,
@@ -62,6 +69,19 @@ public:
             ++retry;
         }
         thisId = hpx::lcos::make_ready_future(id);
+    }
+
+    HpxWriterSink(
+        unsigned period,
+        std::size_t numUpdateGroups,
+        const std::string& name) :
+        period(period)
+    {
+        thisId
+            = hpx::components::new_<ComponentType>(
+                hpx::find_here(),
+                numUpdateGroups);
+        hpx::agas::register_name(name, thisId.get());
     }
 
     HpxWriterSink(

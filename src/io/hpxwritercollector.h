@@ -29,10 +29,13 @@
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), DisconnectWriterAction)      \
     )                                                                           \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentCreateActionType,                             \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), CreateAction)                \
+    )                                                                           \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
         TYPE ::SinkType::ComponentWriterCreateActionType,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), WriterCreateAction)          \
     )                                                                           \
-                                                                                \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
         TYPE ::SinkType::ComponentParallelWriterCreateActionType,               \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ParallelWriterCreateAction)  \
@@ -70,6 +73,10 @@
     HPX_REGISTER_ACTION(                                                        \
         TYPE ::SinkType::ComponentType::DisconnectWriterAction,                 \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), DisconnectWriterAction)      \
+    )                                                                           \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentCreateActionType,                             \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), CreateAction)                \
     )                                                                           \
                                                                                 \
     HPX_REGISTER_ACTION(                                                        \
