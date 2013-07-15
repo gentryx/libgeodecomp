@@ -51,9 +51,13 @@ public:
         >
         ComponentParallelWriterCreateActionType;
 
-    HpxWriterSink() {}
+    HpxWriterSink() :
+        stepFinishedFuture(hpx::make_ready_future())
+    {}
 
-    HpxWriterSink(const std::string& name) : thisId(hpx::naming::invalid_id)
+    HpxWriterSink(const std::string& name) :
+        thisId(hpx::naming::invalid_id),
+        stepFinishedFuture(hpx::make_ready_future())
     {
         std::size_t retry = 0;
 
@@ -75,7 +79,8 @@ public:
         unsigned period,
         std::size_t numUpdateGroups,
         const std::string& name) :
-        period(period)
+        period(period),
+        stepFinishedFuture(hpx::make_ready_future())
     {
         thisId
             = hpx::components::new_<ComponentType>(
@@ -88,7 +93,8 @@ public:
         ParallelWriter<CELL_TYPE> *parallelWriter,
         std::size_t numUpdateGroups,
         const std::string& name = "") :
-        period(parallelWriter->getPeriod())
+        period(parallelWriter->getPeriod()),
+        stepFinishedFuture(hpx::make_ready_future())
     {
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
         thisId
@@ -106,7 +112,8 @@ public:
         Writer<CELL_TYPE> *serialWriter,
         std::size_t numUpdateGroups,
         const std::string& name = "") :
-        period(serialWriter->getPeriod())
+        period(serialWriter->getPeriod()),
+        stepFinishedFuture(hpx::make_ready_future())
     {
         boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
         thisId
@@ -122,7 +129,8 @@ public:
 
     HpxWriterSink(const HpxWriterSink& sink) :
         thisId(sink.thisId),
-        period(sink.period)
+        period(sink.period),
+        stepFinishedFuture(hpx::make_ready_future())
     {}
 
     void stepFinished(
@@ -137,7 +145,9 @@ public:
         BufferType buffer(validRegion.size());
 
         HiParSimulator::GridVecConv::gridToVector(grid, &buffer, validRegion);
-        hpx::apply<typename ComponentType::StepFinishedAction>(
+        hpx::wait(stepFinishedFuture);
+        stepFinishedFuture = hpx::async<typename ComponentType::StepFinishedAction>(
+        //hpx::apply<typename ComponentType::StepFinishedAction>(
             thisId.get(),
             buffer,
             validRegion,
@@ -180,6 +190,7 @@ public:
 private:
     hpx::future<hpx::naming::id_type> thisId;
     std::size_t period;
+    hpx::future<void> stepFinishedFuture;
 
     template<typename ARCHIVE>
     void load(ARCHIVE& ar, unsigned)

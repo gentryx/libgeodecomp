@@ -96,6 +96,7 @@ public:
     UpdateGroupServer()
       : boundingBoxFuture(boundingBoxPromise.get_future())
       , initFuture(initPromise.get_future())
+      , stopped(false)
     {}
 
     void init(
@@ -264,8 +265,8 @@ public:
             addPatchProvider(adapterInnerSet, HiParSimulator::Stepper<CELL_TYPE>::INNER_SET);
         }
 
-        initPromise.set_value();
         initEvents();
+        initPromise.set_value();
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, init, InitAction);
 
@@ -303,17 +304,21 @@ public:
     void nanoStep(std::size_t remainingNanoSteps)
     {
         hpx::wait(initFuture);
-        /*
-        while (remainingNanoSteps > 0) {
+        stopped = false;
+        while (remainingNanoSteps > 0 && !stopped) {
             std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
             stepper->update(hop);
             handleEvents();
             remainingNanoSteps -= hop;
         }
-        */
-        stepper->update(remainingNanoSteps);
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, nanoStep, NanoStepAction);
+
+    void stop()
+    {
+        stopped = true;
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, stop, StopAction);
 
     CoordBox<DIM> boundingBox()
     {
@@ -357,6 +362,8 @@ private:
 
     hpx::lcos::local::promise<void> initPromise;
     hpx::future<void> initFuture;
+
+    boost::atomic<bool> stopped;
 
     void setRank()
     {

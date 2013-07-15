@@ -95,6 +95,11 @@ public:
             );
     }
 
+    void stop() const
+    {
+        return typename ComponentType::StopAction()(thisId);
+    }
+
     hpx::future<void> setOuterGhostZone(
         std::size_t srcRank,
         boost::shared_ptr<SuperVector<CELL_TYPE> > buffer,

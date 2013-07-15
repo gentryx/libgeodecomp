@@ -30,6 +30,10 @@
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
+    );                                                                          \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), BoundingBoxAction)        \
     );                                                                          \
@@ -60,6 +64,10 @@
     HPX_REGISTER_ACTION(                                                        \
         BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
+    );                                                                          \
+    HPX_REGISTER_ACTION(                                                        \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
         BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
@@ -113,6 +121,13 @@ public:
         initSimulation();
         std::size_t lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
         nanoStep(lastNanoStep);
+    }
+
+    void stop()
+    {
+        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
+            ug.stop();
+        }
     }
 
     inline void step()
