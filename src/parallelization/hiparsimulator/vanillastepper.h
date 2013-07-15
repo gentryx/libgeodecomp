@@ -83,6 +83,7 @@ private:
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
+
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
@@ -102,12 +103,13 @@ private:
         }
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
-        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();
         }
+
+        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
     }
 
     inline void notifyPatchAccepters(

@@ -145,7 +145,7 @@ private:
         const Coord<DIM>& dimensions,
         const MPI::Aint& cellLength)
     {
-        return headerLength + CoordToIndex<DIM>()(c, dimensions) * cellLength;
+        return headerLength + c.toIndex(dimensions) * cellLength;
     }
 
     template<int DIM>

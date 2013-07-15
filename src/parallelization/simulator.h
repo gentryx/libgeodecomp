@@ -20,15 +20,17 @@ public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
+    static const int DIM = Topology::DIM;
 
     /**
      * Creates the abstract Simulator object. The Initializer is
      * assumed to belong to the Simulator, which means that it'll
-     * delete the @a _initializer at the end of its lifetime.
+     * delete the  initializer at the end of its lifetime.
      */
     inline Simulator(Initializer<CELL_TYPE> *initializer) :
         stepNum(0),
-        initializer(initializer)
+        initializer(initializer),
+        gridDim(initializer->gridDimensions())
     {}
 
     inline virtual ~Simulator()
@@ -72,6 +74,7 @@ protected:
     unsigned stepNum;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     SteererVector steerers;
+    Coord<DIM> gridDim;
 };
 
 }

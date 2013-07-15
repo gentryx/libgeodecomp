@@ -54,7 +54,7 @@ public:
         unsigned cycle = startStep() * TEST_CELL::nanoSteps();
         for (typename CoordBox<DIM>::Iterator i = rect.begin(); i != rect.end(); ++i) {
             Coord<DIM> coord = TEST_CELL::Topology::normalize(*i, dimensions);
-            double index = 1 + CoordToIndex<DIM>()(coord, dimensions);
+            double index = 1 + coord.toIndex(dimensions);
             ret->at(*i) = TEST_CELL(coord, dimensions, cycle, index);
         }
         ret->atEdge() = TEST_CELL(Coord<DIM>::diagonal(-1), dimensions);

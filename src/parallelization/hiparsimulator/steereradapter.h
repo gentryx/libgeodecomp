@@ -14,8 +14,18 @@ public:
     static const int DIM = CELL_TYPE::Topology::DIM;
 
     SteererAdapter(
-        boost::shared_ptr<Steerer<CELL_TYPE> > steerer) :
-        steerer(steerer)
+        boost::shared_ptr<Steerer<CELL_TYPE> > steerer,
+        const std::size_t firstStep,
+        const std::size_t lastStep,
+        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
+        std::size_t rank,
+        bool lastCall) :
+        steerer(steerer),
+        firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
+        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
+        rank(rank),
+        lastCall(lastCall),
+        globalGridDimensions(globalGridDimensions)
     {}
 
     virtual void setRegion(const Region<DIM>& region)
@@ -39,11 +49,31 @@ public:
             return;
         }
 
-        steerer->nextStep(destinationGrid, patchableRegion, step);
+        SteererEvent event = STEERER_NEXT_STEP;
+        if (nanoStep == firstNanoStep) {
+            event = STEERER_INITIALIZED;
+        }
+        if (nanoStep == lastNanoStep) {
+            event = STEERER_ALL_DONE;
+        }
+
+        steerer->nextStep(
+            destinationGrid,
+            patchableRegion,
+            globalGridDimensions,
+            step,
+            event,
+            rank,
+            lastCall);
     }
 
 private:
     boost::shared_ptr<Steerer<CELL_TYPE> > steerer;
+    std::size_t firstNanoStep;
+    std::size_t lastNanoStep;
+    std::size_t rank;
+    bool lastCall;
+    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
 
 };
 

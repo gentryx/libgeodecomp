@@ -22,10 +22,10 @@ public:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 
-    explicit CoordBox(const Coord<DIM>& origin_ = Coord<DIM>(),
-                      const Coord<DIM>& dimensions_ = Coord<DIM>()) :
-        origin(origin_),
-        dimensions(dimensions_)
+    explicit CoordBox(const Coord<DIM>& origin = Coord<DIM>(),
+                      const Coord<DIM>& dimensions = Coord<DIM>()) :
+        origin(origin),
+        dimensions(dimensions)
     {}
 
     inline bool operator==(const CoordBox& other) const
@@ -79,10 +79,10 @@ public:
     {
         return dimensions.prod();
     }
-    
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & origin;
         ar & dimensions;

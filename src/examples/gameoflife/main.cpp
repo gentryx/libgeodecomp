@@ -42,7 +42,8 @@ public:
         alive(alive)
     {}
 
-    int countLivingNeighbors(const CoordMap<ConwayCell>& neighborhood)
+    template<typename COORD_MAP>
+    int countLivingNeighbors(const COORD_MAP& neighborhood)
     {
         int ret = 0;
         for (int y = -1; y < 2; ++y) {
@@ -54,7 +55,8 @@ public:
         return ret;
     }
 
-    void update(const CoordMap<ConwayCell>& neighborhood, const unsigned&)
+    template<typename COORD_MAP>
+    void update(const COORD_MAP& neighborhood, const unsigned&)
     {
         int livingNeighbors = countLivingNeighbors(neighborhood);
         alive = neighborhood[Coord<2>(0, 0)].alive;

@@ -55,7 +55,7 @@ public:
 
     Iterator operator[](const unsigned& pos) const
     {
-        Coord<DIM> cursor = IndexToCoord<DIM>()(pos, dimensions) + origin;
+        Coord<DIM> cursor = dimensions.indexToCoord(pos) + origin;
         return Iterator(origin, cursor, dimensions);
     }
 

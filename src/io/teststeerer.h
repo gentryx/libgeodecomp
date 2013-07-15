@@ -16,6 +16,7 @@ class TestSteerer : public Steerer<TestCell<DIM> >
 {
 public:
     typedef typename Steerer<TestCell<DIM> >::GridType GridType;
+    typedef typename Steerer<TestCell<DIM> >::CoordType CoordType;
     using Steerer<TestCell<DIM> >::region;
 
     TestSteerer(
@@ -31,7 +32,11 @@ public:
     virtual void nextStep(
         GridType *grid,
         const Region<DIM>& validRegion,
-        unsigned step)
+        const CoordType& globalDimensions,
+        unsigned step,
+        SteererEvent event,
+        std::size_t rank,
+        bool lastCall)
     {
         // ensure setRegion() has actually been called
         TS_ASSERT(!region.empty());

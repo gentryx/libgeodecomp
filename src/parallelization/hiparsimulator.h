@@ -91,9 +91,21 @@ public:
 
         // two adapters needed, just as for the writers
         typename UpdateGroupType::PatchProviderPtr adapterGhost(
-            new SteererAdapterType(steererPointer));
+            new SteererAdapterType(
+                steererPointer,
+                initializer->startStep(),
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                communicator->Get_rank(),
+                false));
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
-            new SteererAdapterType(steererPointer));
+            new SteererAdapterType(
+                steererPointer,
+                initializer->startStep(),
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                communicator->Get_rank(),
+                true));
 
         steererAdaptersGhost.push_back(adapterGhost);
         steererAdaptersInner.push_back(adapterInnerSet);

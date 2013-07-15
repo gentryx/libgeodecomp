@@ -24,11 +24,9 @@ public:
     {}
 
     /**
-     * register @a writer which will observe the simulation. The
+     * register  writer which will observe the simulation. The
      * DistributedSimulator will assume that it now owns the
      * ParallelWriter, so it'll delete it upon destruction.
-     *
-     * fixme: replace @a by \a and @return by \returns ...
      */
     virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {

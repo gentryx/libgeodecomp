@@ -209,22 +209,22 @@ public:
 
     void testIndexToCoord()
     {
-        TS_ASSERT_EQUALS(Coord<1>(3),       IndexToCoord<1>()( 3, Coord<1>(10)));
-        TS_ASSERT_EQUALS(Coord<2>(3, 2),    IndexToCoord<2>()(23, Coord<2>(10, 5)));
-        TS_ASSERT_EQUALS(Coord<3>(3, 2, 1), IndexToCoord<3>()(73, Coord<3>(10, 5, 4)));
+        TS_ASSERT_EQUALS(Coord<1>(3),       Coord<1>(10      ).indexToCoord( 3));
+        TS_ASSERT_EQUALS(Coord<2>(3, 2),    Coord<2>(10, 5   ).indexToCoord(23));
+        TS_ASSERT_EQUALS(Coord<3>(3, 2, 1), Coord<3>(10, 5, 4).indexToCoord(73));
     }
 
-    void testCoordToIndex()
+    void testToIndex()
     {
         TS_ASSERT_EQUALS(
             10,
-            CoordToIndex<1>()(Coord<1>(10),      Coord<1>(5)));
+            Coord<1>(10     ).toIndex(Coord<1>(5)));
         TS_ASSERT_EQUALS(
             (5*7+4),
-            CoordToIndex<2>()(Coord<2>(4, 5),    Coord<2>(7, 8)));
+            Coord<2>(4, 5   ).toIndex(Coord<2>(7, 8)));
         TS_ASSERT_EQUALS(
             (3*7*8+5*7+4),
-            CoordToIndex<3>()(Coord<3>(4, 5, 3), Coord<3>(7, 8, 4)));
+            Coord<3>(4, 5, 3).toIndex(Coord<3>(7, 8, 4)));
     }
 
     void testProd()

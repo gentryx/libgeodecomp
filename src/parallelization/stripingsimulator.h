@@ -34,18 +34,19 @@ public:
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
+    using DistributedSimulator<CELL_TYPE>::initializer;
+    using DistributedSimulator<CELL_TYPE>::getStep;
+    using DistributedSimulator<CELL_TYPE>::steerers;
+    using DistributedSimulator<CELL_TYPE>::stepNum;
+    using DistributedSimulator<CELL_TYPE>::writers;
+    using DistributedSimulator<CELL_TYPE>::gridDim;
+
     enum WaitTags {
         GENERAL,
         BALANCELOADS,
         GHOSTREGION_ALPHA,
         GHOSTREGION_BETA
     };
-
-    using DistributedSimulator<CELL_TYPE>::initializer;
-    using DistributedSimulator<CELL_TYPE>::getStep;
-    using DistributedSimulator<CELL_TYPE>::steerers;
-    using DistributedSimulator<CELL_TYPE>::stepNum;
-    using DistributedSimulator<CELL_TYPE>::writers;
 
     StripingSimulator(
         Initializer<CELL_TYPE> *initializer,
@@ -99,13 +100,7 @@ public:
     {
         balanceLoad();
 
-        // notify all registered Steerers
-        waitForGhostRegions();
-        for(unsigned i = 0; i < steerers.size(); ++i) {
-            if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(curStripe, regionWithOuterGhosts, stepNum);
-            }
-        }
+        handleInput(STEERER_NEXT_STEP);
 
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
             nanoStep(i);
@@ -249,6 +244,18 @@ private:
 
         for(unsigned i = 0; i < steerers.size(); i++) {
             steerers[i]->setRegion(region);
+        }
+    }
+
+    void handleInput(SteererEvent event)
+    {
+        // notify all registered Steerers
+        waitForGhostRegions();
+        for(unsigned i = 0; i < steerers.size(); ++i) {
+            if (stepNum % steerers[i]->getPeriod() == 0) {
+                steerers[i]->nextStep(
+                    curStripe, regionWithOuterGhosts, gridDim, getStep(), event, mpilayer.rank(), true);
+            }
         }
     }
 
@@ -398,7 +405,7 @@ private:
     }
 
     /**
-     * resets various sizes, heights etc. according to @a
+     * resets various sizes, heights etc. according to
      * newPartitions, returns the new bounding box of the stripes. It
      * doesn't actually resize the stripes since different actions are
      * required during load balancing and initialization.

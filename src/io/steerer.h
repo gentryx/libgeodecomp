@@ -11,13 +11,28 @@
 
 namespace LibGeoDecomp {
 
+enum SteererEvent {
+    STEERER_INITIALIZED,
+    STEERER_NEXT_STEP,
+    STEERER_ALL_DONE
+};
+
 template<typename CELL_TYPE>
 class Steerer
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
+    typedef Coord<Topology::DIM> CoordType;
 
+    /**
+     * A steerer is an object which is allowed to modify a Simulator's
+     * (region of the) grid. It is the counterpart to a ParallelWriter
+     * (there is no counterpart to the SerialWriter though. Steerers
+     * are all expected to run in parallel). Possible uses include
+     * dynamically introducing new obstacles in a LBM solver or
+     * modifying the ambient temperature in a dendrite simulation.
+     */
     Steerer(const unsigned period) :
         period(period)
     {}
@@ -49,8 +64,11 @@ public:
     virtual void nextStep(
         GridType *grid,
         const Region<Topology::DIM>& validRegion,
-        // fixme: add parameters globalDimensions, step, and lastCall as in Steerer
-        unsigned step) = 0;
+        const CoordType& globalDimensions,
+        unsigned step,
+        SteererEvent event,
+        std::size_t rank,
+        bool lastCall) = 0;
 
     const unsigned& getPeriod() const
     {
@@ -59,7 +77,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
-    void serialize(Archive & ar, unsigned)
+    void serialize(Archive& ar, unsigned)
     {
         ar & region;
         ar & period;

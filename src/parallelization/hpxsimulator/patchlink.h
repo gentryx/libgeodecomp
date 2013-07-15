@@ -30,8 +30,8 @@ public:
     class Link
     {
     public:
-        Link(const Region<DIM> & region)
-          : lastNanoStep(0),
+        Link(const Region<DIM>& region) :
+            lastNanoStep(0),
             stride(1),
             region(region)
         {}

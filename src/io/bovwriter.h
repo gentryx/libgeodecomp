@@ -130,8 +130,7 @@ private:
             // (especially negative coordnates may occurr).
             Coord<DIM> coord = Topology::normalize(i->origin, dimensions);
             int dataComponents = SELECTOR_TYPE::dataComponents();
-            MPI::Offset index =
-                CoordToIndex<DIM>()(coord, dimensions) * varLength * dataComponents;
+            MPI::Offset index = coord.toIndex(dimensions) * varLength * dataComponents;
             file.Seek(index, MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
             std::size_t effectiveLength = length * dataComponents;

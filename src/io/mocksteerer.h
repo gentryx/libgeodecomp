@@ -12,6 +12,7 @@ class MockSteerer : public Steerer<CELL_TYPE>
 public:
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
+    static const int DIM = Topology::DIM;
 
     MockSteerer(const unsigned& period, std::stringstream *eventsBuffer)  :
         Steerer<CELL_TYPE>(period),
@@ -27,10 +28,30 @@ public:
 
     virtual void nextStep(
         GridType *grid,
-        const Region<Topology::DIM>& validRegion,
-        unsigned step)
+        const Region<DIM>& validRegion,
+        const Coord<DIM>& globalDimensions,
+        unsigned step,
+        SteererEvent event,
+        std::size_t rank,
+        bool lastCall)
     {
-        (*eventsBuf) << "nextStep(" << step << ")\n";
+        (*eventsBuf) << "nextStep(" << step << ", ";
+        switch(event) {
+        case STEERER_INITIALIZED:
+            (*eventsBuf) << "STEERER_INITIALIZED";
+            break;
+        case STEERER_NEXT_STEP:
+            (*eventsBuf) << "STEERER_NEXT_STEP";
+            break;
+        case STEERER_ALL_DONE:
+            (*eventsBuf) << "STEERER_ALL_DONE";
+            break;
+        default:
+            (*eventsBuf) << "unknown event";
+            break;
+        }
+
+        (*eventsBuf) << ", " << rank << ", " << lastCall << ")\n";
     }
 
 private:

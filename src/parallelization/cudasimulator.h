@@ -72,7 +72,7 @@ public:
     static const int DIM = Topology::DIMENSIONS;
 
     /**
-     * creates a CudaSimulator with the given @a initializer.
+     * creates a CudaSimulator with the given initializer.
      */
     CudaSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)

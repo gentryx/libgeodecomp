@@ -70,13 +70,15 @@ public:
         TS_ASSERT_EQUALS((31 - 4)       * 27, sim->timeToNextEvent());
         TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
-        std::stringstream expectedEvents;
-        expectedEvents << "initialized()\ninitialized()\n";
+        size_t rank = MPILayer().rank();
+        MockWriter::EventVec expectedEvents;
+        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, false)
+                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, true);
         for (int t = 21; t < 25; t += 1) {
-            expectedEvents << "stepFinished(step=" << t << ")\n"
-                           << "stepFinished(step=" << t << ")\n";
+            expectedEvents << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, rank, false)
+                           << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, rank, true);
         }
-        TS_ASSERT_EQUALS(expectedEvents.str(), mockWriter->events());
+        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
 
         for (int t = 20; t < 25; t += outputPeriod) {
             int globalNanoStep = t * TestCell<2>::nanoSteps();
@@ -133,8 +135,8 @@ public:
         std::stringstream expected;
         expected << "created, period = 5\n";
         for (int i = 25; i <= 101; i += 5) {
-            expected << "nextStep(" << i << ")\n";
-            expected << "nextStep(" << i << ")\n";
+            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "0)\n"
+                     << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "1)\n";
         }
         expected << "deleted\n";
 

@@ -165,7 +165,7 @@ private:
             nanoSteps;
         nanoSteps.reserve(updateGroups.size());
 
-        BOOST_FOREACH(UpdateGroupType & ug, updateGroups) {
+        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
             nanoSteps.push_back(ug.nanoStep(remainingNanoSteps));
         }
         hpx::wait(nanoSteps);
@@ -178,7 +178,7 @@ private:
         }
 
         // TODO: replace with proper broadcast
-        BOOST_FOREACH(UpdateGroupType & ug, updateGroups) {
+        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
             ug.init(
                 updateGroups,
                 //balancer,

@@ -58,8 +58,11 @@ public:
     {
         s->step();
 
-        std::string expectedEvents = "initialized()\ninitialized()\nstepFinished(step=21)\nstepFinished(step=21)\n";
-
+        MockWriter::EventVec expectedEvents;
+        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, false)
+                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, true )
+                       << MockWriterHelpers::MockWriterEvent(21, WRITER_STEP_FINISHED, 0, false)
+                       << MockWriterHelpers::MockWriterEvent(21, WRITER_STEP_FINISHED, 0, true );
         TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
 
         SuperVector<unsigned> actualSteps;
@@ -81,13 +84,16 @@ public:
     {
         s->run();
 
-        std::string expectedEvents = "initialized()\ninitialized()\n";
+        MockWriter::EventVec expectedEvents;
+        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, false)
+                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, true);
         for (int t = 21; t < 200; ++t) {
-            std::stringstream addend;
-            addend << "stepFinished(step=" << t << ")\n";
-            expectedEvents += addend.str() + addend.str();
+            expectedEvents << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, 0, false)
+                           << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, 0, true);
         }
-        expectedEvents += "allDone()\nallDone()\n";
+        expectedEvents << MockWriterHelpers::MockWriterEvent(200, WRITER_ALL_DONE, 0, false)
+                       << MockWriterHelpers::MockWriterEvent(200, WRITER_ALL_DONE, 0, true);
+
         TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
 
         for (int t = 20; t <= 200; ++t) {
@@ -111,8 +117,8 @@ public:
         std::stringstream expected;
         expected << "created, period = 5\n";
         for (int i = 25; i <= 200; i += 5) {
-            expected << "nextStep(" << i << ")\n";
-            expected << "nextStep(" << i << ")\n";
+            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 0)\n";
+            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
         }
         expected << "deleted\n";
 

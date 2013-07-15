@@ -67,7 +67,7 @@ private:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
         ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);

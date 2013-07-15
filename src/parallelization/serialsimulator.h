@@ -22,8 +22,15 @@ public:
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIM;
 
+    using MonolithicSimulator<CELL_TYPE>::initializer;
+    using MonolithicSimulator<CELL_TYPE>::steerers;
+    using MonolithicSimulator<CELL_TYPE>::stepNum;
+    using MonolithicSimulator<CELL_TYPE>::writers;
+    using MonolithicSimulator<CELL_TYPE>::getStep;
+    using MonolithicSimulator<CELL_TYPE>::gridDim;
+
     /**
-     * creates a SerialSimulator with the given @a initializer.
+     * creates a SerialSimulator with the given  initializer.
      */
     SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
@@ -55,19 +62,13 @@ public:
      */
     virtual void step()
     {
-        // notify all registered Steerers
-        for (unsigned i = 0; i < steerers.size(); ++i) {
-            if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(curGrid, simArea, stepNum);
-            }
-        }
+        handleInput(STEERER_NEXT_STEP);
 
         for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); ++i) {
             nanoStep(i);
         }
 
         ++stepNum;
-
         handleOutput(WRITER_STEP_FINISHED);
     }
 
@@ -79,12 +80,15 @@ public:
         initializer->grid(curGrid);
         stepNum = initializer->startStep();
         setIORegions();
+
+        handleInput(STEERER_INITIALIZED);
         handleOutput(WRITER_INITIALIZED);
 
         for (; stepNum < initializer->maxSteps();) {
             step();
         }
 
+        handleInput(STEERER_ALL_DONE);
         handleOutput(WRITER_ALL_DONE);
     }
 
@@ -97,12 +101,6 @@ public:
     }
 
 protected:
-    using MonolithicSimulator<CELL_TYPE>::initializer;
-    using MonolithicSimulator<CELL_TYPE>::steerers;
-    using MonolithicSimulator<CELL_TYPE>::stepNum;
-    using MonolithicSimulator<CELL_TYPE>::writers;
-    using MonolithicSimulator<CELL_TYPE>::getStep;
-
     GridType *curGrid;
     GridType *newGrid;
     Region<DIM> simArea;
@@ -121,6 +119,9 @@ protected:
         std::swap(curGrid, newGrid);
     }
 
+    /**
+     * notifies all registered Writers
+     */
     void handleOutput(WriterEvent event)
     {
         for (unsigned i = 0; i < writers.size(); i++) {
@@ -130,6 +131,18 @@ protected:
                     *curGrid,
                     getStep(),
                     event);
+            }
+        }
+    }
+
+    /**
+     * notifies all registered Steerers
+     */
+    void handleInput(SteererEvent event)
+    {
+        for (unsigned i = 0; i < steerers.size(); ++i) {
+            if (stepNum % steerers[i]->getPeriod() == 0) {
+                steerers[i]->nextStep(curGrid, simArea, gridDim, getStep(), event, 0, true);
             }
         }
     }

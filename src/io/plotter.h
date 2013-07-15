@@ -19,8 +19,8 @@ class Plotter
 public:
 
     /** creates new Plotter object.
-     * @param cellPlotter ist used to plott a single cell
-     * @param width, height see setCellDimensions()
+     * \param cellPlotter ist used to plott a single cell
+     * \param width, height see setCellDimensions()
      */
     Plotter(CELL_PLOTTER *cellPlotter, const unsigned& width = 100, const unsigned& height = 100) :
         _cellPlotter(cellPlotter)
@@ -38,7 +38,7 @@ public:
     }
 
     /**
-     * @return the dimensions of a cell when plotted (width, height).
+     * \return the dimensions of a cell when plotted (width, height).
      */
     Coord<2> getCellDimensions() const
     {

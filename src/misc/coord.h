@@ -27,8 +27,8 @@ class Coord;
 template<>
 class Coord<1>
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
 
     static Coord<1> diagonal(const int& nx)
     {
@@ -44,6 +44,22 @@ public:
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
+    }
+
+    /**
+     * converts a linear index to a coordinate in a cuboid of size given by the Coord.
+     */
+    inline Coord<1> indexToCoord(int index) const
+    {
+        return Coord<1>(index);
+    }
+
+    /**
+     * converts the coord to a linear index. This is good for addressing a linear array via Coords.
+     */
+    inline std::size_t toIndex(const Coord<1>& dim) const
+    {
+        return x();
     }
 
     int& x()
@@ -155,7 +171,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & c;
     }
@@ -168,8 +184,8 @@ private:
 template<>
 class Coord<2>
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
 
     static Coord<2> diagonal(const int& nx)
     {
@@ -187,6 +203,22 @@ public:
     {
         c[0] = X;
         c[1] = Y;
+    }
+
+    /**
+     * converts a linear index to a coordinate in a cuboid of size given by the Coord
+     */
+    inline Coord<2> indexToCoord(int index) const
+    {
+        return Coord<2>(index % x(), index / x());
+    }
+
+    /**
+     * converts the coord to a linear index. This is good for addressing a linear array via Coords.
+     */
+    inline std::size_t toIndex(const Coord<2>& dim) const
+    {
+        return std::size_t(y()) * dim.x() + x();
     }
 
     int& x()
@@ -314,7 +346,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & c;
     }
@@ -327,8 +359,8 @@ private:
 template<>
 class Coord<3>
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
 
     static Coord<3> diagonal(const int& nx)
     {
@@ -348,6 +380,29 @@ public:
         c[0] = X;
         c[1] = Y;
         c[2] = Z;
+    }
+
+    /**
+     * converts a linear index to a coordinate in a cuboid of size given by the Coord
+     */
+    inline Coord<3> indexToCoord(int index) const
+    {
+        int coordX = index % x();
+        int remainder = index / x();
+        int coordY = remainder % y();
+        int coordZ = remainder / y();
+        return Coord<3>(coordX, coordY, coordZ);
+    }
+
+    /**
+     * converts the coord to a linear index. This is good for addressing a linear array via Coords.
+     */
+    inline std::size_t toIndex(const Coord<3>& dim) const
+    {
+        return
+            std::size_t(z()) * dim.x() * dim.y() +
+            y() * dim.x() +
+            x();
     }
 
     int& x()
@@ -492,7 +547,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & c;
     }
@@ -500,85 +555,6 @@ public:
 
 private:
     int c[3];
-};
-
-// fixme: make IndexToCoord and CoordToIndex both members of Coord
-/**
- * converts a linear index to a coordinate in a cuboid of size dim
- */
-template<int DIM>
-class IndexToCoord
-{};
-
-template<>
-class IndexToCoord<1>
-{
-public:
-    Coord<1> operator()(const int& index, const Coord<1>& dim)
-    {
-        return Coord<1>(index);
-    }
-};
-
-template<>
-class IndexToCoord<2>
-{
-public:
-    Coord<2> operator()(const int& index, const Coord<2>& dim)
-    {
-        return Coord<2>(index % dim.x(), index / dim.x());
-    }
-};
-
-template<>
-class IndexToCoord<3>
-{
-public:
-    Coord<3> operator()(const int& index, const Coord<3>& dim)
-    {
-        int x = index % dim.x();
-        int remainder = index / dim.x();
-        int y = remainder % dim.y();
-        int z = remainder / dim.y();
-        return Coord<3>(x, y, z);
-    }
-};
-
-template<int DIM>
-class CoordToIndex
-{};
-
-template<>
-class CoordToIndex<1>
-{
-public:
-    long long operator()(const Coord<1>& c, const Coord<1>& dim)
-    {
-        return c.x();
-    }
-};
-
-template<>
-class CoordToIndex<2>
-{
-public:
-    long long operator()(const Coord<2>& c, const Coord<2>& dim)
-    {
-        return ((long long)c.y()) * dim.x() + c.x();
-    }
-};
-
-template<>
-class CoordToIndex<3>
-{
-public:
-    long long operator()(const Coord<3>& c, const Coord<3>& dim)
-    {
-        return
-            ((long long)c.z()) * dim.x() * dim.y() +
-            ((long long)c.y()) * dim.x() +
-            c.x();
-    }
 };
 
 }
