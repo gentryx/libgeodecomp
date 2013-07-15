@@ -241,9 +241,21 @@ public:
         BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
             // two adapters needed, just as for the writers
             PatchProviderPtr adapterGhost(
-                new SteererAdapterType(steerer));
+                new SteererAdapterType(
+                    steerer,
+                    initializer->startStep(),
+                    initializer->maxSteps(),
+                    initializer->gridDimensions(),
+                    rank,
+                    false));
             PatchProviderPtr adapterInnerSet(
-                new SteererAdapterType(steerer));
+                new SteererAdapterType(
+                    steerer,
+                    initializer->startStep(),
+                    initializer->maxSteps(),
+                    initializer->gridDimensions(),
+                    rank,
+                    false));
 
             adapterGhost->setRegion(partitionManager->ownRegion());
             adapterInnerSet->setRegion(partitionManager->ownRegion());
