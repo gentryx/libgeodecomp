@@ -8,6 +8,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
 #include <hpx/hpx_fwd.hpp>
+#include <hpx/lcos/async.hpp>
 #include <hpx/runtime/components/new.hpp>
 
 namespace LibGeoDecomp {
@@ -161,10 +162,10 @@ public:
 
     hpx::future<std::size_t> connectWriter(ParallelWriter<CELL_TYPE> *parallelWriter)
     {
-        boost::shared_ptr<Writer<CELL_TYPE> > writer(parallelWriter);
+        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
         return
             hpx::async<typename ComponentType::ConnectParallelWriterAction>(
-                thisId,
+                thisId.get(),
                 writer);
     }
 
@@ -173,13 +174,13 @@ public:
         boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
         return
             hpx::async<typename ComponentType::ConnectSerialWriterAction>(
-                thisId,
+                thisId.get(),
                 writer);
     }
 
     void disconnectWriter(std::size_t id)
     {
-        typename ComponentType::DisconnectWriterAction()(thisId, id);
+        typename ComponentType::DisconnectWriterAction()(thisId.get(), id);
     }
 
     std::size_t getPeriod() const

@@ -6,8 +6,10 @@
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
 #include <hpx/hpx_fwd.hpp>
+#include <hpx/include/components.hpp>
 #include <hpx/lcos/local/spinlock.hpp>
 
 namespace LibGeoDecomp {
