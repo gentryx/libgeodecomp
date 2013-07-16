@@ -16,18 +16,19 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
-template<typename CELL_TYPE>
+template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterSink
 {
 public:
     friend class boost::serialization::access;
 
-    typedef HpxWriterSinkServer<CELL_TYPE> ComponentType;
-    typedef typename CELL_TYPE::Topology Topology;
-    typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
+    typedef HpxWriterSinkServer<CELL_TYPE, CONVERTER> ComponentType;
+    typedef typename CONVERTER::CellType CellType;
+    typedef typename CellType::Topology Topology;
+    typedef typename DistributedSimulator<CellType>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
-    typedef SuperVector<CELL_TYPE> BufferType;
+    typedef SuperVector<CellType> BufferType;
 
     typedef
         hpx::components::server::create_component_action1<
@@ -39,7 +40,7 @@ public:
     typedef
         hpx::components::server::create_component_action2<
             ComponentType,
-            boost::shared_ptr<Writer<CELL_TYPE> >,
+            boost::shared_ptr<Writer<CellType> >,
             std::size_t
         >
         ComponentWriterCreateActionType;
@@ -47,7 +48,7 @@ public:
     typedef
         hpx::components::server::create_component_action2<
             ComponentType,
-            boost::shared_ptr<ParallelWriter<CELL_TYPE> >,
+            boost::shared_ptr<ParallelWriter<CellType> >,
             std::size_t
         >
         ComponentParallelWriterCreateActionType;
@@ -91,13 +92,13 @@ public:
     }
 
     HpxWriterSink(
-        ParallelWriter<CELL_TYPE> *parallelWriter,
+        ParallelWriter<CellType> *parallelWriter,
         std::size_t numUpdateGroups,
         const std::string& name = "") :
         period(parallelWriter->getPeriod()),
         stepFinishedFuture(hpx::make_ready_future())
     {
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
+        boost::shared_ptr<ParallelWriter<CellType> > writer(parallelWriter);
         thisId
             = hpx::components::new_<ComponentType>(
                 hpx::find_here(),
@@ -110,13 +111,13 @@ public:
     }
 
     HpxWriterSink(
-        Writer<CELL_TYPE> *serialWriter,
+        Writer<CellType> *serialWriter,
         std::size_t numUpdateGroups,
         const std::string& name = "") :
         period(serialWriter->getPeriod()),
         stepFinishedFuture(hpx::make_ready_future())
     {
-        boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
+        boost::shared_ptr<Writer<CellType> > writer(serialWriter);
         thisId
             = hpx::components::new_<ComponentType>(
                 hpx::find_here(),
@@ -135,17 +136,23 @@ public:
     {}
 
     void stepFinished(
-        const GridType& grid,
-        const RegionType& validRegion,
-        const CoordType& globalDimensions,
+        const typename DistributedSimulator<CELL_TYPE>::GridType& grid,
+        const Region<CELL_TYPE::Topology::DIM>& validRegion,
+        const Coord<CELL_TYPE::Topology::DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
         std::size_t rank,
         bool lastCall)
     {
-        BufferType buffer(validRegion.size());
+        boost::shared_ptr<BufferType> buffer(new BufferType(validRegion.size()));
 
-        HiParSimulator::GridVecConv::gridToVector(grid, &buffer, validRegion);
+        CellType *dest = &(*buffer)[0];
+
+        for (typename Region<CELL_TYPE::Topology::DIM>::Iterator i = validRegion.begin();
+             i != validRegion.end(); ++i) {
+            *dest = CONVERTER()(grid.at(*i), globalDimensions, step, rank);
+            ++dest;
+        }
         hpx::wait(stepFinishedFuture);
         stepFinishedFuture = hpx::async<typename ComponentType::StepFinishedAction>(
         //hpx::apply<typename ComponentType::StepFinishedAction>(
@@ -158,20 +165,21 @@ public:
             rank,
             lastCall
         );
+        hpx::wait(stepFinishedFuture);
     }
 
-    hpx::future<std::size_t> connectWriter(ParallelWriter<CELL_TYPE> *parallelWriter)
+    hpx::future<std::size_t> connectWriter(ParallelWriter<CellType> *parallelWriter)
     {
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer(parallelWriter);
+        boost::shared_ptr<ParallelWriter<CellType> > writer(parallelWriter);
         return
             hpx::async<typename ComponentType::ConnectParallelWriterAction>(
                 thisId.get(),
                 writer);
     }
 
-    hpx::future<std::size_t> connectWriter(Writer<CELL_TYPE> *serialWriter)
+    hpx::future<std::size_t> connectWriter(Writer<CellType> *serialWriter)
     {
-        boost::shared_ptr<Writer<CELL_TYPE> > writer(serialWriter);
+        boost::shared_ptr<Writer<CellType> > writer(serialWriter);
         return
             hpx::async<typename ComponentType::ConnectSerialWriterAction>(
                 thisId.get(),

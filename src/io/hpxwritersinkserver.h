@@ -18,9 +18,26 @@ template<typename CELL_TYPE>
 class DistributedSimulator;
 
 template <typename CELL_TYPE>
+class IdentityConverter
+{
+public:
+    typedef CELL_TYPE CellType;
+    typedef typename CELL_TYPE::Topology Topology;
+
+    const CellType& operator()(
+        const CellType& cell,
+        const Coord<Topology::DIM>& globalDimensions,
+        unsigned step,
+        std::size_t rank)
+    {
+        return cell;
+    }
+};
+
+template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterSinkServer
   : public hpx::components::managed_component_base<
-        HpxWriterSinkServer<CELL_TYPE>
+        HpxWriterSinkServer<CELL_TYPE, CONVERTER>
     >
 {
 
@@ -28,20 +45,21 @@ class HpxWriterSinkServer
 
 public:
 
-    static const int DIM = CELL_TYPE::Topology::DIM;
-    typedef typename CELL_TYPE::Topology Topology;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef typename CONVERTER::CellType CellType;
+    static const int DIM = CellType::Topology::DIM;
+    typedef typename CellType::Topology Topology;
+    typedef Grid<CellType, Topology> GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
-    typedef SuperVector<CELL_TYPE> BufferType;
+    typedef SuperVector<CellType> BufferType;
     typedef SuperMap<unsigned, SuperVector<RegionInfo> > RegionInfoMapType;
     typedef SuperMap<unsigned, std::size_t> StepCountMapType;
     typedef SuperMap<unsigned, GridType> GridMapType;
     typedef
-        SuperMap<std::size_t, boost::shared_ptr<ParallelWriter<CELL_TYPE> > >
+        SuperMap<std::size_t, boost::shared_ptr<ParallelWriter<CellType> > >
         ParallelWritersMap;
     typedef
-        SuperMap<std::size_t, boost::shared_ptr<Writer<CELL_TYPE> > >
+        SuperMap<std::size_t, boost::shared_ptr<Writer<CellType> > >
         SerialWritersMap;
 
     typedef hpx::lcos::local::spinlock MutexType;
@@ -57,7 +75,7 @@ public:
     }
 
     HpxWriterSinkServer(
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter,
+        boost::shared_ptr<ParallelWriter<CellType> > parallelWriter,
         std::size_t numUpdateGroups) :
         numUpdateGroups(numUpdateGroups),
         nextId(0)
@@ -66,7 +84,7 @@ public:
     }
 
     HpxWriterSinkServer(
-        boost::shared_ptr<Writer<CELL_TYPE> > serialWriter,
+        boost::shared_ptr<Writer<CellType> > serialWriter,
         std::size_t numUpdateGroups) :
         numUpdateGroups(numUpdateGroups),
         nextId(0)
@@ -75,7 +93,7 @@ public:
     }
 
     void stepFinished(
-        const BufferType& buffer,
+        boost::shared_ptr<BufferType> buffer,
         const RegionType& validRegion,
         const CoordType& globalDimensions,
         unsigned step,
@@ -98,7 +116,7 @@ public:
                     GridType(globalDimensions)));
         }
 
-        HiParSimulator::GridVecConv::vectorToGrid(buffer, &kt->second, validRegion);
+        HiParSimulator::GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);
 
         RegionMapIterator it = regionInfoMap.find(step);
         if(it == regionInfoMap.end()) {
@@ -138,7 +156,7 @@ public:
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, stepFinished, StepFinishedAction);
 
     std::size_t connectParallelWriter(
-        boost::shared_ptr<ParallelWriter<CELL_TYPE> > parallelWriter)
+        boost::shared_ptr<ParallelWriter<CellType> > parallelWriter)
     {
         MutexType::scoped_lock l(mtx);
         std::size_t id = getNextId();
@@ -148,7 +166,7 @@ public:
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, connectParallelWriter, ConnectParallelWriterAction);
 
     std::size_t connectSerialWriter(
-        boost::shared_ptr<Writer<CELL_TYPE> > serialWriter)
+        boost::shared_ptr<Writer<CellType> > serialWriter)
     {
         MutexType::scoped_lock l(mtx);
         std::size_t id = getNextId();

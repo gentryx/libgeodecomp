@@ -92,7 +92,7 @@
 
 namespace LibGeoDecomp {
 
-template <typename CELL_TYPE>
+template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterCollector : public ParallelWriter<CELL_TYPE>
 {
 public:
@@ -108,9 +108,9 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::RegionType RegionType;
     typedef typename ParallelWriter<CELL_TYPE>::CoordType CoordType;
 
-    typedef HpxWriterSink<CELL_TYPE> SinkType;
+    typedef HpxWriterSink<CELL_TYPE, CONVERTER> SinkType;
 
-    HpxWriterCollector(HpxWriterSink<CELL_TYPE> const & sink) :
+    HpxWriterCollector(const SinkType& sink) :
         ParallelWriter<CELL_TYPE>("", sink.getPeriod()),
         sink(sink)
     {
