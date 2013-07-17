@@ -11,7 +11,8 @@ namespace HiParSimulator {
 
 // fixme: get rid of DIM, deduce it from TOPOLOGY
 template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
-class PartitionManager {
+class PartitionManager
+{
     friend class HiParSimulatorTest;
     friend class PartitionManagerTest;
     friend class VanillaStepperTest;
@@ -19,7 +20,9 @@ public:
     typedef SuperMap<int, SuperVector<Region<DIM> > > RegionVecMap;
     typedef TOPOLOGY Topology;
 
-    enum AccessCode {OUTGROUP = -1};
+    enum AccessCode {
+        OUTGROUP = -1
+    };
 
     PartitionManager(
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
@@ -81,14 +84,20 @@ public:
         Region<DIM> inner = rim(getGhostZoneWidth());
         for (typename RegionVecMap::iterator i = outerGhostZoneFragments.begin();
              i != outerGhostZoneFragments.end();
-             ++i)
-            if (i->first != OUTGROUP)
+             ++i) {
+            if (i->first != OUTGROUP) {
                 outer -= i->second.back();
+            }
+        }
+
         for (typename RegionVecMap::iterator i = innerGhostZoneFragments.begin();
              i != innerGhostZoneFragments.end();
-             ++i)
-            if (i->first != OUTGROUP)
+             ++i) {
+            if (i->first != OUTGROUP) {
                 inner -= i->second.back();
+            }
+        }
+
         outerGhostZoneFragments[OUTGROUP] =
             SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, outer);
         innerGhostZoneFragments[OUTGROUP] =
