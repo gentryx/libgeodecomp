@@ -4,7 +4,6 @@
 #include <cmath>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 
-//fixme: benchmark this number
 #define GOLDEN_RATIO  1.6180339887498948482
 #define EULERS_NUMBER 2.71828182845904523536
 
