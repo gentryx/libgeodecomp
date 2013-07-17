@@ -29,6 +29,10 @@
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), DisconnectWriterAction)      \
     )                                                                           \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentType::NumUpdateGroupsAction,                  \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), NumUpdateGroupsAction)       \
+    )                                                                           \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
         TYPE ::SinkType::ComponentCreateActionType,                             \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), CreateAction)                \
     )                                                                           \
@@ -74,6 +78,11 @@
         TYPE ::SinkType::ComponentType::DisconnectWriterAction,                 \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), DisconnectWriterAction)      \
     )                                                                           \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentType::NumUpdateGroupsAction,                  \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), NumUpdateGroupsAction)       \
+    )                                                                           \
+                                                                                \
     HPX_REGISTER_ACTION(                                                        \
         TYPE ::SinkType::ComponentCreateActionType,                             \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), CreateAction)                \

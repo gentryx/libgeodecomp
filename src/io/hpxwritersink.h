@@ -9,6 +9,7 @@
 
 #include <hpx/hpx_fwd.hpp>
 #include <hpx/lcos/async.hpp>
+#include <hpx/lcos/wait_any.hpp>
 #include <hpx/runtime/components/new.hpp>
 
 namespace LibGeoDecomp {
@@ -29,6 +30,7 @@ public:
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
     typedef SuperVector<CellType> BufferType;
+    typedef hpx::lcos::local::spinlock MutexType;
 
     typedef
         hpx::components::server::create_component_action1<
@@ -53,13 +55,11 @@ public:
         >
         ComponentParallelWriterCreateActionType;
 
-    HpxWriterSink() :
-        stepFinishedFuture(hpx::make_ready_future())
+    HpxWriterSink()
     {}
 
     HpxWriterSink(const std::string& name) :
-        thisId(hpx::naming::invalid_id),
-        stepFinishedFuture(hpx::make_ready_future())
+        thisId(hpx::naming::invalid_id)
     {
         std::size_t retry = 0;
 
@@ -81,8 +81,7 @@ public:
         unsigned period,
         std::size_t numUpdateGroups,
         const std::string& name) :
-        period(period),
-        stepFinishedFuture(hpx::make_ready_future())
+        period(period)
     {
         thisId
             = hpx::components::new_<ComponentType>(
@@ -95,8 +94,7 @@ public:
         ParallelWriter<CellType> *parallelWriter,
         std::size_t numUpdateGroups,
         const std::string& name = "") :
-        period(parallelWriter->getPeriod()),
-        stepFinishedFuture(hpx::make_ready_future())
+        period(parallelWriter->getPeriod())
     {
         boost::shared_ptr<ParallelWriter<CellType> > writer(parallelWriter);
         thisId
@@ -114,8 +112,7 @@ public:
         Writer<CellType> *serialWriter,
         std::size_t numUpdateGroups,
         const std::string& name = "") :
-        period(serialWriter->getPeriod()),
-        stepFinishedFuture(hpx::make_ready_future())
+        period(serialWriter->getPeriod())
     {
         boost::shared_ptr<Writer<CellType> > writer(serialWriter);
         thisId
@@ -131,8 +128,7 @@ public:
 
     HpxWriterSink(const HpxWriterSink& sink) :
         thisId(sink.thisId),
-        period(sink.period),
-        stepFinishedFuture(hpx::make_ready_future())
+        period(sink.period)
     {}
 
     void stepFinished(
@@ -153,19 +149,29 @@ public:
             *dest = CONVERTER()(grid.at(*i), globalDimensions, step, rank);
             ++dest;
         }
-        hpx::wait(stepFinishedFuture);
-        stepFinishedFuture = hpx::async<typename ComponentType::StepFinishedAction>(
-        //hpx::apply<typename ComponentType::StepFinishedAction>(
-            thisId.get(),
-            buffer,
-            validRegion,
-            globalDimensions,
-            step,
-            event,
-            rank,
-            lastCall
-        );
-        hpx::wait(stepFinishedFuture);
+
+        hpx::future<void> stepFinishedFuture
+            = hpx::async<typename ComponentType::StepFinishedAction>(
+                thisId.get(),
+                buffer,
+                validRegion,
+                globalDimensions,
+                step,
+                event,
+                rank,
+                lastCall
+            );
+
+        if(stepFinishedFutures.size() > 100) {
+            MutexType::scoped_lock lk(mtx);
+            HPX_STD_TUPLE<int, hpx::future<void> > res
+                = hpx::wait_any(stepFinishedFutures);
+            stepFinishedFutures[HPX_STD_GET(0, res)] = stepFinishedFuture;
+        }
+        else {
+            MutexType::scoped_lock lk(mtx);
+            stepFinishedFutures.push_back(stepFinishedFuture);
+        }
     }
 
     hpx::future<std::size_t> connectWriter(ParallelWriter<CellType> *parallelWriter)
@@ -196,10 +202,16 @@ public:
         return period;
     }
 
+    std::size_t numUpdateGroups() const
+    {
+        return typename ComponentType::NumUpdateGroupsAction()(thisId.get());
+    }
+
 private:
     hpx::future<hpx::naming::id_type> thisId;
     std::size_t period;
-    hpx::future<void> stepFinishedFuture;
+    std::vector<hpx::future<void> > stepFinishedFutures;
+    MutexType mtx;
 
     template<typename ARCHIVE>
     void load(ARCHIVE& ar, unsigned)
