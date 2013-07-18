@@ -3,6 +3,20 @@
 #pragma OPENCL EXTENSION cl_khr_fp64: enable
 #pragma OPENCL EXTENSION cl_intel_printf: enable
 
+typedef struct {
+  int x, y, z;
+} DummyCell;
+
+__kernel void dummy_test(__constant coords_ctx * coords,
+                         __constant void * in, __global void * out)
+{
+  DummyCell * cells = (DummyCell *)in;
+
+  size_t address = get_address(coords, (0,0,0));
+  printf("(%i, %i, %i) @ %v4i\n",
+         cells[address].x, cells[address].y, cells[address].z, coords->points[get_global_id(0)]);
+}
+
 __kernel void stencil_test(__constant coords_ctx * coords,
                            __constant double * in, __global double * out)
 {
