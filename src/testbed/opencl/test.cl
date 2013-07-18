@@ -8,7 +8,7 @@ __kernel void stencil_test(__constant coords_ctx * coords,
 {
   uint global_id = get_global_id(0);
 
-  int3 point = coords->points[global_id];
+  int4 point = coords->points[global_id];
 
   int index = (point.z - 1) * coords->points_size.x * coords->points_size.y
             + (point.y - 1) * coords->points_size.x

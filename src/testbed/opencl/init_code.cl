@@ -16,7 +16,7 @@ __kernel void
 data_init(__constant coords_ctx * coords)
 {
   size_t gid = get_global_id(0);
-  int3 size = coords->points_size;
+  int4 size = coords->points_size;
   size_t x = coords->points[gid].s0;
   size_t y = coords->points[gid].s1;
   size_t z = coords->points[gid].s2;
