@@ -6,6 +6,25 @@
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
 namespace LibGeoDecomp {
+
+  template<typename CELL>
+  class OpenCLCellInterface {
+    public:
+      static std::string kernel_file(void) {
+        return CELL::kernel_file();
+      }
+      static std::string kernel_function(void) {
+        return CELL::kernel_function();
+      }
+      static std::string cl_struct_code(void) {
+        return CELL::cl_struct_code();
+      }
+      static size_t sizeof_data(void) {
+        return CELL::sizeof_data();
+      }
+      virtual void * data(void) = 0;
+  };
+
 namespace HiParSimulator {
 
 template<typename CELL_TYPE>
