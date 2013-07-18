@@ -5,6 +5,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
+#include "openclwrapper.h"
+
 namespace LibGeoDecomp {
 
   template<typename CELL>
@@ -51,6 +53,7 @@ public:
     using Stepper<CELL_TYPE>::partitionManager;
 
     inline OpenCLStepper(
+        unsigned int platform_id, unsigned int device_id,
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
@@ -69,6 +72,41 @@ public:
         }
 
         initGrids();
+
+        try {
+          std::string kernel_file =
+            OpenCLCellInterface<CELL_TYPE>::kernel_file();
+          std::string kernel_function =
+            OpenCLCellInterface<CELL_TYPE>::kernel_function();
+          size_t sizeof_data =
+            OpenCLCellInterface<CELL_TYPE>::sizeof_data();
+
+          std::vector<OpenCLWrapper::data_t> data;
+          std::vector<OpenCLWrapper::point_t> points;
+
+          auto box = initializer->gridBox();
+          for (auto & p : box) {
+            auto & cell =
+              dynamic_cast<OpenCLCellInterface<CELL_TYPE> &>((*oldGrid)[p]);
+            points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
+            data.push_back(cell.data());
+          }
+
+          int x_size = box.dimensions.x()
+            , y_size = box.dimensions.y()
+            , z_size = box.dimensions.z();
+
+          oclwrapper = OpenCLWrapper_Ptr(
+              new OpenCLWrapper(platform_id, device_id,
+                                kernel_file, kernel_function,
+                                sizeof_data, x_size, y_size, z_size));
+
+          oclwrapper->loadPoints(points);
+          oclwrapper->loadHostData(data);
+
+        } catch (std::exception & e) {
+          exit(EXIT_FAILURE);
+        }
     }
 
     inline virtual void update(int nanoSteps)
@@ -76,6 +114,8 @@ public:
         for (int i = 0; i < nanoSteps; ++i) {
             update();
         }
+
+        oclwrapper->finish();
     }
 
     inline virtual std::pair<int, int> currentStep() const
@@ -89,6 +129,8 @@ public:
     }
 
 private:
+    typedef std::shared_ptr<OpenCLWrapper> OpenCLWrapper_Ptr;
+
     int curStep;
     int curNanoStep;
     int validGhostZoneWidth;
@@ -98,21 +140,14 @@ private:
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
 
+    OpenCLWrapper_Ptr oclwrapper;
+
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            UpdateFunctor<CELL_TYPE>()(
-                *i,
-                i->origin,
-                *oldGrid,
-                &*newGrid,
-                curNanoStep);
-        }
-        std::swap(oldGrid, newGrid);
+
+        oclwrapper->run();
 
         ++curNanoStep;
         if (curNanoStep == CELL_TYPE::nanoSteps()) {
