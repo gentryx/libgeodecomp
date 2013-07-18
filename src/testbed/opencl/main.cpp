@@ -16,7 +16,7 @@ class DummyCell : public OpenCLCellInterface<DummyCell> {
 
     static inline unsigned nanoSteps() { return 1; }
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+      void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
 
 #define MYCELL_STRUCT  \
     typedef struct {   \
@@ -45,36 +45,36 @@ class DummyCellInitializer : public SimpleInitializer<DummyCell> {
 
     virtual void grid(GridBase<DummyCell, 3> *ret)
     {
-        Coord<3> offset = Coord<3>(0, 0, 0);
+      Coord<3> offset = Coord<3>(0, 0, 0);
 
-        for (int z = 0; z < gridDimensions().z(); ++z) {
-          for (int y = 0; y < gridDimensions().y(); ++y) {
-            for (int x = 0; x < gridDimensions().x(); ++x) {
-              Coord<3> c = offset + Coord<3>(x, y, z);
-                        ret->at(c) = DummyCell();
-                        ret->at(c).myCellData.x = x;
-                        ret->at(c).myCellData.y = y;
-                        ret->at(c).myCellData.z = z;
-                }
-            }
+      for (int z = 0; z < gridDimensions().z(); ++z) {
+        for (int y = 0; y < gridDimensions().y(); ++y) {
+          for (int x = 0; x < gridDimensions().x(); ++x) {
+            Coord<3> c = offset + Coord<3>(x, y, z);
+            ret->at(c) = DummyCell();
+            ret->at(c).myCellData.x = x;
+            ret->at(c).myCellData.y = y;
+            ret->at(c).myCellData.z = z;
+          }
         }
+      }
     }
 };
 
 int main(int argc, char **argv)
 {
-    typedef DummyCell MyCell;
-    typedef DummyCellInitializer MyCellInitializer;
+  typedef DummyCell MyCell;
+  typedef DummyCellInitializer MyCellInitializer;
 
-    boost::shared_ptr<HiParSimulator::PartitionManager<3>>
-      pmp(new HiParSimulator::PartitionManager<3>(
-            CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
+  boost::shared_ptr<HiParSimulator::PartitionManager<3>>
+    pmp(new HiParSimulator::PartitionManager<3>(
+          CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
 
-    boost::shared_ptr<MyCellInitializer> dcip(new MyCellInitializer);
+  boost::shared_ptr<MyCellInitializer> dcip(new MyCellInitializer);
 
-    HiParSimulator::OpenCLStepper<MyCell> openclstepper(0, 0, pmp, dcip);
+  HiParSimulator::OpenCLStepper<MyCell> openclstepper(0, 0, pmp, dcip);
 
-    openclstepper.update(1);
+  openclstepper.update(1);
 
   return 0;
 }
