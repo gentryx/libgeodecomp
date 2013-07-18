@@ -1,10 +1,7 @@
 /* vim:set expandtab tabstop=2 shiftwidth=2 softtabstop=2: */
 
-#include <fstream>
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/io/testinitializer.h>
 
 #include "openclstepper.h"
 
