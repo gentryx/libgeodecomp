@@ -267,6 +267,10 @@ OpenCLWrapper::loadHostData(const C<data_t> & data)
 void
 OpenCLWrapper::run(size_t updates)
 {
+  // let's play ping - pong
+  // (http://www.mathematik.uni-dortmund.de/~goeddeke/gpgpu/tutorial.html#feedback2)
+  // 1 + 0 & 1 = 1; 2 - 0 & 1 = 2; 1 + 1 & 1 = 2; 2 - 1 & 1 = 1
+
   for (size_t i = 0; i < updates; ++i) {
     user_code_kernel.setArg(1 + (update_counter & 1), cl_input);
     user_code_kernel.setArg(2 - (update_counter & 1), cl_output);
