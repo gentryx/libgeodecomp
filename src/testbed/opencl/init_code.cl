@@ -4,9 +4,9 @@
 #pragma OPENCL EXTENSION cl_intel_printf: enable
 
 __kernel void
-mem_hook_up(__global coords_ctx * coords,
-            __constant int3 * points,
-            __global int * indices)
+mem_hook(__global coords_ctx * coords,
+         __global int4 * points,
+         __global int * indices)
 {
   coords->points = points;
   coords->indices = indices;
