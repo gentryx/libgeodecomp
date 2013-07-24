@@ -162,7 +162,7 @@ public:
                 lastCall
             );
 
-        if(stepFinishedFutures.size() > 100) {
+        if(stepFinishedFutures.size() > 10) {
             HPX_STD_TUPLE<int, hpx::future<void> > res
                 = hpx::wait_any(stepFinishedFutures);
             stepFinishedFutures[HPX_STD_GET(0, res)] = stepFinishedFuture;

@@ -197,6 +197,12 @@ public:
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, disconnectWriter, DisconnectWriterAction);
 
+    std::size_t getNumUpdateGroups()
+    {
+        return numUpdateGroups;
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, getNumUpdateGroups, NumUpdateGroupsAction);
+
 private:
     GridMapType gridMap;
     ParallelWritersMap parallelWriters;

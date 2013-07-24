@@ -103,7 +103,7 @@ public:
 public:
     inline HpxSimulator(
         Initializer<CELL_TYPE> *initializer,
-        const std::size_t overcommitFactor,
+        const float overcommitFactor,
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1) :
@@ -166,7 +166,7 @@ private:
     using DistributedSimulator<CELL_TYPE>::steerers;
     using DistributedSimulator<CELL_TYPE>::writers;
 
-    std::size_t overcommitFactor;
+    float overcommitFactor;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
