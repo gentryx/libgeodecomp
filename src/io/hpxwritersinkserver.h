@@ -105,43 +105,32 @@ public:
         typedef typename StepCountMapType::iterator StepCountMapIterator;
         typedef typename GridMapType::iterator GridIterator;
 
-        GridIterator kt;
+        MutexType::scoped_lock l(mtx);
+        GridIterator kt = gridMap.find(step);
+        if(kt == gridMap.end())
         {
-            MutexType::scoped_lock l(gridMapMtx);
-            kt = gridMap.find(step);
-            if(kt == gridMap.end())
-            {
-                kt = gridMap.insert(
-                    kt,
-                    std::make_pair(
-                        step,
-                        GridType(globalDimensions)));
-            }
+            kt = gridMap.insert(
+                kt,
+                std::make_pair(
+                    step,
+                    GridType(globalDimensions)));
         }
 
-        HiParSimulator::GridVecConv::vectorToGrid(
-            *buffer,
-            &kt->second,
-            validRegion);
+        HiParSimulator::GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);
 
-        RegionMapIterator it;
-        {
-            MutexType::scoped_lock l(regionMapMtx);
-            it = regionInfoMap.find(step);
-            if(it == regionInfoMap.end()) {
-                it = regionInfoMap.insert(
-                        it,
-                        std::make_pair(step, SuperVector<RegionInfo>())
-                    );
-            }
-
-            it->second.push_back(
-                RegionInfo(validRegion, globalDimensions, event, rank, lastCall)
-            );
+        RegionMapIterator it = regionInfoMap.find(step);
+        if(it == regionInfoMap.end()) {
+            it = regionInfoMap.insert(
+                    it,
+                    std::make_pair(step, SuperVector<RegionInfo>())
+                );
         }
+
+        it->second.push_back(
+            RegionInfo(validRegion, globalDimensions, event, rank, lastCall)
+        );
 
         if(lastCall) {
-            MutexType::scoped_lock l0(stepCountMapMtx);
             StepCountMapIterator jt = stepCountMap.find(step);
             if(jt == stepCountMap.end())
             {
@@ -155,16 +144,12 @@ public:
             if(jt->second == numUpdateGroups)
             {
                 {
-                    hpx::util::unlock_the_lock<MutexType::scoped_lock> ull(l0);
+                    hpx::util::unlock_the_lock<MutexType::scoped_lock> ull(l);
                     notifyWriters(kt->second, step, event);
                 }
-                {
-                    MutexType::scoped_lock l1(regionMapMtx);
-                    MutexType::scoped_lock l2(gridMapMtx);
-                    regionInfoMap.erase(it);
-                    stepCountMap.erase(jt);
-                    gridMap.erase(kt);
-                }
+                regionInfoMap.erase(it);
+                stepCountMap.erase(jt);
+                gridMap.erase(kt);
             }
         }
     }
@@ -173,7 +158,7 @@ public:
     std::size_t connectParallelWriter(
         boost::shared_ptr<ParallelWriter<CellType> > parallelWriter)
     {
-        MutexType::scoped_lock l(parallelWriterMapMtx);
+        MutexType::scoped_lock l(mtx);
         std::size_t id = getNextId();
         parallelWriters.insert(std::make_pair(id, parallelWriter));
         return id;
@@ -183,7 +168,7 @@ public:
     std::size_t connectSerialWriter(
         boost::shared_ptr<Writer<CellType> > serialWriter)
     {
-        MutexType::scoped_lock l(serialWriterMapMtx);
+        MutexType::scoped_lock l(mtx);
         std::size_t id = getNextId();
         serialWriters.insert(std::make_pair(id, serialWriter));
         return id;
@@ -192,22 +177,19 @@ public:
 
     void disconnectWriter(std::size_t id)
     {
+        MutexType::scoped_lock l(mtx);
         {
-            MutexType::scoped_lock l(parallelWriterMapMtx);
             typename ParallelWritersMap::iterator it = parallelWriters.find(id);
             if(it != parallelWriters.end()) {
                 parallelWriters.erase(it);
-                MutexType::scoped_lock l(freeIdsMtx);
                 freeIds.push_back(id);
                 return;
             }
         }
         {
-            MutexType::scoped_lock l(serialWriterMapMtx);
             typename SerialWritersMap::iterator it = serialWriters.find(id);
             if(it != serialWriters.end()) {
                 serialWriters.erase(it);
-                MutexType::scoped_lock l(freeIdsMtx);
                 freeIds.push_back(id);
                 return;
             }
@@ -215,33 +197,22 @@ public:
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, disconnectWriter, DisconnectWriterAction);
 
-    std::size_t getNumUpdateGroups()
-    {
-        return numUpdateGroups;
-    }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, getNumUpdateGroups, NumUpdateGroupsAction);
-
 private:
-    MutexType gridMapMtx;
     GridMapType gridMap;
-    MutexType parallelWriterMapMtx;
     ParallelWritersMap parallelWriters;
-    MutexType serialWriterMapMtx;
     SerialWritersMap serialWriters;
     std::size_t numUpdateGroups;
 
-    MutexType stepCountMapMtx;
     StepCountMapType stepCountMap;
-    MutexType regionMapMtx;
     RegionInfoMapType regionInfoMap;
 
-    MutexType freeIdsMtx;
     std::size_t nextId;
     SuperVector<std::size_t> freeIds;
 
+    MutexType mtx;
+
     std::size_t getNextId()
     {
-        MutexType::scoped_lock l(freeIdsMtx);
         std::size_t id = 0;
         if(!freeIds.empty()) {
             id = freeIds.back();
@@ -255,33 +226,27 @@ private:
 
     void notifyWriters(GridType const & grid, unsigned step, WriterEvent event)
     {
-        {
-            MutexType::scoped_lock l(parallelWriterMapMtx);
-            BOOST_FOREACH(typename ParallelWritersMap::value_type& writer,
-                          parallelWriters) {
-                MutexType::scoped_lock l(regionMapMtx);
-                typedef typename RegionInfoMapType::iterator RegionInfoIterator;
+        BOOST_FOREACH(typename ParallelWritersMap::value_type& writer,
+                      parallelWriters) {
+            MutexType::scoped_lock l(mtx);
+            typedef typename RegionInfoMapType::iterator RegionInfoIterator;
 
-                RegionInfoIterator it = regionInfoMap.find(step);
-                BOOST_ASSERT(it != regionInfoMap.end());
-                BOOST_FOREACH(RegionInfo const & regionInfo, it->second) {
-                    writer.second->stepFinished(
-                        grid,
-                        regionInfo.validRegion,
-                        regionInfo.globalDimensions,
-                        step,
-                        regionInfo.event, regionInfo.rank,
-                        regionInfo.lastCall
-                    );
-                }
+            RegionInfoIterator it = regionInfoMap.find(step);
+            BOOST_ASSERT(it != regionInfoMap.end());
+            BOOST_FOREACH(RegionInfo const & regionInfo, it->second) {
+                writer.second->stepFinished(
+                    grid,
+                    regionInfo.validRegion,
+                    regionInfo.globalDimensions,
+                    step,
+                    regionInfo.event, regionInfo.rank,
+                    regionInfo.lastCall
+                );
             }
         }
-        {
-            MutexType::scoped_lock l(serialWriterMapMtx);
-            BOOST_FOREACH(typename SerialWritersMap::value_type& writer,
-                          serialWriters) {
-                writer.second->stepFinished(grid, step, event);
-            }
+        BOOST_FOREACH(typename SerialWritersMap::value_type& writer,
+                      serialWriters) {
+            writer.second->stepFinished(grid, step, event);
         }
     }
 

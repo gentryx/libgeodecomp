@@ -163,13 +163,11 @@ public:
             );
 
         if(stepFinishedFutures.size() > 100) {
-            MutexType::scoped_lock lk(mtx);
             HPX_STD_TUPLE<int, hpx::future<void> > res
                 = hpx::wait_any(stepFinishedFutures);
             stepFinishedFutures[HPX_STD_GET(0, res)] = stepFinishedFuture;
         }
         else {
-            MutexType::scoped_lock lk(mtx);
             stepFinishedFutures.push_back(stepFinishedFuture);
         }
     }
@@ -211,7 +209,6 @@ private:
     hpx::future<hpx::naming::id_type> thisId;
     std::size_t period;
     std::vector<hpx::future<void> > stepFinishedFutures;
-    MutexType mtx;
 
     template<typename ARCHIVE>
     void load(ARCHIVE& ar, unsigned)
