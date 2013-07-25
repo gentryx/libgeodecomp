@@ -21,17 +21,14 @@ class MPIParser
   # template type for whitch typemaps will be generated using other
   # parameters. Yeah, it's complicated.
   def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="")
-    puts "ping1"
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
     # @log.level = Logger::DEBUG
     @member_cache = {}
 
-    puts "ping2"
     class_files = Dir.glob("#{@path}/*.xml")
     @xml_docs = { }
-    puts "class_files.size = #{class_files.size}"
 
     threads = []
     num_threads = 1
@@ -60,7 +57,6 @@ class MPIParser
     #   @xml_docs[filename] = doc
     # end
 
-    puts "ping3"
     @filename_cache = { }
     @xml_docs.each do |filename, doc|
       next if !is_class_declaration(filename)
@@ -70,20 +66,15 @@ class MPIParser
       @filename_cache[klass] = filename
     end
 
-    puts "ping4"
     @log.debug "filename_cache: "
     @log.debug pp(@filename_cache)
 
     @datatype_map = Datatype.new
     @datatype_map.merge!(map_enums)
     classes_to_be_serialized = find_classes_to_be_serialized
-    puts "ping5"
     @type_hierarchy_closure = @datatype_map.keys.to_set +
       classes_to_be_serialized
-    puts "ping6"
     @all_classes = classes_to_be_serialized
-
-    puts "ping7"
   end
 
   def pp(object)
