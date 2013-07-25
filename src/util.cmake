@@ -8,7 +8,7 @@ function(dump_config outfile)
   set(CONTENT "#ifndef LIBGEODECOMP_CONFIG_H\n\n${CONFIG_HEADER}\n#endif\n")
   file(WRITE "${outfile}.new" "${CONTENT}")
 
-  execute_process(COMMAND cmake -E compare_files "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}" "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}.new" RESULT_VARIABLE res)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}" "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}.new" RESULT_VARIABLE res)
   if(res GREATER 0)
     file(WRITE "${outfile}" "${CONTENT}")
   endif()
