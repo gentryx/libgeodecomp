@@ -152,7 +152,7 @@ private:
     HpxWriterCollector() {}
 
     template <class ARCHIVE>
-    void serialize(ARCHIVE & ar, unsigned)
+    void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
         ar & sink;

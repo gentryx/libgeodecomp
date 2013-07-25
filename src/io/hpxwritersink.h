@@ -64,11 +64,9 @@ public:
         std::size_t retry = 0;
 
         hpx::naming::id_type id = hpx::naming::invalid_id;
-        while(id == hpx::naming::invalid_id)
-        {
+        while(id == hpx::naming::invalid_id) {
             hpx::agas::resolve_name(name, id);
-            if(retry > 10)
-            {
+            if(retry > 10) {
                 throw std::logic_error("Can't find the Writer Sink name");
             }
             hpx::this_thread::suspend();
@@ -102,8 +100,7 @@ public:
                 hpx::find_here(),
                 writer,
                 numUpdateGroups);
-        if(name != "")
-        {
+        if(name != "") {
             hpx::agas::register_name(name, thisId.get());
         }
     }
@@ -120,8 +117,7 @@ public:
                 hpx::find_here(),
                 writer,
                 numUpdateGroups);
-        if(name != "")
-        {
+        if(name != "") {
             hpx::agas::register_name(name, thisId.get());
         }
     }

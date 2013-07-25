@@ -13,7 +13,7 @@
 
 #include <boost/serialization/shared_ptr.hpp>
 
-#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)         \
+#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)        \
     typedef                                                                     \
         SIMULATOR ::UpdateGroupType::ComponentType                              \
         BOOST_PP_CAT(NAME, UpdateGroupType);                                    \
@@ -43,7 +43,7 @@
     );                                                                          \
 /**/
 
-#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                     \
+#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                    \
     typedef                                                                     \
         hpx::components::managed_component<                                     \
             BOOST_PP_CAT(NAME, UpdateGroupType)                                 \
