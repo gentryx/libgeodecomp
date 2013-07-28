@@ -55,10 +55,25 @@ public:
         for (typename CoordBox<DIM>::Iterator i = rect.begin(); i != rect.end(); ++i) {
             Coord<DIM> coord = TEST_CELL::Topology::normalize(*i, dimensions);
             double index = 1 + coord.toIndex(dimensions);
-            ret->at(*i) = TEST_CELL(coord, dimensions, cycle, index);
+            ret->set(*i, TEST_CELL(coord, dimensions, cycle, index));
         }
-        ret->atEdge() = TEST_CELL(Coord<DIM>::diagonal(-1), dimensions);
-        ret->atEdge().isEdgeCell = true;
+
+        TEST_CELL edgeCell(Coord<DIM>::diagonal(-1), dimensions);
+        edgeCell.isEdgeCell = true;
+        ret->setEdge(edgeCell);
+
+        // MPILayer layer;
+        // for (int i = 0; i < layer.size(); ++i) {
+        //     layer.barrier();
+        //     CoordBox<DIM> box = ret->boundingBox();
+        //     if (i == layer.rank()) {
+        //         std::cout << "rank: " << layer.rank() << "\n"
+        //                   << "grid: " << box << "\n";
+        //         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+        //             std::cout << "  " << *i << " -> " << ret->get(*i) << "\n";
+        //         }
+        //     }
+        // }
     }
 
     Coord<DIM> gridDimensions() const
