@@ -259,7 +259,6 @@ public:
             1 * X +
             VonNeumannDimDelta<2, RADIUS, Y>::VALUE +
             VonNeumannDimDelta<3, RADIUS, Z>::VALUE +
-// 2 * Y + 3 * Z +
             (VonNeumann<DIM, RADIUS>::VOLUME - 1) / 2;
     };
 
