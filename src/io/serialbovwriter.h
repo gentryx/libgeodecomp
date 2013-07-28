@@ -60,7 +60,8 @@ private:
     Coord<3> brickletDim;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    SerialBOVWriter() {}
+    SerialBOVWriter()
+    {}
 
     template <typename ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
