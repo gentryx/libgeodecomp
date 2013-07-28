@@ -45,7 +45,7 @@ public:
         pipe.addSteeringFeedback("bingo bongo");
 
         if (validRegion.count(c)) {
-            std::cout << "  get result(" << c << ") = " << accessor->get(grid->at(c)) << "\n";
+            std::cout << "  get result(" << c << ") = " << accessor->get(grid->get(c)) << "\n";
             return true;
         }
 

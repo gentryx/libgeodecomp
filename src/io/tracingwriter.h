@@ -75,8 +75,8 @@ private:
         ar & maxSteps;
     }
 
-    TracingWriter()
-      : stream(std::cout)
+    TracingWriter() :
+        stream(std::cout)
     {}
 #endif
 
