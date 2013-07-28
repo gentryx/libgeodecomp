@@ -1,3 +1,4 @@
+// fixme: get rid of this junk?
 #include <cmath>
 #include <typeinfo>
 // #include <CL/cl.h>
@@ -254,8 +255,8 @@ public:
 
                     // Defiant
                     updater.step(
-                        FixedNeighborhood<4, 4, MY_SIZE>(&coeff.at(coeffCoord), &oldGrid->at(c)),
-                        &newGrid->at(c),
+                        FixedNeighborhood<4, 4, MY_SIZE>(&coeff[coeffCoord], &(*oldGrid)[c]),
+                        &(*newGrid)[c],
                         1,
                         dim[0] - 1);
 

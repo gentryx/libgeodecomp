@@ -678,7 +678,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -757,7 +757,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -1072,7 +1072,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -1344,7 +1344,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).density == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).density == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }

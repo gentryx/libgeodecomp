@@ -539,9 +539,9 @@ public:
     {
         CoordBox<3> box = ret->boundingBox();
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
-            ret->at(*i) = CELL(1.0);
+            ret->set(*i, CELL(1.0));
         }
-        ret->atEdge() = CELL(0.0);
+        ret->setEdge(CELL(0.0));
     }
 };
 
@@ -553,13 +553,13 @@ double singleBenchmark(Coord<3> dim)
 
     SerialSimulator<CELL> sim(
         new MonoInitializer<CELL>(dim, repeats));
-    // sim.addWriter(new TracingWriter<CELL>(500, repeats));
+    sim.addWriter(new TracingWriter<CELL>(500, repeats));
 
     long long tBegin= Chronometer::timeUSec();
     sim.run();
     long long tEnd = Chronometer::timeUSec();
 
-    if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+    if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
         std::cout << "this statement just serves to prevent the compiler from"
                   << "optimizing away the loops above\n";
     }
