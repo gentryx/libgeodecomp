@@ -266,7 +266,7 @@ public:
                                 const MPI::Datatype& datatype)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            recv(&(*stripe).at(i->origin), src, i->length(), tag, datatype);
+            recv(&((*stripe)[i->origin]), src, i->length(), tag, datatype);
         }
     }
 
@@ -278,7 +278,7 @@ public:
                                 const MPI::Datatype& datatype)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            send(&(*stripe).at(i->origin), dest, i->length(), tag, datatype);
+            send(&((*stripe)[i->origin]), dest, i->length(), tag, datatype);
         }
     }
 
