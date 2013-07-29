@@ -153,10 +153,10 @@ public:
     void testRunMustResetGridPriorToSimulation()
     {
         testSim->run();
-        int cycle1 = testSim->curStripe->at(Coord<2>(4, 4)).cycleCounter;
+        int cycle1 = testSim->curStripe->get(Coord<2>(4, 4)).cycleCounter;
 
         testSim->run();
-        int cycle2 = testSim->curStripe->at(Coord<2>(4, 4)).cycleCounter;
+        int cycle2 = testSim->curStripe->get(Coord<2>(4, 4)).cycleCounter;
 
         TS_ASSERT_EQUALS(cycle1, cycle2);
     }

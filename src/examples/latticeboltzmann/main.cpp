@@ -258,23 +258,30 @@ public:
                     Coord<3> c(x, y, z);
                     Cell::State s = Cell::LIQUID;
 
-                    if (c.x() == 0)
+                    if (c.x() == 0) {
                         s = Cell::WEST_NOSLIP;
-                    if (c.x() == (size.x() - 1))
+                    }
+                    if (c.x() == (size.x() - 1)) {
                         s = Cell::EAST_NOSLIP;
+                    }
 
-                    if (c.y() == 0)
+                    if (c.y() == 0) {
                         s = Cell::SOUTH_NOSLIP;
-                    if (c.y() == (size.y() - 1))
+                    }
+                    if (c.y() == (size.y() - 1)) {
                         s = Cell::NORTH_ACC;
+                    }
 
-                    if (c.z() == 0)
+                    if (c.z() == 0) {
                         s = Cell::BOTTOM;
-                    if (c.z() == (size.z() - 1))
+                    }
+                    if (c.z() == (size.z() - 1)) {
                         s = Cell::TOP;
+                    }
 
-                    if (box.inBounds(c))
-                        ret->at(c) = Cell(0, s);
+                    if (box.inBounds(c)) {
+                        ret->set(c, Cell(0, s));
+                    }
                 }
             }
         }

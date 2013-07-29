@@ -431,7 +431,7 @@ public:
                 addBoundary(&container, center, FloatCoord<3>(0, 0, -1));
             }
 
-            target->at(*j) = container;
+            target->set(*j, container);
         }
     }
 

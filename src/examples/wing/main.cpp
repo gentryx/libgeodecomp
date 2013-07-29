@@ -21,7 +21,7 @@ using namespace LibGeoDecomp;
 
 // fixme: use dX for... anything
 // fixme: tune pressure speed, pressure diffusion, driver velocity, influence factor?
-// fixne: don't equalize pressure on lid?
+// fixme: don't equalize pressure on lid?
 const double dX = 1.0;
 const double dT = 1.0;
 
@@ -339,10 +339,10 @@ public:
     virtual void grid(GridBase<Cell, 2> *grid)
     {
         CoordBox<2> box = grid->boundingBox();
-        grid->atEdge() = Cell(SOLID);
+        grid->setEdge(Cell(SOLID));
 
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
-            grid->at(*i) = Cell(LIQUID, 1);
+            grid->set(*i, Cell(LIQUID, 1));
         }
 
 #if SETUP==LID
@@ -351,6 +351,7 @@ public:
 
 #if SETUP==WING
         addInletOutlet(grid);
+        // fixme:
         //        addWing(grid);
 #endif
     }
@@ -365,23 +366,26 @@ public:
         for (int y = 0; y < dimensions.y(); ++y) {
             Coord<2> c1(0, y);
             Coord<2> c2(dimensions.x() - 1, y);
-            if (box.inBounds(c1))
-                grid->at(c1) = slipCell;
-            if (box.inBounds(c2))
-                grid->at(c2) = slipCell;
+            if (box.inBounds(c1)) {
+                grid->set(c1, slipCell);
+            }
+            if (box.inBounds(c2)) {
+                grid->set(c2, slipCell);
+            }
         }
-
 
         for (int x = 0; x < dimensions.x(); ++x) {
             Coord<2> c(x, 0);
-            if (box.inBounds(c))
-                grid->at(c) = slipCell;
+            if (box.inBounds(c)) {
+                grid->set(c, slipCell);
+            }
         }
 
         for (int x = 1; x < dimensions.x() - 1; ++x) {
             Coord<2> c(x, dimensions.y() - 1);
-            if (box.inBounds(c))
-                grid->at(c) = driverCell;
+            if (box.inBounds(c)) {
+                grid->set(c, driverCell);
+            }
         }
     }
 
@@ -394,10 +398,12 @@ public:
             Coord<2> c1(0, y);
             Coord<2> c2(dimensions.x() - 1, y);
 
-            if (box.inBounds(c1))
-                grid->at(c1) = driverCell;
-            if (box.inBounds(c2))
-                grid->at(c2) = driverCell;
+            if (box.inBounds(c1)) {
+                grid->set(c1, driverCell);
+            }
+            if (box.inBounds(c2)) {
+                grid->set(c2, driverCell);
+            }
         }
     }
 
@@ -426,8 +432,9 @@ public:
                 Coord<2> c(x, y);
                 c = c + offset;
                 if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(190, 140) + offset, 40))
-                    grid->at(c) = Cell(SOLID, 0);
+                    inCircle(c, Coord<2>(190, 140) + offset, 40)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -437,8 +444,9 @@ public:
                 Coord<2> c(x, y);
                 c = c + offset;
                 if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25))
-                    grid->at(c) = Cell(SOLID, 0);
+                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -447,8 +455,9 @@ public:
             for (int x = 190; x < 250; ++x) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c))
-                    grid->at(c) = Cell(SOLID, 0);
+                if (box.inBounds(c)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -458,8 +467,9 @@ public:
                 Coord<2> c(x, y);
                 c = c + offset;
                 if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60))
-                    grid->at(c) = Cell(SOLID, 0);
+                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -469,8 +479,9 @@ public:
             for (int y = 100; y < maxY; ++y) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c))
-                    grid->at(c) = Cell(SOLID, 0);
+                if (box.inBounds(c)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
     }

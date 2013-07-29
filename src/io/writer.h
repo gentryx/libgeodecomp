@@ -37,9 +37,6 @@ public:
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
     const static int DIM = CELL_TYPE::Topology::DIM;
 
-    Writer()
-    {}
-
     /**
      * initializes a writer using prefix which subclasses may
      * use to generate filenames. period should be used by
@@ -84,6 +81,9 @@ protected:
     unsigned period;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    Writer()
+    {}
+
     template <typename ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {

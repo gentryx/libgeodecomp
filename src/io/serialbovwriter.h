@@ -32,8 +32,6 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
-    SerialBOVWriter() {}
-
     SerialBOVWriter(
         const std::string& prefix,
         const unsigned period,
@@ -62,6 +60,9 @@ private:
     Coord<3> brickletDim;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    SerialBOVWriter()
+    {}
+
     template <typename ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {

@@ -101,21 +101,22 @@
         bool ollKorrect = true;                                         \
         std::ostringstream message;                                     \
                                                                         \
-        TS_ASSERT(assertGrid.atEdge().isEdgeCell);                      \
-        if (!assertGrid.atEdge().isEdgeCell) {                          \
+        TS_ASSERT(assertGrid.getEdge().isEdgeCell);                     \
+        if (!assertGrid.getEdge().isEdgeCell) {                         \
             ollKorrect = false;                                         \
             message << "edgeCell isn't an edgeCell\n";                  \
         }                                                               \
-        if (!assertGrid.atEdge().valid()) {                             \
+        if (!assertGrid.getEdge().valid()) {                            \
             ollKorrect = false;                                         \
             message << "edgeCell isn't valid\n";                        \
         }                                                               \
         CoordBox<_GRID_TYPE::DIM> box = assertGrid.boundingBox();       \
         for (TYPENAME CoordBox<_GRID_TYPE::DIM>::Iterator i = box.begin(); i != box.end(); ++i) { \
-            bool flagValid   = assertGrid.at(*i).valid();               \
-            bool flagEdge    = (assertGrid.at(*i).isEdgeCell == false); \
-            bool flagCounter = (assertGrid.at(*i).cycleCounter == expectedCycle); \
-            message << "actual: " << (assertGrid.at(*i).cycleCounter) << " expected: " << expectedCycle << "\n"; \
+            bool flagValid   = assertGrid.get(*i).valid();              \
+            bool flagEdge    = (assertGrid.get(*i).isEdgeCell == false); \
+            bool flagCounter = (assertGrid.get(*i).cycleCounter == expectedCycle); \
+            message << "actual: " << (assertGrid.get(*i).cycleCounter)  \
+                    << " expected: " << expectedCycle << "\n";          \
             TS_ASSERT(flagValid);                                       \
             TS_ASSERT(flagEdge);                                        \
             TS_ASSERT(flagCounter);                                     \
@@ -141,22 +142,22 @@
         unsigned expectedCycle = _EXPECTED_CYCLE;                       \
         bool ollKorrect = true;                                         \
                                                                         \
-        ollKorrect &= assertGrid.atEdge().isEdgeCell;                   \
-        ollKorrect &= assertGrid.atEdge().valid();                      \
+        ollKorrect &= assertGrid.getEdge().isEdgeCell;                  \
+        ollKorrect &= assertGrid.getEdge().valid();                     \
         Region<_GRID_TYPE::DIM>::Iterator end = assertRegion.end();     \
         for (Region<_GRID_TYPE::DIM>::Iterator i = assertRegion.begin(); i != end; ++i) { \
-            bool flag = assertGrid.at(*i).valid();                      \
+            bool flag = assertGrid.get(*i).valid();                     \
             if (!flag) {                                                \
                 std::cout << "TestCell not valid\n";                    \
             }                                                           \
-            flag &= (assertGrid.at(*i).isEdgeCell == false);            \
+            flag &= (assertGrid.get(*i).isEdgeCell == false);           \
             if (!flag) {                                                \
                 std::cout << "TestCell claims to be edge cell\n";       \
             }                                                           \
-            flag &= (assertGrid.at(*i).cycleCounter == expectedCycle);  \
+            flag &= (assertGrid.get(*i).cycleCounter == expectedCycle); \
             if (!flag) {                                                \
                 std::cout << "TestCell cycle counter doesn't match expected value (" \
-                          << assertGrid.at(*i).cycleCounter << " != "   \
+                          << assertGrid.get(*i).cycleCounter << " != "  \
                           << expectedCycle << ")\n";                    \
             }                                                           \
             TS_ASSERT(flag);                                            \

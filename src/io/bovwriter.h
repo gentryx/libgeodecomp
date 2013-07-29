@@ -141,7 +141,7 @@ private:
             }
 
             for (std::size_t i = 0; i < effectiveLength; i += dataComponents) {
-                SELECTOR_TYPE()(grid.at(walker), &buffer[i]);
+                SELECTOR_TYPE()(grid.get(walker), &buffer[i]);
                 walker.x()++;
             }
             file.Write(&buffer[0], effectiveLength, datatype);

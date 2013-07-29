@@ -62,7 +62,9 @@ public:
             for (Region<2>::Iterator i = validRegion.begin();
                  i != validRegion.end();
                  ++i) {
-                grid->at(*i).testValue += value;
+                TestCell<2> cell = grid->get(*i);
+                cell.testValue += value;
+                grid->set(*i, cell);
             }
 
             return true;

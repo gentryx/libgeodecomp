@@ -215,13 +215,13 @@ public:
             return false;
         }
 
-        if (edgeCell != other.atEdge()) {
+        if (edgeCell != other.getEdge()) {
             return false;
         }
 
         CoordBox<DIM> box = boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            if ((*this)[*i] != other.at(*i)) {
+            if ((*this)[*i] != other.get(*i)) {
                 return false;
             }
         }
@@ -239,23 +239,22 @@ public:
         return !(*this == other);
     }
 
+    virtual void set(const Coord<DIM>& coord, const CELL_TYPE& cell)
+    {
+        (*this)[coord] = cell;
+    }
 
-    virtual CELL_TYPE& at(const Coord<DIM>& coord)
+    virtual CELL_TYPE get(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
 
-    virtual const CELL_TYPE& at(const Coord<DIM>& coord) const
+    virtual void setEdge(const CELL_TYPE& cell)
     {
-        return (*this)[coord];
+        getEdgeCell() = cell;
     }
 
-    virtual CELL_TYPE& atEdge()
-    {
-        return getEdgeCell();
-    }
-
-    virtual const CELL_TYPE& atEdge() const
+    virtual const CELL_TYPE& getEdge() const
     {
         return getEdgeCell();
     }

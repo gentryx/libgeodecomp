@@ -117,28 +117,32 @@ public:
     virtual void grid(GridBase<Cell, 2> *ret)
     {
         for (int i = 1; i < 90; ++i) {
-            ret->at(Coord<2>(i, 89)) = Cell(0, 1);
+            ret->set(Coord<2>(i, 89), Cell(0, 1));
         }
 
         for (int j = 0; j < 89; ++j) {
             for (int i = 0; i < 90; ++i) {
                 if (i == 0) {
-                    ret->at(Coord<2>(i, j)) = Cell(0, -1);
+                    ret->set(Coord<2>(i, j), Cell(0, -1));
                 } else {
-                    ret->at(Coord<2>(i, j)) = Cell(0);
+                    ret->set(Coord<2>(i, j), Cell(0));
                 }
             }
         }
 
         for (int j = 43; j < 48; ++j) {
             for (int i = 43; i < 48; ++i) {
-                ret->at(Coord<2>(i, j)).direction = BLOCK;
+                Cell c = ret->get(Coord<2>(i, j));
+                c.direction = BLOCK;
+                ret->set(Coord<2>(i, j), c);
             }
         }
 
         for (int j = 23; j < 28; ++j) {
             for (int i = 73; i < 78; ++i) {
-                ret->at(Coord<2>(i, j)).direction = BLOCK;
+                Cell c = ret->get(Coord<2>(i, j));
+                c.direction = BLOCK;
+                ret->set(Coord<2>(i, j), c);
             }
         }
     }

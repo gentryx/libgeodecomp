@@ -59,7 +59,7 @@ public:
             for (int x = 0; x < 250; ++x) {
                 Coord<2> c(x + offsetX, y + offsetY);
                 if (rect.inBounds(c)) {
-                    ret->at(c) = Cell(0.99999999999);
+                    ret->set(c, Cell(0.99999999999));
                 }
             }
         }
@@ -95,12 +95,12 @@ void runSimulation()
         sim(new CellInitializer());
 
     int outputFrequency = 1;
-    // sim.addWriter(
-    //     new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-    //         "./jacobi",
-    //         outputFrequency,
-    //         1,
-    //         1));
+    sim.addWriter(
+        new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+            "jacobi",
+            outputFrequency,
+            1,
+            1));
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, 100));
 
     sim.run();

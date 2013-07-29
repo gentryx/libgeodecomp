@@ -31,13 +31,13 @@ public:
 
     explicit DisplacedGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
-        const CELL_TYPE &defaultCell=CELL_TYPE(),
-        const CELL_TYPE &edgeCell=CELL_TYPE(),
-        const Coord<DIM>& topologicalDimensions=Coord<DIM>()) :
+        const CELL_TYPE &defaultCell = CELL_TYPE(),
+        const CELL_TYPE &edgeCell = CELL_TYPE(),
+        const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
         delegate(box.dimensions, defaultCell, edgeCell),
         origin(box.origin),
         topoDimensions(topologicalDimensions)
-    { }
+    {}
 
     DisplacedGrid(const Delegate& grid,
                   const Coord<DIM>& origin=Coord<DIM>()) :
@@ -105,22 +105,22 @@ public:
         return (const_cast<DisplacedGrid&>(*this))[absoluteCoord];
     }
 
-    virtual CELL_TYPE& at(const Coord<DIM>& coord)
+    virtual void set(const Coord<DIM>& coord, const CELL_TYPE& cell)
+    {
+        (*this)[coord] = cell;
+    }
+
+    virtual CELL_TYPE get(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
 
-    virtual const CELL_TYPE& at(const Coord<DIM>& coord) const
+    virtual void setEdge(const CELL_TYPE& cell)
     {
-        return (*this)[coord];
+        getEdgeCell() = cell;
     }
 
-    virtual CELL_TYPE& atEdge()
-    {
-        return getEdgeCell();
-    }
-
-    virtual const CELL_TYPE& atEdge() const
+    virtual const CELL_TYPE& getEdge() const
     {
         return getEdgeCell();
     }
@@ -133,8 +133,9 @@ public:
     inline void paste(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            const CELL_TYPE *start = &grid.at(i->origin);
-            std::copy(start, start + i->length(), &at(i->origin));
+            for (Coord<DIM> c = i->origin; c.x() < i->endX; ++c.x()) {
+                (*this)[c] = grid.get(c);
+            }
         }
     }
 

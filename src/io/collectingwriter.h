@@ -58,9 +58,14 @@ public:
             }
 
             globalGrid.paste(grid, validRegion);
-            globalGrid.atEdge() = grid.atEdge();
+            globalGrid.setEdge(grid.getEdge());
         }
 
+        CoordBox<DIM> box = grid.boundingBox();
+        StorageGridType localGrid(box);
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            localGrid[*i] = grid.get(*i);
+        }
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
             if (sender != root) {
@@ -78,7 +83,7 @@ public:
                     if (sender == mpiLayer.rank()) {
                         mpiLayer.sendRegion(validRegion, root);
                         mpiLayer.sendUnregisteredRegion(
-                            &grid,
+                            &localGrid,
                             validRegion,
                             root,
                             MPILayer::PARALLEL_MEMORY_WRITER,

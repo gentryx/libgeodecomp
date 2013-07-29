@@ -99,8 +99,9 @@ private:
         if (inCircle(*this, Coord<2>(0, 0)) &&
             inCircle(*this, Coord<2>(1, 0)) &&
             inCircle(*this, Coord<2>(0, 1)) &&
-            inCircle(*this, Coord<2>(1, 1)))
+            inCircle(*this, Coord<2>(1, 1))) {
             state = SOLID;
+        }
     }
 
     void updateSolid()
@@ -136,9 +137,11 @@ public:
             CircleCell(std::make_pair(0.5, 0.5), 0.4));
 
         for (std::vector<std::pair<Coord<2>, CircleCell> >::iterator i =
-                 seeds.begin(); i != seeds.end(); ++i)
-            if (rect.inBounds(i->first))
-                ret->at(i->first) = i->second;
+                 seeds.begin(); i != seeds.end(); ++i) {
+            if (rect.inBounds(i->first)) {
+                ret->set(i->first, i->second);
+            }
+        }
     }
 };
 
@@ -147,10 +150,12 @@ class CellToColor
 public:
     Color operator()(const CircleCell& cell)
     {
-        if (cell.state == CircleCell::SOLID)
+        if (cell.state == CircleCell::SOLID) {
             return Color::RED;
-        if (cell.state == CircleCell::SOLIDIFYING)
+        }
+        if (cell.state == CircleCell::SOLIDIFYING) {
             return Color::GREEN;
+        }
         return Color::BLACK;
     }
 };

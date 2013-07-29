@@ -52,7 +52,7 @@ public:
     virtual void grid(GridBase<BuggyCell, 2> *ret)
     {
         CoordBox<2> rect = ret->boundingBox();
-        ret->atEdge() = BuggyCell();
+        ret->setEdge(BuggyCell());
         std::string buf;
         int width;
         int height;
@@ -67,8 +67,9 @@ public:
                 input >> c >> c >> c;
                 std::cout << ((c == 0)? " " : "x");
                 Coord<2> pos(x, y);
-                if (rect.inBounds(pos))
-                    ret->at(pos) = BuggyCell(c);
+                if (rect.inBounds(pos)) {
+                    ret->set(pos, BuggyCell(c));
+                }
             }
             std::cout << "\n";
         }

@@ -32,7 +32,9 @@ public:
 
         // edge cell is the last element of the header:
         file.Seek(headerLength - cellLength, MPI_SEEK_SET);
-        file.Read(&grid->atEdge(), 1, mpiDatatype);
+        CELL_TYPE cell;
+        file.Read(&cell, 1, mpiDatatype);
+        grid->setEdge(cell);
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
@@ -45,7 +47,15 @@ public:
                 offset(headerLength, coord, dimensions, cellLength),
                 MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
-            file.Read(&grid->at(i->origin), length, mpiDatatype);
+            SuperVector<CELL_TYPE> vec(length);
+
+            file.Read(&vec[0], length, mpiDatatype);
+
+            Coord<DIM> c = i->origin;
+            for (int index = 0; index < length; ++index) {
+                grid->set(c, vec[index]);
+                ++c.x();
+            }
         }
 
         file.Close();
@@ -83,10 +93,11 @@ public:
         getLengths<DIM>(&headerLength, &cellLength, mpiDatatype);
 
         if (comm.Get_rank() == 0) {
-            file.Write(&dimensions,         1, Typemaps::lookup<Coord<DIM> >());
-            file.Write(&step,               1, MPI::UNSIGNED);
-            file.Write(&maxSteps,           1, MPI::UNSIGNED);
-            file.Write(&grid.atEdge(),      1, mpiDatatype);
+            CELL_TYPE cell = grid.getEdge();
+            file.Write(&dimensions, 1, Typemaps::lookup<Coord<DIM> >());
+            file.Write(&step,       1, MPI::UNSIGNED);
+            file.Write(&maxSteps,   1, MPI::UNSIGNED);
+            file.Write(&cell,       1, mpiDatatype);
         }
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
@@ -99,7 +110,14 @@ public:
             file.Seek(offset(headerLength, coord, dimensions, cellLength),
                       MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
-            file.Write(&grid.at(i->origin), length, mpiDatatype);
+            SuperVector<CELL_TYPE> vec(length);
+
+            Coord<DIM> c = i->origin;
+            for (int index = 0; index < length; ++index) {
+                vec[index] = grid.get(c);
+                ++c.x();
+            }
+            file.Write(&vec[0], length, mpiDatatype);
         }
 
         file.Close();
