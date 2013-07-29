@@ -27,7 +27,7 @@ public:
 
     Interactor(
         const std::string& command,
-        int feedbackLines,
+        size_t feedbackLines,
         bool threaded,
         int port,
         const std::string& host = "127.0.0.1") :
@@ -117,7 +117,7 @@ private:
     boost::condition_variable signal;
     boost::mutex mutex;
     std::string command;
-    int feedbackLines;
+    size_t feedbackLines;
     int port;
     std::string host;
     bool started;

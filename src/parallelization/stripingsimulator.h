@@ -200,7 +200,7 @@ private:
             validateLoads(newWorkloads, oldWorkloads);
             newPartitionsSendBuffer = workloadsToPartitions(newWorkloads);
 
-            for (unsigned i = 0; i < mpilayer.size(); i++) {
+            for (size_t i = 0; i < mpilayer.size(); i++) {
                 mpilayer.sendVec(&newPartitionsSendBuffer, i, BALANCELOADS);
             }
         }

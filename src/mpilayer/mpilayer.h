@@ -174,7 +174,7 @@ public:
     /**
      * returns the number of nodes in the communicator.
      */
-    int size() const
+    size_t size() const
     {
         return comm->Get_size();
     }
@@ -182,7 +182,7 @@ public:
     /**
      * returns the id number of the current node.
      */
-    int rank() const
+    size_t rank() const
     {
         return comm->Get_rank();
     }
