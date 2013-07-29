@@ -126,13 +126,13 @@ public:
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
             StringVec feedback = steerer->sendCommandWithFeedback("flush 1234 9", 1);
-            TS_ASSERT_EQUALS(1, feedback.size());
+            TS_ASSERT_EQUALS(size_t(1), feedback.size());
             TS_ASSERT_EQUALS("flush received", feedback[0]);
         }
 
         sim->run();
 
-        TS_ASSERT_EQUALS(writer->getGrids().size(), 16);
+        TS_ASSERT_EQUALS(writer->getGrids().size(), static_cast<size_t>(16));
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(3, 3)].testValue, 64.0);
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(4, 3)].testValue, 65.0);
 

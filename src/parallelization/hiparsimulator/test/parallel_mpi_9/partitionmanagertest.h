@@ -73,7 +73,7 @@ public:
                                  manager.getInnerGhostZoneFragments()[i]);
             } else {
                 TS_ASSERT_EQUALS(
-                    manager.getOuterGhostZoneFragments().count(i), 0);
+                    manager.getOuterGhostZoneFragments().count(i), unsigned(0));
                 if (manager.getOuterGhostZoneFragments().count(i) != 0)
                     std::cerr << "rank: " << layer.rank() << "\n"
                               << "i: " << i << "\n"

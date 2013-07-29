@@ -80,15 +80,15 @@ public:
     void testGhostHeight()
     {
         if (rank == 0) {
-            TS_ASSERT_EQUALS(0, testSim->ghostHeightUpper);
+            TS_ASSERT_EQUALS(unsigned(0), testSim->ghostHeightUpper);
         } else {
-            TS_ASSERT_EQUALS(1, testSim->ghostHeightUpper);
+            TS_ASSERT_EQUALS(unsigned(1), testSim->ghostHeightUpper);
         }
 
         if (rank == (size - 1)) {
-            TS_ASSERT_EQUALS(0, testSim->ghostHeightLower);
+            TS_ASSERT_EQUALS(unsigned(0), testSim->ghostHeightLower);
         } else {
-            TS_ASSERT_EQUALS(1, testSim->ghostHeightLower);
+            TS_ASSERT_EQUALS(unsigned(1), testSim->ghostHeightLower);
         }
     }
 

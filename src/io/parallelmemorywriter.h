@@ -68,7 +68,7 @@ public:
         mpiLayer.waitAll();
     }
 
-    void sendRecvGrid(int sender, int receiver, const GridType& grid, const Region<DIM>& validRegion, int step)
+    void sendRecvGrid(size_t sender, size_t receiver, const GridType& grid, const Region<DIM>& validRegion, int step)
     {
         if (sender == mpiLayer.rank()) {
             mpiLayer.sendRegion(validRegion, receiver);

@@ -448,40 +448,45 @@ private:
 
     int lowerNeighbor() const
     {
-        int lowerNeighbor;
+        size_t lowerNeighbor;
 
         if (WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
             while (lowerNeighbor != mpilayer.rank() &&
-                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1])
+                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
                 lowerNeighbor = (size + lowerNeighbor + 1) % size;
+            }
         } else {
              lowerNeighbor = mpilayer.rank() + 1;
             while (lowerNeighbor != mpilayer.size() &&
-                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1])
+                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
                 lowerNeighbor++;
-            if (lowerNeighbor == mpilayer.size())
+            }
+            if (lowerNeighbor == mpilayer.size()) {
                 lowerNeighbor = -1;
+            }
         }
         return lowerNeighbor;
     }
 
     int upperNeighbor() const
     {
-        int upperNeighbor;
+        size_t upperNeighbor;
 
         if (WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
             while (upperNeighbor != mpilayer.rank() &&
-                   partitions[upperNeighbor] == partitions[upperNeighbor + 1])
+                   partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
                 upperNeighbor = (size + upperNeighbor - 1) % size;
+            }
         } else {
             upperNeighbor = mpilayer.rank() - 1;
             while (upperNeighbor >= 0 &&
-                   partitions[upperNeighbor] == partitions[upperNeighbor + 1])
+                   partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
                 --upperNeighbor;
+            }
         }
 
         return upperNeighbor;
@@ -490,7 +495,7 @@ private:
     WeightVec partitionsToWorkloads(const WeightVec& partitions) const
     {
         WeightVec ret(partitions.size() - 1);
-        for (unsigned i = 0; i < ret.size(); i++) {
+        for (size_t i = 0; i < ret.size(); i++) {
             ret[i] = partitions[i + 1] - partitions[i];
         }
         return ret;
@@ -500,7 +505,7 @@ private:
     {
         WeightVec ret(workloads.size() + 1);
         ret[0] = 0;
-        for (unsigned i = 0; i < workloads.size(); i++) {
+        for (size_t i = 0; i < workloads.size(); i++) {
             ret[i + 1] = ret[i] + workloads[i];
         }
         return ret;
@@ -521,7 +526,7 @@ private:
             newPartitions[mpilayer.rank()    ];
         unsigned newEndRow =
             newPartitions[mpilayer.rank() + 1];
-        for (int i = 0; i < newPartitions.size(); ++i) {
+        for (size_t i = 0; i < newPartitions.size(); ++i) {
             unsigned sourceStartRow = oldPartitions[i];
             unsigned sourceEndRow   = oldPartitions[i + 1];
 
@@ -544,7 +549,7 @@ private:
             oldPartitions[mpilayer.rank()    ];
         unsigned oldEndRow =
             oldPartitions[mpilayer.rank() + 1];
-        for (int i = 0; i < newPartitions.size(); ++i) {
+        for (size_t i = 0; i < newPartitions.size(); ++i) {
             unsigned targetStartRow = newPartitions[i];
             unsigned targetEndRow   = newPartitions[i + 1];
 

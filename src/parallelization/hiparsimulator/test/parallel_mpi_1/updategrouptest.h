@@ -60,7 +60,7 @@ public:
         expected.push_back(8);
         std::deque<std::size_t> actual = mockPatchAccepter->getOfferedNanoSteps();
         TS_ASSERT_EQUALS(actual, expected);
-        TS_ASSERT_EQUALS(10, updateGroup->grid()[Coord<3>(1, 2, 3)].cycleCounter);
+        TS_ASSERT_EQUALS(static_cast<unsigned>(10), updateGroup->grid()[Coord<3>(1, 2, 3)].cycleCounter);
     }
 
 private:

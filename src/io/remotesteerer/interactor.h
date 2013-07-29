@@ -150,7 +150,7 @@ private:
     {
         LOG(DBG, "Interactor::handleInput(" << lines << ")");
         // only add lines which are not equal to "\0"
-        for (int i = 0; i < lines.size(); ++i) {
+        for (size_t i = 0; i < lines.size(); ++i) {
             const std::string& line = lines[i];
             if (line == "") {
                 LOG(WARN, "Interactor rejects empty line as feedback");

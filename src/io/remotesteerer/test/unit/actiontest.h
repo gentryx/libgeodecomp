@@ -36,7 +36,7 @@ public:
                    << "matey";
         action(parameters, pipe);
         StringVec feedback = pipe.retrieveSteeringFeedback();
-        TS_ASSERT_EQUALS(feedback.size(), 1);
+        TS_ASSERT_EQUALS(feedback.size(), size_t(1));
         TS_ASSERT_EQUALS(feedback[0], "MockAction mocks you! arrrr");
     }
 };

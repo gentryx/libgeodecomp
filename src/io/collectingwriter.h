@@ -24,8 +24,8 @@ public:
 
     CollectingWriter(
         Writer<CELL_TYPE> *writer,
-        const unsigned period = 1,
-        const int root = 0,
+        unsigned period = 1,
+        size_t root = 0,
         MPI::Comm *communicator = &MPI::COMM_WORLD,
         MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
         ParallelWriter<CELL_TYPE>("",  period),
@@ -67,7 +67,7 @@ public:
             localGrid[*i] = grid.get(*i);
         }
 
-        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
+        for (size_t sender = 0; sender < mpiLayer.size(); ++sender) {
             if (sender != root) {
                 if (mpiLayer.rank() == root) {
                     Region<DIM> recvRegion;
@@ -103,7 +103,7 @@ public:
 private:
     boost::shared_ptr<Writer<CELL_TYPE> > writer;
     MPILayer mpiLayer;
-    int root;
+    size_t root;
     StorageGridType globalGrid;
     MPI::Datatype datatype;
 };

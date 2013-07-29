@@ -331,7 +331,7 @@ public:
     {
         SuperVector<int> displacements(size());
         displacements[0] = 0;
-        for (int i = 0; i < size() - 1; ++i) {
+        for (size_t i = 0; i < size() - 1; ++i) {
             displacements[i + 1] = displacements[i] + lengths[i];
         }
         comm->Allgatherv(source, lengths[rank()], datatype, &(target->front()), &(lengths.front()), &(displacements.front()), datatype);
@@ -368,7 +368,7 @@ public:
         SuperVector<int> displacements(size());
         if (rank() == root) {
             displacements[0] = 0;
-            for (int i = 0; i < size() - 1; ++i) {
+            for (size_t i = 0; i < size() - 1; ++i) {
                 displacements[i + 1] = displacements[i] + lengths[i];
             }
         }

@@ -25,8 +25,8 @@ public:
 
         pipe.sync();
 
-        TS_ASSERT_EQUALS(pipe.steeringRequests.size(), 2);
-        TS_ASSERT_EQUALS(pipe.steeringFeedback.size(), 0);
+        TS_ASSERT_EQUALS(pipe.steeringRequests.size(), size_t(2));
+        TS_ASSERT_EQUALS(pipe.steeringFeedback.size(), size_t(0));
 
         TS_ASSERT_EQUALS(pipe.steeringRequests[0], "set heat 0.1 100 120 110");
         TS_ASSERT_EQUALS(pipe.steeringRequests[1], "set flow 6.9 100 120 110");

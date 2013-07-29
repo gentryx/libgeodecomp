@@ -94,10 +94,10 @@ public:
         }
 
         // notify all PatchAccepters of the process' region:
-        for (int i = 0; i < patchAcceptersGhost.size(); ++i) {
+        for (size_t i = 0; i < patchAcceptersGhost.size(); ++i) {
             patchAcceptersGhost[i]->setRegion(partitionManager->ownRegion());
         }
-        for (int i = 0; i < patchAcceptersInner.size(); ++i) {
+        for (size_t i = 0; i < patchAcceptersInner.size(); ++i) {
             patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
         }
 
