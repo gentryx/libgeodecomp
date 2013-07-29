@@ -9,10 +9,10 @@ class ImageTest : public CxxTest::TestSuite
 {
 public:
     void testWidthAndHeight() {
-        unsigned width  = 123;
-        unsigned height = 234;
+        int width  = 123;
+        int height = 234;
         Image img(width, height);
-        TS_ASSERT_EQUALS(img.getDimensions().x(),  width);
+        TS_ASSERT_EQUALS(img.getDimensions().x(), width);
         TS_ASSERT_EQUALS(img.getDimensions().y(), height);
     }
 

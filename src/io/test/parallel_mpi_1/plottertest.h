@@ -50,13 +50,13 @@ public:
     {
         unsigned gridDimX = 2;
         unsigned gridDimY = 3;
-        unsigned expectedDimX = gridDimX * width;
-        unsigned expectedDimY = gridDimY * height;
+        int expectedDimX = gridDimX * width;
+        int expectedDimY = gridDimY * height;
 
         Grid<TestCell<2> > testGrid(Coord<2>(gridDimX, gridDimY));
         Image result = plotter->plotGrid(testGrid);
 
-        TS_ASSERT_EQUALS(result.getDimensions().x(),  expectedDimX);
+        TS_ASSERT_EQUALS(result.getDimensions().x(), expectedDimX);
         TS_ASSERT_EQUALS(result.getDimensions().y(), expectedDimY);
     }
 
@@ -107,8 +107,8 @@ public:
 
         int x = 15;
         int y = 10;
-        unsigned width = 40;
-        unsigned height = 80;
+        int width = 40;
+        int height = 80;
 
         int colorWidth = uncut.getDimensions().x() - x;
         int colorHeight = uncut.getDimensions().y() - y;

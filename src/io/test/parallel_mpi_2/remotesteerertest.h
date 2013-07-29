@@ -161,7 +161,7 @@ public:
             res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 2);
 
             std::cout << "res: " << res << "\n";
-            TS_ASSERT_EQUALS(res.size(), 2);
+            TS_ASSERT_EQUALS(res.size(), size_t(2));
             TS_ASSERT_EQUALS(res[0], "command not found: nonExistentAction");
             TS_ASSERT_EQUALS(res[1], "try \"help\"");
         }
@@ -225,7 +225,7 @@ public:
         if (interactor) {
             interactor->waitForCompletion();
             StringVec feedback = interactor->feedback();
-            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback.size(), size_t(2));
             TS_ASSERT_EQUALS(feedback[0], "handler not found: echo");
             TS_ASSERT_EQUALS(feedback[1], "echo reply from rank 1 at time step 0 with cargo »romeo,tango,yankee,papa,echo«");
         }
@@ -258,7 +258,7 @@ public:
         if (interactor) {
             interactor->waitForCompletion();
             StringVec feedback = interactor->feedback();
-            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback.size(), size_t(2));
             TS_ASSERT_EQUALS(feedback[1], "handler not found: echo");
             TS_ASSERT_EQUALS(feedback[0], "echo reply from rank 0 at time step 0 with cargo »romeo,tango,yankee,papa,echo«");
         }
@@ -290,7 +290,7 @@ public:
         if (interactor) {
             interactor->waitForCompletion();
             StringVec feedback = interactor->feedback();
-            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback.size(), size_t(2));
             TS_ASSERT_EQUALS(feedback[0], "handler not found: echo");
             TS_ASSERT_EQUALS(feedback[1], "handler not found: echo");
         }

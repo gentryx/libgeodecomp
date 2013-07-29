@@ -31,13 +31,13 @@ public:
         Coord<DIM> c;
         int index;
 
-        int t = StringOps::atoi(parameters[0]);
+        unsigned time = StringOps::atoi(parameters[0]);
 
         for (index = 1; index < DIM; ++index) {
             c[index] = StringOps::atoi(parameters[index]);
         }
 
-        if (step > t) {
+        if (step > time) {
             return true;
         }
 

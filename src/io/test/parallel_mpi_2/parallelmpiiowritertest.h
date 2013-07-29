@@ -60,7 +60,7 @@ public:
             SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected =
                 memoryWriter->getGrids();
             SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > actual;
-            for (int i = 0; i <= 21; i += (i == 20)? 1 : 4) {
+            for (unsigned i = 0; i <= 21; i += (i == 20)? 1 : 4) {
                 std::string filename = writer->filename(i);
                 files.push_back(filename);
 
@@ -81,7 +81,7 @@ public:
                     MPI::COMM_SELF);
 
                 TS_ASSERT_EQUALS(step, i);
-                TS_ASSERT_EQUALS(maxSteps, 21);
+                TS_ASSERT_EQUALS(maxSteps, unsigned(21));
                 actual.push_back(buffer);
             }
 

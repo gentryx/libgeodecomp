@@ -65,7 +65,7 @@ public:
                 region);
 
             TS_ASSERT_EQUALS(step, i);
-            TS_ASSERT_EQUALS(maxSteps, 21);
+            TS_ASSERT_EQUALS(maxSteps, unsigned(21));
             actual.push_back(buffer);
         }
 
