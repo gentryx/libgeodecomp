@@ -21,7 +21,9 @@ public:
 
         virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion, unsigned step)
         {
-            grid->at(Coord<2>(1, 1)).testValue = 4711;
+            TestCell<2> cell = grid->get(Coord<2>(1, 1));
+            cell.testValue = 4711;
+            grid->set(Coord<2>(1, 1), cell);
             pipe.addSteeringFeedback("MockHandler mocks you! " + parameters[0]);
             return true;
         }
