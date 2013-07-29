@@ -26,7 +26,7 @@ namespace HpxSimulator {
 namespace Implementation {
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, std::size_t overcommitFactor)
+createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, float overcommitFactor)
 {
     typedef hpx::util::remote_locality_result ValueType;
     typedef std::pair<std::size_t, std::vector<ValueType> > ResultType;
@@ -42,7 +42,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         hpx::components::server::runtime_support::bulk_create_components_action
         ActionType;
 
-    std::size_t numComponents = hpx::get_os_thread_count() * overcommitFactor;
+    std::size_t numComponents = std::ceil(hpx::get_os_thread_count() * overcommitFactor);
 
     typedef hpx::future<std::vector<hpx::naming::gid_type> > FutureType;
 

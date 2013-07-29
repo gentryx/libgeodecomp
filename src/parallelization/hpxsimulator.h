@@ -13,7 +13,7 @@
 
 #include <boost/serialization/shared_ptr.hpp>
 
-#define LIBGEDECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)         \
+#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)        \
     typedef                                                                     \
         SIMULATOR ::UpdateGroupType::ComponentType                              \
         BOOST_PP_CAT(NAME, UpdateGroupType);                                    \
@@ -30,6 +30,10 @@
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
+    );                                                                          \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), BoundingBoxAction)        \
     );                                                                          \
@@ -39,7 +43,7 @@
     );                                                                          \
 /**/
 
-#define LIBGEDECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                     \
+#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                    \
     typedef                                                                     \
         hpx::components::managed_component<                                     \
             BOOST_PP_CAT(NAME, UpdateGroupType)                                 \
@@ -60,6 +64,10 @@
     HPX_REGISTER_ACTION(                                                        \
         BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
+    );                                                                          \
+    HPX_REGISTER_ACTION(                                                        \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
         BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
@@ -95,7 +103,7 @@ public:
 public:
     inline HpxSimulator(
         Initializer<CELL_TYPE> *initializer,
-        const std::size_t overcommitFactor,
+        const float overcommitFactor,
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1) :
@@ -113,6 +121,13 @@ public:
         initSimulation();
         std::size_t lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
         nanoStep(lastNanoStep);
+    }
+
+    void stop()
+    {
+        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
+            ug.stop();
+        }
     }
 
     inline void step()
@@ -151,7 +166,7 @@ private:
     using DistributedSimulator<CELL_TYPE>::steerers;
     using DistributedSimulator<CELL_TYPE>::writers;
 
-    std::size_t overcommitFactor;
+    float overcommitFactor;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;

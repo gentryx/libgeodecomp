@@ -15,10 +15,31 @@
     )                                                                           \
                                                                                 \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentType::ConnectParallelWriterAction,            \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ConnectParallelWriterAction) \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentType::ConnectSerialWriterAction,              \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ConnectSerialWriterAction)   \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentType::DisconnectWriterAction,                 \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), DisconnectWriterAction)      \
+    )                                                                           \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentType::NumUpdateGroupsAction,                  \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), NumUpdateGroupsAction)       \
+    )                                                                           \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
+        TYPE ::SinkType::ComponentCreateActionType,                             \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), CreateAction)                \
+    )                                                                           \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
         TYPE ::SinkType::ComponentWriterCreateActionType,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), WriterCreateAction)          \
     )                                                                           \
-                                                                                \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
         TYPE ::SinkType::ComponentParallelWriterCreateActionType,               \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ParallelWriterCreateAction)  \
@@ -44,6 +65,30 @@
     )                                                                           \
                                                                                 \
     HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentType::ConnectParallelWriterAction,            \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ConnectParallelWriterAction) \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentType::ConnectSerialWriterAction,              \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), ConnectSerialWriterAction)   \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentType::DisconnectWriterAction,                 \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), DisconnectWriterAction)      \
+    )                                                                           \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentType::NumUpdateGroupsAction,                  \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), NumUpdateGroupsAction)       \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
+        TYPE ::SinkType::ComponentCreateActionType,                             \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), CreateAction)                \
+    )                                                                           \
+                                                                                \
+    HPX_REGISTER_ACTION(                                                        \
         TYPE ::SinkType::ComponentWriterCreateActionType,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, SinkType), WriterCreateAction)          \
     )                                                                           \
@@ -56,7 +101,7 @@
 
 namespace LibGeoDecomp {
 
-template <typename CELL_TYPE>
+template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterCollector : public ParallelWriter<CELL_TYPE>
 {
 public:
@@ -72,21 +117,17 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::RegionType RegionType;
     typedef typename ParallelWriter<CELL_TYPE>::CoordType CoordType;
 
-    typedef HpxWriterSink<CELL_TYPE> SinkType;
+    typedef HpxWriterSink<CELL_TYPE, CONVERTER> SinkType;
 
-    HpxWriterCollector() {}
-
-    HpxWriterCollector(
-        unsigned period,
-        const HpxWriterSink<CELL_TYPE>& sink) :
-        ParallelWriter<CELL_TYPE>("", period),
+    HpxWriterCollector(const SinkType& sink) :
+        ParallelWriter<CELL_TYPE>("", sink.getPeriod()),
         sink(sink)
     {
     }
 
     ParallelWriter<CELL_TYPE> * clone()
     {
-        return new HpxWriterCollector(period, sink);
+        return new HpxWriterCollector(sink);
     }
 
     void stepFinished(
@@ -107,6 +148,8 @@ public:
 
 private:
     SinkType sink;
+
+    HpxWriterCollector() {}
 
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)

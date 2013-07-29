@@ -22,7 +22,7 @@ typedef
     CreateUpdateGroupsReturnType;
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, std::size_t overcommitFactor);
+createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, float overcommitFactor);
 
 HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
@@ -30,7 +30,7 @@ HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
 template <class UPDATEGROUP>
 inline std::vector<UPDATEGROUP> createUpdateGroups(
-    std::size_t overcommitFactor
+    float overcommitFactor
 )
 {
     hpx::components::component_type type =

@@ -96,6 +96,12 @@ public:
     {
         return !(*this == a);
     }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & c[0];
+    }
 };
 
 template<>
@@ -187,6 +193,13 @@ public:
     bool operator!=(const FloatCoord<2>& a) const
     {
         return !(*this == a);
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & c[0];
+        ar & c[1];
     }
 };
 
@@ -288,6 +301,14 @@ public:
     bool operator!=(const FloatCoord<3>& a) const
     {
         return !(*this == a);
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & c[0];
+        ar & c[1];
+        ar & c[2];
     }
 };
 
