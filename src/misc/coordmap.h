@@ -20,7 +20,8 @@ public:
     const static int DIM = GRID_TYPE::DIM;
 
     inline CoordMap(const Coord<DIM>& origin, const GRID_TYPE *grid) :
-        _origin(origin), _grid(grid) {};
+        origin(origin), grid(grid)
+    {}
 
     /**
      * This operator doesn't implement out-of-bounds-checking. This
@@ -31,7 +32,7 @@ public:
      */
     inline const CELL_TYPE& operator[](const Coord<DIM>& relCoord) const
     {
-        return (*_grid)[_origin + relCoord];
+        return (*grid)[origin + relCoord];
     }
 
     template<int X, int Y, int Z>
@@ -42,12 +43,12 @@ public:
 
     std::string toString() const
     {
-        return "CoordMap origin: " + _origin.toString() + "\n";
+        return "CoordMap origin: " + origin.toString() + "\n";
     }
 
 private:
-    Coord<DIM> _origin;
-    const GRID_TYPE *_grid;
+    Coord<DIM> origin;
+    const GRID_TYPE *grid;
 };
 
 };

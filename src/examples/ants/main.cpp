@@ -181,15 +181,17 @@ public:
 
     virtual void grid(GridBase<Cell, 2> *ret)
     {
-        ret->atEdge() = Cell(Cell::BARRIER);
+        ret->setEdge(Cell(Cell::BARRIER));
         int numAnts =  100;
         int numFood = 500;
 
-        for (int i = 0; i < numFood; ++i)
-            ret->at(randCoord()) = Cell(Cell::FOOD);
+        for (int i = 0; i < numFood; ++i) {
+            ret->set(randCoord(), Cell(Cell::FOOD));
+        }
 
-        for (int i = 0; i < numAnts; ++i)
-            ret->at(randCoord()) = Cell(Cell::IDLE_ANT);
+        for (int i = 0; i < numAnts; ++i) {
+            ret->set(randCoord(), Cell(Cell::IDLE_ANT));
+        }
     }
 
 private:
