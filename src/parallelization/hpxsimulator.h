@@ -170,7 +170,7 @@ private:
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    HiParSimulator::PartitionManager<DIM, Topology> partitionManager;
+    HiParSimulator::PartitionManager<Topology> partitionManager;
     std::vector<UpdateGroupType> updateGroups;
     boost::atomic<bool> initialized;
 

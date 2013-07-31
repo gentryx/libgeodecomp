@@ -116,7 +116,7 @@ public:
              i != startCells.end();
              ++i) {
             if (rect.inBounds(*i)) {
-                ret->at(*i) = ConwayCell(true);
+                ret->set(*i, ConwayCell(true));
             }
         }
     }

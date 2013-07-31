@@ -142,7 +142,7 @@ private:
             i != boundingBox.end();
             ++i)
         {
-            SELECTOR_TYPE()(grid.at(*i), &buffer[j]);
+            SELECTOR_TYPE()(grid.get(*i), &buffer[j]);
             j += dataComponents;
         }
 
