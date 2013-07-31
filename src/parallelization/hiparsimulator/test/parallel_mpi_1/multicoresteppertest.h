@@ -28,7 +28,7 @@ public:
         patchAccepter->pushRequest(10);
         patchAccepter->pushRequest(13);
 
-        partitionManager.reset(new PartitionManager<2>(rect));
+        partitionManager.reset(new PartitionManager<Topologies::Cube<2>::Topology>(rect));
         // stepper.reset(
         //     new StepperType(partitionManager, init));
 
@@ -42,7 +42,7 @@ public:
 
 private:
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
-    boost::shared_ptr<PartitionManager<2> > partitionManager;
+    boost::shared_ptr<PartitionManager<Topologies::Cube<2>::Topology> > partitionManager;
     boost::shared_ptr<StepperType> stepper;
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };

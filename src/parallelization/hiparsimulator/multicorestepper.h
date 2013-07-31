@@ -9,7 +9,7 @@ namespace HiParSimulator {
 
 template<typename CELL_TYPE>
 class MulticoreStepper
-// fixme: not enabled yet
+// fixme: not enabled yet (use code from cacheblockingstepper)
 // : public StepperHelper<
 //     DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology, true> >
 {

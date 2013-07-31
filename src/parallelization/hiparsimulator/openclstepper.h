@@ -26,8 +26,7 @@ public:
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<
-        DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<typename CELL_TYPE::Topology> PartitionManagerType;
 
     using Stepper<CELL_TYPE>::initializer;
     using Stepper<CELL_TYPE>::partitionManager;

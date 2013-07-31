@@ -29,7 +29,7 @@ public:
     const static int DIM = Topology::DIM;
 
     typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
-    typedef PartitionManager<DIM, Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
     typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;
     typedef std::deque<PatchProviderPtr> PatchProviderList;

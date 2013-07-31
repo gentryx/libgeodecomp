@@ -16,7 +16,7 @@ public:
     void setUp()
     {
         layer = MPILayer();
-        manager = PartitionManager<2>();
+        manager = PartitionManager<Topologies::Cube<2>::Topology>();
         dimensions = Coord<2>(20, 400);
 
         // assume this is a dual cluster setup and on the current
@@ -161,7 +161,7 @@ public:
 
 private:
     MPILayer layer;
-    PartitionManager<2> manager;
+    PartitionManager<Topologies::Cube<2>::Topology> manager;
     boost::shared_ptr<StripingPartition<2> > partition;
     Coord<2> dimensions;
     SuperVector<long> weights;

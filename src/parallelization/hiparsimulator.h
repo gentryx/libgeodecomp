@@ -148,7 +148,7 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     EventMap events;
-    PartitionManager<DIM, Topology> partitionManager;
+    PartitionManager<Topology> partitionManager;
     MPI::Comm *communicator;
     MPI::Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
