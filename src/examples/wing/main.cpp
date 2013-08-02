@@ -68,6 +68,7 @@ double PERPENDICULAR_DIRS[][2] = {{DIAG, -DIAG},
                                   {-DIAG, DIAG}};
 
 const double INFLUENCE_FACTOR = 0.04;
+// fixme: reduce this to 1 influence?
 double INFLUENCES[] =
     {INFLUENCE_FACTOR * FLOW_DIFFUSION, FLOW_DIFFUSION, INFLUENCE_FACTOR * FLOW_DIFFUSION,
      FLOW_DIFFUSION, FLOW_DIFFUSION,
@@ -92,14 +93,14 @@ public:
         return 1;
     }
 
-    Cell(const State& _state = LIQUID,
-         const double& _quantity = 0,
-         const double& _velocityX = 0,
-         const double& _velocityY = 0) :
-        state(_state),
-        quantity(_quantity),
-        velocityX(_velocityX),
-        velocityY(_velocityY)
+    Cell(const State& state = LIQUID,
+         const double& quantity = 0,
+         const double& velocityX = 0,
+         const double& velocityY = 0) :
+        state(state),
+        quantity(quantity),
+        velocityX(velocityX),
+        velocityY(velocityY)
     {}
 
     template<class COORD_MAP>
@@ -162,13 +163,6 @@ public:
         *newQuantity += totalFlow;
 
         double pressureCoefficient = length * PRESSURE_SPEED * fluxPressure;
-        // double influxVelocityX;
-        // double influxVelocityY;
-        // pruneVelocity(&influxVelocityX, &influxVelocityY, dir,
-        //               other.velocityX, other.velocityY,
-        //               PERPENDICULAR_DIRS[i]);
-        // *fluxVelocityX += (influxVelocityX - dir.x() * pressureCoefficient) * fluxPressure;
-        // *fluxVelocityY += (influxVelocityY - dir.y() * pressureCoefficient) * fluxPressure;
         *fluxVelocityX += -dir.x() * pressureCoefficient;
         *fluxVelocityY += -dir.y() * pressureCoefficient;
     }
@@ -244,27 +238,6 @@ public:
         quantity = newQuantity;
     }
 
-    // fixme: remove this
-    static void pruneVelocity(
-        double *influxVelocityX, double *influxVelocityY,
-        const Coord<2>& dir,
-        const double& otherVelocityX, const double& otherVelocityY,
-        const double *perpendicularDir)
-    {
-        double prod = otherVelocityX * dir.x() + otherVelocityY * dir.y();
-
-        if (prod > 0) {
-            double prod =
-                perpendicularDir[0] * otherVelocityX +
-                perpendicularDir[1] * otherVelocityY;
-            *influxVelocityX = perpendicularDir[0] * prod;
-            *influxVelocityY = perpendicularDir[1] * prod;
-        } else {
-            *influxVelocityX = otherVelocityX;
-            *influxVelocityY = otherVelocityY;
-        }
-    }
-
     State state;
     double quantity;
     double velocityX;
@@ -331,9 +304,9 @@ public:
     using LibGeoDecomp::SimpleInitializer<Cell>::dimensions;
 
     AeroInitializer(
-        const Coord<2>& _dim,
-        const unsigned& _steps) :
-        SimpleInitializer<Cell>(_dim, _steps)
+        const Coord<2>& dim,
+        const unsigned& steps) :
+        SimpleInitializer<Cell>(dim, steps)
     {}
 
     virtual void grid(GridBase<Cell, 2> *grid)
@@ -351,7 +324,7 @@ public:
 
 #if SETUP==WING
         addInletOutlet(grid);
-        // fixme:
+        // fixme: make this configurable by command line
         //        addWing(grid);
 #endif
     }
