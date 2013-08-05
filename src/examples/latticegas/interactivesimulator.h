@@ -7,8 +7,8 @@
 #include <QSemaphore>
 #include <vector>
 #include <libgeodecomp/examples/latticegas/bigcell.h>
-#include <libgeodecomp/examples/latticegas/fpscounter.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
+#include <libgeodecomp/misc/fpscounter.h>
 
 class InteractiveSimulator : public QObject, public QRunnable, protected FPSCounter
 {
