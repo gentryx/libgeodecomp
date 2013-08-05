@@ -489,8 +489,8 @@ template<template<int A, int B, int C> class KERNEL, int DIM_X, int DIM_Y, int D
 double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
 {
     int index = 0;
-    int size = DIM_X * DIM_Y * DIM_Z * KERNEL<0, 0, 0>::size();
-    int bytesize = size * sizeof(double);
+    size_t size = DIM_X * DIM_Y * (DIM_Z + 4) * KERNEL<0, 0, 0>::size();
+    size_t bytesize = size * sizeof(double);
 
     std::vector<double> grid(size, 4711);
 
@@ -511,7 +511,6 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
 
     dim3 dimBlock(blockWidth, 2, 1);
     dim3 dimGrid(dimX / dimBlock.x, dimY / dimBlock.y, 1);
-
     cudaDeviceSynchronize();
 
     long long tStart = Chronometer::timeUSec();
@@ -558,7 +557,7 @@ public:
     {
 #define CASE(DIM, ADD)                                                  \
         if (max(dim) <= DIM) {                                          \
-            return benchmarkCUDA<KERNEL, DIM + ADD, DIM, 256 + 64>(     \
+            return benchmarkCUDA<KERNEL, DIM + ADD, DIM, DIM>(          \
                 dim.x(), dim.y(), dim.z(), 20);                         \
         }
 
