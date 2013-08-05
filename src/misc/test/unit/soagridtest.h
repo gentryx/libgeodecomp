@@ -63,15 +63,13 @@ public:
         grid.set(Coord<2>(1, 1) + box.origin, 3);
         grid.set(Coord<2>(2, 2) + box.origin, 4);
 
-        std::cout << "actualDimensions: " << grid.actualDimensions << "\n";
         TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(52, 42, 1));
         TS_ASSERT_EQUALS(grid.boundingBox(), box);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0)), edgeCell);
-        std::cout << "-------------------------------------------------------\n";
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0) + box.origin).v, defaultCell.v);
-        std::cout << "-------------------------------------------------------\n";
         TS_ASSERT_EQUALS(grid.get(Coord<2>(1, 1) + box.origin), 3);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), 4);
+        TS_ASSERT_EQUALS(grid.get(Coord<2>(3, 3) + box.origin), 1);
 
         edgeCell = -1;
         grid.setEdge(edgeCell);

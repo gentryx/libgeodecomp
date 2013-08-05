@@ -54,13 +54,13 @@ public:
     {
         for (int z = 0; z < gridDim.z(); ++z) {
             const CELL *cell1 = &innerCell;
-            if ((z < edgeRadii.z()) || (z > (gridDim.z() - edgeRadii.z()))) {
+            if ((z < edgeRadii.z()) || (z >= (gridDim.z() - edgeRadii.z()))) {
                 cell1 = &edgeCell;
             }
 
             for (int y = 0; y < gridDim.y(); ++y) {
                 const CELL *cell2 = cell1;
-                if ((y < edgeRadii.y()) || (y > (gridDim.z() - edgeRadii.y()))) {
+                if ((y < edgeRadii.y()) || (y >= (gridDim.y() - edgeRadii.y()))) {
                     cell2 = &edgeCell;
                 }
 
@@ -164,18 +164,14 @@ public:
 
     virtual CELL get(const Coord<DIM>& absoluteCoord) const
     {
-        std::cout << "get(" << absoluteCoord << ", " << edgeRadii << "\n";
         Coord<DIM> relativeCoord = absoluteCoord - box.origin;
-        std::cout << "relativeCoord: " << relativeCoord << "\n";
         if (TOPOLOGICALLY_CORRECT) {
             relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
         }
-        std::cout << "relativeCoord: " << relativeCoord << "\n";
         if (Topology::isOutOfBounds(relativeCoord, box.dimensions)) {
-            std::cout << "isOutOfBounds\n";
             return edgeCell;
         }
-        std::cout << "relativeCoord: " << relativeCoord << "\n";
+
         return delegateGet(relativeCoord);
     }
 
