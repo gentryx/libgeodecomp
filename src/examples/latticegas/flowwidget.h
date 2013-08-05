@@ -9,8 +9,8 @@
 #include <QtGui/QPainter>
 #include <QtGui/QWidget>
 
-#include <libgeodecomp/examples/latticegas/fpscounter.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
+#include <libgeodecomp/misc/fpscounter.h>
 
 class FlowWidget : public QWidget, FPSCounter
 {
