@@ -51,7 +51,7 @@ __global__ void updateRTMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
     int x = blockIdx.x * blockDim.x + threadIdx.x + 2;
     int y = blockIdx.y * blockDim.y + threadIdx.y + 2;
     int z = 2;
-    
+
     double c0 = hoody(0, 0, -2);
     double c1 = hoody(0, 0, -1);
     double c2 = hoody(0, 0,  0);
@@ -503,6 +503,7 @@ void benchmark(int dim)
     // CASE(64,  24);
     // CASE(96,  24);
     // CASE(128, 24);
+
     // CASE(160, 24);
 
 #undef CASE

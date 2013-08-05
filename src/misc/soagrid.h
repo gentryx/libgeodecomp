@@ -71,23 +71,25 @@ public:
 
                 for (; x < edgeRadii.x(); ++x) {
                     accessor << edgeCell;
-                    ++(*index);
+                    ++*index;
                 }
 
                 if (INIT_INTERIOR) {
                     for (; x < (gridDim.x() - edgeRadii.x()); ++x) {
                         accessor << *cell2;
-                        ++(*index);
+                        ++*index;
                     }
                 } else {
-                    // we need to advance index manually, otherwise
+                    // we need to advance index and x manually, otherwise
                     // the following loop will erase the grid's interior:
-                    index += gridDim.x() - 2 * edgeRadii.x();
+                    int delta = gridDim.x() - 2 * edgeRadii.x();
+                    x += delta;
+                    *index += delta;
                 }
 
                 for (; x < gridDim.x(); ++x) {
                     accessor << edgeCell;
-                    ++(*index);
+                    ++*index;
                 }
             }
 
@@ -157,20 +159,24 @@ public:
             return;
         }
 
-        delegateSet(relativeCoord + edgeRadii, cell);
+        delegateSet(relativeCoord, cell);
     }
 
     virtual CELL get(const Coord<DIM>& absoluteCoord) const
     {
+        std::cout << "get(" << absoluteCoord << ", " << edgeRadii << "\n";
         Coord<DIM> relativeCoord = absoluteCoord - box.origin;
+        std::cout << "relativeCoord: " << relativeCoord << "\n";
         if (TOPOLOGICALLY_CORRECT) {
             relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
         }
+        std::cout << "relativeCoord: " << relativeCoord << "\n";
         if (Topology::isOutOfBounds(relativeCoord, box.dimensions)) {
+            std::cout << "isOutOfBounds\n";
             return edgeCell;
         }
-
-        return delegateGet(relativeCoord + edgeRadii);
+        std::cout << "relativeCoord: " << relativeCoord << "\n";
+        return delegateGet(relativeCoord);
     }
 
     virtual void setEdge(const CELL& cell)
@@ -204,39 +210,39 @@ private:
     static Coord<3> genEdgeRadii()
     {
         return Coord<3>(
-            Topology::wrapsAxis(0) ? 0 : 1,
-            Topology::wrapsAxis(1) ? 0 : 1,
-            Topology::wrapsAxis(2) ? 0 : 1);
+            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : 1,
+            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : 1,
+            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : 1);
     }
 
     CELL delegateGet(const Coord<1>& coord) const
     {
-        return delegate.get(coord.x(), 0, 0);
+        return delegate.get(coord.x() + edgeRadii.x(), edgeRadii.y(), edgeRadii.z());
     }
 
     CELL delegateGet(const Coord<2>& coord) const
     {
-        return delegate.get(coord.x(), coord.y(), 0);
+        return delegate.get(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), edgeRadii.z());
     }
 
     CELL delegateGet(const Coord<3>& coord) const
     {
-        return delegate.get(coord.x(), coord.y(), coord.z());
+        return delegate.get(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), coord.z() + edgeRadii.z());
     }
 
     void delegateSet(const Coord<1>& coord, const CELL& cell)
     {
-        return delegate.set(coord.x(), 0, 0, cell);
+        return delegate.set(coord.x() + edgeRadii.x(),  edgeRadii.y(), edgeRadii.z(), cell);
     }
 
     void delegateSet(const Coord<2>& coord, const CELL& cell)
     {
-        return delegate.set(coord.x(), coord.y(), 0, cell);
+        return delegate.set(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), edgeRadii.z(), cell);
     }
 
     void delegateSet(const Coord<3>& coord, const CELL& cell)
     {
-        return delegate.set(coord.x(), coord.y(), coord.z(), cell);
+        return delegate.set(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), coord.z() + edgeRadii.z(), cell);
     }
 };
 

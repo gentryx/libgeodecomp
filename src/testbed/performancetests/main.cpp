@@ -1,4 +1,3 @@
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
@@ -1504,7 +1503,7 @@ int main(int argc, char **argv)
     }
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
-    // cudaTests(revision, quick, cudaDevice);
+    cudaTests(revision, quick, cudaDevice);
 #endif
 
     return 0;
