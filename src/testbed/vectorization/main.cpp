@@ -24,7 +24,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -57,7 +57,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -98,7 +98,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -219,7 +219,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -359,7 +359,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
