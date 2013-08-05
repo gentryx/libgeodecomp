@@ -249,7 +249,6 @@ public:
         }
 
         if (state == slip) {
-            // fixme: is this really necessary?
             particles[UL] = ur;
             particles[UR] = ul;
             particles[L ] = r;

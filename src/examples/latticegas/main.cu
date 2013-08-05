@@ -12,8 +12,6 @@
 #include <libgeodecomp/examples/latticegas/interactivesimulatorgpu.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
-// fixme: using namespace LibGeoDecomp;
-
 void testModel()
 {
     int width = 7;
