@@ -10,19 +10,19 @@ namespace LibGeoDecomp {
 
 namespace SoAGridHelpers {
 
-template<typename CELL>
-class SetEdges
+template<typename CELL, bool INIT_INTERIOR>
+class SetContent
 {
 public:
     /**
-     * Helper class for initializing the edges of a SoAGrid. gridDim
-     * refers to the size of the grid as requested by the user.
-     * edgeRadii specifies how many layers of cells are to be padded
-     * around these, representing the edgeCell. This procedure makes
-     * updating the edgeCell slow, but eliminates all conditionals on
-     * the grid boundaries. edgeRadii[D] will typically be 0 if the
-     * topology wraps this dimension. It'll be equal to the stencil's
-     * radius if the dimensions is not being wrapped. Example:
+     * Helper class for initializing a SoAGrid. gridDim refers to the
+     * size of the grid as requested by the user. edgeRadii specifies
+     * how many layers of cells are to be padded around these,
+     * representing the edgeCell. This procedure makes updating the
+     * edgeCell slow, but eliminates all conditionals on the grid
+     * boundaries. edgeRadii[D] will typically be 0 if the topology
+     * wraps this dimension. It'll be equal to the stencil's radius if
+     * the dimensions is not being wrapped. Example:
      *
      * gridDim = (6, 3, 1)
      * edgeRadii = (2, 3, 0)
@@ -39,63 +39,66 @@ public:
      * eeeeeeeeee
      * eeeeeeeeee
      */
-    SetEdges(const Coord<3>& gridDim, const Coord<3>& edgeRadii, const CELL& cell) :
+    SetContent(
+        const Coord<3>& gridDim, const Coord<3>& edgeRadii, const CELL& edgeCell, const CELL& innerCell) :
         gridDim(gridDim),
         edgeRadii(edgeRadii),
-        cell(cell)
+        edgeCell(edgeCell),
+        innerCell(innerCell)
     {}
 
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     void operator()(
-        const LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor,
+        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
         int *index)
     {
-        Coord<3> expandedGridDim = gridDim + (edgeRadii * 2);
-        Coord<3> dim;
+        for (int z = 0; z < gridDim.z(); ++z) {
+            const CELL *cell1 = &innerCell;
+            if ((z < edgeRadii.z()) || (z > (gridDim.z() - edgeRadii.z()))) {
+                cell1 = &edgeCell;
+            }
 
-        // west boundary:
-        dim = Coord<3>(edgeRadii.x(), expandedGridDim.y(), expandedGridDim.z());
-        setBox(CoordBox<3>(Coord<3>(), dim), accessor, index);
-        // east boundary:
-        setBox(CoordBox<3>(Coord<3>(gridDim.x() + edgeRadii.x()), dim), accessor, index);
+            for (int y = 0; y < gridDim.y(); ++y) {
+                const CELL *cell2 = cell1;
+                if ((y < edgeRadii.y()) || (y > (gridDim.z() - edgeRadii.y()))) {
+                    cell2 = &edgeCell;
+                }
 
-        // top boundary:
-        dim = Coord<3>(expandedGridDim.x(), edgeRadii.y(), expandedGridDim.z());
-        setBox(CoordBox<3>(Coord<3>(), dim), accessor, index);
-        // bottom boundary:
-        setBox(CoordBox<3>(Coord<3>(0, gridDim.y() + edgeRadii.y()), dim), accessor, index);
+                *index =
+                    z * DIM_X * DIM_Y +
+                    y * DIM_X;
+                int x = 0;
 
-        // south boundary:
-        dim = Coord<3>(expandedGridDim.x(), expandedGridDim.y(), edgeRadii.z());
-        setBox(CoordBox<3>(Coord<3>(), dim), accessor, index);
-        // north boundary:
-        setBox(CoordBox<3>(Coord<3>(0, 0, gridDim.z() + edgeRadii.z()), dim), accessor, index);
+                for (; x < edgeRadii.x(); ++x) {
+                    accessor << edgeCell;
+                    ++(*index);
+                }
+
+                if (INIT_INTERIOR) {
+                    for (; x < (gridDim.x() - edgeRadii.x()); ++x) {
+                        accessor << *cell2;
+                        ++(*index);
+                    }
+                } else {
+                    // we need to advance index manually, otherwise
+                    // the following loop will erase the grid's interior:
+                    index += gridDim.x() - 2 * edgeRadii.x();
+                }
+
+                for (; x < gridDim.x(); ++x) {
+                    accessor << edgeCell;
+                    ++(*index);
+                }
+            }
+
+        }
     }
 
 private:
     Coord<3> gridDim;
     Coord<3> edgeRadii;
-    CELL cell;
-
-    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
-    void setBox(
-        const CoordBox<3>& box,
-        const LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>& accessor,
-        int *index)
-    {
-        for (int z = box.origin.z(); z < (box.origin.z() + box.dimensions.z()); ++z) {
-            for (int y = box.origin.y(); y < (box.origin.y() + box.dimensions.y()); ++y) {
-                for (int x = box.origin.x(); x < (box.origin.x() + box.dimensions.x()); ++x) {
-                    *index =
-                        z * DIM_X * DIM_Y +
-                        y * DIM_X +
-                        x;
-
-                    accessor << cell;
-                }
-            }
-        }
-    }
+    CELL edgeCell;
+    CELL innerCell;
 };
 
 }
@@ -106,6 +109,8 @@ template<typename CELL,
 class SoAGrid : public GridBase<CELL, TOPOLOGY::DIM>
 {
 public:
+    friend class SoAGridTest;
+
     const static int DIM = TOPOLOGY::DIM;
 
     typedef CELL CellType;
@@ -126,24 +131,46 @@ public:
         for (int i = 0; i < DIM; ++i) {
             actualDimensions[i] = box.dimensions[i];
         }
+        actualDimensions += edgeRadii * 2;
 
         delegate.resize(
             actualDimensions.x(),
             actualDimensions.y(),
             actualDimensions.z());
-        fill(defaultCell);
-        setEdge(edgeCell);
+
+        // init edges and interior
+        int index;
+        delegate.callback(SoAGridHelpers::SetContent<CELL, true>(
+                              actualDimensions, edgeRadii, edgeCell, defaultCell), &index);
+
     }
 
 
-    virtual void set(const Coord<DIM>& coord, const CELL& cell)
+    virtual void set(const Coord<DIM>& absoluteCoord, const CELL& cell)
     {
-        delegateSet(coord, cell);
+        Coord<DIM> relativeCoord = absoluteCoord - box.origin;
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
+        if (Topology::isOutOfBounds(relativeCoord, box.dimensions)) {
+            setEdge(cell);
+            return;
+        }
+
+        delegateSet(relativeCoord + edgeRadii, cell);
     }
 
-    virtual CELL get(const Coord<DIM>& coord) const
+    virtual CELL get(const Coord<DIM>& absoluteCoord) const
     {
-        return getDelegate(coord);
+        Coord<DIM> relativeCoord = absoluteCoord - box.origin;
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
+        if (Topology::isOutOfBounds(relativeCoord, box.dimensions)) {
+            return edgeCell;
+        }
+
+        return delegateGet(relativeCoord + edgeRadii);
     }
 
     virtual void setEdge(const CELL& cell)
@@ -151,11 +178,9 @@ public:
         edgeCell = cell;
         int index;
 
-        Coord<3> dim = Coord<3>::diagonal(1);
-        for (int i = 0; i < DIM; ++i) {
-            dim[i] = box.dimensions[i];
-        }
-        delegate.callback(SoAGridHelpers::SetEdges<CELL>(dim, edgeRadii, cell), &index);
+        CELL dummy;
+        delegate.callback(SoAGridHelpers::SetContent<CELL, false>(
+                              actualDimensions, edgeRadii, edgeCell, dummy), &index);
     }
 
     virtual const CELL& getEdge() const
@@ -166,11 +191,6 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return box;
-    }
-
-    void fill(const CELL& cell)
-    {
-        // fixme
     }
 
 private:
@@ -184,9 +204,9 @@ private:
     static Coord<3> genEdgeRadii()
     {
         return Coord<3>(
-            Topology::wrapsAxis(0) ? 1 : 0,
-            Topology::wrapsAxis(1) ? 1 : 0,
-            Topology::wrapsAxis(2) ? 1 : 0);
+            Topology::wrapsAxis(0) ? 0 : 1,
+            Topology::wrapsAxis(1) ? 0 : 1,
+            Topology::wrapsAxis(2) ? 0 : 1);
     }
 
     CELL delegateGet(const Coord<1>& coord) const
