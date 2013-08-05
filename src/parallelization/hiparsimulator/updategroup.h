@@ -17,8 +17,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: STEPPER does not have to be a template parameter. it can also be defined solely in the constructor
-template<class CELL_TYPE, class STEPPER=VanillaStepper<CELL_TYPE> >
+template<class CELL_TYPE>
 class UpdateGroup
 {
     friend class HiParSimulatorTest;
@@ -37,6 +36,7 @@ public:
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
+    template<STEPPER = VanillaStepper<CELL_TYPE> >
     UpdateGroup(
         boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
@@ -47,7 +47,8 @@ public:
         PatchProviderVec patchProvidersGhost=PatchProviderVec(),
         PatchProviderVec patchProvidersInner=PatchProviderVec(),
         const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        MPI::Comm *communicator = &MPI::COMM_WORLD,
+        STEPPER *stepperType = 0) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
         mpiLayer(communicator),
