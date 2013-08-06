@@ -263,7 +263,7 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 #pragma unroll 10
     for (; index < end; index += offset) {
         double c4 = hoody(0, 0, 2).c();
-        hoodNew[LibFlatArray::oord<0, 0, 0>()].c() =
+        hoodNew[LibFlatArray::coord<0, 0, 0>()].c() =
             0.10 * c0 +
             0.15 * c1 +
             0.20 * c2 +

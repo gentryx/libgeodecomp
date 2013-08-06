@@ -10,7 +10,6 @@
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/soaaccessor.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
