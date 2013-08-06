@@ -122,6 +122,25 @@ public:
         TS_ASSERT_EQUALS(64, (Stencils::VonNeumannDimDelta<3, 4, 4>::VALUE));
     }
 
+    void testRadius()
+    {
+        TS_ASSERT_EQUALS(1,  (Stencils::Moore<1, 1>::RADIUS));
+        TS_ASSERT_EQUALS(1,  (Stencils::Moore<2, 1>::RADIUS));
+        TS_ASSERT_EQUALS(1,  (Stencils::Moore<3, 1>::RADIUS));
+
+        TS_ASSERT_EQUALS(2,  (Stencils::Moore<1, 2>::RADIUS));
+        TS_ASSERT_EQUALS(2,  (Stencils::Moore<2, 2>::RADIUS));
+        TS_ASSERT_EQUALS(2,  (Stencils::Moore<3, 2>::RADIUS));
+
+        TS_ASSERT_EQUALS(0,  (Stencils::VonNeumann<1, 0>::RADIUS));
+        TS_ASSERT_EQUALS(2,  (Stencils::VonNeumann<1, 2>::RADIUS));
+        TS_ASSERT_EQUALS(4,  (Stencils::VonNeumann<1, 4>::RADIUS));
+
+        TS_ASSERT_EQUALS(1,  (Stencils::Cross<1, 1>::RADIUS));
+        TS_ASSERT_EQUALS(2,  (Stencils::Cross<1, 2>::RADIUS));
+        TS_ASSERT_EQUALS(3,  (Stencils::Cross<1, 3>::RADIUS));
+    }
+
     void testVolume()
     {
         TS_ASSERT_EQUALS(3,  (Stencils::Moore<1, 1>::VOLUME));

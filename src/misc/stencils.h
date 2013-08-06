@@ -115,10 +115,11 @@ public:
      * distance to the orign (i.e. the current cell) -- as measured by
      * the maximum norm -- is smaller or equal to RADIUS.
      */
-    template<int DIMENSIONS, int RADIUS>
+    template<int DIMENSIONS, int RAD>
     class Moore
     {
     public:
+        static const int RADIUS = RAD;
         static const int DIM = DIMENSIONS;
         static const int VOLUME = Power<RADIUS * 2 + 1, DIM>::VALUE;
 
@@ -147,10 +148,11 @@ public:
      * equal to 1. It replaces the maximum norm with the Manhattan
      * distance.
      */
-    template<int DIMENSIONS, int RADIUS>
+    template<int DIMENSIONS, int RAD>
     class VonNeumann
     {
     public:
+        static const int RADIUS = RAD;
         static const int DIM = DIMENSIONS;
         static const int VOLUME =
             VonNeumann<DIM - 1, RADIUS>::VOLUME +
@@ -177,10 +179,11 @@ public:
      * complicated, but formally correct way to describe an
      * n-dimensional cross.)
      */
-    template<int DIMENSIONS, int RADIUS>
+    template<int DIMENSIONS, int RAD>
     class Cross
     {
     public:
+        static const int RADIUS = RAD;
         static const int DIM = DIMENSIONS;
         static const int VOLUME = 1 + 2 * RADIUS * DIM;
 
