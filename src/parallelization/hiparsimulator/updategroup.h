@@ -36,19 +36,19 @@ public:
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
-    template<STEPPER = VanillaStepper<CELL_TYPE> >
+    template<typename STEPPER>
     UpdateGroup(
         boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
         const unsigned& ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
-        PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
-        PatchProviderVec patchProvidersGhost=PatchProviderVec(),
-        PatchProviderVec patchProvidersInner=PatchProviderVec(),
+        STEPPER *stepperType,
+        PatchAccepterVec patchAcceptersGhost = PatchAccepterVec(),
+        PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
+        PatchProviderVec patchProvidersGhost = PatchProviderVec(),
+        PatchProviderVec patchProvidersInner = PatchProviderVec(),
         const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD,
-        STEPPER *stepperType = 0) :
+        MPI::Comm *communicator = &MPI::COMM_WORLD) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
         mpiLayer(communicator),

@@ -213,6 +213,7 @@ private:
                 box,
                 ghostZoneWidth,
                 initializer,
+                reinterpret_cast<VanillaStepper<CELL_TYPE>*>(0),
                 writerAdaptersGhost,
                 writerAdaptersInner,
                 steererAdaptersGhost,
