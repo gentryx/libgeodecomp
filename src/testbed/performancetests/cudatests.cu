@@ -2,7 +2,7 @@
 #include <iostream>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
-#include <libgeodecomp/misc/soaaccessor.h>
+#include <libgeodecomp/misc/soagrid.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
 #include <stdexcept>
@@ -33,7 +33,7 @@ public:
     char b;
 };
 
-LIBGEODECOMP_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
+LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
 
 class CellLBM
 {
@@ -59,9 +59,9 @@ public:
     double BS;
 };
 
-LIBGEODECOMP_REGISTER_SOA(CellLBM, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS)))
+LIBFLATARRAY_REGISTER_SOA(CellLBM, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS)))
 
-#define hoody(X, Y, Z)                          \
+#define hoody(X, Y, Z)                                                  \
     gridOld[z * dimX * dimY + y * dimX + x + X + Y * dimX + Z * dimX * dimY]
 
 template<int DIM_X, int DIM_Y, int DIM_Z>
@@ -239,7 +239,7 @@ __global__ void updateLBMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
 #undef BS
 
 #define hoody(X, Y, Z)                          \
-    hoodOld[FixedCoord<X, Y, Z>()]
+    hoodOld[LibFlatArray::coord<X, Y, Z>()]
 
 template<int DIM_X, int DIM_Y, int DIM_Z>
 __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
@@ -252,8 +252,8 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    SoAAccessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    SoAAccessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
+    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
+    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
 
     double c0 = hoody(0, 0, -2).c();
     double c1 = hoody(0, 0, -1).c();
@@ -263,7 +263,7 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 #pragma unroll 10
     for (; index < end; index += offset) {
         double c4 = hoody(0, 0, 2).c();
-        hoodNew[FixedCoord<0, 0, 0>()].c() =
+        hoodNew[LibFlatArray::oord<0, 0, 0>()].c() =
             0.10 * c0 +
             0.15 * c1 +
             0.20 * c2 +
@@ -286,8 +286,8 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 
 #undef hoody
 
-#define GET_COMP(X, Y, Z, DIR)                  \
-    hoodOld[FixedCoord<X, Y, Z>()].DIR()
+#define GET_COMP(X, Y, Z, DIR)                          \
+    hoodOld[LibFlatArray::coord<X, Y, Z>()].DIR()
 
 #define SET_COMP(DIR)                           \
     hoodNew.DIR()
@@ -303,8 +303,8 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    SoAAccessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    SoAAccessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
+    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
+    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
 
 #pragma unroll 10
     for (; index < end; index += offset) {
