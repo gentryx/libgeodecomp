@@ -14,13 +14,15 @@
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/testbed/performancetests/benchmark.h>
+#include <libgeodecomp/testbed/performancetests/evaluate.h>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
 
 std::string revision;
 
-class RegionCount
+class CPUBenchmark : public Benchmark
 {
 public:
     std::string order()
@@ -28,6 +30,21 @@ public:
         return "CPU";
     }
 
+    std::string device()
+    {
+        FILE *output = popen("cat /proc/cpuinfo | grep 'model name' | head -1 | cut -c 14-", "r");
+        int idLength = 2048;
+        std::string cpuID(idLength, ' ');
+        idLength = fread(&cpuID[0], 1, idLength, output);
+        cpuID.resize(idLength - 1);
+        pclose(output);
+        return cpuID;
+    }
+};
+
+class RegionCount : public CPUBenchmark
+{
+public:
     std::string family()
     {
         return "RegionCount";
@@ -73,14 +90,9 @@ public:
     }
 };
 
-class RegionInsert
+class RegionInsert : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "RegionInsert";
@@ -113,14 +125,9 @@ public:
     }
 };
 
-class RegionIntersect
+class RegionIntersect : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "RegionIntersect";
@@ -163,14 +170,9 @@ public:
     }
 };
 
-class CoordEnumerationVanilla
+class CoordEnumerationVanilla : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "CoordEnumeration";
@@ -210,14 +212,9 @@ public:
     }
 };
 
-class CoordEnumerationBronze
+class CoordEnumerationBronze : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "CoordEnumeration";
@@ -258,14 +255,9 @@ public:
     }
 };
 
-class CoordEnumerationGold
+class CoordEnumerationGold : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "CoordEnumeration";
@@ -309,14 +301,9 @@ public:
     }
 };
 
-class Jacobi3DVanilla
+class Jacobi3DVanilla : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -390,14 +377,9 @@ public:
     }
 };
 
-class Jacobi3DSSE
+class Jacobi3DSSE : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -625,7 +607,7 @@ public:
     class API : public CellAPITraits::Base
     {};
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -649,14 +631,9 @@ public:
     double temp;
 };
 
-class Jacobi3DClassic
+class Jacobi3DClassic : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -707,7 +684,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -727,14 +704,9 @@ public:
     double temp;
 };
 
-class Jacobi3DFixedHood
+class Jacobi3DFixedHood : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -806,7 +778,7 @@ public:
         temp(t)
     {}
 
-    static int nanoSteps()
+    static unsigned nanoSteps()
     {
         return 1;
     }
@@ -975,14 +947,9 @@ public:
     double temp;
 };
 
-class Jacobi3DStreakUpdate
+class Jacobi3DStreakUpdate : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -1043,14 +1010,9 @@ public:
     }
 };
 
-class Jacobi3DStreakUpdateFunctor
+class Jacobi3DStreakUpdateFunctor : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -1315,14 +1277,9 @@ public:
     State state;
 };
 
-class LBMClassic
+class LBMClassic : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "LBM";
@@ -1360,47 +1317,6 @@ public:
         return "GLUPS";
     }
 };
-
-template<class BENCHMARK>
-void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
-{
-    boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-    std::stringstream buf;
-    buf << now;
-    std::string nowString = buf.str();
-    nowString.resize(20);
-
-    int hostnameLength = 2048;
-    std::string hostname(hostnameLength, ' ');
-    gethostname(&hostname[0], hostnameLength);
-    int actualLength = 0;
-    for (int i = 0; i < hostnameLength; ++i) {
-        if (hostname[i] == 0) {
-            actualLength = i;
-        }
-    }
-    hostname.resize(actualLength);
-
-    FILE *output = popen("cat /proc/cpuinfo | grep 'model name' | head -1 | cut -c 14-", "r");
-    int idLength = 2048;
-    std::string cpuID(idLength, ' ');
-    idLength = fread(&cpuID[0], 1, idLength, output);
-    cpuID.resize(idLength - 1);
-    pclose(output);
-
-
-    std::cout << std::setiosflags(std::ios::left);
-    std::cout << std::setw(18) << revision << "; "
-              << nowString << " ; "
-              << std::setw(16) << hostname << "; "
-              << std::setw(48) << cpuID << "; "
-              << std::setw( 8) << benchmark.order() <<  "; "
-              << std::setw(16) << benchmark.family() <<  "; "
-              << std::setw( 8) << benchmark.species() <<  "; "
-              << std::setw(24) << dim <<  "; "
-              << std::setw(12) << benchmark.performance(dim) <<  "; "
-              << std::setw( 8) << benchmark.unit() <<  "\n";
-}
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
 void cudaTests(std::string revision, bool quick, int cudaDevice);
@@ -1496,7 +1412,8 @@ int main(int argc, char **argv)
           << Coord<3>(64, 64, 64)
           << Coord<3>(68, 68, 68)
           << Coord<3>(106, 106, 106)
-          << Coord<3>(128, 128, 128);
+          << Coord<3>(128, 128, 128)
+          << Coord<3>(160, 160, 160);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         evaluate(LBMClassic(), sizes[i]);
