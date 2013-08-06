@@ -206,9 +206,9 @@ private:
     static Coord<3> genEdgeRadii()
     {
         return Coord<3>(
-            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : 1,
-            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : 1,
-            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : 1);
+            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : CELL::Stencil::RADIUS,
+            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : CELL::Stencil::RADIUS,
+            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : CELL::Stencil::RADIUS);
     }
 
     CELL delegateGet(const Coord<1>& coord) const

@@ -1,11 +1,14 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/soagrid.h>
+#include <libgeodecomp/misc/stencils.h>
 
 using namespace LibGeoDecomp;
 
 class SoATestCell
 {
 public:
+    typedef Stencils::Moore<3, 2> Stencil;
+
     SoATestCell(int v = 0) :
         v(v)
     {}
@@ -37,7 +40,7 @@ public:
         grid.set(Coord<3>(1, 1, 1) + box.origin, 3);
         grid.set(Coord<3>(2, 2, 3) + box.origin, 4);
 
-        TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(52, 42, 37));
+        TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(54, 44, 39));
         TS_ASSERT_EQUALS(grid.boundingBox(), box);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
@@ -63,7 +66,7 @@ public:
         grid.set(Coord<2>(1, 1) + box.origin, 3);
         grid.set(Coord<2>(2, 2) + box.origin, 4);
 
-        TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(52, 42, 1));
+        TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(54, 44, 1));
         TS_ASSERT_EQUALS(grid.boundingBox(), box);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0)), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0) + box.origin).v, defaultCell.v);
@@ -81,13 +84,31 @@ public:
 
     void testDisplacementWithTopologicalCorrectness()
     {
+        CoordBox<3> box(Coord<3>(20, 25, 32), Coord<3>(50, 40, 35));
+        Coord<3> topoDim(60, 50, 50);
+        SoATestCell defaultCell(1);
+        SoATestCell edgeCell(2);
+
+        SoAGrid<SoATestCell, Topologies::Torus<3>::Topology, true> grid(box, defaultCell, edgeCell, topoDim);
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TS_ASSERT_EQUALS(grid.get(*i), defaultCell);
+        }
+
+        // here we check that topological correctness correctly maps
+        // coordinates in the octant close to the origin to the
+        // overlap of the far end of the grid delimited by topoDim.
+        CoordBox<3> originOctant(Coord<3>(), box.origin + box.dimensions - topoDim);
+        for (CoordBox<3>::Iterator i = originOctant.begin(); i != originOctant.end(); ++i) {
+            TS_ASSERT_EQUALS(grid.get(*i), defaultCell);
+        }
+
+        SoATestCell dummy(4711);
+        grid.set(Coord<3>(1, 2, 3), dummy);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>( 1,  2,  3)), dummy);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(61, 52, 53)), dummy);
     }
 
-    // fixme: 2d test: check that z-dim == 1
-    // fixme: test topological correctness
-    // fixme: check that setEdge won't erase interior
     // fixme: check neighborhood may actually access edgecells
-    // fixme: cover stencil radius > 1
 };
 
 }
