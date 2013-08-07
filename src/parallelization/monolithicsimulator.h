@@ -15,8 +15,8 @@ class MonolithicSimulator : public Simulator<CELL_TYPE>
 public:
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
-    inline MonolithicSimulator(Initializer<CELL_TYPE> *_initializer) :
-        Simulator<CELL_TYPE>(_initializer)
+    inline MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :
+        Simulator<CELL_TYPE>(initializer)
     {}
 
     /**
