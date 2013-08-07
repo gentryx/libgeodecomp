@@ -9,6 +9,7 @@
 #include <libgeodecomp/misc/supervector.h>
 #endif
 
+#include <boost/foreach.hpp>
 #include <iostream>
 #include <libgeodecomp/misc/alignedallocator.h>
 #include <libgeodecomp/misc/coord.h>
@@ -114,9 +115,10 @@ public:
     typedef CELL_TYPE CellType;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
 
-    explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
-         const CELL_TYPE& defaultCell=CELL_TYPE(),
-         const CELL_TYPE& edgeCell=CELL_TYPE()) :
+    explicit Grid(
+        const Coord<DIM>& dim = Coord<DIM>(),
+        const CELL_TYPE& defaultCell = CELL_TYPE(),
+        const CELL_TYPE& edgeCell = CELL_TYPE()) :
         dimensions(dim),
         cellMatrix(dim.toExtents()),
         edgeCell(edgeCell)
@@ -127,6 +129,17 @@ public:
             CELL_TYPE *start = &(*this)[*i];
             CELL_TYPE *end   = start + dim.x();
             std::fill(start, end, defaultCell);
+        }
+    }
+
+    explicit Grid(const GridBase<CELL_TYPE, DIM>& base) :
+        dimensions(base.dimensions()),
+        cellMatrix(base.dimensions().toExtents()),
+        edgeCell(base.getEdge())
+    {
+        CoordBox<DIM> box = base.boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            set(*i - box.origin, base.get(*i));
         }
     }
 

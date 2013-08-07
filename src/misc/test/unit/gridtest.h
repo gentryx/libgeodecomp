@@ -56,6 +56,15 @@ public:
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().y());
     }
 
+    void testCopyConstructorFromGridBase()
+    {
+        Grid<int> a;
+        Grid<int> b(Coord<2>(10, 5), 5);
+        GridBase<int, 2>& base = b;
+        a = Grid<int>(base);
+        TS_ASSERT_EQUALS(a, b);
+    }
+
     void testConstructorDefaultInit()
     {
         Grid<double> g(Coord<2>(10, 12), 14.16, 47.11);
