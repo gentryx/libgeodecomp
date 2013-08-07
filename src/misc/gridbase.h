@@ -27,6 +27,37 @@ public:
     virtual void setEdge(const CELL&) = 0;
     virtual const CELL& getEdge() const = 0;
     virtual CoordBox<DIM> boundingBox() const = 0;
+
+    Coord<DIM> dimensions() const
+    {
+        return boundingBox().dimensions;
+    }
+
+
+    bool operator==(const GridBase<CELL, DIMENSIONS>& other) const
+    {
+        if (getEdge() != other.getEdge()) {
+            return false;
+        }
+
+        CoordBox<DIM> box = boundingBox();
+        if (box != other.boundingBox()) {
+            return false;
+        }
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            if (get(*i) != other.get(*i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=(const GridBase<CELL, DIMENSIONS>& other) const
+    {
+        return !(*this == other);
+    }
 };
 
 }
