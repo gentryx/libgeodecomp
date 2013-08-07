@@ -1,7 +1,39 @@
 #ifndef LIBGEODECOMP_MISC_CELLAPITRAITS_H
 #define LIBGEODECOMP_MISC_CELLAPITRAITS_H
 
+#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/soagrid.h>
+
 namespace LibGeoDecomp {
+
+namespace API {
+
+// deduce a CELL's optimum grid type
+template<typename CELL, typename HAS_SOA = void>
+class SelectGridType
+{
+public:
+    typedef DisplacedGrid<CELL, typename CELL::Topology> Type;
+};
+
+template<typename CELL>
+class SelectGridType<CELL, typename CELL::API::HasSoA>
+{
+public:
+    typedef SoAGrid<CELL, typename CELL::Topology> Type;
+};
+
+/**
+ * Use this qualifier in a cell's API to hint that it supports a
+ * Struct of Arrays memory layout.
+ */
+class SupportsSoA
+{
+public:
+    typedef void HasSoA;
+};
+
+}
 
 /**
  * is used to specify which neighborhood types are supported by a

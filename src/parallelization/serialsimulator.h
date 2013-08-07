@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/io/writer.h>
@@ -19,7 +20,8 @@ public:
     friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef API::SelectGridType<CELL_TYPE> GridTypeSelector;
+    typedef typename GridTypeSelector::Type GridType;
     static const int DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL_TYPE>::initializer;
@@ -37,8 +39,8 @@ public:
     {
         stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
-        curGrid = new GridType(dim);
-        newGrid = new GridType(dim);
+        curGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
+        newGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
