@@ -57,7 +57,7 @@ public:
                     }
                 }
             }
-            outfile << ATTRIBUTE_SELECTOR()(grid[*i]) << " ";
+            outfile << ATTRIBUTE_SELECTOR()(grid.get(*i)) << " ";
         }
 
         if (!outfile.good()) {

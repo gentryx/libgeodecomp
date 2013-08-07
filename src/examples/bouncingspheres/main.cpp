@@ -292,7 +292,7 @@ public:
 
         CoordBox<3> box = grid.boundingBox();
         for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            const Container& container = grid[*j];
+            const Container& container = grid.get(*j);
 
             for (int i = 0; i < container.numSpheres; ++i) {
                 file << sphereToPOV(container.spheres[i]);

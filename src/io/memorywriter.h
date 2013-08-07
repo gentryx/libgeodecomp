@@ -17,6 +17,7 @@ class MemoryWriter : public Writer<CELL_TYPE>
 
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
+    typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> StorageGrid;
     using Writer<CELL_TYPE>::period;
 
     MemoryWriter(unsigned period = 1) :
@@ -29,7 +30,7 @@ public:
             return;
         }
 
-        grids.push_back(grid);
+        grids.push_back(StorageGrid(grid));
     }
 
     GridType& getGrid(int i)
@@ -37,13 +38,13 @@ public:
         return grids[i];
     }
 
-    SuperVector<GridType>& getGrids()
+    SuperVector<StorageGrid>& getGrids()
     {
         return grids;
     }
 
 private:
-    SuperVector<GridType> grids;
+    SuperVector<StorageGrid> grids;
 };
 
 }

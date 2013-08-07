@@ -126,8 +126,8 @@ public:
             testSim->step();
             TS_ASSERT_EQUALS(referenceSim->getStep(),
                              testSim->getStep());
-            TS_ASSERT_EQUALS(referenceSim->getGrid()->getDimensions(),
-                             testSim->curStripe->getDimensions());
+            TS_ASSERT_EQUALS(referenceSim->getGrid()->dimensions(),
+                             testSim->curStripe->dimensions());
             TS_ASSERT(*referenceSim->getGrid() == *testSim->curStripe);
             TS_ASSERT_TEST_GRID(GridBaseType, *testSim->curStripe,
                                 (i + 1) * TestCell<2>::nanoSteps());
@@ -144,10 +144,10 @@ public:
     {
         testSim->run();
         referenceSim->run();
-        Grid<TestCell<2> > refGrid = *referenceSim->getGrid();
+        const GridBase<TestCell<2>, 2> *refGrid = referenceSim->getGrid();
 
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
-        TS_ASSERT(refGrid == *testSim->curStripe);
+        TS_ASSERT(*refGrid == *testSim->curStripe);
     }
 
     void testRunMustResetGridPriorToSimulation()

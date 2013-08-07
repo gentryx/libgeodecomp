@@ -223,12 +223,16 @@ public:
         int numAnts = 0;
         int numFood = 0;
 
-        for(int y = 0; y < grid.getDimensions().y(); ++y) {
-            for(int x = 0; x < grid.getDimensions().x(); ++x) {
-                if (grid[Coord<2>(x, y)].isAnt())
+        Coord<2> dim = grid.dimensions();
+
+        for(int y = 0; y < dim.y(); ++y) {
+            for(int x = 0; x < dim.x(); ++x) {
+                if (grid.get(Coord<2>(x, y)).isAnt()) {
                     ++numAnts;
-                if (grid[Coord<2>(x, y)].containsFood())
+                }
+                if (grid.get(Coord<2>(x, y)).containsFood()) {
                     ++numFood;
+                }
             }
         }
 

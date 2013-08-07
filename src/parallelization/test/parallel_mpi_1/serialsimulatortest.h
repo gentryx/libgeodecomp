@@ -20,6 +20,7 @@ class SerialSimulatorTest : public CxxTest::TestSuite
 {
 public:
     typedef MockSteerer<TestCell<2> > SteererType;
+    typedef GridBase<TestCell<2>, 2> GridBaseType;
 
     void setUp()
     {
@@ -39,20 +40,18 @@ public:
 
     void testInitialization()
     {
-        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().x(),
-                         (unsigned)17);
-        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(),
-                         (unsigned)12);
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *simulator->getGrid(), startStep * TestCell<2>::nanoSteps());
+        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().x(), 17);
+        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(), 12);
+        TS_ASSERT_TEST_GRID(GridBaseType, *simulator->getGrid(), startStep * TestCell<2>::nanoSteps());
     }
 
     void testStep()
     {
-        TS_ASSERT_EQUALS(startStep, (int)simulator->getStep());
+        TS_ASSERT_EQUALS(startStep, simulator->getStep());
 
         simulator->step();
-        const Grid<TestCell<2> > *grid = simulator->getGrid();
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *grid,
+        const GridBase<TestCell<2>, 2> *grid = simulator->getGrid();
+        TS_ASSERT_TEST_GRID(GridBaseType, *grid,
                             (startStep + 1) * TestCell<2>::nanoSteps());
         TS_ASSERT_EQUALS(startStep + 1, (int)simulator->getStep());
     }
@@ -62,7 +61,7 @@ public:
         simulator->run();
         TS_ASSERT_EQUALS(init->maxSteps(), simulator->getStep());
         TS_ASSERT_TEST_GRID(
-            Grid<TestCell<2> >,
+            GridBaseType,
             *simulator->getGrid(),
             init->maxSteps() * TestCell<2>::nanoSteps());
     }
@@ -101,7 +100,7 @@ public:
         MockWriter *w = new MockWriter();
         simulator->addWriter(w);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
-        TS_ASSERT_EQUALS(1, writers.size());
+        TS_ASSERT_EQUALS(size_t(1), writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
     }
 
@@ -149,22 +148,23 @@ public:
     }
 
     typedef Grid<TestCell<3>, TestCell<3>::Topology> Grid3D;
+    typedef GridBase<TestCell<3>, 3> GridBase3D;
 
     void test3D()
     {
         SerialSimulator<TestCell<3> > sim(new TestInitializer<TestCell<3> >());
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(), 0);
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(), 0);
 
         sim.step();
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(),
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
                             TestCell<3>::nanoSteps());
 
         sim.nanoStep(0);
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(),
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
                             TestCell<3>::nanoSteps() + 1);
 
         sim.run();
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(),
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
                             21 * TestCell<3>::nanoSteps());
     }
 

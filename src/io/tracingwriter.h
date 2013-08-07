@@ -42,7 +42,7 @@ public:
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
-        stepFinished(step, grid.getDimensions(), event);
+        stepFinished(step, grid.dimensions(), event);
     }
 
     virtual void stepFinished(

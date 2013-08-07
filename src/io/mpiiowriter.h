@@ -43,7 +43,7 @@ public:
 
         MPIIO<CELL_TYPE>::writeRegion(
             grid,
-            grid.getDimensions(),
+            grid.dimensions(),
             step,
             maxSteps,
             filename(step),

@@ -18,9 +18,9 @@ class Simulator
 {
 public:
     typedef typename CELL_TYPE::Topology Topology;
-    typedef Grid<CELL_TYPE, Topology> GridType;
-    typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
     static const int DIM = Topology::DIM;
+    typedef GridBase<CELL_TYPE, DIM> GridType;
+    typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
 
     /**
      * Creates the abstract Simulator object. The Initializer is
