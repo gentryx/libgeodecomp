@@ -375,8 +375,22 @@ install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflat
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")
-foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
-  set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${lib}")
+foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES} /usr/lib/liblibkremotecontrol.so)
+  get_filename_component(path "${lib}" PATH)
+  get_filename_component(name "${lib}" NAME_WE)
+
+  if(name MATCHES ^lib)
+    # this dirty trick is required to prevent REGEX REPLACE matching
+    # every occurrence of "lib" ("^lib" will sadly match all, too, if
+    # we're going to remove them)
+    set(name "_dummy_${name}")
+    string(REGEX REPLACE "_dummy_lib" "" name "${name}")
+  endif()
+
+  if (path)
+    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -L${path}")
+  endif()
+  set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${name}")
 endforeach()
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
