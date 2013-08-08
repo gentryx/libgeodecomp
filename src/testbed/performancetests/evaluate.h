@@ -19,7 +19,8 @@ void evaluate(BENCHMARK benchmark, const LibGeoDecomp::Coord<3>& dim)
     int hostnameLength = 2048;
     std::string hostname(hostnameLength, ' ');
     gethostname(&hostname[0], hostnameLength);
-    hostname = LibGeoDecomp::StringOps::tokenize(hostname, " ")[0];
+    // cuts string at first 0 byte, required as gethostname returns 0-terminated strings
+    hostname = std::string(hostname.c_str());
 
     std::string device = benchmark.device();
 
