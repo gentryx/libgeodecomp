@@ -366,6 +366,8 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
+# install libflatarray, too
+install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflatarray)
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
