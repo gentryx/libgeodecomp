@@ -9,6 +9,7 @@
 #include <libgeodecomp/parallelization/hpxsimulator/patchlink.h>
 
 #include <hpx/include/components.hpp>
+#include <hpx/util/high_resolution_timer.hpp>
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
@@ -94,26 +95,21 @@ public:
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
     UpdateGroupServer()
-      : boundingBoxFuture(boundingBoxPromise.get_future())
-      , initFuture(initPromise.get_future())
+      : initFuture(initPromise.get_future())
       , stopped(false)
     {}
 
-    void init(
-        const std::vector<ClientType>& updateGroups,
-        //boost::shared_ptr<LoadBalancer> balancer,
-        unsigned loadBalancingPeriod,
-        unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        const WriterVector& writers,
-        const SteererVector& steerers
-    )
+    void init(typename ClientType::InitData initData)
     {
-        this->updateGroups = updateGroups;
-        this->initializer = initializer;
-        this->loadBalancingPeriod = loadBalancingPeriod;
+        updateGroups = initData.updateGroups;
+        initializer = initData.initializer;
+        loadBalancingPeriod = initData.loadBalancingPeriod;
         //this->balancer = balancer;
         setRank();
+        updateGroupsIds.reserve(updateGroups.size());
+        BOOST_FOREACH(ClientType& ug, updateGroups) {
+            updateGroupsIds.push_back(ug.gid());
+        }
 
         partitionManager.reset(new PartitionManagerType());
         CoordBox<DIM> box = initializer->gridBox();
@@ -130,31 +126,13 @@ public:
                 box,
                 partition,
                 rank,
-                ghostZoneWidth
+                initData.ghostZoneWidth
             );
 
-        boundingBoxPromise.set_value(partitionManager->ownRegion().boundingBox());
-        SuperVector<hpx::future<CoordBox<DIM> > > boundingBoxesFutures;
-        boundingBoxesFutures.reserve(numPartitions);
-        // TODO: replace with proper all gather function
-        BOOST_FOREACH(const ClientType& ug, updateGroups) {
-            if(ug.gid() == this->get_gid()) {
-                boundingBoxesFutures << boundingBoxFuture;
-            } else {
-                boundingBoxesFutures << ug.boundingBox();
-            }
-        }
-
-        SuperVector<CoordBox<DIM> > boundingBoxes;
-        boundingBoxes.reserve(numPartitions);
-
-        BOOST_FOREACH(hpx::future<CoordBox<DIM> >& f, boundingBoxesFutures) {
-            boundingBoxes << f.get();
-        }
-        partitionManager->resetGhostZones(boundingBoxes);
+        partitionManager->resetGhostZones(initData.boundingBoxes);
 
         long firstSyncPoint =
-            initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
+            initializer->startStep() * CELL_TYPE::nanoSteps() + initData.ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
@@ -174,7 +152,7 @@ public:
                 link->charge(
                     firstSyncPoint,
                     PatchLink<GridType, ClientType>::ENDLESS,
-                    ghostZoneWidth);
+                    initData.ghostZoneWidth);
 
                 link->setRegion(partitionManager->ownRegion());
             }
@@ -183,7 +161,7 @@ public:
         PatchAccepterVec patchAcceptersInner;
 
         // Convert writers to patch accepters
-        BOOST_FOREACH(const typename WriterVector::value_type& writer, writers) {
+        BOOST_FOREACH(const typename WriterVector::value_type& writer, initData.writers) {
             PatchAccepterPtr adapterGhost(
                 new ParallelWriterAdapterType(
                     boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
@@ -232,14 +210,14 @@ public:
                 link->charge(
                     firstSyncPoint,
                     PatchLink<GridType, ClientType>::ENDLESS,
-                    ghostZoneWidth);
+                    initData.ghostZoneWidth);
 
                 link->setRegion(partitionManager->ownRegion());
             }
         }
 
         // Convert steerer to patch accepters
-        BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
+        BOOST_FOREACH(const typename SteererVector::value_type& steerer, initData.steerers) {
             // two adapters needed, just as for the writers
             PatchProviderPtr adapterGhost(
                 new SteererAdapterType(
@@ -286,7 +264,6 @@ public:
 
     StepPairType currentStep() const
     {
-        hpx::wait(boundingBoxFuture);
         if(stepper) {
             return stepper->currentStep();
         }
@@ -301,8 +278,9 @@ public:
         return currentStep().first;
     }
 
-    void nanoStep(std::size_t remainingNanoSteps)
+    Statistics nanoStep(std::size_t remainingNanoSteps)
     {
+        hpx::util::high_resolution_timer timer;
         hpx::wait(initFuture);
         stopped = false;
         while (remainingNanoSteps > 0 && !stopped) {
@@ -311,6 +289,15 @@ public:
             handleEvents();
             remainingNanoSteps -= hop;
         }
+        Statistics statistics =
+        {
+            timer.elapsed(),
+            stepper->computeTimeInner,
+            stepper->computeTimeGhost,
+            stepper->patchAcceptersTime,
+            stepper->patchProvidersTime
+        };
+        return statistics;
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, nanoStep, NanoStepAction);
 
@@ -319,12 +306,6 @@ public:
         stopped = true;
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, stop, StopAction);
-
-    CoordBox<DIM> boundingBox()
-    {
-        return boundingBoxFuture.get();
-    }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, boundingBox, BoundingBoxAction);
 
     void setOuterGhostZone(
         std::size_t srcRank,
@@ -346,6 +327,7 @@ public:
     }
 private:
     std::vector<ClientType> updateGroups;
+    std::vector<hpx::id_type> updateGroupsIds;
 
     boost::shared_ptr<HiParSimulator::Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
@@ -356,9 +338,6 @@ private:
     unsigned loadBalancingPeriod;
     std::size_t rank;
     EventMap events;
-
-    hpx::lcos::local::promise<CoordBox<DIM> > boundingBoxPromise;
-    hpx::future<CoordBox<DIM> > boundingBoxFuture;
 
     hpx::lcos::local::promise<void> initPromise;
     hpx::future<void> initFuture;

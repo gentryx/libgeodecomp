@@ -60,7 +60,7 @@ public:
     }
 
     inline void resetGhostZones(
-        const SuperVector<CoordBox<DIM> >& newBoundingBoxes)
+        const std::vector<CoordBox<DIM> >& newBoundingBoxes)
     {
         boundingBoxes = newBoundingBoxes;
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();

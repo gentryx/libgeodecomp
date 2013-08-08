@@ -40,6 +40,10 @@ public:
     inline Stepper(
         const boost::shared_ptr<PartitionManagerType>& partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer) :
+        computeTimeInner(0.0),
+        computeTimeGhost(0.0),
+        patchAcceptersTime(0.0),
+        patchProvidersTime(0.0),
         partitionManager(partitionManager),
         initializer(initializer)
     {}
@@ -69,6 +73,11 @@ public:
     {
         patchAccepters[patchType].push_back(patchAccepter);
     }
+
+    double computeTimeInner;
+    double computeTimeGhost;
+    double patchAcceptersTime;
+    double patchProvidersTime;
 
 protected:
     boost::shared_ptr<PartitionManagerType> partitionManager;

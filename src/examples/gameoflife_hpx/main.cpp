@@ -1,6 +1,6 @@
 
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/io/serialbovwriter.h>
 

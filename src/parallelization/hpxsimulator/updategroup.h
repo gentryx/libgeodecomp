@@ -5,6 +5,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HPXUPDATEGROUP_H
 
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroupserver.h>
@@ -54,26 +55,55 @@ public:
       : thisId(thisId)
     {}
 
-    void init(
+    struct InitData
+    {
+        std::vector<UpdateGroup> updateGroups;
+        unsigned loadBalancingPeriod;
+        unsigned ghostZoneWidth;
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+        WriterVector writers;
+        SteererVector steerers;
+        std::vector<CoordBox<DIM> > boundingBoxes;
+
+        template <typename ARCHIVE>
+        void serialize(ARCHIVE& ar, unsigned)
+        {
+            ar & updateGroups;
+            ar & loadBalancingPeriod;
+            ar & ghostZoneWidth;
+            ar & initializer;
+            ar & writers;
+            ar & steerers;
+            ar & boundingBoxes;
+        }
+    };
+
+    hpx::future<void> init(
         const std::vector<UpdateGroup>& updateGroups,
         //boost::shared_ptr<LoadBalancer> balancer,
         unsigned loadBalancingPeriod,
         unsigned ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const WriterVector& writers,
-        const SteererVector& steerers
+        const SteererVector& steerers,
+        std::vector<CoordBox<DIM> > boundingBoxes
     )
     {
-        hpx::apply<typename ComponentType::InitAction>(
-            thisId,
+        InitData initData =
+        {
             updateGroups,
-            //balancer,
             loadBalancingPeriod,
-            ghostZoneWidth,
+            ghostzoneWidth,
             initializer,
             writers,
-            steerers
-        );
+            steerers,
+            boundingBoxes
+        };
+        return
+            hpx::async<typename ComponentType::InitAction>(
+                thisId,
+                boost::move(initData)
+            );
     }
 
     hpx::naming::id_type gid() const
@@ -86,7 +116,7 @@ public:
         return typename ComponentType::CurrentStepAction()(thisId);
     }
 
-    hpx::future<void> nanoStep(std::size_t remainingNanoSteps)
+    hpx::future<Statistics> nanoStep(std::size_t remainingNanoSteps)
     {
         return
             hpx::async<typename ComponentType::NanoStepAction>(
@@ -122,11 +152,6 @@ private:
     void serialize(ARCHIVE& ar, unsigned)
     {
         ar & thisId;
-    }
-
-    hpx::future<CoordBox<DIM> > boundingBox() const
-    {
-        return hpx::async<typename ComponentType::BoundingBoxAction>(thisId);
     }
 };
 

@@ -5,6 +5,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
+#include <hpx/util/high_resolution_timer.hpp>
+
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
@@ -30,6 +32,11 @@ public:
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
     using Stepper<CELL_TYPE>::partitionManager;
+    
+    using Stepper<CELL_TYPE>::computeTimeInner;
+    using Stepper<CELL_TYPE>::computeTimeGhost;
+    using Stepper<CELL_TYPE>::patchAcceptersTime;
+    using Stepper<CELL_TYPE>::patchProvidersTime;
 
     inline VanillaStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
@@ -49,6 +56,10 @@ public:
         }
 
         initGrids();
+        computeTimeInner = 0.0;
+        computeTimeGhost = 0.0;
+        patchAcceptersTime = 0.0;
+        patchProvidersTime = 0.0;
     }
 
     inline void update(std::size_t nanoSteps)
@@ -81,6 +92,7 @@ private:
 
     inline void update()
     {
+        hpx::util::high_resolution_timer timer;
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
 
@@ -101,6 +113,7 @@ private:
             curNanoStep = 0;
             curStep++;
         }
+        computeTimeInner += timer.elapsed();
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
 
@@ -117,6 +130,7 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
+        hpx::util::high_resolution_timer timer;
         for (typename ParentType::PatchAccepterList::iterator i =
                  patchAccepters[patchType].begin();
              i != patchAccepters[patchType].end();
@@ -125,6 +139,7 @@ private:
                 (*i)->put(*oldGrid, region, nanoStep);
             }
         }
+        patchAcceptersTime += timer.elapsed();
     }
 
     inline void notifyPatchProviders(
@@ -132,6 +147,7 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
+        hpx::util::high_resolution_timer timer;
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
@@ -141,6 +157,7 @@ private:
                 region,
                 nanoStep);
         }
+        patchProvidersTime += timer.elapsed();
     }
 
     inline std::size_t globalNanoStep() const
@@ -185,6 +202,7 @@ private:
      */
     inline void updateGhost()
     {
+        hpx::util::high_resolution_timer timer;
         // fixme: skip all this ghost zone buffering for
         // ghostZoneWidth == 1?
 
@@ -200,11 +218,13 @@ private:
         std::size_t oldNanoStep = curNanoStep;
         std::size_t oldStep = curStep;
         std::size_t curGlobalNanoStep = globalNanoStep();
+        computeTimeGhost += timer.elapsed();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
 
+            timer.restart();
             const Region<DIM>& region = partitionManager->rim(t + 1);
             for (typename Region<DIM>::StreakIterator i = region.beginStreak();
                  i != region.endStreak();
@@ -226,8 +246,10 @@ private:
             std::swap(oldGrid, newGrid);
 
             ++curGlobalNanoStep;
+            computeTimeGhost += timer.elapsed();
             notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
         }
+        timer.restart();
         curNanoStep = oldNanoStep;
         curStep = oldStep;
 
@@ -239,6 +261,7 @@ private:
         // 3: restore grid for kernel update
         restoreRim(true);
         restoreKernel();
+        computeTimeGhost += timer.elapsed();
     }
 private:
 

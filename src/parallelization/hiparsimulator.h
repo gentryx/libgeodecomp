@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/supermap.h>
+#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
@@ -61,6 +62,11 @@ public:
         cellMPIDatatype(cellMPIDatatype)
     {}
 
+    inline void init()
+    {
+        initSimulation();
+    }
+
     inline void run()
     {
         initSimulation();
@@ -73,6 +79,27 @@ public:
         initSimulation();
 
         nanoStep(CELL_TYPE::nanoSteps());
+    }
+
+    inline SuperVector<Statistics> gatherStatistics()
+    {
+        Statistics stat =
+        {
+            totalTime,
+            updateGroup->stepper->computeTimeInner,
+            updateGroup->stepper->computeTimeGhost,
+            updateGroup->stepper->patchAcceptersTime,
+            updateGroup->stepper->patchProvidersTime,
+        };
+
+        MPI::Aint displacements[] = {0};
+        MPI::Datatype memberTypes[] = {MPI_CHAR};
+        int lengths[] = {sizeof(Statistics)};
+        MPI::Datatype objType
+            = MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
+        objType.Commit();
+    
+        return MPILayer(communicator).gather(stat, 0, objType);
     }
 
     virtual unsigned getStep() const
@@ -157,6 +184,8 @@ private:
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
 
+    double totalTime;
+
     SuperVector<long> initialWeights(const long& items, const long& size) const
     {
         SuperVector<long> ret(size);
@@ -173,6 +202,7 @@ private:
 
     inline void nanoStep(const long& s)
     {
+        hpx::util::high_resolution_timer timer;
         long remainingNanoSteps = s;
         while (remainingNanoSteps > 0) {
             long hop = std::min(remainingNanoSteps, timeToNextEvent());
@@ -180,6 +210,7 @@ private:
             handleEvents();
             remainingNanoSteps -= hop;
         }
+        totalTime = timer.elapsed();
     }
 
     /**

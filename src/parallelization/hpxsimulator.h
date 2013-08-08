@@ -3,6 +3,8 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_H
 
+#include <hpx/config.hpp>
+#include <hpx/lcos/broadcast.hpp>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
@@ -34,12 +36,16 @@
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
     );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), BoundingBoxAction)        \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::SetOuterGhostZoneAction,           \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SetOuterGhostZoneAction)  \
+    );                                                                          \
+    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastInitAction)  \
+    );                                                                          \
+    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastNanoStepAction)\
     );                                                                          \
 /**/
 
@@ -70,12 +76,16 @@
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::BoundingBoxAction,                 \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), BoundingBoxAction)        \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
         BOOST_PP_CAT(NAME, UpdateGroupType)::SetOuterGhostZoneAction,           \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SetOuterGhostZoneAction)  \
+    );                                                                          \
+    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastInitAction)  \
+    );                                                                          \
+    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastNanoStepAction)\
     );                                                                          \
 /**/
 
@@ -114,13 +124,102 @@ public:
         ghostZoneWidth(ghostZoneWidth),
         updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor)),
         initialized(false)
-    {}
+    {
+        updateGroupsIds.reserve(updateGroups.size());
+        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
+            updateGroupsIds.push_back(ug.gid());
+        }
+    }
+
+    void calculateBoundingBoxes(
+        std::vector<CoordBox<DIM> >& boundingBoxes,
+        std::size_t rank_start,
+        std::size_t rank_end,
+        const CoordBox<DIM>& box)
+    {
+        std::size_t numPartitions = boundingBoxes.size();
+        for(std::size_t rank = rank_start; rank != rank_end; ++rank)
+        {
+            typedef
+                HiParSimulator::PartitionManager<DIM, typename CELL_TYPE::Topology>
+                PartitionManagerType;
+
+            PartitionManagerType partitionManager;
+            
+            boost::shared_ptr<PARTITION> partition(
+                new PARTITION(
+                    box.origin,
+                    box.dimensions,
+                    0,
+                    initialWeights(box.dimensions.prod(), numPartitions)));
+            partitionManager.resetRegions(
+                    box,
+                    partition,
+                    rank,
+                    ghostZoneWidth
+                );
+            boundingBoxes[rank] = boost::move(partitionManager.ownRegion().boundingBox());
+        }
+    }
+    
+    void init()
+    {
+        if(initialized) {
+            return;
+        }
+        std::vector<CoordBox<DIM> > boundingBoxes;
+        std::size_t numPartitions = updateGroups.size();
+        boundingBoxes.resize(numPartitions);
+
+        CoordBox<DIM> box = initializer->gridBox();
+
+        std::vector<hpx::future<void> > boundingBoxesFutures;
+        boundingBoxesFutures.reserve(numPartitions);
+        std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
+        for(std::size_t i = 0; i < numPartitions; i += steps)
+        {
+            boundingBoxesFutures.push_back(
+                hpx::async(
+                    HPX_STD_BIND(
+                        &HpxSimulator::calculateBoundingBoxes,
+                        this,
+                        boost::ref(boundingBoxes),
+                        i, (std::min)(numPartitions, i + steps), box
+                    )
+                )
+            );
+        }
+        hpx::wait_all(boundingBoxesFutures);
+        typename UpdateGroupType::InitData initData =
+        {
+            updateGroups,
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            initializer,
+            writers,
+            steerers,
+            boundingBoxes
+        };
+        hpx::wait(
+            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
+                updateGroupsIds,
+                initData
+            )
+        );
+
+        initialized = true;
+    }
 
     inline void run()
     {
-        initSimulation();
+        runTimed();
+    }
+
+    inline std::vector<Statistics> runTimed()
+    {
+        init();
         std::size_t lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
-        nanoStep(lastNanoStep);
+        return nanoStep(lastNanoStep);
     }
 
     void stop()
@@ -132,7 +231,7 @@ public:
 
     inline void step()
     {
-        initSimulation();
+        init();
         nanoStep(CELL_TYPE::nanoSteps());
     }
 
@@ -172,41 +271,31 @@ private:
     unsigned ghostZoneWidth;
     HiParSimulator::PartitionManager<DIM, Topology> partitionManager;
     std::vector<UpdateGroupType> updateGroups;
+    std::vector<hpx::id_type> updateGroupsIds;
     boost::atomic<bool> initialized;
 
-    void nanoStep(std::size_t remainingNanoSteps)
+    std::vector<Statistics> nanoStep(std::size_t remainingNanoSteps)
     {
-        std::vector<hpx::future<void> >
-            nanoSteps;
-        nanoSteps.reserve(updateGroups.size());
-
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            nanoSteps.push_back(ug.nanoStep(remainingNanoSteps));
-        }
-        hpx::wait(nanoSteps);
+        return
+            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
+                updateGroupsIds,
+                remainingNanoSteps
+            ).move();
     }
 
-    void initSimulation()
+    SuperVector<long> initialWeights(const long items, const long size) const
     {
-        if(initialized) {
-            return;
+        SuperVector<long> ret(size);
+        long lastPos = 0;
+
+        for (long i = 0; i < size; i++) {
+            long currentPos = items * (i + 1) / size;
+            ret[i] = currentPos - lastPos;
+            lastPos = currentPos;
         }
 
-        // TODO: replace with proper broadcast
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            ug.init(
-                updateGroups,
-                //balancer,
-                loadBalancingPeriod,
-                ghostZoneWidth,
-                initializer,
-                writers,
-                steerers
-            );
-        }
-        initialized = true;
+        return ret;
     }
-
 };
 
 }
