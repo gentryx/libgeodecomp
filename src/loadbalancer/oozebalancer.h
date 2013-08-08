@@ -74,7 +74,7 @@ private:
         const LoadVec& relativeLoads) const;
 
 private:
-    double _newLoadWeight;
+    double newLoadWeight;
 
     WeightVec equalize(const LoadVec& loads);
     LoadVec linearCombo(const WeightVec& oldLoads, const LoadVec& newLoads);
@@ -84,7 +84,7 @@ private:
     void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<LoadBalancer>(*this);
-        ar & _newLoadWeight;
+        ar & newLoadWeight;
     }
 #endif
 };

@@ -4,7 +4,7 @@
 
 namespace LibGeoDecomp {
 
-OozeBalancer::OozeBalancer(double newLoadWeight) : _newLoadWeight(newLoadWeight)
+OozeBalancer::OozeBalancer(double newLoadWeight) : newLoadWeight(newLoadWeight)
 {
     if (newLoadWeight < 0 || newLoadWeight > 1) {
         throw std::invalid_argument(
@@ -132,8 +132,8 @@ OozeBalancer::LoadVec OozeBalancer::linearCombo(
 {
     OozeBalancer::LoadVec ret(newLoads.size());
     for (unsigned i = 0; i < ret.size(); i++)
-        ret[i] = newLoads[i] * _newLoadWeight +
-            oldLoads[i] * (1 - _newLoadWeight);
+        ret[i] = newLoads[i] * newLoadWeight +
+            oldLoads[i] * (1 - newLoadWeight);
     return ret;
 }
 

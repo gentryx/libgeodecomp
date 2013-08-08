@@ -72,10 +72,10 @@ template<int DIM,
          class OUTPUT=TestCellHelpers::StdOutput>
 class TestCell
 {
+public:
     friend class Typemaps;
     friend class TestCellTest;
 
-public:
     typedef STENCIL Stencil;
     class API : public CellAPITraits::Base
     {};
