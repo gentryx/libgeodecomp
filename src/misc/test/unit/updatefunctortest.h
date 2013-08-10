@@ -142,12 +142,13 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        const Streak<3>& streak,
-        const Coord<3>& targetOrigin,
-        const unsigned nanoStep,
-        ACCESSOR1 hoodOld, int *indexOld, ACCESSOR2 hoodNew, int *indexNew)
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
     {
-        std::cout << "cowabunga!\n";
+        for (; *indexOld < indexEnd; ++*indexOld) {
+            hoodNew.temp()  = hoodOld.temp();
+            hoodNew.alive() = hoodOld.alive();
+            ++*indexNew;
+        }
     }
 
     double temp;
@@ -217,23 +218,30 @@ public:
         UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().testSplittedTraversal(3);
     }
 
-    void testStructOfArrays()
+    void testStructOfArraysBasic()
     {
-        CoordBox<3> box(Coord<3>(0, 0, 0), Coord<3>(30, 20, 10));
-        SoAGrid<MySoATestCell, MySoATestCell::Topology> gridOld(box, MySoATestCell(47.0), MySoATestCell(1));
-        SoAGrid<MySoATestCell, MySoATestCell::Topology> gridNew(box, MySoATestCell(11.0), MySoATestCell(0));
+        CoordBox<3> box1(Coord<3>(0,  0,  0),  Coord<3>(30, 20, 10));
+        CoordBox<3> box2(Coord<3>(50, 20, 50), Coord<3>(50, 10, 10));
+        SoAGrid<MySoATestCell, MySoATestCell::Topology> gridOld(box1, MySoATestCell(47), MySoATestCell(1));
+        SoAGrid<MySoATestCell, MySoATestCell::Topology> gridNew(box2, MySoATestCell(11), MySoATestCell(0));
+
+        for (int i = 5; i < 27; ++i) {
+            Coord<3> c(i, 2, 1);
+            gridOld.set(c, MySoATestCell(i - 5));
+        }
+        for (int i = 52; i < 74; ++i) {
+            Coord<3> c(i, 25, 55);
+            TS_ASSERT_EQUALS(gridNew.get(c).temp,  11.0);
+        }
+
         Streak<3> streak(Coord<3>(5, 2, 1), 27);
+        Coord<3> targetOrigin(52, 25, 55);
+        UpdateFunctor<MySoATestCell>()(streak, targetOrigin, gridOld, &gridNew, 0);
 
-        std::cout << "\n";
-        std::cout << "---------------------------------------\n";
-        UpdateFunctor<MySoATestCell>()(streak, streak.origin, gridOld, &gridNew, 0);
-        std::cout << "---------------------------------------\n";
-
-        // Coord<3> c(1, 2, 3);
-        // TS_ASSERT_EQUALS(gridNew.get(c).temp, 11.0);
-        // gridNew.set(c, gridOld.get(c));
-        // gridNew.set(c, MySoATestCell(12.34, true));
-        // TS_ASSERT_EQUALS(gridNew.get(c).temp, 12.34);
+        for (int i = 52; i < 74; ++i) {
+            Coord<3> c(i, 25, 55);
+            TS_ASSERT_EQUALS(gridNew.get(c).temp,  i - 52);
+        }
     }
 
 private:

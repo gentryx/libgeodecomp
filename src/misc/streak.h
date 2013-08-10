@@ -31,6 +31,13 @@ public:
         return buffer.str();
     }
 
+    Coord<DIM> end() const
+    {
+        Coord<DIM> ret = origin;
+        ret.x() = endX;
+        return ret;
+    }
+
     bool operator==(const Streak& other) const
     {
         return

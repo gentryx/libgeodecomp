@@ -31,10 +31,25 @@ public:
             nanoStep(nanoStep)
         {}
 
-        template<typename ACCESSOR1, typename ACCESSOR2>
-        void operator()(ACCESSOR1 hoodOld, int *indexOld, ACCESSOR2 hoodNew, int *indexNew) const
+        template<typename CELL1, int MY_DIM_X1, int MY_DIM_Y1, int MY_DIM_Z1, int INDEX1,
+                 typename CELL2, int MY_DIM_X2, int MY_DIM_Y2, int MY_DIM_Z2, int INDEX2>
+        void operator()(const LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& hoodOld, int *indexOld,
+                              LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew, int *indexNew) const
         {
-            CELL::updateLineX(streak, targetOrigin, nanoStep, hoodOld, indexOld, hoodNew, indexNew);
+            *indexOld =
+                streak.origin.z() * MY_DIM_X1 * MY_DIM_Y1 +
+                streak.origin.y() * MY_DIM_X1 +
+                streak.origin.x();
+            Coord<DIM> end = streak.end();
+            int indexEnd =
+                end.z() * MY_DIM_X1 * MY_DIM_Y1 +
+                end.y() * MY_DIM_X1 +
+                end.x();
+            *indexNew =
+                targetOrigin.z() * MY_DIM_X2 * MY_DIM_Y2 +
+                targetOrigin.y() * MY_DIM_X2 +
+                targetOrigin.x();
+            CELL::updateLineX(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
         }
 
     private:
@@ -56,7 +71,14 @@ public:
         CellAPITraitsFixme::TrueType,
         CellAPITraitsFixme::TrueType)
     {
-        gridOld.callback(gridNew, SoAUpdateHelper(streak, targetOrigin, nanoStep));
+        // fixme: doing this over and over again for every streak
+        // incurs too much overhead. better do this only once per
+        // region.
+        Coord<DIM> gridOldOrigin = gridOld.boundingBox().origin;
+        Streak<DIM> relativeStreak(streak.origin - gridOldOrigin, streak.endX - gridOldOrigin.x());
+        Coord<DIM> gridNewOrigin = gridNew->boundingBox().origin;
+        Coord<DIM> relativeTargetOrigin = targetOrigin - gridNewOrigin;
+        gridOld.callback(gridNew, SoAUpdateHelper(relativeStreak, relativeTargetOrigin, nanoStep));
     }
 
     template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
