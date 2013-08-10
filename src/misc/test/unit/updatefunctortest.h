@@ -9,9 +9,7 @@
 
 using namespace LibGeoDecomp;
 
-namespace LibGeoDecomp {
-
-std::stringstream log;
+std::stringstream myLog;
 
 class BasicCell
 {
@@ -30,7 +28,7 @@ public:
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "BasicCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "BasicCell::update(nanoStep = " << nanoStep << ")\n";
     }
 };
 
@@ -51,7 +49,7 @@ public:
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "LineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "LineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
     }
 
     // won't ever be called as all current update functors support
@@ -59,7 +57,7 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLine(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "LineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
+        myLog << "LineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
 
     }
 };
@@ -81,7 +79,7 @@ public:
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "FixedCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "FixedCell::update(nanoStep = " << nanoStep << ")\n";
     }
 
 };
@@ -103,16 +101,62 @@ public:
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "FixedLineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "FixedLineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
     }
 
     template<typename NEIGHBORHOOD>
     static void updateLine(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
+        myLog << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
 
     }
 };
+
+class MySoATestCell
+{
+public:
+    typedef Stencils::Moore<3, 1> Stencil;
+    typedef Topologies::Torus<3>::Topology Topology;
+
+    class API : public CellAPITraits::Fixed,
+                public CellAPITraitsFixme::SupportsSoA,
+                public CellAPITraitsFixme::SupportsUpdateLineX
+    {};
+
+    static int nanoSteps()
+    {
+        return 1;
+    }
+
+    MySoATestCell(
+        double temp = 0.0,
+        bool alive = false) :
+        temp(temp),
+        alive(alive)
+    {}
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineX(
+        const Streak<3>& streak,
+        const Coord<3>& targetOrigin,
+        const unsigned nanoStep,
+        ACCESSOR1 hoodOld, int *indexOld, ACCESSOR2 hoodNew, int *indexNew)
+    {
+        std::cout << "cowabunga!\n";
+    }
+
+    double temp;
+    bool alive;
+};
+
+LIBFLATARRAY_REGISTER_SOA(MySoATestCell, ((double)(temp))((bool)(alive)))
+
+namespace LibGeoDecomp {
 
 class UpdateFunctorTest : public CxxTest::TestSuite
 {
@@ -173,6 +217,25 @@ public:
         UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().testSplittedTraversal(3);
     }
 
+    void testStructOfArrays()
+    {
+        CoordBox<3> box(Coord<3>(0, 0, 0), Coord<3>(30, 20, 10));
+        SoAGrid<MySoATestCell, MySoATestCell::Topology> gridOld(box, MySoATestCell(47.0), MySoATestCell(1));
+        SoAGrid<MySoATestCell, MySoATestCell::Topology> gridNew(box, MySoATestCell(11.0), MySoATestCell(0));
+        Streak<3> streak(Coord<3>(5, 2, 1), 27);
+
+        std::cout << "\n";
+        std::cout << "---------------------------------------\n";
+        UpdateFunctor<MySoATestCell>()(streak, streak.origin, gridOld, &gridNew, 0);
+        std::cout << "---------------------------------------\n";
+
+        // Coord<3> c(1, 2, 3);
+        // TS_ASSERT_EQUALS(gridNew.get(c).temp, 11.0);
+        // gridNew.set(c, gridOld.get(c));
+        // gridNew.set(c, MySoATestCell(12.34, true));
+        // TS_ASSERT_EQUALS(gridNew.get(c).temp, 12.34);
+    }
+
 private:
     template<typename CELL>
     void checkSelector(const std::string& line, int repeats)
@@ -187,14 +250,14 @@ private:
         UpdateFunctor<CELL>()(streak, streak.origin, gridOld, &gridNew, nanoStep);
 
         std::vector<char> message(1024 * 16, 0);
-        log.read(&message[0], 1024 * 16);
+        myLog.read(&message[0], 1024 * 16);
         std::string expected = "";
         for (int i = 0; i < repeats; ++i) {
             expected += line;
         }
 
         TS_ASSERT_EQUALS(expected, std::string(&message[0]));
-        log.clear();
+        myLog.clear();
     }
 };
 

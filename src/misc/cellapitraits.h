@@ -6,7 +6,16 @@
 
 namespace LibGeoDecomp {
 
-namespace API {
+namespace CellAPITraitsFixme {
+
+class DontCareType
+{};
+
+class FalseType : public DontCareType
+{};
+
+class TrueType : public DontCareType
+{};
 
 // deduce a CELL's optimum grid type
 template<typename CELL, typename HAS_SOA = void>
@@ -14,6 +23,7 @@ class SelectGridType
 {
 public:
     typedef DisplacedGrid<CELL, typename CELL::Topology> Type;
+    typedef FalseType Value;
 };
 
 template<typename CELL>
@@ -21,6 +31,22 @@ class SelectGridType<CELL, typename CELL::API::HasSoA>
 {
 public:
     typedef SoAGrid<CELL, typename CELL::Topology> Type;
+    typedef TrueType Value;
+};
+
+// check whether cell has an updateLineX() member
+template<typename CELL, typename HAS_UPDATE_LINE_X = void>
+class SelectUpdateLineX
+{
+public:
+    typedef FalseType Value;
+};
+
+template<typename CELL>
+class SelectUpdateLineX<CELL, typename CELL::API::HasUpdateLineX>
+{
+public:
+    typedef TrueType Value;
 };
 
 /**
@@ -31,6 +57,17 @@ class SupportsSoA
 {
 public:
     typedef void HasSoA;
+};
+
+/**
+ * This qualifier should be used to flag models which sport a static
+ * updateLineX() function, which is expected to update a streak of
+ * cells along the X axis.
+ */
+class SupportsUpdateLineX
+{
+public:
+    typedef void HasUpdateLineX;
 };
 
 }

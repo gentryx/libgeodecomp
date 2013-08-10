@@ -20,7 +20,7 @@ public:
     friend class SerialSimulatorTest;
     typedef typename CELL_TYPE::Topology Topology;
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
-    typedef API::SelectGridType<CELL_TYPE> GridTypeSelector;
+    typedef CellAPITraitsFixme::SelectGridType<CELL_TYPE> GridTypeSelector;
     typedef typename GridTypeSelector::Type GridType;
     static const int DIM = Topology::DIM;
 
