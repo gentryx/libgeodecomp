@@ -119,6 +119,7 @@ set(AMD64_LINUX false)
 if (MACHINE_ARCH MATCHES "x86_64")
   set(AMD64_LINUX true)
 endif()
+
 #============= CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
@@ -342,17 +343,20 @@ set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
-target_link_libraries(geodecomp ${Boost_LIBRARIES})
+
+set(LIBGEODECOMP_LINK_LIBRARIES ${Boost_LIBRARIES})
 if(FEATURE_MPI)
-  target_link_libraries(geodecomp ${MPI_LIBRARIES})
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${MPI_LIBRARIES})
   set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
 endif()
 if(FEATURE_OPENCL)
-  target_link_libraries(geodecomp OpenCL)
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} OpenCL)
 endif()
 if(FEATURE_VISIT)
-  target_link_libraries(geodecomp ${VisIt_LIBRARIES} dl)
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} dl)
 endif()
+
+target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 
 #============= INSTALLER CONFIG ===================================
 install(TARGETS geodecomp DESTINATION lib)
@@ -366,6 +370,28 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
+# install libflatarray, too
+install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflatarray)
+
+# link against the libs we need
+set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")
+foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES} /usr/lib/liblibkremotecontrol.so)
+  get_filename_component(path "${lib}" PATH)
+  get_filename_component(name "${lib}" NAME_WE)
+
+  if(name MATCHES ^lib)
+    # this dirty trick is required to prevent REGEX REPLACE matching
+    # every occurrence of "lib" ("^lib" will sadly match all, too, if
+    # we're going to remove them)
+    set(name "_dummy_${name}")
+    string(REGEX REPLACE "_dummy_lib" "" name "${name}")
+  endif()
+
+  if (path)
+    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -L${path}")
+  endif()
+  set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${name}")
+endforeach()
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
@@ -374,7 +400,7 @@ includedir=${CMAKE_INSTALL_PREFIX}/include/libgeodecomp
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
-Libs: -L\${libdir} -lgeodecomp
+Libs: ${INSTALLER_LINK_FLAGS}
 Cflags: -I\${includedir}
 ")
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")
