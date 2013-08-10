@@ -53,7 +53,7 @@ public:
         const GridBase<TestCell<2>, 2> *grid = simulator->getGrid();
         TS_ASSERT_TEST_GRID(GridBaseType, *grid,
                             (startStep + 1) * TestCell<2>::nanoSteps());
-        TS_ASSERT_EQUALS(startStep + 1, (int)simulator->getStep());
+        TS_ASSERT_EQUALS(startStep + 1, simulator->getStep());
     }
 
     void testRun()
