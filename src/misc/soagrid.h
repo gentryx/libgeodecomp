@@ -147,7 +147,6 @@ public:
 
     }
 
-
     virtual void set(const Coord<DIM>& absoluteCoord, const CELL& cell)
     {
         Coord<DIM> relativeCoord = absoluteCoord - box.origin;
@@ -193,6 +192,13 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return box;
+    }
+
+    // fixme: needs test
+    template<typename FUNCTOR>
+    void callback(SoAGrid<CELL, TOPOLOGY, TOPOLOGICALLY_CORRECT> *newGrid, FUNCTOR functor) const
+    {
+        delegate.callback(&newGrid->delegate, functor);
     }
 
 private:
