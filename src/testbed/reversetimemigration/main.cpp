@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     SuperMap<std::string, int> hostCount;
     SuperMap<int, int> cudaIDs;
 
-    for (int i = 0; i < layer.size(); ++i) {
+    for (unsigned i = 0; i < layer.size(); ++i) {
         std::string name(names + i * MPI::MAX_PROCESSOR_NAME);
 
         int id = hostCount[name];
