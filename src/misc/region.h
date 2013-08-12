@@ -11,6 +11,8 @@
 
 namespace LibGeoDecomp {
 
+class RegionTest;
+
 namespace RegionHelpers {
 
 template<int DIM>
@@ -206,7 +208,7 @@ public:
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
-    friend class RegionTest;
+    friend class LibGeoDecomp::RegionTest;
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
