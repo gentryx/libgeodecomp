@@ -56,7 +56,7 @@ public:
 
     void testIntersectOrTouch()
     {
-        RegionInsertHelper<0> h;
+        RegionHelpers::RegionInsertHelper<0> h;
         TS_ASSERT_EQUALS(
             true, h.intersectOrTouch(IntPair(10, 30),
                                      IntPair(30, 40)));
@@ -92,7 +92,7 @@ public:
 
     void testIntersect()
     {
-        RegionRemoveHelper<0> h;
+        RegionHelpers::RegionRemoveHelper<0> h;
 
         TS_ASSERT_EQUALS(
             false, h.intersect(IntPair(10, 30),
@@ -130,7 +130,7 @@ public:
 
     void testFuse()
     {
-        RegionInsertHelper<0> h;
+        RegionHelpers::RegionInsertHelper<0> h;
 
         TS_ASSERT_EQUALS(
             IntPair(10, 30),
@@ -148,7 +148,7 @@ public:
 
     void testSubstract()
     {
-        RegionRemoveHelper<0> h;
+        RegionHelpers::RegionRemoveHelper<0> h;
         Region<2>::VecType expected;
 
         TS_ASSERT_EQUALS(
@@ -181,8 +181,8 @@ public:
           << Coord<2>(11, 10)
           << Coord<2>(14, 10);
 
-        TS_ASSERT_EQUALS(1, c.indices[1].size());
-        TS_ASSERT_EQUALS(2, c.indices[0].size());
+        TS_ASSERT_EQUALS(unsigned(1), c.indices[1].size());
+        TS_ASSERT_EQUALS(unsigned(2), c.indices[0].size());
     }
 
     void testInsert1b()
@@ -191,8 +191,8 @@ public:
           << Coord<2>(14, 10)
           << Coord<2>(10, 10);
 
-        TS_ASSERT_EQUALS(1, c.indices[1].size());
-        TS_ASSERT_EQUALS(3, c.indices[0].size());
+        TS_ASSERT_EQUALS(unsigned(1), c.indices[1].size());
+        TS_ASSERT_EQUALS(unsigned(3), c.indices[0].size());
         TS_ASSERT_EQUALS(10, c.indices[0][0].first);
     }
 
@@ -248,44 +248,44 @@ public:
     void testInsert3D()
     {
         Region<3> r;
-        TS_ASSERT_EQUALS(r.indices[0].size(), 0);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 0);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 0);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(0));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(0));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(0));
 
         r << Streak<3>(Coord<3>(10, 20, 30), 40);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(1));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(1));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(1));
 
         r << Streak<3>(Coord<3>(12, 22, 31), 42);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 2);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 2);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 2);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(2));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(2));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(2));
 
         r << Streak<3>(Coord<3>(14, 24, 29), 44);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 3);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 3);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 3);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(3));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(3));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(3));
 
         r << Streak<3>(Coord<3>(16, 21, 30), 46);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 4);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 4);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 3);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(4));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(4));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(3));
 
         r << Streak<3>(Coord<3>(58, 20, 30), 68);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 5);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 4);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 3);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(5));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(4));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(3));
 
         r << Streak<3>(Coord<3>(59, 19, 29), 69);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 6);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 5);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 3);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(6));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(5));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(3));
 
         r << Streak<3>(Coord<3>(38, 20, 30), 60);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 5);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 5);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 3);
+        TS_ASSERT_EQUALS(r.indices[0].size(), unsigned(5));
+        TS_ASSERT_EQUALS(r.indices[1].size(), unsigned(5));
+        TS_ASSERT_EQUALS(r.indices[2].size(), unsigned(3));
     }
 
     void testInsertVsOperator()
@@ -835,39 +835,39 @@ public:
     void testNumStreaks()
     {
         Region<2> a;
-        TS_ASSERT_EQUALS(0, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(0), a.numStreaks());
         a << Streak<2>(Coord<2>(10, 10), 20);
-        TS_ASSERT_EQUALS(1, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(1), a.numStreaks());
         a << Streak<2>(Coord<2>(30, 10), 60);
-        TS_ASSERT_EQUALS(2, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(2), a.numStreaks());
         a << Streak<2>(Coord<2>(10, 20), 20);
-        TS_ASSERT_EQUALS(3, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(3), a.numStreaks());
         a << Streak<2>(Coord<2>(15, 10), 25);
-        TS_ASSERT_EQUALS(3, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(3), a.numStreaks());
         a >> Streak<2>(Coord<2>(15, 10), 17);
-        TS_ASSERT_EQUALS(4, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(4), a.numStreaks());
         a << Streak<2>(Coord<2>(12, 10), 30);
-        TS_ASSERT_EQUALS(2, a.numStreaks());
+        TS_ASSERT_EQUALS(unsigned(2), a.numStreaks());
     }
 
     void testToVector()
     {
         Region<2> a;
-        TS_ASSERT_EQUALS(0, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(0), a.toVector().size());
         a << Streak<2>(Coord<2>(10, 10), 20);
-        TS_ASSERT_EQUALS(1, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(1), a.toVector().size());
         a << Streak<2>(Coord<2>(30, 10), 60);
-        TS_ASSERT_EQUALS(2, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(2), a.toVector().size());
         a << Streak<2>(Coord<2>(10, 20), 20);
-        TS_ASSERT_EQUALS(3, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(3), a.toVector().size());
         a << Streak<2>(Coord<2>(15, 10), 25);
-        TS_ASSERT_EQUALS(3, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(3), a.toVector().size());
         a >> Streak<2>(Coord<2>(15, 10), 17);
-        TS_ASSERT_EQUALS(4, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(4), a.toVector().size());
         SuperVector<Streak<2> > vec = a.toVector();
         TS_ASSERT_EQUALS(a, Region<2>(vec.begin(), vec.end()));
         a << Streak<2>(Coord<2>(12, 10), 30);
-        TS_ASSERT_EQUALS(2, a.toVector().size());
+        TS_ASSERT_EQUALS(unsigned(2), a.toVector().size());
         vec = a.toVector();
         TS_ASSERT_EQUALS(a, Region<2>(vec.begin(), vec.end()));
     }

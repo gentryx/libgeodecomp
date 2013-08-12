@@ -11,6 +11,8 @@
 
 namespace LibGeoDecomp {
 
+namespace RegionHelpers {
+
 template<int DIM>
 class StreakIteratorCompareIterators
 {
@@ -189,6 +191,8 @@ class RegionInsertHelper;
 template<int DIM>
 class RegionRemoveHelper;
 
+}
+
 /**
  * Region stores a set of coordinates. It performs a run-length
  * coding. Instead of storing complete Streak objects, these objects
@@ -198,11 +202,11 @@ class RegionRemoveHelper;
 template<int DIM>
 class Region
 {
-    template<int MY_DIM> friend class RegionLookupHelper;
-    template<int MY_DIM> friend class RegionInsertHelper;
-    template<int MY_DIM> friend class RegionRemoveHelper;
-    friend class RegionTest;
 public:
+    template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
+    template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
+    template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
+    friend class RegionTest;
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
@@ -256,7 +260,7 @@ public:
 
         inline bool operator==(const StreakIterator& other) const
         {
-            return StreakIteratorCompareIterators<DIM - 1>()(iterators, other.iterators);
+            return RegionHelpers::StreakIteratorCompareIterators<DIM - 1>()(iterators, other.iterators);
         }
 
         inline bool operator!=(const StreakIterator& other) const
@@ -377,7 +381,7 @@ public:
         return mySize;
     }
 
-    inline unsigned numStreaks() const
+    inline std::size_t numStreaks() const
     {
         return indices[0].size();
     }
@@ -454,12 +458,12 @@ public:
 
     bool count(const Streak<DIM>& s) const
     {
-        return RegionLookupHelper<DIM - 1>()(*this, s);
+        return RegionHelpers::RegionLookupHelper<DIM - 1>()(*this, s);
     }
 
     bool count(const Coord<DIM>& c) const
     {
-        return RegionLookupHelper<DIM - 1>()(*this, Streak<DIM>(c, c[0] + 1));
+        return RegionHelpers::RegionLookupHelper<DIM - 1>()(*this, Streak<DIM>(c, c[0] + 1));
     }
 
     template<typename ADDEND>
@@ -476,7 +480,7 @@ public:
         }
 
         geometryCacheTainted = true;
-        RegionInsertHelper<DIM - 1>()(this, s);
+        RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);
         return *this;
     }
 
@@ -506,7 +510,7 @@ public:
         }
 
         geometryCacheTainted = true;
-        RegionRemoveHelper<DIM - 1>()(this, s);
+        RegionHelpers::RegionRemoveHelper<DIM - 1>()(this, s);
         return *this;
     }
 
@@ -551,14 +555,14 @@ public:
                 break;
             }
 
-            if (RegionIntersectHelper<DIM - 1>::intersects(*myIter, *otherIter)) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(*myIter, *otherIter)) {
                 Streak<DIM> intersection = *myIter;
                 intersection.origin.x() = (std::max)(myIter->origin.x(), otherIter->origin.x());
                 intersection.endX = (std::min)(myIter->endX, otherIter->endX);
                 ret << intersection;
             }
 
-            if (RegionIntersectHelper<DIM - 1>::lessThan(*myIter, *otherIter)) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*myIter, *otherIter)) {
                 ++myIter;
             } else {
                 ++otherIter;
@@ -610,13 +614,13 @@ public:
 
     inline StreakIterator beginStreak() const
     {
-        StreakIterator ret(this, StreakIteratorInitBegin<DIM>());
+        StreakIterator ret(this, RegionHelpers::StreakIteratorInitBegin<DIM>());
         return ret;
     }
 
     inline StreakIterator endStreak() const
     {
-        StreakIterator ret(this, StreakIteratorInitEnd<DIM>());
+        StreakIterator ret(this, RegionHelpers::StreakIteratorInitEnd<DIM>());
         return ret;
     }
 
@@ -632,7 +636,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template <typename Archive>
-    void serialize(Archive& ar, unsigned)
+    inline void serialize(Archive& ar, unsigned)
     {
         ar & indices;
         ar & myBoundingBox;
@@ -747,6 +751,8 @@ private:
     }
 };
 
+namespace RegionHelpers {
+
 template<int DIM>
 class RegionLookupHelper : public RegionCommonHelper
 {
@@ -833,9 +839,6 @@ public:
 
 };
 
-// fixme check that all helpers are declared inline
-// move all helpers to dedicated namespace
-
 template<int DIM>
 class RegionInsertHelper : public RegionCommonHelper
 {
@@ -916,8 +919,8 @@ public:
 template<>
 class RegionInsertHelper<0>
 {
-    friend class RegionTest;
 public:
+    friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
     typedef Region<1>::VecType VecType;
 
@@ -1052,8 +1055,8 @@ public:
 template<>
 class RegionRemoveHelper<0>
 {
-    friend class RegionTest;
 public:
+    friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
     typedef Region<1>::VecType VecType;
 
@@ -1133,6 +1136,8 @@ private:
         return ret;
     }
 };
+
+}
 
 }
 
