@@ -93,33 +93,33 @@ public:
 
     void testTriangleLengthTrivial()
     {
-        TS_ASSERT_EQUALS(1, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 0));
-        TS_ASSERT_EQUALS(0, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 1));
-        TS_ASSERT_EQUALS(1, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 2));
-        TS_ASSERT_EQUALS(0, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 3));
+        TS_ASSERT_EQUALS(unsigned(1), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 0));
+        TS_ASSERT_EQUALS(unsigned(0), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 1));
+        TS_ASSERT_EQUALS(unsigned(1), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 2));
+        TS_ASSERT_EQUALS(unsigned(0), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 1), 3));
 
-        TS_ASSERT_EQUALS(8, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 0));
-        TS_ASSERT_EQUALS(0, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 1));
-        TS_ASSERT_EQUALS(8, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 2));
-        TS_ASSERT_EQUALS(0, HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 3));
+        TS_ASSERT_EQUALS(unsigned(8), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 0));
+        TS_ASSERT_EQUALS(unsigned(0), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 1));
+        TS_ASSERT_EQUALS(unsigned(8), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 2));
+        TS_ASSERT_EQUALS(unsigned(0), HIndexingPartition::Iterator::triangleLength(Coord<2>(1, 8), 3));
 
-        TS_ASSERT_EQUALS(9, HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 0));
-        TS_ASSERT_EQUALS(0, HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 1));
-        TS_ASSERT_EQUALS(9, HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 2));
-        TS_ASSERT_EQUALS(0, HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 3));
+        TS_ASSERT_EQUALS(unsigned(9), HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 0));
+        TS_ASSERT_EQUALS(unsigned(0), HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 1));
+        TS_ASSERT_EQUALS(unsigned(9), HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 2));
+        TS_ASSERT_EQUALS(unsigned(0), HIndexingPartition::Iterator::triangleLength(Coord<2>(9, 1), 3));
     }
 
     void testTriangleLengthRecursive()
     {
-        TS_ASSERT_EQUALS(7, HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 0));
-        TS_ASSERT_EQUALS(5, HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 1));
-        TS_ASSERT_EQUALS(7, HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 2));
-        TS_ASSERT_EQUALS(5, HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 3));
+        TS_ASSERT_EQUALS(unsigned(7), HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 0));
+        TS_ASSERT_EQUALS(unsigned(5), HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 1));
+        TS_ASSERT_EQUALS(unsigned(7), HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 2));
+        TS_ASSERT_EQUALS(unsigned(5), HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 3));
 
         // repetition to check if cache returns correct results
-        TS_ASSERT_EQUALS(7, HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 0));
+        TS_ASSERT_EQUALS(unsigned(7), HIndexingPartition::Iterator::triangleLength(Coord<2>(4, 3), 0));
 
-        TS_ASSERT_EQUALS(123 * 456,
+        TS_ASSERT_EQUALS(unsigned(123 * 456),
                          HIndexingPartition::Iterator::triangleLength(Coord<2>(123, 456), 0) +
                          HIndexingPartition::Iterator::triangleLength(Coord<2>(123, 456), 3));
     }
