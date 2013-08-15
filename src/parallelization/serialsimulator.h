@@ -109,15 +109,7 @@ protected:
 
     void nanoStep(const unsigned& nanoStep)
     {
-        CoordBox<DIM> box = curGrid->boundingBox();
-        int endX = box.origin.x() + box.dimensions.x();
-        box.dimensions.x() = 1;
-
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            Streak<DIM> streak(*i, endX);
-            UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
-        }
-
+        UpdateFunctor<CELL_TYPE>()(simArea, Coord<DIM>(), *curGrid, newGrid, nanoStep);
         std::swap(curGrid, newGrid);
     }
 
