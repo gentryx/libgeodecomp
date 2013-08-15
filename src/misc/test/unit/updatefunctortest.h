@@ -145,8 +145,8 @@ public:
         ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
     {
         for (; *indexOld < indexEnd; ++*indexOld) {
-            hoodNew.temp()  = hoodOld.temp();
-            hoodNew.alive() = hoodOld.alive();
+            hoodNew.temp()  = hoodOld[FixedCoord<0, 0, 0>()].temp();
+            hoodNew.alive() = hoodOld[FixedCoord<0, 0, 0>()].alive();
             ++*indexNew;
         }
     }

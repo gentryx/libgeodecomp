@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/fixedneighborhood.h>
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/vanillaupdatefunctor.h>
@@ -17,6 +18,7 @@ class Selector
 public:
     typedef typename CELL::Stencil Stencil;
     typedef typename CELL::API CellAPI;
+    typedef typename CELL::Topology Topology;
     static const int DIM = CELL::Topology::DIM;
 
     class SoAUpdateHelper
@@ -49,7 +51,7 @@ public:
                 targetOrigin.z() * MY_DIM_X2 * MY_DIM_Y2 +
                 targetOrigin.y() * MY_DIM_X2 +
                 targetOrigin.x();
-            CELL::updateLineX(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
+            CELL::updateLineX(FixedNeighborhood<CELL, Topology, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>(hoodOld), indexOld, indexEnd, hoodNew, indexNew);
         }
 
     private:
