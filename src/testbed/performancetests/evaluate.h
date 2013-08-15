@@ -27,7 +27,7 @@ void evaluate(BENCHMARK benchmark, const LibGeoDecomp::Coord<3>& dim)
     std::cout << std::setiosflags(std::ios::left);
     std::cout << std::setw(18) << revision << "; "
               << nowString << " ; "
-              << std::setw(17) << hostname << "; "
+              << std::setw(16) << hostname << "; "
               << std::setw(48) << device << "; "
               << std::setw( 8) << benchmark.order() <<  "; "
               << std::setw(16) << benchmark.family() <<  "; "
