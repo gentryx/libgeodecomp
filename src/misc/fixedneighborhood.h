@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_FIXEDNEIGHBORHOOD_H
 
 #include <libflatarray/flat_array.hpp>
+#include <libgeodecomp/misc/fixedcoord.h>
 
 namespace LibGeoDecomp {
 
@@ -36,7 +37,7 @@ public:
 
     template<int X, int Y, int Z>
     __host__ __device__
-   const LibFlatArray::soa_accessor<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>)
+   const LibFlatArray::soa_accessor<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
     {
         return accessor[LibFlatArray::coord<X, Y, Z>()];
     }
