@@ -345,6 +345,12 @@ set(ALL_HEADERS ${HEADERS})
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 
 set(LIBGEODECOMP_LINK_LIBRARIES ${Boost_LIBRARIES})
+if(FEATURE_THREADS)
+  # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} pthread)
+  endif()
+endif()
 if(FEATURE_MPI)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${MPI_LIBRARIES})
   set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
