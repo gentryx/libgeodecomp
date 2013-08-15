@@ -2,6 +2,7 @@
 #include <iostream>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
+#include <libgeodecomp/misc/fixedneighborhood.h>
 #include <libgeodecomp/misc/soagrid.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
@@ -38,6 +39,8 @@ LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
 class CellLBM
 {
 public:
+    typedef Topologies::Torus<3>::Topology Topology;
+
     double C;
     double N;
     double E;
@@ -287,7 +290,7 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 #undef hoody
 
 #define GET_COMP(X, Y, Z, DIR)                          \
-    hoodOld[LibFlatArray::coord<X, Y, Z>()].DIR()
+    hoodOld[FixedCoord<X, Y, Z>()].DIR()
 
 #define SET_COMP(DIR)                           \
     hoodNew.DIR()
@@ -304,7 +307,7 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
     LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
+    FixedNeighborhood<CellLBM, CellLBM::Topology, DIM_X, DIM_Y, DIM_Z, 0> hoodOld(LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0>((char*)gridOld, &index));
 
 #pragma unroll 10
     for (; index < end; index += offset) {
