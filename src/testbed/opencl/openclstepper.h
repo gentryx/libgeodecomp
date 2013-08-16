@@ -143,6 +143,79 @@ private:
 
     OpenCLWrapper_Ptr oclwrapper;
 
+    void toHost(void)
+    {
+      auto box = initializer->gridBox();
+      int x_size = box.dimensions.x(), y_size = box.dimensions.y();
+
+      DATA_TYPE * data = static_cast<DATA_TYPE *>(oclwrapper->readDeviceData());
+      oclwrapper->finish();
+
+        typedef struct { int x,y,z; } foo; foo * bar = (foo *)data;
+      for (int i = 0; i < x_size * y_size * box.dimensions.z(); ++i) {
+        std::cerr << i << " : "
+                  << "(" << bar[i].x << ", " << bar[i].y << ", " << bar[i].z << ")"
+                  << std::endl;
+      }
+
+      for (auto & p : box) {
+        auto & cell =
+          dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
+        // using newGrid here, compared to data_to_device  ^^^
+
+        uint32_t address = p.z() * y_size * x_size
+                         + p.y() * x_size
+                         + p.x();
+
+        *(cell.data()) = data[address]; // *(data + address * sizeof_data);
+      }
+    }
+
+    void toDevice(void)
+    {
+      try {
+        std::string kernel_file =
+          OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
+        std::string kernel_function =
+          OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
+        size_t sizeof_data =
+          OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::sizeof_data();
+
+        auto box = initializer->gridBox();
+
+        std::vector<OpenCLWrapper::data_t> data;
+        std::vector<OpenCLWrapper::point_t> points;
+
+        for (auto & p : box) {
+          auto & cell =
+            dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
+          points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
+          data.push_back(cell.data());
+
+          // typedef struct { int x,y,z; } foo; foo * bar = (foo *)cell.data();
+          // std::cerr << p << " : " // "(" << p.x() << ", " << p.y() << ", " << p.z() << ") : "
+          //           << "(" << bar->x << ", " << bar->y << ", " << bar->z << ")"
+                    // << std::endl;
+        }
+
+        int x_size = box.dimensions.x()
+          , y_size = box.dimensions.y()
+          , z_size = box.dimensions.z();
+
+        oclwrapper = OpenCLWrapper_Ptr(
+            new OpenCLWrapper(platform_id, device_id,
+                              kernel_file, kernel_function,
+                              sizeof_data, x_size, y_size, z_size));
+
+        oclwrapper->loadPoints(points);
+        oclwrapper->loadHostData(data);
+
+      } catch(std::exception & error) {
+        std::cerr << __PRETTY_FUNCTION__ << ": " << error.what() << std::endl;
+        exit(EXIT_FAILURE);
+      }
+    }
+
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
