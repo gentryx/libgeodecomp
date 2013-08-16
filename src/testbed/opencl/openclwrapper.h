@@ -48,6 +48,8 @@ class OpenCLWrapper {
     template<template<class T, class = std::allocator<T>> class C>
       void loadHostData(const C<data_t> & data);
 
+    void * const readDeviceData(void);
+
   private:
     const std::string init_code_cl_file = "./init_code.cl";
     const std::string mem_hook_function = "mem_hook";
@@ -262,6 +264,13 @@ OpenCLWrapper::loadHostData(const C<data_t> & data)
     printCLError(error, __PRETTY_FUNCTION__);
     exit(EXIT_FAILURE);
   }
+}
+
+void * const
+OpenCLWrapper::readDeviceData(void)
+{
+  return cmdqueue.enqueueMapBuffer(cl_output, CL_TRUE, CL_MAP_READ, 0,
+                                   num_points * sizeof_data);
 }
 
 void
