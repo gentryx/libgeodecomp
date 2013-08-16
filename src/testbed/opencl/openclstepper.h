@@ -73,41 +73,6 @@ public:
         }
 
         initGrids();
-
-        try {
-          std::string kernel_file =
-            OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
-          std::string kernel_function =
-            OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
-          size_t sizeof_data =
-            OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::sizeof_data();
-
-          std::vector<OpenCLWrapper::data_t> data;
-          std::vector<OpenCLWrapper::point_t> points;
-
-          auto box = initializer->gridBox();
-          for (auto & p : box) {
-            auto & cell =
-              dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
-            points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
-            data.push_back(cell.data());
-          }
-
-          int x_size = box.dimensions.x()
-            , y_size = box.dimensions.y()
-            , z_size = box.dimensions.z();
-
-          oclwrapper = OpenCLWrapper_Ptr(
-              new OpenCLWrapper(platform_id, device_id,
-                                kernel_file, kernel_function,
-                                sizeof_data, x_size, y_size, z_size));
-
-          oclwrapper->loadPoints(points);
-          oclwrapper->loadHostData(data);
-
-        } catch (std::exception & e) {
-          exit(EXIT_FAILURE);
-        }
     }
 
     inline virtual void update(int nanoSteps)
@@ -221,8 +186,10 @@ private:
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
 
+        toDevice();
         oclwrapper->run();
         oclwrapper->finish();
+        toHost();
 
         ++curNanoStep;
         if (curNanoStep == CELL_TYPE::nanoSteps()) {
