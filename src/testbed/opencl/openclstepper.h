@@ -9,7 +9,7 @@
 
 namespace LibGeoDecomp {
 
-  template<typename CELL>
+  template<typename CELL, typename DATA_TYPE>
   class OpenCLCellInterface {
     public:
       static std::string kernel_file(void) {
@@ -24,12 +24,12 @@ namespace LibGeoDecomp {
       static size_t sizeof_data(void) {
         return CELL::sizeof_data();
       }
-      virtual void * data(void) = 0;
+      virtual DATA_TYPE * data(void) = 0;
   };
 
 namespace HiParSimulator {
 
-template<typename CELL_TYPE>
+template<typename CELL_TYPE, typename DATA_TYPE>
 class OpenCLStepper : public Stepper<CELL_TYPE>
 {
     friend class OpenCLStepperRegionTest;
@@ -75,11 +75,11 @@ public:
 
         try {
           std::string kernel_file =
-            OpenCLCellInterface<CELL_TYPE>::kernel_file();
+            OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
           std::string kernel_function =
-            OpenCLCellInterface<CELL_TYPE>::kernel_function();
+            OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
           size_t sizeof_data =
-            OpenCLCellInterface<CELL_TYPE>::sizeof_data();
+            OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::sizeof_data();
 
           std::vector<OpenCLWrapper::data_t> data;
           std::vector<OpenCLWrapper::point_t> points;
@@ -87,7 +87,7 @@ public:
           auto box = initializer->gridBox();
           for (auto & p : box) {
             auto & cell =
-              dynamic_cast<OpenCLCellInterface<CELL_TYPE> &>((*oldGrid)[p]);
+              dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
             points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
             data.push_back(cell.data());
           }

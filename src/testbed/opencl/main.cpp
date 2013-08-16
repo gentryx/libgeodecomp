@@ -7,7 +7,16 @@
 
 using namespace LibGeoDecomp;
 
-class DummyCell : public OpenCLCellInterface<DummyCell> {
+#define MYCELL_STRUCT  \
+    typedef struct {   \
+      int x, y, z;      \
+    } MyCell;
+
+MYCELL_STRUCT
+
+#define STRINGIFY(STRING) #STRING
+
+class DummyCell : public OpenCLCellInterface<DummyCell, MyCell> {
   public:
     static const int DIMENSIONS = 3;
     typedef Stencils::VonNeumann<3, 1> Stencil;
@@ -18,20 +27,12 @@ class DummyCell : public OpenCLCellInterface<DummyCell> {
     template<typename COORD_MAP>
       void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
 
-#define MYCELL_STRUCT  \
-    typedef struct {   \
-      int x, y, z;      \
-    } MyCell;
-
-#define STRINGIFY(STRING) #STRING
-
-    MYCELL_STRUCT
 
     static std::string kernel_file() { return "./test.cl"; }
     static std::string kernel_function() { return "dummy_test"; }
     static std::string cl_struct_code() { return STRINGIFY(MYCELL_STRUCT); }
     static size_t sizeof_data() { return sizeof(MyCell); }
-    void * data() { return &myCellData; }
+    MyCell * data() { return &myCellData; }
 
     MyCell myCellData;
 };
@@ -63,16 +64,14 @@ class DummyCellInitializer : public SimpleInitializer<DummyCell> {
 
 int main(int argc, char **argv)
 {
-  typedef DummyCell MyCell;
-  typedef DummyCellInitializer MyCellInitializer;
 
   boost::shared_ptr<HiParSimulator::PartitionManager<3>>
     pmp(new HiParSimulator::PartitionManager<3>(
           CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
 
-  boost::shared_ptr<MyCellInitializer> dcip(new MyCellInitializer);
+  boost::shared_ptr<DummyCellInitializer> dcip(new DummyCellInitializer);
 
-  HiParSimulator::OpenCLStepper<MyCell> openclstepper(0, 0, pmp, dcip);
+  HiParSimulator::OpenCLStepper<DummyCell, MyCell> openclstepper(0, 0, pmp, dcip);
 
   openclstepper.update(1);
 
