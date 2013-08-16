@@ -58,7 +58,8 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(partitionManager, initializer)
+        ParentType(partitionManager, initializer),
+        platform_id(platform_id), device_id(device_id)
     {
         curStep = initializer->startStep();
         curNanoStep = 0;
@@ -128,6 +129,8 @@ public:
 
 private:
     typedef std::shared_ptr<OpenCLWrapper> OpenCLWrapper_Ptr;
+
+    unsigned int platform_id, device_id;
 
     int curStep;
     int curNanoStep;
