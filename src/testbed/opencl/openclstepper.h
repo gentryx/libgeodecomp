@@ -114,8 +114,6 @@ public:
         for (int i = 0; i < nanoSteps; ++i) {
             update();
         }
-
-        oclwrapper->finish();
     }
 
     inline virtual std::pair<int, int> currentStep() const
@@ -148,6 +146,7 @@ private:
         const Region<DIM>& region = partitionManager->innerSet(index);
 
         oclwrapper->run();
+        oclwrapper->finish();
 
         ++curNanoStep;
         if (curNanoStep == CELL_TYPE::nanoSteps()) {
