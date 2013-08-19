@@ -117,6 +117,20 @@ public:
         static const unsigned NANO_STEPS = CELL::API::NANO_STEPS;
     };
 
+    template<typename CELL, typename HAS_TOPOLOGY = void>
+    class SelectTopology
+    {
+    public:
+        typedef Topologies::Cube<2>::Topology Topology;
+    };
+
+    template<typename CELL>
+    class SelectTopology<CELL, typename CELL::API::SupportsTopology>
+    {
+    public:
+        typedef typename CELL::API::Topology Topology;
+    };
+
     /**
      * Use this qualifier in a cell's API to hint that it supports a
      * Struct of Arrays memory layout.
@@ -162,6 +176,11 @@ public:
         typedef STENCIL Stencil;
     };
 
+    /**
+     * Defines how many logical time steps constitute one physically
+     * correct time step (e.g. LBM kernels often involve two passes:
+     * one for streaming, on for collision).
+     */
     template<unsigned CELL_NANO_STEPS>
     class HasNanoSteps
     {
@@ -169,6 +188,20 @@ public:
         typedef void SupportsNanoSteps;
 
         static const unsigned NANO_STEPS = CELL_NANO_STEPS;
+    };
+
+    /**
+     * Here cells can specify whether they expect a different topology
+     * (number of spatial dimensions, type of boundary conditions)
+     * than defined in the default.
+     */
+    template<typename TOPOLOGY>
+    class HasTopology
+    {
+    public:
+        typedef void SupportsTopology;
+
+        typedef TOPOLOGY Topology;
     };
 };
 
