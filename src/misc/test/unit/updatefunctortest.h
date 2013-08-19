@@ -119,8 +119,8 @@ public:
     typedef Topologies::Torus<3>::Topology Topology;
 
     class API : public CellAPITraits::Fixed,
-                public CellAPITraitsFixme::SupportsSoA,
-                public CellAPITraitsFixme::SupportsUpdateLineX
+                public CellAPITraitsFixme::HasSoA,
+                public CellAPITraitsFixme::HasUpdateLineX
     {};
 
     static int nanoSteps()
