@@ -1,5 +1,4 @@
-#include <emmintrin.h>
-// #include <immintrin.h>
+#include <immintrin.h>
 #include <iomanip>
 #include <iostream>
 #include <libgeodecomp/config.h>
@@ -1480,81 +1479,192 @@ private:
     __m128d val4;
 };
 
-// class ShortVec4xAVX
-// {
-// public:
-//     static const int ARITY = 16;
+#ifdef __AVX__
 
-//     inline ShortVec4xAVX() :
-//         val1(_mm256_set_pd(0, 0, 0, 0)),
-//         val2(_mm256_set_pd(0, 0, 0, 0)),
-//         val3(_mm256_set_pd(0, 0, 0, 0)),
-//         val4(_mm256_set_pd(0, 0, 0, 0))
-//     {}
+class ShortVec1xAVX
+{
+public:
+    static const int ARITY = 4;
 
-//     inline ShortVec4xAVX(const double *addr) :
-//         val1(_mm256_loadu_pd(addr +  0)),
-//         val2(_mm256_loadu_pd(addr +  4)),
-//         val3(_mm256_loadu_pd(addr +  8)),
-//         val4(_mm256_loadu_pd(addr + 12))
-//     {}
+    inline ShortVec1xAVX() :
+        val1(_mm256_set_pd(0, 0, 0, 0))
+    {}
 
-//     inline ShortVec4xAVX(const double val) :
-//         val1(_mm256_set_pd(val, val, val, val)),
-//         val2(_mm256_set_pd(val, val, val, val)),
-//         val3(_mm256_set_pd(val, val, val, val)),
-//         val4(_mm256_set_pd(val, val, val, val))
-//     {}
+    inline ShortVec1xAVX(const double *addr) :
+        val1(_mm256_loadu_pd(addr +  0))
+    {}
 
-//     inline ShortVec4xAVX(__m256d val1, __m256d val2, __m256d val3, __m256d val4) :
-//         val1(val1),
-//         val2(val2),
-//         val3(val3),
-//         val4(val4)
-//     {}
+    inline ShortVec1xAVX(const double val) :
+        val1(_mm256_set_pd(val, val, val, val))
+    {}
 
-//     inline ShortVec4xAVX operator+(const ShortVec4xAVX a) const
-//     {
-//         return ShortVec4xAVX(
-//             _mm256_add_pd(val1, a.val1),
-//             _mm256_add_pd(val2, a.val2),
-//             _mm256_add_pd(val3, a.val3),
-//             _mm256_add_pd(val4, a.val4));
-//     }
+    inline ShortVec1xAVX(__m256d val1) :
+        val1(val1)
+    {}
 
-//     inline ShortVec4xAVX operator-(const ShortVec4xAVX a) const
-//     {
-//         return ShortVec4xAVX(
-//             _mm256_sub_pd(val1, a.val1),
-//             _mm256_sub_pd(val2, a.val2),
-//             _mm256_sub_pd(val3, a.val3),
-//             _mm256_sub_pd(val4, a.val4));
+    inline ShortVec1xAVX operator+(const ShortVec1xAVX a) const
+    {
+        return ShortVec1xAVX(
+            _mm256_add_pd(val1, a.val1));
+    }
 
-//     }
+    inline ShortVec1xAVX operator-(const ShortVec1xAVX a) const
+    {
+        return ShortVec1xAVX(
+            _mm256_sub_pd(val1, a.val1));
 
-//     inline ShortVec4xAVX operator*(const ShortVec4xAVX a) const
-//     {
-//         return ShortVec4xAVX(
-//             _mm256_mul_pd(val1, a.val1),
-//             _mm256_mul_pd(val2, a.val2),
-//             _mm256_mul_pd(val3, a.val3),
-//             _mm256_mul_pd(val4, a.val4));
-//     }
+    }
 
-//     inline void store(double *a) const
-//     {
-//         _mm256_storeu_pd(a +  0, val1);
-//         _mm256_storeu_pd(a +  4, val2);
-//         _mm256_storeu_pd(a +  8, val3);
-//         _mm256_storeu_pd(a + 12, val4);
-//     }
+    inline ShortVec1xAVX operator*(const ShortVec1xAVX a) const
+    {
+        return ShortVec1xAVX(
+            _mm256_mul_pd(val1, a.val1));
+    }
 
-// private:
-//     __m256d val1;
-//     __m256d val2;
-//     __m256d val3;
-//     __m256d val4;
-// };
+    inline void store(double *a) const
+    {
+        _mm256_storeu_pd(a +  0, val1);
+    }
+
+private:
+    __m256d val1;
+};
+
+class ShortVec2xAVX
+{
+public:
+    static const int ARITY = 8;
+
+    inline ShortVec2xAVX() :
+        val1(_mm256_set_pd(0, 0, 0, 0)),
+        val2(_mm256_set_pd(0, 0, 0, 0))
+    {}
+
+    inline ShortVec2xAVX(const double *addr) :
+        val1(_mm256_loadu_pd(addr +  0)),
+        val2(_mm256_loadu_pd(addr +  4))
+    {}
+
+    inline ShortVec2xAVX(const double val) :
+        val1(_mm256_set_pd(val, val, val, val)),
+        val2(_mm256_set_pd(val, val, val, val))
+    {}
+
+    inline ShortVec2xAVX(__m256d val1, __m256d val2) :
+        val1(val1),
+        val2(val2)
+    {}
+
+    inline ShortVec2xAVX operator+(const ShortVec2xAVX a) const
+    {
+        return ShortVec2xAVX(
+            _mm256_add_pd(val1, a.val1),
+            _mm256_add_pd(val2, a.val2));
+    }
+
+    inline ShortVec2xAVX operator-(const ShortVec2xAVX a) const
+    {
+        return ShortVec2xAVX(
+            _mm256_sub_pd(val1, a.val1),
+            _mm256_sub_pd(val2, a.val2));
+
+    }
+
+    inline ShortVec2xAVX operator*(const ShortVec2xAVX a) const
+    {
+        return ShortVec2xAVX(
+            _mm256_mul_pd(val1, a.val1),
+            _mm256_mul_pd(val2, a.val2));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm256_storeu_pd(a +  0, val1);
+        _mm256_storeu_pd(a +  4, val2);
+    }
+
+private:
+    __m256d val1;
+    __m256d val2;
+};
+
+class ShortVec4xAVX
+{
+public:
+    static const int ARITY = 16;
+
+    inline ShortVec4xAVX() :
+        val1(_mm256_set_pd(0, 0, 0, 0)),
+        val2(_mm256_set_pd(0, 0, 0, 0)),
+        val3(_mm256_set_pd(0, 0, 0, 0)),
+        val4(_mm256_set_pd(0, 0, 0, 0))
+    {}
+
+    inline ShortVec4xAVX(const double *addr) :
+        val1(_mm256_loadu_pd(addr +  0)),
+        val2(_mm256_loadu_pd(addr +  4)),
+        val3(_mm256_loadu_pd(addr +  8)),
+        val4(_mm256_loadu_pd(addr + 12))
+    {}
+
+    inline ShortVec4xAVX(const double val) :
+        val1(_mm256_set_pd(val, val, val, val)),
+        val2(_mm256_set_pd(val, val, val, val)),
+        val3(_mm256_set_pd(val, val, val, val)),
+        val4(_mm256_set_pd(val, val, val, val))
+    {}
+
+    inline ShortVec4xAVX(__m256d val1, __m256d val2, __m256d val3, __m256d val4) :
+        val1(val1),
+        val2(val2),
+        val3(val3),
+        val4(val4)
+    {}
+
+    inline ShortVec4xAVX operator+(const ShortVec4xAVX a) const
+    {
+        return ShortVec4xAVX(
+            _mm256_add_pd(val1, a.val1),
+            _mm256_add_pd(val2, a.val2),
+            _mm256_add_pd(val3, a.val3),
+            _mm256_add_pd(val4, a.val4));
+    }
+
+    inline ShortVec4xAVX operator-(const ShortVec4xAVX a) const
+    {
+        return ShortVec4xAVX(
+            _mm256_sub_pd(val1, a.val1),
+            _mm256_sub_pd(val2, a.val2),
+            _mm256_sub_pd(val3, a.val3),
+            _mm256_sub_pd(val4, a.val4));
+
+    }
+
+    inline ShortVec4xAVX operator*(const ShortVec4xAVX a) const
+    {
+        return ShortVec4xAVX(
+            _mm256_mul_pd(val1, a.val1),
+            _mm256_mul_pd(val2, a.val2),
+            _mm256_mul_pd(val3, a.val3),
+            _mm256_mul_pd(val4, a.val4));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm256_storeu_pd(a +  0, val1);
+        _mm256_storeu_pd(a +  4, val2);
+        _mm256_storeu_pd(a +  8, val3);
+        _mm256_storeu_pd(a + 12, val4);
+    }
+
+private:
+    __m256d val1;
+    __m256d val2;
+    __m256d val3;
+    __m256d val4;
+};
+
+#endif
 
 template<typename VEC>
 void store(double *a, VEC v)
@@ -1567,13 +1677,17 @@ class LBMSoACell
 public:
     typedef Stencils::Moore<3, 1> Stencil;
     typedef Topologies::Cube<3>::Topology Topology;
+    // typedef ShortVec1xSSE Double;
     // typedef ShortVec2xSSE Double;
     typedef ShortVec4xSSE Double;
+    // typedef ShortVec1xAVX Double;
+    // typedef ShortVec2xAVX Double;
     // typedef ShortVec4xAVX Double;
 
     class API : public CellAPITraits::Fixed,
-                public CellAPITraitsFixme::SupportsSoA,
-                public CellAPITraitsFixme::SupportsUpdateLineX
+                public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
+                public CellAPITraitsFixme::HasSoA,
+                public CellAPITraitsFixme::HasUpdateLineX
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
@@ -1659,6 +1773,7 @@ public:
     static void updateLineXFluid(
         ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
     {
+
 #define GET_COMP(X, Y, Z, COMP) Double(&hoodOld[FixedCoord<X, Y, Z>()].COMP())
 #define SQR(X) ((X)*(X))
         const Double omega = 1.0/1.7;
@@ -1937,7 +2052,7 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        int maxT = 10;
+        int maxT = 20;
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
 
