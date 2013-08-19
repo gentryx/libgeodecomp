@@ -125,7 +125,7 @@ private:
 
       for (auto & p : box) {
         auto & cell =
-          dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
+          dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*newGrid)[p]);
         // using newGrid here, compared to data_to_device  ^^^
 
         uint32_t address = p.z() * y_size * x_size
@@ -190,6 +190,7 @@ private:
         oclwrapper->run();
         oclwrapper->finish();
         toHost();
+        std::swap(newGrid, oldGrid);
 
         ++curNanoStep;
         if (curNanoStep == CELL_TYPE::nanoSteps()) {
