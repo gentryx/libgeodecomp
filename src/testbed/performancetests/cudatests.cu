@@ -495,7 +495,6 @@ public:
 template<template<int A, int B, int C> class KERNEL, int DIM_X, int DIM_Y, int DIM_Z>
 double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
 {
-    int index = 0;
     size_t size = DIM_X * DIM_Y * (DIM_Z + 4) * KERNEL<0, 0, 0>::size();
     size_t bytesize = size * sizeof(double);
 
