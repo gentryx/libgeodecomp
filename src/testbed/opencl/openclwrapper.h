@@ -230,6 +230,9 @@ OpenCLWrapper::loadPoints(const C<point_t> & points)
     pvec.push_back({ static_cast<cl_int>(std::get<0>(p))
                    , static_cast<cl_int>(std::get<1>(p))
                    , static_cast<cl_int>(std::get<2>(p))
+                   // cl_int4 is really a cl_int4
+                   // so, in order to not mess up with struct packing, etc.
+                   // put a dummy value here
                    , 0
                    });
   }
