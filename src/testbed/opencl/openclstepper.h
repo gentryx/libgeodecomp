@@ -40,7 +40,7 @@ public:
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<typename CELL_TYPE::Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
@@ -75,14 +75,14 @@ public:
         initGrids();
     }
 
-    inline virtual void update(int nanoSteps)
+    inline virtual void update(std::size_t nanoSteps)
     {
         for (int i = 0; i < nanoSteps; ++i) {
             update();
         }
     }
 
-    inline virtual std::pair<int, int> currentStep() const
+    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
     {
         return std::make_pair(curStep, curNanoStep);
     }
@@ -336,7 +336,7 @@ private:
         restoreKernel();
     }
 
-    inline const unsigned& ghostZoneWidth() const
+    inline const unsigned ghostZoneWidth() const
     {
         return partitionManager->getGhostZoneWidth();
     }

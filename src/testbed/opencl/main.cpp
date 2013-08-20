@@ -23,6 +23,15 @@ class DummyCell : public OpenCLCellInterface<DummyCell, MyCell> {
     class API : public CellAPITraits::Base {};
     typedef Topologies::Cube<3>::Topology Topology;
 
+    DummyCell(void) {}
+
+    DummyCell(int x, int y, int z)
+    {
+      myCellData.x = x;
+      myCellData.y = y;
+      myCellData.z = z;
+    }
+
     static inline unsigned nanoSteps() { return 1; }
     template<typename COORD_MAP>
       void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
@@ -52,10 +61,7 @@ class DummyCellInitializer : public SimpleInitializer<DummyCell> {
         for (int y = 0; y < gridDimensions().y(); ++y) {
           for (int x = 0; x < gridDimensions().x(); ++x) {
             Coord<3> c = offset + Coord<3>(x, y, z);
-            ret->at(c) = DummyCell();
-            ret->at(c).myCellData.x = x;
-            ret->at(c).myCellData.y = y;
-            ret->at(c).myCellData.z = z;
+            ret->set(c, DummyCell(x, y, z));
           }
         }
       }
@@ -65,8 +71,8 @@ class DummyCellInitializer : public SimpleInitializer<DummyCell> {
 int main(int argc, char **argv)
 {
 
-  boost::shared_ptr<HiParSimulator::PartitionManager<3>>
-    pmp(new HiParSimulator::PartitionManager<3>(
+  boost::shared_ptr<HiParSimulator::PartitionManager<DummyCell::Topology>>
+    pmp(new HiParSimulator::PartitionManager<DummyCell::Topology>(
           CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
 
   boost::shared_ptr<DummyCellInitializer> dcip(new DummyCellInitializer);
