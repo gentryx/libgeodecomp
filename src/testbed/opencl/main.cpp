@@ -79,7 +79,18 @@ int main(int argc, char **argv)
 
   HiParSimulator::OpenCLStepper<DummyCell, MyCell> openclstepper(0, 0, pmp, dcip);
 
-  openclstepper.update(1);
+  openclstepper.update(2);
+
+  auto & grid = openclstepper.grid();
+
+  std::cerr << "result" << std::endl;
+  for (auto & p : dcip->gridBox()) {
+    std::cerr << "(" << grid.get(p).myCellData.x << ", "
+                     << grid.get(p).myCellData.y << ", "
+                     << grid.get(p).myCellData.z << ")"
+                     << " @ " << p
+                     << std::endl;
+  }
 
   return 0;
 }
