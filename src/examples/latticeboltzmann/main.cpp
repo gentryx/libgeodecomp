@@ -17,9 +17,10 @@ class Cell
 {
 public:
     typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};

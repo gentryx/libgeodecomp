@@ -17,7 +17,7 @@ template<typename CELL_TYPE>
 class Simulator
 {
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
     typedef GridBase<CELL_TYPE, DIM> GridType;
     typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;

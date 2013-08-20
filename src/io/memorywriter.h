@@ -17,7 +17,8 @@ class MemoryWriter : public Writer<CELL_TYPE>
 
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
-    typedef Grid<CELL_TYPE, typename CELL_TYPE::Topology> StorageGrid;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef Grid<CELL_TYPE, Topology> StorageGrid;
     using Writer<CELL_TYPE>::period;
 
     MemoryWriter(unsigned period = 1) :

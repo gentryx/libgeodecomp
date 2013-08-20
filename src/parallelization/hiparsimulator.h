@@ -38,7 +38,7 @@ class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {
     friend class HiParSimulatorTest;
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;

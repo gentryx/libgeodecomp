@@ -37,6 +37,7 @@ template<class TEST_CELL>
 class TestInitializer : public Initializer<TEST_CELL>
 {
 public:
+    typedef typename Initializer<TEST_CELL>::Topology Topology;
     static const int DIM = TEST_CELL::DIMENSIONS;
 
     TestInitializer(
@@ -53,7 +54,7 @@ public:
         CoordBox<DIM> rect = ret->boundingBox();
         unsigned cycle = startStep() * TEST_CELL::nanoSteps();
         for (typename CoordBox<DIM>::Iterator i = rect.begin(); i != rect.end(); ++i) {
-            Coord<DIM> coord = TEST_CELL::Topology::normalize(*i, dimensions);
+            Coord<DIM> coord = Topology::normalize(*i, dimensions);
             double index = 1 + coord.toIndex(dimensions);
             ret->set(*i, TEST_CELL(coord, dimensions, cycle, index));
         }

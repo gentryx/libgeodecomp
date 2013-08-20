@@ -15,7 +15,7 @@ class ParallelMPIIOWriter : public ParallelWriter<CELL_TYPE>
 public:
     friend class ParallelMPIIOWriterTest;
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
 
     ParallelMPIIOWriter(

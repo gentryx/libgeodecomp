@@ -23,7 +23,7 @@ class SerialBOVWriter : public Writer<CELL_TYPE>
     friend class boost::serialization::access;
 #endif
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
     typedef Grid<CELL_TYPE, Topology> GridType;
 

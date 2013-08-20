@@ -24,17 +24,17 @@ class UpdateGroup
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
     typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
-    typedef PartitionManager<typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
+    const static int DIM = Topology::DIM;
 
     template<typename STEPPER>
     UpdateGroup(

@@ -44,9 +44,10 @@ public:
 
         TS_ASSERT_EQUALS("testmpiiowriter01234.mpiio", writer->filename(1234));
 
-        SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected =
+        typedef typename CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
+        SuperVector<Grid<TestCell<3>, Topology> > expected =
             memoryWriter->getGrids();
-        SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > actual;
+        SuperVector<Grid<TestCell<3>, Topology> > actual;
         for (size_t i = 0; i <= 21; i += (i == 20)? 1 : 4) {
             std::string filename = writer->filename(i);
             files.push_back(filename);
@@ -58,7 +59,7 @@ public:
 
             Region<3> region;
             region << CoordBox<3>(Coord<3>(), dimensions);
-            Grid<TestCell<3>, TestCell<3>::Topology> buffer(dimensions);
+            Grid<TestCell<3>, Topology> buffer(dimensions);
             MPIIO<TestCell<3> >::readRegion(
                 &buffer,
                 filename,

@@ -14,7 +14,7 @@ public:
     typedef STENCIL Stencil;
     const static int DIM = Stencil::DIM;
     typedef TestCell<DIM, Stencil> TestCellType;
-    typedef Grid<TestCellType, typename TestCellType::Topology> GridType;
+    typedef Grid<TestCellType, typename CellAPITraitsFixme::SelectTopology<TestCellType>::Value> GridType;
 
     virtual ~UpdateFunctorTestBase()
     {}

@@ -28,9 +28,10 @@ class ConwayCell
 {
 public:
     typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<2>::Topology>
     {};
 
     static inline unsigned nanoSteps()

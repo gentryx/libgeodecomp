@@ -14,9 +14,9 @@ namespace HiParSimulator {
 class MulticoreStepperTest : public CxxTest::TestSuite
 {
 public:
-
-    typedef DisplacedGrid<TestCell<3>, TestCell<3>::Topology, true> GridType;
-    typedef MulticoreStepper<TestCell<3> > StepperType;
+    typedef typename CellAPITraitsFixme::SelectTopology<TestCell<2> >::Value Topology;
+    typedef DisplacedGrid<TestCell<2>, Topology, true> GridType;
+    typedef MulticoreStepper<TestCell<2> > StepperType;
 
     void setUp()
     {
@@ -28,7 +28,7 @@ public:
         patchAccepter->pushRequest(10);
         patchAccepter->pushRequest(13);
 
-        partitionManager.reset(new PartitionManager<Topologies::Cube<2>::Topology>(rect));
+        partitionManager.reset(new PartitionManager<Topology>(rect));
         // stepper.reset(
         //     new StepperType(partitionManager, init));
 
@@ -42,7 +42,7 @@ public:
 
 private:
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
-    boost::shared_ptr<PartitionManager<Topologies::Cube<2>::Topology> > partitionManager;
+    boost::shared_ptr<PartitionManager<Topology> > partitionManager;
     boost::shared_ptr<StepperType> stepper;
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };

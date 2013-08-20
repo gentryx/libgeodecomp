@@ -152,10 +152,12 @@ class VisItDataBuffer : public VisItWriterHelpers::VisItDataAccessor<CELL_TYPE>
 {
 public:
     typedef typename VisItDataAccessor<CELL_TYPE>::GridType GridType;
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    static const int DIM = Topology::DIM;
 
-    VisItDataBuffer(DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor,
-                    size_t gridVolume) :
+    VisItDataBuffer(
+        DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor,
+        size_t gridVolume) :
         VisItDataAccessor<CELL_TYPE>(accessor->type()),
         accessor(accessor),
         gridVolume(gridVolume),
@@ -206,7 +208,7 @@ class VisItWriter : public Writer<CELL_TYPE>
 {
 public:
     typedef SuperVector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     typedef VisItWriter<CELL_TYPE, MESH_TYPE> SVW;
     static const int DIMENSIONS = Topology::DIM;

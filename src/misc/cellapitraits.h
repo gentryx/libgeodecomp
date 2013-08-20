@@ -40,23 +40,6 @@ public:
     class TrueType : public DontCareType
     {};
 
-    // deduce a CELL's optimum grid type
-    template<typename CELL, typename HAS_SOA = void>
-    class SelectGridType
-    {
-    public:
-        typedef DisplacedGrid<CELL, typename CELL::Topology> Type;
-        typedef FalseType Value;
-    };
-
-    template<typename CELL>
-    class SelectGridType<CELL, typename CELL::API::SupportsSoA>
-    {
-    public:
-        typedef SoAGrid<CELL, typename CELL::Topology> Type;
-        typedef TrueType Value;
-    };
-
     // check whether cell has an updateLineX() member
     template<typename CELL, typename HAS_UPDATE_LINE_X = void>
     class SelectUpdateLineX
@@ -92,14 +75,14 @@ public:
     class SelectStencil
     {
     public:
-        typedef Stencils::Moore<2, 1> Stencil;
+        typedef Stencils::Moore<2, 1> Value;
     };
 
     template<typename CELL>
     class SelectStencil<CELL, typename CELL::API::SupportsStencil>
     {
     public:
-        typedef typename CELL::API::Stencil Stencil;
+        typedef typename CELL::API::Stencil Value;
     };
 
     // of how many nano steps (intermediate steps) is a whole cell cycle composed?
@@ -107,28 +90,45 @@ public:
     class SelectNanoSteps
     {
     public:
-        static const unsigned NANO_STEPS = 1;
+        static const unsigned VALUE = 1;
     };
 
     template<typename CELL>
     class SelectNanoSteps<CELL, typename CELL::API::SupportsNanoSteps>
     {
     public:
-        static const unsigned NANO_STEPS = CELL::API::NANO_STEPS;
+        static const unsigned VALUE = CELL::API::NANO_STEPS;
     };
 
     template<typename CELL, typename HAS_TOPOLOGY = void>
     class SelectTopology
     {
     public:
-        typedef Topologies::Cube<2>::Topology Topology;
+        typedef Topologies::Cube<2>::Topology Value;
     };
 
     template<typename CELL>
     class SelectTopology<CELL, typename CELL::API::SupportsTopology>
     {
     public:
-        typedef typename CELL::API::Topology Topology;
+        typedef typename CELL::API::Topology Value;
+    };
+
+    // deduce a CELL's optimum grid type
+    template<typename CELL, typename HAS_SOA = void>
+    class SelectGridType
+    {
+    public:
+        typedef DisplacedGrid<CELL, typename SelectTopology<CELL>::Value> Type;
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectGridType<CELL, typename CELL::API::SupportsSoA>
+    {
+    public:
+        typedef SoAGrid<CELL, typename SelectTopology<CELL>::Value> Type;
+        typedef TrueType Value;
     };
 
     /**

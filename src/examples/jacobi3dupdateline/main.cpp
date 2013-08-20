@@ -16,8 +16,11 @@ class Cell
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     static inline unsigned nanoSteps()

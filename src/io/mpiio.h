@@ -12,7 +12,10 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL_TYPE, typename TOPOLOGY=typename CELL_TYPE::Topology>
+template<
+    typename CELL_TYPE,
+    typename TOPOLOGY = typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value
+>
 class MPIIO
 {
 public:

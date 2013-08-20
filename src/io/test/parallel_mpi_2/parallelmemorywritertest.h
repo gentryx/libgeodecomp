@@ -35,7 +35,8 @@ public:
 class ParallelMemoryWriterTest :  public CxxTest::TestSuite
 {
 public:
-    typedef DisplacedGrid<TestCell<2>, TestCell<2>::Topology> GridType;
+    typedef typename CellAPITraitsFixme::SelectTopology<TestCell<2> >::Value Topology;
+    typedef DisplacedGrid<TestCell<2>, Topology> GridType;
 
     void setUp()
     {

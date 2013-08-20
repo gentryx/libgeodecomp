@@ -20,12 +20,14 @@ class Cell
     friend class CellToColor;
 public:
     typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-    class API : public CellAPITraits::Base
+
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<2>::Topology>
     {};
 
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
-    static const double  PI;
+    static const double PI;
 
     static inline unsigned nanoSteps()
     {

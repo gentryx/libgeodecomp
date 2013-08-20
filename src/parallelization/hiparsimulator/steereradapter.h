@@ -11,13 +11,14 @@ template<typename GRID_TYPE, typename CELL_TYPE>
 class SteererAdapter : public PatchProvider<GRID_TYPE>
 {
 public:
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    static const int DIM = Topology::DIM;
 
     SteererAdapter(
         boost::shared_ptr<Steerer<CELL_TYPE> > steerer,
         const std::size_t firstStep,
         const std::size_t lastStep,
-        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
+        Coord<Topology::DIM> globalGridDimensions,
         std::size_t rank,
         bool lastCall) :
         steerer(steerer),
@@ -73,7 +74,7 @@ private:
     std::size_t lastNanoStep;
     std::size_t rank;
     bool lastCall;
-    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
+    Coord<Topology::DIM> globalGridDimensions;
 
 };
 

@@ -35,7 +35,8 @@ class Writer
 #endif
 public:
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    const static int DIM = Topology::DIM;
 
     /**
      * initializes a writer using prefix which subclasses may

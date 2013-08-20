@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_IO_INITIALIZER_H
 
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/gridbase.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
@@ -15,15 +16,16 @@ template<typename CELL>
 class Initializer
 {
 public:
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
 #endif
-    static const int DIM = CELL::Topology::DIM;
+    static const int DIM = Topology::DIM;
 
     /**
      * initializes all cells of the grid at target
      */
-    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target) =0;
+    virtual void grid(GridBase<CELL, Topology::DIM> *target) =0;
 
     virtual ~Initializer()
     {}

@@ -17,7 +17,10 @@ namespace HiParSimulator {
 class Cell
 {
 public:
-    typedef Topologies::Cube<3>::Topology Topology;
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+    {};
 
     double val;
 };

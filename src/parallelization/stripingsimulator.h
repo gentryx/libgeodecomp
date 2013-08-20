@@ -23,13 +23,12 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class StripingSimulator : public DistributedSimulator<CELL_TYPE>
 {
-
 public:
     friend class StripingSimulatorTest;
     friend class ParallelStripingSimulatorTest;
+    typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
-    typedef typename CELL_TYPE::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;

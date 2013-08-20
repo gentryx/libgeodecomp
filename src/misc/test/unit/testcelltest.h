@@ -122,7 +122,7 @@ public:
     }
 
     typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, TestCellHelpers::NoOutput> TestCell3D;
-    typedef Grid<TestCell3D, TestCell3D::Topology> Grid3D;
+    typedef Grid<TestCell3D, typename CellAPITraitsFixme::SelectTopology<TestCell3D>::Value> Grid3D;
 
     void test3D1()
     {

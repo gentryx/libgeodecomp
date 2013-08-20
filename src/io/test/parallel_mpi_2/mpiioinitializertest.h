@@ -85,8 +85,9 @@ public:
         MPILayer().barrier();
 
         if (rank == 0) {
-            Grid<TestCell<3>, TestCell<3>::Topology> expected(dimensions);
-            Grid<TestCell<3>, TestCell<3>::Topology> actual(dimensions);
+            typedef CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
+            Grid<TestCell<3>, Topology> expected(dimensions);
+            Grid<TestCell<3>, Topology> actual(dimensions);
 
             Region<3> region;
             region << CoordBox<3>(Coord<3>(), dimensions);

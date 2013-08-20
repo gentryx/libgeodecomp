@@ -38,7 +38,7 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
 #endif
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;

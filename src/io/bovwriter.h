@@ -22,13 +22,13 @@ class BOVWriter : public ParallelWriter<CELL_TYPE>
 public:
     friend class BOVWriterTest;
 
-    typedef typename CELL_TYPE::Topology Topology;
-    typedef typename SELECTOR_TYPE::VariableType VariableType;
-
-    static const int DIM = CELL_TYPE::Topology::DIM;
-
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;
+
+    typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
+    typedef typename SELECTOR_TYPE::VariableType VariableType;
+
+    static const int DIM = Topology::DIM;
 
     BOVWriter(
         const std::string& prefix,

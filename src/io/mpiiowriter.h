@@ -17,8 +17,9 @@ public:
     friend class MPIIOInitializerTest;
 
     typedef typename Writer<CELL_TYPE>::GridType GridType;
+    typedef typename Writer<CELL_TYPE>::Topology Topology;
 
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    static const int DIM = Topology::DIM;
 
     MPIIOWriter(
         const std::string& prefix,

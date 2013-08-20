@@ -13,6 +13,7 @@ template<typename CELL_TYPE>
 class MonolithicSimulator : public Simulator<CELL_TYPE>
 {
 public:
+    using typename Simulator<CELL_TYPE>::Topology;
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
     inline MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :

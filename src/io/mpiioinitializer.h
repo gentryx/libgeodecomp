@@ -13,7 +13,8 @@ template<typename CELL_TYPE>
 class MPIIOInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    static const int DIM = Topology::DIM;
 
     MPIIOInitializer(
         const std::string& filename,

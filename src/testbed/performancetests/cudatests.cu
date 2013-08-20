@@ -1,5 +1,6 @@
 #include <cuda.h>
 #include <iostream>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/misc/fixedneighborhood.h>
@@ -39,7 +40,10 @@ LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
 class CellLBM
 {
 public:
-    typedef Topologies::Torus<3>::Topology Topology;
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+    {};
 
     double C;
     double N;
@@ -307,7 +311,7 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
     LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    FixedNeighborhood<CellLBM, CellLBM::Topology, DIM_X, DIM_Y, DIM_Z, 0> hoodOld(LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0>((char*)gridOld, &index));
+    FixedNeighborhood<CellLBM, CellAPITraitsFixme::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0> hoodOld(LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0>((char*)gridOld, &index));
 
 #pragma unroll 10
     for (; index < end; index += offset) {

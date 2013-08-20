@@ -15,11 +15,12 @@ class VanillaStepper : public Stepper<CELL_TYPE>
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    const static int DIM = Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;

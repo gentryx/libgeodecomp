@@ -19,6 +19,7 @@ template<typename GRID_TYPE, typename CELL_TYPE>
 class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
 
     using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
     using PatchAccepter<GRID_TYPE>::pushRequest;
@@ -28,7 +29,7 @@ public:
         boost::shared_ptr<ParallelWriter<CELL_TYPE> > writer,
         const std::size_t firstStep,
         const std::size_t lastStep,
-        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
+        Coord<Topology::DIM> globalGridDimensions,
         std::size_t rank,
         bool lastCall) :
         writer(writer),
@@ -85,7 +86,7 @@ private:
     std::size_t stride;
     std::size_t rank;
     bool lastCall;
-    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
+    Coord<Topology::DIM> globalGridDimensions;
 };
 
 }

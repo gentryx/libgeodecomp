@@ -13,9 +13,10 @@ class BuggyCell
 {
 public:
     typedef Stencils::VonNeumann<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<2>::Topology>
     {};
 
     friend class BuggyCellToColor;
@@ -25,8 +26,8 @@ public:
         return 1;
     }
 
-    BuggyCell(const char& _val=0) :
-        val(_val)
+    BuggyCell(const char val=0) :
+        val(val)
     {}
 
     template<typename COORD_MAP>

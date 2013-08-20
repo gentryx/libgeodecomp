@@ -147,7 +147,8 @@ public:
         TS_ASSERT_EQUALS(grids1, grids2);
     }
 
-    typedef Grid<TestCell<3>, TestCell<3>::Topology> Grid3D;
+    typedef typename CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
+    typedef Grid<TestCell<3>, Topology> Grid3D;
     typedef GridBase<TestCell<3>, 3> GridBase3D;
 
     void test3D()

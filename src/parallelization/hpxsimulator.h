@@ -93,7 +93,7 @@ class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {
     friend class HpxSimulatorTest;
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    using typename DistributedSimulator<CELL_TYPE>::Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
     typedef typename ParentType::GridType GridType;

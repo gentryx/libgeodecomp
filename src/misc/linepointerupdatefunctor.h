@@ -43,7 +43,16 @@ namespace LibGeoDecomp {
  * constant boundary conditions as periodic boundary conditions would
  * automatically wrap accesses to cells within the grid.
  */
-template<typename CELL, int DIM=CELL::Topology::DIM, bool HIGH=true, int CUR_DIM=(DIM - 1), bool BOUNDARY_TOP=false, bool BOUNDARY_BOTTOM=false, bool BOUNDARY_SOUTH=false, bool BOUNDARY_NORTH=false>
+template<
+    typename CELL,
+    int DIM = CellAPITraitsFixme::SelectTopology<CELL>::Value::DIM,
+    bool HIGH = true,
+    int CUR_DIM = (DIM - 1),
+    bool BOUNDARY_TOP = false,
+    bool BOUNDARY_BOTTOM = false,
+    bool BOUNDARY_SOUTH = false,
+    bool BOUNDARY_NORTH = false
+>
 class LinePointerUpdateFunctor
 {
 public:
@@ -54,7 +63,7 @@ public:
         CELL *newLine,
         int nanoStep)
     {
-        typedef typename CELL::Topology Topology;
+        typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
         const Coord<DIM>& c = streak.origin;
 
         if ((CUR_DIM == 2) && (HIGH == true)) {

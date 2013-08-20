@@ -11,14 +11,16 @@ using namespace LibGeoDecomp;
 
 class CircleCell
 {
-    friend class CellToColor;
 public:
+    friend class CellToColor;
     typedef Stencils::VonNeumann<2, 1> Stencil;
     typedef Topologies::Cube<2>::Topology Topology;
     enum State {LIQUID, SOLIDIFYING, SOLID};
     typedef std::pair<double, double> DPair;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<2>::Topology>
     {};
 
     static inline unsigned nanoSteps()
@@ -114,9 +116,9 @@ class CircleCellInitializer : public SimpleInitializer<CircleCell>
 {
 public:
     CircleCellInitializer(
-        Coord<2> _dimensions = Coord<2>(100, 100),
-        const unsigned _steps = 300) :
-        SimpleInitializer<CircleCell>(_dimensions, _steps)
+        Coord<2> dimensions = Coord<2>(100, 100),
+        const unsigned steps = 300) :
+        SimpleInitializer<CircleCell>(dimensions, steps)
     {}
 
     virtual void grid(GridBase<CircleCell, 2> *ret)

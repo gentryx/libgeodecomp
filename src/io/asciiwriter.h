@@ -24,7 +24,8 @@ class ASCIIWriter : public Writer<CELL_TYPE>
 public:
     friend class ASCIIWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    static const int DIM = Topology::DIM;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 

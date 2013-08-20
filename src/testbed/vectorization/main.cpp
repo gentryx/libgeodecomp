@@ -15,9 +15,10 @@ class JacobiCellSimple
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
 
-    class API : public CellAPITraits::Fixed
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
     JacobiCellSimple(double t = 0) :
@@ -48,9 +49,11 @@ class JacobiCellMagic
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
 
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
     JacobiCellMagic(double t = 0) :
@@ -89,9 +92,11 @@ class JacobiCellStraightforward
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
 
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
     JacobiCellStraightforward(double t = 0) :
@@ -210,9 +215,11 @@ class JacobiCellStraightforwardNT
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
 
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
     JacobiCellStraightforwardNT(double t = 0) :
@@ -350,9 +357,11 @@ class JacobiCellStreakUpdate
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
 
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :

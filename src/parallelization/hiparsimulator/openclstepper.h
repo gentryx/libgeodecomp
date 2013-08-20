@@ -22,11 +22,12 @@ class OpenCLStepper : public Stepper<CELL_TYPE>
 {
     friend class OpenCLStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    const static int DIM = Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
 
     using Stepper<CELL_TYPE>::initializer;
     using Stepper<CELL_TYPE>::partitionManager;
@@ -35,8 +36,8 @@ public:
         const std::string& cellSourceFile,
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        const int& platformID=0,
-        const int& deviceID=0) :
+        const int platformID=0,
+        const int deviceID=0) :
         ParentType(partitionManager, initializer)
     {
 //         std::vector<cl::Platform> platforms;

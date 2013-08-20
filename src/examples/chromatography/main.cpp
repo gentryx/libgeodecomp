@@ -305,7 +305,10 @@ class ContainerCell
 public:
     const static int MAX_CELLS = 100;
 
-    typedef Topologies::Cube<2>::Topology Topology;
+    class API :
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+    {};
+
     typedef Grid<ContainerCell, Topology> GridType;
     typedef CoordMap<ContainerCell, GridType> CoordMapType;
 

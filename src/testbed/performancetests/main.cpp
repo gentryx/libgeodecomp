@@ -588,13 +588,15 @@ template<typename CELL>
 class NoOpInitializer : public SimpleInitializer<CELL>
 {
 public:
+    typedef typename SimpleInitializer<CELL>::Topology Topology;
+
     NoOpInitializer(
         const Coord<3>& dimensions,
         const unsigned& steps) :
         SimpleInitializer<CELL>(dimensions, steps)
     {}
 
-    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target)
+    virtual void grid(GridBase<CELL, Topology::DIM> *target)
     {}
 };
 
@@ -602,8 +604,10 @@ class JacobiCellClassic
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Base
+
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     static unsigned nanoSteps()
@@ -675,8 +679,9 @@ class JacobiCellFixedHood
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Fixed
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     JacobiCellFixedHood(double t = 0) :
@@ -768,9 +773,11 @@ class JacobiCellStreakUpdate
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
 
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public CellAPITraits::Fixed,
+        public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
@@ -961,7 +968,9 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellStreakUpdate, JacobiCellStreakUpdate::Topology> GridType;
+        typedef Grid<
+            JacobiCellStreakUpdate,
+            typename CellAPITraitsFixme::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
         GridType gridA(dim, 1.0);
         GridType gridB(dim, 2.0);
         GridType *gridOld = &gridA;
@@ -1054,9 +1063,10 @@ class LBMCell
 {
 public:
     typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
@@ -1676,7 +1686,6 @@ class LBMSoACell
 {
 public:
     typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
     // typedef ShortVec1xSSE Double;
     // typedef ShortVec2xSSE Double;
     typedef ShortVec4xSSE Double;
@@ -1687,7 +1696,8 @@ public:
     class API : public CellAPITraits::Fixed,
                 public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
                 public CellAPITraitsFixme::HasSoA,
-                public CellAPITraitsFixme::HasUpdateLineX
+                public CellAPITraitsFixme::HasUpdateLineX,
+                public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};

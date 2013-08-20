@@ -14,7 +14,8 @@ template<typename CELL_TYPE>
 class SimpleInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename Initializer<CELL_TYPE>::Topology Topology;
+    const static int DIM = Topology::DIM;
 
     SimpleInitializer(
         const Coord<DIM>& dimensions,

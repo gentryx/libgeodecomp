@@ -18,8 +18,9 @@ class Selector
 public:
     typedef typename CELL::Stencil Stencil;
     typedef typename CELL::API CellAPI;
-    typedef typename CELL::Topology Topology;
-    static const int DIM = CELL::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+
+    static const int DIM = Topology::DIM;
 
     class SoARegionUpdateHelper
     {
@@ -234,7 +235,8 @@ template<typename CELL>
 class UpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIM;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+    static const int DIM = Topology::DIM;
 
     template<typename GRID1, typename GRID2>
     void operator()(

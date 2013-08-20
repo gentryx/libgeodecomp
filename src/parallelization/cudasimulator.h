@@ -67,7 +67,7 @@ class CudaSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class CudaSimulatorTest;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIMENSIONS;
 

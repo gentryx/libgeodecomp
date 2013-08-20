@@ -13,9 +13,10 @@ class ConwayCell
 {
 public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
     {};
 
     static inline unsigned nanoSteps()

@@ -77,9 +77,12 @@ public:
     friend class TestCellTest;
 
     typedef STENCIL Stencil;
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasTopology<TOPOLOGY>
+
     {};
-    typedef TOPOLOGY Topology;
+
     static const int DIMENSIONS = DIM;
 
     static inline unsigned nanoSteps()
@@ -127,7 +130,7 @@ public:
 
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !Topology::isOutOfBounds(c, dimensions.dimensions);
+        return !TOPOLOGY::isOutOfBounds(c, dimensions.dimensions);
     }
 
     bool operator==(const TestCell& other) const
@@ -230,7 +233,7 @@ public:
 
             Coord<DIM> rawPos = pos + relativeLoc;
             Coord<DIM> expectedPos =
-                Topology::normalize(rawPos, dimensions.dimensions);
+                TOPOLOGY::normalize(rawPos, dimensions.dimensions);
 
             if (other.pos != expectedPos) {
                 OUTPUT() << "TestCell error: other position "

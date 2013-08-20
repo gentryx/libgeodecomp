@@ -18,7 +18,7 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class SerialSimulatorTest;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename MonolithicSimulator<CELL_TYPE>::Topology Topology;
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
     typedef CellAPITraitsFixme::SelectGridType<CELL_TYPE> GridTypeSelector;
     typedef typename GridTypeSelector::Type GridType;

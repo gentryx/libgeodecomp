@@ -16,7 +16,7 @@ template<typename CELL_TYPE>
 class CollectingWriter : public ParallelWriter<CELL_TYPE>
 {
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
