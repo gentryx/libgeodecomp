@@ -1,5 +1,6 @@
 #include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/misc/stringops.h>
 
 using namespace LibGeoDecomp;
 
@@ -13,11 +14,17 @@ public:
     class API : public CellAPITraits::Base
     {};
 
+    MySimpleDummyCell(int val = 0) :
+        val(val)
+    {};
+
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
-        myTestEvents << "MySimpleDummyCell::update()\n";
+        myTestEvents << "MySimpleDummyCell::update(" << hood[FixedCoord<-1, 0, 0>()].val << ")\n";
     }
+
+    int val;
 };
 
 class MyFancyDummyCell
@@ -35,11 +42,17 @@ public:
         return 3;
     }
 
+    MyFancyDummyCell(int val = 0) :
+        val(val)
+    {};
+
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, unsigned nanoStep)
     {
-        myTestEvents << "MyFancyDummyCell::update()\n";
+        myTestEvents << "MyFancyDummyCell::update(" << hood[FixedCoord<-1, 0, 0>()].val << ")\n";
     }
+
+    int val;
 };
 
 namespace LibGeoDecomp {
@@ -56,7 +69,7 @@ public:
     {
         Coord<2> gridDim(10, 5);
         typedef CellAPITraitsFixme::SelectTopology<MySimpleDummyCell>::Value Topology;
-        Grid<MySimpleDummyCell, Topology> gridOld(gridDim);
+        Grid<MySimpleDummyCell, Topology> gridOld(gridDim, 666, 31);
         Grid<MySimpleDummyCell, Topology> gridNew(gridDim);
         Streak<2> streak(Coord<2>(0, 0), 5);
         Coord<2> targetOffset(0, 0);
@@ -64,7 +77,11 @@ public:
 
         std::string expected;
         for (int i = 0; i < streak.length(); ++i) {
-            expected += "MySimpleDummyCell::update()\n";
+            int num = 666;
+            if (i == 0) {
+                num = 31;
+            }
+            expected += "MySimpleDummyCell::update(" + StringOps::itoa(num) + ")\n";
         }
         TS_ASSERT_EQUALS(myTestEvents.str(), expected);
     }
@@ -73,7 +90,7 @@ public:
     {
         Coord<3> gridDim(10, 5, 10);
         typedef CellAPITraitsFixme::SelectTopology<MyFancyDummyCell>::Value Topology;
-        Grid<MyFancyDummyCell, Topology> gridOld(gridDim);
+        Grid<MyFancyDummyCell, Topology> gridOld(gridDim, 666, 31);
         Grid<MyFancyDummyCell, Topology> gridNew(gridDim);
         Streak<3> streak(Coord<3>(0, 0, 0), 4);
         Coord<3> targetOffset(0, 0, 0);
@@ -81,7 +98,7 @@ public:
 
         std::string expected;
         for (int i = 0; i < streak.length(); ++i) {
-            expected += "MyFancyDummyCell::update()\n";
+            expected += "MyFancyDummyCell::update(666)\n";
         }
         TS_ASSERT_EQUALS(myTestEvents.str(), expected);
     }
