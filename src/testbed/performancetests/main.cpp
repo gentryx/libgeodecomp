@@ -607,7 +607,7 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     static unsigned nanoSteps()
@@ -681,7 +681,7 @@ public:
     typedef Stencils::VonNeumann<3, 1> Stencil;
     class API :
         public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     JacobiCellFixedHood(double t = 0) :
@@ -777,7 +777,7 @@ public:
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
@@ -1066,7 +1066,7 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
@@ -1697,7 +1697,7 @@ public:
                 public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
                 public CellAPITraitsFixme::HasSoA,
                 public CellAPITraitsFixme::HasUpdateLineX,
-                public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+                public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};

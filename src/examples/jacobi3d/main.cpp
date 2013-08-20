@@ -19,7 +19,7 @@ public:
 
     class API :
         public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     static inline unsigned nanoSteps()

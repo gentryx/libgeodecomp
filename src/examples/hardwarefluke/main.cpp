@@ -16,7 +16,7 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<2>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 
     friend class BuggyCellToColor;

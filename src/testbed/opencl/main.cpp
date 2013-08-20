@@ -12,7 +12,7 @@ public:
         public CellAPITraits::Fixed,
         public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
         public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     static inline unsigned nanoSteps()

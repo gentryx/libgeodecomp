@@ -143,7 +143,7 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<Topologies::Cube<3>::Topology>
+        public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
     Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :

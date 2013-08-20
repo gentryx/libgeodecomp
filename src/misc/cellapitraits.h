@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/soagrid.h>
 #include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/misc/topologies.h>
 
 namespace LibGeoDecomp {
 
@@ -203,6 +204,20 @@ public:
 
         typedef TOPOLOGY Topology;
     };
+
+    /**
+     * Convenience overload to simplify most common topology specifications
+     */
+    template<int DIM>
+    class HasCubeTopology : public HasTopology<typename Topologies::Cube<DIM>::Topology>
+    {};
+
+    /**
+     * Same as for HasCubeTopology: overload purely for convenience.
+     */
+    template<int DIM>
+    class HasTorusTopology : public HasTopology<typename Topologies::Torus<DIM>::Topology>
+    {};
 };
 
 /**
