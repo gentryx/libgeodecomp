@@ -15,6 +15,7 @@
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/fixedarray.h>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
