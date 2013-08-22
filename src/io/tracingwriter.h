@@ -26,7 +26,7 @@ public:
     TracingWriter(
         const unsigned period,
         const unsigned maxSteps,
-        std::ostream& stream = std::cout) :
+        std::ostream& stream = std::cerr) :
         Writer<CELL_TYPE>("", period),
         ParallelWriter<CELL_TYPE>("", period),
         stream(stream),
@@ -54,7 +54,7 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        if (lastCall) {
+        if (lastCall && rank == 0) {
             stepFinished(step, globalDimensions, event);
         }
     }
@@ -76,7 +76,7 @@ private:
     }
 
     TracingWriter()
-      : stream(std::cout)
+      : stream(std::cerr)
     {}
 #endif
 
