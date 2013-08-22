@@ -188,13 +188,19 @@ private:
 
     SuperVector<long> initialWeights(const long& items, const long& size) const
     {
+        MPILayer layer(communicator);
+        double mySpeed = CELL_TYPE::speed();
+        SuperVector<double> speeds = layer.allGather(mySpeed);
+        double sum = speeds.sum();
         SuperVector<long> ret(size);
-        long lastPos = 0;
 
+        long lastPos = 0;
+        double partialSum = 0.0;
         for (long i = 0; i < size; i++) {
-            long currentPos = items * (i + 1) / size;
-            ret[i] = currentPos - lastPos;
-            lastPos = currentPos;
+            partialSum += speeds[i];
+            long nextPos = items * partialSum / sum;
+            ret[i] = nextPos - lastPos;
+            lastPos = nextPos;
         }
 
         return ret;
