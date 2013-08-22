@@ -13,4 +13,14 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE(
     LibGeoDecomp_BaseLcoCoordBox2
 )
 
+HPX_REGISTER_BASE_LCO_WITH_VALUE(
+    std::vector<double>,
+    LibGeoDecomp_BaseLcovector_double
+)
+
+HPX_REGISTER_BASE_LCO_WITH_VALUE(
+    std::vector<LibGeoDecomp::Statistics>,
+    LibGeoDecomp_BaseLcovector_Statistics
+)
+
 #endif

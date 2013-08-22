@@ -99,17 +99,13 @@ public:
       , stopped(false)
     {}
 
-    void init(typename ClientType::InitData initData)
+    void init(const typename ClientType::InitData& initData)
     {
         updateGroups = initData.updateGroups;
         initializer = initData.initializer;
         loadBalancingPeriod = initData.loadBalancingPeriod;
         //this->balancer = balancer;
         setRank();
-        updateGroupsIds.reserve(updateGroups.size());
-        BOOST_FOREACH(ClientType& ug, updateGroups) {
-            updateGroupsIds.push_back(ug.gid());
-        }
 
         partitionManager.reset(new PartitionManagerType());
         CoordBox<DIM> box = initializer->gridBox();
@@ -120,7 +116,7 @@ public:
                 box.origin,
                 box.dimensions,
                 0,
-                initialWeights(box.dimensions.prod(), numPartitions)));
+                initData.initialWeights));
 
         partitionManager->resetRegions(
                 box,
@@ -140,7 +136,12 @@ public:
         PatchAccepterVec patchAcceptersGhost;
         RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-            if (!i->second.back().empty()) {
+            if (!i->second.empty() && !i->second.back().empty()) {
+                if(i->first == -1)
+                {
+                    std::cerr << rank << " accepter got outgroup fragment\n";
+                    continue;
+                }
                 PatchLinkAccepterPtr link(
                     new PatchLinkAccepterType(
                         i->second.back(),
@@ -197,7 +198,13 @@ public:
         // ghostzone generation is being received.
         map = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-            if (!i->second.back().empty()) {
+            if (!i->second.empty() && !i->second.back().empty()) {
+                if(i->first == -1)
+                {
+                    std::cerr << rank << " provider got outgroup fragment\n";
+                    continue;
+                }
+
                 PatchLinkProviderPtr link(
                     new PatchLinkProviderType(
                         i->second.back()));
@@ -315,11 +322,22 @@ public:
         hpx::wait(initFuture);
         typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
         patchlinkIter = patchlinkProviderMap.find(srcRank);
+        if(patchlinkIter == patchlinkProviderMap.end())
+        {
+            std::cerr << rank << " setting outer ghostzone from unknown rank: " << srcRank << "\n";
+            return;
+        }
         BOOST_ASSERT(patchlinkIter != patchlinkProviderMap.end());
 
         patchlinkIter->second->setBuffer(buffer, nanoStep);
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
+
+    double speed()
+    {
+        return CELL_TYPE::speed();
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, speed, SpeedAction);
 
     std::size_t getRank() const
     {
@@ -327,7 +345,6 @@ public:
     }
 private:
     std::vector<ClientType> updateGroups;
-    std::vector<hpx::id_type> updateGroupsIds;
 
     boost::shared_ptr<HiParSimulator::Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
@@ -353,20 +370,6 @@ private:
             }
             ++rank;
         }
-    }
-
-    SuperVector<long> initialWeights(const long items, const long size) const
-    {
-        SuperVector<long> ret(size);
-        long lastPos = 0;
-
-        for (long i = 0; i < size; i++) {
-            long currentPos = items * (i + 1) / size;
-            ret[i] = currentPos - lastPos;
-            lastPos = currentPos;
-        }
-
-        return ret;
     }
 
     void initEvents()

@@ -134,10 +134,24 @@ public:
             const bool remove=true
         )
         {
+            throw std::logic_error("not implemented!");
+        }
+
+        void get(
+            GRID_TYPE *grid,
+            const Region<DIM>&,
+            const std::size_t nanoStep,
+            hpx::lcos::local::spinlock& gridMutex,
+            const bool remove=true
+        )
+        {
             boost::shared_ptr<BufferType> buffer = bufferFuture.get();
 
             checkNanoStepGet(nanoStep);
-            HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
+            {
+                hpx::lcos::local::spinlock::scoped_lock lock(gridMutex);
+                HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
+            }
 
             std::size_t nextNanoStep = (storedNanoSteps.min)() + stride;
             if ((lastNanoStep == std::size_t(-1)) ||

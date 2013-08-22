@@ -64,6 +64,7 @@ public:
         WriterVector writers;
         SteererVector steerers;
         std::vector<CoordBox<DIM> > boundingBoxes;
+        SuperVector<long> initialWeights;
 
         template <typename ARCHIVE>
         void serialize(ARCHIVE& ar, unsigned)
@@ -75,36 +76,9 @@ public:
             ar & writers;
             ar & steerers;
             ar & boundingBoxes;
+            ar & initialWeights;
         }
     };
-
-    hpx::future<void> init(
-        const std::vector<UpdateGroup>& updateGroups,
-        //boost::shared_ptr<LoadBalancer> balancer,
-        unsigned loadBalancingPeriod,
-        unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        const WriterVector& writers,
-        const SteererVector& steerers,
-        std::vector<CoordBox<DIM> > boundingBoxes
-    )
-    {
-        InitData initData =
-        {
-            updateGroups,
-            loadBalancingPeriod,
-            ghostzoneWidth,
-            initializer,
-            writers,
-            steerers,
-            boundingBoxes
-        };
-        return
-            hpx::async<typename ComponentType::InitAction>(
-                thisId,
-                boost::move(initData)
-            );
-    }
 
     hpx::naming::id_type gid() const
     {

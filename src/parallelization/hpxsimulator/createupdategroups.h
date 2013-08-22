@@ -17,12 +17,31 @@ namespace LibGeoDecomp {
 namespace HpxSimulator {
 namespace Implementation {
 
+    struct OvercommitFunctor
+    {
+        double overcommitFactor;
+
+        std::size_t operator()() const
+        {
+            return std::ceil(hpx::get_os_thread_count() * overcommitFactor);
+        }
+
+        template <typename ARCHIVE>
+        void serialize(ARCHIVE& ar, unsigned)
+        {
+            ar & overcommitFactor;
+        }
+    };
+
 typedef
     std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
     CreateUpdateGroupsReturnType;
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, float overcommitFactor);
+createUpdateGroups(
+    std::vector<hpx::id_type> localities,
+    hpx::components::component_type type,
+    const hpx::util::function<std::size_t()>& numUpdateGroups);
 
 HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
@@ -30,7 +49,7 @@ HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
 template <class UPDATEGROUP>
 inline std::vector<UPDATEGROUP> createUpdateGroups(
-    float overcommitFactor
+    const hpx::util::function<std::size_t()>& numUpdateGroups
 )
 {
     hpx::components::component_type type =
@@ -41,7 +60,7 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     hpx::id_type id = localities[0];
     hpx::future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
         asyncResult = hpx::async<Implementation::CreateUpdateGroupsAction>(
-            id, boost::move(localities), type, overcommitFactor);
+            id, boost::move(localities), type, numUpdateGroups);
 
     std::vector<UPDATEGROUP> components;
 
@@ -62,6 +81,15 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     }
 
     return components;
+}
+
+template <class UPDATEGROUP>
+inline std::vector<UPDATEGROUP> createUpdateGroups(
+    float overcommitFactor
+)
+{
+    Implementation::OvercommitFunctor f = {overcommitFactor};
+    return createUpdateGroups(f);
 }
 
 }

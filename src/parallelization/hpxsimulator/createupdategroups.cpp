@@ -26,7 +26,10 @@ namespace HpxSimulator {
 namespace Implementation {
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, float overcommitFactor)
+createUpdateGroups(
+    std::vector<hpx::id_type> localities,
+    hpx::components::component_type type,
+    const hpx::util::function<std::size_t()>& numUpdateGroups)
 {
     typedef hpx::util::remote_locality_result ValueType;
     typedef std::pair<std::size_t, std::vector<ValueType> > ResultType;
@@ -42,7 +45,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         hpx::components::server::runtime_support::bulk_create_components_action
         ActionType;
 
-    std::size_t numComponents = std::ceil(hpx::get_os_thread_count() * overcommitFactor);
+    std::size_t numComponents = numUpdateGroups();
 
     typedef hpx::future<std::vector<hpx::naming::gid_type> > FutureType;
 
@@ -66,7 +69,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         {
             hpx::lcos::packaged_action<CreateUpdateGroupsAction, ResultType > p;
             hpx::id_type id = locsFirst[0];
-            p.apply(hpx::launch::async, id, boost::move(locsFirst), type, overcommitFactor);
+            p.apply(hpx::launch::async, id, boost::move(locsFirst), type, numUpdateGroups);
             componentsFutures.push_back(
                 p.get_future()
             );
@@ -76,7 +79,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         {
             hpx::lcos::packaged_action<CreateUpdateGroupsAction, ResultType > p;
             hpx::id_type id = locsSecond[0];
-            p.apply(hpx::launch::async, id, boost::move(locsSecond), type, overcommitFactor);
+            p.apply(hpx::launch::async, id, boost::move(locsSecond), type, numUpdateGroups);
             componentsFutures.push_back(
                 p.get_future()
             );
