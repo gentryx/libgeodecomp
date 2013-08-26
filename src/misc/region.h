@@ -241,9 +241,10 @@ public:
             }
 
             for (int i = 1; i < DIM; ++i) {
-                // we don't need to (and without performing illegal
-                // reads) advance upper-level iterators if they're
-                // already pointing at the secondt-to-last field:
+                // we don't need to (and can't without performing
+                // illegal reads) advance upper-level iterators if
+                // they're already pointing to the second-to-last
+                // field:
                 if ((iterators[i] + 1) == region->indices[i].end()) {
                     return;
                 }
