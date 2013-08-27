@@ -26,6 +26,7 @@ std::ostream & operator<<(std::ostream &, cl::Platform);
 
 std::ostream & operator<<(std::ostream &, cl::Device);
 
+template<typename DATA_TYPE>
 class OpenCLWrapper {
   public:
     typedef std::tuple<size_t, size_t, size_t> point_t;
@@ -34,7 +35,6 @@ class OpenCLWrapper {
     OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
                   const std::string & user_code_file,
                   const std::string & user_code_function,
-                  const size_t sizeof_data,
                   const size_t x_size, const size_t y_size, const size_t z_size,
                   bool verbose = false);
 
@@ -60,7 +60,7 @@ class OpenCLWrapper {
     std::string init_code_txt, user_code_txt;
 
     coords_ctx coords;
-    const size_t sizeof_data, x_size, y_size, z_size;
+    const size_t x_size, y_size, z_size;
     const size_t num_points;
 
     bool verbose = false;
@@ -80,17 +80,16 @@ class OpenCLWrapper {
     void printCLError(cl::Error & error, const std::string & where);
 };
 
-OpenCLWrapper::
+template<typename DATA_TYPE>
+OpenCLWrapper<DATA_TYPE>::
 OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
               const std::string & user_code_file,
               const std::string & user_code_function,
-              const size_t sizeof_data,
               const size_t x_size, const size_t y_size, const size_t z_size,
               bool verbose)
   : platform_id(platform_id), device_id(device_id)
   , user_code_file(user_code_file)
   , user_code_function(user_code_function)
-  , sizeof_data(sizeof_data)
   , x_size(x_size), y_size(y_size), z_size(z_size)
   , num_points(x_size * y_size * z_size)
   , verbose(verbose)
@@ -138,7 +137,9 @@ OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
     }
 }
 
-void OpenCLWrapper::initCommandQueue(void)
+template<typename DATA_TYPE>
+void
+OpenCLWrapper<DATA_TYPE>::initCommandQueue(void)
 {
   std::vector<cl::Platform> platforms;
   cl::Platform::get(&platforms);
@@ -163,17 +164,20 @@ void OpenCLWrapper::initCommandQueue(void)
   cmdqueue = cl::CommandQueue(context, device);
 }
 
+template<typename DATA_TYPE>
 void
-OpenCLWrapper::createBuffers(void)
+OpenCLWrapper<DATA_TYPE>::createBuffers(void)
 {
   cl_coords = cl::Buffer(context, CL_MEM_READ_ONLY, sizeof(coords_ctx));
-  cl_input = cl::Buffer(context, CL_MEM_READ_WRITE, num_points * sizeof_data);
-  cl_output = cl::Buffer(context, CL_MEM_READ_WRITE, num_points * sizeof_data);
+  cl_input = cl::Buffer(context, CL_MEM_READ_WRITE, num_points * sizeof(DATA_TYPE));
+  cl_output = cl::Buffer(context, CL_MEM_READ_WRITE, num_points * sizeof(DATA_TYPE));
   cl_points = cl::Buffer(context, CL_MEM_READ_ONLY, num_points * sizeof(cl_int4));
   cl_indices = cl::Buffer(context, CL_MEM_READ_ONLY, num_points * sizeof(cl_int));
 }
 
-void OpenCLWrapper::readKernels(void)
+template<typename DATA_TYPE>
+void
+OpenCLWrapper<DATA_TYPE>::readKernels(void)
 {
   std::ifstream fstream;
   fstream.exceptions(std::ios::failbit | std::ios::badbit);
@@ -189,8 +193,9 @@ void OpenCLWrapper::readKernels(void)
   fstream.close();
 }
 
+template<typename DATA_TYPE>
 void
-OpenCLWrapper::initKernels(void)
+OpenCLWrapper<DATA_TYPE>::initKernels(void)
 {
   init_code_program = cl::Program(context,
       { std::make_pair(init_code_txt.c_str(), init_code_txt.length() + 1) });
@@ -217,9 +222,10 @@ OpenCLWrapper::initKernels(void)
   user_code_kernel.setArg(arg_counter++, cl_coords);
 }
 
+template<typename DATA_TYPE>
 template<template<class T, class = std::allocator<T>> class C>
 void
-OpenCLWrapper::loadPoints(const C<point_t> & points)
+OpenCLWrapper<DATA_TYPE>::loadPoints(const C<point_t> & points)
 {
   if (points.size() != num_points) {
     throw std::length_error("points.size() != num_points");
@@ -249,9 +255,10 @@ OpenCLWrapper::loadPoints(const C<point_t> & points)
   }
 }
 
+template<typename DATA_TYPE>
 template<template<class T, class = std::allocator<T>> class C>
 void
-OpenCLWrapper::loadHostData(const C<data_t> & data)
+OpenCLWrapper<DATA_TYPE>::loadHostData(const C<data_t> & data)
 {
   if (data.size() != num_points) {
     throw std::length_error("points.size() != num_points");
@@ -260,8 +267,8 @@ OpenCLWrapper::loadHostData(const C<data_t> & data)
   try {
     for (int i = 0; i < num_points; ++i) {
       cmdqueue.enqueueWriteBuffer(cl_input, CL_TRUE,
-                                  i * sizeof_data,
-                                  sizeof_data, data[i]);
+                                  i * sizeof(DATA_TYPE),
+                                  sizeof(DATA_TYPE), data[i]);
     }
   } catch (cl::Error & error) {
     printCLError(error, __PRETTY_FUNCTION__);
@@ -269,15 +276,17 @@ OpenCLWrapper::loadHostData(const C<data_t> & data)
   }
 }
 
+template<typename DATA_TYPE>
 void * const
-OpenCLWrapper::readDeviceData(void)
+OpenCLWrapper<DATA_TYPE>::readDeviceData(void)
 {
   return cmdqueue.enqueueMapBuffer(cl_output, CL_TRUE, CL_MAP_READ, 0,
-                                   num_points * sizeof_data);
+                                   num_points * sizeof(DATA_TYPE));
 }
 
+template<typename DATA_TYPE>
 void
-OpenCLWrapper::run(size_t updates)
+OpenCLWrapper<DATA_TYPE>::run(size_t updates)
 {
   // let's play ping - pong
   // (http://www.mathematik.uni-dortmund.de/~goeddeke/gpgpu/tutorial.html#feedback2)
@@ -294,20 +303,23 @@ OpenCLWrapper::run(size_t updates)
   }
 }
 
+template<typename DATA_TYPE>
 void
-OpenCLWrapper::flush(void)
+OpenCLWrapper<DATA_TYPE>::flush(void)
 {
   cmdqueue.flush();
 }
 
+template<typename DATA_TYPE>
 void
-OpenCLWrapper::finish(void)
+OpenCLWrapper<DATA_TYPE>::finish(void)
 {
   cmdqueue.finish();
 }
 
+template<typename DATA_TYPE>
 void
-OpenCLWrapper::printCLError(cl::Error & error, const std::string & where)
+OpenCLWrapper<DATA_TYPE>::printCLError(cl::Error & error, const std::string & where)
 {
   std::cerr << where << ": " << error.what()
             << std::endl

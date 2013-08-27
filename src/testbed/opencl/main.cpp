@@ -36,11 +36,8 @@ class DummyCell : public OpenCLCellInterface<DummyCell, MyCell> {
     template<typename COORD_MAP>
       void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
 
-
     static std::string kernel_file() { return "./test.cl"; }
     static std::string kernel_function() { return "add_test"; }
-    static std::string cl_struct_code() { return STRINGIFY(MYCELL_STRUCT); }
-    static size_t sizeof_data() { return sizeof(MyCell); }
     MyCell * data() { return &myCellData; }
 
     MyCell myCellData;

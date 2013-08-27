@@ -9,20 +9,16 @@
 
 namespace LibGeoDecomp {
 
-  template<typename CELL, typename DATA_TYPE>
+  template<typename CELL_TYPE, typename DATA_TYPE>
   class OpenCLCellInterface {
     public:
-      static std::string kernel_file(void) {
-        return CELL::kernel_file();
+      static std::string kernel_file(void)
+      {
+        return CELL_TYPE::kernel_file();
       }
-      static std::string kernel_function(void) {
-        return CELL::kernel_function();
-      }
-      static std::string cl_struct_code(void) {
-        return CELL::cl_struct_code();
-      }
-      static size_t sizeof_data(void) {
-        return CELL::sizeof_data();
+      static std::string kernel_function(void)
+      {
+        return CELL_TYPE::kernel_function();
       }
       virtual DATA_TYPE * data(void) = 0;
   };
@@ -93,7 +89,7 @@ public:
     }
 
 private:
-    typedef std::shared_ptr<OpenCLWrapper> OpenCLWrapper_Ptr;
+    typedef std::shared_ptr<OpenCLWrapper<DATA_TYPE>> OpenCLWrapper_Ptr;
 
     unsigned int platform_id, device_id;
 
@@ -143,13 +139,11 @@ private:
           OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
         std::string kernel_function =
           OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
-        size_t sizeof_data =
-          OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::sizeof_data();
 
         auto box = initializer->gridBox();
 
-        std::vector<OpenCLWrapper::data_t> data;
-        std::vector<OpenCLWrapper::point_t> points;
+        std::vector<typename OpenCLWrapper<DATA_TYPE>::data_t> data;
+        std::vector<typename OpenCLWrapper<DATA_TYPE>::point_t> points;
 
         for (auto & p : box) {
           auto & cell =
@@ -168,9 +162,9 @@ private:
           , z_size = box.dimensions.z();
 
         oclwrapper = OpenCLWrapper_Ptr(
-            new OpenCLWrapper(platform_id, device_id,
-                              kernel_file, kernel_function,
-                              sizeof_data, x_size, y_size, z_size));
+            new OpenCLWrapper<DATA_TYPE>(platform_id, device_id,
+                                         kernel_file, kernel_function,
+                                         x_size, y_size, z_size));
 
         oclwrapper->loadPoints(points);
         oclwrapper->loadHostData(data);
