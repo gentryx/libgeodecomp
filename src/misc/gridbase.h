@@ -18,6 +18,45 @@ public:
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;
 
+    class ConstIterator
+    {
+    public:
+	ConstIterator(const GridBase<CELL, DIM> *grid, const Coord<DIM>& origin) :
+	    grid(grid),
+	    cursor(origin)
+	{
+	    cell = grid->get(cursor);
+	}
+
+	const CELL& operator*() const
+	{
+	    return cell;
+	}
+
+	const CELL *operator->() const
+	{
+	    return &cell;
+	}
+
+	ConstIterator& operator>>(CELL& target)
+	{
+	    target = cell;
+	    ++(*this);
+	    return *this;
+	}
+
+	void operator++()
+	{
+	    ++cursor.x();
+	    cell = grid->get(cursor);
+	}
+
+    private:
+	const GridBase<CELL, DIM> *grid;
+	Coord<DIM> cursor;
+	CELL cell;
+    };
+
     virtual ~GridBase()
     {}
 
@@ -27,6 +66,11 @@ public:
     virtual void setEdge(const CELL&) = 0;
     virtual const CELL& getEdge() const = 0;
     virtual CoordBox<DIM> boundingBox() const = 0;
+
+    ConstIterator at(const Coord<DIM>& coord) const
+    {
+	return ConstIterator(this, coord);
+    }
 
     Coord<DIM> dimensions() const
     {
