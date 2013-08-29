@@ -255,6 +255,10 @@ if(FEATURE_HPX)
   )
 endif()
 
+if(FEATURE_QT)
+  include(${QT_USE_FILE})
+endif()
+
 # LIBDIRS is used to find source files and headers
 set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions parallelization/hpxsimulator)
 # AUXDIRS lists auxiliary directories to be included in the main
