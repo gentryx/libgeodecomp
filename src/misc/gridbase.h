@@ -18,6 +18,10 @@ public:
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;
 
+    /**
+     * Convenice class for reading multiple cells. Incurs overhead due
+     * to copying cells -- probably more often than desired.
+     */
     class ConstIterator
     {
     public:
@@ -57,6 +61,66 @@ public:
 	CELL cell;
     };
 
+    /**
+     * Convenice class for reading/writing multiple cells. Incurs
+     * overhead due to copying cells -- probably more often than
+     * desired.
+     */
+    class Iterator
+    {
+    public:
+	Iterator(GridBase<CELL, DIM> *grid, const Coord<DIM>& origin) :
+	    grid(grid),
+	    cursor(origin)
+	{
+	    cell = grid->get(cursor);
+	}
+
+	~Iterator()
+	{
+	    grid->set(cursor, cell);
+	}
+
+	const CELL& operator*() const
+	{
+	    return cell;
+	}
+
+	CELL& operator*()
+	{
+	    return cell;
+	}
+
+	const CELL *operator->() const
+	{
+	    return &cell;
+	}
+
+	CELL *operator->()
+	{
+	    return &cell;
+	}
+
+	Iterator& operator>>(CELL& target)
+	{
+	    target = cell;
+	    ++(*this);
+	    return *this;
+	}
+
+	void operator++()
+	{
+	    grid->set(cursor, cell);
+	    ++cursor.x();
+	    cell = grid->get(cursor);
+	}
+
+    private:
+	GridBase<CELL, DIM> *grid;
+	Coord<DIM> cursor;
+	CELL cell;
+    };
+
     virtual ~GridBase()
     {}
 
@@ -70,6 +134,11 @@ public:
     ConstIterator at(const Coord<DIM>& coord) const
     {
 	return ConstIterator(this, coord);
+    }
+
+    Iterator at(const Coord<DIM>& coord)
+    {
+	return Iterator(this, coord);
     }
 
     Coord<DIM> dimensions() const
