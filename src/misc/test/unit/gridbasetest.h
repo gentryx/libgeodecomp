@@ -76,7 +76,7 @@ public:
 	TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->second, 'a');
     }
 
-    void testIterator()
+    void testIteratorRead()
     {
 	Grid<int> grid(Coord<2>(5, 3));
 	for (int y = 0; y < 3; ++y) {
@@ -102,6 +102,28 @@ public:
 	Grid<std::pair<int, char> > grid2(Coord<2>(2, 2), std::make_pair(123, 'a'));
 	TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->first, 123);
 	TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->second, 'a');
+    }
+
+    void testIteratorWrite()
+    {
+	Grid<int> grid1(Coord<2>(5, 3));
+	Grid<int> grid2(Coord<2>(5, 3));
+
+	for (int y = 0; y < 3; ++y) {
+	    GridBase<int, 2>::Iterator i = grid2.at(Coord<2>(0, y));
+
+	    for (int x = 0; x < 5; ++x) {
+		grid1[Coord<2>(x, y)] = x * 10 + y;
+		i << x * 10 + y;
+	    }
+	}
+
+	for (int y = 0; y < 3; ++y) {
+	    for (int x = 0; x < 5; ++x) {
+		TS_ASSERT_EQUALS(grid1[Coord<2>(x, y)],
+				 grid2[Coord<2>(x, y)]);
+	    }
+	}
     }
 };
 

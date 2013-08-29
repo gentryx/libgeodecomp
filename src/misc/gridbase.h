@@ -76,27 +76,12 @@ public:
 	    cell = grid->get(cursor);
 	}
 
-	~Iterator()
-	{
-	    grid->set(cursor, cell);
-	}
-
 	const CELL& operator*() const
 	{
 	    return cell;
 	}
 
-	CELL& operator*()
-	{
-	    return cell;
-	}
-
 	const CELL *operator->() const
-	{
-	    return &cell;
-	}
-
-	CELL *operator->()
 	{
 	    return &cell;
 	}
@@ -108,9 +93,16 @@ public:
 	    return *this;
 	}
 
+	Iterator& operator<<(const CELL& source)
+	{
+	    cell = source;
+	    grid->set(cursor, cell);
+	    ++(*this);
+	    return *this;
+	}
+
 	void operator++()
 	{
-	    grid->set(cursor, cell);
 	    ++cursor.x();
 	    cell = grid->get(cursor);
 	}
