@@ -5,8 +5,8 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/testcellplotter.h>
 #include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/io/testplotter.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
@@ -38,7 +38,7 @@ public:
 
     void testWritePPM()
     {
-        simulator->addWriter(new PPMWriter<TestCell<2>, TestPlotter>(tempFile));
+        simulator->addWriter(new PPMWriter<TestCell<2>, TestCellPlotter>(tempFile));
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
@@ -73,7 +73,7 @@ public:
     void testWritePPMPeriod()
     {
         int period = 2;
-        simulator->addWriter(new PPMWriter<TestCell<2>, TestPlotter>(tempFile, period));
+        simulator->addWriter(new PPMWriter<TestCell<2>, TestCellPlotter>(tempFile, period));
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
@@ -92,8 +92,8 @@ public:
     {
         std::string path("/non/existent/path/prefix1");
         std::string expectedErrorMessage("Could not open file " + path);
-        PPMWriter<TestCell<2>, TestPlotter> *writer =
-            new PPMWriter<TestCell<2>, TestPlotter>(path);
+        PPMWriter<TestCell<2>, TestCellPlotter> *writer =
+            new PPMWriter<TestCell<2>, TestCellPlotter>(path);
         TS_ASSERT_THROWS_ASSERT(
             writer->stepFinished(
                 *simulator->getGrid(),

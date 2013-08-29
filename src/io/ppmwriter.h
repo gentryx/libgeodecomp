@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <libgeodecomp/io/image.h>
+#include <libgeodecomp/io/imagepainter.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/io/writer.h>
@@ -27,8 +28,7 @@ public:
         const unsigned dimX = 20,
         const unsigned dimY = 20) :
         Writer<CELL_TYPE>(prefix, period),
-        cellPlotter(),
-        gridPlotter(&cellPlotter, dimX, dimY)
+        plotter(Coord<2>(dimX, dimY))
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -37,12 +37,14 @@ public:
             return;
         }
 
-        writePPM(gridPlotter.plotGrid(grid), step);
+        Coord<2> imageDim = plotter.calcImageDim(grid.boundingBox().dimensions);
+        Image image(imageDim);
+        plotter.plotGrid(grid, ImagePainter(&image));
+        writePPM(image, step);
     }
 
  private:
-    CELL_PLOTTER cellPlotter;
-    Plotter<CELL_TYPE, CELL_PLOTTER> gridPlotter;
+    Plotter<CELL_TYPE, CELL_PLOTTER> plotter;
 
     void writePPM(const Image& img, unsigned step)
     {

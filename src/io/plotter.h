@@ -18,56 +18,34 @@ template<typename CELL, class CELL_PLOTTER>
 class Plotter
 {
 public:
+    Plotter(Coord<2> cellDim = Coord<2>(32, 32)) :
+	cellDim(cellDim)
+    {}
 
-    /** creates new Plotter object.
-     * \param cellPlotter ist used to plott a single cell
-     * \param width, height see setCellDimensions()
-     */
-    Plotter(CELL_PLOTTER *cellPlotter, const unsigned& width = 100, const unsigned& height = 100) :
-        cellPlotter(cellPlotter)
+    template<typename PAINTER>
+    void plotGrid(const typename Writer<CELL>::GridType& grid, PAINTER painter) const
     {
-        setCellDimensions(width, height);
+	CoordBox<2> viewport(
+	    Coord<2>(0, 0),
+	    Coord<2>(cellDim.x() * grid.dimensions().x(),
+		     cellDim.y() * grid.dimensions().y()));
+        plotGridInViewport(grid, painter, viewport);
     }
 
     /**
-     * sets the pixel dimensions of a cell when plotted
+     * plots a part of the grid. Dimensions are given in pixel
+     * coordinates. This is useful to e.g. render a panned excerpt.
      */
-    void setCellDimensions(const unsigned& width, const unsigned& height)
-    {
-        cellDim = Coord<2>(width, height);
-    }
-
-    /**
-     * \return the dimensions of a cell when plotted (width, height).
-     */
-    Coord<2> getCellDimensions() const
-    {
-        return cellDim;
-    }
-
-    Image plotGrid(const typename Writer<CELL>::GridType& grid) const
-    {
-        unsigned width = cellDim.x() * grid.dimensions().x();
-        unsigned height = cellDim.y() * grid.dimensions().y();
-        return plotGridInViewport(grid, Coord<2>(0, 0), width, height);
-    }
-
-    /**
-     * Plot the Grid in the given viewport. upperLeft, width and
-     * height are pixel coordinates.
-     */
-    Image plotGridInViewport(
+    template<typename PAINTER>
+    void plotGridInViewport(
         const typename Writer<CELL>::GridType& grid,
-        const Coord<2>& upperLeft,
-        const unsigned& width,
-        const unsigned& height) const
+	PAINTER painter,
+        const CoordBox<2>& viewport) const
     {
-        Image ret(width, height, Color::BLACK);
-
-        int sx = upperLeft.x() / cellDim.x();
-        int sy = upperLeft.y() / cellDim.y();
-        int ex = (int)ceil(((double)upperLeft.x() + width)  / cellDim.x());
-        int ey = (int)ceil(((double)upperLeft.y() + height) / cellDim.y());
+        int sx = viewport.origin.x() / cellDim.x();
+        int sy = viewport.origin.y() / cellDim.y();
+        int ex = (int)ceil(((double)viewport.origin.x() + viewport.dimensions.x()) / cellDim.x());
+        int ey = (int)ceil(((double)viewport.origin.y() + viewport.dimensions.y()) / cellDim.y());
         ex = std::max(ex, 0);
         ey = std::max(ey, 0);
         ex = std::min(ex, grid.dimensions().x());
@@ -76,25 +54,32 @@ public:
         for (int y = sy; y < ey; y++) {
             for (int x = sx; x < ex; x++) {
                 Coord<2> relativeUpperLeft =
-                    Coord<2>(x * cellDim.x(), y * cellDim.y()) - upperLeft;
-                cellPlotter->plotCell(
+                    Coord<2>(x * cellDim.x(), y * cellDim.y()) - viewport.origin;
+                painter.moveTo(relativeUpperLeft);
+                CELL_PLOTTER()(
                     grid.get(Coord<2>(x, y)),
-                    &ret,
-                    relativeUpperLeft,
-                    cellDim.x(),
-                    cellDim.y());
+		    painter,
+                    cellDim);
             }
         }
-
-        return ret;
     }
 
+    const Coord<2>& getCellDim()
+    {
+        return cellDim;
+    }
+
+    Coord<2> calcImageDim(const Coord<2> gridDim)
+    {
+        return Coord<2>(
+            cellDim.x() * gridDim.x(),
+            cellDim.y() * gridDim.y());
+    }
 
 private:
-    CELL_PLOTTER *cellPlotter;
     Coord<2> cellDim;
 };
 
-};
+}
 
 #endif
