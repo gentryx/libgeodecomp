@@ -265,9 +265,27 @@ public:
         (*this)[coord] = cell;
     }
 
+    virtual void set(const Streak<DIM>& streak, const CELL_TYPE *cells)
+    {
+	Coord<DIM> cursor = streak.origin;;
+	for (; cursor.x() < streak.endX; ++cursor.x()) {
+	    (*this)[cursor] = *cells;
+	    ++cells;
+	}
+    }
+
     virtual CELL_TYPE get(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
+    }
+
+    virtual void get(const Streak<DIM>& streak, CELL_TYPE *cells) const
+    {
+	Coord<DIM> cursor = streak.origin;;
+	for (; cursor.x() < streak.endX; ++cursor.x()) {
+	    *cells = (*this)[cursor];
+	    ++cells;
+	}
     }
 
     virtual void setEdge(const CELL_TYPE& cell)

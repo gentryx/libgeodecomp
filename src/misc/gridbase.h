@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/misc/streak.h>
 
 namespace LibGeoDecomp {
 
@@ -116,9 +117,11 @@ public:
     virtual ~GridBase()
     {}
 
-    // fixme: add functions for getting/setting streak of cells. use these in mpiio.h, writers, steerers, mpilayer...
+    // fixme: use functions for getting/setting streaks of cells in mpiio.h, writers, steerers, mpilayer...
     virtual void set(const Coord<DIM>&, const CELL&) = 0;
+    virtual void set(const Streak<DIM>&, const CELL*) = 0;
     virtual CELL get(const Coord<DIM>&) const = 0;
+    virtual void get(const Streak<DIM>&, CELL *) const = 0;
     virtual void setEdge(const CELL&) = 0;
     virtual const CELL& getEdge() const = 0;
     virtual CoordBox<DIM> boundingBox() const = 0;

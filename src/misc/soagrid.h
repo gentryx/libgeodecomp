@@ -124,7 +124,7 @@ public:
         const CELL &defaultCell = CELL(),
         const CELL &edgeCell = CELL(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
-        edgeRadii(genEdgeRadii()),
+        edgeRadii(calcEdgeRadii()),
         edgeCell(edgeCell),
         box(box),
         topoDimensions(topologicalDimensions)
@@ -161,6 +161,16 @@ public:
         delegateSet(relativeCoord, cell);
     }
 
+    virtual void set(const Streak<DIM>& streak, const CELL *cells)
+    {
+        Coord<DIM> relativeCoord = streak.origin - box.origin;
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
+
+        delegateSet(relativeCoord, cells, streak.length());
+    }
+
     virtual CELL get(const Coord<DIM>& absoluteCoord) const
     {
         Coord<DIM> relativeCoord = absoluteCoord - box.origin;
@@ -172,6 +182,16 @@ public:
         }
 
         return delegateGet(relativeCoord);
+    }
+
+    virtual void get(const Streak<DIM>& streak, CELL *cells) const
+    {
+        Coord<DIM> relativeCoord = streak.origin - box.origin;
+        if (TOPOLOGICALLY_CORRECT) {
+            relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
+        }
+
+        delegateGet(relativeCoord, cells, streak.length());
     }
 
     virtual void setEdge(const CELL& cell)
@@ -209,7 +229,7 @@ private:
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
 
-    static Coord<3> genEdgeRadii()
+    static Coord<3> calcEdgeRadii()
     {
         return Coord<3>(
             Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : CELL::Stencil::RADIUS,
@@ -219,32 +239,113 @@ private:
 
     CELL delegateGet(const Coord<1>& coord) const
     {
-        return delegate.get(coord.x() + edgeRadii.x(), edgeRadii.y(), edgeRadii.z());
+        return delegate.get(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y(),
+            edgeRadii.z());
     }
 
     CELL delegateGet(const Coord<2>& coord) const
     {
-        return delegate.get(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), edgeRadii.z());
+        return delegate.get(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z());
     }
 
     CELL delegateGet(const Coord<3>& coord) const
     {
-        return delegate.get(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), coord.z() + edgeRadii.z());
+        return delegate.get(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z() + coord.z());
+    }
+
+    void delegateGet(const Coord<1>& coord, CELL *cells, int count) const
+    {
+        delegate.get(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y(),
+            edgeRadii.z(),
+            cells,
+            count);
+    }
+
+    void delegateGet(const Coord<2>& coord, CELL *cells, int count) const
+    {
+        delegate.get(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z(),
+            cells,
+            count);
+    }
+
+    void delegateGet(const Coord<3>& coord, CELL *cells, int count) const
+    {
+        delegate.get(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z() + coord.z(),
+            cells,
+            count);
     }
 
     void delegateSet(const Coord<1>& coord, const CELL& cell)
     {
-        return delegate.set(coord.x() + edgeRadii.x(),  edgeRadii.y(), edgeRadii.z(), cell);
+        return delegate.set(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y(),
+            edgeRadii.z(),
+            cell);
     }
 
     void delegateSet(const Coord<2>& coord, const CELL& cell)
     {
-        return delegate.set(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), edgeRadii.z(), cell);
+        return delegate.set(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z(),
+            cell);
     }
 
     void delegateSet(const Coord<3>& coord, const CELL& cell)
     {
-        return delegate.set(coord.x() + edgeRadii.x(), coord.y() + edgeRadii.y(), coord.z() + edgeRadii.z(), cell);
+        return delegate.set(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z() + coord.z(),
+            cell);
+    }
+
+    void delegateSet(const Coord<1>& coord, const CELL *cells, int count)
+    {
+        return delegate.set(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y(),
+            edgeRadii.z(),
+            cells,
+            count);
+    }
+
+    void delegateSet(const Coord<2>& coord, const CELL *cells, int count)
+    {
+        return delegate.set(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z(),
+            cells,
+            count);
+    }
+
+    void delegateSet(const Coord<3>& coord, const CELL *cells, int count)
+    {
+        return delegate.set(
+            edgeRadii.x() + coord.x(),
+            edgeRadii.y() + coord.y(),
+            edgeRadii.z() + coord.z(),
+            cells,
+            count);
     }
 };
 

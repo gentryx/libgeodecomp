@@ -82,6 +82,38 @@ public:
         TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), 4);
     }
 
+
+    void testGetSetManyCells()
+    {
+        Coord<2> origin(20, 15);
+        Coord<2> dim(30, 10);
+        Coord<2> end = origin + dim;
+        SoAGrid<SoATestCell > testGrid(CoordBox<2>(origin, dim));
+
+        int num = 200;
+        for (int y = origin.y(); y < end.y(); y++) {
+            for (int x = origin.x(); x < end.x(); x++) {
+                testGrid.set(Coord<2>(x, y), SoATestCell(num * 10000 + x * 100 + y));
+            }
+        }
+
+	SoATestCell cells[5];
+	testGrid.get(Streak<2>(Coord<2>(21, 18), 26), cells);
+
+	for (int i = 0; i < 5; ++i) {
+	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+            cells[i].v = i + 1234;
+        }
+        testGrid.set(Streak<2>(Coord<2>(21, 18), 26), cells);
+
+	for (int i = 0; i < 5; ++i) {
+	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+	}
+    }
+
     void testDisplacementWithTopologicalCorrectness()
     {
         CoordBox<3> box(Coord<3>(20, 25, 32), Coord<3>(50, 40, 35));

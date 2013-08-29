@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/testcell.h>
 
 using namespace LibGeoDecomp;
 
@@ -98,6 +99,39 @@ public:
         TS_ASSERT_EQUALS(27, grid[Coord<3>(4, 4, 4)]);
         TS_ASSERT_EQUALS(1,  grid[Coord<3>(6, 6, 6)]);
         TS_ASSERT_EQUALS(newBox, grid.boundingBox());
+    }
+
+    void testGetSetManyCells()
+    {
+        Coord<2> origin(20, 15);
+        Coord<2> dim(30, 10);
+        Coord<2> end = origin + dim;
+        DisplacedGrid<TestCell<2> > testGrid(CoordBox<2>(origin, dim));
+
+        int num = 200;
+        for (int y = origin.y(); y < end.y(); y++) {
+            for (int x = origin.x(); x < end.x(); x++) {
+                testGrid[Coord<2>(x, y)] =
+                    TestCell<2>(Coord<2>(x, y), testGrid.getDimensions());
+                testGrid[Coord<2>(x, y)].testValue =  num++;
+            }
+        }
+
+	TestCell<2> cells[5];
+	testGrid.get(Streak<2>(Coord<2>(21, 18), 26), cells);
+
+	for (int i = 0; i < 5; ++i) {
+	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+            cells[i].testValue = i + 1234;
+        }
+        testGrid.set(Streak<2>(Coord<2>(21, 18), 26), cells);
+
+	for (int i = 0; i < 5; ++i) {
+	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+	}
     }
 
     void testFill3D()
