@@ -44,7 +44,6 @@ public:
         TS_ASSERT_EQUALS(result.getDimensions().y(), expectedDimY);
     }
 
-
     void testPlotGridContent()
     {
         unsigned gridDimX = 2;
