@@ -225,8 +225,8 @@ public:
             c << *i;
         }
 
-        TS_ASSERT_EQUALS(4, c.indices[1].size());
-        TS_ASSERT_EQUALS(7, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(4), c.indices[1].size());
+        TS_ASSERT_EQUALS(size_t(7), c.indices[0].size());
     }
 
     void testInsertCoordBox()
@@ -428,28 +428,28 @@ public:
     void testUnorderedInsert()
     {
         c << Coord<2>(7, 8);
-        TS_ASSERT_EQUALS(1, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(1), c.indices[0].size());
         c << Coord<2>(6, 8);
-        TS_ASSERT_EQUALS(1, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(1), c.indices[0].size());
         c << Coord<2>(9, 8);
-        TS_ASSERT_EQUALS(2, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(2), c.indices[0].size());
         c << Coord<2>(4, 8);
-        TS_ASSERT_EQUALS(3, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(3), c.indices[0].size());
         c << Coord<2>(8, 8);
-        TS_ASSERT_EQUALS(2, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(2), c.indices[0].size());
         TS_ASSERT_EQUALS(IntPair(4,  5), c.indices[0][0]);
         TS_ASSERT_EQUALS(IntPair(6, 10), c.indices[0][1]);
 
         c << Coord<2>(3, 8);
-        TS_ASSERT_EQUALS(2, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(2), c.indices[0].size());
         c << Coord<2>(2, 8);
-        TS_ASSERT_EQUALS(2, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(2), c.indices[0].size());
         c << Coord<2>(11, 8);
-        TS_ASSERT_EQUALS(3, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(3), c.indices[0].size());
         c << Coord<2>(5, 8);
-        TS_ASSERT_EQUALS(2, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(2), c.indices[0].size());
         c << Coord<2>(10, 8);
-        TS_ASSERT_EQUALS(1, c.indices[0].size());
+        TS_ASSERT_EQUALS(size_t(1), c.indices[0].size());
         TS_ASSERT_EQUALS(IntPair(2, 12), c.indices[0][0]);
     }
 
@@ -556,13 +556,16 @@ public:
     void testSize()
     {
         Region<2> c;
-        TS_ASSERT_EQUALS(0, c.size());
+        TS_ASSERT_EQUALS(size_t( 0), c.size());
+
         c << Streak<2>(Coord<2>(10, 10), 20);
-        TS_ASSERT_EQUALS(10, c.size());
+        TS_ASSERT_EQUALS(size_t(10), c.size());
+
         c << Streak<2>(Coord<2>(17, 20), 98);
-        TS_ASSERT_EQUALS(91, c.size());
+        TS_ASSERT_EQUALS(size_t(91), c.size());
+
         c >> Streak<2>(Coord<2>(15, 10), 18);
-        TS_ASSERT_EQUALS(88, c.size());
+        TS_ASSERT_EQUALS(size_t(88), c.size());
     }
 
     void testExpand1()
@@ -938,7 +941,7 @@ public:
             retrievedStreaks << *i;
         }
 
-        TS_ASSERT_EQUALS(retrievedStreaks.size(), 1);
+        TS_ASSERT_EQUALS(retrievedStreaks.size(), size_t(1));
         TS_ASSERT_EQUALS(retrievedStreaks[0], Streak<3>(Coord<3>(10, 10, 10), 20));
     }
 
@@ -953,7 +956,7 @@ public:
             retrievedStreaks << *i;
         }
 
-        TS_ASSERT_EQUALS(retrievedStreaks.size(), 2);
+        TS_ASSERT_EQUALS(retrievedStreaks.size(), size_t(2));
         TS_ASSERT_EQUALS(retrievedStreaks[0], Streak<3>(Coord<3>(10, 10, 10), 15));
         TS_ASSERT_EQUALS(retrievedStreaks[1], Streak<3>(Coord<3>(16, 10, 10), 20));
     }
@@ -1087,55 +1090,56 @@ public:
     void testRemove3D()
     {
         Region<3> r;
-        TS_ASSERT_EQUALS(r.size(), 0);
+        TS_ASSERT_EQUALS(r.size(), size_t(0));
         TS_ASSERT_EQUALS(r.boundingBox(), CoordBox<3>(Coord<3>(), Coord<3>()));
 
         r << Streak<3>(Coord<3>(10, 20, 30), 40);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
-        TS_ASSERT_EQUALS(r.size(), 30);
-        TS_ASSERT_EQUALS(r.boundingBox(),
-                         CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(30, 1, 1)));
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.size(), size_t(30));
+        TS_ASSERT_EQUALS(
+            r.boundingBox(),
+            CoordBox<3>(Coord<3>(10, 20, 30), Coord<3>(30, 1, 1)));
 
         r >> Streak<3>(Coord<3>(15, 20, 30), 35);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 2);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(2));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(1));
 
         r >> Streak<3>(Coord<3>(36, 20, 30), 37);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 3);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(3));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(1));
 
         r >> Streak<3>(Coord<3>(30, 20, 30), 50);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(1));
 
         r << Streak<3>(Coord<3>(40, 21, 29), 60);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 2);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 2);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 2);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(2));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(2));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(2));
 
         r >> Streak<3>(Coord<3>(50, 21, 29), 55);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 3);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 2);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 2);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(3));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(2));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(2));
 
         r >> Streak<3>(Coord<3>(35, 21, 29), 60);
-        TS_ASSERT_EQUALS(r.indices[0].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 1);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 1);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(1));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(1));
 
         TS_ASSERT_EQUALS(r.indices[1][0].second, 0);
         TS_ASSERT_EQUALS(r.indices[2][0].second, 0);
 
         r >> Streak<3>(Coord<3>(10, 20, 30), 15);
 
-        TS_ASSERT_EQUALS(r.indices[0].size(), 0);
-        TS_ASSERT_EQUALS(r.indices[1].size(), 0);
-        TS_ASSERT_EQUALS(r.indices[2].size(), 0);
+        TS_ASSERT_EQUALS(r.indices[0].size(), size_t(0));
+        TS_ASSERT_EQUALS(r.indices[1].size(), size_t(0));
+        TS_ASSERT_EQUALS(r.indices[2].size(), size_t(0));
     }
 
     void testStreakIterator()
@@ -1149,8 +1153,8 @@ public:
         Streak<3> newStreak(Coord<3>(10, 10, 10), 20);
         r << newStreak;
         TS_ASSERT_EQUALS(newStreak, *r.beginStreak());
-        TS_ASSERT_EQUALS(1, r.numStreaks());
-        TS_ASSERT_EQUALS(10, r.size());
+        TS_ASSERT_EQUALS(size_t(1), r.numStreaks());
+        TS_ASSERT_EQUALS(size_t(10), r.size());
         for (Region<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
         }
@@ -1160,8 +1164,8 @@ public:
         newStreak = Streak<3>(Coord<3>(10, 20, 10), 20);
         expected << newStreak;
         r << newStreak;
-        TS_ASSERT_EQUALS(2, r.numStreaks());
-        TS_ASSERT_EQUALS(20, r.size());
+        TS_ASSERT_EQUALS(size_t(2), r.numStreaks());
+        TS_ASSERT_EQUALS(size_t(20), r.size());
         actual.clear();
         for (Region<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
@@ -1171,8 +1175,8 @@ public:
         newStreak = Streak<3>(Coord<3>(30, 20, 10), 40);
         expected << newStreak;
         r << newStreak;
-        TS_ASSERT_EQUALS(3, r.numStreaks());
-        TS_ASSERT_EQUALS(30, r.size());
+        TS_ASSERT_EQUALS(size_t(3), r.numStreaks());
+        TS_ASSERT_EQUALS(size_t(30), r.size());
         actual.clear();
         for (Region<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;
@@ -1182,8 +1186,8 @@ public:
         newStreak = Streak<3>(Coord<3>(10, 20, 11), 20);
         expected << newStreak;
         r << newStreak;
-        TS_ASSERT_EQUALS(4, r.numStreaks());
-        TS_ASSERT_EQUALS(40, r.size());
+        TS_ASSERT_EQUALS(size_t(4), r.numStreaks());
+        TS_ASSERT_EQUALS(size_t(40), r.size());
         actual.clear();
         for (Region<3>::StreakIterator i = r.beginStreak(); i != r.endStreak(); ++i) {
             actual << *i;

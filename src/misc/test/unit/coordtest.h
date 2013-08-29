@@ -217,13 +217,13 @@ public:
     void testToIndex()
     {
         TS_ASSERT_EQUALS(
-            10,
+            size_t(10),
             Coord<1>(10     ).toIndex(Coord<1>(5)));
         TS_ASSERT_EQUALS(
-            (5*7+4),
+            size_t(5*7+4),
             Coord<2>(4, 5   ).toIndex(Coord<2>(7, 8)));
         TS_ASSERT_EQUALS(
-            (3*7*8+5*7+4),
+            size_t(3*7*8+5*7+4),
             Coord<3>(4, 5, 3).toIndex(Coord<3>(7, 8, 4)));
     }
 
