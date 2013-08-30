@@ -113,33 +113,23 @@ namespace LibGeoDecomp {
                 DATA_TYPE * data = static_cast<DATA_TYPE *>(oclwrapper->readDeviceData());
                 oclwrapper->finish();
 
-                typedef struct { int x,y,z; } foo; foo * bar = (foo *)data;
-                for (int i = 0; i < x_size * y_size * box.dimensions.z(); ++i) {
-                    std::cerr << i << " : "
-                        << "(" << bar[i].x << ", " << bar[i].y << ", " << bar[i].z << ")"
-                        << std::endl;
-                }
-
                 for (auto & p : box) {
-                    auto & cell =
-                        dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*newGrid)[p]);
+                    auto & cell = dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*newGrid)[p]);
                     // using newGrid here, compared to data_to_device  ^^^
 
                     uint32_t address = p.z() * y_size * x_size
-                        + p.y() * x_size
-                        + p.x();
+                                     + p.y() * x_size
+                                     + p.x();
 
-                    *(cell.data()) = data[address]; // *(data + address * sizeof_data);
+                    *(cell.data()) = data[address];
                 }
             }
 
             void copyGridToDevice(void)
             {
                 try {
-                    std::string kernel_file =
-                        OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
-                    std::string kernel_function =
-                        OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
+                    std::string kernel_file = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
+                    std::string kernel_function = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
 
                     auto box = initializer->gridBox();
 
@@ -147,15 +137,9 @@ namespace LibGeoDecomp {
                     std::vector<typename OpenCLWrapper<DATA_TYPE>::point_t> points;
 
                     for (auto & p : box) {
-                        auto & cell =
-                            dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
+                        auto & cell = dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
                         points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
                         data.push_back(cell.data());
-
-                        // typedef struct { int x,y,z; } foo; foo * bar = (foo *)cell.data();
-                        // std::cerr << p << " : " // "(" << p.x() << ", " << p.y() << ", " << p.z() << ") : "
-                        //           << "(" << bar->x << ", " << bar->y << ", " << bar->z << ")"
-                        // << std::endl;
                     }
 
                     int x_size = box.dimensions.x()
@@ -163,7 +147,8 @@ namespace LibGeoDecomp {
                         , z_size = box.dimensions.z();
 
                     oclwrapper = OpenCLWrapper_Ptr(
-                            new OpenCLWrapper<DATA_TYPE>(platform_id, device_id,
+                            new OpenCLWrapper<DATA_TYPE>(
+                                platform_id, device_id,
                                 kernel_file, kernel_function,
                                 x_size, y_size, z_size));
 
