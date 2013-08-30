@@ -69,6 +69,17 @@ namespace LibGeoDecomp {
                 }
 
                 initGrids();
+
+                std::string kernel_file = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
+                std::string kernel_function = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
+
+                oclwrapper = OpenCLWrapper_Ptr(
+                        new OpenCLWrapper<DATA_TYPE>(
+                            platform_id, device_id,
+                            kernel_file, kernel_function,
+                            initializer->gridBox().dimensions.x(),
+                            initializer->gridBox().dimensions.y(),
+                            initializer->gridBox().dimensions.z()));
             }
 
             inline virtual void update(std::size_t nanoSteps)
@@ -129,9 +140,6 @@ namespace LibGeoDecomp {
             void copyGridToDevice(void)
             {
                 try {
-                    std::string kernel_file = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
-                    std::string kernel_function = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
-
                     auto box = initializer->gridBox();
 
                     std::vector<typename OpenCLWrapper<DATA_TYPE>::data_t> data;
@@ -142,16 +150,6 @@ namespace LibGeoDecomp {
                         points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
                         data.push_back(cell.data());
                     }
-
-                    int x_size = box.dimensions.x();
-                    int y_size = box.dimensions.y();
-                    int z_size = box.dimensions.z();
-
-                    oclwrapper = OpenCLWrapper_Ptr(
-                            new OpenCLWrapper<DATA_TYPE>(
-                                platform_id, device_id,
-                                kernel_file, kernel_function,
-                                x_size, y_size, z_size));
 
                     oclwrapper->loadPoints(points.begin(), points.end());
                     oclwrapper->loadHostData(data.begin(), data.end());
