@@ -108,7 +108,8 @@ namespace LibGeoDecomp {
             void copyGridToHost(void)
             {
                 auto box = initializer->gridBox();
-                int x_size = box.dimensions.x(), y_size = box.dimensions.y();
+                int x_size = box.dimensions.x();
+                int y_size = box.dimensions.y();
 
                 DATA_TYPE * data = static_cast<DATA_TYPE *>(oclwrapper->readDeviceData());
                 oclwrapper->finish();
@@ -142,9 +143,9 @@ namespace LibGeoDecomp {
                         data.push_back(cell.data());
                     }
 
-                    int x_size = box.dimensions.x()
-                        , y_size = box.dimensions.y()
-                        , z_size = box.dimensions.z();
+                    int x_size = box.dimensions.x();
+                    int y_size = box.dimensions.y();
+                    int z_size = box.dimensions.z();
 
                     oclwrapper = OpenCLWrapper_Ptr(
                             new OpenCLWrapper<DATA_TYPE>(
