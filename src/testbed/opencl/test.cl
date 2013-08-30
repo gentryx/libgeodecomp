@@ -17,15 +17,15 @@ __kernel void add_test(__constant coords_ctx * coords,
   MyCell * cells_in = (MyCell *)in;
   MyCell * cells_out = (MyCell *)out;
   size_t address = get_address(coords, (0,0,0));
-  printf("add_test in: ");
-  printf("(%i, %i, %i) @ %v4i\n",
-         cells_in[address].x, cells_in[address].y, cells_in[address].z, coords->points[get_global_id(0)]);
+
   cells_out[address].x = cells_in[address].x + 1;
   cells_out[address].y = cells_in[address].y + 1;
   cells_out[address].z = cells_in[address].z + 1;
-  printf("add_test out ");
-  printf("(%i, %i, %i) @ %v4i\n",
-         cells_out[address].x, cells_out[address].y, cells_out[address].z, coords->points[get_global_id(0)]);
+
+  printf("add_test @ %v4i: (%i, %i, %i) => (%i, %i, %i)\n",
+      coords->points[get_global_id(0)],
+      cells_in[address].x, cells_in[address].y, cells_in[address].z,
+      cells_out[address].x, cells_out[address].y, cells_out[address].z);
 }
 
 __kernel void dummy_test(__constant coords_ctx * coords,
