@@ -262,7 +262,8 @@ template<typename Iterator>
 void
 OpenCLWrapper<DATA_TYPE>::loadHostData(Iterator begin, Iterator end)
 {
-
+  // reset internal update counter, so that run() begins from start (0) again
+  update_counter = 0;
   int i = 0;
   try {
     for (Iterator it = begin; it != end; ++it) {
