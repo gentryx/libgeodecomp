@@ -42,11 +42,11 @@ class OpenCLWrapper {
     void flush(void);
     void finish(void);
 
-    template<template<class T, class = std::allocator<T>> class C>
-      void loadPoints(const C<point_t> & points);
+    template<typename Iterator>
+      void loadPoints(Iterator begin, Iterator end);
 
-    template<template<class T, class = std::allocator<T>> class C>
-      void loadHostData(const C<data_t> & data);
+    template<typename Iterator>
+      void loadHostData(Iterator begin, Iterator end);
 
     void * const readDeviceData(void);
 
@@ -223,24 +223,26 @@ OpenCLWrapper<DATA_TYPE>::initKernels(void)
 }
 
 template<typename DATA_TYPE>
-template<template<class T, class = std::allocator<T>> class C>
+template<typename Iterator>
 void
-OpenCLWrapper<DATA_TYPE>::loadPoints(const C<point_t> & points)
+OpenCLWrapper<DATA_TYPE>::loadPoints(Iterator begin, Iterator end)
 {
-  if (points.size() != num_points) {
-    throw std::length_error("points.size() != num_points");
-  }
-
+  int i = 0;
   std::vector<cl_int4> pvec;
-  for (auto & p : points) {
-    pvec.push_back({ static_cast<cl_int>(std::get<0>(p))
-                   , static_cast<cl_int>(std::get<1>(p))
-                   , static_cast<cl_int>(std::get<2>(p))
+  for (Iterator p = begin; p != end; ++p) {
+    ++i;
+    pvec.push_back({ static_cast<cl_int>(std::get<0>(*p))
+                   , static_cast<cl_int>(std::get<1>(*p))
+                   , static_cast<cl_int>(std::get<2>(*p))
                    // cl_int4 is really a cl_int4
                    // so, in order to not mess up with struct packing, etc.
                    // put a dummy value here
                    , 0
                    });
+  }
+
+  if (i != num_points) {
+    throw std::length_error("points.size() != num_points");
   }
 
   try {
@@ -256,23 +258,26 @@ OpenCLWrapper<DATA_TYPE>::loadPoints(const C<point_t> & points)
 }
 
 template<typename DATA_TYPE>
-template<template<class T, class = std::allocator<T>> class C>
+template<typename Iterator>
 void
-OpenCLWrapper<DATA_TYPE>::loadHostData(const C<data_t> & data)
+OpenCLWrapper<DATA_TYPE>::loadHostData(Iterator begin, Iterator end)
 {
-  if (data.size() != num_points) {
-    throw std::length_error("points.size() != num_points");
-  }
 
+  int i = 0;
   try {
-    for (int i = 0; i < num_points; ++i) {
+    for (Iterator it = begin; it != end; ++it) {
       cmdqueue.enqueueWriteBuffer(cl_input, CL_TRUE,
                                   i * sizeof(DATA_TYPE),
-                                  sizeof(DATA_TYPE), data[i]);
+                                  sizeof(DATA_TYPE), *it);
+      ++i;
     }
   } catch (cl::Error & error) {
     printCLError(error, __PRETTY_FUNCTION__);
     exit(EXIT_FAILURE);
+  }
+
+  if (i != num_points) {
+    throw std::length_error("points.size() != num_points");
   }
 }
 

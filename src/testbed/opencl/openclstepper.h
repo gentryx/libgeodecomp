@@ -166,8 +166,8 @@ private:
                                          kernel_file, kernel_function,
                                          x_size, y_size, z_size));
 
-        oclwrapper->loadPoints(points);
-        oclwrapper->loadHostData(data);
+        oclwrapper->loadPoints(points.begin(), points.end());
+        oclwrapper->loadHostData(data.begin(), data.end());
 
       } catch(std::exception & error) {
         std::cerr << __PRETTY_FUNCTION__ << ": " << error.what() << std::endl;
