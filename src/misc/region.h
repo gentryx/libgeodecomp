@@ -4,7 +4,6 @@
 #include <algorithm>
 
 #include <libgeodecomp/misc/coordbox.h>
-#include <libgeodecomp/misc/outputpairs.h>
 #include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/supervector.h>

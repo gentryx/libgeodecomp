@@ -5,6 +5,7 @@
 #include <iterator>
 #include <sstream>
 #include <vector>
+#include <libgeodecomp/misc/outputpairs.h>
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
@@ -70,8 +71,9 @@ public:
         for (const_iterator i = begin(); i != end();) {
             temp << *i;
             i++;
-            if (i != end())
+            if (i != end()) {
                 temp << ", ";
+            }
         }
         temp << "]";
         return temp.str();

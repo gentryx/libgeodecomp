@@ -2,6 +2,7 @@
 #include <boost/math/tools/precision.hpp>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/misc/supervector.h>
 
 using namespace LibGeoDecomp;
 

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/fixedcoord.h>
-#include <libgeodecomp/misc/supervector.h>
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #endif

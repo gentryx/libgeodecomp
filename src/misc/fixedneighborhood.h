@@ -12,7 +12,6 @@ template<int DIM, int DISTANCE>
 class NormalizeCoord
 {
 public:
-    
 };
 
 }
