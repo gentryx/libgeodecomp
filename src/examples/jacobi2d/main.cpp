@@ -13,14 +13,13 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<2, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<2, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 
-    inline Cell(const double& v = 0) :
+    inline Cell(double v = 0) :
         temp(v)
     {}
 

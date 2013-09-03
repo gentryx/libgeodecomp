@@ -5,11 +5,10 @@ using namespace LibGeoDecomp;
 class CactusCell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraitsFixme::HasTorusTopology<3>,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
         public CellAPITraitsFixme::HasUpdateLineX
     {};
 

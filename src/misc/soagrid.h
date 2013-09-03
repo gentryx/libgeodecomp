@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_SOAGRID_H
 
 #include <libflatarray/flat_array.hpp>
+#include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/topologies.h>
@@ -106,8 +107,8 @@ private:
 }
 
 template<typename CELL,
-         typename TOPOLOGY=Topologies::Cube<2>::Topology,
-         bool TOPOLOGICALLY_CORRECT=false>
+         typename TOPOLOGY,
+         bool TOPOLOGICALLY_CORRECT>
 class SoAGrid : public GridBase<CELL, TOPOLOGY::DIM>
 {
 public:
@@ -118,6 +119,7 @@ public:
     typedef CELL CellType;
     typedef TOPOLOGY Topology;
     typedef LibFlatArray::soa_grid<CELL> Delegate;
+    typedef typename CellAPITraitsFixme::SelectStencil<CELL>::Value Stencil;
 
     explicit SoAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
@@ -232,9 +234,9 @@ private:
     static Coord<3> calcEdgeRadii()
     {
         return Coord<3>(
-            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : CELL::Stencil::RADIUS,
-            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : CELL::Stencil::RADIUS,
-            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : CELL::Stencil::RADIUS);
+            Topology::wrapsAxis(0) || (Topology::DIM < 1) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(1) || (Topology::DIM < 2) ? 0 : Stencil::RADIUS,
+            Topology::wrapsAxis(2) || (Topology::DIM < 3) ? 0 : Stencil::RADIUS);
     }
 
     CELL delegateGet(const Coord<1>& coord) const

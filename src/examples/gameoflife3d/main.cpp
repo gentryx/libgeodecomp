@@ -12,10 +12,9 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 

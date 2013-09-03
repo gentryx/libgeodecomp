@@ -79,13 +79,12 @@ public:
     static const int DIMENSIONS = DIM;
     static const unsigned NANO_STEPS = 27;
 
-    typedef STENCIL Stencil;
     class API :
         public CellAPITraits::Base,
         public CellAPITraitsFixme::HasTopology<TOPOLOGY>,
-        public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>
+        public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>,
+        public CellAPITraitsFixme::HasStencil<STENCIL>
     {};
-
 
     Coord<DIM> pos;
     CoordBox<DIM> dimensions;

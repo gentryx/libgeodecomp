@@ -17,9 +17,8 @@ Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
 
 class Cell
 {
-    friend class CellToColor;
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
+    friend class CellToColor;
 
     class API :
         public CellAPITraits::Base,

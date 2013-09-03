@@ -603,10 +603,9 @@ public:
 class JacobiCellClassic
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
@@ -673,9 +672,9 @@ public:
 class JacobiCellFixedHood
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
     class API :
         public CellAPITraits::Fixed,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
@@ -762,11 +761,10 @@ public:
 class JacobiCellStreakUpdate
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
@@ -1047,10 +1045,9 @@ public:
 class LBMCell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
@@ -1079,7 +1076,7 @@ public:
 #define TS 17
 #define BS 18
 
-    inline explicit LBMCell(const double& v=1.0, const State& s=LIQUID) :
+    inline explicit LBMCell(double v = 1.0, State s = LIQUID) :
         state(s)
     {
         comp[C] = v;
@@ -1090,7 +1087,7 @@ public:
     }
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, const unsigned /* nanoStep */)
     {
         *this = neighborhood[FixedCoord<0, 0>()];
 
@@ -1665,7 +1662,6 @@ void store(double *a, VEC v)
 class LBMSoACell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
     // typedef ShortVec1xSSE Double;
     // typedef ShortVec2xSSE Double;
     typedef ShortVec4xSSE Double;
@@ -1677,6 +1673,7 @@ public:
                 public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
                 public CellAPITraitsFixme::HasSoA,
                 public CellAPITraitsFixme::HasUpdateLineX,
+                public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
                 public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 

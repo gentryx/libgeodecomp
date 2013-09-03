@@ -14,11 +14,10 @@ using namespace LibGeoDecomp;
 class JacobiCellSimple
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public CellAPITraitsFixme::HasTopoloygy<Topologies::Torus<3>::Topology>
     {};
 
     JacobiCellSimple(double t = 0) :
@@ -43,11 +42,10 @@ public:
 class JacobiCellMagic
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
@@ -81,11 +79,10 @@ public:
 class JacobiCellStraightforward
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
@@ -199,11 +196,10 @@ public:
 class JacobiCellStraightforwardNT
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 
@@ -336,11 +332,10 @@ public:
 class JacobiCellStreakUpdate
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 

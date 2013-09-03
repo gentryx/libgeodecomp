@@ -7,7 +7,9 @@ using namespace LibGeoDecomp;
 class SoATestCell
 {
 public:
-    typedef Stencils::Moore<3, 2> Stencil;
+    class API :
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 2> >
+    {};
 
     SoATestCell(int v = 0) :
         v(v)

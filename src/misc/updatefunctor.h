@@ -16,8 +16,7 @@ template<typename CELL>
 class Selector
 {
 public:
-    typedef typename CELL::Stencil Stencil;
-    typedef typename CELL::API CellAPI;
+    typedef typename CellAPITraitsFixme::SelectStencil<CELL>::Value Stencil;
     typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
 
     static const int DIM = Topology::DIM;

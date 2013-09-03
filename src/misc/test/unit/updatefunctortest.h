@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/cellapitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/soagrid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/misc/updatefunctortestbase.h>
 
@@ -14,8 +15,6 @@ std::stringstream myLog;
 class BasicCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
@@ -31,8 +30,6 @@ public:
 class LineUpdateCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-
     class API :
         public CellAPITraits::Line,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
@@ -57,8 +54,6 @@ public:
 class FixedCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
@@ -75,8 +70,6 @@ public:
 class FixedLineUpdateCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
@@ -100,12 +93,11 @@ public:
 class MySoATestCell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraitsFixme::HasSoA,
         public CellAPITraitsFixme::HasUpdateLineX,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
         public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
     {};
 

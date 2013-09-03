@@ -13,13 +13,12 @@ class CircleCell
 {
 public:
     friend class CellToColor;
-    typedef Stencils::VonNeumann<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
     enum State {LIQUID, SOLIDIFYING, SOLID};
     typedef std::pair<double, double> DPair;
 
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<2, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 

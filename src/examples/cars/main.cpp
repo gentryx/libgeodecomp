@@ -26,8 +26,6 @@ public:
     friend class DirectionAccessor;
     friend class RateAccessor;
 
-    typedef Stencils::Moore<2, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
         public CellAPITraitsFixme::HasCubeTopology<2>,

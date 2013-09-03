@@ -139,11 +139,10 @@ class Container
 public:
     friend class GasWriter;
 
-    typedef Stencils::Moore<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
         public CellAPITraitsFixme::HasCubeTopology<3>,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
         public CellAPITraitsFixme::HasNanoSteps<2>
     {};
 

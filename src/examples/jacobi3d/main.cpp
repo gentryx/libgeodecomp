@@ -15,14 +15,13 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
-    inline explicit Cell(const double& v=0) : temp(v)
+    inline explicit Cell(double v = 0) : temp(v)
     {}
 
     template<typename COORD_MAP>
@@ -44,10 +43,9 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    CellInitializer(int num) : SimpleInitializer<Cell>(
-        Coord<3>(128 * num,
-                 128 * num,
-                 128 * num), 1000)
+    CellInitializer(int num) :
+        SimpleInitializer<Cell>(
+            Coord<3>(128) * num, 1000)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)

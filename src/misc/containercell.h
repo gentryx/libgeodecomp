@@ -18,7 +18,6 @@ public:
     typedef KEY Key;
     typedef TOPOLOGY Topology;
     typedef Cargo* Iterator;
-    typedef Stencils::Moore<Topology::DIM, 1> Stencil;
 
     const static unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CARGO>::VALUE;
     const static int DIM = Topology::DIM;
@@ -26,6 +25,7 @@ public:
 
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<Topology::DIM, 1> >,
         public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>
     {};
 

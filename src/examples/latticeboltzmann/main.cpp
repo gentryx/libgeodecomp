@@ -16,10 +16,9 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
@@ -48,7 +47,7 @@ public:
 #define TS 17
 #define BS 18
 
-    inline explicit Cell(const double& v=1.0, const State& s=LIQUID) :
+    inline explicit Cell(double v = 1.0, State s = LIQUID) :
         state(s)
     {
         comp[C] = v;

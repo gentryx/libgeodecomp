@@ -2,11 +2,15 @@
 #define LIBGEODECOMP_MISC_CELLAPITRAITS_H
 
 #include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/soagrid.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/topologies.h>
 
 namespace LibGeoDecomp {
+
+template<typename CELL,
+         typename TOPOLOGY = Topologies::Cube<2>::Topology,
+         bool TOPOLOGICALLY_CORRECT = false>
+class SoAGrid;
 
 // fixme: rename this this to "class API"
 /**
@@ -32,10 +36,10 @@ namespace LibGeoDecomp {
 class CellAPITraitsFixme
 {
 public:
-    class FalseType : public DontCareType
+    class FalseType
     {};
 
-    class TrueType : public DontCareType
+    class TrueType
     {};
 
     // check whether cell has an updateLineX() member
@@ -125,7 +129,7 @@ public:
     class SelectGridType<CELL, typename CELL::API::SupportsSoA>
     {
     public:
-        typedef SoAGrid<CELL, typename SelectTopology<CELL>::Value> Type;
+        typedef SoAGrid<CELL, typename SelectTopology<CELL>::Value, false> Type;
         typedef TrueType Value;
     };
 

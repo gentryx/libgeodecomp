@@ -9,9 +9,8 @@ std::ostringstream myTestEvents;
 class MySimpleDummyCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public CellAPITraits::Base
     {};
 
     MySimpleDummyCell(int val = 0) :
@@ -30,11 +29,10 @@ public:
 class MyFancyDummyCell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Base,
         public CellAPITraitsFixme::HasTorusTopology<3>,
+        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
         public CellAPITraitsFixme::HasNanoSteps<3>
     {};
 

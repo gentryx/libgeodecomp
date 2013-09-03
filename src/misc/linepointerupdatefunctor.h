@@ -116,7 +116,7 @@ public:
         CELL *newLine,
         int nanoStep)
     {
-        typedef typename CELL::Stencil Stencil;
+        typedef typename CellAPITraitsFixme::SelectStencil<CELL>::Value Stencil;
 
         long x = 0;
         long endX = streak.endX - streak.origin.x();

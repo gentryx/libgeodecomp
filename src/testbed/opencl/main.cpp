@@ -6,20 +6,19 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
         public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public CellAPITraitsFixme::HasCubeTopology<3>,
     {};
 
-    inline explicit Cell(const double& v=0) : temp(v)
+    inline explicit Cell(const double& v = 0) :
+        temp(v)
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, const unsigned& /* nanoStep */)
     {
         temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
                 neighborhood[FixedCoord< 0, -1,  0>()].temp +

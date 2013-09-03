@@ -15,11 +15,10 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-
     class API :
         public CellAPITraits::Fixed,
         public CellAPITraits::Line,
+        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
