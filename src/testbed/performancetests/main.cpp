@@ -970,7 +970,7 @@ public:
     {
         typedef Grid<
             JacobiCellStreakUpdate,
-            typename CellAPITraitsFixme::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
+            CellAPITraitsFixme::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
         GridType gridA(dim, 1.0);
         GridType gridB(dim, 2.0);
         GridType *gridOld = &gridA;
