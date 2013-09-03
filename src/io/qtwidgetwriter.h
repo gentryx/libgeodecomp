@@ -4,6 +4,7 @@
 #ifndef LIBGEODECOMP_IO_QTWIDGETWRITER_H
 #define LIBGEODECOMP_IO_QTWIDGETWRITER_H
 
+#include <QtGui/QResizeEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QWidget>
 
@@ -16,22 +17,29 @@ namespace QtWidgetWriterHelpers {
 
 class Widget : public QWidget
 {
-    Q_OBJECT
 public:
     Widget() :
-        image(1000, 1000, QImage::Format_ARGB32),
-	counter(0)
+        image(0, 0, QImage::Format_ARGB32)
     {}
 
-    void paintEvent(QPaintEvent * /* event */)
+    void resizeImage(const Coord<2>& imageSize)
+    {
+        if (image.size() != QSize(imageSize.x(), imageSize.y())) {
+            image = QImage(imageSize.x(), imageSize.y(), QImage::Format_ARGB32);
+        }
+    }
+
+
+    void paintEvent(QPaintEvent *event)
     {
         QPainter painter(this);
 
-        painter.drawImage(0, 0, image);
+        painter.drawImage(event->rect(), image);
+    }
 
-        painter.setPen(Qt::green);
-        painter.drawText(32, 32, "Frame " + QString::number(counter));
-        ++counter;
+    Coord<2> dimensions() const
+    {
+        return Coord<2>(width(), height());
     }
 
     QImage *getImage()
@@ -41,7 +49,6 @@ public:
 
 private:
     QImage image;
-    int counter;
 };
 
 class PainterWrapper
@@ -49,25 +56,23 @@ class PainterWrapper
 public:
     PainterWrapper(QPainter *painter) :
         painter(painter)
-    {
-        painter->save();
-    }
+    {}
 
     void moveTo(const Coord<2>& coord)
     {
-        painter->restore();
-        painter->save();
-        painter->translate(coord.x(), coord.y());
+        painter->translate(coord.x() - translation.x(),
+                           coord.y() - translation.y());
+        translation = coord;
     }
 
     void fillRect(int x, int y, int dimX, int dimY, Color color)
     {
-        painter->fillRect(400, 400, 100, 100, 0x00ffff00);
-        painter->fillRect(x, y, dimX / 2, dimY / 2, color.rgb);
+        painter->fillRect(x, y, dimX, dimY, color.rgb);
     }
 
   private:
     QPainter *painter;
+    Coord<2> translation;
 };
 
 }
@@ -83,14 +88,21 @@ public:
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
+        Coord<2> gridDim(grid.dimensions());
+        Coord<2> imageSize(
+            gridDim.x() * cellDimensions.x(),
+            gridDim.y() * cellDimensions.y());
+        myWidget.resizeImage(imageSize);
+
         QPainter qPainter(myWidget.getImage());
         QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
         Plotter<CELL_TYPE, CELL_PLOTTER> plotter(cellDimensions);
-        plotter.plotGrid(grid, painter);
+        plotter.plotGridInViewport(grid, painter, CoordBox<2>(Coord<2>(0, 0), myWidget.dimensions()));
+
         myWidget.update();
     }
 
-    QWidget *widget()
+    QtWidgetWriterHelpers::Widget *widget()
     {
 	return &myWidget;
     }
