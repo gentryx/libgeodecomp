@@ -18,48 +18,12 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// // fixme
-// class IdentityMarker
-// {
-// public:
-//     inline IdentityMarker(const Region *region) :
-//         r(region)
-//     {}
-
-//     inline Region::Iterator begin(const unsigned&) const
-//     {
-//         return r->begin();
-//     }
-
-//     inline Region::Iterator end(const unsigned&) const
-//     {
-//         return r->end();
-//     }
-
-//     inline Region::StreakIterator beginStreak(const unsigned&) const
-//     {
-//         return r->beginStreak();
-//     }
-
-//     inline Region::StreakIterator endStreak(const unsigned&) const
-//     {
-//         return r->endStreak();
-//     }
-
-//     inline const Region& region(const unsigned&) const
-//     {
-//         return *r;
-//     }
-
-// private:
-//     const Region *r;
-// };
-
+// This is an old test code for setting up a hierarchical domain
+// decomposition, suitable for multi-cluster runs with a high-latency
+// link in betweeen them. It's being kept for reference.
 class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
-    // typedef ZCurvePartition Partition;
-
     void setUp()
     {
     //     rank = MPILayer().rank();
@@ -72,7 +36,7 @@ public:
     //     maxSteps = 1500;
     //     firstStep = 20;
     //     firstNanoStep = 18;
-    //     firstCycle = firstStep * TestCell::nanoSteps() + firstNanoStep;
+    //     firstCycle = firstStep * CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE + firstNanoStep;
     //     init.reset(new TestInitializer(buildTestInit()));
 
 
