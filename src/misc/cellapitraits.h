@@ -32,14 +32,6 @@ namespace LibGeoDecomp {
 class CellAPITraitsFixme
 {
 public:
-    // can be used for argument-dependent lookup if a certain property
-    // is specifies, but not acutally used. example:
-    //
-    // void foo(CELL_TYPE cell, TrueType, TrueType,     FalseType) {}
-    // void foo(CELL_TYPE cell, TrueType, DontCareType, TrueType) {}
-    class DontCareType
-    {};
-
     class FalseType : public DontCareType
     {};
 
