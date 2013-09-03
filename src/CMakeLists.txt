@@ -66,7 +66,7 @@ find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
-find_package(Qt4)
+find_package(Qt4 REQUIRED QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
 if(NOT DEFINED QT4_FOUND)
@@ -245,14 +245,6 @@ if(FEATURE_HPX)
   if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
   endif()
-
-  set(LOCAL_LIBGEODECOMP_LINK_LIB
-    ${LOCAL_LIBGEODECOMP_LINK_LIB}
-    hpx${HPX_LIB_SUFFIX}
-    hpx_serialization${HPX_LIB_SUFFIX}
-    hpx_init${HPX_LIB_SUFFIX}
-    ${HPX_LIBRARIES}
-  )
 endif()
 
 if(FEATURE_QT)
@@ -348,20 +340,40 @@ set(ALL_HEADERS ${HEADERS})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 
+# link 3rd party libraries to main lib and add them to pkg-config file down below
 set(LIBGEODECOMP_LINK_LIBRARIES ${Boost_LIBRARIES})
+if(FEATURE_HPX)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    hpx${HPX_LIB_SUFFIX}
+    hpx_serialization${HPX_LIB_SUFFIX}
+    hpx_init${HPX_LIB_SUFFIX}
+    ${HPX_LIBRARIES}
+  )
+endif()
+
+if(FEATURE_QT)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${QT_LIBRARIES})
+endif()
+
 if(FEATURE_THREADS)
   # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} pthread)
   endif()
 endif()
+
 if(FEATURE_MPI)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${MPI_LIBRARIES})
   set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
 endif()
+
 if(FEATURE_OPENCL)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} OpenCL)
 endif()
+
 if(FEATURE_VISIT)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} dl)
 endif()
