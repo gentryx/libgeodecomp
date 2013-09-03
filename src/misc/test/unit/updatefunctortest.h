@@ -228,7 +228,7 @@ public:
     {
         CoordBox<3> box1(Coord<3>(0,  0,  0),  Coord<3>(30, 20, 10));
         CoordBox<3> box2(Coord<3>(50, 20, 50), Coord<3>(50, 10, 10));
-        typedef typename CellAPITraitsFixme::SelectTopology<MySoATestCell>::Value Topology;
+        typedef CellAPITraitsFixme::SelectTopology<MySoATestCell>::Value Topology;
         SoAGrid<MySoATestCell, Topology> gridOld(box1, MySoATestCell(47), MySoATestCell(1));
         SoAGrid<MySoATestCell, Topology> gridNew(box2, MySoATestCell(11), MySoATestCell(0));
 

@@ -14,7 +14,7 @@ namespace HiParSimulator {
 class MulticoreStepperTest : public CxxTest::TestSuite
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<TestCell<2> >::Value Topology;
+    typedef CellAPITraitsFixme::SelectTopology<TestCell<2> >::Value Topology;
     typedef DisplacedGrid<TestCell<2>, Topology, true> GridType;
     typedef MulticoreStepper<TestCell<2> > StepperType;
 

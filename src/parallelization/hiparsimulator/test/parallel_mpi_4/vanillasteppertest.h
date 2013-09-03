@@ -18,7 +18,7 @@ namespace HiParSimulator {
 class VanillaStepperTest : public CxxTest::TestSuite
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
+    typedef CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef VanillaStepper<TestCell<3> > StepperType;
     typedef PatchLink<StepperType::GridType> PatchLinkType;

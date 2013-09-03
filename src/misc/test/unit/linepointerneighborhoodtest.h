@@ -136,8 +136,7 @@ public:
         Coord<2> dim(31, 20);
         long endX = dim.x();
 
-        typedef Grid<TestCell<2>,
-                     typename CellAPITraitsFixme::SelectTopology<TestCell<2> >::Value> GridType;
+        typedef Grid<TestCell<2>, CellAPITraitsFixme::SelectTopology<TestCell<2> >::Value> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
         TestInitializer<TestCell<2> > init(dim);
@@ -174,8 +173,7 @@ public:
         Coord<3> dim(13, 12, 11);
         long endX = dim.x();
 
-        typedef Grid<
-            TestCell<3>, typename CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value> GridType;
+        typedef Grid<TestCell<3>, CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
         TestInitializer<TestCell<3> > init(dim);
