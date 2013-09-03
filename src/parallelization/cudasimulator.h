@@ -104,7 +104,7 @@ public:
             }
         }
 
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); ++i) {
+        for (unsigned i = 0; i < NANO_STEPS; ++i) {
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
         }

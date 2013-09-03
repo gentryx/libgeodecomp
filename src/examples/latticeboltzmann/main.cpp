@@ -25,11 +25,6 @@ public:
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
 #define C 0
 #define N 1
 #define E 2

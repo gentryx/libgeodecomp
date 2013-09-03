@@ -20,26 +20,13 @@ enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
 typedef SuperMap<std::size_t, EventSet> EventMap;
 
-inline std::string eventToStr(const EventPoint& event)
-{
-    switch (event) {
-    case LOAD_BALANCING:
-        return "LOAD_BALANCING";
-    case END:
-        return "END";
-    default:
-        return "invalid";
-    }
-}
-
 template <class CELL_TYPE, class PARTITION, class STEPPER>
-class UpdateGroupServer
-  : public hpx::components::managed_component_base<
-        UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER>
-    >
+class UpdateGroupServer : public hpx::components::managed_component_base<
+    UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> >
 {
 public:
     const static int DIM = CELL_TYPE::Topology::DIM;
+    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef
         UpdateGroup<CELL_TYPE, PARTITION, STEPPER> ClientType;
@@ -154,7 +141,7 @@ public:
         partitionManager->resetGhostZones(boundingBoxes);
 
         long firstSyncPoint =
-            initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
+            initializer->startStep() * NANO_STEPS + ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
@@ -393,7 +380,7 @@ private:
     void initEvents()
     {
         events.clear();
-        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
         events[lastNanoStep] << END;
 
         insertNextLoadBalancingEvent();
@@ -428,7 +415,7 @@ private:
     std::size_t currentNanoStep() const
     {
         std::pair<std::size_t, std::size_t> now = currentStep();
-        return now.first * CELL_TYPE::nanoSteps() + now.second;
+        return now.first * NANO_STEPS + now.second;
     }
 
     std::size_t timeToNextEvent()

@@ -19,12 +19,15 @@ class CacheBlockingSimulator : public MonolithicSimulator<CELL>
 {
 public:
     friend class CacheBlockingSimulatorTest;
+
     typedef typename MonolithicSimulator<CELL>::Topology Topology;
     typedef typename TopologiesHelpers::Topology<3, Topology::template WrapsAxis<0>::VALUE, Topology::template WrapsAxis<1>::VALUE, true> BufferTopology;
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef SuperVector<SuperVector<Region<3> > > WavefrontFrames;
     static const int DIM = Topology::DIMENSIONS;
+
+    using MonolithicSimulator<CELL>::NANO_STEPS;
 
     CacheBlockingSimulator(
         Initializer<CELL> *initializer,
@@ -191,8 +194,8 @@ private:
 
         std::swap(curGrid, newGrid);
         int curNanoStep = nanoStep + pipelineLength;
-        stepNum += curNanoStep / CELL::nanoSteps();
-        nanoStep = curNanoStep % CELL::nanoSteps();
+        stepNum += curNanoStep / NANO_STEPS;
+        nanoStep = curNanoStep % NANO_STEPS;
     }
 
     void updateWavefront(BufferType *buffer, const Coord<DIM - 1>& wavefrontCoord)
@@ -255,7 +258,7 @@ private:
             int targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
 
             const Region<DIM>& updateFrame = frames[frameCoord][globalIndex - 2 * i][i];
-            unsigned curNanoStep = (nanoStep + i) % CELL::nanoSteps();
+            unsigned curNanoStep = (nanoStep + i) % NANO_STEPS;
 
             if ( firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, newGrid, curNanoStep);

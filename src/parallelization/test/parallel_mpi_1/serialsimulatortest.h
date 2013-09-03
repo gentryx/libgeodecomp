@@ -19,6 +19,8 @@ namespace LibGeoDecomp {
 class SerialSimulatorTest : public CxxTest::TestSuite
 {
 public:
+    static const int NANO_STEPS_2D = CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
+    static const int NANO_STEPS_3D = CellAPITraitsFixme::SelectNanoSteps<TestCell<3> >::VALUE;
     typedef MockSteerer<TestCell<2> > SteererType;
     typedef GridBase<TestCell<2>, 2> GridBaseType;
 
@@ -42,7 +44,7 @@ public:
     {
         TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().x(), 17);
         TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(), 12);
-        TS_ASSERT_TEST_GRID(GridBaseType, *simulator->getGrid(), startStep * TestCell<2>::nanoSteps());
+        TS_ASSERT_TEST_GRID(GridBaseType, *simulator->getGrid(), startStep * NANO_STEPS_2D);
     }
 
     void testStep()
@@ -52,7 +54,7 @@ public:
         simulator->step();
         const GridBase<TestCell<2>, 2> *grid = simulator->getGrid();
         TS_ASSERT_TEST_GRID(GridBaseType, *grid,
-                            (startStep + 1) * TestCell<2>::nanoSteps());
+                            (startStep + 1) * NANO_STEPS_2D);
         TS_ASSERT_EQUALS(startStep + 1, simulator->getStep());
     }
 
@@ -63,7 +65,7 @@ public:
         TS_ASSERT_TEST_GRID(
             GridBaseType,
             *simulator->getGrid(),
-            init->maxSteps() * TestCell<2>::nanoSteps());
+            init->maxSteps() * NANO_STEPS_2D);
     }
 
     void testWriterInvocation()
@@ -158,15 +160,15 @@ public:
 
         sim.step();
         TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
-                            TestCell<3>::nanoSteps());
+                            NANO_STEPS_3D);
 
         sim.nanoStep(0);
         TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
-                            TestCell<3>::nanoSteps() + 1);
+                            NANO_STEPS_3D + 1);
 
         sim.run();
         TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
-                            21 * TestCell<3>::nanoSteps());
+                            21 * NANO_STEPS_3D);
     }
 
     void testSteererCallback()

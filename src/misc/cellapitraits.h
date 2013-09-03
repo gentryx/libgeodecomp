@@ -8,7 +8,7 @@
 
 namespace LibGeoDecomp {
 
-
+// fixme: rename this this to "class API"
 /**
  * CellAPITraits contains a set of classes which can be used to
  * describe/discover the interface between a user-supplied model (cell
@@ -32,6 +32,11 @@ namespace LibGeoDecomp {
 class CellAPITraitsFixme
 {
 public:
+    // can be used for argument-dependent lookup if a certain property
+    // is specifies, but not acutally used. example:
+    //
+    // void foo(CELL_TYPE cell, TrueType, TrueType,     FalseType) {}
+    // void foo(CELL_TYPE cell, TrueType, DontCareType, TrueType) {}
     class DontCareType
     {};
 
@@ -220,6 +225,7 @@ public:
     {};
 };
 
+// fixme: kill this!
 /**
  * is used to specify which neighborhood types are supported by a
  * given cell or Simulator/Stepper. This is necessary as the different

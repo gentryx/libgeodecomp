@@ -130,7 +130,7 @@ public:
                              testSim->curStripe->dimensions());
             TS_ASSERT(*referenceSim->getGrid() == *testSim->curStripe);
             TS_ASSERT_TEST_GRID(GridBaseType, *testSim->curStripe,
-                                (i + 1) * TestCell<2>::nanoSteps());
+                                (i + 1) * CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE);
         }
     }
 

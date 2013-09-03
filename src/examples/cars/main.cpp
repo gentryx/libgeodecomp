@@ -30,13 +30,9 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<2>
+        public CellAPITraitsFixme::HasCubeTopology<2>,
+        public CellAPITraitsFixme::HasNanoSteps<2>
     {};
-
-    static inline unsigned nanoSteps()
-    {
-        return 2;
-    }
 
     Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
         direction(direction),

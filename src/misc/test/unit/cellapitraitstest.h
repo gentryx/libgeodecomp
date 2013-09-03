@@ -34,13 +34,9 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTorusTopology<3>
+        public CellAPITraitsFixme::HasTorusTopology<3>,
+        public CellAPITraitsFixme::HasNanoSteps<3>
     {};
-
-    static unsigned nanoSteps()
-    {
-        return 3;
-    }
 
     MyFancyDummyCell(int val = 0) :
         val(val)

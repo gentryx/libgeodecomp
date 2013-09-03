@@ -23,24 +23,19 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     CircleCell() :
         state(LIQUID)
     {}
 
-    CircleCell(const DPair& _relativeCenter, const double& _speed, const double _radius=0) :
+    CircleCell(const DPair& relativeCenter, double speed, double radius = 0) :
         state(SOLIDIFYING),
-        relativeCenter(_relativeCenter),
-        speed(_speed),
-        radius(_radius)
+        relativeCenter(relativeCenter),
+        speed(speed),
+        radius(radius)
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned&)
+    void update(const COORD_MAP& neighborhood, unsigned /* unused */)
     {
         *this = neighborhood[Coord<2>(0, 0)];
         switch (state) {

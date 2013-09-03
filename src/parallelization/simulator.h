@@ -19,6 +19,7 @@ class Simulator
 public:
     typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
+    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
     typedef GridBase<CELL_TYPE, DIM> GridType;
     typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
 

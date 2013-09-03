@@ -18,11 +18,6 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     inline MyQtTestCell(const double& v = 0) :
         temp(v)
     {}

@@ -21,6 +21,8 @@ class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 public:
     typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
 
+    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
+
     using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
     using PatchAccepter<GRID_TYPE>::pushRequest;
     using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
@@ -33,9 +35,9 @@ public:
         std::size_t rank,
         bool lastCall) :
         writer(writer),
-        firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
-        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
-        stride(writer->getPeriod() * CELL_TYPE::nanoSteps()),
+        firstNanoStep(firstStep * NANO_STEPS),
+        lastNanoStep(lastStep   * NANO_STEPS),
+        stride(writer->getPeriod() * NANO_STEPS),
         rank(rank),
         lastCall(lastCall),
         globalGridDimensions(globalGridDimensions)
@@ -70,7 +72,7 @@ public:
             grid,
             validRegion,
             globalGridDimensions,
-            nanoStep / CELL_TYPE::nanoSteps(),
+            nanoStep / NANO_STEPS,
             event,
             rank,
             lastCall);

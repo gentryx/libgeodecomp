@@ -31,7 +31,7 @@ public:
         const unsigned step,
         WriterEvent event)
     {
-        unsigned myExpectedCycle = TestCell<2>::nanoSteps() * step;
+        unsigned myExpectedCycle = NANO_STEPS * step;
         TS_ASSERT_TEST_GRID(GridType, grid, myExpectedCycle);
 
         TS_ASSERT(!expectedSteps.empty());

@@ -20,17 +20,14 @@ public:
     typedef Cargo* Iterator;
     typedef Stencils::Moore<Topology::DIM, 1> Stencil;
 
-    class API : public CellAPITraits::Base
-    {};
-
-
-    inline static int nanoSteps()
-    {
-        return Cargo::nanoSteps();
-    }
-
+    const static unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CARGO>::VALUE;
     const static int DIM = Topology::DIM;
     const static int MAX_SIZE = SIZE;
+
+    class API :
+        public CellAPITraits::Base,
+        public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>
+    {};
 
     inline ContainerCell() :
         size(0)

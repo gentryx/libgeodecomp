@@ -32,11 +32,6 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     ConwayCell(bool alive = false) :
         alive(alive)
     {}

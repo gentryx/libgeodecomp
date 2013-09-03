@@ -12,6 +12,8 @@ class SteererAdapter : public PatchProvider<GRID_TYPE>
 {
 public:
     typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+
+    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
     static const int DIM = Topology::DIM;
 
     SteererAdapter(
@@ -22,8 +24,8 @@ public:
         std::size_t rank,
         bool lastCall) :
         steerer(steerer),
-        firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
-        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
+        firstNanoStep(firstStep * NANO_STEPS),
+        lastNanoStep(lastStep   * NANO_STEPS),
         rank(rank),
         lastCall(lastCall),
         globalGridDimensions(globalGridDimensions)
@@ -40,12 +42,12 @@ public:
         const std::size_t globalNanoStep,
         const bool remove = true)
     {
-        std::size_t nanoStep = globalNanoStep % CELL_TYPE::nanoSteps();
+        std::size_t nanoStep = globalNanoStep % NANO_STEPS;
         if (nanoStep != 0) {
             return;
         }
 
-        std::size_t step = globalNanoStep / CELL_TYPE::nanoSteps();
+        std::size_t step = globalNanoStep / NANO_STEPS;
         if (step % steerer->getPeriod() != 0) {
             return;
         }

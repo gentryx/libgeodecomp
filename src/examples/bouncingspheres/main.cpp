@@ -143,7 +143,8 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public CellAPITraitsFixme::HasCubeTopology<3>,
+        public CellAPITraitsFixme::HasNanoSteps<2>
     {};
 
     Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
@@ -151,11 +152,6 @@ public:
         numSpheres(0),
         numBoundaries(0)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 2;
-    }
 
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)

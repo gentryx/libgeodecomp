@@ -33,6 +33,7 @@ public:
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
+    using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::getStep;
     using DistributedSimulator<CELL_TYPE>::steerers;
@@ -101,7 +102,7 @@ public:
 
         handleInput(STEERER_NEXT_STEP);
 
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
+        for (unsigned i = 0; i < NANO_STEPS; i++) {
             nanoStep(i);
         }
         ++stepNum;

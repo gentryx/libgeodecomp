@@ -23,16 +23,12 @@ public:
 
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<2>
+        public CellAPITraitsFixme::HasCubeTopology<2>,
+        public CellAPITraitsFixme::HasNanoSteps<3>
     {};
 
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
     static const double PI;
-
-    static inline unsigned nanoSteps()
-    {
-        return 3;
-    }
 
     Cell(State _state=EMPTY) :
         state(_state),

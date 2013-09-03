@@ -24,6 +24,7 @@ public:
     typedef typename GridTypeSelector::Type GridType;
     static const int DIM = Topology::DIM;
 
+    using MonolithicSimulator<CELL_TYPE>::NANO_STEPS;
     using MonolithicSimulator<CELL_TYPE>::initializer;
     using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
@@ -66,7 +67,7 @@ public:
     {
         handleInput(STEERER_NEXT_STEP);
 
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); ++i) {
+        for (unsigned i = 0; i < NANO_STEPS; ++i) {
             nanoStep(i);
         }
 

@@ -19,11 +19,6 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     ConwayCell(const bool& alive = false) :
         alive(alive)
     {}

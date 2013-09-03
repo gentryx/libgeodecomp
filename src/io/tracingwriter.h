@@ -17,6 +17,7 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
 #endif
+    using Writer<CELL_TYPE>::NANO_STEPS;
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
@@ -118,7 +119,7 @@ private:
         Duration remaining = delta * (maxSteps - step) / step;
         Time eta = now + remaining;
 
-        double updates = 1.0 * step * CELL_TYPE::nanoSteps() * globalDimensions.prod();
+        double updates = 1.0 * step * NANO_STEPS * globalDimensions.prod();
         double seconds = delta.total_microseconds() / 1000.0 / 1000.0;
         double glups = updates / seconds / 1000.0 / 1000.0 / 1000.0;
         double bandwidth = glups * 2 * sizeof(CELL_TYPE);

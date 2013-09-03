@@ -21,23 +21,12 @@ enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
 typedef SuperMap<long, EventSet> EventMap;
 
-inline std::string eventToStr(const EventPoint& event)
-{
-    switch (event) {
-    case LOAD_BALANCING:
-        return "LOAD_BALANCING";
-    case END:
-        return "END";
-    default:
-        return "invalid";
-    }
-}
-
 template<class CELL_TYPE, class PARTITION>
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {
-    friend class HiParSimulatorTest;
 public:
+    friend class HiParSimulatorTest;
+    using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
@@ -55,7 +44,7 @@ public:
         MPI::Comm *communicator = &MPI::COMM_WORLD) :
         ParentType(initializer),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
+        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         communicator(communicator),
         cellMPIDatatype(cellMPIDatatype)
@@ -72,7 +61,7 @@ public:
     {
         initSimulation();
 
-        nanoStep(CELL_TYPE::nanoSteps());
+        nanoStep(NANO_STEPS);
     }
 
     virtual unsigned getStep() const
@@ -230,7 +219,7 @@ private:
     inline void initEvents()
     {
         events.clear();
-        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
         events[lastNanoStep] << END;
 
         insertNextLoadBalancingEvent();
@@ -265,7 +254,7 @@ private:
     inline long currentNanoStep() const
     {
         std::pair<int, int> now = updateGroup->currentStep();
-        return (long)now.first * CELL_TYPE::nanoSteps() + now.second;
+        return (long)now.first * NANO_STEPS + now.second;
     }
 
     /**

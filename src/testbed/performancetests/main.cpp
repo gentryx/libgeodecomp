@@ -610,11 +610,6 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     JacobiCellClassic(double t = 0) :
         temp(t)
     {}
@@ -687,11 +682,6 @@ public:
     JacobiCellFixedHood(double t = 0) :
         temp(t)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -783,11 +773,6 @@ public:
     JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -1070,11 +1055,6 @@ public:
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
 
 #define C 0
 #define N 1
@@ -1701,11 +1681,6 @@ public:
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     inline explicit LBMSoACell(const double& v=1.0, const State& s=LIQUID) :
         C(v),

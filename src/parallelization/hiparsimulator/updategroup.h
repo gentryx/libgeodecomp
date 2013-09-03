@@ -66,7 +66,8 @@ public:
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
         long firstSyncPoint =
-            initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
+            initializer->startStep() * CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE +
+            ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones

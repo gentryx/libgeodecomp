@@ -17,6 +17,8 @@ class Initializer
 {
 public:
     typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL>::VALUE;
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
 #endif

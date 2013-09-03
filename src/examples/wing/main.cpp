@@ -89,11 +89,6 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<2>
     {};
 
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     Cell(const State& state = LIQUID,
          const double& quantity = 0,
          const double& velocityX = 0,

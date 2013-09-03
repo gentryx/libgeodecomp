@@ -21,12 +21,7 @@ public:
 
     friend class BuggyCellToColor;
 
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    BuggyCell(const char val=0) :
+    BuggyCell(const char val = 0) :
         val(val)
     {}
 

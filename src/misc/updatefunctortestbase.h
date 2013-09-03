@@ -16,6 +16,8 @@ public:
     typedef TestCell<DIM, Stencil> TestCellType;
     typedef Grid<TestCellType, typename CellAPITraitsFixme::SelectTopology<TestCellType>::Value> GridType;
 
+    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<TestCellType>::VALUE;
+
     virtual ~UpdateFunctorTestBase()
     {}
 
@@ -42,7 +44,7 @@ public:
                 callFunctor(streak, gridOld, &gridNew, s);
             }
 
-            int cycle = init.startStep() * TestCellType::nanoSteps() + s;
+            int cycle = init.startStep() * NANO_STEPS + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;
             TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);
@@ -81,7 +83,7 @@ public:
                 callFunctor(s1, gridOld, &gridNew, s);
             }
 
-            int cycle = init.startStep() * TestCellType::nanoSteps() + s;
+            int cycle = init.startStep() * NANO_STEPS + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
             cycle += 1;
             TS_ASSERT_TEST_GRID2(GridType, gridNew, cycle, typename);

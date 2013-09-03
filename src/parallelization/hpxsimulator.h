@@ -91,8 +91,9 @@ template<
 >
 class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {
-    friend class HpxSimulatorTest;
 public:
+    friend class HpxSimulatorTest;
+    using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     using typename DistributedSimulator<CELL_TYPE>::Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
@@ -110,7 +111,7 @@ public:
         ParentType(initializer),
         overcommitFactor(overcommitFactor),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
+        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor)),
         initialized(false)
@@ -119,7 +120,7 @@ public:
     inline void run()
     {
         initSimulation();
-        std::size_t lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        std::size_t lastNanoStep = initializer->maxSteps() * NANO_STEPS;
         nanoStep(lastNanoStep);
     }
 
@@ -133,7 +134,7 @@ public:
     inline void step()
     {
         initSimulation();
-        nanoStep(CELL_TYPE::nanoSteps());
+        nanoStep(NANO_STEPS);
     }
 
     virtual unsigned getStep() const

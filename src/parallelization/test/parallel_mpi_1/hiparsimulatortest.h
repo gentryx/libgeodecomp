@@ -72,7 +72,7 @@ public:
         MemoryWriterType::GridMap grids = memoryWriter->getGrids();
         for (MemoryWriterType::GridMap::iterator iter = grids.begin(); iter != grids.end(); ++iter) {
             actualSteps << iter->first;
-            int globalNanoStep = iter->first * TestCell<2>::nanoSteps();
+            int globalNanoStep = iter->first * CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType, iter->second, globalNanoStep);
         }
@@ -97,7 +97,7 @@ public:
         TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
 
         for (int t = 20; t <= 200; ++t) {
-            int globalNanoStep = t * TestCell<2>::nanoSteps();
+            int globalNanoStep = t * CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType,

@@ -22,11 +22,6 @@ public:
         public CellAPITraitsFixme::HasCubeTopology<3>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     inline explicit Cell(const double& v=0) : temp(v)
     {}
 

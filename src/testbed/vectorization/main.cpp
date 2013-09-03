@@ -25,11 +25,6 @@ public:
         temp(t)
     {}
 
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
@@ -59,11 +54,6 @@ public:
     JacobiCellMagic(double t = 0) :
         temp(t)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -102,11 +92,6 @@ public:
     JacobiCellStraightforward(double t = 0) :
         temp(t)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -225,11 +210,6 @@ public:
     JacobiCellStraightforwardNT(double t = 0) :
         temp(t)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -367,11 +347,6 @@ public:
     JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)

@@ -17,6 +17,7 @@ class VanillaStepper : public Stepper<CELL_TYPE>
 public:
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
+    const static unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
@@ -98,7 +99,7 @@ private:
         std::swap(oldGrid, newGrid);
 
         ++curNanoStep;
-        if (curNanoStep == CELL_TYPE::nanoSteps()) {
+        if (curNanoStep == NANO_STEPS) {
             curNanoStep = 0;
             curStep++;
         }
@@ -146,7 +147,7 @@ private:
 
     inline std::size_t globalNanoStep() const
     {
-        return curStep * CELL_TYPE::nanoSteps() + curNanoStep;
+        return curStep * NANO_STEPS + curNanoStep;
     }
 
     inline void initGrids()
@@ -219,7 +220,7 @@ private:
             }
 
             ++curNanoStep;
-            if (curNanoStep == CELL_TYPE::nanoSteps()) {
+            if (curNanoStep == NANO_STEPS) {
                 curNanoStep = 0;
                 curStep++;
             }

@@ -76,19 +76,16 @@ public:
     friend class Typemaps;
     friend class TestCellTest;
 
+    static const int DIMENSIONS = DIM;
+    static const unsigned NANO_STEPS = 27;
+
     typedef STENCIL Stencil;
     class API :
         public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<TOPOLOGY>
-
+        public CellAPITraitsFixme::HasTopology<TOPOLOGY>,
+        public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>
     {};
 
-    static const int DIMENSIONS = DIM;
-
-    static inline unsigned nanoSteps()
-    {
-        return 27;
-    }
 
     Coord<DIM> pos;
     CoordBox<DIM> dimensions;
@@ -164,14 +161,14 @@ public:
                          TestCellHelpers::CheckNeighbor,
                          STENCIL>()(&isValid, this, neighborhood);
 
-        if (nanoStep >= nanoSteps()) {
+        if (nanoStep >= NANO_STEPS) {
             OUTPUT() << "TestCell error: nanoStep too large: "
                      << nanoStep << "\n";
             isValid = false;
             return;
         }
 
-        unsigned expectedNanoStep = cycleCounter % nanoSteps();
+        unsigned expectedNanoStep = cycleCounter % NANO_STEPS;
         if (nanoStep != expectedNanoStep) {
             OUTPUT() << "TestCell error: nanoStep out of sync. got "
                      << nanoStep << " but expected "

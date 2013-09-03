@@ -20,7 +20,7 @@ public:
     void setUp()
     {
         init = TestInitializer<TestCell<2> >(Coord<2>(10, 11), 12, 9);
-        startCycle = 9 * TestCell<2>::nanoSteps();
+        startCycle = 9 * CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
     }
 
     void testGridRectangle()
@@ -45,7 +45,7 @@ public:
                 Coord<2> pos(x, y);
                 newGrid[pos + rect.origin].update(
                     CoordMap<TestCell<2> >(pos, grid.vanillaGrid()),
-                    startCycle % TestCell<2>::nanoSteps());
+                    startCycle % CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE);
             }
         }
 
