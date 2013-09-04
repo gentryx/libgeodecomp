@@ -8,7 +8,7 @@ class SoATestCell
 {
 public:
     class API :
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 2> >
+        public APITraits::HasStencil<Stencils::Moore<3, 2> >
     {};
 
     SoATestCell(int v = 0) :
@@ -90,7 +90,7 @@ public:
         Coord<2> origin(20, 15);
         Coord<2> dim(30, 10);
         Coord<2> end = origin + dim;
-        SoAGrid<SoATestCell > testGrid(CoordBox<2>(origin, dim));
+        SoAGrid<SoATestCell> testGrid(CoordBox<2>(origin, dim));
 
         int num = 200;
         for (int y = origin.y(); y < end.y(); y++) {

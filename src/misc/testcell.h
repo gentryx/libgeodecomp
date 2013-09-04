@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/coordmap.h>
@@ -80,10 +80,9 @@ public:
     static const unsigned NANO_STEPS = 27;
 
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<TOPOLOGY>,
-        public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>,
-        public CellAPITraitsFixme::HasStencil<STENCIL>
+        public APITraits::HasTopology<TOPOLOGY>,
+        public APITraits::HasNanoSteps<NANO_STEPS>,
+        public APITraits::HasStencil<STENCIL>
     {};
 
     Coord<DIM> pos;

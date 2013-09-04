@@ -19,8 +19,8 @@ namespace LibGeoDecomp {
 class SerialSimulatorTest : public CxxTest::TestSuite
 {
 public:
-    static const int NANO_STEPS_2D = CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
-    static const int NANO_STEPS_3D = CellAPITraitsFixme::SelectNanoSteps<TestCell<3> >::VALUE;
+    static const int NANO_STEPS_2D = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
+    static const int NANO_STEPS_3D = APITraits::SelectNanoSteps<TestCell<3> >::VALUE;
     typedef MockSteerer<TestCell<2> > SteererType;
     typedef GridBase<TestCell<2>, 2> GridBaseType;
 
@@ -42,8 +42,8 @@ public:
 
     void testInitialization()
     {
-        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().x(), 17);
-        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(), 12);
+        TS_ASSERT_EQUALS(simulator->getGrid()->dimensions().x(), 17);
+        TS_ASSERT_EQUALS(simulator->getGrid()->dimensions().y(), 12);
         TS_ASSERT_TEST_GRID(GridBaseType, *simulator->getGrid(), startStep * NANO_STEPS_2D);
     }
 
@@ -149,7 +149,7 @@ public:
         TS_ASSERT_EQUALS(grids1, grids2);
     }
 
-    typedef typename CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
+    typedef typename APITraits::SelectTopology<TestCell<3> >::Value Topology;
     typedef Grid<TestCell<3>, Topology> Grid3D;
     typedef GridBase<TestCell<3>, 3> GridBase3D;
 

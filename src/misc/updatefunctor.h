@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
 #define LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
 
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/fixedneighborhood.h>
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
@@ -16,8 +16,8 @@ template<typename CELL>
 class Selector
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectStencil<CELL>::Value Stencil;
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+    typedef typename APITraits::SelectStencil<CELL>::Value Stencil;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
 
     static const int DIM = Topology::DIM;
 
@@ -119,10 +119,12 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Fixed,
-        CellAPITraits::Base,
-        CellAPITraitsFixme::TrueType,
-        CellAPITraitsFixme::TrueType)
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::TrueType,
+        // SelectSoA
+        APITraits::TrueType,
+        // SelectUpdateLineX
+        APITraits::TrueType)
     {
         Coord<DIM> gridOldOrigin = gridOld.boundingBox().origin;
         Coord<DIM> gridNewOrigin = gridNew->boundingBox().origin;
@@ -138,10 +140,12 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Fixed,
-        CellAPITraits::Base,
-        CellAPITraitsFixme::TrueType,
-        CellAPITraitsFixme::TrueType)
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::TrueType,
+        // SelectSoA
+        APITraits::TrueType,
+        // SelectGridType
+        APITraits::TrueType)
     {
         Coord<DIM> gridOldOrigin = gridOld.boundingBox().origin;
         Streak<DIM> relativeStreak(streak.origin - gridOldOrigin, streak.endX - gridOldOrigin.x());
@@ -150,17 +154,19 @@ public:
         gridOld.callback(gridNew, SoAStreakUpdateHelper(relativeStreak, relativeTargetOrigin, nanoStep));
     }
 
-    template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
+    template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& targetOffset,
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Fixed,
-        UPDATE_POLICY,
-        CellAPITraitsFixme::FalseType,
-        CellAPITraitsFixme::FalseType)
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::TrueType,
+        // SelectSoA
+        APITraits::FalseType,
+        // SelectUpdateLineX
+        ANY_API)
     {
         const CELL *pointers[Stencil::VOLUME];
 
@@ -171,17 +177,19 @@ public:
         }
     }
 
-    template<typename GRID1, typename GRID2, typename UPDATE_POLICY>
+    template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Streak<DIM>& streak,
         const Coord<DIM>& targetOrigin,
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Fixed,
-        UPDATE_POLICY,
-        CellAPITraitsFixme::FalseType,
-        CellAPITraitsFixme::FalseType)
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::TrueType,
+        // SelectSoA
+        APITraits::FalseType,
+        // SelectUpdateLineX
+        ANY_API)
     {
         const CELL *pointers[Stencil::VOLUME];
         LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
@@ -189,34 +197,38 @@ public:
             streak, gridOld.boundingBox(), pointers, &(*gridNew)[targetOrigin], nanoStep);
     }
 
-    template<typename GRID1, typename GRID2>
+    template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& targetOffset,
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Base,
-        CellAPITraits::Base,
-        CellAPITraitsFixme::FalseType,
-        CellAPITraitsFixme::FalseType)
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::FalseType,
+        // SelectSoA
+        APITraits::FalseType,
+        // SelectUpdateLineX
+        ANY_API)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             VanillaUpdateFunctor<CELL>()(*i, i->origin + targetOffset, gridOld, gridNew, nanoStep);
         }
     }
 
-    template<typename GRID1, typename GRID2>
+    template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Streak<DIM>& streak,
         const Coord<DIM>& targetOrigin,
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
-        CellAPITraits::Base,
-        CellAPITraits::Base,
-        CellAPITraitsFixme::FalseType,
-        CellAPITraitsFixme::FalseType)
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::FalseType,
+        // SelectSoA
+        APITraits::FalseType,
+        // SelectUpdateLineX
+        ANY_API)
     {
         VanillaUpdateFunctor<CELL>()(streak, targetOrigin, gridOld, gridNew, nanoStep);
     }
@@ -234,7 +246,7 @@ template<typename CELL>
 class UpdateFunctor
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     static const int DIM = Topology::DIM;
 
     template<typename GRID1, typename GRID2>
@@ -247,9 +259,9 @@ public:
     {
         UpdateFunctorHelpers::Selector<CELL>()(
             region, targetOffset, gridOld, gridNew, nanoStep,
-            typename CELL::API(), typename CELL::API(),
-            typename CellAPITraitsFixme::SelectGridType<CELL>::Value(),
-            typename CellAPITraitsFixme::SelectUpdateLineX<CELL>::Value());
+            typename APITraits::SelectFixedCoordsOnlyUpdate<CELL>::Value(),
+            typename APITraits::SelectSoA<CELL>::Value(),
+            typename APITraits::SelectUpdateLineX<CELL>::Value());
     }
 
     template<typename GRID1, typename GRID2>
@@ -262,9 +274,9 @@ public:
     {
         UpdateFunctorHelpers::Selector<CELL>()(
             sourceStreak, targetCoord, gridOld, gridNew, nanoStep,
-            typename CELL::API(), typename CELL::API(),
-            typename CellAPITraitsFixme::SelectGridType<CELL>::Value(),
-            typename CellAPITraitsFixme::SelectUpdateLineX<CELL>::Value());
+            typename APITraits::SelectFixedCoordsOnlyUpdate<CELL>::Value(),
+            typename APITraits::SelectSoA<CELL>::Value(),
+            typename APITraits::SelectUpdateLineX<CELL>::Value());
     }
 };
 

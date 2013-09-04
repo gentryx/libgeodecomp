@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_CELLAPITRAITS_H
-#define LIBGEODECOMP_MISC_CELLAPITRAITS_H
+#ifndef LIBGEODECOMP_MISC_APITRAITS_H
+#define LIBGEODECOMP_MISC_APITRAITS_H
 
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stencils.h>
@@ -7,17 +7,11 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL,
-         typename TOPOLOGY = Topologies::Cube<2>::Topology,
-         bool TOPOLOGICALLY_CORRECT = false>
-class SoAGrid;
-
-// fixme: rename this this to "class API"
 /**
- * CellAPITraits contains a set of classes which can be used to
+ * APITraits contains a set of classes which can be used to
  * describe/discover the interface between a user-supplied model (cell
  * class) and LibGeoDecomp. More specifically, a cell exports a class
- * named API which derives from certail child classes of CellAPITraits
+ * named API which derives from certail child classes of APITraits
  * to allow Simulators and the UpdateFunctor to discover its
  * properties (e.g. number of nano steps, stencil shape, signature and
  * flavor of update() functions...).
@@ -33,7 +27,7 @@ class SoAGrid;
  * - provide sensible defaults, and
  * - avoid breaking user code whenever a new feature is introduced.
  */
-class CellAPITraitsFixme
+class APITraits
 {
 public:
     class FalseType
@@ -116,20 +110,19 @@ public:
         typedef typename CELL::API::Topology Value;
     };
 
-    // deduce a CELL's optimum grid type
+    // determine whether a cell supports SoA (Struct of Arrays)
+    // storage via LibFlatArray.
     template<typename CELL, typename HAS_SOA = void>
-    class SelectGridType
+    class SelectSoA
     {
     public:
-        typedef DisplacedGrid<CELL, typename SelectTopology<CELL>::Value> Type;
         typedef FalseType Value;
     };
 
     template<typename CELL>
-    class SelectGridType<CELL, typename CELL::API::SupportsSoA>
+    class SelectSoA<CELL, typename CELL::API::SupportsSoA>
     {
     public:
-        typedef SoAGrid<CELL, typename SelectTopology<CELL>::Value, false> Type;
         typedef TrueType Value;
     };
 
@@ -219,44 +212,6 @@ public:
     template<int DIM>
     class HasTorusTopology : public HasTopology<typename Topologies::Torus<DIM>::Topology>
     {};
-};
-
-// fixme: kill this!
-/**
- * is used to specify which neighborhood types are supported by a
- * given cell or Simulator/Stepper. This is necessary as the different
- * neighborhood implementations vary greatly in performance (depending
- * on the hardware) and some may even be incompatible with certain
- * models (e.g. when the relative coordinates for neighbor accesses
- * are not known at compile time).
- */
-class CellAPITraits
-{
-public:
-    /**
-     * If a cell's API specifier derives only from this class and no
-     * other class, it means that the class is using the classic
-     * (default) API.
-     */
-    class Base
-    {};
-
-    /**
-     * Fixed means that a given model may only use FixedCoord to
-     * address neighbors, which allows us to do significant compile
-     * time optimizations.
-     */
-    class Fixed : public Base
-    {
-    };
-
-    /**
-     * indicates that the model may not only update a single cell, but
-     * a linear sequence cells within the grid.
-     */
-    class Line : public Base
-    {
-    };
 };
 
 }

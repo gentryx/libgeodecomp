@@ -6,7 +6,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 
@@ -16,13 +16,14 @@ class Cell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
-    inline explicit Cell(const double& v=0) : temp(v)
+    inline explicit Cell(double v = 0) :
+        temp(v)
     {}
 
     template<typename NEIGHBORHOOD>
@@ -38,7 +39,7 @@ public:
 
     // fixme: use locally defined var for x-offset?
     template<typename NEIGHBORHOOD>
-    static void updateLine(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         for (; *x < endX; ++x) {
             target[*x].temp = (hood[FixedCoord< 0,  0, -1>()].temp +

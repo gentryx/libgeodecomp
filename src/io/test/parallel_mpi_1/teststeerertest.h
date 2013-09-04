@@ -35,7 +35,7 @@ public:
     {
         simulator->run();
 
-        TS_ASSERT_TEST_GRID(SerialSimulator<TestCell<2> >::GridType,
+        TS_ASSERT_TEST_GRID(SerialSimulator<TestCell<2> >::GridBaseType,
                             *simulator->getGrid(),
                             (34 + 4) * 27);
 

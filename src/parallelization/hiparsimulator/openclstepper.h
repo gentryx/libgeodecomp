@@ -22,7 +22,7 @@ class OpenCLStepper : public Stepper<CELL_TYPE>
 {
     friend class OpenCLStepperTest;
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
 
     typedef class Stepper<CELL_TYPE> ParentType;

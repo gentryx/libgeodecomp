@@ -26,7 +26,7 @@ class UpdateGroupServer : public hpx::components::managed_component_base<
 {
 public:
     const static int DIM = CELL_TYPE::Topology::DIM;
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef
         UpdateGroup<CELL_TYPE, PARTITION, STEPPER> ClientType;

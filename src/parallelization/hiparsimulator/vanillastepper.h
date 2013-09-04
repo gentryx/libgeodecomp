@@ -17,7 +17,7 @@ class VanillaStepper : public Stepper<CELL_TYPE>
 public:
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
-    const static unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
+    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;

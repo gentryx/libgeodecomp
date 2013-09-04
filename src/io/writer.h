@@ -35,9 +35,9 @@ class Writer
 #endif
 public:
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     /**
      * initializes a writer using prefix which subclasses may

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/grid.h>
@@ -604,9 +604,8 @@ class JacobiCellClassic
 {
 public:
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     JacobiCellClassic(double t = 0) :
@@ -673,9 +672,9 @@ class JacobiCellFixedHood
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     JacobiCellFixedHood(double t = 0) :
@@ -762,10 +761,10 @@ class JacobiCellStreakUpdate
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
@@ -785,7 +784,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -953,7 +952,7 @@ public:
     {
         typedef Grid<
             JacobiCellStreakUpdate,
-            CellAPITraitsFixme::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
+            APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
         GridType gridA(dim, 1.0);
         GridType gridB(dim, 2.0);
         GridType *gridOld = &gridA;
@@ -972,8 +971,10 @@ public:
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
-                const JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, *gridOld);
+
+                typedef APITraits::SelectStencil<JacobiCellStreakUpdate>::Value Stencil;
+                const JacobiCellStreakUpdate *pointers[Stencil::VOLUME];
+                LinePointerAssembly<Stencil>()(pointers, streak, *gridOld);
                 LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
                     streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
             }
@@ -1046,9 +1047,8 @@ class LBMCell
 {
 public:
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
@@ -1669,12 +1669,11 @@ public:
     // typedef ShortVec2xAVX Double;
     // typedef ShortVec4xAVX Double;
 
-    class API : public CellAPITraits::Fixed,
-                public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
-                public CellAPITraitsFixme::HasSoA,
-                public CellAPITraitsFixme::HasUpdateLineX,
-                public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-                public CellAPITraitsFixme::HasCubeTopology<3>
+    class API : public APITraits::HasFixedCoordsOnlyUpdate,
+                public APITraits::HasSoA,
+                public APITraits::HasUpdateLineX,
+                public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+                public APITraits::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};

@@ -25,7 +25,7 @@ class Stepper
     friend class StepperTest;
 public:
     enum PatchType {GHOST=0, INNER_SET=1};
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
 
     typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;

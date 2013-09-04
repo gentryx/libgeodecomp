@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_CONTAINERCELL_H
 #define LIBGEODECOMP_MISC_CONTAINERCELL_H
 
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/neighborhoodadapter.h>
@@ -19,14 +19,13 @@ public:
     typedef TOPOLOGY Topology;
     typedef Cargo* Iterator;
 
-    const static unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CARGO>::VALUE;
+    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CARGO>::VALUE;
     const static int DIM = Topology::DIM;
     const static int MAX_SIZE = SIZE;
 
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<Topology::DIM, 1> >,
-        public CellAPITraitsFixme::HasNanoSteps<NANO_STEPS>
+        public APITraits::HasStencil<Stencils::Moore<Topology::DIM, 1> >,
+        public APITraits::HasNanoSteps<NANO_STEPS>
     {};
 
     inline ContainerCell() :

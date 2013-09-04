@@ -12,7 +12,7 @@ template<typename CELL>
 class VanillaUpdateFunctor
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     static const int DIM = Topology::DIM;
 
     template<typename GRID1, typename GRID2>

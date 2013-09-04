@@ -18,8 +18,7 @@ class Cell
 {
 public:
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasCubeTopology<3>
     {};
 
     double val;

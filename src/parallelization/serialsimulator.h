@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/io/writer.h>
@@ -18,10 +18,12 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class SerialSimulatorTest;
+    typedef APITraits::SelectSoA<CELL_TYPE> GridTypeSelector;
+    typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridBaseType;
     typedef typename MonolithicSimulator<CELL_TYPE>::Topology Topology;
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
-    typedef CellAPITraitsFixme::SelectGridType<CELL_TYPE> GridTypeSelector;
-    typedef typename GridTypeSelector::Type GridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename SimulatorHelpers::GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
     static const int DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL_TYPE>::NANO_STEPS;
@@ -33,7 +35,7 @@ public:
     using MonolithicSimulator<CELL_TYPE>::gridDim;
 
     /**
-     * creates a SerialSimulator with the given  initializer.
+     * creates a SerialSimulator with the given initializer.
      */
     SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
@@ -98,7 +100,7 @@ public:
     /**
      * returns the current grid.
      */
-    virtual const GridType *getGrid()
+    virtual const GridBaseType *getGrid()
     {
         return curGrid;
     }

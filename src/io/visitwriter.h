@@ -152,7 +152,7 @@ class VisItDataBuffer : public VisItWriterHelpers::VisItDataAccessor<CELL_TYPE>
 {
 public:
     typedef typename VisItDataAccessor<CELL_TYPE>::GridType GridType;
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
 
     VisItDataBuffer(

@@ -1,7 +1,7 @@
 #include <sstream>
 #include <vector>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/soagrid.h>
@@ -16,8 +16,7 @@ class BasicCell
 {
 public:
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
+        public APITraits::HasTorusTopology<2>
     {};
 
     template<typename NEIGHBORHOOD>
@@ -31,8 +30,8 @@ class LineUpdateCell
 {
 public:
     class API :
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasTorusTopology<2>
     {};
 
     template<typename NEIGHBORHOOD>
@@ -55,8 +54,8 @@ class FixedCell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasTorusTopology<2>
     {};
 
     template<typename NEIGHBORHOOD>
@@ -71,9 +70,9 @@ class FixedLineUpdateCell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<2>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasTorusTopology<2>
     {};
 
     template<typename NEIGHBORHOOD>
@@ -83,7 +82,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
+    static void updateLineX(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
         myLog << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
 
@@ -94,11 +93,11 @@ class MySoATestCell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasSoA,
-        public CellAPITraitsFixme::HasUpdateLineX,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     MySoATestCell(
@@ -195,7 +194,7 @@ public:
     {
         CoordBox<3> box1(Coord<3>(0,  0,  0),  Coord<3>(30, 20, 10));
         CoordBox<3> box2(Coord<3>(50, 20, 50), Coord<3>(50, 10, 10));
-        typedef CellAPITraitsFixme::SelectTopology<MySoATestCell>::Value Topology;
+        typedef APITraits::SelectTopology<MySoATestCell>::Value Topology;
         SoAGrid<MySoATestCell, Topology> gridOld(box1, MySoATestCell(47), MySoATestCell(1));
         SoAGrid<MySoATestCell, Topology> gridNew(box2, MySoATestCell(11), MySoATestCell(0));
 

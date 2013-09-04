@@ -15,9 +15,9 @@ class JacobiCellSimple
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasTopoloygy<Topologies::Torus<3>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellSimple(double t = 0) :
@@ -43,10 +43,10 @@ class JacobiCellMagic
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellMagic(double t = 0) :
@@ -66,7 +66,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellMagic *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellMagic *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         for (; *x < endX; ++*x) {
             target[*x].update(hood, 0);
@@ -80,10 +80,10 @@ class JacobiCellStraightforward
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellStraightforward(double t = 0) :
@@ -103,7 +103,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStraightforward *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStraightforward *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -197,10 +197,10 @@ class JacobiCellStraightforwardNT
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellStraightforwardNT(double t = 0) :
@@ -220,7 +220,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStraightforwardNT *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStraightforwardNT *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -333,10 +333,10 @@ class JacobiCellStreakUpdate
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraits::Line,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasTopology<Topologies::Torus<3>::Topology>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
@@ -356,7 +356,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);

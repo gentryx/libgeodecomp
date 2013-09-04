@@ -7,10 +7,9 @@ class Cell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasFixedCoordsOnlyUpdate,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>,
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     inline explicit Cell(const double& v = 0) :
@@ -35,7 +34,7 @@ template<typename CELL>
 class MyFutureOpenCLStepper
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef DisplacedGrid<CELL, Topology>  GridType;
     const static int DIM = Topology::DIM;
 

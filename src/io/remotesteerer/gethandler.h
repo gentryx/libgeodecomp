@@ -13,7 +13,7 @@ template<typename CELL_TYPE, typename MEMBER_TYPE>
 class GetHandler : public Handler<CELL_TYPE>
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > AccessorPtr;
 

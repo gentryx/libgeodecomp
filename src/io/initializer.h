@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_INITIALIZER_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/gridbase.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
@@ -16,8 +16,8 @@ template<typename CELL>
 class Initializer
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL>::Value Topology;
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL>::VALUE;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;

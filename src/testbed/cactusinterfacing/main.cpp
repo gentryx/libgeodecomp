@@ -6,10 +6,10 @@ class CactusCell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasTorusTopology<3>,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-        public CellAPITraitsFixme::HasUpdateLineX
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasTorusTopology<3>,
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasUpdateLineX
     {};
 
     // roughly imitating what's required by WaveToyC_Evolution in

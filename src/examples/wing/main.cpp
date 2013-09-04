@@ -82,9 +82,7 @@ double LENGTHS[] =
 class Cell
 {
 public:
-    class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<2>
+    class API
     {};
 
     Cell(const State& state = LIQUID,

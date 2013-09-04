@@ -140,10 +140,9 @@ public:
     friend class GasWriter;
 
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<3>,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-        public CellAPITraitsFixme::HasNanoSteps<2>
+        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasNanoSteps<2>
     {};
 
     Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
@@ -256,6 +255,10 @@ void Boundary::update(
 class GasWriter : public Writer<Container>
 {
 public:
+    typedef APITraits::SelectTopology<Container>::Value Topology;
+    static const int DIM = Topology::DIM;
+    typedef GridBase<Container, DIM> GridType;
+
     GasWriter(
         const std::string& prefix,
         const unsigned period = 1) :

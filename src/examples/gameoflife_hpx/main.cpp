@@ -16,7 +16,7 @@
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stencils.h>
 
 using namespace boost::assign;
@@ -25,8 +25,7 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    class API :
-        public CellAPITraits::Base
+    class API
     {};
 
     ConwayCell(bool alive = false) :

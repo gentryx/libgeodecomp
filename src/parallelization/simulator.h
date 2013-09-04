@@ -5,9 +5,32 @@
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/steerer.h>
-#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/soagrid.h>
 
 namespace LibGeoDecomp {
+
+namespace SimulatorHelpers {
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT, typename SUPPORTS_SOA>
+class GridTypeSelector;
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::FalseType>
+{
+public:
+    typedef DisplacedGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
+};
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::TrueType>
+{
+public:
+    typedef SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
+};
+
+
+}
 
 /**
  * This is the abstract main application class. Its descendants
@@ -17,9 +40,9 @@ template<typename CELL_TYPE>
 class Simulator
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
     typedef GridBase<CELL_TYPE, DIM> GridType;
     typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
 

@@ -9,8 +9,7 @@ std::ostringstream myTestEvents;
 class MySimpleDummyCell
 {
 public:
-    class API :
-        public CellAPITraits::Base
+    class API
     {};
 
     MySimpleDummyCell(int val = 0) :
@@ -30,10 +29,9 @@ class MyFancyDummyCell
 {
 public:
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasTorusTopology<3>,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-        public CellAPITraitsFixme::HasNanoSteps<3>
+        public APITraits::HasTorusTopology<3>,
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasNanoSteps<3>
     {};
 
     MyFancyDummyCell(int val = 0) :
@@ -62,7 +60,7 @@ public:
     void testBasicCallback1()
     {
         Coord<2> gridDim(10, 5);
-        typedef CellAPITraitsFixme::SelectTopology<MySimpleDummyCell>::Value Topology;
+        typedef APITraits::SelectTopology<MySimpleDummyCell>::Value Topology;
         Grid<MySimpleDummyCell, Topology> gridOld(gridDim, 666, 31);
         Grid<MySimpleDummyCell, Topology> gridNew(gridDim);
         Streak<2> streak(Coord<2>(0, 0), 5);
@@ -83,7 +81,7 @@ public:
     void testBasicCallback2()
     {
         Coord<3> gridDim(10, 5, 10);
-        typedef CellAPITraitsFixme::SelectTopology<MyFancyDummyCell>::Value Topology;
+        typedef APITraits::SelectTopology<MyFancyDummyCell>::Value Topology;
         Grid<MyFancyDummyCell, Topology> gridOld(gridDim, 666, 31);
         Grid<MyFancyDummyCell, Topology> gridNew(gridDim);
         Streak<3> streak(Coord<3>(0, 0, 0), 4);

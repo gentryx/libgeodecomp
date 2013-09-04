@@ -44,7 +44,7 @@ public:
 
         TS_ASSERT_EQUALS("testmpiiowriter01234.mpiio", writer->filename(1234));
 
-        typedef CellAPITraitsFixme::SelectTopology<TestCell<3> >::Value Topology;
+        typedef APITraits::SelectTopology<TestCell<3> >::Value Topology;
         SuperVector<Grid<TestCell<3>, Topology> > expected =
             memoryWriter->getGrids();
         SuperVector<Grid<TestCell<3>, Topology> > actual;

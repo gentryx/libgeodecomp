@@ -19,9 +19,9 @@ template<typename GRID_TYPE, typename CELL_TYPE>
 class ParallelWriterAdapter : public PatchAccepter<GRID_TYPE>
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
 
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<CELL_TYPE>::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
     using PatchAccepter<GRID_TYPE>::pushRequest;

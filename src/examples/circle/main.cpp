@@ -17,9 +17,8 @@ public:
     typedef std::pair<double, double> DPair;
 
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<2, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<2>
+        public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >,
+        public APITraits::HasCubeTopology<2>
     {};
 
     CircleCell() :

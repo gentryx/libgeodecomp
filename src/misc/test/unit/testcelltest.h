@@ -12,7 +12,7 @@ class TestCellTest : public CxxTest::TestSuite
 {
 private:
     typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::NoOutput> TestCellType;
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<TestCellType>::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCellType>::VALUE;
     Grid<TestCellType> grid;
     int width;
     int height;
@@ -123,7 +123,7 @@ public:
     }
 
     typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, TestCellHelpers::NoOutput> TestCell3D;
-    typedef Grid<TestCell3D, CellAPITraitsFixme::SelectTopology<TestCell3D>::Value> Grid3D;
+    typedef Grid<TestCell3D, APITraits::SelectTopology<TestCell3D>::Value> Grid3D;
 
     void test3D1()
     {

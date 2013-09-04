@@ -14,9 +14,9 @@ public:
     typedef STENCIL Stencil;
     const static int DIM = Stencil::DIM;
     typedef TestCell<DIM, Stencil> TestCellType;
-    typedef Grid<TestCellType, typename CellAPITraitsFixme::SelectTopology<TestCellType>::Value> GridType;
+    typedef Grid<TestCellType, typename APITraits::SelectTopology<TestCellType>::Value> GridType;
 
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<TestCellType>::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCellType>::VALUE;
 
     virtual ~UpdateFunctorTestBase()
     {}

@@ -319,8 +319,8 @@ public:
     const static int MAX_CELLS = 100;
 
     class API :
-        public CellAPITraitsFixme::HasCubeTopology<3>,
-        public CellAPITraitsFixme::HasNanoSteps<2>
+        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasNanoSteps<2>
     {};
 
     typedef Grid<ContainerCell, Topology> GridType;

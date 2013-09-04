@@ -17,9 +17,8 @@ class Cell
 {
 public:
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasStencil<Stencils::Moore<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};

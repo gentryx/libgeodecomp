@@ -45,7 +45,7 @@ class HpxWriterSinkServer
 
 public:
     typedef typename CONVERTER::CellType CellType;
-    typedef typename CellAPITraitsFixme::SelectTopology<CellType>::Value Topology;
+    typedef typename APITraits::SelectTopology<CellType>::Value Topology;
     static const int DIM = Topology::DIM;
     typedef Grid<CellType, Topology> GridType;
     typedef Region<Topology::DIM> RegionType;

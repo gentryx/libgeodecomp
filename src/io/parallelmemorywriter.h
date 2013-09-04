@@ -18,7 +18,7 @@ class ParallelMemoryWriter : public ParallelWriter<CELL_TYPE>
 {
 
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType WriterGridType;
     typedef SuperMap<unsigned, GridType> GridMap;

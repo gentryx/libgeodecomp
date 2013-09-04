@@ -6,7 +6,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 
@@ -16,9 +16,9 @@ class Cell
 {
 public:
     class API :
-        public CellAPITraits::Fixed,
-        public CellAPITraitsFixme::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public CellAPITraitsFixme::HasCubeTopology<3>
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     inline explicit Cell(double v = 0) : temp(v)

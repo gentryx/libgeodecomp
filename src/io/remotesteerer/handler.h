@@ -17,7 +17,7 @@ template<typename CELL_TYPE>
 class Handler
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
 
     Handler(const std::string& myKey) :

@@ -28,7 +28,7 @@ public:
     typedef MockSteerer<TestCell<2> > MockSteererType;
     typedef TestSteerer<2 > TestSteererType;
 
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
 
     void setUp()
     {

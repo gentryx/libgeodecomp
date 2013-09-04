@@ -8,7 +8,7 @@ using namespace HiParSimulator;
 class RTMCell
 {
 public:
-    class API : public CellAPITraitsFixme::HasCubeTopology<3>
+    class API : public APITraits::HasCubeTopology<3>
     {};
 
     static int flops()

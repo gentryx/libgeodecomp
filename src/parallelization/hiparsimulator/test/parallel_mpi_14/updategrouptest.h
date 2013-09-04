@@ -36,7 +36,7 @@ public:
     //     maxSteps = 1500;
     //     firstStep = 20;
     //     firstNanoStep = 18;
-    //     firstCycle = firstStep * CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE + firstNanoStep;
+    //     firstCycle = firstStep * APITraits::SelectNanoSteps<TestCell<2> >::VALUE + firstNanoStep;
     //     init.reset(new TestInitializer(buildTestInit()));
 
 

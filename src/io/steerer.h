@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_STEERER_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/region.h>
 
@@ -22,7 +22,7 @@ template<typename CELL_TYPE>
 class Steerer
 {
 public:
-    typedef typename CellAPITraitsFixme::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef Coord<Topology::DIM> CoordType;
 

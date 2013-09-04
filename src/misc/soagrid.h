@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_MISC_SOAGRID_H
 
 #include <libflatarray/flat_array.hpp>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/gridbase.h>
 #include <libgeodecomp/misc/topologies.h>
@@ -107,8 +107,8 @@ private:
 }
 
 template<typename CELL,
-         typename TOPOLOGY,
-         bool TOPOLOGICALLY_CORRECT>
+         typename TOPOLOGY = Topologies::Cube<2>::Topology,
+         bool TOPOLOGICALLY_CORRECT = false>
 class SoAGrid : public GridBase<CELL, TOPOLOGY::DIM>
 {
 public:
@@ -119,7 +119,7 @@ public:
     typedef CELL CellType;
     typedef TOPOLOGY Topology;
     typedef LibFlatArray::soa_grid<CELL> Delegate;
-    typedef typename CellAPITraitsFixme::SelectStencil<CELL>::Value Stencil;
+    typedef typename APITraits::SelectStencil<CELL>::Value Stencil;
 
     explicit SoAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),

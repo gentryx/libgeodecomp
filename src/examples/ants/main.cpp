@@ -21,9 +21,7 @@ public:
     friend class CellToColor;
 
     class API :
-        public CellAPITraits::Base,
-        public CellAPITraitsFixme::HasCubeTopology<2>,
-        public CellAPITraitsFixme::HasNanoSteps<3>
+        public APITraits::HasNanoSteps<3>
     {};
 
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};

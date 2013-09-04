@@ -38,7 +38,7 @@ private:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
     typedef TestSteerer<2 > TestSteererType;
 
-    static const unsigned NANO_STEPS = CellAPITraitsFixme::SelectNanoSteps<TestCell<2> >::VALUE;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
 
     MonolithicSimulator<TestCell<2> > *referenceSim;
     StripingSimulator<TestCell<2> > *testSim;
