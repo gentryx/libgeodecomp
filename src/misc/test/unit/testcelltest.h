@@ -122,7 +122,11 @@ public:
         TS_ASSERT(!grid[0][0].isValid);
     }
 
-    typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, TestCellHelpers::NoOutput> TestCell3D;
+    typedef TestCell<
+        3,
+        Stencils::Moore<3, 1>,
+        Topologies::Torus<3>::Topology,
+        TestCellHelpers::NoOutput> TestCell3D;
     typedef Grid<TestCell3D, APITraits::SelectTopology<TestCell3D>::Value> Grid3D;
 
     void test3D1()

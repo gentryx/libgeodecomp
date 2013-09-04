@@ -48,6 +48,7 @@ public:
         SuperVector<Grid<TestCell<3>, Topology> > expected =
             memoryWriter->getGrids();
         SuperVector<Grid<TestCell<3>, Topology> > actual;
+
         for (size_t i = 0; i <= 21; i += (i == 20)? 1 : 4) {
             std::string filename = writer->filename(i);
             files.push_back(filename);

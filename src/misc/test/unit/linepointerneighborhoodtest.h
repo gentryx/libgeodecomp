@@ -139,6 +139,7 @@ public:
         typedef Grid<TestCell<2>, APITraits::SelectTopology<TestCell<2> >::Value> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
+
         TestInitializer<TestCell<2> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
@@ -176,6 +177,7 @@ public:
         typedef Grid<TestCell<3>, APITraits::SelectTopology<TestCell<3> >::Value> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
+
         TestInitializer<TestCell<3> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);

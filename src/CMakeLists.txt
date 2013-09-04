@@ -66,7 +66,7 @@ find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
-find_package(Qt4 REQUIRED QtOpenGL QtGui QtCore)
+find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
 if(NOT DEFINED QT4_FOUND)
