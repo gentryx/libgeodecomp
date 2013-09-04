@@ -27,9 +27,6 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    class API
-    {};
-
     ConwayCell(bool alive = false) :
         alive(alive)
     {}

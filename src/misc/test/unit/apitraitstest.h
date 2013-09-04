@@ -1,4 +1,4 @@
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/misc/stringops.h>
 
@@ -9,9 +9,6 @@ std::ostringstream myTestEvents;
 class MySimpleDummyCell
 {
 public:
-    class API
-    {};
-
     MySimpleDummyCell(int val = 0) :
         val(val)
     {};

@@ -82,13 +82,10 @@ double LENGTHS[] =
 class Cell
 {
 public:
-    class API
-    {};
-
-    Cell(const State& state = LIQUID,
-         const double& quantity = 0,
-         const double& velocityX = 0,
-         const double& velocityY = 0) :
+    Cell(State state = LIQUID,
+         double quantity = 0,
+         double velocityX = 0,
+         double velocityY = 0) :
         state(state),
         quantity(quantity),
         velocityX(velocityX),
