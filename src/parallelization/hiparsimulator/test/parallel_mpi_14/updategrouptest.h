@@ -64,20 +64,20 @@ public:
     //     SuperVector<int> level0Ranks;
     //     level0Ranks += 2, 3, 4, 5, 6, 7, 8, 9, 10;
 
-    //     level2MPIGroup = MPI::COMM_WORLD.Get_group().Incl(3, &level2Ranks[0]);
-    //     level2MPIComm  = MPI::COMM_WORLD.Create(level2MPIGroup);
+    //     level2MPIGroup = MPI_COMM_WORLD.Get_group().Incl(3, &level2Ranks[0]);
+    //     level2MPIComm  = MPI_COMM_WORLD.Create(level2MPIGroup);
 
-    //     level1aMPIGroup = MPI::COMM_WORLD.Get_group().Incl(1, &level1aRanks[0]);
-    //     level1aMPIComm  = MPI::COMM_WORLD.Create(level1aMPIGroup);
+    //     level1aMPIGroup = MPI_COMM_WORLD.Get_group().Incl(1, &level1aRanks[0]);
+    //     level1aMPIComm  = MPI_COMM_WORLD.Create(level1aMPIGroup);
 
-    //     level1bMPIGroup = MPI::COMM_WORLD.Get_group().Incl(3, &level1bRanks[0]);
-    //     level1bMPIComm  = MPI::COMM_WORLD.Create(level1bMPIGroup);
+    //     level1bMPIGroup = MPI_COMM_WORLD.Get_group().Incl(3, &level1bRanks[0]);
+    //     level1bMPIComm  = MPI_COMM_WORLD.Create(level1bMPIGroup);
 
-    //     level1cMPIGroup = MPI::COMM_WORLD.Get_group().Incl(2, &level1cRanks[0]);
-    //     level1cMPIComm  = MPI::COMM_WORLD.Create(level1cMPIGroup);
+    //     level1cMPIGroup = MPI_COMM_WORLD.Get_group().Incl(2, &level1cRanks[0]);
+    //     level1cMPIComm  = MPI_COMM_WORLD.Create(level1cMPIGroup);
 
-    //     level0MPIGroup = MPI::COMM_WORLD.Get_group().Incl(9, &level0Ranks[0]);
-    //     level0MPIComm  = MPI::COMM_WORLD.Create(level0MPIGroup);
+    //     level0MPIGroup = MPI_COMM_WORLD.Get_group().Incl(9, &level0Ranks[0]);
+    //     level0MPIComm  = MPI_COMM_WORLD.Create(level0MPIGroup);
 
     //     SuperVector<unsigned> weights;
     //     unsigned offset;
@@ -118,7 +118,7 @@ public:
     //                 init,
     //                 &*patchBuffer,
     //                 0,
-    //                 &MPI::COMM_SELF));
+    //                 &MPI_COMM_SELF));
 
     //         level2Group.reset(
     //             new UpdateGroup<TestCell, Partition>(
@@ -131,7 +131,7 @@ public:
     //                 init,
     //                 0,
     //                 &*patchBuffer,
-    //                 &MPI::COMM_SELF));
+    //                 &MPI_COMM_SELF));
 
     //         level2GhostZoneResolution.reset(
     //             new GhostZoneResolution(
@@ -225,16 +225,16 @@ public:
 //     unsigned level0GhostZoneWidth;
 //     unsigned level1GhostZoneWidth;
 //     unsigned level2GhostZoneWidth;
-//     MPI::Group level2MPIGroup;
-//     MPI::Group level1aMPIGroup;
-//     MPI::Group level1bMPIGroup;
-//     MPI::Group level1cMPIGroup;
-//     MPI::Group level0MPIGroup;
-//     MPI::Intracomm level2MPIComm;
-//     MPI::Intracomm level1aMPIComm;
-//     MPI::Intracomm level1bMPIComm;
-//     MPI::Intracomm level1cMPIComm;
-//     MPI::Intracomm level0MPIComm;
+//     MPI_Group level2MPIGroup;
+//     MPI_Group level1aMPIGroup;
+//     MPI_Group level1bMPIGroup;
+//     MPI_Group level1cMPIGroup;
+//     MPI_Group level0MPIGroup;
+//     MPI_Intracomm level2MPIComm;
+//     MPI_Intracomm level1aMPIComm;
+//     MPI_Intracomm level1bMPIComm;
+//     MPI_Intracomm level1cMPIComm;
+//     MPI_Intracomm level0MPIComm;
 //     unsigned offset;
 //     unsigned maxSteps;
 //     unsigned firstStep;

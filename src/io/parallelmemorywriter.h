@@ -27,7 +27,7 @@ public:
 
     ParallelMemoryWriter(
         int period = 1,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         ParallelWriter<CELL_TYPE>("", period),
         mpiLayer(communicator, MPILayer::PARALLEL_MEMORY_WRITER)
     {}

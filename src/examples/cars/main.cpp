@@ -251,7 +251,7 @@ void runSimulation()
     //     1234,
     //     functionMap,
     //     myData,
-    //     MPI::COMM_WORLD);
+    //     MPI_COMM_WORLD);
     // sim.addSteerer(steerer);
 
     sim.run();
@@ -259,9 +259,11 @@ void runSimulation()
 
 int main(int argc, char* argv[])
 {
-    MPI::Init(argc, argv);
+    MPI_Init(argc, argv);
     srand((unsigned)time(0));
+
     runSimulation();
-    MPI::Finalize();
+
+    MPI_Finalize();
     return 0;
 }

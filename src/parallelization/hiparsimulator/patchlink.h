@@ -38,7 +38,7 @@ public:
         inline Link(
             const Region<DIM>& region,
             const int tag,
-            MPI::Comm *communicator = &MPI::COMM_WORLD) :
+            MPI_Comm communicator = MPI_COMM_WORLD) :
             lastNanoStep(0),
             stride(1),
             mpiLayer(communicator),
@@ -94,14 +94,14 @@ public:
         using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
         inline Accepter(
-            const Region<DIM>& _region,
-            const int _dest,
-            const int _tag,
-            const MPI::Datatype& _cellMPIDatatype,
-            MPI::Comm *communicator = &MPI::COMM_WORLD) :
-            Link(_region, _tag, communicator),
-            dest(_dest),
-            cellMPIDatatype(_cellMPIDatatype)
+            const Region<DIM>& region,
+            const int dest,
+            const int tag,
+            const MPI_Datatype& cellMPIDatatype,
+            MPI_Comm communicator = MPI_COMM_WORLD) :
+            Link(region, tag, communicator),
+            dest(dest),
+            cellMPIDatatype(cellMPIDatatype)
         {}
 
         virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
@@ -133,7 +133,7 @@ public:
 
     private:
         int dest;
-        MPI::Datatype cellMPIDatatype;
+        MPI_Datatype cellMPIDatatype;
     };
 
     class Provider :
@@ -155,8 +155,8 @@ public:
             const Region<DIM>& region,
             const int& source,
             const int& tag,
-            const MPI::Datatype& cellMPIDatatype,
-            MPI::Comm *communicator = &MPI::COMM_WORLD) :
+            const MPI_Datatype& cellMPIDatatype,
+            MPI_Comm communicator = MPI_COMM_WORLD) :
             Link(region, tag, communicator),
             source(source),
             cellMPIDatatype(cellMPIDatatype)
@@ -198,7 +198,7 @@ public:
 
     private:
         int source;
-        MPI::Datatype cellMPIDatatype;
+        MPI_Datatype cellMPIDatatype;
     };
 
 };

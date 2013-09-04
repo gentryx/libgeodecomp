@@ -6,7 +6,7 @@
 #include <libgeodecomp/mpilayer/typemaps.h>
 
 /**
- * OpenMPI can't run multiple MPI::Init() - MPI::Finalize() cycles
+ * OpenMPI can't run multiple MPI_Init() - MPI_Finalize() cycles
  * during one program execution. Therefore this file has to hook these
  * calls into CxxTest's global fixtures (so the get executed exactly
  * once).
@@ -17,14 +17,14 @@ class MPIGlobalFixture : public CxxTest::GlobalFixture
     {
         int argc = 0;
         char **argv = 0;
-        MPI::Init(argc, argv);
+        MPI_Init(&argc, &argv);
         LibGeoDecomp::Typemaps::initializeMaps();
         return true;
     }
 
     virtual bool tearDownWorld()
     {
-        MPI::Finalize();
+        MPI_Finalize();
         return true;
     }
 };
@@ -40,9 +40,10 @@ public:
 
     void testMPIUpAndRunning()
     {
-        TS_ASSERT_THROWS_NOTHING(  MPI::COMM_WORLD.Get_rank(); );
+        TS_ASSERT_THROWS_NOTHING(  int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank); );
     }
 };
 
 static MPIGlobalFixture mpiSetupAndFinalizer;
+
 #endif

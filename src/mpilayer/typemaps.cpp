@@ -30,17 +30,19 @@ namespace MPI {
 }
 
 namespace LibGeoDecomp {
-// Member Specification, holds all relevant information for a given member.
-class MemberSpec {
-public:
-    MemberSpec(MPI::Aint _address, MPI::Datatype _type, int _length) {
-        address = _address;
-        type = _type;
-        length = _length;
-    }
 
-    MPI::Aint address;
-    MPI::Datatype type;
+// Member Specification, holds all relevant information for a given member.
+class MemberSpec
+{
+public:
+    MemberSpec(MPI_Aint address, MPI_Datatype type, int length) :
+        address(address),
+        type(type),
+        length(length)
+    {}
+
+    MPI_Aint address;
+    MPI_Datatype type;
     int length;
 };
 
@@ -49,7 +51,7 @@ bool addressLower(MemberSpec a, MemberSpec b)
     return a.address < b.address;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Coord_1_() {
     char fakeObject[sizeof(LibGeoDecomp::Coord<1 >)];
     LibGeoDecomp::Coord<1 > *obj = (LibGeoDecomp::Coord<1 >*)fakeObject;
@@ -64,8 +66,8 @@ Typemaps::generateMapLibGeoDecomp_Coord_1_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -79,14 +81,14 @@ Typemaps::generateMapLibGeoDecomp_Coord_1_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Coord_2_() {
     char fakeObject[sizeof(LibGeoDecomp::Coord<2 >)];
     LibGeoDecomp::Coord<2 > *obj = (LibGeoDecomp::Coord<2 >*)fakeObject;
@@ -101,8 +103,8 @@ Typemaps::generateMapLibGeoDecomp_Coord_2_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -116,14 +118,14 @@ Typemaps::generateMapLibGeoDecomp_Coord_2_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Coord_3_() {
     char fakeObject[sizeof(LibGeoDecomp::Coord<3 >)];
     LibGeoDecomp::Coord<3 > *obj = (LibGeoDecomp::Coord<3 >*)fakeObject;
@@ -138,8 +140,8 @@ Typemaps::generateMapLibGeoDecomp_Coord_3_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -153,14 +155,14 @@ Typemaps::generateMapLibGeoDecomp_Coord_3_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_CoordBox_1_() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBox<1 >)];
     LibGeoDecomp::CoordBox<1 > *obj = (LibGeoDecomp::CoordBox<1 >*)fakeObject;
@@ -176,8 +178,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_1_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -191,14 +193,14 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_1_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_CoordBox_2_() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBox<2 >)];
     LibGeoDecomp::CoordBox<2 > *obj = (LibGeoDecomp::CoordBox<2 >*)fakeObject;
@@ -214,8 +216,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_2_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -229,14 +231,14 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_2_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_CoordBox_3_() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBox<3 >)];
     LibGeoDecomp::CoordBox<3 > *obj = (LibGeoDecomp::CoordBox<3 >*)fakeObject;
@@ -252,8 +254,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_3_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -267,14 +269,14 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_3_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::CoordBoxMPIDatatypeHelper)];
     LibGeoDecomp::CoordBoxMPIDatatypeHelper *obj = (LibGeoDecomp::CoordBoxMPIDatatypeHelper*)fakeObject;
@@ -291,8 +293,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -306,14 +308,14 @@ Typemaps::generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoordBase_1_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoordBase<1 >)];
     LibGeoDecomp::FloatCoordBase<1 > *obj = (LibGeoDecomp::FloatCoordBase<1 >*)fakeObject;
@@ -328,8 +330,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_1_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -343,14 +345,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_1_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoordBase_2_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoordBase<2 >)];
     LibGeoDecomp::FloatCoordBase<2 > *obj = (LibGeoDecomp::FloatCoordBase<2 >*)fakeObject;
@@ -365,8 +367,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_2_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -380,14 +382,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_2_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoordBase_3_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoordBase<3 >)];
     LibGeoDecomp::FloatCoordBase<3 > *obj = (LibGeoDecomp::FloatCoordBase<3 >*)fakeObject;
@@ -402,8 +404,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_3_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -417,14 +419,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_3_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper)];
     LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper *obj = (LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper*)fakeObject;
@@ -441,8 +443,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -456,14 +458,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Streak_1_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<1 >)];
     LibGeoDecomp::Streak<1 > *obj = (LibGeoDecomp::Streak<1 >*)fakeObject;
@@ -479,8 +481,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_1_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -494,14 +496,14 @@ Typemaps::generateMapLibGeoDecomp_Streak_1_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Streak_2_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<2 >)];
     LibGeoDecomp::Streak<2 > *obj = (LibGeoDecomp::Streak<2 >*)fakeObject;
@@ -517,8 +519,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_2_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -532,14 +534,14 @@ Typemaps::generateMapLibGeoDecomp_Streak_2_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Streak_3_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<3 >)];
     LibGeoDecomp::Streak<3 > *obj = (LibGeoDecomp::Streak<3 >*)fakeObject;
@@ -555,8 +557,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_3_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -570,14 +572,14 @@ Typemaps::generateMapLibGeoDecomp_Streak_3_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_StreakMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::StreakMPIDatatypeHelper)];
     LibGeoDecomp::StreakMPIDatatypeHelper *obj = (LibGeoDecomp::StreakMPIDatatypeHelper*)fakeObject;
@@ -594,8 +596,8 @@ Typemaps::generateMapLibGeoDecomp_StreakMPIDatatypeHelper() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -609,14 +611,14 @@ Typemaps::generateMapLibGeoDecomp_StreakMPIDatatypeHelper() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
     char fakeObject[sizeof(LibGeoDecomp::TestCell<1 >)];
     LibGeoDecomp::TestCell<1 > *obj = (LibGeoDecomp::TestCell<1 >*)fakeObject;
@@ -636,8 +638,8 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -651,14 +653,14 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
     char fakeObject[sizeof(LibGeoDecomp::TestCell<2 >)];
     LibGeoDecomp::TestCell<2 > *obj = (LibGeoDecomp::TestCell<2 >*)fakeObject;
@@ -678,8 +680,8 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -693,14 +695,14 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
     char fakeObject[sizeof(LibGeoDecomp::TestCell<3 >)];
     LibGeoDecomp::TestCell<3 > *obj = (LibGeoDecomp::TestCell<3 >*)fakeObject;
@@ -720,8 +722,8 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -735,14 +737,14 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_TestCellMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::TestCellMPIDatatypeHelper)];
     LibGeoDecomp::TestCellMPIDatatypeHelper *obj = (LibGeoDecomp::TestCellMPIDatatypeHelper*)fakeObject;
@@ -759,8 +761,8 @@ Typemaps::generateMapLibGeoDecomp_TestCellMPIDatatypeHelper() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -774,14 +776,14 @@ Typemaps::generateMapLibGeoDecomp_TestCellMPIDatatypeHelper() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoord_1_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoord<1 >)];
     LibGeoDecomp::FloatCoord<1 > *obj = (LibGeoDecomp::FloatCoord<1 >*)fakeObject;
@@ -796,8 +798,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_1_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -811,14 +813,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_1_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoord_2_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoord<2 >)];
     LibGeoDecomp::FloatCoord<2 > *obj = (LibGeoDecomp::FloatCoord<2 >*)fakeObject;
@@ -833,8 +835,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_2_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -848,14 +850,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_2_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoord_3_() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoord<3 >)];
     LibGeoDecomp::FloatCoord<3 > *obj = (LibGeoDecomp::FloatCoord<3 >*)fakeObject;
@@ -870,8 +872,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_3_() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -885,14 +887,14 @@ Typemaps::generateMapLibGeoDecomp_FloatCoord_3_() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
 
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper() {
     char fakeObject[sizeof(LibGeoDecomp::FloatCoordMPIDatatypeHelper)];
     LibGeoDecomp::FloatCoordMPIDatatypeHelper *obj = (LibGeoDecomp::FloatCoordMPIDatatypeHelper*)fakeObject;
@@ -909,8 +911,8 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -924,9 +926,9 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }
@@ -957,6 +959,7 @@ void Typemaps::initializeMaps()
     MPI::LIBGEODECOMP_FLOATCOORD_3_ = generateMapLibGeoDecomp_FloatCoord_3_();
     MPI::LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER = generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper();
 }
+
 };
 
 #endif

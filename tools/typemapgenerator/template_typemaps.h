@@ -10,12 +10,14 @@ namespace MPI {
 }
 
 NAMESPACE_BEGIN
-class Typemaps {
+class Typemaps
+{
 public:
     static void initializeMaps();
 
     template<typename T>
-    static inline MPI::Datatype lookup() {
+    static inline MPI_Datatype lookup()
+    {
         return lookup((T*)0);
     }
 

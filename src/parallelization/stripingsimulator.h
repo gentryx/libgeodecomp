@@ -52,7 +52,7 @@ public:
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
         const unsigned& loadBalancingPeriod = 1,
-        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()):
+        const MPI_Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()):
         DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod),
@@ -159,7 +159,7 @@ private:
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
-    MPI::Datatype cellMPIDatatype;
+    MPI_Datatype cellMPIDatatype;
     Chronometer chrono;
 
     void swapGrids()

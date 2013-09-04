@@ -38,15 +38,16 @@ public:
     inline HiParSimulator(
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
-        const unsigned& loadBalancingPeriod = 1,
-        const unsigned &ghostZoneWidth = 1,
-        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        unsigned loadBalancingPeriod = 1,
+        unsigned ghostZoneWidth = 1,
+        MPI_Datatype cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         ParentType(initializer),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         communicator(communicator),
+        mpiLayer(communicator),
         cellMPIDatatype(cellMPIDatatype)
     {}
 
@@ -85,7 +86,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 false));
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
             new SteererAdapterType(
@@ -93,7 +94,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 true));
 
         steererAdaptersGhost.push_back(adapterGhost);
@@ -113,7 +114,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
@@ -121,7 +122,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 true));
 
         writerAdaptersGhost.push_back(adapterGhost);
@@ -138,15 +139,16 @@ private:
     unsigned ghostZoneWidth;
     EventMap events;
     PartitionManager<Topology> partitionManager;
-    MPI::Comm *communicator;
-    MPI::Datatype cellMPIDatatype;
+    MPI_Comm communicator;
+    MPILayer mpiLayer;
+    MPI_Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
 
-    SuperVector<long> initialWeights(const long& items, const long& size) const
+    SuperVector<long> initialWeights(long items, long size) const
     {
         SuperVector<long> ret(size);
         long lastPos = 0;
@@ -194,7 +196,8 @@ private:
                 box.origin,
                 box.dimensions,
                 0,
-                initialWeights(box.dimensions.prod(), communicator->Get_size())));
+                initialWeights(box.dimensions.prod(),
+                               mpiLayer.size())));
 
         updateGroup.reset(
             new UpdateGroupType(
@@ -275,13 +278,12 @@ private:
 
     inline void balanceLoad()
     {
-        if (communicator->Get_rank() == 0) {
+        if (mpiLayer.rank() == 0) {
             if (!balancer) {
                 return;
             }
 
-            int size = communicator->Get_size();
-            LoadBalancer::LoadVec loads(size, 1.0);
+            LoadBalancer::LoadVec loads(mpiLayer.size(), 1.0);
             LoadBalancer::WeightVec newWeights =
                 balancer->balance(updateGroup->getWeights(), loads);
             // fixme: actually balance the load!

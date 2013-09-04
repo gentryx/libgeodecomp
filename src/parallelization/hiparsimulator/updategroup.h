@@ -47,8 +47,8 @@ public:
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost = PatchProviderVec(),
         PatchProviderVec patchProvidersInner = PatchProviderVec(),
-        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        const MPI_Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
         mpiLayer(communicator),
@@ -82,7 +82,7 @@ public:
                         i->first,
                         MPILayer::PATCH_LINK,
                         cellMPIDatatype,
-                        mpiLayer.getCommunicator()));
+                        mpiLayer.communicator()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
 
@@ -121,7 +121,7 @@ public:
                         i->first,
                         MPILayer::PATCH_LINK,
                         cellMPIDatatype,
-                        mpiLayer.getCommunicator()));
+                        mpiLayer.communicator()));
                 addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
                 patchLinks << link;
 
@@ -196,7 +196,7 @@ private:
     unsigned ghostZoneWidth;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     MPILayer mpiLayer;
-    MPI::Datatype cellMPIDatatype;
+    MPI_Datatype cellMPIDatatype;
     unsigned rank;
 };
 

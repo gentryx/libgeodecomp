@@ -153,7 +153,7 @@ void runSimulation()
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
         10,
-        MPI::BOOL);
+        MPI_BOOL);
 
     sim.addWriter(
         new BOVWriter<ConwayCell, StateSelector>(
@@ -170,11 +170,11 @@ void runSimulation()
 
 int main(int argc, char *argv[])
 {
-    MPI::Init(argc, argv);
+    MPI_Init(&argc, &argv);
     Typemaps::initializeMaps();
 
     runSimulation();
 
-    MPI::Finalize();
+    MPI_Finalize();
     return 0;
 }

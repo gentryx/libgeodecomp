@@ -14,32 +14,13 @@
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
+#include <libgeodecomp/testbed/performancetests/cpubenchmarks.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
 
 std::string revision;
-
-class CPUBenchmark : public Benchmark
-{
-public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
-    std::string device()
-    {
-        FILE *output = popen("cat /proc/cpuinfo | grep 'model name' | head -1 | cut -c 14-", "r");
-        int idLength = 2048;
-        std::string cpuID(idLength, ' ');
-        idLength = fread(&cpuID[0], 1, idLength, output);
-        cpuID.resize(idLength - 1);
-        pclose(output);
-        return cpuID;
-    }
-};
 
 class RegionCount : public CPUBenchmark
 {
@@ -2112,17 +2093,18 @@ int main(int argc, char **argv)
     }
 
     bool quick = false;
-    int revIndex = 1;
+    int argumentIndex = 1;
     if (argc == 4) {
         if ((std::string(argv[1]) == "-q") ||
             (std::string(argv[1]) == "--quick")) {
             quick = true;
         }
-        revIndex = 2;
+        argumentIndex = 2;
     }
-    revision = argv[revIndex];
+    revision = argv[argumentIndex];
+
     std::stringstream s;
-    s << argv[revIndex + 1];
+    s << argv[argumentIndex + 1];
     int cudaDevice;
     s >> cudaDevice;
 

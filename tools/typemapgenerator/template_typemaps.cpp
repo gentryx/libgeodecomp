@@ -6,17 +6,19 @@ namespace MPI {
 }
 
 NAMESPACE_BEGIN
-// Member Specification, holds all relevant information for a given member.
-class MemberSpec {
-public:
-    MemberSpec(MPI::Aint _address, MPI::Datatype _type, int _length) {
-        address = _address;
-        type = _type;
-        length = _length;
-    }
 
-    MPI::Aint address;
-    MPI::Datatype type;
+// Member Specification, holds all relevant information for a given member.
+class MemberSpec
+{
+public:
+    MemberSpec(MPI_Aint address, MPI_Datatype type, int length) :
+        address(address),
+        type(type),
+        length(length)
+    {}
+
+    MPI_Aint address;
+    MPI_Datatype type;
     int length;
 };
 
@@ -30,4 +32,5 @@ void Typemaps::initializeMaps()
 {
     ASSIGNMENTS
 }
+
 NAMESPACE_END

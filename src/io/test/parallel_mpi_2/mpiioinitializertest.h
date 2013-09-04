@@ -63,7 +63,7 @@ public:
                     "testmpiioinitializer1_",
                     4,
                     init->maxSteps(),
-                    MPI::COMM_SELF));
+                    MPI_COMM_SELF));
 
             referenceSim.run();
         }
@@ -79,7 +79,7 @@ public:
                 "testmpiioinitializer2_",
                 4,
                 init->maxSteps(),
-                MPI::COMM_SELF));
+                MPI_COMM_SELF));
 
         sim.run();
         MPILayer().barrier();
@@ -92,9 +92,9 @@ public:
             Region<3> region;
             region << CoordBox<3>(Coord<3>(), dimensions);
             MPIIO<TestCell<3> >::readRegion(
-                &expected, "testmpiioinitializer1_00021.mpiio", region, MPI::COMM_SELF);
+                &expected, "testmpiioinitializer1_00021.mpiio", region, MPI_COMM_SELF);
             MPIIO<TestCell<3> >::readRegion(
-                &actual,   "testmpiioinitializer2_00021.mpiio", region, MPI::COMM_SELF);
+                &actual,   "testmpiioinitializer2_00021.mpiio", region, MPI_COMM_SELF);
 
             TS_ASSERT_EQUALS(expected, actual);
         }

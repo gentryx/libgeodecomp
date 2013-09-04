@@ -30,7 +30,7 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_MPI
     Pipe(
         unsigned root = 0,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         mpiLayer(communicator),
         root(root)
     {}

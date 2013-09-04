@@ -107,7 +107,7 @@ void runSimulation()
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
         1000,
         1,
-        MPI::DOUBLE);
+        MPI_DOUBLE);
 
     if (MPILayer().rank() == 0) {
         sim.addWriter(

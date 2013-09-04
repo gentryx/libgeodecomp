@@ -47,7 +47,7 @@ public:
         unsigned period,
         int port,
         unsigned root = 0,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         Steerer<CELL_TYPE>(period),
         port(port),
         pipe(new Pipe(root, communicator))

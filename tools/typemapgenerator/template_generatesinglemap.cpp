@@ -1,4 +1,4 @@
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapKLASS_NAME() {
     char fakeObject[sizeof(KLASS)];
     KLASS *obj = (KLASS*)fakeObject;
@@ -13,8 +13,8 @@ Typemaps::generateMapKLASS_NAME() {
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -28,9 +28,9 @@ Typemaps::generateMapKLASS_NAME() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(objType);
 
     return objType;
 }

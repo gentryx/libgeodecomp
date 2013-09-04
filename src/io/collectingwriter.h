@@ -26,8 +26,8 @@ public:
         Writer<CELL_TYPE> *writer,
         unsigned period = 1,
         size_t root = 0,
-        MPI::Comm *communicator = &MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        MPI_Comm communicator = MPI_COMM_WORLD,
+        MPI_Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
         ParallelWriter<CELL_TYPE>("",  period),
         writer(writer),
         mpiLayer(communicator),
@@ -64,6 +64,7 @@ public:
         CoordBox<DIM> box = grid.boundingBox();
         StorageGridType localGrid(box);
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            // fixme: slow. better: get whole lines
             localGrid[*i] = grid.get(*i);
         }
 
@@ -105,7 +106,7 @@ private:
     MPILayer mpiLayer;
     size_t root;
     StorageGridType globalGrid;
-    MPI::Datatype datatype;
+    MPI_Datatype datatype;
 };
 
 }

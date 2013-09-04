@@ -454,12 +454,11 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     Typemaps::initializeMaps();
 
-    MPI::Aint displacements[] = {0};
-    MPI::Datatype memberTypes[] = {MPI::CHAR};
-    int lengths[] = {sizeof(Cell)};
-    MPI::Datatype objType;
-    objType =
-        MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
+    MPI_Aint displacements[] = { 0 };
+    MPI_Datatype memberTypes[] = { MPI_CHAR };
+    int lengths[] = { sizeof(Cell) };
+    MPI_Datatype objType;
+    objType = MPI_Datatype::Create_struct(1, lengths, displacements, memberTypes);
     objType.Commit();
 
     {
@@ -478,7 +477,7 @@ int main(int argc, char *argv[])
                 "snapshot",
                 6000,
                 init->maxSteps(),
-                MPI::COMM_WORLD,
+                MPI_COMM_WORLD,
                 objType));
 
         sim.addWriter(
