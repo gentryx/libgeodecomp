@@ -10,8 +10,11 @@
 namespace LibGeoDecomp {
 
 /**
- * SerialSimulator is the simplest implementation of the simulator
- * concept.
+ * SerialSimulator is the simplest implementation of the Simulator
+ * concept (or rather the MonolithicSimulator, to be exact). It's
+ * purpose is to make fostering new applications easier. The absence
+ * of concurrency simplifies debugging. As its name implies, it
+ * doesn't do any threading, but vectorization (SIMD) is supported.
  */
 template<typename CELL_TYPE>
 class SerialSimulator : public MonolithicSimulator<CELL_TYPE>

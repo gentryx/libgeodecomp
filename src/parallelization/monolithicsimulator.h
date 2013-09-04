@@ -9,6 +9,9 @@ namespace LibGeoDecomp {
 
 template<class CELL_TYPE> class Writer;
 
+/**
+ * A MonolithicSimulator is a Simulator which runs on a
+ */
 template<typename CELL_TYPE>
 class MonolithicSimulator : public Simulator<CELL_TYPE>
 {

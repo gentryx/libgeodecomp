@@ -33,8 +33,12 @@ public:
 }
 
 /**
- * This is the abstract main application class. Its descendants
- * perform the iteration of simulation steps.
+ * A Simulator controls the workflow of the simulation. It also needs
+ * to interface with the Initializer (for setting up the initial
+ * grid), Writer objects (for output) and Steerer objects (for input
+ * at runtime). Simulator itself is just an abstract base class,
+ * implementations may target different hardware architectures (e.g.
+ * CUDASimulator or SerialSimulator).
  */
 template<typename CELL_TYPE>
 class Simulator
