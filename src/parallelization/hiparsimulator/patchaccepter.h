@@ -55,7 +55,7 @@ protected:
             nanoStep < (requestedNanoSteps.min)())
             return false;
         if (nanoStep > (requestedNanoSteps.min)()) {
-            std::cout << "got: " << nanoStep << " expected " << (requestedNanoSteps.min)() << "\n";
+            std::cerr << "got: " << nanoStep << " expected " << (requestedNanoSteps.min)() << "\n";
             throw std::logic_error("expected nano step was left out");
         }
 
