@@ -153,7 +153,7 @@ void runSimulation()
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
         10,
-        MPI_BOOL);
+        MPI_C_BOOL);
 
     sim.addWriter(
         new BOVWriter<ConwayCell, StateSelector>(

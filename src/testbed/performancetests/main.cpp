@@ -14,7 +14,7 @@
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
-#include <libgeodecomp/testbed/performancetests/cpubenchmarks.h>
+#include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
 #include <stdio.h>
 

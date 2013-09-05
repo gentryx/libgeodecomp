@@ -343,7 +343,7 @@ void runSimulation()
     int lengths[] = { sizeof(Cell) };
     MPI_Datatype objType;
     MPI_Type_create_struct(1, lengths, displacements, memberTypes, &objType);
-    MPI_Type_commit(objType);
+    MPI_Type_commit(&objType);
 
     int outputFrequency = 1000;
     CellInitializer *init = new CellInitializer(Coord<3>(400, 400, 400), 2000000);

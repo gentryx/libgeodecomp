@@ -115,7 +115,7 @@ We recommend an out-of-source build:
   mkdir -p $BUILD_DIR
   cd $BUILD_DIR
   cmake ../../src/
-  make 
+  make
 
 That's it. CMake will output a number of configure options. You can
 change these by specifying their valued via "-D NAME=value". Note that

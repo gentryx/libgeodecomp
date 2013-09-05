@@ -458,8 +458,8 @@ int main(int argc, char *argv[])
     MPI_Datatype memberTypes[] = { MPI_CHAR };
     int lengths[] = { sizeof(Cell) };
     MPI_Datatype objType;
-    objType = MPI_Datatype::Create_struct(1, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Type_create_struct(1, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
 
     {
         AeroInitializer *init = new AeroInitializer(
