@@ -8,7 +8,7 @@ if(FEATURE_INTRINSICS)
   target_link_libraries(performancetests ${LOCAL_LIBGEODECOMP_LINK_LIB})
 endif()
 
-if(FEATURE_CUDA)
+if(FEATURE_CUDA AND FEATURE_INTRINSICS)
   cuda_add_library(cudatests cudatests.cu)
   target_link_libraries(performancetests cudatests)
 endif()
