@@ -1,9 +1,7 @@
 #include "typemaps.h"
 #include <algorithm>
 
-namespace MPI {
-    CLASS_VARS
-}
+CLASS_VARS
 
 NAMESPACE_BEGIN
 

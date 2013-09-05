@@ -2,7 +2,7 @@ require 'pathname'
 
 # Here we generate the C++ code that will in turn create the typemaps
 # for MPI.
-class MPIGenerator  
+class MPIGenerator
   def initialize(template_path="./", namespace=nil, macro_guard=nil)
     @path = Pathname.new(template_path)
     if namespace
@@ -34,12 +34,12 @@ class MPIGenerator
     ret.gsub!(/NUM_MEMBERS/, num_members.to_s)
 
     member_specs1 = members.map do |name, properties|
-      "        MemberSpec(MPI::Get_address(&obj->#{name}), #{properties[:type]}, #{properties[:cardinality]})"
+      "        MemberSpec(getAddress(&obj->#{name}), #{properties[:type]}, #{properties[:cardinality]})"
     end
     member_specs2 = []
     if parents
       member_specs2 = parents.map do |name, mpiname|
-        "        MemberSpec(MPI::Get_address((#{name}*)obj), #{mpiname}, 1)"
+        "        MemberSpec(getAddress((#{name}*)obj), #{mpiname}, 1)"
       end
     end
     member_specs = member_specs1 + member_specs2
@@ -56,19 +56,19 @@ class MPIGenerator
     ret.gsub!(/NAMESPACE_END\n/, @namespace_end)
 
     class_vars = classes.map do |klass|
-      klass_name = datatype_map[klass].sub(/MPI::/, "")
-      "    extern Datatype #{klass_name};"
+      klass_name = datatype_map[klass]
+      "extern MPI_Datatype #{klass_name};"
     end
     ret.sub!(/.*CLASS_VARS/, class_vars.join("\n"))
-    
+
     mapgens = classes.map do |klass|
-      "    static MPI::Datatype generateMap#{simple_name(klass)}();"
+      "    static MPI_Datatype generateMap#{simple_name(klass)}();"
     end
     ret.sub!(/.*MAPGEN_DECLARATIONS/, mapgens.join("\n"))
-    
+
     lookup_types = (Datatype.new.keys.sort + classes).uniq
     lookups = lookup_types.map do |klass|
-      "    static inline MPI::Datatype lookup(#{klass}*) { return #{datatype_map[klass]}; }"
+      "    static inline MPI_Datatype lookup(#{klass}*) { return #{datatype_map[klass]}; }"
     end
     ret.sub!(/.*LOOKUP_DEFINITIONS/, lookups.join("\n"))
 
@@ -96,8 +96,8 @@ class MPIGenerator
     ret = File.read(@path + "template_typemaps.cpp");
 
     class_vars = topological_class_sortation.map do |klass|
-      klass_name = datatype_map[klass].sub(/MPI::/, "")
-      "    Datatype #{klass_name};"
+      klass_name = datatype_map[klass]
+      "MPI_Datatype #{klass_name};"
     end
     ret.sub!(/ *CLASS_VARS/, class_vars.join("\n"))
     ret.sub!(/NAMESPACE_BEGIN\n/, @namespace_begin)
@@ -122,7 +122,7 @@ class MPIGenerator
 
   # wraps the code generation for multiple typemaps.
   def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers, header_pattern=nil, header_replacement=nil)
-    return [generate_header(topological_class_sortation, datatype_map, headers, header_pattern, header_replacement), 
+    return [generate_header(topological_class_sortation, datatype_map, headers, header_pattern, header_replacement),
             generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)]
   end
 

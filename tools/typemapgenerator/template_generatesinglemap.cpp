@@ -30,7 +30,7 @@ Typemaps::generateMapKLASS_NAME() {
     // create datatype
     MPI_Datatype objType;
     MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
-    MPI_Type_commit(objType);
+    MPI_Type_commit(&objType);
 
     return objType;
 }
