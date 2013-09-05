@@ -22,7 +22,7 @@ class Datatype < Hash
       self[t] = Datatype.cpp_to_mpi(t)
     end
 
-    self["bool"] = "MPI_C_BOOL"
+    self["bool"] = "MPI_CHAR"
     self["wchar_t"] = "MPI_WCHAR"
     self["std::complex<float>"] = "MPI_COMPLEX"
     self["std::complex<double>"] = "MPI_DOUBLE_COMPLEX"
