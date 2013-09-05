@@ -98,7 +98,7 @@ private:
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoord_3_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper();
 
-    static inline MPI_Datatype lookup(bool*) { return MPI_C_BOOL; }
+    static inline MPI_Datatype lookup(bool*) { return MPI_CHAR; }
     static inline MPI_Datatype lookup(char*) { return MPI_CHAR; }
     static inline MPI_Datatype lookup(double*) { return MPI_DOUBLE; }
     static inline MPI_Datatype lookup(float*) { return MPI_FLOAT; }
@@ -140,7 +140,7 @@ private:
     static inline MPI_Datatype lookup(LibGeoDecomp::FloatCoord<3 >*) { return MPI_LIBGEODECOMP_FLOATCOORD_3_; }
     static inline MPI_Datatype lookup(LibGeoDecomp::FloatCoordMPIDatatypeHelper*) { return MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER; }
 };
-};
+}
 
 #endif
 

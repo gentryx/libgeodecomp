@@ -628,8 +628,8 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), MPI_UNSIGNED, 1),
         MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORDBOX_1_, 1),
-        MemberSpec(getAddress(&obj->isEdgeCell), MPI_C_BOOL, 1),
-        MemberSpec(getAddress(&obj->isValid), MPI_C_BOOL, 1),
+        MemberSpec(getAddress(&obj->isEdgeCell), MPI_CHAR, 1),
+        MemberSpec(getAddress(&obj->isValid), MPI_CHAR, 1),
         MemberSpec(getAddress(&obj->pos), MPI_LIBGEODECOMP_COORD_1_, 1),
         MemberSpec(getAddress(&obj->testValue), MPI_DOUBLE, 1)
     };
@@ -670,8 +670,8 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), MPI_UNSIGNED, 1),
         MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORDBOX_2_, 1),
-        MemberSpec(getAddress(&obj->isEdgeCell), MPI_C_BOOL, 1),
-        MemberSpec(getAddress(&obj->isValid), MPI_C_BOOL, 1),
+        MemberSpec(getAddress(&obj->isEdgeCell), MPI_CHAR, 1),
+        MemberSpec(getAddress(&obj->isValid), MPI_CHAR, 1),
         MemberSpec(getAddress(&obj->pos), MPI_LIBGEODECOMP_COORD_2_, 1),
         MemberSpec(getAddress(&obj->testValue), MPI_DOUBLE, 1)
     };
@@ -712,8 +712,8 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->cycleCounter), MPI_UNSIGNED, 1),
         MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORDBOX_3_, 1),
-        MemberSpec(getAddress(&obj->isEdgeCell), MPI_C_BOOL, 1),
-        MemberSpec(getAddress(&obj->isValid), MPI_C_BOOL, 1),
+        MemberSpec(getAddress(&obj->isEdgeCell), MPI_CHAR, 1),
+        MemberSpec(getAddress(&obj->isValid), MPI_CHAR, 1),
         MemberSpec(getAddress(&obj->pos), MPI_LIBGEODECOMP_COORD_3_, 1),
         MemberSpec(getAddress(&obj->testValue), MPI_DOUBLE, 1)
     };

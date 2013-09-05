@@ -8,7 +8,7 @@ class MPIGenerator
     if namespace
       @namespace_guard = namespace.upcase + "_"
       @namespace_begin = "namespace #{namespace} {\n"
-      @namespace_end = "};\n"
+      @namespace_end = "}\n"
     else
       @namespace_guard = ""
       @namespace_begin = ""
