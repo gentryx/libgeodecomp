@@ -958,6 +958,6 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER = generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper();
 }
 
-};
+}
 
 #endif
