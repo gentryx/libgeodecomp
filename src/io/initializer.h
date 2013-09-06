@@ -12,6 +12,13 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The initializer sets up the initial state of the grid. For this a
+ * Simulator will invoke Initializer::grid(). Keep in mind that grid()
+ * might be called multiple times and that for parallel runs each
+ * Initializer will be responsible just for a sub-cuboid of the whole
+ * grid.
+ */
 template<typename CELL>
 class Initializer
 {
@@ -27,7 +34,7 @@ public:
     /**
      * initializes all cells of the grid at target
      */
-    virtual void grid(GridBase<CELL, Topology::DIM> *target) =0;
+    virtual void grid(GridBase<CELL, Topology::DIM> *target) = 0;
 
     virtual ~Initializer()
     {}
