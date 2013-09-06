@@ -14,6 +14,7 @@ MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_1_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_2_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_3_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASEMPIDATATYPEHELPER;
+MPI_Datatype MPI_LIBGEODECOMP_MYSIMPLECELL;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_1_;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_2_;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_3_;
@@ -437,6 +438,43 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper() {
         MemberSpec(getAddress(&obj->a), MPI_LIBGEODECOMP_FLOATCOORDBASE_1_, 1),
         MemberSpec(getAddress(&obj->b), MPI_LIBGEODECOMP_FLOATCOORDBASE_2_, 1),
         MemberSpec(getAddress(&obj->c), MPI_LIBGEODECOMP_FLOATCOORDBASE_3_, 1)
+    };
+    std::sort(rawSpecs, rawSpecs + count, addressLower);
+
+    // split addresses from member types
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
+    for (int i = 0; i < count; i++) {
+        displacements[i] = rawSpecs[i].address;
+        memberTypes[i] = rawSpecs[i].type;
+        lengths[i] = rawSpecs[i].length;
+    }
+
+    // transform absolute addresses into offsets
+    for (int i = count-1; i > 0; i--) {
+        displacements[i] -= displacements[0];
+    }
+    displacements[0] = 0;
+
+    // create datatype
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
+
+    return objType;
+}
+
+MPI_Datatype
+Typemaps::generateMapLibGeoDecomp_MySimpleCell() {
+    char fakeObject[sizeof(LibGeoDecomp::MySimpleCell)];
+    LibGeoDecomp::MySimpleCell *obj = (LibGeoDecomp::MySimpleCell*)fakeObject;
+
+    const int count = 1;
+    int lengths[count];
+
+    // sort addresses in ascending order
+    MemberSpec rawSpecs[] = {
+        MemberSpec(getAddress(&obj->temp), MPI_DOUBLE, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -944,6 +982,7 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_FLOATCOORDBASE_2_ = generateMapLibGeoDecomp_FloatCoordBase_2_();
     MPI_LIBGEODECOMP_FLOATCOORDBASE_3_ = generateMapLibGeoDecomp_FloatCoordBase_3_();
     MPI_LIBGEODECOMP_FLOATCOORDBASEMPIDATATYPEHELPER = generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper();
+    MPI_LIBGEODECOMP_MYSIMPLECELL = generateMapLibGeoDecomp_MySimpleCell();
     MPI_LIBGEODECOMP_STREAK_1_ = generateMapLibGeoDecomp_Streak_1_();
     MPI_LIBGEODECOMP_STREAK_2_ = generateMapLibGeoDecomp_Streak_2_();
     MPI_LIBGEODECOMP_STREAK_3_ = generateMapLibGeoDecomp_Streak_3_();
@@ -958,6 +997,6 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER = generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper();
 }
 
-};
+}
 
 #endif

@@ -8,21 +8,11 @@
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
+#include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
 
 using namespace LibGeoDecomp;
 
 std::string revision;
-
-class MySimpleCell
-{
-public:
-    class API :
-        public APITraits::HasCubeTopology<3>,
-        public APITraits::HasStencil<Stencils::Moore<3, 1> >
-    {};
-
-    double temp;
-};
 
 class CollectingWriterStepFinished1 : public CPUBenchmark
 {
@@ -45,7 +35,7 @@ public:
         if (mpiLayer.rank() == 0) {
             cargoWriter = new MemoryWriter<MySimpleCell>(1);
         }
-        CollectingWriter<MySimpleCell> writer(cargoWriter, 1, 0, MPI_COMM_WORLD, MPI_DOUBLE);
+        CollectingWriter<MySimpleCell> writer(cargoWriter, 1, 0);
 
         typedef CollectingWriter<MySimpleCell>::SimulatorGridType SimulatorGridType;
         typedef CollectingWriter<MySimpleCell>::StorageGridType StorageGridType;
@@ -71,12 +61,9 @@ public:
         long long tEnd = Chronometer::timeUSec();
 
 
-        // fixme: implement me
         // fixme: add test for cell with SoA
         return seconds(tStart, tEnd);
     }
-
-    // fixme: benchmark mpi functions
 
     std::string unit()
     {
@@ -84,12 +71,17 @@ public:
     }
 };
 
-class PatchLink1 : public CPUBenchmark
+template<typename MODEL>
+class PatchLinkTest : public CPUBenchmark
 {
 public:
+    PatchLinkTest(const std::string& modelName) :
+        modelName(modelName)
+    {}
+
     std::string family()
     {
-        return "PatchLink1";
+        return "PatchLink" + modelName;
     }
 
     std::string species()
@@ -101,10 +93,10 @@ public:
     {
         MPILayer mpiLayer;
 
-        typedef HiParSimulator::Stepper<MySimpleCell>::GridType GridType;
+        typedef typename HiParSimulator::Stepper<MODEL>::GridType GridType;
 
         CoordBox<3> gridBox(Coord<3>(), dim);
-        GridType grid(gridBox, MySimpleCell(), MySimpleCell(), dim);
+        GridType grid(gridBox, MODEL(), MODEL(), dim);
         Coord<3> offset(10, 10, 10);
         CoordBox<3> transmissionBox(offset, dim - offset * 2);
         Region<3> transmissionRegion;
@@ -116,7 +108,7 @@ public:
         long long tEnd = 0;
 
         if (mpiLayer.rank() == 0) {
-            HiParSimulator::PatchLink<GridType>::Provider provider(
+            typename HiParSimulator::PatchLink<GridType>::Provider provider(
                 transmissionRegion,
                 1,
                 666,
@@ -132,7 +124,7 @@ public:
             tEnd = Chronometer::timeUSec();
 
         } else {
-            HiParSimulator::PatchLink<GridType>::Accepter accepter(
+            typename HiParSimulator::PatchLink<GridType>::Accepter accepter(
                 transmissionRegion,
                 0,
                 666,
@@ -144,18 +136,17 @@ public:
             }
         }
 
-        // // fixme: repeats? sizes?
-        // // fixme: implement me
-        // // fixme: add test for cell with SoA
+        // fixme: add test for cell with SoA
         return seconds(tStart, tEnd);
     }
-
-    // fixme: benchmark mpi functions
 
     std::string unit()
     {
         return "s";
     }
+
+private:
+    std::string modelName;
 };
 
 int main(int argc, char **argv)
@@ -192,7 +183,7 @@ int main(int argc, char **argv)
     }
 
     eval(CollectingWriterStepFinished1(), Coord<3>::diagonal(256), output);
-    eval(PatchLink1(), Coord<3>::diagonal(256), output);
+    eval(PatchLinkTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(256), output);
 
     MPI_Finalize();
     return 0;
