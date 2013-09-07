@@ -14,14 +14,18 @@ using namespace LibGeoDecomp;
 
 std::string revision;
 
-class CollectingWriterStepFinished1 : public CPUBenchmark
+template<typename CELL_TYPE>
+class CollectingWriterPerfTest : public CPUBenchmark
 {
 public:
+    CollectingWriterPerfTest(const std::string& modelName) :
+        modelName(modelName)
+    {}
+
     std::string family()
     {
-        return "CollectingWriterStepFinished1";
+        return "CollectingWriter<" + modelName + ">";
     }
-
     std::string species()
     {
         return "gold";
@@ -31,14 +35,14 @@ public:
     {
         MPILayer mpiLayer;
 
-        Writer<MySimpleCell> *cargoWriter = 0;
+        Writer<CELL_TYPE> *cargoWriter = 0;
         if (mpiLayer.rank() == 0) {
-            cargoWriter = new MemoryWriter<MySimpleCell>(1);
+            cargoWriter = new MemoryWriter<CELL_TYPE>(1);
         }
-        CollectingWriter<MySimpleCell> writer(cargoWriter, 1, 0);
+        CollectingWriter<CELL_TYPE> writer(cargoWriter, 1, 0);
 
-        typedef CollectingWriter<MySimpleCell>::SimulatorGridType SimulatorGridType;
-        typedef CollectingWriter<MySimpleCell>::StorageGridType StorageGridType;
+        typedef typename CollectingWriter<CELL_TYPE>::SimulatorGridType SimulatorGridType;
+        typedef typename CollectingWriter<CELL_TYPE>::StorageGridType StorageGridType;
 
         StorageGridType grid(CoordBox<3>(Coord<3>(), dim));
 
@@ -55,33 +59,47 @@ public:
         region << regionBox;
 
         long long tStart = Chronometer::timeUSec();
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < repeats(); ++i) {
             writer.stepFinished(grid, region, dim, 0, WRITER_INITIALIZED, mpiLayer.rank(), true);
         }
         long long tEnd = Chronometer::timeUSec();
 
 
         // fixme: add test for cell with SoA
-        return seconds(tStart, tEnd);
+        return gigaBytesPerSecond(dim, seconds(tStart, tEnd));
     }
 
     std::string unit()
     {
-        return "s";
+        return "GB/s";
+    }
+
+private:
+    std::string modelName;
+
+    double gigaBytesPerSecond(const Coord<3>& dim, double seconds)
+    {
+        // multiply by 2 because all parts of the grid get sent AND received
+        return 2.0 * dim.prod() * repeats() * sizeof(CELL_TYPE) * 1e-9 / seconds;
+    }
+
+    int repeats()
+    {
+        return 10;
     }
 };
 
-template<typename MODEL>
-class PatchLinkTest : public CPUBenchmark
+template<typename CELL_TYPE>
+class PatchLinkPerfTest : public CPUBenchmark
 {
 public:
-    PatchLinkTest(const std::string& modelName) :
+    PatchLinkPerfTest(const std::string& modelName) :
         modelName(modelName)
     {}
 
     std::string family()
     {
-        return "PatchLink" + modelName;
+        return "PatchLink<" + modelName + ">";
     }
 
     std::string species()
@@ -93,32 +111,34 @@ public:
     {
         MPILayer mpiLayer;
 
-        typedef typename HiParSimulator::Stepper<MODEL>::GridType GridType;
+        typedef typename HiParSimulator::Stepper<CELL_TYPE>::GridType GridType;
 
         CoordBox<3> gridBox(Coord<3>(), dim);
-        GridType grid(gridBox, MODEL(), MODEL(), dim);
+        GridType grid(gridBox, CELL_TYPE(), CELL_TYPE(), dim);
         Coord<3> offset(10, 10, 10);
         CoordBox<3> transmissionBox(offset, dim - offset * 2);
         Region<3> transmissionRegion;
         transmissionRegion << transmissionBox;
         Region<3> wholeGridRegion;
         wholeGridRegion << gridBox;
-
+        int repeats = 0;
         long long tStart = 0;
         long long tEnd = 0;
+        int maxNanoStep = 201234;
 
         if (mpiLayer.rank() == 0) {
             typename HiParSimulator::PatchLink<GridType>::Provider provider(
                 transmissionRegion,
                 1,
                 666,
-                MPI_DOUBLE);
-            provider.charge(1234, 201234, 1000);
+                Typemaps::lookup<CELL_TYPE>());
+            provider.charge(1234, maxNanoStep, 1000);
 
             tStart = Chronometer::timeUSec();
 
-            for (int i = 1234; i <= 201234; i += 1000) {
+            for (int i = 1234; i <= maxNanoStep; i += 1000) {
                 provider.get(&grid, wholeGridRegion, i, true);
+                ++repeats;
             }
 
             tEnd = Chronometer::timeUSec();
@@ -128,25 +148,32 @@ public:
                 transmissionRegion,
                 0,
                 666,
-                MPI_DOUBLE);
-            accepter.charge(1234, 201234, 1000);
+                Typemaps::lookup<CELL_TYPE>());
+            accepter.charge(1234, maxNanoStep, 1000);
 
-            for (int i = 1234; i <= 201234; i += 1000) {
+            for (int i = 1234; i <= maxNanoStep; i += 1000) {
                 accepter.put(grid, wholeGridRegion, i);
             }
         }
 
         // fixme: add test for cell with SoA
-        return seconds(tStart, tEnd);
+        return gigaBytesPerSecond(transmissionBox.dimensions, repeats, seconds(tStart, tEnd));
     }
 
     std::string unit()
     {
-        return "s";
+        return "GB/s";
     }
 
 private:
     std::string modelName;
+
+    double gigaBytesPerSecond(const Coord<3>& dim, int repeats, double seconds)
+    {
+        // multiply by 2 because the whole transmissionBox is read and written
+        return 2.0 * dim.prod() * repeats * sizeof(CELL_TYPE) * 1e-9 / seconds;
+    }
+
 };
 
 int main(int argc, char **argv)
@@ -182,8 +209,10 @@ int main(int argc, char **argv)
         eval.printHeader();
     }
 
-    eval(CollectingWriterStepFinished1(), Coord<3>::diagonal(256), output);
-    eval(PatchLinkTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(256), output);
+    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(256), output);
+    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
+    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(200), output);
+    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
 
     MPI_Finalize();
     return 0;
