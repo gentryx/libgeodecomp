@@ -1997,8 +1997,6 @@ public:
 
 LIBFLATARRAY_REGISTER_SOA(LBMSoACell, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS))((double)(density))((double)(velocityX))((double)(velocityY))((double)(velocityZ))((LBMSoACell::State)(state)))
 
-
-
 class LBMClassic : public CPUBenchmark
 {
 public:
