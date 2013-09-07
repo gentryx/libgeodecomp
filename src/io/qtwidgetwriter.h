@@ -31,7 +31,6 @@ public:
         }
     }
 
-
     void paintEvent(QPaintEvent *event)
     {
         QPainter painter(this);
@@ -82,7 +81,7 @@ public:
         painter->fillRect(x, y, dimX, dimY, color.rgb);
     }
 
-  private:
+private:
     QPainter *painter;
     Coord<2> translation;
 };
@@ -109,23 +108,12 @@ public:
 
         QPainter qPainter(myWidget.getImage());
 
-        for (int y = 0; y < gridDim.y(); ++y) {
-            for (int x = 0; x < gridDim.x(); ++x) {
-                qPainter.fillRect(x * cellDimensions.x(), y * cellDimensions.y(),
-                                  cellDimensions.x(), cellDimensions.y(),
-                                  QColor(x * 255 / gridDim.x(), y * 255 / gridDim.y(), 255));
-            }
-        }
-
         {
             QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
             Plotter<CELL_TYPE, CELL_PLOTTER> plotter(cellDimensions);
             CoordBox<2> viewport(Coord<2>(0, 0), myWidget.getImage()->size());
             plotter.plotGridInViewport(grid, painter, viewport);
         }
-
-        qPainter.fillRect(0, 0, 10, 10, QColor(0, 0, 255));
-        qPainter.fillRect(imageSize.x() - 10, imageSize.y() - 10, 10, 10, QColor(0, 0, 255));
 
         myWidget.swapImages();
         myWidget.update();
