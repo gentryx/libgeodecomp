@@ -180,6 +180,7 @@ public:
 
             checkNanoStepGet(nanoStep);
             wait();
+
             GridVecConv::vectorToGrid(buffer, grid, region);
 
             std::size_t nextNanoStep = storedNanoSteps.min() + stride;

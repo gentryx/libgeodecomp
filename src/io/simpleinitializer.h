@@ -10,6 +10,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This convenience class implements some straightforward functions of
+ * Initializer. Generally users will only need to implement grid().
+ */
 template<typename CELL_TYPE>
 class SimpleInitializer : public Initializer<CELL_TYPE>
 {

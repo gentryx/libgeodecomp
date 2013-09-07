@@ -61,7 +61,7 @@ public:
             std::cout << "pure debug statement to prevent the compiler from optimizing away the previous loop";
         }
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -96,7 +96,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -141,7 +141,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -183,7 +183,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -226,7 +226,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -272,7 +272,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -2108,31 +2108,32 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family          ; species ; dimensions              ; perf        ; unit\n";
+    Evaluate eval;
+    eval.printHeader();
 
-    evaluate(RegionCount(), Coord<3>( 128,  128,  128));
-    evaluate(RegionCount(), Coord<3>( 512,  512,  512));
-    evaluate(RegionCount(), Coord<3>(2048, 2048, 2048));
+    eval(RegionCount(), Coord<3>( 128,  128,  128));
+    eval(RegionCount(), Coord<3>( 512,  512,  512));
+    eval(RegionCount(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
-    evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
-    evaluate(RegionInsert(), Coord<3>(2048, 2048, 2048));
+    eval(RegionInsert(), Coord<3>( 128,  128,  128));
+    eval(RegionInsert(), Coord<3>( 512,  512,  512));
+    eval(RegionInsert(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
-    evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
-    evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
+    eval(RegionIntersect(), Coord<3>( 128,  128,  128));
+    eval(RegionIntersect(), Coord<3>( 512,  512,  512));
+    eval(RegionIntersect(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
+    eval(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
+    eval(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
+    eval(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
+    eval(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
+    eval(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
+    eval(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
     SuperVector<Coord<3> > sizes;
     sizes << Coord<3>(22, 22, 22)
@@ -2147,27 +2148,27 @@ int main(int argc, char **argv)
           << Coord<3>(1026, 1026, 32);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DVanilla(), sizes[i]);
+        eval(Jacobi3DVanilla(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DSSE(), sizes[i]);
+        eval(Jacobi3DSSE(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DClassic(), sizes[i]);
+        eval(Jacobi3DClassic(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DFixedHood(), sizes[i]);
+        eval(Jacobi3DFixedHood(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdate(), sizes[i]);
+        eval(Jacobi3DStreakUpdate(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
+        eval(Jacobi3DStreakUpdateFunctor(), sizes[i]);
     }
 
     sizes.clear();
@@ -2180,11 +2181,11 @@ int main(int argc, char **argv)
           << Coord<3>(160, 160, 160);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(LBMClassic(), sizes[i]);
+        eval(LBMClassic(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(LBMSoA(), sizes[i]);
+        eval(LBMSoA(), sizes[i]);
     }
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA

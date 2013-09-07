@@ -602,18 +602,20 @@ void cudaTests(std::string revision, bool quick, int cudaDevice)
     cudaGetDeviceProperties(&properties, cudaDevice);
     cudaDeviceID = properties.name;
 
+    Evaluate eval;
+
     for (int d = 32; d <= 544; d += 4) {
-        evaluate(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));
     }
     for (int d = 32; d <= 544; d += 4) {
-        evaluate(BenchmarkCUDA<RTMSoA>(),     Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<RTMSoA>(),     Coord<3>::diagonal(d));
     }
     for (int d = 32; d <= 160; d += 4) {
         Coord<3> dim(d, d, 256 + 32 - 4);
-        evaluate(BenchmarkCUDA<LBMClassic>(), Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<LBMClassic>(), Coord<3>::diagonal(d));
     }
     for (int d = 32; d <= 160; d += 4) {
         Coord<3> dim(d, d, 256 + 32 - 4);
-        evaluate(BenchmarkCUDA<LBMSoA>(),     Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<LBMSoA>(),     Coord<3>::diagonal(d));
     }
 }

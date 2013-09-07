@@ -13,6 +13,10 @@ public:
     virtual std::string unit() = 0;
     virtual std::string device() = 0;
 
+    double seconds(long long tStart, long long tEnd)
+    {
+        return (tEnd - tStart) * 0.000001;
+    }
 };
 
 #endif
