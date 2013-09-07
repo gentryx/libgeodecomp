@@ -11,7 +11,7 @@ namespace LibGeoDecomp {
 class TestCellTest : public CxxTest::TestSuite
 {
 private:
-    typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::NoOutput> TestCellType;
+    typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCellType;
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCellType>::VALUE;
     Grid<TestCellType> grid;
     int width;
@@ -126,6 +126,7 @@ public:
         3,
         Stencils::Moore<3, 1>,
         Topologies::Torus<3>::Topology,
+        TestCellHelpers::EmptyAPI,
         TestCellHelpers::NoOutput> TestCell3D;
     typedef Grid<TestCell3D, APITraits::SelectTopology<TestCell3D>::Value> Grid3D;
 

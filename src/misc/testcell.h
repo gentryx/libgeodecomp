@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
+#include <libflatarray/flat_array.hpp>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
@@ -11,6 +12,10 @@
 namespace LibGeoDecomp {
 
 namespace TestCellHelpers {
+
+class EmptyAPI
+{
+};
 
 template<int DIM>
 class TopologyType
@@ -67,9 +72,10 @@ public:
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
 template<int DIM,
-         class STENCIL=Stencils::Moore<DIM, 1>,
-         class TOPOLOGY=typename TestCellHelpers::TopologyType<DIM>::Topology,
-         class OUTPUT=TestCellHelpers::StdOutput>
+         typename STENCIL = Stencils::Moore<DIM, 1>,
+         class TOPOLOGY = typename TestCellHelpers::TopologyType<DIM>::Topology,
+         class ADDITIONAL_API = TestCellHelpers::EmptyAPI,
+         class OUTPUT = TestCellHelpers::StdOutput>
 class TestCell
 {
 public:
@@ -80,6 +86,7 @@ public:
     static const unsigned NANO_STEPS = 27;
 
     class API :
+        // public ADDITIONAL_API,
         public APITraits::HasTopology<TOPOLOGY>,
         public APITraits::HasNanoSteps<NANO_STEPS>,
         public APITraits::HasStencil<STENCIL>
@@ -266,6 +273,8 @@ class TestCellMPIDatatypeHelper
 };
 
 }
+
+LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::TestCell<3>, ((LibGeoDecomp::Coord<3>)(pos))((LibGeoDecomp::CoordBox<3>)(dimensions))((unsigned)(cycleCounter))((bool)(isEdgeCell))((bool)(isValid))((double)(testValue)))
 
 template<typename _CharT, typename _Traits, int _Dim>
 std::basic_ostream<_CharT, _Traits>&

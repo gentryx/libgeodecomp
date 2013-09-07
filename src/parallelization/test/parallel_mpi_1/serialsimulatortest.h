@@ -193,6 +193,11 @@ public:
         TS_ASSERT_EQUALS(events.str(), expected.str());
     }
 
+    void testSoA()
+    {
+        typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, APITraits::HasSoA> MyTestCell;
+    }
+
 private:
     boost::shared_ptr<SerialSimulator<TestCell<2> > > simulator;
     boost::shared_ptr<Initializer<TestCell<2> > > init;
