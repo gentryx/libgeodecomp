@@ -19,22 +19,22 @@ class Widget : public QWidget
 {
 public:
     Widget() :
-        image(0, 0, QImage::Format_ARGB32)
+        curImage(0, 0, QImage::Format_ARGB32),
+        bufImage(0, 0, QImage::Format_ARGB32)
     {}
 
     void resizeImage(const Coord<2>& imageSize)
     {
-        if (image.size() != QSize(imageSize.x(), imageSize.y())) {
-            image = QImage(imageSize.x(), imageSize.y(), QImage::Format_ARGB32);
+        if (curImage.size() != QSize(imageSize.x(), imageSize.y())) {
+            curImage = QImage(imageSize.x(), imageSize.y(), QImage::Format_ARGB32);
+            bufImage = QImage(imageSize.x(), imageSize.y(), QImage::Format_ARGB32);
         }
     }
-
 
     void paintEvent(QPaintEvent *event)
     {
         QPainter painter(this);
-
-        painter.drawImage(event->rect(), image);
+        painter.drawImage(event->rect(), curImage);
     }
 
     Coord<2> dimensions() const
@@ -44,11 +44,17 @@ public:
 
     QImage *getImage()
     {
-        return &image;
+        return &bufImage;
+    }
+
+    void swapImages()
+    {
+        std::swap(curImage, bufImage);
     }
 
 private:
-    QImage image;
+    QImage curImage;
+    QImage bufImage;
 };
 
 class PainterWrapper
@@ -57,6 +63,11 @@ public:
     PainterWrapper(QPainter *painter) :
         painter(painter)
     {}
+
+    ~PainterWrapper()
+    {
+        // painter->translate(-translation.x(), -translation.y());
+    }
 
     void moveTo(const Coord<2>& coord)
     {
@@ -70,7 +81,7 @@ public:
         painter->fillRect(x, y, dimX, dimY, color.rgb);
     }
 
-  private:
+private:
     QPainter *painter;
     Coord<2> translation;
 };
@@ -83,7 +94,8 @@ public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
     QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8)) :
-	cellDimensions(cellDimensions)
+        Writer<CELL_TYPE>("", 1),
+        cellDimensions(cellDimensions)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -95,10 +107,15 @@ public:
         myWidget.resizeImage(imageSize);
 
         QPainter qPainter(myWidget.getImage());
-        QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
-        Plotter<CELL_TYPE, CELL_PLOTTER> plotter(cellDimensions);
-        plotter.plotGridInViewport(grid, painter, CoordBox<2>(Coord<2>(0, 0), myWidget.dimensions()));
 
+        {
+            QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
+            Plotter<CELL_TYPE, CELL_PLOTTER> plotter(cellDimensions);
+            CoordBox<2> viewport(Coord<2>(0, 0), myWidget.getImage()->size());
+            plotter.plotGridInViewport(grid, painter, viewport);
+        }
+
+        myWidget.swapImages();
         myWidget.update();
     }
 
