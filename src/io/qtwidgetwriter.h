@@ -13,11 +13,15 @@
 
 namespace LibGeoDecomp {
 
+class QtWidgetWriterTest;
+
 namespace QtWidgetWriterHelpers {
 
 class Widget : public QWidget
 {
 public:
+    friend class LibGeoDecomp::QtWidgetWriterTest;
+
     Widget() :
         curImage(0, 0, QImage::Format_ARGB32),
         bufImage(0, 0, QImage::Format_ARGB32)
@@ -87,10 +91,12 @@ private:
 };
 
 }
+
 template<typename CELL_TYPE, typename CELL_PLOTTER>
 class QtWidgetWriter : public Writer<CELL_TYPE>
 {
 public:
+    friend class QtWidgetWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
     QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8)) :

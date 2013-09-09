@@ -70,7 +70,7 @@ public:
         }
         writer.stepFinished(grid, 12, WRITER_INITIALIZED);
 
-        QImage *image = writer.widget()->getImage();
+        QImage& image = writer.widget()->curImage;
         for (int y = 0; y < 50; ++y) {
             for (int x = 0; x < 100; ++x) {
                 for (int tileY = 0; tileY < cellDim.y(); ++tileY) {
@@ -83,13 +83,13 @@ public:
                         int value = (xReal * xReal + yReal * yReal) * 0.5 * 255;
 
                         // blue
-                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 0], 0);
+                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 0], 0);
                         // green
-                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 1], value);
+                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 1], value);
                         // red
-                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 2], 255);
+                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 2], 255);
                         // alpha
-                        TS_ASSERT_EQUALS(image->scanLine(logicalY)[4 * logicalX + 3], 255);
+                        TS_ASSERT_EQUALS(image.scanLine(logicalY)[4 * logicalX + 3], 255);
                     }
                 }
             }
