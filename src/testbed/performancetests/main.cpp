@@ -1693,7 +1693,7 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
     {
         updateLineXFluid(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
     }
