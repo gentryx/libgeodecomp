@@ -195,7 +195,28 @@ public:
 
     void testSoA()
     {
-        typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, APITraits::HasSoA> MyTestCell;
+
+        typedef GridBase<TestCellSoA, 3> GridBaseType;
+        SerialSimulator<TestCellSoA> sim(new TestInitializer<TestCellSoA>());
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), 0);
+
+        std::cout << sim.getGrid()->getEdge() << "\n"
+                  << (*sim.getGrid()).get(Coord<3>(0, 0, 0)) << "\n"
+                  << (*sim.getGrid()).get(Coord<3>(-1, -1, -1)) << "\n";
+
+        std::cout << "----------------------------------------------------------------------\n";
+        // sim.step();
+        std::cout << "----------------------------------------------------------------------\n";
+        // TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
+        //                     NANO_STEPS_3D);
+
+        // sim.nanoStep(0);
+        // TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
+        //                     NANO_STEPS_3D + 1);
+
+        // sim.run();
+        // TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
+        //                     21 * NANO_STEPS_3D);
     }
 
 private:

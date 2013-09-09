@@ -297,16 +297,17 @@ private:
             Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
             fillDim[DIM - 1] = 1;
 
-            buffers[omp_get_thread_num()].fill(CoordBox<DIM>(fillOrigin, fillDim), buffers[omp_get_thread_num()].getEdgeCell());
+            buffers[omp_get_thread_num()].fill(
+                CoordBox<DIM>(fillOrigin, fillDim),
+                buffers[omp_get_thread_num()].getEdgeCell());
+            
         } else {
-            for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak();
-                 iter != updateFrame.endStreak(); ++iter) {
-                Streak<DIM> sourceStreak = *iter;
-                Coord<DIM> targetCoord  = iter->origin;
-                sourceStreak.origin[DIM - 1] = sourceIndex;
-                targetCoord[DIM - 1] = targetIndex;
-                UpdateFunctor<CELL>()(sourceStreak, targetCoord, sourceGrid, targetGrid, curNanoStep);
-            }
+            Coord<DIM> sourceOffset;
+            Coord<DIM> targetOffset;
+            sourceOffset[DIM - 1] = sourceIndex;
+            targetOffset[DIM - 1] = targetIndex;
+
+            UpdateFunctor<CELL>()(updateFrame, sourceOffset, targetOffset, sourceGrid, targetGrid, curNanoStep);
         }
      }
 

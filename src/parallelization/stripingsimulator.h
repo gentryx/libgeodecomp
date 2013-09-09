@@ -297,16 +297,14 @@ private:
     void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
     {
         chrono.tic();
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            UpdateFunctor<CELL_TYPE>()(
-                *i,
-                i->origin,
-                *curStripe,
-                newStripe,
-                nanoStep);
-        }
+
+        UpdateFunctor<CELL_TYPE>()(
+            region,
+            Coord<DIM>(),
+            Coord<DIM>(),
+            *curStripe,
+            newStripe,
+            nanoStep);
 
         chrono.toc();
     }

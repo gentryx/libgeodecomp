@@ -19,13 +19,18 @@ public:
         typedef STENCIL Stencil;
 
         virtual void callFunctor(
-            const Streak<DIM>& streak,
+            const Region<DIM>& region,
             const GridType& gridOld,
             GridType *gridNew,
             unsigned nanoStep)
         {
-            VanillaUpdateFunctor<TestCellType>()(
-                streak, streak.origin, gridOld, gridNew, nanoStep);
+            for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+                 i != region.endStreak();
+                 ++i) {
+                Streak<DIM> streak = *i;
+                VanillaUpdateFunctor<TestCellType>()(
+                    streak, streak.origin, gridOld, gridNew, nanoStep);
+            }
         }
     };
 

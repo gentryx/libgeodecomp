@@ -114,7 +114,7 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
     {
         for (; *indexOld < indexEnd; ++*indexOld) {
             hoodNew.temp()  = hoodOld[FixedCoord<0, 0, 0>()].temp();
@@ -144,13 +144,13 @@ public:
         typedef STENCIL Stencil;
 
         virtual void callFunctor(
-            const Streak<DIM>& streak,
+            const Region<DIM>& region,
             const GridType& gridOld,
             GridType *gridNew,
             unsigned nanoStep)
         {
             UpdateFunctor<TestCellType>()(
-                streak, streak.origin, gridOld, gridNew, nanoStep);
+                region, Coord<DIM>(), Coord<DIM>(), gridOld, gridNew, nanoStep);
         }
     };
 
@@ -203,20 +203,25 @@ public:
             Coord<3> c(i, 2, 1);
             gridOld.set(c, MySoATestCell(i - 5));
         }
-        for (int i = 52; i < 74; ++i) {
-            Coord<3> c(i, 25, 55);
+        for (int i = 57; i < 79; ++i) {
+            Coord<3> c(i, 27, 56);
             TS_ASSERT_EQUALS(gridNew.get(c).temp,  11.0);
         }
 
-        Streak<3> streak(Coord<3>(5, 2, 1), 27);
-        Coord<3> targetOrigin(52, 25, 55);
-        UpdateFunctor<MySoATestCell>()(streak, targetOrigin, gridOld, &gridNew, 0);
+        Streak<3> streak(Coord<3>(4, 1, 0), 26);
+        Coord<3> sourceOffset(1, 1, 1);
+        Coord<3> targetOffset(53, 26, 56);
+        Region<3> region;
+        region << streak;
+        UpdateFunctor<MySoATestCell>()(region, sourceOffset, targetOffset, gridOld, &gridNew, 0);
 
-        for (int i = 52; i < 74; ++i) {
-            Coord<3> c(i, 25, 55);
-            TS_ASSERT_EQUALS(gridNew.get(c).temp,  i - 52);
+        for (int i = 57; i < 79; ++i) {
+            Coord<3> c(i, 27, 56);
+            TS_ASSERT_EQUALS(gridNew.get(c).temp,  i - 57);
         }
     }
+
+    // fixme: add test with Cube topology
 
 private:
     template<typename CELL>
@@ -228,8 +233,10 @@ private:
 
         Grid<CELL> gridOld(dim);
         Grid<CELL> gridNew(dim);
+        Region<2> region;
+        region << streak;
 
-        UpdateFunctor<CELL>()(streak, streak.origin, gridOld, &gridNew, nanoStep);
+        UpdateFunctor<CELL>()(region, Coord<2>(), Coord<2>(), gridOld, &gridNew, nanoStep);
 
         std::vector<char> message(1024 * 16, 0);
         myLog.read(&message[0], 1024 * 16);

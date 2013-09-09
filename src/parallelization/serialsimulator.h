@@ -115,7 +115,7 @@ protected:
 
     void nanoStep(const unsigned& nanoStep)
     {
-        UpdateFunctor<CELL_TYPE>()(simArea, Coord<DIM>(), *curGrid, newGrid, nanoStep);
+        UpdateFunctor<CELL_TYPE>()(simArea, Coord<DIM>(), Coord<DIM>(), *curGrid, newGrid, nanoStep);
         std::swap(curGrid, newGrid);
     }
 

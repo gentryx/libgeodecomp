@@ -60,9 +60,11 @@ public:
         typedef APITraits::SelectTopology<MySimpleDummyCell>::Value Topology;
         Grid<MySimpleDummyCell, Topology> gridOld(gridDim, 666, 31);
         Grid<MySimpleDummyCell, Topology> gridNew(gridDim);
+
         Streak<2> streak(Coord<2>(0, 0), 5);
-        Coord<2> targetOffset(0, 0);
-        UpdateFunctor<MySimpleDummyCell>()(streak, targetOffset, gridOld, &gridNew, 0);
+        Region<2> region;
+        region << streak;
+        UpdateFunctor<MySimpleDummyCell>()(region, Coord<2>(), Coord<2>(), gridOld, &gridNew, 0);
 
         std::string expected;
         for (int i = 0; i < streak.length(); ++i) {
@@ -81,9 +83,11 @@ public:
         typedef APITraits::SelectTopology<MyFancyDummyCell>::Value Topology;
         Grid<MyFancyDummyCell, Topology> gridOld(gridDim, 666, 31);
         Grid<MyFancyDummyCell, Topology> gridNew(gridDim);
+
         Streak<3> streak(Coord<3>(0, 0, 0), 4);
-        Coord<3> targetOffset(0, 0, 0);
-        UpdateFunctor<MyFancyDummyCell>()(streak, targetOffset, gridOld, &gridNew, 0);
+        Region<3> region;
+        region << streak;
+        UpdateFunctor<MyFancyDummyCell>()(region, Coord<3>(), Coord<3>(), gridOld, &gridNew, 0);
 
         std::string expected;
         for (int i = 0; i < streak.length(); ++i) {

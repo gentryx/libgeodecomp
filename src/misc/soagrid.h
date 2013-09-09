@@ -211,6 +211,11 @@ public:
         return edgeCell;
     }
 
+    const Coord<3>& getEdgeRadii() const
+    {
+        return edgeRadii;
+    }
+
     virtual CoordBox<DIM> boundingBox() const
     {
         return box;

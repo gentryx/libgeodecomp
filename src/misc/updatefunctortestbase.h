@@ -33,16 +33,12 @@ public:
         init.grid(&gridOld);
         GridType gridNew = gridOld;
 
-        CoordBox<DIM> lineStarts = gridOld.boundingBox();
-        lineStarts.dimensions.x() = 1;
+        Region<DIM> region;
+        region << gridOld.boundingBox();
+
 
         for (int s = 0; s < steps; ++s) {
-            for (typename CoordBox<DIM>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<DIM> streak(*i, dim.x());
-                callFunctor(streak, gridOld, &gridNew, s);
-            }
+            callFunctor(region, gridOld, &gridNew, s);
 
             int cycle = init.startStep() * NANO_STEPS + s;
             TS_ASSERT_TEST_GRID2(GridType, gridOld, cycle, typename);
@@ -79,8 +75,13 @@ public:
                 Streak<DIM> s1(origin1, halfWidth);
                 Streak<DIM> s2(origin2, dim.x());
 
-                callFunctor(s2, gridOld, &gridNew, s);
-                callFunctor(s1, gridOld, &gridNew, s);
+                Region<DIM> r1;
+                Region<DIM> r2;
+                r1 << s1;
+                r2 << s2;
+
+                callFunctor(r2, gridOld, &gridNew, s);
+                callFunctor(r1, gridOld, &gridNew, s);
             }
 
             int cycle = init.startStep() * NANO_STEPS + s;
@@ -93,7 +94,7 @@ public:
     }
 
     virtual void callFunctor(
-        const Streak<DIM>& streak,
+        const Region<DIM>& region,
         const GridType& gridOld,
         GridType *gridNew,
         unsigned nanoStep) = 0;
