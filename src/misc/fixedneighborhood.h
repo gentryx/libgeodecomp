@@ -36,9 +36,14 @@ public:
 
     template<int X, int Y, int Z>
     __host__ __device__
-   const LibFlatArray::soa_accessor<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
+    const LibFlatArray::soa_accessor<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
     {
         return accessor[LibFlatArray::coord<X, Y, Z>()];
+    }
+
+    void operator>>(CELL& cell) const
+    {
+        cell << accessor;
     }
 
 private:
