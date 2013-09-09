@@ -89,6 +89,8 @@ class TestCell
 public:
     friend class Typemaps;
     friend class TestCellTest;
+    // template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    // friend void operator<<(TestCell&, const LibFlatArray::soa_accessor<TestCell, DIM_X, DIM_Y, DIM_Z, INDEX>);
 
     static const int DIMENSIONS = DIM;
     static const unsigned NANO_STEPS = 27;
@@ -212,12 +214,12 @@ public:
             hoodOld >> cell1;
             cell2 << hoodNew;
 
-            std::cout << "updateLine\n"
-                      << "1:\n"
-                      << cell1 << "\n"
-                      << "2:\n"
-                      << cell2 << "\n";
-
+            // std::cout << "updateLine\n"
+            //           << "1:\n"
+            //           << cell1 << "\n"
+            //           << "2:\n"
+            //           << cell2 << "\n"
+;
             TestCell cell;
             cell.update(hoodOld, nanoStep);
             hoodNew << cell;
