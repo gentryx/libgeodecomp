@@ -1,6 +1,5 @@
 #ifndef LIBGEODECOMP_LIBGEODECOMP_H
 #define LIBGEODECOMP_LIBGEODECOMP_H
-
 #include <libgeodecomp/config.h>
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
