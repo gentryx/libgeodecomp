@@ -23,10 +23,44 @@ public:
     int v;
 };
 
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const SoATestCell& cell)
+{
+    __os << "SoATestCell(" << cell.v << ")";
+    return __os;
+}
+
 LIBFLATARRAY_REGISTER_SOA(SoATestCell, ((int)(v)))
 
 namespace LibGeoDecomp {
 
+class CheckCellValues
+{
+public:
+    CheckCellValues(int startOffset, int endOffset, int expected) :
+        startOffset(startOffset),
+        endOffset(endOffset),
+        expected(expected)
+    {}
+
+    template<typename ACCESSOR>
+    void operator()(ACCESSOR accessor, int *index)
+    {
+        *index += startOffset;
+
+        for (int offset = startOffset; offset < endOffset; ++offset) {
+            TS_ASSERT_EQUALS(expected, accessor.v());
+            ++*index;
+        }
+    }
+
+private:
+    int startOffset;
+    int endOffset;
+    int expected;
+};
 
 class SoAGridTest : public CxxTest::TestSuite
 {
@@ -84,7 +118,6 @@ public:
         TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), 4);
     }
 
-
     void testGetSetManyCells()
     {
         Coord<2> origin(20, 15);
@@ -116,6 +149,36 @@ public:
 	}
     }
 
+    void testInitialization()
+    {
+        CoordBox<3> box(Coord<3>(20, 25, 32), Coord<3>(51, 21, 15));
+        Coord<3> topoDim(60, 50, 50);
+        SoATestCell defaultCell(1);
+        SoATestCell edgeCell(2);
+
+        // next larger dimensions for x/y from 51 and 21 are 64 and 64.
+        // int oppositeSideOffset = 22 * 64 + 16 * 64 * 64;
+        int oppositeSideOffset0 = (21 + 4 - 1) * 64;
+        int oppositeSideOffset1 = (15 + 4 - 1) * 64 * 64;
+        int oppositeSideOffset2 = (15 + 4 - 1) * 64 * 64 + (21 + 4 - 1) * 64;
+
+        SoAGrid<SoATestCell, Topologies::Cube<3>::Topology, true> grid(box, defaultCell, edgeCell, topoDim);
+
+        // check not only first row, but also all other 3 outermost horizontal edges:
+        // (width 51 + 2 edge cell layers on each side)
+        grid.callback(CheckCellValues(0, 51 + 4, 2));
+        grid.callback(CheckCellValues(0 + oppositeSideOffset0, 51 + 4 + oppositeSideOffset0, 2));
+        grid.callback(CheckCellValues(0 + oppositeSideOffset1, 51 + 4 + oppositeSideOffset1, 2));
+        grid.callback(CheckCellValues(0 + oppositeSideOffset2, 51 + 4 + oppositeSideOffset2, 2));
+
+        grid.setEdge(SoATestCell(4));
+
+        grid.callback(CheckCellValues(0, 51 + 4, 4));
+        grid.callback(CheckCellValues(0 + oppositeSideOffset0, 51 + 4 + oppositeSideOffset0, 4));
+        grid.callback(CheckCellValues(0 + oppositeSideOffset1, 51 + 4 + oppositeSideOffset1, 4));
+        grid.callback(CheckCellValues(0 + oppositeSideOffset2, 51 + 4 + oppositeSideOffset2, 4));
+    }
+
     void testDisplacementWithTopologicalCorrectness()
     {
         CoordBox<3> box(Coord<3>(20, 25, 32), Coord<3>(50, 40, 35));
@@ -141,8 +204,6 @@ public:
         TS_ASSERT_EQUALS(grid.get(Coord<3>( 1,  2,  3)), dummy);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(61, 52, 53)), dummy);
     }
-
-    // fixme: check neighborhood may actually access edgecells
 };
 
 }

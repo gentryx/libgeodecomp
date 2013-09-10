@@ -60,6 +60,7 @@ public:
                     relativeTargetOrigin.z() * MY_DIM_X2 * MY_DIM_Y2 +
                     relativeTargetOrigin.y() * MY_DIM_X2 +
                     relativeTargetOrigin.x();
+
                 CELL::updateLineX(
                     FixedNeighborhood<CELL, Topology, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>(hoodOld),
                     indexOld,

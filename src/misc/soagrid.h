@@ -54,15 +54,19 @@ public:
         int *index)
     {
         for (int z = 0; z < gridDim.z(); ++z) {
+            bool onEdge1 = false;
             const CELL *cell1 = &innerCell;
             if ((z < edgeRadii.z()) || (z >= (gridDim.z() - edgeRadii.z()))) {
                 cell1 = &edgeCell;
+                onEdge1 = true;
             }
 
             for (int y = 0; y < gridDim.y(); ++y) {
+                bool onEdge2 = onEdge1;
                 const CELL *cell2 = cell1;
                 if ((y < edgeRadii.y()) || (y >= (gridDim.y() - edgeRadii.y()))) {
                     cell2 = &edgeCell;
+                    onEdge2 = true;
                 }
 
                 *index =
@@ -75,7 +79,7 @@ public:
                     ++*index;
                 }
 
-                if (INIT_INTERIOR) {
+                if (onEdge2 || INIT_INTERIOR) {
                     for (; x < (gridDim.x() - edgeRadii.x()); ++x) {
                         accessor << *cell2;
                         ++*index;
@@ -221,7 +225,13 @@ public:
         return box;
     }
 
-    // fixme: needs test
+    template<typename FUNCTOR>
+    void callback(FUNCTOR functor) const
+    {
+        int index = 0;
+        delegate.callback(functor, &index);
+    }
+
     template<typename FUNCTOR>
     void callback(SoAGrid<CELL, TOPOLOGY, TOPOLOGICALLY_CORRECT> *newGrid, FUNCTOR functor) const
     {
