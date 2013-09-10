@@ -1434,10 +1434,10 @@ public:
 
     inline void store(double *a) const
     {
-        _mm_store_pd(a + 0, val1);
-        _mm_store_pd(a + 2, val2);
-        _mm_store_pd(a + 4, val3);
-        _mm_store_pd(a + 6, val4);
+        _mm_storeu_pd(a + 0, val1);
+        _mm_storeu_pd(a + 2, val2);
+        _mm_storeu_pd(a + 4, val3);
+        _mm_storeu_pd(a + 6, val4);
     }
 
 private:
@@ -1735,7 +1735,6 @@ public:
     static void updateLineXFluid(
         ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
     {
-
 #define GET_COMP(X, Y, Z, COMP) Double(&hoodOld[FixedCoord<X, Y, Z>()].COMP())
 #define SQR(X) ((X)*(X))
         const Double omega = 1.0/1.7;
