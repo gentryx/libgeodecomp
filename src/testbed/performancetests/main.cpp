@@ -1276,7 +1276,7 @@ public:
     static const int ARITY = 2;
 
     inline ShortVec1xSSE() :
-        val(_mm_set_pd1(0))
+        val(_mm_set1_pd(0))
     {}
 
     inline ShortVec1xSSE(const double *addr) :
@@ -1284,7 +1284,7 @@ public:
     {}
 
     inline ShortVec1xSSE(const double val) :
-        val(_mm_set_pd1(val))
+        val(_mm_set1_pd(val))
     {}
 
     inline ShortVec1xSSE(__m128d val) :
@@ -1320,8 +1320,8 @@ public:
     static const int ARITY = 4;
 
     inline ShortVec2xSSE() :
-        val1(_mm_set_pd1(0)),
-        val2(_mm_set_pd1(0))
+        val1(_mm_set1_pd(0)),
+        val2(_mm_set1_pd(0))
     {}
 
     inline ShortVec2xSSE(const double *addr) :
@@ -1330,8 +1330,8 @@ public:
     {}
 
     inline ShortVec2xSSE(const double val) :
-        val1(_mm_set_pd1(val)),
-        val2(_mm_set_pd1(val))
+        val1(_mm_set1_pd(val)),
+        val2(_mm_set1_pd(val))
     {}
 
     inline ShortVec2xSSE(__m128d val1, __m128d val2) :
@@ -1377,10 +1377,10 @@ public:
     static const int ARITY = 8;
 
     inline ShortVec4xSSE() :
-        val1(_mm_set_pd1(0)),
-        val2(_mm_set_pd1(0)),
-        val3(_mm_set_pd1(0)),
-        val4(_mm_set_pd1(0))
+        val1(_mm_set1_pd(0)),
+        val2(_mm_set1_pd(0)),
+        val3(_mm_set1_pd(0)),
+        val4(_mm_set1_pd(0))
     {}
 
     inline ShortVec4xSSE(const double *addr) :
@@ -1391,10 +1391,10 @@ public:
     {}
 
     inline ShortVec4xSSE(const double val) :
-        val1(_mm_set_pd1(val)),
-        val2(_mm_set_pd1(val)),
-        val3(_mm_set_pd1(val)),
-        val4(_mm_set_pd1(val))
+        val1(_mm_set1_pd(val)),
+        val2(_mm_set1_pd(val)),
+        val3(_mm_set1_pd(val)),
+        val4(_mm_set1_pd(val))
     {}
 
     inline ShortVec4xSSE(__m128d val1, __m128d val2, __m128d val3, __m128d val4) :

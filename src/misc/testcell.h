@@ -139,7 +139,7 @@ public:
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     TestCell(const LibFlatArray::soa_accessor<TestCell, DIM_X, DIM_Y, DIM_Z, INDEX>& hood)
     {
-        *this << hood;
+        hood >> *this;
     }
 
     const bool& valid() const
@@ -209,21 +209,21 @@ public:
         unsigned nanoStep)
     {
         for (; *indexOld < indexEnd; ++(*indexOld)) {
-            TestCell cell1;
-            TestCell cell2;
-            hoodOld >> cell1;
-            cell2 << hoodNew;
+            // TestCell cell1;
+            // TestCell cell2;
+            // hoodOld >> cell1;
+            // hoodNew >> cell2;
 
+            std::cout << "fixme--------------\n";
             // std::cout << "updateLine\n"
             //           << "1:\n"
             //           << cell1 << "\n"
             //           << "2:\n"
-            //           << cell2 << "\n"
-;
+            //           << cell2 << "\n";
+
             TestCell cell;
             cell.update(hoodOld, nanoStep);
             hoodNew << cell;
-
             ++(*indexNew);
         }
     }
