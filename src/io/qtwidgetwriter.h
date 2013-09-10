@@ -99,8 +99,8 @@ public:
     friend class QtWidgetWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8)) :
-        Writer<CELL_TYPE>("", 1),
+    QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8), unsigned period = 1) :
+        Writer<CELL_TYPE>("", period),
         cellDimensions(cellDimensions)
     {}
 
