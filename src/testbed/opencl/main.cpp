@@ -89,7 +89,8 @@ class JacobiCell : public OpenCLCellInterface<JacobiCell, double> {
 
 class JacobiCellInitializer : public SimpleInitializer<JacobiCell> {
   public:
-    JacobiCellInitializer(void) : SimpleInitializer<JacobiCell>(Coord<3>(2, 2, 2))
+    JacobiCellInitializer(int size, int steps)
+      : SimpleInitializer<JacobiCell>(Coord<3>(size, size, size), steps)
     {}
 
     virtual void grid(GridBase<JacobiCell, 3> *ret)
@@ -109,6 +110,9 @@ class JacobiCellInitializer : public SimpleInitializer<JacobiCell> {
 
 int main(int argc, char **argv)
 {
+  int size = 32;
+  int steps = 100;
+
   // boost::shared_ptr<HiParSimulator::PartitionManager<DummyCell::Topology>>
   //   pmp(new HiParSimulator::PartitionManager<DummyCell::Topology>(
   //         CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
@@ -132,14 +136,14 @@ int main(int argc, char **argv)
 
   boost::shared_ptr<HiParSimulator::PartitionManager<JacobiCell::Topology>>
     pmp(new HiParSimulator::PartitionManager<JacobiCell::Topology>(
-          CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
+          CoordBox<3>(Coord<3>(0,0,0), Coord<3>(size,size,size))));
 
-  boost::shared_ptr<JacobiCellInitializer> dcip(new JacobiCellInitializer);
+  auto dcip = boost::shared_ptr<JacobiCellInitializer>(
+      new JacobiCellInitializer(size, steps));
 
   HiParSimulator::OpenCLStepper<JacobiCell, double> openclstepper(0, 0, pmp, dcip);
 
   openclstepper.update(2);
-
 
 
   return 0;
