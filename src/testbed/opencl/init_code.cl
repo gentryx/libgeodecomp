@@ -1,7 +1,5 @@
 #include "libgeodecomp.cl"
 
-#pragma OPENCL EXTENSION cl_khr_fp64: enable
-#pragma OPENCL EXTENSION cl_intel_printf: enable
 
 __kernel void
 mem_hook(__global coords_ctx * coords,
