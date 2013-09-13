@@ -156,7 +156,6 @@ namespace LibGeoDecomp {
 
                 } catch(std::exception & error) {
                     std::cerr << __PRETTY_FUNCTION__ << ": " << error.what() << std::endl;
-                    throw error;
                 }
             }
 
