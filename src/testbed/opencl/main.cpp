@@ -89,8 +89,6 @@ class JacobiCell : public OpenCLCellInterface<JacobiCell, double> {
 
 class JacobiCellInitializer : public SimpleInitializer<JacobiCell> {
   public:
-    using SimpleInitializer<JacobiCell>::gridDimensions;
-
     JacobiCellInitializer(void) : SimpleInitializer<JacobiCell>(Coord<3>(2, 2, 2))
     {}
 
@@ -98,9 +96,9 @@ class JacobiCellInitializer : public SimpleInitializer<JacobiCell> {
     {
       Coord<3> offset = Coord<3>(0, 0, 0);
 
-      for (int z = 0; z < gridDimensions().z(); ++z) {
-        for (int y = 0; y < gridDimensions().y(); ++y) {
-          for (int x = 0; x < gridDimensions().x(); ++x) {
+      for (int z = 0; z < dimensions.z(); ++z) {
+        for (int y = 0; y < dimensions.y(); ++y) {
+          for (int x = 0; x < dimensions.x(); ++x) {
             Coord<3> c = offset + Coord<3>(x, y, z);
             ret->set(c, JacobiCell(0.99999999999));
           }
