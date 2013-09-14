@@ -32,12 +32,12 @@ __kernel void update(__constant void * coords,
   __constant double * i = (__constant double *)in;
   __global   double * o = (  __global double *)out;
 
-  o[get_address(coords, ( 0, 0, 0))] =
-    ( i[get_address(coords, ( 0, 0,-1))]
-    + i[get_address(coords, ( 0,-1, 0))]
-    + i[get_address(coords, (-1, 0, 0))]
-    + i[get_address(coords, ( 1, 0, 0))]
-    + i[get_address(coords, ( 0, 1, 0))]
-    + i[get_address(coords, ( 0, 0, 1))]
+  o[get_address(coords, (int4)( 0, 0, 0, 0))] =
+    ( i[get_address(coords, (int4)( 0, 0,-1, 0))]
+    + i[get_address(coords, (int4)( 0,-1, 0, 0))]
+    + i[get_address(coords, (int4)(-1, 0, 0, 0))]
+    + i[get_address(coords, (int4)( 1, 0, 0, 0))]
+    + i[get_address(coords, (int4)( 0, 1, 0, 0))]
+    + i[get_address(coords, (int4)( 0, 0, 1, 0))]
     ) * (1.0/6.0);
 }
