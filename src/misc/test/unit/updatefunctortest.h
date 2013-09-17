@@ -41,11 +41,11 @@ public:
     }
 
     // won't ever be called as all current update functors support
-    // updateLine only with fixed neighborhoods
+    // updateLineX only with fixed neighborhoods
     template<typename NEIGHBORHOOD>
-    static void updateLine(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
+    static void updateLineX(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
-        myLog << "LineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
+        myLog << "LineUpdateCell::updateLineX(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
 
     }
 };
@@ -163,7 +163,7 @@ public:
         checkSelector<FixedCell>(
             "FixedCell::update(nanoStep = 0)\n", 8);
         checkSelector<FixedLineUpdateCell>(
-            "FixedLineUpdateCell::update(nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 0, endX = 7, nanoStep = 0)\nFixedLineUpdateCell::update(nanoStep = 0)\n", 1);
+            "FixedLineUpdateCell::update(nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 1, endX = 7, nanoStep = 0)\nFixedLineUpdateCell::update(nanoStep = 0)\n", 1);
     }
 
     void testMoore2D()

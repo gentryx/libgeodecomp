@@ -3,6 +3,7 @@
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 
 using namespace LibGeoDecomp;
 
@@ -227,6 +228,44 @@ public:
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
             TS_ASSERT(!gridB[*i].valid());
         }
+    }
+
+    class AdditionalAPI :
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasFixedCoordsOnlyUpdate
+    {};
+
+    void test3DwithUpdateLineXandWithoutSoA()
+    {
+        typedef TestCell<
+            3,
+            Stencils::Moore<3, 1>,
+            Topologies::Torus<3>::Topology,
+            AdditionalAPI> TestCellType;
+        typedef Grid<TestCellType, Topologies::Torus<3>::Topology> GridType;
+
+        Coord<3> dim(20, 10, 5);
+        CoordBox<3> box(Coord<3>(), dim);
+        Region<3> region;
+        region << box;
+
+        GridType gridA(dim);
+        gridA.getEdgeCell() =
+            TestCellType(Coord<3>::diagonal(-1), dim);
+        gridA.getEdgeCell().isEdgeCell = true;
+        for (CoordBox<3>::Iterator i =  box.begin(); i != box.end(); ++i) {
+            gridA[*i] = TestCellType(*i, dim, 0);
+        }
+
+        GridType gridB(dim);
+        gridB.getEdgeCell() = gridA.getEdgeCell();
+
+        TS_ASSERT_TEST_GRID(GridType, gridA, 0);
+
+        UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), gridA, &gridB, 0);
+
+        TS_ASSERT_TEST_GRID(GridType, gridA, 0);
+        TS_ASSERT_TEST_GRID(GridType, gridB, 1);
     }
 
     void update(unsigned nanoStep = 0)

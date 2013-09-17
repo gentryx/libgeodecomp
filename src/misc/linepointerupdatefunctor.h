@@ -130,6 +130,7 @@ public:
 
         LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
         newLine[x].update(hoodWest, nanoStep);
+        ++x;
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
         updateMain(newLine, &x, long(endX - 1), hood, nanoStep, UpdateLineXFlag());
@@ -142,7 +143,7 @@ private:
     template<typename NEIGHBORHOOD>
     void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::FalseType)
     {
-        for ((*x) += 1; (*x) < endX; ++(*x)) {
+        for (; *x < endX; ++*x) {
             newLine[(*x)].update(hood, nanoStep);
         }
     }
