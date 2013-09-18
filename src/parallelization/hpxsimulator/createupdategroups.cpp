@@ -5,7 +5,7 @@
 
 #include <hpx/runtime/components/server/runtime_support.hpp>
 #include <hpx/runtime/components/plain_component_factory.hpp>
-#include <hpx/lcos/wait_any.hpp>
+#include <hpx/lcos/wait_all.hpp>
 
 #include <boost/serialization/vector.hpp>
 
@@ -92,14 +92,13 @@ createUpdateGroups(
     );
     res.second.back().gids_ = boost::move(f.move());
 
-    while(!componentsFutures.empty()) {
-        HPX_STD_TUPLE<int, hpx::future<ResultType> >
-            compRes = hpx::wait_any(componentsFutures);
+    hpx::wait_all(componentsFutures);
 
-        ResultType r = boost::move(HPX_STD_GET(1, compRes).move());
+    BOOST_FOREACH(hpx::future<ResultType> & rf, componentsFutures)
+    {
+        ResultType r = rf.move();
         res.second.insert(res.second.end(), r.second.begin(), r.second.end());
         res.first += r.first;
-        componentsFutures.erase(componentsFutures.begin() + HPX_STD_GET(0, compRes));
     }
 
     return res;
