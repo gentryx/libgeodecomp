@@ -24,7 +24,7 @@ public:
     PartitionManager(
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
     {
-        SuperVector<long> weights(1, simulationArea.size());
+        SuperVector<std::size_t> weights(1, simulationArea.size());
         boost::shared_ptr<Partition<DIM> > partition(
             new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights));
         resetRegions(simulationArea, partition, 0, 1);
@@ -159,7 +159,7 @@ public:
         return volatileKernel;
     }
 
-    inline const SuperVector<long>& getWeights() const
+    inline const SuperVector<std::size_t>& getWeights() const
     {
         return partition->getWeights();
     }
@@ -236,13 +236,11 @@ private:
         innerGhosts.reserve(getGhostZoneWidth() + 1);
         for (unsigned i = 0; i <= getGhostZoneWidth(); ++i) {
             const Region<DIM>& outerGhost = getRegion(rank, i) & getRegion(node, 0);
-            if(!outerGhost.empty()) {
+            if(!outerGhost.empty())
                 outerGhosts << outerGhost;
-            }
             const Region<DIM>& innerGhost = getRegion(rank, 0) & getRegion(node, i);
-            if(!innerGhost.empty()) {
+            if(!innerGhost.empty())
                 innerGhosts << innerGhost;
-            }
         }
     }
 };

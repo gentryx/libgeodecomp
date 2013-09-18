@@ -13,7 +13,7 @@ class RecursiveBisectionPartition : public Partition<DIM>
 {
     friend class RecursiveBisectionPartitionTest;
 public:
-    typedef SuperVector<long> LongVec;
+    typedef SuperVector<std::size_t> LongVec;
 
     inline RecursiveBisectionPartition(
         const Coord<DIM>& _origin = Coord<DIM>(),
@@ -27,7 +27,7 @@ public:
         dimWeights(_dimWeights)
     {}
 
-    inline Region<DIM> getRegion(const long& i) const
+    inline Region<DIM> getRegion(const std::size_t i) const
     {
         CoordBox<DIM> cuboid = searchNodeCuboid(
             startOffsets.begin(),
@@ -63,16 +63,16 @@ private:
             return box;
         }
 
-        long halfWeight = (*begin + *end) / 2;
+        std::size_t halfWeight = (*begin + *end) / 2;
 
         LongVec::const_iterator approxMiddle = std::lower_bound(
             begin,
             end,
             halfWeight);
         if (*approxMiddle != halfWeight) {
-            long delta1 = *approxMiddle - halfWeight;
+            std::size_t delta1 = *approxMiddle - halfWeight;
             LongVec::const_iterator predecessor = approxMiddle - 1;
-            long delta2 = halfWeight - *predecessor;
+            std::size_t delta2 = halfWeight - *predecessor;
             if (delta2 < delta1) {
                 approxMiddle = predecessor;
             }

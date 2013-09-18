@@ -20,6 +20,13 @@
         SIMULATOR ::UpdateGroupType::ComponentType                              \
         BOOST_PP_CAT(NAME, UpdateGroupType);                                    \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitPartitionsAction)     \
+    );                                                                          \
+    HPX_ACTION_USES_HUGE_STACK(                                                 \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction               \
+    );                                                                          \
+    HPX_REGISTER_ACTION_DECLARATION(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitAction)               \
     );                                                                          \
@@ -34,6 +41,9 @@
         BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
     );                                                                          \
+    HPX_ACTION_USES_HUGE_STACK(                                                 \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction                     \
+    );                                                                          \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
@@ -46,17 +56,21 @@
         BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SpeedZoneAction)          \
     );                                                                          \
+    HPX_REGISTER_BROADCAST_WITH_INDEX_ACTION_DECLARATION_2(                     \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitPartitionsAction) \
+    );                                                                          \
     HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
         BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastInitAction)  \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitAction)           \
     );                                                                          \
     HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
         BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastNanoStepAction)\
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), NanoStepAction)       \
     );                                                                          \
     HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
         BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastSpeedAction) \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), SpeedAction)          \
     );                                                                          \
 /**/
 
@@ -69,6 +83,10 @@
     HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(                                     \
         BOOST_PP_CAT(NAME, UpdateGroupComponentType),                           \
         BOOST_PP_CAT(NAME, UpdateGroupComponentType)                            \
+    );                                                                          \
+    HPX_REGISTER_ACTION(                                                        \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitPartitionsAction)     \
     );                                                                          \
     HPX_REGISTER_ACTION(                                                        \
         BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
@@ -94,17 +112,21 @@
         BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SpeedZoneAction)          \
     );                                                                          \
+    HPX_REGISTER_BROADCAST_WITH_INDEX_ACTION_2(                                 \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitPartitionsAction) \
+    );                                                                          \
     HPX_REGISTER_BROADCAST_ACTION_2(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastInitAction)  \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitAction)           \
     );                                                                          \
     HPX_REGISTER_BROADCAST_ACTION_2(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastNanoStepAction)\
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), NanoStepAction)       \
     );                                                                          \
     HPX_REGISTER_BROADCAST_ACTION_2(                                            \
         BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), BroadcastSpeedAction) \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), SpeedAction)          \
     );                                                                          \
 /**/
 
@@ -140,9 +162,9 @@ public:
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
         ghostZoneWidth(ghostZoneWidth),
-        updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor)),
         initialized(false)
     {
+        std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor));
         updateGroupsIds.reserve(updateGroups.size());
         BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
             updateGroupsIds.push_back(ug.gid());
@@ -159,9 +181,9 @@ public:
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
         ghostZoneWidth(ghostZoneWidth),
-        updateGroups(createUpdateGroups<UpdateGroupType>(numUpdateGroups)),
         initialized(false)
     {
+        std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(numUpdateGroups));
         updateGroupsIds.reserve(updateGroups.size());
         BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
             updateGroupsIds.push_back(ug.gid());
@@ -173,15 +195,14 @@ public:
         std::size_t rank_start,
         std::size_t rank_end,
         const CoordBox<DIM>& box,
-        const SuperVector<long>& weights)
+        const SuperVector<std::size_t>& weights)
     {
-        std::size_t numPartitions = boundingBoxes.size();
+        typedef
+            HiParSimulator::PartitionManager<DIM, typename CELL_TYPE::Topology>
+            PartitionManagerType;
+
         for(std::size_t rank = rank_start; rank != rank_end; ++rank)
         {
-            typedef
-                HiParSimulator::PartitionManager<DIM, typename CELL_TYPE::Topology>
-                PartitionManagerType;
-
             PartitionManagerType partitionManager;
             
             boost::shared_ptr<PARTITION> partition(
@@ -190,6 +211,7 @@ public:
                     box.dimensions,
                     0,
                     weights));
+
             partitionManager.resetRegions(
                     box,
                     partition,
@@ -206,7 +228,7 @@ public:
             return;
         }
         std::vector<CoordBox<DIM> > boundingBoxes;
-        std::size_t numPartitions = updateGroups.size();
+        std::size_t numPartitions = updateGroupsIds.size();
         boundingBoxes.resize(numPartitions);
 
         CoordBox<DIM> box = initializer->gridBox();
@@ -215,7 +237,7 @@ public:
         boundingBoxesFutures.reserve(numPartitions);
         std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
         
-        SuperVector<long> weights(initialWeights(box.dimensions.prod(), numPartitions));
+        SuperVector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
         for(std::size_t i = 0; i < numPartitions; i += steps)
         {
             boundingBoxesFutures.push_back(
@@ -231,13 +253,9 @@ public:
             );
         }
         hpx::wait_all(boundingBoxesFutures);
-        for(std::size_t i = 0; i < boundingBoxes.size(); ++i)
-        {
-            std::cerr << "boundingBox " << i << ": " << boundingBoxes[i] << "\n";
-        }
         typename UpdateGroupType::InitData initData =
         {
-            updateGroups,
+            //updateGroups,
             loadBalancingPeriod,
             ghostZoneWidth,
             initializer,
@@ -247,9 +265,16 @@ public:
             weights
         };
         hpx::wait(
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
+            hpx::lcos::broadcast_with_index<
+                typename UpdateGroupType::ComponentType::InitPartitionsAction
+            >(
                 updateGroupsIds,
                 initData
+            )
+        );
+        hpx::wait(
+            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
+                updateGroupsIds
             )
         );
 
@@ -270,9 +295,11 @@ public:
 
     void stop()
     {
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            ug.stop();
-        }
+        hpx::wait(
+            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
+                updateGroupsIds,
+            )
+        );
     }
 
     inline void step()
@@ -284,7 +311,7 @@ public:
     virtual unsigned getStep() const
     {
         if (initialized) {
-            return updateGroups[0].currentStep().first;
+            return typename UpdateGroupType::ComponentType::CurrentStepAction()(updateGroupsIds[0]).first;
         } else {
             return initializer->startStep();
         }
@@ -303,7 +330,7 @@ public:
 
     std::size_t numUpdateGroups() const
     {
-        return updateGroups.size();
+        return updateGroupsIds.size();
     }
 
 private:
@@ -315,7 +342,6 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     HiParSimulator::PartitionManager<DIM, Topology> partitionManager;
-    std::vector<UpdateGroupType> updateGroups;
     std::vector<hpx::id_type> updateGroupsIds;
     boost::atomic<bool> initialized;
 
@@ -328,32 +354,26 @@ private:
             ).move();
     }
 
-    SuperVector<long> initialWeights(const long items, const long size) const
+    SuperVector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
     {
         SuperVector<double> speeds(
             hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
                 updateGroupsIds
             ).move());
         double sum = speeds.sum();
-        SuperVector<long> ret(size);
+        SuperVector<std::size_t> ret(size);
 
-        long lastPos = 0;
+        std::size_t lastPos = 0;
         double partialSum = 0.0;
-        for (long i = 0; i < size -1; i++) {
-            partialSum += speeds[i];
-            long nextPos = items * partialSum / sum;
-            std::cerr << "i: " << i << " " << nextPos << "\n";
-            ret[i] = nextPos - lastPos;
-            lastPos = nextPos;
+        if(size > 1) {
+            for (std::size_t i = 0; i < size -1; ++i) {
+                partialSum += speeds[i];
+                std::size_t nextPos = items * (partialSum / sum);
+                ret[i] = nextPos - lastPos;
+                lastPos = nextPos;
+            }
         }
-        std::cerr << "i: 1023 " << items << "\n";
         ret[size-1] = items - lastPos;
-
-        std::cerr << size << " " << speeds.size() << "\n";
-        std::cerr << speeds << "\n";
-        std::cerr << ret << "\n";
-        std::cerr << ret.sum() << "\n";
-        std::cerr << items << "\n";
 
         return ret;
     }

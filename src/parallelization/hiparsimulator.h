@@ -186,22 +186,25 @@ private:
 
     double totalTime;
 
-    SuperVector<long> initialWeights(const long& items, const long& size) const
+    SuperVector<std::size_t> initialWeights(const std::size_t& items, const std::size_t& size) const
     {
         MPILayer layer(communicator);
         double mySpeed = CELL_TYPE::speed();
         SuperVector<double> speeds = layer.allGather(mySpeed);
         double sum = speeds.sum();
-        SuperVector<long> ret(size);
+        SuperVector<std::size_t> ret(size);
 
-        long lastPos = 0;
+        std::size_t lastPos = 0;
         double partialSum = 0.0;
-        for (long i = 0; i < size; i++) {
-            partialSum += speeds[i];
-            long nextPos = items * partialSum / sum;
-            ret[i] = nextPos - lastPos;
-            lastPos = nextPos;
+        if(size > 1) {
+            for (std::size_t i = 0; i < size -1; i++) {
+                partialSum += speeds[i];
+                std::size_t nextPos = items * partialSum / sum;
+                ret[i] = nextPos - lastPos;
+                lastPos = nextPos;
+            }
         }
+        ret[size-1] = items - lastPos;
 
         return ret;
     }
@@ -243,6 +246,7 @@ private:
                 box.dimensions,
                 0,
                 initialWeights(box.dimensions.prod(), communicator->Get_size())));
+        
 
         updateGroup.reset(
             new UpdateGroupType(

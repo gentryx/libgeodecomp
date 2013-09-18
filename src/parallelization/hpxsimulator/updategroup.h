@@ -57,19 +57,17 @@ public:
 
     struct InitData
     {
-        std::vector<UpdateGroup> updateGroups;
         unsigned loadBalancingPeriod;
         unsigned ghostZoneWidth;
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
         WriterVector writers;
         SteererVector steerers;
         std::vector<CoordBox<DIM> > boundingBoxes;
-        SuperVector<long> initialWeights;
+        SuperVector<std::size_t> initialWeights;
 
         template <typename ARCHIVE>
         void serialize(ARCHIVE& ar, unsigned)
         {
-            ar & updateGroups;
             ar & loadBalancingPeriod;
             ar & ghostZoneWidth;
             ar & initializer;
@@ -83,25 +81,6 @@ public:
     hpx::naming::id_type gid() const
     {
         return thisId;
-    }
-
-    StepPairType currentStep() const
-    {
-        return typename ComponentType::CurrentStepAction()(thisId);
-    }
-
-    hpx::future<Statistics> nanoStep(std::size_t remainingNanoSteps)
-    {
-        return
-            hpx::async<typename ComponentType::NanoStepAction>(
-                thisId,
-                remainingNanoSteps
-            );
-    }
-
-    void stop() const
-    {
-        return typename ComponentType::StopAction()(thisId);
     }
 
     hpx::future<void> setOuterGhostZone(

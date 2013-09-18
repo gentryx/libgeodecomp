@@ -70,10 +70,11 @@ public:
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
         // upon creation and we have to send those over to our neighbors.
+    
         PatchAccepterVec ghostZoneAccepterLinks;
         RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-            if (!i->second.back().empty()) {
+            if (!i->second.empty() && !i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
                     new typename PatchLink<GridType>::Accepter(
                         i->second.back(),
@@ -112,7 +113,7 @@ public:
         // ghostzone generation is being received.
         map = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-            if (!i->second.back().empty()) {
+            if (!i->second.empty() && !i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
                     new typename PatchLink<GridType>::Provider(
                         i->second.back(),
@@ -182,7 +183,7 @@ public:
         return stepper->currentStep();
     }
 
-    inline const SuperVector<long>& getWeights() const
+    inline const SuperVector<std::size_t>& getWeights() const
     {
         return partitionManager->getWeights();
     }

@@ -95,21 +95,27 @@ public:
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
     UpdateGroupServer()
-      : initFuture(initPromise.get_future())
-      , stopped(false)
+      : stopped(false)
     {}
 
-    void init(const typename ClientType::InitData& initData)
+    void initPartitions(const typename ClientType::InitData& initData, std::size_t global_idx)
     {
-        updateGroups = initData.updateGroups;
         initializer = initData.initializer;
         loadBalancingPeriod = initData.loadBalancingPeriod;
+        ghostZoneWidth = initData.ghostZoneWidth;
+        writers = initData.writers;
+        steerers = initData.steerers;
         //this->balancer = balancer;
-        setRank();
+        rank = global_idx;
+        ////////////////////////////////////////////////////////////////////////
+        // Registering name.
+        std::string name = "LibGeoDecomp.UpdateGroup.";
+        name += boost::lexical_cast<std::string>(rank);
+        hpx::agas::register_name(name, this->get_gid());
+        ////////////////////////////////////////////////////////////////////////
 
         partitionManager.reset(new PartitionManagerType());
         CoordBox<DIM> box = initializer->gridBox();
-        std::size_t numPartitions = updateGroups.size();
 
         boost::shared_ptr<PARTITION> partition(
             new PARTITION(
@@ -122,21 +128,52 @@ public:
                 box,
                 partition,
                 rank,
-                initData.ghostZoneWidth
+                ghostZoneWidth
             );
 
         partitionManager->resetGhostZones(initData.boundingBoxes);
+        
+        const RegionVecMap& outerMap = partitionManager->getOuterGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = outerMap.begin(); i != outerMap.end(); ++i) {
+            if (!i->second.empty() && !i->second.back().empty()) {
+                if(i->second.size() != ghostZoneWidth)
+                {
+                    std::cerr << rank << " trying to accept fragments with size " << i->second.size() << " " << ghostZoneWidth << "\n";
+                    continue;
+                }
+                if(i->first == -1)
+                {
+                    std::cerr << rank << " provider got outgroup fragment\n";
+                    continue;
+                }
 
+                PatchLinkProviderPtr link(
+                    new PatchLinkProviderType(
+                        i->second.back()));
+
+                patchlinkProviderMap.insert(std::make_pair(i->first, link));
+            }
+        }
+    }
+    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, initPartitions, InitPartitionsAction);
+
+    void init()
+    {
         long firstSyncPoint =
-            initializer->startStep() * CELL_TYPE::nanoSteps() + initData.ghostZoneWidth;
+            initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
         // upon creation and we have to send those over to our neighbors.
         PatchAccepterVec patchAcceptersGhost;
-        RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
-        for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
+        const RegionVecMap& innerMap = partitionManager->getInnerGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = innerMap.begin(); i != innerMap.end(); ++i) {
             if (!i->second.empty() && !i->second.back().empty()) {
+                if(i->second.size() != ghostZoneWidth)
+                {
+                    std::cerr << rank << " trying to accept fragments with size " << i->second.size() << " " << ghostZoneWidth << "\n";
+                    continue;
+                }
                 if(i->first == -1)
                 {
                     std::cerr << rank << " accepter got outgroup fragment\n";
@@ -146,14 +183,14 @@ public:
                     new PatchLinkAccepterType(
                         i->second.back(),
                         rank,
-                        updateGroups[i->first]));
+                        getUpdateGroup(i->first)));
                 patchAcceptersGhost.push_back(link);
                 patchLinks << link;
 
                 link->charge(
                     firstSyncPoint,
                     PatchLink<GridType, ClientType>::ENDLESS,
-                    initData.ghostZoneWidth);
+                    ghostZoneWidth);
 
                 link->setRegion(partitionManager->ownRegion());
             }
@@ -162,7 +199,7 @@ public:
         PatchAccepterVec patchAcceptersInner;
 
         // Convert writers to patch accepters
-        BOOST_FOREACH(const typename WriterVector::value_type& writer, initData.writers) {
+        BOOST_FOREACH(const typename WriterVector::value_type& writer, writers) {
             PatchAccepterPtr adapterGhost(
                 new ParallelWriterAdapterType(
                     boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
@@ -196,35 +233,23 @@ public:
         // the ghostzone receivers may be safely added after
         // initialization as they're only really needed when the next
         // ghostzone generation is being received.
-        map = partitionManager->getOuterGhostZoneFragments();
-        for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-            if (!i->second.empty() && !i->second.back().empty()) {
-                if(i->first == -1)
-                {
-                    std::cerr << rank << " provider got outgroup fragment\n";
-                    continue;
-                }
+        typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
+        for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it)
+        {
+            addPatchProvider(it->second, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
+            patchLinks << it->second;
 
-                PatchLinkProviderPtr link(
-                    new PatchLinkProviderType(
-                        i->second.back()));
+            it->second->charge(
+                firstSyncPoint,
+                PatchLink<GridType, ClientType>::ENDLESS,
+                ghostZoneWidth);
 
-                patchlinkProviderMap.insert(std::make_pair(i->first, link));
-
-                addPatchProvider(link, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
-                patchLinks << link;
-
-                link->charge(
-                    firstSyncPoint,
-                    PatchLink<GridType, ClientType>::ENDLESS,
-                    initData.ghostZoneWidth);
-
-                link->setRegion(partitionManager->ownRegion());
-            }
+            it->second->setRegion(partitionManager->ownRegion());
         }
 
+
         // Convert steerer to patch accepters
-        BOOST_FOREACH(const typename SteererVector::value_type& steerer, initData.steerers) {
+        BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
             // two adapters needed, just as for the writers
             PatchProviderPtr adapterGhost(
                 new SteererAdapterType(
@@ -251,7 +276,6 @@ public:
         }
 
         initEvents();
-        initPromise.set_value();
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, init, InitAction);
 
@@ -288,7 +312,6 @@ public:
     Statistics nanoStep(std::size_t remainingNanoSteps)
     {
         hpx::util::high_resolution_timer timer;
-        hpx::wait(initFuture);
         stopped = false;
         while (remainingNanoSteps > 0 && !stopped) {
             std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
@@ -319,12 +342,16 @@ public:
         boost::shared_ptr<SuperVector<CELL_TYPE> > buffer,
         long nanoStep)
     {
-        hpx::wait(initFuture);
         typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
         patchlinkIter = patchlinkProviderMap.find(srcRank);
         if(patchlinkIter == patchlinkProviderMap.end())
         {
-            std::cerr << rank << " setting outer ghostzone from unknown rank: " << srcRank << "\n";
+            std::cerr << rank << " setting outer ghostzone from unknown rank: " << srcRank << "\ngot these ranks:\n";
+            typedef std::pair<std::size_t, PatchLinkProviderPtr> pair_type;
+            BOOST_FOREACH(const pair_type& p, patchlinkProviderMap)
+            {
+                std::cerr << rank << " " << p.first << "\n";
+            }
             return;
         }
         BOOST_ASSERT(patchlinkIter != patchlinkProviderMap.end());
@@ -344,7 +371,7 @@ public:
         return rank;
     }
 private:
-    std::vector<ClientType> updateGroups;
+    std::map<std::size_t, ClientType> updateGroups;
 
     boost::shared_ptr<HiParSimulator::Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
@@ -353,23 +380,38 @@ private:
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
+    unsigned ghostZoneWidth;
+    WriterVector writers;
+    SteererVector steerers;
     std::size_t rank;
     EventMap events;
 
-    hpx::lcos::local::promise<void> initPromise;
-    hpx::future<void> initFuture;
-
     boost::atomic<bool> stopped;
 
-    void setRank()
+    ClientType getUpdateGroup(std::size_t dstRank)
     {
-        rank = 0;
-        BOOST_FOREACH(const ClientType& ug, updateGroups) {
-            if(ug.gid() == this->get_gid()) {
-                break;
+        typename std::map<std::size_t, ClientType>::iterator it = updateGroups.find(dstRank);
+        if(it == updateGroups.end())
+        {
+            hpx::id_type updateGroupId;
+            std::string name = "LibGeoDecomp.UpdateGroup.";
+            name += boost::lexical_cast<std::string>(dstRank);
+            while(true)
+            {
+                hpx::agas::resolve_name(name, updateGroupId);
+
+                if(!updateGroupId)
+                {
+                    hpx::this_thread::suspend(boost::posix_time::seconds(1));
+                }
+                else
+                {
+                    break;
+                }
             }
-            ++rank;
+            it = updateGroups.insert(it, std::make_pair(dstRank, ClientType(updateGroupId)));
         }
+        return it->second;
     }
 
     void initEvents()
