@@ -3,6 +3,12 @@
 
 #include <libgeodecomp/config.h>
 
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/config.hpp>
+#include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
+#endif
+
 #ifdef LIBGEODECOMP_FEATURE_MPI
 #include <mpi.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
