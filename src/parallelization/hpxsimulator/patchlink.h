@@ -42,6 +42,8 @@ public:
             stride = newStride;
         }
 
+        virtual ~Link() {}
+
     protected:
         std::size_t lastNanoStep;
         long stride;
@@ -120,6 +122,16 @@ public:
             recvFuture(recvPromise.get_future())
         {}
 
+        ~Provider()
+        {
+            if(!recvFuture.is_ready()) {
+                recvPromise.set_value(-1);
+            }
+            if(!bufferFuture.is_ready()) {
+                bufferPromise.set_value(boost::shared_ptr<BufferType>());
+            }
+        }
+
         void charge(long next, long last, long newStride)
         {
             Link::charge(last, newStride);
@@ -149,7 +161,7 @@ public:
 
             checkNanoStepGet(nanoStep);
             {
-                hpx::lcos::local::spinlock::scoped_lock lock(gridMutex);
+                //hpx::lcos::local::spinlock::scoped_lock lock(gridMutex);
                 HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
             }
 
@@ -166,7 +178,7 @@ public:
             storedNanoSteps << nanoStep;
             bufferPromise = hpx::lcos::local::promise<boost::shared_ptr<BufferType> >();
             bufferFuture = bufferPromise.get_future();
-            BOOST_ASSERT(!recvPromise.ready());
+            BOOST_ASSERT(!recvPromise.is_ready());
             recvPromise.set_value(nanoStep);
         }
 
@@ -174,7 +186,7 @@ public:
         {
             hpx::wait(recvFuture);
             BOOST_ASSERT(recvFuture.get() == nanoStep);
-            BOOST_ASSERT(!bufferPromise.ready());
+            BOOST_ASSERT(!bufferPromise.is_ready());
             recvPromise = hpx::lcos::local::promise<long>();
             recvFuture = recvPromise.get_future();
             bufferPromise.set_value(buffer);
