@@ -9,6 +9,7 @@
 #include <libgeodecomp/misc/supervector.h>
 #endif
 
+#include <boost/foreach.hpp>
 #include <iostream>
 #include <libgeodecomp/misc/alignedallocator.h>
 #include <libgeodecomp/misc/coord.h>
@@ -114,9 +115,10 @@ public:
     typedef CELL_TYPE CellType;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
 
-    explicit Grid(const Coord<DIM>& dim=Coord<DIM>(),
-         const CELL_TYPE& defaultCell=CELL_TYPE(),
-         const CELL_TYPE& edgeCell=CELL_TYPE()) :
+    explicit Grid(
+        const Coord<DIM>& dim = Coord<DIM>(),
+        const CELL_TYPE& defaultCell = CELL_TYPE(),
+        const CELL_TYPE& edgeCell = CELL_TYPE()) :
         dimensions(dim),
         cellMatrix(dim.toExtents()),
         edgeCell(edgeCell)
@@ -127,6 +129,17 @@ public:
             CELL_TYPE *start = &(*this)[*i];
             CELL_TYPE *end   = start + dim.x();
             std::fill(start, end, defaultCell);
+        }
+    }
+
+    explicit Grid(const GridBase<CELL_TYPE, DIM>& base) :
+        dimensions(base.dimensions()),
+        cellMatrix(base.dimensions().toExtents()),
+        edgeCell(base.getEdge())
+    {
+        CoordBox<DIM> box = base.boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            set(*i - box.origin, base.get(*i));
         }
     }
 
@@ -223,13 +236,13 @@ public:
             return false;
         }
 
-        if (edgeCell != other.atEdge()) {
+        if (edgeCell != other.getEdge()) {
             return false;
         }
 
         CoordBox<DIM> box = boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            if ((*this)[*i] != other.at(*i)) {
+            if ((*this)[*i] != other.get(*i)) {
                 return false;
             }
         }
@@ -247,23 +260,40 @@ public:
         return !(*this == other);
     }
 
+    virtual void set(const Coord<DIM>& coord, const CELL_TYPE& cell)
+    {
+        (*this)[coord] = cell;
+    }
 
-    virtual CELL_TYPE& at(const Coord<DIM>& coord)
+    virtual void set(const Streak<DIM>& streak, const CELL_TYPE *cells)
+    {
+	Coord<DIM> cursor = streak.origin;;
+	for (; cursor.x() < streak.endX; ++cursor.x()) {
+	    (*this)[cursor] = *cells;
+	    ++cells;
+	}
+    }
+
+    virtual CELL_TYPE get(const Coord<DIM>& coord) const
     {
         return (*this)[coord];
     }
 
-    virtual const CELL_TYPE& at(const Coord<DIM>& coord) const
+    virtual void get(const Streak<DIM>& streak, CELL_TYPE *cells) const
     {
-        return (*this)[coord];
+	Coord<DIM> cursor = streak.origin;;
+	for (; cursor.x() < streak.endX; ++cursor.x()) {
+	    *cells = (*this)[cursor];
+	    ++cells;
+	}
     }
 
-    virtual CELL_TYPE& atEdge()
+    virtual void setEdge(const CELL_TYPE& cell)
     {
-        return getEdgeCell();
+        getEdgeCell() = cell;
     }
 
-    virtual const CELL_TYPE& atEdge() const
+    virtual const CELL_TYPE& getEdge() const
     {
         return getEdgeCell();
     }

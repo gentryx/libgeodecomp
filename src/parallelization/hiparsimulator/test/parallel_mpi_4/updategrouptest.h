@@ -20,7 +20,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 public:
     typedef ZCurvePartition<2> PartitionType;
     typedef VanillaStepper<TestCell<2> > StepperType;
-    typedef UpdateGroup<TestCell<2>, StepperType> UpdateGroupType;
+    typedef UpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
     void setUp()
@@ -36,7 +36,8 @@ public:
                 partition,
                 CoordBox<2>(Coord<2>(), dimensions),
                 ghostZoneWidth,
-                init));
+                init,
+                reinterpret_cast<StepperType*>(0)));
         expectedNanoSteps.clear();
         expectedNanoSteps += 5, 7, 8, 33, 55;
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());

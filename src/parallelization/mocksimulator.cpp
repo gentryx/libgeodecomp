@@ -7,7 +7,7 @@
  * (juqueen), as this compiler is easily confused by templates.
  */
 #ifdef __IBM_ATTRIBUTES
-typedef LibGeoDecomp::Grid<LibGeoDecomp::TestCell<2,LibGeoDecomp::Stencils::Moore<2,1>,LibGeoDecomp::TopologiesHelpers::Topology<2,0,0,0>,LibGeoDecomp::TestCellHelpers::StdOutput>,LibGeoDecomp::TopologiesHelpers::Topology<2,0,0,0> > TestGrid;
+typedef LibGeoDecomp::Grid<LibGeoDecomp::TestCell<2,LibGeoDecomp::Stencils::Moore<2,1>,LibGeoDecomp::TopologiesHelpers::Topology<2,0,0,0>,LibGeoDecomp::TestCellHelpers::EmptyAPI,LibGeoDecomp::TestCellHelpers::StdOutput>,LibGeoDecomp::TopologiesHelpers::Topology<2,0,0,0> > TestGrid;
 TestGrid dummy(LibGeoDecomp::Coord<2>(10, 20));
 #endif
 

@@ -4,7 +4,7 @@
 namespace LibGeoDecomp {
 
 /**
- * updates a Streak of cells using the "vanilla" API (i.e.
+ * Updates a Streak of cells using the "vanilla" API (i.e.
  * LibGeoDecomp's classic cell interface which calls update() once per
  * cell and facilitates access to neighboring cells via a proxy object.
  */
@@ -12,7 +12,8 @@ template<typename CELL>
 class VanillaUpdateFunctor
 {
 public:
-    static const int DIM = CELL::Topology::DIM;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
+    static const int DIM = Topology::DIM;
 
     template<typename GRID1, typename GRID2>
     void operator()(

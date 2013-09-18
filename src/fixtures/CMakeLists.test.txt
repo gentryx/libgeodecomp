@@ -10,15 +10,22 @@ set(TARGET_UNIT_TEST_EXE test_${BUFFER2})
 set(TARGET_RUN_UNIT_TEST run_${BUFFER2})
 
 get_filename_component(DIRNAME ${PWD} NAME)
-string(REGEX MATCH "^parallel_mpi" is_mpi_test ${DIRNAME})
-string(REGEX MATCH "^unit" is_unit_test ${DIRNAME})
+string(REGEX MATCH "^parallel_mpi"    is_mpi_test    ${DIRNAME})
+string(REGEX MATCH "^parallel_openmp" is_openmp_test ${DIRNAME})
+string(REGEX MATCH "^unit"            is_unit_test   ${DIRNAME})
 
 # check if config enabled this test class
 set(allowed_test false)
 if (is_unit_test)
   set(allowed_test true)
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${UNITEXEC} ./test")
-endif(is_unit_test)
+endif()
+
+if (is_openmp_test AND FEATURE_THREADS)
+  set(allowed_test true)
+  string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
+endif()
 
 if (is_mpi_test AND FEATURE_MPI)
   set(allowed_test true)

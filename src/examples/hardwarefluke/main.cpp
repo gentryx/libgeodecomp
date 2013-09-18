@@ -12,21 +12,15 @@ using namespace LibGeoDecomp;
 class BuggyCell
 {
 public:
-    typedef Stencils::VonNeumann<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >,
+        public APITraits::HasCubeTopology<2>
     {};
 
     friend class BuggyCellToColor;
 
-    static unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    BuggyCell(const char& _val=0) :
-        val(_val)
+    BuggyCell(const char val = 0) :
+        val(val)
     {}
 
     template<typename COORD_MAP>
@@ -52,7 +46,7 @@ public:
     virtual void grid(GridBase<BuggyCell, 2> *ret)
     {
         CoordBox<2> rect = ret->boundingBox();
-        ret->atEdge() = BuggyCell();
+        ret->setEdge(BuggyCell());
         std::string buf;
         int width;
         int height;
@@ -67,8 +61,9 @@ public:
                 input >> c >> c >> c;
                 std::cout << ((c == 0)? " " : "x");
                 Coord<2> pos(x, y);
-                if (rect.inBounds(pos))
-                    ret->at(pos) = BuggyCell(c);
+                if (rect.inBounds(pos)) {
+                    ret->set(pos, BuggyCell(c));
+                }
             }
             std::cout << "\n";
         }

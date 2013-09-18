@@ -23,7 +23,7 @@ class SerialBOVWriter : public Writer<CELL_TYPE>
     friend class boost::serialization::access;
 #endif
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
     typedef Grid<CELL_TYPE, Topology> GridType;
 
@@ -60,7 +60,8 @@ private:
     Coord<3> brickletDim;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    SerialBOVWriter() {}
+    SerialBOVWriter()
+    {}
 
     template <typename ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
@@ -141,7 +142,7 @@ private:
             i != boundingBox.end();
             ++i)
         {
-            SELECTOR_TYPE()(grid.at(*i), &buffer[j]);
+            SELECTOR_TYPE()(grid.get(*i), &buffer[j]);
             j += dataComponents;
         }
 

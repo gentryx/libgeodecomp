@@ -22,18 +22,7 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
-    {};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    ConwayCell(const bool& alive = false) :
+    ConwayCell(bool alive = false) :
         alive(alive)
     {
         count = alive? 1 : 0;
@@ -51,7 +40,7 @@ public:
         return ret;
     }
 
-    void update(const CoordMap<ConwayCell>& neighborhood, const unsigned&)
+    void update(const CoordMap<ConwayCell>& neighborhood, unsigned)
     {
         int livingNeighbors = countLivingNeighbors(neighborhood);
         alive = neighborhood[Coord<2>(0, 0)].alive;
@@ -111,7 +100,7 @@ public:
              i != startCells.end();
              ++i) {
             if (rect.inBounds(*i)) {
-                ret->at(*i) = ConwayCell(true);
+                ret->set(*i, ConwayCell(true));
             }
         }
     }

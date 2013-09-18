@@ -12,7 +12,7 @@ function(dump_config outfile)
   if(res GREATER 0)
     file(WRITE "${outfile}" "${CONTENT}")
   endif()
-  
+
   file(REMOVE "${outfile}.new")
 endfunction(dump_config)
 
@@ -36,7 +36,7 @@ endfunction(add_config_option)
 function(generate_sourcelists relative_dir)
   get_filename_component(dir ${relative_dir} ABSOLUTE)
   # message("generate_sourcelists ${dir}")
- 
+
   file(GLOB RAW_SOURCES "${dir}/*.cu" "${dir}/*.cpp")
   file(GLOB RAW_HEADERS "${dir}/*.h")
 
@@ -57,7 +57,7 @@ function(generate_sourcelists relative_dir)
     if(STRIPPED_SOURCES)
       list(SORT STRIPPED_SOURCES)
     endif(STRIPPED_SOURCES)
-    
+
     if(STRIPPED_HEADERS)
       list(SORT STRIPPED_HEADERS)
     endif(STRIPPED_HEADERS)

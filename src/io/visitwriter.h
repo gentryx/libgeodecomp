@@ -129,7 +129,7 @@ template<typename CELL_TYPE>
 class VisItDataAccessor
 {
 public:
-    typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
+    typedef typename Writer<CELL_TYPE>::GridType GridType;
 
     VisItDataAccessor(const std::string& myType) :
         myType(myType)
@@ -152,10 +152,12 @@ class VisItDataBuffer : public VisItWriterHelpers::VisItDataAccessor<CELL_TYPE>
 {
 public:
     typedef typename VisItDataAccessor<CELL_TYPE>::GridType GridType;
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    static const int DIM = Topology::DIM;
 
-    VisItDataBuffer(DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor,
-                    size_t gridVolume) :
+    VisItDataBuffer(
+        DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor,
+        size_t gridVolume) :
         VisItDataAccessor<CELL_TYPE>(accessor->type()),
         accessor(accessor),
         gridVolume(gridVolume),
@@ -206,8 +208,8 @@ class VisItWriter : public Writer<CELL_TYPE>
 {
 public:
     typedef SuperVector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
-    typedef typename CELL_TYPE::Topology Topology;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef typename Writer<CELL_TYPE>::Topology Topology;
+    typedef typename Writer<CELL_TYPE>::GridType GridType;
     typedef VisItWriter<CELL_TYPE, MESH_TYPE> SVW;
     static const int DIMENSIONS = Topology::DIM;
 
@@ -228,20 +230,20 @@ public:
 
     // fixme: parameter names shouldn't start with underscore
     virtual void stepFinished(
-        const GridType& _grid, unsigned _step, WriterEvent _event)
+        const GridType& newGrid, unsigned newStep, WriterEvent newEvent)
     {
-        grid = &_grid;
-        step = _step;
+        grid = &newGrid;
+        step = newStep;
 
-        if (_event == WRITER_INITIALIZED) {
+        if (newEvent == WRITER_INITIALIZED) {
             initialized();
-        } else if (_event == WRITER_STEP_FINISHED) {
+        } else if (newEvent == WRITER_STEP_FINISHED) {
             VisItTimeStepChanged();
 
-            if (((_step % period) == 0) && (VisItIsConnected())) {
+            if (((newStep % period) == 0) && (VisItIsConnected())) {
                 std::cout << "VisItWriter::stepFinished()" << std::endl;
-                std::cout << "  step: " << _step << std::endl;
-                std::cout << "  event: " << _event << std::endl;
+                std::cout << "  step: " << newStep << std::endl;
+                std::cout << "  event: " << newEvent << std::endl;
                 if (VisItIsConnected()) {
                     VisItUpdatePlots();
                 }
@@ -252,7 +254,7 @@ public:
             }
 
             checkVisitState();
-        } else if (_event == WRITER_ALL_DONE) {
+        } else if (newEvent == WRITER_ALL_DONE) {
             allDone();
         }
     }

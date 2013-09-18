@@ -17,11 +17,13 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
 #endif
+    using Writer<CELL_TYPE>::NANO_STEPS;
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
+    static const int DIM = Topology::DIM;
 
     TracingWriter(
         const unsigned period,
@@ -42,7 +44,7 @@ public:
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
-        stepFinished(step, grid.getDimensions(), event);
+        stepFinished(step, grid.dimensions(), event);
     }
 
     virtual void stepFinished(
@@ -75,8 +77,8 @@ private:
         ar & maxSteps;
     }
 
-    TracingWriter()
-      : stream(std::cerr)
+    TracingWriter() :
+        stream(std::cerr)
     {}
 #endif
 
@@ -117,7 +119,7 @@ private:
         Duration remaining = delta * (maxSteps - step) / step;
         Time eta = now + remaining;
 
-        double updates = 1.0 * step * CELL_TYPE::nanoSteps() * globalDimensions.prod();
+        double updates = 1.0 * step * NANO_STEPS * globalDimensions.prod();
         double seconds = delta.total_microseconds() / 1000.0 / 1000.0;
         double glups = updates / seconds / 1000.0 / 1000.0 / 1000.0;
         double bandwidth = glups * 2 * sizeof(CELL_TYPE);

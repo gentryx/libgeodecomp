@@ -13,7 +13,7 @@ template<typename CELL_TYPE, typename MEMBER_TYPE>
 class GetHandler : public Handler<CELL_TYPE>
 {
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > AccessorPtr;
 
@@ -31,13 +31,13 @@ public:
         Coord<DIM> c;
         int index;
 
-        int t = StringOps::atoi(parameters[0]);
+        unsigned time = StringOps::atoi(parameters[0]);
 
         for (index = 1; index < DIM; ++index) {
             c[index] = StringOps::atoi(parameters[index]);
         }
 
-        if (step > t) {
+        if (step > time) {
             return true;
         }
 
@@ -45,7 +45,7 @@ public:
         pipe.addSteeringFeedback("bingo bongo");
 
         if (validRegion.count(c)) {
-            std::cout << "  get result(" << c << ") = " << accessor->get(grid->at(c)) << "\n";
+            std::cout << "  get result(" << c << ") = " << accessor->get(grid->get(c)) << "\n";
             return true;
         }
 

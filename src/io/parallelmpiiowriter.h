@@ -15,15 +15,15 @@ class ParallelMPIIOWriter : public ParallelWriter<CELL_TYPE>
 public:
     friend class ParallelMPIIOWriterTest;
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
 
     ParallelMPIIOWriter(
         const std::string& prefix,
         const unsigned period,
         const unsigned maxSteps,
-        const MPI::Intracomm& communicator = MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        const MPI_Comm& communicator = MPI_COMM_WORLD,
+        MPI_Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
         ParallelWriter<CELL_TYPE>(prefix, period),
         maxSteps(maxSteps),
         comm(communicator),
@@ -59,8 +59,8 @@ private:
     using ParallelWriter<CELL_TYPE>::prefix;
 
     unsigned maxSteps;
-    MPI::Intracomm comm;
-    MPI::Datatype datatype;
+    MPI_Comm comm;
+    MPI_Datatype datatype;
 
     std::string filename(unsigned step) const
     {

@@ -57,10 +57,11 @@ public:
 
             TS_ASSERT_EQUALS("testmpiiowriter01234.mpiio", writer->filename(1234));
 
-            SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > expected =
-                memoryWriter->getGrids();
-            SuperVector<Grid<TestCell<3>, TestCell<3>::Topology> > actual;
-            for (int i = 0; i <= 21; i += (i == 20)? 1 : 4) {
+            typedef APITraits::SelectTopology<TestCell<3> >::Value Topology;
+            SuperVector<Grid<TestCell<3>, Topology> > expected = memoryWriter->getGrids();
+            SuperVector<Grid<TestCell<3>, Topology> > actual;
+
+            for (unsigned i = 0; i <= 21; i += (i == 20)? 1 : 4) {
                 std::string filename = writer->filename(i);
                 files.push_back(filename);
 
@@ -69,19 +70,19 @@ public:
                 unsigned maxSteps;
                 MPIIO<TestCell<3> >::readMetadata(
                     &dimensions, &step, &maxSteps, filename,
-                    MPI::COMM_SELF);
+                    MPI_COMM_SELF);
 
                 Region<3> region;
                 region << CoordBox<3>(Coord<3>(), dimensions);
-                Grid<TestCell<3>, TestCell<3>::Topology> buffer(dimensions);
+                Grid<TestCell<3>, Topology> buffer(dimensions);
                 MPIIO<TestCell<3> >::readRegion(
                     &buffer,
                     filename,
                     region,
-                    MPI::COMM_SELF);
+                    MPI_COMM_SELF);
 
                 TS_ASSERT_EQUALS(step, i);
-                TS_ASSERT_EQUALS(maxSteps, 21);
+                TS_ASSERT_EQUALS(maxSteps, unsigned(21));
                 actual.push_back(buffer);
             }
 

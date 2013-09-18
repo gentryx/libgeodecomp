@@ -29,20 +29,43 @@ class MPIParser
 
     class_files = Dir.glob("#{@path}/*.xml")
     @xml_docs = { }
-    class_files.each do |filename|
-      doc = REXML::Document.new File.new(filename)
-      @xml_docs[filename] = doc
+
+    threads = []
+    num_threads = 1
+    slices = class_files.each_slice(num_threads)
+
+    num_threads.times do |i|
+      thread = Thread.new do
+        slices.each do |slice|
+          filename = slice[i]
+          break if filename.nil?
+
+          # puts "  thread(#{i}) is parsing #{filename}"
+          doc = REXML::Document.new File.new(filename)
+          @xml_docs[filename] = doc
+        end
+      end
+
+      threads.push thread
     end
 
+    threads.each { |t| t.join }
+
+    # class_files.each do |filename|
+    #   puts "  #{filename}"
+    #   doc = REXML::Document.new File.new(filename)
+    #   @xml_docs[filename] = doc
+    # end
+
     @filename_cache = { }
-    @xml_docs.each do |filename, doc|    
+    @xml_docs.each do |filename, doc|
       next if !is_class_declaration(filename)
 
       xpath = "doxygen/compounddef/compoundname"
       klass = parse_class_name(doc.elements[xpath].text)
       @filename_cache[klass] = filename
     end
-    
+
     @log.debug "filename_cache: "
     @log.debug pp(@filename_cache)
 
@@ -50,8 +73,8 @@ class MPIParser
     @datatype_map.merge!(map_enums)
     classes_to_be_serialized = find_classes_to_be_serialized
     @type_hierarchy_closure = @datatype_map.keys.to_set +
-      classes_to_be_serialized 
-    @all_classes = classes_to_be_serialized 
+      classes_to_be_serialized
+    @all_classes = classes_to_be_serialized
   end
 
   def pp(object)
@@ -97,14 +120,14 @@ class MPIParser
 
     headers = topological_class_sortation.map { |klass| find_header(klass) }
 
-    return [resolved_classes, resolved_parents, 
+    return [resolved_classes, resolved_parents,
             @datatype_map, topological_class_sortation, headers]
   end
 
   def template_parameters(klass)
     xpath = "doxygen/compounddef/templateparamlist/param/declname"
     doc = @xml_docs[@filename_cache[klass]]
-    
+
     template_params = []
     doc.elements.each(xpath) do |spec|
       template_params.push spec.text
@@ -204,7 +227,7 @@ class MPIParser
         @log.debug pp(used_params)
 
         used_params.each do |values|
-          new_members = 
+          new_members =
             map_template_parameters(members, template_params, values)
           new_class = "#{klass}<#{values.join(",")} >"
           resolve_class_simple(new_class, new_members, parents,
@@ -258,10 +281,10 @@ class MPIParser
 
     return false
   end
-  
+
   # returns a map consisting of all member variables listed in the
-  # class' doxygen .xml file. 
-  def get_members(klass) 
+  # class' doxygen .xml file.
+  def get_members(klass)
     @log.debug "get_members(#{klass})"
 
     entry = @member_cache[klass]
@@ -269,7 +292,7 @@ class MPIParser
 
     members = { }
 
-    sweep_all_members(klass) do |member| 
+    sweep_all_members(klass) do |member|
       klass, spec = parse_member(member)
       members[klass] = spec
     end
@@ -286,11 +309,11 @@ class MPIParser
     doc = @xml_docs[filename]
     xpath = "doxygen/compounddef/basecompoundref"
     parents = []
-    doc.elements.each(xpath) do |member| 
+    doc.elements.each(xpath) do |member|
       stripped_member = member.text.gsub(/<\s*/, "<")
       @log.debug "  »#{stripped_member}«"
       parents.push stripped_member
-    end   
+    end
     return parents
   end
 
@@ -302,8 +325,8 @@ class MPIParser
   # dictionary). Returns nil if a type could not be found.
   def map_types_to_MPI_Datatypes(members)
     resolved = { }
-    
-    members.each do |name, map_orig| 
+
+    members.each do |name, map_orig|
       lookup = lookup_type(map_orig[:type])
       unless lookup
         name1 = map_orig[:type]
@@ -319,10 +342,10 @@ class MPIParser
   end
 
   # tries to map all parent types to mpi datatypes. Returns nil if a
-  # type could not be found. 
+  # type could not be found.
   def map_parent_types_to_MPI_Datatypes(parents)
     resolved = { }
-    parents.each do |name|            
+    parents.each do |name|
       lookup = lookup_type(name)
       unless lookup
         raise "could not resolve parent #{name} or #{@namespace + "::" + name}"
@@ -342,7 +365,7 @@ class MPIParser
   def exclude?(klass)
     # for exclusion, look for template name (without parameter list), too
     stripped = template_basename(klass)
-    return @sloppy && 
+    return @sloppy &&
       !@type_hierarchy_closure.include?(klass) &&
       !@type_hierarchy_closure.include?(stripped)
   end
@@ -354,7 +377,7 @@ class MPIParser
     @log.debug "---------member"
     @log.debug member.to_s
 
-    spec = { 
+    spec = {
       :type => extract_type(member),
       :cardinality => resolve_cardinality(member)
     }
@@ -397,7 +420,7 @@ class MPIParser
     # easy case: non-array member
     return 1 unless argsString.has_text?
     # more difficult: array members...
-    raise "illegal cardinality" unless argsString.text =~ /\[(.+)\]/ 
+    raise "illegal cardinality" unless argsString.text =~ /\[(.+)\]/
     # numeric constant as array size:
     return $1.to_i if argsString.text =~ /\[(\d+)\]/
     # gotta search a little longer for symbolic sizes:
@@ -435,8 +458,8 @@ class MPIParser
     codeline = nil
     doc.elements.each("doxygen/compounddef/programlisting/codeline") do |line|
       @log.debug "  codeline #{line}"
-      if line.attributes["refid"] == member_id        
-        codeline = line 
+      if line.attributes["refid"] == member_id
+        codeline = line
         break
       end
     end
@@ -487,7 +510,7 @@ class MPIParser
 
         @log.debug "  returning #{ret}"
         return ret
-      end      
+      end
     end
 
     raise "cardinality declaration not found"
@@ -519,10 +542,10 @@ class MPIParser
   # wraps the iteration though all XML class definitions and their
   # contained class members.
   def sweep_all_classes
-    @xml_docs.each do |filename, doc|    
+    @xml_docs.each do |filename, doc|
       next if !is_class_declaration(filename)
       raw_name = doc.elements["doxygen/compounddef/compoundname"].text
-      klass = parse_class_name(raw_name) 
+      klass = parse_class_name(raw_name)
       doc.elements.each("doxygen/compounddef/sectiondef/memberdef") do |member|
         yield(klass, member)
       end
@@ -540,7 +563,7 @@ class MPIParser
 
     doc.elements.each(xpath) do |member|
       yield member
-    end   
+    end
   end
 
   # locate the header filename
@@ -567,7 +590,7 @@ class MPIParser
       header = member.attributes["file"]
       @log.debug "  header: #{header}"
       return header if header
-    end   
+    end
 
     raise "no header found for class #{klass}"
   end
@@ -576,12 +599,12 @@ class MPIParser
     ret = Set.new
 
     sweep_all_classes do |klass, member|
-      if member.attributes["kind"] == "friend" && 
+      if member.attributes["kind"] == "friend" &&
           member.elements["name"].text == "Typemaps"
         ret.add klass
-      end      
+      end
     end
-    
+
     return ret
   end
 

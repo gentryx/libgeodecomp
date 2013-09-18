@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_LINEPOINTERUPDATEFUNCTOR_H
 #define LIBGEODECOMP_MISC_LINEPOINTERUPDATEFUNCTOR_H
 
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/linepointerneighborhood.h>
@@ -43,7 +43,16 @@ namespace LibGeoDecomp {
  * constant boundary conditions as periodic boundary conditions would
  * automatically wrap accesses to cells within the grid.
  */
-template<typename CELL, int DIM=CELL::Topology::DIM, bool HIGH=true, int CUR_DIM=(DIM - 1), bool BOUNDARY_TOP=false, bool BOUNDARY_BOTTOM=false, bool BOUNDARY_SOUTH=false, bool BOUNDARY_NORTH=false>
+template<
+    typename CELL,
+    int DIM = APITraits::SelectTopology<CELL>::Value::DIM,
+    bool HIGH = true,
+    int CUR_DIM = (DIM - 1),
+    bool BOUNDARY_TOP = false,
+    bool BOUNDARY_BOTTOM = false,
+    bool BOUNDARY_SOUTH = false,
+    bool BOUNDARY_NORTH = false
+>
 class LinePointerUpdateFunctor
 {
 public:
@@ -54,7 +63,7 @@ public:
         CELL *newLine,
         int nanoStep)
     {
-        typedef typename CELL::Topology Topology;
+        typedef typename APITraits::SelectTopology<CELL>::Value Topology;
         const Coord<DIM>& c = streak.origin;
 
         if ((CUR_DIM == 2) && (HIGH == true)) {
@@ -107,7 +116,8 @@ public:
         CELL *newLine,
         int nanoStep)
     {
-        typedef typename CELL::Stencil Stencil;
+        typedef typename APITraits::SelectStencil<CELL>::Value Stencil;
+        typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
 
         long x = 0;
         long endX = streak.endX - streak.origin.x();
@@ -120,9 +130,10 @@ public:
 
         LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
         newLine[x].update(hoodWest, nanoStep);
+        ++x;
 
         LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-        updateMain(newLine, &x, (long)(endX - 1), hood, nanoStep, typename CELL::API());
+        updateMain(newLine, &x, long(endX - 1), hood, nanoStep, UpdateLineXFlag());
 
         LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
         newLine[x].update(hoodEast, nanoStep);
@@ -130,17 +141,17 @@ public:
 
 private:
     template<typename NEIGHBORHOOD>
-    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, CellAPITraits::Base)
+    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::FalseType)
     {
-        for ((*x) += 1; (*x) < endX; ++(*x)) {
+        for (; *x < endX; ++*x) {
             newLine[(*x)].update(hood, nanoStep);
         }
     }
 
     template<typename NEIGHBORHOOD>
-    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, CellAPITraits::Line)
+    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::TrueType)
     {
-        CELL::updateLine(newLine, x, endX, hood, nanoStep);
+        CELL::updateLineX(newLine, x, endX, hood, nanoStep);
     }
 };
 

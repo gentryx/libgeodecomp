@@ -45,7 +45,7 @@ public:
             unsigned cycle = 0;
 
             for (int i = 0; i < (size - 1); ++i) {
-                cycle = TestCell<3>::nanoSteps() * i;
+                cycle = APITraits::SelectNanoSteps<TestCell<3> >::VALUE * i;
                 TS_ASSERT_TEST_GRID(MemoryWriter<TestCell<3> >::GridType, writer->getGrids()[i], cycle);
             }
 

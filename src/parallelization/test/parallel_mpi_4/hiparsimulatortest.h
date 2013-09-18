@@ -28,6 +28,8 @@ public:
     typedef MockSteerer<TestCell<2> > MockSteererType;
     typedef TestSteerer<2 > TestSteererType;
 
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
+
     void setUp()
     {
         int width = 131;
@@ -35,7 +37,7 @@ public:
         dim = Coord<2>(width, height);
         maxSteps = 101;
         firstStep = 20;
-        firstCycle = firstStep * TestCell<2>::nanoSteps();
+        firstCycle = firstStep * NANO_STEPS;
         TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(
             dim, maxSteps, firstStep);
 
@@ -81,7 +83,7 @@ public:
         TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
 
         for (int t = 20; t < 25; t += outputPeriod) {
-            int globalNanoStep = t * TestCell<2>::nanoSteps();
+            int globalNanoStep = t * NANO_STEPS;
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType,
@@ -96,7 +98,7 @@ public:
         sim->run();
 
         for (unsigned t = firstStep; t < maxSteps; t += outputPeriod) {
-            unsigned globalNanoStep = t * TestCell<2>::nanoSteps();
+            unsigned globalNanoStep = t * NANO_STEPS;
             MemoryWriterType::GridMap grids = memoryWriter->getGrids();
             TS_ASSERT_TEST_GRID(
                 MemoryWriterType::GridType,
@@ -107,7 +109,7 @@ public:
 
         // check last step, too
         unsigned t = maxSteps;
-        unsigned globalNanoStep = t * TestCell<2>::nanoSteps();
+        unsigned globalNanoStep = t * NANO_STEPS;
         MemoryWriterType::GridMap grids = memoryWriter->getGrids();
         TS_ASSERT_TEST_GRID(
             MemoryWriterType::GridType,

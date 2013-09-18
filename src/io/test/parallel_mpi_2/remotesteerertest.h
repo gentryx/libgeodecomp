@@ -62,7 +62,9 @@ public:
             for (Region<2>::Iterator i = validRegion.begin();
                  i != validRegion.end();
                  ++i) {
-                grid->at(*i).testValue += value;
+                TestCell<2> cell = grid->get(*i);
+                cell.testValue += value;
+                grid->set(*i, cell);
             }
 
             return true;
@@ -124,13 +126,13 @@ public:
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
             StringVec feedback = steerer->sendCommandWithFeedback("flush 1234 9", 1);
-            TS_ASSERT_EQUALS(1, feedback.size());
+            TS_ASSERT_EQUALS(size_t(1), feedback.size());
             TS_ASSERT_EQUALS("flush received", feedback[0]);
         }
 
         sim->run();
 
-        TS_ASSERT_EQUALS(writer->getGrids().size(), 16);
+        TS_ASSERT_EQUALS(writer->getGrids().size(), static_cast<size_t>(16));
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(3, 3)].testValue, 64.0);
         TS_ASSERT_EQUALS(writer->getGrid( 0)[Coord<2>(4, 3)].testValue, 65.0);
 
@@ -159,7 +161,7 @@ public:
             res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 2);
 
             std::cout << "res: " << res << "\n";
-            TS_ASSERT_EQUALS(res.size(), 2);
+            TS_ASSERT_EQUALS(res.size(), size_t(2));
             TS_ASSERT_EQUALS(res[0], "command not found: nonExistentAction");
             TS_ASSERT_EQUALS(res[1], "try \"help\"");
         }
@@ -223,7 +225,7 @@ public:
         if (interactor) {
             interactor->waitForCompletion();
             StringVec feedback = interactor->feedback();
-            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback.size(), size_t(2));
             TS_ASSERT_EQUALS(feedback[0], "handler not found: echo");
             TS_ASSERT_EQUALS(feedback[1], "echo reply from rank 1 at time step 0 with cargo »romeo,tango,yankee,papa,echo«");
         }
@@ -256,7 +258,7 @@ public:
         if (interactor) {
             interactor->waitForCompletion();
             StringVec feedback = interactor->feedback();
-            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback.size(), size_t(2));
             TS_ASSERT_EQUALS(feedback[1], "handler not found: echo");
             TS_ASSERT_EQUALS(feedback[0], "echo reply from rank 0 at time step 0 with cargo »romeo,tango,yankee,papa,echo«");
         }
@@ -288,7 +290,7 @@ public:
         if (interactor) {
             interactor->waitForCompletion();
             StringVec feedback = interactor->feedback();
-            TS_ASSERT_EQUALS(2, feedback.size());
+            TS_ASSERT_EQUALS(feedback.size(), size_t(2));
             TS_ASSERT_EQUALS(feedback[0], "handler not found: echo");
             TS_ASSERT_EQUALS(feedback[1], "handler not found: echo");
         }

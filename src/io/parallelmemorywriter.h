@@ -18,15 +18,16 @@ class ParallelMemoryWriter : public ParallelWriter<CELL_TYPE>
 {
 
 public:
-    static const int DIM = CELL_TYPE::Topology::DIM;
-    typedef DisplacedGrid<CELL_TYPE, typename CELL_TYPE::Topology> GridType;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType WriterGridType;
     typedef SuperMap<unsigned, GridType> GridMap;
     using ParallelWriter<CELL_TYPE>::period;
+    static const int DIM = Topology::DIM;
 
     ParallelMemoryWriter(
         int period = 1,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         ParallelWriter<CELL_TYPE>("", period),
         mpiLayer(communicator, MPILayer::PARALLEL_MEMORY_WRITER)
     {}
@@ -48,13 +49,19 @@ public:
             grids[step].resize(CoordBox<DIM>(Coord<DIM>(), globalDimensions));
         }
 
+        CoordBox<DIM> box = grid.boundingBox();
+        GridType localGrid(box);
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            localGrid[*i] = grid.get(*i);
+        }
+
         grids[step].paste(grid, validRegion);
-        grids[step].atEdge() = grid.atEdge();
+        grids[step].setEdge(grid.getEdge());
 
         for (std::size_t sender = 0; sender < mpiLayer.size(); ++sender) {
             for (std::size_t receiver = 0; receiver < mpiLayer.size(); ++receiver) {
                 if (sender != receiver) {
-                    sendRecvGrid(sender, receiver, grid, validRegion, step);
+                    sendRecvGrid(sender, receiver, localGrid, validRegion, step);
                 }
             }
         }
@@ -62,7 +69,7 @@ public:
         mpiLayer.waitAll();
     }
 
-    void sendRecvGrid(int sender, int receiver, const WriterGridType& grid, const Region<DIM>& validRegion, int step)
+    void sendRecvGrid(size_t sender, size_t receiver, const GridType& grid, const Region<DIM>& validRegion, int step)
     {
         if (sender == mpiLayer.rank()) {
             mpiLayer.sendRegion(validRegion, receiver);

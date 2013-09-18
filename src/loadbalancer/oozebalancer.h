@@ -4,7 +4,6 @@
 #include <cmath>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 
-//fixme: benchmark this number
 #define GOLDEN_RATIO  1.6180339887498948482
 #define EULERS_NUMBER 2.71828182845904523536
 
@@ -75,7 +74,7 @@ private:
         const LoadVec& relativeLoads) const;
 
 private:
-    double _newLoadWeight;
+    double newLoadWeight;
 
     WeightVec equalize(const LoadVec& loads);
     LoadVec linearCombo(const WeightVec& oldLoads, const LoadVec& newLoads);
@@ -85,7 +84,7 @@ private:
     void serialize(ARCHIVE& ar, unsigned)
     {
         ar & boost::serialization::base_object<LoadBalancer>(*this);
-        ar & _newLoadWeight;
+        ar & newLoadWeight;
     }
 #endif
 };

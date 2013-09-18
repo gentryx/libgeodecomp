@@ -142,9 +142,10 @@ template<
 >
 class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {
-    friend class HpxSimulatorTest;
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    friend class HpxSimulatorTest;
+    using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
+    using typename DistributedSimulator<CELL_TYPE>::Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
@@ -160,7 +161,7 @@ public:
         const unsigned ghostZoneWidth = 1) :
         ParentType(initializer),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
+        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         initialized(false)
     {
@@ -179,7 +180,7 @@ public:
         const unsigned ghostZoneWidth = 1) :
         ParentType(initializer),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
+        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         initialized(false)
     {
@@ -198,7 +199,7 @@ public:
         const SuperVector<std::size_t>& weights)
     {
         typedef
-            HiParSimulator::PartitionManager<DIM, typename CELL_TYPE::Topology>
+            HiParSimulator::PartitionManager<Topology>
             PartitionManagerType;
 
         for(std::size_t rank = rank_start; rank != rank_end; ++rank)
@@ -305,7 +306,7 @@ public:
     inline void step()
     {
         init();
-        nanoStep(CELL_TYPE::nanoSteps());
+        nanoStep(NANO_STEPS);
     }
 
     virtual unsigned getStep() const
@@ -341,7 +342,7 @@ private:
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    HiParSimulator::PartitionManager<DIM, Topology> partitionManager;
+    HiParSimulator::PartitionManager<Topology> partitionManager;
     std::vector<hpx::id_type> updateGroupsIds;
     boost::atomic<bool> initialized;
 

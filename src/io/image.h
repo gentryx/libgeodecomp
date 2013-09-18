@@ -18,6 +18,11 @@ class Image : public Grid<Color>
         Grid<Color>(Coord<2>(width, height), col)
     {}
 
+    inline Image(const Coord<2>& dim,
+                 const Color& col=Color()) :
+        Grid<Color>(dim, col)
+    {}
+
     Image slice(const Coord<2>& upperLeft,
                 const unsigned& width,
                 const unsigned& height);
@@ -30,14 +35,6 @@ class Image : public Grid<Color>
     void paste(const Coord<2>& upperLeft, const Image& img);
 
     void paste(const int& x, const int& y, const Image& img);
-
-    inline void setPix(const int& x, const int& y, const Color& col)
-    {
-        if (x < 0 || y < 0 ||
-            x >= (int)getDimensions().x() || y >= (int)getDimensions().y())
-            return;
-        (*this)[y][x] = col;
-    }
 
     inline void fillBox(const Coord<2>& upperLeft,
                         const unsigned& boxWidth,

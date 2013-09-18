@@ -12,29 +12,26 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    ConwayCell(const bool& _alive = false) :
-        alive(_alive)
+    ConwayCell(const bool& alive = false) :
+        alive(alive)
     {}
 
     template<typename COORD_MAP>
     int countLivingNeighbors(const COORD_MAP& neighborhood)
     {
         int ret = 0;
-        for (int z = -1; z < 2; ++z)
-            for (int y = -1; y < 2; ++y)
-                for (int x = -1; x < 2; ++x)
+        for (int z = -1; z < 2; ++z) {
+            for (int y = -1; y < 2; ++y) {
+                for (int x = -1; x < 2; ++x) {
                     ret += neighborhood[Coord<3>(x, y, z)].alive;
+                }
+            }
+        }
         ret -= neighborhood[Coord<3>(0, 0, 0)].alive;
         return ret;
     }
@@ -83,7 +80,7 @@ public:
              ++i)
             {
             if (rect.inBounds(*i)) {
-                ret->at(*i) = ConwayCell(true);
+                ret->set(*i, ConwayCell(true));
             }
         }
     }

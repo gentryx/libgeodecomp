@@ -6,21 +6,18 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Fixed
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    inline explicit Cell(const double& v=0) : temp(v)
+    inline explicit Cell(const double& v = 0) :
+        temp(v)
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, const unsigned& /* nanoStep */)
     {
         temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
                 neighborhood[FixedCoord< 0, -1,  0>()].temp +
@@ -37,10 +34,9 @@ template<typename CELL>
 class MyFutureOpenCLStepper
 {
 public:
-    const static int DIM = CELL::Topology::DIM;
-
-    typedef typename CELL::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef DisplacedGrid<CELL, Topology>  GridType;
+    const static int DIM = Topology::DIM;
 
     MyFutureOpenCLStepper(const CoordBox<DIM> box) :
         box(box),

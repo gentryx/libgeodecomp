@@ -13,20 +13,11 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<2, 1> Stencil;
-
-    typedef Topologies::Cube<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >
     {};
 
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    inline Cell(const double& v = 0) :
+    inline Cell(double v = 0) :
         temp(v)
     {}
 
@@ -59,7 +50,7 @@ public:
             for (int x = 0; x < 250; ++x) {
                 Coord<2> c(x + offsetX, y + offsetY);
                 if (rect.inBounds(c)) {
-                    ret->at(c) = Cell(0.99999999999);
+                    ret->set(c, Cell(0.99999999999));
                 }
             }
         }
@@ -95,12 +86,12 @@ void runSimulation()
         sim(new CellInitializer());
 
     int outputFrequency = 1;
-    // sim.addWriter(
-    //     new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-    //         "./jacobi",
-    //         outputFrequency,
-    //         1,
-    //         1));
+    sim.addWriter(
+        new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+            "jacobi",
+            outputFrequency,
+            1,
+            1));
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, 100));
 
     sim.run();

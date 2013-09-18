@@ -116,7 +116,7 @@ public:
             }
         }
 
-        inline void digDown(const unsigned& offset)
+        inline void digDown(const int& offset)
         {
             if (squareStack.empty()) {
                 throw std::logic_error("cannot descend from empty squares stack");

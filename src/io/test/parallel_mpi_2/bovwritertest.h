@@ -104,10 +104,10 @@ public:
         Coord<3> dimensions)
     {
         Grid<double, Topologies::Cube<3>::Topology> ret(dimensions);
-        MPI::File file = MPIIO<TestCell<3>, Topologies::Cube<3>::Topology>::openFileForRead(
-            filename, MPI::COMM_SELF);
-        file.Read(&ret[Coord<3>()], dimensions.prod(), MPI::DOUBLE);
-        file.Close();
+        MPI_File file = MPIIO<TestCell<3>, Topologies::Cube<3>::Topology>::openFileForRead(
+            filename, MPI_COMM_SELF);
+        MPI_File_read(file, &ret[Coord<3>()], dimensions.prod(), MPI_DOUBLE, MPI_STATUS_IGNORE);
+        MPI_File_close(&file);
         return ret;
     }
 };

@@ -13,12 +13,13 @@ template<typename CELL_TYPE>
 class MPIIOInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    static const int DIM = Topology::DIM;
 
     MPIIOInitializer(
         const std::string& filename,
-        const MPI::Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>(),
-        const MPI::Intracomm& comm = MPI::COMM_WORLD) :
+        const MPI_Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>(),
+        const MPI_Comm& comm = MPI_COMM_WORLD) :
         file(filename),
         datatype(mpiDatatype),
         communicator(comm)
@@ -51,8 +52,8 @@ public:
 
 private:
     std::string file;
-    MPI::Datatype datatype;
-    MPI::Intracomm communicator;
+    MPI_Datatype datatype;
+    MPI_Comm communicator;
     unsigned currentStep;
     unsigned maximumSteps;
     Coord<DIM> dimensions;

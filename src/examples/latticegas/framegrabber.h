@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <QObject>
-#include <libgeodecomp/examples/latticegas/fpscounter.h>
+#include <libgeodecomp/misc/fpscounter.h>
 
 class FrameGrabber : public QObject, FPSCounter
 {

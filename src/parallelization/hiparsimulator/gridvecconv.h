@@ -38,7 +38,7 @@ public:
 
         for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak(); ++i) {
-            const typename GRID_TYPE::CellType *start = &grid.at(i->origin);
+            const typename GRID_TYPE::CellType *start = &(grid[i->origin]);
             std::copy(start, start + i->length(), dest);
             dest += i->length();
         }
@@ -64,7 +64,7 @@ public:
              i != region.endStreak(); ++i) {
             unsigned length = i->length();
             const typename GRID_TYPE::CellType *end = source + length;
-            typename GRID_TYPE::CellType *dest = &grid->at(i->origin);
+            typename GRID_TYPE::CellType *dest = &((*grid)[i->origin]);
             std::copy(source, end, dest);
             source = end;
         }

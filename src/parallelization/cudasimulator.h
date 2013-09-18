@@ -67,7 +67,7 @@ class CudaSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class CudaSimulatorTest;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIMENSIONS;
 
@@ -104,7 +104,7 @@ public:
             }
         }
 
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); ++i) {
+        for (unsigned i = 0; i < NANO_STEPS; ++i) {
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
         }

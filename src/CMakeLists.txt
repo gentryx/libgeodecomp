@@ -37,8 +37,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(HPX_FOUND)
-  set(DEFAULT_FLAGS "${HPX_CXX_COMPILE_FLAGS}")
-  string(REPLACE "\\\\" "\\" DEFAULT_FLAGS ${DEFAULT_FLAGS})
+  set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10)
@@ -53,23 +52,21 @@ set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 # link time. The reason for this ugly multi-stage discovery is the
 # following: since CMAKE 2.8.11 each call to find_package(Boost...)
 # will reset Boost_LIBRARIES.
-if(NOT HPX_FOUND)
-  find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
-  set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS mpi)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS serialization)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS thread)
-  set(Boost_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(MPI)
-endif()
+find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
+set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
+find_package(Boost COMPONENTS mpi)
+set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+find_package(Boost COMPONENTS serialization)
+set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+find_package(Boost COMPONENTS thread)
+set(Boost_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 
 find_package(CUDA)
 find_package(OpenCL)
+find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
-find_package(Qt4)
+find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
 if(NOT DEFINED QT4_FOUND)
@@ -122,6 +119,7 @@ set(AMD64_LINUX false)
 if (MACHINE_ARCH MATCHES "x86_64")
   set(AMD64_LINUX true)
 endif()
+
 #============= CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
@@ -137,17 +135,10 @@ add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Sug
 
 add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
 
-if(HPX_FOUND)
-    set(MPI_FOUND True)
-endif()
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
 add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
 
-
-if(HPX_FOUND)
-    set(Boost_SERIALIZATION_FOUND True)
-endif()
 add_config_option(FEATURE_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
 add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
@@ -190,7 +181,7 @@ set(PACKAGE_EMAIL "users@libgeodecomp.org")
 # detected environment...
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-if(FEATURE_MPI AND NOT FEATURE_HPX)
+if(FEATURE_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
   include_directories(${MPI_INCLUDE_PATH})
 endif()
@@ -205,7 +196,7 @@ if(FEATURE_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "FEATURE_CUDA selected, but could not find the Nvidia CUDA toolkit.")
 endif()
 
-if(FEATURE_MPI AND NOT FEATURE_HPX)
+if(FEATURE_MPI)
   if(NOT MPI_FOUND)
     message(FATAL_ERROR "FEATURE_MPI selected, but could find no MPI implementation.")
   endif()
@@ -227,9 +218,9 @@ if(FEATURE_HPX AND NOT HPX_FOUND)
   message(FATAL_ERROR "FEATURE_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
 endif()
 
-#if(FEATURE_HPX AND NOT Boost_SERIALIZATION_FOUND)
-#  message(FATAL_ERROR "FEATURE_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
-#endif()
+if(FEATURE_HPX AND NOT Boost_SERIALIZATION_FOUND)
+  message(FATAL_ERROR "FEATURE_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
+endif()
 
 if (FEATURE_BOOST_MPI AND NOT Boost_MPI_FOUND)
   message(FATAL_ERROR "FEATURE_BOOST_MPI selected, but Boost.MPI library not found")
@@ -254,14 +245,10 @@ if(FEATURE_HPX)
   if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
   endif()
+endif()
 
-  set(LOCAL_LIBGEODECOMP_LINK_LIB
-    ${LOCAL_LIBGEODECOMP_LINK_LIB}
-    hpx${HPX_LIB_SUFFIX}
-    hpx_serialization${HPX_LIB_SUFFIX}
-    hpx_init${HPX_LIB_SUFFIX}
-    ${HPX_LIBRARIES}
-  )
+if(FEATURE_QT)
+  include(${QT_USE_FILE})
 endif()
 
 # LIBDIRS is used to find source files and headers
@@ -351,25 +338,50 @@ endforeach(dir)
 set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
 
+add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
+
+# link 3rd party libraries to main lib and add them to pkg-config file down below
+set(LIBGEODECOMP_LINK_LIBRARIES ${Boost_LIBRARIES})
 if(FEATURE_HPX)
-    add_hpx_library(geodecomp ESSENTIAL SOURCES ${SOURCES})
-else()
-  add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
-  target_link_libraries(geodecomp ${Boost_LIBRARIES})
-  if(FEATURE_MPI)
-    target_link_libraries(geodecomp ${MPI_LIBRARIES})
-    set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
-  endif()
-  if(FEATURE_OPENCL)
-    target_link_libraries(geodecomp OpenCL)
-  endif()
-  if(FEATURE_VISIT)
-    target_link_libraries(geodecomp ${VisIt_LIBRARIES} dl)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    hpx${HPX_LIB_SUFFIX}
+    hpx_serialization${HPX_LIB_SUFFIX}
+    hpx_init${HPX_LIB_SUFFIX}
+    ${HPX_LIBRARIES}
+  )
+endif()
+
+if(FEATURE_QT)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${QT_LIBRARIES})
+endif()
+
+if(FEATURE_THREADS)
+  # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} pthread)
   endif()
 endif()
 
+if(FEATURE_MPI)
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${MPI_LIBRARIES})
+  set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
+endif()
+
+if(FEATURE_OPENCL)
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} OpenCL)
+endif()
+
+if(FEATURE_VISIT)
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} dl)
+endif()
+
+target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
+
 #============= INSTALLER CONFIG ===================================
-install(TARGETS geodecomp_lib DESTINATION lib)
+install(TARGETS geodecomp DESTINATION lib)
 install(FILES config.h DESTINATION include/${PACKAGE_NAME})
 install(FILES libgeodecomp.h DESTINATION include)
 
@@ -380,6 +392,28 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
+# install libflatarray, too
+install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflatarray)
+
+# link against the libs we need
+set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")
+foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES} /usr/lib/liblibkremotecontrol.so)
+  get_filename_component(path "${lib}" PATH)
+  get_filename_component(name "${lib}" NAME_WE)
+
+  if(name MATCHES ^lib)
+    # this dirty trick is required to prevent REGEX REPLACE matching
+    # every occurrence of "lib" ("^lib" will sadly match all, too, if
+    # we're going to remove them)
+    set(name "_dummy_${name}")
+    string(REGEX REPLACE "_dummy_lib" "" name "${name}")
+  endif()
+
+  if (path)
+    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -L${path}")
+  endif()
+  set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${name}")
+endforeach()
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
@@ -388,7 +422,7 @@ includedir=${CMAKE_INSTALL_PREFIX}/include/libgeodecomp
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
-Libs: -L\${libdir} -lgeodecomp
+Libs: ${INSTALLER_LINK_FLAGS}
 Cflags: -I\${includedir}
 ")
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")

@@ -11,34 +11,29 @@ using namespace LibGeoDecomp;
 
 class CircleCell
 {
-    friend class CellToColor;
 public:
-    typedef Stencils::VonNeumann<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
+    friend class CellToColor;
     enum State {LIQUID, SOLIDIFYING, SOLID};
     typedef std::pair<double, double> DPair;
 
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >,
+        public APITraits::HasCubeTopology<2>
     {};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
 
     CircleCell() :
         state(LIQUID)
     {}
 
-    CircleCell(const DPair& _relativeCenter, const double& _speed, const double _radius=0) :
+    CircleCell(const DPair& relativeCenter, double speed, double radius = 0) :
         state(SOLIDIFYING),
-        relativeCenter(_relativeCenter),
-        speed(_speed),
-        radius(_radius)
+        relativeCenter(relativeCenter),
+        speed(speed),
+        radius(radius)
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned&)
+    void update(const COORD_MAP& neighborhood, unsigned /* unused */)
     {
         *this = neighborhood[Coord<2>(0, 0)];
         switch (state) {
@@ -99,8 +94,9 @@ private:
         if (inCircle(*this, Coord<2>(0, 0)) &&
             inCircle(*this, Coord<2>(1, 0)) &&
             inCircle(*this, Coord<2>(0, 1)) &&
-            inCircle(*this, Coord<2>(1, 1)))
+            inCircle(*this, Coord<2>(1, 1))) {
             state = SOLID;
+        }
     }
 
     void updateSolid()
@@ -113,9 +109,9 @@ class CircleCellInitializer : public SimpleInitializer<CircleCell>
 {
 public:
     CircleCellInitializer(
-        Coord<2> _dimensions = Coord<2>(100, 100),
-        const unsigned _steps = 300) :
-        SimpleInitializer<CircleCell>(_dimensions, _steps)
+        Coord<2> dimensions = Coord<2>(100, 100),
+        const unsigned steps = 300) :
+        SimpleInitializer<CircleCell>(dimensions, steps)
     {}
 
     virtual void grid(GridBase<CircleCell, 2> *ret)
@@ -136,9 +132,11 @@ public:
             CircleCell(std::make_pair(0.5, 0.5), 0.4));
 
         for (std::vector<std::pair<Coord<2>, CircleCell> >::iterator i =
-                 seeds.begin(); i != seeds.end(); ++i)
-            if (rect.inBounds(i->first))
-                ret->at(i->first) = i->second;
+                 seeds.begin(); i != seeds.end(); ++i) {
+            if (rect.inBounds(i->first)) {
+                ret->set(i->first, i->second);
+            }
+        }
     }
 };
 
@@ -147,10 +145,12 @@ class CellToColor
 public:
     Color operator()(const CircleCell& cell)
     {
-        if (cell.state == CircleCell::SOLID)
+        if (cell.state == CircleCell::SOLID) {
             return Color::RED;
-        if (cell.state == CircleCell::SOLIDIFYING)
+        }
+        if (cell.state == CircleCell::SOLIDIFYING) {
             return Color::GREEN;
+        }
         return Color::BLACK;
     }
 };

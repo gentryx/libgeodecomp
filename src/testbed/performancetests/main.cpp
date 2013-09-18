@@ -1,34 +1,30 @@
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/linepointerassembly.h>
 #include <libgeodecomp/misc/linepointerupdatefunctor.h>
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/soaaccessor.h>
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/testbed/performancetests/benchmark.h>
+#include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
+#include <libgeodecomp/testbed/performancetests/evaluate.h>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
 
 std::string revision;
 
-class RegionCount
+class RegionCount : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "RegionCount";
@@ -65,7 +61,7 @@ public:
             std::cout << "pure debug statement to prevent the compiler from optimizing away the previous loop";
         }
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -74,14 +70,9 @@ public:
     }
 };
 
-class RegionInsert
+class RegionInsert : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "RegionInsert";
@@ -105,7 +96,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -114,14 +105,9 @@ public:
     }
 };
 
-class RegionIntersect
+class RegionIntersect : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "RegionIntersect";
@@ -155,7 +141,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -164,14 +150,9 @@ public:
     }
 };
 
-class CoordEnumerationVanilla
+class CoordEnumerationVanilla : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "CoordEnumeration";
@@ -202,7 +183,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -211,14 +192,9 @@ public:
     }
 };
 
-class CoordEnumerationBronze
+class CoordEnumerationBronze : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "CoordEnumeration";
@@ -250,7 +226,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -259,14 +235,9 @@ public:
     }
 };
 
-class CoordEnumerationGold
+class CoordEnumerationGold : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "CoordEnumeration";
@@ -301,7 +272,7 @@ public:
 
         long long tEnd = Chronometer::timeUSec();
 
-        return (tEnd - tStart) * 0.000001;
+        return seconds(tStart, tEnd);
     }
 
     std::string unit()
@@ -310,14 +281,9 @@ public:
     }
 };
 
-class Jacobi3DVanilla
+class Jacobi3DVanilla : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -391,14 +357,9 @@ public:
     }
 };
 
-class Jacobi3DSSE
+class Jacobi3DSSE : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -608,28 +569,25 @@ template<typename CELL>
 class NoOpInitializer : public SimpleInitializer<CELL>
 {
 public:
+    typedef typename SimpleInitializer<CELL>::Topology Topology;
+
     NoOpInitializer(
         const Coord<3>& dimensions,
         const unsigned& steps) :
         SimpleInitializer<CELL>(dimensions, steps)
     {}
 
-    virtual void grid(GridBase<CELL, CELL::Topology::DIM> *target)
+    virtual void grid(GridBase<CELL, Topology::DIM> *target)
     {}
 };
 
 class JacobiCellClassic
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     JacobiCellClassic(double t = 0) :
         temp(t)
@@ -650,14 +608,9 @@ public:
     double temp;
 };
 
-class Jacobi3DClassic
+class Jacobi3DClassic : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -678,7 +631,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -699,19 +652,15 @@ public:
 class JacobiCellFixedHood
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Fixed
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     JacobiCellFixedHood(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -728,14 +677,9 @@ public:
     double temp;
 };
 
-class Jacobi3DFixedHood
+class Jacobi3DFixedHood : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -757,7 +701,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -797,20 +741,16 @@ public:
 class JacobiCellStreakUpdate
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -825,7 +765,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -976,14 +916,9 @@ public:
     double temp;
 };
 
-class Jacobi3DStreakUpdate
+class Jacobi3DStreakUpdate : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -996,7 +931,9 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        typedef Grid<JacobiCellStreakUpdate, JacobiCellStreakUpdate::Topology> GridType;
+        typedef Grid<
+            JacobiCellStreakUpdate,
+            APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
         GridType gridA(dim, 1.0);
         GridType gridB(dim, 2.0);
         GridType *gridOld = &gridA;
@@ -1015,8 +952,10 @@ public:
                  i != lineStarts.end();
                  ++i) {
                 Streak<3> streak(*i, dim.x());
-                const JacobiCellStreakUpdate *pointers[JacobiCellStreakUpdate::Stencil::VOLUME];
-                LinePointerAssembly<JacobiCellStreakUpdate::Stencil>()(pointers, streak, *gridOld);
+
+                typedef APITraits::SelectStencil<JacobiCellStreakUpdate>::Value Stencil;
+                const JacobiCellStreakUpdate *pointers[Stencil::VOLUME];
+                LinePointerAssembly<Stencil>()(pointers, streak, *gridOld);
                 LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
                     streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
             }
@@ -1044,14 +983,9 @@ public:
     }
 };
 
-class Jacobi3DStreakUpdateFunctor
+class Jacobi3DStreakUpdateFunctor : public CPUBenchmark
 {
 public:
-    std::string order()
-    {
-        return "CPU";
-    }
-
     std::string family()
     {
         return "Jacobi3D";
@@ -1072,7 +1006,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -1093,18 +1027,12 @@ public:
 class LBMCell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
 
 #define C 0
 #define N 1
@@ -1129,7 +1057,7 @@ public:
 #define TS 17
 #define BS 18
 
-    inline explicit LBMCell(const double& v=1.0, const State& s=LIQUID) :
+    inline explicit LBMCell(double v = 1.0, State s = LIQUID) :
         state(s)
     {
         comp[C] = v;
@@ -1140,7 +1068,7 @@ public:
     }
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    void update(const COORD_MAP& neighborhood, const unsigned /* nanoStep */)
     {
         *this = neighborhood[FixedCoord<0, 0>()];
 
@@ -1314,16 +1242,763 @@ public:
     double velocityY;
     double velocityZ;
     State state;
+
+#undef C
+#undef N
+#undef E
+#undef W
+#undef S
+#undef T
+#undef B
+
+#undef NW
+#undef SW
+#undef NE
+#undef SE
+
+#undef TW
+#undef BW
+#undef TE
+#undef BE
+
+#undef TN
+#undef BN
+#undef TS
+#undef BS
+
+#undef GET_COMP
+#undef SQR
 };
 
-class LBMClassic
+class ShortVec1xSSE
 {
 public:
-    std::string order()
+    static const int ARITY = 2;
+
+    inline ShortVec1xSSE() :
+        val(_mm_set1_pd(0))
+    {}
+
+    inline ShortVec1xSSE(const double *addr) :
+        val(_mm_loadu_pd(addr))
+    {}
+
+    inline ShortVec1xSSE(const double val) :
+        val(_mm_set1_pd(val))
+    {}
+
+    inline ShortVec1xSSE(__m128d val) :
+        val(val)
+    {}
+
+    inline ShortVec1xSSE operator+(const ShortVec1xSSE a) const
     {
-        return "CPU";
+        return ShortVec1xSSE(_mm_add_pd(val, a.val));
     }
 
+    inline ShortVec1xSSE operator-(const ShortVec1xSSE a) const
+    {
+        return ShortVec1xSSE(_mm_sub_pd(val, a.val));
+    }
+
+    inline ShortVec1xSSE operator*(const ShortVec1xSSE a) const
+    {
+        return ShortVec1xSSE(_mm_mul_pd(val, a.val));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm_store_pd(a + 0, val);
+    }
+
+    __m128d val;
+};
+
+class ShortVec2xSSE
+{
+public:
+    static const int ARITY = 4;
+
+    inline ShortVec2xSSE() :
+        val1(_mm_set1_pd(0)),
+        val2(_mm_set1_pd(0))
+    {}
+
+    inline ShortVec2xSSE(const double *addr) :
+        val1(_mm_loadu_pd(addr + 0)),
+        val2(_mm_loadu_pd(addr + 2))
+    {}
+
+    inline ShortVec2xSSE(const double val) :
+        val1(_mm_set1_pd(val)),
+        val2(_mm_set1_pd(val))
+    {}
+
+    inline ShortVec2xSSE(__m128d val1, __m128d val2) :
+        val1(val1),
+        val2(val2)
+    {}
+
+    inline ShortVec2xSSE operator+(const ShortVec2xSSE a) const
+    {
+        return ShortVec2xSSE(
+            _mm_add_pd(val1, a.val1),
+            _mm_add_pd(val2, a.val2));
+    }
+
+    inline ShortVec2xSSE operator-(const ShortVec2xSSE a) const
+    {
+        return ShortVec2xSSE(
+            _mm_sub_pd(val1, a.val1),
+            _mm_sub_pd(val2, a.val2));
+
+    }
+
+    inline ShortVec2xSSE operator*(const ShortVec2xSSE a) const
+    {
+        return ShortVec2xSSE(
+            _mm_mul_pd(val1, a.val1),
+            _mm_mul_pd(val2, a.val2));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm_store_pd(a + 0, val1);
+        _mm_store_pd(a + 2, val2);
+    }
+
+    __m128d val1;
+    __m128d val2;
+};
+
+class ShortVec4xSSE
+{
+public:
+    static const int ARITY = 8;
+
+    inline ShortVec4xSSE() :
+        val1(_mm_set1_pd(0)),
+        val2(_mm_set1_pd(0)),
+        val3(_mm_set1_pd(0)),
+        val4(_mm_set1_pd(0))
+    {}
+
+    inline ShortVec4xSSE(const double *addr) :
+        val1(_mm_loadu_pd(addr + 0)),
+        val2(_mm_loadu_pd(addr + 2)),
+        val3(_mm_loadu_pd(addr + 4)),
+        val4(_mm_loadu_pd(addr + 6))
+    {}
+
+    inline ShortVec4xSSE(const double val) :
+        val1(_mm_set1_pd(val)),
+        val2(_mm_set1_pd(val)),
+        val3(_mm_set1_pd(val)),
+        val4(_mm_set1_pd(val))
+    {}
+
+    inline ShortVec4xSSE(__m128d val1, __m128d val2, __m128d val3, __m128d val4) :
+        val1(val1),
+        val2(val2),
+        val3(val3),
+        val4(val4)
+    {}
+
+    inline ShortVec4xSSE operator+(const ShortVec4xSSE a) const
+    {
+        return ShortVec4xSSE(
+            _mm_add_pd(val1, a.val1),
+            _mm_add_pd(val2, a.val2),
+            _mm_add_pd(val3, a.val3),
+            _mm_add_pd(val4, a.val4));
+    }
+
+    inline ShortVec4xSSE operator-(const ShortVec4xSSE a) const
+    {
+        return ShortVec4xSSE(
+            _mm_sub_pd(val1, a.val1),
+            _mm_sub_pd(val2, a.val2),
+            _mm_sub_pd(val3, a.val3),
+            _mm_sub_pd(val4, a.val4));
+
+    }
+
+    inline ShortVec4xSSE operator*(const ShortVec4xSSE a) const
+    {
+        return ShortVec4xSSE(
+            _mm_mul_pd(val1, a.val1),
+            _mm_mul_pd(val2, a.val2),
+            _mm_mul_pd(val3, a.val3),
+            _mm_mul_pd(val4, a.val4));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm_storeu_pd(a + 0, val1);
+        _mm_storeu_pd(a + 2, val2);
+        _mm_storeu_pd(a + 4, val3);
+        _mm_storeu_pd(a + 6, val4);
+    }
+
+private:
+    __m128d val1;
+    __m128d val2;
+    __m128d val3;
+    __m128d val4;
+};
+
+#ifdef __AVX__
+
+class ShortVec1xAVX
+{
+public:
+    static const int ARITY = 4;
+
+    inline ShortVec1xAVX() :
+        val1(_mm256_set_pd(0, 0, 0, 0))
+    {}
+
+    inline ShortVec1xAVX(const double *addr) :
+        val1(_mm256_loadu_pd(addr +  0))
+    {}
+
+    inline ShortVec1xAVX(const double val) :
+        val1(_mm256_set_pd(val, val, val, val))
+    {}
+
+    inline ShortVec1xAVX(__m256d val1) :
+        val1(val1)
+    {}
+
+    inline ShortVec1xAVX operator+(const ShortVec1xAVX a) const
+    {
+        return ShortVec1xAVX(
+            _mm256_add_pd(val1, a.val1));
+    }
+
+    inline ShortVec1xAVX operator-(const ShortVec1xAVX a) const
+    {
+        return ShortVec1xAVX(
+            _mm256_sub_pd(val1, a.val1));
+
+    }
+
+    inline ShortVec1xAVX operator*(const ShortVec1xAVX a) const
+    {
+        return ShortVec1xAVX(
+            _mm256_mul_pd(val1, a.val1));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm256_storeu_pd(a +  0, val1);
+    }
+
+private:
+    __m256d val1;
+};
+
+class ShortVec2xAVX
+{
+public:
+    static const int ARITY = 8;
+
+    inline ShortVec2xAVX() :
+        val1(_mm256_set_pd(0, 0, 0, 0)),
+        val2(_mm256_set_pd(0, 0, 0, 0))
+    {}
+
+    inline ShortVec2xAVX(const double *addr) :
+        val1(_mm256_loadu_pd(addr +  0)),
+        val2(_mm256_loadu_pd(addr +  4))
+    {}
+
+    inline ShortVec2xAVX(const double val) :
+        val1(_mm256_set_pd(val, val, val, val)),
+        val2(_mm256_set_pd(val, val, val, val))
+    {}
+
+    inline ShortVec2xAVX(__m256d val1, __m256d val2) :
+        val1(val1),
+        val2(val2)
+    {}
+
+    inline ShortVec2xAVX operator+(const ShortVec2xAVX a) const
+    {
+        return ShortVec2xAVX(
+            _mm256_add_pd(val1, a.val1),
+            _mm256_add_pd(val2, a.val2));
+    }
+
+    inline ShortVec2xAVX operator-(const ShortVec2xAVX a) const
+    {
+        return ShortVec2xAVX(
+            _mm256_sub_pd(val1, a.val1),
+            _mm256_sub_pd(val2, a.val2));
+
+    }
+
+    inline ShortVec2xAVX operator*(const ShortVec2xAVX a) const
+    {
+        return ShortVec2xAVX(
+            _mm256_mul_pd(val1, a.val1),
+            _mm256_mul_pd(val2, a.val2));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm256_storeu_pd(a +  0, val1);
+        _mm256_storeu_pd(a +  4, val2);
+    }
+
+private:
+    __m256d val1;
+    __m256d val2;
+};
+
+class ShortVec4xAVX
+{
+public:
+    static const int ARITY = 16;
+
+    inline ShortVec4xAVX() :
+        val1(_mm256_set_pd(0, 0, 0, 0)),
+        val2(_mm256_set_pd(0, 0, 0, 0)),
+        val3(_mm256_set_pd(0, 0, 0, 0)),
+        val4(_mm256_set_pd(0, 0, 0, 0))
+    {}
+
+    inline ShortVec4xAVX(const double *addr) :
+        val1(_mm256_loadu_pd(addr +  0)),
+        val2(_mm256_loadu_pd(addr +  4)),
+        val3(_mm256_loadu_pd(addr +  8)),
+        val4(_mm256_loadu_pd(addr + 12))
+    {}
+
+    inline ShortVec4xAVX(const double val) :
+        val1(_mm256_set_pd(val, val, val, val)),
+        val2(_mm256_set_pd(val, val, val, val)),
+        val3(_mm256_set_pd(val, val, val, val)),
+        val4(_mm256_set_pd(val, val, val, val))
+    {}
+
+    inline ShortVec4xAVX(__m256d val1, __m256d val2, __m256d val3, __m256d val4) :
+        val1(val1),
+        val2(val2),
+        val3(val3),
+        val4(val4)
+    {}
+
+    inline ShortVec4xAVX operator+(const ShortVec4xAVX a) const
+    {
+        return ShortVec4xAVX(
+            _mm256_add_pd(val1, a.val1),
+            _mm256_add_pd(val2, a.val2),
+            _mm256_add_pd(val3, a.val3),
+            _mm256_add_pd(val4, a.val4));
+    }
+
+    inline ShortVec4xAVX operator-(const ShortVec4xAVX a) const
+    {
+        return ShortVec4xAVX(
+            _mm256_sub_pd(val1, a.val1),
+            _mm256_sub_pd(val2, a.val2),
+            _mm256_sub_pd(val3, a.val3),
+            _mm256_sub_pd(val4, a.val4));
+
+    }
+
+    inline ShortVec4xAVX operator*(const ShortVec4xAVX a) const
+    {
+        return ShortVec4xAVX(
+            _mm256_mul_pd(val1, a.val1),
+            _mm256_mul_pd(val2, a.val2),
+            _mm256_mul_pd(val3, a.val3),
+            _mm256_mul_pd(val4, a.val4));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm256_storeu_pd(a +  0, val1);
+        _mm256_storeu_pd(a +  4, val2);
+        _mm256_storeu_pd(a +  8, val3);
+        _mm256_storeu_pd(a + 12, val4);
+    }
+
+private:
+    __m256d val1;
+    __m256d val2;
+    __m256d val3;
+    __m256d val4;
+};
+
+#endif
+
+template<typename VEC>
+void store(double *a, VEC v)
+{
+    v.store(a);
+}
+
+class LBMSoACell
+{
+public:
+    // typedef ShortVec1xSSE Double;
+    // typedef ShortVec2xSSE Double;
+    typedef ShortVec4xSSE Double;
+    // typedef ShortVec1xAVX Double;
+    // typedef ShortVec2xAVX Double;
+    // typedef ShortVec4xAVX Double;
+
+    class API : public APITraits::HasFixedCoordsOnlyUpdate,
+                public APITraits::HasSoA,
+                public APITraits::HasUpdateLineX,
+                public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+                public APITraits::HasCubeTopology<3>
+    {};
+
+    enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
+
+    inline explicit LBMSoACell(const double& v=1.0, const State& s=LIQUID) :
+        C(v),
+        N(0),
+        E(0),
+        W(0),
+        S(0),
+        T(0),
+        B(0),
+
+        NW(0),
+        SW(0),
+        NE(0),
+        SE(0),
+
+        TW(0),
+        BW(0),
+        TE(0),
+        BE(0),
+
+        TN(0),
+        BN(0),
+        TS(0),
+        BS(0),
+
+        density(1.0),
+        velocityX(0),
+        velocityY(0),
+        velocityZ(0),
+        state(s)
+    {
+    }
+
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineX(
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
+    {
+        updateLineXFluid(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
+    }
+
+
+
+//     template<typename COORD_MAP>
+//     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+//     {
+//         *this = neighborhood[FixedCoord<0, 0>()];
+
+//         switch (state) {
+//         case LIQUID:
+//             updateFluid(neighborhood);
+//             break;
+//         case WEST_NOSLIP:
+//             updateWestNoSlip(neighborhood);
+//             break;
+//         case EAST_NOSLIP:
+//             updateEastNoSlip(neighborhood);
+//             break;
+//         case TOP :
+//             updateTop(neighborhood);
+//             break;
+//         case BOTTOM:
+//             updateBottom(neighborhood);
+//             break;
+//         case NORTH_ACC:
+//             updateNorthAcc(neighborhood);
+//             break;
+//         case SOUTH_NOSLIP:
+//             updateSouthNoSlip(neighborhood);
+//             break;
+//         }
+//     }
+
+// private:
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineXFluid(
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+    {
+#define GET_COMP(X, Y, Z, COMP) Double(&hoodOld[FixedCoord<X, Y, Z>()].COMP())
+#define SQR(X) ((X)*(X))
+        const Double omega = 1.0/1.7;
+        const Double omega_trm = Double(1.0) - omega;
+        const Double omega_w0 = Double(3.0 * 1.0 / 3.0) * omega;
+        const Double omega_w1 = Double(3.0*1.0/18.0)*omega;
+        const Double omega_w2 = Double(3.0*1.0/36.0)*omega;
+        const Double one_third = 1.0 / 3.0;
+        const Double one_half = 0.5;
+        const Double one_point_five = 1.5;
+
+        const int x = 0;
+        const int y = 0;
+        const int z = 0;
+        Double velX, velY, velZ;
+
+        for (; *indexOld < indexEnd; *indexOld += Double::ARITY) {
+            velX  =
+                GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
+                GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
+                GET_COMP(x-1,y,z+1,BE);
+            velY  =
+                GET_COMP(x,y-1,z,N) + GET_COMP(x+1,y-1,z,NW) +
+                GET_COMP(x,y-1,z-1,TN) + GET_COMP(x,y-1,z+1,BN);
+            velZ  =
+                GET_COMP(x,y,z-1,T) + GET_COMP(x,y+1,z-1,TS) +
+                GET_COMP(x+1,y,z-1,TW);
+
+            const Double rho =
+                GET_COMP(x,y,z,C) + GET_COMP(x,y+1,z,S) +
+                GET_COMP(x+1,y,z,W) + GET_COMP(x,y,z+1,B) +
+                GET_COMP(x+1,y+1,z,SW) + GET_COMP(x,y+1,z+1,BS) +
+                GET_COMP(x+1,y,z+1,BW) + velX + velY + velZ;
+            velX  = velX
+                - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW)
+                - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW)
+                - GET_COMP(x+1,y,z+1,BW);
+            velY  = velY
+                + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S)
+                - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE)
+                - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
+            velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
+
+            store(&hoodNew.density(), rho);
+            store(&hoodNew.velocityX(), velX);
+            store(&hoodNew.velocityY(), velY);
+            store(&hoodNew.velocityZ(), velZ);
+
+            const Double dir_indep_trm = one_third*rho - one_half *( velX*velX + velY*velY + velZ*velZ );
+
+            store(&hoodNew.C(), omega_trm * GET_COMP(x,y,z,C) + omega_w0*( dir_indep_trm ));
+
+            store(&hoodNew.NW(), omega_trm * GET_COMP(x+1,y-1,z,NW) + omega_w2*( dir_indep_trm - ( velX-velY ) + one_point_five * SQR( velX-velY ) ));
+            store(&hoodNew.SE(), omega_trm * GET_COMP(x-1,y+1,z,SE) + omega_w2*( dir_indep_trm + ( velX-velY ) + one_point_five * SQR( velX-velY ) ));
+            store(&hoodNew.NE(), omega_trm * GET_COMP(x-1,y-1,z,NE) + omega_w2*( dir_indep_trm + ( velX+velY ) + one_point_five * SQR( velX+velY ) ));
+            store(&hoodNew.SW(), omega_trm * GET_COMP(x+1,y+1,z,SW) + omega_w2*( dir_indep_trm - ( velX+velY ) + one_point_five * SQR( velX+velY ) ));
+
+            store(&hoodNew.TW(), omega_trm * GET_COMP(x+1,y,z-1,TW) + omega_w2*( dir_indep_trm - ( velX-velZ ) + one_point_five * SQR( velX-velZ ) ));
+            store(&hoodNew.BE(), omega_trm * GET_COMP(x-1,y,z+1,BE) + omega_w2*( dir_indep_trm + ( velX-velZ ) + one_point_five * SQR( velX-velZ ) ));
+            store(&hoodNew.TE(), omega_trm * GET_COMP(x-1,y,z-1,TE) + omega_w2*( dir_indep_trm + ( velX+velZ ) + one_point_five * SQR( velX+velZ ) ));
+            store(&hoodNew.BW(), omega_trm * GET_COMP(x+1,y,z+1,BW) + omega_w2*( dir_indep_trm - ( velX+velZ ) + one_point_five * SQR( velX+velZ ) ));
+
+            store(&hoodNew.TS(), omega_trm * GET_COMP(x,y+1,z-1,TS) + omega_w2*( dir_indep_trm - ( velY-velZ ) + one_point_five * SQR( velY-velZ ) ));
+            store(&hoodNew.BN(), omega_trm * GET_COMP(x,y-1,z+1,BN) + omega_w2*( dir_indep_trm + ( velY-velZ ) + one_point_five * SQR( velY-velZ ) ));
+            store(&hoodNew.TN(), omega_trm * GET_COMP(x,y-1,z-1,TN) + omega_w2*( dir_indep_trm + ( velY+velZ ) + one_point_five * SQR( velY+velZ ) ));
+            store(&hoodNew.BS(), omega_trm * GET_COMP(x,y+1,z+1,BS) + omega_w2*( dir_indep_trm - ( velY+velZ ) + one_point_five * SQR( velY+velZ ) ));
+
+            store(&hoodNew.N(), omega_trm * GET_COMP(x,y-1,z,N) + omega_w1*( dir_indep_trm + velY + one_point_five * SQR(velY)));
+            store(&hoodNew.S(), omega_trm * GET_COMP(x,y+1,z,S) + omega_w1*( dir_indep_trm - velY + one_point_five * SQR(velY)));
+            store(&hoodNew.E(), omega_trm * GET_COMP(x-1,y,z,E) + omega_w1*( dir_indep_trm + velX + one_point_five * SQR(velX)));
+            store(&hoodNew.W(), omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + one_point_five * SQR(velX)));
+            store(&hoodNew.T(), omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + one_point_five * SQR(velZ)));
+            store(&hoodNew.B(), omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
+
+            *indexNew += Double::ARITY;
+        }
+    }
+
+//     template<typename ACCESSOR1, typename ACCESSOR2>
+//     static void updateLineXFluid(
+//         ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+//     {
+// #define GET_COMP(X, Y, Z, COMP) hoodOld[FixedCoord<X, Y, Z>()].COMP()
+// #define SQR(X) ((X)*(X))
+//         const double omega = 1.0/1.7;
+//         const double omega_trm = 1.0 - omega;
+//         const double omega_w0 = 3.0 * 1.0 / 3.0 * omega;
+//         const double omega_w1 = 3.0*1.0/18.0*omega;
+//         const double omega_w2 = 3.0*1.0/36.0*omega;
+//         const double one_third = 1.0 / 3.0;
+//         const int x = 0;
+//         const int y = 0;
+//         const int z = 0;
+//         double velX, velY, velZ;
+
+//         for (; *indexOld < indexEnd; ++*indexOld) {
+//             velX  =
+//                 GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
+//                 GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
+//                 GET_COMP(x-1,y,z+1,BE);
+//             velY  = GET_COMP(x,y-1,z,N) + GET_COMP(x+1,y-1,z,NW) +
+//                 GET_COMP(x,y-1,z-1,TN) + GET_COMP(x,y-1,z+1,BN);
+//             velZ  = GET_COMP(x,y,z-1,T) + GET_COMP(x,y+1,z-1,TS) +
+//                 GET_COMP(x+1,y,z-1,TW);
+
+//             const double rho =
+//                 GET_COMP(x,y,z,C) + GET_COMP(x,y+1,z,S) +
+//                 GET_COMP(x+1,y,z,W) + GET_COMP(x,y,z+1,B) +
+//                 GET_COMP(x+1,y+1,z,SW) + GET_COMP(x,y+1,z+1,BS) +
+//                 GET_COMP(x+1,y,z+1,BW) + velX + velY + velZ;
+//             velX  = velX
+//                 - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW)
+//                 - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW)
+//                 - GET_COMP(x+1,y,z+1,BW);
+//             velY  = velY
+//                 + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S)
+//                 - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE)
+//                 - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
+//             velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
+
+//             hoodNew.density() = rho;
+//             hoodNew.velocityX() = velX;
+//             hoodNew.velocityY() = velY;
+//             hoodNew.velocityZ() = velZ;
+
+//             const double dir_indep_trm = one_third*rho - 0.5*( velX*velX + velY*velY + velZ*velZ );
+
+//             hoodNew.C()=omega_trm * GET_COMP(x,y,z,C) + omega_w0*( dir_indep_trm );
+
+//             hoodNew.NW()=omega_trm * GET_COMP(x+1,y-1,z,NW) +
+//                 omega_w2*( dir_indep_trm - ( velX-velY ) + 1.5*SQR( velX-velY ) );
+//             hoodNew.SE()=omega_trm * GET_COMP(x-1,y+1,z,SE) +
+//                 omega_w2*( dir_indep_trm + ( velX-velY ) + 1.5*SQR( velX-velY ) );
+//             hoodNew.NE()=omega_trm * GET_COMP(x-1,y-1,z,NE) +
+//                 omega_w2*( dir_indep_trm + ( velX+velY ) + 1.5*SQR( velX+velY ) );
+//             hoodNew.SW()=omega_trm * GET_COMP(x+1,y+1,z,SW) +
+//                 omega_w2*( dir_indep_trm - ( velX+velY ) + 1.5*SQR( velX+velY ) );
+
+//             hoodNew.TW()=omega_trm * GET_COMP(x+1,y,z-1,TW) + omega_w2*( dir_indep_trm - ( velX-velZ ) + 1.5*SQR( velX-velZ ) );
+//             hoodNew.BE()=omega_trm * GET_COMP(x-1,y,z+1,BE) + omega_w2*( dir_indep_trm + ( velX-velZ ) + 1.5*SQR( velX-velZ ) );
+//             hoodNew.TE()=omega_trm * GET_COMP(x-1,y,z-1,TE) + omega_w2*( dir_indep_trm + ( velX+velZ ) + 1.5*SQR( velX+velZ ) );
+//             hoodNew.BW()=omega_trm * GET_COMP(x+1,y,z+1,BW) + omega_w2*( dir_indep_trm - ( velX+velZ ) + 1.5*SQR( velX+velZ ) );
+
+//             hoodNew.TS()=omega_trm * GET_COMP(x,y+1,z-1,TS) + omega_w2*( dir_indep_trm - ( velY-velZ ) + 1.5*SQR( velY-velZ ) );
+//             hoodNew.BN()=omega_trm * GET_COMP(x,y-1,z+1,BN) + omega_w2*( dir_indep_trm + ( velY-velZ ) + 1.5*SQR( velY-velZ ) );
+//             hoodNew.TN()=omega_trm * GET_COMP(x,y-1,z-1,TN) + omega_w2*( dir_indep_trm + ( velY+velZ ) + 1.5*SQR( velY+velZ ) );
+//             hoodNew.BS()=omega_trm * GET_COMP(x,y+1,z+1,BS) + omega_w2*( dir_indep_trm - ( velY+velZ ) + 1.5*SQR( velY+velZ ) );
+
+//             hoodNew.N()=omega_trm * GET_COMP(x,y-1,z,N) + omega_w1*( dir_indep_trm + velY + 1.5*SQR(velY));
+//             hoodNew.S()=omega_trm * GET_COMP(x,y+1,z,S) + omega_w1*( dir_indep_trm - velY + 1.5*SQR(velY));
+//             hoodNew.E()=omega_trm * GET_COMP(x-1,y,z,E) + omega_w1*( dir_indep_trm + velX + 1.5*SQR(velX));
+//             hoodNew.W()=omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + 1.5*SQR(velX));
+//             hoodNew.T()=omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + 1.5*SQR(velZ));
+//             hoodNew.B()=omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + 1.5*SQR(velZ));
+
+//             ++*indexNew;
+//         }
+//     }
+
+//     template<typename COORD_MAP>
+//     void updateWestNoSlip(const COORD_MAP& neighborhood)
+//     {
+//         comp[E ]=GET_COMP(1, 0,  0, W);
+//         comp[NE]=GET_COMP(1, 1,  0, SW);
+//         comp[SE]=GET_COMP(1,-1,  0, NW);
+//         comp[TE]=GET_COMP(1, 0,  1, BW);
+//         comp[BE]=GET_COMP(1, 0, -1, TW);
+//     }
+
+//     template<typename COORD_MAP>
+//     void updateEastNoSlip(const COORD_MAP& neighborhood)
+//     {
+//         comp[W ]=GET_COMP(-1, 0, 0, E);
+//         comp[NW]=GET_COMP(-1, 0, 1, SE);
+//         comp[SW]=GET_COMP(-1,-1, 0, NE);
+//         comp[TW]=GET_COMP(-1, 0, 1, BE);
+//         comp[BW]=GET_COMP(-1, 0,-1, TE);
+//     }
+
+//     template<typename COORD_MAP>
+//     void updateTop(const COORD_MAP& neighborhood)
+//     {
+//         comp[B] =GET_COMP(0,0,-1,T);
+//         comp[BE]=GET_COMP(1,0,-1,TW);
+//         comp[BW]=GET_COMP(-1,0,-1,TE);
+//         comp[BN]=GET_COMP(0,1,-1,TS);
+//         comp[BS]=GET_COMP(0,-1,-1,TN);
+//     }
+
+//     template<typename COORD_MAP>
+//     void updateBottom(const COORD_MAP& neighborhood)
+//     {
+//         comp[T] =GET_COMP(0,0,1,B);
+//         comp[TE]=GET_COMP(1,0,1,BW);
+//         comp[TW]=GET_COMP(-1,0,1,BE);
+//         comp[TN]=GET_COMP(0,1,1,BS);
+//         comp[TS]=GET_COMP(0,-1,1,BN);
+//     }
+
+//     template<typename COORD_MAP>
+//     void updateNorthAcc(const COORD_MAP& neighborhood)
+//     {
+//         const double w_1 = 0.01;
+//         comp[S] =GET_COMP(0,-1,0,N);
+//         comp[SE]=GET_COMP(1,-1,0,NW)+6*w_1*0.1;
+//         comp[SW]=GET_COMP(-1,-1,0,NE)-6*w_1*0.1;
+//         comp[TS]=GET_COMP(0,-1,1,BN);
+//         comp[BS]=GET_COMP(0,-1,-1,TN);
+//     }
+
+//     template<typename COORD_MAP>
+//     void updateSouthNoSlip(const COORD_MAP& neighborhood)
+//     {
+//         comp[N] =GET_COMP(0,1,0,S);
+//         comp[NE]=GET_COMP(1,1,0,SW);
+//         comp[NW]=GET_COMP(-1,1,0,SE);
+//         comp[TN]=GET_COMP(0,1,1,BS);
+//         comp[BN]=GET_COMP(0,1,-1,TS);
+//     }
+
+//     double comp[19];
+//     double density;
+//     double velocityX;
+//     double velocityY;
+//     double velocityZ;
+//     State state;
+
+
+    double C;
+    double N;
+    double E;
+    double W;
+    double S;
+    double T;
+    double B;
+
+    double NW;
+    double SW;
+    double NE;
+    double SE;
+
+    double TW;
+    double BW;
+    double TE;
+    double BE;
+
+    double TN;
+    double BN;
+    double TS;
+    double BS;
+
+    double density;
+    double velocityX;
+    double velocityY;
+    double velocityZ;
+    State state;
+
+};
+
+LIBFLATARRAY_REGISTER_SOA(LBMSoACell, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS))((double)(density))((double)(velocityX))((double)(velocityY))((double)(velocityZ))((LBMSoACell::State)(state)))
+
+class LBMClassic : public CPUBenchmark
+{
+public:
     std::string family()
     {
         return "LBM";
@@ -1336,7 +2011,7 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        int maxT = 5;
+        int maxT = 20;
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
 
@@ -1344,7 +2019,7 @@ public:
         sim.run();
         long long tEnd = Chronometer::timeUSec();
 
-        if (sim.getGrid()->at(Coord<3>(1, 1, 1)).density == 4711) {
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).density == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -1362,46 +2037,46 @@ public:
     }
 };
 
-template<class BENCHMARK>
-void evaluate(BENCHMARK benchmark, const Coord<3>& dim)
+class LBMSoA : public CPUBenchmark
 {
-    boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-    std::stringstream buf;
-    buf << now;
-    std::string nowString = buf.str();
-    nowString.resize(20);
-
-    int hostnameLength = 2048;
-    std::string hostname(hostnameLength, ' ');
-    gethostname(&hostname[0], hostnameLength);
-    int actualLength = 0;
-    for (int i = 0; i < hostnameLength; ++i) {
-        if (hostname[i] == 0) {
-            actualLength = i;
-        }
+public:
+    std::string family()
+    {
+        return "LBM";
     }
-    hostname.resize(actualLength);
 
-    FILE *output = popen("cat /proc/cpuinfo | grep 'model name' | head -1 | cut -c 14-", "r");
-    int idLength = 2048;
-    std::string cpuID(idLength, ' ');
-    idLength = fread(&cpuID[0], 1, idLength, output);
-    cpuID.resize(idLength - 1);
-    pclose(output);
+    std::string species()
+    {
+        return "gold";
+    }
 
+    double performance(const Coord<3>& dim)
+    {
+        int maxT = 10;
+        SerialSimulator<LBMSoACell> sim(
+            new NoOpInitializer<LBMSoACell>(dim, maxT));
 
-    std::cout << std::setiosflags(std::ios::left);
-    std::cout << std::setw(18) << revision << "; "
-              << nowString << " ; "
-              << std::setw(16) << hostname << "; "
-              << std::setw(48) << cpuID << "; "
-              << std::setw( 8) << benchmark.order() <<  "; "
-              << std::setw(16) << benchmark.family() <<  "; "
-              << std::setw( 8) << benchmark.species() <<  "; "
-              << std::setw(24) << dim <<  "; "
-              << std::setw(12) << benchmark.performance(dim) <<  "; "
-              << std::setw( 8) << benchmark.unit() <<  "\n";
-}
+        long long tBegin= Chronometer::timeUSec();
+        sim.run();
+        long long tEnd = Chronometer::timeUSec();
+
+        if (sim.getGrid()->get(Coord<3>(1, 1, 1)).density == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        double updates = 1.0 * maxT * dim.prod();
+        double seconds = (tEnd - tBegin) * 10e-6;
+        double gLUPS = 10e-9 * updates / seconds;
+
+        return gLUPS;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+};
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
 void cudaTests(std::string revision, bool quick, int cudaDevice);
@@ -1415,45 +2090,47 @@ int main(int argc, char **argv)
     }
 
     bool quick = false;
-    int revIndex = 1;
+    int argumentIndex = 1;
     if (argc == 4) {
         if ((std::string(argv[1]) == "-q") ||
             (std::string(argv[1]) == "--quick")) {
             quick = true;
         }
-        revIndex = 2;
+        argumentIndex = 2;
     }
-    revision = argv[revIndex];
+    revision = argv[argumentIndex];
+
     std::stringstream s;
-    s << argv[revIndex + 1];
+    s << argv[argumentIndex + 1];
     int cudaDevice;
     s >> cudaDevice;
 
-    std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family          ; species ; dimensions              ; perf        ; unit\n";
+    Evaluate eval;
+    eval.printHeader();
 
-    evaluate(RegionCount(), Coord<3>( 128,  128,  128));
-    evaluate(RegionCount(), Coord<3>( 512,  512,  512));
-    evaluate(RegionCount(), Coord<3>(2048, 2048, 2048));
+    eval(RegionCount(), Coord<3>( 128,  128,  128));
+    eval(RegionCount(), Coord<3>( 512,  512,  512));
+    eval(RegionCount(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(RegionInsert(), Coord<3>( 128,  128,  128));
-    evaluate(RegionInsert(), Coord<3>( 512,  512,  512));
-    evaluate(RegionInsert(), Coord<3>(2048, 2048, 2048));
+    eval(RegionInsert(), Coord<3>( 128,  128,  128));
+    eval(RegionInsert(), Coord<3>( 512,  512,  512));
+    eval(RegionInsert(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(RegionIntersect(), Coord<3>( 128,  128,  128));
-    evaluate(RegionIntersect(), Coord<3>( 512,  512,  512));
-    evaluate(RegionIntersect(), Coord<3>(2048, 2048, 2048));
+    eval(RegionIntersect(), Coord<3>( 128,  128,  128));
+    eval(RegionIntersect(), Coord<3>( 512,  512,  512));
+    eval(RegionIntersect(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
+    eval(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
+    eval(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
+    eval(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
+    eval(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
 
-    evaluate(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
-    evaluate(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
-    evaluate(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
+    eval(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
+    eval(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
     SuperVector<Coord<3> > sizes;
     sizes << Coord<3>(22, 22, 22)
@@ -1468,27 +2145,27 @@ int main(int argc, char **argv)
           << Coord<3>(1026, 1026, 32);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DVanilla(), sizes[i]);
+        eval(Jacobi3DVanilla(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DSSE(), sizes[i]);
+        eval(Jacobi3DSSE(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DClassic(), sizes[i]);
+        eval(Jacobi3DClassic(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DFixedHood(), sizes[i]);
+        eval(Jacobi3DFixedHood(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdate(), sizes[i]);
+        eval(Jacobi3DStreakUpdate(), sizes[i]);
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(Jacobi3DStreakUpdateFunctor(), sizes[i]);
+        eval(Jacobi3DStreakUpdateFunctor(), sizes[i]);
     }
 
     sizes.clear();
@@ -1497,14 +2174,19 @@ int main(int argc, char **argv)
           << Coord<3>(64, 64, 64)
           << Coord<3>(68, 68, 68)
           << Coord<3>(106, 106, 106)
-          << Coord<3>(128, 128, 128);
+          << Coord<3>(128, 128, 128)
+          << Coord<3>(160, 160, 160);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        evaluate(LBMClassic(), sizes[i]);
+        eval(LBMClassic(), sizes[i]);
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(LBMSoA(), sizes[i]);
     }
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
-    // cudaTests(revision, quick, cudaDevice);
+    cudaTests(revision, quick, cudaDevice);
 #endif
 
     return 0;

@@ -1,4 +1,5 @@
 #ifndef LIBGEODECOMP_MISC_OUTPUTPAIRS_H
+#define LIBGEODECOMP_MISC_OUTPUTPAIRS_H
 
 template<typename _CharT, typename _Traits, typename _T1, typename _T2>
 std::basic_ostream<_CharT, _Traits>&

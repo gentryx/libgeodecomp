@@ -16,18 +16,12 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
 
 #define C 0
 #define N 1
@@ -52,7 +46,7 @@ public:
 #define TS 17
 #define BS 18
 
-    inline explicit Cell(const double& v=1.0, const State& s=LIQUID) :
+    inline explicit Cell(double v = 1.0, State s = LIQUID) :
         state(s)
     {
         comp[C] = v;
@@ -258,23 +252,30 @@ public:
                     Coord<3> c(x, y, z);
                     Cell::State s = Cell::LIQUID;
 
-                    if (c.x() == 0)
+                    if (c.x() == 0) {
                         s = Cell::WEST_NOSLIP;
-                    if (c.x() == (size.x() - 1))
+                    }
+                    if (c.x() == (size.x() - 1)) {
                         s = Cell::EAST_NOSLIP;
+                    }
 
-                    if (c.y() == 0)
+                    if (c.y() == 0) {
                         s = Cell::SOUTH_NOSLIP;
-                    if (c.y() == (size.y() - 1))
+                    }
+                    if (c.y() == (size.y() - 1)) {
                         s = Cell::NORTH_ACC;
+                    }
 
-                    if (c.z() == 0)
+                    if (c.z() == 0) {
                         s = Cell::BOTTOM;
-                    if (c.z() == (size.z() - 1))
+                    }
+                    if (c.z() == (size.z() - 1)) {
                         s = Cell::TOP;
+                    }
 
-                    if (box.inBounds(c))
-                        ret->at(c) = Cell(0, s);
+                    if (box.inBounds(c)) {
+                        ret->set(c, Cell(0, s));
+                    }
                 }
             }
         }
@@ -337,13 +338,12 @@ public:
 
 void runSimulation()
 {
-    MPI::Aint displacements[] = {0};
-    MPI::Datatype memberTypes[] = {MPI::CHAR};
-    int lengths[] = {sizeof(Cell)};
-    MPI::Datatype objType;
-    objType =
-        MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Aint displacements[] = { 0 };
+    MPI_Datatype memberTypes[] = { MPI_CHAR };
+    int lengths[] = { sizeof(Cell) };
+    MPI_Datatype objType;
+    MPI_Type_create_struct(1, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
 
     int outputFrequency = 1000;
     CellInitializer *init = new CellInitializer(Coord<3>(400, 400, 400), 2000000);

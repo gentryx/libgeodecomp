@@ -43,7 +43,7 @@ public:
         }
         unaccountedRegion -= validRegion;
 
-        unsigned myExpectedCycle = TestCell<2>::nanoSteps() * step;
+        unsigned myExpectedCycle = APITraits::SelectNanoSteps<TestCell<2> >::VALUE * step;
         TS_ASSERT_TEST_GRID_REGION(GridType, grid, validRegion, myExpectedCycle);
 
         TS_ASSERT(!expectedSteps.empty());

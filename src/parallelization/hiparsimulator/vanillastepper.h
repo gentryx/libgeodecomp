@@ -17,11 +17,13 @@ class VanillaStepper : public Stepper<CELL_TYPE>
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    const static int DIM = Topology::DIM;
+    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
@@ -96,20 +98,17 @@ private:
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            UpdateFunctor<CELL_TYPE>()(
-                *i,
-                i->origin,
-                *oldGrid,
-                &*newGrid,
-                curNanoStep);
-        }
+        UpdateFunctor<CELL_TYPE>()(
+            region,
+            Coord<DIM>(),
+            Coord<DIM>(),
+            *oldGrid,
+            &*newGrid,
+            curNanoStep);
         std::swap(oldGrid, newGrid);
 
         ++curNanoStep;
-        if (curNanoStep == CELL_TYPE::nanoSteps()) {
+        if (curNanoStep == NANO_STEPS) {
             curNanoStep = 0;
             curStep++;
         }
@@ -162,7 +161,7 @@ private:
 
     inline std::size_t globalNanoStep() const
     {
-        return curStep * CELL_TYPE::nanoSteps() + curNanoStep;
+        return curStep * NANO_STEPS + curNanoStep;
     }
 
     inline void initGrids()
@@ -226,19 +225,16 @@ private:
 
             timer.restart();
             const Region<DIM>& region = partitionManager->rim(t + 1);
-            for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                 i != region.endStreak();
-                 ++i) {
-                UpdateFunctor<CELL_TYPE>()(
-                    *i,
-                    i->origin,
+            UpdateFunctor<CELL_TYPE>()(
+                    region,
+                    Coord<DIM>(),
+                    Coord<DIM>(),
                     *oldGrid,
                     &*newGrid,
                     curNanoStep);
-            }
 
             ++curNanoStep;
-            if (curNanoStep == CELL_TYPE::nanoSteps()) {
+            if (curNanoStep == NANO_STEPS) {
                 curNanoStep = 0;
                 curStep++;
             }

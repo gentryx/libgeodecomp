@@ -107,9 +107,9 @@ class HpxWriterCollector : public ParallelWriter<CELL_TYPE>
 public:
     friend class boost::serialization::access;
 
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
 
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    static const int DIM = Topology::DIM;
 
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;

@@ -30,7 +30,7 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_MPI
     Pipe(
         unsigned root = 0,
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         mpiLayer(communicator),
         root(root)
     {}
@@ -101,7 +101,7 @@ public:
 #endif
     }
 
-    void waitForFeedback(int lines = 1)
+    void waitForFeedback(size_t lines = 1)
     {
         LOG(DBG, "Pipe::waitForFeedback(" << lines << ")");
         boost::unique_lock<boost::mutex> lock(mutex);

@@ -139,10 +139,10 @@ class Container
 public:
     friend class GasWriter;
 
-    typedef Stencils::Moore<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasNanoSteps<2>
     {};
 
     Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
@@ -150,11 +150,6 @@ public:
         numSpheres(0),
         numBoundaries(0)
     {}
-
-    static unsigned nanoSteps()
-    {
-        return 2;
-    }
 
     template<typename COORD_MAP>
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
@@ -260,6 +255,10 @@ void Boundary::update(
 class GasWriter : public Writer<Container>
 {
 public:
+    typedef APITraits::SelectTopology<Container>::Value Topology;
+    static const int DIM = Topology::DIM;
+    typedef GridBase<Container, DIM> GridType;
+
     GasWriter(
         const std::string& prefix,
         const unsigned period = 1) :
@@ -292,7 +291,7 @@ public:
 
         CoordBox<3> box = grid.boundingBox();
         for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            const Container& container = grid[*j];
+            const Container& container = grid.get(*j);
 
             for (int i = 0; i < container.numSpheres; ++i) {
                 file << sphereToPOV(container.spheres[i]);
@@ -431,7 +430,7 @@ public:
                 addBoundary(&container, center, FloatCoord<3>(0, 0, -1));
             }
 
-            target->at(*j) = container;
+            target->set(*j, container);
         }
     }
 

@@ -136,9 +136,10 @@ public:
         Coord<2> dim(31, 20);
         long endX = dim.x();
 
-        typedef Grid<TestCell<2>, TestCell<2>::Topology> GridType;
+        typedef Grid<TestCell<2>, APITraits::SelectTopology<TestCell<2> >::Value> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
+
         TestInitializer<TestCell<2> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);
@@ -173,9 +174,10 @@ public:
         Coord<3> dim(13, 12, 11);
         long endX = dim.x();
 
-        typedef Grid<TestCell<3>, TestCell<3>::Topology> GridType;
+        typedef Grid<TestCell<3>, APITraits::SelectTopology<TestCell<3> >::Value> GridType;
         GridType gridOld(dim);
         GridType gridNew(dim);
+
         TestInitializer<TestCell<3> > init(dim);
         init.grid(&gridOld);
         init.grid(&gridNew);

@@ -14,20 +14,15 @@ using namespace LibGeoDecomp;
 class JacobiCellSimple
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellSimple(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -47,20 +42,16 @@ public:
 class JacobiCellMagic
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellMagic(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -75,7 +66,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellMagic *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellMagic *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         for (; *x < endX; ++*x) {
             target[*x].update(hood, 0);
@@ -88,20 +79,16 @@ public:
 class JacobiCellStraightforward
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellStraightforward(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -116,7 +103,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStraightforward *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStraightforward *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -209,20 +196,16 @@ public:
 class JacobiCellStraightforwardNT
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellStraightforwardNT(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -237,7 +220,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStraightforwardNT *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStraightforwardNT *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -349,20 +332,16 @@ public:
 class JacobiCellStreakUpdate
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Torus<3>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasTorusTopology<3>
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
@@ -377,7 +356,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    static void updateLineX(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
         if (((*x) % 2) == 1) {
             target[*x].update(hood, 0);
@@ -539,9 +518,9 @@ public:
     {
         CoordBox<3> box = ret->boundingBox();
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
-            ret->at(*i) = CELL(1.0);
+            ret->set(*i, CELL(1.0));
         }
-        ret->atEdge() = CELL(0.0);
+        ret->setEdge(CELL(0.0));
     }
 };
 
@@ -553,13 +532,13 @@ double singleBenchmark(Coord<3> dim)
 
     SerialSimulator<CELL> sim(
         new MonoInitializer<CELL>(dim, repeats));
-    // sim.addWriter(new TracingWriter<CELL>(500, repeats));
+    sim.addWriter(new TracingWriter<CELL>(500, repeats));
 
     long long tBegin= Chronometer::timeUSec();
     sim.run();
     long long tEnd = Chronometer::timeUSec();
 
-    if (sim.getGrid()->at(Coord<3>(1, 1, 1)).temp == 4711) {
+    if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
         std::cout << "this statement just serves to prevent the compiler from"
                   << "optimizing away the loops above\n";
     }

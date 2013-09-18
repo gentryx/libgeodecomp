@@ -27,7 +27,7 @@ public:
 
     Interactor(
         const std::string& command,
-        int feedbackLines,
+        size_t feedbackLines,
         bool threaded,
         int port,
         const std::string& host = "127.0.0.1") :
@@ -117,7 +117,7 @@ private:
     boost::condition_variable signal;
     boost::mutex mutex;
     std::string command;
-    int feedbackLines;
+    size_t feedbackLines;
     int port;
     std::string host;
     bool started;
@@ -150,7 +150,7 @@ private:
     {
         LOG(DBG, "Interactor::handleInput(" << lines << ")");
         // only add lines which are not equal to "\0"
-        for (int i = 0; i < lines.size(); ++i) {
+        for (size_t i = 0; i < lines.size(); ++i) {
             const std::string& line = lines[i];
             if (line == "") {
                 LOG(WARN, "Interactor rejects empty line as feedback");

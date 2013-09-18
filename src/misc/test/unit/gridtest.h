@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/testcell.h>
 
 #define GRIDWIDTH 4
@@ -54,6 +55,15 @@ public:
         Grid<TestCell<2> > g;
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().x());
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().y());
+    }
+
+    void testCopyConstructorFromGridBase()
+    {
+        Grid<int> a;
+        Grid<int> b(Coord<2>(10, 5), 5);
+        GridBase<int, 2>& base = b;
+        a = Grid<int>(base);
+        TS_ASSERT_EQUALS(a, b);
     }
 
     void testConstructorDefaultInit()
@@ -179,6 +189,25 @@ public:
                          TestCell<2>::defaultValue());
 
         TS_ASSERT_EQUALS(hood[Coord<2>( 0,  1)].testValue, 207);
+    }
+
+    void testGetSetManyCells()
+    {
+	TestCell<2> cells[2];
+	testGrid->get(Streak<2>(Coord<2>(1, 3), 3), cells);
+
+	for (int i = 0; i < 2; ++i) {
+	    TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
+	}
+
+	for (int i = 0; i < 2; ++i) {
+            cells[i].testValue = i + 1234;
+        }
+        testGrid->set(Streak<2>(Coord<2>(1, 3), 3), cells);
+
+	for (int i = 0; i < 2; ++i) {
+	    TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
+	}
     }
 
     void testToString()

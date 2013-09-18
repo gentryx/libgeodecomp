@@ -21,7 +21,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 public:
     typedef ZCurvePartition<3> PartitionType;
     typedef VanillaStepper<TestCell<3> > StepperType;
-    typedef UpdateGroup<TestCell<3>, StepperType> UpdateGroupType;
+    typedef UpdateGroup<TestCell<3> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
     void setUp()
@@ -38,7 +38,8 @@ public:
                 partition,
                 CoordBox<3>(Coord<3>(), dimensions),
                 ghostZoneWidth,
-                init));
+                init,
+                reinterpret_cast<VanillaStepper<TestCell<3> >*>(0)));
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
         mockPatchAccepter->pushRequest(5);
         mockPatchAccepter->pushRequest(7);
@@ -60,7 +61,7 @@ public:
         expected.push_back(8);
         std::deque<std::size_t> actual = mockPatchAccepter->getOfferedNanoSteps();
         TS_ASSERT_EQUALS(actual, expected);
-        TS_ASSERT_EQUALS(10, updateGroup->grid()[Coord<3>(1, 2, 3)].cycleCounter);
+        TS_ASSERT_EQUALS(static_cast<unsigned>(10), updateGroup->grid()[Coord<3>(1, 2, 3)].cycleCounter);
     }
 
 private:

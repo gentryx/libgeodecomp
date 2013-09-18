@@ -38,6 +38,8 @@ private:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
     typedef TestSteerer<2 > TestSteererType;
 
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
+
     MonolithicSimulator<TestCell<2> > *referenceSim;
     StripingSimulator<TestCell<2> > *testSim;
     int rank;
@@ -60,7 +62,7 @@ public:
         height = 12;
         maxSteps = 50;
         firstStep = 20;
-        firstCycle = firstStep * TestCell<2>::nanoSteps();
+        firstCycle = firstStep * NANO_STEPS;
         init = new TestInitializer<TestCell<2> >(
             Coord<2>(width, height), maxSteps, firstStep);
 
@@ -80,15 +82,15 @@ public:
     void testGhostHeight()
     {
         if (rank == 0) {
-            TS_ASSERT_EQUALS(0, testSim->ghostHeightUpper);
+            TS_ASSERT_EQUALS(unsigned(0), testSim->ghostHeightUpper);
         } else {
-            TS_ASSERT_EQUALS(1, testSim->ghostHeightUpper);
+            TS_ASSERT_EQUALS(unsigned(1), testSim->ghostHeightUpper);
         }
 
         if (rank == (size - 1)) {
-            TS_ASSERT_EQUALS(0, testSim->ghostHeightLower);
+            TS_ASSERT_EQUALS(unsigned(0), testSim->ghostHeightLower);
         } else {
-            TS_ASSERT_EQUALS(1, testSim->ghostHeightLower);
+            TS_ASSERT_EQUALS(unsigned(1), testSim->ghostHeightLower);
         }
     }
 
@@ -156,7 +158,7 @@ public:
         for (int i = 0; i < 40; i++) {
             referenceSim->step();
             testSim->step();
-            cycle += TestCell<2>::nanoSteps();
+            cycle += NANO_STEPS;
 
             TS_ASSERT_EQUALS(referenceSim->getStep(),
                              testSim->getStep());
@@ -176,7 +178,7 @@ public:
 
         TS_ASSERT_EQUALS(init->maxSteps(), testSim->getStep());
 
-        int cycle = maxSteps * TestCell<2>::nanoSteps();
+        int cycle = maxSteps * NANO_STEPS;
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType,
             *testSim->curStripe,
@@ -265,7 +267,7 @@ public:
         testSim->run();
         referenceSim->run();
 
-        int cycle = maxSteps * TestCell<2>::nanoSteps();
+        int cycle = maxSteps * NANO_STEPS;
 
         TS_ASSERT_TEST_GRID_REGION(
             GridBaseType,

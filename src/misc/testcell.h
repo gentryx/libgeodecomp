@@ -2,15 +2,27 @@
 #define LIBGEODECOMP_MISC_TESTCELL_H
 
 #include <iostream>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libflatarray/flat_array.hpp>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/coordmap.h>
+#include <libgeodecomp/misc/fixedneighborhood.h>
 #include <libgeodecomp/misc/stencils.h>
 
 namespace LibGeoDecomp {
 
 namespace TestCellHelpers {
+
+class EmptyAPI
+{
+};
+
+class SoAAPI :
+        public APITraits::HasSoA,
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX
+{};
 
 template<int DIM>
 class TopologyType
@@ -66,26 +78,27 @@ public:
 /**
  * Useful for verifying the various parallelizations in LibGeoDecomp
  */
-template<int DIM,
-         class STENCIL=Stencils::Moore<DIM, 1>,
-         class TOPOLOGY=typename TestCellHelpers::TopologyType<DIM>::Topology,
-         class OUTPUT=TestCellHelpers::StdOutput>
+template<
+    int DIM,
+    typename STENCIL = Stencils::Moore<DIM, 1>,
+    typename TOPOLOGY = typename TestCellHelpers::TopologyType<DIM>::Topology,
+    typename ADDITIONAL_API = TestCellHelpers::EmptyAPI,
+    typename OUTPUT = TestCellHelpers::StdOutput>
 class TestCell
 {
+public:
     friend class Typemaps;
     friend class TestCellTest;
 
-public:
-    typedef STENCIL Stencil;
-    class API : public CellAPITraits::Base
-    {};
-    typedef TOPOLOGY Topology;
     static const int DIMENSIONS = DIM;
+    static const unsigned NANO_STEPS = 27;
 
-    static inline unsigned nanoSteps()
-    {
-        return 27;
-    }
+    class API :
+        public ADDITIONAL_API,
+        public APITraits::HasTopology<TOPOLOGY>,
+        public APITraits::HasNanoSteps<NANO_STEPS>,
+        public APITraits::HasStencil<STENCIL>
+    {};
 
     Coord<DIM> pos;
     CoordBox<DIM> dimensions;
@@ -120,6 +133,12 @@ public:
         isEdgeCell = !inBounds(pos);
     }
 
+    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    TestCell(const LibFlatArray::soa_accessor<TestCell, DIM_X, DIM_Y, DIM_Z, INDEX>& hood)
+    {
+        hood >> *this;
+    }
+
     const bool& valid() const
     {
         return isValid;
@@ -127,7 +146,7 @@ public:
 
     bool inBounds(const Coord<DIM>& c) const
     {
-        return !Topology::isOutOfBounds(c, dimensions.dimensions);
+        return !TOPOLOGY::isOutOfBounds(c, dimensions.dimensions);
     }
 
     bool operator==(const TestCell& other) const
@@ -149,7 +168,7 @@ public:
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
     {
         // initialize Cell by copying from previous state
-        *this = neighborhood[FixedCoord<0, 0, 0>()];
+        *this = TestCell(neighborhood[FixedCoord<0, 0, 0>()]);
 
         if (isEdgeCell) {
             OUTPUT() << "TestCell error: update called for edge cell\n";
@@ -161,14 +180,14 @@ public:
                          TestCellHelpers::CheckNeighbor,
                          STENCIL>()(&isValid, this, neighborhood);
 
-        if (nanoStep >= nanoSteps()) {
+        if (nanoStep >= NANO_STEPS) {
             OUTPUT() << "TestCell error: nanoStep too large: "
                      << nanoStep << "\n";
             isValid = false;
             return;
         }
 
-        unsigned expectedNanoStep = cycleCounter % nanoSteps();
+        unsigned expectedNanoStep = cycleCounter % NANO_STEPS;
         if (nanoStep != expectedNanoStep) {
             OUTPUT() << "TestCell error: nanoStep out of sync. got "
                      << nanoStep << " but expected "
@@ -178,6 +197,33 @@ public:
         }
 
         ++cycleCounter;
+    }
+
+    template<typename NEIGHBORHOOD>
+    static void updateLineX(
+        TestCell *targetLine,
+        long *index,
+        long indexEnd,
+        const NEIGHBORHOOD& hood,
+        unsigned nanoStep)
+    {
+        for (; *index < indexEnd; ++(*index)) {
+            targetLine[*index].update(hood, nanoStep);
+        }
+    }
+
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineX(
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd,
+        ACCESSOR2 hoodNew, int *indexNew,
+        unsigned nanoStep)
+    {
+        for (; *indexOld < indexEnd; ++(*indexOld)) {
+            TestCell cell;
+            cell.update(hoodOld, nanoStep);
+            hoodNew << cell;
+            ++(*indexNew);
+        }
     }
 
     std::string toString() const
@@ -230,7 +276,7 @@ public:
 
             Coord<DIM> rawPos = pos + relativeLoc;
             Coord<DIM> expectedPos =
-                Topology::normalize(rawPos, dimensions.dimensions);
+                TOPOLOGY::normalize(rawPos, dimensions.dimensions);
 
             if (other.pos != expectedPos) {
                 OUTPUT() << "TestCell error: other position "
@@ -252,6 +298,13 @@ public:
     }
 };
 
+typedef TestCell<
+    3,
+    Stencils::Moore<3, 1>,
+    Topologies::Cube<3>::Topology,
+    TestCellHelpers::SoAAPI
+    > TestCellSoA;
+
 /**
  * The MPI typemap generator need to find out for which template
  * parameter values it should generate typemaps. It does so by
@@ -269,10 +322,12 @@ class TestCellMPIDatatypeHelper
 
 }
 
-template<typename _CharT, typename _Traits, int _Dim>
+LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::TestCellSoA, ((LibGeoDecomp::Coord<3>)(pos))((LibGeoDecomp::CoordBox<3>)(dimensions))((unsigned)(cycleCounter))((bool)(isEdgeCell))((bool)(isValid))((double)(testValue)))
+
+template<typename _CharT, typename _Traits, int _Dim, typename _Stencil, typename _Topology, typename _AdditionalAPI, typename _Output>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::TestCell<_Dim>& cell)
+           const LibGeoDecomp::TestCell<_Dim, _Stencil, _Topology, _AdditionalAPI, _Output>& cell)
 {
     __os << cell.toString();
     return __os;

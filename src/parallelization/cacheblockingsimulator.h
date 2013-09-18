@@ -19,12 +19,15 @@ class CacheBlockingSimulator : public MonolithicSimulator<CELL>
 {
 public:
     friend class CacheBlockingSimulatorTest;
-    typedef typename CELL::Topology Topology;
+
+    typedef typename MonolithicSimulator<CELL>::Topology Topology;
     typedef typename TopologiesHelpers::Topology<3, Topology::template WrapsAxis<0>::VALUE, Topology::template WrapsAxis<1>::VALUE, true> BufferTopology;
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef SuperVector<SuperVector<Region<3> > > WavefrontFrames;
     static const int DIM = Topology::DIMENSIONS;
+
+    using MonolithicSimulator<CELL>::NANO_STEPS;
 
     CacheBlockingSimulator(
         Initializer<CELL> *initializer,
@@ -191,8 +194,8 @@ private:
 
         std::swap(curGrid, newGrid);
         int curNanoStep = nanoStep + pipelineLength;
-        stepNum += curNanoStep / CELL::nanoSteps();
-        nanoStep = curNanoStep % CELL::nanoSteps();
+        stepNum += curNanoStep / NANO_STEPS;
+        nanoStep = curNanoStep % NANO_STEPS;
     }
 
     void updateWavefront(BufferType *buffer, const Coord<DIM - 1>& wavefrontCoord)
@@ -255,7 +258,7 @@ private:
             int targetIndex = lastIteration  ? currentGlobalIndex : normalizeIndex(localIndex + 0 - 4 * i);
 
             const Region<DIM>& updateFrame = frames[frameCoord][globalIndex - 2 * i][i];
-            unsigned curNanoStep = (nanoStep + i) % CELL::nanoSteps();
+            unsigned curNanoStep = (nanoStep + i) % NANO_STEPS;
 
             if ( firstIteration &&  lastIteration) {
                 frameUpdate(needsFlushing, updateFrame, sourceIndex, targetIndex, *curGrid, newGrid, curNanoStep);
@@ -294,16 +297,17 @@ private:
             Coord<DIM> fillDim = buffers[omp_get_thread_num()].getDimensions();
             fillDim[DIM - 1] = 1;
 
-            buffers[omp_get_thread_num()].fill(CoordBox<DIM>(fillOrigin, fillDim), buffers[omp_get_thread_num()].getEdgeCell());
+            buffers[omp_get_thread_num()].fill(
+                CoordBox<DIM>(fillOrigin, fillDim),
+                buffers[omp_get_thread_num()].getEdgeCell());
+            
         } else {
-            for (typename Region<DIM>::StreakIterator iter = updateFrame.beginStreak();
-                 iter != updateFrame.endStreak(); ++iter) {
-                Streak<DIM> sourceStreak = *iter;
-                Coord<DIM> targetCoord  = iter->origin;
-                sourceStreak.origin[DIM - 1] = sourceIndex;
-                targetCoord[DIM - 1] = targetIndex;
-                UpdateFunctor<CELL>()(sourceStreak, targetCoord, sourceGrid, targetGrid, curNanoStep);
-            }
+            Coord<DIM> sourceOffset;
+            Coord<DIM> targetOffset;
+            sourceOffset[DIM - 1] = sourceIndex;
+            targetOffset[DIM - 1] = targetIndex;
+
+            UpdateFunctor<CELL>()(updateFrame, sourceOffset, targetOffset, sourceGrid, targetGrid, curNanoStep);
         }
      }
 

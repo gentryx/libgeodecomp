@@ -11,18 +11,21 @@ template<typename GRID_TYPE, typename CELL_TYPE>
 class SteererAdapter : public PatchProvider<GRID_TYPE>
 {
 public:
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
+    static const int DIM = Topology::DIM;
 
     SteererAdapter(
         boost::shared_ptr<Steerer<CELL_TYPE> > steerer,
         const std::size_t firstStep,
         const std::size_t lastStep,
-        Coord<CELL_TYPE::Topology::DIM> globalGridDimensions,
+        Coord<Topology::DIM> globalGridDimensions,
         std::size_t rank,
         bool lastCall) :
         steerer(steerer),
-        firstNanoStep(firstStep * CELL_TYPE::nanoSteps()),
-        lastNanoStep(lastStep   * CELL_TYPE::nanoSteps()),
+        firstNanoStep(firstStep * NANO_STEPS),
+        lastNanoStep(lastStep   * NANO_STEPS),
         rank(rank),
         lastCall(lastCall),
         globalGridDimensions(globalGridDimensions)
@@ -39,12 +42,12 @@ public:
         const std::size_t globalNanoStep,
         const bool remove = true)
     {
-        std::size_t nanoStep = globalNanoStep % CELL_TYPE::nanoSteps();
+        std::size_t nanoStep = globalNanoStep % NANO_STEPS;
         if (nanoStep != 0) {
             return;
         }
 
-        std::size_t step = globalNanoStep / CELL_TYPE::nanoSteps();
+        std::size_t step = globalNanoStep / NANO_STEPS;
         if (step % steerer->getPeriod() != 0) {
             return;
         }
@@ -73,7 +76,7 @@ private:
     std::size_t lastNanoStep;
     std::size_t rank;
     bool lastCall;
-    Coord<CELL_TYPE::Topology::DIM> globalGridDimensions;
+    Coord<Topology::DIM> globalGridDimensions;
 
 };
 

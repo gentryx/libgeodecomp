@@ -64,7 +64,7 @@ public:
             new StripingPartition<2>(Coord<2>(0, 0), rect.dimensions, 0, weights));
 
         // Feed the partition into the partition manager
-        partitionManager.reset(new PartitionManager<2>());
+        partitionManager.reset(new PartitionManager<Topologies::Cube<2>::Topology>());
         partitionManager->resetRegions(
             init->gridBox(),
             partition,
@@ -91,7 +91,7 @@ public:
 private:
     int ghostZoneWidth;
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
-    boost::shared_ptr<PartitionManager<2> > partitionManager;
+    boost::shared_ptr<PartitionManager<Topologies::Cube<2>::Topology> > partitionManager;
     boost::shared_ptr<StepperType> stepper;
 
     void checkInnerSet(

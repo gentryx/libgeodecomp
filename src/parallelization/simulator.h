@@ -5,22 +5,50 @@
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/steerer.h>
-#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/soagrid.h>
 
 namespace LibGeoDecomp {
 
+namespace SimulatorHelpers {
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT, typename SUPPORTS_SOA>
+class GridTypeSelector;
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::FalseType>
+{
+public:
+    typedef DisplacedGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
+};
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::TrueType>
+{
+public:
+    typedef SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
+};
+
+
+}
+
 /**
- * This is the abstract main application class. Its descendants
- * perform the iteration of simulation steps.
+ * A Simulator controls the workflow of the simulation. It also needs
+ * to interface with the Initializer (for setting up the initial
+ * grid), Writer objects (for output) and Steerer objects (for input
+ * at runtime). Simulator itself is just an abstract base class,
+ * implementations may target different hardware architectures (e.g.
+ * CUDASimulator or SerialSimulator).
  */
 template<typename CELL_TYPE>
 class Simulator
 {
 public:
-    typedef typename CELL_TYPE::Topology Topology;
-    typedef Grid<CELL_TYPE, Topology> GridType;
-    typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
+    typedef GridBase<CELL_TYPE, DIM> GridType;
+    typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
 
     /**
      * Creates the abstract Simulator object. The Initializer is

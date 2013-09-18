@@ -22,20 +22,20 @@ class BOVWriter : public ParallelWriter<CELL_TYPE>
 public:
     friend class BOVWriterTest;
 
-    typedef typename CELL_TYPE::Topology Topology;
-    typedef typename SELECTOR_TYPE::VariableType VariableType;
-
-    static const int DIM = CELL_TYPE::Topology::DIM;
-
     using ParallelWriter<CELL_TYPE>::period;
     using ParallelWriter<CELL_TYPE>::prefix;
+
+    typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
+    typedef typename SELECTOR_TYPE::VariableType VariableType;
+
+    static const int DIM = Topology::DIM;
 
     BOVWriter(
         const std::string& prefix,
         const unsigned period,
         const Coord<3>& brickletDim = Coord<3>(),
-        const MPI::Intracomm& communicator = MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<VariableType>()) :
+        const MPI_Comm& communicator = MPI_COMM_WORLD,
+        MPI_Datatype mpiDatatype = Typemaps::lookup<VariableType>()) :
         ParallelWriter<CELL_TYPE>(prefix, period),
         brickletDim(brickletDim),
         comm(communicator),
@@ -62,8 +62,8 @@ public:
 
 private:
     Coord<3> brickletDim;
-    MPI::Intracomm comm;
-    MPI::Datatype datatype;
+    MPI_Comm comm;
+    MPI_Datatype datatype;
 
     std::string filename(const unsigned& step, const std::string& suffix) const
     {
@@ -74,10 +74,12 @@ private:
 
     void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
     {
-        MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
+        MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "bov"), comm);
+        int rank;
+        MPI_Comm_rank(comm, &rank);
 
-        if (comm.Get_rank() == 0) {
+        if (rank == 0) {
             // BOV only accepts 3D data, so we'll have to inflate 1D
             // and 2D dimensions.
             Coord<DIM> c = dimensions;
@@ -104,10 +106,10 @@ private:
                 << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
                 << "DATA_COMPONENTS: " << SELECTOR_TYPE::dataComponents() << "\n";
             std::string s = buf.str();
-            file.Write(s.c_str(), s.length(), MPI::CHAR);
+            MPI_File_write(file, const_cast<char*>(s.c_str()), s.length(), MPI_CHAR, MPI_STATUS_IGNORE);
         }
 
-        file.Close();
+        MPI_File_close(&file);
     }
 
     template<typename GRID_TYPE>
@@ -117,9 +119,9 @@ private:
         const GRID_TYPE& grid,
         const Region<DIM>& region)
     {
-        MPI::File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
+        MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "data"), comm);
-        MPI::Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
+        MPI_Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
         SuperVector<VariableType> buffer;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
@@ -130,8 +132,8 @@ private:
             // (especially negative coordnates may occurr).
             Coord<DIM> coord = Topology::normalize(i->origin, dimensions);
             int dataComponents = SELECTOR_TYPE::dataComponents();
-            MPI::Offset index = coord.toIndex(dimensions) * varLength * dataComponents;
-            file.Seek(index, MPI_SEEK_SET);
+            MPI_Offset index = coord.toIndex(dimensions) * varLength * dataComponents;
+            MPI_File_seek(file, index, MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
             std::size_t effectiveLength = length * dataComponents;
             Coord<DIM> walker = i->origin;
@@ -141,13 +143,13 @@ private:
             }
 
             for (std::size_t i = 0; i < effectiveLength; i += dataComponents) {
-                SELECTOR_TYPE()(grid.at(walker), &buffer[i]);
+                SELECTOR_TYPE()(grid.get(walker), &buffer[i]);
                 walker.x()++;
             }
-            file.Write(&buffer[0], effectiveLength, datatype);
+            MPI_File_write(file, &buffer[0], effectiveLength, datatype, MPI_STATUS_IGNORE);
         }
 
-        file.Close();
+        MPI_File_close(&file);
     }
 };
 

@@ -22,24 +22,13 @@ enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
 typedef SuperMap<long, EventSet> EventMap;
 
-inline std::string eventToStr(const EventPoint& event)
-{
-    switch (event) {
-    case LOAD_BALANCING:
-        return "LOAD_BALANCING";
-    case END:
-        return "END";
-    default:
-        return "invalid";
-    }
-}
-
 template<class CELL_TYPE, class PARTITION>
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {
-    friend class HiParSimulatorTest;
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    friend class HiParSimulatorTest;
+    using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
+    typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
@@ -50,15 +39,16 @@ public:
     inline HiParSimulator(
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
-        const unsigned& loadBalancingPeriod = 1,
-        const unsigned &ghostZoneWidth = 1,
-        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        unsigned loadBalancingPeriod = 1,
+        unsigned ghostZoneWidth = 1,
+        MPI_Datatype cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         ParentType(initializer),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * CELL_TYPE::nanoSteps()),
+        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
         communicator(communicator),
+        mpiLayer(communicator),
         cellMPIDatatype(cellMPIDatatype)
     {}
 
@@ -78,7 +68,7 @@ public:
     {
         initSimulation();
 
-        nanoStep(CELL_TYPE::nanoSteps());
+        nanoStep(NANO_STEPS);
     }
 
     inline SuperVector<Statistics> gatherStatistics()
@@ -123,7 +113,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 false));
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
             new SteererAdapterType(
@@ -131,7 +121,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 true));
 
         steererAdaptersGhost.push_back(adapterGhost);
@@ -151,7 +141,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 false));
         typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
             new ParallelWriterAdapterType(
@@ -159,7 +149,7 @@ public:
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
-                communicator->Get_rank(),
+                mpiLayer.rank(),
                 true));
 
         writerAdaptersGhost.push_back(adapterGhost);
@@ -175,9 +165,10 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     EventMap events;
-    PartitionManager<DIM, Topology> partitionManager;
-    MPI::Comm *communicator;
-    MPI::Datatype cellMPIDatatype;
+    PartitionManager<Topology> partitionManager;
+    MPI_Comm communicator;
+    MPILayer mpiLayer;
+    MPI_Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
@@ -186,11 +177,10 @@ private:
 
     double totalTime;
 
-    SuperVector<std::size_t> initialWeights(const std::size_t& items, const std::size_t& size) const
+    SuperVector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
     {
-        MPILayer layer(communicator);
         double mySpeed = CELL_TYPE::speed();
-        SuperVector<double> speeds = layer.allGather(mySpeed);
+        SuperVector<double> speeds = mpiLayer.allGather(mySpeed);
         double sum = speeds.sum();
         SuperVector<std::size_t> ret(size);
 
@@ -211,7 +201,9 @@ private:
 
     inline void nanoStep(const long& s)
     {
+#ifdef FEATURE_HPX
         hpx::util::high_resolution_timer timer;
+#endif
         long remainingNanoSteps = s;
         while (remainingNanoSteps > 0) {
             long hop = std::min(remainingNanoSteps, timeToNextEvent());
@@ -219,7 +211,9 @@ private:
             handleEvents();
             remainingNanoSteps -= hop;
         }
+#ifdef FEATURE_HPX
         totalTime = timer.elapsed();
+#endif
     }
 
     /**
@@ -245,7 +239,8 @@ private:
                 box.origin,
                 box.dimensions,
                 0,
-                initialWeights(box.dimensions.prod(), communicator->Get_size())));
+                initialWeights(box.dimensions.prod(),
+                               mpiLayer.size())));
         
 
         updateGroup.reset(
@@ -254,6 +249,7 @@ private:
                 box,
                 ghostZoneWidth,
                 initializer,
+                static_cast<VanillaStepper<CELL_TYPE>*>(0),
                 writerAdaptersGhost,
                 writerAdaptersInner,
                 steererAdaptersGhost,
@@ -270,7 +266,7 @@ private:
     inline void initEvents()
     {
         events.clear();
-        long lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
         events[lastNanoStep] << END;
 
         insertNextLoadBalancingEvent();
@@ -305,7 +301,7 @@ private:
     inline long currentNanoStep() const
     {
         std::pair<int, int> now = updateGroup->currentStep();
-        return (long)now.first * CELL_TYPE::nanoSteps() + now.second;
+        return (long)now.first * NANO_STEPS + now.second;
     }
 
     /**
@@ -326,13 +322,12 @@ private:
 
     inline void balanceLoad()
     {
-        if (communicator->Get_rank() == 0) {
+        if (mpiLayer.rank() == 0) {
             if (!balancer) {
                 return;
             }
 
-            int size = communicator->Get_size();
-            LoadBalancer::LoadVec loads(size, 1.0);
+            LoadBalancer::LoadVec loads(mpiLayer.size(), 1.0);
             LoadBalancer::WeightVec newWeights =
                 balancer->balance(updateGroup->getWeights(), loads);
             // fixme: actually balance the load!

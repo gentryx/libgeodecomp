@@ -19,7 +19,10 @@ namespace LibGeoDecomp {
 class SerialSimulatorTest : public CxxTest::TestSuite
 {
 public:
+    static const int NANO_STEPS_2D = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
+    static const int NANO_STEPS_3D = APITraits::SelectNanoSteps<TestCell<3> >::VALUE;
     typedef MockSteerer<TestCell<2> > SteererType;
+    typedef GridBase<TestCell<2>, 2> GridBaseType;
 
     void setUp()
     {
@@ -39,22 +42,20 @@ public:
 
     void testInitialization()
     {
-        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().x(),
-                         (unsigned)17);
-        TS_ASSERT_EQUALS(simulator->getGrid()->getDimensions().y(),
-                         (unsigned)12);
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *simulator->getGrid(), startStep * TestCell<2>::nanoSteps());
+        TS_ASSERT_EQUALS(simulator->getGrid()->dimensions().x(), 17);
+        TS_ASSERT_EQUALS(simulator->getGrid()->dimensions().y(), 12);
+        TS_ASSERT_TEST_GRID(GridBaseType, *simulator->getGrid(), startStep * NANO_STEPS_2D);
     }
 
     void testStep()
     {
-        TS_ASSERT_EQUALS(startStep, (int)simulator->getStep());
+        TS_ASSERT_EQUALS(startStep, simulator->getStep());
 
         simulator->step();
-        const Grid<TestCell<2> > *grid = simulator->getGrid();
-        TS_ASSERT_TEST_GRID(Grid<TestCell<2> >, *grid,
-                            (startStep + 1) * TestCell<2>::nanoSteps());
-        TS_ASSERT_EQUALS(startStep + 1, (int)simulator->getStep());
+        const GridBase<TestCell<2>, 2> *grid = simulator->getGrid();
+        TS_ASSERT_TEST_GRID(GridBaseType, *grid,
+                            (startStep + 1) * NANO_STEPS_2D);
+        TS_ASSERT_EQUALS(startStep + 1, simulator->getStep());
     }
 
     void testRun()
@@ -62,9 +63,9 @@ public:
         simulator->run();
         TS_ASSERT_EQUALS(init->maxSteps(), simulator->getStep());
         TS_ASSERT_TEST_GRID(
-            Grid<TestCell<2> >,
+            GridBaseType,
             *simulator->getGrid(),
-            init->maxSteps() * TestCell<2>::nanoSteps());
+            init->maxSteps() * NANO_STEPS_2D);
     }
 
     void testWriterInvocation()
@@ -101,7 +102,7 @@ public:
         MockWriter *w = new MockWriter();
         simulator->addWriter(w);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
-        TS_ASSERT_EQUALS(1, writers.size());
+        TS_ASSERT_EQUALS(size_t(1), writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
     }
 
@@ -148,24 +149,26 @@ public:
         TS_ASSERT_EQUALS(grids1, grids2);
     }
 
-    typedef Grid<TestCell<3>, TestCell<3>::Topology> Grid3D;
+    typedef APITraits::SelectTopology<TestCell<3> >::Value Topology;
+    typedef Grid<TestCell<3>, Topology> Grid3D;
+    typedef GridBase<TestCell<3>, 3> GridBase3D;
 
     void test3D()
     {
         SerialSimulator<TestCell<3> > sim(new TestInitializer<TestCell<3> >());
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(), 0);
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(), 0);
 
         sim.step();
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(),
-                            TestCell<3>::nanoSteps());
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
+                            NANO_STEPS_3D);
 
         sim.nanoStep(0);
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(),
-                            TestCell<3>::nanoSteps() + 1);
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
+                            NANO_STEPS_3D + 1);
 
         sim.run();
-        TS_ASSERT_TEST_GRID(Grid3D, *sim.getGrid(),
-                            21 * TestCell<3>::nanoSteps());
+        TS_ASSERT_TEST_GRID(GridBase3D, *sim.getGrid(),
+                            21 * NANO_STEPS_3D);
     }
 
     void testSteererCallback()
@@ -188,6 +191,26 @@ public:
 
         simulator.reset();
         TS_ASSERT_EQUALS(events.str(), expected.str());
+    }
+
+    void testSoA()
+    {
+
+        typedef GridBase<TestCellSoA, 3> GridBaseType;
+        SerialSimulator<TestCellSoA> sim(new TestInitializer<TestCellSoA>());
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), 0);
+
+        sim.step();
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
+                            NANO_STEPS_3D);
+
+        sim.nanoStep(0);
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
+                            NANO_STEPS_3D + 1);
+
+        sim.run();
+        TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(),
+                            21 * NANO_STEPS_3D);
     }
 
 private:

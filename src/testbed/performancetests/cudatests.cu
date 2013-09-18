@@ -1,10 +1,31 @@
 #include <cuda.h>
 #include <iostream>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
-#include <libgeodecomp/misc/soaaccessor.h>
+#include <libgeodecomp/misc/fixedneighborhood.h>
+#include <libgeodecomp/misc/soagrid.h>
+#include <libgeodecomp/testbed/performancetests/benchmark.h>
+#include <libgeodecomp/testbed/performancetests/evaluate.h>
+#include <stdexcept>
 
 using namespace LibGeoDecomp;
+
+std::string cudaDeviceID;
+
+class GPUBenchmark : public Benchmark
+{
+public:
+    std::string order()
+    {
+        return "GPU";
+    }
+
+    std::string device()
+    {
+        return cudaDeviceID;
+    }
+};
 
 class Cell
 {
@@ -14,11 +35,16 @@ public:
     char b;
 };
 
-LIBGEODECOMP_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
+LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(c))((int)(a))((char)(b)))
 
 class CellLBM
 {
 public:
+    class API :
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasCubeTopology<3>
+    {};
+
     double C;
     double N;
     double E;
@@ -40,9 +66,9 @@ public:
     double BS;
 };
 
-LIBGEODECOMP_REGISTER_SOA(CellLBM, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS)))
+LIBFLATARRAY_REGISTER_SOA(CellLBM, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS)))
 
-#define hoody(X, Y, Z)                          \
+#define hoody(X, Y, Z)                                                  \
     gridOld[z * dimX * dimY + y * dimX + x + X + Y * dimX + Z * dimX * dimY]
 
 template<int DIM_X, int DIM_Y, int DIM_Z>
@@ -51,7 +77,7 @@ __global__ void updateRTMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
     int x = blockIdx.x * blockDim.x + threadIdx.x + 2;
     int y = blockIdx.y * blockDim.y + threadIdx.y + 2;
     int z = 2;
-    
+
     double c0 = hoody(0, 0, -2);
     double c1 = hoody(0, 0, -1);
     double c2 = hoody(0, 0,  0);
@@ -119,7 +145,7 @@ __global__ void updateLBMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
     int x = blockIdx.x * blockDim.x + threadIdx.x + 2;
     int y = blockIdx.y * blockDim.y + threadIdx.y + 2;
     int z = 2;
-    
+
 #pragma unroll 10
     for (; z < (dimZ - 2); z += 1) {
 
@@ -141,18 +167,18 @@ __global__ void updateLBMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
         velZ  = GET_COMP(x,y,z-1,T) + GET_COMP(x,y+1,z-1,TS) +
             GET_COMP(x+1,y,z-1,TW);
 
-        const double rho = 
+        const double rho =
             GET_COMP(x,y,z,C) + GET_COMP(x,y+1,z,S) +
             GET_COMP(x+1,y,z,W) + GET_COMP(x,y,z+1,B) +
             GET_COMP(x+1,y+1,z,SW) + GET_COMP(x,y+1,z+1,BS) +
             GET_COMP(x+1,y,z+1,BW) + velX + velY + velZ;
-        velX  = velX 
-            - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW) 
-            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW) 
+        velX  = velX
+            - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW)
+            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW)
             - GET_COMP(x+1,y,z+1,BW);
         velY  = velY
-            + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S) 
-            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE) 
+            + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S)
+            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE)
             - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
         velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
 
@@ -196,31 +222,31 @@ __global__ void updateLBMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
 #undef GET_COMP
 #undef SET_COMP
 
-#undef C 
-#undef N 
-#undef E 
-#undef W 
-#undef S 
-#undef T 
-#undef B 
+#undef C
+#undef N
+#undef E
+#undef W
+#undef S
+#undef T
+#undef B
 
-#undef NW 
-#undef SW 
-#undef NE 
-#undef SE 
+#undef NW
+#undef SW
+#undef NE
+#undef SE
 
-#undef TW 
-#undef BW 
-#undef TE 
-#undef BE 
+#undef TW
+#undef BW
+#undef TE
+#undef BE
 
-#undef TN 
-#undef BN 
-#undef TS 
-#undef BS 
+#undef TN
+#undef BN
+#undef TS
+#undef BS
 
 #define hoody(X, Y, Z)                          \
-    hoodOld[FixedCoord<X, Y, Z>()]
+    hoodOld[LibFlatArray::coord<X, Y, Z>()]
 
 template<int DIM_X, int DIM_Y, int DIM_Z>
 __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
@@ -228,13 +254,13 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
     int x = blockIdx.x * blockDim.x + threadIdx.x + 2;
     int y = blockIdx.y * blockDim.y + threadIdx.y + 2;
     int z = 2;
-    
+
     int index = z * DIM_X * DIM_Y + y * DIM_X + x;
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    SoAAccessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    SoAAccessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
+    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
+    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
 
     double c0 = hoody(0, 0, -2).c();
     double c1 = hoody(0, 0, -1).c();
@@ -244,7 +270,7 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 #pragma unroll 10
     for (; index < end; index += offset) {
         double c4 = hoody(0, 0, 2).c();
-        hoodNew[FixedCoord<0, 0, 0>()].c() = 
+        hoodNew[LibFlatArray::coord<0, 0, 0>()].c() =
             0.10 * c0 +
             0.15 * c1 +
             0.20 * c2 +
@@ -267,7 +293,7 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 
 #undef hoody
 
-#define GET_COMP(X, Y, Z, DIR)                  \
+#define GET_COMP(X, Y, Z, DIR)                          \
     hoodOld[FixedCoord<X, Y, Z>()].DIR()
 
 #define SET_COMP(DIR)                           \
@@ -284,9 +310,9 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    SoAAccessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    SoAAccessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
-    
+    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
+    FixedNeighborhood<CellLBM, APITraits::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0> hoodOld(LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0>((char*)gridOld, &index));
+
 #pragma unroll 10
     for (; index < end; index += offset) {
 
@@ -311,18 +337,18 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
         velZ  = GET_COMP(x,y,z-1,T) + GET_COMP(x,y+1,z-1,TS) +
             GET_COMP(x+1,y,z-1,TW);
 
-        const double rho = 
+        const double rho =
             GET_COMP(x,y,z,C) + GET_COMP(x,y+1,z,S) +
             GET_COMP(x+1,y,z,W) + GET_COMP(x,y,z+1,B) +
             GET_COMP(x+1,y+1,z,SW) + GET_COMP(x,y+1,z+1,BS) +
             GET_COMP(x+1,y,z+1,BW) + velX + velY + velZ;
-        velX  = velX 
-            - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW) 
-            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW) 
+        velX  = velX
+            - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW)
+            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW)
             - GET_COMP(x+1,y,z+1,BW);
         velY  = velY
-            + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S) 
-            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE) 
+            + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S)
+            - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE)
             - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
         velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
 
@@ -370,9 +396,24 @@ template<int DIM_X, int DIM_Y, int DIM_Z>
 class LBMSoA
 {
 public:
+    static std::string family()
+    {
+        return "LBM";
+    }
+
+    static std::string species()
+    {
+        return "gold";
+    }
+
     static void run(dim3 dimGrid, dim3 dimBlock, int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
     {
         benchmarkLBMSoA<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, gridOld, gridNew);
+    }
+
+    static int size()
+    {
+        return 20;
     }
 };
 
@@ -380,9 +421,24 @@ template<int DIM_X, int DIM_Y, int DIM_Z>
 class LBMClassic
 {
 public:
+    static std::string family()
+    {
+        return "LBM";
+    }
+
+    static std::string species()
+    {
+        return "pepper";
+    }
+
     static void run(dim3 dimGrid, dim3 dimBlock, int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
     {
         updateLBMClassic<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, gridOld, gridNew);
+    }
+
+    static int size()
+    {
+        return 20;
     }
 };
 
@@ -390,9 +446,24 @@ template<int DIM_X, int DIM_Y, int DIM_Z>
 class RTMSoA
 {
 public:
+    static std::string family()
+    {
+        return "RTM";
+    }
+
+    static std::string species()
+    {
+        return "gold";
+    }
+
     static void run(dim3 dimGrid, dim3 dimBlock, int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
     {
         updateRTMSoA<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, gridOld, gridNew);
+    }
+
+    static int size()
+    {
+        return 1;
     }
 };
 
@@ -400,19 +471,32 @@ template<int DIM_X, int DIM_Y, int DIM_Z>
 class RTMClassic
 {
 public:
+    static std::string family()
+    {
+        return "RTM";
+    }
+
+    static std::string species()
+    {
+        return "pepper";
+    }
+
     static void run(dim3 dimGrid, dim3 dimBlock, int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
     {
         updateRTMClassic<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, gridOld, gridNew);
     }
+
+    static int size()
+    {
+        return 1;
+    }
 };
 
-template<template<int A, int B, int C> class KERNEL, int DIM_X, int DIM_Y, int DIM_Z> 
-double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats) 
+template<template<int A, int B, int C> class KERNEL, int DIM_X, int DIM_Y, int DIM_Z>
+double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
 {
-    int index = 0;
-    // int size = DIM_X * DIM_Y * DIM_Z;
-    int size = DIM_X * DIM_Y * DIM_Z * 20;
-    int bytesize = size * sizeof(double);
+    size_t size = DIM_X * DIM_Y * (DIM_Z + 4) * KERNEL<0, 0, 0>::size();
+    size_t bytesize = size * sizeof(double);
 
     std::vector<double> grid(size, 4711);
 
@@ -430,21 +514,15 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     }
     blockWidth /= 2;
     blockWidth = std::min(256, blockWidth);
-    
+
     dim3 dimBlock(blockWidth, 2, 1);
     dim3 dimGrid(dimX / dimBlock.x, dimY / dimBlock.y, 1);
-
     cudaDeviceSynchronize();
 
     long long tStart = Chronometer::timeUSec();
 
     for (int t = 0; t < repeats; ++t) {
         KERNEL<DIM_X, DIM_Y, DIM_Z>::run(dimGrid, dimBlock, dimX, dimY, dimZ, devGridOld, devGridNew);
-        // updateLBMSoA<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, devGridOld, devGridNew);
-        // updateLBMClassic<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, devGridOld, devGridNew);
-        // updateRTMSoA<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, devGridOld, devGridNew);
-        // updateRTMClassic<DIM_X, DIM_Y, DIM_Z><<<dimGrid, dimBlock>>>(dimX, dimY, dimZ, devGridOld, devGridNew);
-
         std::swap(devGridOld, devGridNew);
     }
     cudaDeviceSynchronize();
@@ -456,63 +534,88 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     cudaFree(devGridOld);
     cudaFree(devGridNew);
 
-    double updates = 1.0 * dimGrid.x * dimBlock.x * dimGrid.y * dimBlock.y  * 
-        (DIM_Z - 4) * repeats;
+    double updates = 1.0 * dimGrid.x * dimBlock.x * dimGrid.y * dimBlock.y * dimZ * repeats;
     double seconds = (tEnd - tStart) * 10e-6;
     double glups = 10e-9 * updates / seconds;
     return glups;
 }
 
-void benchmark(int dim)
+template<template<int A, int B, int C> class KERNEL>
+class BenchmarkCUDA : public GPUBenchmark
 {
-#define CASE(DIM, ADD)                                                  \
-    if (dim <= DIM) {                                                   \
-        std::cout << dim << " "                                         \
-                  << benchmarkCUDA<RTMClassic, DIM + ADD, DIM, 256 + 64>( \
-                      dim, dim, 256 + 32 - 4, 20) << "\n";              \
-        return;                                                         \
+public:
+    std::string family()
+    {
+        return KERNEL<0, 0, 0>::family();
     }
 
-                                    // << benchmarkCUDA<LBMSoA, DIM + ADD, DIM, 256 + 64>(   \
-// << benchmarkCUDA<KERNEL, DIM + ADD, DIM, 256 + 64>(   \
+    std::string species()
+    {
+        return KERNEL<0, 0, 0>::species();
+    }
 
+    std::string unit()
+    {
+        return "GLUPS";
+    }
 
-    // CASE(32,  12);
-    // CASE(64,  12);
-    // CASE(96,  12);
-    // CASE(128, 12);
-    // CASE(160, 12);
-    // CASE(192, 12);
-    // CASE(256,  4);
-    // CASE(288,  4);
-    // CASE(320, 24);
-    // CASE(352, 24);
-    // CASE(384, 24);
-    // CASE(416, 28);
-    // CASE(448, 28);
-    // CASE(480, 28);
-    // CASE(512, 28);
+    double performance(const Coord<3>& dim)
+    {
+#define CASE(DIM, ADD)                                                  \
+        if (max(dim) <= DIM) {                                          \
+            return benchmarkCUDA<KERNEL, DIM + ADD, DIM, DIM>(          \
+                dim.x(), dim.y(), dim.z(), 20);                         \
+        }
 
-    CASE(32,  0);
-    CASE(64,  0);
-    CASE(96,  0);
-    CASE(128, 0);
-    CASE(160, 0);
-
-    // CASE(32,  24);
-    // CASE(64,  24);
-    // CASE(96,  24);
-    // CASE(128, 24);
-    // CASE(160, 24);
+        CASE(32,  0);
+        CASE(64,  0);
+        CASE(96,  0);
+        CASE(128, 0);
+        CASE(160, 0);
+        CASE(192, 0);
+        CASE(256, 0);
+        CASE(288, 0);
+        CASE(320, 0);
+        CASE(352, 0);
+        CASE(384, 0);
+        CASE(416, 0);
+        CASE(448, 0);
+        CASE(480, 0);
+        CASE(512, 0);
+        CASE(544, 0);
 
 #undef CASE
-}
+
+        throw std::range_error("dim too large");
+    }
+
+    int max(const Coord<3>& coord) const
+    {
+        return (std::max)(coord.x(), (std::max)(coord.y(), coord.z()));
+    }
+};
 
 void cudaTests(std::string revision, bool quick, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
+    cudaDeviceProp properties;
+    cudaGetDeviceProperties(&properties, cudaDevice);
+    cudaDeviceID = properties.name;
 
-    for (int d = 32; d <= 640; d += 4) {
-        benchmark(d);
+    Evaluate eval;
+
+    for (int d = 32; d <= 544; d += 4) {
+        eval(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));
+    }
+    for (int d = 32; d <= 544; d += 4) {
+        eval(BenchmarkCUDA<RTMSoA>(),     Coord<3>::diagonal(d));
+    }
+    for (int d = 32; d <= 160; d += 4) {
+        Coord<3> dim(d, d, 256 + 32 - 4);
+        eval(BenchmarkCUDA<LBMClassic>(), Coord<3>::diagonal(d));
+    }
+    for (int d = 32; d <= 160; d += 4) {
+        Coord<3> dim(d, d, 256 + 32 - 4);
+        eval(BenchmarkCUDA<LBMSoA>(),     Coord<3>::diagonal(d));
     }
 }

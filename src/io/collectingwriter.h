@@ -16,7 +16,7 @@ template<typename CELL_TYPE>
 class CollectingWriter : public ParallelWriter<CELL_TYPE>
 {
 public:
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
@@ -24,10 +24,10 @@ public:
 
     CollectingWriter(
         Writer<CELL_TYPE> *writer,
-        const unsigned period = 1,
-        const int root = 0,
-        MPI::Comm *communicator = &MPI::COMM_WORLD,
-        MPI::Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        unsigned period = 1,
+        size_t root = 0,
+        MPI_Comm communicator = MPI_COMM_WORLD,
+        MPI_Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
         ParallelWriter<CELL_TYPE>("",  period),
         writer(writer),
         mpiLayer(communicator),
@@ -58,11 +58,17 @@ public:
             }
 
             globalGrid.paste(grid, validRegion);
-            globalGrid.atEdge() = grid.atEdge();
+            globalGrid.setEdge(grid.getEdge());
         }
 
+        CoordBox<DIM> box = grid.boundingBox();
+        StorageGridType localGrid(box);
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            // fixme: slow. better: get whole lines
+            localGrid[*i] = grid.get(*i);
+        }
 
-        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
+        for (size_t sender = 0; sender < mpiLayer.size(); ++sender) {
             if (sender != root) {
                 if (mpiLayer.rank() == root) {
                     Region<DIM> recvRegion;
@@ -78,7 +84,7 @@ public:
                     if (sender == mpiLayer.rank()) {
                         mpiLayer.sendRegion(validRegion, root);
                         mpiLayer.sendUnregisteredRegion(
-                            &grid,
+                            &localGrid,
                             validRegion,
                             root,
                             MPILayer::PARALLEL_MEMORY_WRITER,
@@ -98,9 +104,9 @@ public:
 private:
     boost::shared_ptr<Writer<CELL_TYPE> > writer;
     MPILayer mpiLayer;
-    int root;
+    size_t root;
     StorageGridType globalGrid;
-    MPI::Datatype datatype;
+    MPI_Datatype datatype;
 };
 
 }

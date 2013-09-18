@@ -18,7 +18,8 @@ namespace HiParSimulator {
 class VanillaStepperTest : public CxxTest::TestSuite
 {
 public:
-    typedef PartitionManager<3, TestCell<3>::Topology> PartitionManagerType;
+    typedef APITraits::SelectTopology<TestCell<3> >::Value Topology;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef VanillaStepper<TestCell<3> > StepperType;
     typedef PatchLink<StepperType::GridType> PatchLinkType;
     typedef boost::shared_ptr<PatchLinkType::Accepter> PatchAccepterPtrType;

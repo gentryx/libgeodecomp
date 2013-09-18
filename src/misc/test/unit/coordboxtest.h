@@ -1,6 +1,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/misc/supervector.h>
 
 using namespace LibGeoDecomp;
 using namespace boost::assign;
@@ -9,27 +10,20 @@ namespace LibGeoDecomp {
 
 class CoordBoxTest : public CxxTest::TestSuite
 {
-private:
-    Coord<2> origin;
-    unsigned width;
-    unsigned height;
-    CoordBox<2> _rect;
-
 public:
-
     void setUp()
     {
         origin = Coord<2>(3,4);
         width = 4;
         height = 3;
-        _rect = CoordBox<2>(origin, Coord<2>(width, height));
+        rect = CoordBox<2>(origin, Coord<2>(width, height));
     }
 
     void testConstructor1()
     {
-        TS_ASSERT_EQUALS(origin, _rect.origin);
-        TS_ASSERT_EQUALS(width,  _rect.dimensions.x());
-        TS_ASSERT_EQUALS(height, _rect.dimensions.y());
+        TS_ASSERT_EQUALS(origin, rect.origin);
+        TS_ASSERT_EQUALS(width,  rect.dimensions.x());
+        TS_ASSERT_EQUALS(height, rect.dimensions.y());
     }
 
     void testConstructor2()
@@ -42,17 +36,17 @@ public:
 
     void testInBounds()
     {
-        TS_ASSERT(_rect.inBounds(Coord<2>(3, 4)));
-        TS_ASSERT(_rect.inBounds(Coord<2>(6, 4)));
-        TS_ASSERT(_rect.inBounds(Coord<2>(3, 6)));
-        TS_ASSERT(_rect.inBounds(Coord<2>(6, 6)));
-        TS_ASSERT(_rect.inBounds(Coord<2>(4, 4)));
+        TS_ASSERT(rect.inBounds(Coord<2>(3, 4)));
+        TS_ASSERT(rect.inBounds(Coord<2>(6, 4)));
+        TS_ASSERT(rect.inBounds(Coord<2>(3, 6)));
+        TS_ASSERT(rect.inBounds(Coord<2>(6, 6)));
+        TS_ASSERT(rect.inBounds(Coord<2>(4, 4)));
 
-        TS_ASSERT(!_rect.inBounds(Coord<2>(0, 0)));
-        TS_ASSERT(!_rect.inBounds(Coord<2>(100, 0)));
-        TS_ASSERT(!_rect.inBounds(Coord<2>(0, 100)));
-        TS_ASSERT(!_rect.inBounds(Coord<2>(5, 8)));
-        TS_ASSERT(!_rect.inBounds(Coord<2>(8, 5)));
+        TS_ASSERT(!rect.inBounds(Coord<2>(0, 0)));
+        TS_ASSERT(!rect.inBounds(Coord<2>(100, 0)));
+        TS_ASSERT(!rect.inBounds(Coord<2>(0, 100)));
+        TS_ASSERT(!rect.inBounds(Coord<2>(5, 8)));
+        TS_ASSERT(!rect.inBounds(Coord<2>(8, 5)));
 
         CoordBox<3> rect(Coord<3>(3, 4, 5), Coord<3>(30, 20, 10));
         TS_ASSERT(rect.inBounds(Coord<3>( 3,  4,  5)));
@@ -160,6 +154,12 @@ public:
 
         TS_ASSERT_EQUALS(expected, actual);
     }
+
+private:
+    Coord<2> origin;
+    int width;
+    int height;
+    CoordBox<2> rect;
 };
 
 }

@@ -23,17 +23,17 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class StripingSimulator : public DistributedSimulator<CELL_TYPE>
 {
-
 public:
     friend class StripingSimulatorTest;
     friend class ParallelStripingSimulatorTest;
+    typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
-    typedef typename CELL_TYPE::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
+    using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::getStep;
     using DistributedSimulator<CELL_TYPE>::steerers;
@@ -52,7 +52,7 @@ public:
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
         const unsigned& loadBalancingPeriod = 1,
-        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()):
+        const MPI_Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()):
         DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod),
@@ -102,7 +102,7 @@ public:
 
         handleInput(STEERER_NEXT_STEP);
 
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); i++) {
+        for (unsigned i = 0; i < NANO_STEPS; i++) {
             nanoStep(i);
         }
         ++stepNum;
@@ -159,7 +159,7 @@ private:
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
-    MPI::Datatype cellMPIDatatype;
+    MPI_Datatype cellMPIDatatype;
     Chronometer chrono;
 
     void swapGrids()
@@ -200,7 +200,7 @@ private:
             validateLoads(newWorkloads, oldWorkloads);
             newPartitionsSendBuffer = workloadsToPartitions(newWorkloads);
 
-            for (unsigned i = 0; i < mpilayer.size(); i++) {
+            for (size_t i = 0; i < mpilayer.size(); i++) {
                 mpilayer.sendVec(&newPartitionsSendBuffer, i, BALANCELOADS);
             }
         }
@@ -297,16 +297,14 @@ private:
     void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
     {
         chrono.tic();
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            UpdateFunctor<CELL_TYPE>()(
-                *i,
-                i->origin,
-                *curStripe,
-                newStripe,
-                nanoStep);
-        }
+
+        UpdateFunctor<CELL_TYPE>()(
+            region,
+            Coord<DIM>(),
+            Coord<DIM>(),
+            *curStripe,
+            newStripe,
+            nanoStep);
 
         chrono.toc();
     }
@@ -448,40 +446,45 @@ private:
 
     int lowerNeighbor() const
     {
-        int lowerNeighbor;
+        size_t lowerNeighbor;
 
         if (WRAP_EDGES) {
             int size = mpilayer.size();
             lowerNeighbor = (size + mpilayer.rank() + 1) % size;
             while (lowerNeighbor != mpilayer.rank() &&
-                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1])
+                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
                 lowerNeighbor = (size + lowerNeighbor + 1) % size;
+            }
         } else {
              lowerNeighbor = mpilayer.rank() + 1;
             while (lowerNeighbor != mpilayer.size() &&
-                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1])
+                   partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
                 lowerNeighbor++;
-            if (lowerNeighbor == mpilayer.size())
+            }
+            if (lowerNeighbor == mpilayer.size()) {
                 lowerNeighbor = -1;
+            }
         }
         return lowerNeighbor;
     }
 
     int upperNeighbor() const
     {
-        int upperNeighbor;
+        size_t upperNeighbor;
 
         if (WRAP_EDGES) {
             int size = mpilayer.size();
             upperNeighbor = (size + mpilayer.rank() - 1) % size;
             while (upperNeighbor != mpilayer.rank() &&
-                   partitions[upperNeighbor] == partitions[upperNeighbor + 1])
+                   partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
                 upperNeighbor = (size + upperNeighbor - 1) % size;
+            }
         } else {
             upperNeighbor = mpilayer.rank() - 1;
             while (upperNeighbor >= 0 &&
-                   partitions[upperNeighbor] == partitions[upperNeighbor + 1])
+                   partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
                 --upperNeighbor;
+            }
         }
 
         return upperNeighbor;
@@ -490,7 +493,7 @@ private:
     WeightVec partitionsToWorkloads(const WeightVec& partitions) const
     {
         WeightVec ret(partitions.size() - 1);
-        for (unsigned i = 0; i < ret.size(); i++) {
+        for (size_t i = 0; i < ret.size(); i++) {
             ret[i] = partitions[i + 1] - partitions[i];
         }
         return ret;
@@ -500,7 +503,7 @@ private:
     {
         WeightVec ret(workloads.size() + 1);
         ret[0] = 0;
-        for (unsigned i = 0; i < workloads.size(); i++) {
+        for (size_t i = 0; i < workloads.size(); i++) {
             ret[i + 1] = ret[i] + workloads[i];
         }
         return ret;
@@ -521,7 +524,7 @@ private:
             newPartitions[mpilayer.rank()    ];
         unsigned newEndRow =
             newPartitions[mpilayer.rank() + 1];
-        for (int i = 0; i < newPartitions.size(); ++i) {
+        for (size_t i = 0; i < newPartitions.size(); ++i) {
             unsigned sourceStartRow = oldPartitions[i];
             unsigned sourceEndRow   = oldPartitions[i + 1];
 
@@ -544,7 +547,7 @@ private:
             oldPartitions[mpilayer.rank()    ];
         unsigned oldEndRow =
             oldPartitions[mpilayer.rank() + 1];
-        for (int i = 0; i < newPartitions.size(); ++i) {
+        for (size_t i = 0; i < newPartitions.size(); ++i) {
             unsigned targetStartRow = newPartitions[i];
             unsigned targetEndRow   = newPartitions[i + 1];
 

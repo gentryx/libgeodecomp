@@ -8,7 +8,9 @@ using namespace HiParSimulator;
 class RTMCell
 {
 public:
-    typedef Topologies::Cube<3>::Topology Topology;
+    class API : public APITraits::HasCubeTopology<3>
+    {};
+
     static int flops()
     {
         return 50;

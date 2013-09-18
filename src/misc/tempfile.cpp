@@ -40,13 +40,13 @@ std::string TempFile::parallel(const std::string& prefix)
     if (MPILayer().rank() == 0) {
         ret = serial(prefix);
         int len = ret.size();
-        MPI::COMM_WORLD.Bcast(&len, 1, MPI::INT, 0);
-        MPI::COMM_WORLD.Bcast((void*)ret.c_str(), len, MPI::CHAR, 0);
+        MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast((void*)ret.c_str(), len, MPI_CHAR, 0, MPI_COMM_WORLD);
     } else {
         int len;
-        MPI::COMM_WORLD.Bcast(&len, 1, MPI::INT, 0);
+        MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
         ret = std::string(len, 'X');
-        MPI::COMM_WORLD.Bcast((void*)ret.c_str(), len, MPI::CHAR, 0);
+        MPI_Bcast((void*)ret.c_str(), len, MPI_CHAR, 0, MPI_COMM_WORLD);
     }
 
     return ret;

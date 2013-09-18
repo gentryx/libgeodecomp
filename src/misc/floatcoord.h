@@ -18,8 +18,8 @@ class FloatCoord;
 template<>
 class FloatCoord<1> : public FloatCoordBase<1>
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
 
     explicit
     inline

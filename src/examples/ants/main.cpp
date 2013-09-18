@@ -17,20 +17,15 @@ Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
 
 class Cell
 {
-    friend class CellToColor;
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-    class API : public CellAPITraits::Base
+    friend class CellToColor;
+
+    class API :
+        public APITraits::HasNanoSteps<3>
     {};
 
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
-    static const double  PI;
-
-    static inline unsigned nanoSteps()
-    {
-        return 3;
-    }
+    static const double PI;
 
     Cell(State _state=EMPTY) :
         state(_state),
@@ -181,15 +176,17 @@ public:
 
     virtual void grid(GridBase<Cell, 2> *ret)
     {
-        ret->atEdge() = Cell(Cell::BARRIER);
+        ret->setEdge(Cell(Cell::BARRIER));
         int numAnts =  100;
         int numFood = 500;
 
-        for (int i = 0; i < numFood; ++i)
-            ret->at(randCoord()) = Cell(Cell::FOOD);
+        for (int i = 0; i < numFood; ++i) {
+            ret->set(randCoord(), Cell(Cell::FOOD));
+        }
 
-        for (int i = 0; i < numAnts; ++i)
-            ret->at(randCoord()) = Cell(Cell::IDLE_ANT);
+        for (int i = 0; i < numAnts; ++i) {
+            ret->set(randCoord(), Cell(Cell::IDLE_ANT));
+        }
     }
 
 private:
@@ -221,12 +218,16 @@ public:
         int numAnts = 0;
         int numFood = 0;
 
-        for(int y = 0; y < grid.getDimensions().y(); ++y) {
-            for(int x = 0; x < grid.getDimensions().x(); ++x) {
-                if (grid[Coord<2>(x, y)].isAnt())
+        Coord<2> dim = grid.dimensions();
+
+        for(int y = 0; y < dim.y(); ++y) {
+            for(int x = 0; x < dim.x(); ++x) {
+                if (grid.get(Coord<2>(x, y)).isAnt()) {
                     ++numAnts;
-                if (grid[Coord<2>(x, y)].containsFood())
+                }
+                if (grid.get(Coord<2>(x, y)).containsFood()) {
                     ++numFood;
+                }
             }
         }
 

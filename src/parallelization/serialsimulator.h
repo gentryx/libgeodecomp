@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/io/writer.h>
@@ -9,19 +10,26 @@
 namespace LibGeoDecomp {
 
 /**
- * SerialSimulator is the simplest implementation of the simulator
- * concept.
+ * SerialSimulator is the simplest implementation of the Simulator
+ * concept (or rather the MonolithicSimulator, to be exact). It's
+ * purpose is to make fostering new applications easier. The absence
+ * of concurrency simplifies debugging. As its name implies, it
+ * doesn't do any threading, but vectorization (SIMD) is supported.
  */
 template<typename CELL_TYPE>
 class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class SerialSimulatorTest;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef APITraits::SelectSoA<CELL_TYPE> GridTypeSelector;
+    typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridBaseType;
+    typedef typename MonolithicSimulator<CELL_TYPE>::Topology Topology;
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename SimulatorHelpers::GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
     static const int DIM = Topology::DIM;
 
+    using MonolithicSimulator<CELL_TYPE>::NANO_STEPS;
     using MonolithicSimulator<CELL_TYPE>::initializer;
     using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
@@ -30,15 +38,15 @@ public:
     using MonolithicSimulator<CELL_TYPE>::gridDim;
 
     /**
-     * creates a SerialSimulator with the given  initializer.
+     * creates a SerialSimulator with the given initializer.
      */
     SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
         stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
-        curGrid = new GridType(dim);
-        newGrid = new GridType(dim);
+        curGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
+        newGrid = new GridType(CoordBox<DIM>(Coord<DIM>(), dim));
         initializer->grid(curGrid);
         initializer->grid(newGrid);
 
@@ -64,7 +72,7 @@ public:
     {
         handleInput(STEERER_NEXT_STEP);
 
-        for (unsigned i = 0; i < CELL_TYPE::nanoSteps(); ++i) {
+        for (unsigned i = 0; i < NANO_STEPS; ++i) {
             nanoStep(i);
         }
 
@@ -95,7 +103,7 @@ public:
     /**
      * returns the current grid.
      */
-    virtual const GridType *getGrid()
+    virtual const GridBaseType *getGrid()
     {
         return curGrid;
     }
@@ -107,15 +115,7 @@ protected:
 
     void nanoStep(const unsigned& nanoStep)
     {
-        CoordBox<DIM> box = curGrid->boundingBox();
-        int endX = box.origin.x() + box.dimensions.x();
-        box.dimensions.x() = 1;
-
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            Streak<DIM> streak(*i, endX);
-            UpdateFunctor<CELL_TYPE>()(streak, streak.origin, *curGrid, newGrid, nanoStep);
-        }
-
+        UpdateFunctor<CELL_TYPE>()(simArea, Coord<DIM>(), Coord<DIM>(), *curGrid, newGrid, nanoStep);
         std::swap(curGrid, newGrid);
     }
 

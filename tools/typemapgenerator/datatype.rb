@@ -16,17 +16,17 @@ class Datatype < Hash
      "float",
      "double",
      "long double",
-     "bool",
      "long long",
      "unsigned long long",
     ].each do |t|
       self[t] = Datatype.cpp_to_mpi(t)
     end
 
-    self["wchar_t"] = "MPI::WCHAR"
-    self["std::complex<float>"] = "MPI::COMPLEX"
-    self["std::complex<double>"] = "MPI::DOUBLE_COMPLEX"
-    self["std::complex<long double>"] = "MPI::LONG_DOUBLE_COMPLEX"
+    self["bool"] = "MPI_CHAR"
+    self["wchar_t"] = "MPI_WCHAR"
+    self["std::complex<float>"] = "MPI_COMPLEX"
+    self["std::complex<double>"] = "MPI_DOUBLE_COMPLEX"
+    # self["std::complex<long double>"] = "MPI_LONG_DOUBLE_COMPLEX"
   end
 
   class << self
@@ -39,7 +39,7 @@ class Datatype < Hash
     # pending classes. If in doubt take a look at the calls to
     # Datatype#[] and Datatype::class2mpi.
     def cpp_to_mpi(type, partial = false)
-      ret = "MPI::" + type.gsub(/[ :<>]+/, '_').upcase
+      ret = "MPI_" + type.gsub(/[ :<>]+/, '_').upcase
       ret += "_PARTIAL" if partial
       return ret
     end

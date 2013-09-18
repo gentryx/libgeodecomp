@@ -3,6 +3,7 @@
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/updatefunctor.h>
 
 using namespace LibGeoDecomp;
 
@@ -11,7 +12,8 @@ namespace LibGeoDecomp {
 class TestCellTest : public CxxTest::TestSuite
 {
 private:
-    typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::NoOutput> TestCellType;
+    typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Cube<2>::Topology, TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCellType;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCellType>::VALUE;
     Grid<TestCellType> grid;
     int width;
     int height;
@@ -56,7 +58,7 @@ public:
     void testMultipleUpdate()
     {
         for (int i = 0; i < 100; i++) {
-            update(i % TestCellType::nanoSteps());
+            update(i % NANO_STEPS);
             TS_ASSERT_TEST_GRID(Grid<TestCellType >, grid, i + 1);
         }
     }
@@ -121,8 +123,13 @@ public:
         TS_ASSERT(!grid[0][0].isValid);
     }
 
-    typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology, TestCellHelpers::NoOutput> TestCell3D;
-    typedef Grid<TestCell3D, TestCell3D::Topology> Grid3D;
+    typedef TestCell<
+        3,
+        Stencils::Moore<3, 1>,
+        Topologies::Torus<3>::Topology,
+        TestCellHelpers::EmptyAPI,
+        TestCellHelpers::NoOutput> TestCell3D;
+    typedef Grid<TestCell3D, APITraits::SelectTopology<TestCell3D>::Value> Grid3D;
 
     void test3D1()
     {
@@ -221,6 +228,44 @@ public:
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
             TS_ASSERT(!gridB[*i].valid());
         }
+    }
+
+    class AdditionalAPI :
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasFixedCoordsOnlyUpdate
+    {};
+
+    void test3DwithUpdateLineXandWithoutSoA()
+    {
+        typedef TestCell<
+            3,
+            Stencils::Moore<3, 1>,
+            Topologies::Torus<3>::Topology,
+            AdditionalAPI> TestCellType;
+        typedef Grid<TestCellType, Topologies::Torus<3>::Topology> GridType;
+
+        Coord<3> dim(20, 10, 5);
+        CoordBox<3> box(Coord<3>(), dim);
+        Region<3> region;
+        region << box;
+
+        GridType gridA(dim);
+        gridA.getEdgeCell() =
+            TestCellType(Coord<3>::diagonal(-1), dim);
+        gridA.getEdgeCell().isEdgeCell = true;
+        for (CoordBox<3>::Iterator i =  box.begin(); i != box.end(); ++i) {
+            gridA[*i] = TestCellType(*i, dim, 0);
+        }
+
+        GridType gridB(dim);
+        gridB.getEdgeCell() = gridA.getEdgeCell();
+
+        TS_ASSERT_TEST_GRID(GridType, gridA, 0);
+
+        UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), gridA, &gridB, 0);
+
+        TS_ASSERT_TEST_GRID(GridType, gridA, 0);
+        TS_ASSERT_TEST_GRID(GridType, gridB, 1);
     }
 
     void update(unsigned nanoStep = 0)

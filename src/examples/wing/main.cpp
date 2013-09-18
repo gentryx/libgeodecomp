@@ -21,7 +21,7 @@ using namespace LibGeoDecomp;
 
 // fixme: use dX for... anything
 // fixme: tune pressure speed, pressure diffusion, driver velocity, influence factor?
-// fixne: don't equalize pressure on lid?
+// fixme: don't equalize pressure on lid?
 const double dX = 1.0;
 const double dT = 1.0;
 
@@ -68,6 +68,7 @@ double PERPENDICULAR_DIRS[][2] = {{DIAG, -DIAG},
                                   {-DIAG, DIAG}};
 
 const double INFLUENCE_FACTOR = 0.04;
+// fixme: reduce this to 1 influence?
 double INFLUENCES[] =
     {INFLUENCE_FACTOR * FLOW_DIFFUSION, FLOW_DIFFUSION, INFLUENCE_FACTOR * FLOW_DIFFUSION,
      FLOW_DIFFUSION, FLOW_DIFFUSION,
@@ -81,25 +82,14 @@ double LENGTHS[] =
 class Cell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
-    {};
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
-
-    Cell(const State& _state = LIQUID,
-         const double& _quantity = 0,
-         const double& _velocityX = 0,
-         const double& _velocityY = 0) :
-        state(_state),
-        quantity(_quantity),
-        velocityX(_velocityX),
-        velocityY(_velocityY)
+    Cell(State state = LIQUID,
+         double quantity = 0,
+         double velocityX = 0,
+         double velocityY = 0) :
+        state(state),
+        quantity(quantity),
+        velocityX(velocityX),
+        velocityY(velocityY)
     {}
 
     template<class COORD_MAP>
@@ -162,13 +152,6 @@ public:
         *newQuantity += totalFlow;
 
         double pressureCoefficient = length * PRESSURE_SPEED * fluxPressure;
-        // double influxVelocityX;
-        // double influxVelocityY;
-        // pruneVelocity(&influxVelocityX, &influxVelocityY, dir,
-        //               other.velocityX, other.velocityY,
-        //               PERPENDICULAR_DIRS[i]);
-        // *fluxVelocityX += (influxVelocityX - dir.x() * pressureCoefficient) * fluxPressure;
-        // *fluxVelocityY += (influxVelocityY - dir.y() * pressureCoefficient) * fluxPressure;
         *fluxVelocityX += -dir.x() * pressureCoefficient;
         *fluxVelocityY += -dir.y() * pressureCoefficient;
     }
@@ -244,27 +227,6 @@ public:
         quantity = newQuantity;
     }
 
-    // fixme: remove this
-    static void pruneVelocity(
-        double *influxVelocityX, double *influxVelocityY,
-        const Coord<2>& dir,
-        const double& otherVelocityX, const double& otherVelocityY,
-        const double *perpendicularDir)
-    {
-        double prod = otherVelocityX * dir.x() + otherVelocityY * dir.y();
-
-        if (prod > 0) {
-            double prod =
-                perpendicularDir[0] * otherVelocityX +
-                perpendicularDir[1] * otherVelocityY;
-            *influxVelocityX = perpendicularDir[0] * prod;
-            *influxVelocityY = perpendicularDir[1] * prod;
-        } else {
-            *influxVelocityX = otherVelocityX;
-            *influxVelocityY = otherVelocityY;
-        }
-    }
-
     State state;
     double quantity;
     double velocityX;
@@ -331,18 +293,18 @@ public:
     using LibGeoDecomp::SimpleInitializer<Cell>::dimensions;
 
     AeroInitializer(
-        const Coord<2>& _dim,
-        const unsigned& _steps) :
-        SimpleInitializer<Cell>(_dim, _steps)
+        const Coord<2>& dim,
+        const unsigned& steps) :
+        SimpleInitializer<Cell>(dim, steps)
     {}
 
     virtual void grid(GridBase<Cell, 2> *grid)
     {
         CoordBox<2> box = grid->boundingBox();
-        grid->atEdge() = Cell(SOLID);
+        grid->setEdge(Cell(SOLID));
 
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
-            grid->at(*i) = Cell(LIQUID, 1);
+            grid->set(*i, Cell(LIQUID, 1));
         }
 
 #if SETUP==LID
@@ -351,6 +313,7 @@ public:
 
 #if SETUP==WING
         addInletOutlet(grid);
+        // fixme: make this configurable by command line
         //        addWing(grid);
 #endif
     }
@@ -365,23 +328,26 @@ public:
         for (int y = 0; y < dimensions.y(); ++y) {
             Coord<2> c1(0, y);
             Coord<2> c2(dimensions.x() - 1, y);
-            if (box.inBounds(c1))
-                grid->at(c1) = slipCell;
-            if (box.inBounds(c2))
-                grid->at(c2) = slipCell;
+            if (box.inBounds(c1)) {
+                grid->set(c1, slipCell);
+            }
+            if (box.inBounds(c2)) {
+                grid->set(c2, slipCell);
+            }
         }
-
 
         for (int x = 0; x < dimensions.x(); ++x) {
             Coord<2> c(x, 0);
-            if (box.inBounds(c))
-                grid->at(c) = slipCell;
+            if (box.inBounds(c)) {
+                grid->set(c, slipCell);
+            }
         }
 
         for (int x = 1; x < dimensions.x() - 1; ++x) {
             Coord<2> c(x, dimensions.y() - 1);
-            if (box.inBounds(c))
-                grid->at(c) = driverCell;
+            if (box.inBounds(c)) {
+                grid->set(c, driverCell);
+            }
         }
     }
 
@@ -394,10 +360,12 @@ public:
             Coord<2> c1(0, y);
             Coord<2> c2(dimensions.x() - 1, y);
 
-            if (box.inBounds(c1))
-                grid->at(c1) = driverCell;
-            if (box.inBounds(c2))
-                grid->at(c2) = driverCell;
+            if (box.inBounds(c1)) {
+                grid->set(c1, driverCell);
+            }
+            if (box.inBounds(c2)) {
+                grid->set(c2, driverCell);
+            }
         }
     }
 
@@ -426,8 +394,9 @@ public:
                 Coord<2> c(x, y);
                 c = c + offset;
                 if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(190, 140) + offset, 40))
-                    grid->at(c) = Cell(SOLID, 0);
+                    inCircle(c, Coord<2>(190, 140) + offset, 40)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -437,8 +406,9 @@ public:
                 Coord<2> c(x, y);
                 c = c + offset;
                 if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25))
-                    grid->at(c) = Cell(SOLID, 0);
+                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -447,8 +417,9 @@ public:
             for (int x = 190; x < 250; ++x) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c))
-                    grid->at(c) = Cell(SOLID, 0);
+                if (box.inBounds(c)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -458,8 +429,9 @@ public:
                 Coord<2> c(x, y);
                 c = c + offset;
                 if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60))
-                    grid->at(c) = Cell(SOLID, 0);
+                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
 
@@ -469,8 +441,9 @@ public:
             for (int y = 100; y < maxY; ++y) {
                 Coord<2> c(x, y);
                 c = c + offset;
-                if (box.inBounds(c))
-                    grid->at(c) = Cell(SOLID, 0);
+                if (box.inBounds(c)) {
+                    grid->set(c, Cell(SOLID, 0));
+                }
             }
         }
     }
@@ -481,13 +454,12 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     Typemaps::initializeMaps();
 
-    MPI::Aint displacements[] = {0};
-    MPI::Datatype memberTypes[] = {MPI::CHAR};
-    int lengths[] = {sizeof(Cell)};
-    MPI::Datatype objType;
-    objType =
-        MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Aint displacements[] = { 0 };
+    MPI_Datatype memberTypes[] = { MPI_CHAR };
+    int lengths[] = { sizeof(Cell) };
+    MPI_Datatype objType;
+    MPI_Type_create_struct(1, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
 
     {
         AeroInitializer *init = new AeroInitializer(
@@ -505,7 +477,7 @@ int main(int argc, char *argv[])
                 "snapshot",
                 6000,
                 init->maxSteps(),
-                MPI::COMM_WORLD,
+                MPI_COMM_WORLD,
                 objType));
 
         sim.addWriter(

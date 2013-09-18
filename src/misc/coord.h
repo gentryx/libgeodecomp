@@ -11,9 +11,13 @@
 #include <stdlib.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/fixedcoord.h>
-#include <libgeodecomp/misc/supervector.h>
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
+#endif
+
+#ifdef LIBGEODECOMP_FEATURE_QT
+#include <QtCore/QSize>
 #endif
 
 namespace LibGeoDecomp {
@@ -197,6 +201,14 @@ public:
         c[0] = nx;
         c[1] = ny;
     }
+
+#ifdef LIBGEODECOMP_FEATURE_QT
+    inline Coord(const QSize& size)
+    {
+        c[0] = size.width();
+        c[1] = size.height();
+    }
+#endif
 
     template<int X, int Y, int Z>
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)

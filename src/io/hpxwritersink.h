@@ -140,7 +140,7 @@ public:
 
         for (typename Region<CELL_TYPE::Topology::DIM>::Iterator i = validRegion.begin();
              i != validRegion.end(); ++i) {
-            *dest = CONVERTER()(grid.at(*i), globalDimensions, step, rank);
+            *dest = CONVERTER()(grid.get(*i), globalDimensions, step, rank);
             ++dest;
         }
 

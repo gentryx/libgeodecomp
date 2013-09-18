@@ -57,7 +57,7 @@ public:
                                       region,
                                       receiver,
                                       tag,
-                                      MPI::INT));
+                                      MPI_INT));
 
                         acc->pushRequest(nanoStep);
                         acc->put(sendGrid, boundingBox, nanoStep);
@@ -69,7 +69,7 @@ public:
                                       region,
                                       sender,
                                       tag,
-                                      MPI::INT));
+                                      MPI_INT));
 
                         expected = markGrid(region, sender);
                         actual = zeroGrid;
@@ -99,13 +99,13 @@ public:
                     region1,
                     i,
                     genTag(mpiLayer.rank(), i),
-                    MPI::INT);
+                    MPI_INT);
 
                 providers << PatchProviderType(
                     region1,
                     i,
                     genTag(i, mpiLayer.rank()),
-                    MPI::INT);
+                    MPI_INT);
             }
         }
 
@@ -144,13 +144,13 @@ public:
                     region1,
                     i,
                     genTag(mpiLayer.rank(), i),
-                    MPI::INT);
+                    MPI_INT);
 
                 providers << PatchProviderType(
                     region1,
                     i,
                     genTag(i, mpiLayer.rank()),
-                    MPI::INT);
+                    MPI_INT);
             }
         }
 

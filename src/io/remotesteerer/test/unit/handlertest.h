@@ -21,7 +21,9 @@ public:
 
         virtual bool operator()(const StringVec& parameters, Pipe& pipe, GridType *grid, const Region<Topology::DIM>& validRegion, unsigned step)
         {
-            grid->at(Coord<2>(1, 1)).testValue = 4711;
+            TestCell<2> cell = grid->get(Coord<2>(1, 1));
+            cell.testValue = 4711;
+            grid->set(Coord<2>(1, 1), cell);
             pipe.addSteeringFeedback("MockHandler mocks you! " + parameters[0]);
             return true;
         }
@@ -45,7 +47,7 @@ public:
 
         bool res = handler(parameters, pipe, &grid, region, 123);
         StringVec feedback = pipe.retrieveSteeringFeedback();
-        TS_ASSERT_EQUALS(feedback.size(), 1);
+        TS_ASSERT_EQUALS(feedback.size(), size_t(1));
         TS_ASSERT_EQUALS(feedback[0], "MockHandler mocks you! arrrr");
         TS_ASSERT_EQUALS(grid[Coord<2>(1, 1)].testValue, 4711.0);
         TS_ASSERT(res);

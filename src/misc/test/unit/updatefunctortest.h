@@ -1,65 +1,51 @@
 #include <sstream>
 #include <vector>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/misc/soagrid.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/misc/updatefunctortestbase.h>
 
 using namespace LibGeoDecomp;
 
-namespace LibGeoDecomp {
-
-std::stringstream log;
+std::stringstream myLog;
 
 class BasicCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Torus<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasTorusTopology<2>
     {};
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "BasicCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "BasicCell::update(nanoStep = " << nanoStep << ")\n";
     }
 };
 
 class LineUpdateCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Torus<2>::Topology Topology;
-
-    class API : public CellAPITraits::Line
+    class API :
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasTorusTopology<2>
     {};
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "LineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "LineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
     }
 
     // won't ever be called as all current update functors support
-    // updateLine only with fixed neighborhoods
+    // updateLineX only with fixed neighborhoods
     template<typename NEIGHBORHOOD>
-    static void updateLine(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
+    static void updateLineX(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "LineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
+        myLog << "LineUpdateCell::updateLineX(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
 
     }
 };
@@ -67,21 +53,15 @@ public:
 class FixedCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Torus<2>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasTorusTopology<2>
     {};
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "FixedCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "FixedCell::update(nanoStep = " << nanoStep << ")\n";
     }
 
 };
@@ -89,30 +69,67 @@ public:
 class FixedLineUpdateCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Torus<2>::Topology Topology;
-
-    class API : public CellAPITraits::Fixed, public CellAPITraits::Line
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasTorusTopology<2>
     {};
-
-    static int nanoSteps()
-    {
-        return 1;
-    }
 
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "FixedLineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
+        myLog << "FixedLineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
     }
 
     template<typename NEIGHBORHOOD>
-    static void updateLine(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
+    static void updateLineX(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
-        log << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
+        myLog << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
 
     }
 };
+
+class MySoATestCell
+{
+public:
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasTorusTopology<3>
+    {};
+
+    MySoATestCell(
+        double temp = 0.0,
+        bool alive = false) :
+        temp(temp),
+        alive(alive)
+    {}
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineX(
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
+    {
+        for (; *indexOld < indexEnd; ++*indexOld) {
+            hoodNew.temp()  = hoodOld[FixedCoord<0, 0, 0>()].temp();
+            hoodNew.alive() = hoodOld[FixedCoord<0, 0, 0>()].alive();
+            ++*indexNew;
+        }
+    }
+
+    double temp;
+    bool alive;
+};
+
+LIBFLATARRAY_REGISTER_SOA(MySoATestCell, ((double)(temp))((bool)(alive)))
+
+namespace LibGeoDecomp {
 
 class UpdateFunctorTest : public CxxTest::TestSuite
 {
@@ -127,13 +144,13 @@ public:
         typedef STENCIL Stencil;
 
         virtual void callFunctor(
-            const Streak<DIM>& streak,
+            const Region<DIM>& region,
             const GridType& gridOld,
             GridType *gridNew,
             unsigned nanoStep)
         {
             UpdateFunctor<TestCellType>()(
-                streak, streak.origin, gridOld, gridNew, nanoStep);
+                region, Coord<DIM>(), Coord<DIM>(), gridOld, gridNew, nanoStep);
         }
     };
 
@@ -146,7 +163,7 @@ public:
         checkSelector<FixedCell>(
             "FixedCell::update(nanoStep = 0)\n", 8);
         checkSelector<FixedLineUpdateCell>(
-            "FixedLineUpdateCell::update(nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 0, endX = 7, nanoStep = 0)\nFixedLineUpdateCell::update(nanoStep = 0)\n", 1);
+            "FixedLineUpdateCell::update(nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 1, endX = 7, nanoStep = 0)\nFixedLineUpdateCell::update(nanoStep = 0)\n", 1);
     }
 
     void testMoore2D()
@@ -173,6 +190,39 @@ public:
         UpdateFunctorTestHelper<Stencils::VonNeumann<3, 1> >().testSplittedTraversal(3);
     }
 
+    void testStructOfArraysBasic()
+    {
+        CoordBox<3> box1(Coord<3>(0,  0,  0),  Coord<3>(30, 20, 10));
+        CoordBox<3> box2(Coord<3>(50, 20, 50), Coord<3>(50, 10, 10));
+
+        typedef APITraits::SelectTopology<MySoATestCell>::Value Topology;
+        SoAGrid<MySoATestCell, Topology> gridOld(box1, MySoATestCell(47), MySoATestCell(1));
+        SoAGrid<MySoATestCell, Topology> gridNew(box2, MySoATestCell(11), MySoATestCell(0));
+
+        for (int i = 5; i < 27; ++i) {
+            Coord<3> c(i, 2, 1);
+            gridOld.set(c, MySoATestCell(i - 5));
+        }
+        for (int i = 57; i < 79; ++i) {
+            Coord<3> c(i, 27, 56);
+            TS_ASSERT_EQUALS(gridNew.get(c).temp,  11.0);
+        }
+
+        Streak<3> streak(Coord<3>(4, 1, 0), 26);
+        Coord<3> sourceOffset(1, 1, 1);
+        Coord<3> targetOffset(53, 26, 56);
+        Region<3> region;
+        region << streak;
+        UpdateFunctor<MySoATestCell>()(region, sourceOffset, targetOffset, gridOld, &gridNew, 0);
+
+        for (int i = 57; i < 79; ++i) {
+            Coord<3> c(i, 27, 56);
+            TS_ASSERT_EQUALS(gridNew.get(c).temp,  i - 57);
+        }
+    }
+
+    // fixme: add test with Cube topology
+
 private:
     template<typename CELL>
     void checkSelector(const std::string& line, int repeats)
@@ -183,18 +233,20 @@ private:
 
         Grid<CELL> gridOld(dim);
         Grid<CELL> gridNew(dim);
+        Region<2> region;
+        region << streak;
 
-        UpdateFunctor<CELL>()(streak, streak.origin, gridOld, &gridNew, nanoStep);
+        UpdateFunctor<CELL>()(region, Coord<2>(), Coord<2>(), gridOld, &gridNew, nanoStep);
 
         std::vector<char> message(1024 * 16, 0);
-        log.read(&message[0], 1024 * 16);
+        myLog.read(&message[0], 1024 * 16);
         std::string expected = "";
         for (int i = 0; i < repeats; ++i) {
             expected += line;
         }
 
         TS_ASSERT_EQUALS(expected, std::string(&message[0]));
-        log.clear();
+        myLog.clear();
     }
 };
 

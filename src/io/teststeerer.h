@@ -49,7 +49,9 @@ public:
         for (typename Region<DIM>::Iterator i = validRegion.begin();
              i != validRegion.end();
              ++i) {
-            grid->at(*i).cycleCounter += cycleOffset;
+            TestCell<DIM> cell = grid->get(*i);
+            cell.cycleCounter += cycleOffset;
+            grid->set(*i, cell);
         }
     }
 

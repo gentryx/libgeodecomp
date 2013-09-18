@@ -17,37 +17,38 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: STEPPER does not have to be a template parameter. it can also be defined solely in the constructor
-template<class CELL_TYPE, class STEPPER=VanillaStepper<CELL_TYPE> >
+template<class CELL_TYPE>
 class UpdateGroup
 {
     friend class HiParSimulatorTest;
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
     typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
+    const static int DIM = Topology::DIM;
 
+    template<typename STEPPER>
     UpdateGroup(
         boost::shared_ptr<Partition<DIM> > partition,
         const CoordBox<DIM>& box,
         const unsigned& ghostZoneWidth,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        PatchAccepterVec patchAcceptersGhost=PatchAccepterVec(),
-        PatchAccepterVec patchAcceptersInner=PatchAccepterVec(),
-        PatchProviderVec patchProvidersGhost=PatchProviderVec(),
-        PatchProviderVec patchProvidersInner=PatchProviderVec(),
-        const MPI::Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
-        MPI::Comm *communicator = &MPI::COMM_WORLD) :
+        STEPPER *stepperType,
+        PatchAccepterVec patchAcceptersGhost = PatchAccepterVec(),
+        PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
+        PatchProviderVec patchProvidersGhost = PatchProviderVec(),
+        PatchProviderVec patchProvidersInner = PatchProviderVec(),
+        const MPI_Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
+        MPI_Comm communicator = MPI_COMM_WORLD) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
         mpiLayer(communicator),
@@ -65,7 +66,8 @@ public:
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
         long firstSyncPoint =
-            initializer->startStep() * CELL_TYPE::nanoSteps() + ghostZoneWidth;
+            initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
+            ghostZoneWidth;
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
@@ -81,7 +83,7 @@ public:
                         i->first,
                         MPILayer::PATCH_LINK,
                         cellMPIDatatype,
-                        mpiLayer.getCommunicator()));
+                        mpiLayer.communicator()));
                 ghostZoneAccepterLinks << link;
                 patchLinks << link;
 
@@ -95,10 +97,10 @@ public:
         }
 
         // notify all PatchAccepters of the process' region:
-        for (int i = 0; i < patchAcceptersGhost.size(); ++i) {
+        for (size_t i = 0; i < patchAcceptersGhost.size(); ++i) {
             patchAcceptersGhost[i]->setRegion(partitionManager->ownRegion());
         }
-        for (int i = 0; i < patchAcceptersInner.size(); ++i) {
+        for (size_t i = 0; i < patchAcceptersInner.size(); ++i) {
             patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
         }
 
@@ -120,7 +122,7 @@ public:
                         i->first,
                         MPILayer::PATCH_LINK,
                         cellMPIDatatype,
-                        mpiLayer.getCommunicator()));
+                        mpiLayer.communicator()));
                 addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
                 patchLinks << link;
 
@@ -196,7 +198,7 @@ private:
     unsigned ghostZoneWidth;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     MPILayer mpiLayer;
-    MPI::Datatype cellMPIDatatype;
+    MPI_Datatype cellMPIDatatype;
     unsigned rank;
 };
 

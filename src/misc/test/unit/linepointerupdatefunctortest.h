@@ -21,16 +21,21 @@ public:
         typedef STENCIL Stencil;
 
         virtual void callFunctor(
-            const Streak<DIM>& streak,
+            const Region<DIM>& region,
             const GridType& gridOld,
             GridType *gridNew,
             unsigned nanoStep)
         {
             CoordBox<DIM> gridBox = gridOld.boundingBox();
             const TestCellType *pointers[Stencil::VOLUME];
-            LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
-            LinePointerUpdateFunctor<TestCellType>()(
-                streak, gridBox, pointers, &(*gridNew)[streak.origin], nanoStep);
+            for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+                 i != region.endStreak();
+                 ++i) {
+                Streak<DIM> streak = *i;
+                LinePointerAssembly<Stencil>()(pointers, streak, gridOld);
+                LinePointerUpdateFunctor<TestCellType>()(
+                    streak, gridBox, pointers, &(*gridNew)[streak.origin], nanoStep);
+            }
         }
     };
 

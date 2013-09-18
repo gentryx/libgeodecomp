@@ -5,7 +5,6 @@
 
 using namespace LibGeoDecomp;
 
-// fixme: move this class and chronometer to libgeodecomp/misc
 class FPSCounter
 {
 public:

@@ -16,7 +16,7 @@ public:
     void setUp()
     {
         layer = MPILayer();
-        manager = PartitionManager<2>();
+        manager = PartitionManager<Topologies::Cube<2>::Topology>();
         dimensions = Coord<2>(20, 400);
 
         // assume this is a dual cluster setup and on the current
@@ -72,12 +72,7 @@ public:
                 TS_ASSERT_EQUALS(innerFragments,
                                  manager.getInnerGhostZoneFragments()[i]);
             } else {
-                TS_ASSERT_EQUALS(
-                    manager.getOuterGhostZoneFragments().count(i), 0);
-                if (manager.getOuterGhostZoneFragments().count(i) != 0)
-                    std::cerr << "rank: " << layer.rank() << "\n"
-                              << "i: " << i << "\n"
-                              << "fragments:" << manager.getOuterGhostZoneFragments()[i] << "\n";
+                TS_ASSERT_EQUALS(manager.getOuterGhostZoneFragments().count(i), unsigned(0));
             }
         }
     }
@@ -161,7 +156,7 @@ public:
 
 private:
     MPILayer layer;
-    PartitionManager<2> manager;
+    PartitionManager<Topologies::Cube<2>::Topology> manager;
     boost::shared_ptr<StripingPartition<2> > partition;
     Coord<2> dimensions;
     SuperVector<long> weights;

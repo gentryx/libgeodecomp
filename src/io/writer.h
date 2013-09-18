@@ -35,7 +35,9 @@ class Writer
 #endif
 public:
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    const static int DIM = Topology::DIM;
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     /**
      * initializes a writer using prefix which subclasses may
@@ -56,7 +58,8 @@ public:
         }
     }
 
-    virtual ~Writer() {};
+    virtual ~Writer()
+    {};
 
     /**
      * is called back from sim after each simulation step. event
@@ -81,6 +84,11 @@ protected:
     unsigned period;
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+    // fixme: we need to get rid of these default constructors as user
+    // code may inherit them and thus miss calling the "real"
+    // constructor. point in case: the marching pixels demo crashed in
+    // an unlikely place (SerialSimulator::handleOutput()). Reason:
+    // Writer::period was default-initialized to 0.
     Writer()
     {}
 

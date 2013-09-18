@@ -26,16 +26,9 @@ public:
     friend class DirectionAccessor;
     friend class RateAccessor;
 
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
+    class API :
+        public APITraits::HasNanoSteps<2>
     {};
-
-    static inline unsigned nanoSteps()
-    {
-        return 2;
-    }
 
     Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
         direction(direction),
@@ -117,28 +110,32 @@ public:
     virtual void grid(GridBase<Cell, 2> *ret)
     {
         for (int i = 1; i < 90; ++i) {
-            ret->at(Coord<2>(i, 89)) = Cell(0, 1);
+            ret->set(Coord<2>(i, 89), Cell(0, 1));
         }
 
         for (int j = 0; j < 89; ++j) {
             for (int i = 0; i < 90; ++i) {
                 if (i == 0) {
-                    ret->at(Coord<2>(i, j)) = Cell(0, -1);
+                    ret->set(Coord<2>(i, j), Cell(0, -1));
                 } else {
-                    ret->at(Coord<2>(i, j)) = Cell(0);
+                    ret->set(Coord<2>(i, j), Cell(0));
                 }
             }
         }
 
         for (int j = 43; j < 48; ++j) {
             for (int i = 43; i < 48; ++i) {
-                ret->at(Coord<2>(i, j)).direction = BLOCK;
+                Cell c = ret->get(Coord<2>(i, j));
+                c.direction = BLOCK;
+                ret->set(Coord<2>(i, j), c);
             }
         }
 
         for (int j = 23; j < 28; ++j) {
             for (int i = 73; i < 78; ++i) {
-                ret->at(Coord<2>(i, j)).direction = BLOCK;
+                Cell c = ret->get(Coord<2>(i, j));
+                c.direction = BLOCK;
+                ret->set(Coord<2>(i, j), c);
             }
         }
     }
@@ -254,7 +251,7 @@ void runSimulation()
     //     1234,
     //     functionMap,
     //     myData,
-    //     MPI::COMM_WORLD);
+    //     MPI_COMM_WORLD);
     // sim.addSteerer(steerer);
 
     sim.run();
@@ -262,9 +259,11 @@ void runSimulation()
 
 int main(int argc, char* argv[])
 {
-    MPI::Init(argc, argv);
+    MPI_Init(&argc, &argv);
     srand((unsigned)time(0));
+
     runSimulation();
-    MPI::Finalize();
+
+    MPI_Finalize();
     return 0;
 }

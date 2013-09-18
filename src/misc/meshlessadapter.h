@@ -6,6 +6,7 @@
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supermap.h>
+#include <libgeodecomp/misc/supervector.h>
 #include <libgeodecomp/misc/topologies.h>
 
 namespace LibGeoDecomp {
@@ -181,7 +182,7 @@ public:
 
     bool checkBoxSize(const CoordVec& positions, const Graph& graph)
     {
-        for (int i = 0; i < graph.size(); ++i)
+        for (size_t i = 0; i < graph.size(); ++i)
             for (SuperVector<int>::const_iterator n = graph[i].begin();
                  n != graph[i].end(); ++n)
                 if (manhattanDistance(positions[i].first, positions[*n].first) > 1)

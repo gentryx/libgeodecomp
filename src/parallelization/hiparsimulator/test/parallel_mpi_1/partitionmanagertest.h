@@ -149,7 +149,7 @@ public:
         boost::shared_ptr<Partition<3> > partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
-        PartitionManager<3, Topologies::Torus<3>::Topology> partitionManager;
+        PartitionManager<Topologies::Torus<3>::Topology> partitionManager;
         partitionManager.resetRegions(
             box,
             partition,
@@ -236,7 +236,7 @@ private:
     unsigned rank;
     unsigned ghostZoneWidth;
     SuperVector<CoordBox<2> > boundingBoxes;
-    PartitionManager<2> partitionManager;
+    PartitionManager<Topologies::Cube<2>::Topology> partitionManager;
 
     SuperVector<CoordBox<2> > fakeBoundingBoxes(
         const unsigned& offset,

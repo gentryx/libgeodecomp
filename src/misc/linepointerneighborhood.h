@@ -447,9 +447,9 @@ public:
     using LinePointerNeighborhoodHelper::North< CELL, STENCIL, BOUNDARY_NORTH >::access;
     using LinePointerNeighborhoodHelper::South< CELL, STENCIL, BOUNDARY_SOUTH >::access;
 
-    LinePointerNeighborhood(const CELL **_lines, long *_offset) :
-        lines(_lines),
-        offset(_offset)
+    LinePointerNeighborhood(const CELL **lines, long *offset) :
+        lines(lines),
+        offset(offset)
     {}
 
     /**

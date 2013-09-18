@@ -9,14 +9,18 @@ namespace LibGeoDecomp {
 
 template<class CELL_TYPE> class Writer;
 
+/**
+ * A MonolithicSimulator is a Simulator which runs on a
+ */
 template<typename CELL_TYPE>
 class MonolithicSimulator : public Simulator<CELL_TYPE>
 {
 public:
+    using typename Simulator<CELL_TYPE>::Topology;
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
-    inline MonolithicSimulator(Initializer<CELL_TYPE> *_initializer) :
-        Simulator<CELL_TYPE>(_initializer)
+    inline MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :
+        Simulator<CELL_TYPE>(initializer)
     {}
 
     /**

@@ -10,17 +10,19 @@ template<typename CELL_TYPE, typename CELL_TO_COLOR>
 class SimpleCellPlotter
 {
 public:
-    void plotCell(
+    template<typename PAINTER>
+    void operator()(
         const CELL_TYPE& cell,
-        Image *image,
-        const Coord<2>& origin,
-        const unsigned& width,
-        const unsigned& height)
+	PAINTER painter,
+        const Coord<2>& cellDimensions) const
     {
-        image->paste(origin, Image(width, height, CELL_TO_COLOR()(cell)));
+        painter.fillRect(
+            0, 0,
+            cellDimensions.x(), cellDimensions.y(),
+            CELL_TO_COLOR()(cell));
     }
 };
 
-};
+}
 
 #endif

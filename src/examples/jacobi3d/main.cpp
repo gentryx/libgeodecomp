@@ -6,7 +6,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 
@@ -15,17 +15,13 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    typedef Topologies::Cube<3>::Topology Topology;
-    class API : public CellAPITraits::Fixed
+    class API :
+        public APITraits::HasFixedCoordsOnlyUpdate,
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
     {};
 
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
-    inline explicit Cell(const double& v=0) : temp(v)
+    inline explicit Cell(double v = 0) : temp(v)
     {}
 
     template<typename COORD_MAP>
@@ -47,10 +43,9 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    CellInitializer(int num) : SimpleInitializer<Cell>(
-        Coord<3>(128 * num,
-                 128 * num,
-                 128 * num), 1000)
+    CellInitializer(int num) :
+        SimpleInitializer<Cell>(
+            Coord<3>(128) * num, 1000)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)
@@ -66,7 +61,7 @@ public:
                 for (int x = 0; x < size; ++x) {
                     Coord<3> c = offset + Coord<3>(x, y, z);
                     if (box.inBounds(c)) {
-                        ret->at(c) = Cell(0.99999999999);
+                        ret->set(c, Cell(0.99999999999));
                     }
                 }
             }
@@ -112,7 +107,7 @@ void runSimulation()
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
         1000,
         1,
-        MPI::DOUBLE);
+        MPI_DOUBLE);
 
     if (MPILayer().rank() == 0) {
         sim.addWriter(

@@ -18,7 +18,7 @@
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/misc/cellapitraits.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stencils.h>
 
 using namespace boost::assign;
@@ -27,17 +27,6 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    typedef Stencils::Moore<2, 1> Stencil;
-    typedef Topologies::Cube<2>::Topology Topology;
-
-    class API : public CellAPITraits::Base
-    {};
-
-    static inline unsigned nanoSteps()
-    {
-        return 1;
-    }
-
     ConwayCell(bool alive = false) :
         alive(alive)
     {}
@@ -114,7 +103,7 @@ public:
              i != startCells.end();
              ++i) {
             if (rect.inBounds(*i)) {
-                ret->at(*i) = ConwayCell(true);
+                ret->set(*i, ConwayCell(true));
             }
         }
     }
@@ -164,7 +153,7 @@ void runSimulation()
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
         10,
-        MPI::BOOL);
+        MPI_CHAR);
 
     sim.addWriter(
         new BOVWriter<ConwayCell, StateSelector>(
@@ -181,11 +170,11 @@ void runSimulation()
 
 int main(int argc, char *argv[])
 {
-    MPI::Init(argc, argv);
+    MPI_Init(&argc, &argv);
     Typemaps::initializeMaps();
 
     runSimulation();
 
-    MPI::Finalize();
+    MPI_Finalize();
     return 0;
 }

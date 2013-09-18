@@ -17,7 +17,9 @@ namespace HiParSimulator {
 class Cell
 {
 public:
-    typedef Topologies::Cube<3>::Topology Topology;
+    class API :
+        public APITraits::HasCubeTopology<3>
+    {};
 
     double val;
 };
@@ -47,7 +49,7 @@ public:
         init.reset(new CellInitializer(Coord<3>(128, 128, 128)));
         CoordBox<3> rect = init->gridBox();
 
-        partitionManager.reset(new PartitionManager<3>(rect));
+        partitionManager.reset(new PartitionManager<Topologies::Cube<3>::Topology>(rect));
         stepper.reset(
             new StepperType(cellSourceFile, partitionManager, init));
     }
@@ -66,7 +68,7 @@ public:
 #ifdef LIBGEODECOMP_FEATURE_OPENCL
 private:
     boost::shared_ptr<CellInitializer> init;
-    boost::shared_ptr<PartitionManager<3> > partitionManager;
+    boost::shared_ptr<PartitionManager<Topologies::Cube<3>::Topology> > partitionManager;
     boost::shared_ptr<StepperType> stepper;
 #endif
 };
