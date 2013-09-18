@@ -39,11 +39,11 @@ public:
     inline SuperVector()
     {}
 
-    inline SuperVector(int i) :
+    inline SuperVector(std::size_t i) :
         std::vector<T>(i)
     {}
 
-    inline SuperVector(int i, T t) :
+    inline SuperVector(std::size_t i, T t) :
         std::vector<T>(i, t)
     {}
 
@@ -56,8 +56,12 @@ public:
         std::vector<T>(other)
     {}
 
-    inline SuperVector(BOOST_RV_REF(VectorType) other) :
+    inline SuperVector(BOOST_RV_REF(std::vector<T, Allocator>) other) :
         std::vector<T>(boost::move(other))
+    {}
+
+    inline SuperVector(BOOST_RV_REF(VectorType) other) :
+        std::vector<T>(boost::move(static_cast<std::vector<T>(other)))
     {}
 
     /**
