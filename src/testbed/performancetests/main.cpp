@@ -1,4 +1,4 @@
-#include <immintrin.h>
+#include <emmintrin.h>
 #include <iomanip>
 #include <iostream>
 #include <libgeodecomp/config.h>
