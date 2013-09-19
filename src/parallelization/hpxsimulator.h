@@ -290,7 +290,7 @@ public:
     inline std::vector<Statistics> runTimed()
     {
         init();
-        std::size_t lastNanoStep = initializer->maxSteps() * CELL_TYPE::nanoSteps();
+        std::size_t lastNanoStep = initializer->maxSteps() * NANO_STEPS;
         return nanoStep(lastNanoStep);
     }
 

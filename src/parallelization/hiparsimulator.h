@@ -47,7 +47,6 @@ public:
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
-        communicator(communicator),
         mpiLayer(communicator),
         cellMPIDatatype(cellMPIDatatype)
     {}
@@ -89,7 +88,7 @@ public:
             = MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
         objType.Commit();
     
-        return MPILayer(communicator).gather(stat, 0, objType);
+        return mpiLayer.gather(stat, 0, objType);
     }
 
     virtual unsigned getStep() const
@@ -166,7 +165,6 @@ private:
     unsigned ghostZoneWidth;
     EventMap events;
     PartitionManager<Topology> partitionManager;
-    MPI_Comm communicator;
     MPILayer mpiLayer;
     MPI_Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
@@ -177,9 +175,19 @@ private:
 
     double totalTime;
 
+    double getCellSpeed(APITraits::FalseType) const
+    {
+        return 1.0;
+    }
+
+    double getCellSpeed(APITraits::TrueType) const
+    {
+        return CELL_TYPE::speed();
+    }
+
     SuperVector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
     {
-        double mySpeed = CELL_TYPE::speed();
+        double mySpeed = getCellSpeed(APITraits::SelectSpeed<CELL_TYPE>::Value());
         SuperVector<double> speeds = mpiLayer.allGather(mySpeed);
         double sum = speeds.sum();
         SuperVector<std::size_t> ret(size);
@@ -201,7 +209,7 @@ private:
 
     inline void nanoStep(const long& s)
     {
-#ifdef FEATURE_HPX
+#ifdef LIBGEODECOMP_FEATURE_HPX
         hpx::util::high_resolution_timer timer;
 #endif
         long remainingNanoSteps = s;
@@ -211,7 +219,7 @@ private:
             handleEvents();
             remainingNanoSteps -= hop;
         }
-#ifdef FEATURE_HPX
+#ifdef LIBGEODECOMP_FEATURE_HPX
         totalTime = timer.elapsed();
 #endif
     }
@@ -255,7 +263,7 @@ private:
                 steererAdaptersGhost,
                 steererAdaptersInner,
                 cellMPIDatatype,
-                communicator));
+                mpiLayer.communicator()));
 
         writerAdaptersGhost.clear();
         writerAdaptersInner.clear();

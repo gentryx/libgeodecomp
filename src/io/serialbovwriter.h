@@ -25,9 +25,9 @@ class SerialBOVWriter : public Writer<CELL_TYPE>
 public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    static const int DIM = CELL_TYPE::Topology::DIM;
+    static const int DIM = Topology::DIM;
 
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
@@ -45,13 +45,13 @@ public:
         return new SerialBOVWriter(this->prefix, this->period, brickletDim);
     }
 
-    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
+    void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
             return;
         }
 
-        writeHeader(step, grid.getDimensions());
+        writeHeader(step, grid.dimensions());
 
         writeRegion(step, grid);
     }
@@ -128,7 +128,7 @@ private:
 
         SuperVector<VariableType> buffer;
 
-        Coord<DIM> dimensions = grid.getDimensions();
+        Coord<DIM> dimensions = grid.dimensions();
 
         std::size_t dataComponents = SELECTOR_TYPE::dataComponents();
         std::size_t length = dimensions.prod();

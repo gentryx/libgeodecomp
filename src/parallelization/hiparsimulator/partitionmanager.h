@@ -9,17 +9,19 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-// fixme: get rid of DIM, deduce it from TOPOLOGY
-template<int DIM, typename TOPOLOGY=typename Topologies::Cube<DIM>::Topology>
+template<typename TOPOLOGY>
 class PartitionManager {
     friend class HiParSimulatorTest;
     friend class PartitionManagerTest;
     friend class VanillaStepperTest;
 public:
-    typedef SuperMap<int, SuperVector<Region<DIM> > > RegionVecMap;
     typedef TOPOLOGY Topology;
+    static const int DIM = Topology::DIM;
+    typedef SuperMap<int, SuperVector<Region<DIM> > > RegionVecMap;
 
-    enum AccessCode {OUTGROUP = -1};
+    enum AccessCode {
+        OUTGROUP = -1
+    };
 
     PartitionManager(
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())

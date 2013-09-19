@@ -94,7 +94,9 @@ private:
 
     inline void update()
     {
+#ifdef LIBGEODECOMP_FEATURE_HPX
         hpx::util::high_resolution_timer timer;
+#endif
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
 
@@ -112,7 +114,9 @@ private:
             curNanoStep = 0;
             curStep++;
         }
+#ifdef LIBGEODECOMP_FEATURE_HPX
         computeTimeInner += timer.elapsed();
+#endif
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
 
@@ -129,7 +133,9 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
+#ifdef LIBGEODECOMP_FEATURE_HPX
         hpx::util::high_resolution_timer timer;
+#endif
         for (typename ParentType::PatchAccepterList::iterator i =
                  patchAccepters[patchType].begin();
              i != patchAccepters[patchType].end();
@@ -138,7 +144,9 @@ private:
                 (*i)->put(*oldGrid, region, nanoStep);
             }
         }
+#ifdef LIBGEODECOMP_FEATURE_HPX
         patchAcceptersTime += timer.elapsed();
+#endif
     }
 
     inline void notifyPatchProviders(
@@ -146,7 +154,9 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
+#ifdef LIBGEODECOMP_FEATURE_HPX
         hpx::util::high_resolution_timer timer;
+#endif
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
@@ -156,7 +166,9 @@ private:
                 region,
                 nanoStep);
         }
+#ifdef LIBGEODECOMP_FEATURE_HPX
         patchProvidersTime += timer.elapsed();
+#endif
     }
 
     inline std::size_t globalNanoStep() const
@@ -201,7 +213,9 @@ private:
      */
     inline void updateGhost()
     {
+#ifdef LIBGEODECOMP_FEATURE_HPX
         hpx::util::high_resolution_timer timer;
+#endif
         // fixme: skip all this ghost zone buffering for
         // ghostZoneWidth == 1?
 
@@ -217,13 +231,16 @@ private:
         std::size_t oldNanoStep = curNanoStep;
         std::size_t oldStep = curStep;
         std::size_t curGlobalNanoStep = globalNanoStep();
+#ifdef LIBGEODECOMP_FEATURE_HPX
         computeTimeGhost += timer.elapsed();
+#endif
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
-
+#ifdef LIBGEODECOMP_FEATURE_HPX
             timer.restart();
+#endif
             const Region<DIM>& region = partitionManager->rim(t + 1);
             UpdateFunctor<CELL_TYPE>()(
                     region,
@@ -242,10 +259,14 @@ private:
             std::swap(oldGrid, newGrid);
 
             ++curGlobalNanoStep;
+#ifdef LIBGEODECOMP_FEATURE_HPX
             computeTimeGhost += timer.elapsed();
+#endif
             notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
         }
+#ifdef LIBGEODECOMP_FEATURE_HPX
         timer.restart();
+#endif
         curNanoStep = oldNanoStep;
         curStep = oldStep;
 
@@ -257,7 +278,9 @@ private:
         // 3: restore grid for kernel update
         restoreRim(true);
         restoreKernel();
+#ifdef LIBGEODECOMP_FEATURE_HPX
         computeTimeGhost += timer.elapsed();
+#endif
     }
 private:
 

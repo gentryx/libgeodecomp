@@ -21,28 +21,21 @@ class UpdateGroup
     friend class boost::serialization::access;
     friend class UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER>;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef typename STEPPER::Topology Topology;
+    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
+    typedef typename STEPPER::PatchType PatchType;
+    typedef typename STEPPER::PatchProviderPtr PatchProviderPtr;
+    typedef typename STEPPER::PatchAccepterPtr PatchAccepterPtr;
+    typedef typename STEPPER::PatchAccepterVec PatchAccepterVec;
+    typedef typename STEPPER::PatchProviderVec PatchProviderVec;
+    const static int DIM = Topology::DIM;
+
     typedef
         typename DistributedSimulator<CELL_TYPE>::WriterVector
         WriterVector;
     typedef
         typename DistributedSimulator<CELL_TYPE>::SteererVector
         SteererVector;
-    typedef typename HiParSimulator::Stepper<CELL_TYPE>::PatchType PatchType;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderPtr
-        PatchProviderPtr;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterPtr
-        PatchAccepterPtr;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterVec
-        PatchAccepterVec;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderVec
-        PatchProviderVec;
 
     typedef UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> ComponentType;
 

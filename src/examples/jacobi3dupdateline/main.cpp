@@ -1,6 +1,7 @@
 #include <cmath>
 #include <mpi.h>
 
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>

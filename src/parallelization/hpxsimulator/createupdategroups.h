@@ -10,6 +10,8 @@
 
 #include <libgeodecomp/io/initializer.h>
 
+#include <boost/range/algorithm/copy.hpp>
+
 #include <utility>
 #include <vector>
 
@@ -72,24 +74,17 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
 
     std::vector<hpx::util::locality_result> res;
     res.reserve(result.second.size());
-    BOOST_FOREACH(const hpx::util::remote_locality_result& rl, result.second) {
-        res.push_back(rl);
-    }
-
-    BOOST_FOREACH(hpx::id_type id, hpx::util::locality_results(res)) {
-        components.push_back(id);
-    }
+    boost::copy(result.second, std::back_inserter(res));
+    boost::copy(hpx::util::locality_results(res), std::back_inserter(components));
 
     return components;
 }
 
 template <class UPDATEGROUP>
-inline std::vector<UPDATEGROUP> createUpdateGroups(
-    float overcommitFactor
-)
+inline std::vector<UPDATEGROUP> createUpdateGroups(float overcommitFactor)
 {
     Implementation::OvercommitFunctor f = {overcommitFactor};
-    return createUpdateGroups(f);
+    return createUpdateGroups<UPDATEGROUP>(f);
 }
 
 }

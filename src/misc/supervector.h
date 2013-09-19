@@ -53,16 +53,12 @@ public:
         std::vector<T>(start, end)
     {}
 
-    inline SuperVector(std::vector<T, Allocator> const & other) :
+    inline SuperVector(const VectorType& other) :
         std::vector<T>(other)
     {}
 
-    inline SuperVector(BOOST_RV_REF(std::vector<T, Allocator>) other) :
-        std::vector<T>(boost::move(other))
-    {}
-
     inline SuperVector(BOOST_RV_REF(VectorType) other) :
-        std::vector<T>(boost::move(static_cast<std::vector<T>(other)))
+        std::vector<T>(boost::move(static_cast<std::vector<T> >(other)))
     {}
 
     /**

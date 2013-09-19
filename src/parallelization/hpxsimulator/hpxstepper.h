@@ -18,11 +18,13 @@ class HpxStepper : public Stepper<CELL_TYPE>
     friend class HpxStepperBasicTest;
     friend class HpxStepperTest;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    const static int DIM = Topology::DIM;
+    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<DIM, typename CELL_TYPE::Topology> PartitionManagerType;
+    typedef PartitionManager<Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
@@ -68,7 +70,7 @@ public:
     {
         for (std::size_t i = 0; i < nanoSteps; ++i)
         {
-            updateImpl().wait();
+            update().wait();
         }
     }
 
@@ -95,7 +97,7 @@ private:
     hpx::lcos::local::spinlock gridMutex;
     hpx::util::high_resolution_timer timer;
 
-    inline hpx::future<void> updateImpl()
+    inline hpx::future<void> update()
     {
         timer.restart();
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
@@ -106,13 +108,16 @@ private:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
              ++i) {
+            Region<DIM> r;
+            r << *i;
+            Coord<DIM> null;
             if(i->length() > asyncThreshold) {
-                Streak<DIM> streak(*i);
                 updateFutures.push_back(
                     hpx::async(
                         UpdateFunctor<CELL_TYPE>(),
-                        streak,
-                        streak.origin,
+                        r,
+                        null,
+                        null,
                         boost::cref(*oldGrid),
                         &*newGrid,
                         curNanoStep
@@ -120,7 +125,7 @@ private:
                 );
             }
             else {
-                UpdateFunctor<CELL_TYPE>()(*i, i->origin, *oldGrid, &*newGrid, curNanoStep);
+                UpdateFunctor<CELL_TYPE>()(r, null, null, *oldGrid, &*newGrid, curNanoStep);
             }
         }
         if(updateFutures.empty()) {
@@ -128,7 +133,7 @@ private:
         }
 
         ++curNanoStep;
-        if (curNanoStep == CELL_TYPE::nanoSteps()) {
+        if (curNanoStep == NANO_STEPS) {
             curNanoStep = 0;
             curStep++;
         }
@@ -224,7 +229,7 @@ private:
 
     inline std::size_t globalNanoStep() const
     {
-        return curStep * CELL_TYPE::nanoSteps() + curNanoStep;
+        return curStep * NANO_STEPS + curNanoStep;
     }
 
     inline void initGrids()
@@ -295,13 +300,16 @@ private:
             for (typename Region<DIM>::StreakIterator i = region.beginStreak();
                  i != region.endStreak();
                  ++i) {
+                Region<DIM> r;
+                r << *i;
+                Coord<DIM> null;
                 if(i->length() > asyncThreshold) {
-                    Streak<DIM> streak(*i);
                     updateFutures.push_back(
                         hpx::async(
                             UpdateFunctor<CELL_TYPE>(),
-                            streak,
-                            streak.origin,
+                            r,
+                            null,
+                            null,
                             boost::cref(*oldGrid),
                             &*newGrid,
                             curNanoStep
@@ -309,7 +317,7 @@ private:
                     );
                 }
                 else {
-                    UpdateFunctor<CELL_TYPE>()(*i, i->origin, *oldGrid, &*newGrid, curNanoStep);
+                    UpdateFunctor<CELL_TYPE>()(r, null, null, *oldGrid, &*newGrid, curNanoStep);
                 }
             }
             if(updateFutures.empty()) {
@@ -317,7 +325,7 @@ private:
             }
 
             ++curNanoStep;
-            if (curNanoStep == CELL_TYPE::nanoSteps()) {
+            if (curNanoStep == NANO_STEPS) {
                 curNanoStep = 0;
                 curStep++;
             }

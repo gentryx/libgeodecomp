@@ -26,36 +26,28 @@ class UpdateGroupServer : public hpx::components::managed_component_base<
     UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> >
 {
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
+    typedef typename STEPPER::Topology Topology;
+    const static int DIM = Topology::DIM;
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
     typedef
         UpdateGroup<CELL_TYPE, PARTITION, STEPPER> ClientType;
 
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
     typedef
         typename DistributedSimulator<CELL_TYPE>::WriterVector
         WriterVector;
     typedef
         typename DistributedSimulator<CELL_TYPE>::SteererVector
         SteererVector;
-    typedef typename HiParSimulator::Stepper<CELL_TYPE>::PatchType PatchType;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderPtr
-        PatchProviderPtr;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterPtr
-        PatchAccepterPtr;
 
+
+    typedef typename STEPPER::PatchType PatchType;
+    typedef typename STEPPER::PatchProviderPtr PatchProviderPtr;
+    typedef typename STEPPER::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType, ClientType>::Link> PatchLinkPtr;
-
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterVec
-        PatchAccepterVec;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderVec
-        PatchProviderVec;
+    typedef typename STEPPER::PatchAccepterVec PatchAccepterVec;
+    typedef typename STEPPER::PatchProviderVec PatchProviderVec;
 
     typedef
         typename PatchLink<GridType, ClientType>::Provider
@@ -70,7 +62,7 @@ public:
     typedef boost::shared_ptr<PatchLinkAccepterType> PatchLinkAccepterPtr;
 
     typedef
-        HiParSimulator::PartitionManager<typename CELL_TYPE::Topology>
+        HiParSimulator::PartitionManager<Topology>
         PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
 
@@ -186,6 +178,7 @@ public:
         PatchAccepterVec patchAcceptersInner;
 
         // Convert writers to patch accepters
+        /*
         BOOST_FOREACH(const typename WriterVector::value_type& writer, writers) {
             PatchAccepterPtr adapterGhost(
                 new ParallelWriterAdapterType(
@@ -210,6 +203,7 @@ public:
             patchAcceptersGhost.push_back(adapterGhost);
             patchAcceptersInner.push_back(adapterInnerSet);
         }
+        */
 
         stepper.reset(new STEPPER(
                           partitionManager,
@@ -236,6 +230,7 @@ public:
 
 
         // Convert steerer to patch accepters
+        /*
         BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
             // two adapters needed, just as for the writers
             PatchProviderPtr adapterGhost(
@@ -261,6 +256,7 @@ public:
             addPatchProvider(adapterGhost, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
             addPatchProvider(adapterInnerSet, HiParSimulator::Stepper<CELL_TYPE>::INNER_SET);
         }
+        */
 
         initEvents();
     }
@@ -335,10 +331,12 @@ public:
         {
             std::cerr << rank << " setting outer ghostzone from unknown rank: " << srcRank << "\ngot these ranks:\n";
             typedef std::pair<std::size_t, PatchLinkProviderPtr> pair_type;
+            /*
             BOOST_FOREACH(const pair_type& p, patchlinkProviderMap)
             {
                 std::cerr << rank << " " << p.first << "\n";
             }
+            */
             return;
         }
         BOOST_ASSERT(patchlinkIter != patchlinkProviderMap.end());
@@ -347,9 +345,19 @@ public:
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
 
-    double speed()
+    double getCellSpeed(APITraits::FalseType) const
+    {
+        return 1.0;
+    }
+
+    double getCellSpeed(APITraits::TrueType) const
     {
         return CELL_TYPE::speed();
+    }
+
+    double speed()
+    {
+        return getCellSpeed(APITraits::SelectSpeed<CELL_TYPE>::Value());
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, speed, SpeedAction);
 
