@@ -1,3 +1,4 @@
+// fixme: use delta from original image to detect obstacles (rather than a threshold)
 #include <iostream>
 
 #include <QtGui/QApplication>
