@@ -1,4 +1,7 @@
 #include <emmintrin.h>
+#ifdef __AVX__
+#include <immintrin.h>
+#endif
 #include <iomanip>
 #include <iostream>
 #include <libgeodecomp/config.h>

@@ -221,7 +221,10 @@ public:
         }
     }
 
+    void testStructOfArraysTestCell()
+    {
     // fixme: add test with Cube topology
+    }
 
 private:
     template<typename CELL>

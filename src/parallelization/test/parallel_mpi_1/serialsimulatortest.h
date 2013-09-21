@@ -195,7 +195,6 @@ public:
 
     void testSoA()
     {
-
         typedef GridBase<TestCellSoA, 3> GridBaseType;
         SerialSimulator<TestCellSoA> sim(new TestInitializer<TestCellSoA>());
         TS_ASSERT_TEST_GRID(GridBaseType, *sim.getGrid(), 0);
