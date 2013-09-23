@@ -223,7 +223,34 @@ public:
 
     void testStructOfArraysTestCell()
     {
-    // fixme: add test with Cube topology
+        int steps = 5;
+        Coord<3> dim(10, 15, 5);
+        CoordBox<3> box(Coord<3>(), dim);
+        typedef TestCellSoA TestCellType;
+        typedef SoAGrid<TestCellType, Topologies::Cube<3>::Topology> GridType;
+
+        TestInitializer<TestCellType> init(dim);
+        GridType gridA(box);
+        init.grid(&gridA);
+        GridType gridB = gridA;
+
+        Region<3> region;
+        region << gridA.boundingBox();
+
+        GridType *gridOld = &gridA;
+        GridType *gridNew = &gridB;
+
+
+        for (int s = 0; s < steps; ++s) {
+            UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, s);
+            int cycle = init.startStep() * TestCellType::NANO_STEPS + s;
+
+            TS_ASSERT_TEST_GRID2(GridType, *gridOld, cycle, typename);
+            cycle += 1;
+            TS_ASSERT_TEST_GRID2(GridType, *gridNew, cycle, typename);
+
+            std::swap(gridOld, gridNew);
+        }
     }
 
 private:
