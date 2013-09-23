@@ -99,5 +99,15 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
 )
 
+HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
+    std::size_t(),
+    LibGeoDecomp::HpxSimulator::Implementation::OvercommitFunctor,
+    LibGeoDecompHpxSimulatorImplementationOvercommitFunctor)
+
+HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
+    std::size_t(),
+    hpx::util::function<std::size_t()>,
+    LibGeoDecompHpxSimulatorImplementationFunction)
+
 #endif
 #endif

@@ -21,6 +21,16 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE(
     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
 )
 
+HPX_UTIL_REGISTER_FUNCTION(
+    std::size_t(),
+    LibGeoDecomp::HpxSimulator::Implementation::OvercommitFunctor,
+    LibGeoDecompHpxSimulatorImplementationOvercommitFunctor)
+
+HPX_UTIL_REGISTER_FUNCTION(
+    std::size_t(),
+    hpx::util::function<std::size_t()>,
+    LibGeoDecompHpxSimulatorImplementationFunction)
+
 namespace LibGeoDecomp {
 namespace HpxSimulator {
 namespace Implementation {
@@ -94,14 +104,12 @@ createUpdateGroups(
 
     hpx::wait_all(componentsFutures);
 
-    /*
     BOOST_FOREACH(hpx::future<ResultType> & rf, componentsFutures)
     {
         ResultType r = rf.move();
         res.second.insert(res.second.end(), r.second.begin(), r.second.end());
         res.first += r.first;
     }
-    */
 
     return res;
 }
