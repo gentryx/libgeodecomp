@@ -38,7 +38,8 @@ public:
 
         Grid<TestCell<2> > testGrid(gridDim);
         Image result(plotter->calcImageDim(gridDim));
-        plotter->plotGrid(testGrid, ImagePainter(&result));
+        ImagePainter painter(&result);
+        plotter->plotGrid(testGrid, painter);
 
         TS_ASSERT_EQUALS(result.getDimensions().x(), expectedDimX);
         TS_ASSERT_EQUALS(result.getDimensions().y(), expectedDimY);
@@ -61,7 +62,8 @@ public:
         testGrid[Coord<2>(1, 2)].testValue = 200;
 
         Image result(plotter->calcImageDim(gridDim));
-        plotter->plotGrid(testGrid, ImagePainter(&result));
+        ImagePainter painter(&result);
+        plotter->plotGrid(testGrid, painter);
 
         Image expected(expectedDimX, expectedDimY);
 
@@ -88,7 +90,8 @@ public:
         testGrid[Coord<2>(0, 2)].testValue = 166;
         testGrid[Coord<2>(1, 2)].testValue = 200;
         Image uncut(plotter->calcImageDim(Coord<2>(2, 3)));
-        plotter->plotGrid(testGrid, ImagePainter(&uncut));
+        ImagePainter painter1(&uncut);
+        plotter->plotGrid(testGrid, painter1);
 
         int x = 15;
         int y = 10;
@@ -101,10 +104,11 @@ public:
         int blackHeight = height - colorHeight;
 
         Image actual(Coord<2>(width, height));
+        ImagePainter painter2(&actual);
 
         plotter->plotGridInViewport(
             testGrid,
-            ImagePainter(&actual),
+            painter2,
             CoordBox<2>(Coord<2>(x, y), Coord<2>(width, height)));
         TS_ASSERT_EQUALS(actual.getDimensions().x(), width);
         TS_ASSERT_EQUALS(actual.getDimensions().y(), height);
@@ -128,9 +132,10 @@ public:
         Grid<TestCell<2> > testGrid(Coord<2>(2000, 2000));
         int t1 = time(0);
         Image actual(Coord<2>(1000, 1000));
+        ImagePainter painter(&actual);
         plotter->plotGridInViewport(
             testGrid,
-            ImagePainter(&actual),
+            painter,
             CoordBox<2>(Coord<2>(500, 500), Coord<2>(1000, 1000)));
         int t2 = time(0);
         int span = t2 - t1;

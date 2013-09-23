@@ -23,7 +23,7 @@ public:
     {}
 
     template<typename PAINTER>
-    void plotGrid(const typename Writer<CELL>::GridType& grid, PAINTER painter) const
+    void plotGrid(const typename Writer<CELL>::GridType& grid, PAINTER& painter) const
     {
 	CoordBox<2> viewport(
 	    Coord<2>(0, 0),
@@ -39,7 +39,7 @@ public:
     template<typename PAINTER>
     void plotGridInViewport(
         const typename Writer<CELL>::GridType& grid,
-	PAINTER painter,
+	PAINTER& painter,
         const CoordBox<2>& viewport) const
     {
         int sx = viewport.origin.x() / cellDim.x();

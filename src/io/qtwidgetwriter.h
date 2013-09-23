@@ -70,7 +70,7 @@ public:
 
     ~PainterWrapper()
     {
-        // painter->translate(-translation.x(), -translation.y());
+        painter->translate(-translation.x(), -translation.y());
     }
 
     void moveTo(const Coord<2>& coord)
