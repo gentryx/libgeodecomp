@@ -249,6 +249,7 @@ endif()
 
 if(FEATURE_QT)
   include(${QT_USE_FILE})
+  add_definitions(-DQT_NO_KEYWORDS)
 endif()
 
 # LIBDIRS is used to find source files and headers

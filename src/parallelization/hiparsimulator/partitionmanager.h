@@ -27,7 +27,7 @@ public:
     PartitionManager(
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
     {
-        SuperVector<long> weights(1, simulationArea.size());
+        SuperVector<std::size_t> weights(1, simulationArea.size());
         boost::shared_ptr<Partition<DIM> > partition(
             new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights));
         resetRegions(simulationArea, partition, 0, 1);
@@ -63,7 +63,7 @@ public:
     }
 
     inline void resetGhostZones(
-        const SuperVector<CoordBox<DIM> >& newBoundingBoxes)
+        const std::vector<CoordBox<DIM> >& newBoundingBoxes)
     {
         boundingBoxes = newBoundingBoxes;
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();
@@ -74,8 +74,9 @@ public:
                 (!(getRegion(rank, ghostZoneWidth) &
                    getRegion(i,    0)).empty() ||
                  !(getRegion(i,    ghostZoneWidth) &
-                   getRegion(rank, 0)).empty()))
+                   getRegion(rank, 0)).empty())) {
                 intersect(i);
+            }
         }
 
         // outgroup ghost zone fragments are computed a tad generous,
@@ -89,7 +90,6 @@ public:
                 outer -= i->second.back();
             }
         }
-
         for (typename RegionVecMap::iterator i = innerGhostZoneFragments.begin();
              i != innerGhostZoneFragments.end();
              ++i) {
@@ -97,7 +97,6 @@ public:
                 inner -= i->second.back();
             }
         }
-
         outerGhostZoneFragments[OUTGROUP] =
             SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, outer);
         innerGhostZoneFragments[OUTGROUP] =
@@ -173,7 +172,7 @@ public:
         return volatileKernel;
     }
 
-    inline const SuperVector<long>& getWeights() const
+    inline const SuperVector<std::size_t>& getWeights() const
     {
         return partition->getWeights();
     }
@@ -256,6 +255,7 @@ private:
 };
 
 }
+
 }
 
 #endif

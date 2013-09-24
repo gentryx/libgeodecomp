@@ -11,6 +11,7 @@
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/vector.hpp>
 #endif
+#include <boost/move/move.hpp>
 
 namespace LibGeoDecomp {
 
@@ -31,23 +32,33 @@ public:
     using std::vector<T, Allocator>::pop_back;
     using std::vector<T, Allocator>::push_back;
 
-    typedef typename std::vector<T>::iterator iterator;
-    typedef typename std::vector<T>::const_iterator const_iterator;
+    typedef std::vector<T, Allocator> VectorType;
+
+    typedef typename std::vector<T, Allocator>::iterator iterator;
+    typedef typename std::vector<T, Allocator>::const_iterator const_iterator;
 
     inline SuperVector()
     {}
 
-    inline SuperVector(int i) :
+    inline SuperVector(std::size_t i) :
         std::vector<T>(i)
     {}
 
-    inline SuperVector(int i, T t) :
+    inline SuperVector(std::size_t i, T t) :
         std::vector<T>(i, t)
     {}
 
     template<typename ITERATOR>
     inline SuperVector(ITERATOR start, ITERATOR end) :
         std::vector<T>(start, end)
+    {}
+
+    inline SuperVector(const VectorType& other) :
+        std::vector<T>(other)
+    {}
+
+    inline SuperVector(BOOST_RV_REF(VectorType) other) :
+        std::vector<T>(boost::move(static_cast<std::vector<T> >(other)))
     {}
 
     /**

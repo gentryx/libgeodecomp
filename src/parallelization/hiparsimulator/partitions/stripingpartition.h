@@ -21,7 +21,7 @@ public:
         const Coord<DIM>& _origin=Coord<DIM>(),
         const Coord<DIM>& _dimensions=Coord<DIM>(),
         const long& offset=0,
-        const SuperVector<long>& weights=SuperVector<long>(2)) :
+        const SuperVector<std::size_t>& weights=SuperVector<std::size_t>(2)) :
         SpaceFillingCurve<DIM>(offset, weights),
         origin(_origin),
         dimensions(_dimensions)
@@ -46,7 +46,7 @@ public:
         return Iterator(origin, origin + endOffset, dimensions);
     }
 
-    inline Region<DIM> getRegion(const long& node) const
+    inline Region<DIM> getRegion(const std::size_t node) const
     {
         return Region<DIM>(
             (*this)[startOffsets[node + 0]],

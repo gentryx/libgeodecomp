@@ -89,6 +89,7 @@ public:
             }
             return *this;
         }
+
     private:
         std::list<Square> squareStack;
         unsigned trivialSquareDirDim;
@@ -269,10 +270,10 @@ public:
     };
 
     inline ZCurvePartition(
-        const Coord<DIM>& origin=Coord<DIM>(),
-        const Coord<DIM>& dimensions=Coord<DIM>(),
-        const long& offset=0,
-        const SuperVector<long>& weights=SuperVector<long>(2)) :
+        const Coord<DIM>& origin = Coord<DIM>(),
+        const Coord<DIM>& dimensions = Coord<DIM>(),
+        const long& offset = 0,
+        const SuperVector<size_t>& weights = SuperVector<size_t>(2)) :
         SpaceFillingCurve<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions)
@@ -293,7 +294,7 @@ public:
         return Iterator(origin);
     }
 
-    inline Region<DIM> getRegion(const long& node) const
+    inline Region<DIM> getRegion(const size_t node) const
     {
         return Region<DIM>(
             (*this)[startOffsets[node + 0]],

@@ -5,7 +5,7 @@
 
 #include <hpx/runtime/components/server/runtime_support.hpp>
 #include <hpx/runtime/components/plain_component_factory.hpp>
-#include <hpx/lcos/wait_any.hpp>
+#include <hpx/lcos/wait_all.hpp>
 
 #include <boost/serialization/vector.hpp>
 
@@ -21,12 +21,25 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE(
     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
 )
 
+HPX_UTIL_REGISTER_FUNCTION(
+    std::size_t(),
+    LibGeoDecomp::HpxSimulator::Implementation::OvercommitFunctor,
+    LibGeoDecompHpxSimulatorImplementationOvercommitFunctor)
+
+HPX_UTIL_REGISTER_FUNCTION(
+    std::size_t(),
+    hpx::util::function<std::size_t()>,
+    LibGeoDecompHpxSimulatorImplementationFunction)
+
 namespace LibGeoDecomp {
 namespace HpxSimulator {
 namespace Implementation {
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, float overcommitFactor)
+createUpdateGroups(
+    std::vector<hpx::id_type> localities,
+    hpx::components::component_type type,
+    const hpx::util::function<std::size_t()>& numUpdateGroups)
 {
     typedef hpx::util::remote_locality_result ValueType;
     typedef std::pair<std::size_t, std::vector<ValueType> > ResultType;
@@ -42,7 +55,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         hpx::components::server::runtime_support::bulk_create_components_action
         ActionType;
 
-    std::size_t numComponents = std::ceil(hpx::get_os_thread_count() * overcommitFactor);
+    std::size_t numComponents = numUpdateGroups();
 
     typedef hpx::future<std::vector<hpx::naming::gid_type> > FutureType;
 
@@ -66,7 +79,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         {
             hpx::lcos::packaged_action<CreateUpdateGroupsAction, ResultType > p;
             hpx::id_type id = locsFirst[0];
-            p.apply(hpx::launch::async, id, boost::move(locsFirst), type, overcommitFactor);
+            p.apply(hpx::launch::async, id, boost::move(locsFirst), type, numUpdateGroups);
             componentsFutures.push_back(
                 p.get_future()
             );
@@ -76,7 +89,7 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
         {
             hpx::lcos::packaged_action<CreateUpdateGroupsAction, ResultType > p;
             hpx::id_type id = locsSecond[0];
-            p.apply(hpx::launch::async, id, boost::move(locsSecond), type, overcommitFactor);
+            p.apply(hpx::launch::async, id, boost::move(locsSecond), type, numUpdateGroups);
             componentsFutures.push_back(
                 p.get_future()
             );
@@ -89,14 +102,13 @@ createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::compon
     );
     res.second.back().gids_ = boost::move(f.move());
 
-    while(!componentsFutures.empty()) {
-        HPX_STD_TUPLE<int, hpx::future<ResultType> >
-            compRes = hpx::wait_any(componentsFutures);
+    hpx::wait_all(componentsFutures);
 
-        ResultType r = boost::move(HPX_STD_GET(1, compRes).move());
+    BOOST_FOREACH(hpx::future<ResultType> & rf, componentsFutures)
+    {
+        ResultType r = rf.move();
         res.second.insert(res.second.end(), r.second.begin(), r.second.end());
         res.first += r.first;
-        componentsFutures.erase(componentsFutures.begin() + HPX_STD_GET(0, compRes));
     }
 
     return res;

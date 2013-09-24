@@ -1,6 +1,7 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
-
+#include <hpx/config.hpp>
+#include <boost/foreach.hpp>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE(
@@ -11,6 +12,21 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE(
 HPX_REGISTER_BASE_LCO_WITH_VALUE(
     LibGeoDecomp::CoordBox<2>,
     LibGeoDecomp_BaseLcoCoordBox2
+)
+
+HPX_REGISTER_BASE_LCO_WITH_VALUE(
+    std::vector<double>,
+    LibGeoDecomp_BaseLcovector_double
+)
+
+HPX_REGISTER_BASE_LCO_WITH_VALUE(
+    LibGeoDecomp::Statistics,
+    LibGeoDecomp_BaseLcovector_Statistics
+)
+
+HPX_REGISTER_BASE_LCO_WITH_VALUE(
+    std::vector<LibGeoDecomp::Statistics>,
+    LibGeoDecomp_BaseLcovector_StatisticsVector
 )
 
 #endif

@@ -184,13 +184,14 @@ public:
         return stepper->currentStep();
     }
 
-    inline const SuperVector<long>& getWeights() const
+    inline const SuperVector<std::size_t>& getWeights() const
     {
         return partitionManager->getWeights();
     }
 
-private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
+
+private:
     boost::shared_ptr<PartitionManagerType> partitionManager;
     SuperVector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;

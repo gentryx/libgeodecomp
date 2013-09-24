@@ -143,7 +143,7 @@ public:
         int ghostZoneWidth = 4;
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
-        SuperVector<long> weights;
+        SuperVector<size_t> weights;
         weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
         boost::shared_ptr<Partition<3> > partition(
@@ -197,7 +197,7 @@ public:
 
         // int ghostZoneWidth = 3;
         // CoordBox<3> box(Coord<3>(), Coord<3>(4000, 1000, 1000));
-        // SuperVector<long> weights;
+        // SuperVector<size_t> weights;
         // weights += 1000000000, 1000000000, 1000000000, 1000000000;
 
         // Partition<3> *partition =
@@ -232,7 +232,7 @@ private:
     Coord<2> dimensions;
     unsigned offset;
     boost::shared_ptr<StripingPartition<2> > partition;
-    SuperVector<long> weights;
+    SuperVector<size_t> weights;
     unsigned rank;
     unsigned ghostZoneWidth;
     SuperVector<CoordBox<2> > boundingBoxes;
@@ -242,7 +242,7 @@ private:
         const unsigned& offset,
         const unsigned& size,
         const unsigned& ghostZoneWidth,
-        const SuperVector<long>& weights,
+        const SuperVector<size_t>& weights,
         const boost::shared_ptr<StripingPartition<2> > partition)
     {
         SuperVector<CoordBox<2> > boundingBoxes(size);

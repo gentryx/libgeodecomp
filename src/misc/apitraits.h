@@ -212,6 +212,31 @@ public:
     template<int DIM>
     class HasTorusTopology : public HasTopology<typename Topologies::Torus<DIM>::Topology>
     {};
+
+
+    // determine whether a cell supports custom speeds
+    template<typename CELL, typename HAS_SPEED = void>
+    class SelectSpeed
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectSpeed<CELL, typename CELL::API::SupportsSpeed>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Use this if you want to use your Cell in a heterogenous environment
+     * to specify different "speeds". This affects the domain decomposition.
+     */
+    class HasSpeed
+    {
+        typedef void SupportsSpeed;
+    };
 };
 
 }

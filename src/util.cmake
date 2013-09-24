@@ -5,7 +5,9 @@ function(print_options)
 endfunction(print_options)
 
 function(dump_config outfile)
-  set(CONTENT "#ifndef LIBGEODECOMP_CONFIG_H\n\n${CONFIG_HEADER}\n#endif\n")
+  set(CONTENT "#ifndef LIBGEODECOMP_CONFIG_H\n\n")
+  set(CONTENT "${CONTENT}${CONFIG_HEADER}\n")
+  set(CONTENT "${CONTENT}#endif\n")
   file(WRITE "${outfile}.new" "${CONTENT}")
 
   execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}" "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}.new" RESULT_VARIABLE res)

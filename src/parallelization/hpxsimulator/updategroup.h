@@ -5,6 +5,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HPXUPDATEGROUP_H
 
 #include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroupserver.h>
@@ -20,28 +21,21 @@ class UpdateGroup
     friend class boost::serialization::access;
     friend class UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER>;
 public:
-    const static int DIM = CELL_TYPE::Topology::DIM;
-    typedef DisplacedGrid<
-        CELL_TYPE, typename CELL_TYPE::Topology, true> GridType;
+    typedef typename STEPPER::Topology Topology;
+    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
+    typedef typename STEPPER::PatchType PatchType;
+    typedef typename STEPPER::PatchProviderPtr PatchProviderPtr;
+    typedef typename STEPPER::PatchAccepterPtr PatchAccepterPtr;
+    typedef typename STEPPER::PatchAccepterVec PatchAccepterVec;
+    typedef typename STEPPER::PatchProviderVec PatchProviderVec;
+    const static int DIM = Topology::DIM;
+
     typedef
         typename DistributedSimulator<CELL_TYPE>::WriterVector
         WriterVector;
     typedef
         typename DistributedSimulator<CELL_TYPE>::SteererVector
         SteererVector;
-    typedef typename HiParSimulator::Stepper<CELL_TYPE>::PatchType PatchType;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderPtr
-        PatchProviderPtr;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterPtr
-        PatchAccepterPtr;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchAccepterVec
-        PatchAccepterVec;
-    typedef
-        typename HiParSimulator::Stepper<CELL_TYPE>::PatchProviderVec
-        PatchProviderVec;
 
     typedef UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> ComponentType;
 
@@ -54,50 +48,32 @@ public:
       : thisId(thisId)
     {}
 
-    void init(
-        const std::vector<UpdateGroup>& updateGroups,
-        //boost::shared_ptr<LoadBalancer> balancer,
-        unsigned loadBalancingPeriod,
-        unsigned ghostZoneWidth,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        const WriterVector& writers,
-        const SteererVector& steerers
-    )
+    struct InitData
     {
-        hpx::apply<typename ComponentType::InitAction>(
-            thisId,
-            updateGroups,
-            //balancer,
-            loadBalancingPeriod,
-            ghostZoneWidth,
-            initializer,
-            writers,
-            steerers
-        );
-    }
+        unsigned loadBalancingPeriod;
+        unsigned ghostZoneWidth;
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+        WriterVector writers;
+        SteererVector steerers;
+        std::vector<CoordBox<DIM> > boundingBoxes;
+        SuperVector<std::size_t> initialWeights;
+
+        template <typename ARCHIVE>
+        void serialize(ARCHIVE& ar, unsigned)
+        {
+            ar & loadBalancingPeriod;
+            ar & ghostZoneWidth;
+            ar & initializer;
+            ar & writers;
+            ar & steerers;
+            ar & boundingBoxes;
+            ar & initialWeights;
+        }
+    };
 
     hpx::naming::id_type gid() const
     {
         return thisId;
-    }
-
-    StepPairType currentStep() const
-    {
-        return typename ComponentType::CurrentStepAction()(thisId);
-    }
-
-    hpx::future<void> nanoStep(std::size_t remainingNanoSteps)
-    {
-        return
-            hpx::async<typename ComponentType::NanoStepAction>(
-                thisId,
-                remainingNanoSteps
-            );
-    }
-
-    void stop() const
-    {
-        return typename ComponentType::StopAction()(thisId);
     }
 
     hpx::future<void> setOuterGhostZone(
@@ -122,11 +98,6 @@ private:
     void serialize(ARCHIVE& ar, unsigned)
     {
         ar & thisId;
-    }
-
-    hpx::future<CoordBox<DIM> > boundingBox() const
-    {
-        return hpx::async<typename ComponentType::BoundingBoxAction>(thisId);
     }
 };
 

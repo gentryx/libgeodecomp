@@ -531,7 +531,7 @@ public:
         const Coord<2>& origin=Coord<2>(0, 0),
         const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,
-        const SuperVector<long>& weights=SuperVector<long>(2)) :
+        const SuperVector<std::size_t>& weights=SuperVector<std::size_t>(2)) :
         SpaceFillingCurve<2>(offset, weights),
         origin(origin),
         dimensions(dimensions)
@@ -547,7 +547,7 @@ public:
         return Iterator(origin);
     }
 
-    inline Region<2> getRegion(const long& node) const
+    inline Region<2> getRegion(const std::size_t node) const
     {
         return Region<2>(
             (*this)[startOffsets[node + 0]],

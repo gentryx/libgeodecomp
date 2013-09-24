@@ -22,7 +22,7 @@ class IdentityConverter
 {
 public:
     typedef CELL_TYPE CellType;
-    typedef typename CELL_TYPE::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
 
     const CellType& operator()(
         const CellType& cell,
@@ -143,7 +143,7 @@ public:
             if (jt->second == numUpdateGroups)
             {
                 {
-                    hpx::util::unlock_the_lock<MutexType::scoped_lock> ull(l);
+                    hpx::util::scoped_unlock<MutexType::scoped_lock> ull(l);
                     notifyWriters(kt->second, step, event);
                 }
                 regionInfoMap.erase(it);

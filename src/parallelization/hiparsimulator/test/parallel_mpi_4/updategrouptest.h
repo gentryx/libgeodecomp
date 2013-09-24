@@ -65,19 +65,19 @@ private:
     std::deque<std::size_t> expectedNanoSteps;
     unsigned rank;
     Coord<2> dimensions;
-    SuperVector<long> weights;
+    SuperVector<size_t> weights;
     unsigned ghostZoneWidth;
     boost::shared_ptr<PartitionType> partition;
     boost::shared_ptr<Initializer<TestCell<2> > > init;
     boost::shared_ptr<UpdateGroup<TestCell<2> > > updateGroup;
     boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 
-    SuperVector<long> genWeights(
+    SuperVector<size_t> genWeights(
         const unsigned& width,
         const unsigned& height,
         const unsigned& size)
     {
-        SuperVector<long> ret(size);
+        SuperVector<size_t> ret(size);
         unsigned totalSize = width * height;
         for (std::size_t i = 0; i < ret.size(); ++i)
             ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);

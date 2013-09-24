@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/supermap.h>
+#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
@@ -46,10 +47,14 @@ public:
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
-        communicator(communicator),
         mpiLayer(communicator),
         cellMPIDatatype(cellMPIDatatype)
     {}
+
+    inline void init()
+    {
+        initSimulation();
+    }
 
     inline void run()
     {
@@ -63,6 +68,27 @@ public:
         initSimulation();
 
         nanoStep(NANO_STEPS);
+    }
+
+    inline SuperVector<Statistics> gatherStatistics()
+    {
+        Statistics stat =
+        {
+            totalTime,
+            updateGroup->stepper->computeTimeInner,
+            updateGroup->stepper->computeTimeGhost,
+            updateGroup->stepper->patchAcceptersTime,
+            updateGroup->stepper->patchProvidersTime,
+        };
+
+        MPI::Aint displacements[] = {0};
+        MPI::Datatype memberTypes[] = {MPI_CHAR};
+        int lengths[] = {sizeof(Statistics)};
+        MPI::Datatype objType
+            = MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
+        objType.Commit();
+    
+        return mpiLayer.gather(stat, 0, objType);
     }
 
     virtual unsigned getStep() const
@@ -139,7 +165,6 @@ private:
     unsigned ghostZoneWidth;
     EventMap events;
     PartitionManager<Topology> partitionManager;
-    MPI_Comm communicator;
     MPILayer mpiLayer;
     MPI_Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
@@ -148,22 +173,45 @@ private:
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
 
-    SuperVector<long> initialWeights(long items, long size) const
-    {
-        SuperVector<long> ret(size);
-        long lastPos = 0;
+    double totalTime;
 
-        for (long i = 0; i < size; i++) {
-            long currentPos = items * (i + 1) / size;
-            ret[i] = currentPos - lastPos;
-            lastPos = currentPos;
+    double getCellSpeed(APITraits::FalseType) const
+    {
+        return 1.0;
+    }
+
+    double getCellSpeed(APITraits::TrueType) const
+    {
+        return CELL_TYPE::speed();
+    }
+
+    SuperVector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
+    {
+        double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
+        SuperVector<double> speeds = mpiLayer.allGather(mySpeed);
+        double sum = speeds.sum();
+        SuperVector<std::size_t> ret(size);
+
+        std::size_t lastPos = 0;
+        double partialSum = 0.0;
+        if(size > 1) {
+            for (std::size_t i = 0; i < size -1; i++) {
+                partialSum += speeds[i];
+                std::size_t nextPos = items * partialSum / sum;
+                ret[i] = nextPos - lastPos;
+                lastPos = nextPos;
+            }
         }
+        ret[size-1] = items - lastPos;
 
         return ret;
     }
 
     inline void nanoStep(const long& s)
     {
+#ifdef LIBGEODECOMP_FEATURE_HPX
+        hpx::util::high_resolution_timer timer;
+#endif
         long remainingNanoSteps = s;
         while (remainingNanoSteps > 0) {
             long hop = std::min(remainingNanoSteps, timeToNextEvent());
@@ -171,6 +219,9 @@ private:
             handleEvents();
             remainingNanoSteps -= hop;
         }
+#ifdef LIBGEODECOMP_FEATURE_HPX
+        totalTime = timer.elapsed();
+#endif
     }
 
     /**
@@ -198,6 +249,7 @@ private:
                 0,
                 initialWeights(box.dimensions.prod(),
                                mpiLayer.size())));
+        
 
         updateGroup.reset(
             new UpdateGroupType(
@@ -205,13 +257,13 @@ private:
                 box,
                 ghostZoneWidth,
                 initializer,
-                reinterpret_cast<VanillaStepper<CELL_TYPE>*>(0),
+                static_cast<VanillaStepper<CELL_TYPE>*>(0),
                 writerAdaptersGhost,
                 writerAdaptersInner,
                 steererAdaptersGhost,
                 steererAdaptersInner,
                 cellMPIDatatype,
-                communicator));
+                mpiLayer.communicator()));
 
         writerAdaptersGhost.clear();
         writerAdaptersInner.clear();

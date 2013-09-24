@@ -10,6 +10,8 @@
 
 #include <libgeodecomp/io/initializer.h>
 
+#include <boost/range/algorithm/copy.hpp>
+
 #include <utility>
 #include <vector>
 
@@ -17,12 +19,31 @@ namespace LibGeoDecomp {
 namespace HpxSimulator {
 namespace Implementation {
 
+    struct OvercommitFunctor
+    {
+        double overcommitFactor;
+
+        std::size_t operator()() const
+        {
+            return std::ceil(hpx::get_os_thread_count() * overcommitFactor);
+        }
+
+        template <typename ARCHIVE>
+        void serialize(ARCHIVE& ar, unsigned)
+        {
+            ar & overcommitFactor;
+        }
+    };
+
 typedef
     std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
     CreateUpdateGroupsReturnType;
 
 std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(std::vector<hpx::id_type> localities, hpx::components::component_type type, float overcommitFactor);
+createUpdateGroups(
+    std::vector<hpx::id_type> localities,
+    hpx::components::component_type type,
+    const hpx::util::function<std::size_t()>& numUpdateGroups);
 
 HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
@@ -30,7 +51,7 @@ HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
 template <class UPDATEGROUP>
 inline std::vector<UPDATEGROUP> createUpdateGroups(
-    float overcommitFactor
+    const hpx::util::function<std::size_t()>& numUpdateGroups
 )
 {
     hpx::components::component_type type =
@@ -41,7 +62,7 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     hpx::id_type id = localities[0];
     hpx::future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
         asyncResult = hpx::async<Implementation::CreateUpdateGroupsAction>(
-            id, boost::move(localities), type, overcommitFactor);
+            id, boost::move(localities), type, numUpdateGroups);
 
     std::vector<UPDATEGROUP> components;
 
@@ -53,15 +74,17 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
 
     std::vector<hpx::util::locality_result> res;
     res.reserve(result.second.size());
-    BOOST_FOREACH(const hpx::util::remote_locality_result& rl, result.second) {
-        res.push_back(rl);
-    }
-
-    BOOST_FOREACH(hpx::id_type id, hpx::util::locality_results(res)) {
-        components.push_back(id);
-    }
+    boost::copy(result.second, std::back_inserter(res));
+    boost::copy(hpx::util::locality_results(res), std::back_inserter(components));
 
     return components;
+}
+
+template <class UPDATEGROUP>
+inline std::vector<UPDATEGROUP> createUpdateGroups(float overcommitFactor)
+{
+    Implementation::OvercommitFunctor f = {overcommitFactor};
+    return createUpdateGroups<UPDATEGROUP>(f);
 }
 
 }
@@ -75,6 +98,16 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
     LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsReturnType,
     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
 )
+
+HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
+    std::size_t(),
+    LibGeoDecomp::HpxSimulator::Implementation::OvercommitFunctor,
+    LibGeoDecompHpxSimulatorImplementationOvercommitFunctor)
+
+HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
+    std::size_t(),
+    hpx::util::function<std::size_t()>,
+    LibGeoDecompHpxSimulatorImplementationFunction)
 
 #endif
 #endif

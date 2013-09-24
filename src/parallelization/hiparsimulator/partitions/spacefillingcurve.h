@@ -60,7 +60,7 @@ public:
 
     inline SpaceFillingCurve(
         const long& offset,
-        const SuperVector<long>& weights) :
+        const SuperVector<std::size_t>& weights) :
         Partition<DIM>(offset, weights)
     {}
 };

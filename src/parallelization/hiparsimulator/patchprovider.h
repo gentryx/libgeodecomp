@@ -1,10 +1,15 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHPROVIDER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHPROVIDER_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/superset.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
+
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/lcos/local/spinlock.hpp>
+#endif
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -35,6 +40,19 @@ public:
         const Region<DIM>& patchableRegion,
         const std::size_t nanoStep,
         const bool remove=true) = 0;
+
+#ifdef LIBGEODECOMP_FEATURE_HPX
+    virtual void get(
+        GRID_TYPE *destinationGrid,
+        const Region<DIM>& patchableRegion,
+        const std::size_t nanoStep,
+        hpx::lcos::local::spinlock& mutex,
+        const bool remove=true)
+    {
+        hpx::lcos::local::spinlock::scoped_lock lock(mutex);
+        this->get(destinationGrid, patchableRegion, nanoStep, remove);
+    }
+#endif
 
 protected:
     SuperSet<std::size_t> storedNanoSteps;

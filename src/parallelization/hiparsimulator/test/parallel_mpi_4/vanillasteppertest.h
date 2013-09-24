@@ -38,7 +38,7 @@ public:
         init.reset(new TestInitializer<TestCell<3> >(gridDim));
         CoordBox<3> box = init->gridBox();
 
-        SuperVector<long> weights;
+        SuperVector<size_t> weights;
         weights += 10000, 15000, 25000;
         weights << box.dimensions.prod() - weights.sum();
         boost::shared_ptr<Partition<3> > partition(
