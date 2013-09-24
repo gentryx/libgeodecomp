@@ -7,11 +7,10 @@
 
 namespace LibGeoDecomp {
 
-// fixme: rename
-namespace RegionHelpers {
+namespace RegionStreakIteratorHelpers {
 
 template<int DIM>
-class StreakIteratorCompareIterators
+class Compare
 {
 public:
     typedef std::pair<int, int> IntPair;
@@ -23,12 +22,12 @@ public:
             return false;
         }
 
-        return StreakIteratorCompareIterators<DIM - 1>()(a, b);
+        return Compare<DIM - 1>()(a, b);
     }
 };
 
 template<>
-class StreakIteratorCompareIterators<0>
+class Compare<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
@@ -94,7 +93,7 @@ public:
 
     inline bool operator==(const RegionStreakIterator& other) const
     {
-        return RegionHelpers::StreakIteratorCompareIterators<DIM - 1>()(iterators, other.iterators);
+        return RegionStreakIteratorHelpers::Compare<DIM - 1>()(iterators, other.iterators);
     }
 
     inline bool operator!=(const RegionStreakIterator& other) const
