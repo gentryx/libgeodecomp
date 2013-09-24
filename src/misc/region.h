@@ -23,10 +23,10 @@ public:
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
         StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
-        iterators[DIM] = region.indices[DIM].begin();
+        iterators[DIM] = region.indicesBegin(DIM);
 
-        if (region.indices[DIM].size() > 0) {
-            streak->origin[DIM] = region.indices[DIM][0].first;
+        if (region.indicesSize(DIM) > 0) {
+            streak->origin[DIM] = region.indicesBegin(DIM)->first;
         }
     }
 };
@@ -41,7 +41,7 @@ public:
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
-        iterators[0] = region.indices[0].begin();
+        iterators[0] = region.indicesBegin(0);
 
         if (region.indices[0].size() > 0) {
             streak->endX = region.indices[0][0].second;
@@ -61,7 +61,7 @@ public:
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
         StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region);
-        iterators[DIM] = region.indices[DIM].end();
+        iterators[DIM] = region.indicesEnd(DIM);
     }
 };
 
@@ -75,7 +75,7 @@ public:
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
-        iterators[0] = region.indices[0].end();
+        iterators[0] = region.indicesEnd(0);
     }
 };
 
@@ -538,6 +538,26 @@ public:
     inline Iterator end() const
     {
         return Iterator(endStreak());
+    }
+
+    inline size_t indicesSize(size_t dim) const
+    {
+        return indices[dim].size();
+    }
+
+    inline VecType::const_iterator indicesAt(size_t dim, size_t offset) const
+    {
+        return indices[dim].begin() + offset;
+    }
+
+    inline VecType::const_iterator indicesBegin(size_t dim) const
+    {
+        return indices[dim].begin();
+    }
+
+    inline VecType::const_iterator indicesEnd(size_t dim) const
+    {
+        return indices[dim].end();
     }
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
