@@ -19,14 +19,14 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
-    template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
-        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, vectors);
-        iterators[DIM] = vectors[DIM].begin();
+        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
+        iterators[DIM] = region.indices[DIM].begin();
 
-        if (vectors[DIM].size() > 0) {
-            streak->origin[DIM] = vectors[DIM][0].first;
+        if (region.indices[DIM].size() > 0) {
+            streak->origin[DIM] = region.indices[DIM][0].first;
         }
     }
 };
@@ -38,14 +38,14 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
-    template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
-        iterators[0] = vectors[0].begin();
+        iterators[0] = region.indices[0].begin();
 
-        if (vectors[0].size() > 0) {
-            streak->endX = vectors[0][0].second;
-            streak->origin[0] = vectors[0][0].first;
+        if (region.indices[0].size() > 0) {
+            streak->endX = region.indices[0][0].second;
+            streak->origin[0] = region.indices[0][0].first;
         }
     }
 };
@@ -57,11 +57,11 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
-    template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
-        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, vectors);
-        iterators[DIM] = vectors[DIM].end();
+        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region);
+        iterators[DIM] = region.indices[DIM].end();
     }
 };
 
@@ -72,10 +72,10 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
-    template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const VecType *vectors)
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
     {
-        iterators[0] = vectors[0].end();
+        iterators[0] = region.indices[0].end();
     }
 };
 
@@ -180,11 +180,14 @@ public:
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
-    friend class RegionStreakIterator<DIM>;
+    template<int MY_DIM> friend class RegionHelpers::StreakIteratorInitBegin;
+    template<int MY_DIM> friend class RegionHelpers::StreakIteratorInitEnd;
+
+    friend class RegionStreakIterator<DIM, Region<DIM> >;
     friend class LibGeoDecomp::RegionTest;
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-    typedef RegionStreakIterator<DIM> StreakIterator;
+    typedef RegionStreakIterator<DIM, Region<DIM> > StreakIterator;
 
     class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const Coord<DIM> >

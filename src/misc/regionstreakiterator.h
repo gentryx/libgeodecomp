@@ -42,10 +42,7 @@ public:
 
 }
 
-template<int DIM>
-class Region;
-
-template<int DIM>
+template<int DIM, typename REGION>
 class RegionStreakIterator : public std::iterator<std::forward_iterator_tag, const Streak<DIM> >
 {
 public:
@@ -55,10 +52,10 @@ public:
     typedef SuperVector<IntPair> VecType;
 
     template<template<int D> class INIT_HELPER>
-    inline RegionStreakIterator(const Region<DIM> *region, INIT_HELPER<DIM> /*unused*/) :
+    inline RegionStreakIterator(const REGION *region, INIT_HELPER<DIM> /*unused*/) :
         region(region)
     {
-        INIT_HELPER<DIM - 1>()(&streak, iterators, region->indices);
+        INIT_HELPER<DIM - 1>()(&streak, iterators, *region);
     }
 
     inline void operator++()
@@ -123,7 +120,7 @@ public:
 private:
     VecType::const_iterator iterators[DIM];
     Streak<DIM> streak;
-    const Region<DIM> *region;
+    const REGION *region;
 };
 
 }
