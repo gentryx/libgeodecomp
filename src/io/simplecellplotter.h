@@ -13,7 +13,7 @@ public:
     template<typename PAINTER>
     void operator()(
         const CELL_TYPE& cell,
-	PAINTER painter,
+	PAINTER& painter,
         const Coord<2>& cellDimensions) const
     {
         painter.fillRect(

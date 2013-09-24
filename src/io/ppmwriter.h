@@ -39,7 +39,8 @@ public:
 
         Coord<2> imageDim = plotter.calcImageDim(grid.boundingBox().dimensions);
         Image image(imageDim);
-        plotter.plotGrid(grid, ImagePainter(&image));
+        ImagePainter painter(&image);
+        plotter.plotGrid(grid, painter);
         writePPM(image, step);
     }
 

@@ -36,6 +36,11 @@ public:
                 hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
     }
 
+    const double& read() const
+    {
+        return temp;
+    }
+
     double temp;
 };
 
@@ -71,6 +76,11 @@ public:
         for (; *x < endX; ++*x) {
             target[*x].update(hood, 0);
         }
+    }
+
+    const double& read() const
+    {
+        return temp;
     }
 
     double temp;
@@ -190,6 +200,11 @@ public:
 
     }
 
+    const double& read() const
+    {
+        return temp;
+    }
+
     double temp;
 };
 
@@ -305,6 +320,11 @@ public:
         }
 
 
+    }
+
+    const double& read() const
+    {
+        return temp;
     }
 
     double temp;
@@ -504,8 +524,294 @@ public:
         return _mm_set_pd(*p, *p);
     }
 
+    const double& read() const
+    {
+        return temp;
+    }
+
     double temp;
 };
+
+void store(double *a, double v)
+{
+    *a = v;
+}
+
+template<typename VEC>
+void store(double *a, VEC v)
+{
+    v.store(a);
+}
+
+class ShortVec4xSSE
+{
+public:
+    static const int ARITY = 8;
+
+    inline ShortVec4xSSE() :
+        val1(_mm_set1_pd(0)),
+        val2(_mm_set1_pd(0)),
+        val3(_mm_set1_pd(0)),
+        val4(_mm_set1_pd(0))
+    {}
+
+    inline ShortVec4xSSE(const double *addr) :
+        val1(_mm_loadu_pd(addr + 0)),
+        val2(_mm_loadu_pd(addr + 2)),
+        val3(_mm_loadu_pd(addr + 4)),
+        val4(_mm_loadu_pd(addr + 6))
+    {}
+
+    inline ShortVec4xSSE(const double val) :
+        val1(_mm_set1_pd(val)),
+        val2(_mm_set1_pd(val)),
+        val3(_mm_set1_pd(val)),
+        val4(_mm_set1_pd(val))
+    {}
+
+    inline ShortVec4xSSE(__m128d val1, __m128d val2, __m128d val3, __m128d val4) :
+        val1(val1),
+        val2(val2),
+        val3(val3),
+        val4(val4)
+    {}
+
+    inline ShortVec4xSSE operator+(const ShortVec4xSSE a) const
+    {
+        return ShortVec4xSSE(
+            _mm_add_pd(val1, a.val1),
+            _mm_add_pd(val2, a.val2),
+            _mm_add_pd(val3, a.val3),
+            _mm_add_pd(val4, a.val4));
+    }
+
+    inline ShortVec4xSSE operator-(const ShortVec4xSSE a) const
+    {
+        return ShortVec4xSSE(
+            _mm_sub_pd(val1, a.val1),
+            _mm_sub_pd(val2, a.val2),
+            _mm_sub_pd(val3, a.val3),
+            _mm_sub_pd(val4, a.val4));
+
+    }
+
+    inline ShortVec4xSSE operator*(const ShortVec4xSSE a) const
+    {
+        return ShortVec4xSSE(
+            _mm_mul_pd(val1, a.val1),
+            _mm_mul_pd(val2, a.val2),
+            _mm_mul_pd(val3, a.val3),
+            _mm_mul_pd(val4, a.val4));
+    }
+
+    inline void store(double *a) const
+    {
+        _mm_storeu_pd(a + 0, val1);
+        _mm_storeu_pd(a + 2, val2);
+        _mm_storeu_pd(a + 4, val3);
+        _mm_storeu_pd(a + 6, val4);
+    }
+
+private:
+    __m128d val1;
+    __m128d val2;
+    __m128d val3;
+    __m128d val4;
+};
+
+// this class is a quick helper to allow us to discover the number of
+// elements in a given (short vector) float type:
+template<typename T>
+class ArityHelper;
+
+template<>
+class ArityHelper<double>
+{
+public:
+    static const int VALUE = 1;
+};
+
+template<>
+class ArityHelper<ShortVec4xSSE>
+{
+public:
+    static const int VALUE = 8;
+};
+
+template<typename DOUBLE>
+class LBMSoACell
+{
+public:
+    typedef DOUBLE Double;
+
+    class API : public APITraits::HasFixedCoordsOnlyUpdate,
+                public APITraits::HasSoA,
+                public APITraits::HasUpdateLineX,
+                public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+                public APITraits::HasCubeTopology<3>
+    {};
+
+    enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
+
+    inline explicit LBMSoACell(const double& v=1.0, const State& s=LIQUID) :
+        C(v),
+        N(0),
+        E(0),
+        W(0),
+        S(0),
+        T(0),
+        B(0),
+
+        NW(0),
+        SW(0),
+        NE(0),
+        SE(0),
+
+        TW(0),
+        BW(0),
+        TE(0),
+        BE(0),
+
+        TN(0),
+        BN(0),
+        TS(0),
+        BS(0),
+
+        density(1.0),
+        velocityX(0),
+        velocityY(0),
+        velocityZ(0),
+        state(s)
+    {
+    }
+
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineX(
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
+    {
+        updateLineXFluid(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
+    }
+
+    template<typename ACCESSOR1, typename ACCESSOR2>
+    static void updateLineXFluid(
+        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+    {
+#define GET_COMP(X, Y, Z, COMP) Double(hoodOld[FixedCoord<X, Y, Z>()].COMP())
+#define SQR(X) ((X)*(X))
+        const Double omega = 1.0/1.7;
+        const Double omega_trm = Double(1.0) - omega;
+        const Double omega_w0 = Double(3.0 * 1.0 / 3.0) * omega;
+        const Double omega_w1 = Double(3.0*1.0/18.0)*omega;
+        const Double omega_w2 = Double(3.0*1.0/36.0)*omega;
+        const Double one_third = 1.0 / 3.0;
+        const Double one_half = 0.5;
+        const Double one_point_five = 1.5;
+
+        const int x = 0;
+        const int y = 0;
+        const int z = 0;
+        Double velX, velY, velZ;
+
+        for (; *indexOld < indexEnd; *indexOld += ArityHelper<Double>::VALUE) {
+            velX  =
+                GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
+                GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
+                GET_COMP(x-1,y,z+1,BE);
+            velY  =
+                GET_COMP(x,y-1,z,N) + GET_COMP(x+1,y-1,z,NW) +
+                GET_COMP(x,y-1,z-1,TN) + GET_COMP(x,y-1,z+1,BN);
+            velZ  =
+                GET_COMP(x,y,z-1,T) + GET_COMP(x,y+1,z-1,TS) +
+                GET_COMP(x+1,y,z-1,TW);
+
+            const Double rho =
+                GET_COMP(x,y,z,C) + GET_COMP(x,y+1,z,S) +
+                GET_COMP(x+1,y,z,W) + GET_COMP(x,y,z+1,B) +
+                GET_COMP(x+1,y+1,z,SW) + GET_COMP(x,y+1,z+1,BS) +
+                GET_COMP(x+1,y,z+1,BW) + velX + velY + velZ;
+            velX  = velX
+                - GET_COMP(x+1,y,z,W)    - GET_COMP(x+1,y-1,z,NW)
+                - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x+1,y,z-1,TW)
+                - GET_COMP(x+1,y,z+1,BW);
+            velY  = velY
+                + GET_COMP(x-1,y-1,z,NE) - GET_COMP(x,y+1,z,S)
+                - GET_COMP(x+1,y+1,z,SW) - GET_COMP(x-1,y+1,z,SE)
+                - GET_COMP(x,y+1,z-1,TS) - GET_COMP(x,y+1,z+1,BS);
+            velZ  = velZ+GET_COMP(x,y-1,z-1,TN) + GET_COMP(x-1,y,z-1,TE) - GET_COMP(x,y,z+1,B) - GET_COMP(x,y-1,z+1,BN) - GET_COMP(x,y+1,z+1,BS) - GET_COMP(x+1,y,z+1,BW) - GET_COMP(x-1,y,z+1,BE);
+
+            store(&hoodNew.density(), rho);
+            store(&hoodNew.velocityX(), velX);
+            store(&hoodNew.velocityY(), velY);
+            store(&hoodNew.velocityZ(), velZ);
+
+            const Double dir_indep_trm = one_third*rho - one_half *( velX*velX + velY*velY + velZ*velZ );
+
+            store(&hoodNew.C(), omega_trm * GET_COMP(x,y,z,C) + omega_w0*( dir_indep_trm ));
+
+            store(&hoodNew.NW(), omega_trm * GET_COMP(x+1,y-1,z,NW) + omega_w2*( dir_indep_trm - ( velX-velY ) + one_point_five * SQR( velX-velY ) ));
+            store(&hoodNew.SE(), omega_trm * GET_COMP(x-1,y+1,z,SE) + omega_w2*( dir_indep_trm + ( velX-velY ) + one_point_five * SQR( velX-velY ) ));
+            store(&hoodNew.NE(), omega_trm * GET_COMP(x-1,y-1,z,NE) + omega_w2*( dir_indep_trm + ( velX+velY ) + one_point_five * SQR( velX+velY ) ));
+            store(&hoodNew.SW(), omega_trm * GET_COMP(x+1,y+1,z,SW) + omega_w2*( dir_indep_trm - ( velX+velY ) + one_point_five * SQR( velX+velY ) ));
+
+            store(&hoodNew.TW(), omega_trm * GET_COMP(x+1,y,z-1,TW) + omega_w2*( dir_indep_trm - ( velX-velZ ) + one_point_five * SQR( velX-velZ ) ));
+            store(&hoodNew.BE(), omega_trm * GET_COMP(x-1,y,z+1,BE) + omega_w2*( dir_indep_trm + ( velX-velZ ) + one_point_five * SQR( velX-velZ ) ));
+            store(&hoodNew.TE(), omega_trm * GET_COMP(x-1,y,z-1,TE) + omega_w2*( dir_indep_trm + ( velX+velZ ) + one_point_five * SQR( velX+velZ ) ));
+            store(&hoodNew.BW(), omega_trm * GET_COMP(x+1,y,z+1,BW) + omega_w2*( dir_indep_trm - ( velX+velZ ) + one_point_five * SQR( velX+velZ ) ));
+
+            store(&hoodNew.TS(), omega_trm * GET_COMP(x,y+1,z-1,TS) + omega_w2*( dir_indep_trm - ( velY-velZ ) + one_point_five * SQR( velY-velZ ) ));
+            store(&hoodNew.BN(), omega_trm * GET_COMP(x,y-1,z+1,BN) + omega_w2*( dir_indep_trm + ( velY-velZ ) + one_point_five * SQR( velY-velZ ) ));
+            store(&hoodNew.TN(), omega_trm * GET_COMP(x,y-1,z-1,TN) + omega_w2*( dir_indep_trm + ( velY+velZ ) + one_point_five * SQR( velY+velZ ) ));
+            store(&hoodNew.BS(), omega_trm * GET_COMP(x,y+1,z+1,BS) + omega_w2*( dir_indep_trm - ( velY+velZ ) + one_point_five * SQR( velY+velZ ) ));
+
+            store(&hoodNew.N(), omega_trm * GET_COMP(x,y-1,z,N) + omega_w1*( dir_indep_trm + velY + one_point_five * SQR(velY)));
+            store(&hoodNew.S(), omega_trm * GET_COMP(x,y+1,z,S) + omega_w1*( dir_indep_trm - velY + one_point_five * SQR(velY)));
+            store(&hoodNew.E(), omega_trm * GET_COMP(x-1,y,z,E) + omega_w1*( dir_indep_trm + velX + one_point_five * SQR(velX)));
+            store(&hoodNew.W(), omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + one_point_five * SQR(velX)));
+            store(&hoodNew.T(), omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + one_point_five * SQR(velZ)));
+            store(&hoodNew.B(), omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
+
+            *indexNew += ArityHelper<Double>::VALUE;
+        }
+    }
+
+    const double& read() const
+    {
+        return C;
+    }
+
+    double C;
+    double N;
+    double E;
+    double W;
+    double S;
+    double T;
+    double B;
+
+    double NW;
+    double SW;
+    double NE;
+    double SE;
+
+    double TW;
+    double BW;
+    double TE;
+    double BE;
+
+    double TN;
+    double BN;
+    double TS;
+    double BS;
+
+    double density;
+    double velocityX;
+    double velocityY;
+    double velocityZ;
+    State state;
+};
+
+LIBFLATARRAY_REGISTER_SOA(LBMSoACell<double>, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS))((double)(density))((double)(velocityX))((double)(velocityY))((double)(velocityZ))((LBMSoACell<double>::State)(state)))
+
+LIBFLATARRAY_REGISTER_SOA(LBMSoACell<ShortVec4xSSE>, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS))((double)(density))((double)(velocityX))((double)(velocityY))((double)(velocityZ))((LBMSoACell<ShortVec4xSSE>::State)(state)))
 
 template<class CELL>
 class MonoInitializer : public SimpleInitializer<CELL>
@@ -532,13 +838,13 @@ double singleBenchmark(Coord<3> dim)
 
     SerialSimulator<CELL> sim(
         new MonoInitializer<CELL>(dim, repeats));
-    sim.addWriter(new TracingWriter<CELL>(500, repeats));
+    // sim.addWriter(new TracingWriter<CELL>(500, repeats));
 
     long long tBegin= Chronometer::timeUSec();
     sim.run();
     long long tEnd = Chronometer::timeUSec();
 
-    if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
+    if (sim.getGrid()->get(Coord<3>(1, 1, 1)).read() == 4711) {
         std::cout << "this statement just serves to prevent the compiler from"
                   << "optimizing away the loops above\n";
     }
@@ -551,7 +857,7 @@ double singleBenchmark(Coord<3> dim)
 }
 
 template<class CELL>
-void benchmark(std::string name)
+void benchmark(std::string name, SuperVector<Coord<3> > sizes)
 {
     std::cout << "Benchmarking " << name << "\n";
 
@@ -560,15 +866,12 @@ void benchmark(std::string name)
     std::ofstream outfile(fileName.str().c_str());
     outfile << "# BENCHMARK_ID MAXTRIX_SIZE GLUPS\n";
 
-    int maxI = 24;
+    int maxI = sizes.size();
 
     for (int i = 0; i < maxI; ++i) {
-        int dim = std::pow(2, 4 + 0.25 * i);
-        if (dim % 2) {
-            ++dim;
-        }
-
-        double glups = singleBenchmark<CELL>(Coord<3>::diagonal(dim));
+        Coord<3> c = sizes[i];
+        int dim = c.x();
+        double glups = singleBenchmark<CELL>(c);
         outfile << dim << " " << glups << "\n";
 
         int percent = 100 * i / (maxI - 1);
@@ -585,10 +888,31 @@ void benchmark(std::string name)
 
 int main(int argc, char **argv)
 {
-    benchmark<JacobiCellSimple           >("JacobiCellSimple");
-    benchmark<JacobiCellMagic            >("JacobiCellMagic");
-    benchmark<JacobiCellStraightforward  >("JacobiCellStraightforward");
-    benchmark<JacobiCellStraightforwardNT>("JacobiCellStraightforwardNT");
-    benchmark<JacobiCellStreakUpdate     >("JacobiCellStreakUpdate");
+    SuperVector<Coord<3> > sizesLBM;
+    sizesLBM << Coord<3>(22, 22, 22)
+             << Coord<3>(64, 64, 64)
+             << Coord<3>(68, 68, 68)
+             << Coord<3>(106, 106, 106)
+             << Coord<3>(128, 128, 128)
+             << Coord<3>(160, 160, 160);
+
+    SuperVector<Coord<3> > sizesJacobi;
+    for (int i = 0; i < 21; ++i) {
+        int dim = std::pow(2, 4 + 0.25 * i);
+        if (dim % 2) {
+            ++dim;
+        }
+
+        sizesJacobi << Coord<3>::diagonal(dim);
+    }
+
+    benchmark<JacobiCellSimple           >("JacobiCellSimple", sizesJacobi);
+    benchmark<JacobiCellMagic            >("JacobiCellMagic", sizesJacobi);
+    benchmark<JacobiCellStraightforward  >("JacobiCellStraightforward", sizesJacobi);
+    benchmark<JacobiCellStraightforwardNT>("JacobiCellStraightforwardNT", sizesJacobi);
+    benchmark<JacobiCellStreakUpdate     >("JacobiCellStreakUpdate", sizesJacobi);
+    benchmark<LBMSoACell<double>            >("LBMSoACell<double>", sizesLBM);
+    benchmark<LBMSoACell<ShortVec4xSSE>     >("LBMSoACell<ShortVec4xSSE>", sizesLBM);
+
     return 0;
 }
