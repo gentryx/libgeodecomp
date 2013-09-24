@@ -28,9 +28,11 @@ public:
     TracingWriter(
         const unsigned period,
         const unsigned maxSteps,
+        int outputRank = -1,
         std::ostream& stream = std::cerr) :
         Writer<CELL_TYPE>("", period),
         ParallelWriter<CELL_TYPE>("", period),
+        outputRank(outputRank),
         stream(stream),
         lastStep(0),
         maxSteps(maxSteps)
@@ -39,7 +41,7 @@ public:
 
     ParallelWriter<CELL_TYPE> * clone()
     {
-        return new TracingWriter(Writer<CELL_TYPE>::period, maxSteps);
+        return new TracingWriter(Writer<CELL_TYPE>::period, maxSteps, outputRank);
     }
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
@@ -56,12 +58,13 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        if (lastCall && rank == 0) {
+        if (lastCall && (outputRank == -1 || outputRank == rank)) {
             stepFinished(step, globalDimensions, event);
         }
     }
 
 private:
+    int outputRank;
     std::ostream& stream;
     Time startTime;
     unsigned lastStep;
@@ -73,6 +76,7 @@ private:
     {
         ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
         ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
+        ar & outputRank;
         ar & lastStep;
         ar & maxSteps;
     }

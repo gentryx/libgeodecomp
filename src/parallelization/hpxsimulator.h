@@ -210,8 +210,7 @@ public:
             HiParSimulator::PartitionManager<Topology>
             PartitionManagerType;
 
-        for(std::size_t rank = rank_start; rank != rank_end; ++rank)
-        {
+        for(std::size_t rank = rank_start; rank != rank_end; ++rank) {
             PartitionManagerType partitionManager;
 
             boost::shared_ptr<PARTITION> partition(
@@ -247,8 +246,7 @@ public:
         std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
 
         SuperVector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
-        for(std::size_t i = 0; i < numPartitions; i += steps)
-        {
+        for(std::size_t i = 0; i < numPartitions; i += steps) {
             boundingBoxesFutures.push_back(
                 hpx::async(
                     HPX_STD_BIND(

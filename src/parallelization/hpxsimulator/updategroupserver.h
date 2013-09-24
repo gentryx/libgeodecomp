@@ -214,8 +214,7 @@ public:
         // initialization as they're only really needed when the next
         // ghostzone generation is being received.
         typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
-        for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it)
-        {
+        for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it) {
             addPatchProvider(it->second, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
             patchLinks << it->second;
 
@@ -324,13 +323,11 @@ public:
     {
         typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
         patchlinkIter = patchlinkProviderMap.find(srcRank);
-        if(patchlinkIter == patchlinkProviderMap.end())
-        {
+        if(patchlinkIter == patchlinkProviderMap.end()) {
             std::cerr << rank << " setting outer ghostzone from unknown rank: " << srcRank << "\ngot these ranks:\n";
             typedef std::pair<std::size_t, PatchLinkProviderPtr> pair_type;
             /*
-            BOOST_FOREACH(const pair_type& p, patchlinkProviderMap)
-            {
+            BOOST_FOREACH(const pair_type& p, patchlinkProviderMap) {
                 std::cerr << rank << " " << p.first << "\n";
             }
             */
@@ -383,21 +380,17 @@ private:
     ClientType getUpdateGroup(std::size_t dstRank)
     {
         typename std::map<std::size_t, ClientType>::iterator it = updateGroups.find(dstRank);
-        if(it == updateGroups.end())
-        {
+        if(it == updateGroups.end()) {
             hpx::id_type updateGroupId;
             std::string name = "LibGeoDecomp.UpdateGroup.";
             name += boost::lexical_cast<std::string>(dstRank);
-            while(true)
-            {
+            while(true) {
                 hpx::agas::resolve_name(name, updateGroupId);
 
-                if(!updateGroupId)
-                {
+                if(!updateGroupId) {
                     hpx::this_thread::suspend(boost::posix_time::seconds(1));
                 }
-                else
-                {
+                else {
                     break;
                 }
             }

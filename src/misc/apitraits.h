@@ -214,8 +214,7 @@ public:
     {};
 
 
-    // determine whether a cell supports SoA (Struct of Arrays)
-    // storage via LibFlatArray.
+    // determine whether a cell supports custom speeds
     template<typename CELL, typename HAS_SPEED = void>
     class SelectSpeed
     {
