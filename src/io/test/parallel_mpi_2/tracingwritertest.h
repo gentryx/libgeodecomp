@@ -22,18 +22,20 @@ public:
             1000);
     }
 
-
-    void tearDown() {
+    void tearDown()
+    {
         delete simulator;
     }
-
 
     void testOutputToStream()
     {
         std::ostringstream output;
         simulator->addWriter(
             new TracingWriter<TestCell<2> >(
-                1, simulator->getInitializer()->maxSteps(), output));
+                1,
+                simulator->getInitializer()->maxSteps(),
+                -1,
+                output));
 
         simulator->run();
 

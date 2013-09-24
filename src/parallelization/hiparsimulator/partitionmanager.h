@@ -69,7 +69,12 @@ public:
         CoordBox<DIM> ownBoundingBox = ownExpandedRegion().boundingBox();
 
         for (unsigned i = 0; i < boundingBoxes.size(); ++i) {
-            if (i != rank) {
+            if (i != rank &&
+                boundingBoxes[i].intersects(ownBoundingBox) &&
+                (!(getRegion(rank, ghostZoneWidth) &
+                   getRegion(i,    0)).empty() ||
+                 !(getRegion(i,    ghostZoneWidth) &
+                   getRegion(rank, 0)).empty())) {
                 intersect(i);
             }
         }
@@ -81,14 +86,14 @@ public:
         for (typename RegionVecMap::iterator i = outerGhostZoneFragments.begin();
              i != outerGhostZoneFragments.end();
              ++i) {
-            if (i->first != OUTGROUP && !i->second.empty()) {
+            if (i->first != OUTGROUP) {
                 outer -= i->second.back();
             }
         }
         for (typename RegionVecMap::iterator i = innerGhostZoneFragments.begin();
              i != innerGhostZoneFragments.end();
              ++i) {
-            if (i->first != OUTGROUP && !i->second.empty()) {
+            if (i->first != OUTGROUP) {
                 inner -= i->second.back();
             }
         }
@@ -240,22 +245,17 @@ private:
     {
         SuperVector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
         SuperVector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];
-        outerGhosts.reserve(getGhostZoneWidth() + 1);
-        innerGhosts.reserve(getGhostZoneWidth() + 1);
+        outerGhosts.resize(getGhostZoneWidth() + 1);
+        innerGhosts.resize(getGhostZoneWidth() + 1);
         for (unsigned i = 0; i <= getGhostZoneWidth(); ++i) {
-            const Region<DIM>& outerGhost = getRegion(rank, i) & getRegion(node, 0);
-            if(!outerGhost.empty()) {
-                outerGhosts << outerGhost;
-            }
-            const Region<DIM>& innerGhost = getRegion(rank, 0) & getRegion(node, i);
-            if(!innerGhost.empty()) {
-                innerGhosts << innerGhost;
-            }
+            outerGhosts[i] = getRegion(rank, i) & getRegion(node, 0);
+            innerGhosts[i] = getRegion(rank, 0) & getRegion(node, i);
         }
     }
 };
 
 }
+
 }
 
 #endif
