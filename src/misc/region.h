@@ -43,6 +43,36 @@ protected:
 };
 
 template<int DIM>
+class ConstructStreakFromIterators
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    template<int STREAK_DIM>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators)
+    {
+        ConstructStreakFromIterators<DIM - 1>()(streak, iterators);
+        streak->origin[DIM] = iterators[DIM]->first;
+    }
+};
+
+template<>
+class ConstructStreakFromIterators<0>
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    template<int STREAK_DIM>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators)
+    {
+        streak->origin[0] = iterators[0]->first;
+        streak->endX      = iterators[0]->second;
+    }
+};
+
+template<int DIM>
 class StreakIteratorInitSingleOffset
 {
 public:
@@ -67,11 +97,6 @@ public:
         iterators[DIM] = upperBound - 1;
         newOffset =  iterators[DIM] - region.indicesBegin(DIM);
 
-        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
-        if (region.indicesSize(DIM) > newOffset) {
-            streak->origin[DIM] = iterators[DIM]->first;
-        }
-
         return newOffset;
     }
 
@@ -94,13 +119,30 @@ public:
     inline size_t operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesBegin(0) + offset;
-        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
-        if (region.indicesSize(0) > offset) {
-            streak->endX = iterators[0]->second;
-            streak->origin[0] = iterators[0]->first;
-        }
-
         return offset;
+    }
+
+private:
+    const size_t& offset;
+};
+
+template<int DIM>
+class StreakIteratorInitSingleOffsetWrapper
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    StreakIteratorInitSingleOffsetWrapper(const size_t& offset) :
+        offset(offset)
+    {}
+
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    {
+        StreakIteratorInitSingleOffset<DIM> delegate(offset);
+        delegate(streak, iterators, region);
+        ConstructStreakFromIterators<DIM>()(streak, iterators);
     }
 
 private:
@@ -121,14 +163,10 @@ public:
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
-        StreakIteratorInitOffsets<DIM - 1, COORD_DIM> delegate(offsets);
-        delegate(streak, iterators, region);
         iterators[DIM] = region.indicesBegin(DIM) + offsets[DIM];
 
-        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
-        if (region.indicesSize(DIM) > offsets[DIM]) {
-            streak->origin[DIM] = iterators[DIM]->first;
-        }
+        StreakIteratorInitOffsets<DIM - 1, COORD_DIM> delegate(offsets);
+        delegate(streak, iterators, region);
     }
 
 private:
@@ -151,10 +189,8 @@ public:
     {
         iterators[0] = region.indicesBegin(0) + offsets[0];
 
-        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
         if (region.indicesSize(0) > offsets[0]) {
-            streak->endX = iterators[0]->second;
-            streak->origin[0] = iterators[0]->first;
+            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators);
         }
     }
 
@@ -172,13 +208,8 @@ public:
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
-        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
         iterators[DIM] = region.indicesBegin(DIM);
-
-        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
-        if (region.indicesSize(DIM) > 0) {
-            streak->origin[DIM] = region.indicesBegin(DIM)->first;
-        }
+        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
     }
 };
 
@@ -194,10 +225,8 @@ public:
     {
         iterators[0] = region.indicesBegin(0);
 
-        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
         if (region.indicesSize(0) > 0) {
-            streak->endX = region.indicesBegin(0)->second;
-            streak->origin[0] = region.indicesBegin(0)->first;
+            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators);
         }
     }
 };
@@ -656,7 +685,7 @@ public:
      */
     inline StreakIterator operator[](size_t offset) const
     {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffset<DIM - 1>(offset));
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
     }
 
     inline Iterator begin() const
