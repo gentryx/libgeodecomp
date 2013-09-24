@@ -90,7 +90,7 @@ public:
         // Registering name.
         std::string name = "LibGeoDecomp.UpdateGroup.";
         name += boost::lexical_cast<std::string>(rank);
-        hpx::agas::register_name(name, this->get_gid());
+        hpx::agas::register_name(name, this->get_gid()).get();
         ////////////////////////////////////////////////////////////////////////
 
         partitionManager.reset(new PartitionManagerType());
@@ -385,7 +385,7 @@ private:
             std::string name = "LibGeoDecomp.UpdateGroup.";
             name += boost::lexical_cast<std::string>(dstRank);
             while(true) {
-                hpx::agas::resolve_name(name, updateGroupId);
+                updateGroupId = hpx::agas::resolve_name(name).get();
 
                 if(!updateGroupId) {
                     hpx::this_thread::suspend(boost::posix_time::seconds(1));
