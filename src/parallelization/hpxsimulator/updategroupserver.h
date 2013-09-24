@@ -111,7 +111,7 @@ public:
             );
 
         partitionManager->resetGhostZones(initData.boundingBoxes);
-        
+
         const RegionVecMap& outerMap = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = outerMap.begin(); i != outerMap.end(); ++i) {
             if (!i->second.empty() && !i->second.back().empty()) {
@@ -178,11 +178,11 @@ public:
         PatchAccepterVec patchAcceptersInner;
 
         // Convert writers to patch accepters
-        /*
         BOOST_FOREACH(const typename WriterVector::value_type& writer, writers) {
+            boost::shared_ptr<ParallelWriter<CELL_TYPE> > writerPtr(writer->clone());
             PatchAccepterPtr adapterGhost(
                 new ParallelWriterAdapterType(
-                    boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
+                    writerPtr,
                     initializer->startStep(),
                     initializer->maxSteps(),
                     initializer->gridDimensions(),
@@ -190,7 +190,7 @@ public:
                     false));
             PatchAccepterPtr adapterInnerSet(
                 new ParallelWriterAdapterType(
-                    boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer->clone()),
+                    writerPtr,
                     initializer->startStep(),
                     initializer->maxSteps(),
                     initializer->gridDimensions(),
@@ -203,7 +203,6 @@ public:
             patchAcceptersGhost.push_back(adapterGhost);
             patchAcceptersInner.push_back(adapterInnerSet);
         }
-        */
 
         stepper.reset(new STEPPER(
                           partitionManager,
@@ -230,7 +229,6 @@ public:
 
 
         // Convert steerer to patch accepters
-        /*
         BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
             // two adapters needed, just as for the writers
             PatchProviderPtr adapterGhost(
@@ -256,7 +254,6 @@ public:
             addPatchProvider(adapterGhost, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
             addPatchProvider(adapterInnerSet, HiParSimulator::Stepper<CELL_TYPE>::INNER_SET);
         }
-        */
 
         initEvents();
     }
@@ -357,7 +354,7 @@ public:
 
     double speed()
     {
-        return getCellSpeed(APITraits::SelectSpeed<CELL_TYPE>::Value());
+        return getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, speed, SpeedAction);
 

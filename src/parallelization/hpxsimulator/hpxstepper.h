@@ -35,7 +35,7 @@ public:
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
     using Stepper<CELL_TYPE>::partitionManager;
-    
+
     using Stepper<CELL_TYPE>::computeTimeInner;
     using Stepper<CELL_TYPE>::computeTimeGhost;
     using Stepper<CELL_TYPE>::patchAcceptersTime;
@@ -101,7 +101,7 @@ private:
     {
         timer.restart();
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        const Region<DIM>& region = partitionManager->innerSet(index);
+        Region<DIM> region = partitionManager->innerSet(index);
 
         std::vector<hpx::future<void> > updateFutures;
         updateFutures.reserve(region.numStreaks());
@@ -138,7 +138,7 @@ private:
             curStep++;
         }
 
-        return 
+        return
             hpx::when_all(updateFutures).then(
                 hpx::util::bind(&HpxStepper::updateGhostZones, this, region)
             );
@@ -294,7 +294,7 @@ private:
 
             timer.restart();
             const Region<DIM>& region = partitionManager->rim(t + 1);
-            
+
             std::vector<hpx::future<void> > updateFutures;
             updateFutures.reserve(region.numStreaks());
             for (typename Region<DIM>::StreakIterator i = region.beginStreak();

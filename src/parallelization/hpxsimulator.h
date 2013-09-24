@@ -72,6 +72,10 @@
         BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), SpeedAction)          \
     );                                                                          \
+    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), StopAction)           \
+    );                                                                          \
 /**/
 
 #define LIBGEODECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                    \
@@ -128,6 +132,10 @@
         BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
         BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), SpeedAction)          \
     );                                                                          \
+    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
+        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
+        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), StopAction)           \
+    );                                                                          \
 /**/
 
 namespace LibGeoDecomp {
@@ -145,7 +153,7 @@ class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 public:
     friend class HpxSimulatorTest;
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
-    using typename DistributedSimulator<CELL_TYPE>::Topology;
+    typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
@@ -171,7 +179,7 @@ public:
             updateGroupsIds.push_back(ug.gid());
         }
     }
-    
+
     inline HpxSimulator(
         Initializer<CELL_TYPE> *initializer,
         const hpx::util::function<std::size_t()>& numUpdateGroups,
@@ -205,7 +213,7 @@ public:
         for(std::size_t rank = rank_start; rank != rank_end; ++rank)
         {
             PartitionManagerType partitionManager;
-            
+
             boost::shared_ptr<PARTITION> partition(
                 new PARTITION(
                     box.origin,
@@ -222,7 +230,7 @@ public:
             boundingBoxes[rank] = boost::move(partitionManager.ownRegion().boundingBox());
         }
     }
-    
+
     void init()
     {
         if(initialized) {
@@ -237,7 +245,7 @@ public:
         std::vector<hpx::future<void> > boundingBoxesFutures;
         boundingBoxesFutures.reserve(numPartitions);
         std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
-        
+
         SuperVector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
         for(std::size_t i = 0; i < numPartitions; i += steps)
         {
@@ -298,7 +306,7 @@ public:
     {
         hpx::wait(
             hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
-                updateGroupsIds,
+                updateGroupsIds
             )
         );
     }
