@@ -56,7 +56,7 @@ public:
 
         // Set up a striping partition. We'll take rank 1, placing us
         // between the two others 0 and 2.
-        SuperVector<long> weights(3);
+        SuperVector<size_t> weights(3);
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];

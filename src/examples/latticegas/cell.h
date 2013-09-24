@@ -323,8 +323,8 @@ public:
                 targetValid = true;
             if ((cCell.state == solid3) && (targetCell.state == solid2))
                 targetValid = true;
-            if (targetValid)
-                printf("boom\n");
+            // if (targetValid)
+            //     printf("boom\n");
 
             if (particles[target] != 0)
                 targetValid = false;

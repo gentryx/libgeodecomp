@@ -13,18 +13,18 @@ class RecursiveBisectionPartition : public Partition<DIM>
 {
     friend class RecursiveBisectionPartitionTest;
 public:
-    typedef SuperVector<std::size_t> LongVec;
+    typedef SuperVector<std::size_t> SizeTVec;
 
     inline RecursiveBisectionPartition(
-        const Coord<DIM>& _origin = Coord<DIM>(),
-        const Coord<DIM>& _dimensions = Coord<DIM>(),
+        const Coord<DIM>& origin = Coord<DIM>(),
+        const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
-        const LongVec weights = LongVec(),
-        const Coord<DIM>& _dimWeights = Coord<DIM>::diagonal(1)) :
+        const SizeTVec weights = SizeTVec(),
+        const Coord<DIM>& dimWeights = Coord<DIM>::diagonal(1)) :
         Partition<DIM>(0, weights),
-        origin(_origin),
-        dimensions(_dimensions),
-        dimWeights(_dimWeights)
+        origin(origin),
+        dimensions(dimensions),
+        dimWeights(dimWeights)
     {}
 
     inline Region<DIM> getRegion(const std::size_t i) const
@@ -54,9 +54,9 @@ private:
      * CoordBox box.
      */
     CoordBox<DIM> searchNodeCuboid(
-        const LongVec::const_iterator& begin,
-        const LongVec::const_iterator& end,
-        const LongVec::const_iterator& node,
+        const SizeTVec::const_iterator& begin,
+        const SizeTVec::const_iterator& end,
+        const SizeTVec::const_iterator& node,
         const CoordBox<DIM>& box) const
     {
         if (std::distance(begin, end) == 1) {
@@ -65,13 +65,13 @@ private:
 
         std::size_t halfWeight = (*begin + *end) / 2;
 
-        LongVec::const_iterator approxMiddle = std::lower_bound(
+        SizeTVec::const_iterator approxMiddle = std::lower_bound(
             begin,
             end,
             halfWeight);
         if (*approxMiddle != halfWeight) {
             std::size_t delta1 = *approxMiddle - halfWeight;
-            LongVec::const_iterator predecessor = approxMiddle - 1;
+            SizeTVec::const_iterator predecessor = approxMiddle - 1;
             std::size_t delta2 = halfWeight - *predecessor;
             if (delta2 < delta1) {
                 approxMiddle = predecessor;

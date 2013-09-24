@@ -25,7 +25,7 @@ public:
         // the StripingPartition.
         offset = 130 * dimensions.x();
         ghostZoneWidth = 6;
-        weights = SuperVector<long>(layer.size(), 30 * dimensions.x());
+        weights = SuperVector<size_t>(layer.size(), 30 * dimensions.x());
         weights[3] = 40 * dimensions.x();
         weights[5] = 20 * dimensions.x();
         // sanity check
@@ -159,7 +159,7 @@ private:
     PartitionManager<Topologies::Cube<2>::Topology> manager;
     boost::shared_ptr<StripingPartition<2> > partition;
     Coord<2> dimensions;
-    SuperVector<long> weights;
+    SuperVector<size_t> weights;
     unsigned offset;
     unsigned ghostZoneWidth;
 

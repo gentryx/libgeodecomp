@@ -187,7 +187,7 @@ private:
 
     SuperVector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
     {
-        double mySpeed = getCellSpeed(APITraits::SelectSpeed<CELL_TYPE>::Value());
+        double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
         SuperVector<double> speeds = mpiLayer.allGather(mySpeed);
         double sum = speeds.sum();
         SuperVector<std::size_t> ret(size);

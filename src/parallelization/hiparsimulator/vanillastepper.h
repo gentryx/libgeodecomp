@@ -5,7 +5,9 @@
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
+#ifdef LIBGEODECOMP_FEATURE_HPX
 #include <hpx/util/high_resolution_timer.hpp>
+#endif
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
@@ -34,7 +36,7 @@ public:
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
     using Stepper<CELL_TYPE>::partitionManager;
-    
+
     using Stepper<CELL_TYPE>::computeTimeInner;
     using Stepper<CELL_TYPE>::computeTimeGhost;
     using Stepper<CELL_TYPE>::patchAcceptersTime;
