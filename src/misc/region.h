@@ -43,9 +43,9 @@ public:
     {
         iterators[0] = region.indicesBegin(0);
 
-        if (region.indices[0].size() > 0) {
-            streak->endX = region.indices[0][0].second;
-            streak->origin[0] = region.indices[0][0].first;
+        if (region.indicesSize(0) > 0) {
+            streak->endX = region.indicesBegin(0)->second;
+            streak->origin[0] = region.indicesBegin(0)->first;
         }
     }
 };
