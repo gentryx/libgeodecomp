@@ -245,9 +245,9 @@ public:
             UpdateFunctor<TestCellType>()(region, Coord<3>(), Coord<3>(), *gridOld, gridNew, s);
             int cycle = init.startStep() * TestCellType::NANO_STEPS + s;
 
-            TS_ASSERT_TEST_GRID2(GridType, *gridOld, cycle, typename);
+            TS_ASSERT_TEST_GRID2(GridType, *gridOld, cycle, );
             cycle += 1;
-            TS_ASSERT_TEST_GRID2(GridType, *gridNew, cycle, typename);
+            TS_ASSERT_TEST_GRID2(GridType, *gridNew, cycle, );
 
             std::swap(gridOld, gridNew);
         }
