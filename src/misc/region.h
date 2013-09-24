@@ -12,6 +12,61 @@ class RegionTest;
 
 namespace RegionHelpers {
 
+template<int DIM, int COORD_DIM>
+class StreakIteratorInitOffsets
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+        offsets(offsets)
+    {}
+
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    {
+        StreakIteratorInitOffsets<DIM - 1, COORD_DIM> delegate(offsets);
+        delegate(streak, iterators, region);
+        iterators[DIM] = region.indicesBegin(DIM) + offsets[DIM];
+
+        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
+        if (region.indicesSize(DIM) > offsets[DIM]) {
+            streak->origin[DIM] = iterators[DIM]->first;
+        }
+    }
+
+private:
+    const Coord<COORD_DIM>& offsets;
+};
+
+template<int COORD_DIM>
+class StreakIteratorInitOffsets<0, COORD_DIM>
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef SuperVector<IntPair> VecType;
+
+    StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+        offsets(offsets)
+    {}
+
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    {
+        iterators[0] = region.indicesBegin(0) + offsets[0];
+
+        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
+        if (region.indicesSize(0) > offsets[0]) {
+            streak->endX = iterators[0]->second;
+            streak->origin[0] = iterators[0]->first;
+        }
+    }
+
+private:
+    const Coord<COORD_DIM>& offsets;
+};
+
 template<int DIM>
 class StreakIteratorInitBegin
 {
@@ -20,11 +75,12 @@ public:
     typedef SuperVector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
         StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
         iterators[DIM] = region.indicesBegin(DIM);
 
+        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
         if (region.indicesSize(DIM) > 0) {
             streak->origin[DIM] = region.indicesBegin(DIM)->first;
         }
@@ -39,10 +95,11 @@ public:
     typedef SuperVector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesBegin(0);
 
+        // fixme: can't we get rid of having 3 if conditions? (if one is true, the other should be true, too)
         if (region.indicesSize(0) > 0) {
             streak->endX = region.indicesBegin(0)->second;
             streak->origin[0] = region.indicesBegin(0)->first;
@@ -58,7 +115,7 @@ public:
     typedef SuperVector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
         StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region);
         iterators[DIM] = region.indicesEnd(DIM);
@@ -73,7 +130,7 @@ public:
     typedef SuperVector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region)
+    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesEnd(0);
     }
@@ -510,21 +567,32 @@ public:
 
     inline StreakIterator beginStreak() const
     {
-        StreakIterator ret(this, RegionHelpers::StreakIteratorInitBegin<DIM>());
-        return ret;
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>());
     }
 
     inline StreakIterator endStreak() const
     {
-        StreakIterator ret(this, RegionHelpers::StreakIteratorInitEnd<DIM>());
-        return ret;
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>());
     }
 
+    /**
+     * Returns an iterator whose internal iterators are set to the
+     * given offsets from the corresponding array starts. Runs in O(1)
+     * time.
+     */
+    inline StreakIterator operator[](const Coord<DIM>& offsets) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitOffsets<DIM - 1, DIM>(offsets));
+    }
+
+    /**
+     * Yields an iterator to the pos'th Streak in the Region. Runs in
+     * O(log n) time.
+     */
     inline StreakIterator operator[](size_t pos) const
     {
         // fixme:
-        StreakIterator ret(this, RegionHelpers::StreakIteratorInitBegin<DIM>());
-        return ret;
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>());
     }
 
     inline Iterator begin() const

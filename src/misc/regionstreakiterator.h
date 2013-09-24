@@ -50,11 +50,11 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
 
-    template<template<int D> class INIT_HELPER>
-    inline RegionStreakIterator(const REGION *region, INIT_HELPER<DIM> /*unused*/) :
+    template<typename INIT_HELPER>
+    inline RegionStreakIterator(const REGION *region, INIT_HELPER initHelper) :
         region(region)
     {
-        INIT_HELPER<DIM - 1>()(&streak, iterators, *region);
+        initHelper(&streak, iterators, *region);
     }
 
     inline void operator++()

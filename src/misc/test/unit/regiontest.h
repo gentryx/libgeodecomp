@@ -14,7 +14,8 @@ class RegionTest : public CxxTest::TestSuite
 {
 public:
     typedef SuperVector<Coord<2> > CoordVector;
-    typedef std::pair<int, int> IntPair;
+    typedef Region<1>::IntPair IntPair;
+    typedef Region<1>::VecType VecType;
 
     void setUp()
     {
@@ -1215,6 +1216,43 @@ public:
         }
 
         TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testRandomStreakIteratorAccess()
+    {
+        Region<3> r;
+        for (int z = 0; z < 5; ++z) {
+            for (int y = 0; y < 4; ++y) {
+                for (int x = 0; x < (2 + y); ++x) {
+                    r << Streak<3>(Coord<3>(10 * x, y, z), 10 * x + 4);
+                }
+            }
+        }
+
+        Region<3>::StreakIterator expected = r.beginStreak();
+        // cursor will provide us with the initial offsets from which
+        // we'll construct the iterators. we need to drag it along
+        // with the loops b/c otherwise these is no knowing of how to
+        // set the individual offsets.
+        Coord<3> cursor(0, 0, 0);
+
+        for (int z = 0; z < 5; ++z) {
+            for (int y = 0; y < 4; ++y) {
+                for (int x = 0; x < (2 + y); ++x) {
+                    Region<3>::StreakIterator actual = r[cursor];
+                    TS_ASSERT_EQUALS(*actual, *expected);
+
+                    ++expected;
+
+                    ++actual;
+                    TS_ASSERT_EQUALS(*actual, *expected);
+
+                    ++cursor.x();
+                }
+                ++cursor.y();
+            }
+            ++cursor.z();
+        }
     }
 
 private:
