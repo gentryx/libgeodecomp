@@ -1,48 +1,16 @@
 #ifndef LIBGEODECOMP_MISC_REGION_H
 #define LIBGEODECOMP_MISC_REGION_H
 
-#include <algorithm>
-
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/supermap.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/regionstreakiterator.h>
 
 namespace LibGeoDecomp {
 
 class RegionTest;
 
 namespace RegionHelpers {
-
-template<int DIM>
-class StreakIteratorCompareIterators
-{
-public:
-    typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
-
-    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
-    {
-        if (a[DIM] != b[DIM]) {
-            return false;
-        }
-
-        return StreakIteratorCompareIterators<DIM - 1>()(a, b);
-    }
-};
-
-template<>
-class StreakIteratorCompareIterators<0>
-{
-public:
-    typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
-
-    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
-    {
-        return a[0] == b[0];
-    }
-};
 
 template<int DIM>
 class StreakIteratorInitBegin
@@ -117,6 +85,11 @@ public:
     static inline bool pairCompareFirst(const std::pair<int, int>& a, const std::pair<int, int>& b)
     {
         return a.first < b.first;
+    }
+
+    static inline bool pairCompareSecond(const std::pair<int, int>& a, const std::pair<int, int>& b)
+    {
+        return a.second < b.second;
     }
 
 protected:
@@ -207,99 +180,20 @@ public:
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
+    friend class RegionStreakIterator<DIM>;
     friend class LibGeoDecomp::RegionTest;
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
-
-    class StreakIterator : public std::iterator<std::forward_iterator_tag, const Streak<DIM> >
-    {
-        template<int> friend class InitIterators;
-        template<int> friend class Region;
-    public:
-        typedef std::pair<int, int> IntPair;
-        typedef SuperVector<IntPair> VecType;
-
-        template<template<int D> class INIT_HELPER>
-        inline StreakIterator(const Region *_region, INIT_HELPER<DIM> /*unused*/) :
-            region(_region)
-        {
-            INIT_HELPER<DIM - 1>()(&streak, iterators, region->indices);
-        }
-
-        inline void operator++()
-        {
-            ++iterators[0];
-            if (iterators[0] == region->indices[0].end()) {
-                for (int i = 1; i < DIM; ++i) {
-                    iterators[i] = region->indices[i].end();
-                }
-                return;
-            } else {
-                streak.origin[0] = iterators[0]->first;
-                streak.endX = iterators[0]->second;
-            }
-
-            for (int i = 1; i < DIM; ++i) {
-                // we don't need to (and can't without performing
-                // illegal reads) advance upper-level iterators if
-                // they're already pointing to the second-to-last
-                // field:
-                if ((iterators[i] + 1) == region->indices[i].end()) {
-                    return;
-                }
-
-                VecType::const_iterator nextEnd =
-                    region->indices[i - 1].begin() + (iterators[i] + 1)->second;
-
-                if (iterators[i - 1] != nextEnd) {
-                    return;
-                }
-
-                ++iterators[i];
-                streak.origin[i] = iterators[i]->first;
-            }
-        }
-
-        inline bool operator==(const StreakIterator& other) const
-        {
-            return RegionHelpers::StreakIteratorCompareIterators<DIM - 1>()(iterators, other.iterators);
-        }
-
-        inline bool operator!=(const StreakIterator& other) const
-        {
-            return !(*this == other);
-        }
-
-        inline const Streak<DIM>& operator*() const
-        {
-            return streak;
-        }
-
-        inline const Streak<DIM> *operator->() const
-        {
-            return &streak;
-        }
-
-        inline bool endReached() const
-        {
-            return iterators[0] == region->indices[0].end();
-        }
-
-    private:
-        VecType::const_iterator iterators[DIM];
-        Streak<DIM> streak;
-        const Region<DIM> *region;
-    };
+    typedef RegionStreakIterator<DIM> StreakIterator;
 
     class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const Coord<DIM> >
     {
     public:
-        inline Iterator(const StreakIterator& _streakIterator) :
-            streakIterator(_streakIterator)
-        {
-            cursor = _streakIterator->origin;
-        }
+        inline Iterator(const StreakIterator& streakIterator) :
+            streakIterator(streakIterator),
+            cursor(streakIterator->origin)
+        {}
 
         inline void operator++()
         {
@@ -623,6 +517,13 @@ public:
     inline StreakIterator endStreak() const
     {
         StreakIterator ret(this, RegionHelpers::StreakIteratorInitEnd<DIM>());
+        return ret;
+    }
+
+    inline StreakIterator operator[](size_t pos) const
+    {
+        // fixme:
+        StreakIterator ret(this, RegionHelpers::StreakIteratorInitBegin<DIM>());
         return ret;
     }
 
