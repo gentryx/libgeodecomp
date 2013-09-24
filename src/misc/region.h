@@ -180,11 +180,8 @@ public:
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
-    template<int MY_DIM> friend class RegionHelpers::StreakIteratorInitBegin;
-    template<int MY_DIM> friend class RegionHelpers::StreakIteratorInitEnd;
-
-    friend class RegionStreakIterator<DIM, Region<DIM> >;
     friend class LibGeoDecomp::RegionTest;
+
     typedef std::pair<int, int> IntPair;
     typedef SuperVector<IntPair> VecType;
     typedef RegionStreakIterator<DIM, Region<DIM> > StreakIterator;

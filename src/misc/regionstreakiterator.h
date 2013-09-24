@@ -61,9 +61,9 @@ public:
     inline void operator++()
     {
         ++iterators[0];
-        if (iterators[0] == region->indices[0].end()) {
+        if (iterators[0] == region->indicesEnd(0)) {
             for (int i = 1; i < DIM; ++i) {
-                iterators[i] = region->indices[i].end();
+                iterators[i] = region->indicesEnd(i);
             }
             return;
         } else {
@@ -76,12 +76,12 @@ public:
             // illegal reads) advance upper-level iterators if
             // they're already pointing to the second-to-last
             // field:
-            if ((iterators[i] + 1) == region->indices[i].end()) {
+            if ((iterators[i] + 1) == region->indicesEnd(i)) {
                 return;
             }
 
             VecType::const_iterator nextEnd =
-                region->indices[i - 1].begin() + (iterators[i] + 1)->second;
+                region->indicesBegin(i - 1) + (iterators[i] + 1)->second;
 
             if (iterators[i - 1] != nextEnd) {
                 return;
@@ -114,7 +114,7 @@ public:
 
     inline bool endReached() const
     {
-        return iterators[0] == region->indices[0].end();
+        return iterators[0] == region->indicesEnd(0);
     }
 
 private:
