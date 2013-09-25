@@ -59,9 +59,9 @@ set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 find_package(Boost COMPONENTS serialization)
 set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 find_package(Boost COMPONENTS thread)
-set(Boost_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 find_package(Boost COMPONENTS move)
-set(Boost_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 
 find_package(CUDA)
 find_package(OpenCL)
@@ -354,7 +354,7 @@ set(ALL_HEADERS ${HEADERS})
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
-set(LIBGEODECOMP_LINK_LIBRARIES ${Boost_LIBRARIES})
+set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
 if(FEATURE_HPX)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
