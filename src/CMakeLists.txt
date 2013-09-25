@@ -60,6 +60,8 @@ find_package(Boost COMPONENTS serialization)
 set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 find_package(Boost COMPONENTS thread)
 set(Boost_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+find_package(Boost COMPONENTS move)
+set(Boost_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 
 find_package(CUDA)
 find_package(OpenCL)
@@ -95,6 +97,10 @@ endif()
 
 if(NOT DEFINED Boost_MPI_FOUND)
   set(Boost_MPI_FOUND false)
+endif()
+
+if(NOT DEFINED Boost_MOVE_FOUND)
+  set(Boost_MOVE_FOUND false)
 endif()
 
 set(DEFAULT_TYPEMAP_GENERATION false)
@@ -138,6 +144,8 @@ add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" $
 add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
 add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
+
+add_config_option(FEATURE_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
 
 add_config_option(FEATURE_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
@@ -224,6 +232,10 @@ endif()
 
 if (FEATURE_BOOST_MPI AND NOT Boost_MPI_FOUND)
   message(FATAL_ERROR "FEATURE_BOOST_MPI selected, but Boost.MPI library not found")
+endif()
+
+if (FEATURE_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
+  message(FATAL_ERROR "FEATURE_BOOST_MOVE selected, but Boost.Move library not found")
 endif()
 
 if (FEATURE_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)

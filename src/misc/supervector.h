@@ -11,7 +11,9 @@
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/vector.hpp>
 #endif
+#ifdef LIBGEODECOMP_FEATURE_BOOST_MOVE
 #include <boost/move/move.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -57,9 +59,11 @@ public:
         std::vector<T>(other)
     {}
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_MOVE
     inline SuperVector(BOOST_RV_REF(VectorType) other) :
         std::vector<T>(boost::move(static_cast<std::vector<T> >(other)))
     {}
+#endif
 
     /**
      * Deletes items from _self_ that are equal to @param obj
