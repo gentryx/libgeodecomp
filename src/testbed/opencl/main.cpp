@@ -16,25 +16,26 @@ MYCELL_STRUCT
 
 #define STRINGIFY(STRING) #STRING
 
-class DummyCell : public OpenCLCellInterface<DummyCell, MyCell> {
-  public:
-    static const int DIMENSIONS = 3;
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    class API : public CellAPITraits::Base {};
-    typedef Topologies::Cube<3>::Topology Topology;
+class DummyCell : public OpenCLCellInterface<DummyCell, MyCell>
+{
+public:
+    // fixme: get rid of this?
+    // static const int DIMENSIONS = 3;
 
-    DummyCell(void) {}
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
+    {};
 
     DummyCell(int x, int y, int z)
     {
-      myCellData.x = x;
-      myCellData.y = y;
-      myCellData.z = z;
+        myCellData.x = x;
+        myCellData.y = y;
+        myCellData.z = z;
     }
 
-    static inline unsigned nanoSteps() { return 1; }
     template<typename COORD_MAP>
-      void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
 
     static std::string kernel_file() { return "./test.cl"; }
     static std::string kernel_function() { return "add_test"; }
@@ -43,108 +44,105 @@ class DummyCell : public OpenCLCellInterface<DummyCell, MyCell> {
     MyCell myCellData;
 };
 
-class DummyCellInitializer : public SimpleInitializer<DummyCell> {
-  public:
+class DummyCellInitializer : public SimpleInitializer<DummyCell>
+{
+public:
     using SimpleInitializer<DummyCell>::gridDimensions;
 
-    DummyCellInitializer(void) : SimpleInitializer<DummyCell>(Coord<3>(2, 2, 2))
+    DummyCellInitializer() :
+        SimpleInitializer<DummyCell>(Coord<3>(2, 2, 2))
     {}
 
     virtual void grid(GridBase<DummyCell, 3> *ret)
     {
-      Coord<3> offset = Coord<3>(0, 0, 0);
+        Coord<3> offset = Coord<3>(0, 0, 0);
 
-      for (int z = 0; z < gridDimensions().z(); ++z) {
-        for (int y = 0; y < gridDimensions().y(); ++y) {
-          for (int x = 0; x < gridDimensions().x(); ++x) {
-            Coord<3> c = offset + Coord<3>(x, y, z);
-            ret->set(c, DummyCell(x, y, z));
-          }
+        for (int z = 0; z < gridDimensions().z(); ++z) {
+            for (int y = 0; y < gridDimensions().y(); ++y) {
+                for (int x = 0; x < gridDimensions().x(); ++x) {
+                    Coord<3> c = offset + Coord<3>(x, y, z);
+                    ret->set(c, DummyCell(x, y, z));
+                }
+            }
         }
-      }
     }
 };
 
-class JacobiCell : public OpenCLCellInterface<JacobiCell, double> {
-  public:
-    static const int DIMENSIONS = 3;
-    typedef Stencils::VonNeumann<3, 1> Stencil;
-    class API : public CellAPITraits::Base {};
-    typedef Topologies::Cube<3>::Topology Topology;
+class JacobiCell : public OpenCLCellInterface<JacobiCell, double>
+{
+public:
+    // fixme: get rid of this?
+    // static const int DIMENSIONS = 3;
 
-    JacobiCell(void) {}
-    JacobiCell(double temp) : m_temp(temp) {}
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
+    {};
 
-    static inline unsigned nanoSteps() { return 1; }
+    JacobiCell(double temp = 0) :
+        m_temp(temp)
+    {}
 
     template<typename COORD_MAP>
-      void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    {}
 
-    static std::string kernel_file() { return "./jacobi3d.cl"; }
-    static std::string kernel_function() { return "update"; }
-    double * data() { return &m_temp; }
+    static std::string kernel_file()
+    {
+        return "./jacobi3d.cl";
+    }
+
+    static std::string kernel_function()
+    {
+        return "update";
+    }
+
+    double *data()
+    {
+        return &m_temp;
+    }
 
     double m_temp;
 };
 
-class JacobiCellInitializer : public SimpleInitializer<JacobiCell> {
-  public:
-    JacobiCellInitializer(int size, int steps)
-      : SimpleInitializer<JacobiCell>(Coord<3>(size, size, size), steps)
+class JacobiCellInitializer : public SimpleInitializer<JacobiCell>
+{
+public:
+    JacobiCellInitializer(int size, int steps) :
+        SimpleInitializer<JacobiCell>(Coord<3>(size, size, size), steps)
     {}
 
     virtual void grid(GridBase<JacobiCell, 3> *ret)
     {
-      Coord<3> offset = Coord<3>(0, 0, 0);
+        Coord<3> offset = Coord<3>(0, 0, 0);
 
-      for (int z = 0; z < dimensions.z(); ++z) {
-        for (int y = 0; y < dimensions.y(); ++y) {
-          for (int x = 0; x < dimensions.x(); ++x) {
-            Coord<3> c = offset + Coord<3>(x, y, z);
-            ret->set(c, JacobiCell(0.99999999999));
-          }
+        for (int z = 0; z < dimensions.z(); ++z) {
+            for (int y = 0; y < dimensions.y(); ++y) {
+                for (int x = 0; x < dimensions.x(); ++x) {
+                    Coord<3> c = offset + Coord<3>(x, y, z);
+                    ret->set(c, JacobiCell(0.99999999999));
+                }
+            }
         }
-      }
     }
 };
 
 int main(int argc, char **argv)
 {
-  int size = 32;
-  int steps = 100;
+    int size = 32;
+    int steps = 100;
 
-  // boost::shared_ptr<HiParSimulator::PartitionManager<DummyCell::Topology>>
-  //   pmp(new HiParSimulator::PartitionManager<DummyCell::Topology>(
-  //         CoordBox<3>(Coord<3>(0,0,0), Coord<3>(2,2,2))));
+    typedef APITraits::SelectTopology<JacobiCell>::Value Topology;
+    boost::shared_ptr<HiParSimulator::PartitionManager<Topology>> partitionManager(
+        new HiParSimulator::PartitionManager<Topology>(
+            CoordBox<3>(Coord<3>(0,0,0), Coord<3>::diagonal(size))));
 
-  // boost::shared_ptr<DummyCellInitializer> dcip(new DummyCellInitializer);
+    boost::shared_ptr<JacobiCellInitializer> initizalizer(
+        new JacobiCellInitializer(size, steps));
 
-  // HiParSimulator::OpenCLStepper<DummyCell, MyCell> openclstepper(0, 0, pmp, dcip);
+    HiParSimulator::OpenCLStepper<JacobiCell, double> openclstepper(0, 0, partitionManager, initizalizer);
 
-  // openclstepper.update(2);
+    openclstepper.update(2);
 
-  // auto & grid = openclstepper.grid();
-
-  // std::cerr << "result" << std::endl;
-  // for (auto & p : dcip->gridBox()) {
-  //   std::cerr << "(" << grid.get(p).myCellData.x << ", "
-  //                    << grid.get(p).myCellData.y << ", "
-  //                    << grid.get(p).myCellData.z << ")"
-  //                    << " @ " << p
-  //                    << std::endl;
-  // }
-
-  boost::shared_ptr<HiParSimulator::PartitionManager<JacobiCell::Topology>>
-    pmp(new HiParSimulator::PartitionManager<JacobiCell::Topology>(
-          CoordBox<3>(Coord<3>(0,0,0), Coord<3>(size,size,size))));
-
-  auto dcip = boost::shared_ptr<JacobiCellInitializer>(
-      new JacobiCellInitializer(size, steps));
-
-  HiParSimulator::OpenCLStepper<JacobiCell, double> openclstepper(0, 0, pmp, dcip);
-
-  openclstepper.update(2);
-
-
-  return 0;
+    return 0;
 }

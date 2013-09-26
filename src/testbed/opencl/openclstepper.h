@@ -32,11 +32,14 @@ namespace LibGeoDecomp {
             friend class OpenCLStepperBasicTest;
             friend class OpenCLStepperTest;
             public:
-            const static int DIM = CELL_TYPE::Topology::DIM;
+
+            typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+            const static int DIM = Topology::DIM;
+            const static int NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
             typedef class Stepper<CELL_TYPE> ParentType;
             typedef typename ParentType::GridType GridType;
-            typedef PartitionManager<typename CELL_TYPE::Topology> PartitionManagerType;
+            typedef PartitionManager<Topology> PartitionManagerType;
             typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
             typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
             typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
@@ -172,7 +175,7 @@ namespace LibGeoDecomp {
                 std::swap(newGrid, oldGrid);
 
                 ++curNanoStep;
-                if (curNanoStep == CELL_TYPE::nanoSteps()) {
+                if (curNanoStep == NANO_STEPS) {
                     curNanoStep = 0;
                     curStep++;
                 }
@@ -219,7 +222,7 @@ namespace LibGeoDecomp {
 
             inline long globalNanoStep() const
             {
-                return curStep * CELL_TYPE::nanoSteps() + curNanoStep;
+                return curStep * NANO_STEPS + curNanoStep;
             }
 
             inline void initGrids()
@@ -280,19 +283,16 @@ namespace LibGeoDecomp {
                             partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
 
                     const Region<DIM>& region = partitionManager->rim(t + 1);
-                    for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                            i != region.endStreak();
-                            ++i) {
-                        UpdateFunctor<CELL_TYPE>()(
-                                *i,
-                                i->origin,
-                                *oldGrid,
-                                &*newGrid,
-                                curNanoStep);
-                    }
+                    UpdateFunctor<CELL_TYPE>()(
+                        region,
+                        Coord<DIM>(),
+                        Coord<DIM>(),
+                        *oldGrid,
+                        &*newGrid,
+                        curNanoStep);
 
                     ++curNanoStep;
-                    if (curNanoStep == CELL_TYPE::nanoSteps()) {
+                    if (curNanoStep == NANO_STEPS) {
                         curNanoStep = 0;
                         curStep++;
                     }
