@@ -19,9 +19,6 @@ MYCELL_STRUCT
 class DummyCell : public OpenCLCellInterface<DummyCell, MyCell>
 {
 public:
-    // fixme: get rid of this?
-    // static const int DIMENSIONS = 3;
-
     class API :
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
         public APITraits::HasCubeTopology<3>
@@ -35,11 +32,23 @@ public:
     }
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep) {}
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    {}
 
-    static std::string kernel_file() { return "./test.cl"; }
-    static std::string kernel_function() { return "add_test"; }
-    MyCell * data() { return &myCellData; }
+    static std::string kernel_file()
+    {
+        return "./test.cl";
+    }
+
+    static std::string kernel_function()
+    {
+        return "add_test";
+    }
+
+    MyCell *data()
+    {
+        return &myCellData;
+    }
 
     MyCell myCellData;
 };
@@ -71,16 +80,13 @@ public:
 class JacobiCell : public OpenCLCellInterface<JacobiCell, double>
 {
 public:
-    // fixme: get rid of this?
-    // static const int DIMENSIONS = 3;
-
     class API :
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
         public APITraits::HasCubeTopology<3>
     {};
 
     JacobiCell(double temp = 0) :
-        m_temp(temp)
+        temp(temp)
     {}
 
     template<typename COORD_MAP>
@@ -99,17 +105,17 @@ public:
 
     double *data()
     {
-        return &m_temp;
+        return &temp;
     }
 
-    double m_temp;
+    double temp;
 };
 
 class JacobiCellInitializer : public SimpleInitializer<JacobiCell>
 {
 public:
     JacobiCellInitializer(int size, int steps) :
-        SimpleInitializer<JacobiCell>(Coord<3>(size, size, size), steps)
+        SimpleInitializer<JacobiCell>(Coord<3>::diagonal(size), steps)
     {}
 
     virtual void grid(GridBase<JacobiCell, 3> *ret)

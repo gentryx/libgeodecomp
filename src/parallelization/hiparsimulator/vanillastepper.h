@@ -45,8 +45,8 @@ public:
     inline VanillaStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
-        const PatchAccepterVec ghostZonePatchAccepters = PatchAccepterVec(),
-        const PatchAccepterVec innerSetPatchAccepters = PatchAccepterVec()) :
+        const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
+        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
         ParentType(partitionManager, initializer)
     {
         curStep = initializer->startStep();
