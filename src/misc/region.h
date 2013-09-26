@@ -740,7 +740,7 @@ private:
         if (empty()) {
             myBoundingBox = CoordBox<DIM>();
         } else {
-            const Streak<DIM>& someStreak = *beginStreak();
+            Streak<DIM> someStreak = *beginStreak();
             Coord<DIM> min = someStreak.origin;
             Coord<DIM> max = someStreak.origin;
 
@@ -755,6 +755,7 @@ private:
                 max = (max.max)(right);
                 mySize += i->endX - i->origin.x();
             }
+
             myBoundingBox =
                 CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
         }
