@@ -108,18 +108,16 @@ endif()
 # compute default flags:
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
-if(OPENCL_FOUND)
-  check_cxx_compiler_flag("-std=c++11" SUPPORTS_CXX_11)
-  if(NOT SUPPORTS_CXX_11)
-    message(FATAL_ERROR "FEATURE_OPENCL selected, but compiler doesn't support mandatory flag \"-std=c++11\".")
-  endif()
-
-  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -std=c++11")
-endif()
-
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
+endif()
+
+if(OPENCL_FOUND)
+  check_cxx_compiler_flag("-std=c++11" SUPPORTS_CXX_11)
+  if(SUPPORTS_CXX_11)
+    set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -std=c++11")
+  endif()
 endif()
 
 # configure whether the dreaded typemap-generator will run:
@@ -178,7 +176,7 @@ add_config_option(FEATURE_THREADS "Lets you control whether we'll use threads (e
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
 add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
-add_config_option(CMAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
+add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
 add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
 
