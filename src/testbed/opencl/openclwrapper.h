@@ -112,7 +112,17 @@ OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
                 << error.what() << std::endl;
     }
 
-    initKernels();
+    try {
+      initKernels();
+    } catch (cl::Error & error) {
+      std::cerr << "Error: " << error.what() << ": "
+                << get_error_description(error.err())
+                << " (" << error.err() << ")" << std::endl
+                << "Build Log for user code:" << std::endl
+                << user_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)
+                << "Build Log for init code:" << std::endl
+                << init_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+    }
 
     try {
       cmdqueue.enqueueWriteBuffer(cl_coords, CL_TRUE, 0,
@@ -212,13 +222,7 @@ OpenCLWrapper<DATA_TYPE>::initKernels(void)
     arg_counter = 0;
     user_code_kernel.setArg(arg_counter++, cl_coords);
   } catch (cl::Error & error) {
-    std::cerr << "Build error: " << error.what() << ": "
-              << get_error_description(error.err())
-              << " (" << error.err() << ")" << std::endl
-              << "Build Log for user code:" << std::endl
-              << user_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)
-              << "Build Log for init code:" << std::endl
-              << init_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+    printCLError(error, __PRETTY_FUNCTION__);
   }
 }
 
