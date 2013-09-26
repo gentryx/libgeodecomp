@@ -159,7 +159,7 @@ add_config_option(FEATURE_BOOST_MOVE "Enable/disable Boost.Move for move semanti
 
 add_config_option(FEATURE_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
-add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" ${OPENCL_FOUND} true)
+add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" false true)
 
 add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
 
