@@ -2,18 +2,23 @@ ABOUT
 =====
 
 LibGeoDecomp (Library for Geometric Decomposition codes) is an
-auto-parallelizing library for computer simulations codes. It is
-written in C++ and works best with kernels written in C++, but other
-languages (e.g. Fortran) may be linked in, too. Thanks to its modular
-design, the library can harness all state of the art hardware
-architectures (e.g. multi core CPUs, GPUs, MPI clusters, GPU clusters,
-and yes: the Raspberry Pi, too).
+auto-parallelizing library for computer simulations. It is written in
+C++ and works best with kernels written in C++, but other languages
+(e.g. Fortran) may be linked in, too. Thanks to its modular design the
+library can harness all state of the art hardware architectures:
+
+- multi-core CPUs
+- GPUs (currently only NVIDIA GPUs, via CUDA)
+- Intel Xeon Phi (thanks to the HPX backend)
+- MPI clusters (with or without accelerators)
+- and yes: the Raspberry Pi, too
 
 Here is how it works: the library takes over the spatial and temporal
-loops of the simulation as well as storage of the simulation data. By
-this it can controll which code runs when. It will call back the user
-code for performing the actual computations. User code in turn calls
-back the library to access simulation data.
+loops of the simulation as well as storage of the simulation data. It
+will call back the user code for performing the actual computations.
+User code in turn calls back the library to access simulation data.
+Thanks to this two-way callback the library can control which part of
+the code runs when.
 
 Users can build custom computer simulations (e.g. engineering or
 natural sciences problems) by encapsulating their model in a C++
@@ -49,19 +54,19 @@ DIRECTORY LAYOUT
 
   Here you'll find 3rd party libraries which LibGeoDecomp needs, but
   which are generally not available on target systems (e.g.
-  libflatarray for Struct of Array datastructures or cxxtest for unit
+  libflatarray for Struct of Array data structures or cxxtest for unit
   tests). Please note that these libraries may be licensed under
   different terms than LibGeoDecomp itself.
 
 3. libgeodecomp/src/
 --------------------
 
-  The library's source code. This dir holds some basic files such as
-  the main libgeodecomp.h header and the main cmake file. Unit tests
-  are found beneath its subdirectories. The naming conventions is
-  src/foo/test/unit/myclasstest.h for unit tests of a class MyClass in
-  src/foo/myclass.h and src/foo/test/parallel_mpi_X/myclasstest.h for
-  parallel tests with X ranks. Subdirectories are:
+  The library's source code. This directory holds some basic files
+  such as the main libgeodecomp.h header and the main CMake file. Unit
+  tests are found beneath its subdirectories. The naming conventions
+  is src/foo/test/unit/myclasstest.h for unit tests of a class MyClass
+  in src/foo/myclass.h and src/foo/test/parallel_mpi_X/myclasstest.h
+  for parallel tests with X ranks. Subdirectories are:
 
   - libgeodecomp/src/examples/
     --------------------------
@@ -82,10 +87,10 @@ DIRECTORY LAYOUT
   - libgeodecomp/src/loadbalancer/
     ------------------------------
     These classes steer the equalization of load within the library.
-    The interface between the parallelization and the loadbalancers is
+    The interface between the parallelization and the load balancers is
     formed by two weight vectors: one describes the relative ratio of
     calculation time to communication time (i.e. the load of a node),
-    the other one the number of work items (e.g. nmber of cells)
+    the other one the number of work items (e.g. number of cells)
     assigned to a node.
 
   - libgeodecomp/src/misc/
@@ -124,7 +129,7 @@ DIRECTORY LAYOUT
 BUILDING
 ========
 
-For compiling LibGeoDecomp you'll need cmake (http://www.cmake.org) installed.
+For compiling LibGeoDecomp you'll need CMake (http://www.cmake.org) installed.
 We recommend an out-of-source build:
 
   BUILD_DIR=build/`uname -ms | sed s/\ /-/g`
