@@ -1,18 +1,33 @@
 ABOUT
 =====
 
-LibGeoDecomp (Library for Geometric Decomposition codes) is a generic
-library for stencil codes. Users can build custom computer simulations
-(e.g. engineering or natural sciences problems) by encapsulating their
-model in a C++ class. This class is then supplied to the library as a
-template parameter. The library essentially relieves the user from the
-pains of parallel programming, but is limited to applications which
-perform space- and time-discrete simulations with only local
-interactions.
+LibGeoDecomp (Library for Geometric Decomposition codes) is an
+auto-parallelizing library for computer simulations codes. It is
+written in C++ and works best with kernels written in C++, but other
+languages (e.g. Fortran) may be linked in, too. Thanks to its modular
+design, the library can harness all state of the art hardware
+architectures (e.g. multi core CPUs, GPUs, MPI clusters, GPU clusters,
+and yes: the Raspberry Pi, too).
 
-Its modular architecture makes it applicable to various architectures
-(e.g. multi core CPUs, GPUs, MPI clusters). For more details and a
-user guide see http://www.libgeodecomp.org
+Here is how it works: the library takes over the spatial and temporal
+loops of the simulation as well as storage of the simulation data. By
+this it can controll which code runs when. It will call back the user
+code for performing the actual computations. User code in turn calls
+back the library to access simulation data.
+
+Users can build custom computer simulations (e.g. engineering or
+natural sciences problems) by encapsulating their model in a C++
+class. This class is then supplied to the library as a template
+parameter. The library essentially relieves the user from the pains of
+parallel programming, but is limited to applications which perform
+space- and time-discrete simulations with only local interactions.
+
+Further information:
+  - homepage:          http://www.libgeodecomp.org
+  - mailing list:      http://www.libgeodecomp.org/mailing_lists.html
+  - source repository: https://bitbucket.org/gentryx/libgeodecomp
+  - contributors:      see file "AUTHORS"
+
 
 DIRECTORY LAYOUT
 ================
@@ -104,6 +119,7 @@ DIRECTORY LAYOUT
 ----------------------
   Tools that help us to generate code (typemap generator for MPI
   datatypes) or compile (build system).
+
 
 BUILDING
 ========
