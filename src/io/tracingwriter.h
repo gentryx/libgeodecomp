@@ -10,6 +10,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The purpose of the TracingWriter is out output performance data
+ * which allows the user to gauge execution time (current, remaining,
+ * estimated time of arrival (ETA)) and performance (GLUPS, memory
+ * bandwidth).
+ */
 template<typename CELL_TYPE>
 class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
@@ -18,17 +24,20 @@ public:
     friend class boost::serialization::access;
 #endif
     using Writer<CELL_TYPE>::NANO_STEPS;
+
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
     typedef typename Writer<CELL_TYPE>::GridType WriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType ParallelWriterGridType;
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
+
     static const int DIM = Topology::DIM;
+    static const int OUTPUT_ON_ALL_RANKS = -1;
 
     TracingWriter(
         const unsigned period,
         const unsigned maxSteps,
-        int outputRank = -1,
+        int outputRank = OUTPUT_ON_ALL_RANKS,
         std::ostream& stream = std::cerr) :
         Writer<CELL_TYPE>("", period),
         ParallelWriter<CELL_TYPE>("", period),
@@ -58,7 +67,7 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        if (lastCall && (outputRank == -1 || outputRank == rank)) {
+        if (lastCall && ((outputRank == OUTPUT_ON_ALL_RANKS) || (outputRank == rank))) {
             stepFinished(step, globalDimensions, event);
         }
     }
