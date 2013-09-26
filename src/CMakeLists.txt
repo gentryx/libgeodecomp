@@ -4,9 +4,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 include(util.cmake)
 include(CheckCXXCompilerFlag)
 
-#============= DETECT DEFAULTS ====================================
-set(RELEASE false)
-
+#============= 1. FIND PACKAGES WE DEPEND ON =========================
 if(NOT DEFINED BOOST_ROOT)
   # deduce Boost location from environment (e.g. on woody.rrze.uni-erlangen.de)
   set(BOOST_ENV_LIBDIR "$ENV{BOOST_LIBDIR}")
@@ -17,35 +15,6 @@ if(NOT DEFINED BOOST_ROOT)
     set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
   endif()
 endif()
-
-detect_distro()
-
-if(NOT HPX_ROOT)
-  if(NOT $ENV{HPX_ROOT} STREQUAL "")
-    set(HPX_ROOT $ENV{HPX_ROOT})
-  endif()
-endif()
-
-if(HPX_ROOT)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
-  find_package(HPX)
-endif()
-
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-if(HPX_FOUND)
-  set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
-  include_directories(${HPX_INCLUDE_DIR})
-  link_directories(${HPX_LIBRARY_DIR})
-  add_definitions(-DHPX_LIMIT=10)
-  set(HPX_FOUND true)
-else()
-  set(HPX_FOUND false)
-endif()
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
 # mandatory Boost libs go into the first line, optional ones into
 # their own call. This avoids leaving out any available lib during
@@ -71,6 +40,31 @@ find_package(Ruby)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
+# find HPX
+if(NOT HPX_ROOT)
+  if(NOT $ENV{HPX_ROOT} STREQUAL "")
+    set(HPX_ROOT $ENV{HPX_ROOT})
+  endif()
+endif()
+
+if(HPX_ROOT)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
+  find_package(HPX)
+endif()
+
+if(HPX_FOUND)
+  set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
+  include_directories(${HPX_INCLUDE_DIR})
+  link_directories(${HPX_LIBRARY_DIR})
+  add_definitions(-DHPX_LIMIT=10)
+  set(HPX_FOUND true)
+else()
+  set(HPX_FOUND false)
+endif()
+
+# if a package was not found it's safer to set the corresponding
+# variable to false, this avoids undefined/unintended behavior in some
+# cases.
 if(NOT DEFINED QT4_FOUND)
   set(QT4_FOUND false)
 endif()
@@ -103,11 +97,34 @@ if(NOT DEFINED Boost_MOVE_FOUND)
   set(Boost_MOVE_FOUND false)
 endif()
 
-set(DEFAULT_TYPEMAP_GENERATION false)
+#============= 2. DETECT DEFAULTS ====================================
+set(RELEASE false)
+detect_distro()
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+# compute default flags:
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
+
+if(OPENCL_FOUND)
+  check_cxx_compiler_flag("-std=c++11" SUPPORTS_CXX_11)
+  if(NOT SUPPORTS_CXX_11)
+    message(FATAL_ERROR "FEATURE_OPENCL selected, but compiler doesn't support mandatory flag \"-std=c++11\".")
+  endif()
+
+  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -std=c++11")
+endif()
+
+check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
+if(SUPPORTS_MARCH_NATIVE)
+  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
+endif()
+
+# configure whether the dreaded typemap-generator will run:
+set(DEFAULT_TYPEMAP_GENERATION false)
 if(NOT RELEASE)
-  # Boost is creating too many warnings, -Werror is just too much
-  # set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Werror")
   set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
 endif()
 
@@ -116,17 +133,12 @@ execute_process(
   OUTPUT_VARIABLE MACHINE_ARCH
   ERROR_QUIET)
 
-CHECK_CXX_COMPILER_FLAG("-march=native" SUPPORTS_MARCH_NATIVE)
-if(SUPPORTS_MARCH_NATIVE)
-  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
-endif()
-
 set(AMD64_LINUX false)
 if (MACHINE_ARCH MATCHES "x86_64")
   set(AMD64_LINUX true)
 endif()
 
-#============= CONFIGURABLE BUILD OPTIONS =========================
+#============= 3. CONFIGURABLE BUILD OPTIONS =========================
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
 add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
@@ -173,8 +185,7 @@ add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a 
 print_options()
 dump_config("config.h")
 
-#============= GENERAL CONFIGURATION ==============================
-
+#============= 4. GENERAL CONFIGURATION ==============================
 set(PACKAGE_NAME libgeodecomp)
 set(CMAKE_C_FLAGS   "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -184,11 +195,24 @@ set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
 
+# LIBDIRS is used to find source files and headers
+set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions parallelization/hpxsimulator)
+# AUXDIRS lists auxiliary directories to be included in the main
+# build. They may for instance include additionally libraries to be
+# linked into the main lib.
+set(AUXDIRS)
+# set(AUXDIRS misc/testbed/cell/spustuff)
+set(SUBDIRS examples io loadbalancer misc mpilayer parallelization testbed)
+
+set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+generate_sourcelists("./")
+
+#============= 5. SANITY CHECKS ======================================
 # import settings detected by packages to decouple from their
 # interfaces, perform sanity checks to match selected options and
 # detected environment...
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if(FEATURE_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
   include_directories(${MPI_INCLUDE_PATH})
@@ -264,25 +288,12 @@ if(FEATURE_QT)
   add_definitions(-DQT_NO_KEYWORDS)
 endif()
 
-# LIBDIRS is used to find source files and headers
-set(LIBDIRS io loadbalancer misc mpilayer parallelization parallelization/hiparsimulator parallelization/hiparsimulator/partitions parallelization/hpxsimulator)
-# AUXDIRS lists auxiliary directories to be included in the main
-# build. They may for instance include additionally libraries to be
-# linked into the main lib.
-set(AUXDIRS)
-# set(AUXDIRS misc/testbed/cell/spustuff)
-set(SUBDIRS examples io loadbalancer misc mpilayer parallelization testbed)
-
-set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
-
-generate_sourcelists("./")
-
-#============= TOP-LEVEL TARGETS ==================================
+#============= 6. TOP-LEVEL TARGETS ==================================
 add_custom_target(test echo "Tests passed.")
 add_custom_target(code_generation ALL echo "Code generation done.")
 add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
 
-#============= INSTALLER STUFF ====================================
+#============= 7. INSTALLER STUFF ====================================
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PACKAGE_NAME})
 set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
@@ -321,7 +332,7 @@ endif(WIN32 AND NOT UNIX)
 
 include(CPack)
 
-#============= RECURSE SUBDIRS ====================================
+#============= 8. RECURSE SUBDIRS ====================================
 set(HEADERS "")
 set(SOURCES "")
 
@@ -335,7 +346,7 @@ foreach(dir ${AUXDIRS})
   include(${dir}/aux.cmake)
 endforeach(dir)
 
-#============= ADD THE MAIN LIBRARY ===============================
+#============= 9. ADD THE MAIN LIBRARY ===============================
 if(WIN32)
   add_library(local_libgeodecomp_lib STATIC IMPORTED)
   set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/libgeodecomp/geodecomp.lib)
@@ -393,7 +404,7 @@ endif()
 
 target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 
-#============= INSTALLER CONFIG ===================================
+#============= 10. INSTALLER CONFIG ==================================
 install(TARGETS geodecomp DESTINATION lib)
 install(FILES config.h DESTINATION include/${PACKAGE_NAME})
 install(FILES libgeodecomp.h DESTINATION include)
@@ -440,7 +451,7 @@ Cflags: -I\${includedir}
 ")
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")
 
-#============= TYPEMAPS GENERATION ================================
+#============= 11. TYPEMAPS GENERATION ===============================
 if (GENERATE_TYPEMAPS)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/mpilayer/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/mpilayer/typemaps.cpp"
