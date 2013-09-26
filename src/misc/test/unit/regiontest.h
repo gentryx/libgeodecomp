@@ -1268,7 +1268,7 @@ public:
 
         Region<3>::StreakIterator expected = r.beginStreak();
 
-        for (int i = 0; i < r.numStreaks(); ++i) {
+        for (unsigned i = 0; i < r.numStreaks(); ++i) {
             Region<3>::StreakIterator actual = r[i];
             TS_ASSERT_EQUALS(*actual, *expected);
 
