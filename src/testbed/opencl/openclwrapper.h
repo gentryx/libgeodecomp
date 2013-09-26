@@ -102,7 +102,7 @@ OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
       createBuffers();
     } catch (cl::Error & error) {
       printCLError(error, __PRETTY_FUNCTION__);
-      throw error;
+      exit(EXIT_FAILURE);
     }
 
     try {
@@ -111,7 +111,7 @@ OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
       std::cerr << "Error while trying to access \""
                 << user_code_file << "\":" << std::endl
                 << error.what() << std::endl;
-      throw error;
+      exit(EXIT_FAILURE);
     }
 
     try {
@@ -124,7 +124,7 @@ OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
                 << user_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)
                 << "Build Log for init code:" << std::endl
                 << init_code_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
-      throw error;
+      exit(EXIT_FAILURE);
     }
 
     try {
@@ -133,7 +133,7 @@ OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
       cmdqueue.enqueueTask(mem_hook_kernel);
     } catch (cl::Error & error) {
       printCLError(error, __PRETTY_FUNCTION__);
-      throw error;
+      exit(EXIT_FAILURE);
     }
 }
 
@@ -253,7 +253,7 @@ OpenCLWrapper<DATA_TYPE>::loadPoints(Iterator begin, Iterator end)
                                   cl::NullRange);
   } catch (cl::Error & error) {
     printCLError(error, __PRETTY_FUNCTION__);
-    throw error;
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -274,7 +274,7 @@ OpenCLWrapper<DATA_TYPE>::loadHostData(Iterator begin, Iterator end)
     }
   } catch (cl::Error & error) {
     printCLError(error, __PRETTY_FUNCTION__);
-    throw error;
+    exit(EXIT_FAILURE);
   }
 
   if (i != num_points) {
@@ -332,7 +332,7 @@ OpenCLWrapper<DATA_TYPE>::printCLError(cl::Error & error, const std::string & wh
             << "Error " << error.err() << ": "
             << get_error_description(error.err())
             << std::endl;
-  throw error;
+  exit(EXIT_FAILURE);
 }
 
 std::string
