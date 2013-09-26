@@ -179,55 +179,47 @@ template<typename DATA_TYPE>
 void
 OpenCLWrapper<DATA_TYPE>::readKernels(void)
 {
-  try {
-    std::ifstream fstream;
-    fstream.exceptions(std::ios::failbit | std::ios::badbit);
+  std::ifstream fstream;
+  fstream.exceptions(std::ios::failbit | std::ios::badbit);
 
-    fstream.open(init_code_cl_file);
-    init_code_txt.append(std::istreambuf_iterator<char>(fstream),
-                         std::istreambuf_iterator<char>());
-    fstream.close();
+  fstream.open(init_code_cl_file);
+  init_code_txt.append(std::istreambuf_iterator<char>(fstream),
+                       std::istreambuf_iterator<char>());
+  fstream.close();
 
-    fstream.open(user_code_file);
-    user_code_txt.append(std::istreambuf_iterator<char>(fstream),
-                         std::istreambuf_iterator<char>());
-    fstream.close();
-  } catch (cl::Error & error) {
-    throw error;
-  }
+  fstream.open(user_code_file);
+  user_code_txt.append(std::istreambuf_iterator<char>(fstream),
+                       std::istreambuf_iterator<char>());
+  fstream.close();
 }
 
 template<typename DATA_TYPE>
 void
 OpenCLWrapper<DATA_TYPE>::initKernels(void)
 {
-  try {
-    init_code_program = cl::Program(context,
-        { std::make_pair(init_code_txt.c_str(), init_code_txt.length() + 1) });
+  init_code_program = cl::Program(context,
+      { std::make_pair(init_code_txt.c_str(), init_code_txt.length() + 1) });
 
-    user_code_program = cl::Program(context,
-        { std::make_pair(user_code_txt.c_str(), user_code_txt.length() + 1) });
+  user_code_program = cl::Program(context,
+      { std::make_pair(user_code_txt.c_str(), user_code_txt.length() + 1) });
 
-    init_code_program.build({ device });
-    user_code_program.build({ device });
+  init_code_program.build({ device });
+  user_code_program.build({ device });
 
-    mem_hook_kernel = cl::Kernel(init_code_program, mem_hook_function.c_str());
-    data_init_kernel = cl::Kernel(init_code_program, data_init_function.c_str());
-    user_code_kernel = cl::Kernel(user_code_program, user_code_function.c_str());
+  mem_hook_kernel = cl::Kernel(init_code_program, mem_hook_function.c_str());
+  data_init_kernel = cl::Kernel(init_code_program, data_init_function.c_str());
+  user_code_kernel = cl::Kernel(user_code_program, user_code_function.c_str());
 
-    size_t arg_counter = 0;
-    mem_hook_kernel.setArg(arg_counter++, cl_coords);
-    mem_hook_kernel.setArg(arg_counter++, cl_points);
-    mem_hook_kernel.setArg(arg_counter++, cl_indices);
+  size_t arg_counter = 0;
+  mem_hook_kernel.setArg(arg_counter++, cl_coords);
+  mem_hook_kernel.setArg(arg_counter++, cl_points);
+  mem_hook_kernel.setArg(arg_counter++, cl_indices);
 
-    arg_counter = 0;
-    data_init_kernel.setArg(arg_counter++, cl_coords);
+  arg_counter = 0;
+  data_init_kernel.setArg(arg_counter++, cl_coords);
 
-    arg_counter = 0;
-    user_code_kernel.setArg(arg_counter++, cl_coords);
-  } catch (cl::Error & error) {
-    throw error;
-  }
+  arg_counter = 0;
+  user_code_kernel.setArg(arg_counter++, cl_coords);
 }
 
 template<typename DATA_TYPE>
@@ -310,14 +302,9 @@ OpenCLWrapper<DATA_TYPE>::run(size_t updates)
     user_code_kernel.setArg(1 + (update_counter & 1), cl_input);
     user_code_kernel.setArg(2 - (update_counter & 1), cl_output);
 
-    try {
-      cmdqueue.enqueueNDRangeKernel(user_code_kernel, cl::NullRange,
-                                    cl::NDRange(num_points),
-                                    cl::NullRange);
-    } catch (cl::Error & error) {
-      printCLError(error, __PRETTY_FUNCTION__);
-    }
-
+    cmdqueue.enqueueNDRangeKernel(user_code_kernel, cl::NullRange,
+                                  cl::NDRange(num_points),
+                                  cl::NullRange);
     ++update_counter;
   }
 }
