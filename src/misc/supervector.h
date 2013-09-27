@@ -99,7 +99,7 @@ T& (max)(std::vector<T, Allocator>& vec)
 template <typename T, typename Allocator>
 const T& (max)(const std::vector<T, Allocator>& vec)
 {
-    return *(std::max_element(begin(), end()));
+    return *(std::max_element(vec.begin(), vec.end()));
 }
 
 template <typename T, typename Allocator, typename U>

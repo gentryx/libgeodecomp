@@ -187,7 +187,7 @@ private:
 
     std::vector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
     {
-        double mySpeed = getCellSpeed(APITraits::SelectSpeed<CELL_TYPE>::Value());
+        double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
         std::vector<double> speeds = mpiLayer.allGather(mySpeed);
         double s = sum(speeds);
         std::vector<std::size_t> ret(size);

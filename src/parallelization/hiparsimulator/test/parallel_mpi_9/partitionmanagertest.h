@@ -29,7 +29,8 @@ public:
         weights[3] = 40 * dimensions.x();
         weights[5] = 20 * dimensions.x();
         // sanity check
-        TS_ASSERT_EQUALS(sum(weights) + offset, dimensions.prod());
+        unsigned product = dimensions.prod();
+        TS_ASSERT_EQUALS(sum(weights) + offset, product);
 
         partition.reset(new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights));
         manager.resetRegions(
