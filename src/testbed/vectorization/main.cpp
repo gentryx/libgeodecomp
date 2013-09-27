@@ -857,7 +857,7 @@ double singleBenchmark(Coord<3> dim)
 }
 
 template<class CELL>
-void benchmark(std::string name, SuperVector<Coord<3> > sizes)
+void benchmark(std::string name, std::vector<Coord<3> > sizes)
 {
     std::cout << "Benchmarking " << name << "\n";
 
@@ -888,7 +888,7 @@ void benchmark(std::string name, SuperVector<Coord<3> > sizes)
 
 int main(int argc, char **argv)
 {
-    SuperVector<Coord<3> > sizesLBM;
+    std::vector<Coord<3> > sizesLBM;
     sizesLBM << Coord<3>(22, 22, 22)
              << Coord<3>(64, 64, 64)
              << Coord<3>(68, 68, 68)
@@ -896,7 +896,7 @@ int main(int argc, char **argv)
              << Coord<3>(128, 128, 128)
              << Coord<3>(160, 160, 160);
 
-    SuperVector<Coord<3> > sizesJacobi;
+    std::vector<Coord<3> > sizesJacobi;
     for (int i = 0; i < 21; ++i) {
         int dim = std::pow(2, 4 + 0.25 * i);
         if (dim % 2) {

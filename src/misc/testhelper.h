@@ -44,8 +44,8 @@
 
 #define TS_ASSERT_EQUALS_DOUBLE_VEC(va, vb)                             \
     {                                                                   \
-        SuperVector<double> tsa_comp2_a = va;                           \
-        SuperVector<double> tsa_comp2_b = vb;                           \
+        std::vector<double> tsa_comp2_a = va;                           \
+        std::vector<double> tsa_comp2_b = vb;                           \
         TS_ASSERT_EQUALS(tsa_comp2_a.size(), tsa_comp2_b.size());       \
         for (unsigned i = 0; i < tsa_comp2_b.size(); i++) {             \
             TS_ASSERT_EQUALS_DOUBLE(tsa_comp2_a[i], tsa_comp2_b[i]);    \

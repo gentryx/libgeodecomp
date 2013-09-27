@@ -143,9 +143,9 @@ public:
         int ghostZoneWidth = 4;
         CoordBox<3> box(Coord<3>(), Coord<3>(55, 47, 31));
 
-        SuperVector<size_t> weights;
+        std::vector<std::size_t> weights;
         weights += 10000, 15000, 25000;
-        weights << box.dimensions.prod() - weights.sum();
+        weights << box.dimensions.prod() - sum(weights);
         boost::shared_ptr<Partition<3> > partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
@@ -156,7 +156,7 @@ public:
             0,
             ghostZoneWidth);
 
-        SuperVector<CoordBox<3> > boundingBoxes;
+        std::vector<CoordBox<3> > boundingBoxes;
         for (int i = 0; i < 4; ++i)
             boundingBoxes << partitionManager.getRegion(i, 0).boundingBox();
 
@@ -197,7 +197,7 @@ public:
 
         // int ghostZoneWidth = 3;
         // CoordBox<3> box(Coord<3>(), Coord<3>(4000, 1000, 1000));
-        // SuperVector<size_t> weights;
+        // std::vector<long> weights;
         // weights += 1000000000, 1000000000, 1000000000, 1000000000;
 
         // Partition<3> *partition =
@@ -212,7 +212,7 @@ public:
         //     partition,
         //     0,
         //     ghostZoneWidth);
-        // SuperVector<CoordBox<3> > boundingBoxes;
+        // std::vector<CoordBox<3> > boundingBoxes;
         // for (int i = 0; i < 4; ++i) {
         //     std::cout << "getting region " << i << "\n";
 
@@ -232,20 +232,20 @@ private:
     Coord<2> dimensions;
     unsigned offset;
     boost::shared_ptr<StripingPartition<2> > partition;
-    SuperVector<size_t> weights;
+    std::vector<std::size_t> weights;
     unsigned rank;
     unsigned ghostZoneWidth;
-    SuperVector<CoordBox<2> > boundingBoxes;
+    std::vector<CoordBox<2> > boundingBoxes;
     PartitionManager<Topologies::Cube<2>::Topology> partitionManager;
 
-    SuperVector<CoordBox<2> > fakeBoundingBoxes(
+    std::vector<CoordBox<2> > fakeBoundingBoxes(
         const unsigned& offset,
         const unsigned& size,
         const unsigned& ghostZoneWidth,
-        const SuperVector<size_t>& weights,
+        const std::vector<std::size_t>& weights,
         const boost::shared_ptr<StripingPartition<2> > partition)
     {
-        SuperVector<CoordBox<2> > boundingBoxes(size);
+        std::vector<CoordBox<2> > boundingBoxes(size);
         long startOffset = offset;
         long endOffset = offset;
 
@@ -274,8 +274,8 @@ private:
         const unsigned& end,
         const boost::shared_ptr<PARTITION> partition)
     {
-        SuperVector<Coord<2> > expected;
-        SuperVector<Coord<2> > actual;
+        std::vector<Coord<2> > expected;
+        std::vector<Coord<2> > actual;
         for (typename PARTITION::Iterator i = (*partition)[start];
              i != (*partition)[end];
              ++i)

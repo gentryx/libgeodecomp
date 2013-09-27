@@ -65,8 +65,8 @@ public:
                        << MockWriterHelpers::MockWriterEvent(21, WRITER_STEP_FINISHED, 0, true );
         TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
 
-        SuperVector<unsigned> actualSteps;
-        SuperVector<unsigned> expectedSteps;
+        std::vector<unsigned> actualSteps;
+        std::vector<unsigned> expectedSteps;
         expectedSteps += 20, 21;
 
         MemoryWriterType::GridMap grids = memoryWriter->getGrids();

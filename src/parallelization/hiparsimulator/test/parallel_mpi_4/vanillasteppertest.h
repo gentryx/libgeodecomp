@@ -38,9 +38,9 @@ public:
         init.reset(new TestInitializer<TestCell<3> >(gridDim));
         CoordBox<3> box = init->gridBox();
 
-        SuperVector<size_t> weights;
+        std::vector<std::size_t> weights;
         weights += 10000, 15000, 25000;
-        weights << box.dimensions.prod() - weights.sum();
+        weights << box.dimensions.prod() - sum(weights);
         boost::shared_ptr<Partition<3> > partition(
             new StripingPartition<3>(Coord<3>(), box.dimensions, 0, weights));
 
@@ -51,7 +51,7 @@ public:
             mpiLayer.rank(),
             ghostZoneWidth);
 
-        SuperVector<CoordBox<3> > boundingBoxes;
+        std::vector<CoordBox<3> > boundingBoxes;
         for (int i = 0; i < 4; ++i) {
             boundingBoxes << partitionManager->getRegion(i, 0).boundingBox();
         }
@@ -122,8 +122,8 @@ public:
 
         int tag = 4711;
 
-        SuperVector<PatchProviderPtrType> providers;
-        SuperVector<PatchAccepterPtrType> accepters;
+        std::vector<PatchProviderPtrType> providers;
+        std::vector<PatchAccepterPtrType> accepters;
 
         // manually set up patch links for ghost zone communication
         PartitionManagerType::RegionVecMap m;
@@ -162,13 +162,13 @@ public:
         }
 
         // add events to patchlinks
-        for (SuperVector<PatchProviderPtrType>::iterator i = providers.begin();
+        for (std::vector<PatchProviderPtrType>::iterator i = providers.begin();
              i != providers.end();
              ++i) {
             (*i)->charge(ghostZoneWidth, ghostZoneWidth * 5, ghostZoneWidth);
         }
 
-        for (SuperVector<PatchAccepterPtrType>::iterator i = accepters.begin();
+        for (std::vector<PatchAccepterPtrType>::iterator i = accepters.begin();
              i != accepters.end();
              ++i) {
             (*i)->charge(ghostZoneWidth, ghostZoneWidth * 5, ghostZoneWidth);

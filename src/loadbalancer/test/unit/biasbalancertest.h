@@ -12,15 +12,15 @@ public:
 
     void setUp()
     {
-        _loads = BiasBalancer::WeightVec(3);
-        _loads[0] = 47;
-        _loads[1] = 11;
-        _loads[2] = 9;
+        loads = BiasBalancer::WeightVec(3);
+        loads[0] = 47;
+        loads[1] = 11;
+        loads[2] = 9;
 
-        _relLoads = BiasBalancer::LoadVec(3);
-        _relLoads[0] = 0.2;
-        _relLoads[1] = 0.3;
-        _relLoads[2] = 0.4;
+        relLoads = BiasBalancer::LoadVec(3);
+        relLoads[0] = 0.2;
+        relLoads[1] = 0.3;
+        relLoads[2] = 0.4;
     }
 
 
@@ -30,7 +30,7 @@ public:
         BiasBalancer::WeightVec expected(3, 0);
         expected[0] = 67;
 
-        TS_ASSERT_EQUALS(expected, b.balance(_loads, _relLoads));
+        TS_ASSERT_EQUALS(expected, b.balance(loads, relLoads));
     }
 
 
@@ -47,22 +47,22 @@ public:
     void testInterfaceToOtherBalancer()
     {
         BiasBalancer b(new MockBalancer);
-        std::string expected = "balance() " + _loads.toString() + " " +
-            _relLoads.toString() + "\n";
+        std::string expected = "balance() " + toString(loads) + " " +
+            toString(relLoads) + "\n";
 
         TS_ASSERT_EQUALS("", MockBalancer::events);
-        b.balance(_loads, _relLoads);
+        b.balance(loads, relLoads);
         TS_ASSERT_EQUALS("", MockBalancer::events);
-        TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
+        TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(expected, MockBalancer::events);
-        TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
-        TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
-        TS_ASSERT_EQUALS(_loads, b.balance(_loads, _relLoads));
+        TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
+        TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
+        TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
     }
 
 private:
-    BiasBalancer::WeightVec _loads;
-    BiasBalancer::LoadVec _relLoads;
+    BiasBalancer::WeightVec loads;
+    BiasBalancer::LoadVec relLoads;
 };
 
 };

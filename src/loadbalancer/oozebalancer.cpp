@@ -19,22 +19,22 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
 {
     unsigned n = weights.size();
     // calculate approximate load share we want on each node
-    double targetLoadPerNode = relativeLoads.sum() / n;
+    double targetLoadPerNode = sum(relativeLoads) / n;
 
     if (targetLoadPerNode == 0)
-        return LoadVec(n, weights.sum()/ (double)n);
+        return LoadVec(n, sum(weights)/ (double)n);
 
     LoadVec ret(n, 0);
     LoadVec loadPerItem;
     for (unsigned i = 0; i < n; i++) {
         if (weights[i]) {
             LoadVec add(weights[i], relativeLoads[i] / weights[i]);
-            loadPerItem.append(add);
+            append(loadPerItem, add);
         }
     }
     // stores the remaining fraction, which is still to be assigned,
     // of each item.
-    LoadVec remFractPerItem(weights.sum(), 1.0);
+    LoadVec remFractPerItem(sum(weights), 1.0);
 
     // now fill up one node after another so that each gets his
     // targeted share...
@@ -63,7 +63,7 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
     }
 
     // add remainder to last node
-    ret.back() += remFractPerItem.sum();
+    ret.back() += sum(remFractPerItem);
 
     return ret;
 }
@@ -77,11 +77,11 @@ OozeBalancer::WeightVec OozeBalancer::balance(
     LoadVec newLoads = linearCombo(weights, expectedOptimal);
 
     WeightVec ret = equalize(newLoads);
-    if (weights.sum() != ret.sum()) {
+    if (sum(weights) != sum(ret)) {
         std::cerr << "OozeBalancer::balance() failed\n"
-                  << "  weights.sum() = " << weights.sum() << "\n"
-                  << "  ret.sum() = " << ret.sum() << "\n"
-                  << "  expectedOptimal.sum() = " << expectedOptimal.sum() << "\n"
+                  << "  weights.sum() = " << sum(weights) << "\n"
+                  << "  ret.sum() = " << sum(ret) << "\n"
+                  << "  expectedOptimal.sum() = " << sum(expectedOptimal) << "\n"
                   << "  weights = " << weights << "\n"
                   << "  relativeLoads = " << relativeLoads << "\n"
                   << "  expectedOptimal = " << expectedOptimal << "\n"

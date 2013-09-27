@@ -24,8 +24,8 @@ public:
 
         TS_ASSERT_EQUALS((unsigned)4,  actualA.size());
         TS_ASSERT_EQUALS((unsigned)4,  actualB.size());
-        TS_ASSERT_EQUALS((unsigned)24, actualA.sum());
-        TS_ASSERT_EQUALS((unsigned)24, actualB.sum());
+        TS_ASSERT_EQUALS((unsigned)24, sum(actualA));
+        TS_ASSERT_EQUALS((unsigned)24, sum(actualB));
     }
 };
 

@@ -279,7 +279,7 @@ public:
         ++numNeighbors;
     }
 
-    void setShape(const SuperVector<Coord<2> >& newShape)
+    void setShape(const std::vector<Coord<2> >& newShape)
     {
         if (newShape.size() > MAX_NEIGHBORS) {
             throw std::logic_error("shape too large");
@@ -397,7 +397,7 @@ public:
     Element& operator<<(const Equation& eq)
     {
         limits << eq;
-        SuperVector<Coord<2> > cutPoints = generateCutPoints();
+        std::vector<Coord<2> > cutPoints = generateCutPoints();
         SuperSet<int> deleteSet;
 
         for (int i = 0; i < limits. size(); ++i) {
@@ -426,7 +426,7 @@ public:
                 }
         }
 
-        SuperVector<Equation> newLimits;
+        std::vector<Equation> newLimits;
         for (int i = 0; i < limits.size(); ++i) {
             if (!deleteSet.count(i)) {
                 newLimits << limits[i];
@@ -453,9 +453,9 @@ public:
         return *this;
     }
 
-    SuperVector<Coord<2> > generateCutPoints()
+    std::vector<Coord<2> > generateCutPoints()
     {
-        SuperVector<Coord<2> > buf(2 * limits.size(), FarAway);
+        std::vector<Coord<2> > buf(2 * limits.size(), FarAway);
 
         for (int i = 0; i < limits.size(); ++i) {
             for (int j = 0; j < limits.size(); ++j) {
@@ -502,9 +502,9 @@ public:
         return buf;
     }
 
-    SuperVector<Coord<2> > getShape()
+    std::vector<Coord<2> > getShape()
     {
-        SuperVector<Coord<2> > cutPoints = generateCutPoints();
+        std::vector<Coord<2> > cutPoints = generateCutPoints();
 
         for (int i = 0; i < cutPoints.size(); ++i) {
             if (cutPoints[i] == FarAway) {
@@ -524,7 +524,7 @@ public:
             points[angle] = cutPoints[i];
         }
 
-        SuperVector<Coord<2> > res;
+        std::vector<Coord<2> > res;
         for (SuperMap<double, Coord<2> >::iterator i = points.begin();
              i != points.end(); ++i) {
             res << i->second;
@@ -549,7 +549,7 @@ public:
 
     void updateGeometryData()
     {
-        SuperVector<Coord<2> > cutPoints = generateCutPoints();
+        std::vector<Coord<2> > cutPoints = generateCutPoints();
 
         for (int i = 0; i < limits. size(); ++i) {
             Coord<2> delta = cutPoints[2 * i + 0] - cutPoints[2 * i + 1];
@@ -594,7 +594,7 @@ public:
         return area;
     }
 
-    const SuperVector<Equation>& getLimits() const
+    const std::vector<Equation>& getLimits() const
     {
         return limits;
     }
@@ -609,7 +609,7 @@ private:
     ID id;
     double area;
     double diameter;
-    SuperVector<Equation> limits;
+    std::vector<Equation> limits;
 
     Coord<2> turnLeft90(const Coord<2>& c)
     {
@@ -979,7 +979,7 @@ private:
                 cell.updatePressures();
                 cell.setShape(e.getShape());
 
-                for (SuperVector<Equation>::const_iterator l =
+                for (std::vector<Equation>::const_iterator l =
                          e.getLimits().begin();
                      l != e.getLimits().end(); ++l) {
                     if (l->neighborID.container != FarAway) {
@@ -1044,8 +1044,8 @@ private:
                         const int& n)
     {
         int dim = 2;
-        SuperVector<float> x;
-        SuperVector<float> y;
+        std::vector<float> x;
+        std::vector<float> y;
 
         CoordBox<2> box(Coord<2>(), grid.getDimensions());
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
@@ -1064,16 +1064,16 @@ private:
                        const int& n)
     {
         int dim = 2;
-        SuperVector<float> x;
-        SuperVector<float> y;
-        SuperVector<int> nodes;
-        SuperVector<int> shapeSizes;
+        std::vector<float> x;
+        std::vector<float> y;
+        std::vector<int> nodes;
+        std::vector<int> shapeSizes;
 
         CoordBox<2> box(Coord<2>(), grid.getDimensions());
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             const ContainerCell& container = grid[*iter];
             for (int i = 0; i < container.numCells; ++i) {
-                SuperVector<Coord<2> > coords(container.cells[i].shapeSize);
+                std::vector<Coord<2> > coords(container.cells[i].shapeSize);
                 std::copy(container.cells[i].shape,
                           container.cells[i].shape + container.cells[i].shapeSize,
                           &coords[0]);
@@ -1088,8 +1088,8 @@ private:
         }
 
         float *coords[] = {&x[0], &y[0]};
-        SuperVector<int> shapeCounts(n, 1);
-        SuperVector<int> shapeTypes(n, DB_ZONETYPE_POLYGON);
+        std::vector<int> shapeCounts(n, 1);
+        std::vector<int> shapeTypes(n, DB_ZONETYPE_POLYGON);
         int numShapeTypes = n;
         int numNodes = x.size();
         int numZones = shapeSizes.size();
@@ -1109,8 +1109,8 @@ private:
                         const int& n)
     {
         int dim = 2;
-        SuperVector<float> x;
-        SuperVector<float> y;
+        std::vector<float> x;
+        std::vector<float> y;
 
         for (int i = 0; i < grid.getDimensions().x() + 1; ++i) {
             x << i * CELL_SPACING;
@@ -1131,7 +1131,7 @@ private:
 
 #define WRITE_SCALAR(FIELD, NAME)                                       \
         {                                                               \
-            SuperVector<double> buf;                                    \
+            std::vector<double> buf;                                    \
             for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) { \
                 const ContainerCell& container = grid[*iter];           \
                 for (int i = 0; i < container.numCells; ++i)            \
@@ -1148,8 +1148,8 @@ private:
         WRITE_SCALAR(ratios[2], "ratios_2");
 #undef WRITE_SCALAR
 
-        SuperVector<double> velocityX;
-        SuperVector<double> velocityY;
+        std::vector<double> velocityX;
+        std::vector<double> velocityY;
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             const ContainerCell& container = grid[*iter];
 

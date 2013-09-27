@@ -280,7 +280,7 @@ private:
                 continue;
             }
 
-            std::string command = parameters.pop_front();
+            std::string command = pop_front(parameters);
             if (actions.count(command) == 0) {
                 std::string message = "command not found: " + command;
                 LOG(WARN, message);

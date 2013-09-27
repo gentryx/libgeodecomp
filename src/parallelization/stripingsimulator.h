@@ -470,7 +470,7 @@ private:
 
     int upperNeighbor() const
     {
-        size_t upperNeighbor;
+        int upperNeighbor;
 
         if (WRAP_EDGES) {
             int size = mpilayer.size();
@@ -580,7 +580,7 @@ private:
     void validateLoads(const WeightVec& newLoads, const WeightVec& oldLoads) const
     {
         if (newLoads.size() != oldLoads.size() ||
-            newLoads.sum() != oldLoads.sum()) {
+            sum(newLoads) != sum(oldLoads)) {
             throw std::invalid_argument(
                     "newLoads and oldLoads do not maintain invariance");
         }

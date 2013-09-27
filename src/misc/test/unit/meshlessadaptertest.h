@@ -124,7 +124,7 @@ public:
         AdapterType::Graph graph;
         for (int i = 0; i < width; ++i) {
             positions.push_back(std::make_pair(FloatCoord<2>(i * 0.5, 0.5), i));
-            SuperVector<int> neighbors;
+            std::vector<int> neighbors;
             neighbors << ((i + width - 1) % width)
                       << ((i + width + 1) % width);
             graph << neighbors;

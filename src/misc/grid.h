@@ -106,8 +106,8 @@ public:
         CELL_TYPE, DIM, AlignedAllocator<CELL_TYPE, 64> > CellMatrix;
     typedef typename CellMatrix::index Index;
 #else
-    typedef SuperVector<CELL_TYPE>& SliceRef;
-    typedef const SuperVector<CELL_TYPE>& ConstSliceRef;
+    typedef std::vector<CELL_TYPE>& SliceRef;
+    typedef const std::vector<CELL_TYPE>& ConstSliceRef;
     typedef int Index;
 #endif
 

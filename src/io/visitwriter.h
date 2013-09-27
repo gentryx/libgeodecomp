@@ -198,7 +198,7 @@ public:
 private:
     boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > accessor;
     size_t gridVolume;
-    SuperVector<MEMBER_TYPE> dataBuffer;
+    std::vector<MEMBER_TYPE> dataBuffer;
 };
 
 }
@@ -207,7 +207,7 @@ template<typename CELL_TYPE, typename MESH_TYPE>
 class VisItWriter : public Writer<CELL_TYPE>
 {
 public:
-    typedef SuperVector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
+    typedef std::vector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     typedef VisItWriter<CELL_TYPE, MESH_TYPE> SVW;
@@ -314,7 +314,7 @@ public:
     int runMode;
     int dataNumber;
     DataAccessorVec dataAccessors;
-    SuperVector<SuperVector<char> > values;
+    std::vector<std::vector<char> > values;
     std::map<std::string, int> variableMap;
     const GridType *grid;
     unsigned step;

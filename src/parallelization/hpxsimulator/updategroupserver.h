@@ -18,8 +18,8 @@ template <class CELL_TYPE, class PARTITION, class STEPPER>
 class UpdateGroup;
 
 enum EventPoint {LOAD_BALANCING, END};
-typedef SuperSet<EventPoint> EventSet;
-typedef SuperMap<std::size_t, EventSet> EventMap;
+typedef std::set<EventPoint> EventSet;
+typedef std::map<std::size_t, EventSet> EventMap;
 
 template <class CELL_TYPE, class PARTITION, class STEPPER>
 class UpdateGroupServer : public hpx::components::managed_component_base<
@@ -111,6 +111,9 @@ public:
             );
 
         partitionManager->resetGhostZones(initData.boundingBoxes);
+        
+        long firstSyncPoint =
+            initializer->startStep() * NANO_STEPS + ghostZoneWidth;
 
         const RegionVecMap& outerMap = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = outerMap.begin(); i != outerMap.end(); ++i) {
@@ -129,6 +132,10 @@ public:
                 PatchLinkProviderPtr link(
                     new PatchLinkProviderType(
                         i->second.back()));
+                link->charge(
+                    firstSyncPoint,
+                    PatchLink<GridType, ClientType>::ENDLESS,
+                    ghostZoneWidth);
 
                 patchlinkProviderMap.insert(std::make_pair(i->first, link));
             }
@@ -203,6 +210,10 @@ public:
             patchAcceptersGhost.push_back(adapterGhost);
             patchAcceptersInner.push_back(adapterInnerSet);
         }
+        
+        typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
+        for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it) {
+        }
 
         stepper.reset(new STEPPER(
                           partitionManager,
@@ -213,19 +224,12 @@ public:
         // the ghostzone receivers may be safely added after
         // initialization as they're only really needed when the next
         // ghostzone generation is being received.
-        typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
         for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it) {
             addPatchProvider(it->second, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
             patchLinks << it->second;
 
-            it->second->charge(
-                firstSyncPoint,
-                PatchLink<GridType, ClientType>::ENDLESS,
-                ghostZoneWidth);
-
             it->second->setRegion(partitionManager->ownRegion());
         }
-
 
         // Convert steerer to patch accepters
         BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
@@ -318,7 +322,7 @@ public:
 
     void setOuterGhostZone(
         std::size_t srcRank,
-        boost::shared_ptr<SuperVector<CELL_TYPE> > buffer,
+        boost::shared_ptr<std::vector<CELL_TYPE> > buffer,
         long nanoStep)
     {
         typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
@@ -326,11 +330,9 @@ public:
         if(patchlinkIter == patchlinkProviderMap.end()) {
             std::cerr << rank << " setting outer ghostzone from unknown rank: " << srcRank << "\ngot these ranks:\n";
             typedef std::pair<std::size_t, PatchLinkProviderPtr> pair_type;
-            /*
             BOOST_FOREACH(const pair_type& p, patchlinkProviderMap) {
                 std::cerr << rank << " " << p.first << "\n";
             }
-            */
             return;
         }
         BOOST_ASSERT(patchlinkIter != patchlinkProviderMap.end());
@@ -364,8 +366,8 @@ private:
 
     boost::shared_ptr<HiParSimulator::Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
-    SuperVector<PatchLinkPtr> patchLinks;
-    SuperMap<std::size_t, PatchLinkProviderPtr> patchlinkProviderMap;
+    std::vector<PatchLinkPtr> patchLinks;
+    std::map<std::size_t, PatchLinkProviderPtr> patchlinkProviderMap;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
@@ -403,7 +405,7 @@ private:
     {
         events.clear();
         long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
-        events[lastNanoStep] << END;
+        events[lastNanoStep].insert(END);
 
         insertNextLoadBalancingEvent();
     }
@@ -431,7 +433,7 @@ private:
     inline void insertNextLoadBalancingEvent()
     {
         long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
-        events[nextLoadBalancing] << LOAD_BALANCING;
+        events[nextLoadBalancing].insert(LOAD_BALANCING);
     }
 
     std::size_t currentNanoStep() const

@@ -32,7 +32,7 @@ public:
         region(region),
         indexRead(0),
         indexWrite(0),
-        buffer(SIZE, SuperVector<CellType>(region.size()))
+        buffer(SIZE, std::vector<CellType>(region.size()))
     {}
 
     virtual void put(
@@ -77,7 +77,7 @@ private:
     Region<DIM> region;
     int indexRead;
     int indexWrite;
-    SuperVector<SuperVector<CellType> > buffer;
+    std::vector<std::vector<CellType> > buffer;
 
     inline void inc(int *index)
     {

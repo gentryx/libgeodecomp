@@ -13,7 +13,7 @@ class MockCell
 public:
     typedef Topologies::Cube<2>::Topology Topology;
 
-    MockCell(int _id=0, SuperVector<int> *_ids=0) :
+    MockCell(int _id=0, std::vector<int> *_ids=0) :
         id(_id),
         ids(_ids)
     {}
@@ -21,7 +21,7 @@ public:
     template<class NEIGHBORHOOD>
     void update(NEIGHBORHOOD neighbors, int nanoStep)
     {
-        for (SuperVector<int>::iterator i = ids->begin();
+        for (std::vector<int>::iterator i = ids->begin();
              i != ids->end(); ++i) {
             TS_ASSERT_EQUALS(*i, neighbors[*i].id);
         }
@@ -31,7 +31,7 @@ public:
     }
 
     int id;
-    SuperVector<int> *ids;
+    std::vector<int> *ids;
 };
 
 class ContainerCellTest : public CxxTest::TestSuite
@@ -41,7 +41,7 @@ public:
     void testInsertAndSearch()
     {
         ContainerCell<MockCell, 5> container;
-        SuperVector<int> ids;
+        std::vector<int> ids;
         ids << 1 << 2 << 4 << 5 << 6;
 
         container.insert(2, MockCell(2, &ids));
@@ -72,7 +72,7 @@ public:
     void testRemove()
     {
         ContainerCell<MockCell, 5> container;
-        SuperVector<int> ids;
+        std::vector<int> ids;
         ids << 1 << 2 << 6 << 7;
 
         container.insert(2, MockCell(2, &ids));
@@ -90,7 +90,7 @@ public:
 
     void testUpdate()
     {
-        SuperVector<int> ids;
+        std::vector<int> ids;
         DisplacedGrid<ContainerCell<MockCell, 9> > grid(
             CoordBox<2>(Coord<2>(-1, -1), Coord<2>(3, 3)));
 

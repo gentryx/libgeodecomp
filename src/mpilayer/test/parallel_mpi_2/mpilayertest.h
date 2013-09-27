@@ -16,22 +16,22 @@ public:
     void testAllGather1()
     {
         MPILayer layer;
-        SuperVector<size_t> expected;
+        std::vector<size_t> expected;
         for (size_t i = 0; i < layer.size(); i++) {
             expected.push_back(i);
         }
-        SuperVector<size_t> actual = layer.allGather(layer.rank());
+        std::vector<size_t> actual = layer.allGather(layer.rank());
         TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testAllGather2()
     {
         MPILayer layer;
-        SuperVector<size_t> expected;
+        std::vector<size_t> expected;
         for (size_t i = 0; i < layer.size(); i++) {
             expected.push_back(i);
         }
-        SuperVector<size_t> actual(layer.size());
+        std::vector<size_t> actual(layer.size());
         size_t rank = layer.rank();
         layer.allGather(&rank, &actual[0], 1);
         TS_ASSERT_EQUALS(actual, expected);
@@ -40,11 +40,11 @@ public:
     void testAllGather3()
     {
         MPILayer layer;
-        SuperVector<size_t> expected;
+        std::vector<size_t> expected;
         for (size_t i = 0; i < layer.size(); i++) {
             expected.push_back(i);
         }
-        SuperVector<size_t> actual(layer.size());
+        std::vector<size_t> actual(layer.size());
         layer.allGather(layer.rank(), &actual);
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -53,13 +53,13 @@ public:
     {
         MPILayer layer;
         size_t root = 0;
-        SuperVector<size_t> expected_root;
-        SuperVector<size_t> expected_slave;
+        std::vector<size_t> expected_root;
+        std::vector<size_t> expected_slave;
         for (unsigned i = 0; i < layer.size(); i++) {
             expected_root.push_back(i);
         }
 
-        SuperVector<size_t> actual = layer.gather(layer.rank(), root);
+        std::vector<size_t> actual = layer.gather(layer.rank(), root);
         if (layer.rank() == root) {
             TS_ASSERT_EQUALS(actual, expected_root);
         } else {
@@ -94,15 +94,15 @@ public:
     {
         MPILayer layer;
         unsigned root = 0;
-        SuperVector<double> expected;
+        std::vector<double> expected;
         expected += 2,4,24;
-        SuperVector<double> actual;
-        SuperVector<double> source;
+        std::vector<double> actual;
+        std::vector<double> source;
 
         if (layer.rank() == root) {
             source = expected;
         } else {
-            source = SuperVector<double>();
+            source = std::vector<double>();
         }
 
         actual = layer.broadcastVector(source, root);
@@ -169,7 +169,7 @@ public:
     {
         MPILayer layer;
         int i = layer.rank() + 1000;
-        SuperVector<int> actual, expected;
+        std::vector<int> actual, expected;
         actual += 4711, 4712;
         expected += 1000, 1001;
         layer.allGather(i, &actual);
@@ -179,17 +179,17 @@ public:
     void testAllGatherV1()
     {
         MPILayer layer;
-        SuperVector<unsigned> values;
-        SuperVector<int> lengths;
+        std::vector<unsigned> values;
+        std::vector<int> lengths;
         lengths += 3, 5;
         if (layer.rank() == 0) {
             values += 1, 2, 3;
         } else {
             values += 4, 5, 6, 7, 8;
         }
-        SuperVector<unsigned> target(8);
+        std::vector<unsigned> target(8);
         layer.allGatherV(&values[0], lengths, &target);
-        SuperVector<unsigned> expected;
+        std::vector<unsigned> expected;
         expected += 1, 2, 3, 4, 5, 6, 7, 8;
         TS_ASSERT_EQUALS(expected, target);
     }
@@ -197,16 +197,16 @@ public:
     void testAllGatherV2()
     {
         MPILayer layer;
-        SuperVector<unsigned> values;
-        SuperVector<int> lengths;
+        std::vector<unsigned> values;
+        std::vector<int> lengths;
         lengths += 3, 5;
         if (layer.rank() == 0) {
             values += 1, 2, 3;
         } else {
             values += 4, 5, 6, 7, 8;
         }
-        SuperVector<unsigned> target(layer.allGatherV(&values[0], lengths));
-        SuperVector<unsigned> expected;
+        std::vector<unsigned> target(layer.allGatherV(&values[0], lengths));
+        std::vector<unsigned> expected;
         expected += 1, 2, 3, 4, 5, 6, 7, 8;
         TS_ASSERT_EQUALS(expected, target);
     }
@@ -220,14 +220,14 @@ public:
             data[1] = 11;
         }
 
-        SuperVector<int> target(5);
-        SuperVector<int> lengths;
+        std::vector<int> target(5);
+        std::vector<int> lengths;
         lengths << 3
                 << 2;
         layer.gatherV(data, lengths[layer.rank()], lengths, 0, &target[0]);
 
         if (layer.rank() == 0) {
-            SuperVector<int> expected;
+            std::vector<int> expected;
             expected << 1
                      << 2
                      << 3

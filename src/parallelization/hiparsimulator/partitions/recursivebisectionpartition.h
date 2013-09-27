@@ -13,7 +13,7 @@ class RecursiveBisectionPartition : public Partition<DIM>
 {
     friend class RecursiveBisectionPartitionTest;
 public:
-    typedef SuperVector<std::size_t> SizeTVec;
+    typedef std::vector<std::size_t> SizeTVec;
 
     inline RecursiveBisectionPartition(
         const Coord<DIM>& origin = Coord<DIM>(),

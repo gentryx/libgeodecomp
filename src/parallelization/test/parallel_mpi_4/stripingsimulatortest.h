@@ -117,9 +117,12 @@ public:
     void testInitRegions()
     {
         Region<2> regions[4];
-        layer.sendRegion(testSim->region, 0);
-        if (rank == 0) {
-            for (int i = 0; i < 4; ++i) {
+        if (rank != 0) {
+            layer.sendRegion(testSim->region, 0);
+        }
+        else {
+            regions[0] = testSim->region;
+            for (int i = 1; i < 4; ++i) {
                 layer.recvRegion(&regions[i], i);
             }
         }
@@ -139,7 +142,6 @@ public:
 
             TS_ASSERT_EQUALS(expected, whole);
         }
-
     }
 
     void testStep()
@@ -401,8 +403,8 @@ public:
     void testParallelWriterInvocation()
     {
         unsigned period = 4;
-        SuperVector<unsigned> expectedSteps;
-        SuperVector<WriterEvent> expectedEvents;
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
         expectedSteps << 20
                       << 24
                       << 28

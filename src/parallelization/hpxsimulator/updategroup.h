@@ -56,7 +56,7 @@ public:
         WriterVector writers;
         SteererVector steerers;
         std::vector<CoordBox<DIM> > boundingBoxes;
-        SuperVector<std::size_t> initialWeights;
+        std::vector<std::size_t> initialWeights;
 
         template <typename ARCHIVE>
         void serialize(ARCHIVE& ar, unsigned)
@@ -78,7 +78,7 @@ public:
 
     hpx::future<void> setOuterGhostZone(
         std::size_t srcRank,
-        boost::shared_ptr<SuperVector<CELL_TYPE> > buffer,
+        boost::shared_ptr<std::vector<CELL_TYPE> > buffer,
         long nanoStep)
     {
         return

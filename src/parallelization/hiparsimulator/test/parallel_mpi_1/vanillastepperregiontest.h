@@ -32,13 +32,13 @@ public:
     }
 
     inline
-    const SuperVector<Event>& getEvents() const
+    const std::vector<Event>& getEvents() const
     {
         return events;
     }
 
 private:
-    SuperVector<Event> events;
+    std::vector<Event> events;
 };
 
 class VanillaStepperRegionTest : public CxxTest::TestSuite
@@ -56,7 +56,7 @@ public:
 
         // Set up a striping partition. We'll take rank 1, placing us
         // between the two others 0 and 2.
-        SuperVector<size_t> weights(3);
+        std::vector<std::size_t> weights(3);
         weights[0] = 4*17 + 7;
         weights[1] = 2*17 - 1;
         weights[2] = 12*17 - weights[0] - weights[1];
@@ -70,7 +70,7 @@ public:
             partition,
             1,
             ghostZoneWidth);
-        SuperVector<CoordBox<2> > boundingBoxes;
+        std::vector<CoordBox<2> > boundingBoxes;
         for (int i = 0; i < 3; ++i)
             boundingBoxes.push_back(partition->getRegion(i).boundingBox());
         partitionManager->resetGhostZones(boundingBoxes);

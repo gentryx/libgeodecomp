@@ -11,19 +11,19 @@ class GridVecConv
 {
 public:
     template<typename GRID_TYPE>
-    static SuperVector<typename GRID_TYPE::CellType> gridToVector(
+    static std::vector<typename GRID_TYPE::CellType> gridToVector(
         const GRID_TYPE& grid,
         const Region<GRID_TYPE::DIM>& region)
     {
-        SuperVector<typename GRID_TYPE::CellType> ret(region.size());
+        std::vector<typename GRID_TYPE::CellType> ret(region.size());
         gridToVector(grid, &ret, region);
         return ret;
     }
 
-    template<typename GRID_TYPE>
+    template<typename GRID_TYPE, typename VECTOR_TYPE>
     static void gridToVector(
         const GRID_TYPE& grid,
-        SuperVector<typename GRID_TYPE::CellType> *vec,
+        VECTOR_TYPE *vec,
         const Region<GRID_TYPE::DIM>& region)
     {
         if (vec->size() != region.size()) {

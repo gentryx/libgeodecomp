@@ -66,7 +66,7 @@ class MockWriter : public Writer<TestCell<2> >, public ParallelWriter<TestCell<2
 public:
     static std::string staticEvents;
 
-    typedef SuperVector<MockWriterHelpers::MockWriterEvent> EventVec;
+    typedef std::vector<MockWriterHelpers::MockWriterEvent> EventVec;
 
     MockWriter(const unsigned& period=1) :
         Writer<TestCell<2> >("", period),

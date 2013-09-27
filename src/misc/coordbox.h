@@ -167,9 +167,6 @@ class CoordBoxMPIDatatypeHelper
     CoordBox<3> c;
 };
 
-}
-
-
 template<typename _CharT, typename _Traits, int _Dimensions>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
@@ -178,5 +175,8 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
     __os << rect.toString();
     return __os;
 }
+
+}
+
 
 #endif

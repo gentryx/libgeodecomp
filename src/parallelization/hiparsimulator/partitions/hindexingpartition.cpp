@@ -12,7 +12,7 @@ int HIndexingPartition::triangleTransitions[4][4] = {
 
 Coord<2> HIndexingPartition::maxCachedDimensions;
 
-boost::shared_ptr<boost::multi_array<SuperVector<Coord<2> >, 3> > HIndexingPartition::triangleCoordsCache;
+boost::shared_ptr<boost::multi_array<std::vector<Coord<2> >, 3> > HIndexingPartition::triangleCoordsCache;
 
 SuperMap<std::pair<Coord<2>, unsigned>, unsigned> HIndexingPartition::triangleLengthCache;
 

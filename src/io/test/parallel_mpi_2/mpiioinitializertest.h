@@ -19,7 +19,7 @@ namespace LibGeoDecomp {
 class MPIIOInitializerTest : public CxxTest::TestSuite
 {
 public:
-    SuperVector<std::string> files;
+    std::vector<std::string> files;
     int rank;
 
     void setUp()

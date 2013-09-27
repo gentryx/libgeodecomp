@@ -17,7 +17,7 @@ class DistributedSimulator : public Simulator<CELL_TYPE>
 public:
     typedef typename Simulator<CELL_TYPE>::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
-    typedef SuperVector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
+    typedef std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
 
     inline DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)

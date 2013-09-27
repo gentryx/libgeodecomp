@@ -1,3 +1,5 @@
+
+#include <libgeodecomp/config.h>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <sstream>
@@ -164,8 +166,8 @@ public:
     void testParallelWriterInvocation()
     {
         unsigned period = 4;
-        SuperVector<unsigned> expectedSteps;
-        SuperVector<WriterEvent> expectedEvents;
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
         expectedSteps << 20
                       << 24
                       << 28

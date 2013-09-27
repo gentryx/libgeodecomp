@@ -75,7 +75,7 @@ public:
              ++i) {
             LOG(DBG, "RemoteSteerer::nextStep got" << *i);
             StringVec parameters = StringOps::tokenize(*i, " ");
-            std::string command = parameters.pop_front();
+            std::string command = pop_front(parameters);
 
             if (handlers.count(command) == 0) {
                 std::string message = "handler not found: " + command;

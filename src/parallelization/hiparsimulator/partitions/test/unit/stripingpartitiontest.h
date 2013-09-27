@@ -14,14 +14,14 @@ namespace HiParSimulator {
 class StripingPartitionTest : public CxxTest::TestSuite
 {
 public:
-    typedef SuperVector<Coord<2> > CoordVector;
+    typedef std::vector<Coord<2> > CoordVector;
 
     void setUp()
     {
         expected.clear();
     }
 
-    void check(StripingPartition<2> p, CoordVector expected)
+    void check(const StripingPartition<2>& p, const CoordVector& expected)
     {
         CoordVector actual;
         StripingPartition<2>::Iterator end = p.end();
@@ -69,7 +69,7 @@ public:
     void testSquareBracketsOperator()
     {
         StripingPartition<2> s(Coord<2>(), Coord<2>(3, 3));
-        SuperVector<StripingPartition<2>::Iterator> expected, actual;
+        std::vector<StripingPartition<2>::Iterator> expected, actual;
         expected += s[0], s[1], s[2], s[3];
         StripingPartition<2>::Iterator i = s.begin();
         for (int c = 0; c < 4; ++c) {
@@ -81,8 +81,8 @@ public:
 
     void test3D()
     {
-        SuperVector<Coord<3> > expected;
-        SuperVector<Coord<3> > actual;
+        std::vector<Coord<3> > expected;
+        std::vector<Coord<3> > actual;
 
         Coord<3> offset(4, 3, 5);
         Coord<3> dim(4, 3, 5);

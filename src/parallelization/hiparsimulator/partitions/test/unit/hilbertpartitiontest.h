@@ -13,7 +13,7 @@ namespace HiParSimulator {
 class HilbertPartitionTest : public CxxTest::TestSuite
 {
 public:
-    typedef SuperVector<Coord<2> > CoordVector;
+    typedef std::vector<Coord<2> > CoordVector;
 
     void setUp()
     {
@@ -129,11 +129,11 @@ public:
         for (int x = offset.x(); x < (offset.x() + dimensions.x()); ++x)
             for (int y = offset.y(); y < (offset.y() + dimensions.y()); ++y)
                 expectedSorted += Coord<2>(x, y);
-        expectedSorted.sort();
+        sort(expectedSorted);
         CoordVector actual;
         for (HilbertPartition::Iterator i = partition.begin(); i != partition.end(); ++i)
             actual.push_back(*i);
-        actual.sort();
+        sort(actual);
         TS_ASSERT_EQUALS(expectedSorted, actual);
     }
 

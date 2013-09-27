@@ -71,7 +71,7 @@ class HIndexingPartition : public SpaceFillingCurve<2>
     friend class HIndexingPartitionTest;
 
 public:
-    typedef SuperVector<Coord<2> > CoordVector;
+    typedef std::vector<Coord<2> > CoordVector;
 
     class Triangle
     {
@@ -141,7 +141,7 @@ public:
             triangleStack.push_back(Triangle(1, dimensions, origin + dimensions, -1));
             triangleStack.push_back(Triangle(2, dimensions, origin));
             for (;;) {
-                Triangle curTria = triangleStack.pop();
+                Triangle curTria = pop(triangleStack);
                 unsigned length = triangleLength(curTria);
                 if (length <= remainder) {
                     remainder -= length;
@@ -211,7 +211,7 @@ public:
         }
 
     private:
-        SuperVector<Triangle> triangleStack;
+        std::vector<Triangle> triangleStack;
         Coord<2> cachedTriangleOrigin;
         Coord<2> *cachedTriangleCoordsIterator;
         Coord<2> *cachedTriangleCoordsEnd;
@@ -243,7 +243,7 @@ public:
         inline void digDown()
         {
             Triangle curTria;
-            for (curTria = triangleStack.pop();
+            for (curTria = pop(triangleStack);
                  !hasTrivialDimensions(curTria.dimensions) && !isCached(curTria.dimensions);
                  nextSubTriangle(&curTria)) {
                 triangleStack.push_back(curTria);
@@ -531,7 +531,7 @@ public:
         const Coord<2>& origin=Coord<2>(0, 0),
         const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,
-        const SuperVector<std::size_t>& weights=SuperVector<std::size_t>(2)) :
+        const std::vector<std::size_t>& weights=std::vector<std::size_t>(2)) :
         SpaceFillingCurve<2>(offset, weights),
         origin(origin),
         dimensions(dimensions)

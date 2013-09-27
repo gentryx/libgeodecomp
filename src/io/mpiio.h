@@ -51,7 +51,7 @@ public:
                 offset(headerLength, coord, dimensions, cellLength),
                 MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
-            SuperVector<CELL_TYPE> vec(length);
+            std::vector<CELL_TYPE> vec(length);
 
             MPI_File_read(file, &vec[0], length, mpiDatatype, MPI_STATUS_IGNORE);
 
@@ -92,12 +92,12 @@ public:
         const MPI_Comm& comm = MPI_COMM_WORLD)
     {
         MPI_File file = openFileForWrite(filename, comm);
-        MPI_Aint headerLength;
-        MPI_Aint cellLength;
+        MPI_Aint headerLength = 0;
+        MPI_Aint cellLength = 0;
         getLengths<DIM>(&headerLength, &cellLength, mpiDatatype);
         int rank;
         MPI_Comm_rank(comm, &rank);
-
+        
         if (rank == 0) {
             CELL_TYPE cell = grid.getEdge();
             MPI_File_write(file, const_cast<Coord<DIM>*>(&dimensions),
@@ -126,7 +126,7 @@ public:
                 MPI_SEEK_SET);
 
             int length = i->endX - i->origin.x();
-            SuperVector<CELL_TYPE> vec(length);
+            std::vector<CELL_TYPE> vec(length);
 
             Coord<DIM> c = i->origin;
             for (int index = 0; index < length; ++index) {

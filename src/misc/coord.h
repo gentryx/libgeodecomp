@@ -569,6 +569,15 @@ private:
     int c[3];
 };
 
+template<typename _CharT, typename _Traits, int DIMENSIONS>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
+           const LibGeoDecomp::Coord<DIMENSIONS>& coord)
+{
+    os << coord.toString();
+    return os;
+}
+
 }
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
@@ -576,14 +585,5 @@ BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<1>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<2>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<3>)
 #endif
-
-template<typename _CharT, typename _Traits, int DIMENSIONS>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::Coord<DIMENSIONS>& coord)
-{
-    __os << coord.toString();
-    return __os;
-}
 
 #endif

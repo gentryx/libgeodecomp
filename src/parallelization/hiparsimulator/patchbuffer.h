@@ -69,7 +69,7 @@ public:
 
 private:
     Region<DIM> region;
-    std::deque<SuperVector<CellType> > storedRegions;
+    std::deque<std::vector<CellType> > storedRegions;
 };
 
 }

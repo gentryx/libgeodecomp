@@ -13,9 +13,9 @@ class CoordTest : public CxxTest::TestSuite
     Coord<2> *c1;
 
 public:
-    bool includesCoord(SuperVector<Coord<2> > vec, int x, int y) {
+    bool includesCoord(std::vector<Coord<2> > vec, int x, int y) {
         Coord<2> compare(x, y);
-        for(SuperVector<Coord<2> >::iterator i = vec.begin(); i != vec.end(); i++) {
+        for(std::vector<Coord<2> >::iterator i = vec.begin(); i != vec.end(); i++) {
             if (*i == compare) {
                 return true;
             }

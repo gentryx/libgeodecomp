@@ -29,7 +29,7 @@ public:
     typedef typename DistributedSimulator<CellType>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
-    typedef SuperVector<CellType> BufferType;
+    typedef std::vector<CellType> BufferType;
     typedef hpx::lcos::local::spinlock MutexType;
 
     typedef

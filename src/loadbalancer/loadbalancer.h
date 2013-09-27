@@ -12,8 +12,8 @@ namespace LibGeoDecomp {
 class LoadBalancer
 {
 public:
-    typedef SuperVector<std::size_t> WeightVec;
-    typedef SuperVector<double> LoadVec;
+    typedef std::vector<std::size_t> WeightVec;
+    typedef std::vector<double> LoadVec;
 
     virtual ~LoadBalancer() {}
 

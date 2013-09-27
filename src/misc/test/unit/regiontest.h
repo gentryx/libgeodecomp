@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
 class RegionTest : public CxxTest::TestSuite
 {
 public:
-    typedef SuperVector<Coord<2> > CoordVector;
+    typedef std::vector<Coord<2> > CoordVector;
     typedef Region<1>::IntPair IntPair;
     typedef Region<1>::VecType VecType;
 
@@ -21,7 +21,7 @@ public:
     {
         c = Region<2>();
 
-        SuperVector<std::string> s;
+        std::vector<std::string> s;
         s +=
             "               ",
             "               ",
@@ -383,7 +383,7 @@ public:
 
     void testStreakIteration()
     {
-        SuperVector<Streak<2> > actual, expected;
+        std::vector<Streak<2> > actual, expected;
         for (Region<2>::StreakIterator i = c.beginStreak();
              i != c.endStreak(); ++i) {
             actual += *i;
@@ -868,7 +868,7 @@ public:
         TS_ASSERT_EQUALS(unsigned(3), a.toVector().size());
         a >> Streak<2>(Coord<2>(15, 10), 17);
         TS_ASSERT_EQUALS(unsigned(4), a.toVector().size());
-        SuperVector<Streak<2> > vec = a.toVector();
+        std::vector<Streak<2> > vec = a.toVector();
         TS_ASSERT_EQUALS(a, Region<2>(vec.begin(), vec.end()));
         a << Streak<2>(Coord<2>(12, 10), 30);
         TS_ASSERT_EQUALS(unsigned(2), a.toVector().size());
@@ -905,8 +905,8 @@ public:
     void test3DSimple1()
     {
         Region<3> a;
-        SuperVector<Streak<3> > streaks;
-        SuperVector<Streak<3> > retrievedStreaks;
+        std::vector<Streak<3> > streaks;
+        std::vector<Streak<3> > retrievedStreaks;
         streaks << Streak<3>(Coord<3>(10, 10, 10), 20)
                 << Streak<3>(Coord<3>(10, 11, 10), 20)
                 << Streak<3>(Coord<3>(10, 12, 10), 20)
@@ -929,8 +929,8 @@ public:
     void test3DSimple2()
     {
         Region<3> a;
-        SuperVector<Streak<3> > streaks;
-        SuperVector<Streak<3> > retrievedStreaks;
+        std::vector<Streak<3> > streaks;
+        std::vector<Streak<3> > retrievedStreaks;
         streaks << Streak<3>(Coord<3>(10, 10, 10), 20)
                 << Streak<3>(Coord<3>(11, 10, 10), 20)
                 << Streak<3>(Coord<3>(12, 10, 10), 20);
@@ -949,7 +949,7 @@ public:
     void test3DSimple3()
     {
         Region<3> a;
-        SuperVector<Streak<3> > retrievedStreaks;
+        std::vector<Streak<3> > retrievedStreaks;
         a << Streak<3>(Coord<3>(10, 10, 10), 20);
         a >> Streak<3>(Coord<3>(15, 10, 10), 16);
 
@@ -1145,8 +1145,8 @@ public:
 
     void testStreakIterator()
     {
-        SuperVector<Streak<3> > expected;
-        SuperVector<Streak<3> > actual;
+        std::vector<Streak<3> > expected;
+        std::vector<Streak<3> > actual;
 
         Region<3> r;
         TS_ASSERT_EQUALS(r.beginStreak(), r.endStreak());
@@ -1198,8 +1198,8 @@ public:
 
     void testNormalIterator()
     {
-        SuperVector<Coord<3> > expected;
-        SuperVector<Coord<3> > actual;
+        std::vector<Coord<3> > expected;
+        std::vector<Coord<3> > actual;
 
         Region<3> r;
         r << Streak<3>(Coord<3>(10, 20, 30), 40);
@@ -1284,7 +1284,7 @@ private:
     CoordVector bigInsertOrdered;
     CoordVector bigInsertShuffled;
 
-    CoordVector transform(const SuperVector<std::string>& shape)
+    CoordVector transform(const std::vector<std::string>& shape)
     {
         CoordVector ret;
         for (int y = 0; y < (int)shape.size(); y++) {

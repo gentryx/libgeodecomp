@@ -126,7 +126,7 @@ private:
         file.open(
             filename(step, "data").c_str(), std::ios::binary);
 
-        SuperVector<VariableType> buffer;
+        std::vector<VariableType> buffer;
 
         Coord<DIM> dimensions = grid.dimensions();
 

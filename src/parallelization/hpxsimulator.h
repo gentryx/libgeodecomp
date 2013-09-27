@@ -204,7 +204,7 @@ public:
         std::size_t rank_start,
         std::size_t rank_end,
         const CoordBox<DIM>& box,
-        const SuperVector<std::size_t>& weights)
+        const std::vector<std::size_t>& weights)
     {
         typedef
             HiParSimulator::PartitionManager<Topology>
@@ -245,7 +245,7 @@ public:
         boundingBoxesFutures.reserve(numPartitions);
         std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
 
-        SuperVector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
+        std::vector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
         for(std::size_t i = 0; i < numPartitions; i += steps) {
             boundingBoxesFutures.push_back(
                 hpx::async(
@@ -361,21 +361,21 @@ private:
             ).move();
     }
 
-    SuperVector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
+    std::vector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
     {
-        SuperVector<double> speeds(
+        std::vector<double> speeds(
             hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
                 updateGroupsIds
             ).move());
-        double sum = speeds.sum();
-        SuperVector<std::size_t> ret(size);
+        double s = sum(speeds);
+        std::vector<std::size_t> ret(size);
 
         std::size_t lastPos = 0;
         double partialSum = 0.0;
         if(size > 1) {
             for (std::size_t i = 0; i < size -1; ++i) {
                 partialSum += speeds[i];
-                std::size_t nextPos = items * (partialSum / sum);
+                std::size_t nextPos = items * (partialSum / s);
                 ret[i] = nextPos - lastPos;
                 lastPos = nextPos;
             }

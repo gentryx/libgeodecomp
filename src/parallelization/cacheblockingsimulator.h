@@ -24,7 +24,7 @@ public:
     typedef typename TopologiesHelpers::Topology<3, Topology::template WrapsAxis<0>::VALUE, Topology::template WrapsAxis<1>::VALUE, true> BufferTopology;
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
-    typedef SuperVector<SuperVector<Region<3> > > WavefrontFrames;
+    typedef std::vector<std::vector<Region<3> > > WavefrontFrames;
     static const int DIM = Topology::DIMENSIONS;
 
     using MonolithicSimulator<CELL>::NANO_STEPS;
@@ -147,7 +147,7 @@ private:
         wavefrontRegionDim[DIM - 1] = gridDim[DIM - 1] - offset[DIM - 1];
         Region<DIM> region;
         region << CoordBox<DIM>(offset, wavefrontRegionDim);
-        SuperVector<Region<3> > regions(pipelineLength);
+        std::vector<Region<3> > regions(pipelineLength);
         regions[pipelineLength - 1] = region.expandWithTopology(
             0, gridDim, Topologies::Cube<3>::Topology());
 
@@ -157,7 +157,7 @@ private:
         }
 
         int wavefrontLength = gridDim[DIM - 1] + 1;
-        WavefrontFrames ret(wavefrontLength, SuperVector<Region<DIM> >(pipelineLength));
+        WavefrontFrames ret(wavefrontLength, std::vector<Region<DIM> >(pipelineLength));
 
         for (int index = index; index < wavefrontLength; ++index) {
             Coord<DIM> maskOrigin;

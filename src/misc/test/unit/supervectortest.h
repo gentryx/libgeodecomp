@@ -15,17 +15,17 @@ public:
     {
         // create test object
         int size = 7;
-        SuperVector<int> original(size);
+        std::vector<int> original(size);
         for (int i = 0; i < size - 2; i++) {
             original[i] = 1 << i;
         }
 
         original[size - 2] = 4;
         original[size - 1] = 4;
-        original.del(excludeObj);
+        del(original, excludeObj);
 
         // create reference
-        SuperVector<int> cropped;
+        std::vector<int> cropped;
         for (int i = 0; i < size - 2; i++) {
             int val = 1 << i;
             if (val != excludeObj) {
@@ -47,7 +47,7 @@ public:
         expected.push_back(4);
         expected.push_back(7);
         expected.push_back(11);
-        SuperVector<int> actual(expected.begin(), expected.end());
+        std::vector<int> actual(expected.begin(), expected.end());
         TS_ASSERT_EQUALS(actual.size(), expected.size());
         TS_ASSERT_EQUALS(actual[0], expected[0]);
         TS_ASSERT_EQUALS(actual[1], expected[1]);
@@ -64,62 +64,62 @@ public:
 
     void testPop()
     {
-        SuperVector<int> stack;
+        std::vector<int> stack;
         stack << 1
               << 2
               << 3;
-        TS_ASSERT_EQUALS(3, stack.pop());
-        TS_ASSERT_EQUALS(2, stack.pop());
-        TS_ASSERT_EQUALS(1, stack.pop());
+        TS_ASSERT_EQUALS(3, pop(stack));
+        TS_ASSERT_EQUALS(2, pop(stack));
+        TS_ASSERT_EQUALS(1, pop(stack));
     }
 
     void testPopFront()
     {
-        SuperVector<int> stack;
+        std::vector<int> stack;
         stack << 1
               << 2
               << 3;
-        TS_ASSERT_EQUALS(1, stack.pop_front());
-        TS_ASSERT_EQUALS(2, stack.pop_front());
-        TS_ASSERT_EQUALS(3, stack.pop_front());
+        TS_ASSERT_EQUALS(1, pop_front(stack));
+        TS_ASSERT_EQUALS(2, pop_front(stack));
+        TS_ASSERT_EQUALS(3, pop_front(stack));
     }
 
     void testPushFront()
     {
-        SuperVector<int> a;
+        std::vector<int> a;
         a += 47, 11, 2000;
 
-        SuperVector<int> b;
+        std::vector<int> b;
         b += 11, 2000;
-        b.push_front(47);
+        push_front(b, 47);
 
         TS_ASSERT_EQUALS(a, b);
     }
 
     void testSum()
     {
-        SuperVector<int> s;
+        std::vector<int> s;
         s += 12, 43, -9, -8, 15;
-        TS_ASSERT_EQUALS(53, s.sum());
+        TS_ASSERT_EQUALS(53, sum(s));
     }
 
     void testAppend()
     {
-        SuperVector<int> a;
+        std::vector<int> a;
         a += 1, 2, 3;
-        SuperVector<int> b;
+        std::vector<int> b;
         b += 4, 5;
-        SuperVector<int> c;
+        std::vector<int> c;
         c += 1, 2, 3, 4, 5;
 
         TS_ASSERT_EQUALS(a + b, c);
-        a.append(b);
+        append(a, b);
         TS_ASSERT_EQUALS(a, c);
     }
 
     void testOperatorLessLess()
     {
-        SuperVector<int> a;
+        std::vector<int> a;
         a += 1, 2, 3;
         std::ostringstream temp;
         temp << a;
@@ -128,27 +128,27 @@ public:
 
     void testContains()
     {
-        SuperVector<int> a;
+        std::vector<int> a;
         a += 0, 1;
-        TS_ASSERT_EQUALS(a.contains(2), false);
-        TS_ASSERT_EQUALS(a.contains(1), true);
+        TS_ASSERT_EQUALS(contains(a, 2), false);
+        TS_ASSERT_EQUALS(contains(a, 1), true);
     }
 
     void testSort()
     {
-        SuperVector<unsigned> v;
-        SuperVector<unsigned> w;
+        std::vector<unsigned> v;
+        std::vector<unsigned> w;
         v += 0, 3, 1, 2;
         w += 0, 1, 2, 3;
-        v.sort();
+        sort(v);
         TS_ASSERT_EQUALS(v, w);
     }
 
     void testMax()
     {
-        SuperVector<unsigned> a;
+        std::vector<unsigned> a;
         a += 0, 3, 1 ,2;
-        TS_ASSERT_EQUALS(a.max(), (unsigned)3);
+        TS_ASSERT_EQUALS((max)(a), (unsigned)3);
     }
 };
 

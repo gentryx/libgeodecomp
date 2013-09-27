@@ -60,7 +60,7 @@ public:
     virtual void grid(GridBase<ConwayCell, 3> *ret)
     {
         CoordBox<3> rect = ret->boundingBox();
-        SuperVector<Coord<3> > startCells;
+        std::vector<Coord<3> > startCells;
         int tmp;
         for (int z = 0; z < 20; ++z) {
             for (int y = 0; y < 20; ++y) {
@@ -75,7 +75,7 @@ public:
             }
         }
 
-        for (SuperVector<Coord<3> >::iterator i = startCells.begin();
+        for (std::vector<Coord<3> >::iterator i = startCells.begin();
              i != startCells.end();
              ++i)
             {

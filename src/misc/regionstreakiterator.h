@@ -14,7 +14,7 @@ class Compare
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
@@ -31,7 +31,7 @@ class Compare<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
     {
@@ -48,7 +48,7 @@ public:
     template<int> friend class InitIterators;
     template<int> friend class Region;
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<typename INIT_HELPER>
     inline RegionStreakIterator(const REGION *region, INIT_HELPER initHelper) :

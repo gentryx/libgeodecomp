@@ -26,7 +26,7 @@ private:
     enum Form {LL_TO_LR=0, LL_TO_UL=1, UR_TO_LR=2, UR_TO_UL=3};
 
 public:
-    static boost::shared_ptr<boost::multi_array<SuperVector<Coord<2> >, 3> > squareCoordsCache;
+    static boost::shared_ptr<boost::multi_array<std::vector<Coord<2> >, 3> > squareCoordsCache;
     static Form squareFormTransitions[4][4];
     static int squareSectorTransitions[4][4];
     static Coord<2> maxCachedDimensions;
@@ -92,7 +92,7 @@ public:
         }
 
     private:
-        SuperVector<Square> squareStack;
+        std::vector<Square> squareStack;
         unsigned trivialSquareHorizontal;
         unsigned trivialSquareCounter;
         Coord<2> cachedSquareOrigin;
@@ -137,7 +137,7 @@ public:
                 throw std::logic_error("cannot descend from empty squares stack");
             }
 
-            Square currentSquare = squareStack.pop();
+            Square currentSquare = pop(squareStack);
             const Coord<2>& origin = currentSquare.origin;
             const Coord<2>& dimensions = currentSquare.dimensions;
             const Form& form = currentSquare.form;
@@ -181,7 +181,7 @@ public:
             const Form& form)
         {
             sublevelState = CACHED;
-            SuperVector<Coord<2> > &coords =
+            std::vector<Coord<2> > &coords =
                 (*squareCoordsCache)[dimensions.x()][dimensions.y()][form];
             cachedSquareOrigin = origin;
             cachedSquareCoordsIterator = &coords[offset];
@@ -304,7 +304,7 @@ public:
         const Coord<2>& origin=Coord<2>(0, 0),
         const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,
-        const SuperVector<std::size_t>& weights=SuperVector<std::size_t>(2)) :
+        const std::vector<std::size_t>& weights=std::vector<std::size_t>(2)) :
         SpaceFillingCurve<2>(offset, weights),
         origin(origin),
         dimensions(dimensions)
@@ -341,14 +341,14 @@ private:
     static inline bool fillCaches()
     {
         Coord<2> maxDim(17, 17);
-        squareCoordsCache.reset(new boost::multi_array<SuperVector<Coord<2> >, 3>(boost::extents[maxDim.x()][maxDim.y()][4]));
+        squareCoordsCache.reset(new boost::multi_array<std::vector<Coord<2> >, 3>(boost::extents[maxDim.x()][maxDim.y()][4]));
 
         for (int y = 2; y < maxDim.y(); ++y) {
             maxCachedDimensions = Coord<2>(y, y);
             for (int x = 2; x < maxDim.x(); ++x) {
                 Coord<2> dimensions(x, y);
                 for (int f = 0; f < 4; ++f) {
-                    SuperVector<Coord<2> > coords;
+                    std::vector<Coord<2> > coords;
                     Iterator end(Coord<2>(0, 0));
                     for (Iterator i(Coord<2>(0, 0), dimensions, 0, (Form)f); i != end; ++i) {
                         coords.push_back(*i);

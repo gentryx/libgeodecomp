@@ -14,7 +14,7 @@ namespace HiParSimulator {
 class HIndexingPartitionTest : public CxxTest::TestSuite
 {
 public:
-    typedef SuperVector<Coord<2> > CoordVector;
+    typedef std::vector<Coord<2> > CoordVector;
 
     void testFillRectangles()
     {
