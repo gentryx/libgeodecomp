@@ -113,13 +113,6 @@ if(SUPPORTS_MARCH_NATIVE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
-if(OPENCL_FOUND)
-  check_cxx_compiler_flag("-std=c++11" SUPPORTS_CXX_11)
-  if(SUPPORTS_CXX_11)
-    set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -std=c++11")
-  endif()
-endif()
-
 # configure whether the dreaded typemap-generator will run:
 set(DEFAULT_TYPEMAP_GENERATION false)
 if(NOT RELEASE)
