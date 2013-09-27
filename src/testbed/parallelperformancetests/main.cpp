@@ -187,19 +187,10 @@ int main(int argc, char **argv)
     }
 
     if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
+        std::cerr << "usage: " << argv[0] << "REVISION CUDA_DEVICE\n";
         return 1;
     }
 
-    bool quick = false;
-    int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
-        }
-        argumentIndex = 2;
-    }
     revision = argv[argumentIndex];
 
     Evaluate eval;
