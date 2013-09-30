@@ -119,16 +119,20 @@ public:
 
     void testCopyConstructor()
     {
-        Grid<int> *a1 = new Grid<int>(Coord<2>(200, 100));
-        for (int i = 0; i < 100; i++)
+        Grid<int> a1(Coord<2>(200, 100));
+        for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 200; j++) {
-                (*a1)[i][j] = i * 200 + j;
+                a1[Coord<2>(j, i)] = i * 200 + j;
             }
-        Grid<int> *a2 = new Grid<int>;
-        *a2 = *a1;
-        TS_ASSERT_EQUALS(*a1, *a1);
-        (*a2)[Coord<2>(0, 0)] = 4711;
-        TS_ASSERT_DIFFERS(*a1, *a2);
+        }
+
+        Grid<int> a2;
+        a2 = a1;
+        TS_ASSERT_EQUALS(a1, a1);
+        TS_ASSERT_EQUALS(a1, a2);
+
+        a2[Coord<2>(0, 0)] = 4711;
+        TS_ASSERT_DIFFERS(a1, a2);
     }
 
     void testOperatorSquareBracketsOfCoord()
