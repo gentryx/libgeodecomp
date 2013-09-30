@@ -147,12 +147,12 @@ namespace CxxTest
     char *numberToString( N n, char *s )
     {
         std::ostringstream numberFormatter;
-        numberFormatter << std::scientific << n;
+        numberFormatter << std::scientific << n << '\0';
 
         /* handle CxxTest's sick output */
         char *dest = s;
-        const char *source = numberFormatter.str().c_str();
-        dest = copyString(dest, source);
+        std::string buffer = numberFormatter.str();
+        dest = copyString(dest, buffer.c_str());
         return dest;
     }
 

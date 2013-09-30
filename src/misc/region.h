@@ -202,7 +202,7 @@ public:
     {
         iterators[0] = region.indicesBegin(0) + offsets[0];
 
-        if (region.indicesSize(0) > offsets[0]) {
+        if (int(region.indicesSize(0)) > offsets[0]) {
             ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators);
         }
     }

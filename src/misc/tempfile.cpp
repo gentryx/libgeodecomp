@@ -24,7 +24,8 @@ std::string TempFile::serial(const std::string& prefix)
 #endif
         boost::filesystem::path path(name);
         unsigned r = Random::gen_u();
-        path /= prefix + StringOps::itoa(r);
+        std::string filename = prefix + StringOps::itoa(r);
+        path += boost::filesystem::path::preferred_separator + filename;
         if (!boost::filesystem::exists(path)) {
             return path.string();
         }
