@@ -16,8 +16,8 @@ MockBalancer::WeightVec MockBalancer::balance(
     const MockBalancer::WeightVec& weights,
     const MockBalancer::LoadVec& relativeLoads)
 {
-    events += "balance() " + weights.toString() + " " +
-        relativeLoads.toString() + "\n";
+    events += "balance() " + toString(weights) + " " +
+        toString(relativeLoads) + "\n";
     return weights;
 }
 

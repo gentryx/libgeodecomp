@@ -88,8 +88,8 @@ public:
 
     void testMultiple()
     {
-        SuperVector<PatchAccepterType> accepters;
-        SuperVector<PatchProviderType> providers;
+        std::vector<PatchAccepterType> accepters;
+        std::vector<PatchProviderType> providers;
         int stride = 4;
         std::size_t maxNanoSteps = 31;
 
@@ -133,8 +133,8 @@ public:
 
     void testMultiple2()
     {
-        SuperVector<PatchAccepterType> accepters;
-        SuperVector<PatchProviderType> providers;
+        std::vector<PatchAccepterType> accepters;
+        std::vector<PatchProviderType> providers;
         int stride = 4;
         std::size_t maxNanoSteps = 100;
 

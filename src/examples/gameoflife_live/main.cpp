@@ -66,7 +66,7 @@ public:
     virtual void grid(GridBase<ConwayCell, 2> *ret)
     {
         CoordBox<2> rect = ret->boundingBox();
-        SuperVector<Coord<2> > startCells;
+        std::vector<Coord<2> > startCells;
         // start with a single glider...
         //          x
         //           x
@@ -96,7 +96,7 @@ public:
             Coord<2>(110, 32), Coord<2>(111, 32),
             Coord<2>(113, 32), Coord<2>(114, 32), Coord<2>(115, 32);
 
-        for (SuperVector<Coord<2> >::iterator i = startCells.begin();
+        for (std::vector<Coord<2> >::iterator i = startCells.begin();
              i != startCells.end();
              ++i) {
             if (rect.inBounds(*i)) {

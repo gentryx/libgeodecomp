@@ -2135,7 +2135,7 @@ int main(int argc, char **argv)
     eval(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
     eval(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
 
-    SuperVector<Coord<3> > sizes;
+    std::vector<Coord<3> > sizes;
     sizes << Coord<3>(22, 22, 22)
           << Coord<3>(64, 64, 64)
           << Coord<3>(68, 68, 68)

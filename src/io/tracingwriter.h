@@ -64,10 +64,10 @@ public:
         const Coord<DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
-        std::size_t rank,
+        size_t rank,
         bool lastCall)
     {
-        if (lastCall && ((outputRank == OUTPUT_ON_ALL_RANKS) || (outputRank == rank))) {
+        if (lastCall && ((outputRank == OUTPUT_ON_ALL_RANKS) || (outputRank == (int)rank))) {
             stepFinished(step, globalDimensions, event);
         }
     }

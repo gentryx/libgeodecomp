@@ -20,8 +20,8 @@ public:
 
     ParallelTestWriter(
         const unsigned period,
-        const SuperVector<unsigned>& expectedSteps,
-        const SuperVector<WriterEvent> expectedEvents)  :
+        const std::vector<unsigned>& expectedSteps,
+        const std::vector<WriterEvent> expectedEvents)  :
         ParallelWriter<TestCell<2> >("", period),
         expectedSteps(expectedSteps),
         expectedEvents(expectedEvents),
@@ -71,8 +71,8 @@ public:
     }
 
 private:
-    SuperVector<unsigned> expectedSteps;
-    SuperVector<WriterEvent> expectedEvents;
+    std::vector<unsigned> expectedSteps;
+    std::vector<WriterEvent> expectedEvents;
     unsigned lastStep;
     Region<2> unaccountedRegion;
 };

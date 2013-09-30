@@ -71,8 +71,8 @@ public:
     void testWriterInvocation()
     {
         unsigned period = 4;
-        SuperVector<unsigned> expectedSteps;
-        SuperVector<WriterEvent> expectedEvents;
+        std::vector<unsigned> expectedSteps;
+        std::vector<WriterEvent> expectedEvents;
         expectedSteps << 13
                       << 16
                       << 20

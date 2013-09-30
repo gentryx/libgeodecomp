@@ -13,6 +13,7 @@
 using namespace LibGeoDecomp;
 
 std::string revision;
+int cudaDevice;
 
 template<typename CELL_TYPE>
 class CollectingWriterPerfTest : public CPUBenchmark
@@ -186,21 +187,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
+    if (argc != 3) {
+        std::cerr << "usage: " << argv[0] << "REVISION CUDA_DEVICE\n";
         return 1;
     }
 
-    bool quick = false;
-    int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
-        }
-        argumentIndex = 2;
-    }
-    revision = argv[argumentIndex];
+    revision = argv[1];
+    cudaDevice = StringOps::atoi(argv[2]);
 
     Evaluate eval;
 

@@ -25,11 +25,12 @@ public:
         // the StripingPartition.
         offset = 130 * dimensions.x();
         ghostZoneWidth = 6;
-        weights = SuperVector<size_t>(layer.size(), 30 * dimensions.x());
+        weights = std::vector<std::size_t>(layer.size(), 30 * dimensions.x());
         weights[3] = 40 * dimensions.x();
         weights[5] = 20 * dimensions.x();
         // sanity check
-        TS_ASSERT_EQUALS(weights.sum() + offset, dimensions.prod());
+        unsigned product = dimensions.prod();
+        TS_ASSERT_EQUALS(sum(weights) + offset, product);
 
         partition.reset(new StripingPartition<2>(Coord<2>(0, 0), dimensions, offset, weights));
         manager.resetRegions(
@@ -37,7 +38,7 @@ public:
             partition,
             layer.rank(),
             ghostZoneWidth);
-        SuperVector<CoordBox<2> > boundingBoxes(
+        std::vector<CoordBox<2> > boundingBoxes(
             layer.allGather(manager.ownRegion().boundingBox()));
         manager.resetGhostZones(boundingBoxes);
     }
@@ -46,8 +47,8 @@ public:
     {
         for (unsigned i = 0; i < layer.size(); ++i) {
             if ((i == layer.rank() - 1) || (i == layer.rank() + 1)) {
-                SuperVector<Region<2> > outerFragments;
-                SuperVector<Region<2> > innerFragments;
+                std::vector<Region<2> > outerFragments;
+                std::vector<Region<2> > innerFragments;
 
                 unsigned startLine = startingLine(i);
                 if (i == layer.rank() - 1)
@@ -159,7 +160,7 @@ private:
     PartitionManager<Topologies::Cube<2>::Topology> manager;
     boost::shared_ptr<StripingPartition<2> > partition;
     Coord<2> dimensions;
-    SuperVector<size_t> weights;
+    std::vector<std::size_t> weights;
     unsigned offset;
     unsigned ghostZoneWidth;
 

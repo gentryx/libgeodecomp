@@ -40,7 +40,7 @@ public:
         simulator->run();
 
         // collect some substrings we expect the output to contain
-        SuperVector<std::string> s;
+        std::vector<std::string> s;
         s.push_back("TracingWriter::initialized()");
         s.push_back("  time");
         s.push_back("TracingWriter::stepFinished()");

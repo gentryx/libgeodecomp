@@ -193,14 +193,14 @@ public:
 
     template<typename T>
     void sendVec(
-        const SuperVector<T> *vec,
+        const std::vector<T> *vec,
         int dest,
         int waitTag = 0,
         const MPI_Datatype& datatype = Typemaps::lookup<T>())
     {
         MPI_Request req;
         MPI_Isend(
-            &(const_cast<SuperVector<T>&>(*vec))[0],
+            &(const_cast<std::vector<T>&>(*vec))[0],
             vec->size(),
             datatype,
             dest,
@@ -212,7 +212,7 @@ public:
 
     template<typename T>
     void recvVec(
-        SuperVector<T> *vec,
+        std::vector<T> *vec,
         int src,
         int waitTag = 0,
         const MPI_Datatype& datatype = Typemaps::lookup<T>())
@@ -238,7 +238,7 @@ public:
         unsigned numStreaks = region.numStreaks();
         MPI_Request req;
         MPI_Isend(&numStreaks, 1, MPI_UNSIGNED, dest, tag, comm, &req);
-        SuperVector<Streak<DIM> > buf = region.toVector();
+        std::vector<Streak<DIM> > buf = region.toVector();
         MPI_Send(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), dest, tag, comm);
         MPI_Wait(&req, MPI_STATUS_IGNORE);
     }
@@ -251,7 +251,7 @@ public:
     {
         unsigned numStreaks;
         MPI_Recv(&numStreaks, 1, MPI_UNSIGNED, src, tag, comm, MPI_STATUS_IGNORE);
-        SuperVector<Streak<DIM> > buf(numStreaks);
+        std::vector<Streak<DIM> > buf(numStreaks);
         MPI_Recv(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), src, tag, comm, MPI_STATUS_IGNORE);
         region->clear();
         region->load(buf.begin(), buf.end());
@@ -294,11 +294,11 @@ public:
     }
 
     template<typename T>
-    inline SuperVector<T> allGather(
+    inline std::vector<T> allGather(
         const T& source,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        SuperVector<T> result(size());
+        std::vector<T> result(size());
         allGather(source, &result, datatype);
         return result;
     }
@@ -316,19 +316,19 @@ public:
     template<typename T>
     inline void allGather(
         const T& source,
-        SuperVector<T> *target,
+        std::vector<T> *target,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         allGather(&source, &(target->front()), 1, datatype);
     }
 
     template<typename T>
-    inline SuperVector<T> allGatherV(
+    inline std::vector<T> allGatherV(
         const T *source,
-        const SuperVector<int>& lengths,
+        const std::vector<int>& lengths,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        SuperVector<T> result(lengths.sum());
+        std::vector<T> result(sum(lengths));
         allGatherV(source, lengths, &result, datatype);
         return result;
     }
@@ -336,11 +336,11 @@ public:
     template<typename T>
     inline void allGatherV(
         const T *source,
-        const SuperVector<int>& lengths,
-        SuperVector<T> *target,
+        const std::vector<int>& lengths,
+        std::vector<T> *target,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        SuperVector<int> displacements(size());
+        std::vector<int> displacements(size());
         displacements[0] = 0;
         for (size_t i = 0; i < size() - 1; ++i) {
             displacements[i + 1] = displacements[i] + lengths[i];
@@ -352,17 +352,17 @@ public:
     }
 
     template<typename T>
-    inline SuperVector<T> gather(
+    inline std::vector<T> gather(
         const T& item,
         const unsigned& root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        SuperVector<T> result(size());
+        std::vector<T> result(size());
         MPI_Gather(const_cast<T*>(&item), 1, datatype, &(result.front()), 1, datatype, root, comm);
         if (rank() == root) {
             return result;
         } else {
-            return SuperVector<T>();
+            return std::vector<T>();
         }
     }
 
@@ -374,12 +374,12 @@ public:
     inline void gatherV(
         const T *source,
         const int num,
-        const SuperVector<int>& lengths,
+        const std::vector<int>& lengths,
         const unsigned& root,
         T *target,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
-        SuperVector<int> displacements(size());
+        std::vector<int> displacements(size());
         if (rank() == root) {
             displacements[0] = 0;
             for (size_t i = 0; i < size() - 1; ++i) {
@@ -424,14 +424,14 @@ public:
     }
 
     template<typename T>
-    inline SuperVector<T> broadcastVector(
-        const SuperVector<T>& source,
+    inline std::vector<T> broadcastVector(
+        const std::vector<T>& source,
         const unsigned& root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         unsigned size = source.size();
         size = broadcast(size, root);
-        SuperVector<T> buff(size);
+        std::vector<T> buff(size);
 
         if (size == 0) {
             return buff;
@@ -446,7 +446,7 @@ public:
 
     template<typename T>
     inline void broadcastVector(
-        SuperVector<T> *buffer,
+        std::vector<T> *buffer,
         const unsigned& root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {

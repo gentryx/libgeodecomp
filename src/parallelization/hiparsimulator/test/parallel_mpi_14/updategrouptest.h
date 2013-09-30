@@ -49,19 +49,19 @@ public:
     //     //  level0              2-3-4-5-6-7-8-9-10
     //     //
 
-    //     SuperVector<int> level2Ranks;
+    //     std::vector<int> level2Ranks;
     //     level2Ranks += 0, 2, 12;
 
-    //     SuperVector<int> level1aRanks;
+    //     std::vector<int> level1aRanks;
     //     level1aRanks += 0;
 
-    //     SuperVector<int> level1bRanks;
+    //     std::vector<int> level1bRanks;
     //     level1bRanks += 1, 2, 11;
 
-    //     SuperVector<int> level1cRanks;
+    //     std::vector<int> level1cRanks;
     //     level1cRanks += 12, 13;
 
-    //     SuperVector<int> level0Ranks;
+    //     std::vector<int> level0Ranks;
     //     level0Ranks += 2, 3, 4, 5, 6, 7, 8, 9, 10;
 
     //     level2MPIGroup = MPI_COMM_WORLD.Get_group().Incl(3, &level2Ranks[0]);
@@ -79,7 +79,7 @@ public:
     //     level0MPIGroup = MPI_COMM_WORLD.Get_group().Incl(9, &level0Ranks[0]);
     //     level0MPIComm  = MPI_COMM_WORLD.Create(level0MPIGroup);
 
-    //     SuperVector<unsigned> weights;
+    //     std::vector<unsigned> weights;
     //     unsigned offset;
 
     //     genLevel2WeightsAndOffset(&weights, &offset);
@@ -102,7 +102,7 @@ public:
     //                 0,
     //                 &level2MPIComm));
 
-    //         SuperVector<unsigned> newWeights;
+    //         std::vector<unsigned> newWeights;
     //         newWeights += weights[level2MPIComm.Get_rank()];
     //         unsigned newOffset = offset;
     //         for (int i = 0; i < level2MPIComm.Get_rank(); ++i)
@@ -251,7 +251,7 @@ public:
 //         return dimensions.x * dimensions.y;
 //     }
 
-//     void genLevel2WeightsAndOffset(SuperVector<unsigned> *weights, unsigned *offset)
+//     void genLevel2WeightsAndOffset(std::vector<unsigned> *weights, unsigned *offset)
 //     {
 //         weights->clear();
 //         *weights +=
@@ -261,9 +261,9 @@ public:
 //         *offset = 0;
 //     }
 
-//     void genLevel1AWeightsAndOffset(SuperVector<unsigned> *weights, unsigned *offset)
+//     void genLevel1AWeightsAndOffset(std::vector<unsigned> *weights, unsigned *offset)
 //     {
-//         SuperVector<unsigned> superLevelWeights;
+//         std::vector<unsigned> superLevelWeights;
 //         unsigned superLevelOffset;
 //         genLevel2WeightsAndOffset(&superLevelWeights, &superLevelOffset);
 
@@ -272,9 +272,9 @@ public:
 //         *offset = superLevelOffset;
 //     }
 
-//     void genLevel1BWeightsAndOffset(SuperVector<unsigned> *weights, unsigned *offset)
+//     void genLevel1BWeightsAndOffset(std::vector<unsigned> *weights, unsigned *offset)
 //     {
-//         SuperVector<unsigned> superLevelWeights;
+//         std::vector<unsigned> superLevelWeights;
 //         unsigned superLevelOffset;
 //         genLevel2WeightsAndOffset(&superLevelWeights, &superLevelOffset);
 
@@ -286,9 +286,9 @@ public:
 //         *offset = superLevelOffset + superLevelWeights[0];
 //     }
 
-//     void genLevel1CWeightsAndOffset(SuperVector<unsigned> *weights, unsigned *offset)
+//     void genLevel1CWeightsAndOffset(std::vector<unsigned> *weights, unsigned *offset)
 //     {
-//         SuperVector<unsigned> superLevelWeights;
+//         std::vector<unsigned> superLevelWeights;
 //         unsigned superLevelOffset;
 //         genLevel2WeightsAndOffset(&superLevelWeights, &superLevelOffset);
 
@@ -298,9 +298,9 @@ public:
 //         *offset = superLevelOffset + superLevelWeights[0] + superLevelWeights[1];
 //     }
 
-//     void genLevel0WeightsAndOffset(SuperVector<unsigned> *weights, unsigned *offset)
+//     void genLevel0WeightsAndOffset(std::vector<unsigned> *weights, unsigned *offset)
 //     {
-//         SuperVector<unsigned> superLevelWeights;
+//         std::vector<unsigned> superLevelWeights;
 //         unsigned superLevelOffset;
 //         genLevel1BWeightsAndOffset(&superLevelWeights, &superLevelOffset);
 
@@ -315,7 +315,7 @@ public:
 //         *offset = superLevelOffset + superLevelWeights[0];
 //     }
 
-//     void fillinRemainder(SuperVector<unsigned> *vec, const unsigned& size)
+//     void fillinRemainder(std::vector<unsigned> *vec, const unsigned& size)
 //     {
 //         vec->push_back(size - vec->sum());
 //     }

@@ -1,34 +1,39 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
 
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
-#ifdef LIBGEODECOMP_FEATURE_HPX
-#include <hpx/util/high_resolution_timer.hpp>
-#endif
+#include "openclwrapper.h"
 
 namespace LibGeoDecomp {
+
+template<typename CELL_TYPE, typename DATA_TYPE>
+class OpenCLCellInterface {
+public:
+    static std::string kernel_file(void)
+    {
+        return CELL_TYPE::kernel_file();
+    }
+
+    static std::string kernel_function(void)
+    {
+        return CELL_TYPE::kernel_function();
+    }
+
+    virtual DATA_TYPE * data(void) = 0;
+};
+
 namespace HiParSimulator {
 
-template<typename CELL_TYPE>
-class VanillaStepper : public Stepper<CELL_TYPE>
+template<typename CELL_TYPE, typename DATA_TYPE>
+class OpenCLStepper : public Stepper<CELL_TYPE>
 {
-    friend class VanillaStepperRegionTest;
-    friend class VanillaStepperBasicTest;
-    friend class VanillaStepperTest;
 public:
-    typedef typename Stepper<CELL_TYPE>::Topology Topology;
-    const static int DIM = Topology::DIM;
-    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
-
-    typedef class Stepper<CELL_TYPE> ParentType;
-    typedef typename ParentType::GridType GridType;
-    typedef PartitionManager<Topology> PartitionManagerType;
-    typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
-    typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
-    typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
+    friend class OpenCLStepperRegionTest;
+    friend class OpenCLStepperBasicTest;
+    friend class OpenCLStepperTest;
 
     using Stepper<CELL_TYPE>::addPatchAccepter;
     using Stepper<CELL_TYPE>::initializer;
@@ -37,39 +42,55 @@ public:
     using Stepper<CELL_TYPE>::patchProviders;
     using Stepper<CELL_TYPE>::partitionManager;
 
-    using Stepper<CELL_TYPE>::computeTimeInner;
-    using Stepper<CELL_TYPE>::computeTimeGhost;
-    using Stepper<CELL_TYPE>::patchAcceptersTime;
-    using Stepper<CELL_TYPE>::patchProvidersTime;
+    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+    typedef class Stepper<CELL_TYPE> ParentType;
+    typedef typename ParentType::GridType GridType;
+    typedef PartitionManager<Topology> PartitionManagerType;
+    typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
+    typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
+    typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
-    inline VanillaStepper(
+    const static int DIM = Topology::DIM;
+    const static int NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
+
+    inline OpenCLStepper(
+        unsigned platformID,
+        unsigned deviceID,
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(partitionManager, initializer)
+        ParentType(partitionManager, initializer),
+        platformID(platformID), deviceID(deviceID)
     {
         curStep = initializer->startStep();
         curNanoStep = 0;
 
-        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
+        for (int i = 0; i < ghostZonePatchAccepters.size(); ++i) {
             addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
         }
-        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
+
+        for (int i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
 
         initGrids();
-        computeTimeInner = 0.0;
-        computeTimeGhost = 0.0;
-        patchAcceptersTime = 0.0;
-        patchProvidersTime = 0.0;
+
+        std::string kernel_file = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_file();
+        std::string kernel_function = OpenCLCellInterface<CELL_TYPE, DATA_TYPE>::kernel_function();
+
+        oclwrapper = OpenCLWrapper_Ptr(
+            new OpenCLWrapper<DATA_TYPE>(
+                platformID, deviceID,
+                kernel_file, kernel_function,
+                initializer->gridBox().dimensions.x(),
+                initializer->gridBox().dimensions.y(),
+                initializer->gridBox().dimensions.z()));
     }
 
-    inline void update(std::size_t nanoSteps)
+    inline virtual void update(std::size_t nanoSteps)
     {
-        for (std::size_t i = 0; i < nanoSteps; ++i)
-        {
+        for (int i = 0; i < nanoSteps; ++i) {
             update();
         }
     }
@@ -85,59 +106,96 @@ public:
     }
 
 private:
-    std::size_t curStep;
-    std::size_t curNanoStep;
-    unsigned validGhostZoneWidth;
+    typedef std::shared_ptr<OpenCLWrapper<DATA_TYPE>> OpenCLWrapper_Ptr;
+
+    unsigned int platformID;
+    unsigned int deviceID;
+
+    int curStep;
+    int curNanoStep;
+    int validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
     PatchBufferType2 rimBuffer;
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
 
+    OpenCLWrapper_Ptr oclwrapper;
+
+    void copyGridToHost(void)
+    {
+        auto box = initializer->gridBox();
+        int x_size = box.dimensions.x();
+        int y_size = box.dimensions.y();
+
+        DATA_TYPE * data = static_cast<DATA_TYPE *>(oclwrapper->readDeviceData());
+        oclwrapper->finish();
+
+        for (auto & p : box) {
+            auto & cell = dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*newGrid)[p]);
+            // using newGrid here, compared to data_to_device  ^^^
+
+            uint32_t address = p.z() * y_size * x_size
+                + p.y() * x_size
+                + p.x();
+
+            *(cell.data()) = data[address];
+        }
+    }
+
+    void copyGridToDevice(void)
+    {
+        try {
+            auto box = initializer->gridBox();
+
+            std::vector<typename OpenCLWrapper<DATA_TYPE>::data_t> data;
+            std::vector<typename OpenCLWrapper<DATA_TYPE>::point_t> points;
+
+            for (auto & p : box) {
+                auto & cell = dynamic_cast<OpenCLCellInterface<CELL_TYPE, DATA_TYPE> &>((*oldGrid)[p]);
+                points.push_back(std::make_tuple(p.x(), p.y(), p.z()));
+                data.push_back(cell.data());
+            }
+
+            oclwrapper->loadPoints(points.begin(), points.end());
+            oclwrapper->loadHostData(data.begin(), data.end());
+        } catch(std::exception & error) {
+            std::cerr << __PRETTY_FUNCTION__ << ": " << error.what() << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+
     inline void update()
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
 
-        UpdateFunctor<CELL_TYPE>()(
-            region,
-            Coord<DIM>(),
-            Coord<DIM>(),
-            *oldGrid,
-            &*newGrid,
-            curNanoStep);
-        std::swap(oldGrid, newGrid);
+        copyGridToDevice();
+        oclwrapper->run();
+        oclwrapper->finish();
+        copyGridToHost();
+        std::swap(newGrid, oldGrid);
 
         ++curNanoStep;
         if (curNanoStep == NANO_STEPS) {
             curNanoStep = 0;
             curStep++;
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        computeTimeInner += timer.elapsed();
-#endif
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();
         }
-
-        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
     }
 
     inline void notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
-        std::size_t nanoStep)
+        const long& nanoStep)
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
         for (typename ParentType::PatchAccepterList::iterator i =
                  patchAccepters[patchType].begin();
              i != patchAccepters[patchType].end();
@@ -146,19 +204,13 @@ private:
                 (*i)->put(*oldGrid, region, nanoStep);
             }
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        patchAcceptersTime += timer.elapsed();
-#endif
     }
 
     inline void notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
-        std::size_t nanoStep)
+        const long& nanoStep)
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
@@ -168,12 +220,9 @@ private:
                 region,
                 nanoStep);
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        patchProvidersTime += timer.elapsed();
-#endif
     }
 
-    inline std::size_t globalNanoStep() const
+    inline long globalNanoStep() const
     {
         return curStep * NANO_STEPS + curNanoStep;
     }
@@ -215,9 +264,6 @@ private:
      */
     inline void updateGhost()
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
         // fixme: skip all this ghost zone buffering for
         // ghostZoneWidth == 1?
 
@@ -230,27 +276,22 @@ private:
         restoreRim(false);
 
         // 2: actual ghostzone update
-        std::size_t oldNanoStep = curNanoStep;
-        std::size_t oldStep = curStep;
-        std::size_t curGlobalNanoStep = globalNanoStep();
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        computeTimeGhost += timer.elapsed();
-#endif
+        int oldNanoStep = curNanoStep;
+        int oldStep = curStep;
+        int curGlobalNanoStep = globalNanoStep();
 
-        for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
+        for (int t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
-#ifdef LIBGEODECOMP_FEATURE_HPX
-            timer.restart();
-#endif
+
             const Region<DIM>& region = partitionManager->rim(t + 1);
             UpdateFunctor<CELL_TYPE>()(
-                    region,
-                    Coord<DIM>(),
-                    Coord<DIM>(),
-                    *oldGrid,
-                    &*newGrid,
-                    curNanoStep);
+                region,
+                Coord<DIM>(),
+                Coord<DIM>(),
+                *oldGrid,
+                &*newGrid,
+                curNanoStep);
 
             ++curNanoStep;
             if (curNanoStep == NANO_STEPS) {
@@ -261,14 +302,8 @@ private:
             std::swap(oldGrid, newGrid);
 
             ++curGlobalNanoStep;
-#ifdef LIBGEODECOMP_FEATURE_HPX
-            computeTimeGhost += timer.elapsed();
-#endif
             notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        timer.restart();
-#endif
         curNanoStep = oldNanoStep;
         curStep = oldStep;
 
@@ -280,13 +315,9 @@ private:
         // 3: restore grid for kernel update
         restoreRim(true);
         restoreKernel();
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        computeTimeGhost += timer.elapsed();
-#endif
     }
-private:
 
-    inline unsigned ghostZoneWidth() const
+    inline const unsigned ghostZoneWidth() const
     {
         return partitionManager->getGhostZoneWidth();
     }
@@ -301,13 +332,13 @@ private:
         validGhostZoneWidth = ghostZoneWidth();
     }
 
-    inline void saveRim(std::size_t nanoStep)
+    inline void saveRim(const long& nanoStep)
     {
         rimBuffer.pushRequest(nanoStep);
         rimBuffer.put(*oldGrid, rim(), nanoStep);
     }
 
-    inline void restoreRim(bool remove)
+    inline void restoreRim(const bool& remove)
     {
         rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
     }
@@ -331,6 +362,7 @@ private:
 };
 
 }
+
 }
 
 #endif

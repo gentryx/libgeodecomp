@@ -70,7 +70,7 @@ public:
         nanoStep(NANO_STEPS);
     }
 
-    inline SuperVector<Statistics> gatherStatistics()
+    inline std::vector<Statistics> gatherStatistics()
     {
         Statistics stat =
         {
@@ -185,19 +185,19 @@ private:
         return CELL_TYPE::speed();
     }
 
-    SuperVector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
+    std::vector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
     {
         double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
-        SuperVector<double> speeds = mpiLayer.allGather(mySpeed);
-        double sum = speeds.sum();
-        SuperVector<std::size_t> ret(size);
+        std::vector<double> speeds = mpiLayer.allGather(mySpeed);
+        double s = sum(speeds);
+        std::vector<std::size_t> ret(size);
 
         std::size_t lastPos = 0;
         double partialSum = 0.0;
         if(size > 1) {
             for (std::size_t i = 0; i < size -1; i++) {
                 partialSum += speeds[i];
-                std::size_t nextPos = items * partialSum / sum;
+                std::size_t nextPos = items * partialSum / s;
                 ret[i] = nextPos - lastPos;
                 lastPos = nextPos;
             }

@@ -48,7 +48,7 @@ public:
     static const int DIM = Topology::DIM;
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
     typedef GridBase<CELL_TYPE, DIM> GridType;
-    typedef SuperVector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
+    typedef std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > SteererVector;
 
     /**
      * Creates the abstract Simulator object. The Initializer is

@@ -5,7 +5,7 @@
 
 namespace LibGeoDecomp {
 
-typedef SuperVector<std::string> StringVec;
+typedef std::vector<std::string> StringVec;
 
 }
 

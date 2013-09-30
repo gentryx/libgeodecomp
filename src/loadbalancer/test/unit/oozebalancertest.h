@@ -128,7 +128,7 @@ public:
     void checkBoundaryConditions(OozeBalancer::WeightVec oldLoads, OozeBalancer::WeightVec newLoads)
     {
         TS_ASSERT_EQUALS(oldLoads.size(), newLoads.size());
-        TS_ASSERT_EQUALS(oldLoads.sum(), newLoads.sum());
+        TS_ASSERT_EQUALS(sum(oldLoads), sum(newLoads));
     }
 
 
@@ -165,7 +165,7 @@ public:
             oldLoads = newLoads;
         }
 
-        double targetLoadPerNode = itemLoads.sum() / nodeSpeeds.sum();
+        double targetLoadPerNode = sum(itemLoads) / sum(nodeSpeeds);
 
         OozeBalancer::LoadVec relLoads = calcRelLoads(newLoads, itemLoads, nodeSpeeds);
         for (unsigned i = 0; i < relLoads.size(); i++) {

@@ -39,13 +39,13 @@ public:
         return grids[i];
     }
 
-    SuperVector<StorageGrid>& getGrids()
+    std::vector<StorageGrid>& getGrids()
     {
         return grids;
     }
 
 private:
-    SuperVector<StorageGrid> grids;
+    std::vector<StorageGrid> grids;
 };
 
 }

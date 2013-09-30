@@ -12,7 +12,7 @@ namespace HiParSimulator {
 class ZCurvePartitionTest : public CxxTest::TestSuite
 {
 public:
-    typedef SuperVector<Coord<2> > CoordVector;
+    typedef std::vector<Coord<2> > CoordVector;
 
     void setUp()
     {
@@ -99,11 +99,11 @@ public:
         for (int x = 10; x < 610; ++x)
             for (int y = 20; y < 3520; ++y)
                 expectedSorted += Coord<2>(x, y);
-        expectedSorted.sort();
+        sort(expectedSorted);
         CoordVector actual;
         for (ZCurvePartition<2>::Iterator i = partition.begin(); i != partition.end(); ++i)
             actual.push_back(*i);
-        actual.sort();
+        sort(actual);
         TS_ASSERT_EQUALS(expectedSorted, actual);
     }
 
@@ -111,17 +111,17 @@ public:
     {
         ZCurvePartition<3> partition(Coord<3>(1, 2, 3), Coord<3>(2, 2, 2));
 
-        SuperVector<Coord<3> > actual1;
+        std::vector<Coord<3> > actual1;
         for (int i = 0; i < 8; ++i)
             actual1 << *partition[i];
 
-        SuperVector<Coord<3> > actual2;
+        std::vector<Coord<3> > actual2;
         for (ZCurvePartition<3>::Iterator i = partition.begin();
              i != partition.end();
              ++i)
             actual2 << *i;
 
-        SuperVector<Coord<3> > expected;
+        std::vector<Coord<3> > expected;
         expected << Coord<3>(1, 2, 3)
                  << Coord<3>(2, 2, 3)
                  << Coord<3>(1, 3, 3)
@@ -140,9 +140,9 @@ public:
         Coord<3> offset(10, 20, 30);
         ZCurvePartition<3> partition(offset, dimensions);
 
-        SuperVector<Coord<3> > actual1;
-        SuperVector<Coord<3> > actual2;
-        SuperVector<Coord<3> > expected;
+        std::vector<Coord<3> > actual1;
+        std::vector<Coord<3> > actual2;
+        std::vector<Coord<3> > expected;
 
         CoordBox<3> box(offset, dimensions);
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -157,9 +157,9 @@ public:
              ++i)
             actual2 << *i;
 
-        actual1.sort();
-        actual2.sort();
-        expected.sort();
+        sort(actual1);
+        sort(actual2);
+        sort(expected);
 
         TS_ASSERT_EQUALS(actual1, expected);
         TS_ASSERT_EQUALS(actual2, expected);

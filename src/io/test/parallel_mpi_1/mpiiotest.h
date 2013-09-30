@@ -17,8 +17,8 @@ public:
     {
         int width = 5;
         int height = 3;
-        unsigned step;
-        unsigned maxSteps;
+        unsigned step = 42;
+        unsigned maxSteps = 4711;
         std::string filename = TempFile::parallel("mpiio");
 
         Grid<double> grid1(Coord<2>(width, height));
@@ -38,12 +38,13 @@ public:
         MPIIO<double, Topologies::Cube<2>::Topology>::readMetadata(
             &dimensions, &s, &ms, filename);
         TS_ASSERT_EQUALS(Coord<2>(width, height), dimensions);
+        TS_ASSERT_EQUALS(s, step);
+        TS_ASSERT_EQUALS(ms, maxSteps);
 
         Grid<double> grid2(dimensions);
         TS_ASSERT_DIFFERS(grid1, grid2);
         MPIIO<double, Topologies::Cube<2>::Topology>::readRegion(&grid2, filename, region);
         TS_ASSERT_EQUALS(grid1, grid2);
-
     }
 
     void testBasicReadWrite3D()

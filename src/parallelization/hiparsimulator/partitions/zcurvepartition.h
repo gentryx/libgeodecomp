@@ -22,7 +22,7 @@ class ZCurvePartition : public SpaceFillingCurve<DIMENSIONS>
 public:
     const static int DIM = DIMENSIONS;
 
-    typedef SuperVector<Coord<DIM> > CoordVector;
+    typedef std::vector<Coord<DIM> > CoordVector;
     typedef Grid<CoordVector, typename Topologies::Cube<DIM>::Topology> GridType;
     typedef boost::shared_ptr<GridType> Cache;
     typedef typename Topologies::Cube<DIM>::Topology Topology;
@@ -89,7 +89,6 @@ public:
             }
             return *this;
         }
-
     private:
         std::list<Square> squareStack;
         unsigned trivialSquareDirDim;
@@ -273,7 +272,7 @@ public:
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
-        const SuperVector<size_t>& weights = SuperVector<size_t>(2)) :
+        const std::vector<std::size_t>& weights = std::vector<std::size_t>(2)) :
         SpaceFillingCurve<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions)

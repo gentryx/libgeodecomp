@@ -15,7 +15,7 @@ class MPIIOWriterTest : public CxxTest::TestSuite
 {
 public:
 
-    SuperVector<std::string> files;
+    std::vector<std::string> files;
 
     void setUp()
     {
@@ -45,9 +45,9 @@ public:
         TS_ASSERT_EQUALS("testmpiiowriter01234.mpiio", writer->filename(1234));
 
         typedef APITraits::SelectTopology<TestCell<3> >::Value Topology;
-        SuperVector<Grid<TestCell<3>, Topology> > expected =
+        std::vector<Grid<TestCell<3>, Topology> > expected =
             memoryWriter->getGrids();
-        SuperVector<Grid<TestCell<3>, Topology> > actual;
+        std::vector<Grid<TestCell<3>, Topology> > actual;
 
         for (size_t i = 0; i <= 21; i += (i == 20)? 1 : 4) {
             std::string filename = writer->filename(i);

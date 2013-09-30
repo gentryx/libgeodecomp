@@ -122,7 +122,7 @@ private:
         MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "data"), comm);
         MPI_Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
-        SuperVector<VariableType> buffer;
+        std::vector<VariableType> buffer;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
@@ -139,7 +139,7 @@ private:
             Coord<DIM> walker = i->origin;
 
             if (buffer.size() != effectiveLength) {
-                buffer = SuperVector<VariableType>(effectiveLength);
+                buffer = std::vector<VariableType>(effectiveLength);
             }
 
             for (std::size_t i = 0; i < effectiveLength; i += dataComponents) {

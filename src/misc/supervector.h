@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_SUPERVECTOR_H
 
 #include <algorithm>
+#include <numeric>
 #include <iterator>
 #include <sstream>
 #include <vector>
@@ -11,174 +12,119 @@
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/vector.hpp>
 #endif
-#ifdef LIBGEODECOMP_FEATURE_BOOST_MOVE
-#include <boost/move/move.hpp>
-#endif
 
 namespace LibGeoDecomp {
 
+using std::vector;
+
 /**
- * This class adds some functionality the std::vector ought to
- * provide (but fails to).
+ * Deletes items from @param vec that are equal to @param obj
  */
-template<typename T, typename Allocator = std::allocator<T> >
-class SuperVector : public std::vector<T, Allocator>
+template <typename T, typename Allocator, typename U>
+inline void del(std::vector<T, Allocator> & vec, const U& obj)
 {
-public:
-    using std::vector<T, Allocator>::back;
-    using std::vector<T, Allocator>::begin;
-    using std::vector<T, Allocator>::insert;
-    using std::vector<T, Allocator>::end;
-    using std::vector<T, Allocator>::erase;
-    using std::vector<T, Allocator>::front;
-    using std::vector<T, Allocator>::pop_back;
-    using std::vector<T, Allocator>::push_back;
+    vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
+}
 
-    typedef std::vector<T, Allocator> VectorType;
-
-    typedef typename std::vector<T, Allocator>::iterator iterator;
-    typedef typename std::vector<T, Allocator>::const_iterator const_iterator;
-
-    inline SuperVector()
-    {}
-
-    inline SuperVector(std::size_t i) :
-        std::vector<T>(i)
-    {}
-
-    inline SuperVector(std::size_t i, T t) :
-        std::vector<T>(i, t)
-    {}
-
-    template<typename ITERATOR>
-    inline SuperVector(ITERATOR start, ITERATOR end) :
-        std::vector<T>(start, end)
-    {}
-
-    inline SuperVector(const VectorType& other) :
-        std::vector<T>(other)
-    {}
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_MOVE
-    inline SuperVector(BOOST_RV_REF(VectorType) other) :
-        std::vector<T>(boost::move(static_cast<std::vector<T> >(other)))
-    {}
-#endif
-
-    /**
-     * Deletes items from _self_ that are equal to @param obj
-     */
-    inline void del(const T& obj)
-    {
-        erase(std::remove(begin(), end(), obj), end());
-    }
-
-    // We have to use the inherited operator by hand, as this requires a cast
-    inline bool operator==(const SuperVector<T>& comp) const
-    {
-        return ((std::vector<T>)*this) == ((std::vector<T>)comp);
-    }
-
-    inline std::string toString() const
-    {
-        std::ostringstream temp;
-        temp << "[";
-        for (const_iterator i = begin(); i != end();) {
-            temp << *i;
-            i++;
-            if (i != end()) {
-                temp << ", ";
-            }
+template <typename T, typename Allocator>
+inline std::string toString(const std::vector<T, Allocator>& vec)
+{
+    std::ostringstream temp;
+    temp << "[";
+    for (typename std::vector<T, Allocator>::const_iterator i = vec.begin(); i != vec.end();) {
+        temp << *i;
+        i++;
+        if (i != vec.end()) {
+            temp << ", ";
         }
-        temp << "]";
-        return temp.str();
     }
+    temp << "]";
+    return temp.str();
+}
 
-    inline SuperVector& operator<<(const T& obj)
-    {
-        push_back(obj);
-        return *this;
-    }
+template <typename T, typename Allocator>
+inline void append(std::vector<T, Allocator>& target, const std::vector<T, Allocator>& other)
+{
+    target.insert(target.end(), other.begin(), other.end());
+}
 
-    inline void append(const SuperVector& other)
-    {
-        insert(end(), other.begin(), other.end());
-    }
+template <typename T, typename Allocator>
+inline void push_front(std::vector<T, Allocator>& vec, const T& obj)
+{
+    vec.insert(vec.begin(), obj);
+}
 
-    inline SuperVector operator+(const SuperVector& other) const
-    {
-        SuperVector ret = *this;
-        ret.append(other);
-        return ret;
-    }
+template <typename T, typename Allocator>
+inline T pop_front(std::vector<T, Allocator>& vec)
+{
+    T ret = vec.front();
+    vec.erase(vec.begin());
+    return ret;
+}
 
-    inline void push_front(const T& obj)
-    {
-        insert(begin(), obj);
-    }
+template <typename T, typename Allocator>
+inline T pop(std::vector<T, Allocator>& vec)
+{
+    T ret = vec.back();
+    vec.pop_back();
+    return ret;
+}
 
-    inline T pop_front()
-    {
-        T ret = front();
-        erase(begin());
-        return ret;
-    }
 
-    inline T pop()
-    {
-        T ret = back();
-        pop_back();
-        return ret;
-    }
-
-    inline T sum() const
-    {
-        T res = 0;
-        for (const_iterator i = begin(); i != end(); i++) {
-            res += *i;
-        }
-        return res;
-
-    }
-
-    inline bool contains(const T& element) const
-    {
-        return std::find(begin(), end(), element) != end();
-    }
-
-    inline void sort()
-    {
-        std::sort(begin(), end());
-    }
-
-    T& (max)()
-    {
-        return *(std::max_element(begin(), end()));
-    }
-
-    const T& (max)() const
-    {
-        return *(std::max_element(begin(), end()));
-    }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & static_cast<std::vector<T, Allocator>&>(*this);
-    }
-#endif
-};
+template <typename T, typename Allocator>
+inline T sum(const std::vector<T, Allocator>& vec)
+{
+    return std::accumulate(vec.begin(), vec.end(), T());
 
 }
 
-template<typename _CharT, typename _Traits, typename T>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::SuperVector<T>& superVector)
+template <typename T, typename Allocator>
+inline bool contains(const std::vector<T, Allocator>& vec, const T& element)
 {
-    __os << superVector.toString();
-    return __os;
+    return std::find(vec.begin(), vec.end(), element) != vec.end();
+}
+
+template <typename T, typename Allocator>
+inline void sort(std::vector<T, Allocator>& vec)
+{
+    std::sort(vec.begin(), vec.end());
+}
+
+template <typename T, typename Allocator>
+T& (max)(std::vector<T, Allocator>& vec)
+{
+    return *(std::max_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator>
+const T& (max)(const std::vector<T, Allocator>& vec)
+{
+    return *(std::max_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator, typename U>
+inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, const U& obj)
+{
+    vec.push_back(obj);
+    return vec;
+}
+
+template <typename T, typename Allocator>
+inline std::vector<T, Allocator> operator+(std::vector<T, Allocator>& target, const std::vector<T, Allocator>& other)
+{
+    std::vector<T, Allocator> ret(target);
+    append(ret, other);
+    return ret;
+}
+
+template<typename _CharT, typename _Traits, typename T, typename Allocator>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
+           const std::vector<T, Allocator>& vec)
+{
+    os << toString(vec);
+    return os;
+}
 }
 
 #endif

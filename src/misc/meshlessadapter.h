@@ -26,8 +26,8 @@ public:
 
     typedef std::list<std::pair<FloatCoord<DIM>, int> > CoordList;
     typedef Grid<CoordList, TOPOLOGY> CoordListGrid;
-    typedef SuperVector<std::pair<FloatCoord<DIM>, int> > CoordVec;
-    typedef SuperVector<SuperVector<int> > Graph;
+    typedef std::vector<std::pair<FloatCoord<DIM>, int> > CoordVec;
+    typedef std::vector<std::vector<int> > Graph;
 
     /**
      * creates an MeshlessAdapter which assumes that the coordinates
@@ -183,7 +183,7 @@ public:
     bool checkBoxSize(const CoordVec& positions, const Graph& graph)
     {
         for (size_t i = 0; i < graph.size(); ++i)
-            for (SuperVector<int>::const_iterator n = graph[i].begin();
+            for (std::vector<int>::const_iterator n = graph[i].begin();
                  n != graph[i].end(); ++n)
                 if (manhattanDistance(positions[i].first, positions[*n].first) > 1)
                     return false;

@@ -25,7 +25,7 @@ public:
     const static int ENDLESS = -1;
 
     typedef typename GRID_TYPE::CellType CellType;
-    typedef SuperVector<CellType> BufferType;
+    typedef std::vector<CellType> BufferType;
 
     class Link
     {

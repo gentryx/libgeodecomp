@@ -6,6 +6,19 @@
 #include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/regionstreakiterator.h>
 
+namespace std {
+
+template<typename _CharT, typename _Traits, typename T, typename U>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const pair<T, U>& p)
+{
+    __os << "(" << p.first << ", " << p.second << ")";
+    return __os;
+}
+
+}
+
 namespace LibGeoDecomp {
 
 class RegionTest;
@@ -27,7 +40,7 @@ public:
 
 protected:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     inline void incRemainder(const VecType::iterator& start, const VecType::iterator& end, const int& inserts)
     {
@@ -47,7 +60,7 @@ class ConstructStreakFromIterators
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators)
@@ -62,7 +75,7 @@ class ConstructStreakFromIterators<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<int STREAK_DIM>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators)
@@ -77,7 +90,7 @@ class StreakIteratorInitSingleOffset
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     StreakIteratorInitSingleOffset(const size_t& offset) :
         offset(offset)
@@ -109,7 +122,7 @@ class StreakIteratorInitSingleOffset<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     StreakIteratorInitSingleOffset(const size_t& offset) :
         offset(offset)
@@ -131,7 +144,7 @@ class StreakIteratorInitSingleOffsetWrapper
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     StreakIteratorInitSingleOffsetWrapper(const size_t& offset) :
         offset(offset)
@@ -154,7 +167,7 @@ class StreakIteratorInitOffsets
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
         offsets(offsets)
@@ -178,7 +191,7 @@ class StreakIteratorInitOffsets<0, COORD_DIM>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
         offsets(offsets)
@@ -203,7 +216,7 @@ class StreakIteratorInitBegin
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
@@ -218,7 +231,7 @@ class StreakIteratorInitBegin<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
@@ -236,7 +249,7 @@ class StreakIteratorInitEnd
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
@@ -251,7 +264,7 @@ class StreakIteratorInitEnd<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
 
     template<int STREAK_DIM, typename REGION>
     inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
@@ -334,7 +347,7 @@ public:
     friend class LibGeoDecomp::RegionTest;
 
     typedef std::pair<int, int> IntPair;
-    typedef SuperVector<IntPair> VecType;
+    typedef std::vector<IntPair> VecType;
     typedef RegionStreakIterator<DIM, Region<DIM> > StreakIterator;
 
     class Iterator : public std::iterator<std::forward_iterator_tag,
@@ -633,9 +646,9 @@ public:
         return ret;
     }
 
-    inline SuperVector<Streak<DIM> > toVector() const
+    inline std::vector<Streak<DIM> > toVector() const
     {
-        SuperVector<Streak<DIM> > ret(numStreaks());
+        std::vector<Streak<DIM> > ret(numStreaks());
         std::copy(beginStreak(), endStreak(), ret.begin());
         return ret;
     }
@@ -740,7 +753,7 @@ private:
         if (empty()) {
             myBoundingBox = CoordBox<DIM>();
         } else {
-            const Streak<DIM>& someStreak = *beginStreak();
+            Streak<DIM> someStreak = *beginStreak();
             Coord<DIM> min = someStreak.origin;
             Coord<DIM> max = someStreak.origin;
 
@@ -755,6 +768,7 @@ private:
                 max = (max.max)(right);
                 mySize += i->endX - i->origin.x();
             }
+
             myBoundingBox =
                 CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
         }
@@ -1204,10 +1218,10 @@ private:
     inline VecType substract(const IntPair& base, const IntPair& minuend) const
     {
         if (!intersect(base, minuend)) {
-            return SuperVector<IntPair>(1, base);
+            return std::vector<IntPair>(1, base);
         }
 
-        SuperVector<IntPair> ret;
+        std::vector<IntPair> ret;
         IntPair s1(base.first, minuend.first);
         IntPair s2(minuend.second, base.second);
 
@@ -1223,8 +1237,6 @@ private:
 
 }
 
-}
-
 template<typename _CharT, typename _Traits, int _Dim>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
@@ -1232,6 +1244,8 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 {
     __os << region.toString();
     return __os;
+}
+
 }
 
 

@@ -16,7 +16,7 @@ class RecursiveBisectionPartitionTest : public CxxTest::TestSuite
 public:
     void testSearchNodeCuboid()
     {
-        SuperVector<size_t> weights;
+        std::vector<std::size_t> weights;
         weights += 25, 25;
 
         checkCuboid(weights, 0, Coord<2>( 0, 0), Coord<2>(15, 20));
@@ -38,7 +38,7 @@ public:
 
     void testGetRegion()
     {
-        SuperVector<size_t> weights;
+        std::vector<std::size_t> weights;
         weights += 200, 100, 50, 25, 25;
 
         Coord<3> origin(100, 200, 300);
@@ -77,7 +77,7 @@ public:
 
     void testDimWeights()
     {
-        SuperVector<size_t> weights;
+        std::vector<std::size_t> weights;
         weights += 16, 16, 16, 16;
         Coord<2> dim(96, 32);
         Coord<2> dimWeights(1, 3);
@@ -88,7 +88,7 @@ public:
         checkCuboid(weights, 3, Coord<2>(48, 16), Coord<2>(48, 16), dim, dimWeights);
     }
 
-    void checkCuboid(SuperVector<size_t> weights, long node, Coord<2> expectedOffset, Coord<2> expectedDim, Coord<2> dimensions=Coord<2>(30, 20), Coord<2> dimWeights=Coord<2>::diagonal(1))
+    void checkCuboid(std::vector<std::size_t> weights, long node, Coord<2> expectedOffset, Coord<2> expectedDim, Coord<2> dimensions=Coord<2>(30, 20), Coord<2> dimWeights=Coord<2>::diagonal(1))
     {
         Coord<2> origin(0, 0);
         RecursiveBisectionPartition<2> p(

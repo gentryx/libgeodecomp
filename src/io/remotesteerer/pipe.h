@@ -135,7 +135,7 @@ private:
             LOG(DBG, "  steeringRequestsQueue: " << steeringRequestsQueue);
         }
 
-        SuperVector<int> requestSizes(numRequests);
+        std::vector<int> requestSizes(numRequests);
 
         if (mpiLayer.rank() == root) {
             for (int i = 0; i < numRequests; ++i) {
@@ -153,7 +153,7 @@ private:
         for (int i = 0; i < numRequests; ++i) {
             mpiLayer.broadcast(&steeringRequestsQueue[i][0], requestSizes[i], root);
         }
-        steeringRequests.append(steeringRequestsQueue);
+        append(steeringRequests, steeringRequestsQueue);
         steeringRequestsQueue.clear();
         LOG(DBG, "  steeringRequests: " << steeringRequests);
     }
@@ -165,8 +165,8 @@ private:
     void moveSteeringFeedbackToRoot()
     {
         // marshall all feedback in order to use scalable gather afterwards
-        SuperVector<char> localBuffer;
-        SuperVector<int> localLengths;
+        std::vector<char> localBuffer;
+        std::vector<int> localLengths;
         for (StringVec::iterator i = steeringFeedback.begin();
              i != steeringFeedback.end();
              ++i) {
@@ -176,15 +176,15 @@ private:
         LOG(DBG, "moveSteeringFeedbackToRoot: " << localBuffer << " " << localLengths);
 
         // how many strings are sent per node?
-        SuperVector<int> numFeedback = mpiLayer.gather((int)localLengths.size(), root);
+        std::vector<int> numFeedback = mpiLayer.gather((int)localLengths.size(), root);
 
         // all lengths of all strings:
-        SuperVector<int> allFeedbackLengths(numFeedback.sum());
+        std::vector<int> allFeedbackLengths(sum(numFeedback));
         mpiLayer.gatherV(&localLengths[0], localLengths.size(), numFeedback, root, &allFeedbackLengths[0]);
 
         // gather all messages in a single, giant buffer:
-        SuperVector<int> charsPerNode = mpiLayer.gather((int)localBuffer.size(), root);
-        SuperVector<char> globalBuffer(charsPerNode.sum());
+        std::vector<int> charsPerNode = mpiLayer.gather((int)localBuffer.size(), root);
+        std::vector<char> globalBuffer(sum(charsPerNode));
 
         mpiLayer.gatherV(&localBuffer[0], localBuffer.size(), charsPerNode, root, &globalBuffer[0]);
 
@@ -192,7 +192,7 @@ private:
         int cursor = 0;
         steeringFeedback.resize(0);
 
-        for (SuperVector<int>::iterator i = allFeedbackLengths.begin();
+        for (std::vector<int>::iterator i = allFeedbackLengths.begin();
              i != allFeedbackLengths.end();
              ++i) {
             int nextCursor = cursor + *i;

@@ -446,41 +446,44 @@ private:
 
     int lowerNeighbor() const
     {
-        size_t lowerNeighbor;
+        int lowerNeighbor;
+        int size = mpilayer.size();
+        int rank = mpilayer.rank();
 
         if (WRAP_EDGES) {
-            int size = mpilayer.size();
-            lowerNeighbor = (size + mpilayer.rank() + 1) % size;
-            while (lowerNeighbor != mpilayer.rank() &&
+            lowerNeighbor = (size + rank + 1) % size;
+            while (lowerNeighbor != rank &&
                    partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
                 lowerNeighbor = (size + lowerNeighbor + 1) % size;
             }
         } else {
-             lowerNeighbor = mpilayer.rank() + 1;
-            while (lowerNeighbor != mpilayer.size() &&
+            lowerNeighbor = rank + 1;
+            while (lowerNeighbor != size &&
                    partitions[lowerNeighbor] == partitions[lowerNeighbor + 1]) {
                 lowerNeighbor++;
             }
-            if (lowerNeighbor == mpilayer.size()) {
+            if (lowerNeighbor == size) {
                 lowerNeighbor = -1;
             }
         }
+
         return lowerNeighbor;
     }
 
     int upperNeighbor() const
     {
-        size_t upperNeighbor;
+        int upperNeighbor;
+        int rank = mpilayer.rank();
 
         if (WRAP_EDGES) {
             int size = mpilayer.size();
-            upperNeighbor = (size + mpilayer.rank() - 1) % size;
-            while (upperNeighbor != mpilayer.rank() &&
+            upperNeighbor = (size + rank - 1) % size;
+            while (upperNeighbor != rank &&
                    partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
                 upperNeighbor = (size + upperNeighbor - 1) % size;
             }
         } else {
-            upperNeighbor = mpilayer.rank() - 1;
+            upperNeighbor = rank - 1;
             while (upperNeighbor >= 0 &&
                    partitions[upperNeighbor] == partitions[upperNeighbor + 1]) {
                 --upperNeighbor;
@@ -580,7 +583,7 @@ private:
     void validateLoads(const WeightVec& newLoads, const WeightVec& oldLoads) const
     {
         if (newLoads.size() != oldLoads.size() ||
-            newLoads.sum() != oldLoads.sum()) {
+            sum(newLoads) != sum(oldLoads)) {
             throw std::invalid_argument(
                     "newLoads and oldLoads do not maintain invariance");
         }

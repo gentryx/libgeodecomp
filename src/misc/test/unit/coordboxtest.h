@@ -100,10 +100,10 @@ public:
     void testIterator1D()
     {
         CoordBox<1> box(Coord<1>(10), Coord<1>(5));
-        SuperVector<Coord<1> > expected;
+        std::vector<Coord<1> > expected;
         expected += Coord<1>(10), Coord<1>(11), Coord<1>(12), Coord<1>(13), Coord<1>(14);
 
-        SuperVector<Coord<1> > actual;
+        std::vector<Coord<1> > actual;
         for (CoordBox<1>::Iterator i = box.begin();
              i != box.end();
              ++i) {
@@ -116,14 +116,14 @@ public:
     void testIterator2D()
     {
         CoordBox<2> box(Coord<2>(10, 15), Coord<2>(8, 9));
-        SuperVector<Coord<2> > expected;
+        std::vector<Coord<2> > expected;
         for (int y = 15; y < 24; ++y) {
             for (int x = 10; x < 18; ++x) {
                 expected << Coord<2>(x, y);
             }
         }
 
-        SuperVector<Coord<2> > actual;
+        std::vector<Coord<2> > actual;
         for (CoordBox<2>::Iterator i = box.begin();
              i != box.end();
              ++i) {
@@ -136,7 +136,7 @@ public:
     void testIterator3D()
     {
         CoordBox<3> box(Coord<3>(10, 15, 20), Coord<3>(8, 9, 5));
-        SuperVector<Coord<3> > expected;
+        std::vector<Coord<3> > expected;
         for (int z = 20; z < 25; ++z) {
             for (int y = 15; y < 24; ++y) {
                 for (int x = 10; x < 18; ++x) {
@@ -145,7 +145,7 @@ public:
             }
         }
 
-        SuperVector<Coord<3> > actual;
+        std::vector<Coord<3> > actual;
         for (CoordBox<3>::Iterator i = box.begin();
              i != box.end();
              ++i) {

@@ -67,7 +67,7 @@ public:
 private:
     unsigned rank;
     Coord<3> dimensions;
-    SuperVector<size_t> weights;
+    std::vector<std::size_t> weights;
     unsigned ghostZoneWidth;
     boost::shared_ptr<PartitionType> partition;
     boost::shared_ptr<Initializer<TestCell<3> > > init;

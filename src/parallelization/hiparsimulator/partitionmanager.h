@@ -18,7 +18,7 @@ class PartitionManager
 public:
     typedef TOPOLOGY Topology;
     static const int DIM = Topology::DIM;
-    typedef SuperMap<int, SuperVector<Region<DIM> > > RegionVecMap;
+    typedef SuperMap<int, std::vector<Region<DIM> > > RegionVecMap;
 
     enum AccessCode {
         OUTGROUP = -1
@@ -27,11 +27,11 @@ public:
     PartitionManager(
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
     {
-        SuperVector<std::size_t> weights(1, simulationArea.size());
+        std::vector<std::size_t> weights(1, simulationArea.size());
         boost::shared_ptr<Partition<DIM> > partition(
             new StripingPartition<DIM>(Coord<DIM>(), simulationArea.dimensions, 0, weights));
         resetRegions(simulationArea, partition, 0, 1);
-        resetGhostZones(SuperVector<CoordBox<DIM> >(1));
+        resetGhostZones(std::vector<CoordBox<DIM> >(1));
     }
 
     /**
@@ -98,9 +98,9 @@ public:
             }
         }
         outerGhostZoneFragments[OUTGROUP] =
-            SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, outer);
+            std::vector<Region<DIM> >(getGhostZoneWidth() + 1, outer);
         innerGhostZoneFragments[OUTGROUP] =
-            SuperVector<Region<DIM> >(getGhostZoneWidth() + 1, inner);
+            std::vector<Region<DIM> >(getGhostZoneWidth() + 1, inner);
     }
 
     inline const RegionVecMap& getOuterGhostZoneFragments() const
@@ -152,7 +152,7 @@ public:
         return ownInnerSets[dist];
     }
 
-    inline const SuperVector<CoordBox<DIM> >& getBoundingBoxes() const
+    inline const std::vector<CoordBox<DIM> >& getBoundingBoxes() const
     {
         return boundingBoxes;
     }
@@ -172,7 +172,7 @@ public:
         return volatileKernel;
     }
 
-    inline const SuperVector<std::size_t>& getWeights() const
+    inline const std::vector<std::size_t>& getWeights() const
     {
         return partition->getWeights();
     }
@@ -185,15 +185,15 @@ private:
     RegionVecMap regions;
     RegionVecMap outerGhostZoneFragments;
     RegionVecMap innerGhostZoneFragments;
-    SuperVector<Region<DIM> > ownRims;
-    SuperVector<Region<DIM> > ownInnerSets;
+    std::vector<Region<DIM> > ownRims;
+    std::vector<Region<DIM> > ownInnerSets;
     unsigned rank;
     unsigned ghostZoneWidth;
-    SuperVector<CoordBox<DIM> > boundingBoxes;
+    std::vector<CoordBox<DIM> > boundingBoxes;
 
     inline void fillRegion(unsigned node)
     {
-        SuperVector<Region<DIM> >& regionExpansion = regions[node];
+        std::vector<Region<DIM> >& regionExpansion = regions[node];
         regionExpansion.resize(getGhostZoneWidth() + 1);
         regionExpansion[0] = partition->getRegion(node);
         for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
@@ -243,8 +243,8 @@ private:
 
     inline void intersect(unsigned node)
     {
-        SuperVector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
-        SuperVector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];
+        std::vector<Region<DIM> >& outerGhosts = outerGhostZoneFragments[node];
+        std::vector<Region<DIM> >& innerGhosts = innerGhostZoneFragments[node];
         outerGhosts.resize(getGhostZoneWidth() + 1);
         innerGhosts.resize(getGhostZoneWidth() + 1);
         for (unsigned i = 0; i <= getGhostZoneWidth(); ++i) {
@@ -255,7 +255,6 @@ private:
 };
 
 }
-
 }
 
 #endif

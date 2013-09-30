@@ -61,7 +61,7 @@ public:
             partition,
             rank,
             ghostZoneWidth);
-        SuperVector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
+        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
@@ -184,7 +184,7 @@ public:
         return stepper->currentStep();
     }
 
-    inline const SuperVector<std::size_t>& getWeights() const
+    inline const std::vector<std::size_t>& getWeights() const
     {
         return partitionManager->getWeights();
     }
@@ -193,7 +193,7 @@ public:
 
 private:
     boost::shared_ptr<PartitionManagerType> partitionManager;
-    SuperVector<PatchLinkPtr> patchLinks;
+    std::vector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     MPILayer mpiLayer;

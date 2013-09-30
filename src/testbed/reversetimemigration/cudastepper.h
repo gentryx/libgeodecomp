@@ -19,8 +19,6 @@ __global__ void update(double *gridOld, double *gridNew)
     int y = (blockIdx.y * BLOCK_DIM_Y + threadIdx.y) * 2 + 2;
     int offset = y * DIM_X + x;
 
-    __shared__ double buf[BLOCK_DIM_Y][BLOCK_DIM_X];
-
     double lineA0 = gridOld[offset + OFFSET(0, 0, 0)];
     double lineA1 = gridOld[offset + OFFSET(0, 0, 1)];
     double lineA2 = gridOld[offset + OFFSET(0, 0, 2)];

@@ -50,8 +50,8 @@ public:
     typedef Grid<CellType, Topology> GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
-    typedef SuperVector<CellType> BufferType;
-    typedef SuperMap<unsigned, SuperVector<RegionInfo> > RegionInfoMapType;
+    typedef std::vector<CellType> BufferType;
+    typedef SuperMap<unsigned, std::vector<RegionInfo> > RegionInfoMapType;
     typedef SuperMap<unsigned, std::size_t> StepCountMapType;
     typedef SuperMap<unsigned, GridType> GridMapType;
     typedef
@@ -121,7 +121,7 @@ public:
         if (it == regionInfoMap.end()) {
             it = regionInfoMap.insert(
                     it,
-                    std::make_pair(step, SuperVector<RegionInfo>())
+                    std::make_pair(step, std::vector<RegionInfo>())
                 );
         }
 
@@ -212,7 +212,7 @@ private:
     RegionInfoMapType regionInfoMap;
 
     std::size_t nextId;
-    SuperVector<std::size_t> freeIds;
+    std::vector<std::size_t> freeIds;
 
     MutexType mutex;
 

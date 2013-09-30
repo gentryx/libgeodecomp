@@ -1,81 +1,154 @@
+/* vim:set expandtab tabstop=2 shiftwidth=2 softtabstop=2: */
+
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
 
+#include "openclstepper.h"
+
 using namespace LibGeoDecomp;
 
-class Cell
+#define MYCELL_STRUCT  \
+    typedef struct {   \
+      int x, y, z;      \
+    } MyCell;
+
+MYCELL_STRUCT
+
+#define STRINGIFY(STRING) #STRING
+
+class DummyCell : public OpenCLCellInterface<DummyCell, MyCell>
 {
 public:
     class API :
-        public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
         public APITraits::HasCubeTopology<3>
     {};
 
-    inline explicit Cell(const double& v = 0) :
-        temp(v)
+    DummyCell(int x, int y, int z)
+    {
+        myCellData.x = x;
+        myCellData.y = y;
+        myCellData.z = z;
+    }
+
+    template<typename COORD_MAP>
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    {}
+
+    static std::string kernel_file()
+    {
+        return "./test.cl";
+    }
+
+    static std::string kernel_function()
+    {
+        return "add_test";
+    }
+
+    MyCell *data()
+    {
+        return &myCellData;
+    }
+
+    MyCell myCellData;
+};
+
+class DummyCellInitializer : public SimpleInitializer<DummyCell>
+{
+public:
+    using SimpleInitializer<DummyCell>::gridDimensions;
+
+    DummyCellInitializer() :
+        SimpleInitializer<DummyCell>(Coord<3>(2, 2, 2))
+    {}
+
+    virtual void grid(GridBase<DummyCell, 3> *ret)
+    {
+        Coord<3> offset = Coord<3>(0, 0, 0);
+
+        for (int z = 0; z < gridDimensions().z(); ++z) {
+            for (int y = 0; y < gridDimensions().y(); ++y) {
+                for (int x = 0; x < gridDimensions().x(); ++x) {
+                    Coord<3> c = offset + Coord<3>(x, y, z);
+                    ret->set(c, DummyCell(x, y, z));
+                }
+            }
+        }
+    }
+};
+
+class JacobiCell : public OpenCLCellInterface<JacobiCell, double>
+{
+public:
+    class API :
+        public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
+        public APITraits::HasCubeTopology<3>
+    {};
+
+    JacobiCell(double temp = 0) :
+        temp(temp)
     {}
 
     template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& /* nanoStep */)
+    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    {}
+
+    static std::string kernel_file()
     {
-        temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
-                neighborhood[FixedCoord< 0, -1,  0>()].temp +
-                neighborhood[FixedCoord<-1,  0,  0>()].temp +
-                neighborhood[FixedCoord< 1,  0,  0>()].temp +
-                neighborhood[FixedCoord< 0,  1,  0>()].temp +
-                neighborhood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 6.0);
+        return "./jacobi3d.cl";
+    }
+
+    static std::string kernel_function()
+    {
+        return "update";
+    }
+
+    double *data()
+    {
+        return &temp;
     }
 
     double temp;
 };
 
-template<typename CELL>
-class MyFutureOpenCLStepper
+class JacobiCellInitializer : public SimpleInitializer<JacobiCell>
 {
 public:
-    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
-    typedef DisplacedGrid<CELL, Topology>  GridType;
-    const static int DIM = Topology::DIM;
+    JacobiCellInitializer(int size, int steps) :
+        SimpleInitializer<JacobiCell>(Coord<3>::diagonal(size), steps)
+    {}
 
-    MyFutureOpenCLStepper(const CoordBox<DIM> box) :
-        box(box),
-        hostGrid(box)
+    virtual void grid(GridBase<JacobiCell, 3> *ret)
     {
-        // todo: allocate deviceGridOld, deviceGridNew via OpenCL on device
-        // todo: specify OpenCL platform, device via constructor
-    }
+        Coord<3> offset = Coord<3>(0, 0, 0);
 
-    void regionToVec(const Region<DIM>& region, SuperVector<int> *coordsX, SuperVector<int> *coordsY, SuperVector<int> *coordsZ)
-    {
-        // todo: iterate through region and add all coordinates to the corresponding vectors
+        for (int z = 0; z < dimensions.z(); ++z) {
+            for (int y = 0; y < dimensions.y(); ++y) {
+                for (int x = 0; x < dimensions.x(); ++x) {
+                    Coord<3> c = offset + Coord<3>(x, y, z);
+                    ret->set(c, JacobiCell(0.99999999999));
+                }
+            }
+        }
     }
-
-    template<typename GRID>
-    void setGridRegion(const GRID& grid, const Region<DIM>& region)
-    {
-        // todo: copy all coords in region from grid (on host) to deviceGridOld
-    }
-
-    template<typename GRID>
-    void getGridRegion(const GRID *grid, const Region<DIM>& region)
-    {
-        // todo: copy all coords in region from deviceGridOld (on host) to grid
-    }
-
-private:
-    CoordBox<DIM> box;
-    GridType hostGrid;
-    // fixme deviceGridOld;
-    // fixme deviceGridNew;
 };
 
 int main(int argc, char **argv)
 {
-    MyFutureOpenCLStepper<Cell> stepper(
-        CoordBox<3>(
-            Coord<3>(10, 10, 10),
-            Coord<3>(20, 30, 40)));
-    std::cout << "test: " << sizeof(stepper) << "\n";
+    int size = 32;
+    int steps = 100;
+
+    typedef APITraits::SelectTopology<JacobiCell>::Value Topology;
+    boost::shared_ptr<HiParSimulator::PartitionManager<Topology>> partitionManager(
+        new HiParSimulator::PartitionManager<Topology>(
+            CoordBox<3>(Coord<3>(0,0,0), Coord<3>::diagonal(size))));
+
+    boost::shared_ptr<JacobiCellInitializer> initizalizer(
+        new JacobiCellInitializer(size, steps));
+
+    HiParSimulator::OpenCLStepper<JacobiCell, double> openclstepper(0, 0, partitionManager, initizalizer);
+
+    openclstepper.update(2);
+
     return 0;
 }

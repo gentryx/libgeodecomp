@@ -73,7 +73,7 @@ public:
         long stride;
         MPILayer mpiLayer;
         Region<DIM> region;
-        SuperVector<CellType> buffer;
+        std::vector<CellType> buffer;
         int tag;
     };
 
