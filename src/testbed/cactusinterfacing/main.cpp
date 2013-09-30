@@ -13,6 +13,14 @@ public:
         public APITraits::HasUpdateLineX
     {};
 
+    CactusCell() :
+        var_phi(0),
+        var_phi_p(0),
+        x(0),
+        y(0),
+        z(0)
+    {}
+
     // roughly imitating what's required by WaveToyC_Evolution in
     // "Cactus/arrangements/CactusWave/WaveToyC/src/WaveToy.c".
     template<typename ACCESSOR1, typename ACCESSOR2>
@@ -96,13 +104,105 @@ public:
             vindex = CCTK_GFINDEX3D(cctkGH, i, 0, 0);
             phi_next_p_p[vindex] = phi_p[vindex];
         }
+
+#undef DECLARE_CCTK_ARGUMENTS
+#undef CCTK_REAL
+#undef CCTK_DELTA_SPACE
+#undef CCTK_DELTA_TIME
+#undef CCTK_GFINDEX3D
+
+#undef phi
+#undef phi_next_p_p
+#undef phi_p
+#undef phi_p_p
     }
 
     double var_phi;
     double var_phi_p;
+    int x;
+    int y;
+    int z;
 };
 
-LIBFLATARRAY_REGISTER_SOA(CactusCell, ((double)(var_phi))((double)(var_phi_p)))
+LIBFLATARRAY_REGISTER_SOA(CactusCell, ((double)(var_phi))((double)(var_phi_p))((int)(x))((int)(y))((int)(z)))
+
+// helper code to pull data from gridbase
+#define ADD_READ_MEMBER(TYPE, MEMBER)                                   \
+    class ReadMember_##MEMBER                                           \
+    {                                                                   \
+    public:                                                             \
+        ReadMember_##MEMBER(GridBase<CactusCell, 3> *source) :          \
+            source(source),                                             \
+            box(source->boundingBox())                                  \
+        {}                                                              \
+                                                                        \
+        TYPE operator[](int index)                                      \
+        {                                                               \
+            Coord<3> c = box.origin +                                   \
+                box.dimensions.indexToCoord(index);                     \
+            return source->get(c).MEMBER;                               \
+        }                                                               \
+                                                                        \
+    private:                                                            \
+        GridBase<CactusCell, 3> *source;                                \
+        CoordBox<3> box;                                                \
+    };
+
+// helper code to write data back to gridbase
+#define ADD_WRITE_MEMBER(TYPE, MEMBER)                                  \
+    class WriteReference_##MEMBER                                       \
+    {                                                                   \
+    public:                                                             \
+        WriteReference_##MEMBER(const Coord<3>& pos,                    \
+                                GridBase<CactusCell, 3> *target) :      \
+            pos(pos),                                                   \
+            target(target)                                              \
+        {}                                                              \
+                                                                        \
+        WriteReference_##MEMBER& operator=(TYPE value)                  \
+        {                                                               \
+            CactusCell cell = target->get(pos);                         \
+            cell.MEMBER = value;                                        \
+            target->set(pos, cell);                                     \
+            return *this;                                               \
+        }                                                               \
+                                                                        \
+        template<typename WRITE_MEMBER>                                 \
+        WriteReference_##MEMBER& operator=(WRITE_MEMBER other)          \
+        {                                                               \
+            *this = other.get();                                        \
+            return *this;                                               \
+        }                                                               \
+                                                                        \
+        TYPE get() const                                                \
+        {                                                               \
+            return target->get(pos).MEMBER;                             \
+        }                                                               \
+                                                                        \
+    private:                                                            \
+        Coord<3> pos;                                                   \
+        GridBase<CactusCell, 3> *target;                                \
+    };                                                                  \
+                                                                        \
+    class WriteMember_##MEMBER                                          \
+    {                                                                   \
+    public:                                                             \
+        WriteMember_##MEMBER(GridBase<CactusCell, 3> *target) :         \
+            target(target),                                             \
+            box(target->boundingBox())                                  \
+        {}                                                              \
+                                                                        \
+        WriteReference_##MEMBER operator[](int index)                   \
+        {                                                               \
+            Coord<3> c = box.origin +                                   \
+                box.dimensions.indexToCoord(index);                     \
+            return WriteReference_##MEMBER(c, target);                  \
+        }                                                               \
+                                                                        \
+    private:                                                            \
+        GridBase<CactusCell, 3> *target;                                \
+        CoordBox<3> box;                                                \
+    };
 
 class CactusInitializer : public SimpleInitializer<CactusCell>
 {
@@ -111,8 +211,144 @@ public:
         SimpleInitializer<CactusCell>(gridDim, maxSteps)
     {}
 
+    ADD_WRITE_MEMBER(double, var_phi)
+    ADD_WRITE_MEMBER(double, var_phi_p)
+    ADD_READ_MEMBER(int, x)
+    ADD_READ_MEMBER(int, y)
+    ADD_READ_MEMBER(int, z)
+
     virtual void grid(GridBase<CactusCell, 3> *target)
     {
+        // manually generated interface code starts here. will be auto-generated by Kurt's scripts lateron.
+#define DECLARE_CCTK_ARGUMENTS
+#define DECLARE_CCTK_PARAMETERS
+#define CCTK_REAL double
+#define CCTK_DELTA_TIME 0.1
+#define CCTK_GFINDEX3D(CCTKGH, I, J, K) (Coord<3>(I, J, K).toIndex(box.dimensions))
+#define CCTK_Equals(A, B) std::string(A) == std::string(B)
+#define SQR(X) ((X)*(X))
+#define initial_data "plane"
+
+// #define phi          (&hoodNew.var_phi())
+// #define phi_next_p_p (&hoodNew.var_phi_p())
+// #define phi_p        (&hoodOld[FixedCoord<0, 0, 0>()].var_phi())
+// #define phi_p_p      (&hoodOld[FixedCoord<0, 0, 0>()].var_phi_p())
+
+        CoordBox<3> box = target->boundingBox();
+        ReadMember_x x(target);
+        ReadMember_y y(target);
+        ReadMember_z z(target);
+        WriteMember_var_phi phi(target);
+        WriteMember_var_phi_p phi_p(target);
+
+        CCTK_REAL kx = 0.1;
+        CCTK_REAL ky = 0.1;
+        CCTK_REAL kz = 0.1;
+        CCTK_REAL amplitude = 0.1;
+        CCTK_REAL radius = 1.234;
+        CCTK_REAL sigma = 5.432;
+        CCTK_REAL cctk_time = 12.34;
+        int i,j,k;
+
+        // carefully set fake indices so that the offsets set below
+        // are equalized (together with our definition of CCTK_GFINDEX3D()
+        int cctk_lsh[] = {box.dimensions.x(), box.dimensions.y(), box.dimensions.z()};
+
+        // fake initialization of x, y, z (would be done by cartgrid thorn)
+        for(k=0; k<cctk_lsh[2]; k++) {
+            for(j=0; j<cctk_lsh[1]; j++) {
+                for(i=0; i<cctk_lsh[0]; i++) {
+                    CactusCell cell;
+                    cell.x = i + box.origin.x();
+                    cell.y = j + box.origin.y();
+                    cell.z = k + box.origin.z();
+                }
+            }
+        }
+
+        // REMARK: verbatim code copy (only whitespace changes) from
+        // WaveToyC_Evolution(), starting here...
+        DECLARE_CCTK_ARGUMENTS
+        DECLARE_CCTK_PARAMETERS
+
+        CCTK_REAL dt;
+        CCTK_REAL omega;
+        int vindex;
+        CCTK_REAL X, Y, Z, R;
+        CCTK_REAL pi;
+
+        dt = CCTK_DELTA_TIME;
+
+        if(CCTK_Equals(initial_data, "plane")) {
+            omega = sqrt(SQR(kx)+SQR(ky)+SQR(kz));
+
+            for(k=0; k<cctk_lsh[2]; k++) {
+                for(j=0; j<cctk_lsh[1]; j++) {
+                    for(i=0; i<cctk_lsh[0]; i++) {
+                        vindex =  CCTK_GFINDEX3D(cctkGH,i,j,k);
+                        phi[vindex]   = amplitude*cos(kx*x[vindex]+ky*y[vindex]+kz*z[vindex]+omega*cctk_time);
+                        phi_p[vindex] = amplitude*cos(kx*x[vindex]+ky*y[vindex]+kz*z[vindex]+omega*(cctk_time-dt));
+                    }
+                }
+            }
+        } else if(CCTK_Equals(initial_data, "gaussian")) {
+            for(k=0; k<cctk_lsh[2]; k++) {
+                for(j=0; j<cctk_lsh[1]; j++) {
+                    for(i=0; i<cctk_lsh[0]; i++) {
+                        vindex =  CCTK_GFINDEX3D(cctkGH,i,j,k);
+
+                        X = x[vindex];
+                        Y = y[vindex];
+                        Z = z[vindex];
+
+                        R = sqrt(X*X + Y*Y + Z*Z);
+
+                        phi[vindex] = amplitude*exp( - SQR( (R - radius) / sigma ) );
+
+                        if (R == 0.0) {
+                            phi_p[vindex] = amplitude*(1.0 - 2.0*dt*dt/sigma/sigma)*exp(-dt*dt/sigma/sigma);
+                        } else {
+                            phi_p[vindex] = amplitude/2.0*(R-dt)/R*
+                                exp( - SQR( (R - radius - dt)/ sigma ) )
+                                + amplitude/2.0*(R+dt)/R*
+                                exp( - SQR( (R - radius + dt)/ sigma ) );
+                        }
+                    }
+                }
+            }
+        } else if(CCTK_Equals(initial_data, "box")) {
+            pi = 4.0*atan(1.0);
+            omega = sqrt(SQR(kx)+SQR(ky)+SQR(kz));
+
+            for(k=0; k<cctk_lsh[2]; k++) {
+                for(j=0; j<cctk_lsh[1]; j++) {
+                    for(i=0; i<cctk_lsh[0]; i++) {
+                        vindex =  CCTK_GFINDEX3D(cctkGH,i,j,k);
+
+                        phi[vindex] = amplitude*sin(kx*(x[vindex]-0.5)*pi)*
+                            sin(ky*(y[vindex]-0.5)*pi)*
+                            sin(kz*(z[vindex]-0.5)*pi)*
+                            cos(omega*cctk_time*pi);
+
+                        phi_p[vindex] = amplitude*sin(kx*(x[vindex]-0.5)*pi)*
+                            sin(ky*(y[vindex]-0.5)*pi)*
+                            sin(kz*(z[vindex]-0.5)*pi)*
+                            cos(omega*(cctk_time-dt)*pi);
+                    }
+                }
+            }
+        } else if (CCTK_Equals(initial_data, "none")) {
+            for(k=0; k<cctk_lsh[2]; k++) {
+                for(j=0; j<cctk_lsh[1]; j++) {
+                    for(i=0; i<cctk_lsh[0]; i++) {
+                        vindex =  CCTK_GFINDEX3D(cctkGH,i,j,k);
+
+                        phi[vindex] = phi_p[vindex] = 0.0;
+                    }
+                }
+            }
+        }
+        // REMARK: ...and ending here.
     }
 
 };
