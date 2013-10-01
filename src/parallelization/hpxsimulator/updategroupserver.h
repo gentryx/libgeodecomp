@@ -90,7 +90,7 @@ public:
         // Registering name.
         std::string name = "LibGeoDecomp.UpdateGroup.";
         name += boost::lexical_cast<std::string>(rank);
-        hpx::agas::register_name(name, this->get_gid()).get();
+        hpx::agas::register_name_sync(name, this->get_gid());
         ////////////////////////////////////////////////////////////////////////
 
         partitionManager.reset(new PartitionManagerType());
@@ -118,14 +118,7 @@ public:
         const RegionVecMap& outerMap = partitionManager->getOuterGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = outerMap.begin(); i != outerMap.end(); ++i) {
             if (!i->second.empty() && !i->second.back().empty()) {
-                if(i->second.size() != ghostZoneWidth)
-                {
-                    std::cerr << rank << " trying to accept fragments with size " << i->second.size() << " " << ghostZoneWidth << "\n";
-                    continue;
-                }
-                if(i->first == -1)
-                {
-                    std::cerr << rank << " provider got outgroup fragment\n";
+                if(i->second.back().empty()) {
                     continue;
                 }
 
@@ -155,16 +148,10 @@ public:
         const RegionVecMap& innerMap = partitionManager->getInnerGhostZoneFragments();
         for (typename RegionVecMap::const_iterator i = innerMap.begin(); i != innerMap.end(); ++i) {
             if (!i->second.empty() && !i->second.back().empty()) {
-                if(i->second.size() != ghostZoneWidth)
-                {
-                    std::cerr << rank << " trying to accept fragments with size " << i->second.size() << " " << ghostZoneWidth << "\n";
+                if(i->second.back().empty()) {
                     continue;
                 }
-                if(i->first == -1)
-                {
-                    std::cerr << rank << " accepter got outgroup fragment\n";
-                    continue;
-                }
+
                 PatchLinkAccepterPtr link(
                     new PatchLinkAccepterType(
                         i->second.back(),
@@ -387,7 +374,7 @@ private:
             std::string name = "LibGeoDecomp.UpdateGroup.";
             name += boost::lexical_cast<std::string>(dstRank);
             while(true) {
-                updateGroupId = hpx::agas::resolve_name(name).get();
+                updateGroupId = hpx::agas::resolve_name_sync(name);
 
                 if(!updateGroupId) {
                     hpx::this_thread::suspend(boost::posix_time::seconds(1));
