@@ -3,6 +3,10 @@
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/hilbertpartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
@@ -177,6 +181,72 @@ private:
 
 };
 
+template<typename PARTITION>
+class PartitionManagerBig3DPerfTest : public CPUBenchmark
+{
+public:
+    PartitionManagerBig3DPerfTest(const std::string& partitionName) :
+        partitionName(partitionName)
+    {}
+
+    std::string family()
+    {
+        return "PartMngr3D<" + partitionName + ">";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(const Coord<3>& dim)
+    {
+        MPILayer mpiLayer;
+
+        long long tStart = Chronometer::timeUSec();
+
+        int ghostZoneWidth = 3;
+        CoordBox<3> box(Coord<3>(), Coord<3>(2 * dim.x(), dim.y(), dim.z()));
+        std::vector<size_t> weights;
+        weights << dim.prod()
+                << dim.prod();
+
+        boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
+
+        HiParSimulator::PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
+
+        myPartitionManager.resetRegions(
+            box,
+            partition,
+            0,
+            ghostZoneWidth);
+        std::vector<CoordBox<3> > boundingBoxes;
+        for (int i = 0; i < 2; ++i) {
+            boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
+        }
+
+        myPartitionManager.resetGhostZones(boundingBoxes);
+
+        for (int i = 0; i < 2; ++i) {
+            if (myPartitionManager.getRegion(i, 0).boundingBox() == CoordBox<3>()) {
+                throw std::runtime_error("test failed: empty bounding box!");
+            }
+        }
+
+        long long tEnd = Chronometer::timeUSec();
+
+        return seconds(tStart, tEnd);
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    std::string partitionName;
+};
+
 int main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
@@ -206,6 +276,8 @@ int main(int argc, char **argv)
     eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
     eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(200), output);
     eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
+    eval(PartitionManagerBig3DPerfTest<HiParSimulator::RecursiveBisectionPartition<3> >("RecursiveBisection"), Coord<3>::diagonal(100), output);
+    eval(PartitionManagerBig3DPerfTest<HiParSimulator::ZCurvePartition<3> >("ZCurve"), Coord<3>::diagonal(100), output);
 
     MPI_Finalize();
     return 0;

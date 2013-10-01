@@ -191,43 +191,6 @@ public:
         TS_ASSERT_EQUALS(expected, partitionManager.innerSet(1));
     }
 
-    void testBig3D()
-    {
-        // std::cout << "testBig3D start\n";
-
-        // int ghostZoneWidth = 3;
-        // CoordBox<3> box(Coord<3>(), Coord<3>(4000, 1000, 1000));
-        // std::vector<long> weights;
-        // weights += 1000000000, 1000000000, 1000000000, 1000000000;
-
-        // Partition<3> *partition =
-        //     new RecursiveBisectionPartition<3>(Coord<3>(), box.dimensions, 0, weights);
-        // std::cout << "creating PartitionManager\n";
-
-        // PartitionManager<3, Topologies::Torus<3>::Topology> myPartitionManager;
-
-        // std::cout << "resetting regions\n";
-        // myPartitionManager.resetRegions(
-        //     box,
-        //     partition,
-        //     0,
-        //     ghostZoneWidth);
-        // std::vector<CoordBox<3> > boundingBoxes;
-        // for (int i = 0; i < 4; ++i) {
-        //     std::cout << "getting region " << i << "\n";
-
-        //     boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
-        // }
-
-        // myPartitionManager.resetGhostZones(boundingBoxes);
-
-        // for (int i = 0; i < 4; ++i) {
-        //     std::cout << "boundingBox[" << i << "] = \n"
-        //               << myPartitionManager.getRegion(i, 0).boundingBox() << "\n";
-        // }
-        // std::cout << "testBig3D end\n";
-     }
-
 private:
     Coord<2> dimensions;
     unsigned offset;
