@@ -18,7 +18,7 @@ public:
     static const int ERROR = 1;
     static const int WARN  = 2;
     static const int INFO  = 3;
-    static const int DBG = 4;
+    static const int DBG   = 4;
 };
 
 }

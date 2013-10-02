@@ -47,6 +47,7 @@ public:
         pipe.addSteeringFeedback("node " + StringOps::itoa(mpiLayer.rank()) + " shutting down");
 
         pipe.sync();
+        // 4 ranks with 2x feedback each ("starting" + "shutting down"), plus rank 2 with an error message
         unsigned expectedSize = (mpiLayer.rank() == 0)? 9 : 0;
         TS_ASSERT_EQUALS(pipe.steeringFeedback.size(),           expectedSize);
         TS_ASSERT_EQUALS(pipe.copySteeringFeedback().size(),     expectedSize);

@@ -64,7 +64,7 @@ public:
         std::size_t retry = 0;
 
         while(thisId == hpx::naming::invalid_id) {
-            hpx::agas::resolve_name(name, thisId);
+            hpx::agas::resolve_name_sync(name, thisId);
             if(retry > 10) {
                 throw std::logic_error("Can't find the Writer Sink name");
             }
