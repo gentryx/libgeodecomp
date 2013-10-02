@@ -147,7 +147,7 @@ namespace CxxTest
     char *numberToString( N n, char *s )
     {
         std::ostringstream numberFormatter;
-        numberFormatter << std::scientific << n << '\0';
+        numberFormatter << std::scientific << n;
 
         /* handle CxxTest's sick output */
         char *dest = s;

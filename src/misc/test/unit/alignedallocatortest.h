@@ -14,12 +14,21 @@ public:
 
     void testBasic()
     {
-        TS_ASSERT_EQUALS(
-            0, ((long)AlignedAllocator<int,   64>().allocate(3))   %  64);
-        TS_ASSERT_EQUALS(
-            0, ((long)AlignedAllocator<char, 128>().allocate(199)) % 128);
-        TS_ASSERT_EQUALS(
-            0, ((long)AlignedAllocator<long, 512>().allocate(256)) % 512);
+        {
+            int *p = AlignedAllocator<int,   64>().allocate(3);
+            TS_ASSERT_EQUALS(0, long(p) %  64);
+            AlignedAllocator<int, 64>().deallocate(p, 3);
+        }
+        {
+            char *p = AlignedAllocator<char, 128>().allocate(199);
+            TS_ASSERT_EQUALS(0, long(p) % 128);
+            AlignedAllocator<char, 128>().deallocate(p, 199);
+        }
+        {
+            long *p = AlignedAllocator<long, 512>().allocate(256);
+            TS_ASSERT_EQUALS(0, long(p) % 512);
+            AlignedAllocator<long, 512>().deallocate(p, 256);
+        }
     }
 };
 
