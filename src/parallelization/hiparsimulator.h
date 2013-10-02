@@ -51,11 +51,6 @@ public:
         cellMPIDatatype(cellMPIDatatype)
     {}
 
-    inline void init()
-    {
-        initSimulation();
-    }
-
     inline void run()
     {
         initSimulation();

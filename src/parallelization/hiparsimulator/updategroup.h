@@ -189,9 +189,8 @@ public:
         return partitionManager->getWeights();
     }
 
-    boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
-
 private:
+    boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
     std::vector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;

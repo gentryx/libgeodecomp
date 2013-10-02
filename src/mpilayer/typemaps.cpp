@@ -15,6 +15,7 @@ MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_2_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_3_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASEMPIDATATYPEHELPER;
 MPI_Datatype MPI_LIBGEODECOMP_MYSIMPLECELL;
+MPI_Datatype MPI_LIBGEODECOMP_STATISTICS;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_1_;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_2_;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_3_;
@@ -475,6 +476,47 @@ Typemaps::generateMapLibGeoDecomp_MySimpleCell() {
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
         MemberSpec(getAddress(&obj->temp), MPI_DOUBLE, 1)
+    };
+    std::sort(rawSpecs, rawSpecs + count, addressLower);
+
+    // split addresses from member types
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
+    for (int i = 0; i < count; i++) {
+        displacements[i] = rawSpecs[i].address;
+        memberTypes[i] = rawSpecs[i].type;
+        lengths[i] = rawSpecs[i].length;
+    }
+
+    // transform absolute addresses into offsets
+    for (int i = count-1; i > 0; i--) {
+        displacements[i] -= displacements[0];
+    }
+    displacements[0] = 0;
+
+    // create datatype
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
+
+    return objType;
+}
+
+MPI_Datatype
+Typemaps::generateMapLibGeoDecomp_Statistics() {
+    char fakeObject[sizeof(LibGeoDecomp::Statistics)];
+    LibGeoDecomp::Statistics *obj = (LibGeoDecomp::Statistics*)fakeObject;
+
+    const int count = 5;
+    int lengths[count];
+
+    // sort addresses in ascending order
+    MemberSpec rawSpecs[] = {
+        MemberSpec(getAddress(&obj->computeTimeGhost), MPI_DOUBLE, 1),
+        MemberSpec(getAddress(&obj->computeTimeInner), MPI_DOUBLE, 1),
+        MemberSpec(getAddress(&obj->patchAcceptersTime), MPI_DOUBLE, 1),
+        MemberSpec(getAddress(&obj->patchProvidersTime), MPI_DOUBLE, 1),
+        MemberSpec(getAddress(&obj->totalTime), MPI_DOUBLE, 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -983,6 +1025,7 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_FLOATCOORDBASE_3_ = generateMapLibGeoDecomp_FloatCoordBase_3_();
     MPI_LIBGEODECOMP_FLOATCOORDBASEMPIDATATYPEHELPER = generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper();
     MPI_LIBGEODECOMP_MYSIMPLECELL = generateMapLibGeoDecomp_MySimpleCell();
+    MPI_LIBGEODECOMP_STATISTICS = generateMapLibGeoDecomp_Statistics();
     MPI_LIBGEODECOMP_STREAK_1_ = generateMapLibGeoDecomp_Streak_1_();
     MPI_LIBGEODECOMP_STREAK_2_ = generateMapLibGeoDecomp_Streak_2_();
     MPI_LIBGEODECOMP_STREAK_3_ = generateMapLibGeoDecomp_Streak_3_();

@@ -17,6 +17,7 @@
 #include <libgeodecomp/misc/floatcoordbase.h>
 #include <libgeodecomp/misc/floatcoordbase.h>
 #include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
+#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/streak.h>
 #include <libgeodecomp/misc/streak.h>
@@ -42,6 +43,7 @@ extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_2_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASE_3_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDBASEMPIDATATYPEHELPER;
 extern MPI_Datatype MPI_LIBGEODECOMP_MYSIMPLECELL;
+extern MPI_Datatype MPI_LIBGEODECOMP_STATISTICS;
 extern MPI_Datatype MPI_LIBGEODECOMP_STREAK_1_;
 extern MPI_Datatype MPI_LIBGEODECOMP_STREAK_2_;
 extern MPI_Datatype MPI_LIBGEODECOMP_STREAK_3_;
@@ -88,6 +90,7 @@ private:
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoordBase_3_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper();
     static MPI_Datatype generateMapLibGeoDecomp_MySimpleCell();
+    static MPI_Datatype generateMapLibGeoDecomp_Statistics();
     static MPI_Datatype generateMapLibGeoDecomp_Streak_1_();
     static MPI_Datatype generateMapLibGeoDecomp_Streak_2_();
     static MPI_Datatype generateMapLibGeoDecomp_Streak_3_();
@@ -131,6 +134,7 @@ private:
     static inline MPI_Datatype lookup(LibGeoDecomp::FloatCoordBase<3 >*) { return MPI_LIBGEODECOMP_FLOATCOORDBASE_3_; }
     static inline MPI_Datatype lookup(LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper*) { return MPI_LIBGEODECOMP_FLOATCOORDBASEMPIDATATYPEHELPER; }
     static inline MPI_Datatype lookup(LibGeoDecomp::MySimpleCell*) { return MPI_LIBGEODECOMP_MYSIMPLECELL; }
+    static inline MPI_Datatype lookup(LibGeoDecomp::Statistics*) { return MPI_LIBGEODECOMP_STATISTICS; }
     static inline MPI_Datatype lookup(LibGeoDecomp::Streak<1 >*) { return MPI_LIBGEODECOMP_STREAK_1_; }
     static inline MPI_Datatype lookup(LibGeoDecomp::Streak<2 >*) { return MPI_LIBGEODECOMP_STREAK_2_; }
     static inline MPI_Datatype lookup(LibGeoDecomp::Streak<3 >*) { return MPI_LIBGEODECOMP_STREAK_3_; }
