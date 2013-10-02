@@ -104,8 +104,7 @@ createUpdateGroups(
 
     hpx::wait_all(componentsFutures);
 
-    BOOST_FOREACH(hpx::future<ResultType> & rf, componentsFutures)
-    {
+    BOOST_FOREACH(hpx::future<ResultType> & rf, componentsFutures) {
         ResultType r = rf.move();
         res.second.insert(res.second.end(), r.second.begin(), r.second.end());
         res.first += r.first;

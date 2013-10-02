@@ -158,8 +158,7 @@ public:
 
         if(stepFinishedFutures.size() > 10) {
             std::vector<hpx::future<void> > res(hpx::wait_any(stepFinishedFutures));
-            BOOST_FOREACH(hpx::future<void>& f, stepFinishedFutures)
-            {
+            BOOST_FOREACH(hpx::future<void>& f, stepFinishedFutures) {
                 if(f.is_ready()) {
                     f = stepFinishedFuture;
                 }
