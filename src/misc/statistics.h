@@ -5,8 +5,11 @@
 
 namespace LibGeoDecomp {
 
-struct Statistics
+class Statistics
 {
+public:
+    friend class Typemaps;
+
     double totalTime;
     double computeTimeInner;
     double computeTimeGhost;
