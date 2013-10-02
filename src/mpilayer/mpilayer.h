@@ -141,7 +141,9 @@ public:
     void wait(int waitTag)
     {
         std::vector<MPI_Request>& requestVec = requests[waitTag];
-        MPI_Waitall(requestVec.size(), &requestVec[0], MPI_STATUSES_IGNORE);
+        if(requestVec.size() > 0) {
+            MPI_Waitall(requestVec.size(), &requestVec[0], MPI_STATUSES_IGNORE);
+        }
         requestVec.clear();
     }
 
@@ -158,7 +160,9 @@ public:
     {
         int flag;
         std::vector<MPI_Request>& requestVec = requests[testTag];
-        MPI_Testall(requestVec.size(), &requestVec[0], &flag, MPI_STATUSES_IGNORE);
+        if(requestVec.size() > 0) {
+            MPI_Testall(requestVec.size(), &requestVec[0], &flag, MPI_STATUSES_IGNORE);
+        }
     }
 
     void barrier()
@@ -238,8 +242,10 @@ public:
         unsigned numStreaks = region.numStreaks();
         MPI_Request req;
         MPI_Isend(&numStreaks, 1, MPI_UNSIGNED, dest, tag, comm, &req);
-        std::vector<Streak<DIM> > buf = region.toVector();
-        MPI_Send(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), dest, tag, comm);
+        if(numStreaks > 0) {
+            std::vector<Streak<DIM> > buf = region.toVector();
+            MPI_Send(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), dest, tag, comm);
+        }
         MPI_Wait(&req, MPI_STATUS_IGNORE);
     }
 
@@ -251,10 +257,15 @@ public:
     {
         unsigned numStreaks;
         MPI_Recv(&numStreaks, 1, MPI_UNSIGNED, src, tag, comm, MPI_STATUS_IGNORE);
-        std::vector<Streak<DIM> > buf(numStreaks);
-        MPI_Recv(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), src, tag, comm, MPI_STATUS_IGNORE);
-        region->clear();
-        region->load(buf.begin(), buf.end());
+        if(numStreaks > 0) {
+            std::vector<Streak<DIM> > buf(numStreaks);
+            MPI_Recv(&buf[0], numStreaks, Typemaps::lookup<Streak<DIM> >(), src, tag, comm, MPI_STATUS_IGNORE);
+            region->clear();
+            region->load(buf.begin(), buf.end());
+        }
+        else {
+            region->clear();
+        }
     }
 
     /**
@@ -398,6 +409,37 @@ public:
             root,
             comm);
     }
+
+    template<typename T>
+    inline void gatherV(const std::vector<T>& source, const std::vector<int>& lengths, unsigned root, std::vector<T>& target, 
+        const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
+    {
+        std::vector<int> displacements(size());
+        if (rank() == root) {
+            displacements[0] = 0;
+            for (size_t i = 0; i < size() - 1; ++i) {
+                displacements[i + 1] = displacements[i] + lengths[i];
+            }
+        }
+
+        T *source_ptr = source.size()>0?const_cast<T*>(&source[0]):0;
+        T *target_ptr = target.size()>0?&target[0]:0;
+
+        int *lengths_ptr = lengths.size()>0 ? const_cast<int*>(&lengths[0]) : 0;
+        int *displacements_ptr = lengths.size()>0 ? &displacements[0] : 0;
+
+        MPI_Gatherv(
+            source_ptr
+          , source.size()
+          , datatype
+          , target_ptr
+          , lengths_ptr
+          , displacements_ptr
+          , datatype
+          , root
+          , comm);
+    }
+
 
     /**
      * Broadcasts static size stuff.

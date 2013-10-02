@@ -180,22 +180,25 @@ private:
 
         // all lengths of all strings:
         std::vector<int> allFeedbackLengths(sum(numFeedback));
-        mpiLayer.gatherV(&localLengths[0], localLengths.size(), numFeedback, root, &allFeedbackLengths[0]);
+        mpiLayer.gatherV(localLengths, numFeedback, root, allFeedbackLengths);
 
         // gather all messages in a single, giant buffer:
         std::vector<int> charsPerNode = mpiLayer.gather((int)localBuffer.size(), root);
         std::vector<char> globalBuffer(sum(charsPerNode));
 
-        mpiLayer.gatherV(&localBuffer[0], localBuffer.size(), charsPerNode, root, &globalBuffer[0]);
+        mpiLayer.gatherV(localBuffer, charsPerNode, root, globalBuffer);
 
         // reconstruct strings:
-        int cursor = 0;
+        std::size_t cursor = 0;
         steeringFeedback.resize(0);
 
         for (std::vector<int>::iterator i = allFeedbackLengths.begin();
              i != allFeedbackLengths.end();
              ++i) {
-            int nextCursor = cursor + *i;
+            std::size_t nextCursor = cursor + *i;
+            if(nextCursor >= globalBuffer.size()) {
+                break;
+            }
             steeringFeedback << std::string(&globalBuffer[cursor],
                                             &globalBuffer[nextCursor]);
             cursor = nextCursor;
