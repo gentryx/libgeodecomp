@@ -196,15 +196,12 @@ private:
              i != allFeedbackLengths.end();
              ++i) {
             std::size_t nextCursor = cursor + *i;
-            if(nextCursor >= globalBuffer.size()) {
-                break;
-            }
-            steeringFeedback << std::string(&globalBuffer[cursor],
-                                            &globalBuffer[nextCursor]);
+            steeringFeedback << std::string(globalBuffer.begin() + cursor,
+                                            globalBuffer.begin() + nextCursor);
             cursor = nextCursor;
         }
 
-        LOG(DBG, "  notifying... steeringFeedback.size(" << MPILayer().rank() << ") == " << steeringFeedback.size() << "\n");
+        LOG(DBG, "  notifying... steeringFeedback(" << mpiLayer.rank() << ") == " << steeringFeedback);
         signal.notify_one();
     }
 #endif
