@@ -1,4 +1,5 @@
 #include <mpi.h>
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/misc/chronometer.h>

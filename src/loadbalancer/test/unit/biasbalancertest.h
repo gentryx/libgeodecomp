@@ -47,14 +47,15 @@ public:
     void testInterfaceToOtherBalancer()
     {
         BiasBalancer b(new MockBalancer);
-        std::string expected = "balance() " + toString(loads) + " " +
-            toString(relLoads) + "\n";
+        std::stringstream expected;
+        expected << "balance() " << loads << " "
+                 << relLoads << "\n";
 
         TS_ASSERT_EQUALS("", MockBalancer::events);
         b.balance(loads, relLoads);
         TS_ASSERT_EQUALS("", MockBalancer::events);
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
-        TS_ASSERT_EQUALS(expected, MockBalancer::events);
+        TS_ASSERT_EQUALS(expected.str(), MockBalancer::events);
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
@@ -65,4 +66,4 @@ private:
     BiasBalancer::LoadVec relLoads;
 };
 
-};
+}

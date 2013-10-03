@@ -29,13 +29,14 @@ public:
     {
         std::ostringstream output;
         TracingBalancer b(new MockBalancer, output);
-        std::string expected = "balance() " + toString(loads) + " " +
-            toString(relLoads) + "\n";
-        std::string longExpected = expected + expected + expected + expected;
+        std::stringstream expected;
+        expected << "balance() " << loads << " "
+                 << relLoads << "\n";
+        std::string longExpected = expected.str() + expected.str() + expected.str() + expected.str();
 
         TS_ASSERT_EQUALS("", MockBalancer::events);
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
-        TS_ASSERT_EQUALS(expected, MockBalancer::events);
+        TS_ASSERT_EQUALS(expected.str(), MockBalancer::events);
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
@@ -57,25 +58,24 @@ public:
     {
         std::ostringstream output;
         TracingBalancer b(new MockBalancer, output);
-        std::string expected = std::string() +
-            "TracingBalancer::balance()\n" +
-            "  weights: " + toString(loads) + "\n" +
-            "  relativeLoads: " + toString(relLoads) + "\n";
-        std::string longExpected = expected + expected + expected + expected;
+        std::stringstream expected;
+        expected << "TracingBalancer::balance()\n"
+                 << "  weights: " << loads << "\n"
+                 << "  relativeLoads: " << relLoads << "\n";
+        std::string longExpected = expected.str() + expected.str() + expected.str() + expected.str();
 
         TS_ASSERT_EQUALS("", MockBalancer::events);
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
-        TS_ASSERT_EQUALS(expected, output.str());
+        TS_ASSERT_EQUALS(expected.str(), output.str());
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(loads, b.balance(loads, relLoads));
         TS_ASSERT_EQUALS(longExpected, output.str());
     }
 
-
 private:
     TracingBalancer::WeightVec loads;
     TracingBalancer::LoadVec relLoads;
 };
 
-};
+}

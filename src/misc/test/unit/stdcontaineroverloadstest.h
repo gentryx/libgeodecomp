@@ -7,6 +7,21 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+class StdContainerOverloadsTest_StdMap : public CxxTest::TestSuite
+{
+public:
+    void testOperatorLessLess()
+    {
+        std::map<int, int> a;
+        a[0] = 1;
+        a[1] = 2;
+        a[2] = 3;
+        std::ostringstream temp;
+        temp << a;
+        TS_ASSERT_EQUALS("{0 => 1, 1 => 2, 2 => 3}", temp.str());
+    }
+};
+
 class StdContainerOverloadsTest_StdVector : public CxxTest::TestSuite
 {
 public:

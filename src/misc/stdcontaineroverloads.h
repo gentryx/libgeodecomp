@@ -2,11 +2,12 @@
 #define LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 
 #include <algorithm>
-#include <numeric>
 #include <iterator>
+#include <map>
+#include <numeric>
 #include <sstream>
 #include <vector>
-#include <libgeodecomp/misc/outputpairs.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
@@ -24,22 +25,6 @@ template <typename T, typename Allocator, typename U>
 inline void del(std::vector<T, Allocator> & vec, const U& obj)
 {
     vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
-}
-
-template <typename T, typename Allocator>
-inline std::string toString(const std::vector<T, Allocator>& vec)
-{
-    std::ostringstream temp;
-    temp << "[";
-    for (typename std::vector<T, Allocator>::const_iterator i = vec.begin(); i != vec.end();) {
-        temp << *i;
-        i++;
-        if (i != vec.end()) {
-            temp << ", ";
-        }
-    }
-    temp << "]";
-    return temp.str();
 }
 
 template <typename T, typename Allocator>
@@ -122,8 +107,44 @@ std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& os,
            const std::vector<T, Allocator>& vec)
 {
-    os << toString(vec);
+    os << "[";
+    for (typename std::vector<T, Allocator>::const_iterator i = vec.begin(); i != vec.end();) {
+        os << *i;
+        i++;
+        if (i != vec.end()) {
+            os << ", ";
+        }
+    }
+    os << "]";
+
     return os;
+}
+
+template<typename _CharT, typename _Traits, typename Key, typename Value>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
+           const std::map<Key, Value>& map)
+{
+    os << "{";
+    for (typename std::map<Key, Value>::const_iterator i = map.begin(); i != map.end();) {
+        os << i->first << " => " << i->second;
+        i++;
+        if (i != map.end()) {
+            os << ", ";
+        }
+    }
+    os << "}";
+
+    return os;
+}
+
+template<typename _CharT, typename _Traits, typename _T1, typename _T2>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const std::pair<_T1, _T2>& p)
+{
+    __os << "(" << p.first << ", " << p.second << ")";
+    return __os;
 }
 
 }

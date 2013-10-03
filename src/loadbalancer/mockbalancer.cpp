@@ -16,8 +16,9 @@ MockBalancer::WeightVec MockBalancer::balance(
     const MockBalancer::WeightVec& weights,
     const MockBalancer::LoadVec& relativeLoads)
 {
-    events += "balance() " + toString(weights) + " " +
-        toString(relativeLoads) + "\n";
+    std::stringstream buf;
+    buf << "balance() " << weights << " " << relativeLoads << "\n";
+    events += buf.str();
     return weights;
 }
 

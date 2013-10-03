@@ -1,15 +1,14 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHPROVIDER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHPROVIDER_H
 
-#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/lcos/local/spinlock.hpp>
+#endif
+
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/superset.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
-
-#ifdef LIBGEODECOMP_FEATURE_HPX
-#include <hpx/lcos/local/spinlock.hpp>
-#endif
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
