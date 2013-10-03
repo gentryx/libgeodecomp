@@ -1,8 +1,4 @@
-
-#include <libgeodecomp/config.h>
-#include <boost/shared_ptr.hpp>
-#include <cxxtest/TestSuite.h>
-#include <sstream>
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/teststeerer.h>
@@ -14,6 +10,10 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
+
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <sstream>
 
 using namespace LibGeoDecomp;
 using namespace HiParSimulator;

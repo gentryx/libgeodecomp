@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>

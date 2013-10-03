@@ -6,7 +6,6 @@
 #include <cmath>
 #include <stdexcept>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
@@ -20,7 +19,7 @@ namespace HiParSimulator {
 
 enum EventPoint {LOAD_BALANCING, END};
 typedef SuperSet<EventPoint> EventSet;
-typedef SuperMap<long, EventSet> EventMap;
+typedef std::map<long, EventSet> EventMap;
 
 template<class CELL_TYPE, class PARTITION>
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>

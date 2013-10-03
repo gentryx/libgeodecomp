@@ -1,12 +1,14 @@
-#include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
 
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

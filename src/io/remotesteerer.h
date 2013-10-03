@@ -40,7 +40,7 @@ public:
     friend class RemoteSteererTest;
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
-    typedef SuperMap<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;
+    typedef std::map<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;
     static const int DIM = Topology::DIM;
 
     RemoteSteerer(

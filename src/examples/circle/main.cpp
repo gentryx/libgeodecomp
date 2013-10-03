@@ -3,7 +3,6 @@
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace boost::assign;

@@ -8,7 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/supermap.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/spacefillingcurve.h>
 
 using namespace boost::assign;
@@ -121,7 +121,7 @@ public:
     // (dimensions.x(), dimensions.y(), type) -> coord sequence
     static boost::shared_ptr<boost::multi_array<CoordVector, 3> > triangleCoordsCache;
     static Coord<2> maxCachedDimensions;
-    static SuperMap<std::pair<Coord<2>, unsigned>, unsigned> triangleLengthCache;
+    static std::map<std::pair<Coord<2>, unsigned>, unsigned> triangleLengthCache;
     static bool cachesInitialized;
 
     class Iterator : public SpaceFillingCurve<2>::Iterator

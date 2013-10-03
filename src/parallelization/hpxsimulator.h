@@ -6,7 +6,6 @@
 #include <hpx/config.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>

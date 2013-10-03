@@ -18,7 +18,7 @@ class PartitionManager
 public:
     typedef TOPOLOGY Topology;
     static const int DIM = Topology::DIM;
-    typedef SuperMap<int, std::vector<Region<DIM> > > RegionVecMap;
+    typedef std::map<int, std::vector<Region<DIM> > > RegionVecMap;
 
     enum AccessCode {
         OUTGROUP = -1
@@ -103,22 +103,22 @@ public:
             std::vector<Region<DIM> >(getGhostZoneWidth() + 1, inner);
     }
 
-    inline const RegionVecMap& getOuterGhostZoneFragments() const
+    inline RegionVecMap& getOuterGhostZoneFragments()
     {
         return outerGhostZoneFragments;
     }
 
-    inline const RegionVecMap& getInnerGhostZoneFragments() const
+    inline RegionVecMap& getInnerGhostZoneFragments()
     {
         return innerGhostZoneFragments;
     }
 
-    inline const Region<DIM>& getInnerOutgroupGhostZoneFragment() const
+    inline const Region<DIM>& getInnerOutgroupGhostZoneFragment()
     {
         return innerGhostZoneFragments[OUTGROUP].back();
     }
 
-    inline const Region<DIM>& getOuterOutgroupGhostZoneFragment() const
+    inline const Region<DIM>& getOuterOutgroupGhostZoneFragment()
     {
         return outerGhostZoneFragments[OUTGROUP].back();
     }
@@ -127,27 +127,28 @@ public:
         int node,
         unsigned expansionWidth)
     {
-        if (regions.count(node) == 0)
+        if (regions.count(node) == 0) {
             fillRegion(node);
+        }
         return regions[node][expansionWidth];
     }
 
-    inline const Region<DIM>& ownRegion(unsigned expansionWidth = 0) const
+    inline const Region<DIM>& ownRegion(unsigned expansionWidth = 0)
     {
         return regions[rank][expansionWidth];
     }
 
-    inline const Region<DIM>& ownExpandedRegion() const
+    inline const Region<DIM>& ownExpandedRegion()
     {
         return regions[rank].back();
     }
 
-    inline const Region<DIM>& rim(unsigned dist) const
+    inline const Region<DIM>& rim(unsigned dist)
     {
         return ownRims[dist];
     }
 
-    inline const Region<DIM>& innerSet(unsigned dist) const
+    inline const Region<DIM>& innerSet(unsigned dist)
     {
         return ownInnerSets[dist];
     }

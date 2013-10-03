@@ -1,6 +1,6 @@
 #include <cxxtest/TestSuite.h>
 
-#include <libgeodecomp/config.h>
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/openclstepper.h>

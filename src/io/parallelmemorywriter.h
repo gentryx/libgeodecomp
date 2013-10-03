@@ -21,7 +21,7 @@ public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     typedef typename ParallelWriter<CELL_TYPE>::GridType WriterGridType;
-    typedef SuperMap<unsigned, GridType> GridMap;
+    typedef std::map<unsigned, GridType> GridMap;
     using ParallelWriter<CELL_TYPE>::period;
     static const int DIM = Topology::DIM;
 
@@ -97,13 +97,13 @@ public:
         return grids[i];
     }
 
-    SuperMap<unsigned, GridType> getGrids()
+    std::map<unsigned, GridType> getGrids()
     {
         return grids;
     }
 
 private:
-    SuperMap<unsigned, GridType> grids;
+    std::map<unsigned, GridType> grids;
     MPILayer mpiLayer;
 
 };

@@ -5,7 +5,6 @@
 #include <set>
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/supermap.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/topologies.h>
 
@@ -31,15 +30,15 @@ public:
 
     /**
      * creates an MeshlessAdapter which assumes that the coordinates
-     * of the cells are elementwise smaller than _dimensions. The
+     * of the cells are elementwise smaller than dimensions. The
      * stencil cells will be of size boxSize^DIMENSIONS.
      */
     inline MeshlessAdapter(
-        const FloatCoord<DIM>& _dimensions=FloatCoord<DIM>(),
-        const double& _boxSize=1) :
-        dimensions(_dimensions)
+        const FloatCoord<DIM>& dimensions=FloatCoord<DIM>(),
+        double boxSize = 1) :
+        dimensions(dimensions)
     {
-        resetBoxSize(_boxSize);
+        resetBoxSize(boxSize);
     }
 
     inline CoordListGrid grid() const
@@ -53,7 +52,7 @@ public:
         for (int i = 0; i < DIM; ++i) {
             // cut all overhanging coords
             c[i] = std::min(discreteDim[i] - 1,
-                              (int)(pos[i] * scale));
+                            (int)(pos[i] * scale));
         }
         return c;
     }
@@ -182,11 +181,14 @@ public:
 
     bool checkBoxSize(const CoordVec& positions, const Graph& graph)
     {
-        for (size_t i = 0; i < graph.size(); ++i)
+        for (size_t i = 0; i < graph.size(); ++i) {
             for (std::vector<int>::const_iterator n = graph[i].begin();
-                 n != graph[i].end(); ++n)
-                if (manhattanDistance(positions[i].first, positions[*n].first) > 1)
+                 n != graph[i].end(); ++n) {
+                if (manhattanDistance(positions[i].first, positions[*n].first) > 1) {
                     return false;
+                }
+            }
+        }
 
         return true;
     }
@@ -196,9 +198,9 @@ public:
         return discreteDim;
     }
 
-    SuperMap<std::string, double> reportFillLevels(const CoordVec& positions) const
+    std::map<std::string, double> reportFillLevels(const CoordVec& positions) const
     {
-        SuperMap<Coord<DIM>, int> cache;
+        std::map<Coord<DIM>, int> cache;
         for (typename CoordVec::const_iterator i = positions.begin(); i != positions.end(); ++i) {
             Coord<DIM> c = posToCoord(*i);
             cache[c]++;
@@ -220,7 +222,7 @@ public:
             }
         }
 
-        SuperMap<std::string, double> ret;
+        std::map<std::string, double> ret;
         ret["emptyCells"]  = emptyCells;
         ret["averageFill"] = 1.0 * sum / discreteDim.prod();
         ret["lowestFill"]  = lowestFill;
@@ -240,7 +242,7 @@ private:
     double radius2;
     double boxSize;
 
-    void resetBoxSize(const double& newBoxSize)
+    void resetBoxSize(double newBoxSize)
     {
         scale = 1 / newBoxSize;
         radius2 = newBoxSize * newBoxSize;
@@ -257,8 +259,9 @@ private:
             discreteDim[i] = std::max(1.0, std::floor(dimensions[i] * scale));
         }
 
-        if (discreteDim.prod() > MAX_SIZE)
+        if (discreteDim.prod() > MAX_SIZE) {
             throw std::logic_error("too many container cells are required");
+        }
     }
 
     bool searchList(
@@ -307,8 +310,9 @@ private:
 
         for (int i = 0; i < DIM; ++i) {
             int dist = std::abs(delta[i]);
-            if (TOPOLOGY::wrapsAxis(i))
+            if (TOPOLOGY::wrapsAxis(i)) {
                 dist = std::min(dist, discreteDim[i] - dist);
+            }
             maxDist = std::max(dist, maxDist);
         }
 

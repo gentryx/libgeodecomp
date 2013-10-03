@@ -1,7 +1,4 @@
-#include <boost/assign/std/vector.hpp>
-#include <boost/shared_ptr.hpp>
-#include <cxxtest/TestSuite.h>
-
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/teststeerer.h>
@@ -11,6 +8,10 @@
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
+
+#include <boost/assign/std/vector.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

@@ -14,7 +14,7 @@ Coord<2> HIndexingPartition::maxCachedDimensions;
 
 boost::shared_ptr<boost::multi_array<std::vector<Coord<2> >, 3> > HIndexingPartition::triangleCoordsCache;
 
-SuperMap<std::pair<Coord<2>, unsigned>, unsigned> HIndexingPartition::triangleLengthCache;
+std::map<std::pair<Coord<2>, unsigned>, unsigned> HIndexingPartition::triangleLengthCache;
 
 bool HIndexingPartition::cachesInitialized = HIndexingPartition::fillCaches();
 

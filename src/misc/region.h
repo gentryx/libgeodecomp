@@ -3,21 +3,8 @@
 
 #include <libgeodecomp/misc/coordbox.h>
 #include <libgeodecomp/misc/streak.h>
-#include <libgeodecomp/misc/supermap.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/regionstreakiterator.h>
-
-namespace std {
-
-template<typename _CharT, typename _Traits, typename T, typename U>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const pair<T, U>& p)
-{
-    __os << "(" << p.first << ", " << p.second << ")";
-    return __os;
-}
-
-}
 
 namespace LibGeoDecomp {
 

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <cerrno>
-#include <boost/assign/std/vector.hpp>
+#include <libgeodecomp.h>
 #include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/testinitializer.h>
@@ -10,6 +10,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

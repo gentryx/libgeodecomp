@@ -51,14 +51,14 @@ public:
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
     typedef std::vector<CellType> BufferType;
-    typedef SuperMap<unsigned, std::vector<RegionInfo> > RegionInfoMapType;
-    typedef SuperMap<unsigned, std::size_t> StepCountMapType;
-    typedef SuperMap<unsigned, GridType> GridMapType;
+    typedef std::map<unsigned, std::vector<RegionInfo> > RegionInfoMapType;
+    typedef std::map<unsigned, std::size_t> StepCountMapType;
+    typedef std::map<unsigned, GridType> GridMapType;
     typedef
-        SuperMap<std::size_t, boost::shared_ptr<ParallelWriter<CellType> > >
+        std::map<std::size_t, boost::shared_ptr<ParallelWriter<CellType> > >
         ParallelWritersMap;
     typedef
-        SuperMap<std::size_t, boost::shared_ptr<Writer<CellType> > >
+        std::map<std::size_t, boost::shared_ptr<Writer<CellType> > >
         SerialWritersMap;
 
     typedef hpx::lcos::local::spinlock MutexType;

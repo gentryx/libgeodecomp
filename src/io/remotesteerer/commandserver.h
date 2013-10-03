@@ -34,7 +34,7 @@ template<typename CELL_TYPE>
 class CommandServer
 {
 public:
-    typedef SuperMap<std::string, boost::shared_ptr<Action<CELL_TYPE> > > ActionMap;
+    typedef std::map<std::string, boost::shared_ptr<Action<CELL_TYPE> > > ActionMap;
 
     /**
      * This helper class lets us and the user safely close the
