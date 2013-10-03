@@ -1,13 +1,13 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class SuperVectorTest : public CxxTest::TestSuite
+class StdContainerOverloadsTest_StdVector : public CxxTest::TestSuite
 {
 public:
 

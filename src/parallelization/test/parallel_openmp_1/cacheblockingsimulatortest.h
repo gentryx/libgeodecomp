@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>

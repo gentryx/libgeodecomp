@@ -3,7 +3,7 @@
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/simulator.h>
 
 namespace LibGeoDecomp {

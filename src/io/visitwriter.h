@@ -31,7 +31,7 @@
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/dataaccessor.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/simulator.h>
 #include <VisItControlInterface_V2.h>
 #include <VisItDataInterface_V2.h>

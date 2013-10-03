@@ -1023,7 +1023,7 @@ public:
     typedef Region<1>::VecType VecType;
 
     template<int MY_DIM>
-    inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
+    inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         VecType& indices = region->indices[0];

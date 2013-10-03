@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHBUFFERFIXED_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHBUFFERFIXED_H
 
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
 

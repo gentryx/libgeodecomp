@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARTITION_H
 
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

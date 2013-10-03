@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_MEMORYWRITER_H
 
 #include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {

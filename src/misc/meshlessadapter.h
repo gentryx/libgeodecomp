@@ -6,7 +6,7 @@
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/supermap.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/topologies.h>
 
 namespace LibGeoDecomp {

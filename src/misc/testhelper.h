@@ -15,7 +15,7 @@
 #include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/region.h>
 #include <libgeodecomp/misc/stringops.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 /**
  * This macro differs from TS_ASSERT_DELTA in that the error margin is relative

@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_SUPERVECTOR_H
-#define LIBGEODECOMP_MISC_SUPERVECTOR_H
+#ifndef LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
+#define LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 
 #include <algorithm>
 #include <numeric>
@@ -125,6 +125,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
     os << toString(vec);
     return os;
 }
+
 }
 
 #endif

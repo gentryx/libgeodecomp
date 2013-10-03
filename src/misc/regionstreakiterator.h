@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <libgeodecomp/misc/streak.h>
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 

@@ -303,7 +303,7 @@ private:
                 Region<DIM> r;
                 r << *i;
                 Coord<DIM> null;
-                if(i->length() > asyncThreshold) {
+                if (i->length() > asyncThreshold) {
                     updateFutures.push_back(
                         hpx::async(
                             UpdateFunctor<CELL_TYPE>(),
@@ -315,11 +315,11 @@ private:
                             curNanoStep
                         )
                     );
-                }
-                else {
+                } else {
                     UpdateFunctor<CELL_TYPE>()(r, null, null, *oldGrid, &*newGrid, curNanoStep);
                 }
             }
+
             if(updateFutures.empty()) {
                 updateFutures.push_back(hpx::make_ready_future());
             }

@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_LOADBALANCER_H
 
-#include <libgeodecomp/misc/supervector.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>
