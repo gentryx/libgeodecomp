@@ -13,12 +13,32 @@ public:
     void testOperatorLessLess()
     {
         std::map<int, int> a;
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("{}", temp.str());
+        }
+
         a[0] = 1;
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("{0 => 1}", temp.str());
+        }
+
         a[1] = 2;
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("{0 => 1, 1 => 2}", temp.str());
+        }
+
         a[2] = 3;
-        std::ostringstream temp;
-        temp << a;
-        TS_ASSERT_EQUALS("{0 => 1, 1 => 2, 2 => 3}", temp.str());
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("{0 => 1, 1 => 2, 2 => 3}", temp.str());
+        }
     }
 };
 
@@ -135,10 +155,25 @@ public:
     void testOperatorLessLess()
     {
         std::vector<int> a;
-        a += 1, 2, 3;
-        std::ostringstream temp;
-        temp << a;
-        TS_ASSERT_EQUALS("[1, 2, 3]", temp.str());
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("[]", temp.str());
+        }
+
+        a += 1;
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("[1]", temp.str());
+        }
+
+        a += 2, 3;
+        {
+            std::ostringstream temp;
+            temp << a;
+            TS_ASSERT_EQUALS("[1, 2, 3]", temp.str());
+        }
     }
 
     void testContains()

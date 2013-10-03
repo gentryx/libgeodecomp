@@ -108,13 +108,17 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
            const std::vector<T, Allocator>& vec)
 {
     os << "[";
-    for (typename std::vector<T, Allocator>::const_iterator i = vec.begin(); i != vec.end();) {
+
+    if (vec.size()) {
+        typename std::vector<T, Allocator>::const_iterator i = vec.begin();
         os << *i;
-        i++;
-        if (i != vec.end()) {
-            os << ", ";
+        ++i;
+
+        for (; i != vec.end(); ++i) {
+            os << ", " << *i;
         }
     }
+
     os << "]";
 
     return os;
@@ -126,13 +130,18 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
            const std::map<Key, Value>& map)
 {
     os << "{";
-    for (typename std::map<Key, Value>::const_iterator i = map.begin(); i != map.end();) {
+
+    if (map.size()) {
+        typename std::map<Key, Value>::const_iterator i = map.begin();
         os << i->first << " => " << i->second;
-        i++;
-        if (i != map.end()) {
-            os << ", ";
+        ++i;
+
+        for (; i != map.end(); ++i) {
+            os << ", " << i->first << " => " << i->second;
         }
+
     }
+
     os << "}";
 
     return os;
@@ -140,11 +149,11 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
 
 template<typename _CharT, typename _Traits, typename _T1, typename _T2>
 std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
            const std::pair<_T1, _T2>& p)
 {
-    __os << "(" << p.first << ", " << p.second << ")";
-    return __os;
+    os << "(" << p.first << ", " << p.second << ")";
+    return os;
 }
 
 }
