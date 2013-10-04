@@ -7,6 +7,98 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+class StdContainerOverloadsTest_StdSet : public CxxTest::TestSuite
+{
+public:
+    void testOperatorLessLess()
+    {
+        std::set<int> s;
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("{}", temp.str());
+        }
+
+        s << 4;
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("{4}", temp.str());
+        }
+
+        s << 1;
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("{1, 4}", temp.str());
+        }
+
+        s << 9;
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("{1, 4, 9}", temp.str());
+        }
+    }
+
+    void testInsertMinMaxAndEraseMin()
+    {
+        std::set<int> set;
+        set.insert(2);
+        set.insert(1);
+        set.insert(3);
+        set << 0
+            << -1;
+        TS_ASSERT_EQUALS((max)(set),  3);
+        TS_ASSERT_EQUALS((min)(set), -1);
+
+        erase_min(set);
+        TS_ASSERT_EQUALS((min)(set), 0);
+    }
+
+    void testOperatorAndAnd()
+    {
+        std::set<int> set0;
+        set0.insert(2);
+        set0.insert(1);
+        set0.insert(3);
+        set0.insert(0);
+
+        std::set<int> set1;
+        set1.insert(2);
+        set1.insert(4);
+        set1.insert(3);
+        set1.insert(0);
+
+        std::set<int> expected;
+        expected.insert(2);
+        expected.insert(3);
+        expected.insert(0);
+
+        TS_ASSERT_EQUALS(set0 && set1, expected);
+    }
+
+    void testOperatorOrOr()
+    {
+        std::set<int> set0;
+        set0.insert(2);
+        set0.insert(1);
+        set0.insert(3);
+
+        std::set<int> set1;
+        set1.insert(2);
+        set1.insert(0);
+
+        std::set<int> expected;
+        expected.insert(1);
+        expected.insert(2);
+        expected.insert(3);
+        expected.insert(0);
+
+        TS_ASSERT_EQUALS(set0 || set1, expected);
+    }
+};
+
 class StdContainerOverloadsTest_StdMap : public CxxTest::TestSuite
 {
 public:

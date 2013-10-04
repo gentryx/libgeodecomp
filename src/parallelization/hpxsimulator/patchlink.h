@@ -93,12 +93,12 @@ public:
             hpx::wait(putFuture);
             putFuture = dest.setOuterGhostZone(rank, buffer, nanoStep);
 
-            std::size_t nextNanoStep = (requestedNanoSteps.min)() + stride;
+            std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
             if ((lastNanoStep == std::size_t(-1)) ||
                (nextNanoStep < lastNanoStep)) {
                 requestedNanoSteps << nextNanoStep;
             }
-            requestedNanoSteps.erase_min();
+            erase_min(requestedNanoSteps);
         }
 
     private:
@@ -165,12 +165,13 @@ public:
                 HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
             }
 
-            std::size_t nextNanoStep = (storedNanoSteps.min)() + stride;
+            std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
             if ((lastNanoStep == std::size_t(-1)) ||
                (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
             }
-            storedNanoSteps.erase_min();
+
+            erase_min(storedNanoSteps);
         }
 
         void recv(long nanoStep)

@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PATCHACCEPTER_H
 
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/superset.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
 namespace LibGeoDecomp {
@@ -47,15 +47,15 @@ public:
     }
 
 protected:
-    SuperSet<std::size_t> requestedNanoSteps;
+    std::set<std::size_t> requestedNanoSteps;
 
     bool checkNanoStepPut(const std::size_t nanoStep) const
     {
         if (requestedNanoSteps.empty() ||
-            nanoStep < (requestedNanoSteps.min)())
+            nanoStep < (min)(requestedNanoSteps))
             return false;
-        if (nanoStep > (requestedNanoSteps.min)()) {
-            std::cerr << "got: " << nanoStep << " expected " << (requestedNanoSteps.min)() << "\n";
+        if (nanoStep > (min)(requestedNanoSteps)) {
+            std::cerr << "got: " << nanoStep << " expected " << (min)(requestedNanoSteps) << "\n";
             throw std::logic_error("expected nano step was left out");
         }
 

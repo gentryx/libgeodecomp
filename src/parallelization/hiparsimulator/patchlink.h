@@ -123,12 +123,13 @@ public:
             GridVecConv::gridToVector(grid, &buffer, region);
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
-            std::size_t nextNanoStep = requestedNanoSteps.min() + stride;
+            std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
             if ((lastNanoStep == ENDLESS) ||
                 (nextNanoStep < lastNanoStep)) {
                 requestedNanoSteps << nextNanoStep;
             }
-            requestedNanoSteps.erase_min();
+
+            erase_min(requestedNanoSteps);
         }
 
     private:
@@ -174,7 +175,7 @@ public:
             const std::size_t nanoStep,
             const bool remove=true)
         {
-            if (storedNanoSteps.empty() || (nanoStep < storedNanoSteps.min())) {
+            if (storedNanoSteps.empty() || (nanoStep < (min)(storedNanoSteps))) {
                 return;
             }
 
@@ -183,12 +184,13 @@ public:
 
             GridVecConv::vectorToGrid(buffer, grid, region);
 
-            std::size_t nextNanoStep = storedNanoSteps.min() + stride;
+            std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
             if ((lastNanoStep == ENDLESS) ||
                 (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
             }
-            storedNanoSteps.erase_min();
+
+            erase_min(storedNanoSteps);
         }
 
         void recv(const std::size_t nanoStep)

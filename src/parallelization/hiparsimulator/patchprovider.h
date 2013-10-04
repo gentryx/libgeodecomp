@@ -6,7 +6,7 @@
 #endif
 
 #include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/superset.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
 
@@ -54,19 +54,21 @@ public:
 #endif
 
 protected:
-    SuperSet<std::size_t> storedNanoSteps;
+    std::set<std::size_t> storedNanoSteps;
 
     void checkNanoStepGet(const std::size_t nanoStep) const
     {
         if (storedNanoSteps.empty()) {
             throw std::logic_error("no nano step available");
         }
-        if ((storedNanoSteps.min)() != nanoStep)
+
+        if ((min)(storedNanoSteps) != nanoStep) {
             throw std::logic_error(
                 std::string(
                     "requested time step doesn't match expected nano step.")
-                + " expected: " + StringOps::itoa((storedNanoSteps.min)())
+                + " expected: " + StringOps::itoa((min)(storedNanoSteps))
                 + " is: " + StringOps::itoa(nanoStep));
+        }
     }
 };
 

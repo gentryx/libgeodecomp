@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
 namespace HiParSimulator {
 
 enum EventPoint {LOAD_BALANCING, END};
-typedef SuperSet<EventPoint> EventSet;
+typedef std::set<EventPoint> EventSet;
 typedef std::map<long, EventSet> EventMap;
 
 template<class CELL_TYPE, class PARTITION>

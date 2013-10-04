@@ -1,6 +1,5 @@
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/superset.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>

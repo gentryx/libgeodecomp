@@ -42,8 +42,8 @@ public:
 
         storedRegions.push_back(
             GridVecConv::gridToVector(grid, region));
-        storedNanoSteps << requestedNanoSteps.min();
-        requestedNanoSteps.erase_min();
+        storedNanoSteps << (min)(requestedNanoSteps);
+        erase_min(requestedNanoSteps);
     }
 
     virtual void get(
@@ -62,7 +62,7 @@ public:
 
         if (remove) {
             storedRegions.pop_front();
-            storedNanoSteps.erase_min();
+            erase_min(storedNanoSteps);
         }
 
     }

@@ -76,7 +76,7 @@ public:
             event,
             rank,
             lastCall);
-        requestedNanoSteps.erase_min();
+        erase_min(requestedNanoSteps);
         std::size_t nextNanoStep = nanoStep + stride;
         pushRequest(nextNanoStep);
     }

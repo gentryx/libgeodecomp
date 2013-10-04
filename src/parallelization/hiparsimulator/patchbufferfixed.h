@@ -51,8 +51,8 @@ public:
         }
 
         GridVecConv::gridToVector(grid, &buffer[indexWrite], region);
-        storedNanoSteps << (requestedNanoSteps.min)();
-        (requestedNanoSteps.erase_min)();
+        storedNanoSteps << (min)(requestedNanoSteps);
+        erase_min(requestedNanoSteps);
         inc(&indexWrite);
     }
 
@@ -68,7 +68,7 @@ public:
             buffer[indexRead], destinationGrid, region);
 
         if (remove) {
-            storedNanoSteps.erase_min();
+            erase_min(storedNanoSteps);
             inc(&indexRead);
         }
     }
