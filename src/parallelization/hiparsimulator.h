@@ -179,29 +179,34 @@ private:
         return CELL_TYPE::speed();
     }
 
-    std::vector<std::size_t> initialWeights(std::size_t items, std::size_t size) const
+    /**
+     * computes an initial weight distribution of the work items (i.e.
+     * number of cells in the simulation space). rankSpeeds gives an
+     * estimate of the relative performance of the different ranks
+     * (good when running on heterogeneous systems, e.g. clusters
+     * comprised of multiple genrations of nodes or x86 clusters with
+     * additional Xeon Phi accelerators).
+     */
+    std::vector<size_t> initialWeights(size_t items, const std::vector<double> rankSpeeds) const
     {
-        double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
-        std::vector<double> speeds = mpiLayer.allGather(mySpeed);
-        double s = sum(speeds);
-        std::vector<std::size_t> ret(size);
+        size_t size = rankSpeeds.size();
+        double totalSum = sum(rankSpeeds);
+        std::vector<size_t> ret(size);
 
-        std::size_t lastPos = 0;
+        size_t lastPos = 0;
         double partialSum = 0.0;
-        if(size > 1) {
-            for (std::size_t i = 0; i < size -1; i++) {
-                partialSum += speeds[i];
-                std::size_t nextPos = items * partialSum / s;
-                ret[i] = nextPos - lastPos;
-                lastPos = nextPos;
-            }
+        for (std::size_t i = 0; i < size - 1; ++i) {
+            partialSum += rankSpeeds[i];
+            std::size_t nextPos = items * partialSum / totalSum;
+            ret[i] = nextPos - lastPos;
+            lastPos = nextPos;
         }
-        ret[size-1] = items - lastPos;
+        ret[size - 1] = items - lastPos;
 
         return ret;
     }
 
-    inline void nanoStep(const long& s)
+    inline void nanoStep(long s)
     {
 #ifdef LIBGEODECOMP_FEATURE_HPX
         hpx::util::high_resolution_timer timer;
@@ -236,14 +241,18 @@ private:
 
         CoordBox<DIM> box = initializer->gridBox();
 
+        double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
+        std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
+        std::vector<size_t> weights = initialWeights(
+            box.dimensions.prod(),
+            rankSpeeds);
+
         boost::shared_ptr<PARTITION> partition(
             new PARTITION(
                 box.origin,
                 box.dimensions,
                 0,
-                initialWeights(box.dimensions.prod(),
-                               mpiLayer.size())));
-        
+                weights));
 
         updateGroup.reset(
             new UpdateGroupType(

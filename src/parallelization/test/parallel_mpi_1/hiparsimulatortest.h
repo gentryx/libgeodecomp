@@ -55,6 +55,43 @@ public:
         s.reset();
     }
 
+    void testInitialWeights()
+    {
+        std::vector<double> rankSpeeds;
+        std::vector<size_t> expected;
+
+        rankSpeeds << 1 << 1 << 1 << 1;
+        expected << 2 << 3 << 2 << 3;
+        TS_ASSERT_EQUALS(s->initialWeights(10, rankSpeeds), expected);
+        rankSpeeds.clear();
+        expected.clear();
+
+        rankSpeeds << 3 << 2 << 2 << 3;
+        expected << 6 << 4 << 4 << 6;
+        TS_ASSERT_EQUALS(s->initialWeights(20, rankSpeeds), expected);
+        rankSpeeds.clear();
+        expected.clear();
+
+        rankSpeeds << 13;
+        expected << 100;
+        TS_ASSERT_EQUALS(s->initialWeights(100, rankSpeeds), expected);
+        rankSpeeds.clear();
+        expected.clear();
+
+        rankSpeeds << 2 << 2 << 2 << 2 << 2;
+        expected << 2 << 2 << 2 << 2 << 3;
+        TS_ASSERT_EQUALS(s->initialWeights(11, rankSpeeds), expected);
+        rankSpeeds.clear();
+        expected.clear();
+
+
+        rankSpeeds << 1 << 1 << 1 << 1;
+        expected << 4 << 5 << 5 << 5;
+        TS_ASSERT_EQUALS(s->initialWeights(19, rankSpeeds), expected);
+        rankSpeeds.clear();
+        expected.clear();
+    }
+
     void testStep()
     {
         s->step();
