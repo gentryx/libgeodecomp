@@ -1,6 +1,7 @@
 #include <emmintrin.h>
+#include <map>
 #include <mpi.h>
-#include <libgeodecomp/misc/supermap.h>
+
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/testbed/reversetimemigration/config.h>
 #include <libgeodecomp/testbed/reversetimemigration/cudastepperlib.h>
@@ -23,8 +24,8 @@ int main(int argc, char *argv[])
 
     char *names = new char[layer.size() * MPI_MAX_PROCESSOR_NAME];
     layer.allGather(hostname, names, MPI_MAX_PROCESSOR_NAME);
-    SuperMap<std::string, int> hostCount;
-    SuperMap<int, int> cudaIDs;
+    std::map<std::string, int> hostCount;
+    std::map<int, int> cudaIDs;
 
     for (unsigned i = 0; i < layer.size(); ++i) {
         std::string name(names + i * MPI_MAX_PROCESSOR_NAME);
