@@ -2,7 +2,7 @@
 #include <boost/math/tools/precision.hpp>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/supervector.h>
 
 using namespace LibGeoDecomp;
 
@@ -10,8 +10,6 @@ namespace LibGeoDecomp {
 
 class CoordTest : public CxxTest::TestSuite
 {
-    Coord<2> *c1;
-
 public:
     bool includesCoord(std::vector<Coord<2> > vec, int x, int y) {
         Coord<2> compare(x, y);
@@ -275,35 +273,8 @@ public:
         TS_ASSERT_EQUALS(26, Coord<3>(3, 4, 1) * Coord<3>(4, 3, 2));
     }
 
-    // fixme: move this to performance tests
-    // void testSpeed()
-    // {
-    //     long long tStart = Chronometer::timeUSec();
-
-    //     const int SIZE = 100;
-    //     Coord<3> coords[SIZE];
-    //     for (int i = 0; i < SIZE; ++i) {
-    //         coords[i] = Coord<3>(i, i + 1, i + 2);
-    //     }
-
-    //     for (int r = 0; r < 10000000; ++r) {
-    //         Coord<3> buf;
-    //         for (int i = 0; i < (SIZE - 1); ++i) {
-    //             buf += coords[i];
-    //             coords[i] = coords[i + 1];
-    //         }
-    //         for (int d = 0; d < 3; ++d) {
-    //             if (buf[d] > 0x010000) {
-    //                 buf[d] &= (0x010000 - 1);
-    //             }
-    //         }
-    //         coords[SIZE - 1] = buf;
-    //     }
-
-    //     long long tEnd = Chronometer::timeUSec();
-    //     double delta = (tEnd - tStart) / 1000000.0;
-    //     std::cout << "delta: " << delta << "\n";
-    // }
+private:
+    Coord<2> *c1;
 };
 
 }
