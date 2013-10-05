@@ -27,8 +27,9 @@ class MPIParser
     # @log.level = Logger::DEBUG
     @member_cache = {}
 
-    class_files = Dir.glob("#{@path}/*.xml")
+    class_files = `grep "friend class Typemaps" #{path}/class*.xml | cut -d : -f 1`.split("\n")
     @xml_docs = { }
+    @xml_cache = {}
 
     threads = []
     num_threads = 1
@@ -75,6 +76,15 @@ class MPIParser
     @type_hierarchy_closure = @datatype_map.keys.to_set +
       classes_to_be_serialized
     @all_classes = classes_to_be_serialized
+  end
+
+  def get_xml(filename)
+    if @xml_cache[filename].nil?
+      doc = REXML::Document.new File.new(filename)
+      @xml_docs[filename] = doc
+    end
+
+    return @xml_docs[filename]
   end
 
   def pp(object)
@@ -126,7 +136,7 @@ class MPIParser
 
   def template_parameters(klass)
     xpath = "doxygen/compounddef/templateparamlist/param/declname"
-    doc = @xml_docs[@filename_cache[klass]]
+    doc = get_xml(@filename_cache[klass])
 
     template_params = []
     doc.elements.each(xpath) do |spec|
@@ -306,7 +316,7 @@ class MPIParser
     @log.info "get_parents(#{klass}"
 
     filename = class_to_filename(klass)
-    doc = @xml_docs[filename]
+    doc = get_xml(filename)
     xpath = "doxygen/compounddef/basecompoundref"
     parents = []
     doc.elements.each(xpath) do |member|
@@ -433,7 +443,7 @@ class MPIParser
   def member_id_to_8h_file(member_id)
     member_id =~ /(class.+)_([^_]+)/
     filename = "#{@path}/#{$1}.xml"
-    doc = @xml_docs[filename]
+    doc = get_xml(filename)
     doc.elements.each("doxygen/compounddef/includes") do |inc|
       eight_h_file = "#{@path}/#{inc.attributes["refid"]}.xml"
       return eight_h_file
@@ -453,7 +463,7 @@ class MPIParser
 
     @log.debug "opening #{filename}, namespace: #{@namespace}"
     @log.debug pp member_id
-    doc = @xml_docs[filename]
+    doc = get_xml(filename)
 
     codeline = nil
     doc.elements.each("doxygen/compounddef/programlisting/codeline") do |line|
@@ -558,7 +568,7 @@ class MPIParser
     filename = class_to_filename(klass)
     @log.debug "  filename = #{filename}"
 
-    doc = @xml_docs[filename]
+    doc = get_xml(filename)
     xpath = "doxygen/compounddef/sectiondef/memberdef[@kind='#{kind}'][@static='no']"
 
     doc.elements.each(xpath) do |member|
@@ -583,7 +593,7 @@ class MPIParser
     @log.info "find_header_simple(#{klass})"
 
     filename = class_to_filename(klass)
-    doc = @xml_docs[filename]
+    doc = get_xml(filename)
     xpath = "doxygen/compounddef/location"
 
     doc.elements.each(xpath) do |member|
