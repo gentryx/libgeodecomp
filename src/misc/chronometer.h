@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
 #define LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
 
-#include <stdexcept>
+#include <libgeodecomp/misc/scopedtimer.h>
 
 namespace LibGeoDecomp {
 
