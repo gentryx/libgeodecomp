@@ -64,15 +64,17 @@ public:
         Region<3> region;
         region << regionBox;
 
-        long long tStart = Chronometer::timeUSec();
-        for (int i = 0; i < repeats(); ++i) {
-            writer.stepFinished(grid, region, dim, 0, WRITER_INITIALIZED, mpiLayer.rank(), true);
-        }
-        long long tEnd = Chronometer::timeUSec();
+        double seconds = 0;
 
+        {
+            ScopedTimer t(&seconds);
+            for (int i = 0; i < repeats(); ++i) {
+                writer.stepFinished(grid, region, dim, 0, WRITER_INITIALIZED, mpiLayer.rank(), true);
+            }
+        }
 
         // fixme: add test for cell with SoA
-        return gigaBytesPerSecond(dim, seconds(tStart, tEnd));
+        return gigaBytesPerSecond(dim, seconds);
     }
 
     std::string unit()
@@ -131,6 +133,7 @@ public:
         long long tStart = 0;
         long long tEnd = 0;
         int maxNanoStep = 201234;
+        double seconds = 0;
 
         if (mpiLayer.rank() == 0) {
             typename HiParSimulator::PatchLink<GridType>::Provider provider(
@@ -140,15 +143,14 @@ public:
                 Typemaps::lookup<CELL_TYPE>());
             provider.charge(1234, maxNanoStep, 1000);
 
-            tStart = Chronometer::timeUSec();
+            {
+                ScopedTimer t(&seconds);
 
-            for (int i = 1234; i <= maxNanoStep; i += 1000) {
-                provider.get(&grid, wholeGridRegion, i, true);
-                ++repeats;
+                for (int i = 1234; i <= maxNanoStep; i += 1000) {
+                    provider.get(&grid, wholeGridRegion, i, true);
+                    ++repeats;
+                }
             }
-
-            tEnd = Chronometer::timeUSec();
-
         } else {
             typename HiParSimulator::PatchLink<GridType>::Accepter accepter(
                 transmissionRegion,
@@ -163,7 +165,7 @@ public:
         }
 
         // fixme: add test for cell with SoA
-        return gigaBytesPerSecond(transmissionBox.dimensions, repeats, seconds(tStart, tEnd));
+        return gigaBytesPerSecond(transmissionBox.dimensions, repeats, seconds);
     }
 
     std::string unit()
@@ -204,39 +206,40 @@ public:
     {
         MPILayer mpiLayer;
 
-        long long tStart = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        int ghostZoneWidth = 3;
-        CoordBox<3> box(Coord<3>(), Coord<3>(2 * dim.x(), dim.y(), dim.z()));
-        std::vector<size_t> weights;
-        weights << dim.prod()
-                << dim.prod();
+            int ghostZoneWidth = 3;
+            CoordBox<3> box(Coord<3>(), Coord<3>(2 * dim.x(), dim.y(), dim.z()));
+            std::vector<size_t> weights;
+            weights << dim.prod()
+                    << dim.prod();
 
-        boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
+            boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
 
-        HiParSimulator::PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
+            HiParSimulator::PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
 
-        myPartitionManager.resetRegions(
-            box,
-            partition,
-            0,
-            ghostZoneWidth);
-        std::vector<CoordBox<3> > boundingBoxes;
-        for (int i = 0; i < 2; ++i) {
-            boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
-        }
+            myPartitionManager.resetRegions(
+                box,
+                partition,
+                0,
+                ghostZoneWidth);
+            std::vector<CoordBox<3> > boundingBoxes;
+            for (int i = 0; i < 2; ++i) {
+                boundingBoxes << myPartitionManager.getRegion(i, 0).boundingBox();
+            }
 
-        myPartitionManager.resetGhostZones(boundingBoxes);
+            myPartitionManager.resetGhostZones(boundingBoxes);
 
-        for (int i = 0; i < 2; ++i) {
-            if (myPartitionManager.getRegion(i, 0).boundingBox() == CoordBox<3>()) {
-                throw std::runtime_error("test failed: empty bounding box!");
+            for (int i = 0; i < 2; ++i) {
+                if (myPartitionManager.getRegion(i, 0).boundingBox() == CoordBox<3>()) {
+                    throw std::runtime_error("test failed: empty bounding box!");
+                }
             }
         }
 
-        long long tEnd = Chronometer::timeUSec();
-
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()

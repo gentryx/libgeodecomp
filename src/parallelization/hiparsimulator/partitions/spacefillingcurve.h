@@ -18,15 +18,15 @@ public:
     class Iterator
     {
     public:
-        inline Iterator(const Coord<DIM>& _origin, const bool& _endReached) :
-            origin(_origin),
-            cursor(_origin),
-            endReached(_endReached)
+        inline Iterator(const Coord<DIM>& origin, const bool& endReached) :
+            origin(origin),
+            cursor(origin),
+            endReached(endReached)
         {}
 
         inline bool operator==(const Iterator& other) const
         {
-            return endReached == other.endReached && cursor == other.cursor;
+            return (endReached == other.endReached) && (cursor == other.cursor);
         }
 
         inline bool operator!=(const Iterator& other) const

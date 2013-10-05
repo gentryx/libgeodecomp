@@ -17,10 +17,10 @@ public:
     void testLargeBenchmark()
     {
         // fixme: move this to performace tests
-//         benchmark<HIndexingPartition, HIndexingPartition::Iterator>("HIndexing");
-//         benchmark<StripingPartition,  StripingPartition::Iterator >("Striping ");
-//         benchmark<HilbertPartition,   HilbertPartition::Iterator  >("Hilbert  ");
-//         benchmark<ZCurvePartition,    ZCurvePartition::Iterator   >("ZCurve   ");
+        benchmark<HIndexingPartition,   HIndexingPartition::Iterator  >("HIndexing");
+        benchmark<StripingPartition<2>, StripingPartition<2>::Iterator>("Striping ");
+        benchmark<HilbertPartition,     HilbertPartition::Iterator    >("Hilbert  ");
+        benchmark<ZCurvePartition<2>,   ZCurvePartition<2>::Iterator  >("ZCurve   ");
     }
 
 private:
@@ -30,15 +30,16 @@ private:
         Coord<2> dim(32*1024, 32*1024);
         Coord<2> accu;
 
-        long long t1 = Chronometer::timeUSec();
+        long t1 = ScopedTimer::timeUSec();
         PARTITION h(Coord<2>(100, 200), dim);
         ITERATOR end = h.end();
-        for (ITERATOR i = h.begin(); i != end; ++i)
+        for (ITERATOR i = h.begin(); i != end; ++i) {
             accu += *i;
-        long long t2 = Chronometer::timeUSec();
+        }
+        long t2 = ScopedTimer::timeUSec();
 
         std::cout << "accu == " << accu << "\n";
-        double span = (t2-t1) / 1000.0;
+        double span = (t2-t1) * 1e-6;
         std::cout << label << ": " << span << "\n";
     }
 

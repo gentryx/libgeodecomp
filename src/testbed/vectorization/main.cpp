@@ -840,9 +840,12 @@ double singleBenchmark(Coord<3> dim)
         new MonoInitializer<CELL>(dim, repeats));
     // sim.addWriter(new TracingWriter<CELL>(500, repeats));
 
-    long long tBegin= Chronometer::timeUSec();
-    sim.run();
-    long long tEnd = Chronometer::timeUSec();
+    double seconds;
+    {
+        ScopedTimer t(&seconds);
+
+        sim.run();
+    }
 
     if (sim.getGrid()->get(Coord<3>(1, 1, 1)).read() == 4711) {
         std::cout << "this statement just serves to prevent the compiler from"
@@ -850,7 +853,6 @@ double singleBenchmark(Coord<3> dim)
     }
 
     double updates = 1.0 * repeats * (dim - Coord<3>::diagonal(2)).prod();
-    double seconds = (tEnd - tBegin) * 10e-6;
     double glups = 10e-9 * updates / seconds;
 
     return glups;

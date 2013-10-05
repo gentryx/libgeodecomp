@@ -16,6 +16,10 @@
 #include <libgeodecomp/misc/stencils.h>
 #include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/hindexingpartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/hilbertpartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
+#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
@@ -48,23 +52,24 @@ public:
             }
         }
 
-        long long tStart = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        for (int z = 0; z < dim.z(); z += 4) {
-            for (int y = 0; y < dim.y(); y += 4) {
-                for (int x = 0; x < dim.x(); x += 4) {
-                    sum += r.count(Coord<3>(x, y, z));
+            for (int z = 0; z < dim.z(); z += 4) {
+                for (int y = 0; y < dim.y(); y += 4) {
+                    for (int x = 0; x < dim.x(); x += 4) {
+                        sum += r.count(Coord<3>(x, y, z));
+                    }
                 }
             }
         }
-
-        long long tEnd = Chronometer::timeUSec();
 
         if (sum == 31) {
             std::cout << "pure debug statement to prevent the compiler from optimizing away the previous loop";
         }
 
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()
@@ -88,18 +93,19 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        long long tStart = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        Region<3> r;
-        for (int z = 0; z < dim.z(); ++z) {
-            for (int y = 0; y < dim.y(); ++y) {
-                r << Streak<3>(Coord<3>(0, y, z), dim.x());
+            Region<3> r;
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
             }
         }
 
-        long long tEnd = Chronometer::timeUSec();
-
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()
@@ -123,28 +129,29 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        long long tStart = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        Region<3> r1;
-        Region<3> r2;
+            Region<3> r1;
+            Region<3> r2;
 
-        for (int z = 0; z < dim.z(); ++z) {
-            for (int y = 0; y < dim.y(); ++y) {
-                r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
             }
+
+            for (int z = 1; z < (dim.z() - 1); ++z) {
+                for (int y = 1; y < (dim.y() - 1); ++y) {
+                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+                }
+            }
+
+            Region<3> r3 = r1 & r2;
         }
 
-        for (int z = 1; z < (dim.z() - 1); ++z) {
-            for (int y = 1; y < (dim.y() - 1); ++y) {
-                r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
-            }
-        }
-
-        Region<3> r3 = r1 & r2;
-
-        long long tEnd = Chronometer::timeUSec();
-
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()
@@ -168,25 +175,27 @@ public:
 
     double performance(const Coord<3>& dim)
     {
-        long long tStart = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        Coord<3> sum;
+            Coord<3> sum;
 
-        for (int z = 0; z < dim.z(); ++z) {
-            for (int y = 0; y < dim.y(); ++y) {
-                for (int x = 0; x < dim.x(); ++x) {
-                    sum += Coord<3>(x, y, z);
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    for (int x = 0; x < dim.x(); ++x) {
+                        sum += Coord<3>(x, y, z);
+                    }
                 }
             }
-        }
-        // trick the compiler to not optimize away the loop above
-        if (sum == Coord<3>(1, 2, 3)) {
-            std::cout << "whatever";
+            // trick the compiler to not optimize away the loop above
+            if (sum == Coord<3>(1, 2, 3)) {
+                std::cout << "whatever";
+            }
+
         }
 
-        long long tEnd = Chronometer::timeUSec();
-
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()
@@ -216,20 +225,23 @@ public:
                 region << Streak<3>(Coord<3>(0, y, z), dim.x());
             }
         }
-        long long tStart = Chronometer::timeUSec();
 
-        Coord<3> sum;
-        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
-            sum += *i;
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Coord<3> sum;
+            for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+                sum += *i;
+            }
+
+            // trick the compiler to not optimize away the loop above
+            if (sum == Coord<3>(1, 2, 3)) {
+                std::cout << "whatever";
+            }
         }
-        // trick the compiler to not optimize away the loop above
-        if (sum == Coord<3>(1, 2, 3)) {
-            std::cout << "whatever";
-        }
 
-        long long tEnd = Chronometer::timeUSec();
-
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()
@@ -259,23 +271,25 @@ public:
                 region << Streak<3>(Coord<3>(0, y, z), dim.x());
             }
         }
-        long long tStart = Chronometer::timeUSec();
 
-        Coord<3> sum;
-        for (Region<3>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            Coord<3> c = i->origin;
-            for (; c.x() < i->endX; c.x() += 1) {
-                sum += c;
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Coord<3> sum;
+            for (Region<3>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+                Coord<3> c = i->origin;
+                for (; c.x() < i->endX; c.x() += 1) {
+                    sum += c;
+                }
+            }
+            // trick the compiler to not optimize away the loop above
+            if (sum == Coord<3>(1, 2, 3)) {
+                std::cout << "whatever";
             }
         }
-        // trick the compiler to not optimize away the loop above
-        if (sum == Coord<3>(1, 2, 3)) {
-            std::cout << "whatever";
-        }
 
-        long long tEnd = Chronometer::timeUSec();
-
-        return seconds(tStart, tEnd);
+        return seconds;
     }
 
     std::string unit()
@@ -317,26 +331,27 @@ public:
             }
         }
 
-        long long tBegin= Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        for (int t = 0; t < maxT; ++t) {
-            for (int z = 1; z < (dimZ - 1); ++z) {
-                for (int y = 1; y < (dimY - 1); ++y) {
-                    for (int x = 1; x < (dimX - 1); ++x) {
-                        gridNew[z * offsetZ + y * dimY + x] =
-                            (gridOld[z * offsetZ + y * dimX + x - offsetZ] +
-                             gridOld[z * offsetZ + y * dimX + x - dimX] +
-                             gridOld[z * offsetZ + y * dimX + x - 1] +
-                             gridOld[z * offsetZ + y * dimX + x + 0] +
-                             gridOld[z * offsetZ + y * dimX + x + 1] +
-                             gridOld[z * offsetZ + y * dimX + x + dimX] +
-                             gridOld[z * offsetZ + y * dimX + x + offsetZ]) * (1.0 / 7.0);
+            for (int t = 0; t < maxT; ++t) {
+                for (int z = 1; z < (dimZ - 1); ++z) {
+                    for (int y = 1; y < (dimY - 1); ++y) {
+                        for (int x = 1; x < (dimX - 1); ++x) {
+                            gridNew[z * offsetZ + y * dimY + x] =
+                                (gridOld[z * offsetZ + y * dimX + x - offsetZ] +
+                                 gridOld[z * offsetZ + y * dimX + x - dimX] +
+                                 gridOld[z * offsetZ + y * dimX + x - 1] +
+                                 gridOld[z * offsetZ + y * dimX + x + 0] +
+                                 gridOld[z * offsetZ + y * dimX + x + 1] +
+                                 gridOld[z * offsetZ + y * dimX + x + dimX] +
+                                 gridOld[z * offsetZ + y * dimX + x + offsetZ]) * (1.0 / 7.0);
+                        }
                     }
                 }
             }
         }
-
-        long long tEnd = Chronometer::timeUSec();
 
         if (gridOld[offsetZ + dimX + 1] == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -345,7 +360,6 @@ public:
 
         Coord<3> actualDim = dim - Coord<3>(2, 2, 2);
         double updates = 1.0 * maxT * actualDim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         delete gridOld;
@@ -393,25 +407,26 @@ public:
             }
         }
 
-        long long tBegin= Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        for (int t = 0; t < maxT; ++t) {
-            for (int z = 1; z < (dimZ - 1); ++z) {
-                for (int y = 1; y < (dimY - 1); ++y) {
-                    updateLine(&gridNew[z * offsetZ + y * dimY + 0],
-                               &gridOld[z * offsetZ + y * dimX - offsetZ],
-                               &gridOld[z * offsetZ + y * dimX - dimX],
-                               &gridOld[z * offsetZ + y * dimX + 0],
-                               &gridOld[z * offsetZ + y * dimX + dimX],
-                               &gridOld[z * offsetZ + y * dimX + offsetZ],
-                               1,
-                               dimX - 1);
+            for (int t = 0; t < maxT; ++t) {
+                for (int z = 1; z < (dimZ - 1); ++z) {
+                    for (int y = 1; y < (dimY - 1); ++y) {
+                        updateLine(&gridNew[z * offsetZ + y * dimY + 0],
+                                   &gridOld[z * offsetZ + y * dimX - offsetZ],
+                                   &gridOld[z * offsetZ + y * dimX - dimX],
+                                   &gridOld[z * offsetZ + y * dimX + 0],
+                                   &gridOld[z * offsetZ + y * dimX + dimX],
+                                   &gridOld[z * offsetZ + y * dimX + offsetZ],
+                                   1,
+                                   dimX - 1);
 
+                    }
                 }
             }
         }
-
-        long long tEnd = Chronometer::timeUSec();
 
         if (gridOld[offsetZ + dimX + 1] == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -420,7 +435,6 @@ public:
 
         Coord<3> actualDim = dim - Coord<3>(2, 2, 2);
         double updates = 1.0 * maxT * actualDim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         delete gridOld;
@@ -630,9 +644,12 @@ public:
         SerialSimulator<JacobiCellClassic> sim(
             new NoOpInitializer<JacobiCellClassic>(dim, maxT));
 
-        long long tBegin= Chronometer::timeUSec();
-        sim.run();
-        long long tEnd = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
 
         if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -640,7 +657,6 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         return gLUPS;
@@ -700,9 +716,12 @@ public:
         SerialSimulator<JacobiCellFixedHood> sim(
             new NoOpInitializer<JacobiCellFixedHood>(dim, maxT));
 
-        long long tBegin= Chronometer::timeUSec();
-        sim.run();
-        long long tEnd = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
 
         if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -710,7 +729,6 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         return gLUPS;
@@ -948,25 +966,26 @@ public:
         CoordBox<3> lineStarts = gridA.boundingBox();
         lineStarts.dimensions.x() = 1;
 
-        long long tBegin= Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
 
-        for (int t = 0; t < maxT; ++t) {
-            for (CoordBox<3>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
-                 ++i) {
-                Streak<3> streak(*i, dim.x());
+            for (int t = 0; t < maxT; ++t) {
+                for (CoordBox<3>::Iterator i = lineStarts.begin();
+                     i != lineStarts.end();
+                     ++i) {
+                    Streak<3> streak(*i, dim.x());
 
-                typedef APITraits::SelectStencil<JacobiCellStreakUpdate>::Value Stencil;
-                const JacobiCellStreakUpdate *pointers[Stencil::VOLUME];
-                LinePointerAssembly<Stencil>()(pointers, streak, *gridOld);
-                LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
-                    streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
+                    typedef APITraits::SelectStencil<JacobiCellStreakUpdate>::Value Stencil;
+                    const JacobiCellStreakUpdate *pointers[Stencil::VOLUME];
+                    LinePointerAssembly<Stencil>()(pointers, streak, *gridOld);
+                    LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
+                        streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
+                }
+
+                std::swap(gridOld, gridNew);
             }
-
-            std::swap(gridOld, gridNew);
         }
-
-        long long tEnd = Chronometer::timeUSec();
 
         if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -974,7 +993,6 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         return gLUPS;
@@ -1005,9 +1023,12 @@ public:
         SerialSimulator<JacobiCellStreakUpdate> sim(
             new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
 
-        long long tBegin= Chronometer::timeUSec();
-        sim.run();
-        long long tEnd = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
 
         if (sim.getGrid()->get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -1015,7 +1036,6 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         return gLUPS;
@@ -2018,9 +2038,12 @@ public:
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
 
-        long long tBegin= Chronometer::timeUSec();
-        sim.run();
-        long long tEnd = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
 
         if (sim.getGrid()->get(Coord<3>(1, 1, 1)).density == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -2028,7 +2051,6 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         return gLUPS;
@@ -2059,9 +2081,12 @@ public:
         SerialSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
 
-        long long tBegin= Chronometer::timeUSec();
-        sim.run();
-        long long tEnd = Chronometer::timeUSec();
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
 
         if (sim.getGrid()->get(Coord<3>(1, 1, 1)).density == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
@@ -2069,7 +2094,6 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double seconds = (tEnd - tBegin) * 10e-6;
         double gLUPS = 10e-9 * updates / seconds;
 
         return gLUPS;
@@ -2079,6 +2103,56 @@ public:
     {
         return "GLUPS";
     }
+};
+
+template<class PARTITION>
+class PartitionBenchmark : public CPUBenchmark
+{
+public:
+    PartitionBenchmark(const std::string& name) :
+        name(name)
+    {}
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    std::string family()
+    {
+        return name;
+    }
+
+    double performance(const Coord<3>& dim)
+    {
+        double duration = 0;
+        Coord<2> accu;
+        Coord<2> realDim(dim.x(), dim.y());
+
+        {
+            ScopedTimer t(&duration);
+
+            PARTITION h(Coord<2>(100, 200), realDim);
+            typename PARTITION::Iterator end = h.end();
+            for (typename PARTITION::Iterator i = h.begin(); i != end; ++i) {
+                accu += *i;
+            }
+        }
+
+        if (accu == Coord<2>()) {
+            throw std::runtime_error("oops, partition iteration went bad!");
+        }
+
+        return duration;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    std::string name;
 };
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
@@ -2187,6 +2261,12 @@ int main(int argc, char **argv)
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(LBMSoA(), sizes[i]);
     }
+
+    Coord<3> dim(32 * 1024, 32 * 1024, 1);
+    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionHIndexing"), dim);
+    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionStriping"),  dim);
+    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionHilbert"),   dim);
+    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionZCurve"),    dim);
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
     cudaTests(revision, quick, cudaDevice);

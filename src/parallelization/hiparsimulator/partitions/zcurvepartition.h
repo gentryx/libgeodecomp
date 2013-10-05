@@ -67,7 +67,7 @@ public:
         inline Iterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& dimensions,
-            const unsigned& pos=0) :
+            const unsigned& pos = 0) :
             SpaceFillingCurve<DIM>::Iterator(origin, false)
         {
             squareStack.push_back(Square(origin, dimensions, 0));
@@ -80,8 +80,10 @@ public:
 
         inline Iterator& operator++()
         {
-            if (endReached)
+            if (endReached) {
                 return *this;
+            }
+
             if (sublevelState == TRIVIAL) {
                 operatorIncTrivial();
             } else {

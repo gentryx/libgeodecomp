@@ -519,7 +519,7 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     dim3 dimGrid(dimX / dimBlock.x, dimY / dimBlock.y, 1);
     cudaDeviceSynchronize();
 
-    long long tStart = Chronometer::timeUSec();
+    long long tStart = ScopedTimer::timeUSec();
 
     for (int t = 0; t < repeats; ++t) {
         KERNEL<DIM_X, DIM_Y, DIM_Z>::run(dimGrid, dimBlock, dimX, dimY, dimZ, devGridOld, devGridNew);
@@ -527,7 +527,7 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     }
     cudaDeviceSynchronize();
 
-    long long tEnd = Chronometer::timeUSec();
+    long long tEnd = ScopedTimer::timeUSec();
     CUDAUtil::checkForError();
 
     cudaMemcpy(&grid[0], devGridNew, bytesize, cudaMemcpyDeviceToHost);
