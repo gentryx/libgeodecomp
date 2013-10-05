@@ -10,7 +10,27 @@ class ScopedTimerTest : public CxxTest::TestSuite
 {
 public:
 
-    void testBasic()
+    void testTimeConsecutive()
+    {
+        for (int i = 0; i < 1024; i++) {
+            TS_ASSERT(ScopedTimer::time() <= ScopedTimer::time());
+        }
+    }
+
+    void testTimeOverflow()
+    {
+        long tOld = ScopedTimer::timeUSec();
+        long tNew;
+
+        for (int i = 0; i < 4; i++) {
+            usleep(250000);
+            tNew = ScopedTimer::timeUSec();
+            TS_ASSERT(tNew > tOld);
+            tOld = tNew;
+        }
+    }
+
+    void testBasicUsageAndBusyWait()
     {
         int max = 100;
         long microSeconds = 250;
@@ -24,11 +44,7 @@ public:
             ScopedTimer timerB(i % 2 ? &timeOdd : &timeEven);
 
             // busy wait because usleep isn't accurate enough
-            long t0 = ScopedTimer::timeUSec();
-            long elapsed = 0;
-            while (elapsed < microSeconds) {
-                elapsed = ScopedTimer::timeUSec() - t0;
-            }
+            ScopedTimer::busyWait(microSeconds);
         }
 
         sort(times);

@@ -35,6 +35,18 @@ public:
         return timeUSec() * 1e-6;
     }
 
+    /**
+     * sleeps for the given period. This is more accurate than usleep() and friends.
+     */
+    static void busyWait(long microSeconds)
+    {
+        long t0 = ScopedTimer::timeUSec();
+        long elapsed = 0;
+        while (elapsed < microSeconds) {
+            elapsed = ScopedTimer::timeUSec() - t0;
+        }
+    }
+
 private:
     double *totalElapsedTime;
     double startTime;
