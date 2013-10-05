@@ -51,19 +51,19 @@ public:
 
         // drop largest 10 percent to ignore OS jitter
         for (int i = 0; i < (0.9 * max); ++i) {
-            // accept at most 1% deviation
-            TS_ASSERT_LESS_THAN(seconds * 0.99, times[i]);
-            TS_ASSERT_LESS_THAN(times[i], seconds * 1.01);
+            // accept at most 5% deviation
+            TS_ASSERT_LESS_THAN(seconds * 0.95, times[i]);
+            TS_ASSERT_LESS_THAN(times[i], seconds * 1.05);
         }
 
         // ensure that accumilation works, too:
-        TS_ASSERT_LESS_THAN(0.99 * timeOdd,  timeEven);
-        TS_ASSERT_LESS_THAN(0.99 * timeEven, timeOdd);
+        TS_ASSERT_LESS_THAN(0.95 * timeOdd,  timeEven);
+        TS_ASSERT_LESS_THAN(0.95 * timeEven, timeOdd);
 
         double expectedTotalTime = microSeconds * max * 1e-6;
         double actualTotalTime = timeOdd + timeEven;
-        TS_ASSERT_LESS_THAN(0.99 * actualTotalTime,   expectedTotalTime);
-        TS_ASSERT_LESS_THAN(0.99 * expectedTotalTime, actualTotalTime);
+        TS_ASSERT_LESS_THAN(0.95 * actualTotalTime,   expectedTotalTime);
+        TS_ASSERT_LESS_THAN(0.95 * expectedTotalTime, actualTotalTime);
     }
 };
 
