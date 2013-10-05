@@ -69,10 +69,10 @@ public:
         Statistics stat =
         {
             totalTime,
-            updateGroup->stepper->computeTimeInner,
-            updateGroup->stepper->computeTimeGhost,
-            updateGroup->stepper->patchAcceptersTime,
-            updateGroup->stepper->patchProvidersTime,
+            updateGroup->computeTimeInner(),
+            updateGroup->computeTimeGhost(),
+            updateGroup->patchAcceptersTime(),
+            updateGroup->patchProvidersTime(),
         };
 
         MPI::Aint displacements[] = {0};

@@ -189,6 +189,26 @@ public:
         return partitionManager->getWeights();
     }
 
+    inline double computeTimeInner() const
+    {
+        return stepper->computeTimeInner;
+    }
+
+    inline double computeTimeGhost() const
+    {
+        return stepper->computeTimeGhost;
+    }
+
+    inline double patchAcceptersTime() const
+    {
+        return stepper->patchAcceptersTime;
+    }
+
+    inline double patchProvidersTime() const
+    {
+        return stepper->patchAcceptersTime;
+    }
+
 private:
     boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
