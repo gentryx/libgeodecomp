@@ -170,6 +170,15 @@ inline std::set<T, Allocator> operator||(
 /**
  * Output
  */
+template<typename _CharT, typename _Traits, typename _T1, typename _T2>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
+           const std::pair<_T1, _T2>& p)
+{
+    os << "(" << p.first << ", " << p.second << ")";
+    return os;
+}
+
 template<typename _CharT, typename _Traits, typename T, typename Allocator>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& os,
@@ -212,15 +221,6 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
 
     os << "}";
 
-    return os;
-}
-
-template<typename _CharT, typename _Traits, typename _T1, typename _T2>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& os,
-           const std::pair<_T1, _T2>& p)
-{
-    os << "(" << p.first << ", " << p.second << ")";
     return os;
 }
 
