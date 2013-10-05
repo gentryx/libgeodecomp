@@ -16,9 +16,12 @@ public:
         long microSeconds = 250;
         double seconds = microSeconds * 1e-6;
         std::vector<double> times(max, 0);
+        double timeOdd = 0;
+        double timeEven = 0;
 
         for (int i = 0; i < max; ++i) {
-            ScopedTimer t(&times[i]);
+            ScopedTimer timerA(&times[i]);
+            ScopedTimer timerB(i % 2 ? &timeOdd : &timeEven);
 
             // busy wait because usleep isn't accurate enough
             long t0 = ScopedTimer::timeUSec();
@@ -36,6 +39,15 @@ public:
             TS_ASSERT_LESS_THAN(seconds * 0.99, times[i]);
             TS_ASSERT_LESS_THAN(times[i], seconds * 1.01);
         }
+
+        // ensure that accumilation works, too:
+        TS_ASSERT_LESS_THAN(0.99 * timeOdd,  timeEven);
+        TS_ASSERT_LESS_THAN(0.99 * timeEven, timeOdd);
+
+        double expectedTotalTime = microSeconds * max * 1e-6;
+        double actualTotalTime = timeOdd + timeEven;
+        TS_ASSERT_LESS_THAN(0.99 * actualTotalTime,   expectedTotalTime);
+        TS_ASSERT_LESS_THAN(0.99 * expectedTotalTime, actualTotalTime);
     }
 };
 
