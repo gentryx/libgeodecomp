@@ -39,7 +39,7 @@ class Datatype < Hash
     # pending classes. If in doubt take a look at the calls to
     # Datatype#[] and Datatype::class2mpi.
     def cpp_to_mpi(type, partial = false)
-      ret = "MPI_" + type.gsub(/[ :<>]+/, '_').upcase
+      ret = "MPI_" + type.gsub(/[, :<>]+/, '_').upcase
       ret += "_PARTIAL" if partial
       return ret
     end

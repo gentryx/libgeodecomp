@@ -41,7 +41,6 @@ class MPIParser
           filename = slice[i]
           break if filename.nil?
 
-          # puts "  thread(#{i}) is parsing #{filename}"
           doc = REXML::Document.new File.new(filename)
           @xml_docs[filename] = doc
         end
@@ -51,12 +50,6 @@ class MPIParser
     end
 
     threads.each { |t| t.join }
-
-    # class_files.each do |filename|
-    #   puts "  #{filename}"
-    #   doc = REXML::Document.new File.new(filename)
-    #   @xml_docs[filename] = doc
-    # end
 
     @filename_cache = { }
     @xml_docs.each do |filename, doc|

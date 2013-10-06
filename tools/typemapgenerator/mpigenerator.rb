@@ -19,7 +19,7 @@ class MPIGenerator
   end
 
   def simple_name(name)
-    name.gsub(/[ :<>]+/, '_')
+    name.gsub(/[, :<>]+/, '_')
   end
 
   # returns the code of a method suitable to create a typemap for the
