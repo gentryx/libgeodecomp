@@ -20,6 +20,8 @@ template<typename T, int SIZE>
 class FixedArray
 {
 public:
+    friend class Typemaps;
+
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     friend class boost::serialization::access;
 #endif

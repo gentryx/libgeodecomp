@@ -5,10 +5,6 @@
 #include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
-#ifdef LIBGEODECOMP_FEATURE_HPX
-#include <hpx/util/high_resolution_timer.hpp>
-#endif
-
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 

@@ -90,7 +90,7 @@ public:
     }
 
 private:
-    FixedArray<double, NUM_INTERVALS> totalTimes;
+    FixedArray<double, Chronometer::NUM_INTERVALS> totalTimes;
 };
 
 }
