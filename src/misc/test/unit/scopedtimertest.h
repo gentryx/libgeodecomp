@@ -55,15 +55,6 @@ public:
             TS_ASSERT_LESS_THAN(seconds * 0.95, times[i]);
             TS_ASSERT_LESS_THAN(times[i], seconds * 1.05);
         }
-
-        // ensure that accumilation works, too:
-        TS_ASSERT_LESS_THAN(0.95 * timeOdd,  timeEven);
-        TS_ASSERT_LESS_THAN(0.95 * timeEven, timeOdd);
-
-        double expectedTotalTime = microSeconds * max * 1e-6;
-        double actualTotalTime = timeOdd + timeEven;
-        TS_ASSERT_LESS_THAN(0.95 * actualTotalTime,   expectedTotalTime);
-        TS_ASSERT_LESS_THAN(0.95 * expectedTotalTime, actualTotalTime);
     }
 };
 
