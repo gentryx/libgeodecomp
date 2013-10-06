@@ -5,6 +5,7 @@
 
 #include <mpi.h>
 #include <complex>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/coord.h>
@@ -31,6 +32,7 @@
 #include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/misc/floatcoord.h>
 
+extern MPI_Datatype MPI_LIBGEODECOMP_CHRONOMETER;
 extern MPI_Datatype MPI_LIBGEODECOMP_COORD_1_;
 extern MPI_Datatype MPI_LIBGEODECOMP_COORD_2_;
 extern MPI_Datatype MPI_LIBGEODECOMP_COORD_3_;
@@ -78,6 +80,7 @@ private:
         return ret;
     }
 
+    static MPI_Datatype generateMapLibGeoDecomp_Chronometer();
     static MPI_Datatype generateMapLibGeoDecomp_Coord_1_();
     static MPI_Datatype generateMapLibGeoDecomp_Coord_2_();
     static MPI_Datatype generateMapLibGeoDecomp_Coord_3_();
@@ -122,6 +125,7 @@ private:
     static inline MPI_Datatype lookup(unsigned long long*) { return MPI_UNSIGNED_LONG_LONG; }
     static inline MPI_Datatype lookup(unsigned short*) { return MPI_UNSIGNED_SHORT; }
     static inline MPI_Datatype lookup(wchar_t*) { return MPI_WCHAR; }
+    static inline MPI_Datatype lookup(LibGeoDecomp::Chronometer*) { return MPI_LIBGEODECOMP_CHRONOMETER; }
     static inline MPI_Datatype lookup(LibGeoDecomp::Coord<1 >*) { return MPI_LIBGEODECOMP_COORD_1_; }
     static inline MPI_Datatype lookup(LibGeoDecomp::Coord<2 >*) { return MPI_LIBGEODECOMP_COORD_2_; }
     static inline MPI_Datatype lookup(LibGeoDecomp::Coord<3 >*) { return MPI_LIBGEODECOMP_COORD_3_; }

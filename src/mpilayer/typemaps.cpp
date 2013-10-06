@@ -3,6 +3,7 @@
 #include "typemaps.h"
 #include <algorithm>
 
+MPI_Datatype MPI_LIBGEODECOMP_CHRONOMETER;
 MPI_Datatype MPI_LIBGEODECOMP_COORD_1_;
 MPI_Datatype MPI_LIBGEODECOMP_COORD_2_;
 MPI_Datatype MPI_LIBGEODECOMP_COORD_3_;
@@ -49,6 +50,46 @@ public:
 bool addressLower(MemberSpec a, MemberSpec b)
 {
     return a.address < b.address;
+}
+
+MPI_Datatype
+Typemaps::generateMapLibGeoDecomp_Chronometer() {
+    char fakeObject[sizeof(LibGeoDecomp::Chronometer)];
+    LibGeoDecomp::Chronometer *obj = (LibGeoDecomp::Chronometer*)fakeObject;
+
+    const int count = 4;
+    int lengths[count];
+
+    // sort addresses in ascending order
+    MemberSpec rawSpecs[] = {
+        MemberSpec(getAddress(&obj->cycleStart), MPI_LONG, 1),
+        MemberSpec(getAddress(&obj->totalTimes), MPI_DOUBLE, LibGeoDecomp::Chronometer::NUM_INTERVALS),
+        MemberSpec(getAddress(&obj->workIntervalStart), MPI_LONG, 1),
+        MemberSpec(getAddress(&obj->workLength), MPI_LONG, 1)
+    };
+    std::sort(rawSpecs, rawSpecs + count, addressLower);
+
+    // split addresses from member types
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
+    for (int i = 0; i < count; i++) {
+        displacements[i] = rawSpecs[i].address;
+        memberTypes[i] = rawSpecs[i].type;
+        lengths[i] = rawSpecs[i].length;
+    }
+
+    // transform absolute addresses into offsets
+    for (int i = count-1; i > 0; i--) {
+        displacements[i] -= displacements[0];
+    }
+    displacements[0] = 0;
+
+    // create datatype
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
+
+    return objType;
 }
 
 MPI_Datatype
@@ -1013,6 +1054,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper() {
 
 void Typemaps::initializeMaps()
 {
+    MPI_LIBGEODECOMP_CHRONOMETER = generateMapLibGeoDecomp_Chronometer();
     MPI_LIBGEODECOMP_COORD_1_ = generateMapLibGeoDecomp_Coord_1_();
     MPI_LIBGEODECOMP_COORD_2_ = generateMapLibGeoDecomp_Coord_2_();
     MPI_LIBGEODECOMP_COORD_3_ = generateMapLibGeoDecomp_Coord_3_();

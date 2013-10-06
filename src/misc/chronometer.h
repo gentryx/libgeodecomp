@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
-#define LIBGEODECOMP_PARALLELIZATION_CHRONOMETER_H
+#ifndef LIBGEODECOMP_MISC_CHRONOMETER_H
+#define LIBGEODECOMP_MISC_CHRONOMETER_H
 
 #include <libgeodecomp/misc/scopedtimer.h>
 
@@ -23,25 +23,68 @@ namespace LibGeoDecomp {
  */
 class Chronometer
 {
-    friend class ChronometerTest;
 public:
-    Chronometer();
+    // fixme:
+    // 1. rework so that StripingSimulator will operate on it
+    // 2. fix comments
+    // 3. make time optinally use HPX timer
+    // 4. get rid of Statistics
+    friend class ChronometerTest;
+    friend class Typemaps;
+
+    enum TimeInterval {
+        TOTAL_TIME,
+        COMPUTE_TIME,
+        COMPUTE_TIME_INNER,
+        COMPUTE_TIME_GHOST,
+        PATCH_ACCEPTERS_TIME,
+        PATCH_PROVIDERS_TIME
+    };
+
+    static const int NUM_INTERVALS = 5;
+
+    Chronometer()
+    {
+        startCycle();
+        reset();
+    }
 
     /**
      * The time passing between tic() and toc() will be
      * counted as one \f$w_i\f$.
      */
+    // fixme: kill this
     void tic();
 
     /**
      * see tic().
      */
+    // fixme: kill this
     void toc();
+
+    /**
+     * starts measurement for the given interval. Timing will be stopped when the ScopedTimer dies.
+     */
+    ScopedTimer tic(TimeInterval interval)
+    {
+        return ScopedTimer(&totalTimes[interval]);
+    }
+
+    /**
+     * flushes all time totals to 0.
+     */
+    void reset()
+    {
+        for (int i = 0; i < NUM_INTERVALS; ++i) {
+            totalTimes[i] = 0;
+        }
+    }
 
     /**
      * Reset the start time of the current cycle and flush all the
      * working times \f$w_i\f$, returns \f$f\f$.
      */
+    // fixme: kill this
     double nextCycle();
 
     /**
@@ -50,9 +93,13 @@ public:
      */
     void nextCycle(long long *cycleLength, long long *workLength);
 
-    static long long timeUSec();
+    double ratio(TimeInterval i1, TimeInterval i2)
+    {
+        return totalTimes[i1] / totalTimes[i2];
+    }
 
 private:
+    double totalTimes[NUM_INTERVALS];
     long long cycleStart;
     long long workIntervalStart;
     long long workLength;
@@ -67,6 +114,6 @@ private:
     void startCycle();
 };
 
-};
+}
 
 #endif

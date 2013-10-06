@@ -8,9 +8,6 @@ namespace LibGeoDecomp {
 
 class ChronometerTest : public CxxTest::TestSuite
 {
-private:
-    Chronometer *c;
-
 public:
     void setUp()
     {
@@ -22,57 +19,43 @@ public:
         delete c;
     }
 
-    void testTimeConsecutive()
-    {
-        for (int i = 0; i < 1024; i++) {
-            TS_ASSERT(c->time() <= c->time());
-        }
-    }
-
-    void testTimeOverflow()
-    {
-        long long tOld = c->time();
-        long long tNew;
-        for (int i = 0; i < 4; i++) {
-            sleep(1);
-            tNew = c->time();
-            TS_ASSERT(tNew > tOld);
-            tOld = tNew;
-        }
-    }
-
-    void testMustCallTic()
-    {
-        TS_ASSERT_THROWS(c->toc(), std::logic_error);
-    }
-
     void testWorkRatio1()
     {
-        c->cycleStart -= 1; // avoidCyclelength of 0 due to low resolution
-        TS_ASSERT_EQUALS(0, c->nextCycle());
+        {
+            ScopedTimer t1 = c->tic(Chronometer::TOTAL_TIME);
+
+            {
+                ScopedTimer t2 = c->tic(Chronometer::COMPUTE_TIME);
+                ScopedTimer::busyWait(30000);
+            }
+
+            ScopedTimer::busyWait(60000);
+        }
+
+        TS_ASSERT_DELTA(1.0/3.0, c->ratio(Chronometer::COMPUTE_TIME, Chronometer::TOTAL_TIME), 0.01);
     }
 
     void testWorkRatio2()
     {
-        c->tic();
-        usleep(300000);
-        c->toc();
-        usleep(600000);
-        TS_ASSERT_DELTA(1.0/3.0, c->nextCycle(), 0.2);
+        {
+            ScopedTimer t1 = c->tic(Chronometer::TOTAL_TIME);
+            {
+                ScopedTimer t2 = c->tic(Chronometer::COMPUTE_TIME);
+                ScopedTimer::busyWait(15000);
+            }
+            ScopedTimer::busyWait(30000);
+            {
+                ScopedTimer t2 = c->tic(Chronometer::COMPUTE_TIME);
+                ScopedTimer::busyWait(15000);
+            }
+            ScopedTimer::busyWait(30000);
+        }
+
+        TS_ASSERT_DELTA(1.0/3.0, c->ratio(Chronometer::COMPUTE_TIME, Chronometer::TOTAL_TIME), 0.01);
     }
 
-    void testWorkRatio3()
-    {
-        c->tic();
-        usleep(150000);
-        c->toc();
-        usleep(300000);
-        c->tic();
-        usleep(150000);
-        c->toc();
-        usleep(300000);
-        TS_ASSERT_DELTA(1.0/3.0, c->nextCycle(), 0.2);
-    }
+private:
+    Chronometer *c;
 };
 
 }
