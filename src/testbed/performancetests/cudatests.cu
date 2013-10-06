@@ -519,15 +519,17 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     dim3 dimGrid(dimX / dimBlock.x, dimY / dimBlock.y, 1);
     cudaDeviceSynchronize();
 
-    long long tStart = ScopedTimer::timeUSec();
+    double seconds = 0;
+    {
+        ScopedTimer t(&seconds);
 
-    for (int t = 0; t < repeats; ++t) {
-        KERNEL<DIM_X, DIM_Y, DIM_Z>::run(dimGrid, dimBlock, dimX, dimY, dimZ, devGridOld, devGridNew);
-        std::swap(devGridOld, devGridNew);
+        for (int t = 0; t < repeats; ++t) {
+            KERNEL<DIM_X, DIM_Y, DIM_Z>::run(dimGrid, dimBlock, dimX, dimY, dimZ, devGridOld, devGridNew);
+            std::swap(devGridOld, devGridNew);
+        }
+        cudaDeviceSynchronize();
     }
-    cudaDeviceSynchronize();
 
-    long long tEnd = ScopedTimer::timeUSec();
     CUDAUtil::checkForError();
 
     cudaMemcpy(&grid[0], devGridNew, bytesize, cudaMemcpyDeviceToHost);
@@ -535,7 +537,6 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     cudaFree(devGridNew);
 
     double updates = 1.0 * dimGrid.x * dimBlock.x * dimGrid.y * dimBlock.y * dimZ * repeats;
-    double seconds = (tEnd - tStart) * 10e-6;
     double glups = 10e-9 * updates / seconds;
     return glups;
 }
