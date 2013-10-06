@@ -24,18 +24,21 @@ void CudaStepperLib::doit(const int& deviceID)
     cudaSetDevice(deviceID);
     CUDAStepper<RTMCell> stepper;
 
-    long long timeStart = ScopedTimer::timeUSec();
-
+    double seconds = 0;
     int repeats = 100;
-    for (int i = 0; i < repeats; ++i) {
-        stepper.step();
+
+    {
+        ScopedTimer t(&seconds);
+
+        for (int i = 0; i < repeats; ++i) {
+            stepper.step();
+        }
+
+        cudaThreadSynchronize();
     }
 
-    cudaThreadSynchronize();
-    long long timeEnd = ScopedTimer::timeUSec();
     double updates = 1.0 * repeats * (DIM_Z - 4)* GRID_DIM_X * GRID_DIM_Y * BLOCK_DIM_X * BLOCK_DIM_Y;
-    double time = (timeEnd - timeStart) * 0.0000001;
-    double glups = updates / time * 0.0000000001;
+    double glups = updates / seconds * 0.0000000001;
     double gflops = glups * RTMCell::flops();
 
     std::cout << "GLUPS:  " << glups << "\n";

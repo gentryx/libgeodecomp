@@ -19,12 +19,12 @@ public:
 
     void testTimeOverflow()
     {
-        long tOld = ScopedTimer::timeUSec();
-        long tNew;
+        double  tOld = ScopedTimer::time();
+        double  tNew;
 
         for (int i = 0; i < 4; i++) {
             usleep(250000);
-            tNew = ScopedTimer::timeUSec();
+            tNew = ScopedTimer::time();
             TS_ASSERT(tNew > tOld);
             tOld = tNew;
         }

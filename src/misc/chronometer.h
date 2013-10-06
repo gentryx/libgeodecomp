@@ -14,10 +14,8 @@ class Chronometer
 {
 public:
     // fixme:
-    // 1. rework so that StripingSimulator will operate on it
-    // 2. fix comments
-    // 3. make time optinally use HPX timer
     // 4. get rid of Statistics
+    // 5. add operator+= to merge statistics
     friend class ChronometerTest;
     friend class Typemaps;
 

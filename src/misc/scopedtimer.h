@@ -19,20 +19,16 @@ public:
     }
 
     /**
-     * returns the current time, measured in microseconds (and with according accuracy).
-     */
-    static long timeUSec()
-    {
-        boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-        return now.time_of_day().total_microseconds();
-    }
-
-    /**
      * returns the time in secods, with microsecond accuracy.
      */
     static double time()
     {
-        return timeUSec() * 1e-6;
+#ifdef LIBGEODECOMP_FEATURE_HPX
+        return hpx::util::high_resolution_timer::now();
+#else
+        boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+        return now.time_of_day().total_microseconds() * 1e-6;
+#endif
     }
 
     /**
@@ -40,10 +36,10 @@ public:
      */
     static void busyWait(long microSeconds)
     {
-        long t0 = ScopedTimer::timeUSec();
-        long elapsed = 0;
-        while (elapsed < microSeconds) {
-            elapsed = ScopedTimer::timeUSec() - t0;
+        double t0 = ScopedTimer::time();
+        double elapsed = 0;
+        while (elapsed < (microSeconds * 1e-6)) {
+            elapsed = ScopedTimer::time() - t0;
         }
     }
 
