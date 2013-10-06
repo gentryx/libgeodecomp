@@ -130,8 +130,6 @@ public:
         Region<3> wholeGridRegion;
         wholeGridRegion << gridBox;
         int repeats = 0;
-        long long tStart = 0;
-        long long tEnd = 0;
         int maxNanoStep = 201234;
         double seconds = 0;
 

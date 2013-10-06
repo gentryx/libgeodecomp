@@ -6,20 +6,9 @@
 namespace LibGeoDecomp {
 
 /**
- * This class takes over all the time-keeping needed to find out how
- * much time a Simulator spends on working and how long it has to wait
- * for communication with his mates.
- *
- * The idea behind the Chronometer's interface is that for an
- * arbitrary slice of time -- a cycle -- all the times \f$w_i\f$ spent
- * on working is recorded. Along with the total length \f$t\f$ of the
- * complete cycle, it is possible to compute the fraction \f$f\f$ of
- * time spent on working (in contrast to the time spent on blocking
- * for communication etc.):
- *
- * \f[
- * f = \frac{1}{t} \sum_{i=0}^{i<n} w_i
- * \f]
+ * This class can be used to measure execution time of different parts
+ * of our code. This is useful to determine the relative load of a
+ * node or to find out which part of the algorithm the most time.
  */
 class Chronometer
 {
@@ -45,22 +34,8 @@ public:
 
     Chronometer()
     {
-        startCycle();
         reset();
     }
-
-    /**
-     * The time passing between tic() and toc() will be
-     * counted as one \f$w_i\f$.
-     */
-    // fixme: kill this
-    void tic();
-
-    /**
-     * see tic().
-     */
-    // fixme: kill this
-    void toc();
 
     /**
      * starts measurement for the given interval. Timing will be stopped when the ScopedTimer dies.
@@ -81,37 +56,20 @@ public:
     }
 
     /**
-     * Reset the start time of the current cycle and flush all the
-     * working times \f$w_i\f$, returns \f$f\f$.
+     * returns the ratio of the accumulated times i1 and i2, returns
+     * 0.5 if the second interval is empty. (ratio() is typically used
+     * for load balancing. For that purpose 0.5 is easier to digest than NaN.)
      */
-    // fixme: kill this
-    double nextCycle();
-
-    /**
-     * Reset the start time of the current cycle and flush all the
-     * woking times \f$w_i\f$, returns (\f$f\f$,\f$t\f$).
-     */
-    void nextCycle(long long *cycleLength, long long *workLength);
-
-    double ratio(TimeInterval i1, TimeInterval i2)
+    double ratio(TimeInterval i1 = COMPUTE_TIME, TimeInterval i2 = TOTAL_TIME)
     {
+        if (totalTimes[i2] == 0) {
+            return 0.5;
+        }
         return totalTimes[i1] / totalTimes[i2];
     }
 
 private:
     double totalTimes[NUM_INTERVALS];
-    long long cycleStart;
-    long long workIntervalStart;
-    long long workLength;
-
-    /**
-     * returns a timestamp from a high resolution timer. There are no
-     * warranties for this method except that consecutive calls will
-     * return strictly monotonic increasing values.
-     */
-    long long time() const;
-
-    void startCycle();
 };
 
 }

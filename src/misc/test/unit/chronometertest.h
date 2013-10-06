@@ -32,7 +32,7 @@ public:
             ScopedTimer::busyWait(60000);
         }
 
-        TS_ASSERT_DELTA(1.0/3.0, c->ratio(Chronometer::COMPUTE_TIME, Chronometer::TOTAL_TIME), 0.01);
+        TS_ASSERT_DELTA(1.0/3.0, c->ratio(Chronometer::COMPUTE_TIME, Chronometer::TOTAL_TIME), 0.1);
     }
 
     void testWorkRatio2()

@@ -57,15 +57,12 @@ Typemaps::generateMapLibGeoDecomp_Chronometer() {
     char fakeObject[sizeof(LibGeoDecomp::Chronometer)];
     LibGeoDecomp::Chronometer *obj = (LibGeoDecomp::Chronometer*)fakeObject;
 
-    const int count = 4;
+    const int count = 1;
     int lengths[count];
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->cycleStart), MPI_LONG, 1),
-        MemberSpec(getAddress(&obj->totalTimes), MPI_DOUBLE, LibGeoDecomp::Chronometer::NUM_INTERVALS),
-        MemberSpec(getAddress(&obj->workIntervalStart), MPI_LONG, 1),
-        MemberSpec(getAddress(&obj->workLength), MPI_LONG, 1)
+        MemberSpec(getAddress(&obj->totalTimes), MPI_DOUBLE, LibGeoDecomp::Chronometer::NUM_INTERVALS)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 

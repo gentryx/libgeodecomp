@@ -190,7 +190,8 @@ private:
             return;
         }
 
-        double ratio = chrono.nextCycle();
+        double ratio = chrono.ratio();
+        chrono.reset();
         LoadVec loads = mpilayer.gather(ratio, 0);
         WeightVec newPartitionsSendBuffer;
 
@@ -220,6 +221,8 @@ private:
         // nanoStep()). actually we could stretch one cycle further to
         // have two concurrent communication requests per ghostregion,
         // but this would be a hell to code and debug.
+
+        ScopedTimer t = chrono.tic(Chronometer::TOTAL_TIME);
 
         waitForGhostRegions();
         recvOuterGhostRegion(newStripe);
@@ -296,7 +299,7 @@ private:
 
     void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
     {
-        chrono.tic();
+        ScopedTimer t = chrono.tic(Chronometer::COMPUTE_TIME);
 
         UpdateFunctor<CELL_TYPE>()(
             region,
@@ -305,8 +308,6 @@ private:
             *curStripe,
             newStripe,
             nanoStep);
-
-        chrono.toc();
     }
 
     /**
@@ -392,7 +393,7 @@ private:
      */
     void initSimulation()
     {
-        chrono.nextCycle();
+        chrono.reset();
 
         CoordBox<DIM> box = curStripe->boundingBox();
         curStripe->resize(box);
