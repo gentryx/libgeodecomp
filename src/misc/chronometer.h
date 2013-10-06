@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_CHRONOMETER_H
 #define LIBGEODECOMP_MISC_CHRONOMETER_H
 
+#include <libgeodecomp/misc/fixedarray.h>
 #include <libgeodecomp/misc/scopedtimer.h>
 
 namespace LibGeoDecomp {
@@ -13,9 +14,6 @@ namespace LibGeoDecomp {
 class Chronometer
 {
 public:
-    // fixme:
-    // 4. get rid of Statistics
-    // 5. add operator+= to merge statistics
     friend class ChronometerTest;
     friend class Typemaps;
 
@@ -28,15 +26,36 @@ public:
         PATCH_PROVIDERS_TIME
     };
 
-    static const int NUM_INTERVALS = 5;
+    static const int NUM_INTERVALS = 6;
 
-    Chronometer()
+    Chronometer() :
+        totalTimes(NUM_INTERVALS, 0)
     {
         reset();
     }
 
     /**
-     * starts measurement for the given interval. Timing will be stopped when the ScopedTimer dies.
+     * Aggregates two chronometers. This is good for accumulating
+     * measurements from multiple sources.
+     */
+    Chronometer& operator+=(const Chronometer& other)
+    {
+        for (int i = 0; i < NUM_INTERVALS; ++i) {
+            totalTimes[i] += other.totalTimes[i];
+        }
+
+        return *this;
+    }
+
+    Chronometer operator+(const Chronometer& other) const
+    {
+        Chronometer ret(*this);
+        ret += other;
+        return ret;
+    }
+    /**
+     * Starts measurement for the given interval. Timing will be
+     * stopped when the ScopedTimer dies.
      */
     ScopedTimer tic(TimeInterval interval)
     {
@@ -44,19 +63,23 @@ public:
     }
 
     /**
-     * flushes all time totals to 0.
+     * Flushes all time totals to 0.
      */
     void reset()
     {
-        for (int i = 0; i < NUM_INTERVALS; ++i) {
-            totalTimes[i] = 0;
-        }
+        std::fill(totalTimes.begin(), totalTimes.end(), 0);
+    }
+
+    double interval(TimeInterval i) const
+    {
+        return totalTimes[i];
     }
 
     /**
-     * returns the ratio of the accumulated times i1 and i2, returns
+     * Returns the ratio of the accumulated times i1 and i2, returns
      * 0.5 if the second interval is empty. (ratio() is typically used
-     * for load balancing. For that purpose 0.5 is easier to digest than NaN.)
+     * for load balancing. For that purpose 0.5 is easier to digest
+     * than NaN.)
      */
     double ratio(TimeInterval i1 = COMPUTE_TIME, TimeInterval i2 = TOTAL_TIME)
     {
@@ -67,7 +90,7 @@ public:
     }
 
 private:
-    double totalTimes[NUM_INTERVALS];
+    FixedArray<double, NUM_INTERVALS> totalTimes;
 };
 
 }
