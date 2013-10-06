@@ -24,9 +24,15 @@ public:
     friend class boost::serialization::access;
 #endif
 
-    FixedArray(const int& _elements=0) :
-        elements(_elements)
+    FixedArray(int elements = 0) :
+        elements(elements)
     {}
+
+    FixedArray(int elements, const T& value) :
+        elements(elements)
+    {
+        std::fill(begin(), end(), value);
+    }
 
     typedef T* iterator;
     inline T& operator[](const int& i)
@@ -79,16 +85,16 @@ public:
         elements = 0;
     }
 
-    void erase(const T *elem)
+    void erase(T *elem)
     {
-        for (T *i = const_cast<T*>(elem); i != end(); ++i) {
+        for (T *i = elem; i != end(); ++i) {
             *i = *(i + 1);
         }
 
         --elements;
     }
 
-    void reserve(const int& num)
+    void reserve(int num)
     {
         if (num > SIZE) {
             throw std::out_of_range("reserving too many elements");
@@ -99,7 +105,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template<class Archive>
-    inline void serialize(Archive &archive, const unsigned int version)
+    inline void serialize(Archive& archive, const unsigned int version)
     {
         archive & store;
         archive & elements;

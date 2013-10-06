@@ -44,12 +44,38 @@ public:
         TS_ASSERT_EQUALS(0, a.size());
     }
 
-    void testDeleteWithConstPointer()
+    void testConstructors()
     {
-        FixedArray<int, 20> a;
-        a << 123;
-        const int *p = &a[0];
-        a.erase(p);
+        FixedArray<int, 4> a(1, 13);
+        FixedArray<int, 4> b(4, 47);
+        FixedArray<int, 4> c(3, 11);
+
+        TS_ASSERT_EQUALS(a.size(), 1);
+        TS_ASSERT_EQUALS(a[0], 13);
+
+        TS_ASSERT_EQUALS(b.size(), 4);
+        TS_ASSERT_EQUALS(b[0], 47);
+        TS_ASSERT_EQUALS(b[1], 47);
+        TS_ASSERT_EQUALS(b[2], 47);
+        TS_ASSERT_EQUALS(b[3], 47);
+
+        TS_ASSERT_EQUALS(c.size(), 3);
+        TS_ASSERT_EQUALS(c[0], 11);
+        TS_ASSERT_EQUALS(c[1], 11);
+        TS_ASSERT_EQUALS(c[2], 11);
+
+        a = b;
+        TS_ASSERT_EQUALS(a.size(), 4);
+        TS_ASSERT_EQUALS(a[0], 47);
+        TS_ASSERT_EQUALS(a[1], 47);
+        TS_ASSERT_EQUALS(a[2], 47);
+        TS_ASSERT_EQUALS(a[3], 47);
+
+        a = c;
+        TS_ASSERT_EQUALS(a.size(), 3);
+        TS_ASSERT_EQUALS(a[0], 11);
+        TS_ASSERT_EQUALS(a[1], 11);
+        TS_ASSERT_EQUALS(a[2], 11);
     }
 };
 
