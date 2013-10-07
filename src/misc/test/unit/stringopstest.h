@@ -23,6 +23,16 @@ public:
         TS_ASSERT_EQUALS(123, StringOps::atoi("123"));
     }
 
+    void testAtof()
+    {
+        TS_ASSERT_EQUALS(0,   StringOps::atof("0"  ));
+        TS_ASSERT_EQUALS(-1,  StringOps::atof("-1" ));
+        TS_ASSERT_EQUALS(123, StringOps::atof("123"));
+
+        TS_ASSERT_EQUALS(0.25, StringOps::atof("0.25"));
+        TS_ASSERT_EQUALS(-0.5, StringOps::atof("-0.5"));
+    }
+
     void testTokenize()
     {
         std::string message = "abc_123_andi ist so toll";

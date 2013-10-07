@@ -38,6 +38,14 @@ public:
         return ret;
     }
 
+    static double atof(const std::string& s)
+    {
+        std::stringstream buf(s);
+        double ret;
+        buf >> ret;
+        return ret;
+    }
+
     static StringVec tokenize(const std::string& string, const std::string& delimiters)
     {
         StringVec ret;
