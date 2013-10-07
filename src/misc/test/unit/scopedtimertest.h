@@ -49,11 +49,11 @@ public:
 
         sort(times);
 
-        // drop largest 10 percent to ignore OS jitter
-        for (int i = 0; i < (0.9 * max); ++i) {
-            // accept at most 10% deviation
-            TS_ASSERT_LESS_THAN(seconds * 0.9, times[i]);
-            TS_ASSERT_LESS_THAN(times[i], seconds * 1.1);
+        // drop largest 20 percent to ignore OS jitter
+        for (int i = 0; i < (0.8 * max); ++i) {
+            // accept at most 20% deviation
+            TS_ASSERT_LESS_THAN(seconds * 0.2, times[i]);
+            TS_ASSERT_LESS_THAN(times[i], seconds * 1.2);
         }
     }
 };
