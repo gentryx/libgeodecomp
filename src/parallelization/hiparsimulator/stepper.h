@@ -5,6 +5,7 @@
 #include <deque>
 
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
@@ -40,10 +41,6 @@ public:
     inline Stepper(
         const boost::shared_ptr<PartitionManagerType>& partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer) :
-        computeTimeInner(0.0),
-        computeTimeGhost(0.0),
-        patchAcceptersTime(0.0),
-        patchProvidersTime(0.0),
         partitionManager(partitionManager),
         initializer(initializer)
     {}
@@ -74,16 +71,17 @@ public:
         patchAccepters[patchType].push_back(patchAccepter);
     }
 
-    double computeTimeInner;
-    double computeTimeGhost;
-    double patchAcceptersTime;
-    double patchProvidersTime;
+    const Chronometer& statistics() const
+    {
+        return chronometer;
+    }
 
 protected:
     boost::shared_ptr<PartitionManagerType> partitionManager;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     PatchProviderList patchProviders[2];
     PatchAccepterList patchAccepters[2];
+    Chronometer chronometer;
 
     /**
      * calculates a (mostly) suitable offset which (in conjuction with

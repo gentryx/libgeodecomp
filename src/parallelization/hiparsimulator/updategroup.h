@@ -155,6 +155,11 @@ public:
     virtual ~UpdateGroup()
     {}
 
+    const Chronometer& statistics() const
+    {
+        return stepper->statistics();
+    }
+
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,
         const PatchType& patchType)

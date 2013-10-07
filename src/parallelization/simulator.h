@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/steerer.h>
+#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/soagrid.h>
 
@@ -99,6 +100,7 @@ public:
     }
 
 protected:
+    Chronometer chronometer;
     unsigned stepNum;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
     SteererVector steerers;

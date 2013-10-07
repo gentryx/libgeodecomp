@@ -18,6 +18,7 @@ public:
     typedef typename Simulator<CELL_TYPE>::Topology Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
+    using Simulator<CELL_TYPE>::chronometer;
 
     inline DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)

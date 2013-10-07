@@ -6,7 +6,6 @@
 #include <cmath>
 #include <stdexcept>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
@@ -27,6 +26,7 @@ class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 public:
     friend class HiParSimulatorTest;
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
+    using DistributedSimulator<CELL_TYPE>::chronometer;
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef DistributedSimulator<CELL_TYPE> ParentType;
     typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
@@ -62,27 +62,6 @@ public:
         initSimulation();
 
         nanoStep(NANO_STEPS);
-    }
-
-    inline std::vector<Statistics> gatherStatistics()
-    {
-        Statistics stat =
-        {
-            totalTime,
-            updateGroup->computeTimeInner(),
-            updateGroup->computeTimeGhost(),
-            updateGroup->patchAcceptersTime(),
-            updateGroup->patchProvidersTime(),
-        };
-
-        MPI::Aint displacements[] = {0};
-        MPI::Datatype memberTypes[] = {MPI_CHAR};
-        int lengths[] = {sizeof(Statistics)};
-        MPI::Datatype objType
-            = MPI::Datatype::Create_struct(1, lengths, displacements, memberTypes);
-        objType.Commit();
-    
-        return mpiLayer.gather(stat, 0, objType);
     }
 
     virtual unsigned getStep() const
@@ -147,6 +126,12 @@ public:
 
         writerAdaptersGhost.push_back(adapterGhost);
         writerAdaptersInner.push_back(adapterInnerSet);
+    }
+
+    inline std::vector<Chronometer> gatherStatistics() const
+    {
+        Chronometer stats = chronometer + updateGroup.statistics();
+        return mpiLayer.gather(chronometer, 0);
     }
 
 private:

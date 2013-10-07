@@ -33,10 +33,7 @@ public:
     using Stepper<CELL_TYPE>::patchProviders;
     using Stepper<CELL_TYPE>::partitionManager;
 
-    using Stepper<CELL_TYPE>::computeTimeInner;
-    using Stepper<CELL_TYPE>::computeTimeGhost;
-    using Stepper<CELL_TYPE>::patchAcceptersTime;
-    using Stepper<CELL_TYPE>::patchProvidersTime;
+    using Stepper<CELL_TYPE>::chronometer;
 
     inline VanillaStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
@@ -56,10 +53,6 @@ public:
         }
 
         initGrids();
-        computeTimeInner = 0.0;
-        computeTimeGhost = 0.0;
-        patchAcceptersTime = 0.0;
-        patchProvidersTime = 0.0;
     }
 
     inline void update(std::size_t nanoSteps)
@@ -92,29 +85,26 @@ private:
 
     inline void update()
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = partitionManager->innerSet(index);
+        {
+            TimeComputeInner t(&chronometer);
 
-        UpdateFunctor<CELL_TYPE>()(
-            region,
-            Coord<DIM>(),
-            Coord<DIM>(),
-            *oldGrid,
-            &*newGrid,
-            curNanoStep);
-        std::swap(oldGrid, newGrid);
+            UpdateFunctor<CELL_TYPE>()(
+                region,
+                Coord<DIM>(),
+                Coord<DIM>(),
+                *oldGrid,
+                &*newGrid,
+                curNanoStep);
+            std::swap(oldGrid, newGrid);
 
-        ++curNanoStep;
-        if (curNanoStep == NANO_STEPS) {
-            curNanoStep = 0;
-            curStep++;
+            ++curNanoStep;
+            if (curNanoStep == NANO_STEPS) {
+                curNanoStep = 0;
+                curStep++;
+            }
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        computeTimeInner += timer.elapsed();
-#endif
 
         notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
 
@@ -131,9 +121,8 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
+        TimePatchAccepters t(&chronometer);
+
         for (typename ParentType::PatchAccepterList::iterator i =
                  patchAccepters[patchType].begin();
              i != patchAccepters[patchType].end();
@@ -142,9 +131,6 @@ private:
                 (*i)->put(*oldGrid, region, nanoStep);
             }
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        patchAcceptersTime += timer.elapsed();
-#endif
     }
 
     inline void notifyPatchProviders(
@@ -152,9 +138,8 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
+        TimePatchProviders t(&chronometer);
+
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
@@ -164,9 +149,6 @@ private:
                 region,
                 nanoStep);
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        patchProvidersTime += timer.elapsed();
-#endif
     }
 
     inline std::size_t globalNanoStep() const
@@ -211,36 +193,34 @@ private:
      */
     inline void updateGhost()
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
-        // fixme: skip all this ghost zone buffering for
-        // ghostZoneWidth == 1?
+        {
+            TimeComputeGhost t(&chronometer);
 
-        // 1: Prepare grid. The following update of the ghostzone will
-        // destroy parts of the kernel, which is why we'll
-        // save/restore those.
-        saveKernel();
-        // We need to restore the rim since it got destroyed while the
-        // kernel was updated.
-        restoreRim(false);
+            // fixme: skip all this ghost zone buffering for
+            // ghostZoneWidth == 1?
+
+            // 1: Prepare grid. The following update of the ghostzone will
+            // destroy parts of the kernel, which is why we'll
+            // save/restore those.
+            saveKernel();
+            // We need to restore the rim since it got destroyed while the
+            // kernel was updated.
+            restoreRim(false);
+        }
 
         // 2: actual ghostzone update
         std::size_t oldNanoStep = curNanoStep;
         std::size_t oldStep = curStep;
         std::size_t curGlobalNanoStep = globalNanoStep();
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        computeTimeGhost += timer.elapsed();
-#endif
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
-#ifdef LIBGEODECOMP_FEATURE_HPX
-            timer.restart();
-#endif
-            const Region<DIM>& region = partitionManager->rim(t + 1);
-            UpdateFunctor<CELL_TYPE>()(
+            {
+                TimeComputeGhost timer(&chronometer);
+
+                const Region<DIM>& region = partitionManager->rim(t + 1);
+                UpdateFunctor<CELL_TYPE>()(
                     region,
                     Coord<DIM>(),
                     Coord<DIM>(),
@@ -248,23 +228,20 @@ private:
                     &*newGrid,
                     curNanoStep);
 
-            ++curNanoStep;
-            if (curNanoStep == NANO_STEPS) {
-                curNanoStep = 0;
-                curStep++;
+                ++curNanoStep;
+                if (curNanoStep == NANO_STEPS) {
+                    curNanoStep = 0;
+                    curStep++;
+                }
+
+                std::swap(oldGrid, newGrid);
+
+                ++curGlobalNanoStep;
             }
-
-            std::swap(oldGrid, newGrid);
-
-            ++curGlobalNanoStep;
-#ifdef LIBGEODECOMP_FEATURE_HPX
-            computeTimeGhost += timer.elapsed();
-#endif
             notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        timer.restart();
-#endif
+
+        TimeComputeGhost t(&chronometer);
         curNanoStep = oldNanoStep;
         curStep = oldStep;
 
@@ -276,9 +253,6 @@ private:
         // 3: restore grid for kernel update
         restoreRim(true);
         restoreKernel();
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        computeTimeGhost += timer.elapsed();
-#endif
     }
 private:
 
