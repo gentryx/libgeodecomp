@@ -190,7 +190,7 @@ private:
             return;
         }
 
-        double ratio = chrono.ratio();
+        double ratio = chrono.ratio<TimeCompute, TimeTotal>();
         chrono.reset();
         LoadVec loads = mpilayer.gather(ratio, 0);
         WeightVec newPartitionsSendBuffer;
@@ -216,14 +216,13 @@ private:
 
     void nanoStep(const unsigned& nanoStep)
     {
+        TimeTotal t(&chrono);
+
         // we wait for ghostregions "just in time" to overlap
         // communication with I/O (which occurs outside of
         // nanoStep()). actually we could stretch one cycle further to
         // have two concurrent communication requests per ghostregion,
         // but this would be a hell to code and debug.
-
-        ScopedTimer t = chrono.tic(Chronometer::TOTAL_TIME);
-
         waitForGhostRegions();
         recvOuterGhostRegion(newStripe);
         updateInnerGhostRegion(nanoStep);
@@ -235,6 +234,8 @@ private:
 
     void waitForGhostRegions()
     {
+        TimeCommunication t(&chrono);
+
         mpilayer.wait(GHOSTREGION_ALPHA);
         mpilayer.wait(GHOSTREGION_BETA);
     }
@@ -299,8 +300,6 @@ private:
 
     void updateRegion(const Region<DIM> &region, const unsigned& nanoStep)
     {
-        ScopedTimer t = chrono.tic(Chronometer::COMPUTE_TIME);
-
         UpdateFunctor<CELL_TYPE>()(
             region,
             Coord<DIM>(),
@@ -315,12 +314,16 @@ private:
      */
     void updateInnerGhostRegion(const unsigned& nanoStep)
     {
+        TimeComputeGhost t(&chrono);
+
         updateRegion(innerUpperGhostRegion, nanoStep);
         updateRegion(innerLowerGhostRegion, nanoStep);
     }
 
     void recvOuterGhostRegion(GridType *stripe)
     {
+        TimeCommunication t(&chrono);
+
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
@@ -344,6 +347,8 @@ private:
 
     void sendInnerGhostRegion(GridType *stripe)
     {
+        TimeCommunication t(&chrono);
+
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
 
@@ -367,6 +372,8 @@ private:
 
     void updateInside(const unsigned& nanoStep)
     {
+        TimeComputeInner t(&chrono);
+
         updateRegion(innerRegion, nanoStep);
     }
 

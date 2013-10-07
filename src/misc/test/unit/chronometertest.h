@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
-#include <unistd.h>
+
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/stringops.h>
 
 using namespace LibGeoDecomp;
 
@@ -22,36 +23,46 @@ public:
     void testWorkRatio1()
     {
         {
-            ScopedTimer t1 = c->tic(Chronometer::TOTAL_TIME);
-
+            TimeTotal t(c);
             {
-                ScopedTimer t2 = c->tic(Chronometer::COMPUTE_TIME);
+                TimeCompute t(c);
                 ScopedTimer::busyWait(100000);
             }
 
             ScopedTimer::busyWait(200000);
         }
 
-        TS_ASSERT_DELTA(1.0/3.0, c->ratio(Chronometer::COMPUTE_TIME, Chronometer::TOTAL_TIME), 0.1);
+        double ratio = c->ratio<TimeCompute, TimeTotal>();
+        TS_ASSERT_DELTA(1.0/3.0, ratio, 0.1);
     }
 
     void testWorkRatio2()
     {
         {
-            ScopedTimer t1 = c->tic(Chronometer::TOTAL_TIME);
+            TimeTotal t(c);
             {
-                ScopedTimer t2 = c->tic(Chronometer::COMPUTE_TIME);
-                ScopedTimer::busyWait(15000);
+                TimeComputeGhost t(c);
+                ScopedTimer::busyWait(100000);
             }
-            ScopedTimer::busyWait(30000);
+
+            ScopedTimer::busyWait(300000);
             {
-                ScopedTimer t2 = c->tic(Chronometer::COMPUTE_TIME);
-                ScopedTimer::busyWait(15000);
+                TimeComputeInner t(c);
+                ScopedTimer::busyWait(200000);
             }
-            ScopedTimer::busyWait(30000);
+            ScopedTimer::busyWait(300000);
         }
 
-        TS_ASSERT_DELTA(1.0/3.0, c->ratio(Chronometer::COMPUTE_TIME, Chronometer::TOTAL_TIME), 0.1);
+        double ratio;
+
+        ratio = c->ratio<TimeCompute, TimeTotal>();
+        TS_ASSERT_DELTA(1.0/3.0, ratio, 0.05);
+
+        ratio = c->ratio<TimeComputeGhost, TimeTotal>();
+        TS_ASSERT_DELTA(1.0/9.0, ratio, 0.05);
+
+        ratio = c->ratio<TimeComputeInner, TimeTotal>();
+        TS_ASSERT_DELTA(2.0/9.0, ratio, 0.05);
     }
 
     void testAddition()
@@ -61,31 +72,58 @@ public:
         Chronometer c3;
 
         {
-            ScopedTimer t1 = c1.tic(Chronometer::PATCH_ACCEPTERS_TIME);
-            ScopedTimer t2 = c2.tic(Chronometer::PATCH_PROVIDERS_TIME);
+            TimePatchAccepters t1(&c1);
+            TimePatchProviders t2(&c2);
 
             {
-                ScopedTimer t = c1.tic(Chronometer::COMPUTE_TIME);
+                TimeCompute t(&c1);
                 ScopedTimer::busyWait(15000);
             }
             {
-                ScopedTimer t = c2.tic(Chronometer::COMPUTE_TIME);
+                TimeCompute t(&c2);
                 ScopedTimer::busyWait(15000);
             }
         }
 
         c3 = c1 + c2;
-        TS_ASSERT_EQUALS(c3.interval(Chronometer::COMPUTE_TIME),
-                         c1.interval(Chronometer::COMPUTE_TIME) +
-                         c2.interval(Chronometer::COMPUTE_TIME));
+        TS_ASSERT_EQUALS(c3.interval<TimeCompute>(),
+                         c1.interval<TimeCompute>() +
+                         c2.interval<TimeCompute>());
 
-        TS_ASSERT_EQUALS(c3.interval(Chronometer::PATCH_ACCEPTERS_TIME),
-                         c1.interval(Chronometer::PATCH_ACCEPTERS_TIME));
+        TS_ASSERT_EQUALS(c3.interval<TimePatchAccepters>(),
+                         c1.interval<TimePatchAccepters>());
 
-        TS_ASSERT_EQUALS(c3.interval(Chronometer::PATCH_PROVIDERS_TIME),
-                         c2.interval(Chronometer::PATCH_PROVIDERS_TIME));
+        TS_ASSERT_EQUALS(c3.interval<TimePatchProviders>(),
+                         c2.interval<TimePatchProviders>());
     }
 
+    void testReport()
+    {
+        {
+            TimeTotal t(c);
+            {
+                TimeCompute t(c);
+                ScopedTimer::busyWait(15000);
+            }
+
+            ScopedTimer::busyWait(30000);
+            {
+                TimeCompute t(c);
+                ScopedTimer::busyWait(15000);
+            }
+            ScopedTimer::busyWait(30000);
+        }
+
+        std::vector<std::string> lines = StringOps::tokenize(c->report(), "\n");
+        TS_ASSERT_EQUALS(lines.size()        , Chronometer::NUM_INTERVALS);
+        TS_ASSERT_LESS_THAN_EQUALS(size_t(6),  Chronometer::NUM_INTERVALS);
+
+        for (size_t i = 0; i < Chronometer::NUM_INTERVALS; ++i) {
+            std::vector<std::string> tokens = StringOps::tokenize(lines[i], ":");
+            TS_ASSERT_EQUALS(size_t(2), tokens.size());
+            TS_ASSERT_LESS_THAN_EQUALS(0, StringOps::atof(tokens[1]));
+        }
+    }
 private:
     Chronometer *c;
 };
