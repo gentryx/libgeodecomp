@@ -33,7 +33,7 @@ public:
     void testBasicUsageAndBusyWait()
     {
         int max = 100;
-        long microSeconds = 2500;
+        long microSeconds = 25000;
         double seconds = microSeconds * 1e-6;
         std::vector<double> times(max, 0);
         double timeOdd = 0;
@@ -52,7 +52,7 @@ public:
         // drop largest 20 percent to ignore OS jitter
         for (int i = 0; i < (0.8 * max); ++i) {
             // accept at most 20% deviation
-            TS_ASSERT_LESS_THAN(seconds * 0.2, times[i]);
+            TS_ASSERT_LESS_THAN(seconds * 0.8, times[i]);
             TS_ASSERT_LESS_THAN(times[i], seconds * 1.2);
         }
     }
