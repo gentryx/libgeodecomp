@@ -32,8 +32,8 @@ public:
 
     void testBasicUsageAndBusyWait()
     {
-        int max = 100;
-        long microSeconds = 2500;
+        int max = 1000;
+        long microSeconds = 250;
         double seconds = microSeconds * 1e-6;
         std::vector<double> times(max, 0);
         double timeOdd = 0;
@@ -49,11 +49,11 @@ public:
 
         sort(times);
 
-        // drop largest 20 percent to ignore OS jitter
-        for (int i = 0; i < (0.8 * max); ++i) {
-            // accept at most 20% deviation
-            TS_ASSERT_LESS_THAN(seconds * 0.2, times[i]);
-            TS_ASSERT_LESS_THAN(times[i], seconds * 1.2);
+        // drop largest 40 percent to ignore OS jitter
+        for (int i = 0; i < (0.6 * max); ++i) {
+            // accept at most 10% deviation
+            TS_ASSERT_LESS_THAN(seconds * 0.9, times[i]);
+            TS_ASSERT_LESS_THAN(times[i], seconds * 1.1);
         }
     }
 };
