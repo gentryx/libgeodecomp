@@ -360,7 +360,7 @@ public:
 
         Coord<3> actualDim = dim - Coord<3>(2, 2, 2);
         double updates = 1.0 * maxT * actualDim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         delete gridOld;
         delete gridNew;
@@ -435,7 +435,7 @@ public:
 
         Coord<3> actualDim = dim - Coord<3>(2, 2, 2);
         double updates = 1.0 * maxT * actualDim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         delete gridOld;
         delete gridNew;
@@ -657,7 +657,7 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         return gLUPS;
     }
@@ -729,7 +729,7 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         return gLUPS;
     }
@@ -993,7 +993,7 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         return gLUPS;
     }
@@ -1036,7 +1036,7 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         return gLUPS;
     }
@@ -2051,7 +2051,7 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         return gLUPS;
     }
@@ -2094,7 +2094,7 @@ public:
         }
 
         double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 10e-9 * updates / seconds;
+        double gLUPS = 1e-9 * updates / seconds;
 
         return gLUPS;
     }
