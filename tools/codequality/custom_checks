@@ -1,0 +1,119 @@
+#!/usr/bin/ruby
+# -*- coding: utf-8 -*-
+require 'pathname'
+
+class TestBase
+  def is_generated?(filename)
+    # don't expect header guards for source files
+    return true if filename =~ /\.cpp$/
+    return true if filename =~ /\.cu$/
+    # add exception for auto-generated file
+    return true if filename =~ /typemaps\.h/
+
+    return false
+  end
+end
+
+class FindUndocumentedClasses < TestBase
+  def test(filename, content)
+    return 0 if is_generated?(filename)
+
+    fragment = "[^<>,]*"
+    nested_template_parameters = "<#{fragment}>#{fragment}"
+    parameter_pattern = "#{fragment}(#{nested_template_parameters})?"
+    template_pattern = "template<((#{parameter_pattern},\n?)*#{parameter_pattern})?>\\s*\\n"
+
+    ret = 0
+
+    content.scan(/\n\n(#{template_pattern})?class (\w+)/) do
+      puts "#{filename}: found undocumented class »#{$6}«"
+      ret += 1
+    end
+
+    return ret
+  end
+end
+
+class FindUnmatchedHeaderGuards < TestBase
+  def test(filename, content)
+    return 0 if is_generated?(filename)
+
+    relative_path = Pathname.new(filename).relative_path_from(@@path)
+    macro = "LIBGEODECOMP_#{relative_path}".upcase.gsub(/[\/\.]/, "_")
+    expected_guard = <<EOF
+#ifndef #{macro}
+#define #{macro}
+EOF
+
+    if !(content =~ /#{expected_guard}/)
+      puts "#{filename}: could not find expected header guard"
+      return 1
+    end
+
+    return 0
+  end
+end
+
+class FindFixmes < TestBase
+  def test(filename, content)
+    ret = 0
+
+    content.scan(/.*fixme.*/i) do
+      puts "#{filename}: #{$&}"
+      ret += 1
+    end
+
+    return ret
+  end
+end
+
+class FindBadIncludes < TestBase
+  def test(filename, content)
+    return 0 if is_generated?(filename)
+
+    ret = 0
+
+    content.scan(/^#include.*".*"/) do
+      ret += 1
+      puts "#{filename}: found malformed include »#{$&}«"
+    end
+
+    return ret
+  end
+end
+
+def scour_files(tester)
+  failures = 0
+
+  @files.each do |file|
+    content = File.read(file)
+    failures += tester.test(file, content)
+  end
+
+  delimiter = "=" * 80
+  puts delimiter
+  puts "#{tester.class}: #{failures}/#{@files.size} tests failed"
+  puts delimiter
+end
+
+if ARGV.size != 1
+  STDERR.puts <<EOF
+A simple detector which scans for common patterns of poor coding style
+(e.g. undocumented classes or malformed header guards).
+
+Usage: #{$0} PATH
+
+...where PATH is the source directory you wish to check.
+EOF
+  exit 1
+end
+
+@@path = Pathname.new(ARGV[0])
+
+pattern = @@path + "**" + "*.{h,cpp,cu}"
+@files = Dir.glob(pattern)
+
+scour_files(FindUndocumentedClasses.new)
+scour_files(FindUnmatchedHeaderGuards.new)
+scour_files(FindFixmes.new)
+scour_files(FindBadIncludes.new)
