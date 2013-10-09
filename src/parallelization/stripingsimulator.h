@@ -30,6 +30,7 @@ public:
     typedef LoadBalancer::WeightVec WeightVec;
     typedef LoadBalancer::LoadVec LoadVec;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
+    typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
     static const int DIM = Topology::DIM;
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
@@ -253,14 +254,23 @@ private:
 
     void handleInput(SteererEvent event)
     {
+        SteererFeedback feedback;
         // notify all registered Steerers
         waitForGhostRegions();
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
                 steerers[i]->nextStep(
-                    curStripe, regionWithOuterGhosts, gridDim, getStep(), event, mpilayer.rank(), true);
+                    curStripe,
+                    regionWithOuterGhosts,
+                    gridDim, getStep(),
+                    event,
+                    mpilayer.rank(),
+                    true,
+                    &feedback);
             }
         }
+
+        // fixme: apply SteererFeedback!
     }
 
     void handleOutput(WriterEvent event)

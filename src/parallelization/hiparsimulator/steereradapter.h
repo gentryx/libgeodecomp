@@ -60,6 +60,8 @@ public:
             event = STEERER_ALL_DONE;
         }
 
+        typename Steerer<CELL_TYPE>::SteererFeedback feedback;
+
         steerer->nextStep(
             destinationGrid,
             patchableRegion,
@@ -67,7 +69,10 @@ public:
             step,
             event,
             rank,
-            lastCall);
+            lastCall,
+            &feedback);
+
+        // fixme: apply SteererFeedback!
     }
 
 private:

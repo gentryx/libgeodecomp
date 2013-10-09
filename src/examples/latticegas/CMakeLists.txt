@@ -7,7 +7,6 @@ if (FEATURE_CUDA AND FEATURE_QT AND FEATURE_OPENCV)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 
-  # fixme: rework this
   set(MY_HEADERS
     cameratester.h
     flowwidget.h
@@ -25,7 +24,6 @@ if (FEATURE_CUDA AND FEATURE_QT AND FEATURE_OPENCV)
   include_directories(./)
   include_directories(${OpenCV_INCLUDE_DIRS})
 
-  # set(CUDA_NVCC_FLAGS "-arch sm_20 ${CUDA_NVCC_FLAGS}")u
   cuda_add_executable(latticegas ${SOURCES} ${MY_MOC_SOURCES})
   target_link_libraries(latticegas ${LOCAL_LIBGEODECOMP_LINK_LIB} ${QT_LIBRARIES} ${OpenCV_LIBS})
 endif()

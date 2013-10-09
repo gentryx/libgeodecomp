@@ -37,6 +37,10 @@ public:
         std::size_t rank,
         bool lastCall)
     {
+        // ensure setRegion() has actually been called
+        TS_ASSERT(!region.empty());
+
+        // ensure that all parts of this->region have been accounted for
         if (lastStep != step) {
             TS_ASSERT(unaccountedRegion.empty());
             unaccountedRegion = region;

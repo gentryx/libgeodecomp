@@ -10,6 +10,7 @@ template<typename CELL_TYPE>
 class MockSteerer : public Steerer<CELL_TYPE>
 {
 public:
+    typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
     static const int DIM = Topology::DIM;
@@ -33,7 +34,8 @@ public:
         unsigned step,
         SteererEvent event,
         std::size_t rank,
-        bool lastCall)
+        bool lastCall,
+        SteererFeedback *feedback)
     {
         (*eventsBuf) << "nextStep(" << step << ", ";
         switch(event) {

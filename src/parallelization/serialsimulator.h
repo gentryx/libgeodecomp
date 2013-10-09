@@ -27,6 +27,8 @@ public:
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename SimulatorHelpers::GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
+    typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
+
     static const int DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL_TYPE>::NANO_STEPS;
@@ -70,7 +72,13 @@ public:
      */
     virtual void step()
     {
-        handleInput(STEERER_NEXT_STEP);
+        SteererFeedback feedback;
+        step(&feedback);
+    }
+
+    virtual void step(SteererFeedback *feedback)
+    {
+        handleInput(STEERER_NEXT_STEP, feedback);
 
         for (unsigned i = 0; i < NANO_STEPS; ++i) {
             nanoStep(i);
@@ -89,14 +97,19 @@ public:
         stepNum = initializer->startStep();
         setIORegions();
 
-        handleInput(STEERER_INITIALIZED);
+        SteererFeedback feedback;
+        handleInput(STEERER_INITIALIZED, &feedback);
         handleOutput(WRITER_INITIALIZED);
 
         for (; stepNum < initializer->maxSteps();) {
-            step();
+            if (feedback.simulationEnded()) {
+                break;
+            }
+
+            step(&feedback);
         }
 
-        handleInput(STEERER_ALL_DONE);
+        handleInput(STEERER_ALL_DONE, &feedback);
         handleOutput(WRITER_ALL_DONE);
     }
 
@@ -138,13 +151,14 @@ protected:
     /**
      * notifies all registered Steerers
      */
-    void handleInput(SteererEvent event)
+    void handleInput(SteererEvent event, SteererFeedback *feedback)
     {
         for (unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(curGrid, simArea, gridDim, getStep(), event, 0, true);
+                steerers[i]->nextStep(curGrid, simArea, gridDim, getStep(), event, 0, true, feedback);
             }
         }
+        // fixme: apply SteererFeedback!
     }
 
     void setIORegions()

@@ -10,11 +10,15 @@ namespace LibGeoDecomp {
  * The TestSteerer demos how a Steerer can be implemented to modify
  * the grid during the course of the simulation. The idea is to
  * advance the cell's cycleCounter at \p eventStep by \p cycleOffset.
+ *
+ * The simulation will be terminated at the time step given by \p
+ * terminalStep.
  */
 template<int DIM>
 class TestSteerer : public Steerer<TestCell<DIM> >
 {
 public:
+    typedef typename Steerer<TestCell<DIM> >::SteererFeedback SteererFeedback;
     typedef typename Steerer<TestCell<DIM> >::GridType GridType;
     typedef typename Steerer<TestCell<DIM> >::CoordType CoordType;
     using Steerer<TestCell<DIM> >::region;
@@ -22,10 +26,12 @@ public:
     TestSteerer(
         const unsigned& period,
         const unsigned& eventStep,
-        const unsigned& cycleOffset)  :
+        const unsigned& cycleOffset,
+        const unsigned& terminalStep = 1000000)  :
         Steerer<TestCell<DIM> >(period),
         eventStep(eventStep),
         cycleOffset(cycleOffset),
+        terminalStep(terminalStep),
         lastStep(-1)
     {}
 
@@ -36,11 +42,24 @@ public:
         unsigned step,
         SteererEvent event,
         std::size_t rank,
-        bool lastCall)
+        bool lastCall,
+        SteererFeedback *feedback)
     {
         // ensure setRegion() has actually been called
         TS_ASSERT(!region.empty());
-        // fixme: extend this test according to paralleltestwriter
+
+        // ensure that all parts of this->region have been accounted for
+        if (lastStep != step) {
+            TS_ASSERT(unaccountedRegion.empty());
+            unaccountedRegion = region;
+        }
+        unaccountedRegion -= validRegion;
+
+        lastStep = step;
+
+        if (step >= terminalStep) {
+            feedback->endSimulation();
+        }
 
         if (step != eventStep) {
             return;
@@ -59,7 +78,9 @@ public:
 private:
     unsigned eventStep;
     unsigned cycleOffset;
-    int lastStep;
+    unsigned terminalStep;
+    unsigned lastStep;
+    Region<DIM> unaccountedRegion;
 };
 
 }

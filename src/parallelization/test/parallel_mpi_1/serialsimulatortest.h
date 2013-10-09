@@ -6,6 +6,7 @@
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/mocksteerer.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/io/testwriter.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -191,6 +192,22 @@ public:
 
         simulator.reset();
         TS_ASSERT_EQUALS(events.str(), expected.str());
+    }
+
+    void testSteererCanTerminateSimulation()
+    {
+        unsigned eventStep = 15;
+        unsigned endStep = 19;
+        unsigned jumpSteps = 2;
+        simulator->addSteerer(new TestSteerer<2>(1, eventStep, NANO_STEPS_2D * jumpSteps, endStep));
+        simulator->run();
+
+        // simulators are allowed to run past the end signal of the
+        // steerer b/c of issues with updating ghost zones first.
+        TS_ASSERT_TEST_GRID(
+            GridBaseType,
+            *simulator->getGrid(),
+            (endStep + 1 + jumpSteps) * NANO_STEPS_2D);
     }
 
     void testSoA()

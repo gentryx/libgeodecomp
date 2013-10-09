@@ -38,6 +38,7 @@ class RemoteSteerer : public Steerer<CELL_TYPE>
 {
 public:
     friend class RemoteSteererTest;
+    typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
     typedef typename Steerer<CELL_TYPE>::Topology Topology;
     typedef typename Steerer<CELL_TYPE>::GridType GridType;
     typedef std::map<std::string, boost::shared_ptr<Handler<CELL_TYPE> > > HandlerMap;
@@ -64,7 +65,8 @@ public:
         unsigned step,
         SteererEvent event,
         std::size_t rank,
-        bool lastCall)
+        bool lastCall,
+        SteererFeedback *feedback)
     {
         LOG(DBG, "RemoteSteerer::nextStep(step = " << step << ")");
         pipe->sync();

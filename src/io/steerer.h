@@ -18,6 +18,14 @@ enum SteererEvent {
     STEERER_ALL_DONE
 };
 
+/**
+ * A steerer is an object which is allowed to modify a Simulator's
+ * (region of the) grid. It is the counterpart to a ParallelWriter
+ * (there is no counterpart to the SerialWriter though. Steerers
+ * are all expected to run in parallel). Possible uses include
+ * dynamically introducing new obstacles in a LBM solver or
+ * modifying the ambient temperature in a dendrite simulation.
+ */
 template<typename CELL_TYPE>
 class Steerer
 {
@@ -27,13 +35,40 @@ public:
     typedef Coord<Topology::DIM> CoordType;
 
     /**
-     * A steerer is an object which is allowed to modify a Simulator's
-     * (region of the) grid. It is the counterpart to a ParallelWriter
-     * (there is no counterpart to the SerialWriter though. Steerers
-     * are all expected to run in parallel). Possible uses include
-     * dynamically introducing new obstacles in a LBM solver or
-     * modifying the ambient temperature in a dendrite simulation.
+     * This class may be used by a Steerer to convey feedback to the
+     * Simulator.
      */
+    class SteererFeedback
+    {
+    public:
+        SteererFeedback() :
+            simulationEnd(false)
+        {}
+
+        void endSimulation()
+        {
+            simulationEnd = true;
+        }
+
+        /**
+         * Instructs the Simulator to update the Cell's static data
+         * block (e.g. global constants like dt or an ambient
+         * temperature). The update will be carried out at the next
+         * possible time step and will be synchronized among all parts
+         * of the grid (i.e. all nodes and all threads/GPUs therein).
+         */
+        void setStaticData()
+        {}
+
+        bool simulationEnded()
+        {
+            return simulationEnd;
+        }
+
+    private:
+        bool simulationEnd;
+    };
+
     Steerer(const unsigned period) :
         period(period)
     {}
@@ -56,11 +91,13 @@ public:
 
     /**
      * is a callback which gives the Steerer access to a Simulator's
-     * grid. The part which is accessible via \p grid is specified in
-     * \p validRegion. The current time step is given in \p step. This
-     * function may be called multiple times per step (e.g. seperately
-     * for inner ghost zones and inner set (which is equivalent to the
-     * interface of ParallelWriter).
+     * grid. Returns false if the Steerer wishes to end the simulation.
+     *
+     * The part of the simulation space which is accessible via \p
+     * grid is specified in \p validRegion. The current time step is
+     * given in \p step. This function may be called multiple times
+     * per step (e.g. seperately for inner ghost zones and inner set
+     * (which is equivalent to the interface of ParallelWriter).
      */
     virtual void nextStep(
         GridType *grid,
@@ -69,7 +106,8 @@ public:
         unsigned step,
         SteererEvent event,
         std::size_t rank,
-        bool lastCall) = 0;
+        bool lastCall,
+        SteererFeedback *feedback) = 0;
 
     const unsigned& getPeriod() const
     {
