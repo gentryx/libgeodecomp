@@ -24,6 +24,7 @@ class MPIParser
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
+    # @log.level = Logger::INFO
     # @log.level = Logger::DEBUG
     @member_cache = {}
 
@@ -175,6 +176,12 @@ class MPIParser
   end
 
   def map_template_parameters(members, template_params, values)
+    @log.info "map_template_parameters(
+  members: #{pp members},
+  template_params: #{pp template_params},
+  values: #{pp values}
+)"
+
     param_map = { }
     values.size.times do |i|
       param_map[template_params[i]] = values[i]
@@ -185,8 +192,10 @@ class MPIParser
       new_spec = spec.clone
 
       param_map.each do |param, val|
-        new_spec[:type       ] = new_spec[:type       ].gsub(/#{param}/, val)
-        new_spec[:cardinality] = new_spec[:cardinality].gsub(/#{param}/, val) if new_spec[:cardinality].class != Fixnum
+        pattern = "(^|\\W)(#{param})($|\\W)"
+        replacement = "\\1#{val}\\3"
+        new_spec[:type       ] = new_spec[:type       ].gsub(/#{pattern}/, replacement)
+        new_spec[:cardinality] = new_spec[:cardinality].gsub(/#{pattern}/, replacement) if new_spec[:cardinality].class != Fixnum
       end
 
       new_members[name] = new_spec
@@ -413,8 +422,6 @@ class MPIParser
 
   # gathers the cardinality for a member. It distinguishes simple
   # members (e.g. "int foo") from arrays (e.g. "int bar[Doedel]").
-  # Cannot handle arrays with non-symbolic width (e.g. "int bar[69]"),
-  # and I refuse an implementation until we have a use case for that.
   def resolve_cardinality(member)
     @log.debug "resolve_cardinality(#{member})"
 
@@ -460,7 +467,7 @@ class MPIParser
 
     codeline = nil
     doc.elements.each("doxygen/compounddef/programlisting/codeline") do |line|
-      @log.debug "  codeline #{line}"
+      # @log.debug "  codeline #{line}"
       if line.attributes["refid"] == member_id
         codeline = line
         break
