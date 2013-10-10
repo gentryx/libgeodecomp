@@ -24,13 +24,6 @@ public:
         endX(endX)
     {}
 
-    std::string toString() const
-    {
-        std::ostringstream buffer;
-        buffer << "(origin: " << origin << ", endX: " << endX << ")";
-        return buffer.str();
-    }
-
     Coord<DIM> end() const
     {
         Coord<DIM> ret = origin;
@@ -78,15 +71,15 @@ class StreakMPIDatatypeHelper
     Streak<3> c;
 };
 
-}
-
 template<typename _CharT, typename _Traits, int _Dim>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::Streak<_Dim>& streak)
+           const Streak<_Dim>& streak)
 {
-    __os << streak.toString();
+    __os << "(origin: " << streak.origin << ", endX: " << streak.endX << ")";
     return __os;
+}
+
 }
 
 #endif
