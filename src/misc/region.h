@@ -685,6 +685,12 @@ public:
      */
     inline StreakIterator operator[](size_t offset) const
     {
+        if (offset == 0) {
+            return beginStreak();
+        }
+        if (offset >= numStreaks()) {
+            return endStreak();
+        }
         return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
     }
 
@@ -1234,6 +1240,5 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 }
 
 }
-
 
 #endif

@@ -45,6 +45,10 @@ template<int DIM, typename REGION>
 class RegionStreakIterator : public std::iterator<std::forward_iterator_tag, const Streak<DIM> >
 {
 public:
+    template<typename REGION_TYPE>
+    friend Coord<DIM> operator-(const RegionStreakIterator<DIM, REGION_TYPE>& a,
+                                const RegionStreakIterator<DIM, REGION_TYPE>& b);
+
     template<int> friend class InitIterators;
     template<int> friend class Region;
     typedef std::pair<int, int> IntPair;
@@ -121,6 +125,33 @@ private:
     Streak<DIM> streak;
     const REGION *region;
 };
+
+template<typename REGION>
+inline Coord<1> operator-(
+    const RegionStreakIterator<1, REGION>& a,
+    const RegionStreakIterator<1, REGION>& b)
+{
+    return Coord<1>(a.iterators[0] - b.iterators[0]);
+}
+
+template<typename REGION>
+inline Coord<2> operator-(
+    const RegionStreakIterator<2, REGION>& a,
+    const RegionStreakIterator<2, REGION>& b)
+{
+    return Coord<2>(a.iterators[0] - b.iterators[0],
+                    a.iterators[1] - b.iterators[1]);
+}
+
+template<typename REGION>
+inline Coord<3> operator-(
+    const RegionStreakIterator<3, REGION>& a,
+    const RegionStreakIterator<3, REGION>& b)
+{
+    return Coord<3>(a.iterators[0] - b.iterators[0],
+                    a.iterators[1] - b.iterators[1],
+                    a.iterators[2] - b.iterators[2]);
+}
 
 }
 
