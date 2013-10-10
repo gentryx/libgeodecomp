@@ -537,7 +537,7 @@ double benchmarkCUDA(int dimX, int dimY, int dimZ, int repeats)
     cudaFree(devGridNew);
 
     double updates = 1.0 * dimGrid.x * dimBlock.x * dimGrid.y * dimBlock.y * dimZ * repeats;
-    double glups = 10e-9 * updates / seconds;
+    double glups = 1e-9 * updates / seconds;
     return glups;
 }
 
