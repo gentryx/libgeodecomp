@@ -292,7 +292,7 @@ public:
         runTimed();
     }
 
-    inline std::vector<Statistics> runTimed()
+    inline std::vector<Chronometer> runTimed()
     {
         init();
         std::size_t lastNanoStep = initializer->maxSteps() * NANO_STEPS;
@@ -351,7 +351,7 @@ private:
     std::vector<hpx::id_type> updateGroupsIds;
     boost::atomic<bool> initialized;
 
-    std::vector<Statistics> nanoStep(std::size_t remainingNanoSteps)
+    std::vector<Chronometer> nanoStep(std::size_t remainingNanoSteps)
     {
         return
             hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
@@ -387,6 +387,7 @@ private:
 
 }
 }
+
 HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
     LibGeoDecomp::HpxSimulator::StepPairType,
     LibGeoDecomp_BaseLcoStepPair
@@ -403,12 +404,12 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
 )
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::Statistics,
+    LibGeoDecomp::Chronometer,
     LibGeoDecomp_BaseLcovector_Statistics
 )
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    std::vector<LibGeoDecomp::Statistics>,
+    std::vector<LibGeoDecomp::Chronometer>,
     LibGeoDecomp_BaseLcovector_StatisticsVector
 )
 

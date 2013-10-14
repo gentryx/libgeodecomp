@@ -17,13 +17,19 @@ namespace ChronometerHelpers {
 template<int ID>
 class EventUtil;
 
-class BasicTimer
+class BasicTimerImplementation
 {
 public:
     template<typename CHRONOMETER>
-    BasicTimer(CHRONOMETER *chrono) :
+    BasicTimerImplementation(CHRONOMETER *chrono) :
         totalTimes(chrono->rawTotalTimes()),
-        tStart(ScopedTimer::time())
+        t(ScopedTimer::time())
+    {}
+
+    template<typename CHRONOMETER>
+    BasicTimerImplementation(CHRONOMETER *chrono, double t) :
+        totalTimes(chrono->rawTotalTimes()),
+        t(t)
     {}
 
 protected:
@@ -31,11 +37,10 @@ protected:
 
     double elapsed() const
     {
-        return ScopedTimer::time() - tStart;
+        return ScopedTimer::time() - t;
     }
 
-private:
-    double tStart;
+    double t;
 };
 
 template<int ID>
@@ -73,20 +78,43 @@ public:
                                                                     \
     }                                                               \
                                                                     \
-    class CLASS_NAME : protected PARENT                             \
+    class CLASS_NAME ## Implementation :                            \
+        protected PARENT ## Implementation                          \
     {                                                               \
     public:                                                         \
         static const size_t ID = EVENT_ID;                          \
                                                                     \
         template<typename CHRONOMETER>                              \
+        CLASS_NAME ## Implementation(CHRONOMETER *chrono) :         \
+            PARENT ## Implementation(chrono)                        \
+        {}                                                          \
+                                                                    \
+        template<typename CHRONOMETER>                              \
+        CLASS_NAME ## Implementation(CHRONOMETER *chrono, double time) : \
+            PARENT ## Implementation(chrono, time)                  \
+        {}                                                          \
+                                                                    \
+        ~CLASS_NAME ## Implementation()                             \
+        {                                                           \
+            totalTimes[ID] += t;                                    \
+        }                                                           \
+    };                                                              \
+                                                                    \
+    class CLASS_NAME : protected CLASS_NAME ## Implementation       \
+    {                                                               \
+    public:                                                         \
+        typedef CLASS_NAME ## Implementation Implementation;        \
+        static const size_t ID = EVENT_ID;                          \
+                                                                    \
+        template<typename CHRONOMETER>                              \
             CLASS_NAME(CHRONOMETER *chrono) :                       \
-            PARENT(chrono)                                          \
+            CLASS_NAME ## Implementation(chrono)                    \
         {}                                                          \
                                                                     \
         ~CLASS_NAME()                                               \
-            {                                                       \
-                totalTimes[ID] += elapsed();                        \
-            }                                                       \
+        {                                                           \
+            t = elapsed();                                          \
+        }                                                           \
     };
 }
 
@@ -163,7 +191,6 @@ class Chronometer
 {
 public:
     friend class ChronometerTest;
-    friend class Typemaps;
 
     // measure one time interval per class of events
     static const size_t NUM_INTERVALS = ChronometerHelpers::EventUtil<100>::NUM_EVENTS;
@@ -172,6 +199,12 @@ public:
         totalTimes(NUM_INTERVALS, 0)
     {
         reset();
+    }
+
+    template <typename ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & totalTimes;
     }
 
     inline const double& operator[](int intervalID) const
@@ -212,6 +245,11 @@ public:
         std::fill(totalTimes.begin(), totalTimes.end(), 0);
     }
 
+    void cycle()
+    {
+
+    }
+
     double interval(int i) const
     {
         return totalTimes[i];
@@ -246,6 +284,18 @@ public:
     double *rawTotalTimes()
     {
         return totalTimes.begin();
+    }
+
+    template<typename EVENT>
+    void addTime(double elapsedTime)
+    {
+        typename EVENT::Implementation(this, elapsedTime);
+    }
+
+    template<typename EVENT>
+    void tock(double startTime)
+    {
+        addTime<EVENT>(ScopedTimer::time() - startTime);
     }
 
     std::string report()

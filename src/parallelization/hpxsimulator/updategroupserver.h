@@ -197,7 +197,7 @@ public:
             patchAcceptersGhost.push_back(adapterGhost);
             patchAcceptersInner.push_back(adapterInnerSet);
         }
-        
+
         typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
         for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it) {
         }
@@ -279,25 +279,21 @@ public:
         return currentStep().first;
     }
 
-    Statistics nanoStep(std::size_t remainingNanoSteps)
+    Chronometer nanoStep(std::size_t remainingNanoSteps)
     {
-        hpx::util::high_resolution_timer timer;
-        stopped = false;
-        while (remainingNanoSteps > 0 && !stopped) {
-            std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
-            stepper->update(hop);
-            handleEvents();
-            remainingNanoSteps -= hop;
-        }
-        Statistics statistics =
+        Chronometer chrono;
         {
-            timer.elapsed(),
-            stepper->computeTimeInner,
-            stepper->computeTimeGhost,
-            stepper->patchAcceptersTime,
-            stepper->patchProvidersTime
-        };
-        return statistics;
+            TimeTotal t(&chrono);
+            stopped = false;
+            while (remainingNanoSteps > 0 && !stopped) {
+                std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
+                stepper->update(hop);
+                handleEvents();
+                remainingNanoSteps -= hop;
+            }
+        }
+        chrono += stepper->statistics();
+        return chrono;
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, nanoStep, NanoStepAction);
 

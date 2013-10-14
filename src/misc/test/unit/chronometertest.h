@@ -124,6 +124,24 @@ public:
             TS_ASSERT_LESS_THAN_EQUALS(0, StringOps::atof(tokens[1]));
         }
     }
+
+    void testAddTime()
+    {
+        TS_ASSERT_EQUALS(0, c->interval<TimeCompute>());
+        c->addTime<TimeCompute>(5);
+        TS_ASSERT_EQUALS(5, c->interval<TimeCompute>());
+        c->addTime<TimeCompute>(4);
+        TS_ASSERT_EQUALS(9, c->interval<TimeCompute>());
+    }
+
+    void testTock()
+    {
+        double t = ScopedTimer::time();
+        ScopedTimer::busyWait(15000);
+        c->tock<TimeComputeInner>(t);
+        TS_ASSERT_LESS_THAN_EQUALS(0.015, c->interval<TimeComputeInner>());
+    }
+
 private:
     Chronometer *c;
 };

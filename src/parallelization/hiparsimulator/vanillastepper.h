@@ -216,6 +216,7 @@ private:
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
                 partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
+
             {
                 TimeComputeGhost timer(&chronometer);
 
@@ -238,21 +239,24 @@ private:
 
                 ++curGlobalNanoStep;
             }
+
             notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
         }
 
-        TimeComputeGhost t(&chronometer);
-        curNanoStep = oldNanoStep;
-        curStep = oldStep;
+        {
+            TimeComputeGhost t(&chronometer);
+            curNanoStep = oldNanoStep;
+            curStep = oldStep;
 
-        saveRim(curGlobalNanoStep);
-        if (ghostZoneWidth() % 2) {
-            std::swap(oldGrid, newGrid);
+            saveRim(curGlobalNanoStep);
+            if (ghostZoneWidth() % 2) {
+                std::swap(oldGrid, newGrid);
+            }
+
+            // 3: restore grid for kernel update
+            restoreRim(true);
+            restoreKernel();
         }
-
-        // 3: restore grid for kernel update
-        restoreRim(true);
-        restoreKernel();
     }
 private:
 

@@ -20,12 +20,12 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE(
 )
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE(
-    LibGeoDecomp::Statistics,
+    LibGeoDecomp::Chronometer,
     LibGeoDecomp_BaseLcovector_Statistics
 )
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE(
-    std::vector<LibGeoDecomp::Statistics>,
+    std::vector<LibGeoDecomp::Chronometer>,
     LibGeoDecomp_BaseLcovector_StatisticsVector
 )
 

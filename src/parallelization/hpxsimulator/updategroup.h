@@ -5,7 +5,6 @@
 #define LIBGEODECOMP_PARALLELIZATION_HPXUPDATEGROUP_H
 
 #include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/statistics.h>
 #include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroupserver.h>
