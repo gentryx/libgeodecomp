@@ -4,20 +4,22 @@
 # include the optional 'long long' types.
 class Datatype < Hash
   def initialize
-    ["char",
-     "signed char",
-     "unsigned char",
-     "short",
-     "unsigned short",
-     "int",
-     "unsigned",
-     "long",
-     "unsigned long",
-     "float",
-     "double",
-     "long double",
-     "long long",
-     "unsigned long long",
+    [
+      "char",
+      "signed char",
+      "unsigned char",
+      "short",
+      "unsigned short",
+      "int",
+      "unsigned",
+      "long",
+      # excluding "unsigned long" to avoid clashes with "size_t"
+      # "unsigned long",
+      "float",
+      "double",
+      "long double",
+      "long long",
+      "unsigned long long",
     ].each do |t|
       self[t] = Datatype.cpp_to_mpi(t)
     end
@@ -26,6 +28,7 @@ class Datatype < Hash
     self["wchar_t"] = "MPI_WCHAR"
     self["std::complex<float>"] = "MPI_COMPLEX"
     self["std::complex<double>"] = "MPI_DOUBLE_COMPLEX"
+    self["size_t"] = "MPI_UNSIGNED_LONG"
     # self["std::complex<long double>"] = "MPI_LONG_DOUBLE_COMPLEX"
   end
 

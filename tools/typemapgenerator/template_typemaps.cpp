@@ -1,5 +1,6 @@
 #include "typemaps.h"
 #include <algorithm>
+#include <stdexcept>
 
 CLASS_VARS
 
@@ -28,6 +29,10 @@ bool addressLower(MemberSpec a, MemberSpec b)
 METHOD_DEFINITIONS
 void Typemaps::initializeMaps()
 {
+    if (sizeof(size_t) != sizeof(unsigned long)) {
+        throw std::logic_error("MPI_UNSIGNED_LONG not suited for communication of size_t, needs to be redefined");
+    }
+
     ASSIGNMENTS
 }
 

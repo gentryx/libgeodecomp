@@ -251,9 +251,9 @@ class MPIParser
 
       classes.delete(klass)
     rescue Exception => e
-      @log.debug "failed with"
-      @log.debug pp(e)
-      @log.debug e.backtrace
+      @log.info "failed with"
+      @log.info pp(e)
+      @log.info e.backtrace
     end
   end
 
@@ -268,7 +268,6 @@ class MPIParser
     return ret
   end
 
-  # fixme: refactor this shitty interface
   def resolve_class_simple(klass, members, parents, classes,
                            resolved_classes, resolved_parents,
                            topological_class_sortation)
