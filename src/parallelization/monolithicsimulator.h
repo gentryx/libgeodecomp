@@ -17,6 +17,7 @@ class MonolithicSimulator : public Simulator<CELL_TYPE>
 {
 public:
     using typename Simulator<CELL_TYPE>::Topology;
+    using Simulator<CELL_TYPE>::chronometer;
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
     inline MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :
@@ -36,6 +37,11 @@ public:
     virtual void addWriter(Writer<CELL_TYPE> *writer)
     {
         writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
+    }
+
+    std::vector<Chronometer> gatherStatistics()
+    {
+        return std::vector<Chronometer>(1, chronometer);
     }
 
 protected:

@@ -29,6 +29,11 @@ public:
         return 0;
     }
 
+    std::vector<Chronometer> gatherStatistics()
+    {
+        return std::vector<Chronometer>(1);
+    }
+
     static std::string events;
 };
 

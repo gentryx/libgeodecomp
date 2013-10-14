@@ -289,14 +289,7 @@ public:
 
     inline void run()
     {
-        runTimed();
-    }
-
-    inline std::vector<Chronometer> runTimed()
-    {
-        init();
-        std::size_t lastNanoStep = initializer->maxSteps() * NANO_STEPS;
-        return nanoStep(lastNanoStep);
+        statistics = runTimed();
     }
 
     void stop()
@@ -339,6 +332,11 @@ public:
         return updateGroupsIds.size();
     }
 
+    std::vector<Chronometer> gatherStatistics()
+    {
+        return statistics;
+    }
+
 private:
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::steerers;
@@ -350,6 +348,7 @@ private:
     HiParSimulator::PartitionManager<Topology> partitionManager;
     std::vector<hpx::id_type> updateGroupsIds;
     boost::atomic<bool> initialized;
+    std::vector<Chronometer> statistics;
 
     std::vector<Chronometer> nanoStep(std::size_t remainingNanoSteps)
     {
@@ -382,6 +381,13 @@ private:
         ret[size-1] = items - lastPos;
 
         return ret;
+    }
+
+    inline std::vector<Chronometer> runTimed()
+    {
+        init();
+        std::size_t lastNanoStep = initializer->maxSteps() * NANO_STEPS;
+        return nanoStep(lastNanoStep);
     }
 };
 

@@ -99,6 +99,13 @@ public:
         steerers << boost::shared_ptr<Steerer<CELL_TYPE> >(steerer);
     }
 
+    /**
+     * Returns histograms which detail how much execution time was
+     * spent on which part of the algorithm. Will return one element
+     * per rank.
+     */
+    virtual std::vector<Chronometer> gatherStatistics() = 0;
+
 protected:
     Chronometer chronometer;
     unsigned stepNum;

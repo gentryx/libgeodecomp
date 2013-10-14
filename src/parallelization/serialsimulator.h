@@ -32,6 +32,7 @@ public:
     static const int DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL_TYPE>::NANO_STEPS;
+    using MonolithicSimulator<CELL_TYPE>::chronometer;
     using MonolithicSimulator<CELL_TYPE>::initializer;
     using MonolithicSimulator<CELL_TYPE>::steerers;
     using MonolithicSimulator<CELL_TYPE>::stepNum;
@@ -78,6 +79,8 @@ public:
 
     virtual void step(SteererFeedback *feedback)
     {
+        TimeTotal t(&chronometer);
+
         handleInput(STEERER_NEXT_STEP, feedback);
 
         for (unsigned i = 0; i < NANO_STEPS; ++i) {
@@ -128,6 +131,8 @@ protected:
 
     void nanoStep(const unsigned& nanoStep)
     {
+        TimeCompute t(&chronometer);
+
         UpdateFunctor<CELL_TYPE>()(simArea, Coord<DIM>(), Coord<DIM>(), *curGrid, newGrid, nanoStep);
         std::swap(curGrid, newGrid);
     }
@@ -137,6 +142,8 @@ protected:
      */
     void handleOutput(WriterEvent event)
     {
+        TimeOutput t(&chronometer);
+
         for (unsigned i = 0; i < writers.size(); i++) {
             if ((event != WRITER_STEP_FINISHED) ||
                 ((getStep() % writers[i]->getPeriod()) == 0)) {
@@ -153,6 +160,8 @@ protected:
      */
     void handleInput(SteererEvent event, SteererFeedback *feedback)
     {
+        TimeInput t(&chronometer);
+
         for (unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
                 steerers[i]->nextStep(curGrid, simArea, gridDim, getStep(), event, 0, true, feedback);

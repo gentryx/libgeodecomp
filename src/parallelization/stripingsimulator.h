@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/updatefunctor.h>
@@ -35,6 +34,7 @@ public:
     static const bool WRAP_EDGES = Topology::template WrapsAxis<DIM - 1>::VALUE;
 
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
+    using DistributedSimulator<CELL_TYPE>::chronometer;
     using DistributedSimulator<CELL_TYPE>::initializer;
     using DistributedSimulator<CELL_TYPE>::getStep;
     using DistributedSimulator<CELL_TYPE>::steerers;
@@ -132,6 +132,11 @@ public:
         return loadBalancingPeriod;
     }
 
+    std::vector<Chronometer> gatherStatistics()
+    {
+        return mpilayer.gather(chronometer, 0);
+    }
+
 private:
     MPILayer mpilayer;
     boost::shared_ptr<LoadBalancer> balancer;
@@ -161,7 +166,6 @@ private:
     WeightVec partitions;
     unsigned loadBalancingPeriod;
     MPI_Datatype cellMPIDatatype;
-    Chronometer chrono;
 
     void swapGrids()
     {
@@ -191,9 +195,11 @@ private:
             return;
         }
 
-        double ratio = chrono.ratio<TimeCompute, TimeTotal>();
-        chrono.reset();
-        LoadVec loads = mpilayer.gather(ratio, 0);
+        // weird: GCC 4.7.3 refuses to let me use chronometer.ratio<Foo, Bar> directly.
+        Chronometer& c = chronometer;
+        double myRatio = c.ratio<TimeCompute, TimeTotal>();
+        chronometer.reset();
+        LoadVec loads = mpilayer.gather(myRatio, 0);
         WeightVec newPartitionsSendBuffer;
 
         if (mpilayer.rank() == 0) {
@@ -217,7 +223,7 @@ private:
 
     void nanoStep(const unsigned& nanoStep)
     {
-        TimeTotal t(&chrono);
+        TimeTotal t(&chronometer);
 
         // we wait for ghostregions "just in time" to overlap
         // communication with I/O (which occurs outside of
@@ -235,7 +241,7 @@ private:
 
     void waitForGhostRegions()
     {
-        TimeCommunication t(&chrono);
+        TimeCommunication t(&chronometer);
 
         mpilayer.wait(GHOSTREGION_ALPHA);
         mpilayer.wait(GHOSTREGION_BETA);
@@ -324,7 +330,7 @@ private:
      */
     void updateInnerGhostRegion(const unsigned& nanoStep)
     {
-        TimeComputeGhost t(&chrono);
+        TimeComputeGhost t(&chronometer);
 
         updateRegion(innerUpperGhostRegion, nanoStep);
         updateRegion(innerLowerGhostRegion, nanoStep);
@@ -332,7 +338,7 @@ private:
 
     void recvOuterGhostRegion(GridType *stripe)
     {
-        TimeCommunication t(&chrono);
+        TimeCommunication t(&chronometer);
 
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
@@ -357,7 +363,7 @@ private:
 
     void sendInnerGhostRegion(GridType *stripe)
     {
-        TimeCommunication t(&chrono);
+        TimeCommunication t(&chronometer);
 
         int upperNeighborRank = upperNeighbor();
         int lowerNeighborRank = lowerNeighbor();
@@ -382,7 +388,7 @@ private:
 
     void updateInside(const unsigned& nanoStep)
     {
-        TimeComputeInner t(&chrono);
+        TimeComputeInner t(&chronometer);
 
         updateRegion(innerRegion, nanoStep);
     }
@@ -410,7 +416,7 @@ private:
      */
     void initSimulation()
     {
-        chrono.reset();
+        chronometer.reset();
 
         CoordBox<DIM> box = curStripe->boundingBox();
         curStripe->resize(box);

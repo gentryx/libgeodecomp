@@ -30,6 +30,11 @@ public:
 
     virtual void run()
     {}
+
+    std::vector<Chronometer> gatherStatistics()
+    {
+        return std::vector<Chronometer>(1);
+    }
 };
 
 class ParallelMemoryWriterTest :  public CxxTest::TestSuite

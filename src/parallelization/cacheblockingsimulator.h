@@ -28,6 +28,7 @@ public:
     static const int DIM = Topology::DIMENSIONS;
 
     using MonolithicSimulator<CELL>::NANO_STEPS;
+    using MonolithicSimulator<CELL>::chronometer;
 
     CacheBlockingSimulator(
         Initializer<CELL> *initializer,
@@ -178,6 +179,8 @@ private:
 
     void hop()
     {
+        TimeTotal t(*&chronometer);
+
         CoordBox<DIM - 1> frameBox = frames.boundingBox();
         // for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin();
         //      waveIter != frameBox.end();
@@ -300,7 +303,6 @@ private:
             buffers[omp_get_thread_num()].fill(
                 CoordBox<DIM>(fillOrigin, fillDim),
                 buffers[omp_get_thread_num()].getEdgeCell());
-            
         } else {
             Coord<DIM> sourceOffset;
             Coord<DIM> targetOffset;

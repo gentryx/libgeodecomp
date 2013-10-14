@@ -128,10 +128,10 @@ public:
         writerAdaptersInner.push_back(adapterInnerSet);
     }
 
-    inline std::vector<Chronometer> gatherStatistics() const
+    std::vector<Chronometer> gatherStatistics()
     {
-        Chronometer stats = chronometer + updateGroup.statistics();
-        return mpiLayer.gather(chronometer, 0);
+        Chronometer stats = chronometer + updateGroup->statistics();
+        return mpiLayer.gather(stats, 0);
     }
 
 private:

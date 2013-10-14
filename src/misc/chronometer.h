@@ -125,6 +125,8 @@ DEFINE_EVENT(TimeComputeGhost,   TimeCompute,                      "compute_time
 DEFINE_EVENT(TimePatchAccepters, ChronometerHelpers::BasicTimer,   "patch_accepters_time", 4)
 DEFINE_EVENT(TimePatchProviders, ChronometerHelpers::BasicTimer,   "patch_providers_time", 5)
 DEFINE_EVENT(TimeCommunication,  ChronometerHelpers::BasicTimer,   "communication_time",   6)
+DEFINE_EVENT(TimeInput,          ChronometerHelpers::BasicTimer,   "input_time",           7)
+DEFINE_EVENT(TimeOutput,         ChronometerHelpers::BasicTimer,   "output_time",          8)
 
 namespace ChronometerHelpers {
 
@@ -191,6 +193,7 @@ class Chronometer
 {
 public:
     friend class ChronometerTest;
+    friend class Typemaps;
 
     // measure one time interval per class of events
     static const size_t NUM_INTERVALS = ChronometerHelpers::EventUtil<100>::NUM_EVENTS;
