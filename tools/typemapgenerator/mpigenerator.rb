@@ -34,7 +34,7 @@ class MPIGenerator
     ret.gsub!(/NUM_MEMBERS/, num_members.to_s)
 
     member_specs1 = members.map do |name, properties|
-      "        MemberSpec(getAddress(&obj->#{name}), #{properties[:type]}, #{properties[:cardinality]})"
+      "        MemberSpec(getAddress(&obj->#{name}), lookup<#{klass}>(), #{properties[:cardinality]})"
     end
     member_specs2 = []
     if parents
@@ -66,7 +66,10 @@ class MPIGenerator
     end
     ret.sub!(/.*MAPGEN_DECLARATIONS/, mapgens.join("\n"))
 
-    lookup_types = (Datatype.new.keys.sort + classes).uniq
+    lookup_types = Datatype.new.find_all { |k, v| v != :ignore }
+    lookup_types = lookup_types.map {|k, v| k }
+    lookup_types = (lookup_types.sort + classes).uniq
+
     lookups = lookup_types.map do |klass|
       "    static inline MPI_Datatype lookup(#{klass}*) { return #{datatype_map[klass]}; }"
     end

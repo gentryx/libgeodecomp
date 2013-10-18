@@ -13,8 +13,7 @@ class Datatype < Hash
       "int",
       "unsigned",
       "long",
-      # excluding "unsigned long" to avoid clashes with "size_t"
-      # "unsigned long",
+      "unsigned long",
       "float",
       "double",
       "long double",
@@ -28,7 +27,7 @@ class Datatype < Hash
     self["wchar_t"] = "MPI_WCHAR"
     self["std::complex<float>"] = "MPI_COMPLEX"
     self["std::complex<double>"] = "MPI_DOUBLE_COMPLEX"
-    self["size_t"] = "MPI_UNSIGNED_LONG"
+    self["size_t"] = :ignore
     # self["std::complex<long double>"] = "MPI_LONG_DOUBLE_COMPLEX"
   end
 
