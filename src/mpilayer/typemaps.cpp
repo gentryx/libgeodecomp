@@ -63,7 +63,7 @@ Typemaps::generateMapLibGeoDecomp_Coord_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->c), MPI_INT, 1)
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::Coord<1 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -100,7 +100,7 @@ Typemaps::generateMapLibGeoDecomp_Coord_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->c), MPI_INT, 2)
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::Coord<2 >>(), 2)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -137,7 +137,7 @@ Typemaps::generateMapLibGeoDecomp_Coord_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->c), MPI_INT, 3)
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::Coord<3 >>(), 3)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -174,8 +174,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORD_1_, 1),
-        MemberSpec(getAddress(&obj->origin), MPI_LIBGEODECOMP_COORD_1_, 1)
+        MemberSpec(getAddress(&obj->dimensions), lookup<LibGeoDecomp::CoordBox<1 >>(), 1),
+        MemberSpec(getAddress(&obj->origin), lookup<LibGeoDecomp::CoordBox<1 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -212,8 +212,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORD_2_, 1),
-        MemberSpec(getAddress(&obj->origin), MPI_LIBGEODECOMP_COORD_2_, 1)
+        MemberSpec(getAddress(&obj->dimensions), lookup<LibGeoDecomp::CoordBox<2 >>(), 1),
+        MemberSpec(getAddress(&obj->origin), lookup<LibGeoDecomp::CoordBox<2 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -250,8 +250,8 @@ Typemaps::generateMapLibGeoDecomp_CoordBox_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORD_3_, 1),
-        MemberSpec(getAddress(&obj->origin), MPI_LIBGEODECOMP_COORD_3_, 1)
+        MemberSpec(getAddress(&obj->dimensions), lookup<LibGeoDecomp::CoordBox<3 >>(), 1),
+        MemberSpec(getAddress(&obj->origin), lookup<LibGeoDecomp::CoordBox<3 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -288,9 +288,9 @@ Typemaps::generateMapLibGeoDecomp_CoordBoxMPIDatatypeHelper() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->a), MPI_LIBGEODECOMP_COORDBOX_1_, 1),
-        MemberSpec(getAddress(&obj->b), MPI_LIBGEODECOMP_COORDBOX_2_, 1),
-        MemberSpec(getAddress(&obj->c), MPI_LIBGEODECOMP_COORDBOX_3_, 1)
+        MemberSpec(getAddress(&obj->a), lookup<LibGeoDecomp::CoordBoxMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->b), lookup<LibGeoDecomp::CoordBoxMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::CoordBoxMPIDatatypeHelper>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -327,8 +327,8 @@ Typemaps::generateMapLibGeoDecomp_FixedArray_double_Chronometer_NUM_INTERVALS_()
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->elements), MPI_UNSIGNED_LONG, 1),
-        MemberSpec(getAddress(&obj->store), MPI_DOUBLE, Chronometer::NUM_INTERVALS)
+        MemberSpec(getAddress(&obj->elements), lookup<LibGeoDecomp::FixedArray<double,Chronometer::NUM_INTERVALS >>(), 1),
+        MemberSpec(getAddress(&obj->store), lookup<LibGeoDecomp::FixedArray<double,Chronometer::NUM_INTERVALS >>(), Chronometer::NUM_INTERVALS)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -365,7 +365,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->c), MPI_DOUBLE, 1)
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::FloatCoordBase<1 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -402,7 +402,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->c), MPI_DOUBLE, 2)
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::FloatCoordBase<2 >>(), 2)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -439,7 +439,7 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBase_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->c), MPI_DOUBLE, 3)
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::FloatCoordBase<3 >>(), 3)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -476,9 +476,9 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordBaseMPIDatatypeHelper() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->a), MPI_LIBGEODECOMP_FLOATCOORDBASE_1_, 1),
-        MemberSpec(getAddress(&obj->b), MPI_LIBGEODECOMP_FLOATCOORDBASE_2_, 1),
-        MemberSpec(getAddress(&obj->c), MPI_LIBGEODECOMP_FLOATCOORDBASE_3_, 1)
+        MemberSpec(getAddress(&obj->a), lookup<LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->b), lookup<LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::FloatCoordBaseMPIDatatypeHelper>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -515,7 +515,7 @@ Typemaps::generateMapLibGeoDecomp_MySimpleCell() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->temp), MPI_DOUBLE, 1)
+        MemberSpec(getAddress(&obj->temp), lookup<LibGeoDecomp::MySimpleCell>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -552,8 +552,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->endX), MPI_INT, 1),
-        MemberSpec(getAddress(&obj->origin), MPI_LIBGEODECOMP_COORD_1_, 1)
+        MemberSpec(getAddress(&obj->endX), lookup<LibGeoDecomp::Streak<1 >>(), 1),
+        MemberSpec(getAddress(&obj->origin), lookup<LibGeoDecomp::Streak<1 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -590,8 +590,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->endX), MPI_INT, 1),
-        MemberSpec(getAddress(&obj->origin), MPI_LIBGEODECOMP_COORD_2_, 1)
+        MemberSpec(getAddress(&obj->endX), lookup<LibGeoDecomp::Streak<2 >>(), 1),
+        MemberSpec(getAddress(&obj->origin), lookup<LibGeoDecomp::Streak<2 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -628,8 +628,8 @@ Typemaps::generateMapLibGeoDecomp_Streak_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->endX), MPI_INT, 1),
-        MemberSpec(getAddress(&obj->origin), MPI_LIBGEODECOMP_COORD_3_, 1)
+        MemberSpec(getAddress(&obj->endX), lookup<LibGeoDecomp::Streak<3 >>(), 1),
+        MemberSpec(getAddress(&obj->origin), lookup<LibGeoDecomp::Streak<3 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -666,9 +666,9 @@ Typemaps::generateMapLibGeoDecomp_StreakMPIDatatypeHelper() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->a), MPI_LIBGEODECOMP_STREAK_1_, 1),
-        MemberSpec(getAddress(&obj->b), MPI_LIBGEODECOMP_STREAK_2_, 1),
-        MemberSpec(getAddress(&obj->c), MPI_LIBGEODECOMP_STREAK_3_, 1)
+        MemberSpec(getAddress(&obj->a), lookup<LibGeoDecomp::StreakMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->b), lookup<LibGeoDecomp::StreakMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::StreakMPIDatatypeHelper>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -705,12 +705,12 @@ Typemaps::generateMapLibGeoDecomp_TestCell_1_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->cycleCounter), MPI_UNSIGNED, 1),
-        MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORDBOX_1_, 1),
-        MemberSpec(getAddress(&obj->isEdgeCell), MPI_CHAR, 1),
-        MemberSpec(getAddress(&obj->isValid), MPI_CHAR, 1),
-        MemberSpec(getAddress(&obj->pos), MPI_LIBGEODECOMP_COORD_1_, 1),
-        MemberSpec(getAddress(&obj->testValue), MPI_DOUBLE, 1)
+        MemberSpec(getAddress(&obj->cycleCounter), lookup<LibGeoDecomp::TestCell<1 >>(), 1),
+        MemberSpec(getAddress(&obj->dimensions), lookup<LibGeoDecomp::TestCell<1 >>(), 1),
+        MemberSpec(getAddress(&obj->isEdgeCell), lookup<LibGeoDecomp::TestCell<1 >>(), 1),
+        MemberSpec(getAddress(&obj->isValid), lookup<LibGeoDecomp::TestCell<1 >>(), 1),
+        MemberSpec(getAddress(&obj->pos), lookup<LibGeoDecomp::TestCell<1 >>(), 1),
+        MemberSpec(getAddress(&obj->testValue), lookup<LibGeoDecomp::TestCell<1 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -747,12 +747,12 @@ Typemaps::generateMapLibGeoDecomp_TestCell_2_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->cycleCounter), MPI_UNSIGNED, 1),
-        MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORDBOX_2_, 1),
-        MemberSpec(getAddress(&obj->isEdgeCell), MPI_CHAR, 1),
-        MemberSpec(getAddress(&obj->isValid), MPI_CHAR, 1),
-        MemberSpec(getAddress(&obj->pos), MPI_LIBGEODECOMP_COORD_2_, 1),
-        MemberSpec(getAddress(&obj->testValue), MPI_DOUBLE, 1)
+        MemberSpec(getAddress(&obj->cycleCounter), lookup<LibGeoDecomp::TestCell<2 >>(), 1),
+        MemberSpec(getAddress(&obj->dimensions), lookup<LibGeoDecomp::TestCell<2 >>(), 1),
+        MemberSpec(getAddress(&obj->isEdgeCell), lookup<LibGeoDecomp::TestCell<2 >>(), 1),
+        MemberSpec(getAddress(&obj->isValid), lookup<LibGeoDecomp::TestCell<2 >>(), 1),
+        MemberSpec(getAddress(&obj->pos), lookup<LibGeoDecomp::TestCell<2 >>(), 1),
+        MemberSpec(getAddress(&obj->testValue), lookup<LibGeoDecomp::TestCell<2 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -789,12 +789,12 @@ Typemaps::generateMapLibGeoDecomp_TestCell_3_() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->cycleCounter), MPI_UNSIGNED, 1),
-        MemberSpec(getAddress(&obj->dimensions), MPI_LIBGEODECOMP_COORDBOX_3_, 1),
-        MemberSpec(getAddress(&obj->isEdgeCell), MPI_CHAR, 1),
-        MemberSpec(getAddress(&obj->isValid), MPI_CHAR, 1),
-        MemberSpec(getAddress(&obj->pos), MPI_LIBGEODECOMP_COORD_3_, 1),
-        MemberSpec(getAddress(&obj->testValue), MPI_DOUBLE, 1)
+        MemberSpec(getAddress(&obj->cycleCounter), lookup<LibGeoDecomp::TestCell<3 >>(), 1),
+        MemberSpec(getAddress(&obj->dimensions), lookup<LibGeoDecomp::TestCell<3 >>(), 1),
+        MemberSpec(getAddress(&obj->isEdgeCell), lookup<LibGeoDecomp::TestCell<3 >>(), 1),
+        MemberSpec(getAddress(&obj->isValid), lookup<LibGeoDecomp::TestCell<3 >>(), 1),
+        MemberSpec(getAddress(&obj->pos), lookup<LibGeoDecomp::TestCell<3 >>(), 1),
+        MemberSpec(getAddress(&obj->testValue), lookup<LibGeoDecomp::TestCell<3 >>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -831,9 +831,9 @@ Typemaps::generateMapLibGeoDecomp_TestCellMPIDatatypeHelper() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->a), MPI_LIBGEODECOMP_TESTCELL_1_, 1),
-        MemberSpec(getAddress(&obj->b), MPI_LIBGEODECOMP_TESTCELL_2_, 1),
-        MemberSpec(getAddress(&obj->c), MPI_LIBGEODECOMP_TESTCELL_3_, 1)
+        MemberSpec(getAddress(&obj->a), lookup<LibGeoDecomp::TestCellMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->b), lookup<LibGeoDecomp::TestCellMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::TestCellMPIDatatypeHelper>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -870,7 +870,7 @@ Typemaps::generateMapLibGeoDecomp_Chronometer() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->totalTimes), MPI_LIBGEODECOMP_FIXEDARRAY_DOUBLE_CHRONOMETER_NUM_INTERVALS_, 1)
+        MemberSpec(getAddress(&obj->totalTimes), lookup<LibGeoDecomp::Chronometer>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
@@ -1018,9 +1018,9 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->a), MPI_LIBGEODECOMP_FLOATCOORD_1_, 1),
-        MemberSpec(getAddress(&obj->b), MPI_LIBGEODECOMP_FLOATCOORD_2_, 1),
-        MemberSpec(getAddress(&obj->c), MPI_LIBGEODECOMP_FLOATCOORD_3_, 1)
+        MemberSpec(getAddress(&obj->a), lookup<LibGeoDecomp::FloatCoordMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->b), lookup<LibGeoDecomp::FloatCoordMPIDatatypeHelper>(), 1),
+        MemberSpec(getAddress(&obj->c), lookup<LibGeoDecomp::FloatCoordMPIDatatypeHelper>(), 1)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 

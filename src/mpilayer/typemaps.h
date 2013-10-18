@@ -117,11 +117,11 @@ private:
     static inline MPI_Datatype lookup(long long*) { return MPI_LONG_LONG; }
     static inline MPI_Datatype lookup(short*) { return MPI_SHORT; }
     static inline MPI_Datatype lookup(signed char*) { return MPI_SIGNED_CHAR; }
-    static inline MPI_Datatype lookup(size_t*) { return MPI_UNSIGNED_LONG; }
     static inline MPI_Datatype lookup(std::complex<double>*) { return MPI_DOUBLE_COMPLEX; }
     static inline MPI_Datatype lookup(std::complex<float>*) { return MPI_COMPLEX; }
     static inline MPI_Datatype lookup(unsigned*) { return MPI_UNSIGNED; }
     static inline MPI_Datatype lookup(unsigned char*) { return MPI_UNSIGNED_CHAR; }
+    static inline MPI_Datatype lookup(unsigned long*) { return MPI_UNSIGNED_LONG; }
     static inline MPI_Datatype lookup(unsigned long long*) { return MPI_UNSIGNED_LONG_LONG; }
     static inline MPI_Datatype lookup(unsigned short*) { return MPI_UNSIGNED_SHORT; }
     static inline MPI_Datatype lookup(wchar_t*) { return MPI_WCHAR; }
