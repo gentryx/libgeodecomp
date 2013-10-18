@@ -34,7 +34,7 @@ class MPIGenerator
     ret.gsub!(/NUM_MEMBERS/, num_members.to_s)
 
     member_specs1 = members.map do |name, properties|
-      "        MemberSpec(getAddress(&obj->#{name}), lookup<#{klass}>(), #{properties[:cardinality]})"
+      "        MemberSpec(getAddress(&obj->#{name}), lookup<#{properties[:class]} >(), #{properties[:cardinality]})"
     end
     member_specs2 = []
     if parents

@@ -347,6 +347,7 @@ class MPIParser
 
       map = map_orig.clone
       map[:type] = lookup
+      map[:class] = map_orig[:type]
       resolved[name] = map
     end
     return resolved
