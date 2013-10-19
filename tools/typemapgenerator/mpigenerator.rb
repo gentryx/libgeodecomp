@@ -5,6 +5,8 @@ require 'pathname'
 class MPIGenerator
   def initialize(template_path="./", namespace=nil, macro_guard=nil)
     @path = Pathname.new(template_path)
+    @namespace = namespace
+
     if namespace
       @namespace_guard = namespace.upcase + "_"
       @namespace_begin = "namespace #{namespace} {\n"
@@ -46,9 +48,53 @@ class MPIGenerator
     ret.sub!(/ *MEMBERSPECS/, member_specs.sort.join(",\n"))
   end
 
+  # Creating a serialize() function for Boost is much simpler than
+  # creating one for MPI as we only need a list of the class' member
+  # names and parent types.
+  def generate_boost_serialize_function(klass, members, parents)
+    ret = <<EOF
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, #{klass}& object, const unsigned /*version*/)
+    {
+EOF
+
+    parents.each do |parent_type, parent_mpi_type|
+      ret += <<EOF
+        archive & boost::serialization::base_object<#{parent_type} >(object);
+EOF
+    end
+
+    members.each do |member, spec|
+      ret += <<EOF
+        archive & object.#{member};
+EOF
+    end
+
+    ret += <<EOF
+    }
+
+EOF
+
+    return ret
+  end
+
+  # By default Boost Serialization will look in its own namespace for
+  # suitable serialization functions. Those are defined here.
+  def generate_boost_namespace_link(klass)
+    return <<EOF
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, #{klass}& object, const unsigned version)
+{
+    Typemaps::serialize(archive, object, version);
+}
+EOF
+  end
+
+
   # The Typemap Class needs a header file, declaring all the static
   # variables, macros and so on. This method will generate it's code.
-  def generate_header(classes, datatype_map, headers, header_pattern=nil, header_replacement=nil)
+  def generate_header(classes, datatype_map, resolved_classes, resolved_parents, headers, header_pattern=nil, header_replacement=nil)
     ret = File.read(@path + "template_typemaps.h");
     ret.gsub!(/HEADERS/, map_headers(headers, header_pattern, header_replacement))
     ret.gsub!(/NAMESPACE_GUARD/, @namespace_guard)
@@ -71,9 +117,32 @@ class MPIGenerator
     lookup_types = (lookup_types.sort + classes).uniq
 
     lookups = lookup_types.map do |klass|
-      "    static inline MPI_Datatype lookup(#{klass}*) { return #{datatype_map[klass]}; }"
+      <<EOF
+    static inline MPI_Datatype lookup(#{klass}*)
+    {
+        return #{datatype_map[klass]};
+    }
+EOF
     end
     ret.sub!(/.*LOOKUP_DEFINITIONS/, lookups.join("\n"))
+
+    serializations = classes.map do |klass|
+      generate_boost_serialize_function(klass, resolved_classes[klass], resolved_parents[klass])
+    end
+    ret.sub!(/.*BOOST_SERIALIZATIION_DEFINITIONS/, serializations.join("\n"))
+
+    serializations = classes.map do |klass|
+      generate_boost_namespace_link(klass)
+    end
+
+    namespace = ""
+    if !@namespace.nil?
+      namespace = <<EOF
+using namespace #{@namespace};
+EOF
+    end
+
+    ret.sub!(/.*BOOST_NAMESPACE_LINK/, ([ namespace ] + serializations).join("\n"))
 
     if @macro_guard
       return guard(ret)
@@ -125,7 +194,7 @@ class MPIGenerator
 
   # wraps the code generation for multiple typemaps.
   def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers, header_pattern=nil, header_replacement=nil)
-    return [generate_header(topological_class_sortation, datatype_map, headers, header_pattern, header_replacement),
+    return [generate_header(topological_class_sortation, datatype_map, resolved_classes, resolved_parents, headers, header_pattern, header_replacement),
             generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)]
   end
 

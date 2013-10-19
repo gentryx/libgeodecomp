@@ -23,7 +23,7 @@ class DatatypeTest < Test::Unit::TestCase
     assert_equal('MPI::LONG', @datatype['long'])
     assert_equal('MPI::UNSIGNED_LONG', @datatype['unsigned long'])
   end
-  
+
   def test_lookup_unknown
     assert_nil @datatype['foo']
   end

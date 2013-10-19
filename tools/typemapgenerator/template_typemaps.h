@@ -19,6 +19,8 @@ public:
         return lookup((T*)0);
     }
 
+    BOOST_SERIALIZATIION_DEFINITIONS
+
 private:
     template<typename T>
     static MPI_Aint getAddress(T *address)
@@ -33,5 +35,13 @@ private:
     LOOKUP_DEFINITIONS
 };
 NAMESPACE_END
+
+namespace boost {
+namespace serialization {
+
+BOOST_NAMESPACE_LINK
+
+}
+}
 
 #endif
