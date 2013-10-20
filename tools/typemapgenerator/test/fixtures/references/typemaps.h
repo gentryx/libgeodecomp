@@ -1,5 +1,5 @@
-#ifndef _typemaps_h_
-#define _typemaps_h_
+#ifndef TYPEMAPS_H
+#define TYPEMAPS_H
 
 #include <mpi.h>
 #include <complex>
@@ -7,48 +7,191 @@
 #include <tire.h>
 #include <wheel.h>
 
-namespace MPI {
-    extern Datatype RIM;
-    extern Datatype TIRE;
-    extern Datatype WHEEL;
-}
+extern MPI_Datatype MPI_RIM;
+extern MPI_Datatype MPI_TIRE;
+extern MPI_Datatype MPI_WHEEL;
 
-class Typemaps {
+class Typemaps
+{
 public:
     static void initializeMaps();
 
     template<typename T>
-    static inline MPI::Datatype lookup() {
+    static inline MPI_Datatype lookup()
+    {
         return lookup((T*)0);
     }
 
-private:
-    static MPI::Datatype generateMapRim();
-    static MPI::Datatype generateMapTire();
-    static MPI::Datatype generateMapWheel();
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, Rim& object, const unsigned /*version*/)
+    {
+        archive & object.chromePlated;
+    }
 
-    static inline MPI::Datatype lookup(bool*) { return MPI::BOOL; }
-    static inline MPI::Datatype lookup(char*) { return MPI::CHAR; }
-    static inline MPI::Datatype lookup(double*) { return MPI::DOUBLE; }
-    static inline MPI::Datatype lookup(float*) { return MPI::FLOAT; }
-    static inline MPI::Datatype lookup(int*) { return MPI::INT; }
-    static inline MPI::Datatype lookup(long*) { return MPI::LONG; }
-    static inline MPI::Datatype lookup(long double*) { return MPI::LONG_DOUBLE; }
-    static inline MPI::Datatype lookup(long long*) { return MPI::LONG_LONG; }
-    static inline MPI::Datatype lookup(short*) { return MPI::SHORT; }
-    static inline MPI::Datatype lookup(signed char*) { return MPI::SIGNED_CHAR; }
-    static inline MPI::Datatype lookup(std::complex<double>*) { return MPI::DOUBLE_COMPLEX; }
-    static inline MPI::Datatype lookup(std::complex<float>*) { return MPI::COMPLEX; }
-    static inline MPI::Datatype lookup(std::complex<long double>*) { return MPI::LONG_DOUBLE_COMPLEX; }
-    static inline MPI::Datatype lookup(unsigned*) { return MPI::UNSIGNED; }
-    static inline MPI::Datatype lookup(unsigned char*) { return MPI::UNSIGNED_CHAR; }
-    static inline MPI::Datatype lookup(unsigned long*) { return MPI::UNSIGNED_LONG; }
-    static inline MPI::Datatype lookup(unsigned long long*) { return MPI::UNSIGNED_LONG_LONG; }
-    static inline MPI::Datatype lookup(unsigned short*) { return MPI::UNSIGNED_SHORT; }
-    static inline MPI::Datatype lookup(wchar_t*) { return MPI::WCHAR; }
-    static inline MPI::Datatype lookup(Rim*) { return MPI::RIM; }
-    static inline MPI::Datatype lookup(Tire*) { return MPI::TIRE; }
-    static inline MPI::Datatype lookup(Wheel*) { return MPI::WHEEL; }
+
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, Tire& object, const unsigned /*version*/)
+    {
+        archive & object.treadDepth;
+    }
+
+
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, Wheel& object, const unsigned /*version*/)
+    {
+        archive & object.rim;
+        archive & object.tire;
+    }
+
+
+
+private:
+    template<typename T>
+    static MPI_Aint getAddress(T *address)
+    {
+        MPI_Aint ret;
+        MPI_Get_address(address, &ret);
+        return ret;
+    }
+
+    static MPI_Datatype generateMapRim();
+    static MPI_Datatype generateMapTire();
+    static MPI_Datatype generateMapWheel();
+
+    static inline MPI_Datatype lookup(bool*)
+    {
+        return MPI_CHAR;
+    }
+
+    static inline MPI_Datatype lookup(char*)
+    {
+        return MPI_CHAR;
+    }
+
+    static inline MPI_Datatype lookup(double*)
+    {
+        return MPI_DOUBLE;
+    }
+
+    static inline MPI_Datatype lookup(float*)
+    {
+        return MPI_FLOAT;
+    }
+
+    static inline MPI_Datatype lookup(int*)
+    {
+        return MPI_INT;
+    }
+
+    static inline MPI_Datatype lookup(long*)
+    {
+        return MPI_LONG;
+    }
+
+    static inline MPI_Datatype lookup(long double*)
+    {
+        return MPI_LONG_DOUBLE;
+    }
+
+    static inline MPI_Datatype lookup(long long*)
+    {
+        return MPI_LONG_LONG;
+    }
+
+    static inline MPI_Datatype lookup(short*)
+    {
+        return MPI_SHORT;
+    }
+
+    static inline MPI_Datatype lookup(signed char*)
+    {
+        return MPI_SIGNED_CHAR;
+    }
+
+    static inline MPI_Datatype lookup(std::complex<double>*)
+    {
+        return MPI_DOUBLE_COMPLEX;
+    }
+
+    static inline MPI_Datatype lookup(std::complex<float>*)
+    {
+        return MPI_COMPLEX;
+    }
+
+    static inline MPI_Datatype lookup(unsigned*)
+    {
+        return MPI_UNSIGNED;
+    }
+
+    static inline MPI_Datatype lookup(unsigned char*)
+    {
+        return MPI_UNSIGNED_CHAR;
+    }
+
+    static inline MPI_Datatype lookup(unsigned long*)
+    {
+        return MPI_UNSIGNED_LONG;
+    }
+
+    static inline MPI_Datatype lookup(unsigned long long*)
+    {
+        return MPI_UNSIGNED_LONG_LONG;
+    }
+
+    static inline MPI_Datatype lookup(unsigned short*)
+    {
+        return MPI_UNSIGNED_SHORT;
+    }
+
+    static inline MPI_Datatype lookup(wchar_t*)
+    {
+        return MPI_WCHAR;
+    }
+
+    static inline MPI_Datatype lookup(Rim*)
+    {
+        return MPI_RIM;
+    }
+
+    static inline MPI_Datatype lookup(Tire*)
+    {
+        return MPI_TIRE;
+    }
+
+    static inline MPI_Datatype lookup(Wheel*)
+    {
+        return MPI_WHEEL;
+    }
+
 };
+
+namespace boost {
+namespace serialization {
+
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, Rim& object, const unsigned version)
+{
+    Typemaps::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, Tire& object, const unsigned version)
+{
+    Typemaps::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, Wheel& object, const unsigned version)
+{
+    Typemaps::serialize(archive, object, version);
+}
+
+
+}
+}
 
 #endif

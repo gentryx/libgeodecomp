@@ -1,4 +1,4 @@
-MPI::Datatype
+MPI_Datatype
 Typemaps::generateMapEngine() {
     char fakeObject[sizeof(Engine)];
     Engine *obj = (Engine*)fakeObject;
@@ -8,15 +8,15 @@ Typemaps::generateMapEngine() {
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(MPI::Get_address(&obj->capacity), MPI::DOUBLE, 1),
-        MemberSpec(MPI::Get_address(&obj->fuel), MPI::INT, 1),
-        MemberSpec(MPI::Get_address(&obj->gearRatios), MPI::DOUBLE, 6)
+        MemberSpec(getAddress(&obj->capacity), lookup<double >(), 1),
+        MemberSpec(getAddress(&obj->fuel), lookup<Fuel >(), 1),
+        MemberSpec(getAddress(&obj->gearRatios), lookup<double >(), 6)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
 
     // split addresses from member types
-    MPI::Aint displacements[count];
-    MPI::Datatype memberTypes[count];
+    MPI_Aint displacements[count];
+    MPI_Datatype memberTypes[count];
     for (int i = 0; i < count; i++) {
         displacements[i] = rawSpecs[i].address;
         memberTypes[i] = rawSpecs[i].type;
@@ -30,9 +30,9 @@ Typemaps::generateMapEngine() {
     displacements[0] = 0;
 
     // create datatype
-    MPI::Datatype objType;
-    objType = MPI::Datatype::Create_struct(count, lengths, displacements, memberTypes);
-    objType.Commit();
+    MPI_Datatype objType;
+    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
+    MPI_Type_commit(&objType);
 
     return objType;
 }

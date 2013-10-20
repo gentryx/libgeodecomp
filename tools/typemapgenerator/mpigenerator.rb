@@ -59,13 +59,13 @@ class MPIGenerator
     {
 EOF
 
-    parents.each do |parent_type, parent_mpi_type|
+    parents.keys.sort.each do |parent_type|
       ret += <<EOF
         archive & boost::serialization::base_object<#{parent_type} >(object);
 EOF
     end
 
-    members.each do |member, spec|
+    members.keys.sort.each do |member|
       ret += <<EOF
         archive & object.#{member};
 EOF
