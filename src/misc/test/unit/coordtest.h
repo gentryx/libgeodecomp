@@ -1,8 +1,16 @@
+#include <sstream>
 #include <cxxtest/TestSuite.h>
 #include <boost/math/tools/precision.hpp>
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/coord.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <libgeodecomp/mpilayer/typemaps.h>
+#endif
 
 using namespace LibGeoDecomp;
 
@@ -271,6 +279,26 @@ public:
         TS_ASSERT_EQUALS(0,  Coord<2>(1, 0)    * Coord<2>(0, 1));
         TS_ASSERT_EQUALS(7,  Coord<2>(3, 4)    * Coord<2>(1, 1));
         TS_ASSERT_EQUALS(26, Coord<3>(3, 4, 1) * Coord<3>(4, 3, 2));
+    }
+
+    void testSerialization()
+    {
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+        std::stringstream buf;
+        Coord<2> c(47,11);
+        Coord<2> d(1, 2);
+
+        {
+            boost::archive::text_oarchive archive(buf);
+            archive << c;
+        }
+        {
+            boost::archive::text_iarchive archive(buf);
+            archive >> d;
+        }
+
+        TS_ASSERT_EQUALS(c, d);
+#endif
     }
 
 private:

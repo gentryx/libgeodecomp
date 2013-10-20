@@ -173,14 +173,6 @@ public:
         return s.str();
     }
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & c;
-    }
-#endif
-
 private:
     int c[1];
 };
@@ -355,14 +347,6 @@ public:
         s << "(" << x() << ", " << y() << ")";
         return s.str();
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & c;
-    }
-#endif
 
 private:
     int c[2];
@@ -556,14 +540,6 @@ public:
         s << "(" << x() << ", " << y() << ", " << z() << ")";
         return s.str();
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & c;
-    }
-#endif
 
 private:
     int c[3];
