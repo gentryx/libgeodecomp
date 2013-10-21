@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_IO_IMAGEPAINTER_H
 #define LIBGEODECOMP_IO_IMAGEPAINTER_H
 
-#include <libgeodecomp/io/image.h>
 #include <libgeodecomp/misc/color.h>
+#include <libgeodecomp/storage/image.h>
 
 namespace LibGeoDecomp {
 

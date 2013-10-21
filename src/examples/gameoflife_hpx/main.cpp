@@ -1,15 +1,12 @@
-
-#include <libgeodecomp/parallelization/hpxsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
-#include <libgeodecomp/io/hpxwritercollector.h>
-#include <libgeodecomp/io/serialbovwriter.h>
-
 #include <hpx/hpx_init.hpp>
+#include <boost/assign/std/vector.hpp>
 
 #include <libgeodecomp/config.h>
-#include <boost/assign/std/vector.hpp>
+#include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/io/hpxwritercollector.h>
+#include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/io/bovwriter.h>
-#include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -17,7 +14,8 @@
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <libgeodecomp/storage/image.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
@@ -153,7 +151,7 @@ public:
 };
 
 typedef
-    HpxSimulator::HpxSimulator<ConwayCell, HiParSimulator::RecursiveBisectionPartition<2> >
+    HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
     SimulatorType;
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
     SimulatorType,

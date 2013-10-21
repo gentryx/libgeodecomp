@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/imagepainter.h>
 #include <libgeodecomp/io/testcellplotter.h>
+#include <libgeodecomp/storage/image.h>
 
 using namespace LibGeoDecomp;
 

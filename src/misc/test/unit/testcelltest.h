@@ -1,9 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <sstream>
-#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 using namespace LibGeoDecomp;
 

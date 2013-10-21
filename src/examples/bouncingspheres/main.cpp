@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/misc/floatcoord.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp;

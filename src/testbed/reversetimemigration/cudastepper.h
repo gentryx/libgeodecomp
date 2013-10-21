@@ -3,9 +3,9 @@
 
 #include <cuda.h>
 
-#include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/testbed/reversetimemigration/config.h>
 
 namespace LibGeoDecomp {

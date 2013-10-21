@@ -5,12 +5,12 @@
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stringops.h>
-#include <libgeodecomp/misc/updatefunctor.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
 

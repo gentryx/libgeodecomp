@@ -7,10 +7,10 @@
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
-#include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/storage/image.h>
 
 namespace LibGeoDecomp {
 

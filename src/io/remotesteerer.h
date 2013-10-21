@@ -4,13 +4,13 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_H
 
+#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/io/remotesteerer/commandserver.h>
 #include <libgeodecomp/io/remotesteerer/handler.h>
 #include <libgeodecomp/io/remotesteerer/gethandler.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 
 namespace LibGeoDecomp {
 

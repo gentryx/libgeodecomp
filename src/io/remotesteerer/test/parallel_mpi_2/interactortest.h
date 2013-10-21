@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/remotesteerer/interactor.h>
 
 using namespace LibGeoDecomp;

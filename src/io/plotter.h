@@ -8,9 +8,10 @@
 #include <cmath>
 #endif
 #include <vector>
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/io/image.h>
+
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/image.h>
 
 namespace LibGeoDecomp {
 

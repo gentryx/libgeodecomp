@@ -3,9 +3,9 @@
 #ifndef LIBGEODECOMP_IO_MPIIOINITIALIZER_H
 #define LIBGEODECOMP_IO_MPIIOINITIALIZER_H
 
+#include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/mpiio.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
 
 namespace LibGeoDecomp {
 

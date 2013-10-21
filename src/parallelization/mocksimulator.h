@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_MOCKSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_MOCKSIMULATOR_H
 
-#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libgeodecomp/storage/grid.h>
 
 namespace LibGeoDecomp {
 

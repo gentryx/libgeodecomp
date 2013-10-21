@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_TESTBED_PERFORMANCE_TESTS_EVALUATE_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/stringops.h>
 
 extern std::string revision;

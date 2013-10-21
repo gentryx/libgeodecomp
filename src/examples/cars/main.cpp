@@ -1,13 +1,13 @@
 #include <mpi.h>
 
+#include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/visitwriter.h>
 #include <libgeodecomp/io/remotesteerer.h>
-#include <libgeodecomp/misc/dataaccessor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
+#include <libgeodecomp/storage/dataaccessor.h>
 
 using namespace LibGeoDecomp;
 

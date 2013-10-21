@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OFFSETHELPER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OFFSETHELPER_H
 
-#include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/coordbox.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/coordbox.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

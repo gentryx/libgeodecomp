@@ -3,7 +3,7 @@
 #include <mpi.h>
 #include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
+#include <libgeodecomp/communication/typemaps.h>
 
 /**
  * OpenMPI can't run multiple MPI_Init() - MPI_Finalize() cycles

@@ -3,9 +3,9 @@
 #ifndef LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
 #define LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
 
+#include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
 
 namespace LibGeoDecomp {
 

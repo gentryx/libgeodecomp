@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_STEERERADAPTER_H
 
 #include <libgeodecomp/io/steerer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
+#include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

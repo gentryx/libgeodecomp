@@ -1,12 +1,12 @@
-
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
 #ifndef LIBGEODECOMP_IO_SERVER_HPXWRITERSINK_H
 #define LIBGEODECOMP_IO_SERVER_HPXWRITERSINK_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
+#include <libgeodecomp/storage/gridvecconv.h>
 
 #include <hpx/hpx_fwd.hpp>
 #include <hpx/include/components.hpp>
@@ -115,7 +115,7 @@ public:
                     GridType(globalDimensions)));
         }
 
-        HiParSimulator::GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);
+        GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);
 
         RegionMapIterator it = regionInfoMap.find(step);
         if (it == regionInfoMap.end()) {

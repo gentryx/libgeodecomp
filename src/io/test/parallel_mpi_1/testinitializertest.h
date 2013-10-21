@@ -1,9 +1,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/misc/coordbox.h>
-#include <libgeodecomp/misc/displacedgrid.h>
+#include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/misc/testhelper.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 using namespace LibGeoDecomp;
 
@@ -116,4 +116,4 @@ public:
     }
 };
 
-};
+}

@@ -3,11 +3,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/parallelization/hiparsimulator/mockpatchaccepter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+#include <libgeodecomp/storage/mockpatchaccepter.h>
 
 #include <boost/assign/std/deque.hpp>
 

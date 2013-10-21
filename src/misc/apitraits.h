@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_MISC_APITRAITS_H
 #define LIBGEODECOMP_MISC_APITRAITS_H
 
-#include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/stencils.h>
-#include <libgeodecomp/misc/topologies.h>
+#include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 namespace LibGeoDecomp {
 

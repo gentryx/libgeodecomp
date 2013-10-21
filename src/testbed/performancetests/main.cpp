@@ -8,18 +8,18 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/linepointerassembly.h>
-#include <libgeodecomp/misc/linepointerupdatefunctor.h>
-#include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/stencils.h>
-#include <libgeodecomp/misc/updatefunctor.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/partitions/hindexingpartition.h>
+#include <libgeodecomp/geometry/partitions/hilbertpartition.h>
+#include <libgeodecomp/geometry/partitions/stripingpartition.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/linepointerassembly.h>
+#include <libgeodecomp/storage/linepointerupdatefunctor.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/hindexingpartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/hilbertpartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
@@ -2263,10 +2263,10 @@ int main(int argc, char **argv)
     }
 
     Coord<3> dim(32 * 1024, 32 * 1024, 1);
-    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionHIndexing"), dim);
-    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionStriping"),  dim);
-    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionHilbert"),   dim);
-    eval(PartitionBenchmark<HiParSimulator::HIndexingPartition>("PartitionZCurve"),    dim);
+    eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
+    eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
+    eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
+    eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
     cudaTests(revision, quick, cudaDevice);

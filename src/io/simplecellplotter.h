@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_IO_SIMPLECELLPLOTTER_H
 #define LIBGEODECOMP_IO_SIMPLECELLPLOTTER_H
 
-#include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/storage/image.h>
 
 namespace LibGeoDecomp {
 

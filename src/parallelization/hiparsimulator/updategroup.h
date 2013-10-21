@@ -3,16 +3,16 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_UPDATEGROUP_H
 
+#include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/communication/patchlink.h>
 #include <libgeodecomp/io/initializer.h>
-#include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
+#include <libgeodecomp/geometry/partitionmanager.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/patchaccepter.h>
+#include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

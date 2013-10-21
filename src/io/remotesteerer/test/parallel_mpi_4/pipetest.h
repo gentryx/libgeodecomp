@@ -1,7 +1,7 @@
 #include <boost/thread.hpp>
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 
 using namespace LibGeoDecomp;
 using namespace LibGeoDecomp::RemoteSteererHelpers;

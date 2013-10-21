@@ -4,13 +4,13 @@
 #include <boost/shared_ptr.hpp>
 #include <deque>
 
+#include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/patchaccepter.h>
+#include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {

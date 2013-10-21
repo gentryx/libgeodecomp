@@ -5,8 +5,8 @@
 #include <stdexcept>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/writer.h>
-#include <libgeodecomp/misc/region.h>
-#include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION

@@ -7,7 +7,7 @@
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
+#include <libgeodecomp/communication/typemaps.h>
 
 namespace LibGeoDecomp {
 

@@ -1,11 +1,11 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
-#include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
 

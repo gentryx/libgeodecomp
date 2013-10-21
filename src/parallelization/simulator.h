@@ -6,8 +6,8 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/soagrid.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/soagrid.h>
 
 namespace LibGeoDecomp {
 

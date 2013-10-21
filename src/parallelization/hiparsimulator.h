@@ -5,10 +5,10 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>

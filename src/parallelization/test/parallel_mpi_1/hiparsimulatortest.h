@@ -4,10 +4,10 @@
 #include <libgeodecomp/io/teststeerer.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>

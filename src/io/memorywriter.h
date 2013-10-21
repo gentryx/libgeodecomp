@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_IO_MEMORYWRITER_H
 #define LIBGEODECOMP_IO_MEMORYWRITER_H
 
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/grid.h>
 
 namespace LibGeoDecomp {
 

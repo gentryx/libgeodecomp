@@ -1,7 +1,7 @@
 #include <boost/assign/std/vector.hpp>
-#include <libgeodecomp/mpilayer/typemaps.h>
+#include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/bovwriter.h>
-#include <libgeodecomp/io/image.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/remotesteerer.h>
@@ -12,9 +12,9 @@
 #include <libgeodecomp/io/remotesteerer/commandserver.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+#include <libgeodecomp/storage/image.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

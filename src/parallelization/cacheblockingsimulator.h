@@ -1,11 +1,11 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
 
-#include <libgeodecomp/io/logger.h>
-#include <libgeodecomp/misc/displacedgrid.h>
-#include <libgeodecomp/misc/updatefunctor.h>
-#include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <omp.h>
+#include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
 

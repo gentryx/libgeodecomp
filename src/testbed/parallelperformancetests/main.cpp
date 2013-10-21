@@ -1,14 +1,14 @@
 #include <mpi.h>
 #include <libgeodecomp.h>
+#include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/communication/patchlink.h>
+#include <libgeodecomp/geometry/partitions/hilbertpartition.h>
+#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+#include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/hilbertpartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitionmanager.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchlink.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
@@ -134,7 +134,7 @@ public:
         double seconds = 0;
 
         if (mpiLayer.rank() == 0) {
-            typename HiParSimulator::PatchLink<GridType>::Provider provider(
+            typename PatchLink<GridType>::Provider provider(
                 transmissionRegion,
                 1,
                 666,
@@ -150,7 +150,7 @@ public:
                 }
             }
         } else {
-            typename HiParSimulator::PatchLink<GridType>::Accepter accepter(
+            typename PatchLink<GridType>::Accepter accepter(
                 transmissionRegion,
                 0,
                 666,
@@ -216,7 +216,7 @@ public:
 
             boost::shared_ptr<PARTITION> partition(new PARTITION(Coord<3>(), box.dimensions, 0, weights));
 
-            HiParSimulator::PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
+            PartitionManager<Topologies::Torus<3>::Topology> myPartitionManager;
 
             myPartitionManager.resetRegions(
                 box,
@@ -278,8 +278,8 @@ int main(int argc, char **argv)
     eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
     eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(200), output);
     eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
-    eval(PartitionManagerBig3DPerfTest<HiParSimulator::RecursiveBisectionPartition<3> >("RecursiveBisection"), Coord<3>::diagonal(100), output);
-    eval(PartitionManagerBig3DPerfTest<HiParSimulator::ZCurvePartition<3> >("ZCurve"), Coord<3>::diagonal(100), output);
+    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), Coord<3>::diagonal(100), output);
+    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"), Coord<3>::diagonal(100), output);
 
     MPI_Finalize();
     return 0;

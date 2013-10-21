@@ -4,11 +4,11 @@
 #include <iostream>
 #include <libflatarray/flat_array.hpp>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/coordbox.h>
-#include <libgeodecomp/misc/coordmap.h>
-#include <libgeodecomp/misc/fixedneighborhood.h>
-#include <libgeodecomp/misc/stencils.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/storage/coordmap.h>
+#include <libgeodecomp/storage/fixedneighborhood.h>
 
 namespace LibGeoDecomp {
 

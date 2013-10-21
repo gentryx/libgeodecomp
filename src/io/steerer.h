@@ -2,9 +2,9 @@
 #define LIBGEODECOMP_IO_STEERER_H
 
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/gridbase.h>
-#include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/storage/gridbase.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>

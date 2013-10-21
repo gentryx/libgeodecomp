@@ -62,7 +62,7 @@ public:
     typedef boost::shared_ptr<PatchLinkAccepterType> PatchLinkAccepterPtr;
 
     typedef
-        HiParSimulator::PartitionManager<Topology>
+        PartitionManager<Topology>
         PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
 

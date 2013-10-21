@@ -11,11 +11,11 @@
 #include <fstream>
 #include <sstream>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/coord.h>
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/grid.h>
 
 /**
  * This macro differs from TS_ASSERT_DELTA in that the error margin is relative

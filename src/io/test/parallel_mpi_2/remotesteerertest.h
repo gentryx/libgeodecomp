@@ -1,10 +1,10 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/parallelmemorywriter.h>
 #include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/misc/dataaccessor.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
+#include <libgeodecomp/storage/dataaccessor.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 

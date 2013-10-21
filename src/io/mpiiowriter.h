@@ -5,7 +5,7 @@
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/writer.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
+#include <libgeodecomp/communication/typemaps.h>
 
 namespace LibGeoDecomp {
 

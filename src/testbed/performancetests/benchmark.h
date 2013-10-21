@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_TESTBED_PERFORMANCETESTS_BENCHMARK_H
 #define LIBGEODECOMP_TESTBED_PERFORMANCETESTS_BENCHMARK_H
 
-#include <libgeodecomp/misc/coord.h>
+#include <libgeodecomp/geometry/coord.h>
 
 class Benchmark
 {

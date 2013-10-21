@@ -3,8 +3,8 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/mockpatchaccepter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/multicorestepper.h>
+#include <libgeodecomp/storage/mockpatchaccepter.h>
 
 using namespace LibGeoDecomp;
 using namespace HiParSimulator;

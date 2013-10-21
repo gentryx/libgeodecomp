@@ -1,9 +1,8 @@
 generate_sourcelists("./")
+
 add_subdirectory(test/parallel_mpi_1)
 add_subdirectory(test/parallel_mpi_4)
-add_subdirectory(test/parallel_mpi_9)
 add_subdirectory(test/parallel_mpi_14)
-add_subdirectory(partitions)
 
 escape_kernel("escapedopenclkernel.h" "openclkernel.cl")
 

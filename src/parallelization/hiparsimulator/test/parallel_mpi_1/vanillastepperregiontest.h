@@ -1,8 +1,8 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+#include <libgeodecomp/storage/patchbuffer.h>
 
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>

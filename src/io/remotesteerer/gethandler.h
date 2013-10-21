@@ -3,7 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/remotesteerer/handler.h>
-#include <libgeodecomp/misc/dataaccessor.h>
+#include <libgeodecomp/storage/dataaccessor.h>
 
 namespace LibGeoDecomp {
 

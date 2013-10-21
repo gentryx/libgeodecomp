@@ -1,6 +1,6 @@
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/updatefunctor.h>
 #include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 using namespace LibGeoDecomp;
 

@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_MONOLITHICSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_MONOLITHICSIMULATOR_H
 
-#include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/simulator.h>
 

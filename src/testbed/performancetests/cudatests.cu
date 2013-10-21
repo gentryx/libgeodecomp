@@ -1,13 +1,14 @@
 #include <cuda.h>
 #include <iostream>
+#include <stdexcept>
+
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
-#include <libgeodecomp/misc/fixedneighborhood.h>
-#include <libgeodecomp/misc/soagrid.h>
+#include <libgeodecomp/storage/fixedneighborhood.h>
+#include <libgeodecomp/storage/soagrid.h>
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
-#include <stdexcept>
 
 using namespace LibGeoDecomp;
 

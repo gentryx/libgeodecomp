@@ -1,17 +1,19 @@
+// we need to include the main header first to avoid pulling in HPX
+// config after boost (which would break HPX).
+#include <libgeodecomp.h>
+
+#include <boost/assign/std/vector.hpp>
 #include <fstream>
 #include <cerrno>
-#include <libgeodecomp.h>
-#include <libgeodecomp/io/image.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/zcurvepartition.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchbuffer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
-
-#include <boost/assign/std/vector.hpp>
+#include <libgeodecomp/storage/image.h>
+#include <libgeodecomp/storage/patchbuffer.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

@@ -1,18 +1,20 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
 #ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+
 #include <hpx/config.hpp>
 #include <hpx/lcos/broadcast.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
+#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/stripingpartition.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 #include <libgeodecomp/parallelization/hpxsimulator/createupdategroups.h>
-
-#include <boost/serialization/shared_ptr.hpp>
 
 #define LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)        \
     typedef                                                                     \
@@ -205,9 +207,7 @@ public:
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights)
     {
-        typedef
-            HiParSimulator::PartitionManager<Topology>
-            PartitionManagerType;
+        typedef PartitionManager<Topology> PartitionManagerType;
 
         for(std::size_t rank = rank_start; rank != rank_end; ++rank) {
             PartitionManagerType partitionManager;
@@ -345,7 +345,7 @@ private:
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    HiParSimulator::PartitionManager<Topology> partitionManager;
+    PartitionManager<Topology> partitionManager;
     std::vector<hpx::id_type> updateGroupsIds;
     boost::atomic<bool> initialized;
     std::vector<Chronometer> statistics;

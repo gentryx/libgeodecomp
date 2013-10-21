@@ -4,9 +4,9 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HPXPATCHLINKS_H
 #define LIBGEODECOMP_PARALLELIZATION_HPXPATCHLINKS_H
 
-#include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchaccepter.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchprovider.h>
+#include <libgeodecomp/storage/gridvecconv.h>
+#include <libgeodecomp/storage/patchaccepter.h>
+#include <libgeodecomp/storage/patchprovider.h>
 
 #include <hpx/hpx_fwd.hpp>
 #include <hpx/async.hpp>
@@ -50,16 +50,16 @@ public:
         Region<DIM> region;
     };
 
-    class Accepter
-      : public Link,
-        public HiParSimulator::PatchAccepter<GRID_TYPE>
+    class Accepter :
+        public Link,
+        public PatchAccepter<GRID_TYPE>
     {
         using Link::lastNanoStep;
         using Link::region;
         using Link::stride;
-        using HiParSimulator::PatchAccepter<GRID_TYPE>::checkNanoStepPut;
-        using HiParSimulator::PatchAccepter<GRID_TYPE>::pushRequest;
-        using HiParSimulator::PatchAccepter<GRID_TYPE>::requestedNanoSteps;
+        using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
+        using PatchAccepter<GRID_TYPE>::pushRequest;
+        using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
     public:
 
         Accepter(
@@ -88,7 +88,7 @@ public:
             }
 
             boost::shared_ptr<BufferType> buffer(new BufferType(region.size()));
-            HiParSimulator::GridVecConv::gridToVector(grid, buffer.get(), region);
+            GridVecConv::gridToVector(grid, buffer.get(), region);
 
             hpx::wait(putFuture);
             putFuture = dest.setOuterGhostZone(rank, buffer, nanoStep);
@@ -107,15 +107,15 @@ public:
         hpx::future<void> putFuture;
     };
 
-    class Provider
-      : public Link,
-        public HiParSimulator::PatchProvider<GRID_TYPE>
+    class Provider :
+        public Link,
+        public PatchProvider<GRID_TYPE>
     {
         using Link::lastNanoStep;
         using Link::region;
         using Link::stride;
-        using HiParSimulator::PatchProvider<GRID_TYPE>::checkNanoStepGet;
-        using HiParSimulator::PatchProvider<GRID_TYPE>::storedNanoSteps;
+        using PatchProvider<GRID_TYPE>::checkNanoStepGet;
+        using PatchProvider<GRID_TYPE>::storedNanoSteps;
     public:
         Provider(const Region<DIM>& region) :
             Link(region),
@@ -162,7 +162,7 @@ public:
             checkNanoStepGet(nanoStep);
             {
                 //hpx::lcos::local::spinlock::scoped_lock lock(gridMutex);
-                HiParSimulator::GridVecConv::vectorToGrid(*buffer, grid, region);
+                GridVecConv::vectorToGrid(*buffer, grid, region);
             }
 
             std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;

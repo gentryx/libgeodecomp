@@ -4,7 +4,7 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <boost/assign/std/vector.hpp>
 
-#include <libgeodecomp/misc/grid.h>
+#include <libgeodecomp/storage/grid.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

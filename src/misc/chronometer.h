@@ -3,8 +3,8 @@
 
 #include <iomanip>
 
-#include <libgeodecomp/misc/fixedarray.h>
 #include <libgeodecomp/misc/scopedtimer.h>
+#include <libgeodecomp/storage/fixedarray.h>
 
 namespace LibGeoDecomp {
 

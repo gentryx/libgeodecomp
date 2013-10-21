@@ -3,8 +3,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/mpiio.h>
-#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/tempfile.h>
+#include <libgeodecomp/storage/grid.h>
 
 using namespace LibGeoDecomp;
 

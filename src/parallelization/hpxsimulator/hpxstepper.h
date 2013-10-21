@@ -1,9 +1,9 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXSTEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXSTEPPER_H
 
-#include <libgeodecomp/misc/updatefunctor.h>
-#include <libgeodecomp/parallelization/hiparsimulator/patchbufferfixed.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/storage/patchbufferfixed.h>
+#include <libgeodecomp/storage/updatefunctor.h>
 
 #include <hpx/async.hpp>
 

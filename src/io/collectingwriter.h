@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_IO_COLLECTINGWRITER_H
 #define LIBGEODECOMP_IO_COLLECTINGWRITER_H
 
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 
 namespace LibGeoDecomp {
 

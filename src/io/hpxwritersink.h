@@ -1,11 +1,11 @@
-
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
 #ifndef LIBGEODECOMP_IO_HPXWRITERSINK_H
 #define LIBGEODECOMP_IO_HPXWRITERSINK_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+
 #include <libgeodecomp/io/hpxwritersinkserver.h>
-#include <libgeodecomp/parallelization/hiparsimulator/gridvecconv.h>
+#include <libgeodecomp/storage/gridvecconv.h>
 
 #include <hpx/hpx_fwd.hpp>
 #include <hpx/lcos/async.hpp>

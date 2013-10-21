@@ -3,12 +3,11 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/misc/gridbase.h>
+#include <libgeodecomp/storage/gridbase.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/base_object.hpp>
 #endif
-
 
 namespace LibGeoDecomp {
 

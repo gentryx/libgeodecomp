@@ -2,6 +2,7 @@
 #include <mpi.h>
 
 #include <libgeodecomp.h>
+#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -9,7 +10,6 @@
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
-#include <libgeodecomp/parallelization/hiparsimulator/partitions/recursivebisectionpartition.h>
 
 using namespace LibGeoDecomp;
 
@@ -94,7 +94,7 @@ void runSimulation()
 
     CellInitializer *init = new CellInitializer(factor);
 
-    HiParSimulator::HiParSimulator<Cell, HiParSimulator::RecursiveBisectionPartition<3> > sim(
+    HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
         1000,

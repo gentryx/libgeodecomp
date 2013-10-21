@@ -2,10 +2,10 @@
 #include <unistd.h>
 #include <cxxtest/TestSuite.h>
 
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/mpiio.h>
-#include <libgeodecomp/misc/grid.h>
 #include <libgeodecomp/misc/tempfile.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
+#include <libgeodecomp/storage/grid.h>
 
 using namespace LibGeoDecomp;
 

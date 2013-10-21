@@ -5,9 +5,9 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/stringops.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 
 namespace LibGeoDecomp {
 

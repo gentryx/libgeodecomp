@@ -2,15 +2,18 @@
 #define LIBGEODECOMP_PARALLELIZATION_DISTRIBUTEDSIMULATOR_H
 
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/misc/displacedgrid.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/simulator.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 namespace LibGeoDecomp {
 
 template<class CELL_TYPE> class ParallelWriter;
 
-// fixme: add short doxygen doc for every class
+/**
+ * This class encompasses all Simulators which can run on multiple
+ * nodes (e.g. using MPI or HPX for synchronization).
+ */
 template<typename CELL_TYPE>
 class DistributedSimulator : public Simulator<CELL_TYPE>
 {

@@ -5,10 +5,10 @@
 
 #include <mpi.h>
 
-#include <libgeodecomp/misc/region.h>
+#include <libgeodecomp/communication/mpilayer.h>
+#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
-#include <libgeodecomp/mpilayer/typemaps.h>
-#include <libgeodecomp/mpilayer/mpilayer.h>
 
 namespace LibGeoDecomp {
 

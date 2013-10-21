@@ -1,10 +1,10 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
 
+#include <libgeodecomp/geometryy/fixedcoord.h>
 #include <libgeodecomp/misc/cudautil.h>
-#include <libgeodecomp/misc/grid.h>
-#include <libgeodecomp/misc/fixedcoord.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libgeodecomp/storage/grid.h>
 
 namespace LibGeoDecomp {
 
