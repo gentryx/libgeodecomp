@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
   <compounddef id="classRim" kind="class" prot="public">
     <compoundname>Rim</compoundname>
     <includes refid="rim_8h" local="no">rim.h</includes>
@@ -15,7 +15,20 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="6" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="6" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="6" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="6" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classRim_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Serialization</definition>
+        <argsstring></argsstring>
+        <name>Serialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="7" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
@@ -30,16 +43,17 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="8" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="8" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="9" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="5" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="4" bodyend="9"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" line="5" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/rim.h" bodystart="4" bodyend="10"/>
     <listofallmembers>
       <member refid="classRim_1af3aa5502df8e41468157661e861b7773" prot="private" virt="non-virtual"><scope>Rim</scope><name>chromePlated</name></member>
+      <member refid="classRim_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Rim</scope><name>Serialization</name></member>
       <member refid="classRim_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Rim</scope><name>Typemaps</name></member>
     </listofallmembers>
   </compounddef>

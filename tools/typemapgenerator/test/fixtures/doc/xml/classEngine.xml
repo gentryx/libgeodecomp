@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
   <compounddef id="classEngine" kind="class" prot="public">
     <compoundname>Engine</compoundname>
     <includes refid="engine_8h" local="no">engine.h</includes>
@@ -33,7 +33,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="8" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="8" bodyend="8"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="9" bodyend="9"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="friend">
@@ -48,7 +48,20 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="6" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="6" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="6" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="6" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classEngine_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Serialization</definition>
+        <argsstring></argsstring>
+        <name>Serialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="7" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
@@ -63,7 +76,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="10" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="10" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" prot="private" static="no" mutable="no">
         <type><ref refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160" kindref="member">Fuel</ref></type>
@@ -76,7 +89,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="11" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="12" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" prot="private" static="no" mutable="no">
         <type>double</type>
@@ -89,22 +102,23 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="12" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="12" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="13" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="5" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="4" bodyend="13"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" line="5" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/engine.h" bodystart="4" bodyend="14"/>
     <listofallmembers>
       <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160ac9683a44177815441e518e565f09f95c" prot="private" virt="non-virtual"><scope>Engine</scope><name>AUTOGAS</name></member>
       <member refid="classEngine_1ad874d9a0b419440d94ab443becb64257" prot="private" virt="non-virtual"><scope>Engine</scope><name>capacity</name></member>
       <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160aa7d03b07702bc46b9fbf22228d4406da" prot="private" virt="non-virtual"><scope>Engine</scope><name>DIESEL</name></member>
-      <member refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" prot="private" virt="non-virtual"><scope>Engine</scope><name>fuel</name></member>
       <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160" prot="private" virt="non-virtual"><scope>Engine</scope><name>Fuel</name></member>
+      <member refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" prot="private" virt="non-virtual"><scope>Engine</scope><name>fuel</name></member>
       <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a" prot="private" virt="non-virtual"><scope>Engine</scope><name>GASOLINE</name></member>
       <member refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" prot="private" virt="non-virtual"><scope>Engine</scope><name>gearRatios</name></member>
+      <member refid="classEngine_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Engine</scope><name>Serialization</name></member>
       <member refid="classEngine_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Engine</scope><name>Typemaps</name></member>
     </listofallmembers>
   </compounddef>

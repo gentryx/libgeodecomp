@@ -4,6 +4,7 @@
 class Tire
 {
     friend class Typemaps;
+    friend class Serialization;
 
     double treadDepth;
 };

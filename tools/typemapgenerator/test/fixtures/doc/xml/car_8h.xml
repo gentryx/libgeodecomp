@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
   <compounddef id="car_8h" kind="file">
     <compoundname>car.h</compoundname>
     <includes refid="engine_8h" local="yes">engine.h</includes>
@@ -109,19 +109,20 @@
 <codeline lineno="7"><highlight class="normal"></highlight></codeline>
 <codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classMech" kindref="compound">Mech</ref>;</highlight></codeline>
 <codeline lineno="9"><highlight class="normal"></highlight></codeline>
-<codeline lineno="10" refid="classCar" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCar" kindref="compound">Car</ref><sp/></highlight></codeline>
+<codeline lineno="10" refid="classCar" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCar" kindref="compound">Car</ref></highlight></codeline>
 <codeline lineno="11"><highlight class="normal">{</highlight></codeline>
 <codeline lineno="12" refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
-<codeline lineno="13"><highlight class="normal"></highlight></codeline>
-<codeline lineno="14" refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/><ref refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kindref="member">NumWheels</ref><sp/>=<sp/>4;</highlight></codeline>
-<codeline lineno="15" refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classWheel" kindref="compound">Wheel</ref><sp/><ref refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" kindref="member">wheels</ref>[<ref refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kindref="member">NumWheels</ref>];</highlight></codeline>
-<codeline lineno="16" refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classEngine" kindref="compound">Engine</ref><sp/><ref refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" kindref="member">engine</ref>;</highlight></codeline>
-<codeline lineno="17"><highlight class="normal"></highlight></codeline>
-<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
-<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classMech" kindref="compound">Mech</ref><sp/><ref refid="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" kindref="member">transformToMech</ref>();</highlight></codeline>
-<codeline lineno="20"><highlight class="normal">};</highlight></codeline>
-<codeline lineno="21"><highlight class="normal"></highlight></codeline>
-<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="13" refid="classCar_1a36ab6ccf31a4ecabebe771ed2a806419" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCar_1a36ab6ccf31a4ecabebe771ed2a806419" kindref="member">Serialization</ref>;</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15" refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/><ref refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kindref="member">NumWheels</ref><sp/>=<sp/>4;</highlight></codeline>
+<codeline lineno="16" refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classWheel" kindref="compound">Wheel</ref><sp/><ref refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" kindref="member">wheels</ref>[<ref refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kindref="member">NumWheels</ref>];</highlight></codeline>
+<codeline lineno="17" refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classEngine" kindref="compound">Engine</ref><sp/><ref refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" kindref="member">engine</ref>;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classMech" kindref="compound">Mech</ref><sp/><ref refid="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" kindref="member">transformToMech</ref>();</highlight></codeline>
+<codeline lineno="21"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
     <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h"/>
   </compounddef>

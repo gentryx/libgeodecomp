@@ -7,6 +7,7 @@
 class Wheel
 {
     friend class Typemaps;
+    friend class Serialization;
     Tire tire;
     Rim rim;
 };

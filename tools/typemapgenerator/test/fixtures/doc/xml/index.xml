@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.3.1">
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.4">
   <compound refid="classBMW" kind="class"><name>BMW</name>
     <member refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kind="variable"><name>price</name></member>
@@ -7,6 +7,7 @@
   </compound>
   <compound refid="classCar" kind="class"><name>Car</name>
     <member refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCar_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
     <member refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kind="variable"><name>NumWheels</name></member>
     <member refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" kind="variable"><name>wheels</name></member>
     <member refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" kind="variable"><name>engine</name></member>
@@ -24,6 +25,10 @@
   </compound>
   <compound refid="classCoord" kind="class"><name>Coord</name>
   </compound>
+  <compound refid="classCoord_3_011_01_4" kind="class"><name>Coord&lt; 1 &gt;</name>
+    <member refid="classCoord_3_011_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classCoord_3_011_01_4_1acee005d94f907f13449ef45532214750" kind="variable"><name>x</name></member>
+  </compound>
   <compound refid="classCoord_3_012_01_4" kind="class"><name>Coord&lt; 2 &gt;</name>
     <member refid="classCoord_3_012_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classCoord_3_012_01_4_1a624d168ba1b3f61e7b548580773d1604" kind="variable"><name>x</name></member>
@@ -31,6 +36,7 @@
   </compound>
   <compound refid="classCoord_3_013_01_4" kind="class"><name>Coord&lt; 3 &gt;</name>
     <member refid="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classCoord_3_013_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
     <member refid="classCoord_3_013_01_4_1a7f23cad7fae04639fb4c8770e6bcca27" kind="variable"><name>x</name></member>
     <member refid="classCoord_3_013_01_4_1a39b49f99ea21d316f463fa50ea152d10" kind="variable"><name>y</name></member>
     <member refid="classCoord_3_013_01_4_1a0b00dc30f1500de789d9d1f21708ec2d" kind="variable"><name>z</name></member>
@@ -63,6 +69,7 @@
     <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a" kind="enumvalue"><name>GASOLINE</name></member>
     <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160ac9683a44177815441e518e565f09f95c" kind="enumvalue"><name>AUTOGAS</name></member>
     <member refid="classEngine_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classEngine_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
     <member refid="classEngine_1ad874d9a0b419440d94ab443becb64257" kind="variable"><name>capacity</name></member>
     <member refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" kind="variable"><name>fuel</name></member>
     <member refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" kind="variable"><name>gearRatios</name></member>
@@ -77,6 +84,10 @@
     <member refid="classFloatCoordTypemapsHelper_1ae015781e3d331f35b1104e57b02b6d9e" kind="variable"><name>pB</name></member>
     <member refid="classFloatCoordTypemapsHelper_1a4348e974d6e694d18311f6faab7d9398" kind="variable"><name>pC</name></member>
   </compound>
+  <compound refid="classLabel" kind="class"><name>Label</name>
+    <member refid="classLabel_1a9aa7565718cf40964685991843243ca2" kind="friend"><name>Serialize</name></member>
+    <member refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" kind="variable"><name>name</name></member>
+  </compound>
   <compound refid="classLuxury" kind="class"><name>Luxury</name>
     <member refid="classLuxury_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classLuxury_1a1b98504fe4a14567b66939a31ca20ab9" kind="variable"><name>sort</name></member>
@@ -90,14 +101,17 @@
   </compound>
   <compound refid="classRim" kind="class"><name>Rim</name>
     <member refid="classRim_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classRim_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
     <member refid="classRim_1af3aa5502df8e41468157661e861b7773" kind="variable"><name>chromePlated</name></member>
   </compound>
   <compound refid="classTire" kind="class"><name>Tire</name>
     <member refid="classTire_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classTire_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
     <member refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" kind="variable"><name>treadDepth</name></member>
   </compound>
   <compound refid="classWheel" kind="class"><name>Wheel</name>
     <member refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
+    <member refid="classWheel_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
     <member refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" kind="variable"><name>tire</name></member>
     <member refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" kind="variable"><name>rim</name></member>
   </compound>
@@ -119,6 +133,8 @@
   <compound refid="engine_8h" kind="file"><name>engine.h</name>
   </compound>
   <compound refid="floatcoordbase_8h" kind="file"><name>floatcoordbase.h</name>
+  </compound>
+  <compound refid="label_8h" kind="file"><name>label.h</name>
   </compound>
   <compound refid="luxury_8h" kind="file"><name>luxury.h</name>
   </compound>

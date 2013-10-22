@@ -12,6 +12,7 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     ] ],
     [ "coord.h", "coord_8h.html", [
       [ "Coord", "classCoord.html", null ],
+      [ "Coord< 1 >", "classCoord_3_011_01_4.html", "classCoord_3_011_01_4" ],
       [ "Coord< 2 >", "classCoord_3_012_01_4.html", "classCoord_3_012_01_4" ],
       [ "Coord< 3 >", "classCoord_3_013_01_4.html", "classCoord_3_013_01_4" ]
     ] ],
@@ -25,6 +26,9 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "floatcoordbase.h", "floatcoordbase_8h.html", [
       [ "FloatCoord", "classFloatCoord.html", "classFloatCoord" ],
       [ "FloatCoordTypemapsHelper", "classFloatCoordTypemapsHelper.html", "classFloatCoordTypemapsHelper" ]
+    ] ],
+    [ "label.h", "label_8h.html", [
+      [ "Label", "classLabel.html", "classLabel" ]
     ] ],
     [ "luxury.h", "luxury_8h.html", [
       [ "Luxury", "classLuxury.html", "classLuxury" ]

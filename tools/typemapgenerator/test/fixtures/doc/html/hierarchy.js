@@ -5,6 +5,7 @@ var hierarchy =
     ] ],
     [ "CarContainer", "classCarContainer.html", null ],
     [ "Coord< DIMENSIONS >", "classCoord.html", null ],
+    [ "Coord< 1 >", "classCoord_3_011_01_4.html", null ],
     [ "Coord< 2 >", "classCoord_3_012_01_4.html", null ],
     [ "Coord< 3 >", "classCoord_3_013_01_4.html", null ],
     [ "CoordContainer< DIMENSIONS >", "classCoordContainer.html", null ],
@@ -24,6 +25,7 @@ var hierarchy =
     [ "FloatCoord< 2 >", "classFloatCoord.html", null ],
     [ "FloatCoord< 4 >", "classFloatCoord.html", null ],
     [ "FloatCoordTypemapsHelper", "classFloatCoordTypemapsHelper.html", null ],
+    [ "Label", "classLabel.html", null ],
     [ "Luxury", "classLuxury.html", [
       [ "BMW", "classBMW.html", null ]
     ] ],

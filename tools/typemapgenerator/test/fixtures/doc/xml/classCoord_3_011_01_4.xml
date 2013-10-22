@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
+  <compounddef id="classCoord_3_011_01_4" kind="class" prot="public">
+    <compoundname>Coord&lt; 1 &gt;</compoundname>
+    <includes refid="coord_8h" local="no">coord.h</includes>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="classCoord_3_011_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class Serialization</definition>
+        <argsstring></argsstring>
+        <name>Serialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="9" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="classCoord_3_011_01_4_1acee005d94f907f13449ef45532214750" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Coord&lt; 1 &gt;::x</definition>
+        <argsstring></argsstring>
+        <name>x</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="11" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="7" bodyend="12"/>
+    <listofallmembers>
+      <member refid="classCoord_3_011_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Coord&lt; 1 &gt;</scope><name>Serialization</name></member>
+      <member refid="classCoord_3_011_01_4_1acee005d94f907f13449ef45532214750" prot="public" virt="non-virtual"><scope>Coord&lt; 1 &gt;</scope><name>x</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

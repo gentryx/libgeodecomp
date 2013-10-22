@@ -5,6 +5,7 @@ var classEngine =
       [ "GASOLINE", "classEngine.html#a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a", null ],
       [ "AUTOGAS", "classEngine.html#a0840fcf48cfd34c39baba4da1c3c2160ac9683a44177815441e518e565f09f95c", null ]
     ] ],
+    [ "Serialization", "classEngine.html#a36ab6ccf31a4ecabebe771ed2a806419", null ],
     [ "Typemaps", "classEngine.html#afc4f4c9697c6a1241774b044f6fbeb3f", null ],
     [ "capacity", "classEngine.html#ad874d9a0b419440d94ab443becb64257", null ],
     [ "fuel", "classEngine.html#a63e4cfe1b4cb0316ef7020fc3d7b2e61", null ],

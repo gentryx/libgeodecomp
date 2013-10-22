@@ -4,6 +4,13 @@
 template<int DIMENSIONS>
 class Coord;
 
+class Coord<1>
+{
+    friend class Serialization;
+public:
+    int x;
+};
+
 class Coord<2>
 {
     friend class Typemaps;
@@ -14,6 +21,7 @@ public:
 class Coord<3>
 {
     friend class Typemaps;
+    friend class Serialization;
 public:
     int x, y, z;
 };

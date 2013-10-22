@@ -1,23 +1,23 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
   <compounddef id="luxury_8h" kind="file">
     <compoundname>luxury.h</compoundname>
     <includedby refid="bmw_8h" local="yes">src/bmw.h</includedby>
     <invincdepgraph>
-      <node id="60">
+      <node id="63">
         <label>src/main.cpp</label>
         <link refid="main_8cpp"/>
       </node>
-      <node id="58">
+      <node id="61">
         <label>src/luxury.h</label>
         <link refid="luxury.h"/>
-        <childnode refid="59" relation="include">
+        <childnode refid="62" relation="include">
         </childnode>
       </node>
-      <node id="59">
+      <node id="62">
         <label>src/bmw.h</label>
         <link refid="bmw_8h"/>
-        <childnode refid="60" relation="include">
+        <childnode refid="63" relation="include">
         </childnode>
       </node>
     </invincdepgraph>

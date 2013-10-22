@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
   <compounddef id="pair_8h" kind="file">
     <compoundname>pair.h</compoundname>
     <includes refid="coord_8h" local="yes">coord.h</includes>
     <incdepgraph>
-      <node id="95">
+      <node id="98">
         <label>src/pair.h</label>
         <link refid="pair.h"/>
-        <childnode refid="96" relation="include">
+        <childnode refid="99" relation="include">
         </childnode>
       </node>
-      <node id="96">
+      <node id="99">
         <label>coord.h</label>
         <link refid="coord_8h"/>
       </node>

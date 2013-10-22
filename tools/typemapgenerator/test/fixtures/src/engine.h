@@ -4,6 +4,7 @@
 class Engine
 {
     friend class Typemaps;
+    friend class Serialization;
 
     enum Fuel {DIESEL, GASOLINE, AUTOGAS};
 

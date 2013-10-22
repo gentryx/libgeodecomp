@@ -1,77 +1,77 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
   <compounddef id="wheel_8h" kind="file">
     <compoundname>wheel.h</compoundname>
     <includes refid="tire_8h" local="yes">tire.h</includes>
     <includes refid="rim_8h" local="yes">rim.h</includes>
     <includedby refid="car_8h" local="yes">src/car.h</includedby>
     <incdepgraph>
-      <node id="118">
-        <label>src/wheel.h</label>
-        <link refid="wheel.h"/>
-        <childnode refid="119" relation="include">
-        </childnode>
-        <childnode refid="120" relation="include">
-        </childnode>
-      </node>
-      <node id="120">
-        <label>rim.h</label>
-        <link refid="rim_8h"/>
-      </node>
-      <node id="119">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
-      </node>
-    </incdepgraph>
-    <invincdepgraph>
-      <node id="122">
-        <label>src/car.h</label>
-        <link refid="car_8h"/>
-        <childnode refid="123" relation="include">
-        </childnode>
-        <childnode refid="125" relation="include">
-        </childnode>
-        <childnode refid="127" relation="include">
-        </childnode>
-        <childnode refid="128" relation="include">
-        </childnode>
-        <childnode refid="124" relation="include">
-        </childnode>
-      </node>
-      <node id="124">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
-      </node>
-      <node id="128">
-        <label>src/carcontainer.h</label>
-        <link refid="carcontainer_8h"/>
-      </node>
       <node id="121">
         <label>src/wheel.h</label>
         <link refid="wheel.h"/>
         <childnode refid="122" relation="include">
         </childnode>
-      </node>
-      <node id="126">
-        <label>src/mech.cpp</label>
-        <link refid="mech_8cpp"/>
-      </node>
-      <node id="125">
-        <label>src/mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="122" relation="include">
+        <childnode refid="123" relation="include">
         </childnode>
+      </node>
+      <node id="123">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="122">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="125">
+        <label>src/car.h</label>
+        <link refid="car_8h"/>
         <childnode refid="126" relation="include">
+        </childnode>
+        <childnode refid="128" relation="include">
+        </childnode>
+        <childnode refid="130" relation="include">
+        </childnode>
+        <childnode refid="131" relation="include">
+        </childnode>
+        <childnode refid="127" relation="include">
         </childnode>
       </node>
       <node id="127">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+      <node id="131">
+        <label>src/carcontainer.h</label>
+        <link refid="carcontainer_8h"/>
+      </node>
+      <node id="124">
+        <label>src/wheel.h</label>
+        <link refid="wheel.h"/>
+        <childnode refid="125" relation="include">
+        </childnode>
+      </node>
+      <node id="129">
+        <label>src/mech.cpp</label>
+        <link refid="mech_8cpp"/>
+      </node>
+      <node id="128">
+        <label>src/mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="125" relation="include">
+        </childnode>
+        <childnode refid="129" relation="include">
+        </childnode>
+      </node>
+      <node id="130">
         <label>src/car.cpp</label>
         <link refid="car_8cpp"/>
       </node>
-      <node id="123">
+      <node id="126">
         <label>src/bmw.h</label>
         <link refid="bmw_8h"/>
-        <childnode refid="124" relation="include">
+        <childnode refid="127" relation="include">
         </childnode>
       </node>
     </invincdepgraph>
@@ -87,14 +87,15 @@
 <codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="tire_8h" kindref="compound">tire.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="rim_8h" kindref="compound">rim.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="6"><highlight class="normal"></highlight></codeline>
-<codeline lineno="7" refid="classWheel" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classWheel" kindref="compound">Wheel</ref><sp/></highlight></codeline>
+<codeline lineno="7" refid="classWheel" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classWheel" kindref="compound">Wheel</ref></highlight></codeline>
 <codeline lineno="8"><highlight class="normal">{</highlight></codeline>
 <codeline lineno="9" refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
-<codeline lineno="10" refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classTire" kindref="compound">Tire</ref><sp/><ref refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" kindref="member">tire</ref>;</highlight></codeline>
-<codeline lineno="11" refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classRim" kindref="compound">Rim</ref><sp/><ref refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" kindref="member">rim</ref>;</highlight></codeline>
-<codeline lineno="12"><highlight class="normal">};</highlight></codeline>
-<codeline lineno="13"><highlight class="normal"></highlight></codeline>
-<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="10" refid="classWheel_1a36ab6ccf31a4ecabebe771ed2a806419" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classWheel_1a36ab6ccf31a4ecabebe771ed2a806419" kindref="member">Serialization</ref>;</highlight></codeline>
+<codeline lineno="11" refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classTire" kindref="compound">Tire</ref><sp/><ref refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" kindref="member">tire</ref>;</highlight></codeline>
+<codeline lineno="12" refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classRim" kindref="compound">Rim</ref><sp/><ref refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" kindref="member">rim</ref>;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
     <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h"/>
   </compounddef>
