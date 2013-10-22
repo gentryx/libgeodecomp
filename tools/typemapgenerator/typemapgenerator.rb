@@ -1,5 +1,6 @@
 require 'mpiparser'
 require 'mpigenerator'
+require 'boostgenerator'
 require 'datatype'
 
 class TypemapGenerator
@@ -12,12 +13,22 @@ class TypemapGenerator
                         namespace=nil,
                         header_pattern=/^$/,
                         header_replacement="",
-                        macro_guard=nil)
+                        macro_guard_mpi=nil,
+                        macro_guard_boost=nil)
       parser = MPIParser.new(xml_path, sloppy, namespace)
-      generator = MPIGenerator.new(template_path, namespace, macro_guard)
-      classes = parser.find_classes_to_be_serialized.sort
-      options = parser.resolve_forest(classes) + [header_pattern, header_replacement]
-      return generator.generate_forest(*options)
+
+      mpi_generator = MPIGenerator.new(template_path, namespace, macro_guard_mpi)
+      boost_generator = BoostGenerator.new(template_path, namespace, macro_guard_boost)
+
+      mpi_classes = parser.find_classes_to_be_serialized("Typemaps").sort
+      boost_classes = parser.find_classes_to_be_serialized("Serialization").sort
+
+      mpi_options = parser.resolve_forest(mpi_classes)         + [header_pattern, header_replacement]
+      boost_options = parser.shallow_resolution(boost_classes) + [header_pattern, header_replacement]
+
+      mpi_ret = mpi_generator.generate_forest(*mpi_options)
+      boost_ret = boost_generator.generate_forest(*boost_options)
+      return boost_ret + mpi_ret
     end
 
     def find_classes_to_be_serialized(xml_path)

@@ -58,9 +58,13 @@ opts = OptionParser.new do |o|
     options[:header_pattern] = $1
     options[:header_replacement] = $2
   end
-  o.on("--macro-guard MACRO",
-       "encapsulate code in #ifdef(MACRO), #endif guards") do |macro|
-    options[:macro_guard] = macro
+  o.on("--macro-guard-mpi MACRO",
+       "encapsulate MPI code in #ifdef(MACRO), #endif guards") do |macro|
+    options[:macro_guard_mpi] = macro
+  end
+  o.on("--macro-guard-boost MACRO",
+       "encapsulate Boost Serialization code in #ifdef(MACRO), #endif guards") do |macro|
+    options[:macro_guard_boost] = macro
   end
   o.on("-p", "--profile",
        "profile execution") do
@@ -155,15 +159,17 @@ if options[:profiling]
 end
 
 output_path = Pathname.new(ARGV[1] || "./")
-header, source =
+boost_header, mpi_header, mpi_source =
   TypemapGenerator.generate_forest(xml_path, basedir,
                                    options[:sloppy],
                                    options[:namespace],
                                    /#{options[:header_pattern]}/,
                                    options[:header_replacement],
-                                   options[:macro_guard])
-File.open(output_path + "typemaps.h",  "w").write(header)
-File.open(output_path + "typemaps.#{options[:extension]}", "w").write(source)
+                                   options[:macro_guard_mpi],
+                                   options[:macro_guard_boost])
+File.open(output_path + "serialization.h", "w").write(boost_header)
+File.open(output_path + "typemaps.h", "w").write(mpi_header)
+File.open(output_path + "typemaps.#{options[:extension]}", "w").write(mpi_source)
 
 if options[:profiling]
   profile = RubyProf.stop

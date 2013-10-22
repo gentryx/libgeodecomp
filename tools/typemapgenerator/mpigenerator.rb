@@ -1,23 +1,13 @@
-require 'pathname'
+require 'basicgenerator'
 
 # Here we generate the C++ code that will in turn create the typemaps
 # for MPI.
 class MPIGenerator
-  def initialize(template_path="./", namespace=nil, macro_guard=nil)
-    @path = Pathname.new(template_path)
-    @namespace = namespace
+  include BasicGenerator
 
-    if namespace
-      @namespace_guard = namespace.upcase + "_"
-      @namespace_begin = "namespace #{namespace} {\n"
-      @namespace_end = "}\n"
-    else
-      @namespace_guard = ""
-      @namespace_begin = ""
-      @namespace_end = ""
-    end
-
-    @macro_guard = macro_guard
+  def initialize(template_path="./", namespace=nil, macro_guard_mpi=nil)
+    init_generator(template_path, namespace)
+    @macro_guard_mpi   = macro_guard_mpi
   end
 
   def simple_name(name)
@@ -47,50 +37,6 @@ class MPIGenerator
     member_specs = member_specs1 + member_specs2
     ret.sub!(/ *MEMBERSPECS/, member_specs.sort.join(",\n"))
   end
-
-  # Creating a serialize() function for Boost is much simpler than
-  # creating one for MPI as we only need a list of the class' member
-  # names and parent types.
-  def generate_boost_serialize_function(klass, members, parents)
-    ret = <<EOF
-    template<typename ARCHIVE>
-    inline
-    static void serialize(ARCHIVE& archive, #{klass}& object, const unsigned /*version*/)
-    {
-EOF
-
-    parents.keys.sort.each do |parent_type|
-      ret += <<EOF
-        archive & boost::serialization::base_object<#{parent_type} >(object);
-EOF
-    end
-
-    members.keys.sort.each do |member|
-      ret += <<EOF
-        archive & object.#{member};
-EOF
-    end
-
-    ret += <<EOF
-    }
-
-EOF
-
-    return ret
-  end
-
-  # By default Boost Serialization will look in its own namespace for
-  # suitable serialization functions. Those are defined here.
-  def generate_boost_namespace_link(klass)
-    return <<EOF
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, #{klass}& object, const unsigned version)
-{
-    Typemaps::serialize(archive, object, version);
-}
-EOF
-  end
-
 
   # The Typemap Class needs a header file, declaring all the static
   # variables, macros and so on. This method will generate it's code.
@@ -126,40 +72,7 @@ EOF
     end
     ret.sub!(/.*LOOKUP_DEFINITIONS/, lookups.join("\n"))
 
-    serializations = classes.map do |klass|
-      generate_boost_serialize_function(klass, resolved_classes[klass], resolved_parents[klass])
-    end
-    ret.sub!(/.*BOOST_SERIALIZATIION_DEFINITIONS/, serializations.join("\n"))
-
-    serializations = classes.map do |klass|
-      generate_boost_namespace_link(klass)
-    end
-
-    namespace = ""
-    if !@namespace.nil?
-      namespace = <<EOF
-using namespace #{@namespace};
-EOF
-    end
-
-    ret.sub!(/.*BOOST_NAMESPACE_LINK/, ([ namespace ] + serializations).join("\n"))
-
-    if @macro_guard
-      return guard(ret)
-    end
-
-    return ret
-  end
-
-  def map_headers(headers, header_pattern, header_replacement)
-    h = headers.map do |header|
-      header_name = header
-      if !header_replacement.nil?
-        header_name = header.gsub(header_pattern, header_replacement)
-      end
-      "#include <#{header_name}>"
-    end
-    return h.join("\n")
+    return guard(@macro_guard_mpi, ret)
   end
 
   # The Typemap Class needs a source file, containing all the method
@@ -185,20 +98,16 @@ EOF
     end
     ret.sub!(/.+ASSIGNMENTS/, assignments.join("\n"))
 
-    if @macro_guard
-      return guard(ret)
+    if @macro_guard_mpi
+      return guard(@macro_guard_mpi, ret)
     end
 
-    return ret;
+    return ret
   end
 
   # wraps the code generation for multiple typemaps.
   def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers, header_pattern=nil, header_replacement=nil)
     return [generate_header(topological_class_sortation, datatype_map, resolved_classes, resolved_parents, headers, header_pattern, header_replacement),
             generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)]
-  end
-
-  def guard(ret)
-    return "#include<libgeodecomp/config.h>\n#ifdef #{@macro_guard}\n#{ret}\n#endif\n"
   end
 end

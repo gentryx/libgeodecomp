@@ -28,7 +28,7 @@ class MPIParser
     # @log.level = Logger::DEBUG
     @member_cache = {}
 
-    class_files = `grep "friend class Typemaps" #{path}/class*.xml | cut -d : -f 1`.split("\n")
+    class_files = grep_typemap_candidates(path)
     @xml_docs = { }
     @xml_cache = {}
 
@@ -66,10 +66,22 @@ class MPIParser
 
     @datatype_map = Datatype.new
     @datatype_map.merge!(map_enums)
-    classes_to_be_serialized = find_classes_to_be_serialized
-    @type_hierarchy_closure = @datatype_map.keys.to_set +
-      classes_to_be_serialized
+    classes_to_be_serialized =
+      find_classes_to_be_serialized("Typemaps") +
+      find_classes_to_be_serialized("Serialization")
+    @type_hierarchy_closure = @datatype_map.keys.to_set + classes_to_be_serialized
     @all_classes = classes_to_be_serialized
+  end
+
+  def grep_typemap_candidates(path)
+    files = []
+
+    ["Typemaps", "Serialization"].each do |klass|
+      files += `grep "friend class #{klass}"             #{path}/class*.xml | cut -d : -f 1`.split("\n")
+      files += `grep "<definition>#{klass}</definition>" #{path}/class*.xml | cut -d : -f 1`.split("\n")
+    end
+
+    return files.uniq
   end
 
   def get_xml(filename)
@@ -128,13 +140,41 @@ class MPIParser
             @datatype_map, topological_class_sortation, headers]
   end
 
+  def shallow_resolution(classes)
+    classes = classes.sort
+
+    members = {}
+    parents = {}
+    template_params = {}
+
+    classes.each do |klass|
+      members[klass] = get_members(klass)
+      parents[klass] = get_parents(klass)
+      template_params[klass] = template_parameters(klass)
+    end
+
+    headers = classes.map { |klass| find_header(klass) }
+
+    return [members, parents, template_params, classes, headers]
+  end
+
   def template_parameters(klass)
-    xpath = "doxygen/compounddef/templateparamlist/param/declname"
+    xpath = "doxygen/compounddef/templateparamlist/param"
     doc = get_xml(@filename_cache[klass])
 
     template_params = []
     doc.elements.each(xpath) do |spec|
-      template_params.push spec.text
+      type = spec.get_elements("type")[0].text
+      if type.nil?
+        type = spec.get_elements("type")[0].get_elements("ref")[0].text
+      end
+
+      s = {
+        :name => spec.get_elements("declname")[0].text,
+        :type => type
+      }
+
+      template_params.push s
     end
 
     return template_params
@@ -147,7 +187,9 @@ class MPIParser
     class_name = $2
 
     @all_classes.each do |c|
-      c_template_params = template_parameters(c)
+      c_template_param_names = template_parameters(c).map do |param|
+        param[:name]
+      end
       members = get_members(c)
 
       members.each do |name, spec|
@@ -161,7 +203,7 @@ class MPIParser
           values.map! { |v| v.strip }
 
           res = values.any? do |v|
-            c_template_params.include?(v)
+            c_template_param_names.include?(v)
           end
 
           params.push values if !res
@@ -212,7 +254,9 @@ class MPIParser
       members = get_members(klass)
       parents = get_parents(klass)
 
-      template_params = template_parameters(klass)
+      template_params = template_parameters(klass).map do |param|
+        param[:name]
+      end
 
       @log.debug "----------------------------------"
       @log.info  "resolve_class(#{klass})"
@@ -347,7 +391,6 @@ class MPIParser
 
       map = map_orig.clone
       map[:type] = lookup
-      map[:class] = map_orig[:type]
       resolved[name] = map
     end
     return resolved
@@ -605,12 +648,12 @@ class MPIParser
     raise "no header found for class #{klass}"
   end
 
-  def find_classes_to_be_serialized
+  def find_classes_to_be_serialized(friend_name)
     ret = Set.new
 
     sweep_all_classes do |klass, member|
       if member.attributes["kind"] == "friend" &&
-          member.elements["name"].text == "Typemaps"
+          member.elements["name"].text == friend_name
         ret.add klass
       end
     end
