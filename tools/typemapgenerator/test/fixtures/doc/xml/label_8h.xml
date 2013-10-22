@@ -27,7 +27,7 @@
 <codeline lineno="5"><highlight class="normal"></highlight></codeline>
 <codeline lineno="6" refid="classLabel" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel" kindref="compound">Label</ref></highlight></codeline>
 <codeline lineno="7"><highlight class="normal">{</highlight></codeline>
-<codeline lineno="8" refid="classLabel_1a9aa7565718cf40964685991843243ca2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel_1a9aa7565718cf40964685991843243ca2" kindref="member">Serialize</ref>;</highlight></codeline>
+<codeline lineno="8" refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" kindref="member">Serialization</ref>;</highlight></codeline>
 <codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
 <codeline lineno="10" refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" kindref="member">name</ref>;</highlight></codeline>
 <codeline lineno="11"><highlight class="normal">};</highlight></codeline>

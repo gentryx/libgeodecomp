@@ -5,7 +5,7 @@
 
 class Label
 {
-    friend class Serialize;
+    friend class Serialization;
 public:
     std::string name;
 };

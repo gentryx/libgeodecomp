@@ -4,11 +4,11 @@
     <compoundname>Label</compoundname>
     <includes refid="label_8h" local="no">label.h</includes>
       <sectiondef kind="friend">
-      <memberdef kind="friend" id="classLabel_1a9aa7565718cf40964685991843243ca2" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
-        <definition>friend class Serialize</definition>
+        <definition>friend class Serialization</definition>
         <argsstring></argsstring>
-        <name>Serialize</name>
+        <name>Serialization</name>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
@@ -40,7 +40,7 @@
     <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="6" bodyend="11"/>
     <listofallmembers>
       <member refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" prot="public" virt="non-virtual"><scope>Label</scope><name>name</name></member>
-      <member refid="classLabel_1a9aa7565718cf40964685991843243ca2" prot="private" virt="non-virtual"><scope>Label</scope><name>Serialize</name></member>
+      <member refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Label</scope><name>Serialization</name></member>
     </listofallmembers>
   </compounddef>
 </doxygen>
