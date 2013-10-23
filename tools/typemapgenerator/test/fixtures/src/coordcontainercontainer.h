@@ -7,7 +7,6 @@ class CoordContainerContainer
 {
     friend class Typemaps;
 
-    CoordContainer<1> cargo1;
     CoordContainer<2> cargo2;
     CoordContainer<3> cargo3;
     CoordContainer<4> cargo4;

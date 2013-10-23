@@ -31,9 +31,9 @@ class TypemapGenerator
       return boost_ret + mpi_ret
     end
 
-    def find_classes_to_be_serialized(xml_path)
+    def find_classes_to_be_serialized(xml_path, friend_name)
       parser = MPIParser.new(xml_path)
-      classes = parser.find_classes_to_be_serialized
+      classes = parser.find_classes_to_be_serialized(friend_name)
       return classes.map { |klass| parser.find_header(klass) }
     end
   end

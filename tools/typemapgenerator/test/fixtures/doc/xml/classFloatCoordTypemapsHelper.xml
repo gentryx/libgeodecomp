@@ -64,28 +64,28 @@
     <detaileddescription>
     </detaileddescription>
     <collaborationgraph>
-      <node id="59">
+      <node id="58">
         <label>FloatCoord&lt; 4 &gt;</label>
         <link refid="classFloatCoord"/>
       </node>
-      <node id="58">
+      <node id="57">
         <label>FloatCoord&lt; 2 &gt;</label>
         <link refid="classFloatCoord"/>
       </node>
-      <node id="57">
+      <node id="56">
         <label>FloatCoord&lt; 1 &gt;</label>
         <link refid="classFloatCoord"/>
       </node>
-      <node id="56">
+      <node id="55">
         <label>FloatCoordTypemapsHelper</label>
         <link refid="classFloatCoordTypemapsHelper"/>
-        <childnode refid="57" relation="usage">
+        <childnode refid="56" relation="usage">
           <edgelabel>pA</edgelabel>
         </childnode>
-        <childnode refid="58" relation="usage">
+        <childnode refid="57" relation="usage">
           <edgelabel>pB</edgelabel>
         </childnode>
-        <childnode refid="59" relation="usage">
+        <childnode refid="58" relation="usage">
           <edgelabel>pC</edgelabel>
         </childnode>
       </node>

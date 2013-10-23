@@ -22,32 +22,6 @@ public:
         return lookup((T*)0);
     }
 
-    template<typename ARCHIVE>
-    inline
-    static void serialize(ARCHIVE& archive, Rim& object, const unsigned /*version*/)
-    {
-        archive & object.chromePlated;
-    }
-
-
-    template<typename ARCHIVE>
-    inline
-    static void serialize(ARCHIVE& archive, Tire& object, const unsigned /*version*/)
-    {
-        archive & object.treadDepth;
-    }
-
-
-    template<typename ARCHIVE>
-    inline
-    static void serialize(ARCHIVE& archive, Wheel& object, const unsigned /*version*/)
-    {
-        archive & object.rim;
-        archive & object.tire;
-    }
-
-
-
 private:
     template<typename T>
     static MPI_Aint getAddress(T *address)
@@ -167,31 +141,5 @@ private:
     }
 
 };
-
-namespace boost {
-namespace serialization {
-
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, Rim& object, const unsigned version)
-{
-    Typemaps::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, Tire& object, const unsigned version)
-{
-    Typemaps::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, Wheel& object, const unsigned version)
-{
-    Typemaps::serialize(archive, object, version);
-}
-
-
-}
-}
 
 #endif

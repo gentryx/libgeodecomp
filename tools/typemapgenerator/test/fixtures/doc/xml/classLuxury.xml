@@ -39,14 +39,14 @@
     <detaileddescription>
     </detaileddescription>
     <inheritancegraph>
-      <node id="62">
+      <node id="61">
         <label>Luxury</label>
         <link refid="classLuxury"/>
       </node>
-      <node id="63">
+      <node id="62">
         <label>BMW</label>
         <link refid="classBMW"/>
-        <childnode refid="62" relation="private-inheritance">
+        <childnode refid="61" relation="private-inheritance">
         </childnode>
       </node>
     </inheritancegraph>

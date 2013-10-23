@@ -64,42 +64,42 @@
     <detaileddescription>
     </detaileddescription>
     <collaborationgraph>
-      <node id="48">
+      <node id="47">
         <label>Coord&lt; 3 &gt;</label>
         <link refid="classCoord_3_013_01_4"/>
       </node>
-      <node id="45">
+      <node id="44">
         <label>Dummy</label>
         <link refid="classDummy"/>
-        <childnode refid="46" relation="usage">
+        <childnode refid="45" relation="usage">
           <edgelabel>p3</edgelabel>
         </childnode>
-        <childnode refid="49" relation="usage">
+        <childnode refid="48" relation="usage">
           <edgelabel>p2</edgelabel>
         </childnode>
-        <childnode refid="50" relation="usage">
+        <childnode refid="49" relation="usage">
           <edgelabel>p1</edgelabel>
         </childnode>
       </node>
-      <node id="50">
+      <node id="49">
         <label>CoordPair&lt; int, int &gt;</label>
         <link refid="classCoordPair"/>
       </node>
-      <node id="46">
+      <node id="45">
         <label>CoordPair&lt; Coord&lt; 3 &gt;, Coord&lt; 2 &gt; &gt;</label>
         <link refid="classCoordPair"/>
-        <childnode refid="47" relation="usage">
+        <childnode refid="46" relation="usage">
           <edgelabel>b</edgelabel>
         </childnode>
-        <childnode refid="48" relation="usage">
+        <childnode refid="47" relation="usage">
           <edgelabel>a</edgelabel>
         </childnode>
       </node>
-      <node id="47">
+      <node id="46">
         <label>Coord&lt; 2 &gt;</label>
         <link refid="classCoord_3_012_01_4"/>
       </node>
-      <node id="49">
+      <node id="48">
         <label>CoordPair&lt; int, double &gt;</label>
         <link refid="classCoordPair"/>
       </node>

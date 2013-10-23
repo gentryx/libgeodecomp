@@ -47,7 +47,6 @@
   </compound>
   <compound refid="classCoordContainerContainer" kind="class"><name>CoordContainerContainer</name>
     <member refid="classCoordContainerContainer_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classCoordContainerContainer_1a5b6772d353d45d3ff8259f86823d7a41" kind="variable"><name>cargo1</name></member>
     <member refid="classCoordContainerContainer_1ae0c2e5a883413699fa483d8a79cc81ad" kind="variable"><name>cargo2</name></member>
     <member refid="classCoordContainerContainer_1a8875c1cb4985bf787a213fa47d9ddc28" kind="variable"><name>cargo3</name></member>
     <member refid="classCoordContainerContainer_1a23b426913ab8a039eccc9cd3fed7ef3b" kind="variable"><name>cargo4</name></member>

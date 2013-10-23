@@ -64,21 +64,21 @@
     <detaileddescription>
     </detaileddescription>
     <collaborationgraph>
-      <node id="72">
+      <node id="71">
         <label>Wheel</label>
         <link refid="classWheel"/>
-        <childnode refid="73" relation="usage">
+        <childnode refid="72" relation="usage">
           <edgelabel>rim</edgelabel>
         </childnode>
-        <childnode refid="74" relation="usage">
+        <childnode refid="73" relation="usage">
           <edgelabel>tire</edgelabel>
         </childnode>
       </node>
-      <node id="74">
+      <node id="73">
         <label>Tire</label>
         <link refid="classTire"/>
       </node>
-      <node id="73">
+      <node id="72">
         <label>Rim</label>
         <link refid="classRim"/>
       </node>

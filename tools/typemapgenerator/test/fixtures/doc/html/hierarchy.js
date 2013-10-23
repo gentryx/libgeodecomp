@@ -9,7 +9,6 @@ var hierarchy =
     [ "Coord< 2 >", "classCoord_3_012_01_4.html", null ],
     [ "Coord< 3 >", "classCoord_3_013_01_4.html", null ],
     [ "CoordContainer< DIMENSIONS >", "classCoordContainer.html", null ],
-    [ "CoordContainer< 1 >", "classCoordContainer.html", null ],
     [ "CoordContainer< 2 >", "classCoordContainer.html", null ],
     [ "CoordContainer< 3 >", "classCoordContainer.html", null ],
     [ "CoordContainer< 4 >", "classCoordContainer.html", null ],

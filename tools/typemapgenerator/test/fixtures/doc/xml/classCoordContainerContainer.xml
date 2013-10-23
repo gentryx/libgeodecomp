@@ -19,19 +19,6 @@
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
-      <memberdef kind="variable" id="classCoordContainerContainer_1a5b6772d353d45d3ff8259f86823d7a41" prot="private" static="no" mutable="no">
-        <type><ref refid="classCoordContainer" kindref="compound">CoordContainer</ref>&lt; 1 &gt;</type>
-        <definition>CoordContainer&lt;1&gt; CoordContainerContainer::cargo1</definition>
-        <argsstring></argsstring>
-        <name>cargo1</name>
-        <briefdescription>
-        </briefdescription>
-        <detaileddescription>
-        </detaileddescription>
-        <inbodydescription>
-        </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="10" bodyend="-1"/>
-      </memberdef>
       <memberdef kind="variable" id="classCoordContainerContainer_1ae0c2e5a883413699fa483d8a79cc81ad" prot="private" static="no" mutable="no">
         <type><ref refid="classCoordContainer" kindref="compound">CoordContainer</ref>&lt; 2 &gt;</type>
         <definition>CoordContainer&lt;2&gt; CoordContainerContainer::cargo2</definition>
@@ -43,7 +30,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="10" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classCoordContainerContainer_1a8875c1cb4985bf787a213fa47d9ddc28" prot="private" static="no" mutable="no">
         <type><ref refid="classCoordContainer" kindref="compound">CoordContainer</ref>&lt; 3 &gt;</type>
@@ -56,7 +43,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="12" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classCoordContainerContainer_1a23b426913ab8a039eccc9cd3fed7ef3b" prot="private" static="no" mutable="no">
         <type><ref refid="classCoordContainer" kindref="compound">CoordContainer</ref>&lt; 4 &gt;</type>
@@ -69,7 +56,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="13" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="12" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -77,7 +64,7 @@
     <detaileddescription>
     </detaileddescription>
     <collaborationgraph>
-      <node id="38">
+      <node id="37">
         <label>CoordContainer&lt; 3 &gt;</label>
         <link refid="classCoordContainer"/>
       </node>
@@ -85,34 +72,26 @@
         <label>CoordContainerContainer</label>
         <link refid="classCoordContainerContainer"/>
         <childnode refid="36" relation="usage">
-          <edgelabel>cargo1</edgelabel>
-        </childnode>
-        <childnode refid="37" relation="usage">
           <edgelabel>cargo2</edgelabel>
         </childnode>
-        <childnode refid="38" relation="usage">
+        <childnode refid="37" relation="usage">
           <edgelabel>cargo3</edgelabel>
         </childnode>
-        <childnode refid="39" relation="usage">
+        <childnode refid="38" relation="usage">
           <edgelabel>cargo4</edgelabel>
         </childnode>
       </node>
-      <node id="39">
+      <node id="38">
         <label>CoordContainer&lt; 4 &gt;</label>
         <link refid="classCoordContainer"/>
       </node>
       <node id="36">
-        <label>CoordContainer&lt; 1 &gt;</label>
-        <link refid="classCoordContainer"/>
-      </node>
-      <node id="37">
         <label>CoordContainer&lt; 2 &gt;</label>
         <link refid="classCoordContainer"/>
       </node>
     </collaborationgraph>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="6" bodyend="14"/>
+    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="6" bodyend="13"/>
     <listofallmembers>
-      <member refid="classCoordContainerContainer_1a5b6772d353d45d3ff8259f86823d7a41" prot="private" virt="non-virtual"><scope>CoordContainerContainer</scope><name>cargo1</name></member>
       <member refid="classCoordContainerContainer_1ae0c2e5a883413699fa483d8a79cc81ad" prot="private" virt="non-virtual"><scope>CoordContainerContainer</scope><name>cargo2</name></member>
       <member refid="classCoordContainerContainer_1a8875c1cb4985bf787a213fa47d9ddc28" prot="private" virt="non-virtual"><scope>CoordContainerContainer</scope><name>cargo3</name></member>
       <member refid="classCoordContainerContainer_1a23b426913ab8a039eccc9cd3fed7ef3b" prot="private" virt="non-virtual"><scope>CoordContainerContainer</scope><name>cargo4</name></member>

@@ -63,19 +63,19 @@
     <detaileddescription>
     </detaileddescription>
     <collaborationgraph>
-      <node id="42">
+      <node id="41">
         <label>A</label>
       </node>
-      <node id="43">
+      <node id="42">
         <label>B</label>
       </node>
-      <node id="41">
+      <node id="40">
         <label>CoordPair&lt; A, B &gt;</label>
         <link refid="classCoordPair"/>
-        <childnode refid="42" relation="usage">
+        <childnode refid="41" relation="usage">
           <edgelabel>a</edgelabel>
         </childnode>
-        <childnode refid="43" relation="usage">
+        <childnode refid="42" relation="usage">
           <edgelabel>b</edgelabel>
         </childnode>
       </node>
