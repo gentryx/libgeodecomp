@@ -58,8 +58,8 @@ public:
         grids[step].paste(grid, validRegion);
         grids[step].setEdge(grid.getEdge());
 
-        for (std::size_t sender = 0; sender < mpiLayer.size(); ++sender) {
-            for (std::size_t receiver = 0; receiver < mpiLayer.size(); ++receiver) {
+        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
+            for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
                 if (sender != receiver) {
                     sendRecvGrid(sender, receiver, localGrid, validRegion, step);
                 }
@@ -69,7 +69,7 @@ public:
         mpiLayer.waitAll();
     }
 
-    void sendRecvGrid(size_t sender, size_t receiver, const GridType& grid, const Region<DIM>& validRegion, int step)
+    void sendRecvGrid(int sender, int receiver, const GridType& grid, const Region<DIM>& validRegion, int step)
     {
         if (sender == mpiLayer.rank()) {
             mpiLayer.sendRegion(validRegion, receiver);

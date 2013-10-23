@@ -34,6 +34,7 @@ class Writer
     friend class boost::serialization::access;
 #endif
 public:
+    friend class Serialization;
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;

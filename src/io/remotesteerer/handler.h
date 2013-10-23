@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_IO_REMOTESTEERER_HANDLER_H
 
 #include <libgeodecomp/io/remotesteerer/pipe.h>
+#include <libgeodecomp/misc/apitraits.h>
 
 namespace LibGeoDecomp {
 

@@ -8,7 +8,7 @@
 #include <hpx/lcos/broadcast.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
-#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/communication/serialization.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>

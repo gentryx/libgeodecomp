@@ -43,7 +43,7 @@ public:
 
     void testOuterAndInnerGhostZoneFragments()
     {
-        for (unsigned i = 0; i < layer.size(); ++i) {
+        for (int i = 0; i < layer.size(); ++i) {
             if ((i == layer.rank() - 1) || (i == layer.rank() + 1)) {
                 std::vector<Region<2> > outerFragments;
                 std::vector<Region<2> > innerFragments;

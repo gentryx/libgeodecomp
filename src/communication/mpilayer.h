@@ -178,7 +178,7 @@ public:
     /**
      * returns the number of nodes in the communicator.
      */
-    size_t size() const
+    int size() const
     {
         int ret;
         MPI_Comm_size(comm, &ret);
@@ -188,7 +188,7 @@ public:
     /**
      * returns the id number of the current node.
      */
-    size_t rank() const
+    int rank() const
     {
         int ret;
         MPI_Comm_rank(comm, &ret);
@@ -318,7 +318,7 @@ public:
     inline void allGather(
         const T *source,
         T *target,
-        const int num,
+        int num,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         MPI_Allgather(const_cast<T*>(source), num, datatype, target, num, datatype, comm);
@@ -353,7 +353,7 @@ public:
     {
         std::vector<int> displacements(size());
         displacements[0] = 0;
-        for (size_t i = 0; i < size() - 1; ++i) {
+        for (int i = 0; i < size() - 1; ++i) {
             displacements[i + 1] = displacements[i] + lengths[i];
         }
         MPI_Allgatherv(
@@ -365,7 +365,7 @@ public:
     template<typename T>
     inline std::vector<T> gather(
         const T& item,
-        const unsigned& root,
+        int root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         std::vector<T> result(size());
@@ -384,16 +384,16 @@ public:
     template<typename T>
     inline void gatherV(
         const T *source,
-        const int num,
+        int num,
         const std::vector<int>& lengths,
-        const unsigned& root,
+        int root,
         T *target,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         std::vector<int> displacements(size());
         if (rank() == root) {
             displacements[0] = 0;
-            for (size_t i = 0; i < size() - 1; ++i) {
+            for (int i = 0; i < size() - 1; ++i) {
                 displacements[i + 1] = displacements[i] + lengths[i];
             }
         }
@@ -411,13 +411,17 @@ public:
     }
 
     template<typename T>
-    inline void gatherV(const std::vector<T>& source, const std::vector<int>& lengths, unsigned root, std::vector<T>& target, 
+    inline void gatherV(
+        const std::vector<T>& source,
+        const std::vector<int>& lengths,
+        int root,
+        std::vector<T>& target,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         std::vector<int> displacements(size());
         if (rank() == root) {
             displacements[0] = 0;
-            for (size_t i = 0; i < size() - 1; ++i) {
+            for (int i = 0; i < size() - 1; ++i) {
                 displacements[i + 1] = displacements[i] + lengths[i];
             }
         }
@@ -429,15 +433,15 @@ public:
         int *displacements_ptr = lengths.size()>0 ? &displacements[0] : 0;
 
         MPI_Gatherv(
-            source_ptr
-          , source.size()
-          , datatype
-          , target_ptr
-          , lengths_ptr
-          , displacements_ptr
-          , datatype
-          , root
-          , comm);
+            source_ptr,
+            source.size(),
+            datatype,
+            target_ptr,
+            lengths_ptr,
+            displacements_ptr,
+            datatype,
+            root,
+            comm);
     }
 
 
@@ -447,7 +451,7 @@ public:
     template<typename T>
     inline T broadcast(
         const T& source,
-        const unsigned& root,
+        int root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         T buff(source);
@@ -458,8 +462,8 @@ public:
     template<typename T>
     void broadcast(
         T *buffer,
-        unsigned num,
-        unsigned root,
+        int num,
+        int root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         MPI_Bcast(buffer, num, datatype, root, comm);
@@ -468,7 +472,7 @@ public:
     template<typename T>
     inline std::vector<T> broadcastVector(
         const std::vector<T>& source,
-        const unsigned& root,
+        int root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         unsigned size = source.size();
@@ -489,7 +493,7 @@ public:
     template<typename T>
     inline void broadcastVector(
         std::vector<T> *buffer,
-        const unsigned& root,
+        int root,
         const MPI_Datatype& datatype = Typemaps::lookup<T>()) const
     {
         unsigned size = buffer->size();

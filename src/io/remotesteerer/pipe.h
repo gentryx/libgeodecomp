@@ -29,7 +29,7 @@ public:
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     Pipe(
-        unsigned root = 0,
+        int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD) :
         mpiLayer(communicator),
         root(root)
@@ -122,7 +122,7 @@ private:
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
     MPILayer mpiLayer;
-    unsigned root;
+    int root;
 
     void broadcastSteeringRequests()
     {

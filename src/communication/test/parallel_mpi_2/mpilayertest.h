@@ -15,23 +15,23 @@ public:
     void testAllGather1()
     {
         MPILayer layer;
-        std::vector<size_t> expected;
-        for (size_t i = 0; i < layer.size(); i++) {
+        std::vector<int> expected;
+        for (int i = 0; i < layer.size(); i++) {
             expected.push_back(i);
         }
-        std::vector<size_t> actual = layer.allGather(layer.rank());
+        std::vector<int> actual = layer.allGather(layer.rank());
         TS_ASSERT_EQUALS(actual, expected);
     }
 
     void testAllGather2()
     {
         MPILayer layer;
-        std::vector<size_t> expected;
-        for (size_t i = 0; i < layer.size(); i++) {
+        std::vector<int> expected;
+        for (int i = 0; i < layer.size(); i++) {
             expected.push_back(i);
         }
-        std::vector<size_t> actual(layer.size());
-        size_t rank = layer.rank();
+        std::vector<int> actual(layer.size());
+        int rank = layer.rank();
         layer.allGather(&rank, &actual[0], 1);
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -39,11 +39,11 @@ public:
     void testAllGather3()
     {
         MPILayer layer;
-        std::vector<size_t> expected;
-        for (size_t i = 0; i < layer.size(); i++) {
+        std::vector<int> expected;
+        for (int i = 0; i < layer.size(); i++) {
             expected.push_back(i);
         }
-        std::vector<size_t> actual(layer.size());
+        std::vector<int> actual(layer.size());
         layer.allGather(layer.rank(), &actual);
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -51,14 +51,14 @@ public:
     void testGather()
     {
         MPILayer layer;
-        size_t root = 0;
-        std::vector<size_t> expected_root;
-        std::vector<size_t> expected_slave;
-        for (unsigned i = 0; i < layer.size(); i++) {
+        int root = 0;
+        std::vector<int> expected_root;
+        std::vector<int> expected_slave;
+        for (int i = 0; i < layer.size(); i++) {
             expected_root.push_back(i);
         }
 
-        std::vector<size_t> actual = layer.gather(layer.rank(), root);
+        std::vector<int> actual = layer.gather(layer.rank(), root);
         if (layer.rank() == root) {
             TS_ASSERT_EQUALS(actual, expected_root);
         } else {
@@ -69,7 +69,7 @@ public:
     void testBroadcast()
     {
         MPILayer layer;
-        unsigned root = 0;
+        int root = 0;
         unsigned expected = 42;
         unsigned actual = 23;
         unsigned source = (layer.rank() == root)? expected : 0;
@@ -81,7 +81,7 @@ public:
     void testBroadcast2()
     {
         MPILayer layer;
-        unsigned root = 0;
+        int root = 0;
         std::string expected = "hello world";
         std::string buffer = (layer.rank() == root)? expected : std::string(expected.size(), 'X');
 
@@ -92,7 +92,7 @@ public:
     void testBroadcastVector()
     {
         MPILayer layer;
-        unsigned root = 0;
+        int root = 0;
         std::vector<double> expected;
         expected += 2,4,24;
         std::vector<double> actual;

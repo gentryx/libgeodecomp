@@ -32,6 +32,7 @@ template<>
 class Coord<1>
 {
 public:
+    friend class Serialization;
     friend class Typemaps;
 
     static Coord<1> diagonal(const int& nx)
@@ -181,6 +182,7 @@ template<>
 class Coord<2>
 {
 public:
+    friend class Serialization;
     friend class Typemaps;
 
     static Coord<2> diagonal(const int& nx)
@@ -356,6 +358,7 @@ template<>
 class Coord<3>
 {
 public:
+    friend class Serialization;
     friend class Typemaps;
 
     static Coord<3> diagonal(const int& nx)

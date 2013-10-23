@@ -47,7 +47,7 @@ public:
     RemoteSteerer(
         unsigned period,
         int port,
-        unsigned root = 0,
+        int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD) :
         Steerer<CELL_TYPE>(period),
         port(port),

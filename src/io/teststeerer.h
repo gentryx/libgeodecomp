@@ -32,7 +32,8 @@ public:
         eventStep(eventStep),
         cycleOffset(cycleOffset),
         terminalStep(terminalStep),
-        lastStep(-1)
+        lastStep(-1),
+        lastEvent(SteererEvent::STEERER_ALL_DONE)
     {}
 
     virtual void nextStep(
@@ -47,6 +48,15 @@ public:
     {
         // ensure setRegion() has actually been called
         TS_ASSERT(!region.empty());
+
+        // lastCall should have been true if we've switche time steps.
+        // But only if we werent initializing before (or are now
+        // finishing up). Hence the even check...
+        if (lastEvent == event) {
+            TS_ASSERT_EQUALS(previousLastCall, (lastStep != step));
+        }
+        lastEvent = event;
+        previousLastCall = lastCall;
 
         // ensure that all parts of this->region have been accounted for
         if (lastStep != step) {
@@ -80,6 +90,8 @@ private:
     unsigned cycleOffset;
     unsigned terminalStep;
     unsigned lastStep;
+    SteererEvent lastEvent;
+    bool previousLastCall;
     Region<DIM> unaccountedRegion;
 };
 

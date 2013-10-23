@@ -8,7 +8,7 @@
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/communication/serialization.h>
 #endif
 
 using namespace LibGeoDecomp;
