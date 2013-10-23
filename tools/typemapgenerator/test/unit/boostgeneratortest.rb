@@ -11,8 +11,16 @@ class TestMPIGenerator < Test::Unit::TestCase
       @parser.shallow_resolution(@classes)
   end
 
-  def test_basic
-    # fixme
-  end
+  def test_generate_boost_serialize_function
+    classes = %w{Car}
+    members = @parser.shallow_resolution(classes)[0]
 
+    actual_def = @generator.generate_boost_serialize_function(classes[0],
+                                                              members[classes[0]],
+                                                              @resolved_parents[classes[0]],
+                                                              @template_params[classes[0]])
+    expected_def = File.read("./test/fixtures/references/boostserialize.h")
+
+    assert_equal(expected_def, actual_def)
+  end
 end
