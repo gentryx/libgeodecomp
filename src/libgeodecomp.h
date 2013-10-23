@@ -10,11 +10,11 @@
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
 #include <mpi.h>
+#include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #endif
 
-#include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
