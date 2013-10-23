@@ -82,7 +82,7 @@ public:
         protected PARENT ## Implementation                          \
     {                                                               \
     public:                                                         \
-        static const size_t ID = EVENT_ID;                          \
+        static const int ID = EVENT_ID;                             \
                                                                     \
         template<typename CHRONOMETER>                              \
         CLASS_NAME ## Implementation(CHRONOMETER *chrono) :         \
@@ -104,7 +104,7 @@ public:
     {                                                               \
     public:                                                         \
         typedef CLASS_NAME ## Implementation Implementation;        \
-        static const size_t ID = EVENT_ID;                          \
+        static const int ID = EVENT_ID;                             \
                                                                     \
         template<typename CHRONOMETER>                              \
             CLASS_NAME(CHRONOMETER *chrono) :                       \
