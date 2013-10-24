@@ -5,9 +5,6 @@
 #include <stdexcept>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/access.hpp>
-#endif
 
 namespace LibGeoDecomp {
 
@@ -29,12 +26,10 @@ template <class CELL_TYPE> class MonolithicSimulator;
 template<typename CELL_TYPE>
 class Writer
 {
-    friend class WriterTest;
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
 public:
     friend class Serialization;
+    friend class WriterTest;
+
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
@@ -92,13 +87,6 @@ protected:
     // Writer::period was default-initialized to 0.
     Writer()
     {}
-
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & prefix;
-        ar & period;
-    }
 #endif
 };
 

@@ -6,10 +6,6 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/base_object.hpp>
-#endif
-
 namespace LibGeoDecomp {
 
 enum SteererEvent {
@@ -30,6 +26,7 @@ template<typename CELL_TYPE>
 class Steerer
 {
 public:
+    friend class Serialization;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef Coord<Topology::DIM> CoordType;
@@ -113,15 +110,6 @@ public:
     {
         return period;
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    void serialize(Archive& ar, unsigned)
-    {
-        ar & region;
-        ar & period;
-    }
-#endif
 
 protected:
     Region<Topology::DIM> region;
