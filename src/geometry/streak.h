@@ -15,8 +15,10 @@ namespace LibGeoDecomp {
 template<int DIM>
 class Streak
 {
-    friend class Typemaps;
 public:
+    friend class Serialization;
+    friend class Typemaps;
+
     inline explicit Streak(
         const Coord<DIM>& origin = Coord<DIM>(),
         int endX = 0) :
@@ -34,23 +36,14 @@ public:
     bool operator==(const Streak& other) const
     {
         return
-            origin == other.origin &&
-            endX == other.endX;
+            (origin == other.origin) &&
+            (endX == other.endX);
     }
 
     int length() const
     {
         return endX - origin.x();
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    void serialize(Archive& ar, unsigned)
-    {
-        ar & origin;
-        ar & endX;
-    }
-#endif
 
     Coord<DIM> origin;
     int endX;

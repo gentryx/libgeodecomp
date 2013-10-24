@@ -328,6 +328,8 @@ template<int DIM>
 class Region
 {
 public:
+    friend class Serialization;
+
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
@@ -723,17 +725,6 @@ public:
     {
         return indices[dim].end();
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    inline void serialize(Archive& ar, unsigned)
-    {
-        ar & indices;
-        ar & myBoundingBox;
-        ar & mySize;
-        ar & geometryCacheTainted;
-    }
-#endif
 
 private:
     VecType indices[DIM];
