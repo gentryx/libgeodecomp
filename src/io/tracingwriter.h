@@ -20,9 +20,7 @@ template<typename CELL_TYPE>
 class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
 public:
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
+    friend class Serialization;
     using Writer<CELL_TYPE>::NANO_STEPS;
 
     typedef boost::posix_time::ptime Time;
@@ -46,7 +44,6 @@ public:
         lastStep(0),
         maxSteps(maxSteps)
     {}
-
 
     ParallelWriter<CELL_TYPE> * clone()
     {
@@ -78,22 +75,6 @@ private:
     Time startTime;
     unsigned lastStep;
     unsigned maxSteps;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
-        ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
-        ar & outputRank;
-        ar & lastStep;
-        ar & maxSteps;
-    }
-
-    TracingWriter() :
-        stream(std::cerr)
-    {}
-#endif
 
     void stepFinished(unsigned step, const Coord<DIM>& globalDimensions, WriterEvent event)
     {
@@ -161,6 +142,40 @@ private:
     }
 };
 
+class Serialization;
+
+}
+
+namespace boost {
+namespace serialization {
+
+template<typename ARCHIVE, typename CELL_TYPE>
+inline
+static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned);
+
+template<typename ARCHIVE>
+inline
+static void serialize(ARCHIVE& archive, std::ostream& object, const unsigned)
+{
+    // intentionally left empty to ignore serialization/deserialization
+}
+
+template<typename ARCHIVE>
+inline
+static void serialize(ARCHIVE& archive, boost::posix_time::ptime& object, const unsigned)
+{
+    // intentionally left empty to ignore serialization/deserialization
+}
+
+template<class Archive, typename CELL_TYPE>
+inline void load_construct_data(
+    Archive& archive, LibGeoDecomp::TracingWriter<CELL_TYPE> *object, const unsigned version)
+{
+    ::new(object)LibGeoDecomp::TracingWriter<CELL_TYPE>(1, 1);
+    serialize(archive, *object, version);
+}
+
+}
 }
 
 #endif

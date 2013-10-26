@@ -22,6 +22,7 @@ class FixedArray
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef T* iterator;
 
     FixedArray(size_t elements = 0) :
         elements(elements)
@@ -33,7 +34,6 @@ public:
         std::fill(begin(), end(), value);
     }
 
-    typedef T* iterator;
     inline T& operator[](const size_t& i)
     {
         return store[i];

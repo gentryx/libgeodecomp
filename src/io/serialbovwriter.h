@@ -19,10 +19,9 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE, typename SELECTOR_TYPE>
 class SerialBOVWriter : public Writer<CELL_TYPE>
 {
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
 public:
+    friend class Serialization;
+
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename SELECTOR_TYPE::VariableType VariableType;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
@@ -58,18 +57,6 @@ public:
 
 private:
     Coord<3> brickletDim;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    SerialBOVWriter()
-    {}
-
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & boost::serialization::base_object<Writer<CELL_TYPE> >(*this);
-        ar & brickletDim;
-    }
-#endif
 
     std::string filename(unsigned step, const std::string& suffix) const
     {
@@ -154,6 +141,27 @@ private:
     }
 };
 
+class Serialization;
+
+}
+
+
+namespace boost {
+namespace serialization {
+
+template<typename ARCHIVE, typename CELL_TYPE, typename SELECTOR_TYPE>
+inline
+static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>& object, const unsigned /*version*/);
+
+template<class Archive, typename CELL_TYPE, typename SELECTOR_TYPE>
+inline void load_construct_data(
+    Archive& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE> *object, const unsigned version)
+{
+    ::new(object)LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>("", 1);
+    serialize(archive, *object, version);
+}
+
+}
 }
 
 #endif

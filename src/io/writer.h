@@ -78,16 +78,6 @@ public:
 protected:
     std::string prefix;
     unsigned period;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    // fixme: we need to get rid of these default constructors as user
-    // code may inherit them and thus miss calling the "real"
-    // constructor. point in case: the marching pixels demo crashed in
-    // an unlikely place (SerialSimulator::handleOutput()). Reason:
-    // Writer::period was default-initialized to 0.
-    Writer()
-    {}
-#endif
 };
 
 }
