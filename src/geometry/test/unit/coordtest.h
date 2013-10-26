@@ -1,15 +1,16 @@
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <hpx/config.hpp>
+#include <libgeodecomp/communication/serialization.h>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#endif
+
 #include <sstream>
 #include <cxxtest/TestSuite.h>
 #include <boost/math/tools/precision.hpp>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <libgeodecomp/communication/serialization.h>
-#endif
 
 using namespace LibGeoDecomp;
 

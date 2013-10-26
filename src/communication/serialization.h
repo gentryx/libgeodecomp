@@ -12,11 +12,17 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/io/hpxwritercollector.h>
+#include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/loadbalancer/oozebalancer.h>
+#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/serialbovwriter.h>
+#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/writer.h>
 
@@ -31,14 +37,12 @@ public:
         archive & object.totalTimes;
     }
 
-
     template<typename ARCHIVE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<1 >& object, const unsigned /*version*/)
     {
         archive & object.c;
     }
-
 
     template<typename ARCHIVE>
     inline
@@ -47,14 +51,12 @@ public:
         archive & object.c;
     }
 
-
     template<typename ARCHIVE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<3 >& object, const unsigned /*version*/)
     {
         archive & object.c;
     }
-
 
     template<typename ARCHIVE, int DIM>
     inline
@@ -64,7 +66,6 @@ public:
         archive & object.origin;
     }
 
-
     template<typename ARCHIVE, typename T, int SIZE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::FixedArray<T, SIZE>& object, const unsigned /*version*/)
@@ -73,14 +74,12 @@ public:
         archive & object.store;
     }
 
-
     template<typename ARCHIVE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<1 >& object, const unsigned /*version*/)
     {
         archive & boost::serialization::base_object<LibGeoDecomp::FloatCoordBase<1 > >(object);
     }
-
 
     template<typename ARCHIVE>
     inline
@@ -89,7 +88,6 @@ public:
         archive & boost::serialization::base_object<LibGeoDecomp::FloatCoordBase<2 > >(object);
     }
 
-
     template<typename ARCHIVE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned /*version*/)
@@ -97,6 +95,19 @@ public:
         archive & boost::serialization::base_object<LibGeoDecomp::FloatCoordBase<3 > >(object);
     }
 
+    template<typename ARCHIVE, typename CELL_TYPE, typename CONVERTER>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::ParallelWriter<CELL_TYPE > >(object);
+        archive & object.sink;
+    }
+
+    template<typename ARCHIVE, typename CELL>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const unsigned /*version*/)
+    {
+    }
 
     template<typename ARCHIVE>
     inline
@@ -104,6 +115,22 @@ public:
     {
     }
 
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
+        archive & object.newLoadWeight;
+    }
+
+    template<typename ARCHIVE, typename CELL_TYPE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned /*version*/)
+    {
+        archive & object.period;
+        archive & object.prefix;
+        archive & object.region;
+    }
 
     template<typename ARCHIVE, int DIM>
     inline
@@ -115,7 +142,6 @@ public:
         archive & object.mySize;
     }
 
-
     template<typename ARCHIVE, typename CELL_TYPE, typename SELECTOR_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>& object, const unsigned /*version*/)
@@ -124,6 +150,14 @@ public:
         archive & object.brickletDim;
     }
 
+    template<typename ARCHIVE, typename CELL_TYPE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleInitializer<CELL_TYPE>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::Initializer<CELL_TYPE > >(object);
+        archive & object.dimensions;
+        archive & object.steps;
+    }
 
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
@@ -133,7 +167,6 @@ public:
         archive & object.region;
     }
 
-
     template<typename ARCHIVE, int DIM>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned /*version*/)
@@ -142,6 +175,14 @@ public:
         archive & object.origin;
     }
 
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
+        archive & object.balancer;
+        archive & object.stream;
+    }
 
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
@@ -156,7 +197,6 @@ public:
         archive & object.stream;
     }
 
-
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned /*version*/)
@@ -164,7 +204,6 @@ public:
         archive & object.period;
         archive & object.prefix;
     }
-
 
 };
 }
@@ -228,8 +267,32 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const uns
     Serialization::serialize(archive, object, version);
 }
 
+template<class ARCHIVE, typename CELL_TYPE, typename CONVERTER>
+void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::LoadBalancer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
@@ -247,6 +310,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECT
 }
 
 template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleInitializer<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
@@ -254,6 +323,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }

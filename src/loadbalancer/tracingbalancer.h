@@ -14,14 +14,7 @@ namespace LibGeoDecomp {
 class TracingBalancer : public LoadBalancer
 {
 public:
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
-
-    TracingBalancer() :
-        stream(std::cout)
-    {
-    }
+    friend class Serialization;
 
     TracingBalancer(LoadBalancer *balancer, std::ostream& stream = std::cout) :
         balancer(balancer),
@@ -41,17 +34,22 @@ public:
 private:
     boost::shared_ptr<LoadBalancer> balancer;
     std::ostream& stream;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template<typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & boost::serialization::base_object<LoadBalancer>(*this);
-        ar & balancer;
-    }
-#endif
 };
 
+}
+
+namespace boost {
+namespace serialization {
+
+template<class Archive, typename CELL_TYPE>
+inline void load_construct_data(
+    Archive& archive, LibGeoDecomp::TracingBalancer *object, const unsigned version)
+{
+    ::new(object)LibGeoDecomp::TracingBalancer(0);
+    serialize(archive, *object, version);
+}
+
+}
 }
 
 #endif

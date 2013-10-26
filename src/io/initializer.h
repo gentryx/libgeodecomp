@@ -5,10 +5,6 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/base_object.hpp>
-#endif
-
 namespace LibGeoDecomp {
 
 /**
@@ -22,12 +18,10 @@ template<typename CELL>
 class Initializer
 {
 public:
+    friend class Serialization;
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
-    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     static const int DIM = Topology::DIM;
 
     /**
@@ -46,14 +40,6 @@ public:
     virtual Coord<DIM> gridDimensions() const = 0;
     virtual unsigned maxSteps() const = 0;
     virtual unsigned startStep() const = 0;
-
-private:
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    void serialize(Archive& ar, unsigned)
-    {}
-#endif
 };
 
 }

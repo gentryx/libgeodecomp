@@ -1,8 +1,8 @@
+#ifndef LIBGEODECOMP_IO_HPXWRITERCOLLECTOR_H
+#define LIBGEODECOMP_IO_HPXWRITERCOLLECTOR_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
-#ifndef LIBGEODECOMP_IO_HPXWRITERCOLLECTOR_H
-#define LIBGEODECOMP_IO_HPXWRITERCOLLECTOR_H
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/hpxwritersink.h>
@@ -105,7 +105,7 @@ template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterCollector : public ParallelWriter<CELL_TYPE>
 {
 public:
-    friend class boost::serialization::access;
+    friend class Serialization;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
 
@@ -148,17 +148,29 @@ public:
 
 private:
     SinkType sink;
-
-    HpxWriterCollector() {}
-
-    template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & boost::serialization::base_object<ParallelWriter<CELL_TYPE> >(*this);
-        ar & sink;
-    }
 };
 
+class Serialization;
+
+}
+
+namespace boost {
+namespace serialization {
+
+template<typename ARCHIVE, typename CELL_TYPE, typename CONVERTER>
+inline
+static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>& object, const unsigned);
+
+template<class Archive, typename CELL_TYPE, typename CONVERTER>
+inline void load_construct_data(
+    Archive& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER> *object, const unsigned version)
+{
+    ::new(object)LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>(
+        LibGeoDecomp::HpxWriterSink<CELL_TYPE, CONVERTER>());
+    serialize(archive, *object, version);
+}
+
+}
 }
 
 #endif
