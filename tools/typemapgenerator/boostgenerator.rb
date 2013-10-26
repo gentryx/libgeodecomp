@@ -38,7 +38,6 @@ EOF
 
     ret += <<EOF
     }
-
 EOF
 
     return ret
