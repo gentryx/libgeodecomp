@@ -1,5 +1,8 @@
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_FEATURE_HPX
 #include <hpx/config.hpp>
+#endif
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <libgeodecomp/communication/serialization.h>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>

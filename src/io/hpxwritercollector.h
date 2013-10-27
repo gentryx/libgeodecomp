@@ -1,6 +1,13 @@
 #ifndef LIBGEODECOMP_IO_HPXWRITERCOLLECTOR_H
 #define LIBGEODECOMP_IO_HPXWRITERCOLLECTOR_H
 
+namespace LibGeoDecomp {
+
+template<typename CELL_TYPE, typename CONVERTER>
+class HpxWriterCollector;
+
+}
+
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
 
