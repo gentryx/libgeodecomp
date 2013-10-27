@@ -33,7 +33,7 @@ public:
         cycleOffset(cycleOffset),
         terminalStep(terminalStep),
         lastStep(-1),
-        lastEvent(SteererEvent::STEERER_ALL_DONE)
+        lastEvent(STEERER_ALL_DONE)
     {}
 
     virtual void nextStep(
