@@ -28,8 +28,11 @@ public:
     class API :
         public APITraits::HasTorusTopology<3>,
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
-        public APITraits::HasNanoSteps<3>
+        public APITraits::HasNanoSteps<3>,
+        public APITraits::HasStaticData<double>
     {};
+
+    static double staticData;
 
     MyFancyDummyCell(int val = 0) :
         val(val)
@@ -43,6 +46,8 @@ public:
 
     int val;
 };
+
+double MyFancyDummyCell::staticData;
 
 namespace LibGeoDecomp {
 
@@ -94,6 +99,14 @@ public:
             expected += "MyFancyDummyCell::update(666)\n";
         }
         TS_ASSERT_EQUALS(myTestEvents.str(), expected);
+    }
+
+    void testStaticDataHandling()
+    {
+        typedef APITraits::SelectStaticData<MyFancyDummyCell>::Value StaticData;
+        StaticData data(12.34);
+        std::swap(MyFancyDummyCell::staticData, data);
+        TS_ASSERT_EQUALS(12.34, MyFancyDummyCell::staticData);
     }
 };
 

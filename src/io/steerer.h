@@ -27,6 +27,7 @@ class Steerer
 {
 public:
     friend class Serialization;
+    typedef typename APITraits::SelectStaticData<CELL_TYPE>::Value StaticData;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef Coord<Topology::DIM> CoordType;
@@ -54,8 +55,12 @@ public:
          * possible time step and will be synchronized among all parts
          * of the grid (i.e. all nodes and all threads/GPUs therein).
          */
-        void setStaticData()
-        {}
+        void setStaticData(const StaticData& data)
+        {
+            // immediate assignent is good enough for now. we might
+            // want to hook into here for more complex NUMA scenarios.
+            CELL_TYPE::staticData = data;
+        }
 
         bool simulationEnded()
         {

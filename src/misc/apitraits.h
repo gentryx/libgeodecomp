@@ -36,79 +36,7 @@ public:
     class TrueType
     {};
 
-    // check whether cell has an updateLineX() member
-    template<typename CELL, typename HAS_UPDATE_LINE_X = void>
-    class SelectUpdateLineX
-    {
-    public:
-        typedef FalseType Value;
-    };
-
-    template<typename CELL>
-    class SelectUpdateLineX<CELL, typename CELL::API::SupportsUpdateLineX>
-    {
-    public:
-        typedef TrueType Value;
-    };
-
-    // does CELL restrict itself to FixedCoord when accessing neighboring cells?
-    template<typename CELL, typename HAS_FIXED_COORDS_ONLY_UPDATE = void>
-    class SelectFixedCoordsOnlyUpdate
-    {
-    public:
-        typedef FalseType Value;
-    };
-
-    template<typename CELL>
-    class SelectFixedCoordsOnlyUpdate<CELL, typename CELL::API::SupportsFixedCoordsOnlyUpdate>
-    {
-    public:
-        typedef TrueType Value;
-    };
-
-    // discover which stencil a cell wants to use
-    template<typename CELL, typename HAS_STENCIL = void>
-    class SelectStencil
-    {
-    public:
-        typedef Stencils::Moore<2, 1> Value;
-    };
-
-    template<typename CELL>
-    class SelectStencil<CELL, typename CELL::API::SupportsStencil>
-    {
-    public:
-        typedef typename CELL::API::Stencil Value;
-    };
-
-    // of how many nano steps (intermediate steps) is a whole cell cycle composed?
-    template<typename CELL, typename HAS_NANO_STEPS = void>
-    class SelectNanoSteps
-    {
-    public:
-        static const unsigned VALUE = 1;
-    };
-
-    template<typename CELL>
-    class SelectNanoSteps<CELL, typename CELL::API::SupportsNanoSteps>
-    {
-    public:
-        static const unsigned VALUE = CELL::API::NANO_STEPS;
-    };
-
-    template<typename CELL, typename HAS_TOPOLOGY = void>
-    class SelectTopology
-    {
-    public:
-        typedef Topologies::Cube<2>::Topology Value;
-    };
-
-    template<typename CELL>
-    class SelectTopology<CELL, typename CELL::API::SupportsTopology>
-    {
-    public:
-        typedef typename CELL::API::Topology Value;
-    };
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     // determine whether a cell supports SoA (Struct of Arrays)
     // storage via LibFlatArray.
@@ -136,6 +64,25 @@ public:
         typedef void SupportsSoA;
     };
 
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * Check whether cell has an updateLineX() member.
+     */
+    template<typename CELL, typename HAS_UPDATE_LINE_X = void>
+    class SelectUpdateLineX
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectUpdateLineX<CELL, typename CELL::API::SupportsUpdateLineX>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
     /**
      * This qualifier should be used to flag models which sport a static
      * updateLineX() function, which is expected to update a streak of
@@ -145,6 +92,25 @@ public:
     {
     public:
         typedef void SupportsUpdateLineX;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * Does CELL restrict itself to FixedCoord when accessing neighboring cells?
+     */
+    template<typename CELL, typename HAS_FIXED_COORDS_ONLY_UPDATE = void>
+    class SelectFixedCoordsOnlyUpdate
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectFixedCoordsOnlyUpdate<CELL, typename CELL::API::SupportsFixedCoordsOnlyUpdate>
+    {
+    public:
+        typedef TrueType Value;
     };
 
     /**
@@ -159,6 +125,25 @@ public:
         typedef void SupportsFixedCoordsOnlyUpdate;
     };
 
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * discover which stencil a cell wants to use
+     */
+    template<typename CELL, typename HAS_STENCIL = void>
+    class SelectStencil
+    {
+    public:
+        typedef Stencils::Moore<2, 1> Value;
+    };
+
+    template<typename CELL>
+    class SelectStencil<CELL, typename CELL::API::SupportsStencil>
+    {
+    public:
+        typedef typename CELL::API::Stencil Value;
+    };
+
     /**
      * Allows cells to override the default stencil shape/radius.
      */
@@ -169,6 +154,25 @@ public:
         typedef void SupportsStencil;
 
         typedef STENCIL Stencil;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * Of how many nano steps (intermediate steps) is a whole cell cycle composed?
+     */
+    template<typename CELL, typename HAS_NANO_STEPS = void>
+    class SelectNanoSteps
+    {
+    public:
+        static const unsigned VALUE = 1;
+    };
+
+    template<typename CELL>
+    class SelectNanoSteps<CELL, typename CELL::API::SupportsNanoSteps>
+    {
+    public:
+        static const unsigned VALUE = CELL::API::NANO_STEPS;
     };
 
     /**
@@ -183,6 +187,22 @@ public:
         typedef void SupportsNanoSteps;
 
         static const unsigned NANO_STEPS = CELL_NANO_STEPS;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_TOPOLOGY = void>
+    class SelectTopology
+    {
+    public:
+        typedef Topologies::Cube<2>::Topology Value;
+    };
+
+    template<typename CELL>
+    class SelectTopology<CELL, typename CELL::API::SupportsTopology>
+    {
+    public:
+        typedef typename CELL::API::Topology Value;
     };
 
     /**
@@ -213,8 +233,11 @@ public:
     class HasTorusTopology : public HasTopology<typename Topologies::Torus<DIM>::Topology>
     {};
 
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    // determine whether a cell supports custom speeds
+    /**
+     * determine whether a cell has an architecture-specific speed indicator defined
+     */
     template<typename CELL, typename HAS_SPEED = void>
     class SelectSpeed
     {
@@ -235,7 +258,33 @@ public:
      */
     class HasSpeed
     {
+    public:
         typedef void SupportsSpeed;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_SPEED = void>
+    class SelectStaticData
+    {
+    public:
+        typedef char Value;
+    };
+
+    template<typename CELL>
+    class SelectStaticData<CELL, typename CELL::API::SupportsStaticData>
+    {
+    public:
+        typedef typename CELL::API::StaticData Value;
+    };
+
+
+    template<typename STATIC_DATA>
+    class HasStaticData
+    {
+    public:
+        typedef void SupportsStaticData;
+        typedef STATIC_DATA StaticData;
     };
 };
 
