@@ -47,7 +47,7 @@ public:
     void testSize()
     {
         MPILayer layer;
-        TS_ASSERT_EQUALS((unsigned)1, layer.size());
+        TS_ASSERT_EQUALS(1, layer.size());
     }
 
     void testRank()
