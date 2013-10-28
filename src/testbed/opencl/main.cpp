@@ -139,8 +139,8 @@ int main(int argc, char **argv)
     int steps = 100;
 
     typedef APITraits::SelectTopology<JacobiCell>::Value Topology;
-    boost::shared_ptr<HiParSimulator::PartitionManager<Topology>> partitionManager(
-        new HiParSimulator::PartitionManager<Topology>(
+    boost::shared_ptr<PartitionManager<Topology> > partitionManager(
+        new PartitionManager<Topology>(
             CoordBox<3>(Coord<3>(0,0,0), Coord<3>::diagonal(size))));
 
     boost::shared_ptr<JacobiCellInitializer> initizalizer(
