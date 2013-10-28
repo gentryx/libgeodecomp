@@ -17,13 +17,13 @@ public:
     typedef typename CoordBox<DIM>::Iterator Iterator;
 
     StripingPartition(
-        const Coord<DIM>& _origin=Coord<DIM>(),
-        const Coord<DIM>& _dimensions=Coord<DIM>(),
-        const long& offset=0,
-        const std::vector<std::size_t>& weights=std::vector<std::size_t>(2)) :
+        const Coord<DIM>& origin = Coord<DIM>(),
+        const Coord<DIM>& newDimensions = Coord<DIM>(),
+        const long& offset = 0,
+        const std::vector<std::size_t>& weights = std::vector<std::size_t>(2)) :
         SpaceFillingCurve<DIM>(offset, weights),
-        origin(_origin),
-        dimensions(_dimensions)
+        origin(origin),
+        dimensions(newDimensions)
     {
         if (dimensions.prod() == 0) {
             // set all dimensions to 1 except for the last one to
