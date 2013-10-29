@@ -3,20 +3,39 @@
 require 'pathname'
 
 class TestBase
-  def is_generated?(filename)
-    # don't expect header guards for source files
-    return true if filename =~ /\.cpp$/
-    return true if filename =~ /\.cu$/
-    # add exception for auto-generated file
-    return true if filename =~ /typemaps\.h/
+  def is_test_header?(filename)
+    return true if filename =~ /test\.h$/
+    return true if filename =~ /testguard\.h/
 
     return false
+  end
+
+  def is_generated?(filename)
+    # add exception for auto-generated file
+    return true if filename =~ /config\.h$/
+    return true if filename =~ /typemaps\.h/
+    return true if filename =~ /typemaps\.cpp/
+    return true if filename =~ /serialization\.h/
+    return true if filename =~ /test\.cpp$/
+
+    return false
+  end
+
+  def is_source?(filename)
+    return true if filename =~ /\.cu/
+    return true if filename =~ /\.cpp/
+
+    return false
+  end
+
+  def is_commonly_excluded?(filename)
+    is_test_header?(filename) || is_generated?(filename) || is_source?(filename)
   end
 end
 
 class FindUndocumentedClasses < TestBase
   def test(filename, content)
-    return 0 if is_generated?(filename)
+    return 0 if is_commonly_excluded?(filename)
 
     fragment = "[^<>,]*"
     nested_template_parameters = "<#{fragment}>#{fragment}"
@@ -36,7 +55,7 @@ end
 
 class FindUnmatchedHeaderGuards < TestBase
   def test(filename, content)
-    return 0 if is_generated?(filename)
+    return 0 if is_commonly_excluded?(filename)
 
     relative_path = Pathname.new(filename).relative_path_from(@@path)
     macro = "LIBGEODECOMP_#{relative_path}".upcase.gsub(/[\/\.]/, "_")
@@ -46,7 +65,8 @@ class FindUnmatchedHeaderGuards < TestBase
 EOF
 
     if !(content =~ /#{expected_guard}/)
-      puts "#{filename}: could not find expected header guard"
+      first_line = content.split("\n")[0]
+      puts "#{filename}: could not find expected header guard (expected: #{expected_guard}, found: #{first_line})."
       return 1
     end
 
