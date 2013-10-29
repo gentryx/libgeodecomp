@@ -9,10 +9,6 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/base_object.hpp>
-#endif
-
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
@@ -35,9 +31,7 @@ template<typename CELL_TYPE>
 class ParallelWriter
 {
 public:
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
+    friend class Serialization;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
@@ -117,22 +111,6 @@ protected:
     Region<Topology::DIM> region;
     std::string prefix;
     unsigned period;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-protected:
-    ParallelWriter()
-    {}
-
-private:
-
-    template<typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & region;
-        ar & prefix;
-        ar & period;
-    }
-#endif
 };
 
 }

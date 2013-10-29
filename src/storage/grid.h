@@ -18,11 +18,6 @@
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/array.hpp>
-#endif
-
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename GRID_TYPE>
@@ -89,13 +84,9 @@ public:
 template<typename CELL_TYPE, typename TOPOLOGY=Topologies::Cube<2>::Topology>
 class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
+public:
     friend class GridTest;
     friend class ParallelStripingSimulatorTest;
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
-
-public:
     const static int DIM = TOPOLOGY::DIM;
 
 #ifndef __CODEGEARC__
@@ -334,16 +325,6 @@ private:
     Coord<DIM> dimensions;
     CellMatrix cellMatrix;
     CELL_TYPE edgeCell;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & dimensions;
-        ar & boost::serialization::make_array(cellMatrix.data(), dimensions.prod());
-        ar & edgeCell;
-    }
-#endif
 };
 
 }

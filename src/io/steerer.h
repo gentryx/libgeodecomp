@@ -6,10 +6,6 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/base_object.hpp>
-#endif
-
 namespace LibGeoDecomp {
 
 enum SteererEvent {
@@ -30,6 +26,8 @@ template<typename CELL_TYPE>
 class Steerer
 {
 public:
+    friend class Serialization;
+    typedef typename APITraits::SelectStaticData<CELL_TYPE>::Value StaticData;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
     typedef Coord<Topology::DIM> CoordType;
@@ -57,8 +55,12 @@ public:
          * possible time step and will be synchronized among all parts
          * of the grid (i.e. all nodes and all threads/GPUs therein).
          */
-        void setStaticData()
-        {}
+        void setStaticData(const StaticData& data)
+        {
+            // immediate assignent is good enough for now. we might
+            // want to hook into here for more complex NUMA scenarios.
+            CELL_TYPE::staticData = data;
+        }
 
         bool simulationEnded()
         {
@@ -113,15 +115,6 @@ public:
     {
         return period;
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template <typename Archive>
-    void serialize(Archive& ar, unsigned)
-    {
-        ar & region;
-        ar & period;
-    }
-#endif
 
 protected:
     Region<Topology::DIM> region;

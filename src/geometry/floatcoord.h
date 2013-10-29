@@ -19,6 +19,7 @@ template<>
 class FloatCoord<1> : public FloatCoordBase<1>
 {
 public:
+    friend class Serialization;
     friend class Typemaps;
 
     explicit
@@ -96,19 +97,15 @@ public:
     {
         return !(*this == a);
     }
-
-    template<typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & c[0];
-    }
 };
 
 template<>
 class FloatCoord<2> : public FloatCoordBase<2>
 {
-    friend class Typemaps;
 public:
+    friend class Serialization;
+    friend class Typemaps;
+
     explicit
     inline
     FloatCoord(
@@ -194,20 +191,15 @@ public:
     {
         return !(*this == a);
     }
-
-    template<typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & c[0];
-        ar & c[1];
-    }
 };
 
 template<>
 class FloatCoord<3> : public FloatCoordBase<3>
 {
-    friend class Typemaps;
 public:
+    friend class Serialization;
+    friend class Typemaps;
+
     explicit
     inline
     FloatCoord(
@@ -302,14 +294,6 @@ public:
     {
         return !(*this == a);
     }
-
-    template<typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & c[0];
-        ar & c[1];
-        ar & c[2];
-    }
 };
 
 /**
@@ -322,6 +306,7 @@ public:
 class FloatCoordMPIDatatypeHelper
 {
     friend class Typemaps;
+
     FloatCoord<1> a;
     FloatCoord<2> b;
     FloatCoord<3> c;

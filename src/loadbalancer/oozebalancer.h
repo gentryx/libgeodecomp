@@ -22,13 +22,11 @@ namespace LibGeoDecomp {
  */
 class OozeBalancer : public LoadBalancer
 {
+public:
+    friend class Serialization;
     friend class OozeBalancerTest1;
     friend class OozeBalancerTest2;
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
 
-public:
     /**
      * returns a new OozeBalancer instance, whose weighting for new
      * load distributions is set to newLoadWeight . A higher value
@@ -78,15 +76,6 @@ private:
 
     WeightVec equalize(const LoadVec& loads);
     LoadVec linearCombo(const WeightVec& oldLoads, const LoadVec& newLoads);
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template<typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & boost::serialization::base_object<LoadBalancer>(*this);
-        ar & newLoadWeight;
-    }
-#endif
 };
 
 }

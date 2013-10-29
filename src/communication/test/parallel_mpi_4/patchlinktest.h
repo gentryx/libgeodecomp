@@ -43,13 +43,13 @@ public:
 
     void testBasic()
     {
-        std::size_t nanoStep = 0;
-        for (std::size_t sender = 0; sender < mpiLayer.size(); ++sender) {
-            for (std::size_t receiver = 0; receiver < mpiLayer.size(); ++receiver) {
+        size_t nanoStep = 0;
+        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
+            for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
                 if (sender != receiver) {
                     Region<2>& region  = sender % 2 ? region2 : region1;
                     GridType& sendGrid = sender % 2 ? sendGrid2 : sendGrid1;
-                    std::size_t nanoStep = sender * receiver + 4711;
+                    size_t nanoStep = sender * receiver + 4711;
 
                     if (sender == mpiLayer.rank()) {
                         acc.reset(new PatchAccepterType(
@@ -90,9 +90,9 @@ public:
         std::vector<PatchAccepterType> accepters;
         std::vector<PatchProviderType> providers;
         int stride = 4;
-        std::size_t maxNanoSteps = 31;
+        size_t maxNanoSteps = 31;
 
-        for (std::size_t i = 0; i < mpiLayer.size(); ++i) {
+        for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
                 accepters << PatchAccepterType(
                     region1,
@@ -108,19 +108,19 @@ public:
             }
         }
 
-        for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
+        for (int i = 0; i < mpiLayer.size() - 1; ++i) {
             accepters[i].charge(0, maxNanoSteps, stride);
             providers[i].charge(0, maxNanoSteps, stride);
         }
 
-        for (std::size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
+        for (size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
-            for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i)
+            for (int i = 0; i < mpiLayer.size() - 1; ++i)
                 accepters[i].put(mySendGrid, boundingBox, nanoStep);
 
-            for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
-                std::size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
+            for (int i = 0; i < mpiLayer.size() - 1; ++i) {
+                size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
                 providers[i].get(&actual, boundingBox, nanoStep);
@@ -135,9 +135,9 @@ public:
         std::vector<PatchAccepterType> accepters;
         std::vector<PatchProviderType> providers;
         int stride = 4;
-        std::size_t maxNanoSteps = 100;
+        size_t maxNanoSteps = 100;
 
-        for (std::size_t i = 0; i < mpiLayer.size(); ++i) {
+        for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
                 accepters << PatchAccepterType(
                     region1,
@@ -153,20 +153,20 @@ public:
             }
         }
 
-        for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
+        for (int i = 0; i < mpiLayer.size() - 1; ++i) {
             accepters[i].charge(0, PatchLink<GridType>::ENDLESS, stride);
             providers[i].charge(0, PatchLink<GridType>::ENDLESS, stride);
         }
 
-        for (std::size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
+        for (size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
-            for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
+            for (int i = 0; i < mpiLayer.size() - 1; ++i) {
                 accepters[i].put(mySendGrid, boundingBox, nanoStep);
             }
 
-            for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
-                std::size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
+            for (int i = 0; i < mpiLayer.size() - 1; ++i) {
+                size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
                 providers[i].get(&actual, boundingBox, nanoStep);
@@ -175,7 +175,7 @@ public:
             }
         }
 
-        for (std::size_t i = 0; i < mpiLayer.size() - 1; ++i) {
+        for (int i = 0; i < mpiLayer.size() - 1; ++i) {
             accepters[i].cancel();
             providers[i].cancel();
         }

@@ -20,11 +20,9 @@ template<typename T, int SIZE>
 class FixedArray
 {
 public:
+    friend class Serialization;
     friend class Typemaps;
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    friend class boost::serialization::access;
-#endif
+    typedef T* iterator;
 
     FixedArray(size_t elements = 0) :
         elements(elements)
@@ -36,7 +34,6 @@ public:
         std::fill(begin(), end(), value);
     }
 
-    typedef T* iterator;
     inline T& operator[](const size_t& i)
     {
         return store[i];
@@ -275,15 +272,6 @@ public:
 
         elements = num;
     }
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-    template<class Archive>
-    inline void serialize(Archive& archive, const unsigned int version)
-    {
-        archive & store;
-        archive & elements;
-    }
-#endif
 
     inline size_t size() const
     {

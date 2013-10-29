@@ -193,6 +193,7 @@ class Chronometer
 {
 public:
     friend class ChronometerTest;
+    friend class Serialization;
     friend class Typemaps;
 
     // measure one time interval per class of events
@@ -202,12 +203,6 @@ public:
         totalTimes(NUM_INTERVALS, 0)
     {
         reset();
-    }
-
-    template <typename ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & totalTimes;
     }
 
     inline const double& operator[](int intervalID) const

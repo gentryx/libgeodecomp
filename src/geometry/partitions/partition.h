@@ -23,13 +23,14 @@ public:
     inline Partition(
         // fixme: drop offset and bounding box from all partitions in favor of simulation region specifier?
         const long& offset,
-        const std::vector<std::size_t>& _weights) :
-        weights(_weights)
+        const std::vector<std::size_t>& weights) :
+        weights(weights)
     {
         startOffsets.resize(weights.size() + 1);
         startOffsets[0] = offset;
-        for (std::size_t i = 0; i < weights.size(); ++i)
+        for (std::size_t i = 0; i < weights.size(); ++i) {
             startOffsets[i + 1] = startOffsets[i] + weights[i];
+        }
     }
 
     virtual ~Partition()

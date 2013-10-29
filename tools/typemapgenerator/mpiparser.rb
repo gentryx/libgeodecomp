@@ -159,6 +159,7 @@ class MPIParser
   end
 
   def template_parameters(klass)
+    @log.debug "template_parameters(#{klass})"
     xpath = "doxygen/compounddef/templateparamlist/param"
     doc = get_xml(@filename_cache[klass])
 
@@ -169,14 +170,29 @@ class MPIParser
         type = spec.get_elements("type")[0].get_elements("ref")[0].text
       end
 
+      declname_elem = spec.get_elements("declname")[0]
+      name = nil
+
+      if declname_elem.nil?
+        if type =~ /typename (\w)+/
+          name = $1
+          type = "typename"
+        else
+          raise "faled to parse template parameter #{type} for class #{klass}"
+        end
+      else
+        name = declname_elem.text
+      end
+
       s = {
-        :name => spec.get_elements("declname")[0].text,
+        :name => name,
         :type => type
       }
 
       template_params.push s
     end
 
+    @log.debug "template_parameters(#{klass}) done"
     return template_params
   end
 
@@ -187,6 +203,7 @@ class MPIParser
     class_name = $2
 
     @all_classes.each do |c|
+      @log.debug "used_template_parameters(#{klass}) -> #{c}"
       c_template_param_names = template_parameters(c).map do |param|
         param[:name]
       end
@@ -358,7 +375,7 @@ class MPIParser
 
   # returns an array containing all parent classes.
   def get_parents(klass)
-    @log.info "get_parents(#{klass}"
+    @log.info "get_parents(#{klass})"
 
     filename = class_to_filename(klass)
     doc = get_xml(filename)
@@ -437,6 +454,7 @@ class MPIParser
       :type => extract_type(member),
       :cardinality => resolve_cardinality(member)
     }
+
     return [name, spec]
   end
 
@@ -467,7 +485,7 @@ class MPIParser
   # gathers the cardinality for a member. It distinguishes simple
   # members (e.g. "int foo") from arrays (e.g. "int bar[Doedel]").
   def resolve_cardinality(member)
-    @log.debug "resolve_cardinality(#{member})"
+    @log.debug "resolve_cardinality(#{member.to_s[0...10]})"
 
     argsString = member.elements["argsstring"]
 
