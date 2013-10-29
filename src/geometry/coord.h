@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_COORD_H
-#define LIBGEODECOMP_MISC_COORD_H
+#ifndef LIBGEODECOMP_GEOMETRY_COORD_H
+#define LIBGEODECOMP_GEOMETRY_COORD_H
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)

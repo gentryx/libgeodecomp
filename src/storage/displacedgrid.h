@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_DISPLACEDGRID_H
-#define LIBGEODECOMP_MISC_DISPLACEDGRID_H
+#ifndef LIBGEODECOMP_STORAGE_DISPLACEDGRID_H
+#define LIBGEODECOMP_STORAGE_DISPLACEDGRID_H
 
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>

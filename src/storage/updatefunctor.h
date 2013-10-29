@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
-#define LIBGEODECOMP_MISC_UPDATEFUNCTOR_H
+#ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
+#define LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>

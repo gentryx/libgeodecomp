@@ -1,8 +1,8 @@
+#ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_UPDATEGROUPSERVER_H
+#define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_UPDATEGROUPSERVER_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
-#ifndef LIBGEODECOMP_PARALLELIZATION_SERVER_HPXUPDATEGROUP_H
-#define LIBGEODECOMP_PARALLELIZATION_SERVER_HPXUPDATEGROUP_H
 
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>

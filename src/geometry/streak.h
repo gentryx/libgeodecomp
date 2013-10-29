@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_STREAK_H
-#define LIBGEODECOMP_MISC_STREAK_H
+#ifndef LIBGEODECOMP_GEOMETRY_STREAK_H
+#define LIBGEODECOMP_GEOMETRY_STREAK_H
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/coord.h>

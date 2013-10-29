@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_SOAGRID_H
-#define LIBGEODECOMP_MISC_SOAGRID_H
+#ifndef LIBGEODECOMP_STORAGE_SOAGRID_H
+#define LIBGEODECOMP_STORAGE_SOAGRID_H
 
 #include <libflatarray/flat_array.hpp>
 #include <libgeodecomp/geometry/coord.h>

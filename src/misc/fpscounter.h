@@ -1,9 +1,9 @@
-#ifndef LIBGEODECOMP_EXAMPLES_LATTICEGAS_FRAMECOUNTER_H
-#define LIBGEODECOMP_EXAMPLES_LATTICEGAS_FRAMECOUNTER_H
+#ifndef LIBGEODECOMP_MISC_FPSCOUNTER_H
+#define LIBGEODECOMP_MISC_FPSCOUNTER_H
 
 #include <libgeodecomp/misc/chronometer.h>
 
-using namespace LibGeoDecomp;
+namespace LibGeoDecomp {
 
 class FPSCounter
 {
@@ -36,5 +36,7 @@ private:
     volatile long long startTime;
     volatile long long frames;
 };
+
+}
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_GRID_H
-#define LIBGEODECOMP_MISC_GRID_H
+#ifndef LIBGEODECOMP_STORAGE_GRID_H
+#define LIBGEODECOMP_STORAGE_GRID_H
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)

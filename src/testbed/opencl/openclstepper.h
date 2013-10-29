@@ -1,11 +1,11 @@
-#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
-#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_OPENCLSTEPPER_H
+#ifndef LIBGEODECOMP_TESTBED_OPENCL_OPENCLSTEPPER_H
+#define LIBGEODECOMP_TESTBED_OPENCL_OPENCLSTEPPER_H
 
 #include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 
-#include "openclwrapper.h"
+#include <libgeodecomp/testbed/opencl/openclwrapper.h>
 
 namespace LibGeoDecomp {
 

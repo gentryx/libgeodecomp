@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_FIXEDNEIGHBORHOOD_H
-#define LIBGEODECOMP_MISC_FIXEDNEIGHBORHOOD_H
+#ifndef LIBGEODECOMP_STORAGE_FIXEDNEIGHBORHOOD_H
+#define LIBGEODECOMP_STORAGE_FIXEDNEIGHBORHOOD_H
 
 #include <libflatarray/flat_array.hpp>
 #include <libgeodecomp/geometry/fixedcoord.h>

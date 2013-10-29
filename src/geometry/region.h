@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_REGION_H
-#define LIBGEODECOMP_MISC_REGION_H
+#ifndef LIBGEODECOMP_GEOMETRY_REGION_H
+#define LIBGEODECOMP_GEOMETRY_REGION_H
 
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>

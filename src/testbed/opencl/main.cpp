@@ -3,7 +3,7 @@
 #include <iostream>
 #include <libgeodecomp/libgeodecomp.h>
 
-#include "openclstepper.h"
+#include <libgeodecomp/testbed/opencl/openclstepper.h>
 
 using namespace LibGeoDecomp;
 

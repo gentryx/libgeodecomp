@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_POINTERNEIGHBORHOOD_H
-#define LIBGEODECOMP_MISC_POINTERNEIGHBORHOOD_H
+#ifndef LIBGEODECOMP_STORAGE_POINTERNEIGHBORHOOD_H
+#define LIBGEODECOMP_STORAGE_POINTERNEIGHBORHOOD_H
 
 #include <libgeodecomp/geometry/fixedcoord.h>
 #include <libgeodecomp/geometry/stencils.h>

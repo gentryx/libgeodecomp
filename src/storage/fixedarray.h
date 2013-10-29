@@ -1,12 +1,8 @@
-#ifndef LIBGEODECOMP_MISC_FIXEDARRAY_H
-#define LIBGEODECOMP_MISC_FIXEDARRAY_H
+#ifndef LIBGEODECOMP_STORAGE_FIXEDARRAY_H
+#define LIBGEODECOMP_STORAGE_FIXEDARRAY_H
 
 #include <stdexcept>
 #include <libgeodecomp/config.h>
-
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/base_object.hpp>
-#endif
 
 namespace LibGeoDecomp {
 

@@ -1,5 +1,5 @@
-#ifndef fixme_cudastepperlib_h
-#define fixme_cudastepperlib_h
+#ifndef LIBGEODECOMP_TESTBED_REVERSETIMEMIGRATION_CUDASTEPPERLIB_H
+#define LIBGEODECOMP_TESTBED_REVERSETIMEMIGRATION_CUDASTEPPERLIB_H
 
 class CudaStepperLib
 {

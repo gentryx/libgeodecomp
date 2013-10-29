@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_COORDMAP_H
-#define LIBGEODECOMP_MISC_COORDMAP_H
+#ifndef LIBGEODECOMP_STORAGE_COORDMAP_H
+#define LIBGEODECOMP_STORAGE_COORDMAP_H
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/fixedcoord.h>

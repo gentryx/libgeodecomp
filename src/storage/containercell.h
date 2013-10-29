@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_MISC_CONTAINERCELL_H
-#define LIBGEODECOMP_MISC_CONTAINERCELL_H
+#ifndef LIBGEODECOMP_STORAGE_CONTAINERCELL_H
+#define LIBGEODECOMP_STORAGE_CONTAINERCELL_H
 
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/coord.h>

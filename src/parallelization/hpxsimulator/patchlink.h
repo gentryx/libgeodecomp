@@ -1,8 +1,8 @@
+#ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_PATCHLINK_H
+#define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_PATCHLINK_H
 
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
-#ifndef LIBGEODECOMP_PARALLELIZATION_HPXPATCHLINKS_H
-#define LIBGEODECOMP_PARALLELIZATION_HPXPATCHLINKS_H
 
 #include <libgeodecomp/storage/gridvecconv.h>
 #include <libgeodecomp/storage/patchaccepter.h>

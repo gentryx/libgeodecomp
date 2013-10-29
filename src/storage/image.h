@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_IO_IMAGE_H
-#define LIBGEODECOMP_IO_IMAGE_H
+#ifndef LIBGEODECOMP_STORAGE_IMAGE_H
+#define LIBGEODECOMP_STORAGE_IMAGE_H
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/color.h>

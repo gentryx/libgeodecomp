@@ -1,3 +1,6 @@
+#ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_TEST_PARALLEL_MPI_1_CELL_H
+#define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_TEST_PARALLEL_MPI_1_CELL_H
+
 #ifdef __cplusplus
 // this makes it easier in our unit tests to locate this file
 std::string cellSourceFile = __FILE__;
@@ -23,3 +26,6 @@ void update(__global struct Cell *target,
 {
     target->val = same->val;
 }
+
+#endif
+
