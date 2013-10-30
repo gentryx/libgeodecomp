@@ -505,22 +505,34 @@ public:
         return true;
     }
 
+    /**
+     * Checks whether the Region includes the given Streak.
+     */
     bool count(const Streak<DIM>& s) const
     {
         return RegionHelpers::RegionLookupHelper<DIM - 1>()(*this, s);
     }
 
+    /**
+     * Is the Coord contained withing the Region?
+     */
     bool count(const Coord<DIM>& c) const
     {
         return RegionHelpers::RegionLookupHelper<DIM - 1>()(*this, Streak<DIM>(c, c[0] + 1));
     }
 
+    /**
+     * Alias for operator<<
+     */
     template<typename ADDEND>
     inline void insert(const ADDEND& a)
     {
         *this << a;
     }
 
+    /**
+     * Add all coordinates of the Streak to this Region
+     */
     inline Region& operator<<(const Streak<DIM>& s)
     {
         //ignore 0 length streaks
@@ -551,6 +563,11 @@ public:
         return *this;
     }
 
+    /**
+     * Remove the given Streak (or all of its coordinates) from the
+     * Region. Takes into account that not all (or none) of the
+     * coordinates may have been contained in the Region before.
+     */
     inline Region& operator>>(const Streak<DIM>& s)
     {
         //ignore 0 length streaks and empty selves
@@ -576,6 +593,10 @@ public:
         }
     }
 
+    /**
+     * Equvalent to (A and (not B)) in sets, where other corresponds
+     * to B and *this corresponds to A.
+     */
     inline Region operator-(const Region& other) const
     {
         Region ret(*this);
@@ -589,6 +610,9 @@ public:
         *this = intersection;
     }
 
+    /**
+     * Computes the intersection of both regions.
+     */
     inline Region operator&(const Region& other) const
     {
         Region ret;
