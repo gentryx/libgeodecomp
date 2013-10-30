@@ -840,7 +840,7 @@ double singleBenchmark(Coord<3> dim)
         new MonoInitializer<CELL>(dim, repeats));
     // sim.addWriter(new TracingWriter<CELL>(500, repeats));
 
-    double seconds;
+    double seconds = 0.0;
     {
         ScopedTimer t(&seconds);
 

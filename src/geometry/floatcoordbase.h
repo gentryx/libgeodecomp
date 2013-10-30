@@ -7,6 +7,7 @@ template<int DIM>
 class FloatCoordBase
 {
     friend class Typemaps;
+    friend class Serialization;
 public:
     inline
     std::string toString() const
