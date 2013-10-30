@@ -6,7 +6,6 @@
 
 namespace LibGeoDecomp {
 
-// fixme: needs test
 class GridVecConv
 {
 public:
