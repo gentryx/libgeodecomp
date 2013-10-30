@@ -12,6 +12,7 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/geometry/floatcoordbase.h>
 #include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
@@ -93,6 +94,13 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned /*version*/)
     {
         archive & boost::serialization::base_object<LibGeoDecomp::FloatCoordBase<3 > >(object);
+    }
+
+    template<typename ARCHIVE, int DIM>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoordBase<DIM>& object, const unsigned /*version*/)
+    {
+        archive & object.c;
     }
 
     template<typename ARCHIVE, typename CELL_TYPE, typename CONVERTER>
@@ -263,6 +271,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<2 >& object, const uns
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, int DIM>
+void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoordBase<DIM>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }

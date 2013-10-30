@@ -65,12 +65,17 @@ public:
         Accepter(
             const Region<DIM>& region,
             std::size_t rank,
-            const UPDATE_GROUP& dest) :
+            const UPDATE_GROUP& ugDest) :
             Link(region),
             rank(rank),
-            dest(dest),
             putFuture(hpx::make_ready_future())
-        {}
+        {
+            // We use an unmanaged GID here to avoid unnecessary credit splits
+            // we know that we keep a reference in the update group anyways.
+            hpx::naming::gid_type gid = ugDest.gid().get_gid();
+            hpx::naming::detail::strip_credit_from_gid(gid);
+            dest = UPDATE_GROUP(hpx::id_type(gid, hpx::id_type::unmanaged));
+        }
 
         void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {
@@ -125,7 +130,8 @@ public:
               : bufferFuture(bufferPromise.get_future())
             {}
 
-            hpx::lcos::local::promise<boost::shared_ptr<BufferType> > bufferPromise;
+            //hpx::lcos::local::promise<boost::shared_ptr<BufferType> > bufferPromise;
+            hpx::lcos::promise<boost::shared_ptr<BufferType> > bufferPromise;
             hpx::lcos::future<boost::shared_ptr<BufferType> > bufferFuture;
         };
 
