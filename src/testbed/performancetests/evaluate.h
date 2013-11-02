@@ -12,7 +12,7 @@ class Evaluate
 public:
     void printHeader()
     {
-        std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family                          ; species ; dimensions              ; perf        ; unit\n";
+        std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family                          ; species ; dimensions              ; perf        ; unit" << std::endl;
     }
 
     template<class BENCHMARK>
@@ -45,7 +45,7 @@ public:
                       << std::setw( 8) << benchmark.species() <<  "; "
                       << std::setw(24) << dim <<  "; "
                       << std::setw(12) << performance <<  "; "
-                      << std::setw( 8) << benchmark.unit() <<  "\n";
+                      << std::setw( 8) << benchmark.unit() << std::endl;
         }
     }
 };
