@@ -53,10 +53,6 @@ if(HPX_ROOT)
 endif()
 
 if(HPX_FOUND)
-  set(DEFAULT_FLAGS ${HPX_CXX_COMPILE_FLAGS})
-  include_directories(${HPX_INCLUDE_DIR})
-  link_directories(${HPX_LIBRARY_DIR})
-  add_definitions(-DHPX_LIMIT=10)
   set(HPX_FOUND true)
 else()
   set(HPX_FOUND false)
@@ -200,17 +196,23 @@ set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 generate_sourcelists("./")
 
-#============= 5. SANITY CHECKS ======================================
-# import settings detected by packages to decouple from their
-# interfaces, perform sanity checks to match selected options and
-# detected environment...
 if(FEATURE_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
+if(FEATURE_HPX)
+  include_directories(${HPX_INCLUDE_DIR})
+  link_directories(${HPX_LIBRARY_DIR})
+  add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
+endif()
+
 include_directories(${Boost_INCLUDE_DIRS})
 
+#============= 5. SANITY CHECKS ======================================
+# import settings detected by packages to decouple from their
+# interfaces, perform sanity checks to match selected options and
+# detected environment...
 if(FEATURE_OPENCV AND NOT OpenCV_FOUND)
   message(FATAL_ERROR "FEATURE_OPENCV selected, but could not find OpenCV.")
 endif()
