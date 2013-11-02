@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
@@ -65,6 +66,8 @@ private:
 class SoAGridTest : public CxxTest::TestSuite
 {
 public:
+    typedef TestCellSoA TestCellType2;
+    typedef APITraits::SelectTopology<TestCellType2>::Value Topology2;
 
     void testBasic()
     {
@@ -203,6 +206,129 @@ public:
         grid.set(Coord<3>(1, 2, 3), dummy);
         TS_ASSERT_EQUALS(grid.get(Coord<3>( 1,  2,  3)), dummy);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(61, 52, 53)), dummy);
+    }
+
+
+    void testSoA()
+    {
+        Coord<3> dim(30, 20, 10);
+        SoAGrid<TestCellType2, Topology2> grid(CoordBox<3>(Coord<3>(), dim));
+        Region<3> region;
+        region << Streak<3>(Coord<3>(0,  0, 0), 30)
+               << Streak<3>(Coord<3>(5, 11, 0), 24)
+               << Streak<3>(Coord<3>(2,  5, 5), 20);
+        std::vector<char> buffer(sizeof(TestCellType2) * region.size());
+
+        int counter = 444;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    TestCellType2 cell(c, dim, 0, counter);
+                    grid.set(c, cell);
+                    ++counter;
+                }
+            }
+        }
+
+        grid.saveRegion(&buffer[0], region);
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    TestCellType2 cell = grid.get(c);
+                    cell.testValue = 666;
+                    grid.set(c, cell);
+                }
+            }
+        }
+
+        grid.loadRegion(&buffer[0], region);
+
+        counter = 444;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    double testValue = 666;
+                    if (region.count(c)) {
+                        testValue = counter;
+                    }
+
+                    TestCellType2 actual = grid.get(c);
+                    TestCellType2 expected(c, dim, 0, testValue);
+
+                    TS_ASSERT_EQUALS(expected, actual);
+                    ++counter;
+                }
+            }
+        }
+    }
+
+    void testSoAWithOffset()
+    {
+        Coord<3> origin(5, 7, 3);
+        Coord<3> dim(30, 20, 10);
+        SoAGrid<TestCellType2, Topology2> grid(CoordBox<3>(origin, dim));
+        Region<3> region;
+        region << Streak<3>(Coord<3>(5,  7,  3), 30)
+               << Streak<3>(Coord<3>(8, 11,  3), 24)
+               << Streak<3>(Coord<3>(9, 10,  5), 20)
+               << Streak<3>(Coord<3>(5, 27, 13), 35);
+        std::vector<char> buffer(sizeof(TestCellType2) * region.size());
+
+        int counter = 444;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    TestCellType2 cell(c, dim, 0, counter);
+                    grid.set(origin + c, cell);
+                    ++counter;
+                }
+            }
+        }
+
+        grid.saveRegion(&buffer[0], region);
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    TestCellType2 cell = grid.get(origin + c);
+                    cell.testValue = 666;
+                    grid.set(origin + c, cell);
+                }
+            }
+        }
+
+        grid.loadRegion(&buffer[0], region);
+
+        counter = 444;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    double testValue = 666;
+                    if (region.count(c + origin)) {
+                        testValue = counter;
+                    }
+
+                    TestCellType2 actual = grid.get(origin + c);
+                    TestCellType2 expected(c, dim, 0, testValue);
+
+                    if (expected != actual) {
+                        std::cout << "error at " << c << "\n"
+                                  << "  expected: " << expected.toString() << "\n"
+                                  << "  actual: " << actual.toString() << "\n";
+                    }
+
+                    TS_ASSERT_EQUALS(expected, actual);
+                    ++counter;
+                }
+            }
+        }
     }
 };
 

@@ -238,6 +238,42 @@ public:
         delegate.callback(&newGrid->delegate, functor);
     }
 
+    void saveRegion(char *target, const Region<DIM>& region)
+    {
+        char *dataIterator = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+            Streak<DIM> s = *i;
+            size_t length = s.length();
+            int x = s.origin.x() + edgeRadii.x() - box.origin.x();
+            int y = s.origin.y() + edgeRadii.y() - box.origin.y();
+            int z = s.origin.z() + edgeRadii.z() - box.origin.z();
+            delegate.save(x, y, z, dataIterator, length);
+            dataIterator += length * sizeof(CELL);
+        }
+
+    }
+
+    void loadRegion(char *source, const Region<DIM>& region)
+    {
+        char *dataIterator = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+            Streak<DIM> s = *i;
+            size_t length = s.length();
+            int x = s.origin.x() + edgeRadii.x() - box.origin.x();
+            int y = s.origin.y() + edgeRadii.y() - box.origin.y();
+            int z = s.origin.z() + edgeRadii.z() - box.origin.z();
+            delegate.load(x, y, z, dataIterator, length);
+            dataIterator += length * sizeof(CELL);
+        }
+
+    }
+
 private:
     Delegate delegate;
     Coord<3> edgeRadii;

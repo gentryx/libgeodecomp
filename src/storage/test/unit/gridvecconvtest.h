@@ -1,6 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/gridvecconv.h>
+#include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
 
