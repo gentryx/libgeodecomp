@@ -11,23 +11,25 @@ namespace LibGeoDecomp {
 class PatchBufferFixedTest : public CxxTest::TestSuite
 {
 public:
-    typedef Grid<int> GridType;
+    typedef DisplacedGrid<int> GridType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType;
 
 
     void setUp()
     {
-        Coord<2> dimensions(7, 5);
+        CoordBox<2> dimensions(Coord<2>(), Coord<2>(7, 5));
         baseGrid = GridType(dimensions, 0);
-        for (int y = 0; y < 5; ++y)
-            for (int x = 0; x < 7; ++x)
+        for (int y = 0; y < 5; ++y) {
+            for (int x = 0; x < 7; ++x) {
                 baseGrid[Coord<2>(x, y)] = 10 * y + x;
+            }
+        }
 
         testGrid1 = GridType(dimensions, 0);
         testGrid2 = GridType(dimensions, 0);
         testGrid3 = GridType(dimensions, 0);
         zeroGrid  = GridType(dimensions, 0);
-        validRegion << CoordBox<2>(Coord<2>(0, 0), dimensions);
+        validRegion << dimensions;
 
         region0.clear();
         region1.clear();

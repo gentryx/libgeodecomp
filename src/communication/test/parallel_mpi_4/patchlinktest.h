@@ -12,7 +12,7 @@ namespace LibGeoDecomp {
 class PatchLinkTest : public CxxTest::TestSuite
 {
 public:
-    typedef Grid<int> GridType;
+    typedef DisplacedGrid<int> GridType;
     typedef PatchLink<GridType>::Accepter PatchAccepterType;
     typedef PatchLink<GridType>::Provider PatchProviderType;
 
@@ -25,7 +25,7 @@ public:
         region2 << Streak<2>(Coord<2>(0, 0), 6);
         region2 << Streak<2>(Coord<2>(4, 1), 5);
 
-        zeroGrid  = GridType(Coord<2>(7, 5), 0);
+        zeroGrid  = GridType(CoordBox<2>(Coord<2>(), Coord<2>(7, 5)), 0);
         boundingBox.clear();
         boundingBox << CoordBox<2>(Coord<2>(0, 0), Coord<2>(7, 5));
 

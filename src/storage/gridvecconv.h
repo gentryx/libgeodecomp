@@ -6,24 +6,27 @@
 
 namespace LibGeoDecomp {
 
+template<typename CELL, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class SoAGrid;
+
 class GridVecConv
 {
 public:
-    template<typename GRID_TYPE>
-    static std::vector<typename GRID_TYPE::CellType> gridToVector(
-        const GRID_TYPE& grid,
-        const Region<GRID_TYPE::DIM>& region)
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
+    static std::vector<CELL_TYPE> gridToVector(
+        const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
+        const REGION_TYPE& region)
     {
-        std::vector<typename GRID_TYPE::CellType> ret(region.size());
+        std::vector<CELL_TYPE> ret(region.size());
         gridToVector(grid, &ret, region);
         return ret;
     }
 
-    template<typename GRID_TYPE, typename VECTOR_TYPE>
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename VECTOR_TYPE, typename REGION_TYPE>
     static void gridToVector(
-        const GRID_TYPE& grid,
+        const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
         VECTOR_TYPE *vec,
-        const Region<GRID_TYPE::DIM>& region)
+        const REGION_TYPE& region)
     {
         if (vec->size() != region.size()) {
             throw std::logic_error("region doesn't match vector size");
@@ -33,20 +36,37 @@ public:
             return;
         }
 
-        typename GRID_TYPE::CellType *dest = &(*vec)[0];
+        CELL_TYPE *dest = &(*vec)[0];
 
-        for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak();
+        for (typename Region<TOPOLOGY_TYPE::DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak(); ++i) {
-            const typename GRID_TYPE::CellType *start = &(grid[i->origin]);
+            const CELL_TYPE *start = &(grid[i->origin]);
             std::copy(start, start + i->length(), dest);
             dest += i->length();
         }
     }
 
-    template<typename VEC_TYPE, typename GRID_TYPE, typename REGION_TYPE>
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, typename VECTOR_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
+    static void gridToVector(
+        const SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
+        VECTOR_TYPE *vec,
+        const REGION_TYPE& region)
+    {
+        if (vec->size() != (sizeof(CELL_TYPE) * region.size())) {
+            throw std::logic_error("region doesn't match vector size");
+        }
+
+        if(vec->size() == 0) {
+            return;
+        }
+
+        grid.saveRegion(&(*vec)[0], region);
+    }
+
+    template<typename VEC_TYPE, typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
         const VEC_TYPE& vec,
-        GRID_TYPE *grid,
+        DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
         const REGION_TYPE& region)
     {
         if (vec.size() != region.size()) {
@@ -57,17 +77,36 @@ public:
             return;
         }
 
-        const typename GRID_TYPE::CellType *source = &vec[0];
+        const CELL_TYPE *source = &vec[0];
 
-        for (typename Region<GRID_TYPE::DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak(); ++i) {
+        for (typename REGION_TYPE::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
             unsigned length = i->length();
-            const typename GRID_TYPE::CellType *end = source + length;
-            typename GRID_TYPE::CellType *dest = &((*grid)[i->origin]);
+            const CELL_TYPE *end = source + length;
+            CELL_TYPE *dest = &((*grid)[i->origin]);
             std::copy(source, end, dest);
             source = end;
         }
     }
+
+    template<typename VEC_TYPE, typename CELL_TYPE, typename TOPOLOGY_TYPE, typename REGION_TYPE, bool TOPOLOGICALLY_CORRECT>
+    static void vectorToGrid(
+        const VEC_TYPE& vec,
+        SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
+        const REGION_TYPE& region)
+    {
+        if (vec.size() != (sizeof(CELL_TYPE) * region.size())) {
+            throw std::logic_error("region doesn't match vector size");
+        }
+
+        if(vec.size() == 0) {
+            return;
+        }
+
+        grid->loadRegion(&vec[0], region);
+    }
+
 };
 
 }

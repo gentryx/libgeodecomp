@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp.h>
 #include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/patchbuffer.h>
 
 using namespace LibGeoDecomp;
@@ -11,12 +11,12 @@ namespace LibGeoDecomp {
 class PatchBufferTest : public CxxTest::TestSuite
 {
 public:
-    typedef Grid<int> GridType;
+    typedef DisplacedGrid<int> GridType;
     typedef PatchBuffer<GridType, GridType> PatchBufferType;
 
     void setUp()
     {
-        Coord<2> dimensions(7, 5);
+        CoordBox<2> dimensions(Coord<2>(), Coord<2>(7, 5));
         baseGrid = GridType(dimensions, 0);
         for (int y = 0; y < 5; ++y)
             for (int x = 0; x < 7; ++x)
@@ -26,7 +26,7 @@ public:
         testGrid2 = GridType(dimensions, 0);
         testGrid3 = GridType(dimensions, 0);
         zeroGrid  = GridType(dimensions, 0);
-        validRegion << CoordBox<2>(Coord<2>(0, 0), dimensions);
+        validRegion << dimensions;
 
         region0.clear();
         region1.clear();
@@ -36,10 +36,12 @@ public:
         region2 << Streak<2>(Coord<2>(0, 0), 2);
         region2 << Streak<2>(Coord<2>(4, 1), 7);
 
-        for (Region<2>::Iterator i = region1.begin(); i != region1.end(); ++i)
+        for (Region<2>::Iterator i = region1.begin(); i != region1.end(); ++i) {
             testGrid1[*i] = i->y() * 10 + i->x();
-        for (Region<2>::Iterator i = region2.begin(); i != region2.end(); ++i)
+        }
+        for (Region<2>::Iterator i = region2.begin(); i != region2.end(); ++i) {
             testGrid2[*i] = i->y() * 10 + i->x();
+        }
 
         Region<2>::Iterator j = region1.begin();
         for (Region<2>::Iterator i = region2.begin();
@@ -52,7 +54,6 @@ public:
 
     void testCopyInCopyOut()
     {
-
         // check that an empty region causes no changes at all
         PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);

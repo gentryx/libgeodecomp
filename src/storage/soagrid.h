@@ -238,7 +238,7 @@ public:
         delegate.callback(&newGrid->delegate, functor);
     }
 
-    void saveRegion(char *target, const Region<DIM>& region)
+    void saveRegion(char *target, const Region<DIM>& region) const
     {
         char *dataIterator = target;
 
@@ -256,9 +256,9 @@ public:
 
     }
 
-    void loadRegion(char *source, const Region<DIM>& region)
+    void loadRegion(const char *source, const Region<DIM>& region)
     {
-        char *dataIterator = source;
+        const char *dataIterator = source;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
