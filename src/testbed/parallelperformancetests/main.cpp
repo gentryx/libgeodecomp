@@ -258,7 +258,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (argc != 3) {
+    if (argc != 4) {
         std::cerr << "usage: " << argv[0] << "HOSTNAME REVISION CUDA_DEVICE\n";
         return 1;
     }
