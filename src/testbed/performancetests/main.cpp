@@ -27,8 +27,6 @@
 
 using namespace LibGeoDecomp;
 
-std::string revision;
-
 class RegionCount : public CPUBenchmark
 {
 public:
@@ -2156,13 +2154,13 @@ private:
 };
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
-void cudaTests(std::string revision, bool quick, int cudaDevice);
+void cudaTests(std::string hostname, std::string revision, bool quick, int cudaDevice);
 #endif
 
 int main(int argc, char **argv)
 {
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
+    if ((argc < 4) || (argc > 5)) {
+        std::cerr << "usage: " << argv[0] << "[-q,--quick] HOSTNAME REVISION CUDA_DEVICE\n";
         return 1;
     }
 
@@ -2175,14 +2173,15 @@ int main(int argc, char **argv)
         }
         argumentIndex = 2;
     }
-    revision = argv[argumentIndex];
+    std::string hostname = argv[argumentIndex + 0];
+    std::string revision = argv[argumentIndex + 1];
 
     std::stringstream s;
-    s << argv[argumentIndex + 1];
+    s << argv[argumentIndex + 2];
     int cudaDevice;
     s >> cudaDevice;
 
-    Evaluate eval;
+    Evaluate eval(hostname, revision);
     eval.printHeader();
 
     eval(RegionCount(), Coord<3>( 128,  128,  128));
@@ -2269,7 +2268,7 @@ int main(int argc, char **argv)
     eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
 
 #ifdef LIBGEODECOMP_FEATURE_CUDA
-    cudaTests(revision, quick, cudaDevice);
+    cudaTests(hostname, revision, quick, cudaDevice);
 #endif
 
     return 0;

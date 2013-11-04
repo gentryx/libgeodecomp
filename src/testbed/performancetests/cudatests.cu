@@ -597,14 +597,14 @@ public:
     }
 };
 
-void cudaTests(std::string revision, bool quick, int cudaDevice)
+void cudaTests(std::string hostname, std::string revision, bool quick, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
     cudaDeviceProp properties;
     cudaGetDeviceProperties(&properties, cudaDevice);
     cudaDeviceID = properties.name;
 
-    Evaluate eval;
+    Evaluate eval(hostname, revision);
 
     for (int d = 32; d <= 544; d += 4) {
         eval(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));
