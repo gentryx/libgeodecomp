@@ -124,36 +124,16 @@ public:
 
         typedef hpx::lcos::local::spinlock MutexType;
 
-        struct Receiver
-        {
-            Receiver()
-              : bufferFuture(bufferPromise.get_future())
-            {}
-
-            //hpx::lcos::local::promise<boost::shared_ptr<BufferType> > bufferPromise;
-            hpx::lcos::promise<boost::shared_ptr<BufferType> > bufferPromise;
-            hpx::lcos::future<boost::shared_ptr<BufferType> > bufferFuture;
-        };
+        typedef
+            boost::shared_ptr<hpx::lcos::local::promise<boost::shared_ptr<BufferType> > >
+            Receiver;
 
         typedef std::map<std::size_t, Receiver> ReceiverMap;
 
     public:
         Provider(const Region<DIM>& region) :
-            Link(region)/*,
-            recvFuture(recvPromise.get_future())*/
+            Link(region)
         {}
-
-        ~Provider()
-        {
-            /*
-            if(!recvFuture.is_ready()) {
-                recvPromise.set_value(-1);
-            }
-            if(!bufferFuture.is_ready()) {
-                bufferPromise.set_value(boost::shared_ptr<BufferType>());
-            }
-            */
-        }
 
         void charge(long next, long last, long newStride)
         {
@@ -180,13 +160,11 @@ public:
             const bool remove=true
         )
         {
-            //boost::shared_ptr<BufferType> buffer = bufferFuture.get();
-            //std::cout << "get ... " << nanoStep << "\n";
             boost::shared_ptr<BufferType> buffer = getBuffer(nanoStep);
 
             checkNanoStepGet(nanoStep);
             {
-                //hpx::lcos::local::spinlock::scoped_lock lock(gridMutex);
+                hpx::lcos::local::spinlock::scoped_lock lock(gridMutex);
                 GridVecConv::vectorToGrid(*buffer, grid, region);
             }
 
@@ -203,37 +181,16 @@ public:
         {
             MutexType::scoped_lock lock(mutex);
             storedNanoSteps << nanoStep;
-            //createReceiver(nanoStep);
-            /*
-            bufferPromise = hpx::lcos::local::promise<boost::shared_ptr<BufferType> >();
-            bufferFuture = bufferPromise.get_future();
-            BOOST_ASSERT(!recvPromise.is_ready());
-            recvPromise.set_value(nanoStep);
-            */
         }
 
         void setBuffer(boost::shared_ptr<BufferType> buffer, long nanoStep)
         {
-            //std::cout << "set ... " << nanoStep << "\n";
             MutexType::scoped_lock lock(mutex);
             typename ReceiverMap::iterator it = receiverMap.find(nanoStep);
             if(it == receiverMap.end()) {
                 it = createReceiver(nanoStep);
             }
-            it->second.bufferPromise.set_value(buffer);
-            //receiverMap.erase(it);
-
-            /*
-            hpx::wait(recvFuture);
-            {
-                MutexType::scoped_lock lock(mutex);
-                BOOST_ASSERT(recvFuture.get() == nanoStep);
-                BOOST_ASSERT(!bufferPromise.is_ready());
-                recvPromise = hpx::lcos::local::promise<long>();
-                recvFuture = recvPromise.get_future();
-                bufferPromise.set_value(buffer);
-            }
-            */
+            it->second->set_value(buffer);
         }
 
     private:
@@ -247,15 +204,14 @@ public:
                 if(it == receiverMap.end()) {
                     it = createReceiver(nanoStep);
                 }
-                resFuture = it->second.bufferFuture;
+                resFuture = it->second->get_future();
             }
             boost::shared_ptr<BufferType> res = resFuture.get();
             {
                 MutexType::scoped_lock lock(mutex);
                 typename ReceiverMap::iterator it = receiverMap.find(nanoStep);
                 if(it == receiverMap.end()) {
-                    std::cerr << "attempt to erase non existing receiver " << nanoStep << "\n";
-                    throw "";
+                    throw std::logic_error("attempt to erase non existing receiver");
                 }
                 receiverMap.erase(it);
             }
@@ -265,22 +221,18 @@ public:
         typename ReceiverMap::iterator createReceiver(std::size_t nanoStep)
         {
             std::pair<typename ReceiverMap::iterator, bool> createRes
-                = receiverMap.insert(std::make_pair(nanoStep, Receiver()));
+                = receiverMap.insert(
+                    std::pair<std::size_t, Receiver>(
+                        nanoStep,
+                        new hpx::lcos::local::promise<boost::shared_ptr<BufferType> >()));
             if(createRes.second == false) {
-                std::cerr << "nano step " << nanoStep << " already inserted\n";
-                throw "";
+                throw std::logic_error("nano step already inserted");
             }
             return createRes.first;
         }
 
         MutexType mutex;
         ReceiverMap receiverMap;
-        /*
-        hpx::lcos::local::promise<boost::shared_ptr<BufferType> > bufferPromise;
-        hpx::future<boost::shared_ptr<BufferType> > bufferFuture;
-        hpx::lcos::local::promise<long> recvPromise;
-        hpx::future<long> recvFuture;
-        */
     };
 };
 

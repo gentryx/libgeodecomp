@@ -17,7 +17,6 @@
 
 using namespace LibGeoDecomp;
 
-std::string revision;
 int cudaDevice;
 
 template<typename CELL_TYPE>
@@ -264,10 +263,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    revision = argv[1];
+    std::string revision = argv[1];
     cudaDevice = StringOps::atoi(argv[2]);
 
-    Evaluate eval;
+    Evaluate eval(revision);
 
     bool output = MPILayer().rank() == 0;
     if (output) {

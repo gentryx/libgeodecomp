@@ -27,8 +27,6 @@
 
 using namespace LibGeoDecomp;
 
-std::string revision;
-
 class RegionCount : public CPUBenchmark
 {
 public:
@@ -2175,14 +2173,14 @@ int main(int argc, char **argv)
         }
         argumentIndex = 2;
     }
-    revision = argv[argumentIndex];
+    std::string revision = argv[argumentIndex + 0];
 
     std::stringstream s;
     s << argv[argumentIndex + 1];
     int cudaDevice;
     s >> cudaDevice;
 
-    Evaluate eval;
+    Evaluate eval(revision);
     eval.printHeader();
 
     eval(RegionCount(), Coord<3>( 128,  128,  128));

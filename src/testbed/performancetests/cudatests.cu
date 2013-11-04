@@ -604,7 +604,7 @@ void cudaTests(std::string revision, bool quick, int cudaDevice)
     cudaGetDeviceProperties(&properties, cudaDevice);
     cudaDeviceID = properties.name;
 
-    Evaluate eval;
+    Evaluate eval(revision);
 
     for (int d = 32; d <= 544; d += 4) {
         eval(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));

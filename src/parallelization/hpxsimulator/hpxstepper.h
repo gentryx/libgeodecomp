@@ -61,7 +61,8 @@ public:
     {
         for (std::size_t i = 0; i < nanoSteps; ++i)
         {
-            update().wait();
+            //update().wait();
+            update();
         }
     }
 
@@ -88,7 +89,8 @@ private:
     hpx::lcos::local::spinlock gridMutex;
     double startTimeUpdate;
 
-    inline hpx::future<void> update()
+    //inline hpx::future<void> update()
+    inline void update()
     {
         startTimeUpdate = ScopedTimer::time();
 
@@ -130,10 +132,13 @@ private:
             curStep++;
         }
 
-        return
-            hpx::when_all(updateFutures).then(
-                hpx::util::bind(&HpxStepper::updateGhostZones, this, region)
-            );
+        // FIXME: this somehow leads to a deadlock
+        //return
+        //    hpx::when_all(updateFutures).then(
+        //        hpx::util::bind(&HpxStepper::updateGhostZones, this, region)
+        //    );
+        hpx::wait_all(updateFutures);
+        updateGhostZones(region);
     }
 
     // remove this function and compilation with g++ 4.7.3 fails. scary!

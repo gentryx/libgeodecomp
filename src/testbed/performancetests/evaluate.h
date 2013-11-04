@@ -1,15 +1,18 @@
 #ifndef LIBGEODECOMP_TESTBED_PERFORMANCETESTS_EVALUATE_H
 #define LIBGEODECOMP_TESTBED_PERFORMANCETESTS_EVALUATE_H
 
+#include <string>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/stringops.h>
 
-extern std::string revision;
-
 class Evaluate
 {
 public:
+     Evaluate(const std::string& revision) :
+        revision(revision)
+    {}
+
     void printHeader()
     {
         std::cout << "#rev              ; date                 ; host            ; device                                          ; order   ; family                          ; species ; dimensions              ; perf        ; unit" << std::endl;
@@ -24,13 +27,13 @@ public:
         std::string nowString = buf.str();
         nowString.resize(20);
 
+        std::string device = benchmark.device();
+
         int hostnameLength = 2048;
         std::string hostname(hostnameLength, ' ');
         gethostname(&hostname[0], hostnameLength);
         // cuts string at first 0 byte, required as gethostname returns 0-terminated strings
         hostname = std::string(hostname.c_str());
-
-        std::string device = benchmark.device();
 
         double performance = benchmark.performance(dim);
 
@@ -48,6 +51,9 @@ public:
                       << std::setw( 8) << benchmark.unit() << std::endl;
         }
     }
+
+private:
+    std::string revision;
 };
 
 #endif
