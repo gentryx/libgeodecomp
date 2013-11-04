@@ -58,6 +58,13 @@ public:
         TS_ASSERT_EQUALS(expected3, StringOps::tokenize("\n", " \n"));
     }
 
+    void testTokenize2()
+    {
+        std::string message = " x y ";
+        StringVec tokens = StringOps::tokenize(message, " ");
+        std::cout << "tokens: " << tokens << "\n";
+    }
+
     void testJoin()
     {
         StringVec tokens;
