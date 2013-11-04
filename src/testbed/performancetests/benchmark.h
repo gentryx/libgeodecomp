@@ -3,6 +3,8 @@
 
 #include <libgeodecomp/geometry/coord.h>
 
+namespace LibGeoDecomp {
+
 class Benchmark
 {
 public:
@@ -18,5 +20,7 @@ public:
         return (tEnd - tStart) * 0.000001;
     }
 };
+
+}
 
 #endif

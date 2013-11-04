@@ -9,8 +9,7 @@
 class Evaluate
 {
 public:
-     Evaluate(const std::string& hostname, const std::string& revision) :
-        hostname(hostname),
+     Evaluate(const std::string& revision) :
         revision(revision)
     {}
 
@@ -30,6 +29,12 @@ public:
 
         std::string device = benchmark.device();
 
+        int hostnameLength = 2048;
+        std::string hostname(hostnameLength, ' ');
+        gethostname(&hostname[0], hostnameLength);
+        // cuts string at first 0 byte, required as gethostname returns 0-terminated strings
+        hostname = std::string(hostname.c_str());
+
         double performance = benchmark.performance(dim);
 
         if (output) {
@@ -48,7 +53,6 @@ public:
     }
 
 private:
-    std::string hostname;
     std::string revision;
 };
 

@@ -258,16 +258,15 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (argc != 4) {
-        std::cerr << "usage: " << argv[0] << "HOSTNAME REVISION CUDA_DEVICE\n";
+    if (argc != 3) {
+        std::cerr << "usage: " << argv[0] << "REVISION CUDA_DEVICE\n";
         return 1;
     }
 
-    std::string hostname = argv[1];
-    std::string revision = argv[2];
-    cudaDevice = StringOps::atoi(argv[3]);
+    std::string revision = argv[1];
+    cudaDevice = StringOps::atoi(argv[2]);
 
-    Evaluate eval(hostname, revision);
+    Evaluate eval(revision);
 
     bool output = MPILayer().rank() == 0;
     if (output) {
