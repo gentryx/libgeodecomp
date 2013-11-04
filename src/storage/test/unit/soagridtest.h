@@ -217,7 +217,9 @@ public:
         region << Streak<3>(Coord<3>(0,  0, 0), 30)
                << Streak<3>(Coord<3>(5, 11, 0), 24)
                << Streak<3>(Coord<3>(2,  5, 5), 20);
-        std::vector<char> buffer(sizeof(TestCellType2) * region.size());
+        std::vector<char> buffer(
+            LibFlatArray::aggregated_member_size<TestCellType2>::VALUE *
+            region.size());
 
         int counter = 444;
         for (int z = 0; z < dim.z(); ++z) {
@@ -276,7 +278,9 @@ public:
                << Streak<3>(Coord<3>(8, 11,  3), 24)
                << Streak<3>(Coord<3>(9, 10,  5), 20)
                << Streak<3>(Coord<3>(5, 27, 13), 35);
-        std::vector<char> buffer(sizeof(TestCellType2) * region.size());
+        std::vector<char> buffer(
+            LibFlatArray::aggregated_member_size<TestCellType2>::VALUE *
+            region.size());
 
         int counter = 444;
         for (int z = 0; z < dim.z(); ++z) {

@@ -86,7 +86,7 @@ public:
             TS_ASSERT_EQUALS(666,        cell.testValue);
         }
 
-        std::vector<char> buf(sizeof(TestCellType2) * region.size());
+        std::vector<char> buf(LibFlatArray::aggregated_member_size<TestCellType2>::VALUE * region.size());
         GridVecConv::gridToVector(gridA, &buf, region);
         GridVecConv::vectorToGrid(buf, &gridB, region);
 
