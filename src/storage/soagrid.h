@@ -251,7 +251,7 @@ public:
             int y = s.origin.y() + edgeRadii.y() - box.origin.y();
             int z = s.origin.z() + edgeRadii.z() - box.origin.z();
             delegate.save(x, y, z, dataIterator, length);
-            dataIterator += length * sizeof(CELL);
+            dataIterator += length * LibFlatArray::aggregated_member_size<CELL>::VALUE;
         }
 
     }
@@ -269,7 +269,7 @@ public:
             int y = s.origin.y() + edgeRadii.y() - box.origin.y();
             int z = s.origin.z() + edgeRadii.z() - box.origin.z();
             delegate.load(x, y, z, dataIterator, length);
-            dataIterator += length * sizeof(CELL);
+            dataIterator += length * LibFlatArray::aggregated_member_size<CELL>::VALUE;
         }
 
     }
