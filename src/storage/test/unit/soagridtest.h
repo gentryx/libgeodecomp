@@ -218,7 +218,7 @@ public:
                << Streak<3>(Coord<3>(5, 11, 0), 24)
                << Streak<3>(Coord<3>(2,  5, 5), 20);
         std::vector<char> buffer(
-            LibFlatArray::aggregated_member_size<TestCellType2>::VALUE *
+            SoAGrid<TestCellType2, Topology2>::AGGREGATED_MEMBER_SIZE *
             region.size());
 
         int counter = 444;
@@ -279,7 +279,7 @@ public:
                << Streak<3>(Coord<3>(9, 10,  5), 20)
                << Streak<3>(Coord<3>(5, 27, 13), 35);
         std::vector<char> buffer(
-            LibFlatArray::aggregated_member_size<TestCellType2>::VALUE *
+            SoAGrid<TestCellType2, Topology2>::AGGREGATED_MEMBER_SIZE *
             region.size());
 
         int counter = 444;

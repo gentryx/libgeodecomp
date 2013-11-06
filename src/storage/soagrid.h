@@ -119,6 +119,12 @@ public:
     friend class SoAGridTest;
 
     const static int DIM = TOPOLOGY::DIM;
+    /**
+     * Accumulated size of all members. Note that this may be lower
+     * than sizeof(CELL) as the compiler may add padding within a
+     * struct/class to ensure alignment.
+     */
+    static const int AGGREGATED_MEMBER_SIZE =  LibFlatArray::aggregated_member_size<CELL>::VALUE;
 
     typedef CELL CellType;
     typedef TOPOLOGY Topology;
@@ -251,7 +257,7 @@ public:
             int y = s.origin.y() + edgeRadii.y() - box.origin.y();
             int z = s.origin.z() + edgeRadii.z() - box.origin.z();
             delegate.save(x, y, z, dataIterator, length);
-            dataIterator += length * LibFlatArray::aggregated_member_size<CELL>::VALUE;
+            dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
 
     }
@@ -269,7 +275,7 @@ public:
             int y = s.origin.y() + edgeRadii.y() - box.origin.y();
             int z = s.origin.z() + edgeRadii.z() - box.origin.z();
             delegate.load(x, y, z, dataIterator, length);
-            dataIterator += length * LibFlatArray::aggregated_member_size<CELL>::VALUE;
+            dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
 
     }

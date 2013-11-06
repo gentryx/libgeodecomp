@@ -52,8 +52,9 @@ public:
         VECTOR_TYPE *vec,
         const REGION_TYPE& region)
     {
-        size_t regionSize = region.size() *
-            LibFlatArray::aggregated_member_size<CELL_TYPE>::VALUE;
+        size_t regionSize =
+            region.size() *
+            SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>::AGGREGATED_MEMBER_SIZE;
 
         if (vec->size() != regionSize) {
             throw std::logic_error("region doesn't match raw vector's size");
@@ -99,8 +100,9 @@ public:
         SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
         const REGION_TYPE& region)
     {
-        size_t regionSize = region.size() *
-            LibFlatArray::aggregated_member_size<CELL_TYPE>::VALUE;
+        size_t regionSize =
+            region.size() *
+            SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>::AGGREGATED_MEMBER_SIZE;
 
         if (vec.size() != regionSize) {
             throw std::logic_error("raw vector doesn't match region's size");
