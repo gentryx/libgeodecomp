@@ -279,10 +279,10 @@ private:
     size_t elements;
 };
 
-template<typename _CharT, typename _Traits, typename _T, int _N>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& os,
-           const FixedArray<_T, _N>& a)
+template<typename CharT, typename Traits, typename T, int N>
+std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& os,
+           const FixedArray<T, N>& a)
 {
     os << "(";
 
