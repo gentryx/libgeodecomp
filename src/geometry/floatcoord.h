@@ -4,7 +4,6 @@
 #include <cmath>
 #include <sstream>
 #include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/floatcoordbase.h>
 
 namespace LibGeoDecomp {
 
@@ -16,7 +15,7 @@ template<int DIM>
 class FloatCoord;
 
 template<>
-class FloatCoord<1> : public FloatCoordBase<1>
+class FloatCoord<1>
 {
 public:
     friend class Serialization;
@@ -97,10 +96,32 @@ public:
     {
         return !(*this == a);
     }
+
+    inline double& operator[](const int i)
+    {
+        return c[i];
+    }
+
+    inline const double& operator[](const int i) const
+    {
+        return c[i];
+    }
+
+    inline
+    std::string toString() const
+    {
+        std::stringstream s;
+        s << "(";
+        s << c[0] << ")";
+        return s.str();
+    }
+
+public:
+    double c[1];
 };
 
 template<>
-class FloatCoord<2> : public FloatCoordBase<2>
+class FloatCoord<2>
 {
 public:
     friend class Serialization;
@@ -191,10 +212,34 @@ public:
     {
         return !(*this == a);
     }
+
+    inline double& operator[](const int i)
+    {
+        return c[i];
+    }
+
+    inline const double& operator[](const int i) const
+    {
+        return c[i];
+    }
+
+    inline
+    std::string toString() const
+    {
+        std::stringstream s;
+        s << "(";
+        for (int i = 0; i < 1; ++i)
+            s << c[i] << ", ";
+        s << c[1] << ")";
+        return s.str();
+    }
+
+public:
+    double c[2];
 };
 
 template<>
-class FloatCoord<3> : public FloatCoordBase<3>
+class FloatCoord<3>
 {
 public:
     friend class Serialization;
@@ -294,6 +339,30 @@ public:
     {
         return !(*this == a);
     }
+
+    inline double& operator[](const int i)
+    {
+        return c[i];
+    }
+
+    inline const double& operator[](const int i) const
+    {
+        return c[i];
+    }
+
+    inline
+    std::string toString() const
+    {
+        std::stringstream s;
+        s << "(";
+        for (int i = 0; i < 2; ++i)
+            s << c[i] << ", ";
+        s << c[2] << ")";
+        return s.str();
+    }
+
+public:
+    double c[3];
 };
 
 /**
