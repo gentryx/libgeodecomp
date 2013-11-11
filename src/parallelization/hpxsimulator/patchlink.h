@@ -224,7 +224,7 @@ public:
                 = receiverMap.insert(
                     std::pair<std::size_t, Receiver>(
                         nanoStep,
-                        new hpx::lcos::local::promise<boost::shared_ptr<BufferType> >()));
+                        boost::make_shared<hpx::lcos::local::promise<boost::shared_ptr<BufferType> > >()));
             if(createRes.second == false) {
                 throw std::logic_error("nano step already inserted");
             }
