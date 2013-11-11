@@ -9,6 +9,9 @@ class FloatCoordBase
     friend class Typemaps;
     friend class Serialization;
 public:
+
+    virtual ~FloatCoordBase() {}
+
     inline
     std::string toString() const
     {
