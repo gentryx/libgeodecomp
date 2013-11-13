@@ -198,9 +198,6 @@ public:
             patchAcceptersInner.push_back(adapterInnerSet);
         }
 
-        typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
-        for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it) {
-        }
 
         stepper.reset(new STEPPER(
                           partitionManager,
@@ -211,6 +208,7 @@ public:
         // the ghostzone receivers may be safely added after
         // initialization as they're only really needed when the next
         // ghostzone generation is being received.
+        typedef typename std::map<std::size_t, PatchLinkProviderPtr>::iterator patchlinkIter;
         for(patchlinkIter it = patchlinkProviderMap.begin(); it != patchlinkProviderMap.end(); ++it) {
             addPatchProvider(it->second, HiParSimulator::Stepper<CELL_TYPE>::GHOST);
             patchLinks << it->second;
@@ -221,9 +219,10 @@ public:
         // Convert steerer to patch accepters
         BOOST_FOREACH(const typename SteererVector::value_type& steerer, steerers) {
             // two adapters needed, just as for the writers
+            boost::shared_ptr<Steerer<CELL_TYPE> > steererPtr(steerer->clone());
             PatchProviderPtr adapterGhost(
                 new SteererAdapterType(
-                    steerer,
+                    steererPtr,
                     initializer->startStep(),
                     initializer->maxSteps(),
                     initializer->gridDimensions(),
@@ -231,12 +230,12 @@ public:
                     false));
             PatchProviderPtr adapterInnerSet(
                 new SteererAdapterType(
-                    steerer,
+                    steererPtr,
                     initializer->startStep(),
                     initializer->maxSteps(),
                     initializer->gridDimensions(),
                     rank,
-                    false));
+                    true));
 
             adapterGhost->setRegion(partitionManager->ownRegion());
             adapterInnerSet->setRegion(partitionManager->ownRegion());

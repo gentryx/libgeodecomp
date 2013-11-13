@@ -27,6 +27,7 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
+    typedef typename ParentType::PatchProviderPtr PatchProviderPtr;
 
     using Stepper<CELL_TYPE>::addPatchAccepter;
     using Stepper<CELL_TYPE>::chronometer;
@@ -88,6 +89,7 @@ private:
     Region<DIM> kernelFraction;
     hpx::lcos::local::spinlock gridMutex;
     double startTimeUpdate;
+    std::vector<PatchProviderPtr> steererVector;
 
     //inline hpx::future<void> update()
     inline void update()
@@ -203,19 +205,24 @@ private:
     {
         TimePatchAccepters t(&chronometer);
 
+        /*
         std::vector<hpx::future<void> > patchProvidersFutures;
         patchProvidersFutures.reserve(patchProviders[patchType].size());
+        */
+        /*
         void (PatchProvider<GridType>::*get)(
             GridType*,
             const Region<DIM>&,
             const std::size_t,
             hpx::lcos::local::spinlock&,
             bool) = &PatchProvider<GridType>::get;
+        */
 
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
              ++i) {
+            /*
                 patchProvidersFutures.push_back(
                     hpx::async(
                         hpx::util::bind(
@@ -229,9 +236,11 @@ private:
                         )
                     )
                 );
+            */
+            (*i)->get(&*oldGrid, region, nanoStep, gridMutex, true);
         }
 
-        hpx::wait_all(patchProvidersFutures);
+        //hpx::wait_all(patchProvidersFutures);
     }
 
     inline std::size_t globalNanoStep() const
