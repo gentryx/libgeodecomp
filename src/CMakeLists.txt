@@ -280,6 +280,7 @@ endif()
 
 if(FEATURE_BOOST_MPI)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+endif()
 
 if(FEATURE_VISIT)
   include_directories(${VisIt_INCLUDE_DIRS})
