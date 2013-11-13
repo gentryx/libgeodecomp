@@ -60,7 +60,7 @@ else()
 endif()
 
 find_package(Boost COMPONENTS mpi)
-set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
 find_package(CUDA)
 find_package(OpenCL)
@@ -277,6 +277,9 @@ endif()
 if (FEATURE_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "FEATURE_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
 endif()
+
+if(FEATURE_BOOST_MPI)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
 
 if(FEATURE_VISIT)
   include_directories(${VisIt_INCLUDE_DIRS})
