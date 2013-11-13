@@ -588,6 +588,7 @@ public:
 
     inline void operator-=(const Region& other)
     {
+        if(other.empty()) return;
         for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
             *this >> *i;
         }
@@ -647,6 +648,7 @@ public:
 
     inline void operator+=(const Region& other)
     {
+        if(other.empty()) return;
         for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
             *this << *i;
         }
