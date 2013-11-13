@@ -137,14 +137,14 @@ public:
         FloatCoord<3> c;
 
         if (layer.rank() == 0) {
-            c = FloatCoord<3>(layer.rank(), 2.0, 3.0);
+            c = FloatCoord<3>(0.5 + layer.rank(), 2.0, 3.0);
             layer.send(&c, 1);
         } else {
             layer.recv(&c, 0);
         }
 
         layer.waitAll();
-        TS_ASSERT_EQUALS(c, FloatCoord<3>(0.0, 2.0, 3.0));
+        TS_ASSERT_EQUALS(c, FloatCoord<3>(0.5, 2.0, 3.0));
     }
 
     void testSendRecvRegion()

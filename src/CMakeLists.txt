@@ -58,28 +58,20 @@ else()
   set(Boost_SERIALIZATION_FOUND true)
   set(Boost_THREAD_FOUND true)
 endif()
-if(FEATURE_BOOST_MPI)
-  find_package(Boost COMPONENTS mpi)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-endif()
+
+find_package(Boost COMPONENTS mpi)
+set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 
 find_package(CUDA)
 find_package(OpenCL)
-if(FEATURE_MPI)
-  find_package(MPI)
-else()
-  set(MPI_FOUND false)
-endif()
+find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
-if(FEATURE_QT)
-  find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
-endif()
+
+find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
-if(HPX_FOUND)
-  set(HPX_FOUND true)
-else()
+if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
 endif()
 
@@ -154,6 +146,8 @@ endif()
 add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
 add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
+
+add_config_option(DONT_LINK_PTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compuiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." false false)
 
 add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
 
@@ -401,9 +395,15 @@ if(FEATURE_QT)
 endif()
 
 if(FEATURE_THREADS)
-  # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
-  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+  if (DONT_LINK_PTHREAD)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+  else()
+    # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
+    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+      set(LIBGEODECOMP_LINK_LIBRARIES
+        ${LIBGEODECOMP_LINK_LIBRARIES}
+        pthread)
+    endif()
   endif()
 endif()
 

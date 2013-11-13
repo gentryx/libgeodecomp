@@ -9,6 +9,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/partitions/hindexingpartition.h>
@@ -285,6 +286,52 @@ public:
             if (sum == Coord<3>(1, 2, 3)) {
                 std::cout << "whatever";
             }
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class FloatCoordAccumulationGold : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "FloatCoordAccumulation";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(const Coord<3>& dim)
+    {
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            FloatCoord<3> sum;
+
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    for (int x = 0; x < dim.x(); ++x) {
+                        FloatCoord<3> addent(x, y, z);
+                        sum += addent;
+                    }
+                }
+            }
+
+            // trick the compiler to not optimize away the loop above
+            if (sum == FloatCoord<3>(1, 2, 3)) {
+                std::cout << "whatever";
+            }
+
         }
 
         return seconds;
@@ -2206,6 +2253,8 @@ int main(int argc, char **argv)
     eval(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
     eval(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
     eval(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
+
+    eval(FloatCoordAccumulationGold(), Coord<3>(2048, 2048, 2048));
 
     std::vector<Coord<3> > sizes;
     sizes << Coord<3>(22, 22, 22)
