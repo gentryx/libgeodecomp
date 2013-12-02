@@ -133,8 +133,8 @@ public:
 
     explicit SoAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
-        const CELL &defaultCell = CELL(),
-        const CELL &edgeCell = CELL(),
+        const CELL& defaultCell = CELL(),
+        const CELL& edgeCell = CELL(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
         edgeRadii(calcEdgeRadii()),
         edgeCell(edgeCell),
