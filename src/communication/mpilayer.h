@@ -22,9 +22,10 @@ namespace LibGeoDecomp {
  */
 class MPILayer
 {
+public:
     friend class MPILayerTest;
     friend class ParallelMPILayerTest;
-public:
+
     /**
      * Tags are required to distinguish different transmissions with
      * identical sender, receiver, and communicator. We list all tags
@@ -142,9 +143,12 @@ public:
     void wait(int waitTag)
     {
         std::vector<MPI_Request>& requestVec = requests[waitTag];
+
         if(requestVec.size() > 0) {
             MPI_Waitall(requestVec.size(), &requestVec[0], MPI_STATUSES_IGNORE);
+
         }
+
         requestVec.clear();
     }
 
@@ -505,6 +509,14 @@ public:
             MPI_Bcast(&(buffer->front()), size, datatype, root, comm);
         }
     }
+
+protected:
+    // Remove default copy c-tor as the MPILayer cannot be safely
+    // copied. This is because it stores MPI requests and waits for
+    // those in its d-tor. If two instances held these handles then
+    // both could/would call MPI_Wait for these and break MPI while
+    // doing so.
+    MPILayer(const MPILayer&);
 
 private:
     MPI_Comm comm;
