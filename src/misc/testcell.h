@@ -324,13 +324,20 @@ class TestCellMPIDatatypeHelper
 
 LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::TestCellSoA, ((LibGeoDecomp::Coord<3>)(pos))((LibGeoDecomp::CoordBox<3>)(dimensions))((unsigned)(cycleCounter))((bool)(isEdgeCell))((bool)(isValid))((double)(testValue)))
 
-template<typename _CharT, typename _Traits, int _Dim, typename _Stencil, typename _Topology, typename _AdditionalAPI, typename _Output>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::TestCell<_Dim, _Stencil, _Topology, _AdditionalAPI, _Output>& cell)
+template<
+    typename CharT,
+    typename Traits,
+    int Dim,
+    typename Stencil,
+    typename Topology,
+    typename AdditionalAPI,
+    typename Output>
+std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& os,
+           const LibGeoDecomp::TestCell<Dim, Stencil, Topology, AdditionalAPI, Output>& cell)
 {
-    __os << cell.toString();
-    return __os;
+    os << cell.toString();
+    return os;
 }
 
 #endif
