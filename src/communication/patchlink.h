@@ -11,6 +11,39 @@
 
 namespace LibGeoDecomp {
 
+namespace PatchLinkHelpers {
+
+template<typename GRID_TYPE>
+class BufferTypeHelper;
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class BufferTypeHelper<DisplacedGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> >
+{
+public:
+    typedef std::vector<CELL_TYPE> Value;
+
+    template<typename REGION>
+    static size_t size(const REGION& region)
+    {
+        return region.size();
+    }
+};
+
+template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
+class BufferTypeHelper<SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> >
+{
+public:
+    typedef std::vector<char> Value;
+
+    template<typename REGION>
+    static size_t size(const REGION& region)
+    {
+        return region.size() * LibFlatArray::aggregated_member_size<CELL_TYPE>::VALUE;
+    }
+};
+
+}
+
 /**
  * PatchLink encapsulates the transmission of patches to and from
  * remote processes. PatchLink::Accepter takes the patches from a
@@ -21,29 +54,33 @@ template<class GRID_TYPE>
 class PatchLink
 {
 public:
+    friend class PatchLinkTest;
+
     const static int DIM = GRID_TYPE::DIM;
     const static size_t ENDLESS = -1;
+
+    typedef typename PatchLinkHelpers::BufferTypeHelper<GRID_TYPE>::Value BufferType;
 
     class Link
     {
     public:
         typedef typename GRID_TYPE::CellType CellType;
 
-        // fixme: there may be multiple PatchLinks connecting any two
-        // nodes. Since MPI matches messages by node, datatype and tag
-        // and the first two of these three will be identical, we need
-        // to make sure that the tag differs. We could use the "level"
-        // of the UpdateGroup in the hierarchy for this or some kind
-        // of registry.
+        /**
+         * MPI matches messages by communicator, rank and tag. To
+         * avoid collisions if more than two patchlinks per node-pair
+         * are present, the tag parameter needs to be unique (for this
+         * pair).
+         */
         inline Link(
             const Region<DIM>& region,
-            const int tag,
+            int tag,
             MPI_Comm communicator = MPI_COMM_WORLD) :
             lastNanoStep(0),
             stride(1),
             mpiLayer(communicator),
             region(region),
-            buffer(region.size()),
+            buffer(PatchLinkHelpers::BufferTypeHelper<GRID_TYPE>::size(region)),
             tag(tag)
         {}
 
@@ -52,7 +89,7 @@ public:
             wait();
         }
 
-        virtual void charge(const std::size_t next, const std::size_t last, const long newStride)
+        virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {
             lastNanoStep = last;
             stride = newStride;
@@ -73,7 +110,7 @@ public:
         long stride;
         MPILayer mpiLayer;
         Region<DIM> region;
-        std::vector<CellType> buffer;
+        BufferType buffer;
         int tag;
     };
 
@@ -104,7 +141,7 @@ public:
             cellMPIDatatype(cellMPIDatatype)
         {}
 
-        virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
+        virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {
             Link::charge(next, last, newStride);
             pushRequest(next);
@@ -152,10 +189,11 @@ public:
         using PatchProvider<GRID_TYPE>::checkNanoStepGet;
         using PatchProvider<GRID_TYPE>::storedNanoSteps;
 
-        inline Provider(
+        inline
+        Provider(
             const Region<DIM>& region,
-            const int& source,
-            const int& tag,
+            int source,
+            int tag,
             const MPI_Datatype& cellMPIDatatype,
             MPI_Comm communicator = MPI_COMM_WORLD) :
             Link(region, tag, communicator),

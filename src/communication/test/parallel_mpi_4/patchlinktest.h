@@ -16,6 +16,9 @@ public:
     typedef PatchLink<GridType>::Accepter PatchAccepterType;
     typedef PatchLink<GridType>::Provider PatchProviderType;
 
+    typedef TestCellSoA TestCellType;
+    typedef SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> GridType2;
+
     void setUp()
     {
         region1.clear();
@@ -87,43 +90,45 @@ public:
 
     void testMultiple()
     {
-        std::vector<PatchAccepterType> accepters;
-        std::vector<PatchProviderType> providers;
+        std::vector<boost::shared_ptr<PatchAccepterType> > accepters;
+        std::vector<boost::shared_ptr<PatchProviderType> > providers;
         int stride = 4;
         size_t maxNanoSteps = 31;
 
         for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
-                accepters << PatchAccepterType(
-                    region1,
-                    i,
-                    genTag(mpiLayer.rank(), i),
-                    MPI_INT);
+                accepters << boost::shared_ptr<PatchAccepterType>(
+                    new PatchAccepterType(
+                        region1,
+                        i,
+                        genTag(mpiLayer.rank(), i),
+                        MPI_INT));
 
-                providers << PatchProviderType(
-                    region1,
-                    i,
-                    genTag(i, mpiLayer.rank()),
-                    MPI_INT);
+                providers << boost::shared_ptr<PatchProviderType>(
+                    new PatchProviderType(
+                        region1,
+                        i,
+                        genTag(i, mpiLayer.rank()),
+                        MPI_INT));
             }
         }
 
         for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-            accepters[i].charge(0, maxNanoSteps, stride);
-            providers[i].charge(0, maxNanoSteps, stride);
+            accepters[i]->charge(0, maxNanoSteps, stride);
+            providers[i]->charge(0, maxNanoSteps, stride);
         }
 
         for (size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i)
-                accepters[i].put(mySendGrid, boundingBox, nanoStep);
+                accepters[i]->put(mySendGrid, boundingBox, nanoStep);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
                 size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
-                providers[i].get(&actual, boundingBox, nanoStep);
+                providers[i]->get(&actual, boundingBox, nanoStep);
 
                 TS_ASSERT_EQUALS(actual, expected);
             }
@@ -132,53 +137,126 @@ public:
 
     void testMultiple2()
     {
-        std::vector<PatchAccepterType> accepters;
-        std::vector<PatchProviderType> providers;
+        std::vector<boost::shared_ptr<PatchAccepterType> > accepters;
+        std::vector<boost::shared_ptr<PatchProviderType> > providers;
         int stride = 4;
         size_t maxNanoSteps = 100;
 
         for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
-                accepters << PatchAccepterType(
-                    region1,
-                    i,
-                    genTag(mpiLayer.rank(), i),
-                    MPI_INT);
+                accepters << boost::shared_ptr<PatchAccepterType>(
+                    new PatchAccepterType(
+                        region1,
+                        i,
+                        genTag(mpiLayer.rank(), i),
+                        MPI_INT));
 
-                providers << PatchProviderType(
-                    region1,
-                    i,
-                    genTag(i, mpiLayer.rank()),
-                    MPI_INT);
+                providers << boost::shared_ptr<PatchProviderType>(
+                    new PatchProviderType(
+                        region1,
+                        i,
+                        genTag(i, mpiLayer.rank()),
+                        MPI_INT));
             }
         }
 
         for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-            accepters[i].charge(0, PatchLink<GridType>::ENDLESS, stride);
-            providers[i].charge(0, PatchLink<GridType>::ENDLESS, stride);
+            accepters[i]->charge(0, PatchLink<GridType>::ENDLESS, stride);
+            providers[i]->charge(0, PatchLink<GridType>::ENDLESS, stride);
         }
 
         for (size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-                accepters[i].put(mySendGrid, boundingBox, nanoStep);
+                accepters[i]->put(mySendGrid, boundingBox, nanoStep);
             }
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
                 size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
-                providers[i].get(&actual, boundingBox, nanoStep);
+                providers[i]->get(&actual, boundingBox, nanoStep);
 
                 TS_ASSERT_EQUALS(actual, expected);
             }
         }
 
         for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-            accepters[i].cancel();
-            providers[i].cancel();
+            accepters[i]->cancel();
+            providers[i]->cancel();
         }
+    }
+
+    void testSoA()
+    {
+        Coord<3> dim(30, 20, 10);
+        CoordBox<3> box(Coord<3>(), dim);
+        Region<3> boxRegion;
+        boxRegion << box;
+
+        GridType2 sendGrid(box);
+        GridType2 recvGrid(box);
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            Coord<3> offset(0, 0, mpiLayer.rank() * 100);
+            sendGrid.set(*i, TestCellSoA(*i + offset, dim, 0, mpiLayer.rank()));
+        }
+
+        std::vector<Region<3> > regions(mpiLayer.size());
+        for (int i = 0; i < mpiLayer.size(); ++i) {
+            Coord<3> frameDim = dim;
+            frameDim.z() = 1;
+            CoordBox<3> frameBox(Coord<3>(0, 0, i), frameDim);
+            regions[i] << frameBox;
+        }
+
+        PatchLink<GridType2>::Accepter accepter(
+            regions[mpiLayer.rank()],
+            mpiLayer.size() - 1,
+            2701,
+            MPI_CHAR);
+        accepter.charge(4, 4, 1);
+        accepter.put(sendGrid, boxRegion, 4);
+
+        std::vector<boost::shared_ptr<PatchLink<GridType2>::Provider> > providers;
+        if (mpiLayer.rank() == (mpiLayer.size() - 1)) {
+            for (int i = 0; i < mpiLayer.size(); ++i) {
+                providers.push_back(
+                    boost::shared_ptr<PatchLink<GridType2>::Provider>(
+                        new PatchLink<GridType2>::Provider(
+                            regions[i],
+                            i,
+                            2701,
+                            MPI_CHAR)));
+
+                providers[i]->charge(4, 4, 1);
+            }
+
+            for (int i = 0; i < mpiLayer.size(); ++i) {
+                providers[i]->get(&recvGrid, boxRegion, 4);
+            }
+
+            for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+                Coord<3> offset(0, 0, mpiLayer.rank() * 100);
+                 TestCellSoA cell = recvGrid.get(*i);
+
+                 double expectedTestValue = i->z();
+                 Coord<3> expectedPosition;
+
+                 if (expectedTestValue < mpiLayer.size()) {
+                     expectedPosition = Coord<3>(i->x(), i->y(), i->z() * 101);
+                 } else {
+                     expectedTestValue = 666;
+                 }
+
+                 TS_ASSERT_EQUALS(expectedTestValue, cell.testValue);
+                 TS_ASSERT_EQUALS(expectedPosition, cell.pos);
+            }
+
+        }
+
+        accepter.wait();
     }
 
 private:
@@ -201,12 +279,15 @@ private:
     GridType markGrid(const Region<2>& region, const int& id)
     {
         GridType ret = zeroGrid;
-        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i)
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
             ret[*i] = id + i->y() * 10 + i->x();
+        }
+
         return ret;
     }
 
-    int genTag(const int& from, const int& to) {
+    int genTag(int from, int to) {
         return 100 + from * 10 + to;
     }
 };
