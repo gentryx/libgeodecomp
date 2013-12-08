@@ -7,6 +7,67 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+class IrregularCell
+{
+public:
+    class API : public APITraits::HasBoostSerialization
+    {};
+
+    IrregularCell(
+        int temperature = 0,
+        IrregularCell *sublevelNW = 0,
+        IrregularCell *sublevelNE = 0,
+        IrregularCell *sublevelSW = 0,
+        IrregularCell *sublevelSE = 0) :
+        sublevelNW(sublevelNW),
+        sublevelNE(sublevelNE),
+        sublevelSW(sublevelSW),
+        sublevelSE(sublevelSE),
+        temperature(temperature)
+    {}
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & sublevelNW;
+        archive & sublevelNE;
+        archive & sublevelSW;
+        archive & sublevelSE;
+        archive & temperature;
+    }
+
+    int size() const
+    {
+        int ret = 1;
+
+        if (sublevelNW) {
+            ret += sublevelNW->size();
+        }
+        if (sublevelNE) {
+            ret += sublevelNE->size();
+        }
+        if (sublevelSW) {
+            ret += sublevelSW->size();
+        }
+        if (sublevelSE) {
+            ret += sublevelSE->size();
+        }
+
+        return ret;
+    }
+
+    IrregularCell *sublevelNW;
+    IrregularCell *sublevelNE;
+    IrregularCell *sublevelSW;
+    IrregularCell *sublevelSE;
+    int temperature;
+};
+
 class GridVecConvTest : public CxxTest::TestSuite
 {
 public:
@@ -95,6 +156,85 @@ public:
             TS_ASSERT_EQUALS(*i,    cell.pos);
             TS_ASSERT_EQUALS(12.45, cell.testValue);
         }
+    }
+
+    void testBoostSerialization()
+    {
+        CoordBox<2> box(Coord<2>(10, 10), Coord<2>(30, 20));
+        DisplacedGrid<IrregularCell> gridA(box);
+        DisplacedGrid<IrregularCell> gridB(box);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            gridA[*i].temperature = i->x() * 100 + i->y() + 90000;
+        }
+
+        gridA[Coord<2>(12, 11)].sublevelNW = new IrregularCell(1);
+        gridA[Coord<2>(12, 11)].sublevelSE = new IrregularCell(
+            2,
+            0,
+            new IrregularCell(3),
+            0,
+            0);
+
+        gridA[Coord<2>(20, 19)].sublevelNE = new IrregularCell(
+            4,
+            new IrregularCell(5),
+            new IrregularCell(6),
+            new IrregularCell(7),
+            new IrregularCell(8, new IrregularCell(9)));
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TS_ASSERT_EQUALS(gridB[*i].temperature, 0);
+            TS_ASSERT_EQUALS(gridB[*i].size(), 1);
+        }
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>(10, 11), 15)
+               << Streak<2>(Coord<2>(10, 19), 40);
+
+        std::stringstream buffer;
+        GridVecConv::gridToVector(gridA, &buffer, region);
+        GridVecConv::vectorToGrid(buffer, &gridB, region);
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            int expected = i->x() * 100 + i->y() + 90000;
+            TS_ASSERT_EQUALS(gridB[*i].temperature, expected);
+        }
+
+        TS_ASSERT_EQUALS(gridB[Coord<2>(12, 11)].size(), 4);
+        IrregularCell *null = 0;
+        IrregularCell *testCell;
+
+        testCell = &gridB[Coord<2>(12, 11)];
+        TS_ASSERT_EQUALS(testCell->temperature, 91211);
+        TS_ASSERT_DIFFERS(testCell->sublevelNW, null);
+        TS_ASSERT_EQUALS( testCell->sublevelNE, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSW, null);
+        TS_ASSERT_DIFFERS(testCell->sublevelSE, null);
+
+        testCell = gridB[Coord<2>(12, 11)].sublevelNW;
+        TS_ASSERT_EQUALS(testCell->temperature, 1);
+        TS_ASSERT_EQUALS( testCell->sublevelNW, null);
+        TS_ASSERT_EQUALS( testCell->sublevelNE, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSW, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSE, null);
+
+        testCell = gridB[Coord<2>(12, 11)].sublevelSE;
+        TS_ASSERT_EQUALS(testCell->temperature, 2);
+        TS_ASSERT_EQUALS( testCell->sublevelNW, null);
+        TS_ASSERT_DIFFERS(testCell->sublevelNE, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSW, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSE, null);
+
+        testCell = gridB[Coord<2>(12, 11)].sublevelSE->sublevelNE;
+        TS_ASSERT_EQUALS(testCell->temperature, 3);
+        TS_ASSERT_EQUALS( testCell->sublevelNW, null);
+        TS_ASSERT_EQUALS( testCell->sublevelNE, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSW, null);
+        TS_ASSERT_EQUALS( testCell->sublevelSE, null);
+
+
+        TS_ASSERT_EQUALS(gridB[Coord<2>(20, 19)].size(), 7);
     }
 };
 

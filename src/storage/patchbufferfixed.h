@@ -7,39 +7,6 @@
 
 namespace LibGeoDecomp {
 
-namespace PatchBufferFixedHelpers {
-
-template<typename CELL, typename SUPPORTS_SOA>
-class SelectVectorType;
-
-template<typename CELL>
-class SelectVectorType<CELL, APITraits::FalseType>
-{
-public:
-    typedef std::vector<CELL> Vector;
-
-    template<typename REGION>
-    Vector create(const REGION region)
-    {
-        return Vector(region.size());
-    }
-};
-
-template<typename CELL>
-class SelectVectorType<CELL, APITraits::TrueType>
-{
-public:
-    typedef std::vector<char> Vector;
-
-    template<typename REGION>
-    Vector create(const REGION region)
-    {
-        return Vector(sizeof(CELL) * region.size());
-    }
-};
-
-}
-
 /**
  * The PatchBuffer's cousin can only store a fixed number of regions
  * at a time, but avoids the memory allocation hassle during
@@ -53,6 +20,7 @@ class PatchBufferFixed :
 public:
     friend class PatchBufferFixedTest;
     typedef typename GRID_TYPE1::CellType CellType;
+    typedef typename APITraits::SelectBufferType<CellType>::Value BufferType;
     const static int DIM = GRID_TYPE1::DIM;
 
     using PatchAccepter<GRID_TYPE1>::checkNanoStepPut;
@@ -64,7 +32,7 @@ public:
         region(region),
         indexRead(0),
         indexWrite(0),
-        buffer(SIZE, std::vector<CellType>(region.size()))
+        buffer(SIZE, APITraits::SelectBufferType<CellType>::create(region))
     {}
 
     virtual void put(
@@ -109,7 +77,7 @@ private:
     Region<DIM> region;
     int indexRead;
     int indexWrite;
-    std::vector<std::vector<CellType> > buffer;
+    std::vector<BufferType> buffer;
 
     inline void inc(int *index)
     {

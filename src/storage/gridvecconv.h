@@ -4,6 +4,11 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/region.h>
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 template<typename CELL, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
@@ -12,23 +17,58 @@ class SoAGrid;
 class GridVecConv
 {
 public:
-    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
-    static std::vector<CELL_TYPE> gridToVector(
-        const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
+    template<typename GRID_TYPE, typename VECTOR_TYPE, typename REGION_TYPE>
+    static void gridToVector(
+        const GRID_TYPE& grid,
+        VECTOR_TYPE *vec,
         const REGION_TYPE& region)
     {
-        std::vector<CELL_TYPE> ret(region.size());
-        gridToVector(grid, &ret, region);
-        return ret;
+        typedef typename GRID_TYPE::CellType CellType;
+        gridToVector(
+            grid, vec, region,
+            typename APITraits::SelectSoA<CellType>::Value(),
+            typename APITraits::SelectBoostSerialization<CellType>::Value());
     }
+
+    template<typename GRID_TYPE, typename VECTOR_TYPE, typename REGION_TYPE>
+    static void vectorToGrid(
+        const VECTOR_TYPE& vec,
+        GRID_TYPE *grid,
+        const REGION_TYPE& region)
+    {
+        typedef typename GRID_TYPE::CellType CellType;
+        vectorToGrid(
+            vec, grid, region,
+            typename APITraits::SelectSoA<CellType>::Value(),
+            typename APITraits::SelectBoostSerialization<CellType>::Value());
+    }
+
+    template<typename GRID_TYPE, typename VECTOR_TYPE, typename REGION_TYPE>
+    static void vectorToGrid(
+        VECTOR_TYPE& vec,
+        GRID_TYPE *grid,
+        const REGION_TYPE& region)
+    {
+        typedef typename GRID_TYPE::CellType CellType;
+        vectorToGrid(
+            vec, grid, region,
+            typename APITraits::SelectSoA<CellType>::Value(),
+            typename APITraits::SelectBoostSerialization<CellType>::Value());
+    }
+
+private:
 
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void gridToVector(
         const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
         std::vector<CELL_TYPE> *vec,
-        const REGION_TYPE& region)
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::FalseType&)
     {
         if (vec->size() != region.size()) {
+            std::cout << "  vec: " << vec->size() << "\n"
+                      << "  reg: " << region.size() << "\n";
             throw std::logic_error("region doesn't match vector size");
         }
 
@@ -50,7 +90,9 @@ public:
     static void gridToVector(
         const SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
         std::vector<char> *vec,
-        const REGION_TYPE& region)
+        const REGION_TYPE& region,
+        const APITraits::TrueType&,
+        const APITraits::FalseType&)
     {
         size_t regionSize =
             region.size() *
@@ -68,10 +110,26 @@ public:
     }
 
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
+    static void gridToVector(
+        const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
+        std::stringstream *stream,
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::TrueType&)
+    {
+        boost::archive::binary_oarchive archive(*stream);
+        for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
+            archive & grid[*i];
+        }
+    }
+
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
         const std::vector<CELL_TYPE>& vec,
         DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
-        const REGION_TYPE& region)
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::FalseType&)
     {
         if (vec.size() != region.size()) {
             throw std::logic_error("vector doesn't match region's size");
@@ -98,7 +156,9 @@ public:
     static void vectorToGrid(
         const std::vector<char>& vec,
         SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
-        const REGION_TYPE& region)
+        const REGION_TYPE& region,
+        const APITraits::TrueType&,
+        const APITraits::FalseType&)
     {
         size_t regionSize =
             region.size() *
@@ -113,6 +173,20 @@ public:
         }
 
         grid->loadRegion(&vec[0], region);
+    }
+
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
+    static void vectorToGrid(
+        std::stringstream& stream,
+        DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::TrueType&)
+    {
+        boost::archive::binary_iarchive archive(stream);
+        for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
+            archive & (*grid)[*i];
+        }
     }
 
 };

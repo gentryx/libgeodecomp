@@ -15,6 +15,7 @@ class PatchBuffer :
 public:
     friend class PatchBufferTest;
     typedef typename GRID_TYPE1::CellType CellType;
+    typedef typename APITraits::SelectBufferType<CellType>::Value BufferType;
     const static int DIM = GRID_TYPE1::DIM;
 
     using PatchAccepter<GRID_TYPE1>::checkNanoStepPut;
@@ -38,8 +39,11 @@ public:
             return;
         }
 
-        storedRegions.push_back(
-            GridVecConv::gridToVector(grid, region));
+        storedRegions.push_back(BufferType());
+        BufferType& buffer = storedRegions.back();
+        buffer = APITraits::SelectBufferType<CellType>::create(region);
+
+        GridVecConv::gridToVector(grid, &buffer, region);
         storedNanoSteps << (min)(requestedNanoSteps);
         erase_min(requestedNanoSteps);
     }
@@ -67,7 +71,7 @@ public:
 
 private:
     Region<DIM> region;
-    std::deque<std::vector<CellType> > storedRegions;
+    std::deque<BufferType> storedRegions;
 };
 
 }
