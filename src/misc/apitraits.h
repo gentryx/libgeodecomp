@@ -1,9 +1,14 @@
 #ifndef LIBGEODECOMP_MISC_APITRAITS_H
 #define LIBGEODECOMP_MISC_APITRAITS_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/storage/displacedgrid.h>
+
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <sstream>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -264,6 +269,38 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    /**
+     * Decide whether a model can be (de-)serialized with Boost.Serialization.
+     */
+    template<typename CELL, typename HAS_BOOST_SERIALIZATION = void>
+    class SelectBoostSerialization
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectBoostSerialization<CELL, typename CELL::API::SupportsBoostSerialization>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * This class can be used to flag cell classes which can be
+     * marshalled with Boost.Serialization. This may be advantageous
+     * for models which highly diverse memory usage per cell (e.g.
+     * n-body codes with heterogeneous particle distributions or AMR
+     * codes).
+     */
+    class HasBoostSerialization
+    {
+    public:
+        typedef void SupportsBoostSerialization;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     template<typename CELL, typename HAS_SPEED = void>
     class SelectStaticData
     {
@@ -285,6 +322,51 @@ public:
     public:
         typedef void SupportsStaticData;
         typedef STATIC_DATA StaticData;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * This is an n-way switch to allow other classes to select the
+     * appropriate type to buffer regions of a grid; for use with GridVecConv.
+     */
+    template<typename CELL, typename SUPPORTS_SOA = void, typename SUPPORTS_BOOST_SERIALIZATION = void>
+    class SelectBufferType
+    {
+    public:
+        typedef std::vector<CELL> Value;
+
+        template<typename REGION>
+        static Value create(const REGION& region)
+        {
+            return Value(region.size());
+        }
+    };
+
+    template<typename CELL>
+    class SelectBufferType<CELL, typename CELL::API::SUPPORTS_SOA, void>
+    {
+    public:
+        typedef std::vector<char> Value;
+
+        template<typename REGION>
+        static Value create(const REGION& region)
+        {
+            return Value(sizeof(CELL) * region.size());
+        }
+    };
+
+    template<typename CELL>
+    class SelectBufferType<CELL, void, typename CELL::API::SUPPORTS_BOOST_SERIALIZATION>
+    {
+    public:
+        typedef std::stringstream Value;
+
+        template<typename REGION>
+        static Value create(const REGION& region)
+        {
+            return Value();
+        }
     };
 };
 
