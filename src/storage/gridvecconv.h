@@ -22,10 +22,10 @@ public:
         return ret;
     }
 
-    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename VECTOR_TYPE, typename REGION_TYPE>
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void gridToVector(
         const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
-        VECTOR_TYPE *vec,
+        std::vector<CELL_TYPE> *vec,
         const REGION_TYPE& region)
     {
         if (vec->size() != region.size()) {
@@ -46,10 +46,10 @@ public:
         }
     }
 
-    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, typename VECTOR_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void gridToVector(
         const SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
-        VECTOR_TYPE *vec,
+        std::vector<char> *vec,
         const REGION_TYPE& region)
     {
         size_t regionSize =
@@ -67,9 +67,9 @@ public:
         grid.saveRegion(&(*vec)[0], region);
     }
 
-    template<typename VEC_TYPE, typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
-        const VEC_TYPE& vec,
+        const std::vector<CELL_TYPE>& vec,
         DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
         const REGION_TYPE& region)
     {
@@ -94,9 +94,9 @@ public:
         }
     }
 
-    template<typename VEC_TYPE, typename CELL_TYPE, typename TOPOLOGY_TYPE, typename REGION_TYPE, bool TOPOLOGICALLY_CORRECT>
+    template<typename CELL_TYPE, typename TOPOLOGY_TYPE, typename REGION_TYPE, bool TOPOLOGICALLY_CORRECT>
     static void vectorToGrid(
-        const VEC_TYPE& vec,
+        const std::vector<char>& vec,
         SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
         const REGION_TYPE& region)
     {
