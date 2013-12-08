@@ -45,8 +45,8 @@ public:
 
     void testInvalidCommand()
     {
-        CommandServer<int> server(47110, pipe);
-        StringVec feedback = CommandServer<int>::sendCommandWithFeedback("blah", 2, 47110);
+        CommandServer<int> server(47112, pipe);
+        StringVec feedback = CommandServer<int>::sendCommandWithFeedback("blah", 2, 47112);
 
         TS_ASSERT_EQUALS(feedback.size(), size_t(2));
         TS_ASSERT_EQUALS(feedback[0], "command not found: blah");
