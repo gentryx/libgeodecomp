@@ -233,7 +233,6 @@ public:
         TS_ASSERT_EQUALS( testCell->sublevelSW, null);
         TS_ASSERT_EQUALS( testCell->sublevelSE, null);
 
-
         TS_ASSERT_EQUALS(gridB[Coord<2>(20, 19)].size(), 7);
     }
 };

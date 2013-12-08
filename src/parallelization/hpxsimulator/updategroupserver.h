@@ -335,7 +335,7 @@ public:
 
     double speed()
     {
-        return getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
+        return getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
     }
     HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, speed, SpeedAction);
 

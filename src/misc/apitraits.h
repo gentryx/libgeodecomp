@@ -244,27 +244,30 @@ public:
      * determine whether a cell has an architecture-specific speed indicator defined
      */
     template<typename CELL, typename HAS_SPEED = void>
-    class SelectSpeed
+    class SelectSpeedGuide
     {
     public:
         typedef FalseType Value;
     };
 
     template<typename CELL>
-    class SelectSpeed<CELL, typename CELL::API::SupportsSpeed>
+    class SelectSpeedGuide<CELL, typename CELL::API::SupportsSpeed>
     {
     public:
         typedef TrueType Value;
     };
 
     /**
-     * Use this if you want to use your Cell in a heterogenous environment
-     * to specify different "speeds". This affects the domain decomposition.
+     * Use this, if you want to use your cell in a heterogenous
+     * environment, to specify architecture-specific efficiency hints.
+     * This affects the domain decomposition: architectures which are
+     * expected to be faster will get a larger initial share of the
+     * grid.
      */
-    class HasSpeed
+    class HasSpeedGuide
     {
     public:
-        typedef void SupportsSpeed;
+        typedef void SupportsSpeedGuide;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

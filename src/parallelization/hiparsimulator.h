@@ -226,7 +226,7 @@ private:
 
         CoordBox<DIM> box = initializer->gridBox();
 
-        double mySpeed = getCellSpeed(typename APITraits::SelectSpeed<CELL_TYPE>::Value());
+        double mySpeed = getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
         std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
         std::vector<size_t> weights = initialWeights(
             box.dimensions.prod(),
