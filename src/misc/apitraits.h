@@ -347,7 +347,7 @@ public:
     };
 
     template<typename CELL>
-    class SelectBufferType<CELL, typename CELL::API::SUPPORTS_SOA, void>
+    class SelectBufferType<CELL, typename CELL::API::SupportsSoA, void>
     {
     public:
         typedef std::vector<char> Value;
@@ -360,7 +360,7 @@ public:
     };
 
     template<typename CELL>
-    class SelectBufferType<CELL, void, typename CELL::API::SUPPORTS_BOOST_SERIALIZATION>
+    class SelectBufferType<CELL, void, typename CELL::API::SupportsBoostSerialization>
     {
     public:
         typedef std::stringstream Value;
