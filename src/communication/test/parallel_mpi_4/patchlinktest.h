@@ -287,6 +287,7 @@ public:
 
     void testBoostSerialization()
     {
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
         Coord<2> dim(30, 20);
         CoordBox<2> box(Coord<2>(), dim);
         Region<2> boxRegion;
@@ -351,6 +352,7 @@ public:
         }
 
         accepter.wait();
+#endif
     }
 
 private:
