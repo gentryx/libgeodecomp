@@ -326,51 +326,6 @@ public:
         typedef void SupportsStaticData;
         typedef STATIC_DATA StaticData;
     };
-
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-    /**
-     * This is an n-way switch to allow other classes to select the
-     * appropriate type to buffer regions of a grid; for use with GridVecConv.
-     */
-    template<typename CELL, typename SUPPORTS_SOA = void, typename SUPPORTS_BOOST_SERIALIZATION = void>
-    class SelectBufferType
-    {
-    public:
-        typedef std::vector<CELL> Value;
-
-        template<typename REGION>
-        static Value create(const REGION& region)
-        {
-            return Value(region.size());
-        }
-    };
-
-    template<typename CELL>
-    class SelectBufferType<CELL, typename CELL::API::SupportsSoA, void>
-    {
-    public:
-        typedef std::vector<char> Value;
-
-        template<typename REGION>
-        static Value create(const REGION& region)
-        {
-            return Value(sizeof(CELL) * region.size());
-        }
-    };
-
-    template<typename CELL>
-    class SelectBufferType<CELL, void, typename CELL::API::SupportsBoostSerialization>
-    {
-    public:
-        typedef std::stringstream Value;
-
-        template<typename REGION>
-        static Value create(const REGION& region)
-        {
-            return Value();
-        }
-    };
 };
 
 }

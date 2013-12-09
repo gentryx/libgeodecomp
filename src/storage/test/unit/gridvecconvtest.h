@@ -195,7 +195,7 @@ public:
         region << Streak<2>(Coord<2>(10, 11), 15)
                << Streak<2>(Coord<2>(10, 19), 40);
 
-        std::stringstream buffer;
+        std::vector<char> buffer;
         GridVecConv::gridToVector(gridA, &buffer, region);
         GridVecConv::vectorToGrid(buffer, &gridB, region);
 

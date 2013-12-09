@@ -4,10 +4,12 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
 
+#include <climits>
 #include <deque>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -56,10 +58,12 @@ class PatchLink
 public:
     friend class PatchLinkTest;
 
+    typedef typename GRID_TYPE::CellType CellType;
+    typedef typename SerializationBuffer<CellType>::BufferType BufferType;
+    typedef typename SerializationBuffer<CellType>::FixedSize FixedSize;
+
     const static int DIM = GRID_TYPE::DIM;
     const static size_t ENDLESS = -1;
-
-    typedef typename PatchLinkHelpers::BufferTypeHelper<GRID_TYPE>::Value BufferType;
 
     class Link
     {
@@ -158,6 +162,7 @@ public:
 
             wait();
             GridVecConv::gridToVector(grid, &buffer, region);
+            sendHeader(FixedSize());
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
             std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
@@ -171,7 +176,23 @@ public:
 
     private:
         int dest;
+        int dataSize;
         MPI_Datatype cellMPIDatatype;
+
+        void sendHeader(APITraits::TrueType)
+        {
+            // we don't need any header for fixed size buffers
+        }
+
+        void sendHeader(APITraits::FalseType)
+        {
+            if (buffer.size() > INT_MAX) {
+                throw std::invalid_argument("buffer size exceeds INT_MAX");
+            }
+
+            dataSize = buffer.size();
+            mpiLayer.send(&dataSize, dest, 1, tag, MPI_INT);
+        }
     };
 
     class Provider :
@@ -198,6 +219,7 @@ public:
             MPI_Comm communicator = MPI_COMM_WORLD) :
             Link(region, tag, communicator),
             source(source),
+            dataSize(0),
             cellMPIDatatype(cellMPIDatatype)
         {}
 
@@ -211,7 +233,7 @@ public:
             GRID_TYPE *grid,
             const Region<DIM>& patchableRegion,
             const std::size_t nanoStep,
-            const bool remove=true)
+            const bool remove = true)
         {
             if (storedNanoSteps.empty() || (nanoStep < (min)(storedNanoSteps))) {
                 return;
@@ -219,6 +241,7 @@ public:
 
             checkNanoStepGet(nanoStep);
             wait();
+            recvSecondPart(FixedSize());
 
             GridVecConv::vectorToGrid(buffer, grid, region);
 
@@ -234,12 +257,38 @@ public:
         void recv(const std::size_t nanoStep)
         {
             storedNanoSteps << nanoStep;
-            mpiLayer.recv(&buffer[0], source, buffer.size(), tag, cellMPIDatatype);
+            recvFirstPart(FixedSize());
         }
 
     private:
         int source;
+        int dataSize;
         MPI_Datatype cellMPIDatatype;
+
+        void recvFirstPart(APITraits::TrueType)
+        {
+                mpiLayer.recv(&buffer[0], source, buffer.size(), tag, cellMPIDatatype);
+        }
+
+        void recvFirstPart(APITraits::FalseType)
+        {
+                // fixme: benchmark whether this could be done more
+                // efficiently with MPI_Iprobe (to detect the message
+                // size)
+                mpiLayer.recv(&dataSize, source, 1, tag, MPI_INT);
+        }
+
+        void recvSecondPart(APITraits::TrueType)
+        {
+            // no second receive neccessary for fixed size payloads
+        }
+
+        void recvSecondPart(APITraits::FalseType)
+        {
+            buffer.resize(dataSize);
+            mpiLayer.recv(&buffer[0], source, dataSize, tag, cellMPIDatatype);
+            wait();
+        }
     };
 
 };

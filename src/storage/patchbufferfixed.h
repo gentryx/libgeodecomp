@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
@@ -20,7 +21,7 @@ class PatchBufferFixed :
 public:
     friend class PatchBufferFixedTest;
     typedef typename GRID_TYPE1::CellType CellType;
-    typedef typename APITraits::SelectBufferType<CellType>::Value BufferType;
+    typedef typename SerializationBuffer<CellType>::BufferType BufferType;
     const static int DIM = GRID_TYPE1::DIM;
 
     using PatchAccepter<GRID_TYPE1>::checkNanoStepPut;
@@ -32,7 +33,7 @@ public:
         region(region),
         indexRead(0),
         indexWrite(0),
-        buffer(SIZE, APITraits::SelectBufferType<CellType>::create(region))
+        buffer(SIZE, SerializationBuffer<CellType>::create(region))
     {}
 
     virtual void put(

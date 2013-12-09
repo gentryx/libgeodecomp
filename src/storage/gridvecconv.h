@@ -5,6 +5,10 @@
 #include <libgeodecomp/geometry/region.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
+
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #endif
@@ -67,8 +71,6 @@ private:
         const APITraits::FalseType&)
     {
         if (vec->size() != region.size()) {
-            std::cout << "  vec: " << vec->size() << "\n"
-                      << "  reg: " << region.size() << "\n";
             throw std::logic_error("region doesn't match vector size");
         }
 
@@ -113,12 +115,17 @@ private:
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void gridToVector(
         const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
-        std::stringstream *stream,
+        std::vector<char> *vec,
         const REGION_TYPE& region,
         const APITraits::FalseType&,
         const APITraits::TrueType&)
     {
-        boost::archive::binary_oarchive archive(*stream);
+        typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
+        vec->resize(0);
+        Device sink(*vec);
+        boost::iostreams::stream<Device> stream(sink);
+        boost::archive::binary_oarchive archive(stream);
+
         for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
             archive & grid[*i];
         }
@@ -180,13 +187,17 @@ private:
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
-        std::stringstream& stream,
+        std::vector<char>& vec,
         DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT> *grid,
         const REGION_TYPE& region,
         const APITraits::FalseType&,
         const APITraits::TrueType&)
     {
+        typedef boost::iostreams::basic_array_source<char> Device;
+        Device source(&vec.front(), vec.size());
+        boost::iostreams::stream<Device> stream(source);
         boost::archive::binary_iarchive archive(stream);
+
         for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
             archive & (*grid)[*i];
         }

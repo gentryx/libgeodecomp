@@ -9,6 +9,31 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+/**
+ * Test model for use with Boost.Serialization
+ */
+class MyComplicatedCell
+{
+public:
+    class API : public APITraits::HasBoostSerialization
+    {};
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+    }
+
+    template<typename ARCHIVE>
+    void serialize(ARCHIVE& archive, int version)
+    {
+        archive & x;
+        archive & cargo;
+    }
+
+    int x;
+    std::vector<int> cargo;
+};
+
 class PatchLinkTest : public CxxTest::TestSuite
 {
 public:
@@ -18,6 +43,8 @@ public:
 
     typedef TestCellSoA TestCellType;
     typedef SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> GridType2;
+
+    typedef DisplacedGrid<MyComplicatedCell> GridType3;
 
     void setUp()
     {
@@ -239,19 +266,86 @@ public:
 
             for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
                 Coord<3> offset(0, 0, mpiLayer.rank() * 100);
-                 TestCellSoA cell = recvGrid.get(*i);
+                TestCellSoA cell = recvGrid.get(*i);
 
-                 double expectedTestValue = i->z();
-                 Coord<3> expectedPosition;
+                double expectedTestValue = i->z();
+                Coord<3> expectedPosition;
 
-                 if (expectedTestValue < mpiLayer.size()) {
-                     expectedPosition = Coord<3>(i->x(), i->y(), i->z() * 101);
-                 } else {
-                     expectedTestValue = 666;
-                 }
+                if (expectedTestValue < mpiLayer.size()) {
+                    expectedPosition = Coord<3>(i->x(), i->y(), i->z() * 101);
+                } else {
+                    expectedTestValue = 666;
+                }
 
-                 TS_ASSERT_EQUALS(expectedTestValue, cell.testValue);
-                 TS_ASSERT_EQUALS(expectedPosition, cell.pos);
+                TS_ASSERT_EQUALS(expectedTestValue, cell.testValue);
+                TS_ASSERT_EQUALS(expectedPosition, cell.pos);
+            }
+        }
+
+        accepter.wait();
+    }
+
+    void testBoostSerialization()
+    {
+        Coord<2> dim(30, 20);
+        CoordBox<2> box(Coord<2>(), dim);
+        Region<2> boxRegion;
+        boxRegion << box;
+
+        GridType3 sendGrid(box);
+        GridType3 recvGrid(box);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            MyComplicatedCell cell;
+            cell.cargo << i->x();
+            cell.cargo << i->y();
+            cell.cargo << mpiLayer.rank();
+            sendGrid.set(*i, cell);
+        }
+
+        std::vector<Region<2> > regions(mpiLayer.size());
+        for (int i = 0; i < mpiLayer.size(); ++i) {
+            regions[i] << Streak<2>(Coord<2>(0, i), dim.x());;
+        }
+
+        PatchLink<GridType3>::Accepter accepter(
+            regions[mpiLayer.rank()],
+            0,
+            2701,
+            MPI_CHAR);
+        accepter.charge(4, 4, 1);
+        accepter.put(sendGrid, boxRegion, 4);
+        accepter.wait();
+
+        std::vector<boost::shared_ptr<PatchLink<GridType3>::Provider> > providers;
+        if (mpiLayer.rank() == 0) {
+            for (int i = 0; i < mpiLayer.size(); ++i) {
+                providers.push_back(
+                    boost::shared_ptr<PatchLink<GridType3>::Provider>(
+                        new PatchLink<GridType3>::Provider(
+                            regions[i],
+                            i,
+                            2701,
+                            MPI_CHAR)));
+
+                providers.back()->charge(4, 4, 1);
+            }
+
+            for (int i = 0; i < mpiLayer.size(); ++i) {
+                providers[i]->get(&recvGrid, boxRegion, 4);
+            }
+
+            for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+                MyComplicatedCell cell = recvGrid.get(*i);
+
+                if (i->y() < mpiLayer.size()) {
+                    TS_ASSERT_EQUALS(cell.cargo.size(), 3);
+                    TS_ASSERT_EQUALS(cell.cargo[0], i->x());
+                    TS_ASSERT_EQUALS(cell.cargo[1], i->y());
+                    TS_ASSERT_EQUALS(cell.cargo[2], i->y());
+                } else {
+                    TS_ASSERT_EQUALS(cell.cargo.size(), 0);
+                }
             }
 
         }
