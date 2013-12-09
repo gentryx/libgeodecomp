@@ -7,6 +7,9 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+/**
+ * Test model for use with Boost.Serialization
+ */
 class IrregularCell
 {
 public:

@@ -109,6 +109,7 @@ private:
         grid.saveRegion(&(*vec)[0], region);
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void gridToVector(
         const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
@@ -122,6 +123,7 @@ private:
             archive & grid[*i];
         }
     }
+#endif
 
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
@@ -175,6 +177,7 @@ private:
         grid->loadRegion(&vec[0], region);
     }
 
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
         std::stringstream& stream,
@@ -188,6 +191,7 @@ private:
             archive & (*grid)[*i];
         }
     }
+#endif
 
 };
 
