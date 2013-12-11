@@ -23,7 +23,7 @@ namespace SerializationBufferHelpers
             return BufferType(region.size());
         }
 
-        ElementType getData(BufferType& buffer)
+        static ElementType *getData(BufferType& buffer)
         {
             return &buffer.first();
         }
@@ -43,7 +43,7 @@ namespace SerializationBufferHelpers
             return BufferType(sizeof(CELL) * region.size());
         }
 
-        ElementType getData(BufferType& buffer)
+        static ElementType *getData(BufferType& buffer)
         {
             return &buffer.front();
         }
@@ -63,7 +63,7 @@ namespace SerializationBufferHelpers
             return BufferType();
         }
 
-        ElementType getData(BufferType& buffer)
+        static ElementType *getData(BufferType& buffer)
         {
             return &buffer.front();
         }
@@ -87,6 +87,11 @@ public:
     static BufferType create(const REGION& region)
     {
         return Implementation::create(region);
+    }
+
+    static ElementType *getData(BufferType& buffer)
+    {
+        return &Implementation::getData(buffer);
     }
 };
 
