@@ -62,7 +62,12 @@ public:
     {
         std::string message = " x y ";
         StringVec tokens = StringOps::tokenize(message, " ");
-        std::cout << "tokens: " << tokens << "\n";
+
+        StringVec expectedTokens;
+        expectedTokens << "x"
+                       << "y";
+
+        TS_ASSERT_EQUALS(tokens, expectedTokens);
     }
 
     void testJoin()
