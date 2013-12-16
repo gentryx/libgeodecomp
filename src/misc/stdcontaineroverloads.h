@@ -27,7 +27,7 @@ using std::vector;
  * Deletes items from @param vec that are equal to @param obj
  */
 template <typename T, typename Allocator, typename U>
-inline void del(std::vector<T, Allocator> & vec, const U& obj)
+inline void del(std::vector<T, Allocator>&  vec, const U& obj)
 {
     vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
 }
@@ -166,6 +166,49 @@ inline std::set<T, Allocator> operator||(
         std::inserter(result, result.begin()));
     return result;
 }
+
+template <typename T, typename Allocator>
+inline std::set<T, Allocator>& operator|=(
+    std::set<T, Allocator>& set,
+    const std::set<T, Allocator>& other)
+{
+    set.insert(other.begin(), other.end());
+    return set;
+}
+
+template <typename T, typename Allocator>
+inline std::set<T, Allocator> operator+(
+    const std::set<T, Allocator>& set,
+    const std::set<T, Allocator>& other)
+{
+    std::set<T, Allocator> ret = set;
+    ret |= other;
+    return ret;
+}
+
+template <typename T, typename Allocator>
+inline std::set<T, Allocator>& operator-=(
+    std::set<T, Allocator>& set,
+    const std::set<T, Allocator>& other)
+{
+    for (typename std::set<T, Allocator>::const_iterator i = other.begin();
+         i != other.end();
+         ++i) {
+        set.erase(*i);
+    }
+    return set;
+}
+
+template <typename T, typename Allocator>
+inline std::set<T, Allocator> operator-(
+    const std::set<T, Allocator>& set,
+    const std::set<T, Allocator>& other)
+{
+    std::set<T, Allocator> ret = set;
+    ret -= other;
+    return ret;
+}
+
 
 /**
  * Output

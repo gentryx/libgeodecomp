@@ -97,6 +97,35 @@ public:
 
         TS_ASSERT_EQUALS(set0 || set1, expected);
     }
+
+    void testOperatorOrEquals()
+    {
+        std::set<int> set0;
+        std::set<int> set1;
+        set0 << 1;
+        set0 << 2;
+        set1 << 2;
+        set1 << 3;
+        set0 |= set1;
+
+        std::set<int> expected;
+        expected << 1
+                 << 2
+                 << 3;
+        TS_ASSERT_EQUALS(set0, expected);
+    }
+
+    void testOperatorPlus()
+    {
+        std::set<int> set0;
+        std::set<int> set1;
+        set0 << 1;
+        set0 << 2;
+        set1 << 2;
+        set1 << 3;
+
+        TS_ASSERT_EQUALS(set0 + set1, set0 || set1);
+    }
 };
 
 class StdContainerOverloadsTest_StdMap : public CxxTest::TestSuite
