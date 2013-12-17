@@ -318,7 +318,13 @@ public:
         typedef typename CELL::API::StaticData Value;
     };
 
-
+    /**
+     * Some models have a need for static, but mutable data blocks,
+     * e.g. coefficients which need to be controlled by steerers. This
+     * class allows users to appropriately flag their classes so that
+     * LibGeoDecomp can take over handling of these. Handling refers
+     * to synchronizing them on a GPU and between time steps.
+     */
     template<typename STATIC_DATA>
     class HasStaticData
     {
