@@ -21,11 +21,35 @@ public:
 
     Region<DIM> getRegion(const std::size_t node) const
     {
-        // @dominik: implement me
-        return Region<DIM>();
+        const unsigned int dim0Nodes = sqrt(weights.size());
+        unsigned int dim1Nodes = dim0Nodes;
+        const unsigned int remain = (weights.size() - dim0Nodes * dim1Nodes);
+        if(remain != 0){
+            dim1Nodes += (remain / dim0Nodes);
+        }
+
+        const unsigned long dim0Box = dimensions[0]/dim0Nodes;
+        const unsigned long dim1Box = dimensions[1]/dim1Nodes;
+        unsigned long remain0 = 0;
+        unsigned long remain1 = 0;
+        if(node/dim1Nodes == (dim0Nodes-1)){
+            remain0 =  dimensions[0]%dim0Nodes;
+        }
+        if(node%dim1Nodes == (dim1Nodes-1)){
+            remain1 = dimensions[1]%dim0Nodes;
+        }
+
+        Region<DIM> r;
+        r << CoordBox<DIM>(
+                           Coord<DIM>(node/dim1Nodes * dim0Box, node%dim1Nodes * dim1Box),
+                           Coord<DIM>(dim0Box + remain0, dim1Box + remain1));
+        return r;
     }
 
 private:
+    using Partition<DIM>::startOffsets;
+    using Partition<DIM>::weights;
+
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 };
