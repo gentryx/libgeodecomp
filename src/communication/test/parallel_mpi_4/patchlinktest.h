@@ -340,7 +340,7 @@ public:
                 MyComplicatedCell cell = recvGrid.get(*i);
 
                 if (i->y() < mpiLayer.size()) {
-                    TS_ASSERT_EQUALS(cell.cargo.size(), 3);
+                    TS_ASSERT_EQUALS(cell.cargo.size(), std::size_t(3));
                     TS_ASSERT_EQUALS(cell.cargo[0], i->x());
                     TS_ASSERT_EQUALS(cell.cargo[1], i->y());
                     TS_ASSERT_EQUALS(cell.cargo[2], i->y());
