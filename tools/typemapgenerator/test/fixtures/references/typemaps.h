@@ -35,6 +35,7 @@ private:
     static MPI_Datatype generateMapTire();
     static MPI_Datatype generateMapWheel();
 
+public:
     static inline MPI_Datatype lookup(bool*)
     {
         return MPI_CHAR;
