@@ -13,39 +13,6 @@
 
 namespace LibGeoDecomp {
 
-namespace PatchLinkHelpers {
-
-template<typename GRID_TYPE>
-class BufferTypeHelper;
-
-template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
-class BufferTypeHelper<DisplacedGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> >
-{
-public:
-    typedef std::vector<CELL_TYPE> Value;
-
-    template<typename REGION>
-    static size_t size(const REGION& region)
-    {
-        return region.size();
-    }
-};
-
-template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
-class BufferTypeHelper<SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> >
-{
-public:
-    typedef std::vector<char> Value;
-
-    template<typename REGION>
-    static size_t size(const REGION& region)
-    {
-        return region.size() * LibFlatArray::aggregated_member_size<CELL_TYPE>::VALUE;
-    }
-};
-
-}
-
 /**
  * PatchLink encapsulates the transmission of patches to and from
  * remote processes. PatchLink::Accepter takes the patches from a
@@ -84,7 +51,7 @@ public:
             stride(1),
             mpiLayer(communicator),
             region(region),
-            buffer(PatchLinkHelpers::BufferTypeHelper<GRID_TYPE>::size(region)),
+            buffer(SerializationBuffer<CellType>::create(region)),
             tag(tag)
         {}
 

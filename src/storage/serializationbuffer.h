@@ -1,6 +1,8 @@
 #ifndef LIBGEODECOMP_STORAGE_SERIALIZATIONBUFFER_H
 #define LIBGEODECOMP_STORAGE_SERIALIZATIONBUFFER_H
 
+#include <libflatarray/flat_array.hpp>
+
 namespace LibGeoDecomp {
 
 namespace SerializationBufferHelpers
@@ -40,7 +42,7 @@ namespace SerializationBufferHelpers
         template<typename REGION>
         static BufferType create(const REGION& region)
         {
-            return BufferType(sizeof(CELL) * region.size());
+            return BufferType(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
         }
 
         static ElementType *getData(BufferType& buffer)
