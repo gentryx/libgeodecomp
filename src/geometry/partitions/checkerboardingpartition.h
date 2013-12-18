@@ -19,30 +19,58 @@ public:
         dimensions(dimensions)
     {}
 
-    Region<DIM> getRegion(const std::size_t node) const
+    Coord<DIM> getNodeGridDim(const std::size_t totalNodes) const
     {
-        const unsigned int dim0Nodes = sqrt(weights.size());
-        unsigned int dim1Nodes = dim0Nodes;
-        const unsigned int remain = (weights.size() - dim0Nodes * dim1Nodes);
-        if(remain != 0){
-            dim1Nodes += (remain / dim0Nodes);
+        if (DIM == 2) {
+            long factor = 1;
+            for(long i = 2; i <= sqrt(totalNodes); ++i){
+                if(totalNodes % i == 0){
+                    factor = i;
+                }
+            }
+            return Coord<DIM>(totalNodes/factor,factor);
+        } else if (DIM == 3) {
+            long factorX = 1;
+            long factorY = 1;
+            for(unsigned long i = 2; i <= sqrt(totalNodes); ++i){
+                if(totalNodes % i == 0){
+                    for(unsigned long j = 2; j <= (totalNodes / i); ++j){
+                        if(totalNodes / i % j == 0 && j >= i){
+                            factorX = i;
+                            factorY = j;
+                        }
+                    }
+                }
+            }
+            Coord<DIM> ret = Coord<DIM>::diagonal(1);
+            ret[0] = factorX;
+            ret[1] = factorY;
+            ret[2] = totalNodes/factorX/factorY;
+            return ret;
         }
 
-        const unsigned long dim0Box = dimensions[0]/dim0Nodes;
-        const unsigned long dim1Box = dimensions[1]/dim1Nodes;
-        unsigned long remain0 = 0;
-        unsigned long remain1 = 0;
-        if(node/dim1Nodes == (dim0Nodes-1)){
-            remain0 =  dimensions[0]%dim0Nodes;
+    }
+
+    Region<DIM> getRegion(const std::size_t node) const
+    {
+
+        Coord<DIM> nodeGridDim = getNodeGridDim(weights.size());
+        Coord<DIM> logicalCoord(node % nodeGridDim.x(),
+                                node / nodeGridDim.x());
+        if (DIM > 2){
+            logicalCoord[2] = node / (nodeGridDim.x() * nodeGridDim.y());
         }
-        if(node%dim1Nodes == (dim1Nodes-1)){
-            remain1 = dimensions[1]%dim0Nodes;
+
+        Coord<DIM> realStart;
+        Coord<DIM> realEnd;
+        for(int i = 0; i < DIM; ++i){
+            realStart[i] = logicalCoord[i] * dimensions[i] / nodeGridDim[i];
+            realEnd[i] = (logicalCoord[i]+1) * dimensions[i] / nodeGridDim[i];
         }
 
         Region<DIM> r;
-        r << CoordBox<DIM>(
-                           Coord<DIM>(node/dim1Nodes * dim0Box, node%dim1Nodes * dim1Box),
-                           Coord<DIM>(dim0Box + remain0, dim1Box + remain1));
+        r << CoordBox<DIM>(origin + realStart, realEnd - realStart);
+
         return r;
     }
 
