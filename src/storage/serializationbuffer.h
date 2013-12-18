@@ -29,6 +29,13 @@ namespace SerializationBufferHelpers
         {
             return &buffer.first();
         }
+
+#ifdef LIBGEODECOMP_FEATURE_MPI
+        static inline MPI_Datatype cellMPIDataType()
+        {
+            return APITraits::SelectMPIDataType<ElementType>::value();
+        }
+#endif
     };
 
     template<typename CELL>
@@ -49,6 +56,13 @@ namespace SerializationBufferHelpers
         {
             return &buffer.front();
         }
+
+#ifdef LIBGEODECOMP_FEATURE_MPI
+        static inline MPI_Datatype cellMPIDataType()
+        {
+            return MPI_CHAR;
+        }
+#endif
     };
 
     template<typename CELL>
@@ -69,6 +83,13 @@ namespace SerializationBufferHelpers
         {
             return &buffer.front();
         }
+
+#ifdef LIBGEODECOMP_FEATURE_MPI
+        static inline MPI_Datatype cellMPIDataType()
+        {
+            return MPI_CHAR;
+        }
+#endif
     };
 }
 
@@ -86,15 +107,22 @@ public:
     typedef typename Implementation::FixedSize FixedSize;
 
     template<typename REGION>
-    static BufferType create(const REGION& region)
+    static inline BufferType create(const REGION& region)
     {
         return Implementation::create(region);
     }
 
-    static ElementType *getData(BufferType& buffer)
+    static inline ElementType *getData(BufferType& buffer)
     {
-        return &Implementation::getData(buffer);
+        return Implementation::getData(buffer);
     }
+
+#ifdef LIBGEODECOMP_FEATURE_MPI
+    static inline  MPI_Datatype cellMPIDataType()
+    {
+        return Implementation::cellMPIDataType();
+    }
+#endif
 };
 
 }
