@@ -95,6 +95,7 @@ private:
     static MPI_Datatype generateMapLibGeoDecomp_TestCellMPIDatatypeHelper();
     static MPI_Datatype generateMapLibGeoDecomp_Chronometer();
 
+public:
     static inline MPI_Datatype lookup(bool*)
     {
         return MPI_CHAR;
