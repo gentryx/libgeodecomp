@@ -30,6 +30,7 @@ private:
 
     MAPGEN_DECLARATIONS
 
+public:
     LOOKUP_DEFINITIONS
 };
 NAMESPACE_END
