@@ -305,10 +305,6 @@ public:
     class SelectMPIDataType
     {
     public:
-        static inline MPI_Datatype value()
-        {
-            return APITraitsHelpers::DefaultMPIDataTypeLookup<Typemaps, CELL>::value();
-        }
     };
 
     template<typename CELL>
