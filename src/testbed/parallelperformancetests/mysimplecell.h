@@ -12,7 +12,8 @@ public:
 
     class API :
         public APITraits::HasCubeTopology<3>,
-        public APITraits::HasStencil<Stencils::Moore<3, 1> >
+        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+        public APITraits::HasPredefinedMPIDataType<double>
     {};
 
     double temp;
