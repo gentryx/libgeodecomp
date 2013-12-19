@@ -20,7 +20,8 @@ public:
         public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasUpdateLineX,
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasCubeTopology<3>
+        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasPredefinedMPIDataType<double>
     {};
 
     inline explicit Cell(double v = 0) :
@@ -98,8 +99,7 @@ void runSimulation()
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
         1000,
-        1,
-        MPI_DOUBLE);
+        1);
 
     if (MPILayer().rank() == 0) {
         sim.addWriter(

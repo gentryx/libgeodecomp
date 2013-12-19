@@ -40,14 +40,12 @@ public:
         LoadBalancer *balancer = 0,
         unsigned loadBalancingPeriod = 1,
         unsigned ghostZoneWidth = 1,
-        MPI_Datatype cellMPIDatatype = Typemaps::lookup<CELL_TYPE>(),
         MPI_Comm communicator = MPI_COMM_WORLD) :
         ParentType(initializer),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
-        mpiLayer(communicator),
-        cellMPIDatatype(cellMPIDatatype)
+        mpiLayer(communicator)
     {}
 
     inline void run()
@@ -145,7 +143,6 @@ private:
     EventMap events;
     PartitionManager<Topology> partitionManager;
     MPILayer mpiLayer;
-    MPI_Datatype cellMPIDatatype;
     boost::shared_ptr<UpdateGroupType> updateGroup;
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
@@ -250,7 +247,6 @@ private:
                 writerAdaptersInner,
                 steererAdaptersGhost,
                 steererAdaptersInner,
-                cellMPIDatatype,
                 mpiLayer.communicator()));
 
         writerAdaptersGhost.clear();
