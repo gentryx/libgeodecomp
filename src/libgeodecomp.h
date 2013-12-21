@@ -15,12 +15,13 @@
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #endif
 
+#include <libgeodecomp/communication/serialization.h>
+#include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>

@@ -60,6 +60,14 @@ public:
             wait();
         }
 
+        /**
+         * Should be called prior to destruction to allow
+         * implementations to perform any cleanup actions (e.g. to
+         * post any receives to pending transmissions).
+         */
+        virtual void cleanup()
+        {}
+
         virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {
             lastNanoStep = last;
@@ -187,8 +195,16 @@ public:
             Link(region, tag, communicator),
             source(source),
             dataSize(0),
-            cellMPIDatatype(cellMPIDatatype)
+            cellMPIDatatype(cellMPIDatatype),
+            transmissionInFlight(false)
         {}
+
+        virtual void cleanup()
+        {
+            if (transmissionInFlight) {
+                recvSecondPart(FixedSize());
+            }
+        }
 
         virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
         {
@@ -209,6 +225,7 @@ public:
             checkNanoStepGet(nanoStep);
             wait();
             recvSecondPart(FixedSize());
+            transmissionInFlight = false;
 
             GridVecConv::vectorToGrid(buffer, grid, region);
 
@@ -225,24 +242,26 @@ public:
         {
             storedNanoSteps << nanoStep;
             recvFirstPart(FixedSize());
+            transmissionInFlight = true;
         }
 
     private:
         int source;
         int dataSize;
         MPI_Datatype cellMPIDatatype;
+        bool transmissionInFlight;
 
         void recvFirstPart(APITraits::TrueType)
         {
-                mpiLayer.recv(&buffer[0], source, buffer.size(), tag, cellMPIDatatype);
+            mpiLayer.recv(&buffer[0], source, buffer.size(), tag, cellMPIDatatype);
         }
 
         void recvFirstPart(APITraits::FalseType)
         {
-                // fixme: benchmark whether this could be done more
-                // efficiently with MPI_Iprobe (to detect the message
-                // size)
-                mpiLayer.recv(&dataSize, source, 1, tag, MPI_INT);
+            // fixme: benchmark whether this could be done more
+            // efficiently with MPI_Iprobe (to detect the message
+            // size)
+            mpiLayer.recv(&dataSize, source, 1, tag, MPI_INT);
         }
 
         void recvSecondPart(APITraits::TrueType)

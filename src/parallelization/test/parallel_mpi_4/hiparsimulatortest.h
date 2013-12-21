@@ -7,6 +7,7 @@
 #include <libgeodecomp/io/paralleltestwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/mockbalancer.h>
+#include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
@@ -215,6 +216,18 @@ public:
 
         sim->addWriter(new ParallelTestWriter(period, expectedSteps, expectedEvents));
         sim->run();
+    }
+
+    void testNonPoDCell()
+    {
+        ghostZoneWidth = 3;
+
+        HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
+            new NonPoDTestCell::Initializer(),
+            new MockBalancer(),
+            loadBalancingPeriod,
+            ghostZoneWidth);
+        sim.run();
     }
 
 private:

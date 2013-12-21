@@ -151,7 +151,13 @@ public:
     }
 
     virtual ~UpdateGroup()
-    {}
+    {
+        for (typename std::vector<PatchLinkPtr>::iterator i = patchLinks.begin();
+             i != patchLinks.end();
+             ++i) {
+            (*i)->cleanup();
+        }
+    }
 
     const Chronometer& statistics() const
     {
