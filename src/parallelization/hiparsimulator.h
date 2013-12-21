@@ -149,8 +149,6 @@ private:
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
 
-    double totalTime;
-
     double getCellSpeed(APITraits::FalseType) const
     {
         return 1.0;
@@ -190,9 +188,6 @@ private:
 
     inline void nanoStep(long s)
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        hpx::util::high_resolution_timer timer;
-#endif
         long remainingNanoSteps = s;
         while (remainingNanoSteps > 0) {
             long hop = std::min(remainingNanoSteps, timeToNextEvent());
@@ -200,9 +195,6 @@ private:
             handleEvents();
             remainingNanoSteps -= hop;
         }
-#ifdef LIBGEODECOMP_FEATURE_HPX
-        totalTime = timer.elapsed();
-#endif
     }
 
     /**
