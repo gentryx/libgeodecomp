@@ -102,6 +102,21 @@ class FindBadIncludes < TestBase
   end
 end
 
+class FindSizeTWithOutStd < TestBase
+  def test(filename, content)
+    ret = 0
+
+    content.scan(/(std::)?size_t.*/) do
+      if $1.nil?
+        ret += 1
+        puts "#{filename}: size_t used when std::size_t should have been used: »#{$&}«"
+      end
+    end
+
+    return ret
+  end
+end
+
 def scour_files(tester)
   failures = 0
 
@@ -137,3 +152,4 @@ scour_files(FindUndocumentedClasses.new)
 scour_files(FindUnmatchedHeaderGuards.new)
 scour_files(FindFixmes.new)
 scour_files(FindBadIncludes.new)
+scour_files(FindSizeTWithOutStd.new)
