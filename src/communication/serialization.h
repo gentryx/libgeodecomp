@@ -15,6 +15,7 @@
 #include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/geometry/region.h>
@@ -113,6 +114,17 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::LoadBalancer& object, const unsigned /*version*/)
     {
+    }
+
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::NonPoDTestCell& object, const unsigned /*version*/)
+    {
+        archive & object.coord;
+        archive & object.cycleCounter;
+        archive & object.missingNeighbors;
+        archive & object.seenNeighbors;
+        archive & object.simSpace;
     }
 
     template<typename ARCHIVE>
@@ -281,6 +293,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const 
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::LoadBalancer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::NonPoDTestCell& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
