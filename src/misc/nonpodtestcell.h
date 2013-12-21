@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_NONPODTESTCELL_H
 #define LIBGEODECOMP_MISC_NONPODTESTCELL_H
 
-#include <cxxtest/TestSuite.h>
+#include <boost/serialization/set.hpp>
 
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -23,6 +23,7 @@ class NonPoDTestCell
 {
 public:
     friend class NonPoDTestCellTest;
+    friend class Serialization;
 
     class API :
         public APITraits::HasBoostSerialization,
@@ -105,8 +106,12 @@ private:
         seenBox.dimensions = oppositeCorner1.min(oppositeCorner2) - origin;
 
         for (CoordBox<2>::Iterator i = seenBox.begin(); i != seenBox.end(); ++i) {
-            TS_ASSERT_EQUALS(seenNeighbors.count(*i), 1);
-            TS_ASSERT_EQUALS(missingNeighbors.count(*i), 0);
+            if (seenNeighbors.count(*i) != 1) {
+                throw std::logic_error("expected neighbors missing");
+            }
+            if (missingNeighbors.count(*i) != 0) {
+                throw std::logic_error("neighbor not properly removed from list");
+            }
         }
     }
 };
