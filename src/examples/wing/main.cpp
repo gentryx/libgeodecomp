@@ -82,6 +82,12 @@ double LENGTHS[] =
 class Cell
 {
 public:
+    static MPI_Datatype MPIDataType;
+
+    class API :
+        public APITraits::HasCustomMPIDataType<Cell>
+    {};
+
     Cell(State state = LIQUID,
          double quantity = 0,
          double velocityX = 0,
@@ -232,6 +238,8 @@ public:
     double velocityX;
     double velocityY;
 };
+
+MPI_Datatype Cell::MPIDataType;
 
 class QuantitySelector
 {
@@ -457,9 +465,8 @@ int main(int argc, char *argv[])
     MPI_Aint displacements[] = { 0 };
     MPI_Datatype memberTypes[] = { MPI_CHAR };
     int lengths[] = { sizeof(Cell) };
-    MPI_Datatype objType;
-    MPI_Type_create_struct(1, lengths, displacements, memberTypes, &objType);
-    MPI_Type_commit(&objType);
+    MPI_Type_create_struct(1, lengths, displacements, memberTypes, &Cell::MPIDataType);
+    MPI_Type_commit(&Cell::MPIDataType);
 
     {
         AeroInitializer *init = new AeroInitializer(
@@ -469,16 +476,14 @@ int main(int argc, char *argv[])
         StripingSimulator<Cell> sim(
             init,
             MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
-            1000,
-            objType);
+            1000);
 
         sim.addWriter(
             new ParallelMPIIOWriter<Cell>(
                 "snapshot",
                 6000,
                 init->maxSteps(),
-                MPI_COMM_WORLD,
-                objType));
+                MPI_COMM_WORLD));
 
         sim.addWriter(
             new BOVWriter<Cell, QuantitySelector>(

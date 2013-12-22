@@ -52,12 +52,10 @@ public:
     StripingSimulator(
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
-        const unsigned& loadBalancingPeriod = 1,
-        const MPI_Datatype& cellMPIDatatype = Typemaps::lookup<CELL_TYPE>()):
+        const unsigned& loadBalancingPeriod = 1):
         DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod),
-        cellMPIDatatype(cellMPIDatatype)
+        loadBalancingPeriod(loadBalancingPeriod)
     {
         if (loadBalancingPeriod  < 1) {
             throw std::invalid_argument(
@@ -165,7 +163,6 @@ private:
     // contains the start and stop rows for each node's stripe
     WeightVec partitions;
     unsigned loadBalancingPeriod;
-    MPI_Datatype cellMPIDatatype;
 
     void swapGrids()
     {
@@ -349,7 +346,7 @@ private:
                 outerUpperGhostRegion,
                 upperNeighborRank,
                 GHOSTREGION_ALPHA,
-                cellMPIDatatype);
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
         }
         if (lowerNeighborRank != -1) {
             mpilayer.recvUnregisteredRegion(
@@ -357,7 +354,7 @@ private:
                 outerLowerGhostRegion,
                 lowerNeighborRank,
                 GHOSTREGION_BETA,
-                cellMPIDatatype);
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
         }
     }
 
@@ -374,7 +371,7 @@ private:
                 innerUpperGhostRegion,
                 upperNeighborRank,
                 GHOSTREGION_BETA,
-                cellMPIDatatype);
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
         }
         if (lowerNeighborRank != -1) {
             mpilayer.sendUnregisteredRegion(
@@ -382,7 +379,7 @@ private:
                 innerLowerGhostRegion,
                 lowerNeighborRank,
                 GHOSTREGION_ALPHA,
-                cellMPIDatatype);
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
         }
     }
 
@@ -565,7 +562,7 @@ private:
                     intersection,
                     i,
                     BALANCELOADS,
-                    cellMPIDatatype);
+                    APITraits::SelectMPIDataType<CELL_TYPE>::value());
             }
         }
 
@@ -588,7 +585,7 @@ private:
                     intersection,
                     i,
                     BALANCELOADS,
-                    cellMPIDatatype);
+                    APITraits::SelectMPIDataType<CELL_TYPE>::value());
             }
         }
 

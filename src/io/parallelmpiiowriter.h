@@ -22,12 +22,10 @@ public:
         const std::string& prefix,
         const unsigned period,
         const unsigned maxSteps,
-        const MPI_Comm& communicator = MPI_COMM_WORLD,
-        MPI_Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        const MPI_Comm& communicator = MPI_COMM_WORLD) :
         ParallelWriter<CELL_TYPE>(prefix, period),
         maxSteps(maxSteps),
-        comm(communicator),
-        datatype(mpiDatatype)
+        comm(communicator)
     {}
 
     virtual void stepFinished(
@@ -50,7 +48,7 @@ public:
             maxSteps,
             filename(step),
             validRegion,
-            datatype,
+            APITraits::SelectMPIDataType<CELL_TYPE>::value(),
             comm);
     }
 
@@ -60,7 +58,6 @@ private:
 
     unsigned maxSteps;
     MPI_Comm comm;
-    MPI_Datatype datatype;
 
     std::string filename(unsigned step) const
     {

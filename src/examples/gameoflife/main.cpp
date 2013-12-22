@@ -28,6 +28,10 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
+    class API :
+        public APITraits::HasPredefinedMPIDataType<char>
+    {};
+
     ConwayCell(bool alive = false) :
         alive(alive)
     {}
@@ -153,8 +157,7 @@ void runSimulation()
     StripingSimulator<ConwayCell> sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new OozeBalancer()),
-        10,
-        MPI_CHAR);
+        10);
 
     sim.addWriter(
         new BOVWriter<ConwayCell, StateSelector>(

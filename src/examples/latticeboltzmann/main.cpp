@@ -16,9 +16,12 @@ using namespace LibGeoDecomp;
 class Cell
 {
 public:
+    static MPI_Datatype MPIDataType;
+
     class API :
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
-        public APITraits::HasCubeTopology<3>
+        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasCustomMPIDataType<Cell>
     {};
 
     enum State {LIQUID, WEST_NOSLIP, EAST_NOSLIP, TOP, BOTTOM, NORTH_ACC, SOUTH_NOSLIP};
@@ -233,6 +236,8 @@ public:
     State state;
 };
 
+MPI_Datatype Cell::MPIDataType;
+
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
@@ -351,8 +356,7 @@ void runSimulation()
     StripingSimulator<Cell> sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
-        1000000,
-        objType);
+        1000000);
 
     sim.addWriter(
         new BOVWriter<Cell, DensitySelector>("lbm.density", outputFrequency));
