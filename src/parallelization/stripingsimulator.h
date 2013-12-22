@@ -520,7 +520,7 @@ private:
     WeightVec partitionsToWorkloads(const WeightVec& partitions) const
     {
         WeightVec ret(partitions.size() - 1);
-        for (size_t i = 0; i < ret.size(); i++) {
+        for (std::size_t i = 0; i < ret.size(); i++) {
             ret[i] = partitions[i + 1] - partitions[i];
         }
         return ret;
@@ -530,7 +530,7 @@ private:
     {
         WeightVec ret(workloads.size() + 1);
         ret[0] = 0;
-        for (size_t i = 0; i < workloads.size(); i++) {
+        for (std::size_t i = 0; i < workloads.size(); i++) {
             ret[i + 1] = ret[i] + workloads[i];
         }
         return ret;
@@ -551,7 +551,7 @@ private:
             newPartitions[mpilayer.rank()    ];
         unsigned newEndRow =
             newPartitions[mpilayer.rank() + 1];
-        for (size_t i = 0; i < newPartitions.size() - 1; ++i) {
+        for (std::size_t i = 0; i < newPartitions.size() - 1; ++i) {
             unsigned sourceStartRow = oldPartitions[i];
             unsigned sourceEndRow   = oldPartitions[i + 1];
 
@@ -574,7 +574,7 @@ private:
             oldPartitions[mpilayer.rank()    ];
         unsigned oldEndRow =
             oldPartitions[mpilayer.rank() + 1];
-        for (size_t i = 0; i < newPartitions.size() - 1; ++i) {
+        for (std::size_t i = 0; i < newPartitions.size() - 1; ++i) {
             unsigned targetStartRow = newPartitions[i];
             unsigned targetEndRow   = newPartitions[i + 1];
 

@@ -116,11 +116,11 @@ public:
 
         std::vector<std::string> lines = StringOps::tokenize(c->report(), "\n");
         TS_ASSERT_EQUALS(lines.size()        , Chronometer::NUM_INTERVALS);
-        TS_ASSERT_LESS_THAN_EQUALS(size_t(6),  Chronometer::NUM_INTERVALS);
+        TS_ASSERT_LESS_THAN_EQUALS(std::size_t(6),  Chronometer::NUM_INTERVALS);
 
-        for (size_t i = 0; i < Chronometer::NUM_INTERVALS; ++i) {
+        for (std::size_t i = 0; i < Chronometer::NUM_INTERVALS; ++i) {
             std::vector<std::string> tokens = StringOps::tokenize(lines[i], ":");
-            TS_ASSERT_EQUALS(size_t(2), tokens.size());
+            TS_ASSERT_EQUALS(std::size_t(2), tokens.size());
             TS_ASSERT_LESS_THAN_EQUALS(0, StringOps::atof(tokens[1]));
         }
     }

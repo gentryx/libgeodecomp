@@ -15,7 +15,7 @@ namespace MockWriterHelpers {
     class MockWriterEvent
     {
     public:
-        MockWriterEvent(unsigned step, WriterEvent event, size_t rank, bool lastCall) :
+        MockWriterEvent(unsigned step, WriterEvent event, std::size_t rank, bool lastCall) :
             step(step),
             event(event),
             rank(rank),
@@ -56,7 +56,7 @@ namespace MockWriterHelpers {
 
         unsigned step;
         WriterEvent event;
-        size_t rank;
+        std::size_t rank;
         bool lastCall;
     };
 }

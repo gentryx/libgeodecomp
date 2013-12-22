@@ -53,10 +53,10 @@ public:
     void testPutPatch()
     {
         stepper->update(9);
-        TS_ASSERT_EQUALS(size_t(2), patchAccepter->offeredNanoSteps.size());
+        TS_ASSERT_EQUALS(std::size_t(2), patchAccepter->offeredNanoSteps.size());
 
         stepper->update(4);
-        TS_ASSERT_EQUALS(size_t(3), patchAccepter->offeredNanoSteps.size());
+        TS_ASSERT_EQUALS(std::size_t(3), patchAccepter->offeredNanoSteps.size());
     }
 
 private:

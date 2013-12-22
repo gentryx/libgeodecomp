@@ -323,7 +323,7 @@ Typemaps::generateMapLibGeoDecomp_FixedArray_double_Chronometer_NUM_INTERVALS_()
 
     // sort addresses in ascending order
     MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->elements), lookup<size_t >(), 1),
+        MemberSpec(getAddress(&obj->elements), lookup<std::size_t >(), 1),
         MemberSpec(getAddress(&obj->store), lookup<double >(), Chronometer::NUM_INTERVALS)
     };
     std::sort(rawSpecs, rawSpecs + count, addressLower);
@@ -895,8 +895,8 @@ Typemaps::generateMapLibGeoDecomp_Chronometer() {
 
 void Typemaps::initializeMaps()
 {
-    if (sizeof(size_t) != sizeof(unsigned long)) {
-        throw std::logic_error("MPI_UNSIGNED_LONG not suited for communication of size_t, needs to be redefined");
+    if (sizeof(std::size_t) != sizeof(unsigned long)) {
+        throw std::logic_error("MPI_UNSIGNED_LONG not suited for communication of std::size_t, needs to be redefined");
     }
 
     MPI_LIBGEODECOMP_COORD_1_ = generateMapLibGeoDecomp_Coord_1_();

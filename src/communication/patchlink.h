@@ -30,7 +30,7 @@ public:
     typedef typename SerializationBuffer<CellType>::FixedSize FixedSize;
 
     const static int DIM = GRID_TYPE::DIM;
-    const static size_t ENDLESS = -1;
+    const static std::size_t ENDLESS = -1;
 
     class Link
     {

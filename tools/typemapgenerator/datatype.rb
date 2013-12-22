@@ -28,6 +28,7 @@ class Datatype < Hash
     self["std::complex<float>"] = "MPI_COMPLEX"
     self["std::complex<double>"] = "MPI_DOUBLE_COMPLEX"
     self["size_t"] = :ignore
+    self["std::size_t"] = :ignore
     # self["std::complex<long double>"] = "MPI_LONG_DOUBLE_COMPLEX"
   end
 

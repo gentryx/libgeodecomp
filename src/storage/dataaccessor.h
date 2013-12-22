@@ -29,7 +29,7 @@ public:
     virtual MEMBER_TYPE get(const CELL_TYPE&) = 0;
     virtual void get(const CELL_TYPE&, void*) = 0;
     virtual void set(CELL_TYPE*, void*) = 0;
-    virtual size_t memberSize() = 0;
+    virtual std::size_t memberSize() = 0;
 
     const std::string& name() const
     {
@@ -71,7 +71,7 @@ private:
             cell->MEMBER_NAME = *(static_cast<MEMBER_TYPE*>(value));    \
         }                                                               \
                                                                         \
-        size_t memberSize()                                             \
+        std::size_t memberSize()                                        \
         {                                                               \
             return sizeof(MEMBER_TYPE);                                 \
         }                                                               \

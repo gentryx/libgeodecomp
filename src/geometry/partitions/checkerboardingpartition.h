@@ -13,7 +13,7 @@ public:
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
-        const std::vector<size_t>& weights = std::vector<std::size_t>(2)) :
+        const std::vector<std::size_t>& weights = std::vector<std::size_t>(2)) :
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions)

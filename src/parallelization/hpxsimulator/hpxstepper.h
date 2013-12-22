@@ -107,7 +107,7 @@ private:
             Region<DIM> r;
             r << *i;
             Coord<DIM> null;
-            if(size_t(i->length()) > asyncThreshold) {
+            if(std::size_t(i->length()) > asyncThreshold) {
                 updateFutures.push_back(
                     hpx::async(
                         UpdateFunctor<CELL_TYPE>(),
@@ -323,7 +323,7 @@ private:
                     Region<DIM> r;
                     r << *i;
                     Coord<DIM> null;
-                    if (size_t(i->length()) > asyncThreshold) {
+                    if (std::size_t(i->length()) > asyncThreshold) {
                         updateFutures.push_back(
                             hpx::async(
                                 UpdateFunctor<CELL_TYPE>(),

@@ -73,13 +73,13 @@ public:
 
     void testBasic()
     {
-        size_t nanoStep = 0;
+        std::size_t nanoStep = 0;
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
             for (int receiver = 0; receiver < mpiLayer.size(); ++receiver) {
                 if (sender != receiver) {
                     Region<2>& region  = sender % 2 ? region2 : region1;
                     GridType& sendGrid = sender % 2 ? sendGrid2 : sendGrid1;
-                    size_t nanoStep = sender * receiver + 4711;
+                    std::size_t nanoStep = sender * receiver + 4711;
 
                     if (sender == mpiLayer.rank()) {
                         acc.reset(new PatchAccepterType(
@@ -120,7 +120,7 @@ public:
         std::vector<boost::shared_ptr<PatchAccepterType> > accepters;
         std::vector<boost::shared_ptr<PatchProviderType> > providers;
         int stride = 4;
-        size_t maxNanoSteps = 31;
+        std::size_t maxNanoSteps = 31;
 
         for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
@@ -145,14 +145,14 @@ public:
             providers[i]->charge(0, maxNanoSteps, stride);
         }
 
-        for (size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
+        for (std::size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i)
                 accepters[i]->put(mySendGrid, boundingBox, nanoStep);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-                size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
+                std::size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
                 providers[i]->get(&actual, boundingBox, nanoStep);
@@ -167,7 +167,7 @@ public:
         std::vector<boost::shared_ptr<PatchAccepterType> > accepters;
         std::vector<boost::shared_ptr<PatchProviderType> > providers;
         int stride = 4;
-        size_t maxNanoSteps = 100;
+        std::size_t maxNanoSteps = 100;
 
         for (int i = 0; i < mpiLayer.size(); ++i) {
             if (i != mpiLayer.rank()) {
@@ -192,7 +192,7 @@ public:
             providers[i]->charge(0, PatchLink<GridType>::ENDLESS, stride);
         }
 
-        for (size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
+        for (std::size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {
             GridType mySendGrid = markGrid(region1, mpiLayer.rank() * 10000 + nanoStep * 100);
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
@@ -200,7 +200,7 @@ public:
             }
 
             for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-                size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
+                std::size_t senderRank = i >= mpiLayer.rank() ? i + 1 : i;
                 GridType expected = markGrid(region1, senderRank * 10000 + nanoStep * 100);
                 GridType actual = zeroGrid;
                 providers[i]->get(&actual, boundingBox, nanoStep);
@@ -345,7 +345,7 @@ public:
                     TS_ASSERT_EQUALS(cell.cargo[1], i->y());
                     TS_ASSERT_EQUALS(cell.cargo[2], i->y());
                 } else {
-                    TS_ASSERT_EQUALS(cell.cargo.size(), 0);
+                    TS_ASSERT_EQUALS(cell.cargo.size(), std::size_t(0));
                 }
             }
 

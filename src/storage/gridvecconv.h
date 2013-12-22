@@ -96,7 +96,7 @@ private:
         const APITraits::TrueType&,
         const APITraits::FalseType&)
     {
-        size_t regionSize =
+        std::size_t regionSize =
             region.size() *
             SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>::AGGREGATED_MEMBER_SIZE;
 
@@ -169,7 +169,7 @@ private:
         const APITraits::TrueType&,
         const APITraits::FalseType&)
     {
-        size_t regionSize =
+        std::size_t regionSize =
             region.size() *
             SoAGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>::AGGREGATED_MEMBER_SIZE;
 

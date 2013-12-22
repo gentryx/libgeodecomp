@@ -106,7 +106,7 @@ class FindSizeTWithOutStd < TestBase
   def test(filename, content)
     ret = 0
 
-    content.scan(/(std::)?size_t.*/) do
+    content.scan(/(std::)?size_t[^_].*/) do
       if $1.nil?
         ret += 1
         puts "#{filename}: size_t used when std::size_t should have been used: »#{$&}«"

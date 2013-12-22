@@ -101,7 +101,7 @@ public:
 #endif
     }
 
-    void waitForFeedback(size_t lines = 1)
+    void waitForFeedback(std::size_t lines = 1)
     {
         LOG(DBG, "Pipe::waitForFeedback(" << lines << ")");
         boost::unique_lock<boost::mutex> lock(mutex);

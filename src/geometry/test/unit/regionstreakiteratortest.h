@@ -62,14 +62,14 @@ public:
             }
         }
 
-        size_t expectedStreaks = 10 * 5 + 10 * (10 - 1) / 2;
+        std::size_t expectedStreaks = 10 * 5 + 10 * (10 - 1) / 2;
         TS_ASSERT_EQUALS(r.numStreaks(), expectedStreaks);
 
-        std::vector<size_t> offsets;
+        std::vector<std::size_t> offsets;
         offsets << 0 << 10 << 15 << 50 << 51 << 90 << 95 << 100;
 
         std::vector<RegionStreakIterator<2, Region<2> > > iterators;
-        for (std::vector<size_t>::iterator i = offsets.begin(); i != offsets.end(); ++i) {
+        for (std::vector<std::size_t>::iterator i = offsets.begin(); i != offsets.end(); ++i) {
             iterators << r[*i];
 
             if (*i <= 0) {
@@ -82,7 +82,7 @@ public:
         }
 
         // ensure x-offsets match original offsets
-        for (size_t i = 1; i < offsets.size(); ++i) {
+        for (std::size_t i = 1; i < offsets.size(); ++i) {
             Coord<2> deltaCoord = iterators[i] - iterators[i - 1];
             int deltaOffset = offsets[i] - offsets[i - 1];
             if (offsets[i] > r.numStreaks()) {
@@ -93,7 +93,7 @@ public:
         }
 
         // ensure result of substration yields the correct iterator after conversion
-        for (size_t i = 0; i < offsets.size(); ++i) {
+        for (std::size_t i = 0; i < offsets.size(); ++i) {
             Coord<2> deltaCoord = iterators[i] - r.beginStreak();
             RegionStreakIterator<2, Region<2> > newIter = r[deltaCoord];
             TS_ASSERT_EQUALS(newIter, iterators[i]);

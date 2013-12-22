@@ -29,7 +29,7 @@ public:
         boost::system::error_code errorCode;
         acceptor.accept(socket, errorCode);
         boost::asio::streambuf buf;
-        size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
+        std::size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
         // gah, converting streambuf to string couldn't be any easier...
         std::istream lineBuf(&buf);
         std::string line(length, 'X');

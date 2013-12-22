@@ -18,7 +18,7 @@ public:
     std::string device()
     {
         std::ifstream file("/proc/cpuinfo");
-        size_t bufferSize = 2048;
+        std::size_t bufferSize = 2048;
         std::string buffer(bufferSize, ' ');
         while (file.getline(&buffer[0], bufferSize)) {
             std::vector<std::string> tokens = StringOps::tokenize(buffer, ":");

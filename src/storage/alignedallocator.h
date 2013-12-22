@@ -9,11 +9,10 @@
 
 namespace LibGeoDecomp {
 
-template<class T, size_t ALIGNMENT>
+template<class T, std::size_t ALIGNMENT>
 class AlignedAllocator
 {
 public:
-    typedef size_t size_type;
     typedef ptrdiff_t difference_type;
     typedef T* pointer;
     typedef const T* const_pointer;
@@ -31,7 +30,7 @@ public:
         return &x;
     }
 
-    pointer allocate(size_type n, const void* =0)
+    pointer allocate(std::size_t n, const void* =0)
     {
         // This code whould have been a piece of cake if it would have
         // worket with posix_memalign, which it doesn't. Alternatively
@@ -45,8 +44,8 @@ public:
             return (pointer)chunk;
         }
 
-        size_type offset = (size_type)chunk % ALIGNMENT;
-        size_type correction = ALIGNMENT - offset;
+        std::size_t offset = (std::size_t)chunk % ALIGNMENT;
+        std::size_t correction = ALIGNMENT - offset;
         if (correction < sizeof(char*))
             correction += ALIGNMENT;
         char *ret = chunk + correction;
@@ -54,7 +53,7 @@ public:
         return (pointer)ret;
     }
 
-    void deallocate(pointer p, size_type n)
+    void deallocate(pointer p, std::size_t n)
     {
         if (p == 0) {
             return;
@@ -67,7 +66,7 @@ public:
         std::allocator<char>().deallocate(actual, upsize(n));
     }
 
-    size_type max_size() const throw()
+    std::size_t max_size() const throw()
     {
         return std::allocator<T>().max_size();
     }
@@ -83,12 +82,12 @@ public:
     }
 
 private:
-    size_type graceOffset()
+    std::size_t graceOffset()
     {
         return ALIGNMENT + sizeof(char*);
     }
 
-    size_type upsize(size_type n)
+    std::size_t upsize(std::size_t n)
     {
         return n * sizeof(T) + graceOffset();
     }

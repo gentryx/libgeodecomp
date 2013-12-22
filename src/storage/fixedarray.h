@@ -20,22 +20,22 @@ public:
     friend class Typemaps;
     typedef T* iterator;
 
-    FixedArray(size_t elements = 0) :
+    FixedArray(std::size_t elements = 0) :
         elements(elements)
     {}
 
-    FixedArray(size_t elements, const T& value) :
+    FixedArray(std::size_t elements, const T& value) :
         elements(elements)
     {
         std::fill(begin(), end(), value);
     }
 
-    inline T& operator[](const size_t& i)
+    inline T& operator[](const std::size_t& i)
     {
         return store[i];
     }
 
-    inline const T& operator[](const size_t& i) const
+    inline const T& operator[](const std::size_t& i) const
     {
         return store[i];
     }
@@ -77,9 +77,9 @@ public:
 
     FixedArray<T, SIZE>& operator-=(const FixedArray<T, SIZE>& other)
     {
-        size_t minSize = std::min(elements, other.elements);
-        size_t maxSize = std::max(elements, other.elements);
-        size_t i = 0;
+        std::size_t minSize = std::min(elements, other.elements);
+        std::size_t maxSize = std::max(elements, other.elements);
+        std::size_t i = 0;
 
         for (; i < minSize; ++i) {
             store[i] -= other[i];
@@ -95,9 +95,9 @@ public:
 
     FixedArray<T, SIZE>& operator+=(const FixedArray<T, SIZE>& other)
     {
-        size_t minSize = std::min(elements, other.elements);
-        size_t maxSize = std::max(elements, other.elements);
-        size_t i = 0;
+        std::size_t minSize = std::min(elements, other.elements);
+        std::size_t maxSize = std::max(elements, other.elements);
+        std::size_t i = 0;
 
         for (; i < minSize; ++i) {
             store[i] += other[i];
@@ -113,10 +113,10 @@ public:
 
     FixedArray<T, SIZE> operator-(const FixedArray<T, SIZE>& other) const
     {
-        size_t minSize = std::min(elements, other.elements);
-        size_t maxSize = std::max(elements, other.elements);
+        std::size_t minSize = std::min(elements, other.elements);
+        std::size_t maxSize = std::max(elements, other.elements);
         FixedArray<T, SIZE> ret(maxSize);
-        size_t i = 0;
+        std::size_t i = 0;
 
         for (; i < minSize; ++i) {
             ret[i] = store[i] - other[i];
@@ -135,10 +135,10 @@ public:
 
     FixedArray<T, SIZE> operator+(const FixedArray<T, SIZE>& other) const
     {
-        size_t minSize = std::min(elements, other.elements);
-        size_t maxSize = std::max(elements, other.elements);
+        std::size_t minSize = std::min(elements, other.elements);
+        std::size_t maxSize = std::max(elements, other.elements);
         FixedArray<T, SIZE> ret(maxSize);
-        size_t i = 0;
+        std::size_t i = 0;
 
         for (; i < minSize; ++i) {
             ret[i] = store[i] + other[i];
@@ -158,7 +158,7 @@ public:
     template<typename F>
     FixedArray<T, SIZE>& operator/=(F f)
     {
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             (*this)[i] /= f;
         }
 
@@ -170,7 +170,7 @@ public:
     {
         FixedArray<T, SIZE> ret(size());
 
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             (*this)[i] *= f;
         }
 
@@ -182,7 +182,7 @@ public:
     {
         FixedArray<T, SIZE> ret(size());
 
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             ret[i] = (*this)[i] / f;
         }
 
@@ -194,7 +194,7 @@ public:
     {
         FixedArray<T, SIZE> ret(size());
 
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             ret[i] = (*this)[i] * f;
         }
 
@@ -207,7 +207,7 @@ public:
             return size() < other.size();
         }
 
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             if ((*this)[i] != other[i]) {
                 return (*this)[i] < other[i];
             }
@@ -222,7 +222,7 @@ public:
             return size() > other.size();
         }
 
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             if ((*this)[i] != other[i]) {
                 return (*this)[i] > other[i];
             }
@@ -237,7 +237,7 @@ public:
             return false;
         }
 
-        for (size_t i = 0; i < size(); ++i) {
+        for (std::size_t i = 0; i < size(); ++i) {
             if ((*this)[i] != other[i]) {
                 return false;
             }
@@ -269,14 +269,14 @@ public:
         elements = num;
     }
 
-    inline size_t size() const
+    inline std::size_t size() const
     {
         return elements;
     }
 
 private:
     T store[SIZE];
-    size_t elements;
+    std::size_t elements;
 };
 
 template<typename CharT, typename Traits, typename T, int N>
@@ -289,7 +289,7 @@ operator<<(std::basic_ostream<CharT, Traits>& os,
     if (a.size() > 0) {
         os << a[0];
 
-        for (size_t i = 1; i < a.size(); ++i) {
+        for (std::size_t i = 1; i < a.size(); ++i) {
             os << ", " << a[i];
         }
     }

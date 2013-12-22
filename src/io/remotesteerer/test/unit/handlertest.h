@@ -48,7 +48,7 @@ public:
 
         bool res = handler(parameters, pipe, &grid, region, 123);
         StringVec feedback = pipe.retrieveSteeringFeedback();
-        TS_ASSERT_EQUALS(feedback.size(), size_t(1));
+        TS_ASSERT_EQUALS(feedback.size(), std::size_t(1));
         TS_ASSERT_EQUALS(feedback[0], "MockHandler mocks you! arrrr");
         TS_ASSERT_EQUALS(grid[Coord<2>(1, 1)].testValue, 4711.0);
         TS_ASSERT(res);

@@ -61,7 +61,7 @@ public:
         const Coord<DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
-        size_t rank,
+        std::size_t rank,
         bool lastCall)
     {
         if (lastCall && ((outputRank == OUTPUT_ON_ALL_RANKS) || (outputRank == (int)rank))) {

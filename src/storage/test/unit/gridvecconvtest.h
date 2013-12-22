@@ -97,11 +97,11 @@ public:
 
         GridVecConv::gridToVector(grid, &buffer, region);
 
-        for (size_t i = 0; i < region.size(); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(i + 4711, buffer[i].testValue);
         }
 
-        for (size_t i = 0; i < region.size(); ++i) {
+        for (std::size_t i = 0; i < region.size(); ++i) {
             buffer[i].testValue = 666 + i;
         }
 

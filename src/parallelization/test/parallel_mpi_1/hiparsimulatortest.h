@@ -58,7 +58,7 @@ public:
     void testInitialWeights()
     {
         std::vector<double> rankSpeeds;
-        std::vector<size_t> expected;
+        std::vector<std::size_t> expected;
 
         rankSpeeds << 1 << 1 << 1 << 1;
         expected << 2 << 3 << 2 << 3;

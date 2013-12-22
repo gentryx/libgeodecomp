@@ -158,7 +158,7 @@ public:
 
     VisItDataBuffer(
         DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor,
-        size_t gridVolume) :
+        std::size_t gridVolume) :
         VisItDataAccessor<CELL_TYPE>(accessor->type()),
         accessor(accessor),
         gridVolume(gridVolume),
@@ -180,13 +180,13 @@ public:
         // }
 
         // CoordBox<DIM> box = grid->getBoundingBox();
-        // size_t expectedSize = box.dimensions.prod();
+        // std::size_t expectedSize = box.dimensions.prod();
 
         // if (dataBuffer.size() != expectedSize) {
         //     dataBuffer.resize(expectedSize);
         // }
 
-        // size_t index = 0;
+        // std::size_t index = 0;
         // for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
         //     accessor->get(grid->at(*i), &dataBuffer[index++]);
         // }
@@ -198,7 +198,7 @@ public:
 
 private:
     boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > accessor;
-    size_t gridVolume;
+    std::size_t gridVolume;
     std::vector<MEMBER_TYPE> dataBuffer;
 };
 

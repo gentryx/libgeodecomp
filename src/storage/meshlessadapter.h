@@ -181,7 +181,7 @@ public:
 
     bool checkBoxSize(const CoordVec& positions, const Graph& graph)
     {
-        for (size_t i = 0; i < graph.size(); ++i) {
+        for (std::size_t i = 0; i < graph.size(); ++i) {
             for (std::vector<int>::const_iterator n = graph[i].begin();
                  n != graph[i].end(); ++n) {
                 if (manhattanDistance(positions[i].first, positions[*n].first) > 1) {

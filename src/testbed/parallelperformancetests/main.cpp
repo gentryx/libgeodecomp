@@ -209,7 +209,7 @@ public:
 
             int ghostZoneWidth = 3;
             CoordBox<3> box(Coord<3>(), Coord<3>(2 * dim.x(), dim.y(), dim.z()));
-            std::vector<size_t> weights;
+            std::vector<std::size_t> weights;
             weights << dim.prod()
                     << dim.prod();
 

@@ -180,7 +180,7 @@ public:
 
             LOG(DBG, "CommandServer::sendCommandWithFeedback() reading line");
 
-            size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
+            std::size_t length = boost::asio::read_until(socket, buf, '\n', errorCode);
             if (errorCode) {
                 LOG(WARN, "error while writing to socket: " << errorCode.message());
             }
@@ -227,7 +227,7 @@ private:
             boost::array<char, 1024> buf;
             boost::system::error_code errorCode;
             LOG(DBG, "CommandServer::runSession(): reading");
-            size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
+            std::size_t length = socket->read_some(boost::asio::buffer(buf), errorCode);
             LOG(DBG, "CommandServer::runSession(): read " << length << " bytes");
 
             if (length > 0) {

@@ -103,7 +103,7 @@ public:
         MockWriter *w = new MockWriter();
         simulator->addWriter(w);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
-        TS_ASSERT_EQUALS(size_t(1), writers.size());
+        TS_ASSERT_EQUALS(std::size_t(1), writers.size());
         TS_ASSERT_EQUALS(w, writers[0].get());
     }
 

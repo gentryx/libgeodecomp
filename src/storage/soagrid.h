@@ -252,7 +252,7 @@ public:
              i != region.endStreak();
              ++i) {
             Streak<DIM> s = *i;
-            size_t length = s.length();
+            std::size_t length = s.length();
             int x = s.origin.x() + edgeRadii.x() - box.origin.x();
             int y = s.origin.y() + edgeRadii.y() - box.origin.y();
             int z = s.origin.z() + edgeRadii.z() - box.origin.z();
@@ -270,7 +270,7 @@ public:
              i != region.endStreak();
              ++i) {
             Streak<DIM> s = *i;
-            size_t length = s.length();
+            std::size_t length = s.length();
             int x = s.origin.x() + edgeRadii.x() - box.origin.x();
             int y = s.origin.y() + edgeRadii.y() - box.origin.y();
             int z = s.origin.z() + edgeRadii.z() - box.origin.z();

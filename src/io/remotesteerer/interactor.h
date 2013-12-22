@@ -27,7 +27,7 @@ public:
 
     Interactor(
         const std::string& command,
-        size_t feedbackLines,
+        std::size_t feedbackLines,
         bool threaded,
         int port,
         const std::string& host = "127.0.0.1") :
@@ -100,7 +100,7 @@ public:
 
             boost::array<char, 1024> buf;
             boost::system::error_code errorCode;
-            size_t length = socket.read_some(boost::asio::buffer(buf), errorCode);
+            std::size_t length = socket.read_some(boost::asio::buffer(buf), errorCode);
             std::string input(buf.data(), length);
             StringVec lines = StringOps::tokenize(input, "\n");
             handleInput(lines);
@@ -117,7 +117,7 @@ private:
     boost::condition_variable signal;
     boost::mutex mutex;
     std::string command;
-    size_t feedbackLines;
+    std::size_t feedbackLines;
     int port;
     std::string host;
     bool started;
@@ -150,7 +150,7 @@ private:
     {
         LOG(DBG, "Interactor::handleInput(" << lines << ")");
         // only add lines which are not equal to "\0"
-        for (size_t i = 0; i < lines.size(); ++i) {
+        for (std::size_t i = 0; i < lines.size(); ++i) {
             const std::string& line = lines[i];
             if (line == "") {
                 LOG(WARN, "Interactor rejects empty line as feedback");

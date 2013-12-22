@@ -75,7 +75,7 @@ public:
         TS_ASSERT_EQUALS((31 - 4)       * 27, sim->timeToNextEvent());
         TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
-        size_t rank = MPILayer().rank();
+        std::size_t rank = MPILayer().rank();
         MockWriter::EventVec expectedEvents;
         expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, false)
                        << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, true);

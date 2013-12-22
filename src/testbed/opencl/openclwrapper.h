@@ -28,17 +28,17 @@ std::ostream & operator<<(std::ostream &, cl::Device);
 
 template<typename DATA_TYPE>
 class OpenCLWrapper {
-  public:
-    typedef std::tuple<size_t, size_t, size_t> point_t;
+  typedef:
+    public std::tuple<std::size_t, std::size_t, std::size_t> point_t;
     typedef void * data_t;
 
     OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
                   const std::string & user_code_file,
                   const std::string & user_code_function,
-                  const size_t x_size, const size_t y_size, const size_t z_size,
+                  const std::size_t x_size, const std::size_t y_size, const std::size_t z_size,
                   bool verbose = false);
 
-    void run(size_t updates = 1);
+    void run(std::size_t updates = 1);
     void flush(void);
     void finish(void);
 
@@ -60,11 +60,11 @@ class OpenCLWrapper {
     std::string init_code_txt, user_code_txt;
 
     coords_ctx coords;
-    const size_t x_size, y_size, z_size;
-    const size_t num_points;
+    const std::size_t x_size, y_size, z_size;
+    const std::size_t num_points;
 
     bool verbose = false;
-    size_t update_counter = 0;
+    std::size_t update_counter = 0;
 
     cl::Device device;
     cl::Context context;
@@ -85,7 +85,7 @@ OpenCLWrapper<DATA_TYPE>::
 OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
               const std::string & user_code_file,
               const std::string & user_code_function,
-              const size_t x_size, const size_t y_size, const size_t z_size,
+              const std::size_t x_size, const std::size_t y_size, const std::size_t z_size,
               bool verbose)
   : platform_id(platform_id), device_id(device_id)
   , user_code_file(user_code_file)
@@ -210,7 +210,7 @@ OpenCLWrapper<DATA_TYPE>::initKernels(void)
   data_init_kernel = cl::Kernel(init_code_program, data_init_function.c_str());
   user_code_kernel = cl::Kernel(user_code_program, user_code_function.c_str());
 
-  size_t arg_counter = 0;
+  std::size_t arg_counter = 0;
   mem_hook_kernel.setArg(arg_counter++, cl_coords);
   mem_hook_kernel.setArg(arg_counter++, cl_points);
   mem_hook_kernel.setArg(arg_counter++, cl_indices);
@@ -292,13 +292,13 @@ OpenCLWrapper<DATA_TYPE>::readDeviceData(void)
 
 template<typename DATA_TYPE>
 void
-OpenCLWrapper<DATA_TYPE>::run(size_t updates)
+OpenCLWrapper<DATA_TYPE>::run(std::size_t updates)
 {
   // let's play ping - pong
   // (http://www.mathematik.uni-dortmund.de/~goeddeke/gpgpu/tutorial.html#feedback2)
   // 1 + 0 & 1 = 1; 2 - 0 & 1 = 2; 1 + 1 & 1 = 2; 2 - 1 & 1 = 1
 
-  for (size_t i = 0; i < updates; ++i) {
+  for (std::size_t i = 0; i < updates; ++i) {
     user_code_kernel.setArg(1 + (update_counter & 1), cl_input);
     user_code_kernel.setArg(2 - (update_counter & 1), cl_output);
 

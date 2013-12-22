@@ -167,13 +167,13 @@ private:
      * comprised of multiple genrations of nodes or x86 clusters with
      * additional Xeon Phi accelerators).
      */
-    std::vector<size_t> initialWeights(size_t items, const std::vector<double> rankSpeeds) const
+    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds) const
     {
-        size_t size = rankSpeeds.size();
+        std::size_t size = rankSpeeds.size();
         double totalSum = sum(rankSpeeds);
-        std::vector<size_t> ret(size);
+        std::vector<std::size_t> ret(size);
 
-        size_t lastPos = 0;
+        std::size_t lastPos = 0;
         double partialSum = 0.0;
         for (std::size_t i = 0; i < size - 1; ++i) {
             partialSum += rankSpeeds[i];
@@ -217,7 +217,7 @@ private:
 
         double mySpeed = getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
         std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
-        std::vector<size_t> weights = initialWeights(
+        std::vector<std::size_t> weights = initialWeights(
             box.dimensions.prod(),
             rankSpeeds);
 

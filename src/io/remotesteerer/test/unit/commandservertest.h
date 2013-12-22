@@ -39,7 +39,7 @@ public:
         CommandServer<int> server(47110, pipe);
         server.addAction(new MockAction());
         StringVec feedback = CommandServer<int>::sendCommandWithFeedback("mock 1 2 3", 1, 47110);
-        TS_ASSERT_EQUALS(feedback.size(), size_t(1));
+        TS_ASSERT_EQUALS(feedback.size(), std::size_t(1));
         TS_ASSERT_EQUALS(feedback[0], "MockAction mocks you!");
     }
 
@@ -48,7 +48,7 @@ public:
         CommandServer<int> server(47112, pipe);
         StringVec feedback = CommandServer<int>::sendCommandWithFeedback("blah", 2, 47112);
 
-        TS_ASSERT_EQUALS(feedback.size(), size_t(2));
+        TS_ASSERT_EQUALS(feedback.size(), std::size_t(2));
         TS_ASSERT_EQUALS(feedback[0], "command not found: blah");
         TS_ASSERT_EQUALS(feedback[1], "try \"help\"");
     }

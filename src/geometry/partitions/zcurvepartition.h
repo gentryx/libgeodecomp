@@ -294,7 +294,7 @@ public:
         return Iterator(origin);
     }
 
-    inline Region<DIM> getRegion(const size_t node) const
+    inline Region<DIM> getRegion(const std::size_t node) const
     {
         return Region<DIM>(
             (*this)[startOffsets[node + 0]],
