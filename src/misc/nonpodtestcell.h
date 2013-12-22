@@ -33,7 +33,7 @@ public:
     class Initializer : public SimpleInitializer<NonPoDTestCell>
     {
     public:
-        Initializer() : SimpleInitializer(Coord<2>(15, 10), 20)
+        Initializer() : SimpleInitializer<NonPoDTestCell>(Coord<2>(15, 10), 20)
         {}
 
         virtual void grid(GridBase<NonPoDTestCell, 2> *target)
