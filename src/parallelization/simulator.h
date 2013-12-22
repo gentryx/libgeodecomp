@@ -1,13 +1,14 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_SIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_SIMULATOR_H
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/soagrid.h>
+
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace LibGeoDecomp {
 

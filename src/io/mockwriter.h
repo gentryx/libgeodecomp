@@ -1,13 +1,13 @@
 #ifndef LIBGEODECOMP_IO_MOCKWRITER_H
 #define LIBGEODECOMP_IO_MOCKWRITER_H
 
-#include <sstream>
-
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/misc/testcell.h>
+
+#include <sstream>
 
 namespace LibGeoDecomp {
 

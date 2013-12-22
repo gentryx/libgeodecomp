@@ -1,12 +1,6 @@
-#include <emmintrin.h>
-#ifdef __AVX__
-#include <immintrin.h>
-#endif
-#include <iomanip>
-#include <iostream>
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
@@ -24,6 +18,14 @@
 #include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/performancetests/evaluate.h>
+
+#include <emmintrin.h>
+#ifdef __AVX__
+#include <immintrin.h>
+#endif
+
+#include <iomanip>
+#include <iostream>
 #include <stdio.h>
 
 using namespace LibGeoDecomp;

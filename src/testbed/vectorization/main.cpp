@@ -1,13 +1,14 @@
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
+
 #include <cmath>
 #include <emmintrin.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/tracingwriter.h>
 
 using namespace LibGeoDecomp;
 
