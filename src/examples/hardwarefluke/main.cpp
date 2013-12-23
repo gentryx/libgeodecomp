@@ -1,11 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/simplecellplotter.h>
-#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp.h>
 
+#include <fstream>
+#include <iostream>
 
 using namespace LibGeoDecomp;
 

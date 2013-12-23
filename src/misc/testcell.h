@@ -1,8 +1,6 @@
 #ifndef LIBGEODECOMP_MISC_TESTCELL_H
 #define LIBGEODECOMP_MISC_TESTCELL_H
 
-#include <iostream>
-#include <libflatarray/flat_array.hpp>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -10,6 +8,9 @@
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
+
+#include <iostream>
+#include <libflatarray/flat_array.hpp>
 
 namespace LibGeoDecomp {
 

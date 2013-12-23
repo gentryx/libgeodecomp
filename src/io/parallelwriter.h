@@ -1,13 +1,16 @@
 #ifndef LIBGEODECOMP_IO_PARALLELWRITER_H
 #define LIBGEODECOMP_IO_PARALLELWRITER_H
 
-#include <string>
-#include <stdexcept>
+#include <mpi.h>
+
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+
+#include <string>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 

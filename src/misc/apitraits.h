@@ -2,24 +2,24 @@
 #define LIBGEODECOMP_MISC_APITRAITS_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/geometry/stencils.h>
-#include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/storage/displacedgrid.h>
 
 #ifdef LIBGEODECOMP_FEATURE_MPI
 #include <mpi.h>
-
-namespace LibGeoDecomp {
-class Typemaps;
-}
-
 #endif
+
+#include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <sstream>
 #endif
 
 namespace LibGeoDecomp {
+
+#ifdef LIBGEODECOMP_FEATURE_MPI
+class Typemaps;
+#endif
 
 namespace APITraitsHelpers {
 

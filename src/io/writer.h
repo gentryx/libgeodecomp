@@ -1,10 +1,11 @@
 #ifndef LIBGEODECOMP_IO_WRITER_H
 #define LIBGEODECOMP_IO_WRITER_H
 
-#include <string>
-#include <stdexcept>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+
+#include <string>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 

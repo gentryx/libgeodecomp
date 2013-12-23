@@ -1,11 +1,9 @@
+#include <libgeodecomp.h>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-
-#include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp;
 

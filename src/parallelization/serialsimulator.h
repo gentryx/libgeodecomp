@@ -1,8 +1,10 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_SERIALSIMULATOR_H
 
-#include <libgeodecomp/io/writer.h>
+// include this file first to avoid clashes of Intel MPI with stdio.h.
 #include <libgeodecomp/misc/apitraits.h>
+
+#include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/updatefunctor.h>

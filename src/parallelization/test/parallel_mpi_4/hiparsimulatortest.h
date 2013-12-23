@@ -218,8 +218,11 @@ public:
         sim->run();
     }
 
+
     void testNonPoDCell()
     {
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+
         ghostZoneWidth = 3;
 
         HiParSimulator<NonPoDTestCell, ZCurvePartition<2> > sim(
@@ -228,6 +231,8 @@ public:
             loadBalancingPeriod,
             ghostZoneWidth);
         sim.run();
+
+#endif
     }
 
 private:
