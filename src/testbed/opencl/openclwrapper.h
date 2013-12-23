@@ -27,10 +27,11 @@ std::ostream & operator<<(std::ostream &, cl::Platform);
 std::ostream & operator<<(std::ostream &, cl::Device);
 
 template<typename DATA_TYPE>
-class OpenCLWrapper {
-  typedef:
-    public std::tuple<std::size_t, std::size_t, std::size_t> point_t;
-    typedef void * data_t;
+class OpenCLWrapper
+{
+public:
+    typedef std::tuple<std::size_t, std::size_t, std::size_t> point_t;
+    typedef void *data_t;
 
     OpenCLWrapper(unsigned int platform_id, unsigned int device_id,
                   const std::string & user_code_file,
