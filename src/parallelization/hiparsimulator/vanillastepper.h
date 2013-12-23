@@ -8,13 +8,22 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
+/**
+ * As its name implies, the VanillaStepper is the simplest
+ * implementation of the Stepper concept: single threaded and no
+ * accelerator offloading. It does however overlap communication and
+ * calculation and support wide halos (halos = ghostzones). Ghost
+ * zones of width k mean that synchronization only needs to be done
+ * every k'th (nano) step.
+ */
 template<typename CELL_TYPE>
 class VanillaStepper : public Stepper<CELL_TYPE>
 {
+public:
     friend class VanillaStepperRegionTest;
     friend class VanillaStepperBasicTest;
     friend class VanillaStepperTest;
-public:
+
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
     const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
