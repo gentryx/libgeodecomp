@@ -41,12 +41,33 @@ endif()
 
 if(allowed_test AND selected_test)
   set(SOURCES)
+  unset(HAS_CUDA_TESTS)
+
+  include_directories(${LIBGEODECOMP_SOURCE_DIR}/../lib/cxxtest)
 
   foreach(header ${HEADERS})
+    # cxxtestgen for test headers...
     if(header MATCHES "test.h")
-      # cxxtestgen for test headers...
-      string(REPLACE "test.h" "test.cpp" source "${header}")
-      list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+      set(IS_CUDA_TEST false)
+      file(READ "${header}" buffer)
+
+      # compilation of CUDA tests requires some tweaks:
+      if(buffer MATCHES "^#include.*cuda.h")
+        set(IS_CUDA_TEST true)
+        set(HAS_CUDA_TESTS true)
+        set(TEST_SUFFIX "test.cu")
+      else()
+        set(TEST_SUFFIX "test.cpp")
+      endif()
+
+      string(REPLACE "test.h" "${TEST_SUFFIX}" source "${header}")
+
+      if(IS_CUDA_TEST)
+        cuda_compile(generated_files "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+        list(APPEND SOURCES "${generated_files}")
+      else()
+        list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+      endif()
 
       # make sure that each test source will include mpi.h first for
       # Intel MPI compliance (which is touchy if stdio.h has been
@@ -57,7 +78,7 @@ if(allowed_test AND selected_test)
 	COMMAND cat "${CMAKE_SOURCE_DIR}/fixtures/testguard.h"   >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
-        DEPENDS ${header} )
+        DEPENDS "${header}" )
     endif()
   endforeach(header)
 
@@ -67,8 +88,12 @@ if(allowed_test AND selected_test)
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
     COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp" --root --error-printer )
 
-  include_directories(${LIBGEODECOMP_SOURCE_DIR}/../lib/cxxtest)
-  add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
+  if(HAS_CUDA_TESTS)
+    cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
+  else()
+    add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})
+  endif()
+
   set_target_properties(${TARGET_UNIT_TEST_EXE} PROPERTIES OUTPUT_NAME test)
   target_link_libraries(${TARGET_UNIT_TEST_EXE} ${LOCAL_LIBGEODECOMP_LINK_LIB})
 
