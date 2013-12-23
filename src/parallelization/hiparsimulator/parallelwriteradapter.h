@@ -7,7 +7,7 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-template<class CELL_TYPE, class PARTITION>
+template<typename CELL_TYPE, typename PARTITION, typename STEPPER>
 class HiParSimulator;
 
 /**

@@ -20,7 +20,7 @@ enum EventPoint {LOAD_BALANCING, END};
 typedef std::set<EventPoint> EventSet;
 typedef std::map<long, EventSet> EventMap;
 
-template<class CELL_TYPE, class PARTITION>
+template<typename CELL_TYPE, typename PARTITION, typename STEPPER = VanillaStepper<CELL_TYPE> >
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {
 public:
@@ -234,7 +234,7 @@ private:
                 box,
                 ghostZoneWidth,
                 initializer,
-                static_cast<VanillaStepper<CELL_TYPE>*>(0),
+                static_cast<STEPPER*>(0),
                 writerAdaptersGhost,
                 writerAdaptersInner,
                 steererAdaptersGhost,
