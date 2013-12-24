@@ -1,9 +1,10 @@
 #ifndef LIBGEODECOMP_MISC_CUDAUTIL_H
 #define LIBGEODECOMP_MISC_CUDAUTIL_H
 
+#include <libgeodecomp/config.h>
+
 #include <iostream>
 #include <stdexcept>
-#include <libgeodecomp/config.h>
 
 #ifndef __host__
 #define __host__
@@ -21,6 +22,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * A loose collection of helper functions for error handling, data
+ * transfer etc. required for CUDA-capable GPUs.
+ */
 class CUDAUtil
 {
 public:
