@@ -95,7 +95,7 @@ private:
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        const Region<DIM>& region = partitionManager->innerSet(index);
+        const Region<DIM>& region = innerSet(index);
         {
             TimeComputeInner t(&chronometer);
 
@@ -181,11 +181,11 @@ private:
             ParentType::GHOST,
             globalNanoStep());
         notifyPatchAccepters(
-            partitionManager->innerSet(0),
+            innerSet(0),
             ParentType::INNER_SET,
             globalNanoStep());
 
-        kernelBuffer = PatchBufferType1(partitionManager->getVolatileKernel());
+        kernelBuffer = PatchBufferType1(getVolatileKernel());
         rimBuffer = PatchBufferType2(rim());
         saveRim(globalNanoStep());
         updateGhost();
@@ -223,13 +223,12 @@ private:
         std::size_t curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
-            notifyPatchProviders(
-                partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
+            notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
 
             {
                 TimeComputeGhost timer(&chronometer);
 
-                const Region<DIM>& region = partitionManager->rim(t + 1);
+                const Region<DIM>& region = rim(t + 1);
                 UpdateFunctor<CELL_TYPE>()(
                     region,
                     Coord<DIM>(),
@@ -267,6 +266,7 @@ private:
             restoreKernel();
         }
     }
+
 private:
 
     inline unsigned ghostZoneWidth() const
@@ -274,9 +274,24 @@ private:
         return partitionManager->getGhostZoneWidth();
     }
 
+    inline const Region<DIM>& rim(unsigned offset) const
+    {
+        return partitionManager->rim(offset);
+    }
+
     inline const Region<DIM>& rim() const
     {
-        return partitionManager->rim(ghostZoneWidth());
+        return rim(ghostZoneWidth());
+    }
+
+    inline const Region<DIM>& innerSet(unsigned offset) const
+    {
+        return partitionManager->innerSet(offset);
+    }
+
+    inline const Region<DIM>& getVolatileKernel() const
+    {
+        return partitionManager->getVolatileKernel();
     }
 
     inline void resetValidGhostZoneWidth()
@@ -299,7 +314,7 @@ private:
     {
         kernelBuffer.pushRequest(globalNanoStep());
         kernelBuffer.put(*oldGrid,
-                         partitionManager->innerSet(ghostZoneWidth()),
+                         innerSet(ghostZoneWidth()),
                          globalNanoStep());
     }
 
@@ -307,7 +322,7 @@ private:
     {
         kernelBuffer.get(
             &*oldGrid,
-            partitionManager->getVolatileKernel(),
+            getVolatileKernel(),
             globalNanoStep(),
             true);
     }
