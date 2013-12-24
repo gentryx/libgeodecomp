@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
@@ -49,7 +50,46 @@ public:
 #endif
     }
 
-    // fixme: 3d test, test topological correctness
+    void test3d()
+    {
+#ifdef LIBGEODECOMP_FEATURE_CUDA
+        typedef TestInitializer<TestCell<3> > TestCellInitializer;
+        typedef TestCellInitializer::Topology Topology;
+
+        Coord<3> dim(35, 20, 20);
+        CoordBox<3> box(Coord<3>(), dim);
+        TestCellInitializer init;
+
+        DisplacedGrid<TestCell<3>, Topology> source(box);
+        DisplacedGrid<TestCell<3>, Topology> target(box);
+        init.grid(&source);
+        CUDAGrid<TestCell<3>, Topology> buffer(box);
+
+        Region<3> region;
+        for (int y = 0; y < 10; ++y) {
+            region << Streak<3>(Coord<3>(y, y + 10, 2 * y), 25 + y / 2);
+        }
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TS_ASSERT_DIFFERS(source[*i], target[*i]);
+        }
+
+        buffer.loadRegion(source,  region);
+        buffer.saveRegion(&target, region);
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            TestCell<3> expected ;
+            if (region.count(*i)) {
+                expected = source[*i];
+            }
+
+            TS_ASSERT_EQUALS(expected, target[*i]);
+        }
+
+#endif
+    }
+
+    // fixme: test topological correctness
 };
 
 }
