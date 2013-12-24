@@ -1,6 +1,7 @@
 syntax: glob
 *~
 ./**/test/**/*test.cpp
+./**/test/**/*test.cu
 ./**/test/**/main.cpp
 ./**/auto.cmake
 ./build
