@@ -266,8 +266,6 @@ private:
         }
     }
 
-private:
-
     inline unsigned ghostZoneWidth() const
     {
         return partitionManager->getGhostZoneWidth();
