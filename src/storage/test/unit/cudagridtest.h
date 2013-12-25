@@ -163,6 +163,48 @@ public:
 
 #endif
     }
+
+    void testConstructor()
+    {
+#ifdef LIBGEODECOMP_FEATURE_CUDA
+        Coord<2> dim(30, 10);
+        CoordBox<2> box(Coord<2>(), dim);
+        Region<2> region;
+        region << box;
+
+        DisplacedGrid<int> hostGrid1(box);
+        DisplacedGrid<int> hostGrid2(box, -1);
+        DisplacedGrid<int> hostGrid3(box, -2);
+        int counter = 0;
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            hostGrid1[*i] = ++counter;
+
+            TS_ASSERT_DIFFERS(hostGrid1[*i], hostGrid2[*i]);
+            TS_ASSERT_DIFFERS(hostGrid1[*i], hostGrid3[*i]);
+            TS_ASSERT_DIFFERS(hostGrid2[*i], hostGrid3[*i]);
+        }
+
+        CUDAGrid<int> deviceGrid1(box);
+        deviceGrid1.loadRegion(hostGrid1, region);
+        CUDAGrid<int> deviceGrid2(deviceGrid1);
+        CUDAGrid<int> deviceGrid3 = deviceGrid1;
+
+        TS_ASSERT_DIFFERS(deviceGrid1.data, deviceGrid2.data);
+        TS_ASSERT_DIFFERS(deviceGrid1.data, deviceGrid3.data);
+
+        deviceGrid2.saveRegion(&hostGrid2, region);
+        deviceGrid3.saveRegion(&hostGrid3, region);
+
+        counter = 0;
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            ++counter;
+
+            TS_ASSERT_EQUALS(counter, hostGrid1[*i]);
+            TS_ASSERT_EQUALS(counter, hostGrid2[*i]);
+            TS_ASSERT_EQUALS(counter, hostGrid3[*i]);
+        }
+#endif
+    }
 };
 
 }

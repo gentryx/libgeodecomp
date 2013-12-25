@@ -20,8 +20,11 @@ template<typename CELL_TYPE,
 class CUDAGrid
 {
 public:
+    friend class CUDAGridTest;
+
     typedef CELL_TYPE CellType;
     typedef TOPOLOGY Topology;
+
     static const int DIM = Topology::DIM;
 
     inline CUDAGrid(
@@ -30,8 +33,15 @@ public:
         box(box),
         topoDimensions(topologicalDimensions)
     {
-        std::size_t byteSize = box.dimensions.prod() * sizeof(CellType);
-        cudaMalloc(&data, byteSize);
+        cudaMalloc(&data, byteSize());
+    }
+
+    inline CUDAGrid(const CUDAGrid& grid)
+    {
+        box = grid.box;
+        topoDimensions = grid.topoDimensions;
+        cudaMalloc(&data, byteSize());
+        cudaMemcpy(data, grid.data, byteSize(), cudaMemcpyDeviceToDevice);
     }
 
     ~CUDAGrid()
@@ -65,6 +75,11 @@ private:
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
     CellType *data;
+
+    std::size_t byteSize() const
+    {
+        return box.dimensions.prod() * sizeof(CellType);
+    }
 
     std::size_t offset(const Coord<DIM>& absoluteCoord) const
     {
