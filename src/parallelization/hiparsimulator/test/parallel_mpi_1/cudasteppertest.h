@@ -6,6 +6,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/cudastepper.h>
 
+#include <cuda.h>
+
 using namespace LibGeoDecomp;
 using namespace HiParSimulator;
 

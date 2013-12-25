@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_H
 
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
@@ -27,6 +28,7 @@ public:
 
     typedef class Stepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
+    typedef CUDAGrid<CELL_TYPE, Topology, true> CUDAGridType;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
@@ -85,6 +87,10 @@ private:
     unsigned validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
+    // fixme: get rid of dummyGrid
+    boost::shared_ptr<GridType> dummyGrid;
+    boost::shared_ptr<CUDAGridType> oldDeviceGrid;
+    boost::shared_ptr<CUDAGridType> newDeviceGrid;
     PatchBufferType2 rimBuffer;
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
@@ -102,8 +108,12 @@ private:
                 Coord<DIM>(),
                 Coord<DIM>(),
                 *oldGrid,
-                &*newGrid,
+                &*dummyGrid,
                 curNanoStep);
+
+            oldDeviceGrid->loadRegion(*dummyGrid, region);
+            oldDeviceGrid->saveRegion(&*newGrid,  region);
+
             std::swap(oldGrid, newGrid);
 
             ++curNanoStep;
@@ -168,8 +178,13 @@ private:
         Coord<DIM> topoDim = initializer->gridDimensions();
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
+
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        dummyGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        oldDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
+        newDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
+
         initializer->grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
