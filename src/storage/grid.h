@@ -11,10 +11,11 @@
 
 #include <boost/foreach.hpp>
 #include <iostream>
+#include <libflatarray/aligned_allocator.hpp>
+
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/storage/alignedallocator.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
 
@@ -94,7 +95,7 @@ public:
     typedef typename boost::detail::multi_array::const_sub_array<CELL_TYPE, 1> ConstSliceRef;
     typedef typename boost::multi_array<
         // always align on cache line boundaries
-        CELL_TYPE, DIM, AlignedAllocator<CELL_TYPE, 64> > CellMatrix;
+        CELL_TYPE, DIM, LibFlatArray::aligned_allocator<CELL_TYPE, 64> > CellMatrix;
     typedef typename CellMatrix::index Index;
 #else
     typedef std::vector<CELL_TYPE>& SliceRef;
