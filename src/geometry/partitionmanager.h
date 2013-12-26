@@ -228,9 +228,10 @@ private:
         ownInnerSets.resize(getGhostZoneWidth() + 1);
 
         ownRims.back() = ownRegion() - kernel;
-        for (int i = getGhostZoneWidth() - 1; i >= 0; --i)
+        for (int i = getGhostZoneWidth() - 1; i >= 0; --i) {
             ownRims[i] = ownRims[i + 1].expandWithTopology(
                 1, simulationArea.dimensions, Topology());
+        }
 
         ownInnerSets.front() = ownRegion();
         Region<DIM> minuend = surface.expandWithTopology(
