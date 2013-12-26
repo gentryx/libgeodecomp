@@ -21,44 +21,48 @@ public:
     template<typename REGION_TYPE>
     CUDARegion(const REGION_TYPE& region)
     {
-        std::vector<int> coordBuffers[DIM];
-
-        for (int i = 0; i < DIM; ++i) {
-            coords[i] = CUDAArray<int>(region.size());
-            coordBuffers[i].reserve(region.size());
-        }
+        int size = DIM * region.size();
+        coords = CUDAArray<int>(size);
+        std::vector<int> coordsBuffer(size);
+        std::size_t index = 0;
 
         for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
-            addCoord(coordBuffers, *i);
+            addCoord(&coordsBuffer, *i, index++, region.size());
         }
+
+        cudaMemcpy(coords.data(), &coordsBuffer[0], size * sizeof(int), cudaMemcpyHostToDevice);
     }
 
-    void getCoordPointers(int *pointers) const
+    int *data()
     {
-        for (int i = 0; i < DIM; ++i) {
-            pointers[i] = coords[i].data();
-        }
+        return coords.data();
+    }
+
+    const int *data() const
+    {
+        return coords.data();
     }
 
 private:
-    CUDAArray<int> coords[DIM];
 
-    void addCoord(std::vector<int> coordBuffers[1], const Coord<1>& c) const
+    CUDAArray<int> coords;
+
+    void addCoord(std::vector<int> *coordsBuffer, const Coord<1>& c, std::size_t index, std::size_t stride) const
     {
-        coordBuffers[0].push_back(c[0]);
+        (*coordsBuffer)[0 * stride + index] = c[0];
     }
 
-    void addCoord(std::vector<int> coordBuffers[2], const Coord<2>& c) const
+    void addCoord(std::vector<int> *coordsBuffer, const Coord<2>& c, std::size_t index, std::size_t stride) const
     {
-        coordBuffers[0].push_back(c[0]);
-        coordBuffers[1].push_back(c[1]);
+        (*coordsBuffer)[0 * stride + index] = c[0];
+        (*coordsBuffer)[1 * stride + index] = c[1];
     }
 
-    void addCoord(std::vector<int> coordBuffers[3], const Coord<3>& c) const
+    void addCoord(std::vector<int> *coordsBuffer, const Coord<3>& c, std::size_t index, std::size_t stride) const
     {
-        coordBuffers[0].push_back(c[0]);
-        coordBuffers[1].push_back(c[1]);
-        coordBuffers[2].push_back(c[2]);
+        (*coordsBuffer)[0 * stride + index] = c[0];
+        (*coordsBuffer)[1 * stride + index] = c[1];
+        (*coordsBuffer)[2 * stride + index] = c[2];
     }
 };
 
