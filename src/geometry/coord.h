@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/fixedcoord.h>
+#include <libgeodecomp/misc/cudautil.h>
 
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
@@ -67,21 +68,25 @@ public:
         return x();
     }
 
+    __host__ __device__
     int& x()
     {
         return c[0];
     }
 
+    __host__ __device__
     const int& x() const
     {
         return c[0];
     }
 
+    __host__ __device__
     inline int& operator[](const int& i)
     {
         return c[i];
     }
 
+    __host__ __device__
     inline const int& operator[](const int& i) const
     {
         return c[i];
@@ -227,31 +232,37 @@ public:
         return std::size_t(y()) * dim.x() + x();
     }
 
+    __host__ __device__
     int& x()
     {
         return c[0];
     }
 
+    __host__ __device__
     const int& x() const
     {
         return c[0];
     }
 
+    __host__ __device__
     int& y()
     {
         return c[1];
     }
 
+    __host__ __device__
     const int& y() const
     {
         return c[1];
     }
 
+    __host__ __device__
     inline int& operator[](const int& i)
     {
         return c[i];
     }
 
+    __host__ __device__
     inline const int& operator[](const int& i) const
     {
         return c[i];
@@ -404,41 +415,49 @@ public:
             x();
     }
 
+    __host__ __device__
     int& x()
     {
         return c[0];
     }
 
+    __host__ __device__
     const int& x() const
     {
         return c[0];
     }
 
+    __host__ __device__
     int& y()
     {
         return c[1];
     }
 
+    __host__ __device__
     const int& y() const
     {
         return c[1];
     }
 
+    __host__ __device__
     int& z()
     {
         return c[2];
     }
 
+    __host__ __device__
     const int& z() const
     {
         return c[2];
     }
 
+    __host__ __device__
     inline int& operator[](const int& i)
     {
         return c[i];
     }
 
+    __host__ __device__
     inline const int& operator[](const int& i) const
     {
         return c[i];
