@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/storage/cudaarray.h>
+#include <libgeodecomp/misc/cudautil.h>
 
 #include <cuda.h>
 
@@ -52,6 +53,9 @@ public:
         TS_ASSERT_DIFFERS(deviceArray2.data(), deviceArray4.data());
 
         TS_ASSERT_DIFFERS(deviceArray3.data(), deviceArray4.data());
+
+        cudaDeviceSynchronize();
+        CUDAUtil::checkForError();
 #endif
     }
 

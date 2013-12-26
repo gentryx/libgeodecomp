@@ -45,6 +45,15 @@ public:
         LibFlatArray::cuda_allocator<ELEMENT_TYPE>().deallocate(dataPointer, size);
     }
 
+    inline void operator=(const CUDAArray& array)
+    {
+        LibFlatArray::cuda_allocator<ELEMENT_TYPE>().deallocate(dataPointer, size);
+
+        size = array.size;
+        dataPointer = LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size);
+        cudaMemcpy(dataPointer, array.dataPointer, byteSize(), cudaMemcpyDeviceToDevice);
+    }
+
     inline void load(const ELEMENT_TYPE *hostData)
     {
         cudaMemcpy(dataPointer, hostData, byteSize(), cudaMemcpyHostToDevice);
@@ -60,11 +69,13 @@ public:
         return size * sizeof(ELEMENT_TYPE);
     }
 
+    __host__ __device__
     inline ELEMENT_TYPE *data()
     {
         return dataPointer;
     }
 
+    __host__ __device__
     inline const ELEMENT_TYPE *data() const
     {
         return dataPointer;
