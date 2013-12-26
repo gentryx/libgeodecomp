@@ -58,11 +58,19 @@ public:
         }
     }
 
+    __host__ __device__
+    const CoordBox<DIM>& boundingBox()
+    {
+        return box;
+    }
+
+    __host__ __device__
     CellType *data()
     {
         return array.data();
     }
 
+    __host__ __device__
     const CellType *data() const
     {
         return array.data();
