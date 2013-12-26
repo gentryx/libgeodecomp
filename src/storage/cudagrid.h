@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/storage/cudaarray.h>
 
 #include <cuda.h>
 
@@ -31,23 +32,9 @@ public:
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
         box(box),
-        topoDimensions(topologicalDimensions)
-    {
-        cudaMalloc(&data, byteSize());
-    }
-
-    inline CUDAGrid(const CUDAGrid& grid)
-    {
-        box = grid.box;
-        topoDimensions = grid.topoDimensions;
-        cudaMalloc(&data, byteSize());
-        cudaMemcpy(data, grid.data, byteSize(), cudaMemcpyDeviceToDevice);
-    }
-
-    ~CUDAGrid()
-    {
-        cudaFree(data);
-    }
+        topoDimensions(topologicalDimensions),
+        array(box.dimensions.prod())
+    {}
 
     template<typename GRID_TYPE, typename REGION>
     void saveRegion(GRID_TYPE *target, const REGION& region) const
@@ -71,10 +58,20 @@ public:
         }
     }
 
+    CellType *data()
+    {
+        return array.data();
+    }
+
+    const CellType *data() const
+    {
+        return array.data();
+    }
+
 private:
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
-    CellType *data;
+    CUDAArray<CellType> array;
 
     std::size_t byteSize() const
     {
@@ -93,12 +90,12 @@ private:
 
     CellType *address(const Coord<DIM>& absoluteCoord)
     {
-        return data + offset(absoluteCoord);
+        return data() + offset(absoluteCoord);
     }
 
     const CellType *address(const Coord<DIM>& absoluteCoord) const
     {
-        return data + offset(absoluteCoord);
+        return data() + offset(absoluteCoord);
     }
 };
 

@@ -189,8 +189,8 @@ public:
         CUDAGrid<int> deviceGrid2(deviceGrid1);
         CUDAGrid<int> deviceGrid3 = deviceGrid1;
 
-        TS_ASSERT_DIFFERS(deviceGrid1.data, deviceGrid2.data);
-        TS_ASSERT_DIFFERS(deviceGrid1.data, deviceGrid3.data);
+        TS_ASSERT_DIFFERS(deviceGrid1.data(), deviceGrid2.data());
+        TS_ASSERT_DIFFERS(deviceGrid1.data(), deviceGrid3.data());
 
         deviceGrid2.saveRegion(&hostGrid2, region);
         deviceGrid3.saveRegion(&hostGrid3, region);
