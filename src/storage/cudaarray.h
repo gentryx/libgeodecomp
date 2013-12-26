@@ -14,7 +14,7 @@ template<typename ELEMENT_TYPE>
 class CUDAArray
 {
 public:
-    inline CUDAArray(std::size_t size) :
+    inline CUDAArray(std::size_t size = 0) :
         size(size),
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
     {}

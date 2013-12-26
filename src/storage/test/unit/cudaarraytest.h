@@ -29,7 +29,8 @@ public:
         CUDAArray<double> deviceArray1(&hostVec1[0], 30);
         CUDAArray<double> deviceArray2(hostVec1);
         CUDAArray<double> deviceArray3(deviceArray1);
-        CUDAArray<double> deviceArray4(30);
+        CUDAArray<double> deviceArray4;
+        deviceArray4 = CUDAArray<double>(30);
         deviceArray4.load(&hostVec1[0]);
 
         deviceArray2.save(&hostVec2[0]);
