@@ -226,6 +226,10 @@ if(FEATURE_HPX)
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
 endif()
 
+if(FEATURE_CUDA)
+  set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
+endif()
+
 include_directories(${Boost_INCLUDE_DIRS})
 
 #============= 5. SANITY CHECKS ======================================
@@ -237,7 +241,7 @@ if(FEATURE_OPENCV AND NOT OpenCV_FOUND)
 endif()
 
 if(FEATURE_CUDA AND NOT CUDA_FOUND)
-  message(FATAL_ERROR "FEATURE_CUDA selected, but could not find the Nvidia CUDA toolkit.")
+  message(FATAL_ERROR "FEATURE_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
 endif()
 
 if(FEATURE_MPI)
