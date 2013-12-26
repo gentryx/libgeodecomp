@@ -2,17 +2,58 @@
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_H
 
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/geometry/cudaregion.h>
 #include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
+
 namespace HiParSimulator {
+
+namespace CUDAStepperHelpers {
+
+__device__
+Coord<2> loadRelativeCoord(int regionIndex, int *coords, int regionSize, const Coord<2> origin)
+{
+    int x = coords[regionIndex + 0 * regionSize] - origin.x();
+    int y = coords[regionIndex + 1 * regionSize] - origin.y();
+
+    return Coord<2>(x, y);
+}
+
+__device__
+Coord<3> loadRelativeCoord(int regionIndex, int *coords, int regionSize, const Coord<3> origin)
+{
+    int x = coords[regionIndex + 0 * regionSize] - origin.x();
+    int y = coords[regionIndex + 1 * regionSize] - origin.y();
+    int z = coords[regionIndex + 2 * regionSize] - origin.z();
+
+    return Coord<3>(x, y, z);
+}
+
+template<int DIM, typename CELL_TYPE>
+__global__
+void copyKernel(CELL_TYPE *gridDataOld, CELL_TYPE *gridDataNew, int *coords, int regionSize, CoordBox<DIM> boundingBox)
+{
+    int regionIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    if (regionIndex >= regionSize) {
+        return;
+    }
+
+    Coord<DIM> relativeCoord = loadRelativeCoord(regionIndex, coords, regionSize, boundingBox.origin);
+    int gridIndex = relativeCoord.toIndex(boundingBox.dimensions);
+
+    gridDataNew[gridIndex] = gridDataOld[gridIndex];
+}
+
+}
 
 /**
  * The CUDAStepper offloads cell updates to a CUDA enabled GPU.
  *
- * FIXME: add option to select CUDA device in c-tor
+ * FIXME: add option to select CUDA device in c-tor. we'll need to use a custom stream in this case.
+ * FIXME: add 2d unit test
  */
 template<typename CELL_TYPE>
 class CUDAStepper : public Stepper<CELL_TYPE>
@@ -112,7 +153,17 @@ private:
                 curNanoStep);
 
             oldDeviceGrid->loadRegion(*dummyGrid, region);
-            oldDeviceGrid->saveRegion(&*newGrid,  region);
+            {
+                CUDARegion<DIM> cudaRegion(region);
+                // fixme: choose grid-/blockDim in a better way
+                dim3 gridDim(512);
+                dim3 blockDim(32);
+                CUDAStepperHelpers::copyKernel<<<gridDim, blockDim>>>(
+                    oldDeviceGrid->data(), newDeviceGrid->data(),
+                    cudaRegion.data(), region.size(),
+                    oldDeviceGrid->boundingBox());
+            }
+            newDeviceGrid->saveRegion(&*newGrid,  region);
 
             std::swap(oldGrid, newGrid);
 
