@@ -41,12 +41,14 @@ public:
         return Coord<1>(nx);
     }
 
+    __host__ __device__
     inline explicit Coord(const int& nx=0)
     {
         c[0] = nx;
     }
 
     template<int X, int Y, int Z>
+    __host__ __device__
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
@@ -63,6 +65,7 @@ public:
     /**
      * converts the coord to a linear index. This is good for addressing a linear array via Coords.
      */
+    __host__ __device__
     inline std::size_t toIndex(const Coord<1>& dim) const
     {
         return x();
@@ -195,6 +198,7 @@ public:
         return Coord<2>(nx, nx);
     }
 
+    __host__ __device__
     inline explicit Coord(const int& nx=0, const int& ny=0)
     {
         c[0] = nx;
@@ -210,6 +214,7 @@ public:
 #endif
 
     template<int X, int Y, int Z>
+    __host__ __device__
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
@@ -227,6 +232,7 @@ public:
     /**
      * converts the coord to a linear index. This is good for addressing a linear array via Coords.
      */
+    __host__ __device__
     inline std::size_t toIndex(const Coord<2>& dim) const
     {
         return std::size_t(y()) * dim.x() + x();
@@ -377,6 +383,7 @@ public:
         return Coord<3>(nx, nx, nx);
     }
 
+    __host__ __device__
     inline explicit Coord(const int& nx=0, const int& ny=0, const int& nz=0)
     {
         c[0] = nx;
@@ -385,6 +392,7 @@ public:
     }
 
     template<int X, int Y, int Z>
+    __host__ __device__
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
@@ -407,6 +415,7 @@ public:
     /**
      * converts the coord to a linear index. This is good for addressing a linear array via Coords.
      */
+    __host__ __device__
     inline std::size_t toIndex(const Coord<3>& dim) const
     {
         return
