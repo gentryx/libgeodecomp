@@ -25,6 +25,25 @@ void setIDs2D(CoordBox<2> boundingBox, double *gridData, int *coords, int region
     gridData[gridIndex] = regionIndex + 0.123;
 }
 
+__global__
+void setIDs3D(CoordBox<3> boundingBox, double *gridData, int *coords, int regionSize)
+{
+    int regionIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    if (regionIndex >= regionSize) {
+        return;
+    }
+
+    int x = coords[regionIndex + 0 * regionSize] - boundingBox.origin.x();
+    int y = coords[regionIndex + 1 * regionSize] - boundingBox.origin.y();
+    int z = coords[regionIndex + 2 * regionSize] - boundingBox.origin.z();
+    int gridIndex =
+        z * boundingBox.dimensions.x() * boundingBox.dimensions.y() +
+        y * boundingBox.dimensions.x() +
+        x;
+
+    gridData[gridIndex] = regionIndex + 0.666;
+}
+
 class CUDARegionTest : public CxxTest::TestSuite
 {
 public:
@@ -62,12 +81,35 @@ public:
 
     void test3D()
     {
-        // fixme: equivalent test to test2D required
-        // - fill Region
-        // - load CUDARegion
-        // - iterate through CUDARegion and set elements of CUDAGrid
-        // - copy CUDAGrid to DisplacedGrid
-        // - check contents
+        CoordBox<3> box(Coord<3>(10, 40, 20), Coord<3>(90, 60, 80));
+        Region<3> gridRegion;
+        gridRegion << box;
+
+        Region<3> region;
+        region << Streak<3>(Coord<3>(10, 50, 20),  50)
+               << Streak<3>(Coord<3>(15, 51, 40),  25)
+               << Streak<3>(Coord<3>(15, 52, 60), 100)
+               << Streak<3>(Coord<3>(20, 53, 99), 100);
+        CUDARegion<3> cudaRegion(region);
+
+        typedef Topologies::Cube<3>::Topology Topology;
+        CUDAGrid<double, Topology> deviceGrid(box);
+        DisplacedGrid<double, Topology> hostGrid(box);
+
+        dim3 gridDim(10);
+        dim3 blockDim(32);
+        setIDs3D<<<gridDim, blockDim>>>(
+            deviceGrid.boundingBox(), deviceGrid.data(),
+            cudaRegion.data(), region.size());
+        deviceGrid.saveRegion(&hostGrid, gridRegion);
+
+        int counter = 0;
+        for (Region<3>::Iterator i = region.begin();
+             i != region.end();
+             ++i) {
+            double expected = counter++ + 0.666;
+            TS_ASSERT_EQUALS(expected, hostGrid[*i]);
+        }
     }
 
 };
