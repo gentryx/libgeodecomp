@@ -153,6 +153,26 @@ public:
         TS_ASSERT_EQUALS(expected, manager.getVolatileKernel());
     }
 
+    void testInnerRim()
+    {
+        Region<2> expected;
+        unsigned startLine =
+            startingLine(layer.rank()) + ghostZoneWidth;
+        unsigned endLine   =
+            startingLine(layer.rank()) + ghostZoneWidth * 2;
+        expected += fillLines(startLine, endLine);
+
+        if (layer.rank() != layer.size() - 1) {
+            unsigned startLine =
+                startingLine(layer.rank() + 1) - ghostZoneWidth * 2;
+            unsigned endLine   =
+                startingLine(layer.rank() + 1) - ghostZoneWidth;
+            expected += fillLines(startLine, endLine);
+        }
+
+        TS_ASSERT_EQUALS(expected, manager.getInnerRim());
+    }
+
 private:
     MPILayer layer;
     PartitionManager<Topologies::Cube<2>::Topology> manager;
@@ -165,16 +185,18 @@ private:
     unsigned startingLine(const unsigned& node)
     {
         unsigned ret = offset;
-        for (unsigned i = 0; i < node; ++i)
+        for (unsigned i = 0; i < node; ++i) {
             ret += weights[i];
+        }
         return ret / dimensions.x();
     }
 
     Region<2> fillLines(const unsigned& startLine, const unsigned& endLine)
     {
         Region<2> ret;
-        for (unsigned row = startLine; row < endLine; ++row)
+        for (unsigned row = startLine; row < endLine; ++row) {
             ret << Streak<2>(Coord<2>(0, row), dimensions.x());
+        }
         return ret;
     }
 };

@@ -175,6 +175,11 @@ public:
         return volatileKernel;
     }
 
+    inline const Region<DIM>& getInnerRim() const
+    {
+        return innerRim;
+    }
+
     inline const std::vector<std::size_t>& getWeights() const
     {
         return partition->getWeights();
@@ -185,6 +190,7 @@ private:
     CoordBox<DIM> simulationArea;
     Region<DIM> outerRim;
     Region<DIM> volatileKernel;
+    Region<DIM> innerRim;
     RegionVecMap regions;
     RegionVecMap outerGhostZoneFragments;
     RegionVecMap innerGhostZoneFragments;
@@ -243,6 +249,7 @@ private:
         }
 
         volatileKernel = ownInnerSets.back() & rim(1) ;
+        innerRim       = ownInnerSets.back() & rim(0) ;
     }
 
     inline void intersect(unsigned node)

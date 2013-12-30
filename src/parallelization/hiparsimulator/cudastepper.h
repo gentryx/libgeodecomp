@@ -315,10 +315,14 @@ private:
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
 
+    boost::shared_ptr<CUDARegion<DIM> > deviceRim;
+    boost::shared_ptr<CUDARegion<DIM> > deviceInnerRim;
+    std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
+
     inline void update()
     {
-        std::cout << "update()\n";
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
+        std::cout << "update(" << index << ")\n";
         const Region<DIM>& region = innerSet(index);
         {
             TimeComputeInner t(&chronometer);
@@ -423,6 +427,19 @@ private:
         initializer->grid(&*oldGrid);
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
+
+        Region<DIM> gridRegion;
+        gridRegion << gridBox;
+        oldDeviceGrid->loadRegion(*oldGrid, gridRegion);
+        oldDeviceGrid->setEdge(oldGrid->getEdgeCell());
+        newDeviceGrid->setEdge(oldGrid->getEdgeCell());
+
+        deviceRim.reset(new CUDARegion<DIM>(rim()));
+        deviceInnerRim.reset(new CUDARegion<DIM>(innerRim()));
+        deviceInnerSets.resize(0);
+        for (int i = 0; i <= ghostZoneWidth(); ++i) {
+            deviceInnerSets.push_back(new CUDARegion<DIM>(innerSet(i)));
+        }
 
         notifyPatchAccepters(
             rim(),
