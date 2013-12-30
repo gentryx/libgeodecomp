@@ -20,10 +20,11 @@ namespace HiParSimulator {
 template<class CELL_TYPE>
 class UpdateGroup
 {
+public:
     friend class HiParSimulatorTest;
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
-public:
+
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
@@ -34,6 +35,7 @@ public:
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
     typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
+
     const static int DIM = Topology::DIM;
 
     template<typename STEPPER>
@@ -134,7 +136,6 @@ public:
 
         // add external PatchProviders last to allow them to override
         // the local ghost zone providers (a.k.a. PatchLink::Source).
-        // fixme: get rid of this as it violates new API?
         for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
              i != patchProvidersGhost.end();
              ++i) {
