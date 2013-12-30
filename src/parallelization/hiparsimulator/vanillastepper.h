@@ -111,7 +111,7 @@ private:
             ++curNanoStep;
             if (curNanoStep == NANO_STEPS) {
                 curNanoStep = 0;
-                curStep++;
+                ++curStep;
             }
         }
 
@@ -153,10 +153,12 @@ private:
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
              ++i) {
-            (*i)->get(
-                &*oldGrid,
-                region,
-                nanoStep);
+            if (nanoStep == (*i)->nextAvailableNanoStep()) {
+                (*i)->get(
+                    &*oldGrid,
+                    region,
+                    nanoStep);
+            }
         }
     }
 
