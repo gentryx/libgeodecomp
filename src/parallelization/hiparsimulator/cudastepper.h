@@ -23,7 +23,7 @@ class LoadAbsoluteCoord<2>
 {
 public:
     __device__
-    Coord<2> operator()(int regionIndex, int *coords, int regionSize)
+    Coord<2> operator()(int regionIndex, const int *coords, int regionSize)
     {
         int x = coords[regionIndex + 0 * regionSize];
         int y = coords[regionIndex + 1 * regionSize];
@@ -37,7 +37,7 @@ class LoadAbsoluteCoord<3>
 {
 public:
     __device__
-    Coord<3> operator()(int regionIndex, int *coords, int regionSize)
+    Coord<3> operator()(int regionIndex, const int *coords, int regionSize)
     {
         int x = coords[regionIndex + 0 * regionSize];
         int y = coords[regionIndex + 1 * regionSize];
@@ -209,7 +209,7 @@ void copyKernel(CELL_TYPE *gridDataOld, CELL_TYPE *gridDataNew, int *coords, int
 
 template<int DIM, typename CELL_TYPE>
 __global__
-void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDataNew, int nanoStep, int *coords, int regionSize, CoordBox<DIM> boundingBox)
+void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDataNew, int nanoStep, const int *coords, int regionSize, CoordBox<DIM> boundingBox)
 {
     int regionIndex = blockIdx.x * blockDim.x + threadIdx.x;
     if (regionIndex >= regionSize) {
@@ -315,8 +315,6 @@ private:
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
 
-    boost::shared_ptr<CUDARegion<DIM> > deviceRim;
-    boost::shared_ptr<CUDARegion<DIM> > deviceInnerRim;
     std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
 
     inline void update()
@@ -338,7 +336,7 @@ private:
 
             oldDeviceGrid->loadRegion(*oldGrid, region);
             {
-                CUDARegion<DIM> cudaRegion(region);
+                const CUDARegion<DIM>& cudaRegion = deviceInnerSet(index);
                 // fixme: choose grid-/blockDim in a better way
                 dim3 gridDim(512);
                 dim3 blockDim(32);
@@ -434,11 +432,11 @@ private:
         oldDeviceGrid->setEdge(oldGrid->getEdgeCell());
         newDeviceGrid->setEdge(oldGrid->getEdgeCell());
 
-        deviceRim.reset(new CUDARegion<DIM>(rim()));
-        deviceInnerRim.reset(new CUDARegion<DIM>(innerRim()));
         deviceInnerSets.resize(0);
         for (int i = 0; i <= ghostZoneWidth(); ++i) {
-            deviceInnerSets.push_back(new CUDARegion<DIM>(innerSet(i)));
+            deviceInnerSets.push_back(
+                boost::shared_ptr<CUDARegion<DIM> >(
+                    new CUDARegion<DIM>(innerSet(i))));
         }
 
         notifyPatchAccepters(
@@ -556,6 +554,16 @@ private:
     inline const Region<DIM>& getVolatileKernel() const
     {
         return partitionManager->getVolatileKernel();
+    }
+
+    inline const Region<DIM>& getInnerRim() const
+    {
+        return partitionManager->getInnerRim();
+    }
+
+    inline const CUDARegion<DIM>& deviceInnerSet(unsigned offset) const
+    {
+        return *deviceInnerSets[offset];
     }
 
     inline void resetValidGhostZoneWidth()
