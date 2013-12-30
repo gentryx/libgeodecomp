@@ -62,10 +62,9 @@ public:
      * This function may be called whenever a copy of a writer is needed
      * instead of a plain pointer copy. Must be implemented by t
      **/
-    virtual ParallelWriter * clone()
+    virtual ParallelWriter *clone()
     {
         throw std::logic_error("clone not implemented");
-        return 0;
     }
 
     /**
