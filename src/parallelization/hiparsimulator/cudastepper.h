@@ -334,23 +334,21 @@ private:
             //     &*dummyGrid,
             //     curNanoStep);
 
-            oldDeviceGrid->loadRegion(*oldGrid, region);
-            {
-                const CUDARegion<DIM>& cudaRegion = deviceInnerSet(index);
-                // fixme: choose grid-/blockDim in a better way
-                dim3 gridDim(512);
-                dim3 blockDim(32);
-                CUDAStepperHelpers::updateKernel<<<gridDim, blockDim>>>(
-                    oldDeviceGrid->data(),
-                    oldDeviceGrid->edgeCell(),
-                    newDeviceGrid->data(),
-                    curNanoStep,
-                    cudaRegion.data(),
-                    region.size(),
-                    oldDeviceGrid->boundingBox());
-            }
-            newDeviceGrid->saveRegion(&*newGrid,  region);
-
+            // oldDeviceGrid->loadRegion(*oldGrid, region);
+            const CUDARegion<DIM>& cudaRegion = deviceInnerSet(index);
+            // fixme: choose grid-/blockDim in a better way
+            dim3 gridDim(512);
+            dim3 blockDim(32);
+            CUDAStepperHelpers::updateKernel<<<gridDim, blockDim>>>(
+                oldDeviceGrid->data(),
+                oldDeviceGrid->edgeCell(),
+                newDeviceGrid->data(),
+                curNanoStep,
+                cudaRegion.data(),
+                region.size(),
+                oldDeviceGrid->boundingBox());
+            // newDeviceGrid->saveRegion(&*newGrid,  region);
+            std::swap(oldDeviceGrid, newDeviceGrid);
             std::swap(oldGrid, newGrid);
 
             ++curNanoStep;
@@ -360,26 +358,25 @@ private:
             }
         }
 
-        notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchAcceptersInnerSet(region, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();
         }
 
-        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchProvidersInnerSet(region, globalNanoStep());
     }
 
-    inline void notifyPatchAccepters(
+    inline void notifyPatchAcceptersGhostZones(
         const Region<DIM>& region,
-        const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
         TimePatchAccepters t(&chronometer);
 
         for (typename ParentType::PatchAccepterList::iterator i =
-                 patchAccepters[patchType].begin();
-             i != patchAccepters[patchType].end();
+                 patchAccepters[ParentType::GHOST].begin();
+             i != patchAccepters[ParentType::GHOST].end();
              ++i) {
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
@@ -387,22 +384,96 @@ private:
         }
     }
 
-    inline void notifyPatchProviders(
+    inline void notifyPatchAcceptersInnerSet(
         const Region<DIM>& region,
-        const typename ParentType::PatchType& patchType,
+        std::size_t nanoStep)
+    {
+        TimePatchAccepters t(&chronometer);
+
+        bool copyRequired = false;
+
+        for (typename ParentType::PatchAccepterList::iterator i =
+                 patchAccepters[ParentType::INNER_SET].begin();
+             i != patchAccepters[ParentType::INNER_SET].end();
+             ++i) {
+            if (nanoStep == (*i)->nextRequiredNanoStep()) {
+                copyRequired = true;
+            }
+        }
+
+        if (!copyRequired) {
+            return;
+        }
+        std::cout << "copy out for PatchAccepters at nanoStep " << nanoStep << "\n";
+        oldDeviceGrid->saveRegion(&*oldGrid, region);
+
+        for (typename ParentType::PatchAccepterList::iterator i =
+                 patchAccepters[ParentType::INNER_SET].begin();
+             i != patchAccepters[ParentType::INNER_SET].end();
+             ++i) {
+            if (nanoStep == (*i)->nextRequiredNanoStep()) {
+                (*i)->put(*oldGrid, region, nanoStep);
+            }
+        }
+    }
+
+    inline void notifyPatchProvidersGhostZones(
+        const Region<DIM>& region,
         std::size_t nanoStep)
     {
         TimePatchProviders t(&chronometer);
 
         for (typename ParentType::PatchProviderList::iterator i =
-                 patchProviders[patchType].begin();
-             i != patchProviders[patchType].end();
+                 patchProviders[ParentType::GHOST].begin();
+             i != patchProviders[ParentType::GHOST].end();
              ++i) {
-            (*i)->get(
-                &*oldGrid,
-                region,
-                nanoStep);
+            if (nanoStep == (*i)->nextAvailableNanoStep()) {
+                (*i)->get(
+                    &*oldGrid,
+                    region,
+                    nanoStep);
+            }
         }
+    }
+
+    inline void notifyPatchProvidersInnerSet(
+        const Region<DIM>& region,
+        std::size_t nanoStep)
+    {
+        TimePatchProviders t(&chronometer);
+
+        bool copyRequired = false;
+
+        for (typename ParentType::PatchProviderList::iterator i =
+                 patchProviders[ParentType::INNER_SET].begin();
+             i != patchProviders[ParentType::INNER_SET].end();
+             ++i) {
+            if (nanoStep == (*i)->nextAvailableNanoStep()) {
+                copyRequired = true;
+            }
+        }
+
+        if (!copyRequired) {
+            return;
+        }
+
+        std::cout << "copy out for PatchProviders at nanoStep " << nanoStep << "\n";
+        oldDeviceGrid->saveRegion(&*oldGrid, region);
+
+        for (typename ParentType::PatchProviderList::iterator i =
+                 patchProviders[ParentType::INNER_SET].begin();
+             i != patchProviders[ParentType::INNER_SET].end();
+             ++i) {
+            if (nanoStep == (*i)->nextAvailableNanoStep()) {
+                (*i)->get(
+                    &*oldGrid,
+                    region,
+                    nanoStep);
+            }
+        }
+
+        std::cout << "copy in for PatchProviders at nanoStep " << nanoStep << "\n";
+        oldDeviceGrid->loadRegion(*oldGrid, region);
     }
 
     inline std::size_t globalNanoStep() const
@@ -439,18 +510,17 @@ private:
                     new CUDARegion<DIM>(innerSet(i))));
         }
 
-        notifyPatchAccepters(
+        notifyPatchAcceptersGhostZones(
             rim(),
-            ParentType::GHOST,
             globalNanoStep());
-        notifyPatchAccepters(
+        notifyPatchAcceptersInnerSet(
             innerSet(0),
-            ParentType::INNER_SET,
             globalNanoStep());
 
         kernelBuffer = PatchBufferType1(getVolatileKernel());
         rimBuffer = PatchBufferType2(rim());
-        saveRim(globalNanoStep());
+        // fixme: we don't need this any longer, as the kernel is handled on the device
+        // saveRim(globalNanoStep());
         updateGhost();
     }
 
@@ -475,10 +545,17 @@ private:
             // 1: Prepare grid. The following update of the ghostzone will
             // destroy parts of the kernel, which is why we'll
             // save/restore those.
-            saveKernel();
+
+            // fixme: we don't need this any longer, as the kernel is handled on the device
+            // saveKernel();
+
             // We need to restore the rim since it got destroyed while the
             // kernel was updated.
-            restoreRim(false);
+
+            // fixme: we don't need this any longer, as the kernel is handled on the device
+            // restoreRim(false);
+
+            oldDeviceGrid->saveRegion(&*oldGrid, rim());
         }
 
         // 2: actual ghostzone update
@@ -487,7 +564,7 @@ private:
         std::size_t curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
-            notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
+            notifyPatchProvidersGhostZones(rim(t), globalNanoStep());
 
             {
                 TimeComputeGhost timer(&chronometer);
@@ -512,7 +589,7 @@ private:
                 ++curGlobalNanoStep;
             }
 
-            notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
+            notifyPatchAcceptersGhostZones(rim(), curGlobalNanoStep);
         }
 
         {
@@ -520,14 +597,19 @@ private:
             curNanoStep = oldNanoStep;
             curStep = oldStep;
 
-            saveRim(curGlobalNanoStep);
+            // fixme: we don't need this any longer, as the kernel is handled on the device
+            // saveRim(curGlobalNanoStep);
             if (ghostZoneWidth() % 2) {
                 std::swap(oldGrid, newGrid);
             }
 
             // 3: restore grid for kernel update
-            restoreRim(true);
-            restoreKernel();
+
+            // fixme: we don't need this any longer, as the kernel is handled on the device
+            // restoreRim(true);
+            // restoreKernel();
+
+            oldDeviceGrid->loadRegion(*oldGrid, getInnerRim());
         }
     }
 
