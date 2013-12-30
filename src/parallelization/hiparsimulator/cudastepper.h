@@ -320,7 +320,8 @@ private:
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        std::cout << "update(" << index << ")\n";
+        // fixme
+        // std::cout << "update(" << index << ")\n";
         const Region<DIM>& region = innerSet(index);
         {
             TimeComputeInner t(&chronometer);
@@ -535,7 +536,8 @@ private:
      */
     inline void updateGhost()
     {
-        std::cout << "updateGhost()\n";
+        // fixme
+        // std::cout << "updateGhost()\n";
         {
             TimeComputeGhost t(&chronometer);
 
