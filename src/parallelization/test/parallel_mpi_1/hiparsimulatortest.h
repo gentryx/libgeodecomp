@@ -163,10 +163,6 @@ public:
                  << "nextStep(200, STEERER_ALL_DONE, 0, 1)\n"
                  << "deleted\n";
 
-        std::cout << "actual:\n"
-                  << events.str() << "\n\n"
-                  << "expected:\n"
-                  << expected.str() << "\n";
         TS_ASSERT_EQUALS(events.str(), expected.str());
     }
 
