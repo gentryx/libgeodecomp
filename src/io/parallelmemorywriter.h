@@ -5,6 +5,7 @@
 
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/apitraits.h>
 
 namespace LibGeoDecomp {
 
@@ -78,7 +79,7 @@ public:
                 validRegion,
                 receiver,
                 MPILayer::PARALLEL_MEMORY_WRITER,
-                Typemaps::lookup<CELL_TYPE>());
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
         }
         if (receiver == mpiLayer.rank()) {
             Region<DIM> recvRegion;
@@ -88,7 +89,7 @@ public:
                 recvRegion,
                 sender,
                 MPILayer::PARALLEL_MEMORY_WRITER,
-                Typemaps::lookup<CELL_TYPE>());
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
         }
     }
 
