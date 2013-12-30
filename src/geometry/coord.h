@@ -36,6 +36,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
 
+    __host__ __device__
     static Coord<1> diagonal(const int& nx)
     {
         return Coord<1>(nx);
@@ -57,6 +58,7 @@ public:
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord.
      */
+    __host__ __device__
     inline Coord<1> indexToCoord(int index) const
     {
         return Coord<1>(index);
@@ -95,66 +97,79 @@ public:
         return c[i];
     }
 
+    __host__ __device__
     inline bool operator==(const Coord& comp) const
     {
         return (x() == comp.x());
     }
 
+    __host__ __device__
     inline bool operator!=(const Coord& comp) const
     {
         return (x() != comp.x());
     }
 
+    __host__ __device__
     inline bool operator<(const Coord& comp) const
     {
         return (x() < comp.x());
     }
 
+    __host__ __device__
     inline Coord operator+(const Coord& addend) const
     {
         return Coord(x() + addend.x());
     }
 
+    __host__ __device__
     inline void operator+=(const Coord& addend)
     {
         x() += addend.x();
     }
 
+    __host__ __device__
     inline void operator-=(const Coord& minuend)
     {
         x() -= minuend.x();
     }
 
+    __host__ __device__
     inline Coord operator-(const Coord& minuend) const
     {
         return Coord(x() - minuend.x());
     }
 
+    __host__ __device__
     inline Coord operator-() const
     {
         return Coord(-x());
     }
 
+    __host__ __device__
     inline Coord operator*(const int& scale) const
     {
         return Coord(scale * x());
     }
 
+    __host__ __device__
     inline int operator*(const Coord& multiplier) const
     {
         return x() * multiplier.x();
     }
 
+    __host__ __device__
     inline Coord operator/(const int& divisor) const
     {
         return Coord(x()/ divisor);
     }
 
+    __host__ __device__
     inline const int& prod() const
     {
         return x();
     }
 
+    __host__ __device__
     inline const int& sum() const
     {
         return x();
@@ -193,6 +208,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
 
+    __host__ __device__
     static Coord<2> diagonal(const int& nx)
     {
         return Coord<2>(nx, nx);
@@ -224,6 +240,7 @@ public:
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
      */
+    __host__ __device__
     inline Coord<2> indexToCoord(int index) const
     {
         return Coord<2>(index % x(), index / x());
@@ -274,68 +291,81 @@ public:
         return c[i];
     }
 
+    __host__ __device__
     inline bool operator==(const Coord& comp) const
     {
         return (x() == comp.x()) && (y() == comp.y());
     }
 
+    __host__ __device__
     inline bool operator!=(const Coord& comp) const
     {
         return (x() != comp.x()) || (y() != comp.y());
     }
 
+    __host__ __device__
     inline bool operator<(const Coord& comp) const
     {
         return (x() < comp.x()) || ((x() == comp.x()) && (y() < comp.y()));
     }
 
+    __host__ __device__
     inline Coord operator+(const Coord& addend) const
     {
         return Coord(x() + addend.x(), y() + addend.y());
     }
 
+    __host__ __device__
     inline void operator+=(const Coord& addend)
     {
         x() += addend.x();
         y() += addend.y();
     }
 
+    __host__ __device__
     inline void operator-=(const Coord& minuend)
     {
         x() -= minuend.x();
         y() -= minuend.y();
     }
 
+    __host__ __device__
     inline Coord operator-(const Coord& minuend) const
     {
         return Coord(x() - minuend.x(), y() - minuend.y());
     }
 
+    __host__ __device__
     inline Coord operator-() const
     {
         return Coord(-x(), -y());
     }
 
+    __host__ __device__
     inline Coord operator*(const int& scale) const
     {
         return Coord(scale * x(), scale * y());
     }
 
+    __host__ __device__
     inline int operator*(const Coord& multiplier) const
     {
         return x() * multiplier.x() + y() * multiplier.y();
     }
 
+    __host__ __device__
     inline Coord operator/(const int& divisor) const
     {
         return Coord(x()/ divisor, y() / divisor);
     }
 
+    __host__ __device__
     inline int prod() const
     {
         return x() * y();
     }
 
+    __host__ __device__
     inline int sum() const
     {
         return x() + y();
@@ -378,6 +408,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
 
+    __host__ __device__
     static Coord<3> diagonal(const int& nx)
     {
         return Coord<3>(nx, nx, nx);
@@ -403,6 +434,7 @@ public:
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
      */
+    __host__ __device__
     inline Coord<3> indexToCoord(int index) const
     {
         int coordX = index % x();
@@ -472,16 +504,19 @@ public:
         return c[i];
     }
 
+    __host__ __device__
     inline bool operator==(const Coord& comp) const
     {
         return (x() == comp.x()) && (y() == comp.y()) && (z() == comp.z());
     }
 
+    __host__ __device__
     inline bool operator!=(const Coord& comp) const
     {
         return (x() != comp.x()) || (y() != comp.y()) || (z() != comp.z());
     }
 
+    __host__ __device__
     inline bool operator<(const Coord& comp) const
     {
         return
@@ -490,11 +525,13 @@ public:
             ((x() == comp.x()) && (y() == comp.y()) && (z() < comp.z()));
     }
 
+    __host__ __device__
     inline Coord operator+(const Coord& addend) const
     {
         return Coord(x() + addend.x(), y() + addend.y(), z() + addend.z());
     }
 
+    __host__ __device__
     inline void operator+=(const Coord& addend)
     {
         x() += addend.x();
@@ -502,6 +539,7 @@ public:
         z() += addend.z();
     }
 
+    __host__ __device__
     inline void operator-=(const Coord& minuend)
     {
         x() -= minuend.x();
@@ -509,36 +547,43 @@ public:
         z() -= minuend.z();
     }
 
+    __host__ __device__
     inline Coord operator-(const Coord& minuend) const
     {
         return Coord(x() - minuend.x(), y() - minuend.y(), z() - minuend.z());
     }
 
+    __host__ __device__
     inline Coord operator-() const
     {
         return Coord(-x(), -y(), -z());
     }
 
+    __host__ __device__
     inline Coord operator*(const int& scale) const
     {
         return Coord(scale * x(), scale * y(), scale * z());
     }
 
+    __host__ __device__
     inline int operator*(const Coord& multiplier) const
     {
         return x() * multiplier.x() + y() * multiplier.y() + z() * multiplier.z();
     }
 
+    __host__ __device__
     inline Coord operator/(const int& divisor) const
     {
         return Coord(x()/ divisor, y() / divisor, z() / divisor);
     }
 
+    __host__ __device__
     inline int prod() const
     {
         return x() * y() * z();
     }
 
+    __host__ __device__
     inline int sum() const
     {
         return x() + y() + z();
