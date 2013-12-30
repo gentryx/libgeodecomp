@@ -36,6 +36,7 @@ public:
 
         buffer.loadRegion(source,  region);
         buffer.saveRegion(&target, region);
+        buffer.setEdge(-4711);
 
         counter = 0;
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
@@ -47,6 +48,9 @@ public:
             TS_ASSERT_EQUALS(target[*i], expected);
         }
 
+        TS_ASSERT_EQUALS(buffer.getEdge(), -4711);
+        buffer.setEdge(123);
+        TS_ASSERT_EQUALS(buffer.getEdge(), 123);
 #endif
     }
 

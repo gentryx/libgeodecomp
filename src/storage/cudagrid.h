@@ -33,8 +33,21 @@ public:
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
         box(box),
         topoDimensions(topologicalDimensions),
-        array(box.dimensions.prod())
+        array(box.dimensions.prod()),
+        edgeCellStore(1)
     {}
+
+    void setEdge(const CELL_TYPE& cell)
+    {
+        cudaMemcpy(edgeCellStore.data(), &cell, sizeof(CELL_TYPE), cudaMemcpyHostToDevice);
+    }
+
+    CELL_TYPE getEdge() const
+    {
+        CELL_TYPE cell;
+        cudaMemcpy(&cell, edgeCellStore.data(), sizeof(CELL_TYPE), cudaMemcpyDeviceToHost);
+        return cell;
+    }
 
     template<typename GRID_TYPE, typename REGION>
     void saveRegion(GRID_TYPE *target, const REGION& region) const
@@ -76,10 +89,23 @@ public:
         return array.data();
     }
 
+    __host__ __device__
+    CellType *edgeCell()
+    {
+        return edgeCellStore.data();
+    }
+
+    __host__ __device__
+    const CellType *edgeCell() const
+    {
+        return edgeCellStore.data();
+    }
+
 private:
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
     CUDAArray<CellType> array;
+    CUDAArray<CellType> edgeCellStore;
 
     std::size_t byteSize() const
     {
