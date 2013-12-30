@@ -145,11 +145,19 @@ public:
         return regions[rank].back();
     }
 
+    /**
+     * Rim describes the node's inner ghost zone and those surrounding
+     * coordinates required to update those.
+     */
     inline const Region<DIM>& rim(unsigned dist)
     {
         return ownRims[dist];
     }
 
+    /**
+     * inner set refers to that part of a node's domain which are
+     * required to update the kernel.
+     */
     inline const Region<DIM>& innerSet(unsigned dist)
     {
         return ownInnerSets[dist];
@@ -165,16 +173,29 @@ public:
         return ghostZoneWidth;
     }
 
+    /**
+     * outer rim is the union of all outer ghost zone fragments.
+     */
     inline const Region<DIM>& getOuterRim() const
     {
         return outerRim;
     }
 
+    /**
+     * The volatile kernel is the part of the kernel which may be
+     * overwritten while updating the inner ghost zone.
+     */
     inline const Region<DIM>& getVolatileKernel() const
     {
         return volatileKernel;
     }
 
+    /**
+     * The inner rim is the part of the kernel which is required for
+     * updating the own rims. Its similar to the outer ghost zone, but
+     * to the inner side. It usually includes just one stencil
+     * diameter more cells than the volatile kernel.
+     */
     inline const Region<DIM>& getInnerRim() const
     {
         return innerRim;
