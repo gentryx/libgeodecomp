@@ -1,8 +1,10 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_CUDASTEPPER_H
 
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/geometry/cudaregion.h>
+#include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/storage/updatefunctor.h>
@@ -13,24 +15,181 @@ namespace HiParSimulator {
 
 namespace CUDAStepperHelpers {
 
-__device__
-Coord<2> loadRelativeCoord(int regionIndex, int *coords, int regionSize, const Coord<2> origin)
+template<int DIM>
+class LoadAbsoluteCoord;
+
+template<>
+class LoadAbsoluteCoord<2>
 {
-    int x = coords[regionIndex + 0 * regionSize] - origin.x();
-    int y = coords[regionIndex + 1 * regionSize] - origin.y();
+public:
+    __device__
+    Coord<2> operator()(int regionIndex, int *coords, int regionSize)
+    {
+        int x = coords[regionIndex + 0 * regionSize];
+        int y = coords[regionIndex + 1 * regionSize];
 
-    return Coord<2>(x, y);
-}
+        return Coord<2>(x, y);
+    }
+};
 
-__device__
-Coord<3> loadRelativeCoord(int regionIndex, int *coords, int regionSize, const Coord<3> origin)
+template<>
+class LoadAbsoluteCoord<3>
 {
-    int x = coords[regionIndex + 0 * regionSize] - origin.x();
-    int y = coords[regionIndex + 1 * regionSize] - origin.y();
-    int z = coords[regionIndex + 2 * regionSize] - origin.z();
+public:
+    __device__
+    Coord<3> operator()(int regionIndex, int *coords, int regionSize)
+    {
+        int x = coords[regionIndex + 0 * regionSize];
+        int y = coords[regionIndex + 1 * regionSize];
+        int z = coords[regionIndex + 2 * regionSize];
 
-    return Coord<3>(x, y, z);
-}
+        return Coord<3>(x, y, z);
+    }
+};
+
+// fixme: inspect resulting PTX of this implementation and benchmark the code
+template<typename CELL_TYPE, typename TOPOLOGY, int DIM>
+class SimpleHood;
+
+template<typename CELL_TYPE, typename TOPOLOGY>
+class SimpleHood<CELL_TYPE, TOPOLOGY, 2>
+{
+public:
+    typedef typename TOPOLOGY::RawTopologyType RawTopo;
+
+    __device__
+    SimpleHood(const Coord<2> *dim, const Coord<2> *index, const CELL_TYPE *grid, const CELL_TYPE *edgeCell) :
+        dim(dim),
+        index(index),
+        grid(grid),
+        edgeCell(edgeCell)
+    {}
+
+    template<int X, int Y, int Z>
+    __device__
+    const CELL_TYPE& operator[](FixedCoord<X, Y, Z> coord) const
+    {
+        int x = index->x() + X;
+        int y = index->y() + Y;
+
+        if (x < 0) {
+            if (RawTopo::WRAP_AXIS0) {
+                x += dim->x();
+            } else {
+                return *edgeCell;
+            }
+        }
+        if (x >= dim->x()) {
+            if (RawTopo::WRAP_AXIS0) {
+                x -= dim->x();
+            } else {
+                return *edgeCell;
+            }
+        }
+
+        if (y < 0) {
+            if (RawTopo::WRAP_AXIS1) {
+                y += dim->y();
+            } else {
+                return *edgeCell;
+            }
+        }
+        if (y >= dim->y()) {
+            if (RawTopo::WRAP_AXIS1) {
+                y -= dim->y();
+            } else {
+                return *edgeCell;
+            }
+        }
+
+        return grid[(y * dim->x()) + x];
+    }
+
+
+private:
+    const Coord<2> *dim;
+    const Coord<2> *index;
+    const CELL_TYPE *grid;
+    const CELL_TYPE *edgeCell;
+};
+
+template<typename CELL_TYPE, typename TOPOLOGY>
+class SimpleHood<CELL_TYPE, TOPOLOGY, 3>
+{
+public:
+    typedef typename TOPOLOGY::RawTopologyType RawTopo;
+
+    __device__
+    SimpleHood(const Coord<3> *dim, const Coord<3> *index, const CELL_TYPE *grid, const CELL_TYPE *edgeCell) :
+        dim(dim),
+        index(index),
+        grid(grid),
+        edgeCell(edgeCell)
+    {}
+
+    template<int X, int Y, int Z>
+    __device__
+    const CELL_TYPE& operator[](FixedCoord<X, Y, Z> coord) const
+    {
+        int x = index->x() + X;
+        int y = index->y() + Y;
+        int z = index->z() + Z;
+
+        if (x < 0) {
+            if (RawTopo::WRAP_AXIS0) {
+                x += dim->x();
+            } else {
+                return *edgeCell;
+            }
+        }
+        if (x >= dim->x()) {
+            if (RawTopo::WRAP_AXIS0) {
+                x -= dim->x();
+            } else {
+                return *edgeCell;
+            }
+        }
+
+        if (y < 0) {
+            if (RawTopo::WRAP_AXIS1) {
+                y += dim->y();
+            } else {
+                return *edgeCell;
+            }
+        }
+        if (y >= dim->y()) {
+            if (RawTopo::WRAP_AXIS1) {
+                y -= dim->y();
+            } else {
+                return *edgeCell;
+            }
+        }
+
+        if (z < 0) {
+            if (RawTopo::WRAP_AXIS2) {
+                z += dim->z();
+            } else {
+                return *edgeCell;
+            }
+        }
+        if (z >= dim->z()) {
+            if (RawTopo::WRAP_AXIS2) {
+                z -= dim->z();
+            } else {
+                return *edgeCell;
+            }
+        }
+
+        return grid[(z * dim->x() * dim->y()) + (y * dim->x()) + x];
+    }
+
+
+private:
+    const Coord<3> *dim;
+    const Coord<3> *index;
+    const CELL_TYPE *grid;
+    const CELL_TYPE *edgeCell;
+};
 
 template<int DIM, typename CELL_TYPE>
 __global__
@@ -41,10 +200,30 @@ void copyKernel(CELL_TYPE *gridDataOld, CELL_TYPE *gridDataNew, int *coords, int
         return;
     }
 
-    Coord<DIM> relativeCoord = loadRelativeCoord(regionIndex, coords, regionSize, boundingBox.origin);
+    Coord<DIM> relativeCoord =
+        LoadAbsoluteCoord<DIM>()(regionIndex, coords, regionSize) - boundingBox.origin;
     int gridIndex = relativeCoord.toIndex(boundingBox.dimensions);
 
     gridDataNew[gridIndex] = gridDataOld[gridIndex];
+}
+
+template<int DIM, typename CELL_TYPE>
+__global__
+void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDataNew, int nanoStep, int *coords, int regionSize, CoordBox<DIM> boundingBox)
+{
+    int regionIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    if (regionIndex >= regionSize) {
+        return;
+    }
+
+    Coord<DIM> relativeCoord =
+        LoadAbsoluteCoord<DIM>()(regionIndex, coords, regionSize) - boundingBox.origin;
+    int gridIndex = relativeCoord.toIndex(boundingBox.dimensions);
+
+    gridDataNew[gridIndex].update(
+        SimpleHood<CELL_TYPE, typename APITraits::SelectTopology<CELL_TYPE>::Value, DIM>(
+            &boundingBox.dimensions, &relativeCoord, gridDataOld, edgeCell),
+        nanoStep);
 }
 
 }
@@ -144,23 +323,28 @@ private:
         {
             TimeComputeInner t(&chronometer);
 
-            UpdateFunctor<CELL_TYPE>()(
-                region,
-                Coord<DIM>(),
-                Coord<DIM>(),
-                *oldGrid,
-                &*dummyGrid,
-                curNanoStep);
+            // fixme:
+            // UpdateFunctor<CELL_TYPE>()(
+            //     region,
+            //     Coord<DIM>(),
+            //     Coord<DIM>(),
+            //     *oldGrid,
+            //     &*dummyGrid,
+            //     curNanoStep);
 
-            oldDeviceGrid->loadRegion(*dummyGrid, region);
+            oldDeviceGrid->loadRegion(*oldGrid, region);
             {
                 CUDARegion<DIM> cudaRegion(region);
                 // fixme: choose grid-/blockDim in a better way
                 dim3 gridDim(512);
                 dim3 blockDim(32);
-                CUDAStepperHelpers::copyKernel<<<gridDim, blockDim>>>(
-                    oldDeviceGrid->data(), newDeviceGrid->data(),
-                    cudaRegion.data(), region.size(),
+                CUDAStepperHelpers::updateKernel<<<gridDim, blockDim>>>(
+                    oldDeviceGrid->data(),
+                    oldDeviceGrid->edgeCell(),
+                    newDeviceGrid->data(),
+                    curNanoStep,
+                    cudaRegion.data(),
+                    region.size(),
                     oldDeviceGrid->boundingBox());
             }
             newDeviceGrid->saveRegion(&*newGrid,  region);
