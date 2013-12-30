@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_STORAGE_ALIGNEDALLOCATOR_H
 
 #ifdef __APPLE__
+#include <cstddef>
 #include <stdlib.h>
 #else
 #include <malloc.h>
