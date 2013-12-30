@@ -49,9 +49,9 @@ public:
         // ensure setRegion() has actually been called
         TS_ASSERT(!region.empty());
 
-        // lastCall should have been true if we've switche time steps.
-        // But only if we werent initializing before (or are now
-        // finishing up). Hence the even check...
+        // lastCall should have been true if we've switched time
+        // steps. But only if we weren't initializing before (or are
+        // now finishing up). Hence the event check...
         if (lastEvent == event) {
             TS_ASSERT_EQUALS(previousLastCall, (lastStep != step));
         }
