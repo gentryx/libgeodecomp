@@ -66,19 +66,18 @@ public:
     void testUpdate()
     {
         typedef CUDAUpdateTestCell CellType;
-        int ioPeriod = 1;
+        int ioPeriod = 10;
         Coord<2> dim(20, 10);
-        int maxT = 5;
+        int maxT = 300;
         HiParSimulator<CellType, RecursiveBisectionPartition<2>, CUDAStepper<CellType> > sim(
             new CUDAUpdateInitializer(dim, maxT));
         ParallelMemoryWriter<CellType> *writer = new ParallelMemoryWriter<CellType>(ioPeriod);
         sim.addWriter(writer);
         sim.run();
 
-        for (int i = 0; i < (maxT + 1); ++i) {
+        for (int t = 0; t <= maxT; t += ioPeriod) {
             for (int y = 0; y < dim.y(); ++y) {
                 for (int x = 0; x < dim.x(); ++x) {
-                    int t = i * ioPeriod;
                     int actual = writer->getGrid(t).get(Coord<2>(x, y)).counter;
                     int expected = y * 1000000 + x * 1000 + t;
 
