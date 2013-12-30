@@ -85,6 +85,7 @@ public:
                 initializer->gridDimensions(),
                 mpiLayer.rank(),
                 false));
+
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
             new SteererAdapterType(
                 steererPointer,

@@ -16,6 +16,8 @@ public:
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
     static const int DIM = Topology::DIM;
 
+    using PatchProvider<GRID_TYPE>::storedNanoSteps;
+
     SteererAdapter(
         boost::shared_ptr<Steerer<CELL_TYPE> > steerer,
         const std::size_t firstStep,
@@ -29,7 +31,17 @@ public:
         rank(rank),
         lastCall(lastCall),
         globalGridDimensions(globalGridDimensions)
-    {}
+    {
+        std::size_t firstRegularEventStep = firstStep;
+        std::size_t period = steerer->getPeriod();
+        std::size_t offset = firstStep % period;
+        firstRegularEventStep = firstStep + period - offset;
+
+        // fixme: make tests work with the following line enabled (ATM steerers never get the STEERER_INITIALIZED event from us if firstStep is not a multiple of period()
+        // storedNanoSteps << firstNanoStep;
+        storedNanoSteps << firstRegularEventStep * NANO_STEPS;
+        storedNanoSteps << lastNanoStep;
+    }
 
     virtual void setRegion(const Region<DIM>& region)
     {
@@ -44,20 +56,23 @@ public:
     {
         std::size_t nanoStep = globalNanoStep % NANO_STEPS;
         if (nanoStep != 0) {
-            return;
+            throw std::logic_error(
+                "SteererAdapter expects to be called only at the beginning of a time step (nanoStep == 0)");
         }
 
         std::size_t step = globalNanoStep / NANO_STEPS;
-        if (step % steerer->getPeriod() != 0) {
-            return;
-        }
 
         SteererEvent event = STEERER_NEXT_STEP;
-        if (nanoStep == firstNanoStep) {
+        if (globalNanoStep == firstNanoStep) {
             event = STEERER_INITIALIZED;
         }
-        if (nanoStep == lastNanoStep) {
+        if (globalNanoStep == lastNanoStep) {
             event = STEERER_ALL_DONE;
+        }
+
+        if ((event == STEERER_NEXT_STEP) && (step % steerer->getPeriod() != 0)) {
+            throw std::logic_error("SteererAdapter called at wrong step (got " + StringOps::itoa(step) +
+                                   " but expected multiple of " + StringOps::itoa(steerer->getPeriod()));
         }
 
         typename Steerer<CELL_TYPE>::SteererFeedback feedback;
@@ -71,6 +86,11 @@ public:
             rank,
             lastCall,
             &feedback);
+
+        if ((event != STEERER_INITIALIZED) && remove) {
+            storedNanoSteps.erase(globalNanoStep);
+            storedNanoSteps << globalNanoStep + NANO_STEPS * steerer->getPeriod();
+        }
 
         // fixme: apply SteererFeedback!
     }

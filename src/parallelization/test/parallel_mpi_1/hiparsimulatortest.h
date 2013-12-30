@@ -154,12 +154,19 @@ public:
 
         std::stringstream expected;
         expected << "created, period = 5\n";
-        for (int i = 25; i <= 200; i += 5) {
-            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 0)\n";
-            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
+        for (int i = 25; i < 200; i += 5) {
+            expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 0)\n"
+                     << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
         }
-        expected << "deleted\n";
 
+        expected << "nextStep(200, STEERER_ALL_DONE, 0, 0)\n"
+                 << "nextStep(200, STEERER_ALL_DONE, 0, 1)\n"
+                 << "deleted\n";
+
+        std::cout << "actual:\n"
+                  << events.str() << "\n\n"
+                  << "expected:\n"
+                  << expected.str() << "\n";
         TS_ASSERT_EQUALS(events.str(), expected.str());
     }
 

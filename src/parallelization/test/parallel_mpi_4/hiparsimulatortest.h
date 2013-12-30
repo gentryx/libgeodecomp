@@ -139,11 +139,14 @@ public:
 
         std::stringstream expected;
         expected << "created, period = 5\n";
-        for (int i = 25; i <= 101; i += 5) {
+        for (int i = 25; i < 101; i += 5) {
             expected << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "0)\n"
                      << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "1)\n";
         }
-        expected << "deleted\n";
+
+        expected << "nextStep(101, STEERER_ALL_DONE, " << MPILayer().rank() << ", " << "0)\n"
+                 << "nextStep(101, STEERER_ALL_DONE, " << MPILayer().rank() << ", " << "1)\n"
+                 << "deleted\n";
 
         TS_ASSERT_EQUALS(events.str(), expected.str());
     }
