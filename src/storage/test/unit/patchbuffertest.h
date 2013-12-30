@@ -57,18 +57,28 @@ public:
         // check that an empty region causes no changes at all
         PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);
-        for (int i = 0; i < 4; ++i)
+        patchBuffer.pushRequest(2);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), -1);
+
+        for (int i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, i);
+        }
         compGrid = zeroGrid;
+
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), 0);
         patchBuffer.get(&compGrid, validRegion, 0);
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), 2);
+        patchBuffer.get(&compGrid, validRegion, 2);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), -1);
 
         // check that we can copy out regions multiple times
         patchBuffer = PatchBufferType(region1);
         patchBuffer.pushRequest(2);
         patchBuffer.pushRequest(3);
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, i);
+        }
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, 2, false);
         TS_ASSERT_EQUALS(testGrid1, compGrid);
@@ -77,7 +87,7 @@ public:
         TS_ASSERT_EQUALS(testGrid1, compGrid);
 
         // this is actually ugly: by changing the region, the copy out
-        // targets different coordinated than the original
+        // targets different coordinates than the original
         // storage. but it should just work.
         patchBuffer.region = region2;
         compGrid = zeroGrid;
@@ -87,8 +97,9 @@ public:
         // just another normal retrieval
         patchBuffer.region = region2;
         patchBuffer.pushRequest(1);
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, i);
+        }
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, 1);
         TS_ASSERT_EQUALS(testGrid2, compGrid);

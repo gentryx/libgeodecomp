@@ -31,8 +31,6 @@ public:
         // empty as most implementations won't need it anyway.
     }
 
-    // fixme: add nextRequiredNanoStep() to let steppers check if PatchProviders need to modify the grid
-
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
@@ -51,6 +49,15 @@ public:
         this->get(destinationGrid, patchableRegion, nanoStep, remove);
     }
 #endif
+
+    virtual std::size_t nextAvailableNanoStep() const
+    {
+        if (storedNanoSteps.empty()) {
+            return -1;
+        }
+
+        return *storedNanoSteps.begin();
+    }
 
 protected:
     std::set<std::size_t> storedNanoSteps;

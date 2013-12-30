@@ -39,10 +39,12 @@ public:
         region2 << Streak<2>(Coord<2>(0, 0), 2);
         region2 << Streak<2>(Coord<2>(4, 1), 7);
 
-        for (Region<2>::Iterator i = region1.begin(); i != region1.end(); ++i)
+        for (Region<2>::Iterator i = region1.begin(); i != region1.end(); ++i) {
             testGrid1[*i] = i->y() * 10 + i->x();
-        for (Region<2>::Iterator i = region2.begin(); i != region2.end(); ++i)
+        }
+        for (Region<2>::Iterator i = region2.begin(); i != region2.end(); ++i) {
             testGrid2[*i] = i->y() * 10 + i->x();
+        }
 
         Region<2>::Iterator j = region1.begin();
         for (Region<2>::Iterator i = region2.begin();
@@ -58,8 +60,9 @@ public:
         // check that an empty region causes no changes at all
         PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, i);
+        }
         compGrid = zeroGrid;
         patchBuffer.get(&compGrid, validRegion, 0);
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
