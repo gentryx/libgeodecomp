@@ -1,15 +1,15 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_HINDEXINGPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_HINDEXINGPARTITION_H
 
-#include <boost/assign/std/vector.hpp>
-#include <boost/multi_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <boost/assign/std/vector.hpp>
+#include <boost/multi_array.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace boost::assign;
 
