@@ -1,17 +1,20 @@
 #ifndef LIBGEODECOMP_GEOMETRY_COORD_H
 #define LIBGEODECOMP_GEOMETRY_COORD_H
 
+#include <string>
+#include <stdlib.h>
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/config.hpp>
+#endif
+
+#include <libgeodecomp/geometry/fixedcoord.h>
+
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)
 #ifndef __CODEGEARC__
 #include <boost/multi_array.hpp>
 #endif
-
-#include <string>
-#include <stdlib.h>
-#include <libgeodecomp/config.h>
-#include <libgeodecomp/geometry/fixedcoord.h>
-
 #ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #endif
