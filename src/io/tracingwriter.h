@@ -21,7 +21,6 @@ class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
 public:
     friend class Serialization;
-    friend class boost::serialization::access;
     using Writer<CELL_TYPE>::NANO_STEPS;
 
     typedef boost::posix_time::ptime Time;
