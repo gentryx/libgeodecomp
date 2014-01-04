@@ -39,15 +39,16 @@ public:
 
 }
 
-
 /**
  * APITraits contains a set of classes which can be used to
  * describe/discover the interface between a user-supplied model (cell
- * class) and LibGeoDecomp. More specifically, a cell exports a class
- * named API which derives from certail child classes of APITraits
- * to allow Simulators and the UpdateFunctor to discover its
- * properties (e.g. number of nano steps, stencil shape, signature and
- * flavor of update() functions...).
+ * class) and LibGeoDecomp. Examples of how to use these can be found
+ * in src/examples/
+ *
+ * A cell exports a class named API which derives from certail child
+ * classes of APITraits to allow Simulators and the UpdateFunctor to
+ * discover its properties (e.g. number of nano steps, stencil shape,
+ * signature and flavor of update() functions...).
  *
  * These classes generally come in pairs: for any feature "foo bar"
  * there is a class HasFooBar which can be derived from by a Cell::API
