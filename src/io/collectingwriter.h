@@ -27,7 +27,7 @@ public:
         unsigned period = 1,
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD,
-        MPI_Datatype mpiDatatype = Typemaps::lookup<CELL_TYPE>()) :
+        MPI_Datatype mpiDatatype = APITraits::SelectMPIDataType<CELL_TYPE>::value()) :
         ParallelWriter<CELL_TYPE>("",  period),
         writer(writer),
         mpiLayer(communicator),

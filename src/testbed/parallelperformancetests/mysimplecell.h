@@ -8,8 +8,6 @@ namespace LibGeoDecomp {
 class MySimpleCell
 {
 public:
-    friend class Typemaps;
-
     class API :
         public APITraits::HasCubeTopology<3>,
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
