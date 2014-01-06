@@ -20,12 +20,12 @@ public:
         Partition<DIM>(offset, weights),
         origin(origin),
         dimensions(dimensions)
-    {}
+    {
+        nodeGridDim = getNodeGridDim(weights.size());
+    }
 
     Region<DIM> getRegion(const std::size_t node) const
     {
-
-        Coord<DIM> nodeGridDim = getNodeGridDim(weights.size());
         Coord<DIM> logicalCoord(node % nodeGridDim.x(),
                                (node % (nodeGridDim.x() * nodeGridDim.y()))/ nodeGridDim.x());
         if (DIM > 2){
@@ -46,6 +46,7 @@ public:
 private:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
+    Coord<DIM> nodeGridDim;
 
     Coord<DIM> getNodeGridDim(const std::size_t totalNodes) const
     {
