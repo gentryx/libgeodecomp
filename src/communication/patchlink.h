@@ -4,7 +4,6 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_MPI
 
-#include <climits>
 #include <deque>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/storage/patchaccepter.h>
@@ -30,7 +29,6 @@ public:
     typedef typename SerializationBuffer<CellType>::FixedSize FixedSize;
 
     const static int DIM = GRID_TYPE::DIM;
-    const static std::size_t ENDLESS = -1;
 
     class Link
     {
@@ -106,6 +104,7 @@ public:
         using Link::tag;
         using Link::wait;
         using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
+        using PatchAccepter<GRID_TYPE>::infinity;
         using PatchAccepter<GRID_TYPE>::pushRequest;
         using PatchAccepter<GRID_TYPE>::requestedNanoSteps;
 
@@ -141,7 +140,7 @@ public:
             mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
 
             std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
-            if ((lastNanoStep == ENDLESS) ||
+            if ((lastNanoStep == infinity()) ||
                 (nextNanoStep < lastNanoStep)) {
                 requestedNanoSteps << nextNanoStep;
             }
@@ -183,6 +182,7 @@ public:
         using Link::tag;
         using Link::wait;
         using PatchProvider<GRID_TYPE>::checkNanoStepGet;
+        using PatchProvider<GRID_TYPE>::infinity;
         using PatchProvider<GRID_TYPE>::storedNanoSteps;
 
         inline
@@ -230,7 +230,7 @@ public:
             GridVecConv::vectorToGrid(buffer, grid, region);
 
             std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
-            if ((lastNanoStep == ENDLESS) ||
+            if ((lastNanoStep == infinity()) ||
                 (nextNanoStep < lastNanoStep)) {
                 recv(nextNanoStep);
             }

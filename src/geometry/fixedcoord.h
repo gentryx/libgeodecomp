@@ -1,6 +1,8 @@
 #ifndef LIBGEODECOMP_GEOMETRY_FIXEDCOORD_H
 #define LIBGEODECOMP_GEOMETRY_FIXEDCOORD_H
 
+#include <libgeodecomp/misc/cudautil.h>
+
 namespace LibGeoDecomp {
 
 /**
@@ -15,6 +17,10 @@ public:
     static const int X = DIM_X;
     static const int Y = DIM_Y;
     static const int Z = DIM_Z;
+
+    __host__ __device__
+    inline FixedCoord()
+    {}
 };
 
 }

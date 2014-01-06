@@ -28,8 +28,14 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    __device__ __host__
     void update(const NEIGHBORHOOD& hood, int)
+    {
+        counter = hood[FixedCoord<0, 0, 0>()].counter + 1;
+    }
+
+    template<typename NEIGHBORHOOD>
+    __device__
+    void updateCUDA(const NEIGHBORHOOD& hood, int)
     {
         counter = hood[FixedCoord<0, 0, 0>()].counter + 1;
     }

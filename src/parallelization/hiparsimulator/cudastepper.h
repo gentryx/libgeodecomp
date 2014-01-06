@@ -222,7 +222,7 @@ void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDa
         LoadAbsoluteCoord<DIM>()(regionIndex, coords, regionSize) - boundingBox.origin;
     int gridIndex = relativeCoord.toIndex(boundingBox.dimensions);
 
-    gridDataNew[gridIndex].update(
+    gridDataNew[gridIndex].updateCUDA(
         SimpleHood<CELL_TYPE, typename APITraits::SelectTopology<CELL_TYPE>::Value, DIM>(
             &boundingBox.dimensions, &relativeCoord, gridDataOld, edgeCell),
         nanoStep);
@@ -496,7 +496,7 @@ private:
         newDeviceGrid->setEdge(oldGrid->getEdgeCell());
 
         deviceInnerSets.resize(0);
-        for (int i = 0; i <= ghostZoneWidth(); ++i) {
+        for (std::size_t i = 0; i <= ghostZoneWidth(); ++i) {
             deviceInnerSets.push_back(
                 boost::shared_ptr<CUDARegion<DIM> >(
                     new CUDARegion<DIM>(innerSet(i))));

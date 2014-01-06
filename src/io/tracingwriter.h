@@ -98,7 +98,6 @@ private:
             break;
         default:
             throw std::invalid_argument("unknown event");
-            break;
         }
     }
 

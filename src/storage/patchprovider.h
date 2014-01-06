@@ -5,6 +5,8 @@
 #include <hpx/lcos/local/spinlock.hpp>
 #endif
 
+#include <limits>
+
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringops.h>
@@ -23,6 +25,11 @@ class PatchProvider
 public:
     typedef typename GRID_TYPE::CellType CellType;
     const static int DIM = GRID_TYPE::DIM;
+
+    static inline std::size_t infinity()
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
 
     virtual ~PatchProvider() {};
 
@@ -53,7 +60,7 @@ public:
     virtual std::size_t nextAvailableNanoStep() const
     {
         if (storedNanoSteps.empty()) {
-            return -1;
+            return infinity();
         }
 
         return *storedNanoSteps.begin();
@@ -70,10 +77,9 @@ protected:
 
         if ((min)(storedNanoSteps) != nanoStep) {
             throw std::logic_error(
-                std::string(
-                    "requested time step doesn't match expected nano step.")
-                + " expected: " + StringOps::itoa((min)(storedNanoSteps))
-                + " is: " + StringOps::itoa(nanoStep));
+                std::string("requested time step doesn't match expected nano step.") +
+                " expected: " + StringOps::itoa((min)(storedNanoSteps)) +
+                " is: " + StringOps::itoa(nanoStep));
         }
     }
 };

@@ -188,8 +188,8 @@ public:
         }
 
         for (int i = 0; i < mpiLayer.size() - 1; ++i) {
-            accepters[i]->charge(0, PatchLink<GridType>::ENDLESS, stride);
-            providers[i]->charge(0, PatchLink<GridType>::ENDLESS, stride);
+            accepters[i]->charge(0, PatchAccepter<GridType>::infinity(), stride);
+            providers[i]->charge(0, PatchProvider<GridType>::infinity(), stride);
         }
 
         for (std::size_t nanoStep = 0; nanoStep < maxNanoSteps; nanoStep += stride) {

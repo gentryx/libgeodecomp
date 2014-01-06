@@ -22,7 +22,6 @@ class PatchLink
 {
 public:
     const static int DIM = GRID_TYPE::DIM;
-    const static int ENDLESS = -1;
 
     typedef typename GRID_TYPE::CellType CellType;
     typedef std::vector<CellType> BufferType;

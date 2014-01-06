@@ -111,7 +111,7 @@ public:
             );
 
         partitionManager->resetGhostZones(initData.boundingBoxes);
-        
+
         long firstSyncPoint =
             initializer->startStep() * NANO_STEPS + ghostZoneWidth;
 
@@ -127,7 +127,7 @@ public:
                         i->second.back()));
                 link->charge(
                     firstSyncPoint,
-                    PatchLink<GridType, ClientType>::ENDLESS,
+                    PatchLink<GridType, ClientType>::infinity(),
                     ghostZoneWidth);
 
                 patchlinkProviderMap.insert(std::make_pair(i->first, link));
