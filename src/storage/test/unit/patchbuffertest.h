@@ -58,19 +58,19 @@ public:
         PatchBufferType patchBuffer(region0);
         patchBuffer.pushRequest(0);
         patchBuffer.pushRequest(2);
-        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), -1);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), PatchAccepter<GridType>::infinity());
 
         for (int i = 0; i < 4; ++i) {
             patchBuffer.put(baseGrid, validRegion, i);
         }
         compGrid = zeroGrid;
 
-        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), 0);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), std::size_t(0));
         patchBuffer.get(&compGrid, validRegion, 0);
         TS_ASSERT_EQUALS(zeroGrid, compGrid);
-        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), 2);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), std::size_t(2));
         patchBuffer.get(&compGrid, validRegion, 2);
-        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), -1);
+        TS_ASSERT_EQUALS(patchBuffer.nextAvailableNanoStep(), PatchAccepter<GridType>::infinity());
 
         // check that we can copy out regions multiple times
         patchBuffer = PatchBufferType(region1);
