@@ -96,6 +96,40 @@ public:
             }
         }
     }
+
+    void test3DwithNonEvenDivisions()
+    {
+        Coord<3> origin(10, 20, 30);
+        Coord<3> dimensions(29, 31, 37);
+        std::vector<std::size_t> weights;
+        for (int i = 0; i < 400; ++i) {
+            weights << 1;
+        }
+
+        CheckerboardingPartition<3> p(origin, dimensions, 0, weights);
+
+        for (int z = 0; z < 10; ++z) {
+            for (int y = 0; y < 8; ++y) {
+                for (int x = 0; x < 5; ++x) {
+                    Region<3> expected;
+                    int xStart = (x + 0) * dimensions.x() / 5;
+                    int xEnd   = (x + 1) * dimensions.x() / 5;
+                    int yStart = (y + 0) * dimensions.y() / 8;
+                    int yEnd   = (y + 1) * dimensions.y() / 8;
+                    int zStart = (z + 0) * dimensions.z() / 10;
+                    int zEnd   = (z + 1) * dimensions.z() / 10;
+                    Coord<3> upperLeftFrontCorner(xStart, yStart, zStart);
+                    Coord<3> lowerRightRearCorner(xEnd,   yEnd,   zEnd);
+
+                    expected << CoordBox<3>(
+                        origin + upperLeftFrontCorner,
+                        lowerRightRearCorner - upperLeftFrontCorner);
+
+                    TS_ASSERT_EQUALS(expected, p.getRegion(z * 5 * 8 + y * 5 + x));
+                }
+            }
+        }
+    }
 };
 
 }

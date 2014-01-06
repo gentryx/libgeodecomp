@@ -108,7 +108,7 @@ private:
 
         primes.push_back(2);
 
-        for (std::size_t i = 3; i <= sqrt(limit); i += 2) {
+        for (std::size_t i = 3; i <= limit; i += 2) {
             std::vector<std::size_t>::iterator iter = primes.begin();
             for (; iter != primes.end(); ++iter) {
                 if ((i % *iter) == 0) {
