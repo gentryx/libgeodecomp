@@ -76,6 +76,26 @@ public:
         TS_ASSERT_EQUALS(expected3, p.getRegion(3));
     }
 
+    void test2DwithMoreNodesAndOffset()
+    {
+        Coord<2> origin(10, 20);
+        Coord<2> dimensions(32, 25);
+        std::vector<std::size_t> weights;
+        for (int i = 0; i < 20; ++i) {
+            weights << 1;
+        }
+
+        CheckerboardingPartition<2> p(origin, dimensions, 0, weights);
+
+        for (int y = 0; y < 5; ++y) {
+            for (int x = 0; x < 4; ++x) {
+                Region<2> expected;
+                expected << CoordBox<2>(origin + Coord<2>(x * 8, y * 5), Coord<2>(8, 5));
+
+                TS_ASSERT_EQUALS(expected, p.getRegion(y * 4 + x));
+            }
+        }
+    }
 };
 
 }
