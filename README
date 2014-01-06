@@ -68,6 +68,12 @@ DIRECTORY LAYOUT
   in src/foo/myclass.h and src/foo/test/parallel_mpi_X/myclasstest.h
   for parallel tests with X ranks. Subdirectories are:
 
+  - libgeodecomp/src/communication/
+    -------------------------------
+    All classes which are involved in moving data between processes.
+    Is also home to auxiliary files, e.g. to help with MPI data type
+    generation or Boost.Serialization.
+
   - libgeodecomp/src/examples/
     --------------------------
     Sample applications which explain basic and advanced usage of the
@@ -76,6 +82,11 @@ DIRECTORY LAYOUT
   - libgeodecomp/src/fixtures/
     --------------------------
     Test rig referenced by all unit tests.
+
+  - libgeodecomp/src/geometry/
+    --------------------------
+    All classes which are related to domain decomposition and spatial
+    addressing (e.g. stencils and coordinates).
 
   - libgeodecomp/src/io/
     --------------------
@@ -96,14 +107,7 @@ DIRECTORY LAYOUT
   - libgeodecomp/src/misc/
     ----------------------
     Assorted classes which don't fit into other categories, yet don't
-    qualify for a dedicated directory of their own. FIXME: this
-    directory is ATM too large and should be split into src/geometry,
-    src/grid, and src/misc.
-
-  - libgeodecomp/src/mpilayer/
-    --------------------------
-    Contains the MPI typemaps as well as a thin convenience layer over
-    MPI, dubbed MPILayer.
+    qualify for a dedicated directory of their own.
 
   - libgeodecomp/src/parallelization/
     ---------------------------------
@@ -113,6 +117,12 @@ DIRECTORY LAYOUT
     HpxSimulator. It sports a hierarchical parallelization, very
     similar to HiParSimulator. Both currently represent our best
     multi-node parallelizations.
+
+  - libgeodecomp/src/storage/
+    -------------------------
+    Classes related to in memory storage and access to simulation
+    data. This includes grid classes as well as implementations of the
+    neighborhood concept and adapters for other memory layouts.
 
   - libgeodecomp/src/testbed/
     -------------------------

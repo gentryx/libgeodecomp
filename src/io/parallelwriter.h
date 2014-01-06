@@ -55,7 +55,7 @@ public:
     }
 
     virtual ~ParallelWriter()
-    {};
+    {}
 
     /**
      * "Virtual Copy constructor"

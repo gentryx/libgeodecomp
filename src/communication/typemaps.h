@@ -17,7 +17,6 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/streak.h>
@@ -40,7 +39,6 @@ extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_1_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_2_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_3_;
 extern MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER;
-extern MPI_Datatype MPI_LIBGEODECOMP_MYSIMPLECELL;
 extern MPI_Datatype MPI_LIBGEODECOMP_STREAK_1_;
 extern MPI_Datatype MPI_LIBGEODECOMP_STREAK_2_;
 extern MPI_Datatype MPI_LIBGEODECOMP_STREAK_3_;
@@ -84,7 +82,6 @@ private:
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoord_2_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoord_3_();
     static MPI_Datatype generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper();
-    static MPI_Datatype generateMapLibGeoDecomp_MySimpleCell();
     static MPI_Datatype generateMapLibGeoDecomp_Streak_1_();
     static MPI_Datatype generateMapLibGeoDecomp_Streak_2_();
     static MPI_Datatype generateMapLibGeoDecomp_Streak_3_();
@@ -244,11 +241,6 @@ public:
     static inline MPI_Datatype lookup(LibGeoDecomp::FloatCoordMPIDatatypeHelper*)
     {
         return MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER;
-    }
-
-    static inline MPI_Datatype lookup(LibGeoDecomp::MySimpleCell*)
-    {
-        return MPI_LIBGEODECOMP_MYSIMPLECELL;
     }
 
     static inline MPI_Datatype lookup(LibGeoDecomp::Streak<1 >*)

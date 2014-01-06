@@ -137,7 +137,7 @@ public:
                 transmissionRegion,
                 1,
                 666,
-                Typemaps::lookup<CELL_TYPE>());
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
             provider.charge(1234, maxNanoStep, 1000);
 
             {
@@ -153,7 +153,7 @@ public:
                 transmissionRegion,
                 0,
                 666,
-                Typemaps::lookup<CELL_TYPE>());
+                APITraits::SelectMPIDataType<CELL_TYPE>::value());
             accepter.charge(1234, maxNanoStep, 1000);
 
             for (int i = 1234; i <= maxNanoStep; i += 1000) {

@@ -16,7 +16,6 @@ MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_1_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_2_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORD_3_;
 MPI_Datatype MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER;
-MPI_Datatype MPI_LIBGEODECOMP_MYSIMPLECELL;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_1_;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_2_;
 MPI_Datatype MPI_LIBGEODECOMP_STREAK_3_;
@@ -502,43 +501,6 @@ Typemaps::generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper() {
 }
 
 MPI_Datatype
-Typemaps::generateMapLibGeoDecomp_MySimpleCell() {
-    char fakeObject[sizeof(LibGeoDecomp::MySimpleCell)];
-    LibGeoDecomp::MySimpleCell *obj = (LibGeoDecomp::MySimpleCell*)fakeObject;
-
-    const int count = 1;
-    int lengths[count];
-
-    // sort addresses in ascending order
-    MemberSpec rawSpecs[] = {
-        MemberSpec(getAddress(&obj->temp), lookup<double >(), 1)
-    };
-    std::sort(rawSpecs, rawSpecs + count, addressLower);
-
-    // split addresses from member types
-    MPI_Aint displacements[count];
-    MPI_Datatype memberTypes[count];
-    for (int i = 0; i < count; i++) {
-        displacements[i] = rawSpecs[i].address;
-        memberTypes[i] = rawSpecs[i].type;
-        lengths[i] = rawSpecs[i].length;
-    }
-
-    // transform absolute addresses into offsets
-    for (int i = count-1; i > 0; i--) {
-        displacements[i] -= displacements[0];
-    }
-    displacements[0] = 0;
-
-    // create datatype
-    MPI_Datatype objType;
-    MPI_Type_create_struct(count, lengths, displacements, memberTypes, &objType);
-    MPI_Type_commit(&objType);
-
-    return objType;
-}
-
-MPI_Datatype
 Typemaps::generateMapLibGeoDecomp_Streak_1_() {
     char fakeObject[sizeof(LibGeoDecomp::Streak<1 >)];
     LibGeoDecomp::Streak<1 > *obj = (LibGeoDecomp::Streak<1 >*)fakeObject;
@@ -911,7 +873,6 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_FLOATCOORD_2_ = generateMapLibGeoDecomp_FloatCoord_2_();
     MPI_LIBGEODECOMP_FLOATCOORD_3_ = generateMapLibGeoDecomp_FloatCoord_3_();
     MPI_LIBGEODECOMP_FLOATCOORDMPIDATATYPEHELPER = generateMapLibGeoDecomp_FloatCoordMPIDatatypeHelper();
-    MPI_LIBGEODECOMP_MYSIMPLECELL = generateMapLibGeoDecomp_MySimpleCell();
     MPI_LIBGEODECOMP_STREAK_1_ = generateMapLibGeoDecomp_Streak_1_();
     MPI_LIBGEODECOMP_STREAK_2_ = generateMapLibGeoDecomp_Streak_2_();
     MPI_LIBGEODECOMP_STREAK_3_ = generateMapLibGeoDecomp_Streak_3_();

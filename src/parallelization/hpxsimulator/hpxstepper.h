@@ -203,26 +203,21 @@ private:
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
-        TimePatchAccepters t(&chronometer);
+        TimePatchProviders t(&chronometer);
 
-        /*
         std::vector<hpx::future<void> > patchProvidersFutures;
         patchProvidersFutures.reserve(patchProviders[patchType].size());
-        */
-        /*
         void (PatchProvider<GridType>::*get)(
             GridType*,
             const Region<DIM>&,
             const std::size_t,
             hpx::lcos::local::spinlock&,
             bool) = &PatchProvider<GridType>::get;
-        */
 
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
              i != patchProviders[patchType].end();
              ++i) {
-            /*
                 patchProvidersFutures.push_back(
                     hpx::async(
                         hpx::util::bind(
@@ -236,11 +231,12 @@ private:
                         )
                     )
                 );
-            */
+            /*
             (*i)->get(&*oldGrid, region, nanoStep, gridMutex, true);
+            */
         }
 
-        //hpx::wait_all(patchProvidersFutures);
+        hpx::wait_all(patchProvidersFutures);
     }
 
     inline std::size_t globalNanoStep() const

@@ -51,7 +51,7 @@ double MyFancyDummyCell::staticData;
 
 namespace LibGeoDecomp {
 
-class CellAPITraitsTest : public CxxTest::TestSuite
+class APITraitsTest : public CxxTest::TestSuite
 {
 public:
     void setUp()

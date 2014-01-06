@@ -56,7 +56,7 @@ public:
     }
 
     virtual ~Writer()
-    {};
+    {}
 
     /**
      * is called back from sim after each simulation step. event
