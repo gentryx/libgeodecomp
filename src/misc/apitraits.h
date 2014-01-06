@@ -460,6 +460,90 @@ public:
         typedef STATIC_DATA StaticData;
     };
 
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_THREADED_UPDATE = void>
+    class SelectThreadedUpdate
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectThreadedUpdate<CELL, typename CELL::API::SupportsThreadedUpdate>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Some models (e.g. n-body codes) are so compute intensive, that
+     * it may be advisable to use multiple threads for updating a
+     * single cell -- as opposed to using multiple threads for dijunct
+     * regions of the grid. This trait can be used to tell
+     * LibGeoDecomp which threading strategy should be used. The model
+     * is responsible to provide a suitable implementation (e.g. based
+     * on OpenMP or HPX). On CUDA each cell will get its own thread
+     * block.
+     */
+    class HasThreadedUpdate
+    {
+    public:
+        typedef void SupportsThreadedUpdate;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_SEPARATE_CUDA_UPDATE = void>
+    class SelectSeparateCUDAUpdate
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectSeparateCUDAUpdate<CELL, typename CELL::API::SupportsSeparateCUDAUpdate>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Sometime cells may need to roll different code on CUDA than on
+     * the CPU. This trait will make the update functor call
+     * updateCUDA() instead of update() when running on the GPU.
+     */
+    class HasSeparateCUDAUpdate
+    {
+    public:
+        typedef void SupportsSeparateCUDAUpdate;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * This is just an empty template for adding new traits.
+     *
+     */
+    // template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    // class SelectTemplateName
+    // {
+    // public:
+    //     typedef FalseType Value;
+    // };
+
+    // template<typename CELL>
+    // class SelectTemplateName<CELL, typename CELL::API::SupportsTemplateName>
+    // {
+    // public:
+    //     typedef TrueType Value;
+    // };
+
+    // class HasTemplateName
+    // {
+    // public:
+    //     typedef void SupportsTemplateName;
+    // };
 };
 
 }
