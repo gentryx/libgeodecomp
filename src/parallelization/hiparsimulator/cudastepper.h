@@ -397,7 +397,6 @@ private:
         if (!copyRequired) {
             return;
         }
-        std::cout << "copy out for PatchAccepters at nanoStep " << nanoStep << "\n";
         oldDeviceGrid->saveRegion(&*oldGrid, region);
 
         for (typename ParentType::PatchAccepterList::iterator i =
