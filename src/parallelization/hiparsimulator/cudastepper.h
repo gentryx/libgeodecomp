@@ -195,7 +195,8 @@ template<int DIM, typename CELL_TYPE>
 __global__
 void copyKernel(CELL_TYPE *gridDataOld, CELL_TYPE *gridDataNew, int *coords, int regionSize, CoordBox<DIM> boundingBox)
 {
-    int regionIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    // fixme:
+    int regionIndex = blockIdx.x;
     if (regionIndex >= regionSize) {
         return;
     }
@@ -211,7 +212,8 @@ template<int DIM, typename CELL_TYPE>
 __global__
 void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDataNew, int nanoStep, const int *coords, int regionSize, CoordBox<DIM> boundingBox)
 {
-    int regionIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    // fixme:
+    int regionIndex = blockIdx.x;
     if (regionIndex >= regionSize) {
         return;
     }
@@ -307,8 +309,6 @@ private:
     unsigned validGhostZoneWidth;
     boost::shared_ptr<GridType> oldGrid;
     boost::shared_ptr<GridType> newGrid;
-    // fixme: get rid of dummyGrid
-    boost::shared_ptr<GridType> dummyGrid;
     boost::shared_ptr<CUDAGridType> oldDeviceGrid;
     boost::shared_ptr<CUDAGridType> newDeviceGrid;
     PatchBufferType2 rimBuffer;
@@ -320,26 +320,18 @@ private:
     inline void update()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        // fixme
-        // std::cout << "update(" << index << ")\n";
         const Region<DIM>& region = innerSet(index);
         {
             TimeComputeInner t(&chronometer);
 
-            // fixme:
-            // UpdateFunctor<CELL_TYPE>()(
-            //     region,
-            //     Coord<DIM>(),
-            //     Coord<DIM>(),
-            //     *oldGrid,
-            //     &*dummyGrid,
-            //     curNanoStep);
-
-            // oldDeviceGrid->loadRegion(*oldGrid, region);
             const CUDARegion<DIM>& cudaRegion = deviceInnerSet(index);
             // fixme: choose grid-/blockDim in a better way
-            dim3 gridDim(512);
-            dim3 blockDim(32);
+            // dim3 gridDim(region.size());
+            // dim3 blockDim(CELL_TYPE::SIZE);
+
+            dim3 gridDim(200);
+            dim3 blockDim(512);
+
             CUDAStepperHelpers::updateKernel<<<gridDim, blockDim>>>(
                 oldDeviceGrid->data(),
                 oldDeviceGrid->edgeCell(),
@@ -348,7 +340,7 @@ private:
                 cudaRegion.data(),
                 region.size(),
                 oldDeviceGrid->boundingBox());
-            // newDeviceGrid->saveRegion(&*newGrid,  region);
+
             std::swap(oldDeviceGrid, newDeviceGrid);
             std::swap(oldGrid, newGrid);
 
@@ -490,7 +482,6 @@ private:
 
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-        dummyGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         oldDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
         newDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
 
