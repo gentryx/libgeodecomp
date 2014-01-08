@@ -122,7 +122,7 @@ endif()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
-if(SUPPORTS_MARCH_NATIVE)
+if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
 endif()
 
