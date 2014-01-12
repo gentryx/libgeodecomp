@@ -94,6 +94,7 @@ private:
 
     inline void update()
     {
+        TimeTotal t(&chronometer);
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = innerSet(index);
         {
