@@ -57,7 +57,7 @@ createUpdateGroups(
 
     std::size_t numComponents = numUpdateGroups();
 
-    typedef hpx::future<std::vector<hpx::naming::gid_type> > FutureType;
+    typedef hpx::unique_future<std::vector<hpx::naming::gid_type> > FutureType;
 
     FutureType f;
     {
@@ -66,7 +66,7 @@ createUpdateGroups(
         f = p.get_future();
     }
 
-    std::vector<hpx::future<ResultType> > componentsFutures;
+    std::vector<hpx::shared_future<ResultType> > componentsFutures;
     componentsFutures.reserve(2);
 
     if(localities.size() > 1) {
@@ -100,12 +100,12 @@ createUpdateGroups(
     res.second.push_back(
         ValueType(thisLoc.get_gid(), type)
     );
-    res.second.back().gids_ = boost::move(f.move());
+    res.second.back().gids_ = boost::move(f.get());
 
     hpx::wait_all(componentsFutures);
 
-    BOOST_FOREACH(hpx::future<ResultType> & rf, componentsFutures) {
-        ResultType r = rf.move();
+    BOOST_FOREACH(hpx::shared_future<ResultType> & rf, componentsFutures) {
+        ResultType const & r = rf.get();
         res.second.insert(res.second.end(), r.second.begin(), r.second.end());
         res.first += r.first;
     }

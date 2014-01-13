@@ -61,14 +61,14 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     std::vector<hpx::id_type> localities = hpx::find_all_localities(type);
 
     hpx::id_type id = localities[0];
-    hpx::future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
+    hpx::unique_future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
         asyncResult = hpx::async<Implementation::CreateUpdateGroupsAction>(
             id, boost::move(localities), type, numUpdateGroups);
 
     std::vector<UPDATEGROUP> components;
 
     std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-        result(boost::move(asyncResult.move()));
+        result(asyncResult.get());
 
     std::size_t numComponents = result.first;
     components.reserve(numComponents);

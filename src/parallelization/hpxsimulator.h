@@ -240,7 +240,7 @@ public:
 
         CoordBox<DIM> box = initializer->gridBox();
 
-        std::vector<hpx::future<void> > boundingBoxesFutures;
+        std::vector<hpx::unique_future<void> > boundingBoxesFutures;
         boundingBoxesFutures.reserve(numPartitions);
         std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
 
@@ -356,7 +356,7 @@ private:
             hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
                 updateGroupsIds,
                 remainingNanoSteps
-            ).move();
+            ).get();
     }
 
     std::vector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
@@ -364,7 +364,7 @@ private:
         std::vector<double> speeds(
             hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
                 updateGroupsIds
-            ).move());
+            ).get());
         double s = sum(speeds);
         std::vector<std::size_t> ret(size);
 

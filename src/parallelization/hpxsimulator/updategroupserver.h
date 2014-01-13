@@ -162,7 +162,7 @@ public:
 
                 link->charge(
                     firstSyncPoint,
-                    PatchLink<GridType, ClientType>::ENDLESS,
+                    PatchLink<GridType, ClientType>::infinity(),
                     ghostZoneWidth);
 
                 link->setRegion(partitionManager->ownRegion());

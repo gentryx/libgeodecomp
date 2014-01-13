@@ -75,7 +75,7 @@ public:
         return thisId;
     }
 
-    hpx::future<void> setOuterGhostZone(
+    hpx::unique_future<void> setOuterGhostZone(
         std::size_t srcRank,
         boost::shared_ptr<std::vector<CELL_TYPE> > buffer,
         long nanoStep)

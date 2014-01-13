@@ -82,7 +82,7 @@ public:
         thisId
             = hpx::components::new_<ComponentType>(
                 hpx::find_here(),
-                numUpdateGroups).move();
+                numUpdateGroups).get();
         hpx::agas::register_name(name, thisId);
     }
 
@@ -114,7 +114,7 @@ public:
             = hpx::components::new_<ComponentType>(
                 hpx::find_here(),
                 writer,
-                numUpdateGroups).move();
+                numUpdateGroups).get();
         if(name != "") {
             hpx::agas::register_name(name, thisId);
         }
@@ -144,7 +144,7 @@ public:
             ++dest;
         }
 
-        hpx::future<void> stepFinishedFuture
+        hpx::unique_future<void> stepFinishedFuture
             = hpx::async<typename ComponentType::StepFinishedAction>(
                 thisId,
                 buffer,
@@ -157,19 +157,19 @@ public:
             );
 
         if(stepFinishedFutures.size() > 10) {
-            std::vector<hpx::future<void> > res(hpx::wait_any(stepFinishedFutures));
-            BOOST_FOREACH(hpx::future<void>& f, stepFinishedFutures) {
+            hpx::wait_any(stepFinishedFutures);
+            BOOST_FOREACH(hpx::unique_future<void>& f, stepFinishedFutures) {
                 if(f.is_ready()) {
-                    f = stepFinishedFuture;
+                    f = std::move(stepFinishedFuture);
                 }
             }
         }
         else {
-            stepFinishedFutures.push_back(stepFinishedFuture);
+            stepFinishedFutures.push_back(std::move(stepFinishedFuture));
         }
     }
 
-    hpx::future<std::size_t> connectWriter(ParallelWriter<CellType> *parallelWriter)
+    hpx::unique_future<std::size_t> connectWriter(ParallelWriter<CellType> *parallelWriter)
     {
         boost::shared_ptr<ParallelWriter<CellType> > writer(parallelWriter);
         return
@@ -178,7 +178,7 @@ public:
                 writer);
     }
 
-    hpx::future<std::size_t> connectWriter(Writer<CellType> *serialWriter)
+    hpx::unique_future<std::size_t> connectWriter(Writer<CellType> *serialWriter)
     {
         boost::shared_ptr<Writer<CellType> > writer(serialWriter);
         return
@@ -205,7 +205,7 @@ public:
 private:
     hpx::naming::id_type thisId;
     std::size_t period;
-    std::vector<hpx::future<void> > stepFinishedFutures;
+    std::vector<hpx::unique_future<void> > stepFinishedFutures;
 
     template<typename ARCHIVE>
     void load(ARCHIVE& ar, unsigned)

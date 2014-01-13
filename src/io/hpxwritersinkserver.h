@@ -47,7 +47,7 @@ public:
     typedef typename CONVERTER::CellType CellType;
     typedef typename APITraits::SelectTopology<CellType>::Value Topology;
     static const int DIM = Topology::DIM;
-    typedef Grid<CellType, Topology> GridType;
+    typedef DisplacedGrid<CellType, Topology> GridType;
     typedef Region<Topology::DIM> RegionType;
     typedef Coord<Topology::DIM> CoordType;
     typedef std::vector<CellType> BufferType;
@@ -108,11 +108,12 @@ public:
         GridIterator kt = gridMap.find(step);
         if (kt == gridMap.end())
         {
+            CoordBox<DIM> coordBox(CoordType(), globalDimensions);
             kt = gridMap.insert(
                 kt,
                 std::make_pair(
                     step,
-                    GridType(globalDimensions)));
+                    GridType(coordBox)));
         }
 
         GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);

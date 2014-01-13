@@ -67,8 +67,8 @@ private:
         const DisplacedGrid<CELL_TYPE, TOPOLOGY_TYPE, TOPOLOGICALLY_CORRECT>& grid,
         std::vector<CELL_TYPE> *vec,
         const REGION_TYPE& region,
-        const APITraits::FalseType&,
-        const APITraits::FalseType&)
+        APITraits::FalseType,
+        APITraits::FalseType)
     {
         if (vec->size() != region.size()) {
             throw std::logic_error("region doesn't match vector size");

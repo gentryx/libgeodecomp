@@ -14,6 +14,8 @@
 #include <hpx/lcos/future_wait.hpp>
 #include <hpx/lcos/local/packaged_task.hpp>
 
+#include <boost/foreach.hpp>
+
 namespace LibGeoDecomp {
 namespace HpxSimulator {
 
@@ -25,6 +27,11 @@ public:
 
     typedef typename GRID_TYPE::CellType CellType;
     typedef std::vector<CellType> BufferType;
+
+    static inline std::size_t infinity()
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
 
     class Link
     {
@@ -108,7 +115,7 @@ public:
     private:
         std::size_t rank;
         UPDATE_GROUP dest;
-        hpx::future<void> putFuture;
+        hpx::unique_future<void> putFuture;
     };
 
     class Provider :
@@ -133,6 +140,17 @@ public:
         Provider(const Region<DIM>& region) :
             Link(region)
         {}
+
+        ~Provider()
+        {
+            BOOST_FOREACH(typename ReceiverMap::value_type & recv, receiverMap)
+            {
+                if(recv.second->valid())
+                {
+                    recv.second->get_future();
+                }
+            }
+        }
 
         void charge(long next, long last, long newStride)
         {
@@ -196,7 +214,7 @@ public:
 
         boost::shared_ptr<BufferType> getBuffer(std::size_t nanoStep)
         {
-            hpx::future<boost::shared_ptr<BufferType> > resFuture;
+            hpx::unique_future<boost::shared_ptr<BufferType> > resFuture;
             {
                 MutexType::scoped_lock lock(mutex);
                 typename ReceiverMap::iterator it = receiverMap.find(nanoStep);
