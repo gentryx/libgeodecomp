@@ -447,7 +447,7 @@ install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflat
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")
-foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES} /usr/lib/liblibkremotecontrol.so)
+foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   get_filename_component(path "${lib}" PATH)
   get_filename_component(name "${lib}" NAME_WE)
 
@@ -467,7 +467,7 @@ endforeach()
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 libdir=${CMAKE_INSTALL_PREFIX}/lib
-includedir=${CMAKE_INSTALL_PREFIX}/include/libgeodecomp
+includedir=${CMAKE_INSTALL_PREFIX}/include
 
 Name: LibGeoDecomp
 Description: High performance stencil code library
