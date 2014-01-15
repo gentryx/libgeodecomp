@@ -1,4 +1,3 @@
-#include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/bovwriter.h>
@@ -15,6 +14,7 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 #include <libgeodecomp/storage/image.h>
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

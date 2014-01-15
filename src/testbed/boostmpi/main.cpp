@@ -1,7 +1,7 @@
-#include <boost/mpi.hpp>
-#include <iostream>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/storage/grid.h>
+#include <boost/mpi.hpp>
+#include <iostream>
 #include <list>
 #include <stdexcept>
 
