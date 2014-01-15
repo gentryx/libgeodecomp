@@ -244,7 +244,7 @@ public:
             if (((newStep % period) == 0) && (VisItIsConnected())) {
                 std::cout << "VisItWriter::stepFinished()" << std::endl;
                 std::cout << "  step: " << newStep << std::endl;
-                std::cout << "  event: " << newEvent << std::endl;
+                std::cout << "  event: " << int(newEvent) << std::endl;
                 if (VisItIsConnected()) {
                     VisItUpdatePlots();
                 }

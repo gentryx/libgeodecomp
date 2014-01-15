@@ -38,7 +38,7 @@ public:
         inline std::string toString() const
         {
             std::stringstream s;
-            s << "Square(origin:" << origin << ", dimensions:" << dimensions << ", quadrant: " << quadrant << ", form: " << form << ")";
+            s << "Square(origin:" << origin << ", dimensions:" << dimensions << ", quadrant: " << quadrant << ", form: " << int(form) << ")";
             return s.str();
         }
 
