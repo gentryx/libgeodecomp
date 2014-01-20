@@ -3,7 +3,7 @@
 
 #include <libgeodecomp/geometry/partitions/partition.h>
 #include "/usr/local/include/scotch.h"
-#include <boost/timer.hpp>
+//#include <boost/timer.hpp>
 
 namespace LibGeoDecomp {
 
@@ -26,16 +26,11 @@ public:
         {
             indices = new SCOTCH_Num[cellNbr];
             regions = new Region<DIM>[weights.size()];
-            /*boxes = new std::vector<std::pair <int,int> >[weights.size()];
-            for(int i = 0;i<weights.size();++i){
-                std::vector<std::pair <int,int> > blubber;
-                boxes[i] = blubber;
-                }*/
-            boost::timer t;
+            //boost::timer t;
             initIndices();
-            std::cout << "\n" <<  t.elapsed() << std::endl;
+            //std::cout << "\n" <<  t.elapsed() << std::endl;
             createRegions();
-            std::cout << "\n" <<  t.elapsed() << std::endl;
+            //std::cout << "\n" <<  t.elapsed() << std::endl;
         }
 
     Region<DIM> getRegion(const std::size_t node) const
