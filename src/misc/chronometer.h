@@ -1,10 +1,10 @@
 #ifndef LIBGEODECOMP_MISC_CHRONOMETER_H
 #define LIBGEODECOMP_MISC_CHRONOMETER_H
 
-#include <iomanip>
-
 #include <libgeodecomp/misc/scopedtimer.h>
 #include <libgeodecomp/storage/fixedarray.h>
+
+#include <iomanip>
 
 namespace LibGeoDecomp {
 

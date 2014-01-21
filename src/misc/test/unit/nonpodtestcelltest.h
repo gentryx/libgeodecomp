@@ -1,6 +1,7 @@
-#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

@@ -1,8 +1,8 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_BIASBALANCER_H
 
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 

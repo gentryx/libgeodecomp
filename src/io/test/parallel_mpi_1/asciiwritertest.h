@@ -1,10 +1,3 @@
-#include <ctime>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <cxxtest/TestSuite.h>
-#include <stdio.h>
-#include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
@@ -12,6 +5,14 @@
 #include <libgeodecomp/io/asciiwriter.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/testinitializer.h>
+
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <cxxtest/TestSuite.h>
+#include <stdio.h>
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

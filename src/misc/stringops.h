@@ -1,9 +1,10 @@
 #ifndef LIBGEODECOMP_MISC_STRINGOPS_H
 #define LIBGEODECOMP_MISC_STRINGOPS_H
 
+#include <libgeodecomp/misc/stringvec.h>
+
 #include <boost/algorithm/string.hpp>
 #include <sstream>
-#include <libgeodecomp/misc/stringvec.h>
 
 // sad but true: CodeGear's C++ compiler has troubles with the +
 // operator for strings.

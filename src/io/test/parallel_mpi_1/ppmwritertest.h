@@ -1,5 +1,3 @@
-#include <cxxtest/TestSuite.h>
-#include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
@@ -7,6 +5,9 @@
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/testcellplotter.h>
 #include <libgeodecomp/io/testinitializer.h>
+
+#include <cxxtest/TestSuite.h>
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

@@ -1,8 +1,9 @@
+#include <libgeodecomp/geometry/partitions/hindexingpartition.h>
+#include <libgeodecomp/geometry/partitions/stripingpartition.h>
+
 #include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/geometry/partitions/hindexingpartition.h>
-#include <libgeodecomp/geometry/partitions/stripingpartition.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

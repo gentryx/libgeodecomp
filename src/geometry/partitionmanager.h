@@ -2,9 +2,10 @@
 #define LIBGEODECOMP_GEOMETRY_PARTITIONMANAGER_H
 
 #include <libgeodecomp/config.h>
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/region.h>
+
+#include <boost/shared_ptr.hpp>
 
 namespace LibGeoDecomp {
 

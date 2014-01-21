@@ -1,8 +1,9 @@
+#include <libgeodecomp/geometry/partitions/stripingpartition.h>
+#include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/misc/chronometer.h>
+
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/geometry/region.h>
-#include <libgeodecomp/geometry/partitions/stripingpartition.h>
-#include <libgeodecomp/misc/chronometer.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

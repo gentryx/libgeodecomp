@@ -1,7 +1,8 @@
-#include <boost/assign/std/vector.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
+
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

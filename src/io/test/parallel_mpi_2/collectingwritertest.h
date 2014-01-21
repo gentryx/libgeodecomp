@@ -1,11 +1,11 @@
-#include <boost/shared_ptr.hpp>
-
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+
+#include <boost/shared_ptr.hpp>
 
 using namespace LibGeoDecomp;
 

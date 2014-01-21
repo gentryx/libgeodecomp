@@ -1,5 +1,6 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_RANDOMBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_RANDOMBALANCER_H
+
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 
 namespace LibGeoDecomp {

@@ -1,10 +1,10 @@
-#include <boost/filesystem.hpp>
-#include <cxxtest/TestSuite.h>
-
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+
+#include <boost/filesystem.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

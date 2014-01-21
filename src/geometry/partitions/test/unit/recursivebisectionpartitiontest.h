@@ -1,7 +1,7 @@
+#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-
-#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 
 using namespace LibGeoDecomp;
 using namespace boost::assign;

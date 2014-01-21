@@ -1,10 +1,11 @@
-#include <sstream>
-#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
+
+#include <sstream>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

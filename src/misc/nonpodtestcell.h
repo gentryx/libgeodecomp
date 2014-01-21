@@ -1,11 +1,11 @@
 #ifndef LIBGEODECOMP_MISC_NONPODTESTCELL_H
 #define LIBGEODECOMP_MISC_NONPODTESTCELL_H
 
-#include <boost/serialization/set.hpp>
-
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+
+#include <boost/serialization/set.hpp>
 
 namespace LibGeoDecomp {
 

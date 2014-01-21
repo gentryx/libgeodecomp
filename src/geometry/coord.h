@@ -1,12 +1,13 @@
 #ifndef LIBGEODECOMP_GEOMETRY_COORD_H
 #define LIBGEODECOMP_GEOMETRY_COORD_H
 
-#include <string>
-#include <stdlib.h>
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
 #include <hpx/config.hpp>
 #endif
+
+#include <string>
+#include <stdlib.h>
 
 #include <libgeodecomp/geometry/fixedcoord.h>
 

@@ -3,10 +3,6 @@
 
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/base_object.hpp>
-#endif
-
 namespace LibGeoDecomp {
 
 class LoadBalancer

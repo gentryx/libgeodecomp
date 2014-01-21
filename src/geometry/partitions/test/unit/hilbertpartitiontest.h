@@ -1,6 +1,7 @@
+#include <libgeodecomp/geometry/partitions/hilbertpartition.h>
+
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/geometry/partitions/hilbertpartition.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

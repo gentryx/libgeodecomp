@@ -1,6 +1,7 @@
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

@@ -1,7 +1,12 @@
-#include <cxxtest/TestSuite.h>
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/config.hpp>
+#endif
 
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/stringops.h>
+
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

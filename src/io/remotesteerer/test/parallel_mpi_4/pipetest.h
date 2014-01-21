@@ -1,7 +1,13 @@
-#include <boost/thread.hpp>
-#include <cxxtest/TestSuite.h>
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/config.hpp>
+#endif
+
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
+
+#include <boost/thread.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 using namespace LibGeoDecomp::RemoteSteererHelpers;

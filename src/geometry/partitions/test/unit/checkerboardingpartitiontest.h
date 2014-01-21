@@ -1,8 +1,8 @@
-#include <boost/assign/std/vector.hpp>
-#include <cxxtest/TestSuite.h>
-
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/partitions/checkerboardingpartition.h>
+
+#include <boost/assign/std/vector.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

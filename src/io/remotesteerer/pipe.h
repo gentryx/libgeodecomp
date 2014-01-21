@@ -1,13 +1,14 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_PIPE_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_PIPE_H
 
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/stringops.h>
+
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 
 namespace LibGeoDecomp {
 
