@@ -2,14 +2,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/geometry/partitions/scotchpartition.h>
+#include <libgeodecomp/geometry/partitions/ptscotchpartition.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class ScotchPartitionTest : public CxxTest::TestSuite
+class PtscotchPartitionTest : public CxxTest::TestSuite
 {
 public:
     void test2D()
@@ -18,7 +18,7 @@ public:
         Coord<2> dimensions(10, 10);
         std::vector<std::size_t> weights;
         weights << 100 << 100 << 100 << 100;
-        ScotchPartition<2> p(origin, dimensions, 0, weights);
+        PtscotchPartition<2> p(origin, dimensions, 0, weights);
 
         Region<2> expected0;
         Region<2> expected1;
@@ -43,7 +43,7 @@ public:
         Coord<2> dimensions(256, 128);
         std::vector<std::size_t> weights;
         weights << 100 << 100 << 100 << 100;
-        ScotchPartition<2> p(origin, dimensions, 0, weights);
+        PtscotchPartition<2> p(origin, dimensions, 0, weights);
 
         Region<2> expected0;
 
@@ -59,7 +59,7 @@ public:
         Coord<2> dimensions(128, 231);
         std::vector<std::size_t> weights;
         weights << 100 << 100 << 100 << 100;
-        ScotchPartition<2> p(origin, dimensions, 0, weights);
+        PtscotchPartition<2> p(origin, dimensions, 0, weights);
 
         Region<2> expected0;
 

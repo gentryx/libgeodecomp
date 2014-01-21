@@ -1,19 +1,19 @@
-#ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_SCOTCHPARTITION_H
-#define LIBGEODECOMP_GEOMETRY_PARTITIONS_SCOTCHPARTITION_H
+#ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHPARTITION_H
+#define LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHPARTITION_H
 
 #include <libgeodecomp/geometry/partitions/partition.h>
-#include "/usr/local/include/scotch.h"
+#include "/usr/local/include/ptscotch.h"
 
 namespace LibGeoDecomp {
 
 template<int DIM>
-class ScotchPartition : public Partition<DIM>
+class PtscotchPartition : public Partition<DIM>
 {
 public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
 
-    inline ScotchPartition(
+    inline PtscotchPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
@@ -40,7 +40,6 @@ private:
     SCOTCH_Num * indices;
     SCOTCH_Num const cellNbr;
     Region<DIM> * regions;
-
     std::vector<std::pair <int,int> > * boxes;
 
     void initIndices(){
@@ -101,10 +100,6 @@ private:
         }
 
         SCOTCH_graphMap (&grafdat,&arch,straptr,indices);
-
-        /*for(int i = 0; i < cellNbr; ++i){
-            std::cout << i << ": "<< indices[i] << std::endl;
-            }*/
     }
 
     void createRegions(){
