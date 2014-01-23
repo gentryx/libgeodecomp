@@ -1,1 +1,1 @@
-include(../../../fixtures/CMakeLists.test.txt)
+include(../../../../CMakeModules/CMakeLists.test.txt)

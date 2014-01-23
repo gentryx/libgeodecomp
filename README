@@ -79,10 +79,6 @@ DIRECTORY LAYOUT
     Sample applications which explain basic and advanced usage of the
     library and implementation paradigms.
 
-  - libgeodecomp/src/fixtures/
-    --------------------------
-    Test rig referenced by all unit tests.
-
   - libgeodecomp/src/geometry/
     --------------------------
     All classes which are related to domain decomposition and spatial
