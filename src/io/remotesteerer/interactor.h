@@ -1,13 +1,13 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_INTERACTOR_H
 
+#include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/misc/stringops.h>
+#include <libgeodecomp/misc/stringvec.h>
+
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <libgeodecomp/io/logger.h>
-#include <libgeodecomp/misc/stringvec.h>
-#include <libgeodecomp/misc/stringvec.h>
-#include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
 

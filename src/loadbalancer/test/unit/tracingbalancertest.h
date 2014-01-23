@@ -1,7 +1,8 @@
+#include <libgeodecomp/loadbalancer/mockbalancer.h>
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
+
 #include <sstream>
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/loadbalancer/mockbalancer.h>
 
 using namespace LibGeoDecomp;
 

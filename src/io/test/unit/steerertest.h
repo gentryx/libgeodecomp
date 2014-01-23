@@ -1,4 +1,3 @@
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -6,6 +5,8 @@
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
+
+#include <boost/shared_ptr.hpp>
 
 using namespace LibGeoDecomp;
 

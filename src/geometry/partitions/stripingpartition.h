@@ -1,10 +1,11 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_STRIPINGPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_STRIPINGPARTITION_H
 
-#include <sstream>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
+
+#include <sstream>
 
 namespace LibGeoDecomp {
 

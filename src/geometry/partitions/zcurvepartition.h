@@ -1,16 +1,17 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_ZCURVEPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_ZCURVEPARTITION_H
 
+#include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
+#include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/storage/grid.h>
+
 #include <bitset>
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <list>
-#include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
-#include <libgeodecomp/storage/grid.h>
 
 namespace LibGeoDecomp {
 

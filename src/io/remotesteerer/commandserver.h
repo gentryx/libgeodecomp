@@ -1,6 +1,14 @@
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_COMMANDSERVER_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_COMMANDSERVER_H
 
+#include <libgeodecomp/config.h>
+#include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/io/remotesteerer/action.h>
+#include <libgeodecomp/io/remotesteerer/getaction.h>
+#include <libgeodecomp/io/remotesteerer/interactor.h>
+#include <libgeodecomp/io/remotesteerer/waitaction.h>
+#include <libgeodecomp/misc/stringops.h>
+
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -9,13 +17,6 @@
 #include <string>
 #include <stdexcept>
 #include <map>
-#include <libgeodecomp/config.h>
-#include <libgeodecomp/io/logger.h>
-#include <libgeodecomp/io/remotesteerer/action.h>
-#include <libgeodecomp/io/remotesteerer/getaction.h>
-#include <libgeodecomp/io/remotesteerer/interactor.h>
-#include <libgeodecomp/io/remotesteerer/waitaction.h>
-#include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
 

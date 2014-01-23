@@ -1,6 +1,13 @@
 #ifndef LIBGEODECOMP_STORAGE_GRID_H
 #define LIBGEODECOMP_STORAGE_GRID_H
 
+#include <libflatarray/aligned_allocator.hpp>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/storage/coordmap.h>
+#include <libgeodecomp/storage/gridbase.h>
+
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)
 #ifndef __CODEGEARC__
@@ -11,13 +18,6 @@
 
 #include <boost/foreach.hpp>
 #include <iostream>
-#include <libflatarray/aligned_allocator.hpp>
-
-#include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/storage/coordmap.h>
-#include <libgeodecomp/storage/gridbase.h>
 
 namespace LibGeoDecomp {
 

@@ -1,5 +1,6 @@
-#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/remotesteerer/interactor.h>
+
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 using namespace LibGeoDecomp::RemoteSteererHelpers;

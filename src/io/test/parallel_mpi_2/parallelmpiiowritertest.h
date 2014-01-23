@@ -1,14 +1,13 @@
-#include <boost/filesystem.hpp>
-#include <cxxtest/TestSuite.h>
-
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/parallelmpiiowriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
+#include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-#include <libgeodecomp/misc/random.h>
+#include <boost/filesystem.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

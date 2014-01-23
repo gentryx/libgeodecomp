@@ -1,7 +1,7 @@
+#include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
+
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
-
-#include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

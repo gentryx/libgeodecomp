@@ -1,11 +1,11 @@
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <unistd.h>
-#include <cxxtest/TestSuite.h>
-
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/grid.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <unistd.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

@@ -1,5 +1,5 @@
-#include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/loadbalancer/randombalancer.h>
+#include <libgeodecomp/misc/random.h>
 
 namespace LibGeoDecomp {
 

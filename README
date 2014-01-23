@@ -155,13 +155,13 @@ when re-running CMake. The following example turns CUDA support off.
 This may come in handy in case CMake detected CUDA, but you don't have
 a compatible GPU installed:
 
-  cmake -D FEATURE_CUDA=false ../../src/
+  cmake -D FEATURE_CUDA=false ../../
 
 Another common option is to manually specify the compiler. Here I
 select GCC 4.7.0 my Gentoo system, which would otherwise use GCC 4.5.3
 as the standard compiler:
 
-  cmake -D CMAKE_CXX_COMPILER=/usr/x86_64-pc-linux-gnu/gcc-bin/4.7.0/g++ ../../src/
+  cmake -D CMAKE_CXX_COMPILER=/usr/x86_64-pc-linux-gnu/gcc-bin/4.7.0/g++ ../../
 
 Additionally you may want to run the library's unit tests via "make
 test" to ensure that it's actually working. For speedier builds you

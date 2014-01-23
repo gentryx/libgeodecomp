@@ -1,7 +1,9 @@
 #ifndef LIBGEODECOMP_MISC_SCOPEDTIMER_H
 #define LIBGEODECOMP_MISC_SCOPEDTIMER_H
 
+#include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/config.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 #else
 #include <boost/date_time/posix_time/posix_time.hpp>

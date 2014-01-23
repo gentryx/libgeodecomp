@@ -1,14 +1,14 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_HILBERTPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_HILBERTPARTITION_H
 
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
 
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 

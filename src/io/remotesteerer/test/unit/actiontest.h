@@ -1,7 +1,8 @@
-#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/remotesteerer/action.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 #include <libgeodecomp/misc/testcell.h>
+
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 using namespace LibGeoDecomp::RemoteSteererHelpers;

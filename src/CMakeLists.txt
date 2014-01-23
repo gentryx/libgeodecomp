@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
-project(LIBGEODECOMP)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
-include(util.cmake)
-include(CheckCXXCompilerFlag)
-
 #============= 1. FIND PACKAGES WE DEPEND ON =========================
 
 # find HPX
@@ -192,15 +186,6 @@ print_options()
 dump_config("config.h")
 
 #============= 4. GENERAL CONFIGURATION ==============================
-set(PACKAGE_NAME libgeodecomp)
-set(CMAKE_C_FLAGS   "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${ADDITIONAL_COMPILE_FLAGS} ${CMAKE_CXX_FLAGS}")
-
-set(PACKAGE_VERSION "0.3.0")
-set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
-set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
-set(PACKAGE_EMAIL "users@libgeodecomp.org")
-
 # LIBDIRS is used to find source files and headers
 set(LIBDIRS communication io geometry geometry/partitions loadbalancer misc parallelization parallelization/hiparsimulator parallelization/hiparsimulator parallelization/hpxsimulator storage)
 # AUXDIRS lists auxiliary directories to be included in the main
@@ -313,7 +298,7 @@ add_custom_target(test echo "Tests passed.")
 add_custom_target(code_generation ALL echo "Code generation done.")
 add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
 
-#============= 7. INSTALLER STUFF ====================================
+#============= 7. CPACK INSTALLER STUFF ==============================
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PACKAGE_NAME})
 set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})

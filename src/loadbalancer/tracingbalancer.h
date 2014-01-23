@@ -1,9 +1,10 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 
-#include <iostream>
-#include <boost/shared_ptr.hpp>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
+
+#include <boost/shared_ptr.hpp>
+#include <iostream>
 
 namespace LibGeoDecomp {
 

@@ -1,8 +1,3 @@
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
-#include <unistd.h>
-#include <cxxtest/TestSuite.h>
-
 #include <libgeodecomp/io/mpiioinitializer.h>
 #include <libgeodecomp/io/mpiiowriter.h>
 #include <libgeodecomp/io/parallelmpiiowriter.h>
@@ -11,6 +6,11 @@
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
+#include <unistd.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 

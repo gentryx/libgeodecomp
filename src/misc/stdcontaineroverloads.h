@@ -1,6 +1,14 @@
 #ifndef LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 #define LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_FEATURE_HPX
+#include <hpx/config.hpp>
+#endif
+#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#include <boost/serialization/vector.hpp>
+#endif
+
 #include <algorithm>
 #include <iterator>
 #include <map>
@@ -8,12 +16,6 @@
 #include <set>
 #include <sstream>
 #include <vector>
-#include <libgeodecomp/misc/stdcontaineroverloads.h>
-
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
-#include <boost/serialization/vector.hpp>
-#endif
 
 namespace LibGeoDecomp {
 

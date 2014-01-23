@@ -1,10 +1,11 @@
 #ifndef LIBGEODECOMP_GEOMETRY_COORDBOX_H
 #define LIBGEODECOMP_GEOMETRY_COORDBOX_H
 
-#include <iostream>
-#include <stdexcept>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/topologies.h>
+
+#include <iostream>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 

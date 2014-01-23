@@ -1,5 +1,6 @@
-#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/stringops.h>
+
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 
