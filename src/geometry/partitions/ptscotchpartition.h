@@ -25,6 +25,10 @@ public:
         {
             indices = new SCOTCH_Num[cellNbr];
             regions = new Region<DIM>[weights.size()];
+            int initial;
+            MPI_Initialized(&initial);
+            if (!initial)
+                initMPI();
             initIndices();
             createRegions();
         }
@@ -33,6 +37,31 @@ public:
     {
         return regions[node];
     }
+
+    void initMPI(){
+        int                   thrdlvlreqval;
+        int                   thrdlvlproval;
+        int                   procglbnbr;
+        int                   proclocnum;
+        int                   procnum;
+
+        MPI_Comm              proccomm;
+        thrdlvlreqval = MPI_THREAD_MULTIPLE;
+        if (MPI_Init_thread (NULL, NULL, thrdlvlreqval, &thrdlvlproval) != MPI_SUCCESS) {
+            exit       (1);
+        }
+        if (thrdlvlreqval > thrdlvlproval) {
+
+            exit       (1);
+        }
+
+
+        proccomm = MPI_COMM_WORLD;
+        MPI_Comm_size (proccomm, &procglbnbr);
+        MPI_Comm_rank (proccomm, &proclocnum);
+
+    }
+
 
 private:
     Coord<DIM> origin;
@@ -53,12 +82,8 @@ private:
         }
         SCOTCH_archCmpltw (&arch,vertnbrArch,velotabArch);
 
-        SCOTCH_Strat * straptr = SCOTCH_stratAlloc();;
-        SCOTCH_stratInit(straptr);
-        SCOTCH_stratGraphMapBuild(straptr,SCOTCH_STRATRECURSIVE,vertnbrArch,0);
-
-        SCOTCH_Graph grafdat;
-        SCOTCH_graphInit (&grafdat);
+        SCOTCH_Dgraph grafdat;
+        SCOTCH_dgraphInit(&grafdat,MPI_COMM_WORLD);
 
         SCOTCH_Num const edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) + (dimensions[0] - 1) * dimensions[1]);
 
@@ -91,15 +116,24 @@ private:
         verttabGra[cellNbr] = pointer;
 
 
-        if(SCOTCH_graphBuild(&grafdat,0,cellNbr,verttabGra,verttabGra +1,NULL,NULL,edgenbrGra, edgetabGra, NULL) != 0){
+if(SCOTCH_dgraphBuild(&grafdat,0,cellNbr,cellNbr,verttabGra,verttabGra +1,NULL,NULL,edgenbrGra,edgenbrGra, edgetabGra,NULL, NULL) != 0){
         }
 
-        if(SCOTCH_graphCheck(&grafdat) != 0){
+        if(SCOTCH_dgraphCheck(&grafdat) != 0){
             //fixme error handling
             std::cerr << "graphCheck error" << std::endl;
         }
 
-        SCOTCH_graphMap (&grafdat,&arch,straptr,indices);
+        SCOTCH_Strat * straptr = SCOTCH_stratAlloc();;
+        SCOTCH_stratInit(straptr);
+        /*const char * strategy= "rfk\0";
+        //strategy= "r";
+        if(SCOTCH_stratDgraphMap(straptr,strategy) != 0)
+            std::cerr << "stratDgraphMap failed" << std::endl;
+        */
+
+        SCOTCH_dgraphMap (&grafdat,&arch,straptr,indices);
+
     }
 
     void createRegions(){

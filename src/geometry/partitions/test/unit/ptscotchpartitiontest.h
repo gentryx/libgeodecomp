@@ -12,42 +12,32 @@ namespace LibGeoDecomp {
 class PtscotchPartitionTest : public CxxTest::TestSuite
 {
 public:
-    void test2D()
-    {
+    void testEqual(){
         Coord<2> origin(0, 0);
-        Coord<2> dimensions(10, 10);
+        Coord<2> dimensions( 1023,511);
         std::vector<std::size_t> weights;
         weights << 100 << 100 << 100 << 100;
         PtscotchPartition<2> p(origin, dimensions, 0, weights);
-
-        Region<2> expected0;
-        Region<2> expected1;
-        Region<2> expected2;
-        Region<2> expected3;
-
-
-        expected0 << CoordBox<2>(Coord<2>( 0, 0), Coord<2>(5,5));
-        expected1 << CoordBox<2>(Coord<2>( 5, 0), Coord<2>(5,5));
-        expected2 << CoordBox<2>(Coord<2>( 0, 5), Coord<2>(5,5));
-        expected3 << CoordBox<2>(Coord<2>( 5, 5), Coord<2>(5,5));
-
-
-        TS_ASSERT_EQUALS(expected0, p.getRegion(1));
-        TS_ASSERT_EQUALS(expected1, p.getRegion(3));
-        TS_ASSERT_EQUALS(expected2, p.getRegion(0));
-        TS_ASSERT_EQUALS(expected3, p.getRegion(2));
+        std::size_t sizeRegion0 = p.getRegion(0).size();
+        std::size_t compSize;
+        for(int i = 1 ; i < weights.size() ; ++i){
+            compSize = p.getRegion(i).size();
+            TS_ASSERT(sizeRegion0 == compSize ||
+                      sizeRegion0 == compSize - 1 ||
+                      sizeRegion0 == compSize + 1);
+        }
     }
+
 
     void testComplete(){
         Coord<2> origin(0, 0);
-        Coord<2> dimensions(256, 128);
+        Coord<2> dimensions(543,234);
         std::vector<std::size_t> weights;
         weights << 100 << 100 << 100 << 100;
         PtscotchPartition<2> p(origin, dimensions, 0, weights);
-
         Region<2> expected0;
 
-        expected0 << CoordBox<2>(Coord<2>(0,0), Coord<2>(256,128));
+        expected0 << CoordBox<2>(Coord<2>(0,0), Coord<2>(543,234));
 
         Region<2> complete = p.getRegion(0) + p.getRegion(1) + p.getRegion(2) + p.getRegion(3);
 
