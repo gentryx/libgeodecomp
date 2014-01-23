@@ -20,6 +20,7 @@ public:
         PtscotchPartition<2> p(origin, dimensions, 0, weights);
         std::size_t sizeRegion0 = p.getRegion(0).size();
         std::size_t compSize;
+
         for(int i = 1 ; i < weights.size() ; ++i){
             compSize = p.getRegion(i).size();
             TS_ASSERT(sizeRegion0 == compSize ||
@@ -58,8 +59,7 @@ public:
         Region<2> cut = p.getRegion(0) & p.getRegion(1) & p.getRegion(2) & p.getRegion(3);
 
         TS_ASSERT_EQUALS(expected0, cut);
-    }
-
+     }
 };
 
 }

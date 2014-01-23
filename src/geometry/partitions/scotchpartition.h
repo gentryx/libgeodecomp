@@ -68,7 +68,6 @@ private:
         verttabGra = new SCOTCH_Num[cellNbr + 1];
         edgetabGra = new SCOTCH_Num[edgenbrGra];
 
-
         int pointer = 0;
         for(int i = 0;i < cellNbr;++i){
             verttabGra[i] = pointer;
@@ -95,16 +94,7 @@ private:
         if(SCOTCH_graphBuild(&grafdat,0,cellNbr,verttabGra,verttabGra +1,NULL,NULL,edgenbrGra, edgetabGra, NULL) != 0){
         }
 
-        if(SCOTCH_graphCheck(&grafdat) != 0){
-            //fixme error handling
-            std::cerr << "graphCheck error" << std::endl;
-        }
-
         SCOTCH_graphMap (&grafdat,&arch,straptr,indices);
-
-        /*for(int i = 0; i < cellNbr; ++i){
-            std::cout << i << ": "<< indices[i] << std::endl;
-            }*/
     }
 
     void createRegions(){

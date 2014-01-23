@@ -25,6 +25,7 @@ public:
         {
             indices = new SCOTCH_Num[cellNbr];
             regions = new Region<DIM>[weights.size()];
+            //fixme: better mpiinit
             int initial;
             MPI_Initialized(&initial);
             if (!initial)
@@ -48,18 +49,15 @@ public:
         MPI_Comm              proccomm;
         thrdlvlreqval = MPI_THREAD_MULTIPLE;
         if (MPI_Init_thread (NULL, NULL, thrdlvlreqval, &thrdlvlproval) != MPI_SUCCESS) {
-            exit       (1);
+            exit (1);
         }
         if (thrdlvlreqval > thrdlvlproval) {
-
-            exit       (1);
+            exit (1);
         }
-
 
         proccomm = MPI_COMM_WORLD;
         MPI_Comm_size (proccomm, &procglbnbr);
         MPI_Comm_rank (proccomm, &proclocnum);
-
     }
 
 
@@ -92,7 +90,6 @@ private:
         verttabGra = new SCOTCH_Num[cellNbr + 1];
         edgetabGra = new SCOTCH_Num[edgenbrGra];
 
-
         int pointer = 0;
         for(int i = 0;i < cellNbr;++i){
             verttabGra[i] = pointer;
@@ -119,21 +116,11 @@ private:
 if(SCOTCH_dgraphBuild(&grafdat,0,cellNbr,cellNbr,verttabGra,verttabGra +1,NULL,NULL,edgenbrGra,edgenbrGra, edgetabGra,NULL, NULL) != 0){
         }
 
-        if(SCOTCH_dgraphCheck(&grafdat) != 0){
-            //fixme error handling
-            std::cerr << "graphCheck error" << std::endl;
-        }
-
         SCOTCH_Strat * straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
-        /*const char * strategy= "rfk\0";
-        //strategy= "r";
-        if(SCOTCH_stratDgraphMap(straptr,strategy) != 0)
-            std::cerr << "stratDgraphMap failed" << std::endl;
-        */
+        //fixme: other strategies
 
         SCOTCH_dgraphMap (&grafdat,&arch,straptr,indices);
-
     }
 
     void createRegions(){
