@@ -3,7 +3,7 @@ set(RELATIVE_PATH "")
 include(auto.cmake)
 
 get_filename_component(PWD ./ ABSOLUTE)
-string(REPLACE "${LIBGEODECOMP_SOURCE_DIR}" "" RELATIVE_PATH ${PWD})
+string(REPLACE "${CMAKE_SOURCE_DIR}" "" RELATIVE_PATH ${PWD})
 string(REPLACE "/" _ BUFFER1 ${RELATIVE_PATH})
 string(REPLACE ":" _ BUFFER2 ${BUFFER1})
 set(TARGET_UNIT_TEST_EXE test_${BUFFER2})
@@ -43,7 +43,7 @@ if(allowed_test AND selected_test)
   set(SOURCES)
   unset(HAS_CUDA_TESTS)
 
-  include_directories(${LIBGEODECOMP_SOURCE_DIR}/../lib/cxxtest)
+  include_directories(${CMAKE_SOURCE_DIR}/lib/cxxtest)
 
   foreach(header ${HEADERS})
     # cxxtestgen for test headers...
@@ -77,7 +77,7 @@ if(allowed_test AND selected_test)
       add_custom_command(
         OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
         COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-	COMMAND cat "${CMAKE_SOURCE_DIR}/fixtures/testguard.h"   >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
+	COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
         DEPENDS "${header}" )
