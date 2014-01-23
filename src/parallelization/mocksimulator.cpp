@@ -1,5 +1,5 @@
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 #include <libgeodecomp/parallelization/mocksimulator.h>
 
 /**

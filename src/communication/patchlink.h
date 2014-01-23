@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_COMMUNICATION_PATCHLINK_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <deque>
 #include <libgeodecomp/communication/mpilayer.h>

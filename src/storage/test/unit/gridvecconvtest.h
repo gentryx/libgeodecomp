@@ -163,7 +163,7 @@ public:
 
     void testBoostSerialization()
     {
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
         CoordBox<2> box(Coord<2>(10, 10), Coord<2>(30, 20));
         DisplacedGrid<IrregularCell> gridA(box);
         DisplacedGrid<IrregularCell> gridB(box);

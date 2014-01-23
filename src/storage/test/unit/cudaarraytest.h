@@ -14,7 +14,7 @@ public:
 
     void testBasic()
     {
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
         std::vector<double> hostVec1(30, -1);
         std::vector<double> hostVec2(30, -2);
         std::vector<double> hostVec3(30, -3);

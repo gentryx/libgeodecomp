@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_PATCHLINK_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 
 #include <libgeodecomp/storage/gridvecconv.h>
 #include <libgeodecomp/storage/patchaccepter.h>

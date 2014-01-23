@@ -2,7 +2,7 @@
 #include <libgeodecomp/io/qtwidgetwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 
-#ifdef LIBGEODECOMP_FEATURE_QT
+#ifdef LIBGEODECOMP_WITH_QT
 #include <QtGui/QApplication>
 #endif
 
@@ -49,7 +49,7 @@ class QtWidgetWriterTest : public CxxTest::TestSuite
 public:
     void testBasic()
     {
-#ifdef LIBGEODECOMP_FEATURE_QT
+#ifdef LIBGEODECOMP_WITH_QT
         int argc = 0;
         char **argv = 0;
         QApplication app(argc, argv);

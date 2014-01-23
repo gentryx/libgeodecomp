@@ -1,5 +1,5 @@
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 
 #include <libgeodecomp/parallelization/hpxsimulator/createupdategroups.h>
 

@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_LOGGER_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
 

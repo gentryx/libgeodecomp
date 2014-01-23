@@ -151,29 +151,29 @@ add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${
 
 add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
 
-add_config_option(FEATURE_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
+add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
 
-add_config_option(FEATURE_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
+add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
 
-add_config_option(FEATURE_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
+add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
 
-add_config_option(FEATURE_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
+add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
 
-add_config_option(FEATURE_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
+add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
-add_config_option(FEATURE_OPENCL "Enable modules for delegating to OpenCL devices" false true)
+add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
 
-add_config_option(FEATURE_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
+add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
 
-add_config_option(FEATURE_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
+add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
 
-add_config_option(FEATURE_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
-add_config_option(FEATURE_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
+add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
 
-add_config_option(FEATURE_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
+add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
-add_config_option(FEATURE_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
 
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
 add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
@@ -200,18 +200,18 @@ set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 generate_sourcelists("./")
 
-if(FEATURE_MPI)
+if(WITH_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
-if(FEATURE_HPX)
+if(WITH_HPX)
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
 endif()
 
-if(FEATURE_CUDA)
+if(WITH_CUDA)
   set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
 endif()
 
@@ -221,57 +221,57 @@ include_directories(${Boost_INCLUDE_DIRS})
 # import settings detected by packages to decouple from their
 # interfaces, perform sanity checks to match selected options and
 # detected environment...
-if(FEATURE_OPENCV AND NOT OpenCV_FOUND)
-  message(FATAL_ERROR "FEATURE_OPENCV selected, but could not find OpenCV.")
+if(WITH_OPENCV AND NOT OpenCV_FOUND)
+  message(FATAL_ERROR "WITH_OPENCV selected, but could not find OpenCV.")
 endif()
 
-if(FEATURE_CUDA AND NOT CUDA_FOUND)
-  message(FATAL_ERROR "FEATURE_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
+if(WITH_CUDA AND NOT CUDA_FOUND)
+  message(FATAL_ERROR "WITH_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
 endif()
 
-if(FEATURE_MPI)
+if(WITH_MPI)
   if(NOT MPI_FOUND)
-    message(FATAL_ERROR "FEATURE_MPI selected, but could find no MPI implementation.")
+    message(FATAL_ERROR "WITH_MPI selected, but could find no MPI implementation.")
   endif()
 
   if(NOT MPIEXEC)
-    message(FATAL_ERROR "FEATURE_MPI selected, but mpiexec not found.")
+    message(FATAL_ERROR "WITH_MPI selected, but mpiexec not found.")
   endif()
 endif()
 
-if(FEATURE_OPENCL AND NOT OPENCL_FOUND)
-  message(FATAL_ERROR "FEATURE_OPENCL selected, but could not find any OpenCL library.")
+if(WITH_OPENCL AND NOT OPENCL_FOUND)
+  message(FATAL_ERROR "WITH_OPENCL selected, but could not find any OpenCL library.")
 endif()
 
-if(FEATURE_QT AND NOT QT4_FOUND)
-  message(FATAL_ERROR "FEATURE_QT selected, but could not find QT4")
+if(WITH_QT AND NOT QT4_FOUND)
+  message(FATAL_ERROR "WITH_QT selected, but could not find QT4")
 endif()
 
-if(FEATURE_HPX AND NOT HPX_FOUND)
-  message(FATAL_ERROR "FEATURE_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
+if(WITH_HPX AND NOT HPX_FOUND)
+  message(FATAL_ERROR "WITH_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
 endif()
 
-if(FEATURE_HPX AND NOT Boost_SERIALIZATION_FOUND)
-  message(FATAL_ERROR "FEATURE_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
+if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
+  message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
 endif()
 
-if (FEATURE_BOOST_MPI AND NOT Boost_MPI_FOUND)
-  message(FATAL_ERROR "FEATURE_BOOST_MPI selected, but Boost.MPI library not found")
+if (WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
+  message(FATAL_ERROR "WITH_BOOST_MPI selected, but Boost.MPI library not found")
 endif()
 
-if (FEATURE_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
-  message(FATAL_ERROR "FEATURE_BOOST_MOVE selected, but Boost.Move library not found")
+if (WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
+  message(FATAL_ERROR "WITH_BOOST_MOVE selected, but Boost.Move library not found")
 endif()
 
-if (FEATURE_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
-  message(FATAL_ERROR "FEATURE_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
+if (WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
+  message(FATAL_ERROR "WITH_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
 endif()
 
-if(FEATURE_BOOST_MPI)
+if(WITH_BOOST_MPI)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
 endif()
 
-if(FEATURE_VISIT)
+if(WITH_VISIT)
   include_directories(${VisIt_INCLUDE_DIRS})
 endif()
 
@@ -281,14 +281,14 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
-if(FEATURE_HPX)
+if(WITH_HPX)
   set(HPX_LIB_SUFFIX "")
   if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
   endif()
 endif()
 
-if(FEATURE_QT)
+if(WITH_QT)
   include(${QT_USE_FILE})
   add_definitions(-DQT_NO_KEYWORDS)
 endif()
@@ -371,7 +371,7 @@ add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
 set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
-if(FEATURE_HPX)
+if(WITH_HPX)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
     hpx${HPX_LIB_SUFFIX}
@@ -381,13 +381,13 @@ if(FEATURE_HPX)
   )
 endif()
 
-if(FEATURE_QT)
+if(WITH_QT)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
     ${QT_LIBRARIES})
 endif()
 
-if(FEATURE_THREADS)
+if(WITH_THREADS)
   if (DONT_LINK_PTHREAD)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
   else()
@@ -400,16 +400,16 @@ if(FEATURE_THREADS)
   endif()
 endif()
 
-if(FEATURE_MPI)
+if(WITH_MPI)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${MPI_LIBRARIES})
   set_property(TARGET geodecomp PROPERTY LINK_FLAGS ${MPI_LINK_FLAGS})
 endif()
 
-if(FEATURE_OPENCL)
+if(WITH_OPENCL)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} OpenCL)
 endif()
 
-if(FEATURE_VISIT)
+if(WITH_VISIT)
   set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} dl)
 endif()
 
@@ -467,7 +467,7 @@ if (GENERATE_TYPEMAPS)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
-    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_FEATURE_MPI --macro-guard-boost LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
+    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
     DEPENDS "${CMAKE_BINARY_DIR}/cache")
 
   list(REMOVE_ITEM ALL_HEADERS "communication/typemaps.h")

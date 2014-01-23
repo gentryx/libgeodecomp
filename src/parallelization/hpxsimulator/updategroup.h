@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_UPDATEGROUP_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>

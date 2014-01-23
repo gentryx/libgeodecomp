@@ -224,7 +224,7 @@ public:
 
     void testNonPoDCell()
     {
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 
         ghostZoneWidth = 3;
 

@@ -12,7 +12,7 @@ using namespace HiParSimulator;
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-#ifdef LIBGEODECOMP_FEATURE_OPENCL
+#ifdef LIBGEODECOMP_WITH_OPENCL
 
 class Cell
 {
@@ -41,7 +41,7 @@ public:
 class OpenCLStepperBasicTest : public CxxTest::TestSuite
 {
 public:
-#ifdef LIBGEODECOMP_FEATURE_OPENCL
+#ifdef LIBGEODECOMP_WITH_OPENCL
     typedef OpenCLStepper<Cell> StepperType;
 
     void setUp()
@@ -60,12 +60,12 @@ public:
 
     void testBasic()
     {
-#ifdef LIBGEODECOMP_FEATURE_OPENCL
+#ifdef LIBGEODECOMP_WITH_OPENCL
         std::cout << "fixme: andi, implement me!\n";
 #endif
     }
 
-#ifdef LIBGEODECOMP_FEATURE_OPENCL
+#ifdef LIBGEODECOMP_WITH_OPENCL
 private:
     boost::shared_ptr<CellInitializer> init;
     boost::shared_ptr<PartitionManager<Topologies::Cube<3>::Topology> > partitionManager;

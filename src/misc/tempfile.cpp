@@ -1,6 +1,6 @@
 #include <libgeodecomp/config.h>
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 #include <libgeodecomp/communication/mpilayer.h>
 #endif
 
@@ -35,7 +35,7 @@ std::string TempFile::serial(const std::string& prefix)
     }
 }
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 
 std::string TempFile::parallel(const std::string& prefix)
 {

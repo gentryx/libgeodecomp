@@ -2,13 +2,13 @@
 #define LIBGEODECOMP_LIBGEODECOMP_H
 #include <libgeodecomp/config.h>
 
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #endif
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>

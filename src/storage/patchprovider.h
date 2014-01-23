@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_PATCHPROVIDER_H
 #define LIBGEODECOMP_STORAGE_PATCHPROVIDER_H
 
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/lcos/local/spinlock.hpp>
 #endif
 
@@ -44,7 +44,7 @@ public:
         const std::size_t nanoStep,
         const bool remove=true) = 0;
 
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
     virtual void get(
         GRID_TYPE *destinationGrid,
         const Region<DIM>& patchableRegion,
