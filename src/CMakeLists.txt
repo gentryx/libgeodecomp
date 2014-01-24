@@ -141,52 +141,52 @@ if (MACHINE_ARCH MATCHES "x86_64")
 endif()
 
 #============= 3. CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
-
-add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
-
-add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
-
-add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
+add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
 
 add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
 
-add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
+add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
+
+add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
+
+# setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
+add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
 add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
 
-add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
+add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
 
-add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
-
-add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
+add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
 
 add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
 
+add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
+
 add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
 
-add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
-
-add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
-
-add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
-
-add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
 
 add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
 
-add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
+add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+
+add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
+
+add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
+
+add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
+
+add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
+
+add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
 
 add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
 
 add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
 
-# setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
-add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
+add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
-add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
-
-add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
+add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
 print_options()
 dump_config("config.h")
