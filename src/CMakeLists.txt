@@ -61,7 +61,7 @@ find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
-
+find_package(SCOTCH)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
@@ -86,6 +86,10 @@ endif()
 
 if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
+endif()
+
+if(NOT DEFINED SCOTCH_FOUND)
+  set(SCOTCH_FOUND false)
 endif()
 
 if(NOT DEFINED OpenCV_FOUND)
@@ -173,6 +177,8 @@ add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} 
 
 add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
+add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
+
 add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
 
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
@@ -196,6 +202,7 @@ set(AUXDIRS)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${ADDITIONAL_COMPILE_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -210,6 +217,10 @@ if(WITH_HPX)
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
+endif()
+
+if(WITH_SCOTCH)
+  include_directories(${SCOTCH_INCLUDE_DIRS})
 endif()
 
 if(WITH_CUDA)
@@ -256,15 +267,19 @@ if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
 endif()
 
-if (WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
+if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
+  message(FATAL_ERROR "WITH_SCOTCH selected but no installation of Scotch could be found.")
+endif()
+
+if(WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
   message(FATAL_ERROR "WITH_BOOST_MPI selected, but Boost.MPI library not found")
 endif()
 
-if (WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
+if(WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
   message(FATAL_ERROR "WITH_BOOST_MOVE selected, but Boost.Move library not found")
 endif()
 
-if (WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
+if(WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "WITH_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
 endif()
 
@@ -378,8 +393,13 @@ if(WITH_HPX)
     hpx${HPX_LIB_SUFFIX}
     hpx_serialization${HPX_LIB_SUFFIX}
     hpx_init${HPX_LIB_SUFFIX}
-    ${HPX_LIBRARIES}
-  )
+    ${HPX_LIBRARIES})
+endif()
+
+if(WITH_SCOTCH)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${SCOTCH_LIBRARIES})
 endif()
 
 if(WITH_QT)
