@@ -137,11 +137,11 @@ if (MACHINE_ARCH MATCHES "x86_64")
 endif()
 
 #============= 3. CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
+add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
-add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
+add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
 
-add_config_option(DONT_LINK_PTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compuiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." false false)
+add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
 
 add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
 
@@ -196,6 +196,7 @@ set(AUXDIRS)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 generate_sourcelists("./")
@@ -388,15 +389,15 @@ if(WITH_QT)
 endif()
 
 if(WITH_THREADS)
-  if (DONT_LINK_PTHREAD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-  else()
+  if (WITH_LIBPTHREAD)
     # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
       set(LIBGEODECOMP_LINK_LIBRARIES
         ${LIBGEODECOMP_LINK_LIBRARIES}
         pthread)
     endif()
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
   endif()
 endif()
 
@@ -463,7 +464,7 @@ Cflags: -I\${includedir}
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")
 
 #============= 11. TYPEMAPS GENERATION ===============================
-if (GENERATE_TYPEMAPS)
+if (WITH_TYPEMAPS)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
@@ -481,4 +482,4 @@ if (GENERATE_TYPEMAPS)
     COMMAND cp -a "${CMAKE_BINARY_DIR}/last_cache" "${CMAKE_BINARY_DIR}/cache" 2>/dev/null || echo "still ok >/dev/null"
     COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --cache "${CMAKE_BINARY_DIR}/cache" "${CMAKE_CURRENT_SOURCE_DIR}" "${CANDIDATES}"
     COMMAND cp -a "${CMAKE_BINARY_DIR}/cache" "${CMAKE_BINARY_DIR}/last_cache")
-endif(GENERATE_TYPEMAPS)
+endif(WITH_TYPEMAPS)
