@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_COMMUNICATION_MPILAYER_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <mpi.h>
 #include <map>

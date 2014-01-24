@@ -2,10 +2,10 @@
 #define LIBGEODECOMP_MISC_STDCONTAINEROVERLOADS_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/vector.hpp>
 #endif
 

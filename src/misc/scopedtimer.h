@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_MISC_SCOPEDTIMER_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 #else
@@ -29,7 +29,7 @@ public:
      */
     static double time()
     {
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
         return hpx::util::high_resolution_timer::now();
 #else
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();

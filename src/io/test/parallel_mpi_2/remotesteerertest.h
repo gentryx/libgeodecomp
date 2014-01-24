@@ -8,7 +8,7 @@
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
 #include <libgeodecomp/io/remotesteerer.h>
 #include <libgeodecomp/io/remotesteerer/interactor.h>
 #endif
@@ -22,7 +22,7 @@ DEFINE_DATAACCESSOR(TestValueAccessor, TestCell<2>, double, testValue);
 class RemoteSteererTest : public CxxTest::TestSuite
 {
 public:
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
     class FlushAction : public Action<TestCell<2> >
     {
     public:
@@ -93,7 +93,7 @@ public:
 
     void setUp()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         unsigned steererPeriod = 3;
         unsigned writerPeriod = 2;
         port = 47112;
@@ -115,14 +115,14 @@ public:
 
     void tearDown()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         sim.reset();
 #endif
     }
 
     void testBasic()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new FlushAction);
             StringVec feedback = steerer->sendCommandWithFeedback("flush 1234 9", 1);
@@ -155,7 +155,7 @@ public:
 
     void testNonExistentAction()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         if (mpiLayer.rank() == 0) {
             StringVec res;
             res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 2);
@@ -170,7 +170,7 @@ public:
 
     void testInvalidHandler()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         boost::shared_ptr<Interactor> interactor;
 
         if (mpiLayer.rank() == 0) {
@@ -201,7 +201,7 @@ public:
 
     void testHandlerNotFound1()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
@@ -234,7 +234,7 @@ public:
 
     void testHandlerNotFound2()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
@@ -267,7 +267,7 @@ public:
 
     void testHandlerNotFound3()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         if (mpiLayer.rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
@@ -299,7 +299,7 @@ public:
 
     void testGetSet()
     {
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
         steerer->addDataAccessor(new TestValueAccessor());
         boost::shared_ptr<Interactor> interactor;
         mpiLayer.barrier();
@@ -326,7 +326,7 @@ public:
     }
 
 private:
-#ifdef LIBGEODECOMP_FEATURE_THREADS
+#ifdef LIBGEODECOMP_WITH_THREADS
     MPILayer mpiLayer;
     boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
     RemoteSteerer<TestCell<2> > *steerer;

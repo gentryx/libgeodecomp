@@ -30,7 +30,7 @@ namespace SerializationBufferHelpers
             return &buffer.first();
         }
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
         static inline MPI_Datatype cellMPIDataType()
         {
             return APITraits::SelectMPIDataType<ElementType>::value();
@@ -57,7 +57,7 @@ namespace SerializationBufferHelpers
             return &buffer.front();
         }
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
         static inline MPI_Datatype cellMPIDataType()
         {
             return MPI_CHAR;
@@ -84,7 +84,7 @@ namespace SerializationBufferHelpers
             return &buffer.front();
         }
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
         static inline MPI_Datatype cellMPIDataType()
         {
             return MPI_CHAR;
@@ -117,7 +117,7 @@ public:
         return Implementation::getData(buffer);
     }
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
     static inline  MPI_Datatype cellMPIDataType()
     {
         return Implementation::cellMPIDataType();

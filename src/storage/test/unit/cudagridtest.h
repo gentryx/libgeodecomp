@@ -15,7 +15,7 @@ public:
 
     void testBasic()
     {
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 
         Coord<2> dim(30, 10);
         CoordBox<2> box(Coord<2>(), dim);
@@ -56,7 +56,7 @@ public:
 
     void test3d()
     {
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 
         typedef TestInitializer<TestCell<3> > TestCellInitializer;
         typedef TestCellInitializer::Topology Topology;
@@ -98,7 +98,7 @@ public:
 
     void testTopologicalCorrectness()
     {
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 
         // simulation space: (0,0), (100, 100),
         //
@@ -170,7 +170,7 @@ public:
 
     void testConstructor()
     {
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
         Coord<2> dim(30, 10);
         CoordBox<2> box(Coord<2>(), dim);
         Region<2> region;

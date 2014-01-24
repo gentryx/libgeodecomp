@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_COORD_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #endif
 
@@ -17,11 +17,11 @@
 #include <boost/multi_array.hpp>
 #endif
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #endif
 
-#ifdef LIBGEODECOMP_FEATURE_QT
+#ifdef LIBGEODECOMP_WITH_QT
 #include <QtCore/QSize>
 #endif
 
@@ -225,7 +225,7 @@ public:
         c[1] = ny;
     }
 
-#ifdef LIBGEODECOMP_FEATURE_QT
+#ifdef LIBGEODECOMP_WITH_QT
     inline Coord(const QSize& size)
     {
         c[0] = size.width();
@@ -636,7 +636,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
 
 }
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<1>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<2>)
 BOOST_IS_BITWISE_SERIALIZABLE(LibGeoDecomp::Coord<3>)

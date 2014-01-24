@@ -28,7 +28,7 @@ class Pipe
 public:
     friend class PipeTest;
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
     Pipe(
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD) :
@@ -96,7 +96,7 @@ public:
     {
         LOG(DBG, "Pipe::sync()");
         boost::lock_guard<boost::mutex> lock(mutex);
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
         broadcastSteeringRequests();
         moveSteeringFeedbackToRoot();
 #endif
@@ -121,7 +121,7 @@ private:
     StringVec steeringRequests;
     StringVec steeringFeedback;
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
     MPILayer mpiLayer;
     int root;
 

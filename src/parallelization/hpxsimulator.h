@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 
 #include <hpx/config.hpp>
 #include <hpx/lcos/broadcast.hpp>

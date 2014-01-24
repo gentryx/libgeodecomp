@@ -14,7 +14,7 @@
 #define __device__
 #endif
 
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 
 #ifdef __CUDACC__
 

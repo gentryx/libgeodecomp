@@ -145,19 +145,19 @@ We recommend an out-of-source build:
   make
 
 That's it. CMake will output a number of configure options. You can
-change these by specifying their valued via "-D NAME=value". Note that
+change these by specifying their valued via "-DNAME=value". Note that
 CMake will cache these settings, you don't have to specify them again
 when re-running CMake. The following example turns CUDA support off.
 This may come in handy in case CMake detected CUDA, but you don't have
 a compatible GPU installed:
 
-  cmake -D FEATURE_CUDA=false ../../
+  cmake -DWITH_CUDA=false ../../
 
 Another common option is to manually specify the compiler. Here I
 select GCC 4.7.0 my Gentoo system, which would otherwise use GCC 4.5.3
 as the standard compiler:
 
-  cmake -D CMAKE_CXX_COMPILER=/usr/x86_64-pc-linux-gnu/gcc-bin/4.7.0/g++ ../../
+  cmake -DCMAKE_CXX_COMPILER=/usr/x86_64-pc-linux-gnu/gcc-bin/4.7.0/g++ ../../
 
 Additionally you may want to run the library's unit tests via "make
 test" to ensure that it's actually working. For speedier builds you

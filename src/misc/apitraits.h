@@ -3,7 +3,7 @@
 
 #include <libgeodecomp/config.h>
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
 #endif
 
@@ -11,19 +11,19 @@
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
-#ifdef LIBGEODECOMP_FEATURE_BOOST_SERIALIZATION
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <sstream>
 #endif
 
 namespace LibGeoDecomp {
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 class Typemaps;
 #endif
 
 namespace APITraitsHelpers {
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 
 template<typename PROVIDER, typename CELL>
 class DefaultMPIDataTypeLookup
@@ -301,7 +301,7 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
     template<typename CELL, typename HAS_MPI_DATA_TYPE = void, typename MPI_DATA_TYPE_RETRIEVAL = void>
     class SelectMPIDataType
     {

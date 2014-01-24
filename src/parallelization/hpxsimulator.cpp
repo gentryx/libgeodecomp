@@ -1,5 +1,5 @@
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_FEATURE_HPX
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <boost/foreach.hpp>
 #include <libgeodecomp/parallelization/hpxsimulator.h>

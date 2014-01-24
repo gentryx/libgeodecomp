@@ -2202,7 +2202,7 @@ private:
     std::string name;
 };
 
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 void cudaTests(std::string revision, bool quick, int cudaDevice);
 #endif
 
@@ -2317,7 +2317,7 @@ int main(int argc, char **argv)
     eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
     eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
 
-#ifdef LIBGEODECOMP_FEATURE_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
     cudaTests(revision, quick, cudaDevice);
 #endif
 
