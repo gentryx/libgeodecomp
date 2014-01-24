@@ -1,7 +1,7 @@
 #include <libgeodecomp/config.h>
 
 // include MPI header first to skirt troubles with Intel MPI and standard C library
-#ifdef LIBGEODECOMP_FEATURE_MPI
+#ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
 #endif
 

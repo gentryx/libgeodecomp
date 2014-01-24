@@ -2,7 +2,7 @@ generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
-if (FEATURE_CUDA AND FEATURE_QT AND FEATURE_OPENCV)
+if (WITH_CUDA AND WITH_QT AND WITH_OPENCV)
   include(${QT_USE_FILE})
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
