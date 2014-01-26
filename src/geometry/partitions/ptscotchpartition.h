@@ -2,18 +2,19 @@
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHPARTITION_H
 
 #include <libgeodecomp/geometry/partitions/partition.h>
-#include "/usr/local/include/ptscotch.h"
+#include <mpi.h>
+#include <ptscotch.h>
 
 namespace LibGeoDecomp {
 
 template<int DIM>
-class PtscotchPartition : public Partition<DIM>
+class PTScotchPartition : public Partition<DIM>
 {
 public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
 
-    inline PtscotchPartition(
+    inline PTScotchPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,
@@ -25,11 +26,6 @@ public:
         {
             indices = new SCOTCH_Num[cellNbr];
             regions = new Region<DIM>[weights.size()];
-            //fixme: better mpiinit
-            int initial;
-            MPI_Initialized(&initial);
-            if (!initial)
-                initMPI();
             initIndices();
             createRegions();
         }
@@ -38,28 +34,6 @@ public:
     {
         return regions[node];
     }
-
-    void initMPI(){
-        int                   thrdlvlreqval;
-        int                   thrdlvlproval;
-        int                   procglbnbr;
-        int                   proclocnum;
-        int                   procnum;
-
-        MPI_Comm              proccomm;
-        thrdlvlreqval = MPI_THREAD_MULTIPLE;
-        if (MPI_Init_thread (NULL, NULL, thrdlvlreqval, &thrdlvlproval) != MPI_SUCCESS) {
-            exit (1);
-        }
-        if (thrdlvlreqval > thrdlvlproval) {
-            exit (1);
-        }
-
-        proccomm = MPI_COMM_WORLD;
-        MPI_Comm_size (proccomm, &procglbnbr);
-        MPI_Comm_rank (proccomm, &proclocnum);
-    }
-
 
 private:
     Coord<DIM> origin;
@@ -83,7 +57,8 @@ private:
         SCOTCH_Dgraph grafdat;
         SCOTCH_dgraphInit(&grafdat,MPI_COMM_WORLD);
 
-        SCOTCH_Num const edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) + (dimensions[0] - 1) * dimensions[1]);
+        SCOTCH_Num const edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) +
+                                           (dimensions[0] - 1) * dimensions[1]);
 
         SCOTCH_Num * verttabGra;
         SCOTCH_Num * edgetabGra;
@@ -113,8 +88,19 @@ private:
         verttabGra[cellNbr] = pointer;
 
 
-if(SCOTCH_dgraphBuild(&grafdat,0,cellNbr,cellNbr,verttabGra,verttabGra +1,NULL,NULL,edgenbrGra,edgenbrGra, edgetabGra,NULL, NULL) != 0){
-        }
+        SCOTCH_dgraphBuild(&grafdat,
+                           0,
+                           cellNbr,
+                           cellNbr,
+                           verttabGra,
+                           verttabGra +1,
+                           NULL,
+                           NULL,
+                           edgenbrGra,
+                           edgenbrGra,
+                           edgetabGra,
+                           NULL,
+                           NULL);
 
         SCOTCH_Strat * straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);

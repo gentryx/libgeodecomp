@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_SCOTCHPARTITION_H
 
 #include <libgeodecomp/geometry/partitions/partition.h>
-#include "/usr/local/include/scotch.h"
+#include <scotch.h>
 
 namespace LibGeoDecomp {
 
@@ -61,7 +61,8 @@ private:
         SCOTCH_Graph grafdat;
         SCOTCH_graphInit (&grafdat);
 
-        SCOTCH_Num const edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) + (dimensions[0] - 1) * dimensions[1]);
+        SCOTCH_Num const edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) +
+                                           (dimensions[0] - 1) * dimensions[1]);
 
         SCOTCH_Num * verttabGra;
         SCOTCH_Num * edgetabGra;
@@ -91,8 +92,18 @@ private:
         verttabGra[cellNbr] = pointer;
 
 
-        if(SCOTCH_graphBuild(&grafdat,0,cellNbr,verttabGra,verttabGra +1,NULL,NULL,edgenbrGra, edgetabGra, NULL) != 0){
-        }
+        SCOTCH_graphBuild(
+                          &grafdat,
+                          0,
+                          cellNbr,
+                          verttabGra,
+                          verttabGra +1,
+                          NULL,
+                          NULL,
+                          edgenbrGra,
+                          edgetabGra,
+                          NULL
+                          );
 
         SCOTCH_graphMap (&grafdat,&arch,straptr,indices);
     }
