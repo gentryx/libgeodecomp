@@ -6,6 +6,7 @@
 #include <libgeodecomp/storage/updatefunctor.h>
 
 #include <hpx/async.hpp>
+#include <hpx/lcos/wait_all.hpp>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
