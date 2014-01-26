@@ -61,7 +61,7 @@ find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
-
+find_package(SCOTCH)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
@@ -86,6 +86,10 @@ endif()
 
 if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
+endif()
+
+if(NOT DEFINED SCOTCH_FOUND)
+  set(SCOTCH_FOUND false)
 endif()
 
 if(NOT DEFINED OpenCV_FOUND)
@@ -137,50 +141,52 @@ if (MACHINE_ARCH MATCHES "x86_64")
 endif()
 
 #============= 3. CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(GENERATE_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
-
-add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." OFF false)
-
-add_config_option(DONT_LINK_PTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compuiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." false false)
-
-add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
+add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
 
 add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
 
-add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
+add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
 
-add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
-
-add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
-
-add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
-
-add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
-
-add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
-
-add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
-
-add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
-
-add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
-
-add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
-
-add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
-
-add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
-
-add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
-
-add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
 
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
 add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
 
-add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
+add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
+
+add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
 
 add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
+
+add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
+
+add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
+
+add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
+
+add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
+
+add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
+
+add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+
+add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
+
+add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
+
+add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
+
+add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
+
+add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
+
+add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
+
+add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+
+add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
+
+add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
 print_options()
 dump_config("config.h")
@@ -196,6 +202,8 @@ set(AUXDIRS)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${ADDITIONAL_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 generate_sourcelists("./")
@@ -209,6 +217,10 @@ if(WITH_HPX)
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
+endif()
+
+if(WITH_SCOTCH)
+  include_directories(${SCOTCH_INCLUDE_DIRS})
 endif()
 
 if(WITH_CUDA)
@@ -255,15 +267,19 @@ if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
 endif()
 
-if (WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
+if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
+  message(FATAL_ERROR "WITH_SCOTCH selected but no installation of Scotch could be found.")
+endif()
+
+if(WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
   message(FATAL_ERROR "WITH_BOOST_MPI selected, but Boost.MPI library not found")
 endif()
 
-if (WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
+if(WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
   message(FATAL_ERROR "WITH_BOOST_MOVE selected, but Boost.Move library not found")
 endif()
 
-if (WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
+if(WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "WITH_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
 endif()
 
@@ -377,8 +393,13 @@ if(WITH_HPX)
     hpx${HPX_LIB_SUFFIX}
     hpx_serialization${HPX_LIB_SUFFIX}
     hpx_init${HPX_LIB_SUFFIX}
-    ${HPX_LIBRARIES}
-  )
+    ${HPX_LIBRARIES})
+endif()
+
+if(WITH_SCOTCH)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${SCOTCH_LIBRARIES})
 endif()
 
 if(WITH_QT)
@@ -388,15 +409,15 @@ if(WITH_QT)
 endif()
 
 if(WITH_THREADS)
-  if (DONT_LINK_PTHREAD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-  else()
+  if (WITH_LIBPTHREAD)
     # some systems (e.g. my devel notebook) require manually linking pthreads for OpenMP...
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
       set(LIBGEODECOMP_LINK_LIBRARIES
         ${LIBGEODECOMP_LINK_LIBRARIES}
         pthread)
     endif()
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
   endif()
 endif()
 
@@ -463,7 +484,7 @@ Cflags: -I\${includedir}
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")
 
 #============= 11. TYPEMAPS GENERATION ===============================
-if (GENERATE_TYPEMAPS)
+if (WITH_TYPEMAPS)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
@@ -481,4 +502,4 @@ if (GENERATE_TYPEMAPS)
     COMMAND cp -a "${CMAKE_BINARY_DIR}/last_cache" "${CMAKE_BINARY_DIR}/cache" 2>/dev/null || echo "still ok >/dev/null"
     COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --cache "${CMAKE_BINARY_DIR}/cache" "${CMAKE_CURRENT_SOURCE_DIR}" "${CANDIDATES}"
     COMMAND cp -a "${CMAKE_BINARY_DIR}/cache" "${CMAKE_BINARY_DIR}/last_cache")
-endif(GENERATE_TYPEMAPS)
+endif(WITH_TYPEMAPS)
