@@ -22,7 +22,7 @@ public:
         std::size_t sizeRegion0 = p.getRegion(0).size();
         std::size_t compSize;
 
-        for(int i = 1 ; i < weights.size() ; ++i){
+        for(unsigned int i = 1 ; i < weights.size() ; ++i){
             compSize = p.getRegion(i).size();
             TS_ASSERT(sizeRegion0 == compSize ||
                       sizeRegion0 == compSize - 1 ||
@@ -87,7 +87,7 @@ public:
         std::size_t sizeRegion0 = p.getRegion(0).size();
         std::size_t compSize;
 
-        for(int i = 1 ; i < weights.size() ; ++i){
+        for(unsigned int i = 1 ; i < weights.size() ; ++i){
             compSize = p.getRegion(i).size();
             TS_ASSERT(sizeRegion0 == compSize ||
                       sizeRegion0 == compSize - 1 ||
