@@ -13,6 +13,7 @@ class ScotchPartitionTest : public CxxTest::TestSuite
 {
 public:
     void testEqual(){
+#ifdev LIBGEODECOMP_WITH_SCOTCH
         Coord<2> origin(0, 0);
         Coord<2> dimensions( 255,511);
         std::vector<std::size_t> weights;
@@ -27,9 +28,11 @@ public:
                       sizeRegion0 == compSize - 1 ||
                       sizeRegion0 == compSize + 1);
         }
+#endif
     }
 
     void testComplete(){
+#ifdev LIBGEODECOMP_WITH_SCOTCH
         Coord<2> origin(0, 0);
         Coord<2> dimensions(512, 234);
         std::vector<std::size_t> weights;
@@ -43,9 +46,11 @@ public:
         Region<2> complete = p.getRegion(0) + p.getRegion(1) + p.getRegion(2) + p.getRegion(3);
 
         TS_ASSERT_EQUALS(expected0, complete);
+#endif
      }
 
      void testOverlapse(){
+#ifdev LIBGEODECOMP_WITH_SCOTCH
          Coord<2> origin(0, 0);
          Coord<2> dimensions(128, 231);
          std::vector<std::size_t> weights;
@@ -59,6 +64,8 @@ public:
          Region<2> cut = p.getRegion(0) & p.getRegion(1) & p.getRegion(2) & p.getRegion(3);
 
          TS_ASSERT_EQUALS(expected0, cut);
+#endif
      }
 };
+
 }
