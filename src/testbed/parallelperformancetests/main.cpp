@@ -46,7 +46,6 @@ public:
         }
         CollectingWriter<CELL_TYPE> writer(cargoWriter, 1, 0);
 
-        typedef typename CollectingWriter<CELL_TYPE>::SimulatorGridType SimulatorGridType;
         typedef typename CollectingWriter<CELL_TYPE>::StorageGridType StorageGridType;
 
         StorageGridType grid(CoordBox<3>(Coord<3>(), dim));
