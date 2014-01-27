@@ -3,7 +3,7 @@ generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
-if((MACHINE_ARCH MATCHES "x86_64") AND WITH_CUDA)
+if((MACHINE_ARCH MATCHES "x86_64") AND WITH_CUDA AND WITH_MPI)
   # set(CMAKE_CXX_FLAGS "-g")
 
   add_executable(rtm main.cpp)
