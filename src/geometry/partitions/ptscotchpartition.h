@@ -1,7 +1,12 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHPARTITION_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/partitions/partition.h>
+
+#ifdef LIBGEODECOMP_WITH_SCOTCH
+#ifdef LIBGEODECOMP_WITH_MPI
+
 #include <mpi.h>
 #include <ptscotch.h>
 
@@ -171,5 +176,9 @@ private:
     }
  };
 }
+
+#endif
+
+#endif
 
 #endif

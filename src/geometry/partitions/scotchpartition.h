@@ -1,7 +1,12 @@
 #ifndef LIBGEODECOMP_GEOMETRY_PARTITIONS_SCOTCHPARTITION_H
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_SCOTCHPARTITION_H
 
+#include <libgeodecomp/config.h>
+
+#ifdef LIBGEODECOMP_WITH_SCOTCH
+
 #include <libgeodecomp/geometry/partitions/partition.h>
+
 #include <scotch.h>
 
 namespace LibGeoDecomp {
@@ -170,5 +175,7 @@ private:
     }
  };
 }
+
+#endif
 
 #endif
