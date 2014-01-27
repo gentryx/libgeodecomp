@@ -21,12 +21,19 @@ public:
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2)) :
         Partition<DIM>(offset, weights),
         origin(origin),
-        dimensions(dimensions),
-        cellNbr(dimensions[0] * dimensions[1])
+        dimensions(dimensions)
         {
+            if(DIM == 3){
+                cellNbr = dimensions[0]
+                    * dimensions[1]
+                    * dimensions[2];
+            } else {
+                cellNbr = dimensions[0]
+                    * dimensions[1];
+            }
             indices = new SCOTCH_Num[cellNbr];
-            regions = new Region<DIM>[weights.size()];
             initIndices();
+            regions = new Region<DIM>[weights.size()];
             createRegions();
         }
 
@@ -39,7 +46,7 @@ private:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
     SCOTCH_Num * indices;
-    SCOTCH_Num const cellNbr;
+    SCOTCH_Num cellNbr;
     Region<DIM> * regions;
     std::vector<std::pair <int,int> > * boxes;
 
@@ -57,8 +64,13 @@ private:
         SCOTCH_Dgraph grafdat;
         SCOTCH_dgraphInit(&grafdat,MPI_COMM_WORLD);
 
-        SCOTCH_Num const edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) +
+        SCOTCH_Num edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) +
                                            (dimensions[0] - 1) * dimensions[1]);
+        if(DIM == 3){
+            edgenbrGra = edgenbrGra
+                * dimensions[2]
+                + 2 * (dimensions[0] * dimensions[1] * (dimensions[2] - 1));
+        }
 
         SCOTCH_Num * verttabGra;
         SCOTCH_Num * edgetabGra;
@@ -66,27 +78,35 @@ private:
         edgetabGra = new SCOTCH_Num[edgenbrGra];
 
         int pointer = 0;
+        int xyArea = dimensions[0] * dimensions[1];
         for(int i = 0;i < cellNbr;++i){
             verttabGra[i] = pointer;
             if(i%dimensions[0] != 0){
-                edgetabGra[pointer] = i-1;
+                edgetabGra[pointer] = i - 1;
                 pointer++;
             }
             if(i%dimensions[0] != (dimensions[0]-1)){
-                edgetabGra[pointer] = i+1;
+                edgetabGra[pointer] = i + 1;
                 pointer++;
             }
-            if(!(i < dimensions[0])){
-                edgetabGra[pointer] = i-dimensions[0];
+            if(!((i % xyArea) < dimensions[0])){
+                edgetabGra[pointer] = i - dimensions[0];
                 pointer++;
             }
-            if(!(i >= dimensions[0] * (dimensions[1]-1))){
-                edgetabGra[pointer] = i+dimensions[0];
+            if(!((i % xyArea) >= dimensions[0] * (dimensions[1]-1))){
+                edgetabGra[pointer] = i + dimensions[0];
+                pointer++;
+            }
+            if(DIM == 3 && i >= (dimensions[0] * dimensions[1])){
+                edgetabGra[pointer] = i - (dimensions[0] * dimensions[1]);
+                pointer++;
+            }
+            if(DIM == 3 && i < (dimensions[0] * dimensions[1]) * (dimensions[2] - 1)){
+                edgetabGra[pointer] = i + (dimensions[0] * dimensions[1]);
                 pointer++;
             }
         }
         verttabGra[cellNbr] = pointer;
-
 
         SCOTCH_dgraphBuild(&grafdat,
                            0,
@@ -102,11 +122,13 @@ private:
                            NULL,
                            NULL);
 
+
         SCOTCH_Strat * straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
         //fixme: other strategies
 
         SCOTCH_dgraphMap (&grafdat,&arch,straptr,indices);
+
     }
 
     void createRegions(){
@@ -118,16 +140,35 @@ private:
                 length++;
             } else {
                 length++;
-                regions[rank] << CoordBox<DIM>(Coord<DIM>(start%dimensions[0],
-                                                          start/dimensions[0]),
-                                               Coord<DIM>(length,1));
+                Coord<DIM> startCoord;
+                Coord<DIM> lengthCoord;
+                lengthCoord[0] = length;
+                lengthCoord[1] = 1;
+                if(DIM == 3){
+                    startCoord[0] = origin[0]
+                        + (start % (dimensions[0] * dimensions[1]))
+                        % dimensions[0];
+                    startCoord[1] = origin[1]
+                        + (start % (dimensions[0] * dimensions[1]))
+                        / dimensions[0];
+                    startCoord[2] = origin[2] + start
+                        / (dimensions[0]
+                           * dimensions[1]);
+                    lengthCoord[2] = 1;
+                } else {
+                    startCoord[0] = origin[0] + start%dimensions[0];
+                    startCoord[1] = origin[1] + start/dimensions[0];
+                }
+
+
+                regions[rank] <<
+                    CoordBox<DIM>(startCoord,lengthCoord);
                 rank = indices[i];
                 start = i;
                 length = 0;
             }
         }
     }
-
  };
 }
 
