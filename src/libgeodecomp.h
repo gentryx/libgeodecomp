@@ -10,18 +10,19 @@
 
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
-#include <libgeodecomp/io/collectingwriter.h>
-#include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/io/collectingwriter.h>
+#include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/parallelization/hiparsimulator.h>
 #endif
 
 #include <libgeodecomp/communication/serialization.h>
+#include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
-#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>

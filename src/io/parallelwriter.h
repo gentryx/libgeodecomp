@@ -1,8 +1,6 @@
 #ifndef LIBGEODECOMP_IO_PARALLELWRITER_H
 #define LIBGEODECOMP_IO_PARALLELWRITER_H
 
-#include <mpi.h>
-
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/geometry/coord.h>
