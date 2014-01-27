@@ -2,6 +2,11 @@
 #define LIBGEODECOMP_IO_WRITER_H
 
 #include <libgeodecomp/config.h>
+
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <mpi.h>
+#endif
+
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 
 #include <string>
