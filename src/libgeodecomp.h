@@ -10,7 +10,6 @@
 
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
-#include <libgeodecomp/communication/serialization.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/parallelwriter.h>
@@ -18,6 +17,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #endif
 
+#include <libgeodecomp/communication/serialization.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/io/ppmwriter.h>
