@@ -270,19 +270,15 @@ public:
             boundingBoxes,
             weights
         };
-        hpx::wait(
-            hpx::lcos::broadcast_with_index<
-                typename UpdateGroupType::ComponentType::InitPartitionsAction
-            >(
-                updateGroupsIds,
-                initData
-            )
-        );
-        hpx::wait(
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
-                updateGroupsIds
-            )
-        );
+        hpx::lcos::broadcast_with_index<
+            typename UpdateGroupType::ComponentType::InitPartitionsAction
+        >(
+            updateGroupsIds,
+            initData
+        ).wait();
+        hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
+            updateGroupsIds
+        ).wait();
 
         initialized = true;
     }
@@ -294,11 +290,9 @@ public:
 
     void stop()
     {
-        hpx::wait(
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
-                updateGroupsIds
-            )
-        );
+        hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
+            updateGroupsIds
+        ).wait();
     }
 
     inline void step()

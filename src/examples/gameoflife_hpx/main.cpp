@@ -1,21 +1,10 @@
-#include <hpx/hpx_init.hpp>
-#include <boost/assign/std/vector.hpp>
 
-#include <libgeodecomp/config.h>
-#include <libgeodecomp/geometry/stencils.h>
-#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
-#include <libgeodecomp/io/hpxwritercollector.h>
-#include <libgeodecomp/io/serialbovwriter.h>
-#include <libgeodecomp/io/bovwriter.h>
-#include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/simplecellplotter.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/loadbalancer/oozebalancer.h>
-#include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/parallelization/hpxsimulator.h>
-#include <libgeodecomp/storage/image.h>
+#include <hpx/hpx.hpp>
+#include <hpx/hpx_init.hpp>
+
+#include <libgeodecomp.h>
+
+#include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

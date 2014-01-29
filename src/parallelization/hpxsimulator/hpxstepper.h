@@ -63,8 +63,7 @@ public:
     {
         for (std::size_t i = 0; i < nanoSteps; ++i)
         {
-            //update().wait();
-            update();
+            update().wait();
         }
     }
 
@@ -92,8 +91,8 @@ private:
     double startTimeUpdate;
     std::vector<PatchProviderPtr> steererVector;
 
-    //inline hpx::unique_future<void> update()
-    inline void update()
+    inline hpx::unique_future<void> update()
+    //inline void update()
     {
         startTimeUpdate = ScopedTimer::time();
 
@@ -137,13 +136,14 @@ private:
             curStep++;
         }
 
-        // FIXME: this somehow leads to a deadlock
-        //return
-        //    hpx::when_all(updateFutures).then(
-        //        hpx::util::bind(&HpxStepper::updateGhostZones, this, region)
-        //    );
+        return
+            hpx::when_all(updateFutures).then(
+                hpx::util::bind(&HpxStepper::updateGhostZones, this, region)
+            );
+        /*
         hpx::wait_all(updateFutures);
         updateGhostZones(region);
+        */
     }
 
     // remove this function and compilation with g++ 4.7.3 fails. scary!
@@ -154,22 +154,35 @@ private:
     }
 
 
-    void updateGhostZones(const Region<DIM>& region)
+    hpx::unique_future<void> updateGhostZones(const Region<DIM>& region)
+    //void updateGhostZones(const Region<DIM>& region)
     {
         std::swap(oldGrid, newGrid);
         chronometer.tock<TimeComputeInner>(startTimeUpdate);
 
-        notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
+        return
+            notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep()).then(
+                hpx::util::bind(&HpxStepper::updateGhostZones2, this, region)
+            );
+    }
+
+    hpx::unique_future<void> updateGhostZones2(const Region<DIM>& region)
+    {
+        //notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();
         }
 
-        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
+        return notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
     }
 
-    inline void notifyPatchAccepters(
+    // helper function to turn a vector of futures into a void future...
+    static void void_() {}
+
+    //inline void notifyPatchAccepters(
+    inline hpx::unique_future<void> notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -198,10 +211,12 @@ private:
             }
         }
 
-        hpx::wait_all(patchAcceptersFutures);
+        //hpx::wait_all(patchAcceptersFutures);
+        return hpx::when_all(patchAcceptersFutures).then(hpx::util::bind(void_));
     }
 
-    inline void notifyPatchProviders(
+    //inline void notifyPatchProviders(
+    inline hpx::unique_future<void> notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -239,7 +254,8 @@ private:
             */
         }
 
-        hpx::wait_all(patchProvidersFutures);
+        //hpx::wait_all(patchProvidersFutures);
+        return hpx::when_all(patchProvidersFutures).then(hpx::util::bind(void_));
     }
 
     inline std::size_t globalNanoStep() const
@@ -262,11 +278,11 @@ private:
         notifyPatchAccepters(
             rimRegion,
             ParentType::GHOST,
-            globalNanoStep());
+            globalNanoStep()).wait();
         notifyPatchAccepters(
             partitionManager->innerSet(0),
             ParentType::INNER_SET,
-            globalNanoStep());
+            globalNanoStep()).wait();
 
         kernelBuffer.reset(new PatchBufferType1(partitionManager->getVolatileKernel()));
         rimBuffer.reset(new PatchBufferType2(rimRegion));
@@ -307,7 +323,7 @@ private:
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
             notifyPatchProviders(
-                partitionManager->rim(t), ParentType::GHOST, globalNanoStep());
+                partitionManager->rim(t), ParentType::GHOST, globalNanoStep()).wait();
 
             {
                 TimeComputeGhost timer(&chronometer);
@@ -357,7 +373,7 @@ private:
                 ++curGlobalNanoStep;
             }
 
-            notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
+            notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep).wait();
         }
 
         {

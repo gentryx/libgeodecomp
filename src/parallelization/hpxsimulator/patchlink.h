@@ -79,7 +79,7 @@ public:
             // We use an unmanaged GID here to avoid unnecessary credit splits
             // we know that we keep a reference in the update group anyways.
             hpx::naming::gid_type gid = ugDest.gid().get_gid();
-            hpx::naming::detail::strip_credit_from_gid(gid);
+            hpx::naming::detail::strip_credits_from_gid(gid);
             dest = UPDATE_GROUP(hpx::id_type(gid, hpx::id_type::unmanaged));
         }
 
@@ -98,7 +98,7 @@ public:
                 return;
             }
 
-            hpx::wait(putFuture);
+            putFuture.wait();
             boost::shared_ptr<BufferType> buffer(new BufferType(region.size()));
             GridVecConv::gridToVector(grid, buffer.get(), region);
 

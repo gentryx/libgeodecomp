@@ -29,20 +29,4 @@ HPX_REGISTER_BASE_LCO_WITH_VALUE(
     LibGeoDecomp_BaseLcovector_StatisticsVector
 )
 
-// FIXME: somehow, this needs to be defined under certain circumstances ...
-namespace hpx { namespace naming {
-    template <typename Archive>
-    void id_type::load(Archive&, unsigned int)
-    {
-        HPX_ASSERT(false);
-    }
-    template void id_type::load<boost::archive::binary_iarchive>(boost::archive::binary_iarchive&, unsigned int);
-    template <typename Archive>
-    void id_type::save(Archive&, unsigned int) const
-    {
-        HPX_ASSERT(false);
-    }
-    template void id_type::save<boost::archive::binary_oarchive>(boost::archive::binary_oarchive&, unsigned int) const;
-}}
-
 #endif
