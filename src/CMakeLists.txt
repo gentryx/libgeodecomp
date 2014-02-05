@@ -217,6 +217,7 @@ if(WITH_HPX)
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
+  set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/lib/hpx:${CMAKE_BINARY_DIR}/lib/hpx:${CMAKE_BINARY_DIR}/src")
 endif()
 
 if(WITH_SCOTCH)

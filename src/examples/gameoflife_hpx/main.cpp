@@ -1,8 +1,8 @@
 
+#include <libgeodecomp.h>
+
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
-
-#include <libgeodecomp.h>
 
 #include <boost/assign/std/vector.hpp>
 
@@ -162,6 +162,7 @@ BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
 typedef
     LibGeoDecomp::HpxWriterCollector<ConwayCell>
     HpxWriterCollectorType;
+
 LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
     HpxWriterCollectorType,
     ConwayCellWriterCollector
@@ -197,7 +198,8 @@ int hpx_main()
         sim.addWriter(
             new TracingWriterType(
                 1,
-                init->maxSteps()));
+                init->maxSteps(),
+                1));
 
         sim.run();
     }
