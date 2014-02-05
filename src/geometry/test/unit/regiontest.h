@@ -1279,6 +1279,39 @@ public:
         }
     }
 
+    void testPrettyPrint()
+    {
+        std::vector<Streak<2> > streaks;
+        streaks << Streak<2>(Coord<2>(1,  2), 10)
+                << Streak<2>(Coord<2>(2,  4), 15)
+                << Streak<2>(Coord<2>(3,  8), 20)
+                << Streak<2>(Coord<2>(4, 16), 25);
+
+        std::ostringstream buf;
+        buf << "Region<2>(\n"
+            << "  " << streaks[0] << "\n"
+            << "  " << streaks[1] << "\n"
+            << "  " << streaks[2] << "\n"
+            << "  " << streaks[3] << "\n"
+            << ")\n";
+
+        Region<2> region;
+        region << streaks[0]
+               << streaks[1]
+               << streaks[2]
+               << streaks[3];
+
+        std::string expected = buf.str();
+        std::string actual = region.prettyPrint();
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testPrintToBOV()
+    {
+        // fixme
+    }
+
 private:
     Region<2> c;
     CoordVector bigInsertOrdered;

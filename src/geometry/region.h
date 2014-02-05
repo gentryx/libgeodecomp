@@ -682,6 +682,20 @@ public:
 
     }
 
+    inline std::string prettyPrint() const
+    {
+        std::ostringstream buf;
+        buf << "Region<" << DIM << ">(\n";
+
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+            buf << "  " << *i << "\n";
+        }
+
+        buf << ")\n";
+
+        return buf.str();
+    }
+
     inline bool empty() const
     {
         return (indices[0].size() == 0);
