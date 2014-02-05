@@ -155,29 +155,16 @@ public:
 
 private:
     SinkType sink;
+
+    friend class boost::serialization::access;
+
+    HpxWriterCollector() :
+        ParallelWriter<CELL_TYPE>("", 1)
+    {}
 };
 
 class Serialization;
 
-}
-
-namespace boost {
-namespace serialization {
-
-template<typename ARCHIVE, typename CELL_TYPE, typename CONVERTER>
-inline
-static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>& object, const unsigned);
-
-template<class Archive, typename CELL_TYPE, typename CONVERTER>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER> *object, const unsigned version)
-{
-    ::new(object)LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>(
-        LibGeoDecomp::HpxWriterSink<CELL_TYPE, CONVERTER>());
-    serialize(archive, *object, version);
-}
-
-}
 }
 
 #endif

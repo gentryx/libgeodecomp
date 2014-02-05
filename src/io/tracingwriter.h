@@ -8,16 +8,6 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 
-namespace boost {
-
-namespace serialization {
-
-class access;
-
-}
-
-}
-
 namespace LibGeoDecomp {
 
 /**
@@ -31,7 +21,6 @@ class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
 public:
     friend class Serialization;
-    friend class boost::serialization::access;
 
     using Writer<CELL_TYPE>::NANO_STEPS;
 
@@ -152,6 +141,8 @@ private:
         return boost::posix_time::microsec_clock::local_time();
     }
 
+    friend class boost::serialization::access;
+
     TracingWriter() :
         Writer<CELL_TYPE>("", 1),
         ParallelWriter<CELL_TYPE>("", 1),
@@ -166,12 +157,6 @@ class Serialization;
 namespace boost {
 namespace serialization {
 
-/*
-template<typename ARCHIVE, typename CELL_TYPE>
-inline
-static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned);
-*/
-
 template<typename ARCHIVE>
 inline
 static void serialize(ARCHIVE& archive, std::ostream& object, const unsigned)
@@ -185,16 +170,6 @@ static void serialize(ARCHIVE& archive, boost::posix_time::ptime& object, const 
 {
     // intentionally left empty to ignore serialization/deserialization
 }
-
-/*
-template<class Archive, typename CELL_TYPE>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::TracingWriter<CELL_TYPE> *object, const unsigned version)
-{
-    ::new(object)LibGeoDecomp::TracingWriter<CELL_TYPE>(1, 1);
-    serialize(archive, *object, version);
-}
-*/
 
 }
 }

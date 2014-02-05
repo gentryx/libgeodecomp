@@ -9,8 +9,13 @@
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/util/portable_binary_oarchive.hpp>
+#include <hpx/util/portable_binary_iarchive.hpp>
+#else
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#endif
 #endif
 
 namespace LibGeoDecomp {
@@ -120,11 +125,18 @@ private:
         const APITraits::FalseType&,
         const APITraits::TrueType&)
     {
-        typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
         vec->resize(0);
+#ifdef LIBGEODECOMP_WITH_HPX
+        int archive_flags = boost::archive::no_header;
+        archive_flags |= hpx::util::disable_data_chunking;
+        hpx::util::binary_filter *f = 0;
+        hpx::util::portable_binary_oarchive archive(*vec, f, archive_flags);
+#else
+        typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
         Device sink(*vec);
         boost::iostreams::stream<Device> stream(sink);
         boost::archive::binary_oarchive archive(stream);
+#endif
 
         for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
             archive & grid[*i];
@@ -193,10 +205,16 @@ private:
         const APITraits::FalseType&,
         const APITraits::TrueType&)
     {
+#ifdef LIBGEODECOMP_WITH_HPX
+        int archive_flags = boost::archive::no_header;
+        archive_flags |= hpx::util::disable_data_chunking;
+        hpx::util::portable_binary_iarchive archive(vec, vec.size(), archive_flags);
+#else
         typedef boost::iostreams::basic_array_source<char> Device;
         Device source(&vec.front(), vec.size());
         boost::iostreams::stream<Device> stream(source);
         boost::archive::binary_iarchive archive(stream);
+#endif
 
         for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
             archive & (*grid)[*i];

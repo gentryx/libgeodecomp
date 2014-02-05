@@ -4,8 +4,13 @@
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <libgeodecomp/communication/serialization.h>
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/util/portable_binary_oarchive.hpp>
+#include <hpx/util/portable_binary_iarchive.hpp>
+#else
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#endif
 #endif
 
 #include <sstream>
@@ -287,10 +292,24 @@ public:
     void testSerialization()
     {
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-        std::stringstream buf;
         Coord<2> c(47,11);
         Coord<2> d(1, 2);
-
+        
+#ifdef LIBGEODECOMP_WITH_HPX
+        std::vector<char> buf;
+        int archive_flags = boost::archive::no_header;
+        archive_flags |= hpx::util::disable_data_chunking;
+        {
+            hpx::util::binary_filter *f = 0;
+            hpx::util::portable_binary_oarchive archive(buf, f, archive_flags);
+            archive << c;
+        }
+        {
+            hpx::util::portable_binary_iarchive archive(buf, buf.size(), archive_flags);
+            archive >> d;
+        }
+#else
+        std::stringstream buf;
         {
             boost::archive::text_oarchive archive(buf);
             archive << c;
@@ -299,6 +318,7 @@ public:
             boost::archive::text_iarchive archive(buf);
             archive >> d;
         }
+#endif
 
         TS_ASSERT_EQUALS(c, d);
 #endif

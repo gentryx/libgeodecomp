@@ -134,6 +134,8 @@ public:
         std::size_t rank,
         bool lastCall)
     {
+        if(validRegion.size() == 0) return;
+
         boost::shared_ptr<BufferType> buffer(new BufferType(validRegion.size()));
 
         CellType *dest = &(*buffer)[0];
@@ -161,6 +163,7 @@ public:
             BOOST_FOREACH(hpx::unique_future<void>& f, stepFinishedFutures) {
                 if(f.is_ready()) {
                     f = std::move(stepFinishedFuture);
+                    break;
                 }
             }
         }
