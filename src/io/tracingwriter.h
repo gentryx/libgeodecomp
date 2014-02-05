@@ -140,7 +140,17 @@ private:
     {
         return boost::posix_time::microsec_clock::local_time();
     }
+
+    friend class boost::serialization::access;
+
+    TracingWriter() :
+        Writer<CELL_TYPE>("", 1),
+        ParallelWriter<CELL_TYPE>("", 1),
+        stream(std::cerr)
+    {}
 };
+
+class Serialization;
 
 }
 
@@ -159,14 +169,6 @@ inline
 static void serialize(ARCHIVE& archive, boost::posix_time::ptime& object, const unsigned)
 {
     // intentionally left empty to ignore serialization/deserialization
-}
-
-template<class Archive, typename CELL_TYPE>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::TracingWriter<CELL_TYPE> *object, const unsigned version)
-{
-    ::new(object)LibGeoDecomp::TracingWriter<CELL_TYPE>(1, 1);
-    serialize(archive, *object, version);
 }
 
 }
