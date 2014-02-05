@@ -68,7 +68,11 @@ private:
 
         SCOTCH_Strat * straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
-        SCOTCH_stratGraphMapBuild(straptr,SCOTCH_STRATRECURSIVE,vertnbrArch,0);
+        //SCOTCH_stratGraphMapBuild(straptr,SCOTCH_STRATRECURSIVE,vertnbrArch,0);
+        /*if(SCOTCH_stratGraphMap(straptr,"d")!=0){
+            std::cerr << "stratGraphMap failed" << std::endl;
+            }*/
+
 
         SCOTCH_Graph grafdat;
         SCOTCH_graphInit (&grafdat);
