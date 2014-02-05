@@ -5,6 +5,7 @@
 #include <libgeodecomp/storage/fixedarray.h>
 
 #include <iomanip>
+#include <sstream>
 
 namespace LibGeoDecomp {
 
