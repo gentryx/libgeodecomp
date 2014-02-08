@@ -8,6 +8,16 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 
+namespace boost {
+
+namespace serialization {
+
+class access;
+
+}
+
+}
+
 namespace LibGeoDecomp {
 
 /**
@@ -21,6 +31,7 @@ class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
 {
 public:
     friend class Serialization;
+    friend class boost::serialization::access;
 
     using Writer<CELL_TYPE>::NANO_STEPS;
 
@@ -140,8 +151,6 @@ private:
     {
         return boost::posix_time::microsec_clock::local_time();
     }
-
-    friend class boost::serialization::access;
 
     TracingWriter() :
         Writer<CELL_TYPE>("", 1),
