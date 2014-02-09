@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits.h>
+#include <string>
 
 
 using namespace LibGeoDecomp;
@@ -52,13 +53,18 @@ int main(int argc, char **argv)
     MPI_Init(&argc, &argv);
     Coord<3> origin(0,0);
     int dim = atoi(argv[1]);
+    std::string scotch = "Scotch";
+    std::string zCurve = "ZCurve";
+    std::string recBi = "RecBi";
+    std::string checker = "checker";
+    std::string dimString = argv[1];
     Coord<3> dimensions(dim,dim,dim);
     std::vector<std::size_t> weights;
     std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck;
-    outputScotch.open("outputScotch.txt");
-    outputZCurve.open("outputZCurve.txt");
-    outputRecBi.open("outputRecBi.txt");
-    outputCheck.open("outputCheck.txt");
+    outputScotch.open((dimString + scotch).c_str());
+    outputZCurve.open((dimString + zCurve).c_str());
+    outputRecBi.open((dimString + recBi).c_str());
+    outputCheck.open((dimString + checker).c_str());
     for(int i = 4; i <= 200; i+=2){
         std::cout << "Round: " << i << std::endl;
         int remain = (dim*dim*dim)%i;
