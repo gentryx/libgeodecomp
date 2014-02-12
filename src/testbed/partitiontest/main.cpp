@@ -51,20 +51,24 @@ int main(int argc, char **argv)
 {
 
     MPI_Init(&argc, &argv);
-    Coord<3> origin(0,0);
+    Coord<3> origin(0,0.0);
     int dim = atoi(argv[1]);
     std::string scotch = "Scotch";
     std::string zCurve = "ZCurve";
     std::string recBi = "RecBi";
-    std::string checker = "checker";
+    std::string checker = "Checker";
+    std::string ptscotch = "PTScotch";
+    std::string striping = "Striping";
     std::string dimString = argv[1];
     Coord<3> dimensions(dim,dim,dim);
     std::vector<std::size_t> weights;
-    std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck;
+    std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck, outputPTScotch, outputStriping;
     outputScotch.open((dimString + scotch).c_str());
     outputZCurve.open((dimString + zCurve).c_str());
     outputRecBi.open((dimString + recBi).c_str());
     outputCheck.open((dimString + checker).c_str());
+    outputPTScotch.open((dimString + ptscotch).c_str());
+    outputStriping.open((dimString + striping).c_str());
     for(int i = 4; i <= 200; i+=2){
         std::cout << "Round: " << i << std::endl;
         int remain = (dim*dim*dim)%i;
@@ -89,6 +93,15 @@ int main(int argc, char **argv)
         Partition<3> *checker = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
         output(checker,outputCheck,weights.size());
         delete checker;
+
+        Partition<3> *ptscotch = new PTScotchPartition<3>(origin, dimensions, 0, weights);
+        output(ptscotch,outputPTScotch,weights.size());
+        delete checker;
+
+        Partition<3> *striping = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
+        output(striping,outputStriping,weights.size());
+        delete checker;
+
         weights.clear();
     }
     MPI_Finalize();
