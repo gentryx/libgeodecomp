@@ -52,7 +52,16 @@ int main(int argc, char **argv)
 
     MPI_Init(&argc, &argv);
     Coord<3> origin(0,0.0);
-    int dim = atoi(argv[1]);
+    int dimx, dimy, dimz;
+    if(argc == 2){
+        dimx = atoi(argv[1]);
+        dimy = dimx;
+        dimz = dimx;
+    } else {
+        dimx = atoi(argv[1]);
+        dimy = atoi(argv[2]);
+        dimz = atoi(argv[3]);
+    }
     std::string scotch = "Scotch";
     std::string zCurve = "ZCurve";
     std::string recBi = "RecBi";
@@ -60,7 +69,7 @@ int main(int argc, char **argv)
     std::string ptscotch = "PTScotch";
     std::string striping = "Striping";
     std::string dimString = argv[1];
-    Coord<3> dimensions(dim,dim,dim);
+    Coord<3> dimensions(dimx,dimy,dimz);
     std::vector<std::size_t> weights;
     std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck, outputPTScotch, outputStriping;
     outputScotch.open((dimString + scotch).c_str());
@@ -71,8 +80,8 @@ int main(int argc, char **argv)
     outputStriping.open((dimString + striping).c_str());
     for(int i = 4; i <= 200; i+=2){
         std::cout << "Round: " << i << std::endl;
-        int remain = (dim*dim*dim)%i;
-        int weight = (dim*dim*dim)/i;
+        int remain = (dimx*dimy*dimz)%i;
+        int weight = (dimx*dimy*dimz)/i;
         for(int j = 1; j <= i; ++j){
             weights.push_back(weight);
         }
@@ -81,26 +90,30 @@ int main(int argc, char **argv)
         for(unsigned int l = 0; l < weights.size(); ++l){
             sum += weights[l];
         }
+        std::cout << "scotch" << std::endl;
         Partition<3> *scotch = new ScotchPartition<3>(origin, dimensions, 0, weights);
         output(scotch,outputScotch,weights.size());
         delete scotch;
+        std::cout << "ZCurve" << std::endl;
         Partition<3> *zCurve = new ZCurvePartition<3>(origin, dimensions, 0, weights);
         output(zCurve,outputZCurve,weights.size());
         delete zCurve;
+        std::cout << "recBi" << std::endl;
         Partition<3> *recBi = new RecursiveBisectionPartition<3>(origin, dimensions, 0, weights);
         output(recBi,outputRecBi,weights.size());
         delete recBi;
+        std::cout << "checker" << std::endl;
         Partition<3> *checker = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
         output(checker,outputCheck,weights.size());
         delete checker;
-
+        std::cout << "ptscotch" << std::endl;
         Partition<3> *ptscotch = new PTScotchPartition<3>(origin, dimensions, 0, weights);
         output(ptscotch,outputPTScotch,weights.size());
-        delete checker;
-
+        delete ptscotch;
+        std::cout << "striping" << std::endl;
         Partition<3> *striping = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
         output(striping,outputStriping,weights.size());
-        delete checker;
+        delete striping;
 
         weights.clear();
     }
