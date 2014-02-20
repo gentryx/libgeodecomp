@@ -1,6 +1,8 @@
 #ifndef LIBGEODECOMP_IO_SELECTOR_H
 #define LIBGEODECOMP_IO_SELECTOR_H
 
+#include <libflatarray/flat_array.hpp>
+
 namespace LibGeoDecomp {
 
 /**

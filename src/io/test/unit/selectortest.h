@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
 class MyDummyCell
 {
 public:
-    MyDummyCell(const int x = 0, const double y = 0, const char c) :
+    MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
         x(x),
         y(y),
         z(z)
@@ -17,7 +17,7 @@ public:
 
     int x;
     double y;
-    char c;
+    char z;
 };
 
 }
@@ -57,7 +57,7 @@ public:
 
         TS_ASSERT_EQUALS("varX", selectorX.name());
         TS_ASSERT_EQUALS("varY", selectorY.name());
-        TS_ASSERT_EQUALS("varZ", selectorY.name());
+        TS_ASSERT_EQUALS("varZ", selectorZ.name());
 
         TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOf());
         TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOf());
