@@ -449,8 +449,16 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
+
 # install libflatarray, too
-install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflatarray)
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/*.hpp")
+foreach(i ${HEADERS})
+  install(FILES ${i} DESTINATION include/libflatarray)
+endforeach()
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/detail/*.hpp")
+foreach(i ${HEADERS})
+  install(FILES ${i} DESTINATION include/libflatarray/detail)
+endforeach()
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")
