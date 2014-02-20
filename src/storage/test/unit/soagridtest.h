@@ -35,6 +35,23 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 LIBFLATARRAY_REGISTER_SOA(SoATestCell, ((int)(v)))
 
+class MyDummyCell
+{
+public:
+    MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
+        x(x),
+        y(y),
+        z(z)
+    {}
+
+    int x;
+    double y;
+    char z;
+};
+
+LIBFLATARRAY_REGISTER_SOA(MyDummyCell, ((int)(x))((double)(y))((char)(z)) )
+
+
 namespace LibGeoDecomp {
 
 class CheckCellValues
@@ -68,6 +85,8 @@ class SoAGridTest : public CxxTest::TestSuite
 public:
     typedef TestCellSoA TestCellType2;
     typedef APITraits::SelectTopology<TestCellType2>::Value Topology2;
+
+    typedef APITraits::SelectTopology<MyDummyCell>::Value Topology3;
 
     void testBasic()
     {
@@ -335,8 +354,64 @@ public:
         }
     }
 
-    void testSaveMember()
+    void testLoadSaveMember2D()
     {
+        // basic setup:
+        Selector<MyDummyCell> ySelector(&MyDummyCell::y, "y");
+
+        Coord<2> origin(61, 62);
+        Coord<2> dim(50, 40);
+        double defaultValue = 111.222;
+
+        SoAGrid<MyDummyCell, Topology3> grid(
+            CoordBox<2>(origin, dim),
+            MyDummyCell(0, defaultValue, 0));
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>(61,  62),  70)
+               << Streak<2>(Coord<2>(70,  80),  90)
+               << Streak<2>(Coord<2>(65, 101), 111);
+
+        std::vector<double> yVector(region.size(), -47);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(yVector[i], -47);
+        }
+
+        // test whether default grid data is accurately copied back:
+        grid.saveMember(reinterpret_cast<char*>(&yVector[0]), ySelector, region);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(yVector[i], defaultValue);
+        }
+
+        // modify grid and repeat:
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            grid.set(*i, MyDummyCell(1, i->x() + i->y(), 1));
+        }
+
+        grid.saveMember(reinterpret_cast<char*>(&yVector[0]), ySelector, region);
+        Region<2>::Iterator cursor = region.begin();
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(yVector[i], cursor->x() + cursor->y());
+            ++cursor;
+        }
+
+        // test loadMember, too:
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            yVector[i] = i + 0.4711;
+        }
+        grid.loadMember(reinterpret_cast<char*>(&yVector[0]), ySelector, region);
+
+        int counter = 0;
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            double expected = counter + 0.4711;
+            TS_ASSERT_EQUALS(grid.get(*i).y, expected);
+            ++counter;
+        }
+    }
+
+    void testLoadSaveMember3D()
+    {
+        // basic setup:
         Selector<TestCellType2> posSelector(&TestCellType2::pos, "pos");
 
         Coord<3> origin(601, 602, 603);
@@ -357,11 +432,13 @@ public:
             TS_ASSERT_EQUALS(posVector[i], Coord<3>(44, 55, 66));
         }
 
+        // test whether default grid data is accurately copied back:
         grid.saveMember(reinterpret_cast<char*>(&posVector[0]), posSelector, region);
         for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(posVector[i], Coord<3>(-1, -2, -3));
         }
 
+        // modify grid and repeat:
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
             grid.set(*i, TestCellType2(*i, dim, 1, 47.11));
         }
@@ -372,10 +449,20 @@ public:
             TS_ASSERT_EQUALS(posVector[i], *cursor);
             ++cursor;
         }
-    }
 
-    // fixme: needs loadmember, too
-    // fixme: needs 2d test, too
+        // test loadMember, too:
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            posVector[i] = Coord<3>(i, i * 1000, 4711);
+        }
+        grid.loadMember(reinterpret_cast<char*>(&posVector[0]), posSelector, region);
+
+        int counter = 0;
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            Coord<3> expected(counter, counter * 1000, 4711);
+            TS_ASSERT_EQUALS(grid.get(*i).pos, expected);
+            ++counter;
+        }
+    }
 };
 
 }

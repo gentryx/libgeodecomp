@@ -109,6 +109,41 @@ private:
     CELL innerCell;
 };
 
+/**
+ * A simple functor for wrapping index calculation within the SoA
+ * layout. It's purpose is to hide differences in the calculation when
+ * using 1D, 2D or 3D coords. LibFlatArray internally always uses a 3D
+ * layout, thus our edgeRadii are also always 3D.
+ */
+template<int DIM_X, int DIM_Y, int DIM_Z>
+class GenIndex
+{
+public:
+    int operator()(const Coord<1>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * edgeRadii.y() +
+            DIM_X * DIM_Y * edgeRadii.z();
+    }
+
+    int operator()(const Coord<2>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * (coord.y() + edgeRadii.y()) +
+            DIM_X * DIM_Y * edgeRadii.z();
+    }
+
+    int operator()(const Coord<3>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * (coord.y() + edgeRadii.y()) +
+            DIM_X * DIM_Y * (coord.z() + edgeRadii.z());
+    }
+};
+
 template<typename CELL, int DIM>
 class SaveMember
 {
@@ -134,7 +169,7 @@ public:
         char *currentTarget = target;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            *index = genIndex<DIM_X, DIM_Y, DIM_Z>(i->origin - origin, edgeRadii);
+            *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             // fixme: use std::copy here, not memcpy
             std::size_t byteSize = selector.sizeOf() * i->length();
@@ -150,33 +185,49 @@ private:
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
     int memberOffset;
+};
 
-    template<int DIM_X, int DIM_Y, int DIM_Z>
-    int genIndex(const Coord<1>& coord, const Coord<3>& edgeRadii) const
+template<typename CELL, int DIM>
+class LoadMember
+{
+public:
+    LoadMember(
+        char *source,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region,
+        const Coord<DIM>& origin,
+        const Coord<3>& edgeRadii) :
+        source(source),
+        selector(selector),
+        region(region),
+        origin(origin),
+        edgeRadii(edgeRadii)
+    {}
+
+    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    void operator()(
+        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
+        int *index) const
     {
-        return
-            coord.x() + edgeRadii.x() +
-            DIM_X * edgeRadii.y() +
-            DIM_X * DIM_Y * edgeRadii.z();
+        char *currentSource = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+
+            // fixme: use std::copy here, not memcpy
+            std::size_t byteSize = selector.sizeOf() * i->length();
+            memcpy(accessor.access_member(selector.sizeOf(), selector.offset()), currentSource, byteSize);
+            currentSource += byteSize;
+        }
     }
 
-    template<int DIM_X, int DIM_Y, int DIM_Z>
-    int genIndex(const Coord<2>& coord, const Coord<3>& edgeRadii) const
-    {
-        return
-            coord.x() + edgeRadii.x() +
-            DIM_X * (coord.y() + edgeRadii.y()) +
-            DIM_X * DIM_Y * edgeRadii.z();
-    }
-
-    template<int DIM_X, int DIM_Y, int DIM_Z>
-    int genIndex(const Coord<3>& coord, const Coord<3>& edgeRadii) const
-    {
-        return
-            coord.x() + edgeRadii.x() +
-            DIM_X * (coord.y() + edgeRadii.y()) +
-            DIM_X * DIM_Y * (coord.z() + edgeRadii.z());
-    }
+private:
+    char *source;
+    const Selector<CELL>& selector;
+    const Region<DIM>& region;
+    const Coord<DIM>& origin;
+    const Coord<3>& edgeRadii;
+    int memberOffset;
 };
 
 }
@@ -354,7 +405,17 @@ public:
     void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region)
     {
         int index = 0;
-        delegate.callback(SoAGridHelpers::SaveMember<CELL, DIM>(target, selector, region, box.origin, edgeRadii), &index);
+        delegate.callback(
+            SoAGridHelpers::SaveMember<CELL, DIM>(target, selector, region, box.origin, edgeRadii),
+            &index);
+    }
+
+    void loadMember(char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    {
+        int index = 0;
+        delegate.callback(
+            SoAGridHelpers::LoadMember<CELL, DIM>(source, selector, region, box.origin, edgeRadii),
+            &index);
     }
 
 private:
