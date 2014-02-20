@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     std::map<std::string, int> hostCount;
     std::map<int, int> cudaIDs;
 
-    for (std::size_t i = 0; i < layer.size(); ++i) {
+    for (int i = 0; i < layer.size(); ++i) {
         std::string name(names + i * MPI_MAX_PROCESSOR_NAME);
 
         int id = hostCount[name];

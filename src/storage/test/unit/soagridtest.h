@@ -334,6 +334,48 @@ public:
             }
         }
     }
+
+    void testSaveMember()
+    {
+        Selector<TestCellType2> posSelector(&TestCellType2::pos, "pos");
+
+        Coord<3> origin(601, 602, 603);
+        Coord<3> dim(50, 40, 20);
+        double defaultValue = 20.062011;
+
+        SoAGrid<TestCellType2, Topology2> grid(
+            CoordBox<3>(origin, dim),
+            TestCellType2(Coord<3>(-1, -2, -3), Coord<3>(-4, -5, -6), 0, defaultValue));
+
+        Region<3> region;
+        region << Streak<3>(Coord<3>(610,  610,  610), 630)
+               << Streak<3>(Coord<3>(610,  611,  610), 620)
+               << Streak<3>(Coord<3>(630,  610,  620), 640);
+
+        std::vector<Coord<3> > posVector(region.size(), Coord<3>(44, 55, 66));
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(posVector[i], Coord<3>(44, 55, 66));
+        }
+
+        grid.saveMember(reinterpret_cast<char*>(&posVector[0]), posSelector, region);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(posVector[i], Coord<3>(-1, -2, -3));
+        }
+
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            grid.set(*i, TestCellType2(*i, dim, 1, 47.11));
+        }
+
+        grid.saveMember(reinterpret_cast<char*>(&posVector[0]), posSelector, region);
+        Region<3>::Iterator cursor = region.begin();
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(posVector[i], *cursor);
+            ++cursor;
+        }
+    }
+
+    // fixme: needs loadmember, too
+    // fixme: needs 2d test, too
 };
 
 }
