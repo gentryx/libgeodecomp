@@ -4,6 +4,7 @@
 #include <libflatarray/flat_array.hpp>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
 
@@ -106,6 +107,76 @@ private:
     Coord<3> edgeRadii;
     CELL edgeCell;
     CELL innerCell;
+};
+
+template<typename CELL, int DIM>
+class SaveMember
+{
+public:
+    SaveMember(
+        char *target,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region,
+        const Coord<DIM>& origin,
+        const Coord<3>& edgeRadii) :
+        target(target),
+        selector(selector),
+        region(region),
+        origin(origin),
+        edgeRadii(edgeRadii)
+    {}
+
+    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    void operator()(
+        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
+        int *index) const
+    {
+        char *currentTarget = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            *index = genIndex<DIM_X, DIM_Y, DIM_Z>(i->origin - origin, edgeRadii);
+
+            // fixme: use std::copy here, not memcpy
+            std::size_t byteSize = selector.sizeOf() * i->length();
+            memcpy(currentTarget, accessor.access_member(selector.sizeOf(), selector.offset()), byteSize);
+            currentTarget += byteSize;
+        }
+    }
+
+private:
+    char *target;
+    const Selector<CELL>& selector;
+    const Region<DIM>& region;
+    const Coord<DIM>& origin;
+    const Coord<3>& edgeRadii;
+    int memberOffset;
+
+    template<int DIM_X, int DIM_Y, int DIM_Z>
+    int genIndex(const Coord<1>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * edgeRadii.y() +
+            DIM_X * DIM_Y * edgeRadii.z();
+    }
+
+    template<int DIM_X, int DIM_Y, int DIM_Z>
+    int genIndex(const Coord<2>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * (coord.y() + edgeRadii.y()) +
+            DIM_X * DIM_Y * edgeRadii.z();
+    }
+
+    template<int DIM_X, int DIM_Y, int DIM_Z>
+    int genIndex(const Coord<3>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * (coord.y() + edgeRadii.y()) +
+            DIM_X * DIM_Y * (coord.z() + edgeRadii.z());
+    }
 };
 
 }
@@ -278,6 +349,12 @@ public:
             dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
 
+    }
+
+    void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region)
+    {
+        int index = 0;
+        delegate.callback(SoAGridHelpers::SaveMember<CELL, DIM>(target, selector, region, box.origin, edgeRadii), &index);
     }
 
 private:
