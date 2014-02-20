@@ -24,7 +24,8 @@ public:
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         memberOffset(LibFlatArray::member_ptr_to_offset()(memberPointer)),
-        memberName(memberName)
+        memberName(memberName),
+        copyHandler(&Selector<CELL>::copyStreakImplementation<MEMBER>)
     {}
 
     inline char CELL:: *operator*() const
@@ -56,11 +57,26 @@ public:
         return memberOffset;
     }
 
+    void copyStreak(const char *first, const char *last, char *target) const
+    {
+        (*copyHandler)(first, last, target);
+    }
+
 private:
     char CELL:: *memberPointer;
     std::size_t memberSize;
     int memberOffset;
     std::string memberName;
+    void (*copyHandler)(const char *, const char *, char *);
+
+    template<typename MEMBER>
+    static void copyStreakImplementation(const char *first, const char *last, char *target)
+    {
+        std::copy(
+            reinterpret_cast<const MEMBER*>(first),
+            reinterpret_cast<const MEMBER*>(last),
+            reinterpret_cast<MEMBER*>(target));
+    }
 };
 
 }
