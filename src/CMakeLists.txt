@@ -62,6 +62,7 @@ find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
 find_package(SCOTCH)
+find_package(Silo)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
@@ -181,6 +182,8 @@ add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenC
 add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
 
 add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
+
+add_config_option(WITH_SILO "Silo is a flexible output library developed by LLNL." ${Silo_FOUND} true)
 
 add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
 
