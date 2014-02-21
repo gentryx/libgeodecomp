@@ -1,6 +1,6 @@
-#include <sstream>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/storage/image.h>
+#include <sstream>
 
 namespace LibGeoDecomp {
 
