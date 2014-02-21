@@ -38,6 +38,10 @@ LIBFLATARRAY_REGISTER_SOA(SoATestCell, ((int)(v)))
 class MyDummyCell
 {
 public:
+    class API :
+        public APITraits::HasSoA
+    {};
+
     MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
         x(x),
         y(y),
@@ -443,6 +447,7 @@ public:
             grid.set(*i, TestCellType2(*i, dim, 1, 47.11));
         }
 
+        // fixme: add templated function to gridbase which avoids this type cast (might even check for typeid of member), rename saveMember to saveMemberImplementation and make it private
         grid.saveMember(reinterpret_cast<char*>(&posVector[0]), posSelector, region);
         Region<3>::Iterator cursor = region.begin();
         for (std::size_t i = 0; i < region.size(); ++i) {

@@ -2,7 +2,9 @@
 #define LIBGEODECOMP_STORAGE_SOAGRID_H
 
 #include <libflatarray/flat_array.hpp>
+
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -194,7 +196,7 @@ class LoadMember
 {
 public:
     LoadMember(
-        char *source,
+        const char *source,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
@@ -211,7 +213,7 @@ public:
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
         int *index) const
     {
-        char *currentSource = source;
+        const char *currentSource = source;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
@@ -227,7 +229,7 @@ public:
     }
 
 private:
-    char *source;
+    const char *source;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
     const Coord<DIM>& origin;
@@ -407,7 +409,7 @@ public:
 
     }
 
-    void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region)
+    void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
         int index = 0;
         delegate.callback(
@@ -415,7 +417,7 @@ public:
             &index);
     }
 
-    void loadMember(char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    void loadMember(const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
     {
         int index = 0;
         delegate.callback(

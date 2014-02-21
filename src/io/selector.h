@@ -1,9 +1,31 @@
 #ifndef LIBGEODECOMP_IO_SELECTOR_H
 #define LIBGEODECOMP_IO_SELECTOR_H
 
+#include <libgeodecomp/misc/apitraits.h>
 #include <libflatarray/flat_array.hpp>
 
 namespace LibGeoDecomp {
+
+class APITraits;
+
+namespace SelectorHelpers {
+
+template<typename CELL, typename MEMBER>
+class GetMemberOffset
+{
+public:
+    int operator()(MEMBER CELL:: *memberPointer, APITraits::TrueType)
+    {
+        return LibFlatArray::member_ptr_to_offset()(memberPointer);
+    }
+
+    int operator()(MEMBER CELL:: *memberPointer, APITraits::FalseType)
+    {
+        return -1;
+    }
+};
+
+}
 
 /**
  * A Selector can be used by library code to extract data from user
@@ -23,9 +45,13 @@ public:
     Selector(MEMBER CELL:: *memberPointer, std::string memberName) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
-        memberOffset(LibFlatArray::member_ptr_to_offset()(memberPointer)),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
-        copyHandler(&Selector<CELL>::copyStreakImplementation<MEMBER>)
+        copyMemberInHandler(&Selector<CELL>::copyMemberInImplementation<MEMBER>),
+        copyMemberOutHandler(&Selector<CELL>::copyMemberOutImplementation<MEMBER>),
+        copyStreakHandler(&Selector<CELL>::copyStreakImplementation<MEMBER>)
     {}
 
     inline char CELL:: *operator*() const
@@ -57,9 +83,19 @@ public:
         return memberOffset;
     }
 
+    void copyMemberIn(const char *source, CELL *target, int num) const
+    {
+        (*copyMemberInHandler)(source, target, num, memberPointer);
+    }
+
+    void copyMemberOut(const CELL *source, char *target, int num) const
+    {
+        (*copyMemberOutHandler)(source, target, num, memberPointer);
+    }
+
     void copyStreak(const char *first, const char *last, char *target) const
     {
-        (*copyHandler)(first, last, target);
+        (*copyStreakHandler)(first, last, target);
     }
 
 private:
@@ -67,7 +103,9 @@ private:
     std::size_t memberSize;
     int memberOffset;
     std::string memberName;
-    void (*copyHandler)(const char *, const char *, char *);
+    void (*copyMemberInHandler)(const char *, CELL *, int num, char CELL:: *memberPointer);
+    void (*copyMemberOutHandler)(const CELL *, char *, int num, char CELL:: *memberPointer);
+    void (*copyStreakHandler)(const char *, const char *, char *);
 
     template<typename MEMBER>
     static void copyStreakImplementation(const char *first, const char *last, char *target)
@@ -77,6 +115,35 @@ private:
             reinterpret_cast<const MEMBER*>(last),
             reinterpret_cast<MEMBER*>(target));
     }
+
+    template<typename MEMBER>
+    static void copyMemberInImplementation(
+        const char *source, CELL *target, int num, char CELL:: *memberPointer)
+    {
+        MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
+        const MEMBER *actualSource = reinterpret_cast<const MEMBER*>(source);
+
+        for (int i = 0; i < num; ++i) {
+            (*target).*actualMember = *actualSource;
+            ++target;
+            ++actualSource;
+        }
+    }
+
+    template<typename MEMBER>
+    static void copyMemberOutImplementation(
+        const CELL *source, char *target, int num, char CELL:: *memberPointer)
+    {
+        MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
+        MEMBER *actualTarget = reinterpret_cast<MEMBER*>(target);
+
+        for (int i = 0; i < num; ++i) {
+            *actualTarget = (*source).*actualMember;
+            ++actualTarget;
+            ++source;
+        }
+    }
+
 };
 
 }

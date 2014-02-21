@@ -4,7 +4,9 @@
 #include <libflatarray/aligned_allocator.hpp>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
 
@@ -320,6 +322,22 @@ public:
     virtual CoordBox<DIM> boundingBox() const
     {
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
+    }
+
+    void saveMember(char *target, const Selector<CELL_TYPE>& selector, const Region<DIM>& region) const
+    {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            selector.copyMemberOut(&(*this)[i->origin], target, i->length());
+            target += selector.sizeOf() * i->length();
+        }
+    }
+
+    void loadMember(const char *source, const Selector<CELL_TYPE>& selector, const Region<DIM>& region)
+    {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            selector.copyMemberIn(source, &(*this)[i->origin], i->length());
+            source += selector.sizeOf() * i->length();
+        }
     }
 
 private:

@@ -9,7 +9,6 @@
 
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/storage/displacedgrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <sstream>
