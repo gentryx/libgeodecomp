@@ -93,14 +93,14 @@ public:
     Selector(MEMBER CELL:: *memberPointer, std::string memberName) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
-        memberTypeIDHandler(&Selector<CELL>::memberTypeIDImplementation<MEMBER>),
+        memberTypeIDHandler(&Selector<CELL>::template memberTypeIDImplementation<MEMBER>),
         memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
-        copyMemberInHandler(&Selector<CELL>::copyMemberInImplementation<MEMBER>),
-        copyMemberOutHandler(&Selector<CELL>::copyMemberOutImplementation<MEMBER>),
-        copyStreakHandler(&Selector<CELL>::copyStreakImplementation<MEMBER>)
+        copyMemberInHandler(&Selector<CELL>::template copyMemberInImplementation<MEMBER>),
+        copyMemberOutHandler(&Selector<CELL>::template copyMemberOutImplementation<MEMBER>),
+        copyStreakHandler(&Selector<CELL>::template copyStreakImplementation<MEMBER>)
     {}
 
     inline char CELL:: *operator*() const
