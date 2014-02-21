@@ -3,7 +3,9 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/io/selector.h>
 
 namespace LibGeoDecomp {
 
@@ -166,6 +168,25 @@ public:
     {
         return !(*this == other);
     }
+
+    void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    {
+        // fixme: make these templated and check for member typeid
+        saveMemberImplementation(target, selector, region);
+    }
+
+    void loadMember(const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    {
+        loadMemberImplementation(source, selector, region);
+    }
+
+protected:
+    virtual void saveMemberImplementation(
+        char *target, const Selector<CELL>& selector, const Region<DIM>& region) const = 0;
+
+    virtual void loadMemberImplementation(
+        const char *source, const Selector<CELL>& selector, const Region<DIM>& region) = 0;
+
 };
 
 }

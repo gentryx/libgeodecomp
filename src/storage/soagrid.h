@@ -409,7 +409,9 @@ public:
 
     }
 
-    void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+protected:
+    void saveMemberImplementation(
+        char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
         int index = 0;
         delegate.callback(
@@ -417,7 +419,8 @@ public:
             &index);
     }
 
-    void loadMember(const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    void loadMemberImplementation(
+        const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
     {
         int index = 0;
         delegate.callback(

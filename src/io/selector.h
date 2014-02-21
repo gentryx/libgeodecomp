@@ -25,6 +25,53 @@ public:
     }
 };
 
+/**
+ * Primitive datatypes don't have member pointers (or members in the
+ * first place). So we provide this primitive implementation to copy
+ * them en block.
+ */
+template<typename CELL>
+class PrimitiveSelector
+{
+public:
+    template<typename MEMBER>
+    void operator()(const CELL *source, MEMBER *target, const std::size_t length) const
+    {
+        std::copy(source, source + length, target);
+    }
+
+    const std::string& name() const
+    {
+        return "primitiveType";
+    }
+
+    std::size_t sizeOf() const
+    {
+        return sizeof(CELL);
+    }
+
+    int offset() const
+    {
+        return 0;
+    }
+
+    void copyMemberIn(const char *source, CELL *target, int num) const
+    {
+        const CELL *actualSource = reinterpret_cast<const CELL*>(source);
+        std::copy(actualSource, actualSource + num, target);
+    }
+
+    void copyMemberOut(const CELL *source, char *target, int num) const
+    {
+        CELL *actualTarget = reinterpret_cast<CELL*>(target);
+        std::copy(source, source + num, actualTarget);
+    }
+
+    // intentionally leaving our copyStreak() as it should only be
+    // called by SoAGrid, which isn't defined for primitive types
+    // anyway.
+};
+
 }
 
 /**
@@ -144,6 +191,32 @@ private:
         }
     }
 
+};
+
+/**
+ * We provide these specializations to allow our unit tests to use
+ * grids with primitive datatypes.
+ */
+template<>
+class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
+{};
+
+template<>
+class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
+{};
+
+template<>
+class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
+{};
+
+template<>
+class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
+{
+};
+
+template<>
+class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
+{
 };
 
 }

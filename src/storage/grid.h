@@ -324,7 +324,9 @@ public:
         return CoordBox<DIM>(Coord<DIM>(), dimensions);
     }
 
-    void saveMember(char *target, const Selector<CELL_TYPE>& selector, const Region<DIM>& region) const
+protected:
+    void saveMemberImplementation(
+        char *target, const Selector<CELL_TYPE>& selector, const Region<DIM>& region) const
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             selector.copyMemberOut(&(*this)[i->origin], target, i->length());
@@ -332,7 +334,8 @@ public:
         }
     }
 
-    void loadMember(const char *source, const Selector<CELL_TYPE>& selector, const Region<DIM>& region)
+    void loadMemberImplementation(
+        const char *source, const Selector<CELL_TYPE>& selector, const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             selector.copyMemberIn(source, &(*this)[i->origin], i->length());

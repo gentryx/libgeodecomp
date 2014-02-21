@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
 #include <libgeodecomp/storage/linepointerassembly.h>
