@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/apitraits.h>
 #include <libflatarray/flat_array.hpp>
+#include <typeinfo>
 
 namespace LibGeoDecomp {
 
@@ -92,6 +93,7 @@ public:
     Selector(MEMBER CELL:: *memberPointer, std::string memberName) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
+        memberTypeIDHandler(&Selector<CELL>::memberTypeIDImplementation<MEMBER>),
         memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
@@ -125,6 +127,12 @@ public:
         return memberSize;
     }
 
+    template<typename MEMBER>
+    bool checkTypeID() const
+    {
+        return (*memberTypeIDHandler)(typeid(MEMBER));
+    }
+
     int offset() const
     {
         return memberOffset;
@@ -148,6 +156,7 @@ public:
 private:
     char CELL:: *memberPointer;
     std::size_t memberSize;
+    bool (*memberTypeIDHandler)(const std::type_info&);
     int memberOffset;
     std::string memberName;
     void (*copyMemberInHandler)(const char *, CELL *, int num, char CELL:: *memberPointer);
@@ -189,6 +198,12 @@ private:
             ++actualTarget;
             ++source;
         }
+    }
+
+    template<typename MEMBER>
+    static bool memberTypeIDImplementation(const std::type_info& otherID)
+    {
+        return typeid(MEMBER) == otherID;
     }
 
 };

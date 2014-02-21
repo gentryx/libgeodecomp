@@ -169,15 +169,22 @@ public:
         return !(*this == other);
     }
 
-    void saveMember(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    template<typename MEMBER>
+    void saveMember(MEMBER *target, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
-        // fixme: make these templated and check for member typeid
-        saveMemberImplementation(target, selector, region);
+        if (!selector.template checkTypeID<MEMBER>()) {
+            throw std::invalid_argument("cannot save member as selector was created for different type");
+        }
+        saveMemberImplementation(reinterpret_cast<char*>(target), selector, region);
     }
 
-    void loadMember(const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    template<typename MEMBER>
+    void loadMember(const MEMBER *source, const Selector<CELL>& selector, const Region<DIM>& region)
     {
-        loadMemberImplementation(source, selector, region);
+        if (!selector.template checkTypeID<MEMBER>()) {
+            throw std::invalid_argument("cannot load member as selector was created for different type");
+        }
+        loadMemberImplementation(reinterpret_cast<const char*>(source), selector, region);
     }
 
 protected:
