@@ -169,6 +169,10 @@ public:
         return !(*this == other);
     }
 
+    /**
+     * Allows the user to extract a single member variable of all
+     * cells within the given region. Assumes that target points to an area with sufficient space.
+     */
     template<typename MEMBER>
     void saveMember(MEMBER *target, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
@@ -178,6 +182,11 @@ public:
         saveMemberImplementation(reinterpret_cast<char*>(target), selector, region);
     }
 
+    /**
+     * Used for bulk-setting of single member variables. Assumes that
+     * source contains as many instances of the member as region
+     * contains coordinates.
+     */
     template<typename MEMBER>
     void loadMember(const MEMBER *source, const Selector<CELL>& selector, const Region<DIM>& region)
     {
