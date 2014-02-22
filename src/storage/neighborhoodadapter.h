@@ -19,11 +19,15 @@ public:
     typedef KEY Key;
     typedef CARGO Cargo;
 
-    NeighborhoodAdapter(NEIGHBORHOOD *_neighbors) :
-        neighbors(_neighbors)
+    NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
+        neighbors(neighbors)
     {}
 
-    const Cargo& operator[](const Key& id)
+    /**
+     * Will search neighboring containers for a Cargo which matches
+     * the given ID.
+     */
+    const Cargo& operator[](const Key& id) const
     {
         const Cargo *res = (*neighbors)[Coord<DIM>()][id];
 
@@ -44,13 +48,8 @@ public:
         throw std::logic_error("id not found");
     }
 
-    inline const Cargo& operator[](const Key& id) const
-    {
-        return (const_cast<NeighborhoodAdapter&>(*this))[id];
-    }
-
 private:
-    NEIGHBORHOOD *neighbors;
+    const NEIGHBORHOOD *neighbors;
 };
 
 }
