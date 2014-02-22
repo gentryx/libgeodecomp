@@ -17,7 +17,7 @@ public:
     typedef CARGO Cargo;
     typedef KEY Key;
     typedef TOPOLOGY Topology;
-    typedef Cargo* Iterator;
+    typedef Cargo *Iterator;
 
     const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CARGO>::VALUE;
     const static int DIM = Topology::DIM;
@@ -83,10 +83,14 @@ public:
         Key *pos = std::upper_bound(ids, end, id);
         int offset = pos - ids;
 
-        if (offset == 0)
+        if (offset == 0) {
             return 0;
-        if (ids[offset - 1] == id)
+        }
+
+        if (ids[offset - 1] == id) {
             return cells + offset - 1;
+        }
+
         return 0;
     }
 
