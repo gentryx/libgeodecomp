@@ -9,8 +9,15 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class is useful for writing irregularly shaped codes with
+ * LibGeoDecomp (e.g. meshfree or unstructured grids). It acts as an
+ * adapter between the underlying, regular grid and the amorphous
+ * structure of the model.
+ */
 template<class CARGO, int SIZE, class TOPOLOGY=typename CARGO::Topology, typename KEY=int>
-class ContainerCell {
+class ContainerCell
+{
 public:
     friend class ContainerCellTest;
 
@@ -70,7 +77,7 @@ public:
                 cells[i] = cells[i + 1];
                 ids[i] = ids[i + 1];
             }
-            size--;
+            --size;
             return true;
         }
 
@@ -114,8 +121,9 @@ public:
     {
         *this = neighbors[Coord<DIM>()];
         NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < size; ++i) {
             cells[i].update(adapter, nanoStep);
+        }
     }
 
     inline const Key *getIDs() const
@@ -135,8 +143,9 @@ private:
 
     inline void checkSize() const
     {
-        if (size == MAX_SIZE)
+        if (size == MAX_SIZE) {
             throw std::logic_error("ContainerCell capacity exeeded");
+        }
     }
 };
 
