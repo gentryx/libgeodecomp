@@ -13,7 +13,8 @@ namespace LibGeoDecomp {
  * This class is useful for writing irregularly shaped codes with
  * LibGeoDecomp (e.g. meshfree or unstructured grids). It acts as an
  * adapter between the underlying, regular grid and the amorphous
- * structure of the model.
+ * structure of the model. Each entity of the model (of type CARGO)
+ * needs to be assigned a unique KEY, which will be used for lookups.
  */
 template<class CARGO, int SIZE, class TOPOLOGY=typename CARGO::Topology, typename KEY=int>
 class ContainerCell
