@@ -89,6 +89,10 @@ if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
 endif()
 
+if(NOT DEFINED Silo_FOUND)
+  set(Silo_FOUND false)
+endif()
+
 if(NOT DEFINED SCOTCH_FOUND)
   set(SCOTCH_FOUND false)
 endif()
@@ -223,6 +227,10 @@ if(WITH_HPX)
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/lib/hpx:${CMAKE_BINARY_DIR}/lib/hpx:${CMAKE_BINARY_DIR}/src")
 endif()
 
+if(WITH_SILO)
+  include_directories(${Silo_INCLUDE_DIR})
+endif()
+
 if(WITH_SCOTCH)
   include_directories(${SCOTCH_INCLUDE_DIRS})
 endif()
@@ -269,6 +277,10 @@ endif()
 
 if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
+endif()
+
+if(WITH_SILO AND NOT Silo_FOUND)
+  message(FATAL_ERROR "WITH_SILO selected, but FindSilo couldn't detect any installation of it.")
 endif()
 
 if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
@@ -398,6 +410,12 @@ if(WITH_HPX)
     hpx_serialization${HPX_LIB_SUFFIX}
     hpx_init${HPX_LIB_SUFFIX}
     ${HPX_LIBRARIES})
+endif()
+
+if(WITH_SILO)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${Silo_LIBRARY})
 endif()
 
 if(WITH_SCOTCH)
