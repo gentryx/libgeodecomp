@@ -84,6 +84,15 @@ public:
  * http://madebyevan.com/obscure-cpp-features/#pointer-to-member-operators
  *
  * fixme: use this class in BOVWriter, RemoteSteerer, VisItWriter, Plotter...
+ *
+ * fixme: extend this to make use of custom filters via function pointers:
+ * - c-tor should save an extra function pointer copyStreakAoSHandler()
+ * - call copyStreakAoSHandler() in operator()
+ *   - default copyStreakAoSHandler() implementation is current implementation
+ *   - alternate implementation can be given in c-tor via function pointer instead of member pointer
+ *   - note that result type (ATM "MEMBER") can differ
+ * - rename copyStreakHandler to copyStreakSoAHandler
+ *   - specify source attribute of cell via member pointer
  */
 template<typename CELL>
 class Selector
