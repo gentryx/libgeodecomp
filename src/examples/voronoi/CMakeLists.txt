@@ -3,4 +3,4 @@ set(RELATIVE_PATH "")
 include(auto.cmake)
 
 add_executable(voronoi ${SOURCES})
-target_link_libraries(voronoi ${LOCAL_LIBGEODECOMP_LINK_LIB} geodecomp)
+target_link_libraries(voronoi ${LOCAL_LIBGEODECOMP_LINK_LIB})
