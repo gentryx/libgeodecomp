@@ -45,7 +45,9 @@ public:
         for (typename CoordBox<DIM>::Iterator i = box.begin();
              i != box.end();
              ++i) {
-            grid.get(*i).dumpData(this);
+
+            CELL cell = grid.get(*i);
+            addShapes(cell.begin(), cell.end());
         }
 
         output(step);
@@ -125,6 +127,26 @@ private:
         coords[0] << coord[0];
         coords[1] << coord[1];
         coords[2] << coord[2];
+    }
+
+    template<typename ITERATOR>
+    inline void addShapes(const ITERATOR& start, const ITERATOR& end)
+    {
+        for (ITERATOR i = start; i != end; ++i) {
+            addShape(i->getShape());
+        }
+    }
+
+    template<typename SHAPE_CONTAINER>
+    inline void addShape(const SHAPE_CONTAINER& shape)
+    {
+        shapeTypes << DB_ZONETYPE_POLYGON;
+        shapeSizes << shape.size();
+        shapeCounts << 1;
+
+        for (typename SHAPE_CONTAINER::const_iterator i = shape.begin(); i != shape.end(); ++i) {
+            addCoord(*i);
+        }
     }
 };
 
