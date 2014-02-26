@@ -11,6 +11,11 @@ namespace LibGeoDecomp {
 /**
  * A real valued coordinate class. Can also be seen as a short,
  * fixed-size vector.
+ *
+ * Conversion operators and arithmetic operators from Coord to
+ * FloatCoord are available to ease interoperability. Vice versa is
+ * left out intentionally to avoid inadvertent conversions to Coord
+ * (and thus losses of accuracy).
  */
 template<int DIM>
 class FloatCoord;
@@ -29,8 +34,9 @@ public:
         c[0] = x;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord(const Coord<1>& p)
+    FloatCoord(const OTHER_COORD<1>& p)
     {
         c[0] = p[0];
     }
@@ -41,36 +47,47 @@ public:
         return fabs(c[0]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    const double& sum() const
+    FloatCoord<1> operator+(const OTHER_COORD<1>& a) const
     {
-        return c[0];
+        return FloatCoord<1>(c[0] + a[0]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<1> operator+(const FloatCoord<1>& a) const
+    FloatCoord<1> operator-(const OTHER_COORD<1>& a) const
     {
-        return FloatCoord<1>(c[0] + a.c[0]);
+        return FloatCoord<1>(c[0] - a[0]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<1> operator-(const FloatCoord<1>& a) const
+    FloatCoord<1>& operator+=(const OTHER_COORD<1>& a)
     {
-        return FloatCoord<1>(c[0] - a.c[0]);
+        c[0] += a[0];
+        return *this;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<1>& operator+=(const FloatCoord<1>& a)
+    FloatCoord<1>& operator-=(const OTHER_COORD<1>& a)
     {
-        c[0] += a.c[0];
+        c[0] -= a[0];
         return *this;
     }
 
     inline
-    FloatCoord<1>& operator-=(const FloatCoord<1>& a)
+    FloatCoord<1> operator/(const double& s) const
     {
-        c[0] -= a.c[0];
-        return *this;
+        return FloatCoord<1>(c[0] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    double operator*(const OTHER_COORD<1>& a) const
+    {
+        return c[0] * a[0];
     }
 
     inline
@@ -86,14 +103,16 @@ public:
         return *this;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    bool operator==(const FloatCoord<1>& a) const
+    bool operator==(const OTHER_COORD<1>& a) const
     {
-        return (c[0] == a.c[0]);
+        return (c[0] == a[0]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    bool operator!=(const FloatCoord<1>& a) const
+    bool operator!=(const OTHER_COORD<1>& a) const
     {
         return !(*this == a);
     }
@@ -106,6 +125,28 @@ public:
     inline const double& operator[](const int i) const
     {
         return c[i];
+    }
+
+    inline const double& prod() const
+    {
+        return c[0];
+    }
+
+    inline const double& sum() const
+    {
+        return c[0];
+    }
+
+    inline FloatCoord<1> (max)(const FloatCoord<1>& other) const
+    {
+        return FloatCoord<1>(
+            (std::max)(c[0], other[0]));
+    }
+
+    inline FloatCoord<1> (min)(const FloatCoord<1>& other) const
+    {
+        return FloatCoord<1>(
+            (std::min)(c[0], other[0]));
     }
 
     inline
@@ -138,8 +179,9 @@ public:
         c[1] = y;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord(const Coord<2>& p)
+    FloatCoord(const OTHER_COORD<2>& p)
     {
         c[0] = p[0];
         c[1] = p[1];
@@ -152,40 +194,53 @@ public:
                     c[1] * c[1]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    double sum() const
+    FloatCoord<2> operator+(const OTHER_COORD<2>& a) const
     {
-        return c[0] + c[1];
+        return FloatCoord<2>(c[0] + a[0],
+                             c[1] + a[1]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<2> operator+(const FloatCoord<2>& a) const
+    FloatCoord<2> operator-(const OTHER_COORD<2>& a) const
     {
-        return FloatCoord<2>(c[0] + a.c[0],
-                             c[1] + a.c[1]);
+        return FloatCoord<2>(c[0] - a[0],
+                             c[1] - a[1]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<2> operator-(const FloatCoord<2>& a) const
+    FloatCoord<2>& operator+=(const OTHER_COORD<2>& a)
     {
-        return FloatCoord<2>(c[0] - a.c[0],
-                             c[1] - a.c[1]);
+        c[0] += a[0];
+        c[1] += a[1];
+        return *this;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<2>& operator+=(const FloatCoord<2>& a)
+    FloatCoord<2>& operator-=(const OTHER_COORD<2>& a)
     {
-        c[0] += a.c[0];
-        c[1] += a.c[1];
+        c[0] -= a[0];
+        c[1] -= a[1];
         return *this;
     }
 
     inline
-    FloatCoord<2>& operator-=(const FloatCoord<2>& a)
+    FloatCoord<2> operator/(const double& s) const
     {
-        c[0] -= a.c[0];
-        c[1] -= a.c[1];
-        return *this;
+        return FloatCoord<2>(
+            c[0] / s,
+            c[1] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    double operator*(const OTHER_COORD<2>& a) const
+    {
+        return c[0] * a[0] + c[1] * a[1];
     }
 
     inline
@@ -202,14 +257,16 @@ public:
         return *this;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    bool operator==(const FloatCoord<2>& a) const
+    bool operator==(const OTHER_COORD<2>& a) const
     {
-        return (c[0] == a.c[0]) && (c[1] == a.c[1]);
+        return (c[0] == a[0]) && (c[1] == a[1]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    bool operator!=(const FloatCoord<2>& a) const
+    bool operator!=(const OTHER_COORD<2>& a) const
     {
         return !(*this == a);
     }
@@ -222,6 +279,30 @@ public:
     inline const double& operator[](const int i) const
     {
         return c[i];
+    }
+
+    inline const double prod() const
+    {
+        return c[0] * c[1];
+    }
+
+    inline const double sum() const
+    {
+        return c[0] + c[1];
+    }
+
+    inline FloatCoord<2> (max)(const FloatCoord<2>& other) const
+    {
+        return FloatCoord<2>(
+            (std::max)(c[0], other[0]),
+            (std::max)(c[1], other[1]));
+    }
+
+    inline FloatCoord<2> (min)(const FloatCoord<2>& other) const
+    {
+        return FloatCoord<2>(
+            (std::min)(c[0], other[0]),
+            (std::min)(c[1], other[1]));
     }
 
     inline
@@ -258,8 +339,9 @@ public:
         c[2] = z;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord(const Coord<3>& p)
+    FloatCoord(const OTHER_COORD<3>& p)
     {
         c[0] = p[0];
         c[1] = p[1];
@@ -274,44 +356,58 @@ public:
                     c[2] * c[2]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    double sum() const
+    FloatCoord<3> operator+(const OTHER_COORD<3>& a) const
     {
-        return c[0] + c[1] + c[2];
+        return FloatCoord<3>(c[0] + a[0],
+                             c[1] + a[1],
+                             c[2] + a[2]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<3> operator+(const FloatCoord<3>& a) const
+    FloatCoord<3> operator-(const OTHER_COORD<3>& a) const
     {
-        return FloatCoord<3>(c[0] + a.c[0],
-                             c[1] + a.c[1],
-                             c[2] + a.c[2]);
+        return FloatCoord<3>(c[0] - a[0],
+                             c[1] - a[1],
+                             c[2] - a[2]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<3> operator-(const FloatCoord<3>& a) const
+    FloatCoord<3>& operator+=(const OTHER_COORD<3>& a)
     {
-        return FloatCoord<3>(c[0] - a.c[0],
-                             c[1] - a.c[1],
-                             c[2] - a.c[2]);
+        c[0] += a[0];
+        c[1] += a[1];
+        c[2] += a[2];
+        return *this;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    FloatCoord<3>& operator+=(const FloatCoord<3>& a)
+    FloatCoord<3>& operator-=(const OTHER_COORD<3>& a)
     {
-        c[0] += a.c[0];
-        c[1] += a.c[1];
-        c[2] += a.c[2];
+        c[0] -= a[0];
+        c[1] -= a[1];
+        c[2] -= a[2];
         return *this;
     }
 
     inline
-    FloatCoord<3>& operator-=(const FloatCoord<3>& a)
+    FloatCoord<3> operator/(const double& s) const
     {
-        c[0] -= a.c[0];
-        c[1] -= a.c[1];
-        c[2] -= a.c[2];
-        return *this;
+        return FloatCoord<3>(
+            c[0] / s,
+            c[1] / s,
+            c[2] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    double operator*(const OTHER_COORD<3>& a) const
+    {
+        return c[0] * a[0] + c[1] * a[1] + c[2] * a[2];
     }
 
     inline
@@ -329,14 +425,16 @@ public:
         return *this;
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    bool operator==(const FloatCoord<3>& a) const
+    bool operator==(const OTHER_COORD<3>& a) const
     {
-        return (c[0] == a.c[0]) && (c[1] == a.c[1]) && (c[2] == a.c[2]);
+        return (c[0] == a[0]) && (c[1] == a[1]) && (c[2] == a[2]);
     }
 
+    template<template<int> class OTHER_COORD>
     inline
-    bool operator!=(const FloatCoord<3>& a) const
+    bool operator!=(const OTHER_COORD<3>& a) const
     {
         return !(*this == a);
     }
@@ -349,6 +447,32 @@ public:
     inline const double& operator[](const int i) const
     {
         return c[i];
+    }
+
+    inline const double prod() const
+    {
+        return c[0] * c[1] * c[2];
+    }
+
+    inline const double sum() const
+    {
+        return c[0] + c[1] + c[2];
+    }
+
+    inline FloatCoord<3> (max)(const FloatCoord<3>& other) const
+    {
+        return FloatCoord<3>(
+            (std::max)(c[0], other[0]),
+            (std::max)(c[1], other[1]),
+            (std::max)(c[2], other[2]));
+    }
+
+    inline FloatCoord<3> (min)(const FloatCoord<3>& other) const
+    {
+        return FloatCoord<3>(
+            (std::min)(c[0], other[0]),
+            (std::min)(c[1], other[1]),
+            (std::min)(c[2], other[2]));
     }
 
     inline
