@@ -30,57 +30,63 @@ public:
     int num;
 };
 
+template<template<int DIM> class COORD>
 class Equation
 {
 public:
-    Equation(const Coord<2>& base, const Coord<2>& dir, ID id = ID()) :
+    Equation(const COORD<2>& base, const COORD<2>& dir, ID id = ID()) :
         base(base),
         dir(dir),
         neighborID(id),
         length(-1)
     {}
 
-    bool includes(const Coord<2>& point) const
+    bool includes(const COORD<2>& point) const
     {
         return (point - base) * dir > 0;
     }
 
-    Coord<2> base;
-    Coord<2> dir;
+    COORD<2> base;
+    COORD<2> dir;
     ID neighborID;
     double length;
 };
 
-template<typename _CharT, typename _Traits>
+template<typename _CharT, typename _Traits, template<int DIM> class COORD>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& os,
-           const Equation& e)
+           const Equation<COORD>& e)
 {
     os << "Equation(base=" << e.base << ", dir" << e.dir << ")";
     return os;
 }
 
+
+template<template<int DIM> class COORD>
 class Element
 {
 public:
-    Element(const Coord<2> center = Coord<2>(1, 1), ID id = ID()) :
+    typedef Equation<COORD> EquationType;
+
+    Element(const COORD<2> center = COORD<2>(1, 1), ID id = ID()) :
         center(center),
         id(id)
     {
-        limits << Equation(Coord<2>(center.x(), 0),     Coord<2>(0, 1))
-               << Equation(Coord<2>(0, center.y()),     Coord<2>(1, 0))
-               << Equation(Coord<2>(MAX_X, center.y()), Coord<2>(-1, 0))
-               << Equation(Coord<2>(center.x(), MAX_Y), Coord<2>(0, -1));
+        limits << EquationType(COORD<2>(center[0], 0),     COORD<2>(0, 1))
+               << EquationType(COORD<2>(0, center[1]),     COORD<2>(1, 0))
+               << EquationType(COORD<2>(MAX_X, center[1]), COORD<2>(-1, 0))
+               << EquationType(COORD<2>(center[0], MAX_Y), COORD<2>(0, -1));
     }
 
-    Element& operator<<(const Equation& eq)
+    Element& operator<<(const EquationType& eq)
     {
         limits << eq;
-        std::vector<Coord<2> > cutPoints = generateCutPoints(limits);
+        std::vector<COORD<2> > cutPoints = generateCutPoints(limits);
+        // fixme: can't this be done more intelligently?
         std::set<int> deleteSet;
 
         for (std::size_t i = 0; i < limits. size(); ++i) {
-            Coord<2> leftDir = turnLeft90(limits[i].dir);
+            COORD<2> leftDir = turnLeft90(limits[i].dir);
             int dist1 = (cutPoints[2 * i + 0] - limits[i].base) * leftDir;
             int dist2 = (cutPoints[2 * i + 1] - limits[i].base) * leftDir;
             if (dist2 >= dist1) {
@@ -105,7 +111,7 @@ public:
                 }
         }
 
-        std::vector<Equation> newLimits;
+        std::vector<EquationType> newLimits;
         for (std::size_t i = 0; i < limits.size(); ++i) {
             if (!deleteSet.count(i)) {
                 newLimits << limits[i];
@@ -119,26 +125,26 @@ public:
     template<typename POINT>
     Element& operator<<(const POINT& c)
     {
-        Coord<2> base = (center + c.center) / 2;
-        Coord<2> dir = center - c.center;
-        *this << Equation(base, dir, c.id);
+        COORD<2> base = (center + c.center) / 2;
+        COORD<2> dir = center - c.center;
+        *this << EquationType(base, dir, c.id);
         return *this;
     }
 
-    static std::vector<Coord<2> > generateCutPoints(const std::vector<Equation>& limits)
+    static std::vector<COORD<2> > generateCutPoints(const std::vector<EquationType>& limits)
     {
-        std::vector<Coord<2> > buf(2 * limits.size(), FarAway);
+        std::vector<COORD<2> > buf(2 * limits.size(), FarAway);
 
         for (std::size_t i = 0; i < limits.size(); ++i) {
             for (std::size_t j = 0; j < limits.size(); ++j) {
                 if (i != j) {
-                    Coord<2> cut = cutPoint(limits[i], limits[j]);
+                    COORD<2> cut = cutPoint(limits[i], limits[j]);
                     int offset = 2 * i;
-                    Coord<2> delta = cut - limits[i].base;
-                    Coord<2> turnedDir = turnLeft90(limits[i].dir);
+                    COORD<2> delta = cut - limits[i].base;
+                    COORD<2> turnedDir = turnLeft90(limits[i].dir);
                     double distance =
-                        1.0 * delta.x() * turnedDir.x() +
-                        1.0 * delta.y() * turnedDir.y();
+                        1.0 * delta[0] * turnedDir[0] +
+                        1.0 * delta[1] * turnedDir[1];
 
 
                     bool isLeftCandidate = true;
@@ -149,8 +155,8 @@ public:
 
                     delta = buf[offset] - limits[i].base;
                     double referenceDist =
-                        1.0 * delta.x() * turnedDir.x() +
-                        1.0 * delta.y() * turnedDir.y();
+                        1.0 * delta[0] * turnedDir[0] +
+                        1.0 * delta[1] * turnedDir[1];
                     bool flag = false;
                     if (buf[offset] == FarAway) {
                         flag = true;
@@ -174,9 +180,9 @@ public:
         return buf;
     }
 
-    std::vector<Coord<2> > getShape() const
+    std::vector<COORD<2> > getShape() const
     {
-        std::vector<Coord<2> > cutPoints = generateCutPoints(limits);
+        std::vector<COORD<2> > cutPoints = generateCutPoints(limits);
 
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             if (cutPoints[i] == FarAway) {
@@ -184,20 +190,20 @@ public:
             }
         }
 
-        std::map<double, Coord<2> > points;
+        std::map<double, COORD<2> > points;
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            Coord<2> delta = cutPoints[i] - center;
-            double length = sqrt(delta.x() * delta.x() + delta.y() * delta.y());
-            double dY = delta.y() / length;
+            COORD<2> delta = cutPoints[i] - center;
+            double length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
+            double dY = delta[1] / length;
             double angle = asin(dY);
-            if (delta.x() < 0) {
+            if (delta[0] < 0) {
                 angle = M_PI - angle;
             }
             points[angle] = cutPoints[i];
         }
 
-        std::vector<Coord<2> > res;
-        for (std::map<double, Coord<2> >::iterator i = points.begin();
+        std::vector<COORD<2> > res;
+        for (typename std::map<double, COORD<2> >::iterator i = points.begin();
              i != points.end(); ++i) {
             res << i->second;
         }
@@ -209,7 +215,7 @@ public:
         return res;
     }
 
-    bool includes(const Coord<2>& c)
+    bool includes(const COORD<2>& c)
     {
         for (std::size_t i = 0; i < limits.size(); ++i) {
             if (!limits[i].includes(c)) {
@@ -221,33 +227,33 @@ public:
 
     void updateGeometryData()
     {
-        std::vector<Coord<2> > cutPoints = generateCutPoints(limits);
+        std::vector<COORD<2> > cutPoints = generateCutPoints(limits);
 
         for (std::size_t i = 0; i < limits.size(); ++i) {
-            Coord<2> delta = cutPoints[2 * i + 0] - cutPoints[2 * i + 1];
-            limits[i].length = sqrt(delta.x() * delta.x() + delta.y() * delta.y());
+            COORD<2> delta = cutPoints[2 * i + 0] - cutPoints[2 * i + 1];
+            limits[i].length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
         }
 
-        Coord<2> min(MAX_X, MAX_Y);
-        Coord<2> max(0, 0);
+        COORD<2> min(MAX_X, MAX_Y);
+        COORD<2> max(0, 0);
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            Coord<2>& c = cutPoints[i];
+            COORD<2>& c = cutPoints[i];
             max = c.max(max);
             min = c.min(min);
         }
-        Coord<2> delta = max - min;
+        COORD<2> delta = max - min;
 
         int hits = 0;
         for (std::size_t i = 0; i < SAMPLES; ++i) {
-            Coord<2> p = Coord<2>(rand() % delta.x(),
-                                  rand() % delta.y()) + min;
+            COORD<2> p = COORD<2>(Random::gen_d(delta[0]),
+                                  Random::gen_d(delta[1])) + min;
             if (includes(p)) {
                 ++hits;
             }
         }
         area = 1.0 * hits / SAMPLES * delta.prod();
 
-        diameter = std::max(delta.x(), delta.y());
+        diameter = std::max(delta[0], delta[1]);
         if (diameter > CELL_SPACING/2) {
             std::cerr << "my diameter: " << diameter << "\n"
                       << "min: " << min << "\n"
@@ -256,7 +262,7 @@ public:
         }
     }
 
-    const Coord<2>& getCenter() const
+    const COORD<2>& getCenter() const
     {
         return center;
     }
@@ -266,7 +272,7 @@ public:
         return area;
     }
 
-    const std::vector<Equation>& getLimits() const
+    const std::vector<EquationType>& getLimits() const
     {
         return limits;
     }
@@ -277,38 +283,38 @@ public:
     }
 
 private:
-    Coord<2> center;
+    COORD<2> center;
     ID id;
     double area;
     double diameter;
-    std::vector<Equation> limits;
+    std::vector<EquationType> limits;
 
-    static Coord<2> turnLeft90(const Coord<2>& c)
+    static COORD<2> turnLeft90(const COORD<2>& c)
     {
-        return Coord<2>(-c.y(), c.x());
+        return COORD<2>(-c[1], c[0]);
     }
 
-    static Coord<2> cutPoint(Equation eq1, Equation eq2)
+    static COORD<2> cutPoint(EquationType eq1, EquationType eq2)
     {
-        if (eq1.dir.y() == 0) {
-            if (eq2.dir.y() == 0) {
+        if (eq1.dir[1] == 0) {
+            if (eq2.dir[1] == 0) {
                 // throw std::invalid_argument("both lines are vertical")
                 return FarAway;
             }
             std::swap(eq1, eq2);
         }
 
-        Coord<2> dir1 = turnLeft90(eq1.dir);
-        double m1 = 1.0 * dir1.y() / dir1.x();
-        double d1 = eq1.base.y() - m1 * eq1.base.x();
+        COORD<2> dir1 = turnLeft90(eq1.dir);
+        double m1 = 1.0 * dir1[1] / dir1[0];
+        double d1 = eq1.base[1] - m1 * eq1.base[0];
 
-        if (eq2.dir.y() == 0) {
-            return Coord<2>(eq2.base.x(), eq2.base.x() * m1 + d1);
+        if (eq2.dir[1] == 0) {
+            return COORD<2>(eq2.base[0], eq2.base[0] * m1 + d1);
         }
 
-        Coord<2> dir2 = turnLeft90(eq2.dir);
-        double m2 = 1.0 * dir2.y() / dir2.x();
-        double d2 = eq2.base.y() - m2 * eq2.base.x();
+        COORD<2> dir2 = turnLeft90(eq2.dir);
+        double m2 = 1.0 * dir2[1] / dir2[0];
+        double d2 = eq2.base[1] - m2 * eq2.base[0];
 
         if (m1 == m2) {
             // throw std::invalid_argument("parallel lines")
@@ -325,79 +331,86 @@ private:
             return FarAway;
         }
 
-        return Coord<2>(x, y);
+        return COORD<2>(x, y);
     }
 };
 
 Coord<2> randCoord()
 {
-    int x = ELEMENT_SPACING / 2 + rand() % (MAX_X - ELEMENT_SPACING);
-    int y = ELEMENT_SPACING / 2 + rand() % (MAX_Y - ELEMENT_SPACING);
+    int x = ELEMENT_SPACING / 2 + Random::gen_u(MAX_X - ELEMENT_SPACING);
+    int y = ELEMENT_SPACING / 2 + Random::gen_u(MAX_Y - ELEMENT_SPACING);
     return Coord<2>(x, y);
 }
 
 Coord<2> pointToContainerCoord(const Coord<2>& c)
 {
-    return Coord<2>(c.x() / CELL_SPACING, c.y() / CELL_SPACING);
+    return Coord<2>(c[0] / CELL_SPACING, c[1] / CELL_SPACING);
 }
 
+template<template<int DIM> class COORD>
 class SimpleCell
 {
 public:
-    friend class Element;
+    friend class Element<COORD>;
     friend class VoronoiInitializer;
 
-    SimpleCell(const Coord<2>& center = Coord<2>(), const ID& id = ID(), const double temperature = 0) :
+    typedef Element<COORD> ElementType;
+    typedef Equation<COORD> EquationType;
+
+    SimpleCell(const COORD<2>& center = COORD<2>(), const ID& id = ID(), const double temperature = 0) :
         center(center),
         id(id),
         temperature(temperature)
     {}
 
-    void setShape(const std::vector<Coord<2> >& newShape)
+    void setShape(const std::vector<COORD<2> >& newShape)
     {
         if (newShape.size() > MAX_NEIGHBORS) {
             throw std::invalid_argument("shape too large");
         }
 
         shape.clear();
-        for (std::vector<Coord<2> >::const_iterator i = newShape.begin(); i != newShape.end(); ++i) {
+        for (typename std::vector<COORD<2> >::const_iterator i = newShape.begin();
+             i != newShape.end();
+             ++i) {
             shape << *i;
         }
     }
 
-    void pushNeighbor(const ID& neighborID, const double length, const Coord<2>& /* unused: dir */)
+    void pushNeighbor(const ID& neighborID, const double length, const COORD<2>& /* unused: dir */)
     {
         neighbors << neighborID;
         neighborBorderLengths << length;
     }
 
-    const FixedArray<Coord<2>, MAX_NEIGHBORS>& getShape() const
+    const FixedArray<COORD<2>, MAX_NEIGHBORS>& getShape() const
     {
         return shape;
     }
 
 private:
-    Coord<2> center;
+    COORD<2> center;
     ID id;
     double temperature;
     double area;
-    FixedArray<Coord<2>, MAX_NEIGHBORS> shape;
+    FixedArray<COORD<2>, MAX_NEIGHBORS> shape;
     FixedArray<ID, MAX_NEIGHBORS> neighbors;
     FixedArray<double, MAX_NEIGHBORS> neighborBorderLengths;
 };
 
-template<std::size_t SIZE = 100>
+template<std::size_t SIZE, typename CARGO>
 class ContainerCell
 {
 public:
     friend class VoronoiInitializer;
     const static std::size_t MAX_SIZE = SIZE;
+    typedef CARGO Cargo;
 
     ContainerCell(const Coord<2>& coord = Coord<2>()) :
         coord(coord)
     {}
 
-    ContainerCell& operator<<(const SimpleCell& cell)
+    ContainerCell& operator<<(const CARGO& cell)
     {
         cells << cell;
         return *this;
@@ -408,37 +421,41 @@ public:
         return cells.size();
     }
 
-    typename FixedArray<SimpleCell, SIZE>::iterator begin()
+    typename FixedArray<CARGO, SIZE>::iterator begin()
     {
         return cells.begin();
     }
 
-    typename FixedArray<SimpleCell, SIZE>::const_iterator begin() const
+    typename FixedArray<CARGO, SIZE>::const_iterator begin() const
     {
         return cells.begin();
     }
 
-    typename FixedArray<SimpleCell, SIZE>::iterator end()
+    typename FixedArray<CARGO, SIZE>::iterator end()
     {
         return cells.end();
     }
 
-    typename FixedArray<SimpleCell, SIZE>::const_iterator end() const
+    typename FixedArray<CARGO, SIZE>::const_iterator end() const
     {
         return cells.end();
     }
 
 private:
-    FixedArray<SimpleCell, SIZE> cells;
+    FixedArray<CARGO, SIZE> cells;
     Coord<2> coord;
 };
 
-typedef ContainerCell<1000> ContainerCellType;
+typedef ContainerCell<1000, SimpleCell<Coord> > ContainerCellType;
 
 // fixme: refactor this demo and chromatography demo by extracting the mesh generator and container cell
 class VoronoiInitializer : public SimpleInitializer<ContainerCellType>
 {
 public:
+    typedef typename ContainerCellType::Cargo Cargo;
+    typedef typename Cargo::ElementType ElementType;
+    typedef typename Cargo::EquationType EquationType;
+
     VoronoiInitializer(
         const Coord<2>& dim,
         const unsigned& steps) :
@@ -464,18 +481,22 @@ private:
 
     Grid<ContainerCellType> createBasicGrid()
     {
-        srand(0);
         Coord<2> cellDim(ceil(1.0 * MAX_X / CELL_SPACING),
                          ceil(1.0 * MAX_Y / CELL_SPACING));
         Grid<ContainerCellType> grid(cellDim);
 
-        srand(0);
         for (std::size_t i = 0; i <= NUM_CELLS; ++i) {
             Coord<2> center = randCoord();
             addCell(&grid, center, 0);
         }
 
         return grid;
+    }
+
+    template<typename COORD_TYPE>
+    double squareVector(const COORD_TYPE& vec)
+    {
+        return vec * vec;
     }
 
     bool checkForCollision(const Grid<ContainerCellType>& grid,
@@ -486,11 +507,11 @@ private:
         bool flag = true;
         for (int y = -1; y < 2; ++y) {
             for (int x = -1; x < 2; ++x) {
-                const ContainerCellType& container = grid[containerCoord +
-                                                      Coord<2>(x, y)];
+                const ContainerCellType& container = grid[containerCoord + Coord<2>(x, y)];
+
                 for (std::size_t j = 0; j < container.size(); ++j) {
-                    Coord<2> delta = center - container.cells[j].center;
-                    if ((delta * delta) < (ELEMENT_SPACING * ELEMENT_SPACING))
+                    double length = squareVector(container.cells[j].center - center);
+                    if ((length * length) < (ELEMENT_SPACING * ELEMENT_SPACING))
                         flag = false;
                 }
             }
@@ -510,16 +531,17 @@ private:
         Coord<2> containerCoord = pointToContainerCoord(center);
         unsigned numCells = (*grid)[containerCoord].size();
 
-        if (center.x() <= 0 || center.x() >= int(MAX_X - 1) ||
-            center.y() <= 0 || center.y() >= int(MAX_Y - 1)) {
+        if (center[0] <= 0 || center[0] >= int(MAX_X - 1) ||
+            center[1] <= 0 || center[1] >= int(MAX_Y - 1)) {
             return;
         }
 
         if (numCells < ContainerCellType::MAX_SIZE) {
             (*grid)[containerCoord] <<
-                SimpleCell(center,
-                     ID(containerCoord, numCells),
-                     0);
+                ContainerCellType::Cargo(
+                    center,
+                    ID(containerCoord, numCells),
+                    0);
         }
     }
 
@@ -537,8 +559,8 @@ private:
             maxCells = std::max(maxCells, container.size());
 
             for (std::size_t i = 0; i < container.size(); ++i) {
-                SimpleCell& cell = container.cells[i];
-                Element e(cell.center, cell.id);
+                ContainerCellType::Cargo& cell = container.cells[i];
+                ElementType e(cell.center, cell.id);
 
                 for (int y = -1; y < 2; ++y) {
                     for (int x = -1; x < 2; ++x) {
@@ -556,7 +578,7 @@ private:
                 cell.area = e.getArea();
                 cell.setShape(e.getShape());
 
-                for (std::vector<Equation>::const_iterator l =
+                for (std::vector<EquationType>::const_iterator l =
                          e.getLimits().begin();
                      l != e.getLimits().end(); ++l) {
                     if (l->neighborID.container != FarAway) {
