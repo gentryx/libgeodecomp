@@ -4,8 +4,8 @@
 using namespace LibGeoDecomp;
 
 // fixme
-const int MAX_X = 800;
-const int MAX_Y = 800;
+const int MAX_X = 1200;
+const int MAX_Y = 1200;
 const std::size_t SAMPLES = 1000;
 const std::size_t NUM_CELLS = 2000;
 const std::size_t MAX_NEIGHBORS = 20;
@@ -13,22 +13,38 @@ const int ELEMENT_SPACING = 10;
 const int CELL_SPACING = 400;
 Coord<2> FarAway(-1, -1);
 
-class ID
+// class ID
+// {
+// public:
+//     ID(const Coord<2>& containerCoord = FarAway, const int index = -1) :
+//         container(containerCoord),
+//         num(index)
+//     {}
+
+//     bool operator==(const ID& other) const
+//     {
+//         return other.container == container && other.num == num;
+//     }
+
+//     Coord<2> container;
+//     int num;
+// };
+
+typedef int ID;
+
+Coord<2> gridDim()
 {
-public:
-    ID(const Coord<2>& containerCoord = FarAway, const int index = -1) :
-        container(containerCoord),
-        num(index)
-    {}
+    return Coord<2>(ceil(1.0 * MAX_X / CELL_SPACING),
+                    ceil(1.0 * MAX_Y / CELL_SPACING));
+}
 
-    bool operator==(const ID& other) const
-    {
-        return other.container == container && other.num == num;
-    }
+ID makeID(Coord<2> coord, int index)
+{
+    // return ID(coord, index);
 
-    Coord<2> container;
-    int num;
-};
+    // fixme: use container size rather than total number of cells
+    return index + NUM_CELLS * (coord.x() + coord.y() * gridDim().x());
+}
 
 template<template<int DIM> class COORD>
 class Equation
@@ -357,7 +373,7 @@ public:
     typedef Element<COORD> ElementType;
     typedef Equation<COORD> EquationType;
 
-    SimpleCell(const COORD<2>& center = COORD<2>(), const ID& id = ID(), const double temperature = 0) :
+    SimpleCell(const COORD<2>& center = COORD<2>(), const int id = 0, const double temperature = 0) :
         center(center),
         id(id),
         temperature(temperature)
@@ -377,7 +393,7 @@ public:
         }
     }
 
-    void pushNeighbor(const ID& neighborID, const double length, const COORD<2>& /* unused: dir */)
+    void pushNeighbor(const int neighborID, const double length, const COORD<2>& /* unused: dir */)
     {
         neighbors << neighborID;
         neighborBorderLengths << length;
@@ -390,63 +406,15 @@ public:
 
 private:
     COORD<2> center;
-    ID id;
+    int id;
     double temperature;
     double area;
     FixedArray<COORD<2>, MAX_NEIGHBORS> shape;
-    FixedArray<ID, MAX_NEIGHBORS> neighbors;
+    FixedArray<int, MAX_NEIGHBORS> neighbors;
     FixedArray<double, MAX_NEIGHBORS> neighborBorderLengths;
 };
 
-template<std::size_t SIZE, typename CARGO>
-class ContainerCell
-{
-public:
-    friend class VoronoiInitializer;
-    const static std::size_t MAX_SIZE = SIZE;
-    typedef CARGO Cargo;
-
-    ContainerCell(const Coord<2>& coord = Coord<2>()) :
-        coord(coord)
-    {}
-
-    ContainerCell& operator<<(const CARGO& cell)
-    {
-        cells << cell;
-        return *this;
-    }
-
-    std::size_t size() const
-    {
-        return cells.size();
-    }
-
-    typename FixedArray<CARGO, SIZE>::iterator begin()
-    {
-        return cells.begin();
-    }
-
-    typename FixedArray<CARGO, SIZE>::const_iterator begin() const
-    {
-        return cells.begin();
-    }
-
-    typename FixedArray<CARGO, SIZE>::iterator end()
-    {
-        return cells.end();
-    }
-
-    typename FixedArray<CARGO, SIZE>::const_iterator end() const
-    {
-        return cells.end();
-    }
-
-private:
-    FixedArray<CARGO, SIZE> cells;
-    Coord<2> coord;
-};
-
-typedef ContainerCell<1000, SimpleCell<Coord> > ContainerCellType;
+typedef ContainerCell<SimpleCell<FloatCoord>, 1000> ContainerCellType;
 
 // fixme: refactor this demo and chromatography demo by extracting the mesh generator and container cell
 class VoronoiInitializer : public SimpleInitializer<ContainerCellType>
@@ -472,18 +440,16 @@ public:
 
         for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             ContainerCellType c = grid[*i];
-            c.coord = *i;
             ret->set(*i, c);
         }
+
     }
 
 private:
 
     Grid<ContainerCellType> createBasicGrid()
     {
-        Coord<2> cellDim(ceil(1.0 * MAX_X / CELL_SPACING),
-                         ceil(1.0 * MAX_Y / CELL_SPACING));
-        Grid<ContainerCellType> grid(cellDim);
+        Grid<ContainerCellType> grid(gridDim());
 
         for (std::size_t i = 0; i <= NUM_CELLS; ++i) {
             Coord<2> center = randCoord();
@@ -509,10 +475,12 @@ private:
             for (int x = -1; x < 2; ++x) {
                 const ContainerCellType& container = grid[containerCoord + Coord<2>(x, y)];
 
-                for (std::size_t j = 0; j < container.size(); ++j) {
-                    double length = squareVector(container.cells[j].center - center);
-                    if ((length * length) < (ELEMENT_SPACING * ELEMENT_SPACING))
+                for (ContainerCellType::const_iterator j = container.begin(); j < container.end(); ++j) {
+                    double length = squareVector(j->center - center);
+
+                    if ((length * length) < (ELEMENT_SPACING * ELEMENT_SPACING)) {
                         flag = false;
+                    }
                 }
             }
         }
@@ -529,7 +497,7 @@ private:
         }
 
         Coord<2> containerCoord = pointToContainerCoord(center);
-        unsigned numCells = (*grid)[containerCoord].size();
+        std::size_t numCells = (*grid)[containerCoord].size();
 
         if (center[0] <= 0 || center[0] >= int(MAX_X - 1) ||
             center[1] <= 0 || center[1] >= int(MAX_Y - 1)) {
@@ -537,11 +505,12 @@ private:
         }
 
         if (numCells < ContainerCellType::MAX_SIZE) {
-            (*grid)[containerCoord] <<
-                ContainerCellType::Cargo(
-                    center,
-                    ID(containerCoord, numCells),
-                    0);
+            ID id = makeID(containerCoord, numCells);
+            ContainerCellType::Cargo cell(
+                center,
+                id,
+                0);
+            (*grid)[containerCoord].insert(id, cell);
         }
     }
 
@@ -558,17 +527,19 @@ private:
             ContainerCellType& container = (*grid)[containerCoord];
             maxCells = std::max(maxCells, container.size());
 
-            for (std::size_t i = 0; i < container.size(); ++i) {
-                ContainerCellType::Cargo& cell = container.cells[i];
+            for (ContainerCellType::Iterator i = container.begin(); i != container.end(); ++i) {
+                ContainerCellType::Cargo& cell = *i;
                 ElementType e(cell.center, cell.id);
 
                 for (int y = -1; y < 2; ++y) {
                     for (int x = -1; x < 2; ++x) {
                         ContainerCellType& container =
                             (*grid)[containerCoord + Coord<2>(x, y)];
-                        for (unsigned j = 0; j < container.size(); ++j) {
-                            if (cell.center != container.cells[j].center) {
-                                e << container.cells[j];
+                        for (ContainerCellType::Iterator j = container.begin();
+                             j != container.end();
+                             ++j) {
+                            if (cell.center != j->center) {
+                                e << *j;
                             }
                         }
                     }
@@ -581,9 +552,7 @@ private:
                 for (std::vector<EquationType>::const_iterator l =
                          e.getLimits().begin();
                      l != e.getLimits().end(); ++l) {
-                    if (l->neighborID.container != FarAway) {
-                        cell.pushNeighbor(l->neighborID, l->length, l->dir);
-                    }
+                    cell.pushNeighbor(l->neighborID, l->length, l->dir);
                 }
 
                 maxShape     = std::max(maxShape,     cell.shape.size());
@@ -597,9 +566,8 @@ private:
 
 int main(int argc, char **argv)
 {
-    std::cout << "gogogo!\n";
-    Coord<2> dim(ceil(1.0 * MAX_X / CELL_SPACING),
-                 ceil(1.0 * MAX_Y / CELL_SPACING));
+    Coord<2> dim = gridDim();
+    std::cout << "dim: " << dim << "\n";
     VoronoiInitializer init(dim, 10);
     Grid<ContainerCellType> grid(dim);
     init.grid(&grid);
