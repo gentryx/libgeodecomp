@@ -36,6 +36,23 @@ public:
         TS_ASSERT_EQUALS_DOUBLE(6.0, FloatCoord<3>(1, 3.3, 1.7).sum());
     }
 
+    void testScale()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(7.5            ),
+                         FloatCoord<1>(2.5            ).scale(FloatCoord<1>(3.0          )));
+        TS_ASSERT_EQUALS(FloatCoord<2>(7.5, 20.0      ),
+                         FloatCoord<2>(2.5,  4.0      ).scale(FloatCoord<2>(3.0, 5.0     )));
+        TS_ASSERT_EQUALS(FloatCoord<3>(7.5, 20.0, 43.5),
+                         FloatCoord<3>(2.5,  4.0,  6.0).scale(FloatCoord<3>(3.0, 5.0, 7.25)));
+
+        TS_ASSERT_EQUALS(FloatCoord<1>(7.5             ),
+                         FloatCoord<1>(2.5             ).scale(Coord<1>(3      )));
+        TS_ASSERT_EQUALS(FloatCoord<2>(7.5, 20.0       ),
+                         FloatCoord<2>(2.5,  4.0       ).scale(Coord<2>(3, 5   )));
+        TS_ASSERT_EQUALS(FloatCoord<3>(7.5, 20.0, 43.75),
+                         FloatCoord<3>(2.5,  4.0,  6.25).scale(Coord<3>(3, 5, 7)));
+    }
+
     void testProd()
     {
         TS_ASSERT_EQUALS_DOUBLE( 2.0, FloatCoord<1>(2.0).prod());

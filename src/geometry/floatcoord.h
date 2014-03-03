@@ -127,6 +127,13 @@ public:
         return c[i];
     }
 
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord scale(const OTHER_COORD<1> other)
+    {
+        return FloatCoord(c[0] * other[0]);
+    }
+
     inline const double& prod() const
     {
         return c[0];
@@ -279,6 +286,14 @@ public:
     inline const double& operator[](const int i) const
     {
         return c[i];
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord scale(const OTHER_COORD<2> other)
+    {
+        return FloatCoord(c[0] * other[0],
+                          c[1] * other[1]);
     }
 
     inline const double prod() const
@@ -447,6 +462,15 @@ public:
     inline const double& operator[](const int i) const
     {
         return c[i];
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord scale(const OTHER_COORD<3> other)
+    {
+        return FloatCoord(c[0] * other[0],
+                          c[1] * other[1],
+                          c[2] * other[2]);
     }
 
     inline const double prod() const
