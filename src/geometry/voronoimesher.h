@@ -15,7 +15,7 @@ namespace VoronoiMesherHelpers {
 template<int DIM>
 Coord<DIM> farAway()
 {
-    return Coord<DIM>::diag(-1);
+    return Coord<DIM>::diagonal(-1);
 }
 
 template<template<int DIM> class COORD, typename ID = int>
@@ -55,24 +55,23 @@ class Element
 public:
     const static std::size_t SAMPLES = 1000;
 
-    // fixme
-    static const int MAX_X = 1200;
-    static const int MAX_Y = 1200;
-
     typedef Equation<COORD> EquationType;
 
-    Element(const COORD<2>& center = COORD<2>(1, 1),
-            const COORD<2>& quadrantSize = COORD<2>(1, 1),
-            const double minCellDistance = 1,
-            ID id = ID()) :
+    Element(const COORD<2>& center,
+            const COORD<2>& quadrantSize,
+            const COORD<2>& simSpaceDim,
+            const double minCellDistance,
+            ID id) :
         center(center),
+        quadrantSize(quadrantSize),
+        simSpaceDim(simSpaceDim),
         minCellDistance(minCellDistance),
         id(id)
     {
-        limits << EquationType(COORD<2>(center[0], 0),     COORD<2>(0, 1))
-               << EquationType(COORD<2>(0, center[1]),     COORD<2>(1, 0))
-               << EquationType(COORD<2>(MAX_X, center[1]), COORD<2>(-1, 0))
-               << EquationType(COORD<2>(center[0], MAX_Y), COORD<2>(0, -1));
+        limits << EquationType(COORD<2>(center[0], 0),     COORD<2>( 0,  1))
+               << EquationType(COORD<2>(0, center[1]),     COORD<2>( 1,  0))
+               << EquationType(COORD<2>(simSpaceDim[0], center[1]), COORD<2>(-1,  0))
+               << EquationType(COORD<2>(center[0], simSpaceDim[1]), COORD<2>( 0, -1));
     }
 
     Element& operator<<(const EquationType& eq)
@@ -128,7 +127,7 @@ public:
         return *this;
     }
 
-    static std::vector<COORD<2> > generateCutPoints(const std::vector<EquationType>& limits)
+    std::vector<COORD<2> > generateCutPoints(const std::vector<EquationType>& limits) const
     {
         std::vector<COORD<2> > buf(2 * limits.size(), farAway<2>());
 
@@ -191,11 +190,16 @@ public:
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             COORD<2> delta = cutPoints[i] - center;
             double length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
-            double dY = delta[1] / length;
-            double angle = asin(dY);
-            if (delta[0] < 0) {
-                angle = M_PI - angle;
+            double angle = 0;
+            if (length > 0) {
+                double dY = delta[1] / length;
+                angle = asin(dY);
+
+                if (delta[0] < 0) {
+                    angle = M_PI - angle;
+                }
             }
+
             points[angle] = cutPoints[i];
         }
 
@@ -231,7 +235,7 @@ public:
             limits[i].length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
         }
 
-        COORD<2> min(MAX_X, MAX_Y);
+        COORD<2> min = simSpaceDim;
         COORD<2> max(0, 0);
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             COORD<2>& c = cutPoints[i];
@@ -254,6 +258,9 @@ public:
         double maxRadiusSquared = quadrantSize * quadrantSize * 0.5;
         if (radiusSquared > maxRadiusSquared) {
             std::cerr << "my diameter: " << diameter << "\n"
+                      << "maxRadiusSquared: " << maxRadiusSquared << "\n"
+                      << "quadrantSize: " << quadrantSize << "\n"
+                      << "cutPoints: " << cutPoints << "\n"
                       << "min: " << min << "\n"
                       << "max: " << max << "\n";
             throw std::logic_error("element too large");
@@ -283,6 +290,7 @@ public:
 private:
     COORD<2> center;
     FloatCoord<2> quadrantSize;
+    FloatCoord<2> simSpaceDim;
     double minCellDistance;
     ID id;
     double area;
@@ -294,7 +302,7 @@ private:
         return COORD<2>(-c[1], c[0]);
     }
 
-    static COORD<2> cutPoint(EquationType eq1, EquationType eq2)
+    COORD<2> cutPoint(EquationType eq1, EquationType eq2) const
     {
         if (eq1.dir[1] == 0) {
             if (eq2.dir[1] == 0) {
@@ -324,10 +332,10 @@ private:
         double x = (d2 - d1) / (m1 - m2);
         double y = d1 + x * m1;
 
-        if ((x < (-10 * MAX_X)) ||
-            (x > ( 10 * MAX_X)) ||
-            (y < (-10 * MAX_Y)) ||
-            (y > ( 10 * MAX_Y))) {
+        if ((x < (-10 * simSpaceDim[0])) ||
+            (x > ( 10 * simSpaceDim[0])) ||
+            (y < (-10 * simSpaceDim[1])) ||
+            (y > ( 10 * simSpaceDim[1]))) {
             return farAway<2>();
         }
 
@@ -394,6 +402,7 @@ public:
     void fillGeometryData(GridType *grid)
     {
         CoordBox<DIM> box = grid->boundingBox();
+        FloatCoord<DIM> simSpaceDim = quadrantSize.scale(box.dimensions);
         // statistics:
         std::size_t maxShape = 0;
         std::size_t maxNeighbors = 0;
@@ -402,12 +411,12 @@ public:
 
         for (typename CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             Coord<2> containerCoord = *iter;
-            ContainerCellType& container = (*grid)[containerCoord];
+            ContainerCellType container = grid->get(containerCoord);
             maxCells = std::max(maxCells, container.size());
 
             for (typename ContainerCellType::Iterator i = container.begin(); i != container.end(); ++i) {
                 Cargo& cell = *i;
-                ElementType e(cell.center, cell.id);
+                ElementType e(cell.center, quadrantSize, simSpaceDim, minCellDistance, cell.id);
 
                 for (int y = -1; y < 2; ++y) {
                     for (int x = -1; x < 2; ++x) {
@@ -424,20 +433,21 @@ public:
                 }
 
                 e.updateGeometryData();
-                cell.area = e.getArea();
+                cell.setArea(e.getArea());
                 cell.setShape(e.getShape());
 
-                for (std::vector<EquationType>::const_iterator l =
-                         e.getLimits().begin();
-                     l != e.getLimits().end(); ++l) {
+                for (std::vector<EquationType>::const_iterator l = e.getLimits().begin();
+                     l != e.getLimits().end();
+                     ++l) {
                     cell.pushNeighbor(l->neighborID, l->length, l->dir);
                 }
 
                 maxShape     = std::max(maxShape,     cell.shape.size());
-                maxNeighbors = std::max(maxNeighbors, cell.neighbors.size());
+                maxNeighbors = std::max(maxNeighbors, cell.neighborIDs.size());
                 maxDiameter  = std::max(maxDiameter,  e.getDiameter());
             }
 
+            grid->set(containerCoord, container);
         }
 
         LOG(DBG,

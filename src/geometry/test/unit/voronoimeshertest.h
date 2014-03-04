@@ -10,11 +10,36 @@ namespace LibGeoDecomp {
 class DummyCell
 {
 public:
-    DummyCell(const FloatCoord<2>& center = FloatCoord<2>(0, 0)) :
-        center(center)
+    DummyCell(const FloatCoord<2>& center = FloatCoord<2>(0, 0), int id = -1) :
+        center(center),
+        id(id),
+        area(0)
     {}
 
+    void setArea(const double newArea)
+    {
+        area = newArea;
+    }
+
+    void setShape(const std::vector<FloatCoord<2> > newShape)
+    {
+        shape = newShape;
+    }
+
+    void pushNeighbor(const int id, const double boundaryLength, const FloatCoord<2> dir)
+    {
+        neighborIDs << id;
+        neighborBoundaryLengths << boundaryLength;
+        neighborDirections << dir;
+    }
+
     FloatCoord<2> center;
+    int id;
+    double area;
+    std::vector<FloatCoord<2> > shape;
+    std::vector<int> neighborIDs;
+    std::vector<double> neighborBoundaryLengths;
+    std::vector<FloatCoord<2> > neighborDirections;
 };
 
 typedef ContainerCell<DummyCell, 100> ContainerCellType;
@@ -54,13 +79,15 @@ public:
                 for (int subY = 0; subY < 10; ++subY) {
                     for (int subX = 0; subX < 10; ++subX) {
                         FloatCoord<2> realPos(
-                            x * quadrantSize[0] + subX,
-                            y * quadrantSize[1] + subY);
+                            x * quadrantSize[0] + subX * 5.5,
+                            y * quadrantSize[1] + subY * 6.5);
                         mesher.addCell(&grid[c], realPos);
                     }
                 }
             }
         }
+
+        mesher.fillGeometryData(&grid);
     }
 
     void testAddRandomCells()
