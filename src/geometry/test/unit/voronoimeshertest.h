@@ -66,7 +66,8 @@ public:
 
     void testFillGeometryData()
     {
-        Coord<2> dim(5, 10);
+        Coord<2> dim(5, 3);
+        CoordBox<2> box(Coord<2>(), dim);
         FloatCoord<2> quadrantSize(100, 100);
         double minCellDistance = 20;
         Grid<ContainerCellType> grid(dim);
@@ -76,11 +77,11 @@ public:
             for (int x = 0; x < dim.x(); ++x) {
                 Coord<2> c(x, y);
 
-                for (int subY = 0; subY < 10; ++subY) {
-                    for (int subX = 0; subX < 10; ++subX) {
+                for (int subY = 0; subY < 4; ++subY) {
+                    for (int subX = 0; subX < 4; ++subX) {
                         FloatCoord<2> realPos(
-                            x * quadrantSize[0] + subX * 5.5,
-                            y * quadrantSize[1] + subY * 6.5);
+                            x * quadrantSize[0] + subX * 15.5,
+                            y * quadrantSize[1] + subY * 16.5);
                         mesher.addCell(&grid[c], realPos);
                     }
                 }
@@ -88,6 +89,20 @@ public:
         }
 
         mesher.fillGeometryData(&grid);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            ContainerCellType cell = grid[*i];
+            TS_ASSERT_EQUALS(cell.size(), std::size_t(16));
+
+            for (ContainerCellType::Iterator j = cell.begin(); j != cell.end(); ++j) {
+                if (j->shape.size() < 4) {
+                    std::cout << "center: " << j->center << "\n"
+                              << "  shape: " << j->shape << "\n";
+                }
+                TS_ASSERT_EQUALS(j->shape.size(), std::size_t(4));
+                TS_ASSERT(j->area > 0);
+            }
+        }
     }
 
     void testAddRandomCells()

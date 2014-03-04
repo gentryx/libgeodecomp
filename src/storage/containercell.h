@@ -130,7 +130,7 @@ public:
         return cells + numElements;
     }
 
-    inline const std::size_t size() const
+    inline std::size_t size() const
     {
         return numElements;
     }

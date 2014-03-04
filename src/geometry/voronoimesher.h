@@ -187,20 +187,13 @@ public:
         }
 
         std::map<double, COORD<2> > points;
-        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            COORD<2> delta = cutPoints[i] - center;
-            double length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
-            double angle = 0;
-            if (length > 0) {
-                double dY = delta[1] / length;
-                angle = asin(dY);
+        for (typename std::vector<COORD<2> >::iterator i = cutPoints.begin();
+             i != cutPoints.end();
+             ++i) {
+            COORD<2> delta = *i - center;
+            double angle = relativeCoordToAngle(delta, cutPoints);
 
-                if (delta[0] < 0) {
-                    angle = M_PI - angle;
-                }
-            }
-
-            points[angle] = cutPoints[i];
+            points[angle] = *i;
         }
 
         std::vector<COORD<2> > res;
@@ -296,6 +289,73 @@ private:
     double area;
     double diameter;
     std::vector<EquationType> limits;
+
+    double relativeCoordToAngle(const COORD<2>& delta, const std::vector<COORD<2> >& cutPoints) const
+    {
+        double length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
+
+        if (length > 0) {
+            double dY = delta[1] / length;
+            double angle = asin(dY);
+
+            if (delta[0] < 0) {
+                angle = M_PI - angle;
+            }
+
+            return angle;
+        }
+
+        // If lengths is 0, then we can't deduce the angle
+        // from the cutPoint's location. But we know that the
+        // center is located on the simulation space's
+        // boundary. Hence at least one of the following four
+        // cases is true, which we can use to assign a fake
+        // angle to the point:
+        //
+        // 1. all x-coordinates are >= than center[0]
+        // 2. all x-coordinates are <= than center[0]
+        // 3. all y-coordinates are >= than center[1]
+        // 4. all y-coordinates are <= than center[1]
+
+        bool case1 = true;
+        bool case2 = true;
+        bool case3 = true;
+        bool case4 = true;
+
+        for (typename std::vector<COORD<2> >::const_iterator i = cutPoints.begin();
+             i != cutPoints.end();
+             ++i) {
+            if ((*i)[0] < center[0]) {
+                case1 = false;
+            }
+            if ((*i)[0] > center[0]) {
+                case2 = false;
+            }
+            if ((*i)[1] < center[1]) {
+                case3 = false;
+            }
+            if ((*i)[1] > center[1]) {
+                case4 = false;
+            }
+        }
+
+        if (!case1 && !case2 && !case3 && !case4) {
+            throw std::logic_error("oops, boundary case in boundary generation should be logically impossible!");
+        }
+
+        if (case1) {
+            return 1.0 * M_PI;
+        }
+        if (case2) {
+            return 0.0 * M_PI;
+        }
+        if (case3) {
+            return 1.5 * M_PI;
+        }
+        if (case4) {
+            return 0.5 * M_PI;
+        }
+    }
 
     static COORD<2> turnLeft90(const COORD<2>& c)
     {
