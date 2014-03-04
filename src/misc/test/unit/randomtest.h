@@ -1,5 +1,6 @@
-#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/misc/random.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 
@@ -37,6 +38,38 @@ public:
             sum += Random::gen_u();
         TS_ASSERT((0.45 * max) < sum);
         TS_ASSERT((0.55 * max) > sum);
+    }
+
+    void testSeed()
+    {
+        std::vector<double> vec1;
+        std::vector<double> vec2;
+
+        Random::seed(47);
+        for (int i = 0; i < 10; ++i) {
+            vec1 << Random::gen_d();
+        }
+
+        Random::seed(47);
+        for (int i = 0; i < 10; ++i) {
+            vec2 << Random::gen_d();
+        }
+
+        TS_ASSERT_EQUALS(vec1, vec2);
+
+        vec1.clear();
+        vec2.clear();
+
+        Random::seed(11);
+        for (int i = 0; i < 20; ++i) {
+            vec1 << Random::gen_d();
+        }
+
+        Random::seed(11);
+        for (int i = 0; i < 20; ++i) {
+            vec2 << Random::gen_d();
+        }
+
     }
 };
 
