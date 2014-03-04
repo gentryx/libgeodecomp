@@ -316,11 +316,25 @@ public:
         TS_ASSERT_EQUALS(v, w);
     }
 
-    void testMax()
+    void testMinMaxVector()
     {
-        std::vector<unsigned> a;
+        std::vector<int> a;
         a += 0, 3, 1 ,2;
-        TS_ASSERT_EQUALS((max)(a), (unsigned)3);
+        TS_ASSERT_EQUALS((min)(a), 0);
+        TS_ASSERT_EQUALS((max)(a), 3);
+
+        (min)(a) = 47;
+        TS_ASSERT_EQUALS((min)(a), 1);
+        TS_ASSERT_EQUALS((max)(a), 47);
+
+        (max)(a) = -1;
+        TS_ASSERT_EQUALS((min)(a), -1);
+        TS_ASSERT_EQUALS((max)(a), 3);
+
+        del(a, -1);
+        del(a, 3);
+        TS_ASSERT_EQUALS((min)(a), 1);
+        TS_ASSERT_EQUALS((max)(a), 2);
     }
 };
 

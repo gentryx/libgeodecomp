@@ -8,10 +8,9 @@ namespace LibGeoDecomp {
 
 class RandomTest : public CxxTest::TestSuite
 {
-
 public:
 
-    void testDouble1cd ()
+    void testDouble1()
     {
         double sum = 0;
         for (int i = 0; i < 1000; ++i)
