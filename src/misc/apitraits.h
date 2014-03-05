@@ -521,13 +521,7 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    /**
-     * This trait is used by unstructured grid and meshfree codes to
-     * set the coordinate type by which the elements are represemted.
-     * The typename defined via HasCoordType needs to match the
-     * dimensions of the model's topology.
-     */
-    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    template<typename CELL, typename HAS_COORD_TYPE = void>
     class SelectCoordType
     {
     public:
@@ -541,6 +535,12 @@ public:
         typedef typename CELL::API::CoordType Value;
     };
 
+    /**
+     * This trait is used by unstructured grid and meshfree codes to
+     * set the coordinate type by which the elements are represemted.
+     * The typename needs to match the dimensions of the model's
+     * topology.
+     */
     template<typename COORD>
     class HasCoordType
     {
@@ -548,6 +548,36 @@ public:
         typedef COORD CoordType;
 
         typedef void SupportsCoordType;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_ID_TYPE = void>
+    class SelectIDType
+    {
+    public:
+        typedef int Value;
+    };
+
+    template<typename CELL>
+    class SelectIDType<CELL, typename CELL::API::SupportsIDType>
+    {
+    public:
+        typedef typename CELL::API::IDType Value;
+    };
+
+    /**
+     * Like HasCoordType, this trait can be used to set the type which
+     * is used in meshfree and unstructured grid codes to uniquely
+     * identify elements.
+     */
+    template<typename ID>
+    class HasIDType
+    {
+    public:
+        typedef ID IDType;
+
+        typedef void SupportsIDType;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

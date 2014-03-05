@@ -422,11 +422,12 @@ class VoronoiMesher
 public:
     typedef CONTAINER_CELL ContainerCellType;
     typedef typename ContainerCellType::Cargo Cargo;
-    // fixme: make discover floatcoord and int from api traits
     typedef VoronoiMesherHelpers::Element<
-        typename APITraits::SelectCoordType<CONTAINER_CELL>::Value, int> ElementType;
+        typename APITraits::SelectCoordType<CONTAINER_CELL>::Value,
+        typename APITraits::SelectIDType<CONTAINER_CELL>::Value> ElementType;
     typedef VoronoiMesherHelpers::Equation<
-        typename APITraits::SelectCoordType<CONTAINER_CELL>::Value, int> EquationType;
+        typename APITraits::SelectCoordType<CONTAINER_CELL>::Value,
+        typename APITraits::SelectIDType<CONTAINER_CELL>::Value> EquationType;
     typedef typename APITraits::SelectTopology<ContainerCellType>::Value Topology;
     static const int DIM = Topology::DIM;
     typedef GridBase<ContainerCellType, DIM> GridType;
