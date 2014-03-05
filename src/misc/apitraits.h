@@ -7,6 +7,7 @@
 #include <mpi.h>
 #endif
 
+#include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
 
@@ -516,6 +517,37 @@ public:
     {
     public:
         typedef void SupportsSeparateCUDAUpdate;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    /**
+     * This trait is used by unstructured grid and meshfree codes to
+     * set the coordinate type by which the elements are represemted.
+     * The typename defined via HasCoordType needs to match the
+     * dimensions of the model's topology.
+     */
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectCoordType
+    {
+    public:
+        typedef FloatCoord<2> Value;
+    };
+
+    template<typename CELL>
+    class SelectCoordType<CELL, typename CELL::API::SupportsCoordType>
+    {
+    public:
+        typedef typename CELL::API::CoordType Value;
+    };
+
+    template<typename COORD>
+    class HasCoordType
+    {
+    public:
+        typedef COORD CoordType;
+
+        typedef void SupportsCoordType;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
