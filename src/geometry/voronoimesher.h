@@ -6,9 +6,12 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <algorithm>
 #include <set>
 
 namespace LibGeoDecomp {
+
+class VoronoiMesherTest;
 
 namespace VoronoiMesherHelpers {
 
@@ -34,6 +37,16 @@ public:
         return (point - base) * dir > 0;
     }
 
+    bool operator==(const Equation& other) const
+    {
+        // intentionally not including ID and length here, as we're
+        // rather interested if both Equations refer to the same set
+        // of coordinates:
+        return
+            (base == other.base) &&
+            (dir  == other.dir);
+    }
+
     COORD base;
     COORD dir;
     ID neighborID;
@@ -53,6 +66,8 @@ template<typename COORD, typename ID = int>
 class Element
 {
 public:
+    friend class LibGeoDecomp::VoronoiMesherTest;
+
     const static std::size_t SAMPLES = 1000;
 
     typedef Equation<COORD> EquationType;
@@ -66,7 +81,9 @@ public:
         quadrantSize(quadrantSize),
         simSpaceDim(simSpaceDim),
         minCellDistance(minCellDistance),
-        id(id)
+        id(id),
+        area(simSpaceDim.prod()),
+        diameter(*std::max_element(&simSpaceDim[0], &simSpaceDim[0] + 2))
     {
         limits << EquationType(COORD(center[0], 0),     COORD( 0,  1))
                << EquationType(COORD(0, center[1]),     COORD( 1,  0))
@@ -76,8 +93,19 @@ public:
 
     Element& operator<<(const EquationType& eq)
     {
+        // no need to reinsert if limit already present (would only cause trouble)
+        for (typename std::vector<EquationType>::iterator i = limits.begin();
+             i != limits.end();
+             ++i) {
+            if (eq == *i) {
+                return *this;
+            }
+        }
+
         limits << eq;
         std::vector<COORD > cutPoints = generateCutPoints(limits);
+
+
         // we need to set up a kill list to avoid jumping beyond the
         // end of limits.
         std::set<int> deleteSet;
@@ -96,11 +124,11 @@ public:
                     // parallel lines, deleting...
                     if (cutPoint(limits[i], limits[j]) == farAway<2>()) {
                         if (limits[i].dir * limits[j].dir > 0) {
-                            int dist1 = (center - limits[i].base) *
+                            double dist1 = (center - limits[i].base) *
                                 limits[i].dir;
-                            int dist2 = (center - limits[j].base) *
+                            double dist2 = (center - limits[j].base) *
                                 limits[i].dir;
-                            if (dist2 >= dist1) {
+                            if (dist2 > dist1) {
                                 deleteSet.insert(j);
                             }
                         }
@@ -114,6 +142,7 @@ public:
                 newLimits << limits[i];
             }
         }
+
         limits = newLimits;
 
         return *this;
@@ -128,29 +157,29 @@ public:
         return *this;
     }
 
-    std::vector<COORD > generateCutPoints(const std::vector<EquationType>& limits) const
+    std::vector<COORD > generateCutPoints(const std::vector<EquationType>& equations) const
     {
-        std::vector<COORD > buf(2 * limits.size(), farAway<2>());
+        std::vector<COORD > buf(2 * equations.size(), farAway<2>());
 
-        for (std::size_t i = 0; i < limits.size(); ++i) {
-            for (std::size_t j = 0; j < limits.size(); ++j) {
+        for (std::size_t i = 0; i < equations.size(); ++i) {
+            for (std::size_t j = 0; j < equations.size(); ++j) {
                 if (i != j) {
-                    COORD cut = cutPoint(limits[i], limits[j]);
+                    COORD cut = cutPoint(equations[i], equations[j]);
                     int offset = 2 * i;
-                    COORD delta = cut - limits[i].base;
-                    COORD turnedDir = turnLeft90(limits[i].dir);
+                    COORD delta = cut - equations[i].base;
+                    COORD turnedDir = turnLeft90(equations[i].dir);
                     double distance =
                         1.0 * delta[0] * turnedDir[0] +
                         1.0 * delta[1] * turnedDir[1];
 
 
                     bool isLeftCandidate = true;
-                    if (limits[j].dir * turnedDir > 0) {
+                    if (equations[j].dir * turnedDir > 0) {
                         isLeftCandidate = false;
                         offset += 1;
                     }
 
-                    delta = buf[offset] - limits[i].base;
+                    delta = buf[offset] - equations[i].base;
                     double referenceDist =
                         1.0 * delta[0] * turnedDir[0] +
                         1.0 * delta[1] * turnedDir[1];
@@ -251,14 +280,24 @@ public:
         double radiusSquared = delta * delta;
         double maxRadiusSquared = quadrantSize * quadrantSize * 0.5;
         if (radiusSquared > maxRadiusSquared) {
-            std::cerr << "my diameter: " << diameter << "\n"
+            std::cerr << "center: " << center << "\n"
+                      << "my diameter: " << diameter << "\n"
                       << "maxRadiusSquared: " << maxRadiusSquared << "\n"
                       << "quadrantSize: " << quadrantSize << "\n"
                       << "cutPoints: " << cutPoints << "\n"
                       << "min: " << min << "\n"
                       << "max: " << max << "\n";
+
             throw std::logic_error("element too large");
         }
+
+        double newDiameter = *std::max_element(&delta[0], &delta[0] + 2);
+        if (newDiameter > diameter) {
+            throw std::logic_error("diameter should never ever increase!");
+
+        }
+
+        diameter = newDiameter;
     }
 
     const COORD& getCenter() const
@@ -289,6 +328,7 @@ private:
     ID id;
     double area;
     double diameter;
+    // fixme: why not use a set here?
     std::vector<EquationType> limits;
 
     double relativeCoordToAngle(const COORD& delta, const std::vector<COORD >& cutPoints) const
@@ -340,10 +380,6 @@ private:
             }
         }
 
-        if (!case1 && !case2 && !case3 && !case4) {
-            throw std::logic_error("oops, boundary case in boundary generation should be logically impossible!");
-        }
-
         if (case1) {
             return 1.0 * M_PI;
         }
@@ -356,6 +392,8 @@ private:
         if (case4) {
             return 0.5 * M_PI;
         }
+
+        throw std::logic_error("oops, boundary case in boundary generation should be logically impossible!");
     }
 
     static COORD turnLeft90(const COORD& c)
@@ -457,7 +495,6 @@ public:
             ContainerCellType container = grid->get(coord);
             FloatCoord<DIM> origin = quadrantSize.scale(coord);
             FloatCoord<DIM> location = origin + randCoord();
-
             insertCell(&container, location, container.begin(), container.end());
             grid->set(coord, container);
         }

@@ -63,6 +63,24 @@ public:
 class VoronoiMesherTest : public CxxTest::TestSuite
 {
 public:
+    void testElementDoesntRemoveLimitsAfterDuplicateInsertion()
+    {
+        FloatCoord<2> center(1.87819, 58.5767);
+        VoronoiMesherHelpers::Element<FloatCoord<2> > element(
+            center,
+            FloatCoord<2>(400, 400),
+            FloatCoord<2>(4000, 1600),
+            10,
+            0);
+
+        FloatCoord<2> origin = FloatCoord<2>(0.939096, 29.2884);
+        VoronoiMesherHelpers::Equation<FloatCoord<2> > equation(origin, (center - origin) * 2, 1);
+        element << equation;
+        TS_ASSERT_EQUALS(element.getShape().size(), std::size_t(5));
+
+        element << equation;
+        TS_ASSERT_EQUALS(element.getShape().size(), std::size_t(5));
+    }
 
     void testFillGeometryData()
     {
@@ -145,6 +163,20 @@ public:
         TS_ASSERT((min)(yCoords) <  minY + 10);
         TS_ASSERT((max)(yCoords) >= maxY - 10);
         TS_ASSERT((max)(yCoords) <  maxY + 0);
+    }
+
+    void testCollision()
+    {
+        Coord<2> dim(1, 1);
+        unsigned steps = 10;
+        std::size_t numCells = 100;
+        double quadrantSize = 400;
+        double minDistance = 40;
+
+        MockMesher mesher(dim, FloatCoord<2>(quadrantSize, quadrantSize), minDistance);
+        Grid<ContainerCellType> grid(dim);
+        mesher.addCell(&grid[Coord<2>(0, 0)], FloatCoord<2>(0, 0));
+        mesher.addRandomCells(&grid, Coord<2>(0, 0), numCells);
     }
 
 };
