@@ -20,6 +20,7 @@
 #include <libgeodecomp/communication/serialization.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/voronoimesher.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
