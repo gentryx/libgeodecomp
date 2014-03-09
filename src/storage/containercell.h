@@ -77,7 +77,7 @@ public:
         Cargo *pos = (*this)[id];
         if (pos) {
             int offset = pos - cells;
-            for (int i = offset; i < numElements - 1; ++i) {
+            for (std::size_t i = offset; i < numElements - 1; ++i) {
                 cells[i] = cells[i + 1];
                 ids[i] = ids[i + 1];
             }
@@ -110,6 +110,11 @@ public:
         return (const_cast<ContainerCell&>(*this))[id];
     }
 
+    inline void clear()
+    {
+        numElements = 0;
+    }
+
     inline Cargo *begin()
     {
         return cells;
@@ -140,7 +145,8 @@ public:
     {
         *this = neighbors[Coord<DIM>()];
         NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
-        for (int i = 0; i < numElements; ++i) {
+
+        for (std::size_t i = 0; i < numElements; ++i) {
             cells[i].update(adapter, nanoStep);
         }
     }
@@ -151,7 +157,6 @@ public:
     }
 
 private:
-    // fixme: use FixedArray here?
     Key ids[SIZE];
     Cargo cells[SIZE];
     std::size_t numElements;

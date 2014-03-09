@@ -14,16 +14,17 @@ class MockCell
 public:
     typedef Topologies::Cube<2>::Topology Topology;
 
-    MockCell(int _id=0, std::vector<int> *_ids=0) :
-        id(_id),
-        ids(_ids)
+    MockCell(int id=0, std::vector<int> *ids=0) :
+        id(id),
+        ids(ids)
     {}
 
     template<class NEIGHBORHOOD>
     void update(NEIGHBORHOOD neighbors, int nanoStep)
     {
         for (std::vector<int>::iterator i = ids->begin();
-             i != ids->end(); ++i) {
+             i != ids->end();
+             ++i) {
             TS_ASSERT_EQUALS(*i, neighbors[*i].id);
         }
 
@@ -52,7 +53,7 @@ public:
         container.insert(4, MockCell(4, &ids));
         container.insert(4, MockCell(4, &ids));
 
-        TS_ASSERT_EQUALS(5, container.size);
+        TS_ASSERT_EQUALS(std::size_t(5), container.size());
         TS_ASSERT_THROWS(container.insert(47, MockCell(47, 0)), std::logic_error);
         TS_ASSERT_THROWS(container.insert(3,  MockCell(3 , 0)), std::logic_error);
 
@@ -87,6 +88,20 @@ public:
             TS_ASSERT_EQUALS(ids[i], container.ids[i]);
             TS_ASSERT_EQUALS(ids[i], container.cells[i].id);
         }
+    }
+
+    void testClear()
+    {
+        ContainerCell<MockCell, 5> container;
+        std::vector<int> ids;
+
+        container.insert(2, MockCell(2, &ids));
+        container.insert(1, MockCell(1, &ids));
+        container.insert(6, MockCell(6, &ids));
+        TS_ASSERT_EQUALS(container.size(), std::size_t(3));
+
+        container.clear();
+        TS_ASSERT_EQUALS(container.size(), std::size_t(0));
     }
 
     void testUpdate()
