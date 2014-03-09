@@ -296,12 +296,12 @@ public:
                           c[1] * other[1]);
     }
 
-    inline const double prod() const
+    inline double prod() const
     {
         return c[0] * c[1];
     }
 
-    inline const double sum() const
+    inline double sum() const
     {
         return c[0] + c[1];
     }
@@ -473,12 +473,12 @@ public:
                           c[2] * other[2]);
     }
 
-    inline const double prod() const
+    inline double prod() const
     {
         return c[0] * c[1] * c[2];
     }
 
-    inline const double sum() const
+    inline double sum() const
     {
         return c[0] + c[1] + c[2];
     }
