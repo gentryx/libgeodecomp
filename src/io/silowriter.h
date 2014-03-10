@@ -33,48 +33,25 @@ public:
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
-        for (int d = 0; d < DIM; ++d) {
-            coords[d].resize(0);
-        }
-        shapeTypes.resize(0);
-        shapeSizes.resize(0);
-        shapeCounts.resize(0);
-        nodeList.resize(0);
+        std::ostringstream filename;
+        filename << prefix << "." << std::setfill('0') << std::setw(5)
+                 << step << ".silo";
 
-        CoordBox<DIM> box = grid.boundingBox();
-        for (typename CoordBox<DIM>::Iterator i = box.begin();
-             i != box.end();
-             ++i) {
+        DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,
+                                  "simulation time step", DB_HDF5);
 
-            CELL cell = grid.get(*i);
-            addShapes(cell.begin(), cell.end());
-        }
+        flushDataStores();
+        collectShapes(grid);
+        outputShapeMesh(dbfile);
 
-        output(step);
+        flushDataStores();
+        collectPoints(grid);
+        outputPointMesh(dbfile);
+
+        DBClose(dbfile);
     }
 
-    // fixme: refactor this so that a selector can extract the relevant data portions from cells
     // fixme: add functions to write variables and point-meshes
-    inline void addQuad(const FloatCoord<DIM>& origin, const FloatCoord<DIM>& dimensions)
-    {
-        if ((shapeSizes.size() > 0) && (shapeSizes.back() == 4)) {
-            shapeCounts.back() += 1;
-        } else {
-            shapeTypes << DB_ZONETYPE_POLYGON;
-            shapeSizes << 4;
-            shapeCounts << 1;
-        }
-
-        FloatCoord<DIM> upperLeft  = origin;
-        FloatCoord<DIM> upperRight = origin + FloatCoord<DIM>(dimensions[0], 0);
-        FloatCoord<DIM> lowerLeft  = origin + FloatCoord<DIM>(0, dimensions[1]);
-        FloatCoord<DIM> lowerRight = origin + dimensions;
-
-        addCoord(upperLeft);
-        addCoord(upperRight);
-        addCoord(lowerRight);
-        addCoord(lowerLeft);
-    }
 
 private:
     std::vector<std::vector<double> > coords;
@@ -83,15 +60,44 @@ private:
     std::vector<int> shapeCounts;
     std::vector<int> nodeList;
 
-    void output(const unsigned step)
+    void flushDataStores()
     {
-        std::ostringstream filename;
-        filename << prefix << "." << std::setfill('0') << std::setw(5)
-                 << step << ".silo";
+        for (int d = 0; d < DIM; ++d) {
+            coords[d].resize(0);
+        }
 
-        DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,
-                                  "simulation time step", DB_HDF5);
+        shapeTypes.resize(0);
+        shapeSizes.resize(0);
+        shapeCounts.resize(0);
+        nodeList.resize(0);
+    }
 
+    void collectPoints(const GridType& grid)
+    {
+        CoordBox<DIM> box = grid.boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin();
+             i != box.end();
+             ++i) {
+
+            CELL cell = grid.get(*i);
+            addPoints(cell.begin(), cell.end());
+        }
+    }
+
+    void collectShapes(const GridType& grid)
+    {
+        CoordBox<DIM> box = grid.boundingBox();
+        for (typename CoordBox<DIM>::Iterator i = box.begin();
+             i != box.end();
+             ++i) {
+
+            CELL cell = grid.get(*i);
+            addShapes(cell.begin(), cell.end());
+        }
+    }
+
+    void outputShapeMesh(DBfile *dbfile)
+    {
         DBPutZonelist2(dbfile, "zonelist", sum(shapeCounts), DIM,
                        &nodeList[0], nodeList.size(),
                        0, 0, 0,
@@ -102,10 +108,24 @@ private:
         for (int d = 0; d < DIM; ++d) {
             tempCoords[d] = &coords[d][0];
         }
-        DBPutUcdmesh(dbfile, "mesh", DIM, NULL, tempCoords, nodeList.size(), sum(shapeCounts), "zonelist",
-                     NULL, DB_DOUBLE, NULL);
 
-        DBClose(dbfile);
+        DBPutUcdmesh(
+            dbfile, "shape_mesh", DIM, NULL, tempCoords,
+            nodeList.size(), sum(shapeCounts), "zonelist",
+            NULL, DB_DOUBLE, NULL);
+
+    }
+
+    void outputPointMesh(DBfile *dbfile)
+    {
+        double *tempCoords[DIM];
+        for (int d = 0; d < DIM; ++d) {
+            tempCoords[d] = &coords[d][0];
+        }
+
+        // fixme: make mesh names configurable
+        // fixme: make connection between variable and mesh configurable
+        DBPutPointmesh(dbfile, "centroids", DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
 
     inline void addCoord(const FloatCoord<1>& coord)
@@ -130,10 +150,26 @@ private:
     }
 
     template<typename ITERATOR>
+    inline void addPoints(const ITERATOR& start, const ITERATOR& end)
+    {
+        for (ITERATOR i = start; i != end; ++i) {
+            addPoint(i->getPoint());
+        }
+    }
+
+    template<typename ITERATOR>
     inline void addShapes(const ITERATOR& start, const ITERATOR& end)
     {
         for (ITERATOR i = start; i != end; ++i) {
             addShape(i->getShape());
+        }
+    }
+
+    template<typename COORD_TYPE>
+    inline void addPoint(const COORD_TYPE& coord)
+    {
+        for (int i = 0; i < DIM; ++i) {
+            coords[i] << coord[i];
         }
     }
 
