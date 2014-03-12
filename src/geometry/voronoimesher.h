@@ -85,8 +85,8 @@ public:
         area(simSpaceDim.prod()),
         diameter(*std::max_element(&simSpaceDim[0], &simSpaceDim[0] + 2))
     {
-        limits << EquationType(COORD(center[0], 0),     COORD( 0,  1))
-               << EquationType(COORD(0, center[1]),     COORD( 1,  0))
+        limits << EquationType(COORD(center[0], 0),              COORD( 0,  1))
+               << EquationType(COORD(0, center[1]),              COORD( 1,  0))
                << EquationType(COORD(simSpaceDim[0], center[1]), COORD(-1,  0))
                << EquationType(COORD(center[0], simSpaceDim[1]), COORD( 0, -1));
     }
