@@ -159,7 +159,6 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        std::cout << "sum(shapeCounts) = " << sum(shapeCounts) << "\n";
         DBPutUcdmesh(
             dbfile, "shape_mesh", DIM, NULL, tempCoords,
             nodeList.size(), sum(shapeCounts), "zonelist",
@@ -176,7 +175,6 @@ private:
 
         // fixme: make mesh names configurable
         // fixme: make connection between variable and mesh configurable
-        std::cout << "coords[0].size() = " << coords[0].size() << "\n";
         DBPutPointmesh(dbfile, "centroids", DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
 
@@ -198,7 +196,6 @@ private:
 
     void outputVariable(DBfile *dbfile)
     {
-        std::cout << "variableData.size() = " << variableData.size() << "\n";
         DBPutUcdvar1(dbfile, "fixme_varname", "shape_mesh", &variableData[0], variableData.size(),
                      NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
     }
