@@ -41,7 +41,7 @@ public:
         std::copy(source, source + length, target);
     }
 
-    const std::string& name() const
+    const std::string name() const
     {
         return "primitiveType";
     }
@@ -117,18 +117,18 @@ public:
         return memberPointer;
     }
 
-    const std::string& name() const
+    inline const std::string& name() const
     {
         return memberName;
     }
 
-    std::size_t sizeOf() const
+    inline std::size_t sizeOf() const
     {
         return memberSize;
     }
 
     template<typename MEMBER>
-    bool checkTypeID() const
+    inline bool checkTypeID() const
     {
         return (*memberTypeIDHandler)(typeid(MEMBER));
     }
@@ -136,7 +136,7 @@ public:
     /**
      * The member's offset in LibFlatArray's SoA memory layout
      */
-    int offset() const
+    inline int offset() const
     {
         return memberOffset;
     }
@@ -145,7 +145,7 @@ public:
      * Read the data from source and set the corresponding member of
      * each CELL at target. Only useful for AoS memory layout.
      */
-    void copyMemberIn(const char *source, CELL *target, int num) const
+    inline void copyMemberIn(const char *source, CELL *target, int num) const
     {
         (*copyMemberInHandler)(source, target, num, memberPointer);
     }
@@ -154,7 +154,7 @@ public:
      * Read the member of all CELLs at source and store them
      * contiguously at target. Only useful for AoS memory layout.
      */
-    void copyMemberOut(const CELL *source, char *target, int num) const
+    inline void copyMemberOut(const CELL *source, char *target, int num) const
     {
         (*copyMemberOutHandler)(source, target, num, memberPointer);
     }
@@ -163,7 +163,7 @@ public:
      * This is a helper function for reading/writing members in a SoA
      * memory layout.
      */
-    void copyStreak(const char *first, const char *last, char *target) const
+    inline void copyStreak(const char *first, const char *last, char *target) const
     {
         (*copyStreakHandler)(first, last, target);
     }
