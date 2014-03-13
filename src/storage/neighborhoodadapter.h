@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/neighborhoodadapter.h>
 
 namespace LibGeoDecomp {
@@ -45,8 +46,7 @@ public:
             }
         }
 
-        LOG(FATAL, "could not find id " << id << " in neighborhood")
-
+        LOG(ERROR, "could not find id " << id << " in neighborhood");
         throw std::logic_error("id not found");
     }
 
