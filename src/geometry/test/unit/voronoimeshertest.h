@@ -168,7 +168,6 @@ public:
     void testCollision()
     {
         Coord<2> dim(1, 1);
-        unsigned steps = 10;
         std::size_t numCells = 100;
         double quadrantSize = 400;
         double minDistance = 40;
