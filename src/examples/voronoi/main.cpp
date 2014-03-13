@@ -153,7 +153,7 @@ private:
 
 int main(int argc, char **argv)
 {
-    Coord<2> dim(10, 4);
+    Coord<2> dim(10, 5);
     unsigned steps = 1000;
     std::size_t numCells = 100;
     double quadrantSize = 400;

@@ -1,4 +1,5 @@
 // fixme: ATM out of order. make it use the SiloWriter and repair
+// fixme: refactor this demo by extracting the mesh generator and container cell
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
