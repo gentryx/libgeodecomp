@@ -117,15 +117,6 @@ public:
         return memberPointer;
     }
 
-    template<typename MEMBER>
-    void operator()(const CELL *source, MEMBER *target, const std::size_t length) const
-    {
-        MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL::*>(memberPointer);
-        for (std::size_t i = 0; i < length; ++i) {
-            target[i] = source[i].*actualMember;
-        }
-    }
-
     const std::string& name() const
     {
         return memberName;
@@ -142,21 +133,36 @@ public:
         return (*memberTypeIDHandler)(typeid(MEMBER));
     }
 
+    /**
+     * The member's offset in LibFlatArray's SoA memory layout
+     */
     int offset() const
     {
         return memberOffset;
     }
 
+    /**
+     * Read the data from source and set the corresponding member of
+     * each CELL at target. Only useful for AoS memory layout.
+     */
     void copyMemberIn(const char *source, CELL *target, int num) const
     {
         (*copyMemberInHandler)(source, target, num, memberPointer);
     }
 
+    /**
+     * Read the member of all CELLs at source and store them
+     * contiguously at target. Only useful for AoS memory layout.
+     */
     void copyMemberOut(const CELL *source, char *target, int num) const
     {
         (*copyMemberOutHandler)(source, target, num, memberPointer);
     }
 
+    /**
+     * This is a helper function for reading/writing members in a SoA
+     * memory layout.
+     */
     void copyStreak(const char *first, const char *last, char *target) const
     {
         (*copyStreakHandler)(first, last, target);
