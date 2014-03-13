@@ -5,19 +5,11 @@
 
 #ifdef LIBGEODECOMP_WITH_SILO
 
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/writer.h>
 #include <silo.h>
 
 namespace LibGeoDecomp {
-
-namespace SiloWriterHelpers {
-
-template<typename CONTAINER_CELL, typename CELL, typename MEMBER>
-class SelectorContainer
-{
-};
-
-}
 
 /**
  * SiloWriter makes use of the Silo library (
@@ -29,19 +21,19 @@ class SiloWriter : public Writer<CELL>
 public:
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
+    typedef typename CELL::Cargo Cargo;
 
     using Writer<CELL>::DIM;
     using Writer<CELL>::prefix;
 
-    template<typename CARGO_CELL>
     SiloWriter(
         const std::string& prefix,
         const unsigned period,
-        // fixme: actually use the selector, maybe even a vector of selectors?
-        const Selector<CARGO_CELL>& selector,
+        const Selector<Cargo>& selector,
         const FloatCoord<DIM> quadrantDim) :
         Writer<CELL>(prefix, period),
         coords(DIM),
+        selector(selector),
         quadrantDim(quadrantDim)
     {}
 
@@ -73,17 +65,14 @@ public:
         DBClose(dbfile);
     }
 
-    // fixme: add functions to write variables and point-meshes
-
 private:
     std::vector<std::vector<double> > coords;
-    // fixme: deduce type from selector
-    std::vector<double> variableData;
     std::vector<int> shapeTypes;
     std::vector<int> shapeSizes;
     std::vector<int> shapeCounts;
+    std::vector<char> variableData;
     std::vector<int> nodeList;
-    // Selector<CELL> selector;
+    Selector<Cargo> selector;
     FloatCoord<DIM> quadrantDim;
 
     void flushDataStores()
@@ -131,7 +120,10 @@ private:
              ++i) {
 
             CELL cell = grid.get(*i);
-            addVariable(cell.begin(), cell.end());
+            std::size_t oldSize = variableData.size();
+            std::size_t newSize = oldSize + cell.size() * selector.sizeOf();
+            variableData.resize(newSize);
+            addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize);
         }
     }
 
@@ -196,8 +188,10 @@ private:
 
     void outputVariable(DBfile *dbfile)
     {
-        DBPutUcdvar1(dbfile, "fixme_varname", "shape_mesh", &variableData[0], variableData.size(),
-                     NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+        DBPutUcdvar1(
+            dbfile, selector.name().c_str(), "shape_mesh",
+            &variableData[0], variableData.size() / selector.sizeOf(),
+            NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
 
     inline void addCoord(const FloatCoord<1>& coord)
@@ -238,14 +232,13 @@ private:
     }
 
     template<typename ITERATOR>
-    inline void addVariable(const ITERATOR& start, const ITERATOR& end)
+    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target)
     {
+        char *cursor = target;
+
         for (ITERATOR i = start; i != end; ++i) {
-            double data;
-            // fixme
-            // selector(&*i, &data, 1);
-            data = i->temperature;
-            variableData << data;
+            selector.copyMemberOut(&*i, cursor, 1);
+            cursor += selector.sizeOf();
         }
     }
 
@@ -268,7 +261,6 @@ private:
             addCoord(*i);
         }
     }
-
 };
 
 }
