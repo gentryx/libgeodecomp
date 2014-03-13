@@ -1,9 +1,15 @@
 #ifndef LIBGEODECOMP_IO_SELECTOR_H
 #define LIBGEODECOMP_IO_SELECTOR_H
 
+#include <libgeodecomp/config.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libflatarray/flat_array.hpp>
 #include <typeinfo>
+
+#ifdef LIBGEODECOMP_WITH_SILO
+#include <silo.h>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -25,6 +31,80 @@ public:
         return -1;
     }
 };
+
+#ifdef LIBGEODECOMP_WITH_SILO
+template<typename MEMBER>
+class GetSiloTypeID
+{
+public:
+    inline int operator()()
+    {
+        LOG(WARN, "Warning: using type unknown to Silo for output");
+        return DB_NOTYPE;
+    }
+};
+
+template<>
+class GetSiloTypeID<int>
+{
+public:
+    inline int operator()()
+    {
+        return DB_INT;
+    }
+};
+
+template<>
+class GetSiloTypeID<short int>
+{
+public:
+    inline int operator()()
+    {
+        return DB_SHORT;
+    }
+};
+
+template<>
+class GetSiloTypeID<float>
+{
+public:
+    inline int operator()()
+    {
+        return DB_FLOAT;
+    }
+};
+
+template<>
+class GetSiloTypeID<double>
+{
+public:
+    inline int operator()()
+    {
+        return DB_DOUBLE;
+    }
+};
+
+template<>
+class GetSiloTypeID<char>
+{
+public:
+    inline int operator()()
+    {
+        return DB_CHAR;
+    }
+};
+
+template<>
+class GetSiloTypeID<long long>
+{
+public:
+    inline int operator()()
+    {
+        return DB_LONG_LONG;
+    }
+};
+
+#endif
 
 /**
  * Primitive datatypes don't have member pointers (or members in the
@@ -107,6 +187,9 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
+#ifdef LIBGEODECOMP_WITH_SILO
+        memberSiloTypeID(SelectorHelpers::GetSiloTypeID<MEMBER>()()),
+#endif
         copyMemberInHandler(&Selector<CELL>::template copyMemberInImplementation<MEMBER>),
         copyMemberOutHandler(&Selector<CELL>::template copyMemberOutImplementation<MEMBER>),
         copyStreakHandler(&Selector<CELL>::template copyStreakImplementation<MEMBER>)
@@ -168,12 +251,20 @@ public:
         (*copyStreakHandler)(first, last, target);
     }
 
+#ifdef LIBGEODECOMP_WITH_SILO
+    int siloTypeID() const
+    {
+        return memberSiloTypeID;
+    }
+#endif
+
 private:
     char CELL:: *memberPointer;
     std::size_t memberSize;
     bool (*memberTypeIDHandler)(const std::type_info&);
     int memberOffset;
     std::string memberName;
+    int memberSiloTypeID;
     void (*copyMemberInHandler)(const char *, CELL *, int num, char CELL:: *memberPointer);
     void (*copyMemberOutHandler)(const CELL *, char *, int num, char CELL:: *memberPointer);
     void (*copyStreakHandler)(const char *, const char *, char *);
