@@ -165,7 +165,8 @@ int main(int argc, char **argv)
     Selector<SimpleCell<FloatCoord> > selector(
         &SimpleCell<FloatCoord>::temperature,
         "SimpleCell_temperature");
-    sim.addWriter(new SiloWriter<ContainerCellType>("voronoi", 1, selector, FloatCoord<2>(400, 400)));
+    sim.addWriter(new SiloWriter<ContainerCellType>(
+                      "voronoi", 1, selector, FloatCoord<2>(quadrantSize, quadrantSize)));
 
     sim.run();
 
