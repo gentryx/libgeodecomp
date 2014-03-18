@@ -48,7 +48,7 @@ class MockMesher : public VoronoiMesher<ContainerCellType>
 {
 public:
     MockMesher(const Coord<2>& gridDim, const FloatCoord<2>& quadrantSize, double minCellDistance) :
-        VoronoiMesher(gridDim, quadrantSize, minCellDistance),
+        VoronoiMesher<ContainerCellType>(gridDim, quadrantSize, minCellDistance),
         cellCounter(0)
     {}
 
