@@ -1,5 +1,5 @@
-#include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/random.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
