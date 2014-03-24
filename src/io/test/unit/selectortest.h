@@ -145,7 +145,21 @@ public:
         }
     };
 
-    void testFilterAoS()
+    class MySimpleFilter : public Selector<MyDummyCell>::SimpleFilter<char, double>
+    {
+    public:
+        void load(const double& source, char *target)
+        {
+            *target = source + 10;
+        }
+
+        void save(const char& source, double *target)
+        {
+            *target = source + 20;
+        }
+    };
+
+    void testFilterAoS1()
     {
         // test copyMemberOut:
         boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
@@ -171,6 +185,37 @@ public:
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(vec[i].y, i * 2 + 10);
+        }
+    }
+
+    void testFilterAoS2()
+    {
+        // test copyMemberOut:
+        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+            new MySimpleFilter());
+        Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
+
+        selectorZ.checkTypeID<double>();
+
+        std::vector<MyDummyCell> vec;
+        for (int i = 0; i < 20; ++i) {
+            vec << MyDummyCell(i, i, 'a' + i);
+        }
+
+        std::vector<double> targetZ(20);
+        selectorZ.copyMemberOut(&vec[0], (char*)&targetZ[0], 20);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(i + 20 + 'a', targetZ[i]);
+        }
+
+        // test copyMemberIn:
+        selectorZ.copyMemberIn((char*)&targetZ[0], &vec[0], 20);
+
+        for (int i = 0; i < 20; ++i) {
+            char expected = i;
+            expected += 30 + 'a';
+            TS_ASSERT_EQUALS((int)vec[i].z, expected);
         }
     }
 
@@ -236,6 +281,44 @@ public:
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(grid.get(Coord<2>(i, 0)).y, (50 + i) * 2 + 10);
+        }
+    }
+
+    void testFilterSoA3()
+    {
+        // test copyStreakOut:
+        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+            new MySimpleFilter());
+        Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
+
+        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(double), selectorZ.sizeOfExternal());
+
+        selectorZ.checkTypeID<double>();
+
+        CoordBox<2> box(Coord<2>(), Coord<2>(20, 1));
+        Region<2> region;
+        region << box;
+        SoAGrid<MyDummyCell> grid(box);
+
+        for (int i = 0; i < 20; ++i) {
+            grid.set(Coord<2>(i, 0), MyDummyCell(47, 11, i + 'a'));
+        }
+
+        std::vector<double> targetZ(20);
+        grid.saveMember(&targetZ[0], selectorZ, region);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(i + 'a' + 20, targetZ[i]);
+        }
+
+        // test copyStreakIn:
+        grid.loadMember(&targetZ[0], selectorZ, region);
+
+        for (int i = 0; i < 20; ++i) {
+            char expected = i;
+            expected += 30 + 'a';
+            TS_ASSERT_EQUALS(grid.get(Coord<2>(i, 0)).z, expected);
         }
     }
 };

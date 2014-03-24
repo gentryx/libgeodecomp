@@ -302,17 +302,17 @@ public:
     class DefaultFilter : public Filter<MEMBER, EXTERNAL>
     {
     public:
-        virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+        void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
         {
             std::copy(first, last, target);
         }
 
-        virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target)
+        void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target)
         {
             std::copy(first, last, target);
         }
 
-        virtual void copyMemberInImpl(
+        void copyMemberInImpl(
             const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
         {
             for (int i = 0; i < num; ++i) {
@@ -320,11 +320,58 @@ public:
             }
         }
 
-        virtual void copyMemberOutImpl(
+        void copyMemberOutImpl(
             const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer)
         {
             for (int i = 0; i < num; ++i) {
                 target[i] = source[i].*memberPointer;
+            }
+        }
+    };
+
+    /**
+     * Inheriting from this class instead of Filter will spare you
+     * having to implement 4 functions (instead you'll have to write
+     * just 2). It'll be a little slower though.
+     */
+    template<typename MEMBER, typename EXTERNAL>
+    class SimpleFilter : public Filter<MEMBER, EXTERNAL>
+    {
+    public:
+        virtual void load(const EXTERNAL& source, MEMBER   *target) = 0;
+        virtual void save(const MEMBER&   source, EXTERNAL *target) = 0;
+
+        virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+        {
+            MEMBER *cursor = target;
+
+            for (const EXTERNAL *i = first; i != last; ++i, ++cursor) {
+                load(*i, cursor);
+            }
+        }
+
+        virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target)
+        {
+            EXTERNAL *cursor = target;
+
+            for (const MEMBER *i = first; i != last; ++i, ++cursor) {
+                save(*i, cursor);
+            }
+        }
+
+        virtual void copyMemberInImpl(
+            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+        {
+            for (int i = 0; i < num; ++i) {
+                load(source[i], &(target[i].*memberPointer));
+            }
+        }
+
+        virtual void copyMemberOutImpl(
+            const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer)
+        {
+            for (int i = 0; i < num; ++i) {
+                save(source[i].*memberPointer, &target[i]);
             }
         }
     };
