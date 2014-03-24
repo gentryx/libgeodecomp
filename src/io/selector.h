@@ -178,11 +178,106 @@ template<typename CELL>
 class Selector
 {
 public:
+    /**
+     * Base class for adding user-defined data filters to a selector.
+     * This can be used to do on-the-fly data extraction, scale
+     * conversion for live output etc. without having to rewrite a
+     * complete ParallelWriter output plugin.
+     *
+     * It is suggested to derive from Filter instead of FilterBase, as
+     * the latter has some convenience functionality already in place.
+     */
+    class FilterBase
+    {
+    public:
+        virtual ~FilterBase()
+        {}
+
+        virtual std::size_t sizeOf() const = 0;
+#ifdef LIBGEODECOMP_WITH_SILO
+        virtual int siloTypeID() const = 0;
+#endif
+        virtual void copyStreakIn(const char *first, const char *last, char *target) = 0;
+        virtual void copyStreakOut(const char *first, const char *last, char *target) = 0;
+        virtual void copyMemberIn(
+            const char *source, CELL *target, int num, char CELL:: *memberPointer) = 0;
+        virtual void copyMemberOut(
+            const CELL *source, char *target, int num, char CELL:: *memberPointer) = 0;
+        virtual bool checkMemberTypeID(const std::type_info& otherID) const = 0;
+    };
+
+    /**
+     * Derive from this class if you wish to add custom data
+     * adapters/converters to your Selector.
+     */
     template<typename MEMBER>
-    Selector(MEMBER CELL:: *memberPointer, std::string memberName) :
+    class Filter : public FilterBase
+    {
+    public:
+        std::size_t sizeOf() const
+        {
+            return sizeof(MEMBER);
+        }
+
+#ifdef LIBGEODECOMP_WITH_SILO
+        int siloTypeID() const
+        {
+            return SelectorHelpers::GetSiloTypeID<MEMBER>()();
+        }
+#endif
+
+        void copyStreakIn(const char *first, const char *last, char *target)
+        {
+            std::copy(
+                reinterpret_cast<const MEMBER*>(first),
+                reinterpret_cast<const MEMBER*>(last),
+                reinterpret_cast<MEMBER*>(target));
+        }
+
+        void copyStreakOut(const char *first, const char *last, char *target)
+        {
+            std::copy(
+                reinterpret_cast<const MEMBER*>(first),
+                reinterpret_cast<const MEMBER*>(last),
+                reinterpret_cast<MEMBER*>(target));
+        }
+
+        void copyMemberIn(
+            const char *source, CELL *target, int num, char CELL:: *memberPointer)
+        {
+            MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
+            const MEMBER *actualSource = reinterpret_cast<const MEMBER*>(source);
+
+            for (int i = 0; i < num; ++i) {
+                (*target).*actualMember = *actualSource;
+                ++target;
+                ++actualSource;
+            }
+        }
+
+        void copyMemberOut(
+            const CELL *source, char *target, int num, char CELL:: *memberPointer)
+        {
+            MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
+            MEMBER *actualTarget = reinterpret_cast<MEMBER*>(target);
+
+            for (int i = 0; i < num; ++i) {
+                *actualTarget = (*source).*actualMember;
+                ++actualTarget;
+                ++source;
+            }
+        }
+
+        bool checkMemberTypeID(const std::type_info& otherID) const
+        {
+            return typeid(MEMBER) == otherID;
+        }
+    };
+
+    template<typename MEMBER>
+    Selector(MEMBER CELL:: *memberPointer, const std::string& memberName) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
-        memberTypeIDHandler(&Selector<CELL>::template memberTypeIDImplementation<MEMBER>),
         memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
@@ -190,15 +285,22 @@ public:
 #ifdef LIBGEODECOMP_WITH_SILO
         memberSiloTypeID(SelectorHelpers::GetSiloTypeID<MEMBER>()()),
 #endif
-        copyMemberInHandler(&Selector<CELL>::template copyMemberInImplementation<MEMBER>),
-        copyMemberOutHandler(&Selector<CELL>::template copyMemberOutImplementation<MEMBER>),
-        copyStreakHandler(&Selector<CELL>::template copyStreakImplementation<MEMBER>)
+        filter(new Filter<MEMBER>)
     {}
 
-    inline char CELL:: *operator*() const
-    {
-        return memberPointer;
-    }
+    template<typename MEMBER>
+    Selector(MEMBER CELL:: *memberPointer, const std::string& memberName, const boost::shared_ptr<FilterBase>& filter) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(filter->sizeOf()),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+#ifdef LIBGEODECOMP_WITH_SILO
+        memberSiloTypeID(filter->siloTypeID()),
+#endif
+        filter(filter)
+    {}
 
     inline const std::string& name() const
     {
@@ -210,10 +312,11 @@ public:
         return memberSize;
     }
 
+    // fixme: use this in public member functions
     template<typename MEMBER>
     inline bool checkTypeID() const
     {
-        return (*memberTypeIDHandler)(typeid(MEMBER));
+        return filter->checkMemberTypeID(typeid(MEMBER));
     }
 
     /**
@@ -230,7 +333,7 @@ public:
      */
     inline void copyMemberIn(const char *source, CELL *target, int num) const
     {
-        (*copyMemberInHandler)(source, target, num, memberPointer);
+        filter->copyMemberIn(source, target, num, memberPointer);
     }
 
     /**
@@ -239,22 +342,31 @@ public:
      */
     inline void copyMemberOut(const CELL *source, char *target, int num) const
     {
-        (*copyMemberOutHandler)(source, target, num, memberPointer);
+        filter->copyMemberOut(source, target, num, memberPointer);
     }
 
     /**
-     * This is a helper function for reading/writing members in a SoA
-     * memory layout.
+     * This is a helper function for writing members of a SoA memory
+     * layout.
      */
-    inline void copyStreak(const char *first, const char *last, char *target) const
+    inline void copyStreakIn(const char *first, const char *last, char *target) const
     {
-        (*copyStreakHandler)(first, last, target);
+        filter->copyStreakIn(first, last, target);
+    }
+
+    /**
+     * This is a helper function for reading members from a SoA memory
+     * layout.
+     */
+    inline void copyStreakOut(const char *first, const char *last, char *target) const
+    {
+        filter->copyStreakOut(first, last, target);
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO
     int siloTypeID() const
     {
-        return memberSiloTypeID;
+        return filter->siloTypeID();
     }
 #endif
 
@@ -265,53 +377,7 @@ private:
     int memberOffset;
     std::string memberName;
     int memberSiloTypeID;
-    void (*copyMemberInHandler)(const char *, CELL *, int num, char CELL:: *memberPointer);
-    void (*copyMemberOutHandler)(const CELL *, char *, int num, char CELL:: *memberPointer);
-    void (*copyStreakHandler)(const char *, const char *, char *);
-
-    template<typename MEMBER>
-    static void copyStreakImplementation(const char *first, const char *last, char *target)
-    {
-        std::copy(
-            reinterpret_cast<const MEMBER*>(first),
-            reinterpret_cast<const MEMBER*>(last),
-            reinterpret_cast<MEMBER*>(target));
-    }
-
-    template<typename MEMBER>
-    static void copyMemberInImplementation(
-        const char *source, CELL *target, int num, char CELL:: *memberPointer)
-    {
-        MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
-        const MEMBER *actualSource = reinterpret_cast<const MEMBER*>(source);
-
-        for (int i = 0; i < num; ++i) {
-            (*target).*actualMember = *actualSource;
-            ++target;
-            ++actualSource;
-        }
-    }
-
-    template<typename MEMBER>
-    static void copyMemberOutImplementation(
-        const CELL *source, char *target, int num, char CELL:: *memberPointer)
-    {
-        MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
-        MEMBER *actualTarget = reinterpret_cast<MEMBER*>(target);
-
-        for (int i = 0; i < num; ++i) {
-            *actualTarget = (*source).*actualMember;
-            ++actualTarget;
-            ++source;
-        }
-    }
-
-    template<typename MEMBER>
-    static bool memberTypeIDImplementation(const std::type_info& otherID)
-    {
-        return typeid(MEMBER) == otherID;
-    }
-
+    boost::shared_ptr<FilterBase> filter;
 };
 
 /**

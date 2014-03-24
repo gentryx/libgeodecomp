@@ -1,3 +1,4 @@
+#include <cxxtest/TestSuite.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/qtwidgetwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
@@ -40,7 +41,6 @@ public:
         return Color(255, cell.temp * 255, 0);
     }
 };
-
 
 namespace LibGeoDecomp {
 

@@ -176,7 +176,7 @@ public:
             std::size_t byteSize = selector.sizeOf() * i->length();
             const char *first = accessor.access_member(selector.sizeOf(), selector.offset());
             const char *last = first + byteSize;
-            selector.copyStreak(first, last, currentTarget);
+            selector.copyStreakOut(first, last, currentTarget);
 
             currentTarget += byteSize;
         }
@@ -222,7 +222,7 @@ public:
             const char *first = currentSource;
             const char *last = currentSource + byteSize;
             char *currentTarget = accessor.access_member(selector.sizeOf(), selector.offset());
-            selector.copyStreak(first, last, currentTarget);
+            selector.copyStreakIn(first, last, currentTarget);
 
             currentSource += byteSize;
         }

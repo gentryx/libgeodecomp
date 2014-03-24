@@ -1,4 +1,5 @@
 #include <libgeodecomp/io/selector.h>
+#include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/soagrid.h>
 
@@ -103,6 +104,117 @@ public:
             TS_ASSERT_EQUALS(targetX[i], i * 2 + 13);
             TS_ASSERT_EQUALS(targetY[i], 1.0 + i / 100.0);
             TS_ASSERT_EQUALS(targetZ[i], i + 69);
+        }
+    }
+
+    class MyDummyFilter : public Selector<MyDummyCell>::Filter<Color>
+    {
+    public:
+
+        void copyStreakIn(const char *first, const char *last, char *target)
+        {
+            // fixme: users shouldn't have to do their own type casting!
+            const Color *actualFirst = reinterpret_cast<const Color*>(first);
+            const Color *actualLast = reinterpret_cast<const Color*>(last);
+            double *actualTarget = reinterpret_cast<double*>(target);
+
+            for (const Color *i = actualFirst; i != actualLast; ++i, ++actualTarget) {
+                *actualTarget = i->red() * 2 + 10;
+            }
+        }
+
+        void copyStreakOut(const char *first, const char *last, char *target)
+        {
+            // fixme: users shouldn't have to do their own type casting!
+            const double *actualFirst = reinterpret_cast<const double*>(first);
+            const double *actualLast = reinterpret_cast<const double*>(last);
+            Color *actualTarget = reinterpret_cast<Color*>(target);
+
+            for (const double *i = actualFirst; i != actualLast; ++i, ++actualTarget) {
+                *actualTarget = Color(*i, 47, 11);
+            }
+        }
+
+        void copyMemberIn(
+            const char *source, MyDummyCell *target, int num, char MyDummyCell:: *memberPointer)
+        {
+            // fixme: users shouldn't have to do their own type casting!
+            double MyDummyCell:: *actualMember = reinterpret_cast<double MyDummyCell:: *>(memberPointer);
+            const Color *cursor = reinterpret_cast<const Color*>(source);
+
+            for (int i = 0; i < num; ++i) {
+                target[i].*actualMember = cursor[i].red() * 2 + 10;
+            }
+        }
+
+        void copyMemberOut(
+            const MyDummyCell *source, char *target, int num, char MyDummyCell:: *memberPointer)
+        {
+            // fixme: users shouldn't have to do their own type casting!
+            double MyDummyCell:: *actualMember = reinterpret_cast<double MyDummyCell:: *>(memberPointer);
+            Color *cursor = reinterpret_cast<Color*>(target);
+
+            for (int i = 0; i < num; ++i) {
+                cursor[i] = Color(source[i].*actualMember, 47, 11);
+            }
+        }
+    };
+
+    void testFilterAoS()
+    {
+        // test copyMemberOut:
+        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+            new MyDummyFilter());
+        Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
+
+        selectorY.checkTypeID<Color>();
+
+        std::vector<MyDummyCell> vec;
+        for (int i = 0; i < 20; ++i) {
+            vec << MyDummyCell(i, i, 'a' + i);
+        }
+
+        std::vector<Color> targetY(20);
+        selectorY.copyMemberOut(&vec[0], (char*)&targetY[0], 20);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(Color(i, 47, 11), targetY[i]);
+        }
+
+        // test copyMemberIn:
+        selectorY.copyMemberIn((char*)&targetY[0], &vec[0], 20);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(vec[i].y, i * 2 + 10);
+        }
+    }
+
+    void testFilterSoA()
+    {
+        // test copyStreakOut:
+        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+            new MyDummyFilter());
+        Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
+
+        selectorY.checkTypeID<Color>();
+
+        std::vector<double> vec;
+        for (int i = 0; i < 20; ++i) {
+            vec << i + 50;
+        }
+
+        std::vector<Color> targetY(20);
+        selectorY.copyStreakOut((char*)&vec[0], (char*)(&vec[0] + 20), (char*)&targetY[0]);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
+        }
+
+        // test copyStreakIn:
+        selectorY.copyStreakIn((char*)&targetY[0], (char*)(&targetY[0] + 20), (char*)&vec[0]);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(vec[i], (50 + i) * 2 + 10);
         }
     }
 };
