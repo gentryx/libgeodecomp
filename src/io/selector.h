@@ -169,15 +169,6 @@ public:
  * http://madebyevan.com/obscure-cpp-features/#pointer-to-member-operators
  *
  * fixme: use this class in BOVWriter, RemoteSteerer, VisItWriter, Plotter...
- *
- * fixme: extend this to make use of custom filters via function pointers:
- * - c-tor should save an extra function pointer copyStreakAoSHandler()
- * - call copyStreakAoSHandler() in operator()
- *   - default copyStreakAoSHandler() implementation is current implementation
- *   - alternate implementation can be given in c-tor via function pointer instead of member pointer
- *   - note that result type (ATM "MEMBER") can differ
- * - rename copyStreakHandler to copyStreakSoAHandler
- *   - specify source attribute of cell via member pointer
  */
 template<typename CELL>
 class Selector
@@ -231,14 +222,31 @@ public:
         }
 #endif
 
-        virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target) {}
-        virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target) {}
+        /**
+         * Copy a streak of variables to an AoS layout.
+         */
+        virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target) = 0;
+
+        /**
+         * Extract a steak of members from an AoS layout.
+         */
+        virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target) = 0;
+
+        /**
+         * Copy a streak of variables to the members of a streak of cells.
+         */
         virtual void copyMemberInImpl(
-            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer) {}
+            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer) = 0;
 
+        /**
+         * Extract a streak of members from a streak of cells.
+         */
         virtual void copyMemberOutImpl(
-            const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer) {}
+            const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer) = 0;
 
+        /**
+         * Do not override this function! It is final.
+         */
         void copyStreakIn(const char *first, const char *last, char *target)
         {
             copyStreakInImpl(
@@ -247,6 +255,9 @@ public:
                 reinterpret_cast<MEMBER*>(target));
         }
 
+        /**
+         * Do not override this function! It is final.
+         */
         void copyStreakOut(const char *first, const char *last, char *target)
         {
             copyStreakOutImpl(
@@ -255,6 +266,9 @@ public:
                 reinterpret_cast<EXTERNAL*>(target));
         }
 
+        /**
+         * Do not override this function! It is final.
+         */
         void copyMemberIn(
             const char *source, CELL *target, int num, char CELL:: *memberPointer)
         {
@@ -265,6 +279,9 @@ public:
                 reinterpret_cast<MEMBER CELL:: *>(memberPointer));
         }
 
+        /**
+         * Do not override this function! It is final.
+         */
         void copyMemberOut(
             const CELL *source, char *target, int num, char CELL:: *memberPointer)
         {
@@ -357,7 +374,6 @@ public:
         return externalSize;
     }
 
-    // fixme: use this in public member functions
     template<typename MEMBER>
     inline bool checkTypeID() const
     {

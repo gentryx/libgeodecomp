@@ -114,52 +114,33 @@ public:
     class MyDummyFilter : public Selector<MyDummyCell>::Filter<double, Color>
     {
     public:
-        // void copyStreakIn(const Color *first, const Color *last, double *target)
-        void copyStreakIn(const char *first, const char *last, char *target)
+        void copyStreakInImpl(const Color *first, const Color *last, double *target)
         {
-            // fixme: users shouldn't have to do their own type casting!
-            const Color *actualFirst = reinterpret_cast<const Color*>(first);
-            const Color *actualLast = reinterpret_cast<const Color*>(last);
-            double *actualTarget = reinterpret_cast<double*>(target);
-
-            for (const Color *i = actualFirst; i != actualLast; ++i, ++actualTarget) {
-                *actualTarget = i->red() * 2 + 10;
+            for (const Color *i = first; i != last; ++i, ++target) {
+                *target = i->red() * 2 + 10;
             }
         }
 
-        void copyStreakOut(const char *first, const char *last, char *target)
+        void copyStreakOutImpl(const double *first, const double *last, Color *target)
         {
-            // fixme: users shouldn't have to do their own type casting!
-            const double *actualFirst = reinterpret_cast<const double*>(first);
-            const double *actualLast = reinterpret_cast<const double*>(last);
-            Color *actualTarget = reinterpret_cast<Color*>(target);
-
-            for (const double *i = actualFirst; i != actualLast; ++i, ++actualTarget) {
-                *actualTarget = Color(*i, 47, 11);
+            for (const double *i = first; i != last; ++i, ++target) {
+                *target = Color(*i, 47, 11);
             }
         }
 
-        void copyMemberIn(
-            const char *source, MyDummyCell *target, int num, char MyDummyCell:: *memberPointer)
+        void copyMemberInImpl(
+            const Color *source, MyDummyCell *target, int num, double MyDummyCell:: *memberPointer)
         {
-            // fixme: users shouldn't have to do their own type casting!
-            double MyDummyCell:: *actualMember = reinterpret_cast<double MyDummyCell:: *>(memberPointer);
-            const Color *cursor = reinterpret_cast<const Color*>(source);
-
             for (int i = 0; i < num; ++i) {
-                target[i].*actualMember = cursor[i].red() * 2 + 10;
+                target[i].*memberPointer = source[i].red() * 2 + 10;
             }
         }
 
-        void copyMemberOut(
-            const MyDummyCell *source, char *target, int num, char MyDummyCell:: *memberPointer)
+        void copyMemberOutImpl(
+            const MyDummyCell *source, Color *target, int num, double MyDummyCell:: *memberPointer)
         {
-            // fixme: users shouldn't have to do their own type casting!
-            double MyDummyCell:: *actualMember = reinterpret_cast<double MyDummyCell:: *>(memberPointer);
-            Color *cursor = reinterpret_cast<Color*>(target);
-
             for (int i = 0; i < num; ++i) {
-                cursor[i] = Color(source[i].*actualMember, 47, 11);
+                target[i] = Color(source[i].*memberPointer, 47, 11);
             }
         }
     };
