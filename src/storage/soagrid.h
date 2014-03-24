@@ -172,13 +172,12 @@ public:
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
-
-            std::size_t byteSize = selector.sizeOf() * i->length();
-            const char *first = accessor.access_member(selector.sizeOf(), selector.offset());
+            std::size_t byteSize = selector.sizeOfMember() * i->length();
+            const char *first = accessor.access_member(selector.sizeOfMember(), selector.offset());
             const char *last = first + byteSize;
             selector.copyStreakOut(first, last, currentTarget);
 
-            currentTarget += byteSize;
+            currentTarget += selector.sizeOfExternal() * i->length();
         }
     }
 
@@ -218,10 +217,10 @@ public:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
-            std::size_t byteSize = selector.sizeOf() * i->length();
+            std::size_t byteSize = selector.sizeOfExternal() * i->length();
             const char *first = currentSource;
             const char *last = currentSource + byteSize;
-            char *currentTarget = accessor.access_member(selector.sizeOf(), selector.offset());
+            char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakIn(first, last, currentTarget);
 
             currentSource += byteSize;

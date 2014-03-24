@@ -44,9 +44,13 @@ public:
         TS_ASSERT_EQUALS("varY", selectorY.name());
         TS_ASSERT_EQUALS("varZ", selectorZ.name());
 
-        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOf());
-        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOf());
-        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOf());
+        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfMember());
+
+        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfExternal());
 
         TS_ASSERT_EQUALS( 0, selectorX.offset());
         TS_ASSERT_EQUALS( 4, selectorY.offset());
@@ -189,7 +193,7 @@ public:
         }
     }
 
-    void testFilterSoA()
+    void testFilterSoA1()
     {
         // test copyStreakOut:
         boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
@@ -215,6 +219,42 @@ public:
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(vec[i], (50 + i) * 2 + 10);
+        }
+    }
+
+    void testFilterSoA2()
+    {
+        // test copyStreakOut:
+        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+            new MyDummyFilter());
+        Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
+
+        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(Color),  selectorY.sizeOfExternal());
+
+        selectorY.checkTypeID<Color>();
+
+        CoordBox<2> box(Coord<2>(), Coord<2>(20, 1));
+        Region<2> region;
+        region << box;
+        SoAGrid<MyDummyCell> grid(box);
+
+        for (int i = 0; i < 20; ++i) {
+            grid.set(Coord<2>(i, 0), MyDummyCell(4711, i + 50));
+        }
+
+        std::vector<Color> targetY(20);
+        grid.saveMember(&targetY[0], selectorY, region);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
+        }
+
+        // test copyStreakIn:
+        grid.loadMember(&targetY[0], selectorY, region);
+
+        for (int i = 0; i < 20; ++i) {
+            TS_ASSERT_EQUALS(grid.get(Coord<2>(i, 0)).y, (50 + i) * 2 + 10);
         }
     }
 };

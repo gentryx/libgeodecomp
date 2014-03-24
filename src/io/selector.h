@@ -126,7 +126,12 @@ public:
         return "primitiveType";
     }
 
-    std::size_t sizeOf() const
+    std::size_t sizeOfMember() const
+    {
+        return sizeof(CELL);
+    }
+
+    std::size_t sizeOfExternal() const
     {
         return sizeof(CELL);
     }
@@ -278,6 +283,7 @@ public:
     Selector(MEMBER CELL:: *memberPointer, const std::string& memberName) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBER)),
         memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
@@ -291,7 +297,8 @@ public:
     template<typename MEMBER>
     Selector(MEMBER CELL:: *memberPointer, const std::string& memberName, const boost::shared_ptr<FilterBase>& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
-        memberSize(filter->sizeOf()),
+        memberSize(sizeof(MEMBER)),
+        externalSize(filter->sizeOf()),
         memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
@@ -307,9 +314,14 @@ public:
         return memberName;
     }
 
-    inline std::size_t sizeOf() const
+    inline std::size_t sizeOfMember() const
     {
         return memberSize;
+    }
+
+    inline std::size_t sizeOfExternal() const
+    {
+        return externalSize;
     }
 
     // fixme: use this in public member functions
@@ -373,7 +385,7 @@ public:
 private:
     char CELL:: *memberPointer;
     std::size_t memberSize;
-    bool (*memberTypeIDHandler)(const std::type_info&);
+    std::size_t externalSize;
     int memberOffset;
     std::string memberName;
     int memberSiloTypeID;

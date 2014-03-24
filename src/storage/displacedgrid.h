@@ -199,7 +199,7 @@ protected:
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             selector.copyMemberOut(&(*this)[i->origin], target, i->length());
-            target += selector.sizeOf() * i->length();
+            target += selector.sizeOfExternal() * i->length();
         }
     }
 
@@ -208,7 +208,7 @@ protected:
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             selector.copyMemberIn(source, &(*this)[i->origin], i->length());
-            source += selector.sizeOf() * i->length();
+            source += selector.sizeOfExternal() * i->length();
         }
     }
 
