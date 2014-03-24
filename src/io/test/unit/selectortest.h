@@ -111,10 +111,10 @@ public:
         }
     }
 
-    class MyDummyFilter : public Selector<MyDummyCell>::Filter<Color>
+    class MyDummyFilter : public Selector<MyDummyCell>::Filter<double, Color>
     {
     public:
-
+        // void copyStreakIn(const Color *first, const Color *last, double *target)
         void copyStreakIn(const char *first, const char *last, char *target)
         {
             // fixme: users shouldn't have to do their own type casting!

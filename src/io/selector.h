@@ -208,74 +208,107 @@ public:
             const char *source, CELL *target, int num, char CELL:: *memberPointer) = 0;
         virtual void copyMemberOut(
             const CELL *source, char *target, int num, char CELL:: *memberPointer) = 0;
-        virtual bool checkMemberTypeID(const std::type_info& otherID) const = 0;
+        virtual bool checkExternalTypeID(const std::type_info& otherID) const = 0;
     };
 
     /**
      * Derive from this class if you wish to add custom data
      * adapters/converters to your Selector.
      */
-    template<typename MEMBER>
+    template<typename MEMBER, typename EXTERNAL>
     class Filter : public FilterBase
     {
     public:
         std::size_t sizeOf() const
         {
-            return sizeof(MEMBER);
+            return sizeof(EXTERNAL);
         }
 
 #ifdef LIBGEODECOMP_WITH_SILO
         int siloTypeID() const
         {
-            return SelectorHelpers::GetSiloTypeID<MEMBER>()();
+            return SelectorHelpers::GetSiloTypeID<EXTERNAL>()();
         }
 #endif
 
+        virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target) {}
+        virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target) {}
+        virtual void copyMemberInImpl(
+            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer) {}
+
+        virtual void copyMemberOutImpl(
+            const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer) {}
+
         void copyStreakIn(const char *first, const char *last, char *target)
         {
-            std::copy(
-                reinterpret_cast<const MEMBER*>(first),
-                reinterpret_cast<const MEMBER*>(last),
+            copyStreakInImpl(
+                reinterpret_cast<const EXTERNAL*>(first),
+                reinterpret_cast<const EXTERNAL*>(last),
                 reinterpret_cast<MEMBER*>(target));
         }
 
         void copyStreakOut(const char *first, const char *last, char *target)
         {
-            std::copy(
+            copyStreakOutImpl(
                 reinterpret_cast<const MEMBER*>(first),
                 reinterpret_cast<const MEMBER*>(last),
-                reinterpret_cast<MEMBER*>(target));
+                reinterpret_cast<EXTERNAL*>(target));
         }
 
         void copyMemberIn(
             const char *source, CELL *target, int num, char CELL:: *memberPointer)
         {
-            MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
-            const MEMBER *actualSource = reinterpret_cast<const MEMBER*>(source);
-
-            for (int i = 0; i < num; ++i) {
-                (*target).*actualMember = *actualSource;
-                ++target;
-                ++actualSource;
-            }
+            copyMemberInImpl(
+                reinterpret_cast<const EXTERNAL*>(source),
+                target,
+                num,
+                reinterpret_cast<MEMBER CELL:: *>(memberPointer));
         }
 
         void copyMemberOut(
             const CELL *source, char *target, int num, char CELL:: *memberPointer)
         {
-            MEMBER CELL:: *actualMember = reinterpret_cast<MEMBER CELL:: *>(memberPointer);
-            MEMBER *actualTarget = reinterpret_cast<MEMBER*>(target);
+            copyMemberOutImpl(
+                source,
+                reinterpret_cast<EXTERNAL*>(target),
+                num,
+                reinterpret_cast<MEMBER CELL:: *>(memberPointer));
+        }
 
+        bool checkExternalTypeID(const std::type_info& otherID) const
+        {
+            return typeid(EXTERNAL) == otherID;
+        }
+    };
+
+    template<typename MEMBER, typename EXTERNAL>
+    class DefaultFilter : public Filter<MEMBER, EXTERNAL>
+    {
+    public:
+        virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+        {
+            std::copy(first, last, target);
+        }
+
+        virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target)
+        {
+            std::copy(first, last, target);
+        }
+
+        virtual void copyMemberInImpl(
+            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+        {
             for (int i = 0; i < num; ++i) {
-                *actualTarget = (*source).*actualMember;
-                ++actualTarget;
-                ++source;
+                target[i].*memberPointer = source[i];
             }
         }
 
-        bool checkMemberTypeID(const std::type_info& otherID) const
+        virtual void copyMemberOutImpl(
+            const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer)
         {
-            return typeid(MEMBER) == otherID;
+            for (int i = 0; i < num; ++i) {
+                target[i] = source[i].*memberPointer;
+            }
         }
     };
 
@@ -291,7 +324,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_SILO
         memberSiloTypeID(SelectorHelpers::GetSiloTypeID<MEMBER>()()),
 #endif
-        filter(new Filter<MEMBER>)
+        filter(new DefaultFilter<MEMBER, MEMBER>)
     {}
 
     template<typename MEMBER>
@@ -328,7 +361,7 @@ public:
     template<typename MEMBER>
     inline bool checkTypeID() const
     {
-        return filter->checkMemberTypeID(typeid(MEMBER));
+        return filter->checkExternalTypeID(typeid(MEMBER));
     }
 
     /**
