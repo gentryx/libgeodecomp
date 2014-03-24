@@ -90,7 +90,7 @@ class VoronoiInitializer : public SimpleInitializer<ContainerCellType>,
                            public VoronoiMesher<ContainerCellType>
 {
 public:
-    typedef typename ContainerCellType::Cargo Cargo;
+    typedef ContainerCellType::Cargo Cargo;
     typedef GridBase<ContainerCellType, 2> GridType;
 
     VoronoiInitializer(
