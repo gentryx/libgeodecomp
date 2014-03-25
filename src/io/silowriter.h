@@ -121,7 +121,7 @@ private:
 
             CELL cell = grid.get(*i);
             std::size_t oldSize = variableData.size();
-            std::size_t newSize = oldSize + cell.size() * selector.sizeOf();
+            std::size_t newSize = oldSize + cell.size() * selector.sizeOfExternal();
             variableData.resize(newSize);
             addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize);
         }
@@ -190,7 +190,7 @@ private:
     {
         DBPutUcdvar1(
             dbfile, selector.name().c_str(), "shape_mesh",
-            &variableData[0], variableData.size() / selector.sizeOf(),
+            &variableData[0], variableData.size() / selector.sizeOfExternal(),
             NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
 
@@ -238,7 +238,7 @@ private:
 
         for (ITERATOR i = start; i != end; ++i) {
             selector.copyMemberOut(&*i, cursor, 1);
-            cursor += selector.sizeOf();
+            cursor += selector.sizeOfExternal();
         }
     }
 
