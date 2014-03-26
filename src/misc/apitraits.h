@@ -582,10 +582,93 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectPointMesh
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectPointMesh<CELL, typename CELL::API::SupportsPointMesh>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
     /**
-     * This is just an empty template for adding new traits.
-     *
+     * Indicates that the model has particles or features other
+     * entities that can be represented by a point mesh. As an
+     * example, the SiloWriter can then dump that mash to an archive.
+     * See the Voronoi example for instructions on how to use this
+     * feature.
      */
+    class HasPointMesh
+    {
+    public:
+        typedef void SupportsPointMesh;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectRegularGrid
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectRegularGrid<CELL, typename CELL::API::SupportsRegularGrid>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Use this trait to flag models which contain a regular grid. All
+     * stencil codes belong to this category, but even
+     * particle-in-cell codes may use such a grid to organizing the
+     * particles and computing certain variables (e.g. direction and
+     * magnitude of the field).
+     */
+    class HasRegularGrid
+    {
+    public:
+        typedef void SupportsRegularGrid;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectUnstructuredGrid
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectUnstructuredGrid<CELL, typename CELL::API::SupportsUnstructuredGrid>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * If a model is based on an unstructred grid, then we assume that
+     * it can be represented a set of polygonal zones. The shape of
+     * each zone will be represented by a sequence of coordinates. See
+     * the Voronoi example for instructions on how to use this
+     * feature.
+     */
+    class HasUnstructuredGrid
+    {
+    public:
+        typedef void SupportsUnstructuredGrid;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     // template<typename CELL, typename HAS_TEMPLATE_NAME = void>
     // class SelectTemplateName
     // {
@@ -600,6 +683,10 @@ public:
     //     typedef TrueType Value;
     // };
 
+    // /**
+    //  * This is just an empty template for adding new traits.
+    //  *
+    //  */
     // class HasTemplateName
     // {
     // public:
