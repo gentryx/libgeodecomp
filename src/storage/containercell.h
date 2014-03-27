@@ -16,7 +16,7 @@ namespace LibGeoDecomp {
  * structure of the model. Each entity of the model (of type CARGO)
  * needs to be assigned a unique KEY, which will be used for lookups.
  */
-template<class CARGO, std::size_t SIZE, class TOPOLOGY=typename APITraits::SelectTopology<CARGO>::Value, typename KEY=int>
+template<class CARGO, std::size_t SIZE, typename KEY=int>
 class ContainerCell
 {
 public:
@@ -24,19 +24,18 @@ public:
 
     typedef CARGO Cargo;
     typedef KEY Key;
-    typedef TOPOLOGY Topology;
+    typedef typename APITraits::SelectTopology<CARGO>::Value Topology;
     typedef Cargo *Iterator;
     typedef Cargo *iterator;
     typedef const Cargo *ConstIterator;
     typedef const Cargo *const_iterator;
 
-    const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CARGO>::VALUE;
     const static int DIM = Topology::DIM;
     const static std::size_t MAX_SIZE = SIZE;
 
     class API :
-        public APITraits::HasStencil<Stencils::Moore<Topology::DIM, 1> >,
-        public APITraits::HasNanoSteps<NANO_STEPS>
+        public APITraits::SelectAPI<CARGO>,
+        public APITraits::HasStencil<Stencils::Moore<Topology::DIM, 1> >
     {};
 
     inline ContainerCell() :

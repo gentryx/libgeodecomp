@@ -72,6 +72,28 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_API = void>
+    class SelectAPI
+    {
+    public:
+        class Value
+        {};
+    };
+
+    /**
+     * Allows library code to pull in a model's whole API without
+     * requiring the user to specify one at all (if none is defined,
+     * we'll return an empty class).
+     */
+    template<typename CELL>
+    class SelectAPI<CELL, typename CELL::API>
+    {
+    public:
+        typedef typename CELL::API Value;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     // determine whether a cell supports SoA (Struct of Arrays)
     // storage via LibFlatArray.
     template<typename CELL, typename HAS_SOA = void>
