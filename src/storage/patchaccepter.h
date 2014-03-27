@@ -6,6 +6,7 @@
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/gridvecconv.h>
+#include <libgeodecomp/storage/serializationbuffer.h>
 
 namespace LibGeoDecomp {
 
