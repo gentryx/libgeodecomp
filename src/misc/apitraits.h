@@ -7,9 +7,9 @@
 #include <mpi.h>
 #endif
 
+#include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/storage/displacedgrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <sstream>
@@ -521,10 +521,154 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_COORD_TYPE = void>
+    class SelectCoordType
+    {
+    public:
+        typedef FloatCoord<2> Value;
+    };
+
+    template<typename CELL>
+    class SelectCoordType<CELL, typename CELL::API::SupportsCoordType>
+    {
+    public:
+        typedef typename CELL::API::CoordType Value;
+    };
+
     /**
-     * This is just an empty template for adding new traits.
-     *
+     * This trait is used by unstructured grid and meshfree codes to
+     * set the coordinate type by which the elements are represemted.
+     * The typename needs to match the dimensions of the model's
+     * topology.
      */
+    template<typename COORD>
+    class HasCoordType
+    {
+    public:
+        typedef COORD CoordType;
+
+        typedef void SupportsCoordType;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_ID_TYPE = void>
+    class SelectIDType
+    {
+    public:
+        typedef int Value;
+    };
+
+    template<typename CELL>
+    class SelectIDType<CELL, typename CELL::API::SupportsIDType>
+    {
+    public:
+        typedef typename CELL::API::IDType Value;
+    };
+
+    /**
+     * Like HasCoordType, this trait can be used to set the type which
+     * is used in meshfree and unstructured grid codes to uniquely
+     * identify elements.
+     */
+    template<typename ID>
+    class HasIDType
+    {
+    public:
+        typedef ID IDType;
+
+        typedef void SupportsIDType;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectPointMesh
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectPointMesh<CELL, typename CELL::API::SupportsPointMesh>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Indicates that the model has particles or features other
+     * entities that can be represented by a point mesh. As an
+     * example, the SiloWriter can then dump that mash to an archive.
+     * See the Voronoi example for instructions on how to use this
+     * feature.
+     */
+    class HasPointMesh
+    {
+    public:
+        typedef void SupportsPointMesh;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectRegularGrid
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectRegularGrid<CELL, typename CELL::API::SupportsRegularGrid>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Use this trait to flag models which contain a regular grid. All
+     * stencil codes belong to this category, but even
+     * particle-in-cell codes may use such a grid to organizing the
+     * particles and computing certain variables (e.g. direction and
+     * magnitude of the field).
+     */
+    class HasRegularGrid
+    {
+    public:
+        typedef void SupportsRegularGrid;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectUnstructuredGrid
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectUnstructuredGrid<CELL, typename CELL::API::SupportsUnstructuredGrid>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * If a model is based on an unstructred grid, then we assume that
+     * it can be represented a set of polygonal zones. The shape of
+     * each zone will be represented by a sequence of coordinates. See
+     * the Voronoi example for instructions on how to use this
+     * feature.
+     */
+    class HasUnstructuredGrid
+    {
+    public:
+        typedef void SupportsUnstructuredGrid;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     // template<typename CELL, typename HAS_TEMPLATE_NAME = void>
     // class SelectTemplateName
     // {
@@ -539,6 +683,10 @@ public:
     //     typedef TrueType Value;
     // };
 
+    // /**
+    //  * This is just an empty template for adding new traits.
+    //  *
+    //  */
     // class HasTemplateName
     // {
     // public:

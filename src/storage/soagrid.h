@@ -2,8 +2,11 @@
 #define LIBGEODECOMP_STORAGE_SOAGRID_H
 
 #include <libflatarray/flat_array.hpp>
+
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
 
@@ -106,6 +109,131 @@ private:
     Coord<3> edgeRadii;
     CELL edgeCell;
     CELL innerCell;
+};
+
+/**
+ * A simple functor for wrapping index calculation within the SoA
+ * layout. It's purpose is to hide differences in the calculation when
+ * using 1D, 2D or 3D coords. LibFlatArray internally always uses a 3D
+ * layout, thus our edgeRadii are also always 3D.
+ */
+template<int DIM_X, int DIM_Y, int DIM_Z>
+class GenIndex
+{
+public:
+    int operator()(const Coord<1>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * edgeRadii.y() +
+            DIM_X * DIM_Y * edgeRadii.z();
+    }
+
+    int operator()(const Coord<2>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * (coord.y() + edgeRadii.y()) +
+            DIM_X * DIM_Y * edgeRadii.z();
+    }
+
+    int operator()(const Coord<3>& coord, const Coord<3>& edgeRadii) const
+    {
+        return
+            coord.x() + edgeRadii.x() +
+            DIM_X * (coord.y() + edgeRadii.y()) +
+            DIM_X * DIM_Y * (coord.z() + edgeRadii.z());
+    }
+};
+
+template<typename CELL, int DIM>
+class SaveMember
+{
+public:
+    SaveMember(
+        char *target,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region,
+        const Coord<DIM>& origin,
+        const Coord<3>& edgeRadii) :
+        target(target),
+        selector(selector),
+        region(region),
+        origin(origin),
+        edgeRadii(edgeRadii)
+    {}
+
+    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    void operator()(
+        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
+        int *index) const
+    {
+        char *currentTarget = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+            std::size_t byteSize = selector.sizeOfMember() * i->length();
+            const char *first = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            const char *last = first + byteSize;
+            selector.copyStreakOut(first, last, currentTarget);
+
+            currentTarget += selector.sizeOfExternal() * i->length();
+        }
+    }
+
+private:
+    char *target;
+    const Selector<CELL>& selector;
+    const Region<DIM>& region;
+    const Coord<DIM>& origin;
+    const Coord<3>& edgeRadii;
+    int memberOffset;
+};
+
+template<typename CELL, int DIM>
+class LoadMember
+{
+public:
+    LoadMember(
+        const char *source,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region,
+        const Coord<DIM>& origin,
+        const Coord<3>& edgeRadii) :
+        source(source),
+        selector(selector),
+        region(region),
+        origin(origin),
+        edgeRadii(edgeRadii)
+    {}
+
+    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    void operator()(
+        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
+        int *index) const
+    {
+        const char *currentSource = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+
+            std::size_t byteSize = selector.sizeOfExternal() * i->length();
+            const char *first = currentSource;
+            const char *last = currentSource + byteSize;
+            char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            selector.copyStreakIn(first, last, currentTarget);
+
+            currentSource += byteSize;
+        }
+    }
+
+private:
+    const char *source;
+    const Selector<CELL>& selector;
+    const Region<DIM>& region;
+    const Coord<DIM>& origin;
+    const Coord<3>& edgeRadii;
+    int memberOffset;
 };
 
 }
@@ -278,6 +406,25 @@ public:
             dataIterator += length * AGGREGATED_MEMBER_SIZE;
         }
 
+    }
+
+protected:
+    void saveMemberImplementation(
+        char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    {
+        int index = 0;
+        delegate.callback(
+            SoAGridHelpers::SaveMember<CELL, DIM>(target, selector, region, box.origin, edgeRadii),
+            &index);
+    }
+
+    void loadMemberImplementation(
+        const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    {
+        int index = 0;
+        delegate.callback(
+            SoAGridHelpers::LoadMember<CELL, DIM>(source, selector, region, box.origin, edgeRadii),
+            &index);
     }
 
 private:

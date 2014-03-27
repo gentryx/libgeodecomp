@@ -141,7 +141,7 @@ We recommend an out-of-source build:
   BUILD_DIR=build/`uname -ms | sed s/\ /-/g`
   mkdir -p $BUILD_DIR
   cd $BUILD_DIR
-  cmake ../../src/
+  cmake ../../
   make
 
 That's it. CMake will output a number of configure options. You can

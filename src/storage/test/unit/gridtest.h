@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -11,6 +12,34 @@
 #define GRIDHEIGHT 5
 
 double edge = 0;
+
+class MyDummyCell
+{
+public:
+    class API :
+        public LibGeoDecomp::APITraits::HasSoA
+    {};
+
+    MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
+        x(x),
+        y(y),
+        z(z)
+    {}
+
+    inline bool operator==(const MyDummyCell& other)
+    {
+        return
+            (x == other.x) &&
+            (y == other.y) &&
+            (z == other.z);
+    }
+
+    int x;
+    double y;
+    char z;
+};
+
+LIBFLATARRAY_REGISTER_SOA(MyDummyCell, ((int)(x))((double)(y))((char)(z)) )
 
 using namespace LibGeoDecomp;
 
@@ -380,6 +409,62 @@ public:
         TS_ASSERT(g2 != g3);
         TS_ASSERT(g2 == g4);
         TS_ASSERT(g2 != g5);
+    }
+
+    void testLoadSaveMember()
+    {
+        // basic setup:
+        Selector<MyDummyCell> xSelector(&MyDummyCell::x, "x");
+        Selector<MyDummyCell> ySelector(&MyDummyCell::y, "y");
+        Selector<MyDummyCell> zSelector(&MyDummyCell::z, "z");
+
+        Coord<2> dim(40, 20);
+        Grid<MyDummyCell, Topologies::Cube<2>::Topology> grid(dim);
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                grid[Coord<2>(x, y)] = MyDummyCell(x, y, 13);
+            }
+        }
+
+        Region<2> region;
+        region << Streak<2>(Coord<2>( 0,  0), 10)
+               << Streak<2>(Coord<2>(10, 10), 20)
+               << Streak<2>(Coord<2>(30, 19), 40);
+
+        std::vector<int   > xVector(region.size(), -1);
+        std::vector<double> yVector(region.size(), -1);
+        std::vector<char  > zVector(region.size(), -1);
+
+        grid.saveMember(&xVector[0], xSelector, region);
+        grid.saveMember(&yVector[0], ySelector, region);
+        grid.saveMember(&zVector[0], zSelector, region);
+
+        Region<2>::Iterator cursor = region.begin();
+
+        // test whether grid data is accurately copied back:
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            TS_ASSERT_EQUALS(xVector[i], cursor->x());
+            TS_ASSERT_EQUALS(yVector[i], cursor->y());
+            TS_ASSERT_EQUALS(zVector[i], 13);
+            ++cursor;
+        }
+
+        // modify vectors and copy back to grid:
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            xVector[i] = 1000 + i;
+            yVector[i] = 2000 + i;
+            zVector[i] = i;
+        }
+
+        grid.loadMember(&xVector[0], xSelector, region);
+        grid.loadMember(&yVector[0], ySelector, region);
+        grid.loadMember(&zVector[0], zSelector, region);
+
+        int counter = 0;
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(grid[*i], MyDummyCell(1000 + counter, 2000 + counter, counter));
+            ++counter;
+        }
     }
 };
 

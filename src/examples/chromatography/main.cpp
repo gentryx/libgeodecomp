@@ -1,14 +1,15 @@
+// fixme: ATM out of order. make it use the SiloWriter and repair
+// fixme: refactor this demo by extracting the mesh generator and container cell
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
+
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <silo.h>
 #include <stdlib.h>
-
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/misc/superset.h>
-#include <libgeodecomp/misc/supervector.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp;
 
@@ -17,15 +18,15 @@ using namespace LibGeoDecomp;
 #define SETUP 2
 
 #if SETUP==NOZZLE
-const int MAX_X   = 2000;
-const int MAX_Y   = 8000;
-const int LIQUID_CELLS = 8000;
+const std::size_t MAX_X   = 2000;
+const std::size_t MAX_Y   = 8000;
+const unsigned LIQUID_CELLS = 8000;
 #endif
 
 #if SETUP==CHROMO
-const int MAX_X   = 4000;
-const int MAX_Y   = 10000;
-const int LIQUID_CELLS = 40000;
+const std::size_t MAX_X   = 4000;
+const std::size_t MAX_Y   = 10000;
+const unsigned LIQUID_CELLS = 40000;
 #endif
 
 enum State {LIQUID=0, SOLID=1, COAL=2};
@@ -40,8 +41,8 @@ const double PRESSURE_SPEED = 1.0;
 const double VELOCITY_MOD[] = {1.0, 0.0, 0.93};
 const double ABSORBTION_RATES[] = {0.0, 0.1, 0.0};
 
-const int SUBSTANCES = 3;
-const int SAMPLES = 1000;
+const std::size_t SUBSTANCES = 3;
+const std::size_t SAMPLES = 1000;
 const int ELEMENT_SPACING = 50;
 const int CELL_SPACING = 400;
 
@@ -67,30 +68,30 @@ public:
 class Cell
 {
 public:
-    static const int MAX_NEIGHBORS = 20;
+    static const unsigned MAX_NEIGHBORS = 20;
 
-    Cell(const Coord<2>& _center=FarAway, const ID& _id=ID(),
-         const double _influxes[SUBSTANCES] = ZERO_INFLUXES,
-         const double& _efflux = 0,
-         const State& _state = LIQUID) :
-        state(_state),
-        efflux(_efflux),
+    Cell(const Coord<2>& center=FarAway, const ID& _id=ID(),
+         const double presetInfluxes[SUBSTANCES] = ZERO_INFLUXES,
+         const double& efflux = 0,
+         const State& state = LIQUID) :
+        state(state),
+        efflux(efflux),
         pressure(0),
         absorbedVolume(0),
         velocityX(0),
         velocityY(0),
-        center(_center),
+        center(center),
         id(_id),
         area(0),
         numNeighbors(0),
         shapeSize(0)
     {
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             quantities[i] = 0;
             ratios[i] = 0;
         }
 
-        std::copy(_influxes, _influxes + SUBSTANCES, influxes);
+        std::copy(presetInfluxes, presetInfluxes + SUBSTANCES, influxes);
     }
 
     template<class CONTAINER>
@@ -115,7 +116,7 @@ public:
         double mass = getMass();
         double totalFlux = 0;
 
-        for (int i = 0; i < numNeighbors; ++i) {
+        for (unsigned i = 0; i < numNeighbors; ++i) {
             const Cell& other = container->cell(neighborIDs[i]);
             if (other.state == SOLID) {
                 fluxesFlow[i] = 0;
@@ -143,7 +144,7 @@ public:
 
         if (mass > 0) {
             double factor = (mass - totalFlux) / mass;
-            for (int i = 0; i < SUBSTANCES; ++i)
+            for (std::size_t i = 0; i < SUBSTANCES; ++i)
                 quantities[i] *= factor;
         }
     }
@@ -158,25 +159,25 @@ public:
 
         double mass = getMass();
         double fluxes[SUBSTANCES];
-        for (int i = 0; i < SUBSTANCES; ++i)
+        for (std::size_t i = 0; i < SUBSTANCES; ++i)
             fluxes[i] = 0;
         double fluxVelocityX = 0;
         double fluxVelocityY = 0;
 
-        for (int i = 0; i < numNeighbors; ++i) {
+        for (unsigned i = 0; i < numNeighbors; ++i) {
             const Cell& other = container->cell(neighborIDs[i]);
             if (other.state != SOLID) {
                 const Coord<2>& dir = borderDirections[i];
                 double length = 1.0 / sqrt(dir.x() * dir.x() +
                                            dir.y() * dir.y());
 
-                for (int j = 0; j < other.numNeighbors; ++j) {
+                for (unsigned j = 0; j < other.numNeighbors; ++j) {
                     if (other.neighborIDs[j] == id) {
                         double otherMass = other.getMass();
                         if (otherMass > 0) {
                             double fluxCoefficient =
                                 (other.fluxesPressure[j] + other.fluxesFlow[j]) / otherMass;
-                            for (int i = 0; i < SUBSTANCES; ++i)
+                            for (unsigned i = 0; i < SUBSTANCES; ++i)
                                 fluxes[i] += fluxCoefficient * other.quantities[i];
                             fluxVelocityX += other.fluxesFlow[j] * other.velocityX;
                             fluxVelocityY += other.fluxesFlow[j] * other.velocityY;
@@ -192,25 +193,25 @@ public:
         }
 
         double newMass = mass;
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             newMass += fluxes[i];
         }
 
         double scale = VELOCITY_MOD[state] / newMass;
         velocityX = (mass * velocityX + fluxVelocityX) * scale;
         velocityY = (mass * velocityY + fluxVelocityY) * scale;
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             quantities[i] += fluxes[i] + influxes[i];
         }
 
         mass = getMass();
         if (mass > 0) {
             double fluxCoefficient = 1.0 - efflux / mass;
-            for (int i = 0; i < SUBSTANCES; ++i)
+            for (std::size_t i = 0; i < SUBSTANCES; ++i)
                 quantities[i] *= fluxCoefficient;
         }
 
-        for (int i = 0; i < SUBSTANCES; ++i)
+        for (std::size_t i = 0; i < SUBSTANCES; ++i)
             quantities[i] = std::max(0.0, quantities[i]);
 
         handleAbsorbtion();
@@ -229,15 +230,15 @@ public:
         double fillLevel = absorbedVolume / area;
         double freeLevel = 1 - fillLevel;
         double substancePressures[SUBSTANCES];
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             substancePressures[i] = ratios[i] * pressure;
         }
 
         double absorbtions[SUBSTANCES];
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             absorbtions[i] = area * freeLevel * substancePressures[i] * ABSORBTION_RATES[i];
         }
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             absorbtions[i] = std::min(absorbtions[i], quantities[i]);
             absorbtions[i] = std::min(absorbtions[i], freeVolume);
             freeVolume -= absorbtions[i];
@@ -249,7 +250,7 @@ public:
     double getMass() const
     {
         double mass = 0;
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             mass += quantities[i];
         }
 
@@ -260,7 +261,7 @@ public:
     {
         double mass = getMass();
         pressure = mass / area;
-        for (int i = 0; i < SUBSTANCES; ++i) {
+        for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             ratios[i] = quantities[i] / mass;
         }
     }
@@ -302,7 +303,7 @@ public:
     Coord<2> center;
     ID id;
     double area;
-    int numNeighbors;
+    unsigned numNeighbors;
     int shapeSize;
 
     ID neighborIDs[MAX_NEIGHBORS];
@@ -316,14 +317,14 @@ public:
 class ContainerCell
 {
 public:
-    const static int MAX_CELLS = 100;
+    const static unsigned MAX_CELLS = 100;
 
     class API :
-        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasCubeTopology<2>,
         public APITraits::HasNanoSteps<2>
     {};
 
-    typedef Grid<ContainerCell, Topology> GridType;
+    typedef Grid<ContainerCell> GridType;
     typedef CoordMap<ContainerCell, GridType> CoordMapType;
 
     ContainerCell() :
@@ -349,14 +350,14 @@ public:
     void update(const CoordMapType& neighborhood, const unsigned& nanoStep)
     {
         neighbors = &neighborhood;
-        for (int i = 0; i < numCells; ++i) {
+        for (std::size_t i = 0; i < numCells; ++i) {
             cells[i].update(this, nanoStep);
         }
     }
 
     Coord<2> coord;
     Cell cells[MAX_CELLS];
-    int numCells;
+    unsigned numCells;
     const CoordMapType *neighbors;
 };
 
@@ -398,9 +399,9 @@ public:
     {
         limits << eq;
         std::vector<Coord<2> > cutPoints = generateCutPoints();
-        SuperSet<int> deleteSet;
+        std::set<int> deleteSet;
 
-        for (int i = 0; i < limits. size(); ++i) {
+        for (std::size_t i = 0; i < limits. size(); ++i) {
             Coord<2> leftDir = turnLeft90(limits[i].dir);
             int dist1 = (cutPoints[2 * i + 0] - limits[i].base) * leftDir;
             int dist2 = (cutPoints[2 * i + 1] - limits[i].base) * leftDir;
@@ -409,7 +410,7 @@ public:
                 deleteSet.insert(i);
             }
 
-            for (int j = 0; j < limits.size(); ++j)
+            for (std::size_t j = 0; j < limits.size(); ++j)
                 if (i != j) {
                     // parallel lines, deleting...
                     if (cutPoint(limits[i], limits[j]) == FarAway) {
@@ -427,7 +428,7 @@ public:
         }
 
         std::vector<Equation> newLimits;
-        for (int i = 0; i < limits.size(); ++i) {
+        for (std::size_t i = 0; i < limits.size(); ++i) {
             if (!deleteSet.count(i)) {
                 newLimits << limits[i];
             }
@@ -457,8 +458,8 @@ public:
     {
         std::vector<Coord<2> > buf(2 * limits.size(), FarAway);
 
-        for (int i = 0; i < limits.size(); ++i) {
-            for (int j = 0; j < limits.size(); ++j) {
+        for (std::size_t i = 0; i < limits.size(); ++i) {
+            for (std::size_t j = 0; j < limits.size(); ++j) {
                 if (i != j) {
                     Coord<2> cut = cutPoint(limits[i], limits[j]);
                     int offset = 2 * i;
@@ -506,14 +507,14 @@ public:
     {
         std::vector<Coord<2> > cutPoints = generateCutPoints();
 
-        for (int i = 0; i < cutPoints.size(); ++i) {
+        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             if (cutPoints[i] == FarAway) {
                 throw std::logic_error("invalid cut point");
             }
         }
 
-        SuperMap<double, Coord<2> > points;
-        for (int i = 0; i < cutPoints.size(); ++i) {
+        std::map<double, Coord<2> > points;
+        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             Coord<2> delta = cutPoints[i] - center;
             double length = sqrt(delta.x() * delta.x() + delta.y() * delta.y());
             double dY = delta.y() / length;
@@ -525,7 +526,7 @@ public:
         }
 
         std::vector<Coord<2> > res;
-        for (SuperMap<double, Coord<2> >::iterator i = points.begin();
+        for (std::map<double, Coord<2> >::iterator i = points.begin();
              i != points.end(); ++i) {
             res << i->second;
         }
@@ -539,7 +540,7 @@ public:
 
     bool includes(const Coord<2>& c)
     {
-        for (int i = 0; i < limits.size(); ++i) {
+        for (std::size_t i = 0; i < limits.size(); ++i) {
             if (!limits[i].includes(c)) {
                 return false;
             }
@@ -551,14 +552,14 @@ public:
     {
         std::vector<Coord<2> > cutPoints = generateCutPoints();
 
-        for (int i = 0; i < limits. size(); ++i) {
+        for (std::size_t i = 0; i < limits. size(); ++i) {
             Coord<2> delta = cutPoints[2 * i + 0] - cutPoints[2 * i + 1];
             limits[i].length = sqrt(delta.x() * delta.x() + delta.y() * delta.y());
         }
 
         Coord<2> min(MAX_X, MAX_Y);
         Coord<2> max(0, 0);
-        for (int i = 0; i < cutPoints.size(); ++i) {
+        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             Coord<2>& c = cutPoints[i];
             max = c.max(max);
             min = c.min(min);
@@ -566,7 +567,7 @@ public:
         Coord<2> delta = max - min;
 
         int hits = 0;
-        for (int i = 0; i < SAMPLES; ++i) {
+        for (std::size_t i = 0; i < SAMPLES; ++i) {
             Coord<2> p = Coord<2>(rand() % delta.x(),
                                   rand() % delta.y()) + min;
             if (includes(p)) {
@@ -669,7 +670,7 @@ Coord<2> pointToContainerCoord(const Coord<2>& c)
     return Coord<2>(c.x() / CELL_SPACING, c.y() / CELL_SPACING);
 }
 
-class ChromoInitializer : public LibGeoDecomp::SimpleInitializer<ContainerCell>
+class ChromoInitializer : public SimpleInitializer<ContainerCell>
 {
 public:
     ChromoInitializer(
@@ -681,14 +682,15 @@ public:
     virtual void grid(GridBase<ContainerCell, 2> *ret)
     {
         CoordBox<2> box = ret->boundingBox();
-        ret->atEdge() = ContainerCell();
+        ret->setEdge(ContainerCell());
 
         Grid<ContainerCell> grid = createBasicGrid();
         fillGeometryData(&grid);
 
         for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            ret->at(*i) = grid[*i];
-            ret->at(*i).coord = *i;
+            ContainerCell c = grid[*i];
+            c.coord = *i;
+            ret->set(*i, c);
         }
     }
 
@@ -744,7 +746,7 @@ private:
 
     void addLiquidCells(Grid<ContainerCell> *grid)
     {
-        for (int i = 0; i < LIQUID_CELLS; ++i) {
+        for (std::size_t i = 0; i < LIQUID_CELLS; ++i) {
             Coord<2> center = randCoord();
             addCell(grid, center, ZERO_INFLUXES, 0, LIQUID);
         }
@@ -753,9 +755,9 @@ private:
     void addInletOutlet(Grid<ContainerCell> *grid, bool alignVertical=false)
     {
         int spacing = 1.3 * ELEMENT_SPACING;
-        int max = alignVertical? MAX_Y : MAX_X;
+        std::size_t max = alignVertical? MAX_Y : MAX_X;
 
-        for (int i = spacing; i < max; i += spacing) {
+        for (std::size_t i = spacing; i < max; i += spacing) {
             int halfStep = spacing / 2;
             int j1 = halfStep;
             int j2 = (alignVertical? MAX_X : MAX_Y) - halfStep;
@@ -877,7 +879,7 @@ private:
             for (int x = -1; x < 2; ++x) {
                 const ContainerCell& container = grid[containerCoord +
                                                       Coord<2>(x, y)];
-                for (int j = 0; j < container.numCells; ++j) {
+                for (std::size_t j = 0; j < container.numCells; ++j) {
                     Coord<2> delta = center - container.cells[j].center;
                     if ((delta * delta) < (ELEMENT_SPACING * ELEMENT_SPACING))
                         flag = false;
@@ -923,10 +925,10 @@ private:
         }
 
         Coord<2> containerCoord = pointToContainerCoord(center);
-        int numCells = (*grid)[containerCoord].numCells;
+        unsigned numCells = (*grid)[containerCoord].numCells;
 
-        if (center.x() <= 0 || center.x() >= (MAX_X - 1) ||
-            center.y() <= 0 || center.y() >= (MAX_Y - 1)) {
+        if (center.x() <= 0 || center.x() >= int(MAX_X - 1) ||
+            center.y() <= 0 || center.y() >= int(MAX_Y - 1)) {
             return;
         }
 
@@ -943,8 +945,8 @@ private:
     void fillGeometryData(Grid<ContainerCell> *grid)
     {
         int maxShape = 0;
-        int maxNeighbors = 0;
-        int maxCells = 0;
+        unsigned maxNeighbors = 0;
+        unsigned maxCells = 0;
         double maxDiameter = 0;
 
         CoordBox<2> box(Coord<2>(), grid->getDimensions());
@@ -953,7 +955,7 @@ private:
             ContainerCell& container = (*grid)[containerCoord];
             maxCells = std::max(maxCells, container.numCells);
 
-            for (int i = 0; i < container.numCells; ++i) {
+            for (std::size_t i = 0; i < container.numCells; ++i) {
                 Cell& cell = container.cells[i];
                 Element e(cell.center, cell.id);
 
@@ -961,7 +963,7 @@ private:
                     for (int x = -1; x < 2; ++x) {
                         ContainerCell& container = (*grid)[containerCoord +
                                                            Coord<2>(x, y)];
-                        for (int j = 0; j < container.numCells; ++j) {
+                        for (unsigned j = 0; j < container.numCells; ++j) {
                             if (cell.center != container.cells[j].center) {
                                 e << container.cells[j];
                             }
@@ -972,7 +974,7 @@ private:
                 e.updateGeometryData();
                 cell.area = e.getArea();
                 cell.quantities[0] = e.getArea();
-                for (int i = 1; i < SUBSTANCES; ++i) {
+                for (std::size_t i = 1; i < SUBSTANCES; ++i) {
                     cell.quantities[i] = 0;
                 }
 
@@ -1004,53 +1006,41 @@ private:
 class ChromoWriter : public Writer<ContainerCell>
 {
 public:
-    ChromoWriter(MonolithicSimulator<ContainerCell> *_sim,
-                 const unsigned& _period = 1) :
-        Writer<ContainerCell>("chromo", _sim, _period)
+    ChromoWriter(const unsigned& period = 1) :
+        Writer<ContainerCell>("chromo", period)
     {}
 
-    virtual void initialized()
+    virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
-        output(*sim->getGrid(), sim->getStep());
-    }
-
-    virtual void stepFinished()
-    {
-        if (sim->getStep() % period == 0) {
-            output(*sim->getGrid(), sim->getStep());
-        }
-    }
-
-    virtual void allDone()
-    {
-        output(*sim->getGrid(), sim->getStep());
+        output(grid, step);
     }
 
 private:
-    using Writer<ContainerCell>::sim;
     using Writer<ContainerCell>::prefix;
 
-    int countCells(const Grid<ContainerCell>& grid)
+    template<typename GRID_TYPE>
+    int countCells(const GRID_TYPE& grid)
     {
         int n = 0;
-        CoordBox<2> box(Coord<2>(), grid.getDimensions());
+        CoordBox<2> box = grid.boundingBox();
         for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            n += grid[*i].numCells;
+            n += grid.get(*i).numCells;
         }
         return n;
     }
 
-    void writePointMesh(DBfile *dbfile, const Grid<ContainerCell>& grid,
+    template<typename GRID_TYPE>
+    void writePointMesh(DBfile *dbfile, const GRID_TYPE& grid,
                         const int& n)
     {
         int dim = 2;
         std::vector<float> x;
         std::vector<float> y;
 
-        CoordBox<2> box(Coord<2>(), grid.getDimensions());
+        CoordBox<2> box = grid.boundingBox();
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
-            const ContainerCell& container = grid[iter];
-            for (int i = 0; i < container.numCells; ++i) {
+            const ContainerCell container = grid.get(*iter);
+            for (std::size_t i = 0; i < container.numCells; ++i) {
                 x << container.cells[i].center.x();
                 y << container.cells[i].center.y();
             }
@@ -1060,7 +1050,8 @@ private:
         DBPutPointmesh(dbfile, "centroids", dim, coords, n, DB_FLOAT, NULL);
     }
 
-    void writeZoneMesh(DBfile *dbfile, const Grid<ContainerCell>& grid,
+    template<typename GRID_TYPE>
+    void writeZoneMesh(DBfile *dbfile, const GRID_TYPE& grid,
                        const int& n)
     {
         int dim = 2;
@@ -1069,17 +1060,17 @@ private:
         std::vector<int> nodes;
         std::vector<int> shapeSizes;
 
-        CoordBox<2> box(Coord<2>(), grid.getDimensions());
+        CoordBox<2> box = grid.boundingBox();
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
-            const ContainerCell& container = grid[*iter];
-            for (int i = 0; i < container.numCells; ++i) {
+            const ContainerCell container = grid.get(*iter);
+            for (std::size_t i = 0; i < container.numCells; ++i) {
                 std::vector<Coord<2> > coords(container.cells[i].shapeSize);
                 std::copy(container.cells[i].shape,
                           container.cells[i].shape + container.cells[i].shapeSize,
                           &coords[0]);
                 shapeSizes << coords.size();
                 int nodeOffset = nodes.size() + 1;
-                for (int k = 0; k < coords.size(); ++k) {
+                for (std::size_t k = 0; k < coords.size(); ++k) {
                     x << coords[k].x();
                     y << coords[k].y();
                     nodes << nodeOffset + k;
@@ -1105,36 +1096,39 @@ private:
                      "zonelist", NULL, DB_FLOAT, NULL);
     }
 
-    void writeSuperGrid(DBfile *dbfile, const Grid<ContainerCell>& grid,
+    template<typename GRID_TYPE>
+    void writeSuperGrid(DBfile *dbfile, const GRID_TYPE& grid,
                         const int& n)
     {
         int dim = 2;
         std::vector<float> x;
         std::vector<float> y;
+        CoordBox<2> box = grid.boundingBox();
 
-        for (int i = 0; i < grid.getDimensions().x() + 1; ++i) {
+        for (int i = 0; i < box.dimensions.x() + 1; ++i) {
             x << i * CELL_SPACING;
         }
-        for (int i = 0; i < grid.getDimensions().y() + 1; ++i) {
+        for (int i = 0; i < box.dimensions.y() + 1; ++i) {
             y << i * CELL_SPACING;
         }
 
-        int dimensions[] = {x.size(), y.size()};
+        int dimensions[] = {int(x.size()), int(y.size())};
         float *coords[] = {&x[0], &y[0]};
         DBPutQuadmesh(dbfile, "supergrid", NULL, coords, dimensions, dim,
                       DB_FLOAT, DB_COLLINEAR, NULL);
     }
 
-    void writeVars(DBfile *dbfile, const Grid<ContainerCell>& grid, const int& n)
+    template<typename GRID_TYPE>
+    void writeVars(DBfile *dbfile, const GRID_TYPE& grid, const int& n)
     {
-        CoordBox<2> box(Coord<2>(), grid.getDimensions());
+        CoordBox<2> box = grid.boundingBox();
 
 #define WRITE_SCALAR(FIELD, NAME)                                       \
         {                                                               \
             std::vector<double> buf;                                    \
             for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) { \
-                const ContainerCell& container = grid[*iter];           \
-                for (int i = 0; i < container.numCells; ++i)            \
+                const ContainerCell container = grid.get(*iter);        \
+                for (unsigned i = 0; i < container.numCells; ++i)       \
                     buf << container.cells[i].FIELD;                    \
             }                                                           \
             DBPutUcdvar1(dbfile, NAME, "elements", &buf[0], n,          \
@@ -1151,9 +1145,9 @@ private:
         std::vector<double> velocityX;
         std::vector<double> velocityY;
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
-            const ContainerCell& container = grid[*iter];
+            const ContainerCell container = grid.get(*iter);
 
-            for (int i = 0; i < container.numCells; ++i) {
+            for (unsigned i = 0; i < container.numCells; ++i) {
                 velocityX << container.cells[i].velocityX;
                 velocityY << container.cells[i].velocityY;
             }
@@ -1163,7 +1157,8 @@ private:
         DBPutPointvar(dbfile, "velocity", "centroids", 2, components, n, DB_DOUBLE, NULL);
     }
 
-    void output(const Grid<ContainerCell>& grid, const int& time)
+    template<typename GRID_TYPE>
+    void output(const GRID_TYPE& grid, const int& time)
     {
         std::ostringstream filename;
         filename << prefix << "." << std::setfill('0') << std::setw(5)
@@ -1184,13 +1179,14 @@ private:
 
 int main(int argc, char *argv[])
 {
+    int maxSteps = 300000;
     SerialSimulator<ContainerCell> sim(
         new ChromoInitializer(
             Coord<2>(ceil(1.0 * MAX_X / CELL_SPACING),
                      ceil(1.0 * MAX_Y / CELL_SPACING)),
-            300000));
-    new ChromoWriter(&sim, 100);
-    new TracingWriter<ContainerCell>(&sim, 100);
+            maxSteps));
+    sim.addWriter(new ChromoWriter(100));
+    sim.addWriter(new TracingWriter<ContainerCell>(100, maxSteps));
     sim.run();
 
     return 0;

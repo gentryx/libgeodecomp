@@ -62,6 +62,7 @@ find_package(MPI)
 find_package(OpenCV)
 find_package(Ruby)
 find_package(SCOTCH)
+find_package(Silo)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
@@ -86,6 +87,10 @@ endif()
 
 if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
+endif()
+
+if(NOT DEFINED Silo_FOUND)
+  set(Silo_FOUND false)
 endif()
 
 if(NOT DEFINED SCOTCH_FOUND)
@@ -182,6 +187,8 @@ add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${
 
 add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
 
+add_config_option(WITH_SILO "Silo is a flexible output library developed by LLNL." ${Silo_FOUND} true)
+
 add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
 
 add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
@@ -218,6 +225,10 @@ if(WITH_HPX)
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/lib/hpx:${CMAKE_BINARY_DIR}/lib/hpx:${CMAKE_BINARY_DIR}/src")
+endif()
+
+if(WITH_SILO)
+  include_directories(${Silo_INCLUDE_DIR})
 endif()
 
 if(WITH_SCOTCH)
@@ -266,6 +277,10 @@ endif()
 
 if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
   message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
+endif()
+
+if(WITH_SILO AND NOT Silo_FOUND)
+  message(FATAL_ERROR "WITH_SILO selected, but FindSilo couldn't detect any installation of it.")
 endif()
 
 if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
@@ -397,6 +412,12 @@ if(WITH_HPX)
     ${HPX_LIBRARIES})
 endif()
 
+if(WITH_SILO)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${Silo_LIBRARY})
+endif()
+
 if(WITH_SCOTCH)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
@@ -449,8 +470,16 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
+
 # install libflatarray, too
-install(FILES ../lib/libflatarray/src/flat_array.hpp DESTINATION include/libflatarray)
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/*.hpp")
+foreach(i ${HEADERS})
+  install(FILES ${i} DESTINATION include/libflatarray)
+endforeach()
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/detail/*.hpp")
+foreach(i ${HEADERS})
+  install(FILES ${i} DESTINATION include/libflatarray/detail)
+endforeach()
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")

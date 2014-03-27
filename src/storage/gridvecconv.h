@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/storage/displacedgrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/iostreams/stream.hpp>

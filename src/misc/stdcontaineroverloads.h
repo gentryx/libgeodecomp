@@ -82,6 +82,18 @@ inline void sort(std::vector<T, Allocator>& vec)
 }
 
 template <typename T, typename Allocator>
+T& (min)(std::vector<T, Allocator>& vec)
+{
+    return *(std::min_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator>
+const T& (min)(const std::vector<T, Allocator>& vec)
+{
+    return *(std::min_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator>
 T& (max)(std::vector<T, Allocator>& vec)
 {
     return *(std::max_element(vec.begin(), vec.end()));
@@ -134,13 +146,6 @@ template <typename T, typename Allocator>
 void erase_min(std::set<T, Allocator>& set)
 {
     set.erase(set.begin());
-}
-
-template <typename T, typename Allocator>
-inline std::set<T, Allocator>& operator<<(std::set<T, Allocator>& set, const T& elem)
-{
-    set.insert(elem);
-    return set;
 }
 
 template <typename T, typename Allocator>

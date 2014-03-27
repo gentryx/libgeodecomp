@@ -20,15 +20,19 @@
 #include <libgeodecomp/communication/serialization.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/voronoimesher.h>
 #include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/color.h>
+#include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+#include <libgeodecomp/storage/containercell.h>
 #include <libgeodecomp/storage/fixedarray.h>
 
 #endif

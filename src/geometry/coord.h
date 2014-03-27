@@ -1,9 +1,19 @@
 #ifndef LIBGEODECOMP_GEOMETRY_COORD_H
 #define LIBGEODECOMP_GEOMETRY_COORD_H
 
+// coord.h is typically one of the first headers to be pulled into any
+// code using LibGeoDecomp. This makes it a good spot to resolve some
+// include order troubles:
+
+// HPX' config needs to be included before Boost's config:
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
+#endif
+
+// For Intel MPI we need to source mpi.h before stdio.h:
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <mpi.h>
 #endif
 
 #include <string>
