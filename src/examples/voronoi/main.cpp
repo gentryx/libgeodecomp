@@ -9,6 +9,12 @@ template<template<int DIM> class COORD>
 class SimpleCell
 {
 public:
+    class API :
+        public APITraits::HasUnstructuredGrid,
+        public APITraits::HasPointMesh,
+        public APITraits::HasRegularGrid
+    {};
+
     SimpleCell(const COORD<2>& center = COORD<2>(), const int id = 0, const double temperature = 0, const double influx = 0) :
         center(center),
         id(id),
@@ -165,8 +171,11 @@ int main(int argc, char **argv)
     Selector<SimpleCell<FloatCoord> > selector(
         &SimpleCell<FloatCoord>::temperature,
         "SimpleCell_temperature");
-    sim.addWriter(new SiloWriter<ContainerCellType>(
-                      "voronoi", 1, selector, FloatCoord<2>(quadrantSize, quadrantSize)));
+
+    SiloWriter<ContainerCellType> *siloWriter =
+        new SiloWriter<ContainerCellType>("voronoi", 1, FloatCoord<2>(quadrantSize, quadrantSize));
+    siloWriter->addSelector(selector);
+    sim.addWriter(siloWriter);
 
     sim.run();
 

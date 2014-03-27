@@ -22,6 +22,7 @@ public:
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
     typedef typename CELL::Cargo Cargo;
+    typedef std::vector<Selector<Cargo> > SelectorVec;
 
     using Writer<CELL>::DIM;
     using Writer<CELL>::prefix;
@@ -29,13 +30,19 @@ public:
     SiloWriter(
         const std::string& prefix,
         const unsigned period,
-        const Selector<Cargo>& selector,
         const FloatCoord<DIM> quadrantDim) :
         Writer<CELL>(prefix, period),
         coords(DIM),
-        selector(selector),
         quadrantDim(quadrantDim)
     {}
+
+    /**
+     * Adds another model variable this writer's output.
+     */
+    void addSelector(const Selector<Cargo>& selector)
+    {
+        selectors << selector;
+    }
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
@@ -46,34 +53,70 @@ public:
         DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,
                                   "simulation time step", DB_HDF5);
 
-        flushDataStores();
-        collectShapes(grid);
-        outputShapeMesh(dbfile);
+        handleUnstructuredGrid(dbfile, grid, typename APITraits::SelectUnstructuredGrid<CELL>::Value());
+        handlePointMesh(       dbfile, grid, typename APITraits::SelectPointMesh<       CELL>::Value());
+        handleRegularGrid(     dbfile, grid, typename APITraits::SelectRegularGrid<     CELL>::Value());
 
-        flushDataStores();
-        collectPoints(grid);
-        outputPointMesh(dbfile);
-
-        flushDataStores();
-        collectVariable(grid);
-        outputVariable(dbfile);
-
-        flushDataStores();
-        collectSuperGridGeometry(grid);
-        outputSuperGrid(dbfile);
+        for (typename SelectorVec::iterator i = selectors.begin(); i != selectors.end(); ++i) {
+            handleVariable(dbfile, grid, *i);
+        }
 
         DBClose(dbfile);
     }
 
 private:
     std::vector<std::vector<double> > coords;
-    std::vector<int> shapeTypes;
+    std::vector<int> elementTypes;
     std::vector<int> shapeSizes;
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    Selector<Cargo> selector;
+    SelectorVec selectors;
     FloatCoord<DIM> quadrantDim;
+
+    void handleUnstructuredGrid(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
+    {
+        flushDataStores();
+        collectShapes(grid);
+        outputUnstructuredMesh(dbfile);
+    }
+
+    void handleUnstructuredGrid(DBfile *dbfile, const GridType& grid, APITraits::FalseType)
+    {
+        // intentinally left blank. no need to output an unstructured grid, if the model doesn't have one.
+    }
+
+    void handlePointMesh(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
+    {
+        flushDataStores();
+        collectPoints(grid);
+        outputPointMesh(dbfile);
+    }
+
+    void handlePointMesh(DBfile *dbfile, const GridType& grid, APITraits::FalseType)
+    {
+        // intentinally left blank. not all models have particles or such.
+    }
+
+    void handleRegularGrid(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
+    {
+        flushDataStores();
+        collectRegularGridGeometry(grid);
+        outputRegularGrid(dbfile);
+    }
+
+    void handleRegularGrid(DBfile *dbfile, const GridType& grid, APITraits::FalseType)
+    {
+        // intentinally left blank. not all meshfree codes may want to expose this.
+    }
+
+    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    {
+        flushDataStores();
+        collectVariable(grid, selector);
+        outputVariable(dbfile, selector);
+    }
+
 
     void flushDataStores()
     {
@@ -81,7 +124,7 @@ private:
             coords[d].resize(0);
         }
 
-        shapeTypes.resize(0);
+        elementTypes.resize(0);
         shapeSizes.resize(0);
         shapeCounts.resize(0);
         variableData.resize(0);
@@ -112,7 +155,7 @@ private:
         }
     }
 
-    void collectVariable(const GridType& grid)
+    void collectVariable(const GridType& grid, const Selector<Cargo>& selector)
     {
         CoordBox<DIM> box = grid.boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin();
@@ -123,11 +166,11 @@ private:
             std::size_t oldSize = variableData.size();
             std::size_t newSize = oldSize + cell.size() * selector.sizeOfExternal();
             variableData.resize(newSize);
-            addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize);
+            addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize, selector);
         }
     }
 
-    void collectSuperGridGeometry(const GridType& grid)
+    void collectRegularGridGeometry(const GridType& grid)
     {
         Coord<DIM> dim = grid.boundingBox().dimensions;
 
@@ -138,13 +181,13 @@ private:
         }
     }
 
-    void outputShapeMesh(DBfile *dbfile)
+    void outputUnstructuredMesh(DBfile *dbfile)
     {
         DBPutZonelist2(dbfile, "zonelist", sum(shapeCounts), DIM,
                        &nodeList[0], nodeList.size(),
                        0, 0, 0,
-                       &shapeTypes[0], &shapeSizes[0], &shapeCounts[0],
-                       shapeTypes.size(), NULL);
+                       &elementTypes[0], &shapeSizes[0], &shapeCounts[0],
+                       elementTypes.size(), NULL);
 
         double *tempCoords[DIM];
         for (int d = 0; d < DIM; ++d) {
@@ -167,10 +210,13 @@ private:
 
         // fixme: make mesh names configurable
         // fixme: make connection between variable and mesh configurable
+        // fixme: add functions for writing point vars (DBPutPointvar())
+        // fixme: add functions for writing quad vars (DBPutQuadvar1())
+        // fixme: allow selectors to return vectorial data (e.g. via FloatCoord)
         DBPutPointmesh(dbfile, "centroids", DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
 
-    void outputSuperGrid(DBfile *dbfile)
+    void outputRegularGrid(DBfile *dbfile)
     {
         int dimensions[DIM];
         for (int i = 0; i < DIM; ++i) {
@@ -186,7 +232,7 @@ private:
                       DB_DOUBLE, DB_COLLINEAR, NULL);
     }
 
-    void outputVariable(DBfile *dbfile)
+    void outputVariable(DBfile *dbfile, const Selector<Cargo>& selector)
     {
         DBPutUcdvar1(
             dbfile, selector.name().c_str(), "shape_mesh",
@@ -232,7 +278,7 @@ private:
     }
 
     template<typename ITERATOR>
-    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target)
+    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target, const Selector<Cargo>& selector)
     {
         char *cursor = target;
 
@@ -253,7 +299,7 @@ private:
     template<typename SHAPE_CONTAINER>
     inline void addShape(const SHAPE_CONTAINER& shape)
     {
-        shapeTypes << DB_ZONETYPE_POLYGON;
+        elementTypes << DB_ZONETYPE_POLYGON;
         shapeSizes << shape.size();
         shapeCounts << 1;
 
