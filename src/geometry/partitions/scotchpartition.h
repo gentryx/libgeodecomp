@@ -139,6 +139,14 @@ private:
                           );
 
         SCOTCH_graphMap(&grafdat, &arch, straptr, indices);
+
+        SCOTCH_archExit (&arch);
+        SCOTCH_graphExit (&grafdat);
+        SCOTCH_stratExit (straptr);
+        free (velotabArch);
+        free (verttabGra);
+        free (edgetabGra);
+
     }
 
     void createRegions()

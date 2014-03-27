@@ -135,6 +135,13 @@ private:
 
         SCOTCH_dgraphMap (&grafdat, &arch, straptr, indices);
 
+        SCOTCH_archExit (&arch);
+        SCOTCH_dgraphExit (&grafdat);
+        SCOTCH_stratExit (straptr);
+        free (velotabArch);
+        free (verttabGra);
+        free (edgetabGra);
+
     }
 
     void createRegions(){
