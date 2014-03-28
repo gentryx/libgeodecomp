@@ -109,6 +109,23 @@ public:
         std::swap(MyFancyDummyCell::staticData, data);
         TS_ASSERT_EQUALS(12.34, MyFancyDummyCell::staticData);
     }
+
+    class TestCell1
+    {
+    public:
+        class API
+        {
+        public:
+            std::string ping() {
+                return "ok";
+            }
+        };
+    };
+
+    void testSelectAPI()
+    {
+        TS_ASSERT_EQUALS("ok", APITraits::SelectAPI<TestCell1>::Value().ping());
+    }
 };
 
 }

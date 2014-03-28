@@ -70,6 +70,17 @@ public:
     class TrueType
     {};
 
+    /**
+     * Helper class for specializations. Thanks to Hartmut Kaiser fro
+     * coming up with this.
+     */
+    template<typename T>
+    class AlwaysVoid
+    {
+    public:
+        typedef void Type;
+    };
+
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     template<typename CELL, typename HAS_API = void>
@@ -86,7 +97,7 @@ public:
      * we'll return an empty class).
      */
     template<typename CELL>
-    class SelectAPI<CELL, typename CELL::API>
+    class SelectAPI<CELL, typename AlwaysVoid<typename CELL::API>::Type>
     {
     public:
         typedef typename CELL::API Value;
