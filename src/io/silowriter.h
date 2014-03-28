@@ -29,10 +29,16 @@ public:
 
     SiloWriter(
         const std::string& prefix,
-        const unsigned period) :
+        const unsigned period,
+        const std::string& regularGridLabel = "regular_grid",
+        const std::string& unstructuredMeshLabel = "unstructured_mesh",
+        const std::string& pointMeshLabel = "point_mesh") :
         Writer<CELL>(prefix, period),
         coords(DIM),
-        quadrantDim(quadrantDim)
+        quadrantDim(quadrantDim),
+        regularGridLabel(regularGridLabel),
+        unstructuredMeshLabel(unstructuredMeshLabel),
+        pointMeshLabel(pointMeshLabel)
     {}
 
     /**
@@ -72,6 +78,9 @@ private:
     std::vector<int> nodeList;
     SelectorVec selectors;
     FloatCoord<DIM> quadrantDim;
+    std::string regularGridLabel;
+    std::string unstructuredMeshLabel;
+    std::string pointMeshLabel;
 
     void handleUnstructuredGrid(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
     {
@@ -194,7 +203,7 @@ private:
         }
 
         DBPutUcdmesh(
-            dbfile, "shape_mesh", DIM, NULL, tempCoords,
+            dbfile, unstructuredMeshLabel.c_str(), DIM, NULL, tempCoords,
             nodeList.size(), sum(shapeCounts), "zonelist",
             NULL, DB_DOUBLE, NULL);
 
@@ -207,12 +216,11 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        // fixme: make mesh names configurable
         // fixme: make connection between variable and mesh configurable
         // fixme: add functions for writing point vars (DBPutPointvar())
         // fixme: add functions for writing quad vars (DBPutQuadvar1())
         // fixme: allow selectors to return vectorial data (e.g. via FloatCoord)
-        DBPutPointmesh(dbfile, "centroids", DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
+        DBPutPointmesh(dbfile, pointMeshLabel.c_str(), DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
 
     void outputRegularGrid(DBfile *dbfile)
@@ -227,14 +235,14 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        DBPutQuadmesh(dbfile, "supergrid", NULL, tempCoords, dimensions, DIM,
+        DBPutQuadmesh(dbfile, regularGridLabel.c_str(), NULL, tempCoords, dimensions, DIM,
                       DB_DOUBLE, DB_COLLINEAR, NULL);
     }
 
     void outputVariable(DBfile *dbfile, const Selector<Cargo>& selector)
     {
         DBPutUcdvar1(
-            dbfile, selector.name().c_str(), "shape_mesh",
+            dbfile, selector.name().c_str(), unstructuredMeshLabel.c_str(),
             &variableData[0], variableData.size() / selector.sizeOfExternal(),
             NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
