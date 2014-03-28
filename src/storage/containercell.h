@@ -34,7 +34,7 @@ public:
     const static std::size_t MAX_SIZE = SIZE;
 
     class API :
-        public APITraits::SelectAPI<CARGO>,
+        public APITraits::SelectAPI<CARGO>::Value,
         public APITraits::HasStencil<Stencils::Moore<Topology::DIM, 1> >
     {};
 

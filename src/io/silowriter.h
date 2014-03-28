@@ -29,8 +29,7 @@ public:
 
     SiloWriter(
         const std::string& prefix,
-        const unsigned period,
-        const FloatCoord<DIM> quadrantDim) :
+        const unsigned period) :
         Writer<CELL>(prefix, period),
         coords(DIM),
         quadrantDim(quadrantDim)
