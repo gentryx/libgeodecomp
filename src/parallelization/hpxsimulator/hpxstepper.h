@@ -91,7 +91,7 @@ private:
     double startTimeUpdate;
     std::vector<PatchProviderPtr> steererVector;
 
-    inline hpx::unique_future<void> update()
+    inline hpx::future<void> update()
     //inline void update()
     {
         startTimeUpdate = ScopedTimer::time();
@@ -99,7 +99,7 @@ private:
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         Region<DIM> region = partitionManager->innerSet(index);
 
-        std::vector<hpx::unique_future<void> > updateFutures;
+        std::vector<hpx::future<void> > updateFutures;
         updateFutures.reserve(region.numStreaks());
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
@@ -154,7 +154,7 @@ private:
     }
 
 
-    hpx::unique_future<void> updateGhostZones(const Region<DIM>& region)
+    hpx::future<void> updateGhostZones(const Region<DIM>& region)
     //void updateGhostZones(const Region<DIM>& region)
     {
         std::swap(oldGrid, newGrid);
@@ -166,7 +166,7 @@ private:
             );
     }
 
-    hpx::unique_future<void> updateGhostZones2(const Region<DIM>& region)
+    hpx::future<void> updateGhostZones2(const Region<DIM>& region)
     {
         //notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
 
@@ -182,14 +182,14 @@ private:
     static void void_() {}
 
     //inline void notifyPatchAccepters(
-    inline hpx::unique_future<void> notifyPatchAccepters(
+    inline hpx::future<void> notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
         TimePatchAccepters t(&chronometer);
 
-        std::vector<hpx::unique_future<void> > patchAcceptersFutures;
+        std::vector<hpx::future<void> > patchAcceptersFutures;
         patchAcceptersFutures.reserve(patchAccepters[patchType].size());
 
         for (typename ParentType::PatchAccepterList::iterator i =
@@ -216,14 +216,14 @@ private:
     }
 
     //inline void notifyPatchProviders(
-    inline hpx::unique_future<void> notifyPatchProviders(
+    inline hpx::future<void> notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
     {
         TimePatchProviders t(&chronometer);
 
-        std::vector<hpx::unique_future<void> > patchProvidersFutures;
+        std::vector<hpx::future<void> > patchProvidersFutures;
         patchProvidersFutures.reserve(patchProviders[patchType].size());
         void (PatchProvider<GridType>::*get)(
             GridType*,
@@ -330,7 +330,7 @@ private:
 
                 const Region<DIM>& region = partitionManager->rim(t + 1);
 
-                std::vector<hpx::unique_future<void> > updateFutures;
+                std::vector<hpx::future<void> > updateFutures;
                 updateFutures.reserve(region.numStreaks());
                 for (typename Region<DIM>::StreakIterator i = region.beginStreak();
                      i != region.endStreak();

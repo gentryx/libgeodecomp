@@ -115,7 +115,7 @@ public:
     private:
         std::size_t rank;
         UPDATE_GROUP dest;
-        hpx::unique_future<void> putFuture;
+        hpx::future<void> putFuture;
     };
 
     class Provider :
@@ -214,7 +214,7 @@ public:
 
         boost::shared_ptr<BufferType> getBuffer(std::size_t nanoStep)
         {
-            hpx::unique_future<boost::shared_ptr<BufferType> > resFuture;
+            hpx::future<boost::shared_ptr<BufferType> > resFuture;
             {
                 MutexType::scoped_lock lock(mutex);
                 typename ReceiverMap::iterator it = receiverMap.find(nanoStep);

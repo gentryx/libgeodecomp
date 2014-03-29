@@ -61,7 +61,7 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     std::vector<hpx::id_type> localities = hpx::find_all_localities(type);
 
     hpx::id_type id = localities[0];
-    hpx::unique_future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
+    hpx::future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
         asyncResult = hpx::async<Implementation::CreateUpdateGroupsAction>(
             id, boost::move(localities), type, numUpdateGroups);
 
