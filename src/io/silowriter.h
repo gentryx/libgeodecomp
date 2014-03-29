@@ -13,7 +13,12 @@ namespace LibGeoDecomp {
 
 /**
  * SiloWriter makes use of the Silo library (
- * https://wci.llnl.gov/codes/silo/ ) to write unstructured mesh data.
+ * https://wci.llnl.gov/codes/silo/ ) to write regular grids,
+ * unstructured grids, and point meshes, as well as variables defined
+ * on those. Variables need to be defined by means of Selectors.
+ *
+ * Per default, all variables are scalar. If you need to write vectorial
+ * data, add a selector for each vector component.
  */
 template<typename CELL>
 class SiloWriter : public Writer<CELL>
@@ -271,7 +276,6 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        // fixme: allow selectors to return vectorial data (e.g. via FloatCoord)
         DBPutPointmesh(dbfile, pointMeshLabel.c_str(), DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
 
