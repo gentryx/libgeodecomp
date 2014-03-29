@@ -60,11 +60,16 @@ find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
+find_package(PythonLibs)
 find_package(Ruby)
 find_package(SCOTCH)
 find_package(Silo)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
+
+if(NOT DEFINED CUDA_FOUND)
+  set(CUDA_FOUND false)
+endif()
 
 if(NOT DEFINED HPX_FOUND)
   set(HPX_FOUND false)
@@ -81,12 +86,8 @@ if(NOT DEFINED RUBY_FOUND)
   set(RUBY_FOUND false)
 endif()
 
-if(NOT DEFINED CUDA_FOUND)
-  set(CUDA_FOUND false)
-endif()
-
-if(NOT DEFINED HPX_FOUND)
-  set(HPX_FOUND false)
+if(NOT DEFINED PYTHONLIBS_FOUND)
+  set(PYTHONLIBS_FOUND false)
 endif()
 
 if(NOT DEFINED Silo_FOUND)
@@ -304,7 +305,15 @@ if(WITH_BOOST_MPI)
 endif()
 
 if(WITH_VISIT)
-  include_directories(${VisIt_INCLUDE_DIRS})
+  if (NOT VISIT_FOUND)
+    message(FATAL_ERROR "WITH_VISIT selected, but no installation of VisIt could be found")
+  endif()
+
+  if (NOT PYTHONLIBS_FOUND)
+    message(FATAL_ERROR "WITH_VISIT selected, but no Python libraries/headers could not be detected")
+  endif()
+
+  include_directories(${VisIt_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 endif()
 
 if(WIN32)
@@ -453,7 +462,7 @@ if(WITH_OPENCL)
 endif()
 
 if(WITH_VISIT)
-  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} dl)
+  set(LIBGEODECOMP_LINK_LIBRARIES ${LIBGEODECOMP_LINK_LIBRARIES} ${VisIt_LIBRARIES} ${PYTHON_LIBRARIES} dl)
 endif()
 
 target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
