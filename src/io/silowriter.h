@@ -46,9 +46,18 @@ public:
      * Adds another variable of the cargo data (e.g. the particles) to
      * this writer's output.
      */
-    void addSelector(const Selector<Cargo>& selector)
+    void addSelectorForPointMesh(const Selector<Cargo>& selector)
     {
-        cargoSelectors << selector;
+        pointMeshSelectors << selector;
+    }
+
+    /**
+     * Adds another variable of the cargo data, but associate it with
+     * the unstructured grid.
+     */
+    void addSelectorForUnstructuredGrid(const Selector<Cargo>& selector)
+    {
+        unstructuredGridSelectors << selector;
     }
 
     /**
@@ -76,8 +85,12 @@ public:
             handleVariable(dbfile, grid, *i);
         }
 
-        for (typename CargoSelectorVec::iterator i = cargoSelectors.begin(); i != cargoSelectors.end(); ++i) {
-            handleVariable(dbfile, grid, *i);
+        for (typename CargoSelectorVec::iterator i = unstructuredGridSelectors.begin(); i != unstructuredGridSelectors.end(); ++i) {
+            handleVariableForUnstructuredGrid(dbfile, grid, *i);
+        }
+
+        for (typename CargoSelectorVec::iterator i = pointMeshSelectors.begin(); i != pointMeshSelectors.end(); ++i) {
+            handleVariableForPointMesh(dbfile, grid, *i);
         }
 
         DBClose(dbfile);
@@ -90,7 +103,8 @@ private:
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    CargoSelectorVec cargoSelectors;
+    CargoSelectorVec pointMeshSelectors;
+    CargoSelectorVec unstructuredGridSelectors;
     CellSelectorVec cellSelectors;
     Region<DIM> region;
     std::string regularGridLabel;
@@ -140,11 +154,18 @@ private:
         outputVariable(dbfile, selector, grid.boundingBox());
     }
 
-    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    void handleVariableForPointMesh(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
     {
         flushDataStores();
         collectVariable(grid, selector);
-        outputVariable(dbfile, selector);
+        outputVariableForPointMesh(dbfile, selector);
+    }
+
+    void handleVariableForUnstructuredGrid(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    {
+        flushDataStores();
+        collectVariable(grid, selector);
+        outputVariableForUnstructuredGrid(dbfile, selector);
     }
 
     void flushDataStores()
@@ -250,7 +271,6 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        // fixme: add functions for writing point vars (DBPutPointvar())
         // fixme: allow selectors to return vectorial data (e.g. via FloatCoord)
         DBPutPointmesh(dbfile, pointMeshLabel.c_str(), DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
@@ -284,7 +304,15 @@ private:
             NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
 
-    void outputVariable(DBfile *dbfile, const Selector<Cargo>& selector)
+    void outputVariableForPointMesh(DBfile *dbfile, const Selector<Cargo>& selector)
+    {
+        DBPutPointvar1(
+            dbfile, selector.name().c_str(), pointMeshLabel.c_str(),
+            &variableData[0], variableData.size() / selector.sizeOfExternal(),
+            selector.siloTypeID(), NULL);
+    }
+
+    void outputVariableForUnstructuredGrid(DBfile *dbfile, const Selector<Cargo>& selector)
     {
         DBPutUcdvar1(
             dbfile, selector.name().c_str(), unstructuredMeshLabel.c_str(),

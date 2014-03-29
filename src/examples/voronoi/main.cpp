@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 
     SiloWriter<ContainerCellType> *siloWriter =
         new SiloWriter<ContainerCellType>("voronoi", 1);
-    siloWriter->addSelector(selector);
+    siloWriter->addSelectorForPointMesh(selector);
     sim.addWriter(siloWriter);
 
     sim.run();
