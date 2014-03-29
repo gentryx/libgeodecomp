@@ -183,6 +183,16 @@ public:
     }
 
     /**
+     * Same as saveMember(), but sans the type checking. Useful in
+     * Writers and other components that might not know about the
+     * variable's type.
+     */
+    void saveMemberUnchecked(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    {
+        saveMemberImplementation(target, selector, region);
+    }
+
+    /**
      * Used for bulk-setting of single member variables. Assumes that
      * source contains as many instances of the member as region
      * contains coordinates.
