@@ -21,11 +21,13 @@ class SiloWriter : public Writer<CELL>
 public:
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
+    typedef CELL Cell;
     typedef typename CELL::Cargo Cargo;
-    typedef std::vector<Selector<Cargo> > SelectorVec;
+    typedef std::vector<Selector<Cargo> > CargoSelectorVec;
+    typedef std::vector<Selector<Cell> > CellSelectorVec;
 
-    using Writer<CELL>::DIM;
-    using Writer<CELL>::prefix;
+    using Writer<Cell>::DIM;
+    using Writer<Cell>::prefix;
 
     SiloWriter(
         const std::string& prefix,
@@ -33,20 +35,28 @@ public:
         const std::string& regularGridLabel = "regular_grid",
         const std::string& unstructuredMeshLabel = "unstructured_mesh",
         const std::string& pointMeshLabel = "point_mesh") :
-        Writer<CELL>(prefix, period),
+        Writer<Cell>(prefix, period),
         coords(DIM),
-        quadrantDim(quadrantDim),
         regularGridLabel(regularGridLabel),
         unstructuredMeshLabel(unstructuredMeshLabel),
         pointMeshLabel(pointMeshLabel)
     {}
 
     /**
-     * Adds another model variable this writer's output.
+     * Adds another variable of the cargo data (e.g. the particles) to
+     * this writer's output.
      */
     void addSelector(const Selector<Cargo>& selector)
     {
-        selectors << selector;
+        cargoSelectors << selector;
+    }
+
+    /**
+     * Adds another model variable of the cells to writer's output.
+     */
+    void addSelector(const Selector<Cell>& selector)
+    {
+        cellSelectors << selector;
     }
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -58,11 +68,15 @@ public:
         DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,
                                   "simulation time step", DB_HDF5);
 
-        handleUnstructuredGrid(dbfile, grid, typename APITraits::SelectUnstructuredGrid<CELL>::Value());
-        handlePointMesh(       dbfile, grid, typename APITraits::SelectPointMesh<       CELL>::Value());
-        handleRegularGrid(     dbfile, grid, typename APITraits::SelectRegularGrid<     CELL>::Value());
+        handleUnstructuredGrid(dbfile, grid, typename APITraits::SelectUnstructuredGrid<Cell>::Value());
+        handlePointMesh(       dbfile, grid, typename APITraits::SelectPointMesh<       Cell>::Value());
+        handleRegularGrid(     dbfile, grid, typename APITraits::SelectRegularGrid<     Cell>::Value());
 
-        for (typename SelectorVec::iterator i = selectors.begin(); i != selectors.end(); ++i) {
+        for (typename CellSelectorVec::iterator i = cellSelectors.begin(); i != cellSelectors.end(); ++i) {
+            handleVariable(dbfile, grid, *i);
+        }
+
+        for (typename CargoSelectorVec::iterator i = cargoSelectors.begin(); i != cargoSelectors.end(); ++i) {
             handleVariable(dbfile, grid, *i);
         }
 
@@ -76,8 +90,9 @@ private:
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    SelectorVec selectors;
-    FloatCoord<DIM> quadrantDim;
+    CargoSelectorVec cargoSelectors;
+    CellSelectorVec cellSelectors;
+    Region<DIM> region;
     std::string regularGridLabel;
     std::string unstructuredMeshLabel;
     std::string pointMeshLabel;
@@ -118,13 +133,19 @@ private:
         // intentinally left blank. not all meshfree codes may want to expose this.
     }
 
+    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<Cell>& selector)
+    {
+        flushDataStores();
+        collectVariable(grid, selector);
+        outputVariable(dbfile, selector, grid.boundingBox());
+    }
+
     void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
     {
         flushDataStores();
         collectVariable(grid, selector);
         outputVariable(dbfile, selector);
     }
-
 
     void flushDataStores()
     {
@@ -146,7 +167,7 @@ private:
              i != box.end();
              ++i) {
 
-            CELL cell = grid.get(*i);
+            Cell cell = grid.get(*i);
             addPoints(cell.begin(), cell.end());
         }
     }
@@ -158,9 +179,21 @@ private:
              i != box.end();
              ++i) {
 
-            CELL cell = grid.get(*i);
+            Cell cell = grid.get(*i);
             addShapes(cell.begin(), cell.end());
         }
+    }
+
+    void collectVariable(const GridType& grid, const Selector<Cell>& selector)
+    {
+        if (region.boundingBox() != grid.boundingBox()) {
+            region.clear();
+            region << grid.boundingBox();
+        }
+
+        std::size_t newSize = region.size() * selector.sizeOfExternal();
+        variableData.resize(newSize);
+        grid.saveMemberUnchecked(&variableData[0], selector, region);
     }
 
     void collectVariable(const GridType& grid, const Selector<Cargo>& selector)
@@ -170,7 +203,7 @@ private:
              i != box.end();
              ++i) {
 
-            CELL cell = grid.get(*i);
+            Cell cell = grid.get(*i);
             std::size_t oldSize = variableData.size();
             std::size_t newSize = oldSize + cell.size() * selector.sizeOfExternal();
             variableData.resize(newSize);
@@ -181,6 +214,7 @@ private:
     void collectRegularGridGeometry(const GridType& grid)
     {
         Coord<DIM> dim = grid.boundingBox().dimensions;
+        FloatCoord<DIM> quadrantDim = APITraits::SelectRegularGrid<Cell>::value();
 
         for (int d = 0; d < DIM; ++d) {
             for (int i = 0; i <= dim[d]; ++i) {
@@ -216,9 +250,7 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        // fixme: make connection between variable and mesh configurable
         // fixme: add functions for writing point vars (DBPutPointvar())
-        // fixme: add functions for writing quad vars (DBPutQuadvar1())
         // fixme: allow selectors to return vectorial data (e.g. via FloatCoord)
         DBPutPointmesh(dbfile, pointMeshLabel.c_str(), DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
@@ -237,6 +269,19 @@ private:
 
         DBPutQuadmesh(dbfile, regularGridLabel.c_str(), NULL, tempCoords, dimensions, DIM,
                       DB_DOUBLE, DB_COLLINEAR, NULL);
+    }
+
+    void outputVariable(DBfile *dbfile, const Selector<Cell>& selector, const CoordBox<DIM>& box)
+    {
+        int dimensions[DIM];
+        for (int i = 0; i < DIM; ++i) {
+            dimensions[i] = box.dimensions[i];
+        }
+
+        DBPutQuadvar1(
+            dbfile, selector.name().c_str(), regularGridLabel.c_str(),
+            &variableData[0], dimensions, DIM,
+            NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
 
     void outputVariable(DBfile *dbfile, const Selector<Cargo>& selector)

@@ -14,6 +14,7 @@ public:
         public APITraits::HasPointMesh,
         public APITraits::HasCustomRegularGrid
     {
+    public:
         static inline FloatCoord<2> getRegularGridSpacing()
         {
             return SimpleCell<COORD>::quadrantSize;
