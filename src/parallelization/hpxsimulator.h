@@ -240,7 +240,7 @@ public:
 
         CoordBox<DIM> box = initializer->gridBox();
 
-        std::vector<hpx::unique_future<void> > boundingBoxesFutures;
+        std::vector<hpx::future<void> > boundingBoxesFutures;
         boundingBoxesFutures.reserve(numPartitions);
         std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
 
