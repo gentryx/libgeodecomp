@@ -30,8 +30,15 @@ public:
         public APITraits::HasTorusTopology<3>,
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
         public APITraits::HasNanoSteps<3>,
-        public APITraits::HasStaticData<double>
-    {};
+        public APITraits::HasStaticData<double>,
+        public APITraits::HasCustomRegularGrid
+    {
+    public:
+        static FloatCoord<3> getRegularGridSpacing()
+        {
+            return FloatCoord<3>(30, 20, 10);
+        }
+    };
 
     static double staticData;
 
@@ -125,6 +132,12 @@ public:
     void testSelectAPI()
     {
         TS_ASSERT_EQUALS("ok", APITraits::SelectAPI<TestCell1>::Value().ping());
+    }
+
+    void testSelectRegularGrid()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<2>( 1,  1),     APITraits::SelectRegularGrid<MySimpleDummyCell>::value());
+        TS_ASSERT_EQUALS(FloatCoord<3>(30, 20, 10), APITraits::SelectRegularGrid<MyFancyDummyCell >::value());
     }
 };
 
