@@ -13,7 +13,12 @@ namespace LibGeoDecomp {
 
 /**
  * SiloWriter makes use of the Silo library (
- * https://wci.llnl.gov/codes/silo/ ) to write unstructured mesh data.
+ * https://wci.llnl.gov/codes/silo/ ) to write regular grids,
+ * unstructured grids, and point meshes, as well as variables defined
+ * on those. Variables need to be defined by means of Selectors.
+ *
+ * Per default, all variables are scalar. If you need to write vectorial
+ * data, add a selector for each vector component.
  */
 template<typename CELL>
 class SiloWriter : public Writer<CELL>
@@ -21,21 +26,52 @@ class SiloWriter : public Writer<CELL>
 public:
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
+    typedef CELL Cell;
     typedef typename CELL::Cargo Cargo;
+    typedef std::vector<Selector<Cargo> > CargoSelectorVec;
+    typedef std::vector<Selector<Cell> > CellSelectorVec;
 
-    using Writer<CELL>::DIM;
-    using Writer<CELL>::prefix;
+    using Writer<Cell>::DIM;
+    using Writer<Cell>::prefix;
 
     SiloWriter(
         const std::string& prefix,
         const unsigned period,
-        const Selector<Cargo>& selector,
-        const FloatCoord<DIM> quadrantDim) :
-        Writer<CELL>(prefix, period),
+        const std::string& regularGridLabel = "regular_grid",
+        const std::string& unstructuredMeshLabel = "unstructured_mesh",
+        const std::string& pointMeshLabel = "point_mesh") :
+        Writer<Cell>(prefix, period),
         coords(DIM),
-        selector(selector),
-        quadrantDim(quadrantDim)
+        regularGridLabel(regularGridLabel),
+        unstructuredMeshLabel(unstructuredMeshLabel),
+        pointMeshLabel(pointMeshLabel)
     {}
+
+    /**
+     * Adds another variable of the cargo data (e.g. the particles) to
+     * this writer's output.
+     */
+    void addSelectorForPointMesh(const Selector<Cargo>& selector)
+    {
+        pointMeshSelectors << selector;
+    }
+
+    /**
+     * Adds another variable of the cargo data, but associate it with
+     * the unstructured grid.
+     */
+    void addSelectorForUnstructuredGrid(const Selector<Cargo>& selector)
+    {
+        unstructuredGridSelectors << selector;
+    }
+
+    /**
+     * Adds another model variable of the cells to writer's output.
+     */
+    void addSelector(const Selector<Cell>& selector)
+    {
+        cellSelectors << selector;
+    }
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
@@ -46,34 +82,96 @@ public:
         DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,
                                   "simulation time step", DB_HDF5);
 
-        flushDataStores();
-        collectShapes(grid);
-        outputShapeMesh(dbfile);
+        handleUnstructuredGrid(dbfile, grid, typename APITraits::SelectUnstructuredGrid<Cell>::Value());
+        handlePointMesh(       dbfile, grid, typename APITraits::SelectPointMesh<       Cell>::Value());
+        handleRegularGrid(     dbfile, grid, typename APITraits::SelectRegularGrid<     Cell>::Value());
 
-        flushDataStores();
-        collectPoints(grid);
-        outputPointMesh(dbfile);
+        for (typename CellSelectorVec::iterator i = cellSelectors.begin(); i != cellSelectors.end(); ++i) {
+            handleVariable(dbfile, grid, *i);
+        }
 
-        flushDataStores();
-        collectVariable(grid);
-        outputVariable(dbfile);
+        for (typename CargoSelectorVec::iterator i = unstructuredGridSelectors.begin(); i != unstructuredGridSelectors.end(); ++i) {
+            handleVariableForUnstructuredGrid(dbfile, grid, *i);
+        }
 
-        flushDataStores();
-        collectSuperGridGeometry(grid);
-        outputSuperGrid(dbfile);
+        for (typename CargoSelectorVec::iterator i = pointMeshSelectors.begin(); i != pointMeshSelectors.end(); ++i) {
+            handleVariableForPointMesh(dbfile, grid, *i);
+        }
 
         DBClose(dbfile);
     }
 
 private:
     std::vector<std::vector<double> > coords;
-    std::vector<int> shapeTypes;
+    std::vector<int> elementTypes;
     std::vector<int> shapeSizes;
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    Selector<Cargo> selector;
-    FloatCoord<DIM> quadrantDim;
+    CargoSelectorVec pointMeshSelectors;
+    CargoSelectorVec unstructuredGridSelectors;
+    CellSelectorVec cellSelectors;
+    Region<DIM> region;
+    std::string regularGridLabel;
+    std::string unstructuredMeshLabel;
+    std::string pointMeshLabel;
+
+    void handleUnstructuredGrid(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
+    {
+        flushDataStores();
+        collectShapes(grid);
+        outputUnstructuredMesh(dbfile);
+    }
+
+    void handleUnstructuredGrid(DBfile *dbfile, const GridType& grid, APITraits::FalseType)
+    {
+        // intentinally left blank. no need to output an unstructured grid, if the model doesn't have one.
+    }
+
+    void handlePointMesh(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
+    {
+        flushDataStores();
+        collectPoints(grid);
+        outputPointMesh(dbfile);
+    }
+
+    void handlePointMesh(DBfile *dbfile, const GridType& grid, APITraits::FalseType)
+    {
+        // intentinally left blank. not all models have particles or such.
+    }
+
+    void handleRegularGrid(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
+    {
+        flushDataStores();
+        collectRegularGridGeometry(grid);
+        outputRegularGrid(dbfile);
+    }
+
+    void handleRegularGrid(DBfile *dbfile, const GridType& grid, APITraits::FalseType)
+    {
+        // intentinally left blank. not all meshfree codes may want to expose this.
+    }
+
+    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<Cell>& selector)
+    {
+        flushDataStores();
+        collectVariable(grid, selector);
+        outputVariable(dbfile, selector, grid.boundingBox());
+    }
+
+    void handleVariableForPointMesh(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    {
+        flushDataStores();
+        collectVariable(grid, selector);
+        outputVariableForPointMesh(dbfile, selector);
+    }
+
+    void handleVariableForUnstructuredGrid(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    {
+        flushDataStores();
+        collectVariable(grid, selector);
+        outputVariableForUnstructuredGrid(dbfile, selector);
+    }
 
     void flushDataStores()
     {
@@ -81,7 +179,7 @@ private:
             coords[d].resize(0);
         }
 
-        shapeTypes.resize(0);
+        elementTypes.resize(0);
         shapeSizes.resize(0);
         shapeCounts.resize(0);
         variableData.resize(0);
@@ -95,7 +193,7 @@ private:
              i != box.end();
              ++i) {
 
-            CELL cell = grid.get(*i);
+            Cell cell = grid.get(*i);
             addPoints(cell.begin(), cell.end());
         }
     }
@@ -107,29 +205,42 @@ private:
              i != box.end();
              ++i) {
 
-            CELL cell = grid.get(*i);
+            Cell cell = grid.get(*i);
             addShapes(cell.begin(), cell.end());
         }
     }
 
-    void collectVariable(const GridType& grid)
+    void collectVariable(const GridType& grid, const Selector<Cell>& selector)
+    {
+        if (region.boundingBox() != grid.boundingBox()) {
+            region.clear();
+            region << grid.boundingBox();
+        }
+
+        std::size_t newSize = region.size() * selector.sizeOfExternal();
+        variableData.resize(newSize);
+        grid.saveMemberUnchecked(&variableData[0], selector, region);
+    }
+
+    void collectVariable(const GridType& grid, const Selector<Cargo>& selector)
     {
         CoordBox<DIM> box = grid.boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin();
              i != box.end();
              ++i) {
 
-            CELL cell = grid.get(*i);
+            Cell cell = grid.get(*i);
             std::size_t oldSize = variableData.size();
             std::size_t newSize = oldSize + cell.size() * selector.sizeOfExternal();
             variableData.resize(newSize);
-            addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize);
+            addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize, selector);
         }
     }
 
-    void collectSuperGridGeometry(const GridType& grid)
+    void collectRegularGridGeometry(const GridType& grid)
     {
         Coord<DIM> dim = grid.boundingBox().dimensions;
+        FloatCoord<DIM> quadrantDim = APITraits::SelectRegularGrid<Cell>::value();
 
         for (int d = 0; d < DIM; ++d) {
             for (int i = 0; i <= dim[d]; ++i) {
@@ -138,13 +249,13 @@ private:
         }
     }
 
-    void outputShapeMesh(DBfile *dbfile)
+    void outputUnstructuredMesh(DBfile *dbfile)
     {
         DBPutZonelist2(dbfile, "zonelist", sum(shapeCounts), DIM,
                        &nodeList[0], nodeList.size(),
                        0, 0, 0,
-                       &shapeTypes[0], &shapeSizes[0], &shapeCounts[0],
-                       shapeTypes.size(), NULL);
+                       &elementTypes[0], &shapeSizes[0], &shapeCounts[0],
+                       elementTypes.size(), NULL);
 
         double *tempCoords[DIM];
         for (int d = 0; d < DIM; ++d) {
@@ -152,7 +263,7 @@ private:
         }
 
         DBPutUcdmesh(
-            dbfile, "shape_mesh", DIM, NULL, tempCoords,
+            dbfile, unstructuredMeshLabel.c_str(), DIM, NULL, tempCoords,
             nodeList.size(), sum(shapeCounts), "zonelist",
             NULL, DB_DOUBLE, NULL);
 
@@ -165,12 +276,10 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        // fixme: make mesh names configurable
-        // fixme: make connection between variable and mesh configurable
-        DBPutPointmesh(dbfile, "centroids", DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
+        DBPutPointmesh(dbfile, pointMeshLabel.c_str(), DIM, tempCoords, coords[0].size(), DB_DOUBLE, NULL);
     }
 
-    void outputSuperGrid(DBfile *dbfile)
+    void outputRegularGrid(DBfile *dbfile)
     {
         int dimensions[DIM];
         for (int i = 0; i < DIM; ++i) {
@@ -182,14 +291,35 @@ private:
             tempCoords[d] = &coords[d][0];
         }
 
-        DBPutQuadmesh(dbfile, "supergrid", NULL, tempCoords, dimensions, DIM,
+        DBPutQuadmesh(dbfile, regularGridLabel.c_str(), NULL, tempCoords, dimensions, DIM,
                       DB_DOUBLE, DB_COLLINEAR, NULL);
     }
 
-    void outputVariable(DBfile *dbfile)
+    void outputVariable(DBfile *dbfile, const Selector<Cell>& selector, const CoordBox<DIM>& box)
+    {
+        int dimensions[DIM];
+        for (int i = 0; i < DIM; ++i) {
+            dimensions[i] = box.dimensions[i];
+        }
+
+        DBPutQuadvar1(
+            dbfile, selector.name().c_str(), regularGridLabel.c_str(),
+            &variableData[0], dimensions, DIM,
+            NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
+    }
+
+    void outputVariableForPointMesh(DBfile *dbfile, const Selector<Cargo>& selector)
+    {
+        DBPutPointvar1(
+            dbfile, selector.name().c_str(), pointMeshLabel.c_str(),
+            &variableData[0], variableData.size() / selector.sizeOfExternal(),
+            selector.siloTypeID(), NULL);
+    }
+
+    void outputVariableForUnstructuredGrid(DBfile *dbfile, const Selector<Cargo>& selector)
     {
         DBPutUcdvar1(
-            dbfile, selector.name().c_str(), "shape_mesh",
+            dbfile, selector.name().c_str(), unstructuredMeshLabel.c_str(),
             &variableData[0], variableData.size() / selector.sizeOfExternal(),
             NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
@@ -232,7 +362,7 @@ private:
     }
 
     template<typename ITERATOR>
-    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target)
+    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target, const Selector<Cargo>& selector)
     {
         char *cursor = target;
 
@@ -253,7 +383,7 @@ private:
     template<typename SHAPE_CONTAINER>
     inline void addShape(const SHAPE_CONTAINER& shape)
     {
-        shapeTypes << DB_ZONETYPE_POLYGON;
+        elementTypes << DB_ZONETYPE_POLYGON;
         shapeSizes << shape.size();
         shapeCounts << 1;
 

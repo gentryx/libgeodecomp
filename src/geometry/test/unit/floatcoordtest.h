@@ -314,6 +314,13 @@ public:
         TS_ASSERT_EQUALS(FloatCoord<2>(5.5, 7.0),       FloatCoord<2>(16.5, 21.0) / 3);
         TS_ASSERT_EQUALS(FloatCoord<3>(3.5, 1.0, 1.25), FloatCoord<3>(14.0,  4.0, 5.0) / 4);
     }
+
+    void testDiagonal()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>::diagonal(12.34), FloatCoord<1>(12.34));
+        TS_ASSERT_EQUALS(FloatCoord<2>::diagonal(23.45), FloatCoord<2>(23.45, 23.45));
+        TS_ASSERT_EQUALS(FloatCoord<3>::diagonal(34.56), FloatCoord<3>(34.56, 34.56, 34.56));
+    }
 };
 
 }
