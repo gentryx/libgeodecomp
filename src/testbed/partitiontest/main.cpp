@@ -72,13 +72,13 @@ int main(int argc, char **argv)
     Coord<3> dimensions(dimx,dimy,dimz);
     std::vector<std::size_t> weights;
     std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck, outputPTScotch, outputStriping;
-    outputScotch.open((dimString + scotch).c_str());
-    outputZCurve.open((dimString + zCurve).c_str());
-    outputRecBi.open((dimString + recBi).c_str());
-    outputCheck.open((dimString + checker).c_str());
-    outputPTScotch.open((dimString + ptscotch).c_str());
-    outputStriping.open((dimString + striping).c_str());
-    for(int i = 4; i <= 200; i+=2){
+    outputScotch.open((dimString + 'x' + dimString + scotch).c_str());
+    outputZCurve.open((dimString + 'x' + dimString + zCurve).c_str());
+    outputRecBi.open((dimString + 'x' + dimString + recBi).c_str());
+    outputCheck.open((dimString + 'x' + dimString + checker).c_str());
+    outputPTScotch.open((dimString + 'x' + dimString + ptscotch).c_str());
+    outputStriping.open((dimString + 'x' + dimString + striping).c_str());
+    for(int i = 4; i <= 200; ++i){
         std::cout << "Round: " << i << std::endl;
         int remain = (dimx*dimy*dimz)%i;
         int weight = (dimx*dimy*dimz)/i;
