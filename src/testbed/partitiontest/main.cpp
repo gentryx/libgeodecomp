@@ -91,51 +91,31 @@ int main(int argc, char **argv)
         for(unsigned int l = 0; l < weights.size(); ++l){
             sum += weights[l];
             }*/
-        #pragma omp parallel sections
-        {
-            #pragma omp section
-            {
-                std::cout << "scotch" << std::endl;
-                Partition<3> *scotch = new ScotchPartition<3>(origin, dimensions, 0, weights);
-                output(scotch,outputScotch,weights.size());
-                delete scotch;
-            }
-            #pragma omp section
-            {
-                std::cout << "ZCurve" << std::endl;
-                Partition<3> *zCurve = new ZCurvePartition<3>(origin, dimensions, 0, weights);
-                output(zCurve,outputZCurve,weights.size());
-                delete zCurve;
-            }
-            #pragma omp section
-            {
-                std::cout << "recBi" << std::endl;
-                Partition<3> *recBi = new RecursiveBisectionPartition<3>(origin, dimensions, 0, weights);
-                output(recBi,outputRecBi,weights.size());
-                delete recBi;
-            }
-            #pragma omp section
-            {
-                std::cout << "checker" << std::endl;
-                Partition<3> *checker = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
-                output(checker,outputCheck,weights.size());
-                delete checker;
-            }
-            #pragma omp section
-            {
-                std::cout << "ptscotch" << std::endl;
-                Partition<3> *ptscotch = new PTScotchPartition<3>(origin, dimensions, 0, weights);
-                output(ptscotch,outputPTScotch,weights.size());
-                delete ptscotch;
-            }
-            #pragma omp section
-            {
-                std::cout << "striping" << std::endl;
-                Partition<3> *striping = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
-                output(striping,outputStriping,weights.size());
-                delete striping;
-            }
-        }
+        std::cout << "scotch" << std::endl;
+        Partition<3> *scotch = new ScotchPartition<3>(origin, dimensions, 0, weights);
+        output(scotch,outputScotch,weights.size());
+        delete scotch;
+        std::cout << "ZCurve" << std::endl;
+        Partition<3> *zCurve = new ZCurvePartition<3>(origin, dimensions, 0, weights);
+        output(zCurve,outputZCurve,weights.size());
+        delete zCurve;
+        std::cout << "recBi" << std::endl;
+        Partition<3> *recBi = new RecursiveBisectionPartition<3>(origin, dimensions, 0, weights);
+        output(recBi,outputRecBi,weights.size());
+        delete recBi;
+        std::cout << "checker" << std::endl;
+        Partition<3> *checker = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
+        output(checker,outputCheck,weights.size());
+        delete checker;
+        std::cout << "ptscotch" << std::endl;
+        Partition<3> *ptscotch = new PTScotchPartition<3>(origin, dimensions, 0, weights);
+        output(ptscotch,outputPTScotch,weights.size());
+        delete ptscotch;
+        std::cout << "striping" << std::endl;
+        Partition<3> *striping = new CheckerboardingPartition<3>(origin, dimensions, 0, weights);
+        output(striping,outputStriping,weights.size());
+        delete striping;
+
         weights.clear();
     }
     MPI_Finalize();
