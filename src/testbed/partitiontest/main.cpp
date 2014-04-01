@@ -68,16 +68,20 @@ int main(int argc, char **argv)
     std::string checker = "Checker";
     std::string ptscotch = "PTScotch";
     std::string striping = "Striping";
-    std::string dimString = argv[1];
+    std::string x = "x";
+    std::string dimString = argv[1] + x + argv[1];
+    if (argc == 4){
+        dimString = argv[1] + x + argv[2] + x + argv[3];
+    }
     Coord<3> dimensions(dimx,dimy,dimz);
     std::vector<std::size_t> weights;
     std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck, outputPTScotch, outputStriping;
-    outputScotch.open((dimString + 'x' + dimString + scotch).c_str());
-    outputZCurve.open((dimString + 'x' + dimString + zCurve).c_str());
-    outputRecBi.open((dimString + 'x' + dimString + recBi).c_str());
-    outputCheck.open((dimString + 'x' + dimString + checker).c_str());
-    outputPTScotch.open((dimString + 'x' + dimString + ptscotch).c_str());
-    outputStriping.open((dimString + 'x' + dimString + striping).c_str());
+    outputScotch.open((dimString + scotch).c_str());
+    outputZCurve.open((dimString + zCurve).c_str());
+    outputRecBi.open((dimString + recBi).c_str());
+    outputCheck.open((dimString + checker).c_str());
+    outputPTScotch.open((dimString + ptscotch).c_str());
+    outputStriping.open((dimString + striping).c_str());
     for(int i = 4; i <= 200; ++i){
         std::cout << "Round: " << i << std::endl;
         int remain = (dimx*dimy*dimz)%i;
