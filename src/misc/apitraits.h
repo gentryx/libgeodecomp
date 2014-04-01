@@ -70,6 +70,39 @@ public:
     class TrueType
     {};
 
+    /**
+     * Helper class for specializations. Thanks to Hartmut Kaiser fro
+     * coming up with this.
+     */
+    template<typename T>
+    class AlwaysVoid
+    {
+    public:
+        typedef void Type;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_API = void>
+    class SelectAPI
+    {
+    public:
+        class Value
+        {};
+    };
+
+    /**
+     * Allows library code to pull in a model's whole API without
+     * requiring the user to specify one at all (if none is defined,
+     * we'll return an empty class).
+     */
+    template<typename CELL>
+    class SelectAPI<CELL, typename AlwaysVoid<typename CELL::API>::Type>
+    {
+    public:
+        typedef typename CELL::API Value;
+    };
+
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     // determine whether a cell supports SoA (Struct of Arrays)
@@ -582,7 +615,7 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    template<typename CELL, typename HAS_POINT_MESH = void>
     class SelectPointMesh
     {
     public:
@@ -611,36 +644,70 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+
+    /**
+     * All stencil codes are based on a regular grid, but even
+     * particle-in-cell codes may use such a grid to organizing the
+     * particles and computing certain variables (e.g. direction and
+     * magnitude of the field).
+     *
+     * By default plugins like the SiloWriter will output such a grid,
+     * but this behavior can be surpressed by a model via the
+     * HasNoRegularGrid trait.
+     */
+    template<typename CELL, typename HAS_REGULAR_GRID = void>
     class SelectRegularGrid
+    {
+    public:
+        typedef TrueType Value;
+
+        static inline FloatCoord<SelectTopology<CELL>::Value::DIM> value()
+        {
+            return FloatCoord<SelectTopology<CELL>::Value::DIM>::diagonal(1.0);
+        }
+    };
+
+    template<typename CELL>
+    class SelectRegularGrid<CELL, typename CELL::API::SupportsCustomRegularGrid>
+    {
+    public:
+        typedef TrueType Value;
+
+        static inline FloatCoord<SelectTopology<CELL>::Value::DIM> value()
+        {
+            return CELL::API::getRegularGridSpacing();
+        }
+    };
+
+    template<typename CELL>
+    class SelectRegularGrid<CELL, typename CELL::API::SupportsNoRegularGrid>
     {
     public:
         typedef FalseType Value;
     };
 
-    template<typename CELL>
-    class SelectRegularGrid<CELL, typename CELL::API::SupportsRegularGrid>
+    /**
+     * Use this trait to flag models which contain a regular grid that
+     * have a non-stanard spacing.
+     *
+     * The spatial extent of the cells needs to be configured. See the
+     * src/examples/voronoi for an example on how to do this.
+     */
+    class HasCustomRegularGrid
     {
     public:
-        typedef TrueType Value;
+        typedef void SupportsCustomRegularGrid;
     };
 
-    /**
-     * Use this trait to flag models which contain a regular grid. All
-     * stencil codes belong to this category, but even
-     * particle-in-cell codes may use such a grid to organizing the
-     * particles and computing certain variables (e.g. direction and
-     * magnitude of the field).
-     */
-    class HasRegularGrid
+    class HasNoRegularGrid
     {
     public:
-        typedef void SupportsRegularGrid;
+        typedef void SupportsNoRegularGrid;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    template<typename CELL, typename HAS_UNSTRUCTURED_GRID = void>
     class SelectUnstructuredGrid
     {
     public:

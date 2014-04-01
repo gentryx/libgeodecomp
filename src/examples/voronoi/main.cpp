@@ -9,6 +9,18 @@ template<template<int DIM> class COORD>
 class SimpleCell
 {
 public:
+    class API :
+        public APITraits::HasUnstructuredGrid,
+        public APITraits::HasPointMesh,
+        public APITraits::HasCustomRegularGrid
+    {
+    public:
+        static inline FloatCoord<2> getRegularGridSpacing()
+        {
+            return SimpleCell<COORD>::quadrantSize;
+        }
+    };
+
     SimpleCell(const COORD<2>& center = COORD<2>(), const int id = 0, const double temperature = 0, const double influx = 0) :
         center(center),
         id(id),
@@ -74,6 +86,7 @@ public:
         return center;
     }
 
+    static FloatCoord<2> quadrantSize;
     COORD<2> center;
     int id;
     double temperature;
@@ -83,6 +96,9 @@ public:
     FixedArray<int, MAX_NEIGHBORS> neighborIDs;
     FixedArray<double, MAX_NEIGHBORS> neighborBorderLengths;
 };
+
+template<template<int DIM> class COORD>
+FloatCoord<2> SimpleCell<COORD>::quadrantSize;
 
 typedef ContainerCell<SimpleCell<FloatCoord>, 1000> ContainerCellType;
 
@@ -103,7 +119,9 @@ public:
         VoronoiMesher<ContainerCellType>(dim, FloatCoord<2>(quadrantSize, quadrantSize), elementSpacing),
         numCells(numCells),
         counter(0)
-    {}
+    {
+        ContainerCellType::Cargo::quadrantSize = FloatCoord<2>(quadrantSize, quadrantSize);
+    }
 
     virtual void grid(GridType *grid)
     {
@@ -165,8 +183,11 @@ int main(int argc, char **argv)
     Selector<SimpleCell<FloatCoord> > selector(
         &SimpleCell<FloatCoord>::temperature,
         "SimpleCell_temperature");
-    sim.addWriter(new SiloWriter<ContainerCellType>(
-                      "voronoi", 1, selector, FloatCoord<2>(quadrantSize, quadrantSize)));
+
+    SiloWriter<ContainerCellType> *siloWriter =
+        new SiloWriter<ContainerCellType>("voronoi", 1);
+    siloWriter->addSelectorForPointMesh(selector);
+    sim.addWriter(siloWriter);
 
     sim.run();
 

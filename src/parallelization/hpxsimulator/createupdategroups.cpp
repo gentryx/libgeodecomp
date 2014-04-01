@@ -57,7 +57,7 @@ createUpdateGroups(
 
     std::size_t numComponents = numUpdateGroups();
 
-    typedef hpx::unique_future<std::vector<hpx::naming::gid_type> > FutureType;
+    typedef hpx::future<std::vector<hpx::naming::gid_type> > FutureType;
 
     FutureType f;
     {

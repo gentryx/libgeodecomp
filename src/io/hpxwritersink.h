@@ -146,7 +146,7 @@ public:
             ++dest;
         }
 
-        hpx::unique_future<void> stepFinishedFuture
+        hpx::future<void> stepFinishedFuture
             = hpx::async<typename ComponentType::StepFinishedAction>(
                 thisId,
                 buffer,
@@ -160,7 +160,7 @@ public:
 
         if(stepFinishedFutures.size() > 10) {
             hpx::wait_any(stepFinishedFutures);
-            BOOST_FOREACH(hpx::unique_future<void>& f, stepFinishedFutures) {
+            BOOST_FOREACH(hpx::future<void>& f, stepFinishedFutures) {
                 if(f.is_ready()) {
                     f = std::move(stepFinishedFuture);
                     break;
@@ -172,7 +172,7 @@ public:
         }
     }
 
-    hpx::unique_future<std::size_t> connectWriter(ParallelWriter<CellType> *parallelWriter)
+    hpx::future<std::size_t> connectWriter(ParallelWriter<CellType> *parallelWriter)
     {
         boost::shared_ptr<ParallelWriter<CellType> > writer(parallelWriter);
         return
@@ -181,7 +181,7 @@ public:
                 writer);
     }
 
-    hpx::unique_future<std::size_t> connectWriter(Writer<CellType> *serialWriter)
+    hpx::future<std::size_t> connectWriter(Writer<CellType> *serialWriter)
     {
         boost::shared_ptr<Writer<CellType> > writer(serialWriter);
         return
@@ -208,7 +208,7 @@ public:
 private:
     hpx::naming::id_type thisId;
     std::size_t period;
-    std::vector<hpx::unique_future<void> > stepFinishedFutures;
+    std::vector<hpx::future<void> > stepFinishedFutures;
 
     template<typename ARCHIVE>
     void load(ARCHIVE& ar, unsigned)

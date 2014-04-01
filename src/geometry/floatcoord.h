@@ -27,6 +27,11 @@ public:
     friend class Serialization;
     friend class Typemaps;
 
+    static inline FloatCoord<1> diagonal(const double& x)
+    {
+        return FloatCoord<1>(x);
+    }
+
     explicit
     inline
     FloatCoord(const double x = 0)
@@ -175,6 +180,11 @@ class FloatCoord<2>
 public:
     friend class Serialization;
     friend class Typemaps;
+
+    static inline FloatCoord<2> diagonal(const double& x)
+    {
+        return FloatCoord<2>(x, x);
+    }
 
     explicit
     inline
@@ -341,6 +351,11 @@ class FloatCoord<3>
 public:
     friend class Serialization;
     friend class Typemaps;
+
+    static inline FloatCoord<3> diagonal(const double& x)
+    {
+        return FloatCoord<3>(x, x, x);
+    }
 
     explicit
     inline
