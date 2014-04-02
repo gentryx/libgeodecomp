@@ -131,11 +131,9 @@ public:
     void setUp()
     {
 #ifdef LIBGEODECOMP_WITH_QT
-        std::cout << "boom1\n";
         int argc = 0;
         char **argv = 0;
         app.reset(new QApplication(argc, argv));
-        std::cout << "boom2\n";
 #endif
 
         prefix = TempFile::serial("silowriter_test") + "foo";
