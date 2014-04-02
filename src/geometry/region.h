@@ -929,7 +929,6 @@ public:
     }
 };
 
-// unify insert/lookup/remove helpers?
 template<>
 class RegionLookupHelper<0> : public RegionCommonHelper
 {
