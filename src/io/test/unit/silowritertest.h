@@ -1,4 +1,5 @@
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
