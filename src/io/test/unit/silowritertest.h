@@ -1,6 +1,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/tempfile.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
