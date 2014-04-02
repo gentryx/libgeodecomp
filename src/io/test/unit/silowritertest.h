@@ -156,7 +156,9 @@ public:
         remove((prefix + "0003.png").c_str());
         remove((prefix + "0004.png").c_str());
         remove(siloFile.c_str());
+#ifdef LIBGEODECOMP_WITH_QT
         app.reset();
+#endif
     }
 
     typedef std::map<QRgb, int> Histogram;
@@ -322,7 +324,9 @@ public:
     }
 
 private:
+#ifdef LIBGEODECOMP_WITH_QT
     boost::shared_ptr<QApplication> app;
+#endif
     std::string prefix;
     std::string siloFile;
 };
