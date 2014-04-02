@@ -1,13 +1,18 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/tempfile.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_QT
+
 #include <Python.h>
 #include <QtGui/QApplication>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
+
+#endif
 #endif
 
 using namespace LibGeoDecomp;
@@ -130,11 +135,9 @@ public:
     void setUp()
     {
 #ifdef LIBGEODECOMP_WITH_QT
-        std::cout << "boom1\n";
         int argc = 0;
         char **argv = 0;
         app.reset(new QApplication(argc, argv));
-        std::cout << "boom2\n";
 #endif
 
         prefix = TempFile::serial("silowriter_test") + "foo";
@@ -155,17 +158,19 @@ public:
         remove((prefix + "0003.png").c_str());
         remove((prefix + "0004.png").c_str());
         remove(siloFile.c_str());
+#ifdef LIBGEODECOMP_WITH_QT
         app.reset();
+#endif
     }
+
+#ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_VISIT
+#ifdef LIBGEODECOMP_WITH_QT
 
     typedef std::map<QRgb, int> Histogram;
 
     void render(std::string visitScript)
     {
-#ifdef LIBGEODECOMP_WITH_SILO
-#ifdef LIBGEODECOMP_WITH_VISIT
-#ifdef LIBGEODECOMP_WITH_QT
-
         // init grid
         Coord<2> dim(10, 5);
         CoordBox<2> box(Coord<2>(), dim);
@@ -201,16 +206,12 @@ public:
         Py_Finalize();
 
         remove(siloFile.c_str());
-#endif
-#endif
-#endif
     }
 
     Histogram loadImage(std::string suffix)
     {
         Histogram ret;
 
-#ifdef LIBGEODECOMP_WITH_QT
         std::string imageFile = prefix + suffix;
 
         QImage result;
@@ -223,12 +224,14 @@ public:
             }
         }
 
-        // remove(imageFile.c_str());
-#endif
+        remove(imageFile.c_str());
 
         return ret;
     }
 
+#endif
+#endif
+#endif
 
     void testBasic()
     {
@@ -321,7 +324,9 @@ public:
     }
 
 private:
+#ifdef LIBGEODECOMP_WITH_QT
     boost::shared_ptr<QApplication> app;
+#endif
     std::string prefix;
     std::string siloFile;
 };
