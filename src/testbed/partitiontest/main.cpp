@@ -28,7 +28,7 @@ void print(Region<2> reg){
 }
 
 template<int DIM>
-void output(Partition<DIM> * part, std::ofstream &output,unsigned int number){
+void outputGzs(Partition<DIM> * part, std::ofstream &output,unsigned int number){
     Region<DIM> reg;
 
     unsigned int min,max,avg,tmp;
@@ -49,6 +49,20 @@ void output(Partition<DIM> * part, std::ofstream &output,unsigned int number){
     avg /= number;
     output << number << "\t" << min << "\t" << avg << "\t" << max << "\n";
 }
+
+template<int DIM>
+void outputGzsVol(Partition<DIM> * part, std::ofstream &output,unsigned int number){
+    Region<DIM> reg;
+
+    double gzs = 0,vol = 0;
+    for(unsigned int j = 0;j < number; ++j){
+        reg = part->getRegion(j);
+        gzs += reg.expand(1).size() - reg.size();
+        vol += reg.size();
+    }
+    output << number << "\t" << (gzs/vol) << "\n";
+}
+
 
 template<int DIM>
 void sizeOverNodes(int dimx, int dimy,int dimz, int maxnodes){
@@ -115,27 +129,27 @@ void sizeOverNodes(int dimx, int dimy,int dimz, int maxnodes){
         //std::cout << DIM << dimensions[0][0] << dimensions[1] << dimensions[2] << std::endl;
         std::cout << "scotch" << std::endl;
         Partition<DIM> *scotch = new ScotchPartition<DIM>(origin, dimensions, 0, weights);
-        output(scotch,outputScotch,i);
+        outputGzs(scotch,outputScotch,i);
         delete scotch;
         std::cout << "ZCurve" << std::endl;
         Partition<DIM> *zCurve = new ZCurvePartition<DIM>(origin, dimensions, 0, weights);
-        output(zCurve,outputZCurve,i);
+        outputGzs(zCurve,outputZCurve,i);
         delete zCurve;
         std::cout << "recBi" << std::endl;
         Partition<DIM> *recBi = new RecursiveBisectionPartition<DIM>(origin, dimensions, 0, weights);
-        output(recBi,outputRecBi,i);
+        outputGzs(recBi,outputRecBi,i);
         delete recBi;
         std::cout << "checker" << std::endl;
         Partition<DIM> *checker = new CheckerboardingPartition<DIM>(origin, dimensions, 0, weights);
-        output(checker,outputCheck,i);
+        outputGzs(checker,outputCheck,i);
         delete checker;
         std::cout << "ptscotch" << std::endl;
         Partition<DIM> *ptscotch = new PTScotchPartition<DIM>(origin, dimensions, 0, weights);
-        output(ptscotch,outputPTScotch,i);
+        outputGzs(ptscotch,outputPTScotch,i);
         delete ptscotch;
         std::cout << "striping" << std::endl;
         Partition<DIM> *striping = new StripingPartition<DIM>(origin, dimensions, 0, weights);
-        output(striping,outputStriping,i);
+        outputGzs(striping,outputStriping,i);
         delete striping;
         /*if(DIM == 2){
             Coord<2> originH(0,0);
@@ -168,7 +182,7 @@ int main(int argc, char **argv)
         dimy = atoi(argv[2]);
         dimz = atoi(argv[3]);
     }
-    nodes = 64;
+    nodes = 70;
     if(argc < 4){
         std::cout << "2D" << std::endl;
         sizeOverNodes<2>(dimx, dimy, dimz, nodes);
