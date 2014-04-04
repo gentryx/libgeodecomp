@@ -217,11 +217,15 @@ public:
 
         QImage result;
         result.load(QString(imageFile.c_str()));
-        TS_ASSERT_EQUALS(QSize(1024, 1024), result.size());
 
-        for (int y = 0; y < 1024; ++y) {
-            for (int x = 0; x < 1024; ++x) {
-                ret[result.pixel(x, y)] += 1;
+        QSize expectedSize(1024, 1024);
+        TS_ASSERT_EQUALS(expectedSize, result.size());
+
+        if (result.size() == expectedSize) {
+            for (int y = 0; y < 1024; ++y) {
+                for (int x = 0; x < 1024; ++x) {
+                    ret[result.pixel(x, y)] += 1;
+                }
             }
         }
 
