@@ -28,6 +28,16 @@ void print(Region<2> reg){
 }
 
 template<int DIM>
+void outputGzsShift(Partition<DIM> * part, std::ofstream &output,unsigned int number){
+    Region<DIM> reg;
+    reg = part->getRegion(0);
+    double num  = reg.expand(1).size() - reg.size();
+    //reg = part->getRegion(1);
+    //num += reg.expand(1).size() - reg.size();
+    output << number << "\t" << num << "\n";
+}
+
+template<int DIM>
 void outputGzs(Partition<DIM> * part, std::ofstream &output,unsigned int number){
     Region<DIM> reg;
 
@@ -57,12 +67,94 @@ void outputGzsVol(Partition<DIM> * part, std::ofstream &output,unsigned int numb
     double gzs = 0,vol = 0;
     for(unsigned int j = 0;j < number; ++j){
         reg = part->getRegion(j);
-        gzs += reg.expand(1).size() - reg.size();
+        gzs += (reg.expand(1).size() - reg.size());
         vol += reg.size();
     }
     output << number << "\t" << (gzs/vol) << "\n";
 }
 
+template<int DIM>
+void varyWeigth(int dimx, int dimy,int dimz, int maxnodes){
+
+    std::string scotch = "Scotch";
+    std::string zCurve = "ZCurve";
+    std::string recBi = "RecBi";
+    std::string checker = "Checker";
+    std::string ptscotch = "PTScotch";
+    std::string striping = "Striping";
+    std::string hilbert = "Hilbert";
+    std::string x = "x";
+    std::string dimString = std::to_string(dimx) + x + std::to_string(dimy);
+    Coord<DIM> origin;
+    Coord<DIM> dimensions;
+    if(DIM == 2){
+        origin[0] = 0;
+        origin[1] = 0;
+        dimensions[0] = dimx;
+        dimensions[1] = dimy;
+    } else {
+        origin[0] = 0;
+        origin[1] = 0;
+        origin[2] = 0;
+        dimensions[0] = dimx;
+        dimensions[1] = dimy;
+        dimensions[2] = dimz;
+        dimString += x + std::to_string(dimz);
+    }
+    int vol = dimx * dimy * dimz;
+
+    std::vector<std::size_t> weights;
+    std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck,
+        outputPTScotch, outputStriping, outputHilbert, gnuplot;
+
+    outputScotch.open((dimString + scotch).c_str());
+    outputZCurve.open((dimString + zCurve).c_str());
+    outputRecBi.open((dimString + recBi).c_str());
+    outputCheck.open((dimString + checker).c_str());
+    outputPTScotch.open((dimString + ptscotch).c_str());
+    outputStriping.open((dimString + striping).c_str());
+    outputHilbert.open((dimString + hilbert).c_str());
+
+    gnuplot.open(("plot" + dimString).c_str());
+    gnuplot << "set title \"" + dimString << "\"\n"
+            << "set xlabel \"weight of Node 0\" \n "
+            << "set ylabel \"Ghostzone of Node 0\" \n"
+            << "plot \"" << dimString << scotch << "\" using 1:2 title \"Scotch\" with lines, "
+            << "\"" << dimString << ptscotch << "\" using 1:2 title \"PTScotch\" with lines,"
+            << "\"" << dimString << recBi << "\" using 1:2 title \"Recursive Bisection\" with lines,"
+
+            << "\"" << dimString << striping << "\" using 1:2 title \"Striping\" with lines,"
+            << "\"" << dimString << zCurve << "\" using 1:2 title \"ZCurve\" with lines ";
+
+    for(int i = 1; i < vol/2; ++i){
+        std::cout << "Round: " << i << std::endl;
+        weights.push_back(i);
+        weights.push_back(vol-i);
+
+        std::cout << "scotch" << std::endl;
+        Partition<DIM> *scotch = new ScotchPartition<DIM>(origin, dimensions, 0, weights);
+        outputGzsShift(scotch,outputScotch,i);
+        delete scotch;
+        std::cout << "ZCurve" << std::endl;
+        Partition<DIM> *zCurve = new ZCurvePartition<DIM>(origin, dimensions, 0, weights);
+        outputGzsShift(zCurve,outputZCurve,i);
+        delete zCurve;
+        std::cout << "recBi" << std::endl;
+        Partition<DIM> *recBi = new RecursiveBisectionPartition<DIM>(origin, dimensions, 0, weights);
+        outputGzsShift(recBi,outputRecBi,i);
+        delete recBi;
+        std::cout << "ptscotch" << std::endl;
+        Partition<DIM> *ptscotch = new PTScotchPartition<DIM>(origin, dimensions, 0, weights);
+        outputGzsShift(ptscotch,outputPTScotch,i);
+        delete ptscotch;
+        std::cout << "striping" << std::endl;
+        Partition<DIM> *striping = new StripingPartition<DIM>(origin, dimensions, 0, weights);
+        outputGzsShift(striping,outputStriping,i);
+        delete striping;
+
+        weights.clear();
+    }
+}
 
 template<int DIM>
 void sizeOverNodes(int dimx, int dimy,int dimz, int maxnodes){
@@ -92,7 +184,6 @@ void sizeOverNodes(int dimx, int dimy,int dimz, int maxnodes){
         dimensions[2] = dimz;
         dimString += x + std::to_string(dimz);
     }
-
 
     std::vector<std::size_t> weights;
     std::ofstream outputScotch,outputZCurve,outputRecBi,outputCheck,
@@ -126,7 +217,8 @@ void sizeOverNodes(int dimx, int dimy,int dimz, int maxnodes){
             weights.push_back(weight);
         }
         weights[i-1] += remain;
-        //std::cout << DIM << dimensions[0][0] << dimensions[1] << dimensions[2] << std::endl;
+
+
         std::cout << "scotch" << std::endl;
         Partition<DIM> *scotch = new ScotchPartition<DIM>(origin, dimensions, 0, weights);
         outputGzs(scotch,outputScotch,i);
@@ -151,18 +243,11 @@ void sizeOverNodes(int dimx, int dimy,int dimz, int maxnodes){
         Partition<DIM> *striping = new StripingPartition<DIM>(origin, dimensions, 0, weights);
         outputGzs(striping,outputStriping,i);
         delete striping;
-        /*if(DIM == 2){
-            Coord<2> originH(0,0);
-            Coord<2> dimensionsH(0,0);
-            std::cout << "hilbert" << std::endl;
-            HilbertPartition *hilbert = new HilbertPartition(originH, dimensionsH);
-            output(hilbert,outputHilbert,i);
-            delete hilbert;
-            }*/
 
         weights.clear();
     }
 }
+
 
 int main(int argc, char **argv)
 {
@@ -183,6 +268,14 @@ int main(int argc, char **argv)
         dimz = atoi(argv[3]);
     }
     nodes = 70;
+    /*if(argc < 4){
+        std::cout << "2D" << std::endl;
+        varyWeigth<2>(dimx, dimy, dimz, nodes);
+    } else {
+        std::cout << "3D" << std::endl;
+        varyWeigth<3>(dimx, dimy, dimz, nodes);
+        }*/
+
     if(argc < 4){
         std::cout << "2D" << std::endl;
         sizeOverNodes<2>(dimx, dimy, dimz, nodes);
@@ -190,7 +283,6 @@ int main(int argc, char **argv)
         std::cout << "3D" << std::endl;
         sizeOverNodes<3>(dimx, dimy, dimz, nodes);
     }
-
 
     MPI_Finalize();
 }
