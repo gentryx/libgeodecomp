@@ -260,7 +260,13 @@ public:
             << "visit.LaunchNowin ()\n"
             << "visit.OpenDatabase(simfile)\n"
             << "attributes = visit.SaveWindowAttributes()\n"
-            << "attributes.fileName = \"" << prefix << "\"\n"
+            // prefix the path with lots of ".." as VisIt may, under
+            // some circumstances, prefix the user's home directory to
+            // our own prefix -- which is by itself an absolute path.
+            // This way the correct path is used in any case. At least
+            // as long as the user's home is not nested deeper than 10
+            // levels from /.
+            << "attributes.fileName = \"../../../../../../../../../.." << prefix << "\"\n"
             << "attributes.format = attributes.PNG\n"
             << "visit.SetSaveWindowAttributes(attributes)\n";
         // first image
