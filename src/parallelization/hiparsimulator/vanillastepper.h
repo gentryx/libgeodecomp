@@ -1,8 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_VANILLASTEPPER_H
 
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
-#include <libgeodecomp/storage/patchbufferfixed.h>
+#include <libgeodecomp/parallelization/hiparsimulator/commonstepper.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
@@ -17,7 +16,7 @@ namespace HiParSimulator {
  * every k'th (nano) step.
  */
 template<typename CELL_TYPE>
-class VanillaStepper : public Stepper<CELL_TYPE>
+class VanillaStepper : public CommonStepper<CELL_TYPE>
 {
 public:
     friend class VanillaStepperRegionTest;
@@ -28,7 +27,7 @@ public:
     const static int DIM = Topology::DIM;
     const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
-    typedef class Stepper<CELL_TYPE> ParentType;
+    typedef class CommonStepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
@@ -49,7 +48,7 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(partitionManager, initializer)
+        CommonStepper<CELL_TYPE>(partitionManager, initializer)
     {
         curStep = initializer->startStep();
         curNanoStep = 0;

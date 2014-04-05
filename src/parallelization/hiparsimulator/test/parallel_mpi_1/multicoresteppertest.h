@@ -17,7 +17,9 @@ class MulticoreStepperTest : public CxxTest::TestSuite
 public:
     typedef APITraits::SelectTopology<TestCell<2> >::Value Topology;
     typedef DisplacedGrid<TestCell<2>, Topology, true> GridType;
-    typedef MulticoreStepper<TestCell<2> > StepperType;
+#ifdef LIBGEODECOMP_WITH_THREADS
+    typedef MultiCoreStepper<TestCell<2> > StepperType;
+#endif
 
     void setUp()
     {
@@ -38,13 +40,17 @@ public:
 
     void testFoo()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         std::cout << "fixme\n";
+#endif
     }
 
 private:
     boost::shared_ptr<TestInitializer<TestCell<2> > > init;
     boost::shared_ptr<PartitionManager<Topology> > partitionManager;
+#ifdef LIBGEODECOMP_WITH_THREADS
     boost::shared_ptr<StepperType> stepper;
+#endif
     boost::shared_ptr<MockPatchAccepter<GridType> > patchAccepter;
 };
 
