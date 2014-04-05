@@ -136,6 +136,9 @@ protected:
         newGrid->getEdgeCell() = oldGrid->getEdgeCell();
         resetValidGhostZoneWidth();
 
+        kernelBuffer = PatchBufferType1(getVolatileKernel());
+        rimBuffer = PatchBufferType2(rim());
+
         return gridBox;
     }
 

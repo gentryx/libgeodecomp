@@ -126,8 +126,6 @@ private:
             ParentType::INNER_SET,
             globalNanoStep());
 
-        kernelBuffer = PatchBufferType1(getVolatileKernel());
-        rimBuffer = PatchBufferType2(rim());
         saveRim(globalNanoStep());
         updateGhost();
     }

@@ -462,8 +462,6 @@ private:
             innerSet(0),
             globalNanoStep());
 
-        kernelBuffer = PatchBufferType1(getVolatileKernel());
-        rimBuffer = PatchBufferType2(rim());
         // fixme: we don't need this any longer, as the kernel is handled on the device
         // saveRim(globalNanoStep());
         updateGhost();
