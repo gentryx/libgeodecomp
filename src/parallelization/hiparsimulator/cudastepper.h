@@ -462,8 +462,6 @@ private:
             innerSet(0),
             globalNanoStep());
 
-        // fixme: we don't need this any longer, as the kernel is handled on the device
-        // saveRim(globalNanoStep());
         updateGhost();
     }
 
@@ -478,8 +476,6 @@ private:
      */
     inline void updateGhost()
     {
-        // fixme
-        // std::cout << "updateGhost()\n";
         {
             TimeComputeGhost t(&chronometer);
 
@@ -490,14 +486,8 @@ private:
             // destroy parts of the kernel, which is why we'll
             // save/restore those.
 
-            // fixme: we don't need this any longer, as the kernel is handled on the device
-            // saveKernel();
-
             // We need to restore the rim since it got destroyed while the
             // kernel was updated.
-
-            // fixme: we don't need this any longer, as the kernel is handled on the device
-            // restoreRim(false);
 
             oldDeviceGrid->saveRegion(&*oldGrid, rim());
         }
@@ -548,10 +538,6 @@ private:
             }
 
             // 3: restore grid for kernel update
-
-            // fixme: we don't need this any longer, as the kernel is handled on the device
-            // restoreRim(true);
-            // restoreKernel();
 
             oldDeviceGrid->loadRegion(*oldGrid, getInnerRim());
         }
