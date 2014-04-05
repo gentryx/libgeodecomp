@@ -261,6 +261,8 @@ public:
     using CommonStepper<CELL_TYPE>::patchProviders;
     using CommonStepper<CELL_TYPE>::partitionManager;
     using CommonStepper<CELL_TYPE>::chronometer;
+    using CommonStepper<CELL_TYPE>::notifyPatchAccepters;
+    using CommonStepper<CELL_TYPE>::notifyPatchProviders;
 
     using CommonStepper<CELL_TYPE>::curStep;
     using CommonStepper<CELL_TYPE>::curNanoStep;
@@ -285,30 +287,12 @@ public:
         initGrids();
     }
 
-    inline void update(std::size_t nanoSteps)
-    {
-        for (std::size_t i = 0; i < nanoSteps; ++i)
-        {
-            update();
-        }
-    }
-
-    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
-    {
-        return std::make_pair(curStep, curNanoStep);
-    }
-
-    inline virtual const GridType& grid() const
-    {
-        return *oldGrid;
-    }
-
 private:
     boost::shared_ptr<CUDAGridType> oldDeviceGrid;
     boost::shared_ptr<CUDAGridType> newDeviceGrid;
     std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
 
-    inline void update()
+    inline void update1()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = innerSet(index);
@@ -356,16 +340,14 @@ private:
         const Region<DIM>& region,
         std::size_t nanoStep)
     {
-        TimePatchAccepters t(&chronometer);
+        notifyPatchAccepters(region, ParentType::GHOST, nanoStep);
+    }
 
-        for (typename ParentType::PatchAccepterList::iterator i =
-                 patchAccepters[ParentType::GHOST].begin();
-             i != patchAccepters[ParentType::GHOST].end();
-             ++i) {
-            if (nanoStep == (*i)->nextRequiredNanoStep()) {
-                (*i)->put(*oldGrid, region, nanoStep);
-            }
-        }
+    inline void notifyPatchProvidersGhostZones(
+        const Region<DIM>& region,
+        std::size_t nanoStep)
+    {
+        notifyPatchProviders(region, ParentType::GHOST, nanoStep);
     }
 
     inline void notifyPatchAcceptersInnerSet(
@@ -396,25 +378,6 @@ private:
              ++i) {
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
-            }
-        }
-    }
-
-    inline void notifyPatchProvidersGhostZones(
-        const Region<DIM>& region,
-        std::size_t nanoStep)
-    {
-        TimePatchProviders t(&chronometer);
-
-        for (typename ParentType::PatchProviderList::iterator i =
-                 patchProviders[ParentType::GHOST].begin();
-             i != patchProviders[ParentType::GHOST].end();
-             ++i) {
-            if (nanoStep == (*i)->nextAvailableNanoStep()) {
-                (*i)->get(
-                    &*oldGrid,
-                    region,
-                    nanoStep);
             }
         }
     }

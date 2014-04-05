@@ -80,12 +80,12 @@ public:
         stepper.reset(new StepperType(partitionManager, init));
     }
 
-    void testUpdate()
+    void testUpdate1()
     {
         checkInnerSet(0, 0);
-        stepper->update();
+        stepper->update1();
         checkInnerSet(1, 1);
-        stepper->update();
+        stepper->update1();
         checkInnerSet(2, 2);
     }
 

@@ -24,6 +24,9 @@ public:
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     using Stepper<CELL_TYPE>::addPatchAccepter;
+    using Stepper<CELL_TYPE>::chronometer;
+    using Stepper<CELL_TYPE>::patchAccepters;
+    using Stepper<CELL_TYPE>::patchProviders;
 
     CommonStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
@@ -45,6 +48,26 @@ public:
         }
     }
 
+    inline virtual void update(std::size_t nanoSteps)
+    {
+        for (std::size_t i = 0; i < nanoSteps; ++i)
+        {
+            update1();
+        }
+    }
+
+    inline std::pair<std::size_t, std::size_t> currentStep() const
+    {
+        return std::make_pair(curStep, curNanoStep);
+    }
+
+    inline const GridType& grid() const
+    {
+        return *oldGrid;
+    }
+
+    virtual void update1() = 0;
+
 protected:
     std::size_t curStep;
     std::size_t curNanoStep;
@@ -54,6 +77,43 @@ protected:
     PatchBufferType2 rimBuffer;
     PatchBufferType1 kernelBuffer;
     Region<DIM> kernelFraction;
+
+    inline void notifyPatchAccepters(
+        const Region<DIM>& region,
+        const typename ParentType::PatchType& patchType,
+        std::size_t nanoStep)
+    {
+        TimePatchAccepters t(&chronometer);
+
+        for (typename ParentType::PatchAccepterList::iterator i =
+                 patchAccepters[patchType].begin();
+             i != patchAccepters[patchType].end();
+             ++i) {
+            if (nanoStep == (*i)->nextRequiredNanoStep()) {
+                (*i)->put(*oldGrid, region, nanoStep);
+            }
+        }
+    }
+
+    inline void notifyPatchProviders(
+        const Region<DIM>& region,
+        const typename ParentType::PatchType& patchType,
+        std::size_t nanoStep)
+    {
+        TimePatchProviders t(&chronometer);
+
+        for (typename ParentType::PatchProviderList::iterator i =
+                 patchProviders[patchType].begin();
+             i != patchProviders[patchType].end();
+             ++i) {
+            if (nanoStep == (*i)->nextAvailableNanoStep()) {
+                (*i)->get(
+                    &*oldGrid,
+                    region,
+                    nanoStep);
+            }
+        }
+    }
 
 };
 

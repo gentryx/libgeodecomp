@@ -40,6 +40,8 @@ public:
     using CommonStepper<CELL_TYPE>::patchProviders;
     using CommonStepper<CELL_TYPE>::partitionManager;
     using CommonStepper<CELL_TYPE>::chronometer;
+    using CommonStepper<CELL_TYPE>::notifyPatchAccepters;
+    using CommonStepper<CELL_TYPE>::notifyPatchProviders;
 
     using CommonStepper<CELL_TYPE>::curStep;
     using CommonStepper<CELL_TYPE>::curNanoStep;
@@ -64,27 +66,8 @@ public:
         initGrids();
     }
 
-    inline void update(std::size_t nanoSteps)
-    {
-        for (std::size_t i = 0; i < nanoSteps; ++i)
-        {
-            update();
-        }
-    }
-
-    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
-    {
-        return std::make_pair(curStep, curNanoStep);
-    }
-
-    inline virtual const GridType& grid() const
-    {
-        return *oldGrid;
-    }
-
 private:
-
-    inline void update()
+    inline void update1()
     {
         TimeTotal t(&chronometer);
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
@@ -116,43 +99,6 @@ private:
         }
 
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
-    }
-
-    inline void notifyPatchAccepters(
-        const Region<DIM>& region,
-        const typename ParentType::PatchType& patchType,
-        std::size_t nanoStep)
-    {
-        TimePatchAccepters t(&chronometer);
-
-        for (typename ParentType::PatchAccepterList::iterator i =
-                 patchAccepters[patchType].begin();
-             i != patchAccepters[patchType].end();
-             ++i) {
-            if (nanoStep == (*i)->nextRequiredNanoStep()) {
-                (*i)->put(*oldGrid, region, nanoStep);
-            }
-        }
-    }
-
-    inline void notifyPatchProviders(
-        const Region<DIM>& region,
-        const typename ParentType::PatchType& patchType,
-        std::size_t nanoStep)
-    {
-        TimePatchProviders t(&chronometer);
-
-        for (typename ParentType::PatchProviderList::iterator i =
-                 patchProviders[patchType].begin();
-             i != patchProviders[patchType].end();
-             ++i) {
-            if (nanoStep == (*i)->nextAvailableNanoStep()) {
-                (*i)->get(
-                    &*oldGrid,
-                    region,
-                    nanoStep);
-            }
-        }
     }
 
     inline std::size_t globalNanoStep() const
