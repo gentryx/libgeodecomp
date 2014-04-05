@@ -4,9 +4,8 @@
 #include <libgeodecomp/geometry/cudaregion.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/apitraits.h>
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/commonstepper.h>
 #include <libgeodecomp/storage/cudagrid.h>
-#include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
@@ -237,7 +236,7 @@ void updateKernel(CELL_TYPE *gridDataOld, CELL_TYPE *edgeCell, CELL_TYPE *gridDa
  * FIXME: add 2d unit test
  */
 template<typename CELL_TYPE>
-class CUDAStepper : public Stepper<CELL_TYPE>
+class CUDAStepper : public CommonStepper<CELL_TYPE>
 {
 public:
     friend class CUDAStepperRegionTest;
@@ -270,7 +269,7 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(partitionManager, initializer)
+        CommonStepper<CELL_TYPE>(partitionManager, initializer)
     {
         curStep = initializer->startStep();
         curNanoStep = 0;

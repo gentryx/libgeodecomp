@@ -17,7 +17,7 @@ class MulticoreStepperTest : public CxxTest::TestSuite
 public:
     typedef APITraits::SelectTopology<TestCell<2> >::Value Topology;
     typedef DisplacedGrid<TestCell<2>, Topology, true> GridType;
-    typedef MulticoreStepper<TestCell<2> > StepperType;
+    typedef MultiCoreStepper<TestCell<2> > StepperType;
 
     void setUp()
     {
