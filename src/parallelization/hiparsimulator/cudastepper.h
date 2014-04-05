@@ -255,32 +255,33 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
-    using Stepper<CELL_TYPE>::addPatchAccepter;
-    using Stepper<CELL_TYPE>::initializer;
-    using Stepper<CELL_TYPE>::guessOffset;
-    using Stepper<CELL_TYPE>::patchAccepters;
-    using Stepper<CELL_TYPE>::patchProviders;
-    using Stepper<CELL_TYPE>::partitionManager;
+    using CommonStepper<CELL_TYPE>::initializer;
+    using CommonStepper<CELL_TYPE>::guessOffset;
+    using CommonStepper<CELL_TYPE>::patchAccepters;
+    using CommonStepper<CELL_TYPE>::patchProviders;
+    using CommonStepper<CELL_TYPE>::partitionManager;
+    using CommonStepper<CELL_TYPE>::chronometer;
 
-    using Stepper<CELL_TYPE>::chronometer;
+    using CommonStepper<CELL_TYPE>::curStep;
+    using CommonStepper<CELL_TYPE>::curNanoStep;
+    using CommonStepper<CELL_TYPE>::validGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::oldGrid;
+    using CommonStepper<CELL_TYPE>::newGrid;
+    using CommonStepper<CELL_TYPE>::rimBuffer;
+    using CommonStepper<CELL_TYPE>::kernelBuffer;
+    using CommonStepper<CELL_TYPE>::kernelFraction;
 
     inline CUDAStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        CommonStepper<CELL_TYPE>(partitionManager, initializer)
+        CommonStepper<CELL_TYPE>(
+            partitionManager,
+            initializer,
+            ghostZonePatchAccepters,
+            innerSetPatchAccepters)
     {
-        curStep = initializer->startStep();
-        curNanoStep = 0;
-
-        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
-            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
-        }
-        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
-            addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
-        }
-
         initGrids();
     }
 
@@ -303,17 +304,8 @@ public:
     }
 
 private:
-    std::size_t curStep;
-    std::size_t curNanoStep;
-    unsigned validGhostZoneWidth;
-    boost::shared_ptr<GridType> oldGrid;
-    boost::shared_ptr<GridType> newGrid;
     boost::shared_ptr<CUDAGridType> oldDeviceGrid;
     boost::shared_ptr<CUDAGridType> newDeviceGrid;
-    PatchBufferType2 rimBuffer;
-    PatchBufferType1 kernelBuffer;
-    Region<DIM> kernelFraction;
-
     std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
 
     inline void update()

@@ -23,16 +23,38 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
+    using Stepper<CELL_TYPE>::addPatchAccepter;
+
     CommonStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
-        boost::shared_ptr<Initializer<CELL_TYPE> > initializer// ,
-        // const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
-        // const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()
-                  ) :
+        boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
+        const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
+        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
         Stepper<CELL_TYPE>(
             partitionManager,
             initializer)
-    {}
+    {
+        curStep = initializer->startStep();
+        curNanoStep = 0;
+
+        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
+            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
+        }
+        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
+            addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
+        }
+    }
+
+protected:
+    std::size_t curStep;
+    std::size_t curNanoStep;
+    unsigned validGhostZoneWidth;
+    boost::shared_ptr<GridType> oldGrid;
+    boost::shared_ptr<GridType> newGrid;
+    PatchBufferType2 rimBuffer;
+    PatchBufferType1 kernelBuffer;
+    Region<DIM> kernelFraction;
+
 };
 
 }
