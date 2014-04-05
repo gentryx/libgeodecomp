@@ -35,7 +35,6 @@ public:
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
     using CommonStepper<CELL_TYPE>::initializer;
-    using CommonStepper<CELL_TYPE>::guessOffset;
     using CommonStepper<CELL_TYPE>::patchAccepters;
     using CommonStepper<CELL_TYPE>::patchProviders;
     using CommonStepper<CELL_TYPE>::partitionManager;
@@ -43,9 +42,22 @@ public:
     using CommonStepper<CELL_TYPE>::notifyPatchAccepters;
     using CommonStepper<CELL_TYPE>::notifyPatchProviders;
 
+    using CommonStepper<CELL_TYPE>::innerSet;
+    using CommonStepper<CELL_TYPE>::saveKernel;
+    using CommonStepper<CELL_TYPE>::restoreRim;
+    using CommonStepper<CELL_TYPE>::globalNanoStep;
+    using CommonStepper<CELL_TYPE>::rim;
+    using CommonStepper<CELL_TYPE>::resetValidGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::initGridsCommon;
+    using CommonStepper<CELL_TYPE>::getVolatileKernel;
+    using CommonStepper<CELL_TYPE>::saveRim;
+    using CommonStepper<CELL_TYPE>::getInnerRim;
+    using CommonStepper<CELL_TYPE>::restoreKernel;
+
     using CommonStepper<CELL_TYPE>::curStep;
     using CommonStepper<CELL_TYPE>::curNanoStep;
     using CommonStepper<CELL_TYPE>::validGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::ghostZoneWidth;
     using CommonStepper<CELL_TYPE>::oldGrid;
     using CommonStepper<CELL_TYPE>::newGrid;
     using CommonStepper<CELL_TYPE>::rimBuffer;
@@ -101,23 +113,9 @@ private:
         notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
     }
 
-    inline std::size_t globalNanoStep() const
-    {
-        return curStep * NANO_STEPS + curNanoStep;
-    }
-
     inline void initGrids()
     {
-        Coord<DIM> topoDim = initializer->gridDimensions();
-        CoordBox<DIM> gridBox;
-        guessOffset(&gridBox.origin, &gridBox.dimensions);
-
-        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-
-        initializer->grid(&*oldGrid);
-        newGrid->getEdgeCell() = oldGrid->getEdgeCell();
-        resetValidGhostZoneWidth();
+        initGridsCommon();
 
         notifyPatchAccepters(
             rim(),
@@ -208,64 +206,6 @@ private:
             restoreRim(true);
             restoreKernel();
         }
-    }
-
-    inline unsigned ghostZoneWidth() const
-    {
-        return partitionManager->getGhostZoneWidth();
-    }
-
-    inline const Region<DIM>& rim(unsigned offset) const
-    {
-        return partitionManager->rim(offset);
-    }
-
-    inline const Region<DIM>& rim() const
-    {
-        return rim(ghostZoneWidth());
-    }
-
-    inline const Region<DIM>& innerSet(unsigned offset) const
-    {
-        return partitionManager->innerSet(offset);
-    }
-
-    inline const Region<DIM>& getVolatileKernel() const
-    {
-        return partitionManager->getVolatileKernel();
-    }
-
-    inline void resetValidGhostZoneWidth()
-    {
-        validGhostZoneWidth = ghostZoneWidth();
-    }
-
-    inline void saveRim(std::size_t nanoStep)
-    {
-        rimBuffer.pushRequest(nanoStep);
-        rimBuffer.put(*oldGrid, rim(), nanoStep);
-    }
-
-    inline void restoreRim(bool remove)
-    {
-        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
-    }
-
-    inline void saveKernel()
-    {
-        kernelBuffer.pushRequest(globalNanoStep());
-        kernelBuffer.put(*oldGrid,
-                         innerSet(ghostZoneWidth()),
-                         globalNanoStep());
-    }
-
-    inline void restoreKernel()
-    {
-        kernelBuffer.get(
-            &*oldGrid,
-            getVolatileKernel(),
-            globalNanoStep(),
-            true);
     }
 };
 

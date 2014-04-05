@@ -23,8 +23,11 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
+    using Stepper<CELL_TYPE>::guessOffset;
     using Stepper<CELL_TYPE>::addPatchAccepter;
     using Stepper<CELL_TYPE>::chronometer;
+    using Stepper<CELL_TYPE>::initializer;
+    using Stepper<CELL_TYPE>::partitionManager;
     using Stepper<CELL_TYPE>::patchAccepters;
     using Stepper<CELL_TYPE>::patchProviders;
 
@@ -115,6 +118,89 @@ protected:
         }
     }
 
+    inline std::size_t globalNanoStep() const
+    {
+        return curStep * NANO_STEPS + curNanoStep;
+    }
+
+    inline CoordBox<DIM> initGridsCommon()
+    {
+        Coord<DIM> topoDim = initializer->gridDimensions();
+        CoordBox<DIM> gridBox;
+        guessOffset(&gridBox.origin, &gridBox.dimensions);
+
+        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
+
+        initializer->grid(&*oldGrid);
+        newGrid->getEdgeCell() = oldGrid->getEdgeCell();
+        resetValidGhostZoneWidth();
+
+        return gridBox;
+    }
+
+    inline unsigned ghostZoneWidth() const
+    {
+        return partitionManager->getGhostZoneWidth();
+    }
+
+    inline const Region<DIM>& rim(unsigned offset) const
+    {
+        return partitionManager->rim(offset);
+    }
+
+    inline const Region<DIM>& rim() const
+    {
+        return rim(ghostZoneWidth());
+    }
+
+    inline const Region<DIM>& innerSet(unsigned offset) const
+    {
+        return partitionManager->innerSet(offset);
+    }
+
+    inline const Region<DIM>& getVolatileKernel() const
+    {
+        return partitionManager->getVolatileKernel();
+    }
+
+    inline const Region<DIM>& getInnerRim() const
+    {
+        return partitionManager->getInnerRim();
+    }
+
+    inline void resetValidGhostZoneWidth()
+    {
+        validGhostZoneWidth = ghostZoneWidth();
+    }
+
+    inline void saveRim(std::size_t nanoStep)
+    {
+        rimBuffer.pushRequest(nanoStep);
+        rimBuffer.put(*oldGrid, rim(), nanoStep);
+    }
+
+    inline void restoreRim(bool remove)
+    {
+        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
+    }
+
+    inline void saveKernel()
+    {
+        kernelBuffer.pushRequest(globalNanoStep());
+        kernelBuffer.put(*oldGrid,
+                         innerSet(ghostZoneWidth()),
+                         globalNanoStep());
+    }
+
+    inline void restoreKernel()
+    {
+        kernelBuffer.get(
+            &*oldGrid,
+            getVolatileKernel(),
+            globalNanoStep(),
+            true);
+    }
 };
 
 }
