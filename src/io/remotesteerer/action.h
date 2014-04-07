@@ -24,6 +24,9 @@ public:
         myHelpMessage(myHelpMessage)
     {}
 
+    virtual ~Action()
+    {}
+
     virtual void operator()(const StringVec& parameters, Pipe& pipe) = 0;
 
     virtual std::string helpMessage()
