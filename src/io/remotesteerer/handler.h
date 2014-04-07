@@ -25,6 +25,9 @@ public:
         myKey(myKey)
     {}
 
+    virtual ~Handler()
+    {}
+
     /**
      * Hanlde command specified by parameters; returns true if command
      * was processed, false if command should be requeued. This is
