@@ -127,7 +127,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # compute default flags:
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
