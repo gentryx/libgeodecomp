@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/storage/gridbase.h>
 
 namespace LibGeoDecomp {
 
