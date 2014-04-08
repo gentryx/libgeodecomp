@@ -2,6 +2,7 @@
 #include <libgeodecomp/io/remotesteerer/handler.h>
 #include <libgeodecomp/io/remotesteerer/pipe.h>
 #include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/storage/grid.h>
 
 using namespace LibGeoDecomp;
 using namespace LibGeoDecomp::RemoteSteererHelpers;

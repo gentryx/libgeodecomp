@@ -1,4 +1,5 @@
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
@@ -143,21 +144,35 @@ public:
         prefix = TempFile::serial("silowriter_test") + "foo";
         siloFile = prefix + ".00123.silo";
 
-        remove((prefix + "0000.png").c_str());
-        remove((prefix + "0001.png").c_str());
-        remove((prefix + "0002.png").c_str());
-        remove((prefix + "0003.png").c_str());
-        remove((prefix + "0004.png").c_str());
+        remove((prefix + "A.png").c_str());
+        remove((prefix + "B.png").c_str());
+        remove((prefix + "C.png").c_str());
+        remove((prefix + "D.png").c_str());
+        remove((prefix + "E.png").c_str());
+
+        remove((prefix + "A0000.png").c_str());
+        remove((prefix + "B0000.png").c_str());
+        remove((prefix + "C0000.png").c_str());
+        remove((prefix + "D0000.png").c_str());
+        remove((prefix + "E0000.png").c_str());
     }
 
     void tearDown()
     {
-        remove((prefix + "0000.png").c_str());
-        remove((prefix + "0001.png").c_str());
-        remove((prefix + "0002.png").c_str());
-        remove((prefix + "0003.png").c_str());
-        remove((prefix + "0004.png").c_str());
+        remove((prefix + "A.png").c_str());
+        remove((prefix + "B.png").c_str());
+        remove((prefix + "C.png").c_str());
+        remove((prefix + "D.png").c_str());
+        remove((prefix + "E.png").c_str());
+
+        remove((prefix + "A0000.png").c_str());
+        remove((prefix + "B0000.png").c_str());
+        remove((prefix + "C0000.png").c_str());
+        remove((prefix + "D0000.png").c_str());
+        remove((prefix + "E0000.png").c_str());
+
         remove(siloFile.c_str());
+
 #ifdef LIBGEODECOMP_WITH_QT
         app.reset();
 #endif
@@ -208,23 +223,33 @@ public:
         remove(siloFile.c_str());
     }
 
-    Histogram loadImage(std::string suffix)
+    Histogram loadImage(const std::string suffix1, const std::string suffix2)
     {
         Histogram ret;
 
-        std::string imageFile = prefix + suffix;
+        std::string imageFile1 = prefix + suffix1 + ".png";
+        std::string imageFile2 = prefix + suffix1 + suffix2 + ".png";
 
-        QImage result;
-        result.load(QString(imageFile.c_str()));
-        TS_ASSERT_EQUALS(QSize(1024, 1024), result.size());
+        QImage image;
+        bool loadOK = image.load(QString(imageFile1.c_str()));
 
-        for (int y = 0; y < 1024; ++y) {
-            for (int x = 0; x < 1024; ++x) {
-                ret[result.pixel(x, y)] += 1;
+        if (!loadOK) {
+            TS_ASSERT(image.load(QString(imageFile2.c_str())));
+        }
+
+        QSize expectedSize(1024, 1024);
+        TS_ASSERT_EQUALS(expectedSize, image.size());
+
+        if (image.size() == expectedSize) {
+            for (int y = 0; y < 1024; ++y) {
+                for (int x = 0; x < 1024; ++x) {
+                    ret[image.pixel(x, y)] += 1;
+                }
             }
         }
 
-        remove(imageFile.c_str());
+        remove(imageFile1.c_str());
+        remove(imageFile2.c_str());
 
         return ret;
     }
@@ -255,35 +280,46 @@ public:
             << "visit.LaunchNowin ()\n"
             << "visit.OpenDatabase(simfile)\n"
             << "attributes = visit.SaveWindowAttributes()\n"
-            << "attributes.fileName = \"" << prefix << "\"\n"
             << "attributes.format = attributes.PNG\n"
-            << "visit.SetSaveWindowAttributes(attributes)\n";
+            << "attributes.width = 1024\n"
+            << "attributes.height = 1024\n"
+            << "attributes.outputToCurrentDirectory = 1\n";
         // first image
-        buf << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+        buf << "attributes.fileName = \"" << prefix << "A\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
             << "visit.DrawPlots()\n"
             << "visit.SaveWindow()\n"
             << "visit.DeleteAllPlots()\n";
         // second image
-        buf << "visit.AddPlot(\"Mesh\", \"point_mesh\")\n"
+        buf << "attributes.fileName = \"" << prefix << "B\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"point_mesh\")\n"
             << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
             << "visit.DrawPlots()\n"
             << "visit.SaveWindow()\n"
             << "visit.DeleteAllPlots()\n";
         // third image
-        buf << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+        buf << "attributes.fileName = \"" << prefix << "C\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
             << "visit.AddPlot(\"Mesh\", \"point_mesh\")\n"
             << "visit.AddPlot(\"Pseudocolor\", \"dummyValue\")\n"
             << "visit.DrawPlots()\n"
             << "visit.SaveWindow()\n"
             << "visit.DeleteAllPlots()\n";
         // fourth image
-        buf << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+        buf << "attributes.fileName = \"" << prefix << "D\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
             << "visit.AddPlot(\"Pseudocolor\", \"posX\")\n"
             << "visit.DrawPlots()\n"
             << "visit.SaveWindow()\n"
             << "visit.DeleteAllPlots()\n";
         // fifth image
-        buf << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+        buf << "attributes.fileName = \"" << prefix << "E\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
             << "visit.AddPlot(\"Mesh\", \"point_mesh\")\n"
             << "visit.AddPlot(\"Pseudocolor\", \"posY\")\n"
             << "visit.DrawPlots()\n"
@@ -291,29 +327,28 @@ public:
             << "visit.DeleteAllPlots()\n";
         render(buf.str());
 
-        Histogram histogram1 = loadImage("0000.png");
+        Histogram histogram1 = loadImage("A", "0000");
 
         TS_ASSERT(histogram1[white.rgb()] > 900000);
 
-        Histogram histogram2 = loadImage("0001.png");
+        Histogram histogram2 = loadImage("B", "0000");
 
         TS_ASSERT(histogram1[white.rgb()] > histogram2[white.rgb()]);
         // point mesh should add 50 dots a 2x2 pixels plus a label
-        TS_ASSERT((histogram2[black.rgb()] - histogram1[black.rgb()]) > 200);
+        TS_ASSERT((histogram1[white.rgb()] - histogram2[white.rgb()]) > 200);
 
-        Histogram histogram3 = loadImage("0002.png");
+        Histogram histogram3 = loadImage("C", "0000");
 
         TS_ASSERT(histogram3[white.rgb()] > 800000);
-        TS_ASSERT_EQUALS(histogram3[red.rgb()  ], 2700);
+        TS_ASSERT(histogram3[red.rgb()  ] >= 40);
 
 
-        Histogram histogram4 = loadImage("0003.png");
+        Histogram histogram4 = loadImage("D", "0000");
 
         TS_ASSERT(histogram1[white.rgb()] > histogram4[white.rgb()]);
-        TS_ASSERT(histogram1[black.rgb()] < histogram4[black.rgb()]);
         TS_ASSERT(histogram4[red.rgb()  ] > 20);
 
-        Histogram histogram5 = loadImage("0004.png");
+        Histogram histogram5 = loadImage("E", "0000");
 
         TS_ASSERT(histogram4[red.rgb()  ] > 20);
         TS_ASSERT(histogram4[white.rgb()] < histogram1[white.rgb()]);

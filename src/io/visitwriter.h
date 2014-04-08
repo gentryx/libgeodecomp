@@ -229,7 +229,6 @@ public:
         runMode(runMode)
     {}
 
-    // fixme: parameter names shouldn't start with underscore
     virtual void stepFinished(
         const GridType& newGrid, unsigned newStep, WriterEvent newEvent)
     {

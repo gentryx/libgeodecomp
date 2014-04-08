@@ -56,6 +56,10 @@ endif()
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
+# currently VisIt only supports Python 2.x. This (undocumented?)
+# feature of CMake allows us to avoid Python 3.y.
+set(PythonLibs_FIND_VERSION 2)
+
 find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
@@ -123,7 +127,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # compute default flags:
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo")
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)

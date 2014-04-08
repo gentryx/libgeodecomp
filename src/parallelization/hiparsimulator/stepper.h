@@ -23,8 +23,9 @@ namespace HiParSimulator {
 template<typename CELL_TYPE>
 class Stepper
 {
-    friend class StepperTest;
 public:
+    friend class StepperTest;
+
     enum PatchType {GHOST=0, INNER_SET=1};
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
