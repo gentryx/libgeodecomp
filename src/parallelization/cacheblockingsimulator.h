@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_CACHEBLOCKINGSIMULATOR_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_THREADS
+
 #include <omp.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
@@ -323,5 +326,7 @@ private:
 };
 
 }
+
+#endif
 
 #endif

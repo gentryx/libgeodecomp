@@ -52,6 +52,9 @@ public:
         cellCounter(0)
     {}
 
+    virtual ~MockMesher()
+    {}
+
     virtual void addCell(ContainerCellType *container, const FloatCoord<DIM>& center)
     {
         container->insert(cellCounter++, DummyCell(center));

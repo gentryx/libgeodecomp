@@ -255,68 +255,56 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
 
-    using Stepper<CELL_TYPE>::addPatchAccepter;
-    using Stepper<CELL_TYPE>::initializer;
-    using Stepper<CELL_TYPE>::guessOffset;
-    using Stepper<CELL_TYPE>::patchAccepters;
-    using Stepper<CELL_TYPE>::patchProviders;
-    using Stepper<CELL_TYPE>::partitionManager;
+    using CommonStepper<CELL_TYPE>::initializer;
+    using CommonStepper<CELL_TYPE>::patchAccepters;
+    using CommonStepper<CELL_TYPE>::patchProviders;
+    using CommonStepper<CELL_TYPE>::partitionManager;
+    using CommonStepper<CELL_TYPE>::chronometer;
+    using CommonStepper<CELL_TYPE>::notifyPatchAccepters;
+    using CommonStepper<CELL_TYPE>::notifyPatchProviders;
 
-    using Stepper<CELL_TYPE>::chronometer;
+    using CommonStepper<CELL_TYPE>::innerSet;
+    using CommonStepper<CELL_TYPE>::saveKernel;
+    using CommonStepper<CELL_TYPE>::restoreRim;
+    using CommonStepper<CELL_TYPE>::globalNanoStep;
+    using CommonStepper<CELL_TYPE>::rim;
+    using CommonStepper<CELL_TYPE>::resetValidGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::initGridsCommon;
+    using CommonStepper<CELL_TYPE>::getVolatileKernel;
+    using CommonStepper<CELL_TYPE>::saveRim;
+    using CommonStepper<CELL_TYPE>::getInnerRim;
+    using CommonStepper<CELL_TYPE>::restoreKernel;
+
+    using CommonStepper<CELL_TYPE>::curStep;
+    using CommonStepper<CELL_TYPE>::curNanoStep;
+    using CommonStepper<CELL_TYPE>::validGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::ghostZoneWidth;
+    using CommonStepper<CELL_TYPE>::oldGrid;
+    using CommonStepper<CELL_TYPE>::newGrid;
+    using CommonStepper<CELL_TYPE>::rimBuffer;
+    using CommonStepper<CELL_TYPE>::kernelBuffer;
+    using CommonStepper<CELL_TYPE>::kernelFraction;
 
     inline CUDAStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        CommonStepper<CELL_TYPE>(partitionManager, initializer)
+        CommonStepper<CELL_TYPE>(
+            partitionManager,
+            initializer,
+            ghostZonePatchAccepters,
+            innerSetPatchAccepters)
     {
-        curStep = initializer->startStep();
-        curNanoStep = 0;
-
-        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
-            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
-        }
-        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
-            addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
-        }
-
         initGrids();
     }
 
-    inline void update(std::size_t nanoSteps)
-    {
-        for (std::size_t i = 0; i < nanoSteps; ++i)
-        {
-            update();
-        }
-    }
-
-    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
-    {
-        return std::make_pair(curStep, curNanoStep);
-    }
-
-    inline virtual const GridType& grid() const
-    {
-        return *oldGrid;
-    }
-
 private:
-    std::size_t curStep;
-    std::size_t curNanoStep;
-    unsigned validGhostZoneWidth;
-    boost::shared_ptr<GridType> oldGrid;
-    boost::shared_ptr<GridType> newGrid;
     boost::shared_ptr<CUDAGridType> oldDeviceGrid;
     boost::shared_ptr<CUDAGridType> newDeviceGrid;
-    PatchBufferType2 rimBuffer;
-    PatchBufferType1 kernelBuffer;
-    Region<DIM> kernelFraction;
-
     std::vector<boost::shared_ptr<CUDARegion<DIM> > > deviceInnerSets;
 
-    inline void update()
+    inline void update1()
     {
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
         const Region<DIM>& region = innerSet(index);
@@ -364,16 +352,14 @@ private:
         const Region<DIM>& region,
         std::size_t nanoStep)
     {
-        TimePatchAccepters t(&chronometer);
+        notifyPatchAccepters(region, ParentType::GHOST, nanoStep);
+    }
 
-        for (typename ParentType::PatchAccepterList::iterator i =
-                 patchAccepters[ParentType::GHOST].begin();
-             i != patchAccepters[ParentType::GHOST].end();
-             ++i) {
-            if (nanoStep == (*i)->nextRequiredNanoStep()) {
-                (*i)->put(*oldGrid, region, nanoStep);
-            }
-        }
+    inline void notifyPatchProvidersGhostZones(
+        const Region<DIM>& region,
+        std::size_t nanoStep)
+    {
+        notifyPatchProviders(region, ParentType::GHOST, nanoStep);
     }
 
     inline void notifyPatchAcceptersInnerSet(
@@ -404,25 +390,6 @@ private:
              ++i) {
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 (*i)->put(*oldGrid, region, nanoStep);
-            }
-        }
-    }
-
-    inline void notifyPatchProvidersGhostZones(
-        const Region<DIM>& region,
-        std::size_t nanoStep)
-    {
-        TimePatchProviders t(&chronometer);
-
-        for (typename ParentType::PatchProviderList::iterator i =
-                 patchProviders[ParentType::GHOST].begin();
-             i != patchProviders[ParentType::GHOST].end();
-             ++i) {
-            if (nanoStep == (*i)->nextAvailableNanoStep()) {
-                (*i)->get(
-                    &*oldGrid,
-                    region,
-                    nanoStep);
             }
         }
     }
@@ -467,25 +434,13 @@ private:
         oldDeviceGrid->loadRegion(*oldGrid, region);
     }
 
-    inline std::size_t globalNanoStep() const
-    {
-        return curStep * NANO_STEPS + curNanoStep;
-    }
-
     inline void initGrids()
     {
         Coord<DIM> topoDim = initializer->gridDimensions();
-        CoordBox<DIM> gridBox;
-        guessOffset(&gridBox.origin, &gridBox.dimensions);
+        CoordBox<DIM> gridBox = initGridsCommon();
 
-        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
         oldDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
         newDeviceGrid.reset(new CUDAGridType(gridBox, topoDim));
-
-        initializer->grid(&*oldGrid);
-        newGrid->getEdgeCell() = oldGrid->getEdgeCell();
-        resetValidGhostZoneWidth();
 
         Region<DIM> gridRegion;
         gridRegion << gridBox;
@@ -507,10 +462,6 @@ private:
             innerSet(0),
             globalNanoStep());
 
-        kernelBuffer = PatchBufferType1(getVolatileKernel());
-        rimBuffer = PatchBufferType2(rim());
-        // fixme: we don't need this any longer, as the kernel is handled on the device
-        // saveRim(globalNanoStep());
         updateGhost();
     }
 
@@ -525,8 +476,6 @@ private:
      */
     inline void updateGhost()
     {
-        // fixme
-        // std::cout << "updateGhost()\n";
         {
             TimeComputeGhost t(&chronometer);
 
@@ -537,14 +486,8 @@ private:
             // destroy parts of the kernel, which is why we'll
             // save/restore those.
 
-            // fixme: we don't need this any longer, as the kernel is handled on the device
-            // saveKernel();
-
             // We need to restore the rim since it got destroyed while the
             // kernel was updated.
-
-            // fixme: we don't need this any longer, as the kernel is handled on the device
-            // restoreRim(false);
 
             oldDeviceGrid->saveRegion(&*oldGrid, rim());
         }
@@ -596,80 +539,13 @@ private:
 
             // 3: restore grid for kernel update
 
-            // fixme: we don't need this any longer, as the kernel is handled on the device
-            // restoreRim(true);
-            // restoreKernel();
-
             oldDeviceGrid->loadRegion(*oldGrid, getInnerRim());
         }
-    }
-
-    inline unsigned ghostZoneWidth() const
-    {
-        return partitionManager->getGhostZoneWidth();
-    }
-
-    inline const Region<DIM>& rim(unsigned offset) const
-    {
-        return partitionManager->rim(offset);
-    }
-
-    inline const Region<DIM>& rim() const
-    {
-        return rim(ghostZoneWidth());
-    }
-
-    inline const Region<DIM>& innerSet(unsigned offset) const
-    {
-        return partitionManager->innerSet(offset);
-    }
-
-    inline const Region<DIM>& getVolatileKernel() const
-    {
-        return partitionManager->getVolatileKernel();
-    }
-
-    inline const Region<DIM>& getInnerRim() const
-    {
-        return partitionManager->getInnerRim();
     }
 
     inline const CUDARegion<DIM>& deviceInnerSet(unsigned offset) const
     {
         return *deviceInnerSets[offset];
-    }
-
-    inline void resetValidGhostZoneWidth()
-    {
-        validGhostZoneWidth = ghostZoneWidth();
-    }
-
-    inline void saveRim(std::size_t nanoStep)
-    {
-        rimBuffer.pushRequest(nanoStep);
-        rimBuffer.put(*oldGrid, rim(), nanoStep);
-    }
-
-    inline void restoreRim(bool remove)
-    {
-        rimBuffer.get(&*oldGrid, rim(), globalNanoStep(), remove);
-    }
-
-    inline void saveKernel()
-    {
-        kernelBuffer.pushRequest(globalNanoStep());
-        kernelBuffer.put(*oldGrid,
-                         innerSet(ghostZoneWidth()),
-                         globalNanoStep());
-    }
-
-    inline void restoreKernel()
-    {
-        kernelBuffer.get(
-            &*oldGrid,
-            getVolatileKernel(),
-            globalNanoStep(),
-            true);
     }
 };
 

@@ -476,6 +476,9 @@ public:
         minCellDistance(minCellDistance)
     {}
 
+    virtual ~VoronoiMesher()
+    {}
+
     /**
      * Adds a number of random cells to the grid cell (quadrant). The
      * seed of the random number generator will depend on the

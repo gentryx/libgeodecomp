@@ -41,7 +41,11 @@ public:
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(partitionManager, initializer)
+        CommonStepper<CELL_TYPE>(
+            partitionManager,
+            initializer,
+            ghostZonePatchAccepters,
+            innerSetPatchAccepters)
     {
     }
 };

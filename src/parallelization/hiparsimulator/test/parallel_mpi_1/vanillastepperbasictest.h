@@ -35,10 +35,10 @@ public:
         stepper->addPatchAccepter(patchAccepter, StepperType::GHOST);
     }
 
-    void testUpdate()
+    void testUpdate1()
     {
         TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 0);
-        stepper->update();
+        stepper->update1();
         TS_ASSERT_TEST_GRID(GridType, stepper->grid(), 1);
     }
 

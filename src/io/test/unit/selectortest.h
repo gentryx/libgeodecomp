@@ -159,6 +159,40 @@ public:
         }
     };
 
+    void testLocalFilter()
+    {
+        class FancyFilter : public Selector<MyDummyCell>::SimpleFilter<char, double>
+        {
+        public:
+            void load(const double& source, char *target)
+            {
+                *target = source + 11;
+            }
+
+            void save(const char& source, double *target)
+            {
+                *target = source + 21;
+            }
+        };
+
+        Selector<MyDummyCell>::FilterBase *filter1 = new FancyFilter();
+        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter2(filter1);
+        Selector<MyDummyCell> selector(&MyDummyCell::z, "varZ", filter2);
+
+        std::vector<MyDummyCell> vec;
+        for (int i = 0; i < 13; ++i) {
+            vec << MyDummyCell(i, i, 'a' + i);
+        }
+
+        std::vector<double> target(13);
+        selector.copyMemberOut(&vec[0], (char*)&target[0], 13);
+        for (int i = 0; i < 13; ++i) {
+            // expecting 'a' + offset from save() + index
+            double expected = 97 + 21 + i;
+            TS_ASSERT_EQUALS(expected, target[i]);
+        }
+    }
+
     void testFilterAoS1()
     {
         // test copyMemberOut:
