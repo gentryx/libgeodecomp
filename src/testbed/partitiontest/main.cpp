@@ -406,7 +406,7 @@ void phiPlotSize(int dimx, int dimy,int dimz, int maxnodes){
     gnuplot.open(("plot" + dimString).c_str());
     gnuplot << "set title \"" + dimString << "\"\n"
             << "set xlabel \"Anzahl von Knoten\" \n "
-            << "set ylabel \"Größte Geisterzone eines Verbundes\" \n"
+            << "set ylabel \"Differenz zwischen größtem und kleinstem Gebiet bezogen auf die durchschnittliche Größe\" \n"
             << "plot \"" << dimString << scotch << "\" using 1:($4 - $2)/$3 title \"Scotch\" with lines, "
             << "\"" << dimString << recBi << "\" using 1:($4 - $2)/$3 title \"Recursive Bisection\" with lines,"
             << "\"" << dimString << zCurve << "\" using 1:($4 - $2)/$3 title \"ZCurve\" with lines ";
