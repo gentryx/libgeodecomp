@@ -311,10 +311,7 @@ void phiPlot(int dimx, int dimy,int dimz, int maxnodes){
             << "set xlabel \"Anzahl von Knoten\" \n "
             << "set ylabel \"Größte Geisterzone eines Verbundes\" \n"
             << "plot \"" << dimString << scotch << "\" using 1:4 title \"Scotch\" with lines, "
-            << "\"" << dimString << ptscotch << "\" using 1:4 title \"PTScotch\" with lines,"
             << "\"" << dimString << recBi << "\" using 1:4 title \"Recursive Bisection\" with lines,"
-            << "\"" << dimString << checker << "\" using 1:4 title \"Checkerboarding\" with lines,"
-            << "\"" << dimString << striping << "\" using 1:4 title \"Striping\" with lines,"
             << "\"" << dimString << zCurve << "\" using 1:4 title \"ZCurve\" with lines ";
 
     for(int i = 2; i <= maxnodes; i+=2){
