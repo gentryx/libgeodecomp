@@ -13,7 +13,6 @@
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #endif
 
@@ -25,6 +24,7 @@
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
