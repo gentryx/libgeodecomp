@@ -1,5 +1,3 @@
-#include <libflatarray/testbed/cpu_benchmark.hpp>
-#include <libflatarray/testbed/evaluate.hpp>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -18,6 +16,9 @@
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
+
+#include <libflatarray/testbed/cpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
 
 #include <emmintrin.h>
 #ifdef __AVX__
