@@ -1,3 +1,5 @@
+#include <libflatarray/testbed/cpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -15,9 +17,7 @@
 #include <libgeodecomp/storage/linepointerupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
-#include <libgeodecomp/testbed/performancetests/evaluate.h>
 
 #include <emmintrin.h>
 #ifdef __AVX__
@@ -2229,8 +2229,8 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    Evaluate eval(revision);
-    eval.printHeader();
+    LibFlatArray::evaluate eval(revision);
+    eval.print_header();
 
     eval(RegionCount(), Coord<3>( 128,  128,  128));
     eval(RegionCount(), Coord<3>( 512,  512,  512));

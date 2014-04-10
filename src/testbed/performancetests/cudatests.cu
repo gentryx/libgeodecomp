@@ -2,31 +2,30 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <libflatarray/testbed/gpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
+#include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
 #include <libgeodecomp/storage/soagrid.h>
-#include <libgeodecomp/testbed/performancetests/benchmark.h>
-#include <libgeodecomp/testbed/performancetests/evaluate.h>
 
 using namespace LibGeoDecomp;
 
-std::string cudaDeviceID;
-
-class GPUBenchmark : public Benchmark
+class GPUBenchmark : public LibFlatArray::gpu_benchmark
 {
 public:
-    std::string order()
+    double performance(int dim[3])
     {
-        return "GPU";
+        Coord<3> c(dim[0], dim[1], dim[2]);
+        return performance(c);
     }
 
-    std::string device()
-    {
-        return cudaDeviceID;
-    }
+    virtual double performance(const Coord<3>& dim) = 0;
 };
+
+std::string cudaDeviceID;
 
 class Cell
 {
@@ -604,7 +603,7 @@ void cudaTests(std::string revision, bool quick, int cudaDevice)
     cudaGetDeviceProperties(&properties, cudaDevice);
     cudaDeviceID = properties.name;
 
-    Evaluate eval(revision);
+    LibFlatArray::evaluate eval(revision);
 
     for (int d = 32; d <= 544; d += 4) {
         eval(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));
