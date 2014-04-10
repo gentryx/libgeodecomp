@@ -25,8 +25,6 @@ public:
     virtual double performance(const Coord<3>& dim) = 0;
 };
 
-std::string cudaDeviceID;
-
 class Cell
 {
 public:
@@ -599,10 +597,6 @@ public:
 void cudaTests(std::string revision, bool quick, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
-    cudaDeviceProp properties;
-    cudaGetDeviceProperties(&properties, cudaDevice);
-    cudaDeviceID = properties.name;
-
     LibFlatArray::evaluate eval(revision);
 
     for (int d = 32; d <= 544; d += 4) {
