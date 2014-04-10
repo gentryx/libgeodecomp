@@ -136,6 +136,9 @@ public:
         myType(myType)
     {}
 
+    virtual ~VisItDataAccessor()
+    {}
+
     const std::string& type()
     {
         return myType;
@@ -163,6 +166,9 @@ public:
         accessor(accessor),
         gridVolume(gridVolume),
         dataBuffer(0)
+    {}
+
+    virtual ~VisItDataBuffer()
     {}
 
     void *dataField()
