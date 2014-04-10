@@ -6,14 +6,13 @@
 #include <libgeodecomp/misc/tempfile.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
-#ifdef LIBGEODECOMP_WITH_QT
-
 #include <Python.h>
+#endif
+
+#ifdef LIBGEODECOMP_WITH_QT
 #include <QtGui/QApplication>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
-
-#endif
 #endif
 
 using namespace LibGeoDecomp;
