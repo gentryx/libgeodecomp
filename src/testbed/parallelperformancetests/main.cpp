@@ -1,6 +1,4 @@
 #include <mpi.h>
-#include <libflatarray/testbed/cpu_benchmark.hpp>
-#include <libflatarray/testbed/evaluate.hpp>
 #include <libgeodecomp.h>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/communication/patchlink.h>
@@ -14,6 +12,8 @@
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
+#include <libflatarray/testbed/cpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
 
 using namespace LibGeoDecomp;
 
