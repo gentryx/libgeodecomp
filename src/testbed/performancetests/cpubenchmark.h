@@ -8,13 +8,13 @@ namespace LibGeoDecomp {
 class CPUBenchmark : public LibFlatArray::cpu_benchmark
 {
 public:
-    double performance(int dim[3])
+    double performance(std::vector<int> dim)
     {
         Coord<3> c(dim[0], dim[1], dim[2]);
-        return performance(c);
+        return performance2(c);
     }
 
-    virtual double performance(const Coord<3>& dim) = 0;
+    virtual double performance2(const Coord<3>& dim) = 0;
 };
 
 }

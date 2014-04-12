@@ -36,7 +36,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         MPILayer mpiLayer;
 
@@ -113,7 +113,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         MPILayer mpiLayer;
 
@@ -198,7 +198,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         MPILayer mpiLayer;
 
@@ -272,12 +272,12 @@ int main(int argc, char **argv)
         eval.print_header();
     }
 
-    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell"),                               Coord<3>::diagonal(256), output);
-    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "),                               Coord<3>::diagonal(64),  output);
-    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"),                                      Coord<3>::diagonal(200), output);
-    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "),                                      Coord<3>::diagonal(64),  output);
-    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), Coord<3>::diagonal(100), output);
-    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"),                         Coord<3>::diagonal(100), output);
+    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell"),                               toVector(Coord<3>::diagonal(256)), output);
+    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "),                               toVector(Coord<3>::diagonal(64)),  output);
+    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"),                                      toVector(Coord<3>::diagonal(200)), output);
+    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "),                                      toVector(Coord<3>::diagonal(64)),  output);
+    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), toVector(Coord<3>::diagonal(100)), output);
+    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"),                         toVector(Coord<3>::diagonal(100)), output);
 
     MPI_Finalize();
     return 0;
