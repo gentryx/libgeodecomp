@@ -120,6 +120,18 @@ inline std::vector<T, Allocator> operator+(std::vector<T, Allocator>& target, co
     return ret;
 }
 
+template <template<int> class COORD, int DIM>
+inline std::vector<typename COORD<DIM>::ValueType> toVector(const COORD<DIM>& coord)
+{
+    std::vector<typename COORD<DIM>::ValueType> vec;
+
+    for (int i = 0; i < DIM; ++i) {
+        vec << coord[i];
+    }
+
+    return vec;
+}
+
 /**
  * set
  */
