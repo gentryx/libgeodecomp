@@ -310,9 +310,25 @@ public:
 
     void testOperatorDivide()
     {
-        TS_ASSERT_EQUALS(FloatCoord<1>(3.5),            FloatCoord<1>(14.0) / 4);
-        TS_ASSERT_EQUALS(FloatCoord<2>(5.5, 7.0),       FloatCoord<2>(16.5, 21.0) / 3);
-        TS_ASSERT_EQUALS(FloatCoord<3>(3.5, 1.0, 1.25), FloatCoord<3>(14.0,  4.0, 5.0) / 4);
+        FloatCoord<1> c1(3.5);
+        FloatCoord<2> c2(5.5, 7.0);
+        FloatCoord<3> c3(3.5, 1.0, 1.25);
+
+        FloatCoord<1> d1(14.0);
+        FloatCoord<2> d2(16.5, 21.0);
+        FloatCoord<3> d3(14.0, 4.0, 5.0);
+
+        TS_ASSERT_EQUALS(c1, d1 / 4);
+        TS_ASSERT_EQUALS(c2, d2 / 3);
+        TS_ASSERT_EQUALS(c3, d3 / 4);
+
+        d1 /= 4;
+        d2 /= 3;
+        d3 /= 4;
+
+        TS_ASSERT_EQUALS(c1, d1);
+        TS_ASSERT_EQUALS(c2, d2);
+        TS_ASSERT_EQUALS(c3, d3);
     }
 
     void testDiagonal()

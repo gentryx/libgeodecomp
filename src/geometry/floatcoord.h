@@ -84,6 +84,13 @@ public:
     }
 
     inline
+    FloatCoord<1>& operator/=(const double s)
+    {
+        c[0] /= s;
+        return *this;
+    }
+
+    inline
     FloatCoord<1> operator/(const double& s) const
     {
         return FloatCoord<1>(c[0] / s);
@@ -244,6 +251,14 @@ public:
     {
         c[0] -= a[0];
         c[1] -= a[1];
+        return *this;
+    }
+
+    inline
+    FloatCoord<2>& operator/=(const double s)
+    {
+        c[0] /= s;
+        c[1] /= s;
         return *this;
     }
 
@@ -424,6 +439,15 @@ public:
         c[0] -= a[0];
         c[1] -= a[1];
         c[2] -= a[2];
+        return *this;
+    }
+
+    inline
+    FloatCoord<3>& operator/=(const double s)
+    {
+        c[0] /= s;
+        c[1] /= s;
+        c[2] /= s;
         return *this;
     }
 
