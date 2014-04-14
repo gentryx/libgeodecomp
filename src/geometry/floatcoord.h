@@ -98,6 +98,14 @@ public:
 
     template<template<int> class OTHER_COORD>
     inline
+    FloatCoord<1> operator/(const OTHER_COORD<1>& a) const
+    {
+        return FloatCoord<1>(
+            c[0] / a[0]);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
     double operator*(const OTHER_COORD<1>& a) const
     {
         return c[0] * a[0];
@@ -268,6 +276,15 @@ public:
         return FloatCoord<2>(
             c[0] / s,
             c[1] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord<2> operator/(const OTHER_COORD<2>& a) const
+    {
+        return FloatCoord<2>(
+            c[0] / a[0],
+            c[1] / a[1]);
     }
 
     template<template<int> class OTHER_COORD>
@@ -458,6 +475,16 @@ public:
             c[0] / s,
             c[1] / s,
             c[2] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord<3> operator/(const OTHER_COORD<3>& a) const
+    {
+        return FloatCoord<3>(
+            c[0] / a[0],
+            c[1] / a[1],
+            c[2] / a[2]);
     }
 
     template<template<int> class OTHER_COORD>

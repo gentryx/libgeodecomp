@@ -329,6 +329,14 @@ public:
         TS_ASSERT_EQUALS(c1, d1);
         TS_ASSERT_EQUALS(c2, d2);
         TS_ASSERT_EQUALS(c3, d3);
+
+        TS_ASSERT_EQUALS(c1 / FloatCoord<1>(0.5),            FloatCoord<1>(7.0));
+        TS_ASSERT_EQUALS(c2 / FloatCoord<2>(5.5, 2.0),       FloatCoord<2>(1.0, 3.5));
+        TS_ASSERT_EQUALS(c3 / FloatCoord<3>(0.5, 0.5, 0.25), FloatCoord<3>(7.0, 2.0, 5.0));
+
+        TS_ASSERT_EQUALS(c1 / Coord<1>(2),       FloatCoord<1>(1.75));
+        TS_ASSERT_EQUALS(c2 / Coord<2>(5, 2),    FloatCoord<2>(1.1,  3.5));
+        TS_ASSERT_EQUALS(c3 / Coord<3>(2, 8, 5), FloatCoord<3>(1.75, 0.125, 0.25));
     }
 
     void testDiagonal()
