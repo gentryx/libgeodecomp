@@ -240,11 +240,13 @@ private:
     void collectRegularGridGeometry(const GridType& grid)
     {
         Coord<DIM> dim = grid.boundingBox().dimensions;
-        FloatCoord<DIM> quadrantDim = APITraits::SelectRegularGrid<Cell>::value();
+        FloatCoord<DIM> quadrantDim;
+        FloatCoord<DIM> origin;
+        APITraits::SelectRegularGrid<Cell>::value(&quadrantDim, &origin);
 
         for (int d = 0; d < DIM; ++d) {
             for (int i = 0; i <= dim[d]; ++i) {
-                coords[d] << quadrantDim[d] * i;
+                coords[d] << (origin[d] + quadrantDim[d] * i);
             }
         }
     }

@@ -661,9 +661,12 @@ public:
     public:
         typedef TrueType Value;
 
-        static inline FloatCoord<SelectTopology<CELL>::Value::DIM> value()
+        static inline void value(
+            FloatCoord<SelectTopology<CELL>::Value::DIM> *quadrantDim,
+            FloatCoord<SelectTopology<CELL>::Value::DIM> *origin)
         {
-            return FloatCoord<SelectTopology<CELL>::Value::DIM>::diagonal(1.0);
+            *quadrantDim = FloatCoord<SelectTopology<CELL>::Value::DIM>::diagonal(1.0);
+            *origin      = FloatCoord<SelectTopology<CELL>::Value::DIM>::diagonal(0.0);
         }
     };
 
@@ -673,9 +676,12 @@ public:
     public:
         typedef TrueType Value;
 
-        static inline FloatCoord<SelectTopology<CELL>::Value::DIM> value()
+        static inline void value(
+            FloatCoord<SelectTopology<CELL>::Value::DIM> *quadrantDim,
+            FloatCoord<SelectTopology<CELL>::Value::DIM> *origin)
         {
-            return CELL::API::getRegularGridSpacing();
+            *quadrantDim = CELL::API::getRegularGridSpacing();
+            *origin      = CELL::API::getRegularGridOrigin();
         }
     };
 
