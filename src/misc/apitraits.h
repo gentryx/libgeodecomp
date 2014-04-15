@@ -680,8 +680,8 @@ public:
             FloatCoord<SelectTopology<CELL>::Value::DIM> *quadrantDim,
             FloatCoord<SelectTopology<CELL>::Value::DIM> *origin)
         {
-            *quadrantDim = CELL::API::getRegularGridSpacing();
-            *origin      = CELL::API::getRegularGridOrigin();
+            *quadrantDim = typename CELL::API().getRegularGridSpacing();
+            *origin      = typename CELL::API().getRegularGridOrigin();
         }
     };
 

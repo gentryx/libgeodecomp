@@ -34,12 +34,12 @@ public:
         public APITraits::HasCustomRegularGrid
     {
     public:
-        static FloatCoord<3> getRegularGridSpacing()
+        inline FloatCoord<3> getRegularGridSpacing()
         {
             return FloatCoord<3>(30, 20, 10);
         }
 
-        static FloatCoord<3> getRegularGridOrigin()
+        inline FloatCoord<3> getRegularGridOrigin()
         {
             return FloatCoord<3>(5, 6, 7);
         }

@@ -15,9 +15,14 @@ public:
         public APITraits::HasCustomRegularGrid
     {
     public:
-        static inline FloatCoord<2> getRegularGridSpacing()
+        inline FloatCoord<2> getRegularGridSpacing()
         {
             return SimpleCell<COORD>::quadrantSize;
+        }
+
+        inline FloatCoord<2> getRegularGridOrigin()
+        {
+            return COORD<2>();
         }
     };
 
