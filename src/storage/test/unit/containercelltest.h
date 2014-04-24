@@ -39,6 +39,53 @@ public:
 class ContainerCellTest : public CxxTest::TestSuite
 {
 public:
+    void testCopy()
+    {
+        ContainerCell<MockCell, 5> container1;
+        ContainerCell<MockCell, 5> container2;
+
+        container1.insert(10, MockCell(10));
+        container1.insert(11, MockCell(11));
+        container1.insert(12, MockCell(12));
+
+        TS_ASSERT_EQUALS(container1.size(), std::size_t(3));
+        TS_ASSERT_EQUALS(container1[10]->id, 10);
+        TS_ASSERT_EQUALS(container1[11]->id, 11);
+        TS_ASSERT_EQUALS(container1[12]->id, 12);
+
+        container2.insert(50, MockCell(50));
+        container2.insert(51, MockCell(51));
+        container2.insert(52, MockCell(52));
+        container2.insert(53, MockCell(53));
+        container2.insert(54, MockCell(54));
+
+        TS_ASSERT_EQUALS(container2.size(), std::size_t(5));
+        TS_ASSERT_EQUALS(container2[50]->id, 50);
+        TS_ASSERT_EQUALS(container2[51]->id, 51);
+        TS_ASSERT_EQUALS(container2[52]->id, 52);
+        TS_ASSERT_EQUALS(container2[53]->id, 53);
+        TS_ASSERT_EQUALS(container2[54]->id, 54);
+
+        container2 = container1;
+
+        container1.remove(10);
+        container1.remove(11);
+        container1.remove(12);
+        container1.insert(50, MockCell(50));
+        container1.insert(51, MockCell(51));
+        container1.insert(52, MockCell(52));
+        container1.insert(53, MockCell(53));
+        container1.insert(54, MockCell(54));
+
+        TS_ASSERT_EQUALS(container2.size(), std::size_t(3));
+        TS_ASSERT_EQUALS(container2[10]->id, 10);
+        TS_ASSERT_EQUALS(container2[11]->id, 11);
+        TS_ASSERT_EQUALS(container2[12]->id, 12);
+
+        TS_ASSERT_EQUALS(container1.size(), std::size_t(5));
+        MockCell *nilCell = 0;
+        TS_ASSERT_EQUALS(container1[10], nilCell);
+    }
 
     void testInsertAndSearch()
     {
