@@ -26,7 +26,7 @@
                                                                         \
             CoordBox<DIM> box(Coord<DIM>::diagonal(-1),                 \
                               Coord<DIM>::diagonal(3));                 \
-            for (typename CoordBox<DIM>::Iterator i = box.begin();      \
+            for (CoordBox<DIM>::Iterator i = box.begin();               \
                  i != box.end();                                        \
                  ++i) {                                                 \
                                                                         \
