@@ -69,6 +69,9 @@ public:
         return *oldGrid;
     }
 
+    /**
+     * Proceed the simulation exactly one nano step
+     */
     virtual void update1() = 0;
 
 protected:
