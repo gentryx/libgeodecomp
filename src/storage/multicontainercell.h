@@ -78,7 +78,7 @@
     public:                                                             \
         friend class MultiContainerCellTest;                            \
                                                                         \
-        typedef typename APITraits::SelectTopology<NAME>::Value Topology; \
+        typedef APITraits::SelectTopology<NAME>::Value Topology;        \
         const static int DIM = Topology::DIM;                           \
                                                                         \
         template<typename NEIGHBORHOOD>                                 \
