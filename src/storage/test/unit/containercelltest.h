@@ -167,7 +167,8 @@ public:
             }
         }
 
-        grid[Coord<2>(0, 0)].update(grid, 0);
+        DisplacedGrid<ContainerCell<MockCell, 9> > gridOld = grid;
+        grid[Coord<2>(0, 0)].update(gridOld, 0);
 
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
