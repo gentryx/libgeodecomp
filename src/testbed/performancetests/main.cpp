@@ -967,19 +967,13 @@ public:
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
     static __m128d load(const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
-        return load<OFFSET>(&hood[coord].temp, hood.arity(coord));
+        return load<OFFSET>(&hood[coord].temp);
     }
 
     template<int OFFSET>
-    static __m128d load(const double *p, VectorArithmetics::Vector)
+    static __m128d load(const double *p)
     {
         return _mm_load_pd(p + OFFSET);
-    }
-
-    template<int OFFSET>
-    static __m128d load(const double *p, VectorArithmetics::Scalar)
-    {
-        return _mm_set_pd(*p, *p);
     }
 
     double temp;
@@ -2210,7 +2204,7 @@ void cudaTests(std::string revision, bool quick, int cudaDevice);
 int main(int argc, char **argv)
 {
     if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
+        std::cerr << "usage: " << argv[0] << " [-q,--quick] REVISION CUDA_DEVICE\n";
         return 1;
     }
 
