@@ -11,9 +11,9 @@
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
-#include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
-#include <libgeodecomp/testbed/performancetests/evaluate.h>
 #include <libgeodecomp/testbed/parallelperformancetests/mysimplecell.h>
+#include <libflatarray/testbed/cpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
 
 using namespace LibGeoDecomp;
 
@@ -36,7 +36,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         MPILayer mpiLayer;
 
@@ -113,7 +113,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         MPILayer mpiLayer;
 
@@ -198,7 +198,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         MPILayer mpiLayer;
 
@@ -258,26 +258,26 @@ int main(int argc, char **argv)
     }
 
     if (argc != 3) {
-        std::cerr << "usage: " << argv[0] << "REVISION CUDA_DEVICE\n";
+        std::cerr << "usage: " << argv[0] << " REVISION CUDA_DEVICE\n";
         return 1;
     }
 
     std::string revision = argv[1];
     cudaDevice = StringOps::atoi(argv[2]);
 
-    Evaluate eval(revision);
+    LibFlatArray::evaluate eval(revision);
 
     bool output = MPILayer().rank() == 0;
     if (output) {
-        eval.printHeader();
+        eval.print_header();
     }
 
-    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(256), output);
-    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
-    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"), Coord<3>::diagonal(200), output);
-    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "), Coord<3>::diagonal(64), output);
-    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), Coord<3>::diagonal(100), output);
-    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"), Coord<3>::diagonal(100), output);
+    eval(CollectingWriterPerfTest<MySimpleCell>("MySimpleCell"),                               toVector(Coord<3>::diagonal(256)), output);
+    eval(CollectingWriterPerfTest<TestCell<3> >("TestCell<3> "),                               toVector(Coord<3>::diagonal(64)),  output);
+    eval(PatchLinkPerfTest<MySimpleCell>("MySimpleCell"),                                      toVector(Coord<3>::diagonal(200)), output);
+    eval(PatchLinkPerfTest<TestCell<3> >("TestCell<3> "),                                      toVector(Coord<3>::diagonal(64)),  output);
+    eval(PartitionManagerBig3DPerfTest<RecursiveBisectionPartition<3> >("RecursiveBisection"), toVector(Coord<3>::diagonal(100)), output);
+    eval(PartitionManagerBig3DPerfTest<ZCurvePartition<3> >("ZCurve"),                         toVector(Coord<3>::diagonal(100)), output);
 
     MPI_Finalize();
     return 0;

@@ -493,6 +493,10 @@ file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/detail/*.
 foreach(i ${HEADERS})
   install(FILES ${i} DESTINATION include/libflatarray/detail)
 endforeach()
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/testbed/*.hpp")
+foreach(i ${HEADERS})
+  install(FILES ${i} DESTINATION include/libflatarray/testbed)
+endforeach()
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")

@@ -26,6 +26,7 @@ class FloatCoord<1>
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef double ValueType;
 
     static inline FloatCoord<1> diagonal(const double& x)
     {
@@ -83,9 +84,24 @@ public:
     }
 
     inline
+    FloatCoord<1>& operator/=(const double s)
+    {
+        c[0] /= s;
+        return *this;
+    }
+
+    inline
     FloatCoord<1> operator/(const double& s) const
     {
         return FloatCoord<1>(c[0] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord<1> operator/(const OTHER_COORD<1>& a) const
+    {
+        return FloatCoord<1>(
+            c[0] / a[0]);
     }
 
     template<template<int> class OTHER_COORD>
@@ -180,6 +196,7 @@ class FloatCoord<2>
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef double ValueType;
 
     static inline FloatCoord<2> diagonal(const double& x)
     {
@@ -246,11 +263,28 @@ public:
     }
 
     inline
+    FloatCoord<2>& operator/=(const double s)
+    {
+        c[0] /= s;
+        c[1] /= s;
+        return *this;
+    }
+
+    inline
     FloatCoord<2> operator/(const double& s) const
     {
         return FloatCoord<2>(
             c[0] / s,
             c[1] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord<2> operator/(const OTHER_COORD<2>& a) const
+    {
+        return FloatCoord<2>(
+            c[0] / a[0],
+            c[1] / a[1]);
     }
 
     template<template<int> class OTHER_COORD>
@@ -351,6 +385,7 @@ class FloatCoord<3>
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef double ValueType;
 
     static inline FloatCoord<3> diagonal(const double& x)
     {
@@ -425,12 +460,31 @@ public:
     }
 
     inline
+    FloatCoord<3>& operator/=(const double s)
+    {
+        c[0] /= s;
+        c[1] /= s;
+        c[2] /= s;
+        return *this;
+    }
+
+    inline
     FloatCoord<3> operator/(const double& s) const
     {
         return FloatCoord<3>(
             c[0] / s,
             c[1] / s,
             c[2] / s);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    FloatCoord<3> operator/(const OTHER_COORD<3>& a) const
+    {
+        return FloatCoord<3>(
+            c[0] / a[0],
+            c[1] / a[1],
+            c[2] / a[2]);
     }
 
     template<template<int> class OTHER_COORD>

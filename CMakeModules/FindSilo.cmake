@@ -63,13 +63,13 @@
 # Silo_INCLUDE_PATH, for CMake backward compatibility
 
 FIND_PATH( Silo_INCLUDE_DIR silo.h
-  /usr/local/include
+  PATHS /usr/local/include
   /usr/include
   ${Silo_ROOT}/include
 )
 
-FIND_LIBRARY( Silo_LIBRARY NAMES siloh5
-  /usr/lib
+FIND_LIBRARY( Silo_LIBRARY NAMES siloh5 silo
+  PATHS /usr/lib
   /usr/lib64
   /usr/local/lib
   ${Silo_ROOT}/lib

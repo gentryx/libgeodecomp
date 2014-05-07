@@ -315,7 +315,7 @@ public:
             Coord<DIM> dim = *iter;
             if (!hasTrivialDimensions(dim)) {
                 CoordVector coords;
-                Iterator end(Coord<DIM>());
+                Iterator end((Coord<DIM>()));
                 for (Iterator i(Coord<DIM>(), dim, 0); i != end; ++i) {
                     coords.push_back(*i);
                 }

@@ -510,19 +510,13 @@ public:
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
     static __m128d load(const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
-        return load<OFFSET>(&hood[coord].temp, hood.arity(coord));
+        return load<OFFSET>(&hood[coord].temp);
     }
 
     template<int OFFSET>
-    static __m128d load(const double *p, VectorArithmetics::Vector)
+    static __m128d load(const double *p)
     {
         return _mm_load_pd(p + OFFSET);
-    }
-
-    template<int OFFSET>
-    static __m128d load(const double *p, VectorArithmetics::Scalar)
-    {
-        return _mm_set_pd(*p, *p);
     }
 
     const double& read() const

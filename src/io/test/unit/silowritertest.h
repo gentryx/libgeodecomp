@@ -6,14 +6,13 @@
 #include <libgeodecomp/misc/tempfile.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
-#ifdef LIBGEODECOMP_WITH_QT
-
 #include <Python.h>
+#endif
+
+#ifdef LIBGEODECOMP_WITH_QT
 #include <QtGui/QApplication>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
-
-#endif
 #endif
 
 using namespace LibGeoDecomp;
@@ -60,6 +59,11 @@ public:
         static FloatCoord<2> getRegularGridSpacing()
         {
             return FloatCoord<2>(20, 10);
+        };
+
+        static FloatCoord<2> getRegularGridOrigin()
+        {
+            return FloatCoord<2>(0, 0);
         };
     };
 
@@ -189,7 +193,9 @@ public:
         // init grid
         Coord<2> dim(10, 5);
         CoordBox<2> box(Coord<2>(), dim);
-        FloatCoord<2> quadrantDim = APITraits::SelectRegularGrid<CellWithPointMesh>::value();
+        FloatCoord<2> quadrantDim;
+        FloatCoord<2> origin;
+        APITraits::SelectRegularGrid<CellWithPointMesh>::value(&quadrantDim, &origin);
 
         Grid<CellWithPointMesh> grid(dim);
         int counter = 0;

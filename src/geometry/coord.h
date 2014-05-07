@@ -49,6 +49,7 @@ class Coord<1>
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef int ValueType;
 
     __host__ __device__
     static Coord<1> diagonal(const int& nx)
@@ -221,6 +222,7 @@ class Coord<2>
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef int ValueType;
 
     __host__ __device__
     static Coord<2> diagonal(const int& nx)
@@ -421,6 +423,7 @@ class Coord<3>
 public:
     friend class Serialization;
     friend class Typemaps;
+    typedef int ValueType;
 
     __host__ __device__
     static Coord<3> diagonal(const int& nx)

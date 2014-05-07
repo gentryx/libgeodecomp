@@ -34,13 +34,19 @@ public:
     using Writer<Cell>::DIM;
     using Writer<Cell>::prefix;
 
+    /**
+     * databaseType can by anything which SILO's DBCreate() accepts
+     * (e.g. DB_HDF5 or DB_PDB)
+     */
     SiloWriter(
         const std::string& prefix,
         const unsigned period,
         const std::string& regularGridLabel = "regular_grid",
         const std::string& unstructuredMeshLabel = "unstructured_mesh",
-        const std::string& pointMeshLabel = "point_mesh") :
+        const std::string& pointMeshLabel = "point_mesh",
+        int databaseType = DB_PDB) :
         Writer<Cell>(prefix, period),
+        databaseType(databaseType),
         coords(DIM),
         regularGridLabel(regularGridLabel),
         unstructuredMeshLabel(unstructuredMeshLabel),
@@ -80,7 +86,7 @@ public:
                  << step << ".silo";
 
         DBfile *dbfile = DBCreate(filename.str().c_str(), DB_CLOBBER, DB_LOCAL,
-                                  "simulation time step", DB_HDF5);
+                                  "simulation time step", databaseType);
 
         handleUnstructuredGrid(dbfile, grid, typename APITraits::SelectUnstructuredGrid<Cell>::Value());
         handlePointMesh(       dbfile, grid, typename APITraits::SelectPointMesh<       Cell>::Value());
@@ -102,6 +108,7 @@ public:
     }
 
 private:
+    int databaseType;
     std::vector<std::vector<double> > coords;
     std::vector<int> elementTypes;
     std::vector<int> shapeSizes;
@@ -240,11 +247,13 @@ private:
     void collectRegularGridGeometry(const GridType& grid)
     {
         Coord<DIM> dim = grid.boundingBox().dimensions;
-        FloatCoord<DIM> quadrantDim = APITraits::SelectRegularGrid<Cell>::value();
+        FloatCoord<DIM> quadrantDim;
+        FloatCoord<DIM> origin;
+        APITraits::SelectRegularGrid<Cell>::value(&quadrantDim, &origin);
 
         for (int d = 0; d < DIM; ++d) {
             for (int i = 0; i <= dim[d]; ++i) {
-                coords[d] << quadrantDim[d] * i;
+                coords[d] << (origin[d] + quadrantDim[d] * i);
             }
         }
     }

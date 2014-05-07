@@ -15,9 +15,10 @@
 #include <libgeodecomp/storage/linepointerupdatefunctor.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/testbed/performancetests/benchmark.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
-#include <libgeodecomp/testbed/performancetests/evaluate.h>
+
+#include <libflatarray/testbed/cpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
 
 #include <emmintrin.h>
 #ifdef __AVX__
@@ -43,7 +44,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int sum = 0;
         Region<3> r;
@@ -92,7 +93,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         double seconds = 0;
         {
@@ -128,7 +129,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         double seconds = 0;
         {
@@ -174,7 +175,7 @@ public:
         return "vanilla";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         double seconds = 0;
         {
@@ -218,7 +219,7 @@ public:
         return "bronze";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
@@ -264,7 +265,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
@@ -312,7 +313,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         double seconds = 0;
         {
@@ -358,7 +359,7 @@ public:
         return "vanilla";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int dimX = dim.x();
         int dimY = dim.y();
@@ -434,7 +435,7 @@ public:
         return "pepper";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int dimX = dim.x();
         int dimY = dim.y();
@@ -685,7 +686,7 @@ public:
         return "bronze";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int maxT = 5;
         SerialSimulator<JacobiCellClassic> sim(
@@ -756,7 +757,7 @@ public:
         return "silver";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int maxT = 20;
 
@@ -966,19 +967,13 @@ public:
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
     static __m128d load(const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
-        return load<OFFSET>(&hood[coord].temp, hood.arity(coord));
+        return load<OFFSET>(&hood[coord].temp);
     }
 
     template<int OFFSET>
-    static __m128d load(const double *p, VectorArithmetics::Vector)
+    static __m128d load(const double *p)
     {
         return _mm_load_pd(p + OFFSET);
-    }
-
-    template<int OFFSET>
-    static __m128d load(const double *p, VectorArithmetics::Scalar)
-    {
-        return _mm_set_pd(*p, *p);
     }
 
     double temp;
@@ -997,7 +992,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         typedef Grid<
             JacobiCellStreakUpdate,
@@ -1064,7 +1059,7 @@ public:
         return "platinum";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int maxT = 20;
         SerialSimulator<JacobiCellStreakUpdate> sim(
@@ -2079,7 +2074,7 @@ public:
         return "bronze";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int maxT = 20;
         SerialSimulator<LBMCell> sim(
@@ -2122,7 +2117,7 @@ public:
         return "gold";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         int maxT = 10;
         SerialSimulator<LBMSoACell> sim(
@@ -2170,7 +2165,7 @@ public:
         return name;
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
         double duration = 0;
         Coord<2> accu;
@@ -2209,7 +2204,7 @@ void cudaTests(std::string revision, bool quick, int cudaDevice);
 int main(int argc, char **argv)
 {
     if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
+        std::cerr << "usage: " << argv[0] << " [-q,--quick] REVISION CUDA_DEVICE\n";
         return 1;
     }
 
@@ -2229,34 +2224,34 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    Evaluate eval(revision);
-    eval.printHeader();
+    LibFlatArray::evaluate eval(revision);
+    eval.print_header();
 
-    eval(RegionCount(), Coord<3>( 128,  128,  128));
-    eval(RegionCount(), Coord<3>( 512,  512,  512));
-    eval(RegionCount(), Coord<3>(2048, 2048, 2048));
+    eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(RegionInsert(), Coord<3>( 128,  128,  128));
-    eval(RegionInsert(), Coord<3>( 512,  512,  512));
-    eval(RegionInsert(), Coord<3>(2048, 2048, 2048));
+    eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(RegionIntersect(), Coord<3>( 128,  128,  128));
-    eval(RegionIntersect(), Coord<3>( 512,  512,  512));
-    eval(RegionIntersect(), Coord<3>(2048, 2048, 2048));
+    eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(CoordEnumerationVanilla(), Coord<3>( 128,  128,  128));
-    eval(CoordEnumerationVanilla(), Coord<3>( 512,  512,  512));
-    eval(CoordEnumerationVanilla(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(CoordEnumerationBronze(), Coord<3>( 128,  128,  128));
-    eval(CoordEnumerationBronze(), Coord<3>( 512,  512,  512));
-    eval(CoordEnumerationBronze(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(CoordEnumerationGold(), Coord<3>( 128,  128,  128));
-    eval(CoordEnumerationGold(), Coord<3>( 512,  512,  512));
-    eval(CoordEnumerationGold(), Coord<3>(2048, 2048, 2048));
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(FloatCoordAccumulationGold(), Coord<3>(2048, 2048, 2048));
+    eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
     std::vector<Coord<3> > sizes;
     sizes << Coord<3>(22, 22, 22)
@@ -2271,27 +2266,27 @@ int main(int argc, char **argv)
           << Coord<3>(1026, 1026, 32);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(Jacobi3DVanilla(), sizes[i]);
+        eval(Jacobi3DVanilla(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(Jacobi3DSSE(), sizes[i]);
+        eval(Jacobi3DSSE(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(Jacobi3DClassic(), sizes[i]);
+        eval(Jacobi3DClassic(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(Jacobi3DFixedHood(), sizes[i]);
+        eval(Jacobi3DFixedHood(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(Jacobi3DStreakUpdate(), sizes[i]);
+        eval(Jacobi3DStreakUpdate(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(Jacobi3DStreakUpdateFunctor(), sizes[i]);
+        eval(Jacobi3DStreakUpdateFunctor(), toVector(sizes[i]));
     }
 
     sizes.clear();
@@ -2304,14 +2299,14 @@ int main(int argc, char **argv)
           << Coord<3>(160, 160, 160);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(LBMClassic(), sizes[i]);
+        eval(LBMClassic(), toVector(sizes[i]));
     }
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(LBMSoA(), sizes[i]);
+        eval(LBMSoA(), toVector(sizes[i]));
     }
 
-    Coord<3> dim(32 * 1024, 32 * 1024, 1);
+    std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
     eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
     eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
     eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);

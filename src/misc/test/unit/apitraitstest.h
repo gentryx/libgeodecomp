@@ -34,9 +34,14 @@ public:
         public APITraits::HasCustomRegularGrid
     {
     public:
-        static FloatCoord<3> getRegularGridSpacing()
+        inline FloatCoord<3> getRegularGridSpacing()
         {
             return FloatCoord<3>(30, 20, 10);
+        }
+
+        inline FloatCoord<3> getRegularGridOrigin()
+        {
+            return FloatCoord<3>(5, 6, 7);
         }
     };
 
@@ -136,8 +141,20 @@ public:
 
     void testSelectRegularGrid()
     {
-        TS_ASSERT_EQUALS(FloatCoord<2>( 1,  1),     APITraits::SelectRegularGrid<MySimpleDummyCell>::value());
-        TS_ASSERT_EQUALS(FloatCoord<3>(30, 20, 10), APITraits::SelectRegularGrid<MyFancyDummyCell >::value());
+        FloatCoord<2> quadrantDimA;
+        FloatCoord<3> quadrantDimB;
+
+        FloatCoord<2> originA;
+        FloatCoord<3> originB;
+
+        APITraits::SelectRegularGrid<MySimpleDummyCell>::value(&quadrantDimA, &originA);
+        APITraits::SelectRegularGrid<MyFancyDummyCell >::value(&quadrantDimB, &originB);
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(1, 1),       quadrantDimA);
+        TS_ASSERT_EQUALS(FloatCoord<3>(30, 20, 10), quadrantDimB);
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(0, 0),    originA);
+        TS_ASSERT_EQUALS(FloatCoord<3>(5, 6, 7), originB);
     }
 };
 

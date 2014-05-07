@@ -2,30 +2,27 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <libflatarray/testbed/gpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
+#include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
 #include <libgeodecomp/storage/soagrid.h>
-#include <libgeodecomp/testbed/performancetests/benchmark.h>
-#include <libgeodecomp/testbed/performancetests/evaluate.h>
 
 using namespace LibGeoDecomp;
 
-std::string cudaDeviceID;
-
-class GPUBenchmark : public Benchmark
+class GPUBenchmark : public LibFlatArray::gpu_benchmark
 {
 public:
-    std::string order()
+    double performance(std::vector<int> dim)
     {
-        return "GPU";
+        Coord<3> c(dim[0], dim[1], dim[2]);
+        return performance2(c);
     }
 
-    std::string device()
-    {
-        return cudaDeviceID;
-    }
+    virtual double performance2(const Coord<3>& dim) = 0;
 };
 
 class Cell
@@ -561,7 +558,7 @@ public:
         return "GLUPS";
     }
 
-    double performance(const Coord<3>& dim)
+    double performance2(const Coord<3>& dim)
     {
 #define CASE(DIM, ADD)                                                  \
         if (max(dim) <= DIM) {                                          \
@@ -600,24 +597,20 @@ public:
 void cudaTests(std::string revision, bool quick, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
-    cudaDeviceProp properties;
-    cudaGetDeviceProperties(&properties, cudaDevice);
-    cudaDeviceID = properties.name;
-
-    Evaluate eval(revision);
+    LibFlatArray::evaluate eval(revision);
 
     for (int d = 32; d <= 544; d += 4) {
-        eval(BenchmarkCUDA<RTMClassic>(), Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<RTMClassic>(), toVector(Coord<3>::diagonal(d)));
     }
     for (int d = 32; d <= 544; d += 4) {
-        eval(BenchmarkCUDA<RTMSoA>(),     Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<RTMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }
     for (int d = 32; d <= 160; d += 4) {
         Coord<3> dim(d, d, 256 + 32 - 4);
-        eval(BenchmarkCUDA<LBMClassic>(), Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<LBMClassic>(), toVector(Coord<3>::diagonal(d)));
     }
     for (int d = 32; d <= 160; d += 4) {
         Coord<3> dim(d, d, 256 + 32 - 4);
-        eval(BenchmarkCUDA<LBMSoA>(),     Coord<3>::diagonal(d));
+        eval(BenchmarkCUDA<LBMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }
 }

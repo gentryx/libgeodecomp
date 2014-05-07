@@ -1,4 +1,6 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
 
 #include <boost/assign/std/vector.hpp>
 #include <cxxtest/TestSuite.h>
@@ -272,6 +274,25 @@ public:
         TS_ASSERT_EQUALS(a + b, c);
         append(a, b);
         TS_ASSERT_EQUALS(a, c);
+    }
+
+    void testCoordToVector()
+    {
+        std::vector<int> expected1;
+        expected1 += 1, 2, 4;
+        TS_ASSERT_EQUALS(expected1, toVector(Coord<3>(1, 2, 4)));
+
+        std::vector<int> expected2;
+        expected2 += 6, 8;
+        TS_ASSERT_EQUALS(expected2, toVector(Coord<2>(6, 8)));
+
+        std::vector<int> expected3;
+        expected3 += 9;
+        TS_ASSERT_EQUALS(expected3, toVector(Coord<1>(9)));
+
+        std::vector<double> expected4;
+        expected4 += 1.2, 3.4;
+        TS_ASSERT_EQUALS(expected4, toVector(FloatCoord<2>(1.2, 3.4)));
     }
 
     void testOperatorLessLess()

@@ -139,10 +139,27 @@ public:
         return numElements;
     }
 
+    /**
+     * The normal update() will copy its state from last time step so
+     * all cargo items are well initialized. Otherwise the current
+     * container wouldn't even know the IDs of the items which need
+     * updating.
+     */
     template<class NEIGHBORHOOD>
-    inline void update(NEIGHBORHOOD neighbors, const int& nanoStep)
+    inline void update(const NEIGHBORHOOD& neighbors, const int& nanoStep)
     {
         *this = neighbors[Coord<DIM>()];
+        updateCargo(neighbors, nanoStep);
+    }
+
+    /**
+     * Assuming that some external entity has already taken care of
+     * initializing this container's cargo, we also provide
+     * updateCargo(), which doesn't copy over the old state:
+     */
+    template<class NEIGHBORHOOD>
+    inline void updateCargo(NEIGHBORHOOD& neighbors, const int& nanoStep)
+    {
         NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
 
         for (std::size_t i = 0; i < numElements; ++i) {
