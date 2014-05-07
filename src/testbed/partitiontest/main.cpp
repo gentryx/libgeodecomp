@@ -447,14 +447,6 @@ void phiPlotSize(int dimx, int dimy,int dimz, int maxnodes){
         Partition<DIM> *recBi = new RecursiveBisectionPartition<DIM>(origin, dimensions, 0, weights);
         outputPhiSize(recBi,outputRecBi,i);
         delete recBi;
-        std::cout << "ptscotch" << std::endl;
-        Partition<DIM> *ptscotch = new PTScotchPartition<DIM>(origin, dimensions, 0, weights);
-        outputPhiSize(ptscotch,outputPTScotch,i);
-        delete ptscotch;
-        std::cout << "striping" << std::endl;
-        Partition<DIM> *striping = new StripingPartition<DIM>(origin, dimensions, 0, weights);
-        outputPhiSize(striping,outputStriping,i);
-        delete striping;
 
         weights.clear();
     }
