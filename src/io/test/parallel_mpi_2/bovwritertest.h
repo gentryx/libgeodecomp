@@ -64,6 +64,8 @@ public:
         simTest.addWriter(new BOVWriter<TestCell<3>, TestValueSelector>("testbovwriter", 4));
         simTest.run();
 
+        MPILayer().barrier();
+
         if (MPILayer().rank() == 0) {
             Grid<TestCell<3>, Topologies::Cube<3>::Topology> buffer(dimensions);
             Grid<double, Topologies::Cube<3>::Topology> expected(dimensions);
