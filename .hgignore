@@ -16,5 +16,6 @@ syntax: glob
 ./tools/typemapgenerator/sample/src/typemaps.h
 ./tools/typemapgenerator/sample/src/typemaps.cpp
 ./builddir
+./build
 syntax: regexp
 ^doc
