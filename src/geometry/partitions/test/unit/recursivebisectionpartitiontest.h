@@ -85,6 +85,20 @@ public:
         checkCuboid(weights, 3, Coord<2>(48, 16), Coord<2>(48, 16), dim, dimWeights);
     }
 
+    void testDegradedDimensions()
+    {
+        std::vector<std::size_t> weights;
+        weights += 0, 0;
+        Coord<3> dim(128, 0, 0);
+        TS_ASSERT_THROWS(
+            RecursiveBisectionPartition<3> p(
+                Coord<3>(),
+                dim,
+                0,
+                weights),
+            std::invalid_argument);
+    }
+
     void checkCuboid(std::vector<std::size_t> weights, long node, Coord<2> expectedOffset, Coord<2> expectedDim, Coord<2> dimensions=Coord<2>(30, 20), Coord<2> dimWeights=Coord<2>::diagonal(1))
     {
         Coord<2> origin(0, 0);

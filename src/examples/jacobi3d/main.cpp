@@ -47,7 +47,7 @@ public:
 
     CellInitializer(int num) :
         SimpleInitializer<Cell>(
-            Coord<3>(128) * num, 1000)
+            Coord<3>::diagonal(128) * num, 1000)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)

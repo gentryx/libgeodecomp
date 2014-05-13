@@ -24,7 +24,11 @@ public:
         origin(origin),
         dimensions(dimensions),
         dimWeights(dimWeights)
-    {}
+    {
+        if (dimensions.prod() == 0) {
+            throw std::invalid_argument("size of simulation space may not be zero");
+        }
+    }
 
     inline Region<DIM> getRegion(const std::size_t i) const
     {
