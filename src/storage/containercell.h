@@ -149,7 +149,9 @@ public:
     inline void update(const NEIGHBORHOOD& neighbors, const int& nanoStep)
     {
         *this = neighbors[Coord<DIM>()];
-        updateCargo(neighbors, nanoStep);
+
+        NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
+        updateCargo(adapter, nanoStep);
     }
 
     /**
@@ -160,10 +162,8 @@ public:
     template<class NEIGHBORHOOD>
     inline void updateCargo(NEIGHBORHOOD& neighbors, const int& nanoStep)
     {
-        NeighborhoodAdapter<NEIGHBORHOOD, Key, Cargo, DIM> adapter(&neighbors);
-
         for (std::size_t i = 0; i < numElements; ++i) {
-            cells[i].update(adapter, nanoStep);
+            cells[i].update(neighbors, nanoStep);
         }
     }
 
