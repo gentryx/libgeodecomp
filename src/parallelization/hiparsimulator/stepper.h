@@ -30,7 +30,6 @@ public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
 
-
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
 
