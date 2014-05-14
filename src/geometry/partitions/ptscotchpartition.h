@@ -26,21 +26,14 @@ public:
         const std::vector<std::size_t>& weights = std::vector<std::size_t>(2)) :
         Partition<DIM>(offset, weights),
         origin(origin),
-        dimensions(dimensions)
-        {
-            if(DIM == 3){
-                cellNbr = dimensions[0] *
-                    dimensions[1] *
-                    dimensions[2];
-            } else {
-                cellNbr = dimensions[0] *
-                    dimensions[1];
-            }
-            indices = new SCOTCH_Num[cellNbr];
-            initIndices();
-            regions = new Region<DIM>[weights.size()];
-            createRegions();
-        }
+        dimensions(dimensions),
+        cellNbr(dimensions.prod())
+    {
+        std::vector<SCOTCH_Num> indices(cellNbr);
+        initIndices(&indices[0]);
+        regions.resize(weights.size());
+        createRegions(&indices[0]);
+    }
 
     Region<DIM> getRegion(const std::size_t node) const
     {
@@ -50,11 +43,11 @@ public:
 private:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
-    SCOTCH_Num *indices;
     SCOTCH_Num cellNbr;
-    Region<DIM> * regions;
+    std::vector<Region<DIM>> regions;
 
-    void initIndices(){
+    void initIndices(SCOTCH_Num *indices)
+    {
         SCOTCH_Arch arch;
         SCOTCH_archInit(&arch);
         SCOTCH_Num * velotabArch;
@@ -133,18 +126,19 @@ private:
         SCOTCH_Strat *straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
 
-        SCOTCH_dgraphMap (&grafdat, &arch, straptr, indices);
+        SCOTCH_dgraphMap(&grafdat, &arch, straptr, indices);
 
-        SCOTCH_archExit (&arch);
-        SCOTCH_dgraphExit (&grafdat);
-        SCOTCH_stratExit (straptr);
-        free (velotabArch);
-        free (verttabGra);
-        free (edgetabGra);
+        SCOTCH_archExit(&arch);
+        SCOTCH_dgraphExit(&grafdat);
+        SCOTCH_stratExit(straptr);
+        delete[] velotabArch;
+        delete[] verttabGra;
+        delete[] edgetabGra;
 
     }
 
-    void createRegions(){
+    void createRegions(SCOTCH_Num *indices)
+    {
         int rank = indices[0];
         int length = 0;
         int start = 0;
