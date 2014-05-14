@@ -11,27 +11,6 @@ namespace LibGeoDecomp {
 class PTScotchPartitionTest : public CxxTest::TestSuite
 {
 public:
-    void testEqual3D()
-    {
-#ifdef LIBGEODECOMP_WITH_SCOTCH
-        Coord<3> origin(0,0,0);
-        Coord<3> dimensions(4,4,4);
-        std::vector<std::size_t> weights;
-        weights << 100 << 100 << 100 << 100;
-        PTScotchPartition<3> p(origin, dimensions, 0, weights);
-        std::size_t sizeRegion0 = p.getRegion(0).size();
-        std::size_t compSize;
-
-        for(unsigned int i = 1 ; i < weights.size() ; ++i){
-            compSize = p.getRegion(i).size();
-            TS_ASSERT(sizeRegion0 == compSize ||
-                      sizeRegion0 == compSize - 1 ||
-                      sizeRegion0 == compSize + 1);
-        }
-#endif
-    }
-
-
     void testComplete3D()
     {
 #ifdef LIBGEODECOMP_WITH_SCOTCH
