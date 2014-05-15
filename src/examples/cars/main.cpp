@@ -259,11 +259,9 @@ void runSimulation()
 
 int main(int argc, char* argv[])
 {
-    MPI_Init(&argc, &argv);
     srand((unsigned)time(0));
 
     runSimulation();
 
-    MPI_Finalize();
     return 0;
 }
