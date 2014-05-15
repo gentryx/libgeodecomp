@@ -43,7 +43,7 @@ private:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
     SCOTCH_Num cellNbr;
-    std::vector<Region<DIM>> regions;
+    std::vector<Region<DIM> > regions;
 
     void initIndices(SCOTCH_Num *indices)
     {
