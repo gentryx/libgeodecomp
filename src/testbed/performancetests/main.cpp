@@ -17,6 +17,7 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 
+#include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
 
@@ -814,47 +815,45 @@ public:
         public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasUpdateLineX,
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasCubeTopology<3>
+        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasSoA
     {};
 
     JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
 
-    template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int /* nanoStep */)
+    template<typename HOOD_OLD, typename HOOD_NEW>
+    static void updateSingle(HOOD_OLD& hoodOld, HOOD_NEW& hoodNew)
     {
-        temp = (hood[FixedCoord<0,  0, -1>()].temp +
-                hood[FixedCoord<0, -1,  0>()].temp +
-                hood[FixedCoord<1,  0,  0>()].temp +
-                hood[FixedCoord<0,  0,  0>()].temp +
-                hood[FixedCoord<1,  0,  0>()].temp +
-                hood[FixedCoord<0,  1,  0>()].temp +
-                hood[FixedCoord<0,  0,  1>()].temp) * (1.0 / 7.0);
+        hoodNew.temp() =
+            (hoodOld[FixedCoord<0,  0, -1>()].temp() +
+             hoodOld[FixedCoord<0, -1,  0>()].temp() +
+             hoodOld[FixedCoord<1,  0,  0>()].temp() +
+             hoodOld[FixedCoord<0,  0,  0>()].temp() +
+             hoodOld[FixedCoord<1,  0,  0>()].temp() +
+             hoodOld[FixedCoord<0,  1,  0>()].temp() +
+             hoodOld[FixedCoord<0,  0,  1>()].temp()) * (1.0 / 7.0);
     }
 
-    template<typename NEIGHBORHOOD>
-    static void updateLineX(JacobiCellStreakUpdate *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
+    template<typename HOOD_OLD, typename HOOD_NEW>
+    static void updateLineX(HOOD_OLD& hoodOld, int indexEnd,
+                            HOOD_NEW& hoodNew, int /* nanoStep */)
     {
-        if (((*x) % 2) == 1) {
-            target[*x].update(hood, 0);
-            ++(*x);
+        if (hoodOld.index() % 2 == 1) {
+            updateSingle(hoodOld, hoodNew);
+            ++hoodOld.index();
+            ++hoodNew.index;
         }
 
-        __m128d oneSeventh = _mm_set_pd(1.0/7.0, 1.0/7.0);
-
+        __m128d oneSeventh = _mm_set1_pd(1.0 / 7.0);
         PentaM128 same;
-        // PentaM128 odds;
+        same.a = _mm_load_pd( &hoodOld[FixedCoord< 0, 0, 0>()].temp());
+        __m128d odds0 = _mm_loadu_pd(&hoodOld[FixedCoord<-1, 0, 0>()].temp());
 
-        same.a = _mm_load_pd( &hood[FixedCoord< 0, 0, 0>()].temp);
-        __m128d odds0 = _mm_loadu_pd(&hood[FixedCoord<-1, 0, 0>()].temp);
+        for (; hoodOld.index() < (indexEnd - 8 + 1); hoodOld.index() += 8, hoodNew.index += 8) {
 
-        for (; (*x) < (endX - 7); (*x) += 8) {
-            load(&same, hood, FixedCoord<0, 0, 0>());
-            // __m128d same2 = _mm_load_pd(&hood[FixedCoord< 2, 0, 0>()].temp);
-            // __m128d same3 = _mm_load_pd(&hood[FixedCoord< 4, 0, 0>()].temp);
-            // __m128d same4 = _mm_load_pd(&hood[FixedCoord< 6, 0, 0>()].temp);
-            // __m128d same5 = _mm_load_pd(&hood[FixedCoord< 8, 0, 0>()].temp);
+            load(&same, hoodOld, FixedCoord<0, 0, 0>());
 
             // shuffle values obtain left/right neighbors
             __m128d odds1 = _mm_shuffle_pd(same.a, same.b, (1 << 0) | (0 << 2));
@@ -864,11 +863,7 @@ public:
 
             // load south neighbors
             QuadM128 buf;
-            load(&buf, hood, FixedCoord<0, 0, -1>());
-            // __m128d buf0 =  load<0>(hood, FixedCoord< 0, 0, -1>());
-            // __m128d buf1 =  load<2>(hood, FixedCoord< 0, 0, -1>());
-            // __m128d buf2 =  load<4>(hood, FixedCoord< 0, 0, -1>());
-            // __m128d buf3 =  load<6>(hood, FixedCoord< 0, 0, -1>());
+            load(&buf, hoodOld, FixedCoord<0, 0, -1>());
 
             // add left neighbors
             same.a = _mm_add_pd(same.a, odds0);
@@ -883,10 +878,10 @@ public:
             same.d = _mm_add_pd(same.d, odds4);
 
             // load top neighbors
-            odds0 = load<0>(hood, FixedCoord< 0, -1, 0>());
-            odds1 = load<2>(hood, FixedCoord< 0, -1, 0>());
-            odds2 = load<4>(hood, FixedCoord< 0, -1, 0>());
-            odds3 = load<6>(hood, FixedCoord< 0, -1, 0>());
+            odds0 = load<0>(hoodOld, FixedCoord< 0, -1, 0>());
+            odds1 = load<2>(hoodOld, FixedCoord< 0, -1, 0>());
+            odds2 = load<4>(hoodOld, FixedCoord< 0, -1, 0>());
+            odds3 = load<6>(hoodOld, FixedCoord< 0, -1, 0>());
 
             // add south neighbors
             same.a = _mm_add_pd(same.a, buf.a);
@@ -895,11 +890,7 @@ public:
             same.d = _mm_add_pd(same.d, buf.d);
 
             // load bottom neighbors
-            load(&buf, hood, FixedCoord<0, 1, 0>());
-            // buf0 =  load<0>(hood, FixedCoord< 0, 1, 0>());
-            // buf1 =  load<2>(hood, FixedCoord< 0, 1, 0>());
-            // buf2 =  load<4>(hood, FixedCoord< 0, 1, 0>());
-            // buf3 =  load<6>(hood, FixedCoord< 0, 1, 0>());
+            load(&buf, hoodOld, FixedCoord<0, 1, 0>());
 
             // add top neighbors
             same.a = _mm_add_pd(same.a, odds0);
@@ -908,10 +899,10 @@ public:
             same.d = _mm_add_pd(same.d, odds3);
 
             // load north neighbors
-            odds0 = load<0>(hood, FixedCoord< 0, 0, 1>());
-            odds1 = load<2>(hood, FixedCoord< 0, 0, 1>());
-            odds2 = load<4>(hood, FixedCoord< 0, 0, 1>());
-            odds3 = load<6>(hood, FixedCoord< 0, 0, 1>());
+            odds0 = load<0>(hoodOld, FixedCoord< 0, 0, 1>());
+            odds1 = load<2>(hoodOld, FixedCoord< 0, 0, 1>());
+            odds2 = load<4>(hoodOld, FixedCoord< 0, 0, 1>());
+            odds3 = load<6>(hoodOld, FixedCoord< 0, 0, 1>());
 
             // add bottom neighbors
             same.a = _mm_add_pd(same.a, buf.a);
@@ -932,17 +923,18 @@ public:
             same.d = _mm_mul_pd(same.d, oneSeventh);
 
             // store results
-            _mm_store_pd(&target[*x + 0].temp, same.a);
-            _mm_store_pd(&target[*x + 2].temp, same.b);
-            _mm_store_pd(&target[*x + 4].temp, same.c);
-            _mm_store_pd(&target[*x + 6].temp, same.d);
+            _mm_store_pd(&hoodNew[LibFlatArray::coord<0, 0, 0>()].temp(), same.a);
+            _mm_store_pd(&hoodNew[LibFlatArray::coord<2, 0, 0>()].temp(), same.b);
+            _mm_store_pd(&hoodNew[LibFlatArray::coord<4, 0, 0>()].temp(), same.c);
+            _mm_store_pd(&hoodNew[LibFlatArray::coord<6, 0, 0>()].temp(), same.d);
 
+            // cycle members
             odds0 = odds4;
             same.a = same.e;
         }
 
-        for (; *x < endX; ++(*x)) {
-            target[*x].update(hood, 0);
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
+            updateSingle(hoodOld, hoodNew);
         }
     }
 
@@ -967,7 +959,7 @@ public:
     template<int OFFSET, typename NEIGHBORHOOD, int X, int Y, int Z>
     static __m128d load(const NEIGHBORHOOD& hood, FixedCoord<X, Y, Z> coord)
     {
-        return load<OFFSET>(&hood[coord].temp);
+        return load<OFFSET>(&hood[coord].temp());
     }
 
     template<int OFFSET>
@@ -978,6 +970,11 @@ public:
 
     double temp;
 };
+
+LIBFLATARRAY_REGISTER_SOA(
+    JacobiCellStreakUpdate,
+    ((double)(temp))
+                          )
 
 class Jacobi3DStreakUpdate : public CPUBenchmark
 {
@@ -994,42 +991,34 @@ public:
 
     double performance2(const Coord<3>& dim)
     {
-        typedef Grid<
+        typedef SoAGrid<
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
-        GridType gridA(dim, 1.0);
-        GridType gridB(dim, 2.0);
+        CoordBox<3> box(Coord<3>(), dim);
+        GridType gridA(box, 1.0);
+        GridType gridB(box, 2.0);
         GridType *gridOld = &gridA;
         GridType *gridNew = &gridB;
 
         int maxT = 20;
 
-        CoordBox<3> gridBox = gridA.boundingBox();
-        CoordBox<3> lineStarts = gridA.boundingBox();
-        lineStarts.dimensions.x() = 1;
+        Region<3> region;
+        region << box;
 
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
 
             for (int t = 0; t < maxT; ++t) {
-                for (CoordBox<3>::Iterator i = lineStarts.begin();
-                     i != lineStarts.end();
-                     ++i) {
-                    Streak<3> streak(*i, dim.x());
+                typedef UpdateFunctorHelpers::Selector<JacobiCellStreakUpdate>::SoARegionUpdateHelper Updater;
 
-                    typedef APITraits::SelectStencil<JacobiCellStreakUpdate>::Value Stencil;
-                    const JacobiCellStreakUpdate *pointers[Stencil::VOLUME];
-                    LinePointerAssembly<Stencil>()(pointers, streak, *gridOld);
-                    LinePointerUpdateFunctor<JacobiCellStreakUpdate>()(
-                        streak, gridBox, pointers, &(*gridNew)[streak.origin], 0);
-                }
-
-                std::swap(gridOld, gridNew);
+                Coord<3> offset(1, 1, 1);
+                Updater updater(region, offset, offset, 0);
+                gridA.callback(&gridB, updater);
             }
         }
 
-        if (gridA[Coord<3>(1, 1, 1)].temp == 4711) {
+        if (gridA.get(Coord<3>(1, 1, 1)).temp == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -1758,9 +1747,10 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
+        ACCESSOR1& hoodOld, int indexEnd,
+        ACCESSOR2& hoodNew, int nanoStep)
     {
-        updateLineXFluid(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
+        updateLineXFluid(hoodOld, indexEnd, hoodNew);
     }
 
 
@@ -1798,7 +1788,8 @@ public:
 // private:
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineXFluid(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+        ACCESSOR1& hoodOld, int indexEnd,
+        ACCESSOR2& hoodNew)
     {
 #define GET_COMP(X, Y, Z, COMP) Double(&hoodOld[FixedCoord<X, Y, Z>()].COMP())
 #define SQR(X) ((X)*(X))
@@ -1816,7 +1807,7 @@ public:
         const int z = 0;
         Double velX, velY, velZ;
 
-        for (; *indexOld < indexEnd; *indexOld += Double::ARITY) {
+        for (; hoodOld.index() < indexEnd; hoodNew.index += Double::ARITY, hoodOld.index() += Double::ARITY) {
             velX  =
                 GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
                 GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
@@ -1873,14 +1864,12 @@ public:
             store(&hoodNew.W(), omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + one_point_five * SQR(velX)));
             store(&hoodNew.T(), omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + one_point_five * SQR(velZ)));
             store(&hoodNew.B(), omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
-
-            *indexNew += Double::ARITY;
         }
     }
 
 //     template<typename ACCESSOR1, typename ACCESSOR2>
 //     static void updateLineXFluid(
-//         ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+//         ACCESSOR1 hoodOld, int hoodOld.index(), int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
 //     {
 // #define GET_COMP(X, Y, Z, COMP) hoodOld[FixedCoord<X, Y, Z>()].COMP()
 // #define SQR(X) ((X)*(X))
@@ -1895,7 +1884,7 @@ public:
 //         const int z = 0;
 //         double velX, velY, velZ;
 
-//         for (; *indexOld < indexEnd; ++*indexOld) {
+//         for (; hoodOld.index() < indexEnd; ++hoodOld.index()) {
 //             velX  =
 //                 GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
 //                 GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +

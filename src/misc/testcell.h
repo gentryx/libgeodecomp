@@ -219,15 +219,13 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd,
-        ACCESSOR2 hoodNew, int *indexNew,
-        unsigned nanoStep)
+        ACCESSOR1 hoodOld, int indexEnd,
+        ACCESSOR2 hoodNew, unsigned nanoStep)
     {
-        for (; *indexOld < indexEnd; ++(*indexOld)) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
             TestCell cell;
             cell.update(hoodOld, nanoStep);
             hoodNew << cell;
-            ++(*indexNew);
         }
     }
 

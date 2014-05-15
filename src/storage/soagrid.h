@@ -54,7 +54,7 @@ public:
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *index)
+        int *unused)
     {
         for (int z = 0; z < gridDim.z(); ++z) {
             bool onEdge1 = false;
@@ -72,32 +72,32 @@ public:
                     onEdge2 = true;
                 }
 
-                *index =
+                accessor.index =
                     z * DIM_X * DIM_Y +
                     y * DIM_X;
                 int x = 0;
 
                 for (; x < edgeRadii.x(); ++x) {
                     accessor << edgeCell;
-                    ++*index;
+                    ++accessor.index;
                 }
 
                 if (onEdge2 || INIT_INTERIOR) {
                     for (; x < (gridDim.x() - edgeRadii.x()); ++x) {
                         accessor << *cell2;
-                        ++*index;
+                        ++accessor.index;
                     }
                 } else {
                     // we need to advance index and x manually, otherwise
                     // the following loop will erase the grid's interior:
                     int delta = gridDim.x() - 2 * edgeRadii.x();
                     x += delta;
-                    *index += delta;
+                    accessor.index += delta;
                 }
 
                 for (; x < gridDim.x(); ++x) {
                     accessor << edgeCell;
-                    ++*index;
+                    ++accessor.index;
                 }
             }
 
@@ -166,12 +166,12 @@ public:
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *index) const
+        int *unused) const
     {
         char *currentTarget = target;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+            accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             std::size_t byteSize = selector.sizeOfMember() * i->length();
             const char *first = accessor.access_member(selector.sizeOfMember(), selector.offset());
             const char *last = first + byteSize;
@@ -210,12 +210,12 @@ public:
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *index) const
+        int *unused) const
     {
         const char *currentSource = source;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            *index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
+            accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             std::size_t byteSize = selector.sizeOfExternal() * i->length();
             const char *first = currentSource;
@@ -281,10 +281,9 @@ public:
             actualDimensions.z());
 
         // init edges and interior
-        int index;
-        delegate.callback(SoAGridHelpers::SetContent<CELL, true>(
-                              actualDimensions, edgeRadii, edgeCell, defaultCell), &index);
-
+        delegate.callback(
+            SoAGridHelpers::SetContent<CELL, true>(
+                actualDimensions, edgeRadii, edgeCell, defaultCell));
     }
 
     virtual void set(const Coord<DIM>& absoluteCoord, const CELL& cell)
@@ -337,11 +336,10 @@ public:
     virtual void setEdge(const CELL& cell)
     {
         edgeCell = cell;
-        int index;
-
         CELL dummy;
-        delegate.callback(SoAGridHelpers::SetContent<CELL, false>(
-                              actualDimensions, edgeRadii, edgeCell, dummy), &index);
+        delegate.callback(
+            SoAGridHelpers::SetContent<CELL, false>(
+                actualDimensions, edgeRadii, edgeCell, dummy));
     }
 
     virtual const CELL& getEdge() const
@@ -362,8 +360,7 @@ public:
     template<typename FUNCTOR>
     void callback(FUNCTOR functor) const
     {
-        int index = 0;
-        delegate.callback(functor, &index);
+        delegate.callback(functor);
     }
 
     template<typename FUNCTOR>
@@ -412,19 +409,17 @@ protected:
     void saveMemberImplementation(
         char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
-        int index = 0;
         delegate.callback(
-            SoAGridHelpers::SaveMember<CELL, DIM>(target, selector, region, box.origin, edgeRadii),
-            &index);
+            SoAGridHelpers::SaveMember<CELL, DIM>(
+                target, selector, region, box.origin, edgeRadii));
     }
 
     void loadMemberImplementation(
         const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
     {
-        int index = 0;
         delegate.callback(
-            SoAGridHelpers::LoadMember<CELL, DIM>(source, selector, region, box.origin, edgeRadii),
-            &index);
+            SoAGridHelpers::LoadMember<CELL, DIM>(
+                source, selector, region, box.origin, edgeRadii));
     }
 
 private:

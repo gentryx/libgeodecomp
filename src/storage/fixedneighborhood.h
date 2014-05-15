@@ -30,7 +30,7 @@ public:
     typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
 
     __host__ __device__
-    FixedNeighborhood(const SoAAccessor& accessor) :
+    FixedNeighborhood(SoAAccessor& accessor) :
         accessor(accessor)
     {}
 
@@ -46,8 +46,22 @@ public:
         cell << accessor;
     }
 
+    __host__ __device__
+    inline
+    int& index()
+    {
+        return accessor.index;
+    }
+
+    __host__ __device__
+    inline
+    const int& index() const
+    {
+        return accessor.index;
+    }
+
 private:
-    const SoAAccessor& accessor;
+    SoAAccessor& accessor;
 };
 
 }

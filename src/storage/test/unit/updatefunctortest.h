@@ -114,12 +114,12 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
+        ACCESSOR1& hoodOld, int indexEnd,
+        ACCESSOR2& hoodNew, int nanoStep)
     {
-        for (; *indexOld < indexEnd; ++*indexOld) {
+        for (; hoodOld.index() < indexEnd; ++hoodOld.index(), ++hoodNew.index) {
             hoodNew.temp()  = hoodOld[FixedCoord<0, 0, 0>()].temp();
             hoodNew.alive() = hoodOld[FixedCoord<0, 0, 0>()].alive();
-            ++*indexNew;
         }
     }
 
@@ -202,6 +202,7 @@ public:
         for (int i = 5; i < 27; ++i) {
             Coord<3> c(i, 2, 1);
             gridOld.set(c, MySoATestCell(i - 5));
+            TS_ASSERT_EQUALS(gridOld.get(c).temp,  i - 5);
         }
         for (int i = 57; i < 79; ++i) {
             Coord<3> c(i, 27, 56);
