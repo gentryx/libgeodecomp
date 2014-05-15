@@ -682,14 +682,14 @@ public:
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineX(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew, unsigned nanoStep)
+        ACCESSOR1& hoodOld, int indexEnd, ACCESSOR2& hoodNew, unsigned nanoStep)
     {
-        updateLineXFluid(hoodOld, indexOld, indexEnd, hoodNew, indexNew);
+        updateLineXFluid(hoodOld, indexEnd, hoodNew);
     }
 
     template<typename ACCESSOR1, typename ACCESSOR2>
     static void updateLineXFluid(
-        ACCESSOR1 hoodOld, int *indexOld, int indexEnd, ACCESSOR2 hoodNew, int *indexNew)
+        ACCESSOR1& hoodOld, int indexEnd, ACCESSOR2& hoodNew)
     {
 #define GET_COMP(X, Y, Z, COMP) Double(hoodOld[FixedCoord<X, Y, Z>()].COMP())
 #define SQR(X) ((X)*(X))
@@ -707,7 +707,9 @@ public:
         const int z = 0;
         Double velX, velY, velZ;
 
-        for (; *indexOld < indexEnd; *indexOld += ArityHelper<Double>::VALUE) {
+        for (;
+             hoodOld.index() < indexEnd;
+             hoodOld.index() += ArityHelper<Double>::VALUE, hoodNew.index += ArityHelper<Double>::VALUE) {
             velX  =
                 GET_COMP(x-1,y,z,E) + GET_COMP(x-1,y-1,z,NE) +
                 GET_COMP(x-1,y+1,z,SE) + GET_COMP(x-1,y,z-1,TE) +
@@ -764,8 +766,6 @@ public:
             store(&hoodNew.W(), omega_trm * GET_COMP(x+1,y,z,W) + omega_w1*( dir_indep_trm - velX + one_point_five * SQR(velX)));
             store(&hoodNew.T(), omega_trm * GET_COMP(x,y,z-1,T) + omega_w1*( dir_indep_trm + velZ + one_point_five * SQR(velZ)));
             store(&hoodNew.B(), omega_trm * GET_COMP(x,y,z+1,B) + omega_w1*( dir_indep_trm - velZ + one_point_five * SQR(velZ)));
-
-            *indexNew += ArityHelper<Double>::VALUE;
         }
     }
 
@@ -804,9 +804,61 @@ public:
     State state;
 };
 
-LIBFLATARRAY_REGISTER_SOA(LBMSoACell<double>, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS))((double)(density))((double)(velocityX))((double)(velocityY))((double)(velocityZ))((LBMSoACell<double>::State)(state)))
+LIBFLATARRAY_REGISTER_SOA(
+    LBMSoACell<double>,
+    ((double)(C))
+    ((double)(N))
+    ((double)(E))
+    ((double)(W))
+    ((double)(S))
+    ((double)(T))
+    ((double)(B))
+    ((double)(NW))
+    ((double)(SW))
+    ((double)(NE))
+    ((double)(SE))
+    ((double)(TW))
+    ((double)(BW))
+    ((double)(TE))
+    ((double)(BE))
+    ((double)(TN))
+    ((double)(BN))
+    ((double)(TS))
+    ((double)(BS))
+    ((double)(density))
+    ((double)(velocityX))
+    ((double)(velocityY))
+    ((double)(velocityZ))
+    ((LBMSoACell<double>::State)(state))
+                          )
 
-LIBFLATARRAY_REGISTER_SOA(LBMSoACell<ShortVec4xSSE>, ((double)(C))((double)(N))((double)(E))((double)(W))((double)(S))((double)(T))((double)(B))((double)(NW))((double)(SW))((double)(NE))((double)(SE))((double)(TW))((double)(BW))((double)(TE))((double)(BE))((double)(TN))((double)(BN))((double)(TS))((double)(BS))((double)(density))((double)(velocityX))((double)(velocityY))((double)(velocityZ))((LBMSoACell<ShortVec4xSSE>::State)(state)))
+LIBFLATARRAY_REGISTER_SOA(
+    LBMSoACell<ShortVec4xSSE>,
+    ((double)(C))
+    ((double)(N))
+    ((double)(E))
+    ((double)(W))
+    ((double)(S))
+    ((double)(T))
+    ((double)(B))
+    ((double)(NW))
+    ((double)(SW))
+    ((double)(NE))
+    ((double)(SE))
+    ((double)(TW))
+    ((double)(BW))
+    ((double)(TE))
+    ((double)(BE))
+    ((double)(TN))
+    ((double)(BN))
+    ((double)(TS))
+    ((double)(BS))
+    ((double)(density))
+    ((double)(velocityX))
+    ((double)(velocityY))
+    ((double)(velocityZ))
+    ((LBMSoACell<ShortVec4xSSE>::State)(state))
+                          )
 
 template<class CELL>
 class MonoInitializer : public SimpleInitializer<CELL>
