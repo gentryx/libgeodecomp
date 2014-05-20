@@ -13,7 +13,7 @@ public:
     class API :
         public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasTorusTopology<3>,
         public APITraits::HasPredefinedMPIDataType<double>
     {};
 
@@ -62,7 +62,7 @@ public:
         int maxSteps = 250;
 
         SimulationFactory<SimFabTestCell> fab;
-        // fab.parameters()["Simulator"] = "CacheBlockingSimulator";
+        fab.parameters()["Simulator"] = "CacheBlockingSimulator";
 
         Simulator<SimFabTestCell> *sim = fab(new SimFabTestInitializer(dim, maxSteps));
         sim->run();
