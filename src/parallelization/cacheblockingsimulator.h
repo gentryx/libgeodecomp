@@ -294,7 +294,11 @@ private:
         GRID2 *targetGrid,
         unsigned curNanoStep)
     {
-        LOG(DBG, "    frameUpdate(" << updateFrame.boundingBox() << ", " << sourceIndex << ", " << targetIndex <<  ")");
+        LOG(DBG, "    frameUpdate("
+            << needsFlushing << ", "
+            << updateFrame.boundingBox() << ", "
+            << sourceIndex << ", "
+            << targetIndex <<  ")");
 
         if (needsFlushing) {
             // fixme: only works with cube topologies
