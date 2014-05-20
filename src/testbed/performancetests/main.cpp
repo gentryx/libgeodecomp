@@ -1014,7 +1014,8 @@ public:
 
                 Coord<3> offset(1, 1, 1);
                 Updater updater(region, offset, offset, 0);
-                gridA.callback(&gridB, updater);
+                gridNew->callback(gridOld, updater);
+                std::swap(gridOld, gridNew);
             }
         }
 
