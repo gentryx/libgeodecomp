@@ -47,7 +47,7 @@ public:
             period = writer->getPeriod();
         }
 
-        mpiLayer.broadcast(period, root);
+        period = mpiLayer.broadcast(period, root);
     }
 
     virtual void stepFinished(
