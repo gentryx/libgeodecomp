@@ -335,7 +335,9 @@ public:
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 #ifdef LIBGEODECOMP_WITH_MPI
-    template<typename CELL, typename HAS_MPI_DATA_TYPE = void, typename MPI_DATA_TYPE_RETRIEVAL = void>
+    template<typename CELL,
+             typename HAS_MPI_DATA_TYPE = void,
+             typename MPI_DATA_TYPE_RETRIEVAL = void>
     class SelectMPIDataType
     {
     public:
@@ -399,7 +401,6 @@ public:
         {
             return CELL::MPIDataType;
         }
-
     };
 
     /**
@@ -427,6 +428,28 @@ public:
         typedef void SupportsPredefinedMPIDataType;
         typedef Typemaps MPIDataTypeProvider;
         typedef BASE_TYPE MPIDataTypeBase;
+    };
+
+    /**
+     * Use this specifyer if your cell is bitwise serializable
+     */
+    template<typename CELL>
+    class HasOpaqueMPIDataType
+    {
+    public:
+        typedef void SupportsMPIDataType;
+        typedef void SupportsCustomMPIDataType;
+
+
+        static inline MPI_Datatype getMPIDataType()
+        {
+            if (CELL::MPIDataType == MPI_DATATYPE_NULL) {
+                MPI_Type_contiguous(sizeof(CELL), MPI_CHAR, &CELL::MPIDataType);
+                MPI_Type_commit(&CELL::MPIDataType);
+            }
+
+            return CELL::MPIDataType;
+        }
     };
 #endif
 
