@@ -10,6 +10,24 @@ class SimulationFactoryTest : public CxxTest::TestSuite
 {
 public:
 
+    // void testUsage()
+    // {
+    //     SimulationParameters params;
+    //     params.addParameter("x",   0, 20);
+    //     params.addParameter("y", -10, 10);
+
+    //     std::cout << params["x"] << "\n";
+    //     std::cout << params["x"].min << "\n";
+    //     std::cout << params["x"].max << "\n";
+
+    //     std::cout << params["y"] << "\n";
+    //     std::cout << params["y"].min << "\n";
+    //     std::cout << params["y"].max << "\n";
+
+    //     params["x"].getIndex();
+    //     params["x"] += 5;
+    // }
+
     void testBasic()
     {
         SimulationParameters params;
