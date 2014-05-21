@@ -23,11 +23,18 @@ public:
  * dimensions to be known at compile time. The benefit is that we can
  * significantly reduce runtime overhead.
  */
-template<typename CELL, typename TOPOLOGY, int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+template<
+    typename CELL,
+    typename TOPOLOGY,
+    int DIM_X,
+    int DIM_Y,
+    int DIM_Z,
+    int INDEX,
+    template<typename CELL2, int DIM_X2, int DIM_Y2, int DIM_Z2, int INDEX2> class SOA_ACCESSOR = LibFlatArray::soa_accessor>
 class FixedNeighborhood
 {
 public:
-    typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
+    typedef SOA_ACCESSOR<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
 
     __host__ __device__
     FixedNeighborhood(SoAAccessor& accessor) :
@@ -36,7 +43,7 @@ public:
 
     template<int X, int Y, int Z>
     __host__ __device__
-    const LibFlatArray::soa_accessor<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
+    const SOA_ACCESSOR<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
     {
         return accessor[LibFlatArray::coord<X, Y, Z>()];
     }

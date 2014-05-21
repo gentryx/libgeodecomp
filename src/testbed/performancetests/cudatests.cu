@@ -257,8 +257,8 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
-    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, index);
+    LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
+    LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, index);
 
     double c0 = hoody(0, 0, -2).c();
     double c1 = hoody(0, 0, -1).c();
@@ -266,7 +266,7 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
     double c3 = hoody(0, 0,  1).c();
 
 #pragma unroll 10
-    for (; hoodOld.index < end; hoodOld.index += offset, hoodNew.index += offset) {
+    for (; index < end; index += offset) {
         double c4 = hoody(0, 0, 2).c();
         hoodNew[LibFlatArray::coord<0, 0, 0>()].c() =
             0.10 * c0 +
@@ -308,13 +308,13 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
-    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOldInternal((char*)gridOld);
-    FixedNeighborhood<CellLBM, APITraits::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0> hoodOld(
+    LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
+    LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOldInternal((char*)gridOld, index);
+    FixedNeighborhood<CellLBM, APITraits::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0, LibFlatArray::soa_accessor_light> hoodOld(
         hoodOldInternal);
 
 #pragma unroll 10
-    for (; hoodOld.index() < end; hoodOld.index() += offset, hoodNew.index += offset) {
+    for (; index < end; index += offset) {
 
 #define SQR(X) ((X)*(X))
         const double omega = 1.0/1.7;
