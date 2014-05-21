@@ -81,15 +81,13 @@ public:
                         datatype);
                 }
                 if (mpiLayer.rank() == sender) {
-                    if (sender == mpiLayer.rank()) {
-                        mpiLayer.sendRegion(validRegion, root);
-                        mpiLayer.sendUnregisteredRegion(
-                            &localGrid,
-                            validRegion,
-                            root,
-                            MPILayer::PARALLEL_MEMORY_WRITER,
-                            datatype);
-                    }
+                    mpiLayer.sendRegion(validRegion, root);
+                    mpiLayer.sendUnregisteredRegion(
+                        &localGrid,
+                        validRegion,
+                        root,
+                        MPILayer::PARALLEL_MEMORY_WRITER,
+                        datatype);
                 }
             }
         }
