@@ -28,7 +28,7 @@ public:
             writer = 0;
         }
 
-        sim->addWriter(new CollectingWriter<TestCell<3> >(writer));
+        sim->addWriter(new CollectingWriter<TestCell<3> >(writer, 0));
     }
 
     void tearDown()

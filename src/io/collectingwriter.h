@@ -20,15 +20,16 @@ public:
     typedef DisplacedGrid<CELL_TYPE, Topology> StorageGridType;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType SimulatorGridType;
 
+    using ParallelWriter<CELL_TYPE>::period;
+
     static const int DIM = Topology::DIM;
 
     CollectingWriter(
         Writer<CELL_TYPE> *writer,
-        unsigned period = 1,
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD,
         MPI_Datatype mpiDatatype = APITraits::SelectMPIDataType<CELL_TYPE>::value()) :
-        ParallelWriter<CELL_TYPE>("",  period),
+        ParallelWriter<CELL_TYPE>("",  1),
         writer(writer),
         mpiLayer(communicator),
         root(root),
@@ -38,9 +39,15 @@ public:
             throw std::invalid_argument("can't call back a writer on a node other than the root");
         }
 
-        if (writer && (period != writer->getPeriod())) {
-            throw std::invalid_argument("period must match delegate's period");
+        if (mpiLayer.rank() == root) {
+            if (writer == 0) {
+                throw std::invalid_argument("delegate writer on root must not be null");
+            }
+
+            period = writer->getPeriod();
         }
+
+        mpiLayer.broadcast(period, root);
     }
 
     virtual void stepFinished(

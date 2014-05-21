@@ -44,7 +44,7 @@ public:
         if (mpiLayer.rank() == 0) {
             cargoWriter = new MemoryWriter<CELL_TYPE>(1);
         }
-        CollectingWriter<CELL_TYPE> writer(cargoWriter, 1, 0);
+        CollectingWriter<CELL_TYPE> writer(cargoWriter, 0);
 
         typedef typename CollectingWriter<CELL_TYPE>::StorageGridType StorageGridType;
 
