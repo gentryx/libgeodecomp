@@ -1,6 +1,12 @@
 #ifndef LIBGEODECOMP_MISC_SIMULATIONPARAMETERS_H
 #define LIBGEODECOMP_MISC_SIMULATIONPARAMETERS_H
 
+// HPX' config needs to be included before Boost's config:
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/config.hpp>
+#endif
+
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
