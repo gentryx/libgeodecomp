@@ -2243,42 +2243,48 @@ int main(int argc, char **argv)
     LibFlatArray::evaluate eval(revision);
     eval.print_header();
 
-    eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
-    eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
-    eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
+    if (!quick) {
+        eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
+        eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
-    eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
-    eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
+        eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
-    eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
-    eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
+        eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
-    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
-    eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
+        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
+        eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
-    eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
-    eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
+        eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
+        eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
-    eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
-    eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
+        eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
+        eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
+    }
 
     eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
     std::vector<Coord<3> > sizes;
-    sizes << Coord<3>(22, 22, 22)
-          << Coord<3>(64, 64, 64)
-          << Coord<3>(68, 68, 68)
-          << Coord<3>(106, 106, 106)
-          << Coord<3>(128, 128, 128)
-          << Coord<3>(150, 150, 150)
-          << Coord<3>(512, 512, 32)
-          << Coord<3>(518, 518, 32)
-          << Coord<3>(1024, 1024, 32)
+
+    if (!quick) {
+        sizes << Coord<3>(22, 22, 22)
+              << Coord<3>(64, 64, 64)
+              << Coord<3>(68, 68, 68)
+              << Coord<3>(106, 106, 106)
+              << Coord<3>(128, 128, 128)
+              << Coord<3>(150, 150, 150)
+              << Coord<3>(512, 512, 32)
+              << Coord<3>(518, 518, 32);
+    }
+
+    sizes << Coord<3>(1024, 1024, 32)
           << Coord<3>(1026, 1026, 32);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
@@ -2307,12 +2313,15 @@ int main(int argc, char **argv)
 
     sizes.clear();
 
-    sizes << Coord<3>(22, 22, 22)
-          << Coord<3>(64, 64, 64)
-          << Coord<3>(68, 68, 68)
-          << Coord<3>(106, 106, 106)
-          << Coord<3>(128, 128, 128)
-          << Coord<3>(160, 160, 160);
+    if (!quick) {
+        sizes << Coord<3>(22, 22, 22)
+              << Coord<3>(64, 64, 64)
+              << Coord<3>(68, 68, 68)
+              << Coord<3>(106, 106, 106)
+              << Coord<3>(128, 128, 128);
+    }
+
+    sizes << Coord<3>(160, 160, 160);
 
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(LBMClassic(), toVector(sizes[i]));
@@ -2322,11 +2331,13 @@ int main(int argc, char **argv)
         eval(LBMSoA(), toVector(sizes[i]));
     }
 
-    std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
-    eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
-    eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
-    eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
-    eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
+    if (!quick) {
+        std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
+        eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
+        eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
+        eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
+        eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
+    }
 
 #ifdef LIBGEODECOMP_WITH_CUDA
     cudaTests(revision, quick, cudaDevice);

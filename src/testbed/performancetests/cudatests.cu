@@ -601,17 +601,22 @@ void cudaTests(std::string revision, bool quick, int cudaDevice)
     cudaSetDevice(cudaDevice);
     LibFlatArray::evaluate eval(revision);
 
-    for (int d = 32; d <= 544; d += 4) {
+    int increment = 4;
+    if (quick) {
+        increment = 32;
+    }
+
+    for (int d = 32; d <= 544; d += increment) {
         eval(BenchmarkCUDA<RTMClassic>(), toVector(Coord<3>::diagonal(d)));
     }
-    for (int d = 32; d <= 544; d += 4) {
+    for (int d = 32; d <= 544; d += increment) {
         eval(BenchmarkCUDA<RTMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }
-    for (int d = 32; d <= 160; d += 4) {
+    for (int d = 32; d <= 160; d += increment) {
         Coord<3> dim(d, d, 256 + 32 - 4);
         eval(BenchmarkCUDA<LBMClassic>(), toVector(Coord<3>::diagonal(d)));
     }
-    for (int d = 32; d <= 160; d += 4) {
+    for (int d = 32; d <= 160; d += increment) {
         Coord<3> dim(d, d, 256 + 32 - 4);
         eval(BenchmarkCUDA<LBMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }
