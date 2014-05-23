@@ -35,7 +35,7 @@ public:
      * assumed to belong to the Simulator, which means that it'll
      * delete the  initializer at the end of its lifetime.
      */
-    inline Simulator(Initializer<CELL_TYPE> *initializer) :
+    inline explicit Simulator(Initializer<CELL_TYPE> *initializer) :
         stepNum(0),
         initializer(initializer),
         gridDim(initializer->gridDimensions())

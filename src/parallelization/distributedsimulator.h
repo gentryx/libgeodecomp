@@ -23,7 +23,7 @@ public:
     typedef std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > WriterVector;
     using Simulator<CELL_TYPE>::chronometer;
 
-    inline DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
+    inline explicit DistributedSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)
     {}
 

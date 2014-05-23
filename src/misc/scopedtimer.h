@@ -14,7 +14,7 @@ namespace LibGeoDecomp {
 class ScopedTimer
 {
 public:
-    inline ScopedTimer(double *totalElapsedTime) :
+    inline explicit ScopedTimer(double *totalElapsedTime) :
         totalElapsedTime(totalElapsedTime),
         startTime(time())
     {}

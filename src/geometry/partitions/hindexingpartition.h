@@ -77,7 +77,7 @@ public:
     class Triangle
     {
     public:
-        Triangle(
+        explicit Triangle(
             const unsigned& type=0,
             const Coord<2>& dimensions=Coord<2>(0, 0),
             const Coord<2>& origin=Coord<2>(0, 0),
@@ -181,7 +181,7 @@ public:
          * Returns an "end" iterator, meaning that the iterator will
          * be frozen at position  origin.
          */
-        inline Iterator(const Coord<2>& _origin) :
+        inline explicit Iterator(const Coord<2>& _origin) :
             SpaceFillingCurve<2>::Iterator(_origin, true)
         {
         }
@@ -528,7 +528,7 @@ public:
         }
     };
 
-    inline HIndexingPartition(
+    inline explicit HIndexingPartition(
         const Coord<2>& origin=Coord<2>(0, 0),
         const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,
