@@ -79,7 +79,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> VecType;
 
-    StreakIteratorInitSingleOffset(const std::size_t& offset) :
+    explicit StreakIteratorInitSingleOffset(const std::size_t& offset) :
         offset(offset)
     {}
 
@@ -111,7 +111,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> VecType;
 
-    StreakIteratorInitSingleOffset(const std::size_t& offset) :
+    explicit StreakIteratorInitSingleOffset(const std::size_t& offset) :
         offset(offset)
     {}
 
@@ -133,7 +133,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> VecType;
 
-    StreakIteratorInitSingleOffsetWrapper(const std::size_t& offset) :
+    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t& offset) :
         offset(offset)
     {}
 
@@ -156,7 +156,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> VecType;
 
-    StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
         offsets(offsets)
     {}
 
@@ -180,7 +180,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> VecType;
 
-    StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
         offsets(offsets)
     {}
 
@@ -343,7 +343,7 @@ public:
                                           const Coord<DIM> >
     {
     public:
-        inline Iterator(const StreakIterator& streakIterator) :
+        inline explicit Iterator(const StreakIterator& streakIterator) :
             streakIterator(streakIterator),
             cursor(streakIterator->origin)
         {}

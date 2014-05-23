@@ -37,7 +37,7 @@ public:
     typedef SOA_ACCESSOR<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
 
     __host__ __device__
-    FixedNeighborhood(SoAAccessor& accessor) :
+    explicit FixedNeighborhood(SoAAccessor& accessor) :
         accessor(accessor)
     {}
 

@@ -8,7 +8,7 @@ namespace LibGeoDecomp {
 class MockInitializer : public TestInitializer<TestCell<2> >
 {
 public:
-    MockInitializer(const std::string& configString = "")
+    explicit MockInitializer(const std::string& configString = "")
     {
         events += "created, configString: '" + configString + "'\n";
     }
