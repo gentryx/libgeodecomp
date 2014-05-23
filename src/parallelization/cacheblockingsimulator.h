@@ -163,7 +163,7 @@ private:
         int wavefrontLength = gridDim[DIM - 1] + 1;
         WavefrontFrames ret(wavefrontLength, std::vector<Region<DIM> >(pipelineLength));
 
-        for (int index = index; index < wavefrontLength; ++index) {
+        for (int index = 0; index < wavefrontLength; ++index) {
             Coord<DIM> maskOrigin;
             maskOrigin[DIM - 1] = index;
             Topology::normalize(maskOrigin, initializer->gridDimensions());
