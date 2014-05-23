@@ -655,7 +655,7 @@ public:
         public APITraits::HasCubeTopology<3>
     {};
 
-    JacobiCellClassic(double t = 0) :
+    explicit JacobiCellClassic(double t = 0) :
         temp(t)
     {}
 
@@ -726,7 +726,7 @@ public:
         public APITraits::HasCubeTopology<3>
     {};
 
-    JacobiCellFixedHood(double t = 0) :
+    explicit JacobiCellFixedHood(double t = 0) :
         temp(t)
     {}
 
@@ -819,7 +819,7 @@ public:
         public APITraits::HasSoA
     {};
 
-    JacobiCellStreakUpdate(double t = 0) :
+    explicit JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
 
