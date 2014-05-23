@@ -21,7 +21,7 @@ public:
     typedef T* iterator;
     typedef const T* const_iterator;
 
-    FixedArray(std::size_t elements = 0) :
+    explicit FixedArray(std::size_t elements = 0) :
         elements(elements)
     {}
 
