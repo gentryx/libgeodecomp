@@ -24,6 +24,13 @@
 
 namespace CxxTest
 {
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
     //
     // This is how we use the value traits
     //
@@ -81,7 +88,7 @@ namespace CxxTest
         char _asString[sizeof("{ ") + sizeof("XX ") * MAX_BYTES + sizeof("... }")];
 
     public:
-        ValueTraits( const T &t ) { bytesToString( (const unsigned char *)&t, sizeof(T), MAX_BYTES, _asString ); }
+        explicit ValueTraits( const T &t ) { bytesToString( (const unsigned char *)&t, sizeof(T), MAX_BYTES, _asString ); }
         const char *asString( void ) const { return _asString; }
     };
 
@@ -162,6 +169,7 @@ namespace CxxTest
     //
 
 #ifndef CXXTEST_USER_VALUE_TRAITS
+
     //
     // ValueTraits: const char * const &
     // This is used for printing strings, as in TS_FAIL( "Message" )
@@ -329,6 +337,11 @@ namespace CxxTest
     CXXTEST_COPY_TRAITS( const float, double );
     CXXTEST_COPY_CONST_TRAITS( float );
 #endif // !CXXTEST_USER_VALUE_TRAITS
+
+#ifdef __ICC
+#pragma warning pop
+#endif
+
 };
 
 #ifdef _CXXTEST_HAVE_STD
