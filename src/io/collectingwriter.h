@@ -70,9 +70,13 @@ public:
 
         CoordBox<DIM> box = grid.boundingBox();
         StorageGridType localGrid(box);
+
+        int width = box.dimensions.x();
+        box.dimensions.x() = 1;
+
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            // fixme: slow. better: get whole lines
-            localGrid[*i] = grid.get(*i);
+            Streak<DIM> s(*i, i->x() + width);
+            grid.get(s, &localGrid[*i]);
         }
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {
