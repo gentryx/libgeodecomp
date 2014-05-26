@@ -14,14 +14,14 @@ namespace LibGeoDecomp {
 class BiasBalancer : public LoadBalancer
 {
 public:
-    BiasBalancer(LoadBalancer *balancer);
+    explicit BiasBalancer(LoadBalancer *balancer);
     virtual WeightVec balance(const WeightVec& weights, const LoadVec& relativeLoads);
 
 private:
-    bool _pristine;
-    boost::shared_ptr<LoadBalancer> _balancer;
+    bool pristine;
+    boost::shared_ptr<LoadBalancer> balancer;
 
-    WeightVec oneNodeOnly(WeightVec weights) const;
+    WeightVec loadOnOneNodeOnly(WeightVec weights) const;
 };
 
 }
