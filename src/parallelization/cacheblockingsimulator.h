@@ -60,7 +60,7 @@ public:
         nanoStep = 0;
     }
 
-    ~CacheBlockingSimulator()
+    virtual ~CacheBlockingSimulator()
     {
         delete newGrid;
         delete curGrid;
