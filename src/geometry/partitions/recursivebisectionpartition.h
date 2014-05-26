@@ -14,7 +14,7 @@ class RecursiveBisectionPartition : public Partition<DIM>
 public:
     typedef std::vector<std::size_t> SizeTVec;
 
-    inline RecursiveBisectionPartition(
+    inline explicit RecursiveBisectionPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,

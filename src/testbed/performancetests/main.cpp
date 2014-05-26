@@ -995,8 +995,8 @@ public:
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
         CoordBox<3> box(Coord<3>(), dim);
-        GridType gridA(box, 1.0);
-        GridType gridB(box, 2.0);
+        GridType gridA(box, JacobiCellStreakUpdate(1.0));
+        GridType gridB(box, JacobiCellStreakUpdate(2.0));
         GridType *gridOld = &gridA;
         GridType *gridNew = &gridB;
 
@@ -1324,6 +1324,12 @@ public:
 #undef GET_COMP
 #undef SQR
 };
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
 
 class ShortVec1xSSE
 {
@@ -1687,6 +1693,10 @@ private:
     __m256d val4;
 };
 
+#endif
+
+#ifdef __ICC
+#pragma warning pop
 #endif
 
 template<typename VEC>
@@ -2167,7 +2177,7 @@ template<class PARTITION>
 class PartitionBenchmark : public CPUBenchmark
 {
 public:
-    PartitionBenchmark(const std::string& name) :
+    explicit PartitionBenchmark(const std::string& name) :
         name(name)
     {}
 

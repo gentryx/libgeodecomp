@@ -18,7 +18,7 @@ class Image : public Grid<Color>
         Grid<Color>(Coord<2>(width, height), col)
     {}
 
-    inline Image(const Coord<2>& dim,
+    inline explicit Image(const Coord<2>& dim,
                  const Color& col=Color()) :
         Grid<Color>(dim, col)
     {}

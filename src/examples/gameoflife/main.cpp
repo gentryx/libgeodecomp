@@ -32,7 +32,7 @@ public:
         public APITraits::HasPredefinedMPIDataType<char>
     {};
 
-    ConwayCell(bool alive = false) :
+    explicit ConwayCell(bool alive = false) :
         alive(alive)
     {}
 

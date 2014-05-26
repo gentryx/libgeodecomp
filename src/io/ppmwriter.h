@@ -22,7 +22,7 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
-    PPMWriter(
+    explicit PPMWriter(
         const std::string& prefix,
         const unsigned period = 1,
         const unsigned dimX = 20,

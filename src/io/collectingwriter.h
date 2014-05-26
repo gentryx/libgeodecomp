@@ -24,7 +24,7 @@ public:
 
     static const int DIM = Topology::DIM;
 
-    CollectingWriter(
+    explicit CollectingWriter(
         Writer<CELL_TYPE> *writer,
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD,

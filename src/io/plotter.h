@@ -19,7 +19,7 @@ template<typename CELL, class CELL_PLOTTER>
 class Plotter
 {
 public:
-    Plotter(Coord<2> cellDim = Coord<2>(32, 32)) :
+    explicit Plotter(Coord<2> cellDim = Coord<2>(32, 32)) :
 	cellDim(cellDim)
     {}
 

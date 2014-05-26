@@ -102,7 +102,7 @@ template<typename VALUE_TYPE>
 class TypedParameter : public Parameter
 {
 public:
-    TypedParameter(const VALUE_TYPE& current) :
+    explicit TypedParameter(const VALUE_TYPE& current) :
         current(current)
     {}
 
@@ -144,7 +144,7 @@ template<typename VALUE_TYPE>
 class DiscreteSet : public TypedParameter<VALUE_TYPE>
 {
 public:
-    DiscreteSet(const std::vector<VALUE_TYPE>& elements) :
+    explicit DiscreteSet(const std::vector<VALUE_TYPE>& elements) :
         TypedParameter<VALUE_TYPE>(elements.front()),
         elements(elements)
     {}

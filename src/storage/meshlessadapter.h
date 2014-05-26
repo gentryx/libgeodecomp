@@ -33,7 +33,7 @@ public:
      * of the cells are elementwise smaller than dimensions. The
      * stencil cells will be of size boxSize^DIMENSIONS.
      */
-    inline MeshlessAdapter(
+    inline explicit MeshlessAdapter(
         const FloatCoord<DIM>& dimensions=FloatCoord<DIM>(),
         double boxSize = 1) :
         dimensions(dimensions)

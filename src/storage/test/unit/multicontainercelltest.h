@@ -21,7 +21,7 @@ class SimpleElement;
 class SimpleNode
 {
 public:
-    SimpleNode(const std::string& cargo = "") :
+    explicit SimpleNode(const std::string& cargo = "") :
         cargo(cargo)
     {}
 
@@ -34,7 +34,7 @@ public:
 class SimpleElement
 {
 public:
-    SimpleElement(const std::string& cargo = "") :
+    explicit SimpleElement(const std::string& cargo = "") :
         cargo(cargo)
     {}
 

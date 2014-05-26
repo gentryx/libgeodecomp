@@ -20,7 +20,7 @@ public:
     typedef KEY Key;
     typedef CARGO Cargo;
 
-    NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
+    explicit NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
         neighbors(neighbors)
     {}
 

@@ -100,7 +100,7 @@ public:
         public APITraits::HasTorusTopology<3>
     {};
 
-    MySoATestCell(
+    explicit MySoATestCell(
         double temp = 0.0,
         bool alive = false) :
         temp(temp),

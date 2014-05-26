@@ -21,7 +21,7 @@ public:
     typedef Grid<CELL_TYPE, Topology> StorageGrid;
     using Writer<CELL_TYPE>::period;
 
-    MemoryWriter(unsigned period = 1) :
+    explicit MemoryWriter(unsigned period = 1) :
         Writer<CELL_TYPE>("", period)
     {}
 

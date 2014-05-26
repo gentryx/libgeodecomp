@@ -12,7 +12,7 @@ public:
         public APITraits::HasStencil<Stencils::Moore<3, 2> >
     {};
 
-    SoATestCell(int v = 0) :
+    explicit SoATestCell(int v = 0) :
         v(v)
     {}
 
@@ -42,7 +42,7 @@ public:
         public APITraits::HasSoA
     {};
 
-    MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
+    explicit MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
         x(x),
         y(y),
         z(z)
@@ -99,22 +99,22 @@ public:
         SoATestCell edgeCell(2);
 
         SoAGrid<SoATestCell, Topologies::Cube<3>::Topology> grid(box, defaultCell, edgeCell);
-        grid.set(Coord<3>(1, 1, 1) + box.origin, 3);
-        grid.set(Coord<3>(2, 2, 3) + box.origin, 4);
+        grid.set(Coord<3>(1, 1, 1) + box.origin, SoATestCell(3));
+        grid.set(Coord<3>(2, 2, 3) + box.origin, SoATestCell(4));
 
         TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(54, 44, 39));
         TS_ASSERT_EQUALS(grid.boundingBox(), box);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
-        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), 3);
-        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), 4);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
 
-        edgeCell = -1;
+        edgeCell = SoATestCell(-1);
         grid.setEdge(edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0)), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<3>(0, 0, 0) + box.origin), defaultCell);
-        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), 3);
-        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), 4);
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(1, 1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<3>(2, 2, 3) + box.origin), SoATestCell(4));
     }
 
     void test2d()
@@ -125,23 +125,23 @@ public:
 
         SoAGrid<SoATestCell, Topologies::Cube<2>::Topology> grid(box, defaultCell, edgeCell);
 
-        grid.set(Coord<2>(1, 1) + box.origin, 3);
-        grid.set(Coord<2>(2, 2) + box.origin, 4);
+        grid.set(Coord<2>(1, 1) + box.origin, SoATestCell(3));
+        grid.set(Coord<2>(2, 2) + box.origin, SoATestCell(4));
 
         TS_ASSERT_EQUALS(grid.actualDimensions, Coord<3>(54, 44, 1));
         TS_ASSERT_EQUALS(grid.boundingBox(), box);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0)), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0) + box.origin).v, defaultCell.v);
-        TS_ASSERT_EQUALS(grid.get(Coord<2>(1, 1) + box.origin), 3);
-        TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), 4);
-        TS_ASSERT_EQUALS(grid.get(Coord<2>(3, 3) + box.origin), 1);
+        TS_ASSERT_EQUALS(grid.get(Coord<2>(1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), SoATestCell(4));
+        TS_ASSERT_EQUALS(grid.get(Coord<2>(3, 3) + box.origin), SoATestCell(1));
 
-        edgeCell = -1;
+        edgeCell = SoATestCell(-1);
         grid.setEdge(edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0)), edgeCell);
         TS_ASSERT_EQUALS(grid.get(Coord<2>(0, 0) + box.origin), defaultCell);
-        TS_ASSERT_EQUALS(grid.get(Coord<2>(1, 1) + box.origin), 3);
-        TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), 4);
+        TS_ASSERT_EQUALS(grid.get(Coord<2>(1, 1) + box.origin), SoATestCell(3));
+        TS_ASSERT_EQUALS(grid.get(Coord<2>(2, 2) + box.origin), SoATestCell(4));
     }
 
     void testGetSetManyCells()

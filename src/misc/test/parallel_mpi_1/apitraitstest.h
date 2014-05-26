@@ -43,7 +43,7 @@ public:
     class API : public APITraits::HasPredefinedMPIDataType<double>
     {};
 
-    CellB(double valA) :
+    explicit CellB(double valA) :
         valA(valA)
     {}
 

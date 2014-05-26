@@ -22,7 +22,7 @@ using namespace LibGeoDecomp;
 class ConwayCell
 {
 public:
-    ConwayCell(bool alive = false) :
+    explicit ConwayCell(bool alive = false) :
         alive(alive)
     {
         count = alive? 1 : 0;

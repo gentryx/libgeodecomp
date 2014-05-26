@@ -49,7 +49,7 @@ public:
         GHOSTREGION_BETA
     };
 
-    StripingSimulator(
+    explicit StripingSimulator(
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
         const unsigned& loadBalancingPeriod = 1):

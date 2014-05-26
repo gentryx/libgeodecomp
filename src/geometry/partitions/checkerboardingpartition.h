@@ -12,7 +12,7 @@ public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
 
-    inline CheckerboardingPartition(
+    inline explicit CheckerboardingPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,

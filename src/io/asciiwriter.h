@@ -29,7 +29,7 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
-    ASCIIWriter(
+    explicit ASCIIWriter(
         const std::string& prefix,
         const unsigned period = 1) :
         Writer<CELL_TYPE>(prefix, period)

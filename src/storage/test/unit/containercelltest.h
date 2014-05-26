@@ -14,7 +14,7 @@ class MockCell
 public:
     typedef Topologies::Cube<2>::Topology Topology;
 
-    MockCell(int id=0, std::vector<int> *ids=0) :
+    explicit MockCell(int id=0, std::vector<int> *ids=0) :
         id(id),
         ids(ids)
     {}

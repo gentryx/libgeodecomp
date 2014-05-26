@@ -26,7 +26,7 @@ public:
         }
     };
 
-    SimpleCell(const COORD<2>& center = COORD<2>(), const int id = 0, const double temperature = 0, const double influx = 0) :
+    explicit SimpleCell(const COORD<2>& center = COORD<2>(), const int id = 0, const double temperature = 0, const double influx = 0) :
         center(center),
         id(id),
         temperature(temperature),

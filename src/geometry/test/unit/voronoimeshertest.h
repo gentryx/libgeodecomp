@@ -10,7 +10,7 @@ namespace LibGeoDecomp {
 class DummyCell
 {
 public:
-    DummyCell(const FloatCoord<2>& center = FloatCoord<2>(0, 0), int id = -1) :
+    explicit DummyCell(const FloatCoord<2>& center = FloatCoord<2>(0, 0), int id = -1) :
         center(center),
         id(id),
         area(0)

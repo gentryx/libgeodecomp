@@ -21,7 +21,7 @@ public:
         public APITraits::HasTorusTopology<3>
     {};
 
-    JacobiCellSimple(double t = 0) :
+    explicit JacobiCellSimple(double t = 0) :
         temp(t)
     {}
 
@@ -55,7 +55,7 @@ public:
         public APITraits::HasTorusTopology<3>
     {};
 
-    JacobiCellMagic(double t = 0) :
+    explicit JacobiCellMagic(double t = 0) :
         temp(t)
     {}
 
@@ -97,7 +97,7 @@ public:
         public APITraits::HasTorusTopology<3>
     {};
 
-    JacobiCellStraightforward(double t = 0) :
+    explicit JacobiCellStraightforward(double t = 0) :
         temp(t)
     {}
 
@@ -219,7 +219,7 @@ public:
         public APITraits::HasTorusTopology<3>
     {};
 
-    JacobiCellStraightforwardNT(double t = 0) :
+    explicit JacobiCellStraightforwardNT(double t = 0) :
         temp(t)
     {}
 
@@ -360,7 +360,7 @@ public:
         public APITraits::HasTorusTopology<3>
     {};
 
-    JacobiCellStreakUpdate(double t = 0) :
+    explicit JacobiCellStreakUpdate(double t = 0) :
         temp(t)
     {}
 
@@ -538,6 +538,12 @@ void store(double *a, VEC v)
     v.store(a);
 }
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
 class ShortVec4xSSE
 {
 public:
@@ -613,6 +619,10 @@ private:
     __m128d val3;
     __m128d val4;
 };
+
+#ifdef __ICC
+#pragma warning pop
+#endif
 
 // this class is a quick helper to allow us to discover the number of
 // elements in a given (short vector) float type:

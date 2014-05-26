@@ -46,7 +46,7 @@ public:
     class QuitAction : public Action<CELL_TYPE>
     {
     public:
-        QuitAction(bool *continueFlag) :
+        explicit QuitAction(bool *continueFlag) :
             Action<CELL_TYPE>("quit", "Terminates the CommandServer and closes its socket."),
             continueFlag(continueFlag)
         {}

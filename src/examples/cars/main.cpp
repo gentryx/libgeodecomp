@@ -30,7 +30,7 @@ public:
         public APITraits::HasNanoSteps<2>
     {};
 
-    Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
+    explicit Cell(const int& direction = FREE, const int& border = 0, const int rate = 5) :
         direction(direction),
         border(border),
         rate(rate)
@@ -103,7 +103,7 @@ private:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    CellInitializer(int maxSteps) :
+    explicit CellInitializer(int maxSteps) :
         SimpleInitializer<Cell>(Coord<2>(90, 90), maxSteps)
     {}
 

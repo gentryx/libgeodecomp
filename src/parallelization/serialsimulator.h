@@ -44,7 +44,7 @@ public:
     /**
      * creates a SerialSimulator with the given initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *initializer) :
+    explicit SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
         stepNum = initializer->startStep();
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    ~SerialSimulator()
+    virtual ~SerialSimulator()
     {
         delete newGrid;
         delete curGrid;

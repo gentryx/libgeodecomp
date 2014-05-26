@@ -9,7 +9,7 @@ namespace LibGeoDecomp {
 class ImagePainter
 {
 public:
-    ImagePainter(Image *image) :
+    explicit ImagePainter(Image *image) :
         image(image)
     {}
 

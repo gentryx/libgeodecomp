@@ -27,8 +27,8 @@ public:
     enum State {EMPTY, FOOD, IDLE_ANT, BUSY_ANT, BARRIER};
     static const double PI;
 
-    Cell(State _state=EMPTY) :
-        state(_state),
+    explicit Cell(State state=EMPTY) :
+        state(state),
         posX(0),
         posY(0),
         dropFood(false)
@@ -168,10 +168,10 @@ public:
 class CellInitializer : public SimpleInitializer<Cell>
 {
 public:
-    CellInitializer(
-        const Coord<2> _dim = Coord<2>(240, 135),
-        const unsigned _steps = 400000) :
-        SimpleInitializer<Cell>(_dim, _steps)
+    explicit CellInitializer(
+        const Coord<2> dim = Coord<2>(240, 135),
+        const unsigned steps = 400000) :
+        SimpleInitializer<Cell>(dim, steps)
     {}
 
     virtual void grid(GridBase<Cell, 2> *ret)

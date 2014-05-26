@@ -104,7 +104,7 @@ private:
 class CircleCellInitializer : public SimpleInitializer<CircleCell>
 {
 public:
-    CircleCellInitializer(
+    explicit CircleCellInitializer(
         Coord<2> dimensions = Coord<2>(100, 100),
         const unsigned steps = 300) :
         SimpleInitializer<CircleCell>(dimensions, steps)

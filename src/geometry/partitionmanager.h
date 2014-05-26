@@ -27,7 +27,7 @@ public:
         OUTGROUP = -1
     };
 
-    PartitionManager(
+    explicit PartitionManager(
         const CoordBox<DIM>& simulationArea=CoordBox<DIM>())
     {
         std::vector<std::size_t> weights(1, simulationArea.size());

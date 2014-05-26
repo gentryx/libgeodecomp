@@ -9,7 +9,7 @@
     class AdapterHelper ## INDEX                                        \
     {                                                                   \
     public:                                                             \
-        AdapterHelper ## INDEX(                                         \
+        explicit AdapterHelper ## INDEX(                                \
             const NEIGHBORHOOD *hood) :                                 \
             hood(hood)                                                  \
         {}                                                              \
@@ -89,7 +89,7 @@
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
-            MultiNeighborhoodAdapter(const NEIGHBORHOOD *hood) :        \
+            explicit MultiNeighborhoodAdapter(const NEIGHBORHOOD *hood) : \
                 BOOST_PP_SEQ_FOR_EACH(                                  \
                     DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT,            \
                     NAME,                                               \

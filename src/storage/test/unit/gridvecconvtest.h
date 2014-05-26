@@ -16,7 +16,7 @@ public:
     class API : public APITraits::HasBoostSerialization
     {};
 
-    IrregularCell(
+    explicit IrregularCell(
         int temperature = 0,
         IrregularCell *sublevelNW = 0,
         IrregularCell *sublevelNE = 0,

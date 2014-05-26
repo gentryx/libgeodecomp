@@ -18,7 +18,7 @@ public:
     using Partition<DIM>::startOffsets;
     using Partition<DIM>::weights;
 
-    inline ScotchPartition(
+    inline explicit ScotchPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,

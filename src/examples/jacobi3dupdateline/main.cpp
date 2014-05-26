@@ -61,7 +61,7 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    CellInitializer(int num) : SimpleInitializer<Cell>(
+    explicit CellInitializer(int num) : SimpleInitializer<Cell>(
         Coord<3>::diagonal(128) * num,
         1000)
     {}

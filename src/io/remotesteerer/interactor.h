@@ -170,7 +170,7 @@ private:
     class ThreadWrapper
     {
     public:
-        ThreadWrapper(DELEGATE *delegate) :
+        explicit ThreadWrapper(DELEGATE *delegate) :
             delegate(delegate)
         {}
 

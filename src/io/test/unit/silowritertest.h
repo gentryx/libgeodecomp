@@ -10,17 +10,30 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_QT
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
 #include <QtGui/QApplication>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
+
+#ifdef __ICC
+#pragma warning pop
 #endif
+
+#endif
+
 
 using namespace LibGeoDecomp;
 
 class DummyParticle
 {
 public:
-    DummyParticle(const FloatCoord<2> pos) :
+    explicit DummyParticle(const FloatCoord<2> pos) :
         pos(pos)
     {
         coords << pos + FloatCoord<2>(-5, -5)
@@ -67,7 +80,7 @@ public:
         };
     };
 
-    CellWithPointMesh(double dummyValue = 0) :
+    explicit CellWithPointMesh(double dummyValue = 0) :
         dummyValue(dummyValue)
     {}
 
