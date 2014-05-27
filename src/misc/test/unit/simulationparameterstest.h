@@ -17,11 +17,17 @@ public:
         return 100 - ((x - 5) * (x - 5)) - (y * y);
     }
 
-    void testOptimizableParameterInterface()
+    void testOptimizableParameterInterface1()
     {
+        std::vector<int> values;
+        values << -10
+               << -5
+               << 0
+               << 5
+               << 10;
         SimulationParameters params;
-        params.addParameter("x",   0, 20);
-        params.addParameter("y", -10, 10);
+        params.addParameter("x", 0, 20);
+        params.addParameter("y", values);
 
         for (int t = 0; t < 10000; ++t) {
             SimulationParameters newParams = params;
@@ -35,6 +41,29 @@ public:
         }
 
         TS_ASSERT_EQUALS(100, eval(params));
+    }
+
+    void testOptimizableParameterInterface2()
+    {
+        std::vector<int> values;
+        values << -10
+               << -5
+               << 0
+               << 5
+               << 10;
+        SimulationParameters params;
+        params.addParameter("x", 0, 20);
+        params.addParameter("y", values);
+
+        double x = params[0].getValue();
+        x += params[0].getGranularity() * 5;
+
+        double oldFitness = eval(params);
+        params[0].setValue(x);
+        x = params[0].getValue();
+        double newFitness = eval(params);
+
+        TS_ASSERT_EQUALS(newFitness - oldFitness, 25);
     }
 
     void testBasic()

@@ -51,6 +51,18 @@ public:
     virtual double getGranularity() const = 0;
 
     /**
+     * Returns a real-valued representation of the parameter's current
+     * value.
+     */
+    virtual double getValue() const = 0;
+
+    /**
+     * Sets the parameter, based on the given real value. Note that
+     * rounding and truncation based on the granularity may occur.
+     */
+    virtual void setValue(double newValue) = 0;
+
+    /**
      * Move the parameter by the offset given by step. Step sizes
      * below granularity may have no effect.
      */
@@ -141,6 +153,18 @@ public:
     {
         return !(*this == other);
     }
+
+    double sanitizeIndex(double index) const
+    {
+        if (index < getMin()) {
+            index = getMin();
+        }
+        if (index >= getMax()) {
+            index = getMax() - getGranularity();
+        }
+
+        return index;
+    }
 };
 
 template<typename VALUE_TYPE>
@@ -175,6 +199,7 @@ class Interval : public TypedParameter<VALUE_TYPE>
 {
 public:
     using TypedParameter<VALUE_TYPE>::current;
+    using Parameter::sanitizeIndex;
 
     Interval(const VALUE_TYPE minimum, const VALUE_TYPE maximum) :
         TypedParameter<VALUE_TYPE>(minimum),
@@ -198,6 +223,17 @@ public:
         return maximum - minimum;
     }
 
+    double getValue() const
+    {
+        return index;
+    }
+
+    void setValue(double newValue)
+    {
+        index = sanitizeIndex(newValue);
+        current = minimum + index;
+    }
+
     double getGranularity() const
     {
         // fixme: for now we only care for integer intervals. this
@@ -205,15 +241,10 @@ public:
         return 1;
     }
 
-    void operator +=(double step)
+    void operator+=(double step)
     {
         index += step;
-        if (index < 0) {
-            index = 0;
-        }
-        if (index > (maximum - minimum - 1)) {
-            index = maximum - minimum - 1;
-        }
+        index = sanitizeIndex(index);
 
         current = minimum + index;
     }
@@ -229,6 +260,7 @@ class DiscreteSet : public TypedParameter<VALUE_TYPE>
 {
 public:
     using TypedParameter<VALUE_TYPE>::current;
+    using Parameter::sanitizeIndex;
 
     explicit DiscreteSet(const std::vector<VALUE_TYPE>& elements) :
         TypedParameter<VALUE_TYPE>(elements.front()),
@@ -251,6 +283,17 @@ public:
         return elements.size();
     }
 
+    double getValue() const
+    {
+        return index;
+    }
+
+    void setValue(double newValue)
+    {
+        index = sanitizeIndex(index);
+        current = elements[index];
+    }
+
     double getGranularity() const
     {
         return 1;
@@ -259,12 +302,7 @@ public:
     void operator+=(double step)
     {
         index += step;
-        if (index < 0) {
-            index = 0;
-        }
-        if (index > double(elements.size() - 1)) {
-            index = elements.size() - 1;
-        }
+        index = sanitizeIndex(index);
 
         current = elements[index];
     }
