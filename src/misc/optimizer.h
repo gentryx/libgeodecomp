@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_OPTIMIZER_H
 
 #include <libgeodecomp/misc/simulationparameters.h>
+#include <limits>
 
 namespace LibGeoDecomp {
 
