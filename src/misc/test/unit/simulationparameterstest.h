@@ -9,24 +9,33 @@ namespace LibGeoDecomp {
 class SimulationFactoryTest : public CxxTest::TestSuite
 {
 public:
+    double eval(SimulationParameters params)
+    {
+        int x = params["x"];
+        int y = params["y"];
 
-    // void testUsage()
-    // {
-    //     SimulationParameters params;
-    //     params.addParameter("x",   0, 20);
-    //     params.addParameter("y", -10, 10);
+        return 100 - ((x - 5) * (x - 5)) - (y * y);
+    }
 
-    //     std::cout << params["x"] << "\n";
-    //     std::cout << params["x"].min << "\n";
-    //     std::cout << params["x"].max << "\n";
+    void testOptimizableParameterInterface()
+    {
+        SimulationParameters params;
+        params.addParameter("x",   0, 20);
+        params.addParameter("y", -10, 10);
 
-    //     std::cout << params["y"] << "\n";
-    //     std::cout << params["y"].min << "\n";
-    //     std::cout << params["y"].max << "\n";
+        for (int t = 0; t < 10000; ++t) {
+            SimulationParameters newParams = params;
+            for (std::size_t i = 0; i < params.size(); ++i) {
+                newParams[i] += ((rand() % 11) - 5) * newParams[i].getGranularity();
+            }
 
-    //     params["x"].getIndex();
-    //     params["x"] += 5;
-    // }
+            if (eval(newParams) > eval(params)) {
+                params = newParams;
+            }
+        }
+
+        TS_ASSERT_EQUALS(100, eval(params));
+    }
 
     void testBasic()
     {

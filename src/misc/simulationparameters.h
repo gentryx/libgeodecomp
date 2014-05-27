@@ -7,6 +7,7 @@
 #include <hpx/config.hpp>
 #endif
 
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
@@ -14,11 +15,55 @@ namespace LibGeoDecomp {
 
 namespace SimulationParametersHelpers {
 
-class Parameter
+/**
+ * Virtual interface which allows the implementation of auto-tuniers
+ * and parameter optimizers without them having to unterstand the
+ * actual meaning of the parameters. For that all parameters are
+ * mapped to an interval [min, max[ in R.
+ *
+ * See the unit tests for an explanation on how to use this interface.
+ */
+class OptimizableParameter
+{
+public:
+    virtual ~OptimizableParameter()
+    {}
+
+    /**
+     * returns the lower bound of the interval. The lower bound is
+     * included in the interval.
+     */
+    virtual double getMin() const = 0;
+
+    /**
+     * returns the upper bound of the interval. The upper bound is
+     * excluded from the interval.
+     */
+    virtual double getMax() const = 0;
+
+    /**
+     * The granularity gives the minimum value that a parameter needs
+     * to change in order to actually affect the model.
+     *
+     * Most parameters won't actually have a real-valued valuation.
+     * For these the granularity is almost always 1.
+     */
+    virtual double getGranularity() const = 0;
+
+    /**
+     * Move the parameter by the offset given by step. Step sizes
+     * below granularity may have no effect.
+     */
+    virtual void operator+=(double step) = 0;
+};
+
+class Parameter : public OptimizableParameter
 {
 public:
     virtual ~Parameter()
     {}
+
+    virtual Parameter *clone() const = 0;
 
     virtual operator std::string() const
     {
@@ -129,28 +174,104 @@ template<typename VALUE_TYPE>
 class Interval : public TypedParameter<VALUE_TYPE>
 {
 public:
+    using TypedParameter<VALUE_TYPE>::current;
+
     Interval(const VALUE_TYPE minimum, const VALUE_TYPE maximum) :
         TypedParameter<VALUE_TYPE>(minimum),
         minimum(minimum),
-        maximum(maximum)
+        maximum(maximum),
+        index(0)
     {}
+
+    Parameter *clone() const
+    {
+        return new Interval<VALUE_TYPE>(*this);
+    }
+
+    double getMin() const
+    {
+        return 0;
+    }
+
+    double getMax() const
+    {
+        return maximum - minimum;
+    }
+
+    double getGranularity() const
+    {
+        // fixme: for now we only care for integer intervals. this
+        // needs to be fixed for real-valued intervals.
+        return 1;
+    }
+
+    void operator +=(double step)
+    {
+        index += step;
+        if (index < 0) {
+            index = 0;
+        }
+        if (index > (maximum - minimum - 1)) {
+            index = maximum - minimum - 1;
+        }
+
+        current = minimum + index;
+    }
 
 private:
     VALUE_TYPE minimum;
     VALUE_TYPE maximum;
+    int index;
 };
 
 template<typename VALUE_TYPE>
 class DiscreteSet : public TypedParameter<VALUE_TYPE>
 {
 public:
+    using TypedParameter<VALUE_TYPE>::current;
+
     explicit DiscreteSet(const std::vector<VALUE_TYPE>& elements) :
         TypedParameter<VALUE_TYPE>(elements.front()),
-        elements(elements)
+        elements(elements),
+        index(0)
     {}
+
+    Parameter *clone() const
+    {
+        return new DiscreteSet<VALUE_TYPE>(*this);
+    }
+
+    double getMin() const
+    {
+        return 0;
+    }
+
+    double getMax() const
+    {
+        return elements.size();
+    }
+
+    double getGranularity() const
+    {
+        return 1;
+    }
+
+    void operator+=(double step)
+    {
+        index += step;
+        if (index < 0) {
+            index = 0;
+        }
+        if (index > double(elements.size() - 1)) {
+            index = elements.size() - 1;
+        }
+
+        current = elements[index];
+    }
 
 private:
     std::vector<VALUE_TYPE> elements;
+    int index;
 };
 
 }
@@ -158,25 +279,60 @@ private:
 class SimulationParameters
 {
 public:
+    typedef boost::shared_ptr<SimulationParametersHelpers::Parameter> ParamPointerType;
+
+    SimulationParameters()
+    {}
+
+    SimulationParameters(const SimulationParameters& other) :
+        names(other.names)
+    {
+        for (std::size_t i = 0; i < other.size(); ++i) {
+            parameters.push_back(ParamPointerType(other[i].clone()));
+        }
+    }
+
     template<typename VALUE_TYPE>
     void addParameter(const std::string& name, const VALUE_TYPE& minimum, const VALUE_TYPE& maximum)
     {
-        parameters[name].reset(new SimulationParametersHelpers::Interval<VALUE_TYPE>(minimum, maximum));
+        names[name] = parameters.size();
+        parameters.push_back(
+            ParamPointerType(
+                new SimulationParametersHelpers::Interval<VALUE_TYPE>(minimum, maximum)));
     }
 
     template<typename VALUE_TYPE>
     void addParameter(const std::string& name, const std::vector<VALUE_TYPE>& elements)
     {
-        parameters[name].reset(new SimulationParametersHelpers::DiscreteSet<VALUE_TYPE>(elements));
+        names[name] = parameters.size();
+        parameters.push_back(
+            ParamPointerType(
+                new SimulationParametersHelpers::DiscreteSet<VALUE_TYPE>(elements)));
     }
 
     SimulationParametersHelpers::Parameter& operator[](const std::string& name)
     {
-        return *parameters[name];
+        return *parameters[names[name]];
+    }
+
+    SimulationParametersHelpers::Parameter& operator[](std::size_t index)
+    {
+        return *parameters[index];
+    }
+
+    const SimulationParametersHelpers::Parameter& operator[](std::size_t index) const
+    {
+        return *parameters[index];
+    }
+
+    std::size_t size() const
+    {
+        return parameters.size();
     }
 
 private:
-    std::map<std::string, boost::shared_ptr<SimulationParametersHelpers::Parameter> > parameters;
+    std::map<std::string, int> names;
+    std::vector<ParamPointerType> parameters;
 };
 
 }
