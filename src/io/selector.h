@@ -11,6 +11,10 @@
 #include <silo.h>
 #endif
 
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <libgeodecomp/communication/typemaps.h>
+#endif
+
 namespace LibGeoDecomp {
 
 class APITraits;
@@ -106,6 +110,68 @@ public:
 
 #endif
 
+#ifdef LIBGEODECOMP_WITH_MPI
+
+template<typename MEMBER, int FLAG>
+class GetMPIDatatype0;
+
+template<typename MEMBER, int FLAG>
+class GetMPIDatatype1;
+
+template<typename MEMBER>
+class GetMPIDatatype0<MEMBER, 0>
+{
+public:
+    inline MPI_Datatype operator()()
+    {
+        throw std::invalid_argument("no MPI data type defined for this type");
+    }
+};
+
+template<typename MEMBER>
+class GetMPIDatatype0<MEMBER, 1>
+{
+public:
+    inline MPI_Datatype operator()()
+    {
+        return Typemaps::lookup<MEMBER>();
+    }
+};
+
+template<typename MEMBER>
+class GetMPIDatatype1<MEMBER, 0>
+{
+public:
+    inline MPI_Datatype operator()()
+    {
+        return GetMPIDatatype0<MEMBER, APITraits::HasLookupMemberFunction<Typemaps, MPI_Datatype, MEMBER>::value>()();
+    }
+};
+
+template<typename MEMBER>
+class GetMPIDatatype1<MEMBER, 1>
+{
+public:
+    inline MPI_Datatype operator()()
+    {
+        return APITraits::SelectMPIDataType<MEMBER>::value();
+    }
+};
+
+template<typename MEMBER>
+class GetMPIDatatype
+{
+public:
+    inline MPI_Datatype operator()()
+    {
+        return GetMPIDatatype1<
+            MEMBER,
+            APITraits::HasValueFunction<APITraits::SelectMPIDataType<MEMBER>, MPI_Datatype>::value>()();
+    }
+};
+
+#endif
+
 /**
  * Primitive datatypes don't have member pointers (or members in the
  * first place). So we provide this primitive implementation to copy
@@ -193,6 +259,17 @@ public:
 #ifdef LIBGEODECOMP_WITH_SILO
         virtual int siloTypeID() const = 0;
 #endif
+#ifdef LIBGEODECOMP_WITH_MPI
+        /**
+         * Yields the member's MPI data type (or that of its external
+         * representation). May source from APITraits or fall back to
+         * Typemaps. If neither yields, no compiler error will follow
+         * as it is assumed that such code is still valid (e.g. if a
+         * Selector is instantiated for the SiloWriter, so that
+         * mpiDatatype() is never called).
+         */
+        virtual MPI_Datatype mpiDatatype() const = 0;
+#endif
         virtual void copyStreakIn(const char *first, const char *last, char *target) = 0;
         virtual void copyStreakOut(const char *first, const char *last, char *target) = 0;
         virtual void copyMemberIn(
@@ -219,6 +296,13 @@ public:
         int siloTypeID() const
         {
             return SelectorHelpers::GetSiloTypeID<EXTERNAL>()();
+        }
+#endif
+
+#ifdef LIBGEODECOMP_WITH_MPI
+        virtual MPI_Datatype mpiDatatype() const
+        {
+            return SelectorHelpers::GetMPIDatatype<EXTERNAL>()();
         }
 #endif
 
@@ -385,9 +469,6 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
-#ifdef LIBGEODECOMP_WITH_SILO
-        memberSiloTypeID(SelectorHelpers::GetSiloTypeID<MEMBER>()()),
-#endif
         filter(new DefaultFilter<MEMBER, MEMBER>)
     {}
 
@@ -400,9 +481,6 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
-#ifdef LIBGEODECOMP_WITH_SILO
-        memberSiloTypeID(filter->siloTypeID()),
-#endif
         filter(filter)
     {}
 
@@ -478,13 +556,19 @@ public:
     }
 #endif
 
+#ifdef LIBGEODECOMP_WITH_MPI
+    MPI_Datatype mpiDatatype() const
+    {
+        return filter->memberMPIDatatype();
+    }
+#endif
+
 private:
     char CELL:: *memberPointer;
     std::size_t memberSize;
     std::size_t externalSize;
     int memberOffset;
     std::string memberName;
-    int memberSiloTypeID;
     boost::shared_ptr<FilterBase> filter;
 };
 

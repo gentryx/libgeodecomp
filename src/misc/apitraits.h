@@ -71,7 +71,7 @@ public:
     {};
 
     /**
-     * Helper class for specializations. Thanks to Hartmut Kaiser fro
+     * Helper class for specializations. Thanks to Hartmut Kaiser for
      * coming up with this.
      */
     template<typename T>
@@ -79,6 +79,40 @@ public:
     {
     public:
         typedef void Type;
+    };
+
+    /**
+     * Type trait which allows external code to detect if a class has
+     * a member function value(). Gratefully based off
+     * http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Member_Detector
+     */
+    template<typename T, typename RESULT, typename PARAM>
+    class HasLookupMemberFunction
+    {
+    private:
+        // to detect member functions, the second parameter would have
+        // to be changed to "RESULT (U::*)()"
+        template <typename U, RESULT (*)(PARAM*)> struct Check;
+        template <typename U> static char func(Check<U, &U::lookup> *);
+        template <typename U> static int func(...);
+    public:
+        enum { value = sizeof(func<T>(0)) == sizeof(char) };
+    };
+
+    /**
+     * Type trait which allows external code to detect if a class has
+     * a member function value(). Gratefully based off
+     * http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Member_Detector
+     */
+    template<typename T, typename RESULT>
+    class HasValueFunction
+    {
+    private:
+        template <typename U, RESULT (*)()> struct Check;
+        template <typename U> static char func(Check<U, &U::value> *);
+        template <typename U> static int func(...);
+    public:
+        enum { value = sizeof(func<T>(0)) == sizeof(char) };
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -447,7 +481,7 @@ public:
                 MPI_Type_contiguous(sizeof(CELL), MPI_CHAR, &CELL::MPIDataType);
                 MPI_Type_commit(&CELL::MPIDataType);
             }
-
+            // fixme: use a static data object internal to this function
             return CELL::MPIDataType;
         }
     };
