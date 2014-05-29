@@ -350,7 +350,7 @@ void runSimulation()
     MPI_Type_commit(&Cell::MPIDataType);
 
     int outputFrequency = 1000;
-    CellInitializer *init = new CellInitializer(Coord<3>(400, 400, 400), 2000000);
+    CellInitializer *init = new CellInitializer(Coord<3>(200, 200, 200), 2000000);
 
     StripingSimulator<Cell> sim(
         init,
@@ -358,9 +358,21 @@ void runSimulation()
         1000000);
 
     sim.addWriter(
-        new BOVWriter<Cell, DensitySelector>("lbm.density", outputFrequency));
+        new BOVWriter<Cell>(Selector<Cell>(&Cell::density,   "density"),
+                            "lbm.density",
+                            outputFrequency));
     sim.addWriter(
-        new BOVWriter<Cell, VelocitySelector>("lbm.velocity", outputFrequency));
+        new BOVWriter<Cell>(Selector<Cell>(&Cell::velocityX, "velocityX"),
+                            "lbm.velocityX",
+                            outputFrequency));
+    sim.addWriter(
+        new BOVWriter<Cell>(Selector<Cell>(&Cell::velocityY, "velocityY"),
+                            "lbm.velocityY",
+                            outputFrequency));
+    sim.addWriter(
+        new BOVWriter<Cell>(Selector<Cell>(&Cell::velocityZ, "velocityZ"),
+                            "lbm.velocityZ",
+                            outputFrequency));
 
     if (MPILayer().rank() == 0) {
         sim.addWriter(

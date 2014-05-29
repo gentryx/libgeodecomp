@@ -173,6 +173,62 @@ public:
 #endif
 
 /**
+ * We're intentionally giving only few specializations for this helper
+ * as it's mostly meant to be used with VisIt's BOV format, and this
+ * is only defined on tree types.
+ */
+template<typename MEMBER>
+class GetTypeName
+{
+public:
+    std::string operator()() const
+    {
+        throw std::invalid_argument("no string representation known for member type");
+    }
+};
+
+template<>
+class GetTypeName<bool>
+{
+public:
+    std::string operator()() const
+    {
+        return "BYTE";
+    }
+};
+
+template<>
+class GetTypeName<char>
+{
+public:
+    std::string operator()() const
+    {
+        return "BYTE";
+    }
+};
+
+template<>
+class GetTypeName<float>
+{
+public:
+    std::string operator()() const
+    {
+        return "FLOAT";
+    }
+};
+
+template<>
+class GetTypeName<double>
+{
+public:
+    std::string operator()() const
+    {
+        return "DOUBLE";
+    }
+};
+
+
+/**
  * Primitive datatypes don't have member pointers (or members in the
  * first place). So we provide this primitive implementation to copy
  * them en block.
@@ -234,7 +290,7 @@ public:
  * Wallace for pointing this out:
  * http://madebyevan.com/obscure-cpp-features/#pointer-to-member-operators
  *
- * fixme: use this class in BOVWriter, RemoteSteerer, VisItWriter, Plotter...
+ * fixme: use this class in RemoteSteerer, VisItWriter, Plotter...
  */
 template<typename CELL>
 class Selector
@@ -270,6 +326,8 @@ public:
          */
         virtual MPI_Datatype mpiDatatype() const = 0;
 #endif
+        virtual std::string typeName() const = 0;
+        virtual int arity() const = 0;
         virtual void copyStreakIn(const char *first, const char *last, char *target) = 0;
         virtual void copyStreakOut(const char *first, const char *last, char *target) = 0;
         virtual void copyMemberIn(
@@ -305,6 +363,16 @@ public:
             return SelectorHelpers::GetMPIDatatype<EXTERNAL>()();
         }
 #endif
+
+        virtual std::string typeName() const
+        {
+            return SelectorHelpers::GetTypeName<EXTERNAL>()();
+        }
+
+        virtual int arity() const
+        {
+            return 1;
+        }
 
         /**
          * Copy a streak of variables to an AoS layout.
@@ -559,9 +627,19 @@ public:
 #ifdef LIBGEODECOMP_WITH_MPI
     MPI_Datatype mpiDatatype() const
     {
-        return filter->memberMPIDatatype();
+        return filter->mpiDatatype();
     }
 #endif
+
+    std::string typeName() const
+    {
+        return filter->typeName();
+    }
+
+    int arity() const
+    {
+        return filter->arity();
+    }
 
 private:
     char CELL:: *memberPointer;

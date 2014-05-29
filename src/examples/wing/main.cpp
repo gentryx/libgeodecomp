@@ -242,60 +242,6 @@ public:
 
 MPI_Datatype Cell::MPIDataType;
 
-class QuantitySelector
-{
-public:
-    typedef double VariableType;
-
-    static std::string varName()
-    {
-        return "quantity";
-    }
-
-    static std::string dataFormat()
-    {
-        return "DOUBLE";
-    }
-
-    static int dataComponents()
-    {
-        return 1;
-    }
-
-    void operator()(const Cell& cell, double *storage)
-    {
-        *storage = cell.quantity;
-    }
-};
-
-class VelocitySelector
-{
-public:
-    typedef double VariableType;
-
-    static std::string varName()
-    {
-        return "velocity";
-    }
-
-    static std::string dataFormat()
-    {
-        return "DOUBLE";
-    }
-
-    static int dataComponents()
-    {
-        return 3;
-    }
-
-    void operator()(const Cell& cell, double *storage)
-    {
-        storage[0] = cell.velocityX;
-        storage[1] = cell.velocityY;
-        storage[2] = 0;
-    }
-};
-
 class AeroInitializer : public LibGeoDecomp::SimpleInitializer<Cell>
 {
 public:
@@ -487,12 +433,16 @@ int main(int argc, char *argv[])
                 MPI_COMM_WORLD));
 
         sim.addWriter(
-            new BOVWriter<Cell, QuantitySelector>(
-                "wing.quantity", 50));
+            new BOVWriter<Cell>(
+                Selector<Cell>(&Cell::quantity, "quantity"),   "wing.quantity", 50));
 
         sim.addWriter(
-            new BOVWriter<Cell, VelocitySelector>(
-                "wing.velocity", 50));
+            new BOVWriter<Cell>(
+                Selector<Cell>(&Cell::velocityX, "velocityX"), "wing.velocityX", 50));
+
+        sim.addWriter(
+            new BOVWriter<Cell>(
+                Selector<Cell>(&Cell::velocityY, "velocityY"), "wing.velocityY", 50));
 
         if (MPILayer().rank() == 0) {
             sim.addWriter(

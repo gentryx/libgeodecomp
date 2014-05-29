@@ -1,13 +1,15 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_IO_BOVWRITER_H
 #define LIBGEODECOMP_IO_BOVWRITER_H
 
-#include <iomanip>
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
 
+#include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/io/selector.h>
+
+#include <iomanip>
 
 namespace LibGeoDecomp {
 
@@ -16,7 +18,7 @@ namespace LibGeoDecomp {
  * (BOV) format using MPI-IO. Uses a selector which maps a cell to a
  * primitive data type so that it can be fed into VisIt or ParaView.
  */
-template<typename CELL_TYPE, typename SELECTOR_TYPE>
+template<typename CELL_TYPE>
 class BOVWriter : public ParallelWriter<CELL_TYPE>
 {
 public:
@@ -26,20 +28,20 @@ public:
     using ParallelWriter<CELL_TYPE>::prefix;
 
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
-    typedef typename SELECTOR_TYPE::VariableType VariableType;
 
     static const int DIM = Topology::DIM;
 
     BOVWriter(
+        const Selector<CELL_TYPE>& selector,
         const std::string& prefix,
         const unsigned period,
         const Coord<3>& brickletDim = Coord<3>(),
-        const MPI_Comm& communicator = MPI_COMM_WORLD,
-        MPI_Datatype mpiDatatype = Typemaps::lookup<VariableType>()) :
+        const MPI_Comm& communicator = MPI_COMM_WORLD) :
         ParallelWriter<CELL_TYPE>(prefix, period),
+        selector(selector),
         brickletDim(brickletDim),
         comm(communicator),
-        datatype(mpiDatatype)
+        datatype(selector.mpiDatatype())
     {}
 
     virtual void stepFinished(
@@ -61,6 +63,7 @@ public:
 
 
 private:
+    Selector<CELL_TYPE> selector;
     Coord<3> brickletDim;
     MPI_Comm comm;
     MPI_Datatype datatype;
@@ -95,8 +98,8 @@ private:
                 << "DATA_FILE: " << filename(step, "data") << "\n"
                 << "DATA_SIZE: "
                 << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
-                << "DATA_FORMAT: " << SELECTOR_TYPE::dataFormat() << "\n"
-                << "VARIABLE: " << SELECTOR_TYPE::varName() << "\n"
+                << "DATA_FORMAT: " << selector.typeName() << "\n"
+                << "VARIABLE: " << selector.name() << "\n"
                 << "DATA_ENDIAN: LITTLE\n"
                 << "BRICK_ORIGIN: 0 0 0\n"
                 << "BRICK_SIZE: "
@@ -104,7 +107,7 @@ private:
                 << "DIVIDE_BRICK: true\n"
                 << "DATA_BRICKLETS: "
                 << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
-                << "DATA_COMPONENTS: " << SELECTOR_TYPE::dataComponents() << "\n";
+                << "DATA_COMPONENTS: " << selector.arity() << "\n";
             std::string s = buf.str();
             MPI_File_write(file, const_cast<char*>(s.c_str()), s.length(), MPI_CHAR, MPI_STATUS_IGNORE);
         }
@@ -122,7 +125,7 @@ private:
         MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "data"), comm);
         MPI_Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
-        std::vector<VariableType> buffer;
+        std::vector<char> buffer;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
              i != region.endStreak();
@@ -131,22 +134,21 @@ private:
             // topologies the coordnates may exceed the bounding box
             // (especially negative coordnates may occurr).
             Coord<DIM> coord = Topology::normalize(i->origin, dimensions);
-            int dataComponents = SELECTOR_TYPE::dataComponents();
+            int dataComponents = selector.arity();
             MPI_Offset index = coord.toIndex(dimensions) * varLength * dataComponents;
             MPI_File_seek(file, index, MPI_SEEK_SET);
             int length = i->endX - i->origin.x();
-            std::size_t effectiveLength = length * dataComponents;
-            Coord<DIM> walker = i->origin;
+            std::size_t byteSize = length * selector.sizeOfExternal();
 
-            if (buffer.size() != effectiveLength) {
-                buffer = std::vector<VariableType>(effectiveLength);
+            if (buffer.size() != byteSize) {
+                buffer.resize(byteSize);
             }
 
-            for (std::size_t i = 0; i < effectiveLength; i += dataComponents) {
-                SELECTOR_TYPE()(grid.get(walker), &buffer[i]);
-                walker.x()++;
-            }
-            MPI_File_write(file, &buffer[0], effectiveLength, datatype, MPI_STATUS_IGNORE);
+            Region<DIM> tempRegion;
+            tempRegion << *i;
+            grid.saveMemberUnchecked(&buffer[0], selector, tempRegion);
+
+            MPI_File_write(file, &buffer[0], length, datatype, MPI_STATUS_IGNORE);
         }
 
         MPI_File_close(&file);

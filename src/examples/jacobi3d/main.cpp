@@ -71,32 +71,6 @@ public:
     }
 };
 
-class TemperatureSelector
-{
-public:
-    typedef double VariableType;
-
-    void operator()(const Cell& in, double *out) const
-    {
-        *out = in.temp;
-    }
-
-    static std::string varName()
-    {
-        return "temperature";
-    }
-
-    static int dataComponents()
-    {
-        return 1;
-    }
-
-    static std::string dataFormat()
-    {
-        return "DOUBLE";
-    }
-};
-
 void runSimulation()
 {
     int outputFrequency = 100;
@@ -116,7 +90,8 @@ void runSimulation()
     }
 
     sim.addWriter(
-        new BOVWriter<Cell, TemperatureSelector>(
+        new BOVWriter<Cell>(
+            Selector<Cell>(&Cell::temp, "temperature"),
             "jacobi3d",
             outputFrequency));
 

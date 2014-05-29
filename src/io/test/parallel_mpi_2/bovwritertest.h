@@ -61,7 +61,10 @@ public:
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
         StripingSimulator<TestCell<3> > simTest(init, balancer);
-        simTest.addWriter(new BOVWriter<TestCell<3>, TestValueSelector>("testbovwriter", 4));
+        simTest.addWriter(new BOVWriter<TestCell<3> >(
+                              Selector<TestCell<3> >(&TestCell<3>::testValue, "val"),
+                              "testbovwriter",
+                              4));
         simTest.run();
 
         MPILayer().barrier();

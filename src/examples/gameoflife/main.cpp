@@ -123,32 +123,6 @@ public:
     }
 };
 
-class StateSelector
-{
-public:
-    typedef double VariableType;
-
-    void operator()(const ConwayCell& in, double *out) const
-    {
-        *out = in.alive;
-    }
-
-    static std::string varName()
-    {
-        return "alive";
-    }
-
-    static int dataComponents()
-    {
-        return 1;
-    }
-
-    static std::string dataFormat()
-    {
-        return "DOUBLE";
-    }
-};
-
 void runSimulation()
 {
     int outputFrequency = 1;
@@ -160,7 +134,8 @@ void runSimulation()
         10);
 
     sim.addWriter(
-        new BOVWriter<ConwayCell, StateSelector>(
+        new BOVWriter<ConwayCell>(
+            Selector<ConwayCell>(&ConwayCell::alive, "alive"),
             "game",
             outputFrequency));
 
