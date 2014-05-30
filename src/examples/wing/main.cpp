@@ -15,29 +15,11 @@
 
 using namespace LibGeoDecomp;
 
-#define LID 1
-#define WING 2
-#define SETUP 1
-
-// fixme: use dX for... anything
-// fixme: tune pressure speed, pressure diffusion, driver velocity, influence factor?
-// fixme: don't equalize pressure on lid?
 const double dX = 1.0;
 const double dT = 1.0;
 
-#if SETUP==LID
-const int MAX_X = 512;
-const int MAX_Y = 512;
-const double FLOW_DIFFUSION = 0.1 * dT;
-const double PRESSURE_DIFFUSION = 0.1 * dT;
-#endif
-
-#if SETUP==WING
-const int MAX_X = 2048;
-const int MAX_Y = 2048;
-const double FLOW_DIFFUSION = 0.1 * dT;
-const double PRESSURE_DIFFUSION = 0.1 * dT;
-#endif
+const double FLOW_DIFFUSION = 0.1 * dT * dX;
+const double PRESSURE_DIFFUSION = 0.1 * dT * dX;
 
 const double PRESSURE_SPEED = 0.1;
 
@@ -46,15 +28,6 @@ const double DRIVER_VELOCITY_X = 3.0;
 const double DRIVER_VELOCITY_Y = 0.0;
 
 enum State {LIQUID=0, SLIP=1, SOLID=2, CONST=3};
-
-Coord<2> NEIGHBOR_COORDS[] = {Coord<2>(-1, -1),
-                              Coord<2>( 0, -1),
-                              Coord<2>( 1, -1),
-                              Coord<2>(-1,  0),
-                              Coord<2>( 1,  0),
-                              Coord<2>(-1,  1),
-                              Coord<2>( 0,  1),
-                              Coord<2>( 1,  1)};
 
 const double DIAG = 0.707107;
 
@@ -68,7 +41,7 @@ double PERPENDICULAR_DIRS[][2] = {{DIAG, -DIAG},
                                   {-DIAG, DIAG}};
 
 const double INFLUENCE_FACTOR = 0.04;
-// fixme: reduce this to 1 influence?
+
 double INFLUENCES[] =
     {INFLUENCE_FACTOR * FLOW_DIFFUSION, FLOW_DIFFUSION, INFLUENCE_FACTOR * FLOW_DIFFUSION,
      FLOW_DIFFUSION, FLOW_DIFFUSION,
@@ -79,13 +52,51 @@ double LENGTHS[] =
      1.0, 1.0,
      DIAG, 1.0, DIAG};
 
+template<int I>
+class NEIGHBORS;
+
+template<>
+class NEIGHBORS<0> : public FixedCoord<-1, -1>
+{};
+
+template<>
+class NEIGHBORS<1> : public FixedCoord< 0, -1>
+{};
+
+template<>
+class NEIGHBORS<2> : public FixedCoord< 1, -1>
+{};
+
+template<>
+class NEIGHBORS<3> : public FixedCoord<-1,  0>
+{};
+
+template<>
+class NEIGHBORS<4> : public FixedCoord< 1,  0>
+{};
+
+template<>
+class NEIGHBORS<5> : public FixedCoord<-1,  1>
+{};
+
+template<>
+class NEIGHBORS<6> : public FixedCoord< 0,  1>
+{};
+
+template<>
+class NEIGHBORS<7> : public FixedCoord< 1,  1>
+{};
+
+
 class Cell
 {
 public:
+    friend int main(int argc, char **argv);
     static MPI_Datatype MPIDataType;
 
     class API :
-        public APITraits::HasCustomMPIDataType<Cell>
+        public APITraits::HasCustomMPIDataType<Cell>,
+        public APITraits::HasFixedCoordsOnlyUpdate
     {};
 
     explicit Cell(
@@ -99,18 +110,21 @@ public:
         velocityY(velocityY)
     {}
 
-    template<class COORD_MAP>
-    void update(const COORD_MAP& neighbors, const int& nanoStep)
+    template<class NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& neighbors, const int& nanoStep)
     {
-        *this = neighbors[Coord<2>()];
+        *this = neighbors[FixedCoord<0, 0>()];
 
-        if (state == SOLID)
+        if (state == SOLID) {
             return;
+        }
 
         diffuse(neighbors);
     }
 
-    static void flux(const Cell& from, const Cell& to, const int& i,
+private:
+    template<int I>
+    static void flux(const Cell& from, const Cell& to,
                      double *fluxFlow, double *fluxPressure)
     {
         if (from.state == SOLID || to.state == SOLID) {
@@ -119,39 +133,38 @@ public:
             return;
         }
 
-        const Coord<2>& dir = NEIGHBOR_COORDS[i];
-        const double& influence = INFLUENCES[i];
+        typedef NEIGHBORS<I> DIR;
+        const double& influence = INFLUENCES[I];
 
-        *fluxFlow = (dir.x() * from.velocityX + dir.y() * from.velocityY) *
+        *fluxFlow = (DIR::X * from.velocityX + DIR::Y * from.velocityY) *
             influence * from.quantity;
         *fluxFlow = std::max(0.0, *fluxFlow);
 
         *fluxPressure = 0;
-        if (from.quantity > to.quantity)
+        if (from.quantity > to.quantity) {
             *fluxPressure = (from.quantity - to.quantity) * PRESSURE_DIFFUSION;
-
-
+        }
     }
 
-    template<class COORD_MAP>
+    template<int I, class NEIGHBORHOOD>
     static void addFlowFromNeighbor(
         const Cell& oldSelf,
-        const int& i,
-        const COORD_MAP& neighbors,
+        const NEIGHBORHOOD& neighbors,
         double *fluxVelocityX,
         double *fluxVelocityY,
         double *newQuantity)
     {
-        const Coord<2>& dir = NEIGHBOR_COORDS[i];
-        const Cell& other = neighbors[dir];
-        const double& length = LENGTHS[i];
+        typedef NEIGHBORS<I> DIR;
+        const Cell& other = neighbors[DIR()];
+        const double& length = LENGTHS[I];
 
         double fluxFlow;
         double fluxPressure;
-        flux(other, oldSelf, 7 - i, &fluxFlow, &fluxPressure);
+        flux<7 - I>(other, oldSelf, &fluxFlow, &fluxPressure);
 
-        if (fluxFlow == 0 && fluxPressure == 0)
+        if (fluxFlow == 0 && fluxPressure == 0) {
             return;
+        }
 
         double totalFlow = fluxFlow + fluxPressure;
         *fluxVelocityX += totalFlow * other.velocityX;
@@ -159,38 +172,56 @@ public:
         *newQuantity += totalFlow;
 
         double pressureCoefficient = length * PRESSURE_SPEED * fluxPressure;
-        *fluxVelocityX += -dir.x() * pressureCoefficient;
-        *fluxVelocityY += -dir.y() * pressureCoefficient;
+        *fluxVelocityX += -DIR::X * pressureCoefficient;
+        *fluxVelocityY += -DIR::Y * pressureCoefficient;
     }
 
-    template<class COORD_MAP>
+    template<int I, class NEIGHBORHOOD>
     static void removeFlowToNeighbor(
         const Cell& oldSelf,
-        const int& i,
-        const COORD_MAP& neighbors,
+        const NEIGHBORHOOD& neighbors,
         double *newQuantity)
     {
-        const Coord<2>& dir = NEIGHBOR_COORDS[i];
-        const Cell& other = neighbors[dir];
+        typedef NEIGHBORS<I> DIR;
+        const Cell& other = neighbors[DIR()];
         double fluxFlow;
         double fluxPressure;
-        flux(oldSelf, other, i, &fluxFlow, &fluxPressure);
+        flux<I>(oldSelf, other, &fluxFlow, &fluxPressure);
 
         *newQuantity -= fluxFlow;
         *newQuantity -= fluxPressure;
     }
 
-    template<class COORD_MAP>
-    void diffuse(const COORD_MAP& neighbors)
+#define CYCLE_NEIGHBORS_3(FUNCTION, P1, P2, P3) \
+    FUNCTION<0>(P1, P2, P3);                    \
+    FUNCTION<1>(P1, P2, P3);                    \
+    FUNCTION<2>(P1, P2, P3);                    \
+    FUNCTION<3>(P1, P2, P3);                    \
+    FUNCTION<4>(P1, P2, P3);                    \
+    FUNCTION<5>(P1, P2, P3);                    \
+    FUNCTION<6>(P1, P2, P3);                    \
+    FUNCTION<7>(P1, P2, P3);
+
+#define CYCLE_NEIGHBORS_5(FUNCTION, P1, P2, P3, P4, P5) \
+    FUNCTION<0>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<1>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<2>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<3>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<4>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<5>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<6>(P1, P2, P3, P4, P5);                    \
+    FUNCTION<7>(P1, P2, P3, P4, P5);
+
+    template<class NEIGHBORHOOD>
+    void diffuse(const NEIGHBORHOOD& neighbors)
     {
         double fluxVelocityX = 0;
         double fluxVelocityY = 0;
         double newQuantity = quantity;
-        const Cell& oldSelf = neighbors[Coord<2>()];
+        const Cell& oldSelf = neighbors[FixedCoord<0, 0>()];
 
-        for (int i = 0; i < 8; ++i)
-            addFlowFromNeighbor(oldSelf, i, neighbors,
-                                &fluxVelocityX, &fluxVelocityY, &newQuantity);
+        CYCLE_NEIGHBORS_5(
+            addFlowFromNeighbor, oldSelf, neighbors, &fluxVelocityX, &fluxVelocityY, &newQuantity);
 
         double velocityCoeff = (state == SLIP) ? (1 - FRICTION) : 1.0;
         velocityCoeff /= newQuantity;
@@ -199,11 +230,11 @@ public:
             velocityY = (quantity * velocityY + fluxVelocityY) * velocityCoeff;
         }
 
-        for (int i = 0; i < 8; ++i)
-            removeFlowToNeighbor(oldSelf, i, neighbors, &newQuantity);
+        CYCLE_NEIGHBORS_3(
+            removeFlowToNeighbor, oldSelf, neighbors, &newQuantity);
 
         if (newQuantity < 0) {
-            std::cout << "ohoh\n"
+            std::cerr << "ohoh\n"
                       << "oldSelf:\n"
                       << "  quantity = " << oldSelf.quantity << "\n"
                       << "  velocityX = " << oldSelf.velocityX << "\n"
@@ -212,21 +243,6 @@ public:
                       << "  quantity = " << newQuantity << "\n"
                       << "  velocityX = " << velocityX << "\n"
                       << "  velocityY = " << velocityY << "\n\n";
-
-            for (int i = 0; i < 8; ++i) {
-                double fluxVelocityX = 0;
-                double fluxVelocityY = 0;
-                double addQuantity = 0;
-                double removeQuantity = 0;
-                addFlowFromNeighbor(oldSelf, i, neighbors,
-                                    &fluxVelocityX, &fluxVelocityY, &addQuantity);
-                removeFlowToNeighbor(oldSelf, i, neighbors, &removeQuantity);
-                std::cout << "i: " << i << "\n"
-                          << "  fluxVelocityX: " << fluxVelocityX << "\n"
-                          << "  fluxVelocityY: " << fluxVelocityY << "\n"
-                          << "  addQuantity: " << addQuantity << "\n"
-                          << "  removeQuantity: " << removeQuantity << "\n";
-            }
 
             throw std::logic_error("negative quantity, unstable simulation!");
         }
@@ -247,10 +263,183 @@ class AeroInitializer : public LibGeoDecomp::SimpleInitializer<Cell>
 public:
     using LibGeoDecomp::SimpleInitializer<Cell>::dimensions;
 
+    class Setup
+    {
+    public:
+        virtual ~Setup()
+        {}
+
+        virtual Coord<2> getMax() const = 0;
+        virtual void addCells(GridBase<Cell, 2> *grid) = 0;
+
+        Coord<2> dimensions() const
+        {
+            return getMax();
+        }
+
+
+    };
+
+    class WingSetup : public Setup
+    {
+    public:
+        Coord<2> getMax() const
+        {
+            return Coord<2>(2048, 2048);
+        }
+
+        void addCells(GridBase<Cell, 2> *grid)
+        {
+            CoordBox<2> box = grid->boundingBox();
+
+            Coord<2> offset = Coord<2>(500, 950);
+            // substract inherent offset
+            offset -= Coord<2>(150, 100);
+
+            // lower left forth circle
+            for (int y = 100; y < 140; ++y) {
+                for (int x = 150; x < 190; ++x) {
+                    Coord<2> c(x, y);
+                    c = c + offset;
+                    if (box.inBounds(c) &&
+                        inCircle(c, Coord<2>(190, 140) + offset, 40)) {
+                        grid->set(c, Cell(SOLID, 0));
+                    }
+                }
+            }
+
+            // upper left forth circle
+            for (int y = 140; y < 200; ++y) {
+                for (int x = 150; x < 250; ++x) {
+                    Coord<2> c(x, y);
+                    c = c + offset;
+                    if (box.inBounds(c) &&
+                        inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25)) {
+                        grid->set(c, Cell(SOLID, 0));
+                    }
+                }
+            }
+
+            // left quadroid filler
+            for (int y = 100; y < 140; ++y) {
+                for (int x = 190; x < 250; ++x) {
+                    Coord<2> c(x, y);
+                    c = c + offset;
+                    if (box.inBounds(c)) {
+                        grid->set(c, Cell(SOLID, 0));
+                    }
+                }
+            }
+
+            // right circle fragment
+            for (int y = 100; y < 200; ++y) {
+                for (int x = 250; x < 350; ++x) {
+                    Coord<2> c(x, y);
+                    c = c + offset;
+                    if (box.inBounds(c) &&
+                        inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60)) {
+                        grid->set(c, Cell(SOLID, 0));
+                    }
+                }
+            }
+
+            // right triangle filler
+            for (int x = 350; x < 600; ++x) {
+                int maxY = 100 + 91.0 * (600 - x) / 250;
+                for (int y = 100; y < maxY; ++y) {
+                    Coord<2> c(x, y);
+                    c = c + offset;
+                    if (box.inBounds(c)) {
+                        grid->set(c, Cell(SOLID, 0));
+                    }
+                }
+            }
+        }
+
+    private:
+        bool inCircle(const Coord<2>& point,
+                      const Coord<2>& center,
+                      const int& diameter,
+                      const double& xScale = 1.0)
+        {
+            Coord<2> delta = center - point;
+            double dist = delta.x() * delta.x() * xScale +
+                delta.y() * delta.y();
+            return sqrt(dist) <= diameter;
+        }
+    };
+
+    class WingWithInletSetup : public WingSetup
+    {
+    public:
+        void addCells(GridBase<Cell, 2> *grid)
+        {
+            WingSetup::addCells(grid);
+
+            CoordBox<2> box = grid->boundingBox();
+
+            Cell driverCell(CONST, 1, DRIVER_VELOCITY_X, DRIVER_VELOCITY_Y);
+            for (int y = 1; y < dimensions().y() - 1; ++y) {
+                Coord<2> c1(0, y);
+                Coord<2> c2(dimensions().x() - 1, y);
+
+                if (box.inBounds(c1)) {
+                    grid->set(c1, driverCell);
+                }
+                if (box.inBounds(c2)) {
+                    grid->set(c2, driverCell);
+                }
+            }
+        }
+    };
+
+    class LidSetup : public Setup
+    {
+    public:
+        Coord<2> getMax() const
+        {
+            return Coord<2>(512, 512);
+        }
+
+        void addCells(GridBase<Cell, 2> *grid)
+        {
+            CoordBox<2> box = grid->boundingBox();
+
+            Cell driverCell(CONST, 1, DRIVER_VELOCITY_X, DRIVER_VELOCITY_Y);
+            Cell slipCell(SLIP, 1);
+
+            for (int y = 0; y < dimensions().y(); ++y) {
+                Coord<2> c1(0, y);
+                Coord<2> c2(dimensions().x() - 1, y);
+                if (box.inBounds(c1)) {
+                    grid->set(c1, slipCell);
+                }
+                if (box.inBounds(c2)) {
+                    grid->set(c2, slipCell);
+                }
+            }
+
+            for (int x = 0; x < dimensions().x(); ++x) {
+                Coord<2> c(x, 0);
+                if (box.inBounds(c)) {
+                    grid->set(c, slipCell);
+                }
+            }
+
+            for (int x = 1; x < dimensions().x() - 1; ++x) {
+                Coord<2> c(x, dimensions().y() - 1);
+                if (box.inBounds(c)) {
+                    grid->set(c, driverCell);
+                }
+            }
+        }
+    };
+
     AeroInitializer(
-        const Coord<2>& dim,
-        const unsigned& steps) :
-        SimpleInitializer<Cell>(dim, steps)
+        Setup *setup,
+        std::size_t steps) :
+        SimpleInitializer<Cell>(setup->getMax(), steps),
+        setup(setup)
     {}
 
     virtual void grid(GridBase<Cell, 2> *grid)
@@ -262,149 +451,14 @@ public:
             grid->set(*i, Cell(LIQUID, 1));
         }
 
-#if SETUP==LID
-        addLid(grid);
-#endif
-
-#if SETUP==WING
-        addInletOutlet(grid);
-        // fixme: make this configurable by command line
-        //        addWing(grid);
-#endif
+        setup->addCells(grid);
     }
 
-    void addLid(GridBase<Cell, 2> *grid)
-    {
-        CoordBox<2> box = grid->boundingBox();
-
-        Cell driverCell(CONST, 1, DRIVER_VELOCITY_X, DRIVER_VELOCITY_Y);
-        Cell slipCell(SLIP, 1);
-
-        for (int y = 0; y < dimensions.y(); ++y) {
-            Coord<2> c1(0, y);
-            Coord<2> c2(dimensions.x() - 1, y);
-            if (box.inBounds(c1)) {
-                grid->set(c1, slipCell);
-            }
-            if (box.inBounds(c2)) {
-                grid->set(c2, slipCell);
-            }
-        }
-
-        for (int x = 0; x < dimensions.x(); ++x) {
-            Coord<2> c(x, 0);
-            if (box.inBounds(c)) {
-                grid->set(c, slipCell);
-            }
-        }
-
-        for (int x = 1; x < dimensions.x() - 1; ++x) {
-            Coord<2> c(x, dimensions.y() - 1);
-            if (box.inBounds(c)) {
-                grid->set(c, driverCell);
-            }
-        }
-    }
-
-    void addInletOutlet(GridBase<Cell, 2> *grid)
-    {
-        CoordBox<2> box = grid->boundingBox();
-
-        Cell driverCell(CONST, 1, DRIVER_VELOCITY_X, DRIVER_VELOCITY_Y);
-        for (int y = 1; y < dimensions.y() - 1; ++y) {
-            Coord<2> c1(0, y);
-            Coord<2> c2(dimensions.x() - 1, y);
-
-            if (box.inBounds(c1)) {
-                grid->set(c1, driverCell);
-            }
-            if (box.inBounds(c2)) {
-                grid->set(c2, driverCell);
-            }
-        }
-    }
-
-    bool inCircle(const Coord<2>& point,
-                  const Coord<2>& center,
-                  const int& diameter,
-                  const double& xScale = 1.0)
-    {
-        Coord<2> delta = center - point;
-        double dist = delta.x() * delta.x() * xScale +
-            delta.y() * delta.y();
-        return sqrt(dist) <= diameter;
-    }
-
-    void addWing(GridBase<Cell, 2> *grid)
-    {
-        CoordBox<2> box = grid->boundingBox();
-
-        Coord<2> offset = Coord<2>(500, 950);
-        // substract inherent offset
-        offset -= Coord<2>(150, 100);
-
-        // lower left forth circle
-        for (int y = 100; y < 140; ++y) {
-            for (int x = 150; x < 190; ++x) {
-                Coord<2> c(x, y);
-                c = c + offset;
-                if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(190, 140) + offset, 40)) {
-                    grid->set(c, Cell(SOLID, 0));
-                }
-            }
-        }
-
-        // upper left forth circle
-        for (int y = 140; y < 200; ++y) {
-            for (int x = 150; x < 250; ++x) {
-                Coord<2> c(x, y);
-                c = c + offset;
-                if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(270, 140) + offset, 60, 0.25)) {
-                    grid->set(c, Cell(SOLID, 0));
-                }
-            }
-        }
-
-        // left quadroid filler
-        for (int y = 100; y < 140; ++y) {
-            for (int x = 190; x < 250; ++x) {
-                Coord<2> c(x, y);
-                c = c + offset;
-                if (box.inBounds(c)) {
-                    grid->set(c, Cell(SOLID, 0));
-                }
-            }
-        }
-
-        // right circle fragment
-        for (int y = 100; y < 200; ++y) {
-            for (int x = 250; x < 350; ++x) {
-                Coord<2> c(x, y);
-                c = c + offset;
-                if (box.inBounds(c) &&
-                    inCircle(c, Coord<2>(250, -125) + offset, 325, 0.60)) {
-                    grid->set(c, Cell(SOLID, 0));
-                }
-            }
-        }
-
-        // right triangle filler
-        for (int x = 350; x < 600; ++x) {
-            int maxY = 100 + 91.0 * (600 - x) / 250;
-            for (int y = 100; y < maxY; ++y) {
-                Coord<2> c(x, y);
-                c = c + offset;
-                if (box.inBounds(c)) {
-                    grid->set(c, Cell(SOLID, 0));
-                }
-            }
-        }
-    }
+private:
+    boost::shared_ptr<Setup> setup;
 };
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
     Typemaps::initializeMaps();
@@ -415,10 +469,34 @@ int main(int argc, char *argv[])
     MPI_Type_create_struct(1, lengths, displacements, memberTypes, &Cell::MPIDataType);
     MPI_Type_commit(&Cell::MPIDataType);
 
+    if (argc != 2) {
+        std::cerr << "USAGE: " << argv[0] << "  PRESET" << std::endl
+                  << "  with PRESET in {WING, WING_WITH_INLET, LID}" << std::endl;
+        MPI_Finalize();
+        return 1;
+    }
+
+    AeroInitializer::Setup *setup = 0;
+    if (argv[1] == std::string("WING")) {
+        setup = new AeroInitializer::WingSetup;
+    }
+    if (argv[1] == std::string("WING_WITH_INLET")) {
+        setup = new AeroInitializer::WingWithInletSetup;
+    }
+    if (argv[1] == std::string("LID")) {
+        setup = new AeroInitializer::LidSetup;
+    }
+
+    if (setup == 0) {
+        std::cerr << "ERROR: unknown preset" << std::endl;
+        MPI_Finalize();
+        return 2;
+    }
+
     {
         AeroInitializer *init = new AeroInitializer(
-            Coord<2>(MAX_X, MAX_Y),
-            100000);
+            setup,
+            200000);
 
         StripingSimulator<Cell> sim(
             init,
@@ -432,17 +510,18 @@ int main(int argc, char *argv[])
                 init->maxSteps(),
                 MPI_COMM_WORLD));
 
-        sim.addWriter(
-            new BOVWriter<Cell>(
-                Selector<Cell>(&Cell::quantity, "quantity"),   "wing.quantity", 50));
 
         sim.addWriter(
             new BOVWriter<Cell>(
-                Selector<Cell>(&Cell::velocityX, "velocityX"), "wing.velocityX", 50));
+                Selector<Cell>(&Cell::quantity,  "quantity"),  "wing.quantity",  100));
 
         sim.addWriter(
             new BOVWriter<Cell>(
-                Selector<Cell>(&Cell::velocityY, "velocityY"), "wing.velocityY", 50));
+                Selector<Cell>(&Cell::velocityX, "velocityX"), "wing.velocityX", 100));
+
+        sim.addWriter(
+            new BOVWriter<Cell>(
+                Selector<Cell>(&Cell::velocityY, "velocityY"), "wing.velocityY", 100));
 
         if (MPILayer().rank() == 0) {
             sim.addWriter(
