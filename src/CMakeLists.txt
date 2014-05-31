@@ -64,6 +64,7 @@ find_package(CUDA)
 find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
+find_package(OpenMP)
 find_package(PythonLibs)
 find_package(Ruby)
 find_package(SCOTCH)
@@ -71,41 +72,9 @@ find_package(Silo)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
 
-if(NOT DEFINED CUDA_FOUND)
-  set(CUDA_FOUND false)
-endif()
-
-if(NOT DEFINED HPX_FOUND)
-  set(HPX_FOUND false)
-endif()
-
 # if a package was not found it's safer to set the corresponding
 # variable to false, this avoids undefined/unintended behavior in some
 # cases.
-if(NOT DEFINED QT4_FOUND)
-  set(QT4_FOUND false)
-endif()
-
-if(NOT DEFINED RUBY_FOUND)
-  set(RUBY_FOUND false)
-endif()
-
-if(NOT DEFINED PYTHONLIBS_FOUND)
-  set(PYTHONLIBS_FOUND false)
-endif()
-
-if(NOT DEFINED Silo_FOUND)
-  set(Silo_FOUND false)
-endif()
-
-if(NOT DEFINED SCOTCH_FOUND)
-  set(SCOTCH_FOUND false)
-endif()
-
-if(NOT DEFINED OpenCV_FOUND)
-  set(OpenCV_FOUND false)
-endif()
-
 if(NOT DEFINED Boost_SERIALIZATION_FOUND)
   set(Boost_SERIALIZATION_FOUND false)
 endif()
@@ -116,6 +85,42 @@ endif()
 
 if(NOT DEFINED Boost_MOVE_FOUND)
   set(Boost_MOVE_FOUND false)
+endif()
+
+if(NOT DEFINED CUDA_FOUND)
+  set(CUDA_FOUND false)
+endif()
+
+if(NOT DEFINED HPX_FOUND)
+  set(HPX_FOUND false)
+endif()
+
+if(NOT DEFINED OpenCV_FOUND)
+  set(OpenCV_FOUND false)
+endif()
+
+if(NOT DEFINED OpenMP_FOUND)
+  set(OpenMP_FOUND false)
+endif()
+
+if(NOT DEFINED PYTHONLIBS_FOUND)
+  set(PYTHONLIBS_FOUND false)
+endif()
+
+if(NOT DEFINED QT4_FOUND)
+  set(QT4_FOUND false)
+endif()
+
+if(NOT DEFINED RUBY_FOUND)
+  set(RUBY_FOUND false)
+endif()
+
+if(NOT DEFINED SCOTCH_FOUND)
+  set(SCOTCH_FOUND false)
+endif()
+
+if(NOT DEFINED Silo_FOUND)
+  set(Silo_FOUND false)
 endif()
 
 #============= 2. DETECT DEFAULTS ====================================
@@ -220,9 +225,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 generate_sourcelists("./")
 
-if(WITH_MPI)
-  add_definitions(${MPI_COMPILE_FLAGS})
-  include_directories(${MPI_INCLUDE_PATH})
+if(WITH_BOOST_MPI)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+endif()
+
+if(WITH_CUDA)
+  set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
 endif()
 
 if(WITH_HPX)
@@ -232,16 +240,21 @@ if(WITH_HPX)
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/lib/hpx:${CMAKE_BINARY_DIR}/lib/hpx:${CMAKE_BINARY_DIR}/src")
 endif()
 
-if(WITH_SILO)
-  include_directories(${Silo_INCLUDE_DIR})
+if(WITH_MPI)
+  add_definitions(${MPI_COMPILE_FLAGS})
+  include_directories(${MPI_INCLUDE_PATH})
 endif()
 
 if(WITH_SCOTCH)
   include_directories(${SCOTCH_INCLUDE_DIRS})
 endif()
 
-if(WITH_CUDA)
-  set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
+if(WITH_SILO)
+  include_directories(${Silo_INCLUDE_DIR})
+endif()
+
+if(WITH_THREADS)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
@@ -250,12 +263,28 @@ include_directories(${Boost_INCLUDE_DIRS})
 # import settings detected by packages to decouple from their
 # interfaces, perform sanity checks to match selected options and
 # detected environment...
-if(WITH_OPENCV AND NOT OpenCV_FOUND)
-  message(FATAL_ERROR "WITH_OPENCV selected, but could not find OpenCV.")
+if(WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
+  message(FATAL_ERROR "WITH_BOOST_MPI selected, but Boost.MPI library not found")
+endif()
+
+if(WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
+  message(FATAL_ERROR "WITH_BOOST_MOVE selected, but Boost.Move library not found")
+endif()
+
+if(WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
+  message(FATAL_ERROR "WITH_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
 endif()
 
 if(WITH_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "WITH_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
+endif()
+
+if(WITH_HPX AND NOT HPX_FOUND)
+  message(FATAL_ERROR "WITH_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
+endif()
+
+if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
+  message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
 endif()
 
 if(WITH_MPI)
@@ -272,40 +301,24 @@ if(WITH_OPENCL AND NOT OPENCL_FOUND)
   message(FATAL_ERROR "WITH_OPENCL selected, but could not find any OpenCL library.")
 endif()
 
+if(WITH_OPENCV AND NOT OpenCV_FOUND)
+  message(FATAL_ERROR "WITH_OPENCV selected, but could not find OpenCV.")
+endif()
+
 if(WITH_QT AND NOT QT4_FOUND)
   message(FATAL_ERROR "WITH_QT selected, but could not find QT4")
-endif()
-
-if(WITH_HPX AND NOT HPX_FOUND)
-  message(FATAL_ERROR "WITH_HPX selected but could not find HPX. Specify HPX_ROOT to point to your HPX installation.")
-endif()
-
-if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
-  message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
-endif()
-
-if(WITH_SILO AND NOT Silo_FOUND)
-  message(FATAL_ERROR "WITH_SILO selected, but FindSilo couldn't detect any installation of it.")
 endif()
 
 if(WITH_SCOTCH AND NOT SCOTCH_FOUND)
   message(FATAL_ERROR "WITH_SCOTCH selected but no installation of Scotch could be found.")
 endif()
 
-if(WITH_BOOST_MPI AND NOT Boost_MPI_FOUND)
-  message(FATAL_ERROR "WITH_BOOST_MPI selected, but Boost.MPI library not found")
+if(WITH_SILO AND NOT Silo_FOUND)
+  message(FATAL_ERROR "WITH_SILO selected, but FindSilo couldn't detect any installation of it.")
 endif()
 
-if(WITH_BOOST_MOVE AND NOT Boost_MOVE_FOUND)
-  message(FATAL_ERROR "WITH_BOOST_MOVE selected, but Boost.Move library not found")
-endif()
-
-if(WITH_BOOST_SERIALIZATION AND NOT Boost_SERIALIZATION_FOUND)
-  message(FATAL_ERROR "WITH_BOOST_SERIALIZATION selected, but Boost.Serialization library not found")
-endif()
-
-if(WITH_BOOST_MPI)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+if(WITH_THREADS AND NOT OPENMP_FOUND)
+message(FATAL_ERROR "WITH_THREADs selected, but no OpenMP support detected.")
 endif()
 
 if(WITH_VISIT)

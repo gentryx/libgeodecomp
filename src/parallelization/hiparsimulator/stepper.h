@@ -8,7 +8,7 @@
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/offsethelper.h>
-#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
 
@@ -30,7 +30,9 @@ public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     const static int DIM = Topology::DIM;
 
-    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
+
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef boost::shared_ptr<PatchProvider<GridType> > PatchProviderPtr;
     typedef boost::shared_ptr<PatchAccepter<GridType> > PatchAccepterPtr;

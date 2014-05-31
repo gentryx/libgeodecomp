@@ -4,9 +4,19 @@
 #ifndef LIBGEODECOMP_IO_QTWIDGETWRITER_H
 #define LIBGEODECOMP_IO_QTWIDGETWRITER_H
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
 #include <QtGui/QResizeEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QWidget>
+
+#ifdef __ICC
+#pragma warning pop
+#endif
 
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/io/writer.h>
@@ -64,7 +74,7 @@ private:
 class PainterWrapper
 {
 public:
-    PainterWrapper(QPainter *painter) :
+    explicit PainterWrapper(QPainter *painter) :
         painter(painter)
     {}
 
@@ -99,7 +109,7 @@ public:
     friend class QtWidgetWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8), unsigned period = 1) :
+    explicit QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8), unsigned period = 1) :
         Writer<CELL_TYPE>("", period),
         cellDimensions(cellDimensions)
     {}

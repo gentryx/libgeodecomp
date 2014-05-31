@@ -16,7 +16,7 @@ template<typename CELL, typename STENCIL>
 class PointerNeighborhood
 {
 public:
-    PointerNeighborhood(CELL **cells) :
+    explicit PointerNeighborhood(CELL **cells) :
         cells(cells)
     {}
 

@@ -74,7 +74,7 @@ public:
             digDown(pos);
         }
 
-        inline Iterator(const Coord<DIM>& origin) :
+        inline explicit Iterator(const Coord<DIM>& origin) :
             SpaceFillingCurve<DIM>::Iterator(origin, true)
         {}
 
@@ -270,7 +270,7 @@ public:
         }
     };
 
-    inline ZCurvePartition(
+    inline explicit ZCurvePartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& dimensions = Coord<DIM>(),
         const long& offset = 0,

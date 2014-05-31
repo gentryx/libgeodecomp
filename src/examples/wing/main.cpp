@@ -88,10 +88,11 @@ public:
         public APITraits::HasCustomMPIDataType<Cell>
     {};
 
-    Cell(State state = LIQUID,
-         double quantity = 0,
-         double velocityX = 0,
-         double velocityY = 0) :
+    explicit Cell(
+        State state = LIQUID,
+        double quantity = 0,
+        double velocityX = 0,
+        double velocityY = 0) :
         state(state),
         quantity(quantity),
         velocityX(velocityX),

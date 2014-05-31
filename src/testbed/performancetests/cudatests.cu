@@ -257,8 +257,8 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    LibFlatArray::soa_accessor<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, &index);
+    LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
+    LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, index);
 
     double c0 = hoody(0, 0, -2).c();
     double c1 = hoody(0, 0, -1).c();
@@ -308,8 +308,10 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     int offset = DIM_X * DIM_Y;
     int end = DIM_X * DIM_Y * (dimZ - 2);
 
-    LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, &index);
-    FixedNeighborhood<CellLBM, APITraits::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0> hoodOld(LibFlatArray::soa_accessor<CellLBM, DIM_X, DIM_Y, DIM_Z, 0>((char*)gridOld, &index));
+    LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
+    LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOldInternal((char*)gridOld, index);
+    FixedNeighborhood<CellLBM, APITraits::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0, LibFlatArray::soa_accessor_light> hoodOld(
+        hoodOldInternal);
 
 #pragma unroll 10
     for (; index < end; index += offset) {
@@ -599,17 +601,22 @@ void cudaTests(std::string revision, bool quick, int cudaDevice)
     cudaSetDevice(cudaDevice);
     LibFlatArray::evaluate eval(revision);
 
-    for (int d = 32; d <= 544; d += 4) {
+    int increment = 4;
+    if (quick) {
+        increment = 32;
+    }
+
+    for (int d = 32; d <= 544; d += increment) {
         eval(BenchmarkCUDA<RTMClassic>(), toVector(Coord<3>::diagonal(d)));
     }
-    for (int d = 32; d <= 544; d += 4) {
+    for (int d = 32; d <= 544; d += increment) {
         eval(BenchmarkCUDA<RTMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }
-    for (int d = 32; d <= 160; d += 4) {
+    for (int d = 32; d <= 160; d += increment) {
         Coord<3> dim(d, d, 256 + 32 - 4);
         eval(BenchmarkCUDA<LBMClassic>(), toVector(Coord<3>::diagonal(d)));
     }
-    for (int d = 32; d <= 160; d += 4) {
+    for (int d = 32; d <= 160; d += increment) {
         Coord<3> dim(d, d, 256 + 32 - 4);
         eval(BenchmarkCUDA<LBMSoA>(),     toVector(Coord<3>::diagonal(d)));
     }

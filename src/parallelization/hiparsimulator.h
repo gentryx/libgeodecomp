@@ -35,7 +35,7 @@ public:
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
     static const int DIM = Topology::DIM;
 
-    inline HiParSimulator(
+    inline explicit HiParSimulator(
         Initializer<CELL_TYPE> *initializer,
         LoadBalancer *balancer = 0,
         unsigned loadBalancingPeriod = 1,

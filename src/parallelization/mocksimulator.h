@@ -10,7 +10,7 @@ namespace LibGeoDecomp {
 class MockSimulator : public MonolithicSimulator<TestCell<2> >
 {
 public:
-    MockSimulator(Initializer<TestCell<2> > *init) :
+    explicit MockSimulator(Initializer<TestCell<2> > *init) :
         MonolithicSimulator<TestCell<2> >(init)
     {}
 

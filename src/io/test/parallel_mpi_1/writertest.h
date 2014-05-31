@@ -15,8 +15,9 @@ class HollowWriter : public Writer<CELL_TYPE>
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    HollowWriter(const std::string& prefix,
-                 unsigned period = 1) :
+    explicit HollowWriter(
+        const std::string& prefix,
+        unsigned period = 1) :
         Writer<CELL_TYPE>(prefix, period)
     {}
 

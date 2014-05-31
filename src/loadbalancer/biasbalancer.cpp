@@ -1,23 +1,20 @@
 #include <libgeodecomp/loadbalancer/biasbalancer.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 
 BiasBalancer::BiasBalancer(LoadBalancer *balancer) :
-    _pristine(true),
-    _balancer(balancer)
+    pristine(true),
+    balancer(balancer)
 {
 }
 
 
-BiasBalancer::WeightVec BiasBalancer::oneNodeOnly(WeightVec weights) const
+BiasBalancer::WeightVec BiasBalancer::loadOnOneNodeOnly(WeightVec weights) const
 {
-    long sum = 0;
-    for (unsigned i = 0; i < weights.size(); i++) {
-        sum += weights[i];
-    }
-
     WeightVec ret(weights.size(), 0);
-    ret[0] = sum;
+    ret[0] = sum(weights);
+
     return ret;
 }
 
@@ -26,11 +23,11 @@ BiasBalancer::WeightVec BiasBalancer::balance(
     const BiasBalancer::WeightVec& weights,
     const BiasBalancer::LoadVec& relativeLoads)
 {
-    if (_pristine) {
-        _pristine = false;
-        return oneNodeOnly(weights);
+    if (pristine) {
+        pristine = false;
+        return loadOnOneNodeOnly(weights);
     } else {
-        return _balancer->balance(weights, relativeLoads);
+        return balancer->balance(weights, relativeLoads);
     }
 }
 

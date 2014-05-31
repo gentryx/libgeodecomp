@@ -17,7 +17,9 @@ class TracingBalancer : public LoadBalancer
 public:
     friend class Serialization;
 
-    TracingBalancer(LoadBalancer *balancer, std::ostream& stream = std::cout) :
+    explicit TracingBalancer(
+        LoadBalancer *balancer,
+        std::ostream& stream = std::cout) :
         balancer(balancer),
         stream(stream)
     {

@@ -37,8 +37,8 @@ public:
 
         template<typename CELL1, int MY_DIM_X1, int MY_DIM_Y1, int MY_DIM_Z1, int INDEX1,
                  typename CELL2, int MY_DIM_X2, int MY_DIM_Y2, int MY_DIM_Z2, int INDEX2>
-        void operator()(const LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& hoodOld, int *indexOld,
-                              LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew, int *indexNew) const
+        void operator()(LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& hoodOld, int *unused1,
+                        LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew, int *unused2) const
         {
             for (typename Region<DIM>::StreakIterator i = region.beginStreak();
                  i != region.endStreak();
@@ -48,7 +48,7 @@ public:
                     i->endX   + sourceOffset.x());
                 Coord<DIM> relativeTargetOrigin = i->origin + targetOffset;
 
-                *indexOld =
+                hoodOld.index =
                     relativeSourceStreak.origin.z() * MY_DIM_X1 * MY_DIM_Y1 +
                     relativeSourceStreak.origin.y() * MY_DIM_X1 +
                     relativeSourceStreak.origin.x();
@@ -57,23 +57,24 @@ public:
                     end.z() * MY_DIM_X1 * MY_DIM_Y1 +
                     end.y() * MY_DIM_X1 +
                     end.x();
-                *indexNew =
+                hoodNew.index =
                     relativeTargetOrigin.z() * MY_DIM_X2 * MY_DIM_Y2 +
                     relativeTargetOrigin.y() * MY_DIM_X2 +
                     relativeTargetOrigin.x();
 
+                FixedNeighborhood<CELL, Topology, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1> hoodOldWrapped(hoodOld);
+
                 CELL::updateLineX(
-                    FixedNeighborhood<CELL, Topology, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>(hoodOld),
-                    indexOld,
+                    hoodOldWrapped,
                     indexEnd,
                     hoodNew,
-                    indexNew,
                     nanoStep);
             }
         }
 
     private:
         const Region<DIM>& region;
+        // fixme: this breaks easily if c-tor params were just temporary variables
         const Coord<DIM>& sourceOffset;
         const Coord<DIM>& targetOffset;
         const unsigned nanoStep;

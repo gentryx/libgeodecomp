@@ -17,7 +17,7 @@ public:
         public APITraits::HasCubeTopology<3>
     {};
 
-    ConwayCell(const bool& alive = false) :
+    explicit ConwayCell(const bool& alive = false) :
         alive(alive)
     {}
 

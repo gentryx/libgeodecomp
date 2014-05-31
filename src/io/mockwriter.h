@@ -68,7 +68,7 @@ public:
 
     typedef std::vector<MockWriterHelpers::MockWriterEvent> EventVec;
 
-    MockWriter(const unsigned& period=1) :
+    explicit MockWriter(const unsigned& period=1) :
         Writer<TestCell<2> >("", period),
         ParallelWriter<TestCell<2> >("", period)
     {}

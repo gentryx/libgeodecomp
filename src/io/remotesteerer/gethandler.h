@@ -19,7 +19,7 @@ public:
 
     static const int DIM = Topology::DIM;
 
-    GetHandler(AccessorPtr accessor) :
+    explicit GetHandler(AccessorPtr accessor) :
         Handler<CELL_TYPE>("get_" + accessor->name()),
         accessor(accessor)
     {}

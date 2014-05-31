@@ -13,30 +13,75 @@ DECLARE_MULTI_CONTAINER_CELL(DummyContainer,            \
                              ((double)(7)(prices))      \
                              )
 
+typedef std::vector<std::pair<std::string, std::string> > LogType;
+LogType multiContainerCellTestLog;
+
+class SimpleElement;
+
 class SimpleNode
 {
 public:
+    explicit SimpleNode(const std::string& cargo = "") :
+        cargo(cargo)
+    {}
+
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
-    {
-        std::cout << "SimpleNode::update()\n";
-    }
+    void update(const NEIGHBORHOOD& hood, int nanoStep);
+
+    std::string cargo;
 };
 
 class SimpleElement
 {
 public:
+    explicit SimpleElement(const std::string& cargo = "") :
+        cargo(cargo)
+    {}
+
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
-        std::cout << "SimpleElement::update()\n";
+        for (int i = 0; i < 20; ++i) {
+            const SimpleNode *node = hood.nodes[i];
+            if (node != 0) {
+                multiContainerCellTestLog << std::make_pair(cargo, node->cargo);
+            }
+        }
+
+        for (int i = 0; i < 20; ++i) {
+            const SimpleElement *element = hood.elements[i];
+            if (element != 0) {
+                multiContainerCellTestLog << std::make_pair(cargo, element->cargo);
+            }
+        }
     }
+
+    std::string cargo;
 };
+
+template<typename NEIGHBORHOOD>
+void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
+{
+    for (int i = 0; i < 20; ++i) {
+        const SimpleNode *node = hood.nodes[i];
+        if (node != 0) {
+            multiContainerCellTestLog << std::make_pair(cargo, node->cargo);
+        }
+    }
+
+    for (int i = 0; i < 20; ++i) {
+        const SimpleElement *element = hood.elements[i];
+        if (element != 0) {
+            multiContainerCellTestLog << std::make_pair(cargo, element->cargo);
+        }
+    }
+}
 
 DECLARE_MULTI_CONTAINER_CELL(SimpleContainer,                   \
                              ((SimpleNode)(30)(nodes))          \
                              ((SimpleElement)(10)(elements))    \
                              )
+
 
 class MultiContainerCellTest : public CxxTest::TestSuite
 {
@@ -73,20 +118,83 @@ public:
         Grid<SimpleContainer> gridNew(dim);
 
         SimpleContainer c;
-        c.nodes.insert(1, SimpleNode());
-        c.nodes.insert(5, SimpleNode());
-        gridOld[Coord<2>(3, 4)] = c;
+        c.nodes.insert(1, SimpleNode("Node1"));
+        c.nodes.insert(5, SimpleNode("Node5a"));
+        gridOld[Coord<2>(3, 3)] = c;
 
         SimpleContainer d;
-        d.nodes.insert(6, SimpleNode());
-        d.elements.insert(1, SimpleElement());
-        d.elements.insert(7, SimpleElement());
-        d.elements.insert(9, SimpleElement());
-        gridOld[Coord<2>(2, 4)] = d;
+        d.nodes.insert(6, SimpleNode("Node6"));
+        d.elements.insert(1, SimpleElement("Element1"));
+        d.elements.insert(7, SimpleElement("Element7"));
+        d.elements.insert(9, SimpleElement("Element9"));
+        gridOld[Coord<2>(3, 4)] = d;
+
+        SimpleContainer e;
+        e.nodes.insert(10, SimpleNode("Node10"));
+        e.nodes.insert(11, SimpleNode("Node11"));
+        e.elements.insert(5, SimpleElement("Element5b"));
+        gridOld[Coord<2>(8, 2)] = e;
 
         Region<2> region;
         region << CoordBox<2>(Coord<2>(), dim);
         UpdateFunctor<SimpleContainer>()(region, Coord<2>(), Coord<2>(), gridOld, &gridNew, 0);
+
+        LogType expectedLog;
+        expectedLog << std::make_pair("Node10", "Node10")
+                    << std::make_pair("Node10", "Node11")
+                    << std::make_pair("Node10", "Element5b");
+
+        expectedLog << std::make_pair("Node11", "Node10")
+                    << std::make_pair("Node11", "Node11")
+                    << std::make_pair("Node11", "Element5b");
+
+        expectedLog << std::make_pair("Element5b", "Node10")
+                    << std::make_pair("Element5b", "Node11")
+                    << std::make_pair("Element5b", "Element5b");
+
+        expectedLog << std::make_pair("Node1",  "Node1")
+                    << std::make_pair("Node1",  "Node5a")
+                    << std::make_pair("Node1",  "Node6")
+                    << std::make_pair("Node1",  "Element1")
+                    << std::make_pair("Node1",  "Element7")
+                    << std::make_pair("Node1",  "Element9");
+
+        expectedLog << std::make_pair("Node5a", "Node1")
+                    << std::make_pair("Node5a", "Node5a")
+                    << std::make_pair("Node5a", "Node6")
+                    << std::make_pair("Node5a", "Element1")
+                    << std::make_pair("Node5a", "Element7")
+                    << std::make_pair("Node5a", "Element9");
+
+        expectedLog << std::make_pair("Node6",  "Node1")
+                    << std::make_pair("Node6",  "Node5a")
+                    << std::make_pair("Node6",  "Node6")
+                    << std::make_pair("Node6",  "Element1")
+                    << std::make_pair("Node6",  "Element7")
+                    << std::make_pair("Node6",  "Element9");
+
+        expectedLog << std::make_pair("Element1", "Node1")
+                    << std::make_pair("Element1", "Node5a")
+                    << std::make_pair("Element1", "Node6")
+                    << std::make_pair("Element1", "Element1")
+                    << std::make_pair("Element1", "Element7")
+                    << std::make_pair("Element1", "Element9");
+
+        expectedLog << std::make_pair("Element7", "Node1")
+                    << std::make_pair("Element7", "Node5a")
+                    << std::make_pair("Element7", "Node6")
+                    << std::make_pair("Element7", "Element1")
+                    << std::make_pair("Element7", "Element7")
+                    << std::make_pair("Element7", "Element9");
+
+        expectedLog << std::make_pair("Element9", "Node1")
+                    << std::make_pair("Element9", "Node5a")
+                    << std::make_pair("Element9", "Node6")
+                    << std::make_pair("Element9", "Element1")
+                    << std::make_pair("Element9", "Element7")
+                    << std::make_pair("Element9", "Element9");
+
+        TS_ASSERT_EQUALS(expectedLog, multiContainerCellTestLog);
     }
 };
 

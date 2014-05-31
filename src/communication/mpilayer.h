@@ -49,7 +49,7 @@ public:
      * for all MPI functions, tag will be the default tag passed to
      * all point-to-point communication functions.
      */
-    MPILayer(MPI_Comm communicator = MPI_COMM_WORLD, int tag = 0) :
+    explicit MPILayer(MPI_Comm communicator = MPI_COMM_WORLD, int tag = 0) :
         comm(communicator),
         tag(tag)
     {}
@@ -553,7 +553,7 @@ private:
     class StreakToLengthTranslatingIterator
     {
     public:
-        inline StreakToLengthTranslatingIterator(typename Region<DIM>::StreakIterator _iter) :
+        inline explicit StreakToLengthTranslatingIterator(typename Region<DIM>::StreakIterator _iter) :
             iter(_iter)
         {}
 

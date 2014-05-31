@@ -29,7 +29,7 @@ public:
     friend class PipeTest;
 
 #ifdef LIBGEODECOMP_WITH_MPI
-    Pipe(
+    explicit Pipe(
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD) :
         mpiLayer(communicator),

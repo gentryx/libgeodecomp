@@ -71,7 +71,7 @@ public:
         bool simulationEnd;
     };
 
-    Steerer(const unsigned period) :
+    explicit Steerer(const unsigned period) :
         period(period)
     {}
 

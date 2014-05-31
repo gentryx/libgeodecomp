@@ -4,7 +4,19 @@
 #include <libgeodecomp/io/simplecellplotter.h>
 
 #ifdef LIBGEODECOMP_WITH_QT
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
 #include <QtGui/QApplication>
+
+#ifdef __ICC
+#pragma warning pop
+#endif
+
 #endif
 
 using namespace LibGeoDecomp;
@@ -16,7 +28,7 @@ public:
         public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >
     {};
 
-    inline MyQtTestCell(double v = 0) :
+    inline explicit MyQtTestCell(double v = 0) :
         temp(v)
     {}
 
@@ -65,7 +77,7 @@ public:
                 double xReal = x * (1.0 / 100.0);
                 double yReal = y * (1.0 / 50.0);
                 double value = (xReal * xReal + yReal * yReal) * 0.5;
-                grid[Coord<2>(x, y)] = value;
+                grid[Coord<2>(x, y)] = MyQtTestCell(value);
             }
         }
         writer.stepFinished(grid, 12, WRITER_INITIALIZED);

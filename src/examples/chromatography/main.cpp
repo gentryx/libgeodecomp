@@ -51,7 +51,7 @@ Coord<2> FarAway(-1, -1);
 class ID
 {
 public:
-    ID(const Coord<2>& containerCoord=FarAway, const int& index=-1) :
+    explicit ID(const Coord<2>& containerCoord=FarAway, const int& index=-1) :
         container(containerCoord),
         num(index)
     {}
@@ -70,7 +70,7 @@ class Cell
 public:
     static const unsigned MAX_NEIGHBORS = 20;
 
-    Cell(const Coord<2>& center=FarAway, const ID& _id=ID(),
+    explicit Cell(const Coord<2>& center=FarAway, const ID& _id=ID(),
          const double presetInfluxes[SUBSTANCES] = ZERO_INFLUXES,
          const double& efflux = 0,
          const State& state = LIQUID) :
@@ -385,7 +385,7 @@ public:
 class Element
 {
 public:
-    Element(const Coord<2> center = Coord<2>(1, 1), ID id = ID()) :
+    explicit Element(const Coord<2> center = Coord<2>(1, 1), ID id = ID()) :
         center(center),
         id(id)
     {
@@ -1006,7 +1006,7 @@ private:
 class ChromoWriter : public Writer<ContainerCell>
 {
 public:
-    ChromoWriter(const unsigned& period = 1) :
+    explicit ChromoWriter(const unsigned& period = 1) :
         Writer<ContainerCell>("chromo", period)
     {}
 

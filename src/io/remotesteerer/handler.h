@@ -22,7 +22,7 @@ public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;
 
-    Handler(const std::string& myKey) :
+    explicit Handler(const std::string& myKey) :
         myKey(myKey)
     {}
 

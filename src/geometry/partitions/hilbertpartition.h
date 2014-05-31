@@ -67,7 +67,7 @@ public:
             digDown(pos);
         }
 
-        inline Iterator(const Coord<2>& origin) :
+        inline explicit Iterator(const Coord<2>& origin) :
             SpaceFillingCurve<2>::Iterator(origin, true)
         {}
 
@@ -293,7 +293,7 @@ public:
         }
     };
 
-    inline HilbertPartition(
+    inline explicit HilbertPartition(
         const Coord<2>& origin=Coord<2>(0, 0),
         const Coord<2>& dimensions=Coord<2>(0, 0),
         const long& offset=0,

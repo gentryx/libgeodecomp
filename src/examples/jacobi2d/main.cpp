@@ -17,7 +17,7 @@ public:
         public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >
     {};
 
-    inline Cell(double v = 0) :
+    inline explicit Cell(double v = 0) :
         temp(v)
     {}
 

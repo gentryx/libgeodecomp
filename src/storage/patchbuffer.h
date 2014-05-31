@@ -23,7 +23,7 @@ public:
     using PatchProvider<GRID_TYPE2>::checkNanoStepGet;
     using PatchProvider<GRID_TYPE2>::storedNanoSteps;
 
-    PatchBuffer(const Region<DIM>& region=Region<DIM>()) :
+    explicit PatchBuffer(const Region<DIM>& region = Region<DIM>()) :
         region(region)
     {}
 

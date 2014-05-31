@@ -21,7 +21,7 @@ public:
     friend class Sphere;
     friend class GasWriter;
 
-    Boundary(
+    explicit Boundary(
         const FloatCoord<3>& myCenter = FloatCoord<3>(),
         const FloatCoord<3>& myNormal = FloatCoord<3>()) :
         center(myCenter),
@@ -46,7 +46,7 @@ public:
     friend class GasWriter;
     friend class Container;
 
-    Sphere(
+    explicit Sphere(
         const int& myID = 0,
         const FloatCoord<3>& myPos = FloatCoord<3>(),
         const FloatCoord<3>& myVel = FloatCoord<3>()) :
@@ -132,6 +132,7 @@ private:
     double col;
 };
 
+// fixme: rewrite this example with the multicontainercell
 class Container
 {
 public:
@@ -143,7 +144,7 @@ public:
         public APITraits::HasNanoSteps<2>
     {};
 
-    Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
+    explicit Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
         origin(myOrigin),
         numSpheres(0),
         numBoundaries(0)
@@ -257,7 +258,7 @@ public:
     static const int DIM = Topology::DIM;
     typedef GridBase<Container, DIM> GridType;
 
-    GasWriter(
+    explicit GasWriter(
         const std::string& prefix,
         const unsigned period = 1) :
         Writer<Container>(prefix, period)

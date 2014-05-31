@@ -41,7 +41,7 @@ public:
     typedef typename Initializer<TEST_CELL>::Topology Topology;
     static const int DIM = TEST_CELL::DIMENSIONS;
 
-    TestInitializer(
+    explicit TestInitializer(
         const Coord<DIM>& dim = TestInitializerHelper<DIM>::getDimensions(),
         const unsigned& maxSteps = TestInitializerHelper<DIM>::maxSteps ,
         const unsigned& startStep = 0) :

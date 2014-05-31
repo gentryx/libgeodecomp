@@ -32,10 +32,28 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_QT
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
 #include <QtCore/QSize>
+
+#ifdef __ICC
+#pragma warning pop
+#endif
+
 #endif
 
 namespace LibGeoDecomp {
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
 
 /**
  * represents an integer coordinate.
@@ -238,6 +256,7 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_QT
+
     inline Coord(const QSize& size)
     {
         c[0] = size.width();
@@ -646,6 +665,10 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
     os << coord.toString();
     return os;
 }
+
+#ifdef __ICC
+#pragma warning pop
+#endif
 
 }
 

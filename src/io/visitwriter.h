@@ -132,7 +132,7 @@ class VisItDataAccessor
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    VisItDataAccessor(const std::string& myType) :
+    explicit VisItDataAccessor(const std::string& myType) :
         myType(myType)
     {}
 
@@ -224,7 +224,7 @@ public:
     using Writer<CELL_TYPE>::prefix;
 
     // fixme: needs test
-    VisItWriter(
+    explicit VisItWriter(
         const std::string& prefix,
         const unsigned& period = 1,
         const int& runMode = VISIT_SIMMODE_RUNNING) :

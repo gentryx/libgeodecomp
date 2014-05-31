@@ -136,7 +136,7 @@ protected:
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         initializer->grid(&*oldGrid);
-        newGrid->getEdgeCell() = oldGrid->getEdgeCell();
+        newGrid->setEdge(oldGrid->getEdge());
         resetValidGhostZoneWidth();
 
         kernelBuffer = PatchBufferType1(getVolatileKernel());

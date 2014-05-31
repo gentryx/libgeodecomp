@@ -188,6 +188,8 @@ void runSimulation()
             "gaussSeidel", outputFrequency, 1, 1);
     }
 
+    outputFrequency = 1000;
+
     CollectingWriter<Cell> *ppmAdapter = new CollectingWriter<Cell>(
         ppmWriter);
     sim.addWriter(ppmAdapter);

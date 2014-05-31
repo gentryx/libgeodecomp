@@ -23,12 +23,12 @@ public:
         sim.reset(new StripingSimulator<TestCell<3> >(init, balancer));
 
         if (MPILayer().rank() == 0) {
-            writer = new MemoryWriter<TestCell<3> >(1);
+            writer = new MemoryWriter<TestCell<3> >(3);
         } else {
             writer = 0;
         }
 
-        sim->addWriter(new CollectingWriter<TestCell<3> >(writer));
+        sim->addWriter(new CollectingWriter<TestCell<3> >(writer, 0));
     }
 
     void tearDown()
@@ -45,9 +45,11 @@ public:
             unsigned cycle = 0;
 
             for (int i = 0; i < (size - 1); ++i) {
-                cycle = APITraits::SelectNanoSteps<TestCell<3> >::VALUE * i;
+                cycle = APITraits::SelectNanoSteps<TestCell<3> >::VALUE * i * 3;
+
                 TS_ASSERT_TEST_GRID(MemoryWriter<TestCell<3> >::GridType, writer->getGrids()[i], cycle);
             }
+
 
             // check the last grid with the same cycle counter as the
             // simulator will notify the writer of this time step

@@ -23,12 +23,12 @@ class CacheBlockingSimulator : public MonolithicSimulator<CELL>
 public:
     friend class CacheBlockingSimulatorTest;
 
-    typedef typename MonolithicSimulator<CELL>::Topology Topology;
+    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef typename TopologiesHelpers::Topology<3, Topology::template WrapsAxis<0>::VALUE, Topology::template WrapsAxis<1>::VALUE, true> BufferTopology;
     typedef Grid<CELL, Topology> GridType;
     typedef DisplacedGrid<CELL, BufferTopology> BufferType;
     typedef std::vector<std::vector<Region<3> > > WavefrontFrames;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     using MonolithicSimulator<CELL>::NANO_STEPS;
     using MonolithicSimulator<CELL>::chronometer;
@@ -60,7 +60,7 @@ public:
         nanoStep = 0;
     }
 
-    ~CacheBlockingSimulator()
+    virtual ~CacheBlockingSimulator()
     {
         delete newGrid;
         delete curGrid;
@@ -163,7 +163,7 @@ private:
         int wavefrontLength = gridDim[DIM - 1] + 1;
         WavefrontFrames ret(wavefrontLength, std::vector<Region<DIM> >(pipelineLength));
 
-        for (int index = index; index < wavefrontLength; ++index) {
+        for (int index = 0; index < wavefrontLength; ++index) {
             Coord<DIM> maskOrigin;
             maskOrigin[DIM - 1] = index;
             Topology::normalize(maskOrigin, initializer->gridDimensions());
@@ -182,7 +182,7 @@ private:
 
     void hop()
     {
-        TimeTotal t(*&chronometer);
+        TimeTotal t(&chronometer);
 
         CoordBox<DIM - 1> frameBox = frames.boundingBox();
         // for (typename CoordBox<DIM -1>::Iterator waveIter = frameBox.begin();
@@ -207,7 +207,7 @@ private:
     void updateWavefront(BufferType *buffer, const Coord<DIM - 1>& wavefrontCoord)
     {
         LOG(INFO, "wavefrontCoord(" << wavefrontCoord << ")");
-        buffer->atEdge() = curGrid->atEdge();
+        buffer->setEdge(curGrid->getEdge());
         buffer->fill(buffer->boundingBox(), curGrid->getEdgeCell());
         fixBufferOrigin(buffer, wavefrontCoord);
 
@@ -294,7 +294,11 @@ private:
         GRID2 *targetGrid,
         unsigned curNanoStep)
     {
-        LOG(DBG, "    frameUpdate(" << updateFrame.boundingBox() << ", " << sourceIndex << ", " << targetIndex <<  ")");
+        LOG(DBG, "    frameUpdate("
+            << needsFlushing << ", "
+            << updateFrame.boundingBox() << ", "
+            << sourceIndex << ", "
+            << targetIndex <<  ")");
 
         if (needsFlushing) {
             // fixme: only works with cube topologies

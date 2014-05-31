@@ -16,7 +16,7 @@ public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
 
-    MPIIOInitializer(
+    explicit MPIIOInitializer(
         const std::string& filename,
         const MPI_Datatype& mpiDatatype = Typemaps::lookup<CELL_TYPE>(),
         const MPI_Comm& comm = MPI_COMM_WORLD) :

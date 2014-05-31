@@ -20,7 +20,7 @@ public:
     using Simulator<CELL_TYPE>::chronometer;
     typedef std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > WriterVector;
 
-    inline MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :
+    inline explicit MonolithicSimulator(Initializer<CELL_TYPE> *initializer) :
         Simulator<CELL_TYPE>(initializer)
     {}
 

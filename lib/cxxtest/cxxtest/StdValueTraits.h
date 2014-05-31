@@ -18,6 +18,12 @@
 
 #ifndef CXXTEST_USER_VALUE_TRAITS
 
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
 namespace CxxTest
 {
     //
@@ -100,6 +106,13 @@ namespace CxxTest
     }
 
 #ifdef _CXXTEST_PARTIAL_TEMPLATE_SPECIALIZATION
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion is exactly our goal here:
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
     //
     // std::pair
     //
@@ -107,7 +120,7 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(pair)<First, Second> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(pair)<First, Second> &p )
+        explicit ValueTraits( const CXXTEST_STD(pair)<First, Second> &p )
         {
             *this << "<" << TS_AS_STRING( p.first ) << ", " << TS_AS_STRING( p.second ) << ">";
         }
@@ -120,7 +133,7 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(vector)<Element> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(vector)<Element> &v )
+        explicit ValueTraits( const CXXTEST_STD(vector)<Element> &v )
         {
             dumpRange( *this, v.begin(), v.end() );
         }
@@ -133,7 +146,7 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(list)<Element> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(list)<Element> &l )
+        explicit ValueTraits( const CXXTEST_STD(list)<Element> &l )
         {
             dumpRange( *this, l.begin(), l.end() );
         }
@@ -146,7 +159,7 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(set)<Element> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(set)<Element> &s )
+        explicit ValueTraits( const CXXTEST_STD(set)<Element> &s )
         {
             dumpRange( *this, s.begin(), s.end() );
         }
@@ -159,7 +172,7 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(map)<Key, Value> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(map)<Key, Value> &m )
+        explicit ValueTraits( const CXXTEST_STD(map)<Key, Value> &m )
         {
             dumpRange( *this, m.begin(), m.end() );
         }
@@ -172,11 +185,15 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(deque)<Element> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(deque)<Element> &d )
+        explicit ValueTraits( const CXXTEST_STD(deque)<Element> &d )
         {
             dumpRange( *this, d.begin(), d.end() );
         }
     };
+
+#ifdef __ICC
+#pragma warning pop
+#endif
 
     //
     // std::multiset
@@ -223,6 +240,10 @@ namespace CxxTest
     };
 #endif // _CXXTEST_PARTIAL_TEMPLATE_SPECIALIZATION
 };
+
+#ifdef __ICC
+#pragma warning pop
+#endif
 
 #endif // CXXTEST_USER_VALUE_TRAITS
 

@@ -46,7 +46,9 @@ public:
         }
     };
 
-    NonPoDTestCell(const Coord<2>& coord = Coord<2>(), const CoordBox<2>& simSpace = CoordBox<2>()) :
+    explicit NonPoDTestCell(
+        const Coord<2>& coord = Coord<2>(),
+        const CoordBox<2>& simSpace = CoordBox<2>()) :
         coord(coord),
         simSpace(simSpace),
         cycleCounter(0)

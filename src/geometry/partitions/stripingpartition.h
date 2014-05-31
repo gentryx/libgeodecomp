@@ -17,7 +17,7 @@ public:
     const static int DIM = DIMENSIONS;
     typedef typename CoordBox<DIM>::Iterator Iterator;
 
-    StripingPartition(
+    explicit StripingPartition(
         const Coord<DIM>& origin = Coord<DIM>(),
         const Coord<DIM>& newDimensions = Coord<DIM>(),
         const long& offset = 0,

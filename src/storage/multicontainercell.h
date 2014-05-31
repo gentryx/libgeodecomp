@@ -9,19 +9,19 @@
     class AdapterHelper ## INDEX                                        \
     {                                                                   \
     public:                                                             \
-        AdapterHelper ## INDEX(                                         \
+        explicit AdapterHelper ## INDEX(                                \
             const NEIGHBORHOOD *hood) :                                 \
             hood(hood)                                                  \
         {}                                                              \
                                                                         \
-        const BOOST_PP_SEQ_ELEM(0, MEMBER)& operator[](                 \
+        const BOOST_PP_SEQ_ELEM(0, MEMBER) *operator[](                 \
             const int& id) const                                        \
         {                                                               \
             const BOOST_PP_SEQ_ELEM(0, MEMBER) *res =                   \
                 (*hood)[Coord<DIM>()].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
                                                                         \
             if (res) {                                                  \
-                return *res;                                            \
+                return res;                                             \
             }                                                           \
                                                                         \
             CoordBox<DIM> box(Coord<DIM>::diagonal(-1),                 \
@@ -33,14 +33,12 @@
                 if (*i != Coord<DIM>()) {                               \
                     res = (*hood)[*i].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
                     if (res) {                                          \
-                        return *res;                                    \
+                        return res;                                     \
                     }                                                   \
                 }                                                       \
             }                                                           \
                                                                         \
-            LOG(ERROR, "could not find id " << id                       \
-                << " in neighborhood AdapterHelper" << INDEX);          \
-            throw std::logic_error("id not found");                     \
+            return 0;                                                   \
         }                                                               \
                                                                         \
     private:                                                            \
@@ -91,7 +89,7 @@
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
-            MultiNeighborhoodAdapter(const NEIGHBORHOOD *hood) :        \
+            explicit MultiNeighborhoodAdapter(const NEIGHBORHOOD *hood) : \
                 BOOST_PP_SEQ_FOR_EACH(                                  \
                     DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT,            \
                     NAME,                                               \
@@ -123,7 +121,6 @@
                 DECLARE_MULTI_CONTAINER_CELL_UPDATE,                    \
                 NAME,                                                   \
                 MEMBERS)                                                \
-                                                                        \
         }                                                               \
     };
 

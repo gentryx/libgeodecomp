@@ -64,7 +64,7 @@ public:
     class Runner
     {
     public:
-        Runner(Pipe *pipe) :
+        explicit Runner(Pipe *pipe) :
             pipe(pipe)
         {}
 

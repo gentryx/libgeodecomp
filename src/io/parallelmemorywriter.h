@@ -26,7 +26,7 @@ public:
     using ParallelWriter<CELL_TYPE>::period;
     static const int DIM = Topology::DIM;
 
-    ParallelMemoryWriter(
+    explicit ParallelMemoryWriter(
         int period = 1,
         MPI_Comm communicator = MPI_COMM_WORLD) :
         ParallelWriter<CELL_TYPE>("", period),

@@ -16,7 +16,7 @@ public:
     typedef DistributedSimulator<TestCell<2> > ParentType;
     typedef ParentType::GridType GridType;
 
-    MockSim(TestInitializer<TestCell<2> > *init) :
+    explicit MockSim(TestInitializer<TestCell<2> > *init) :
         DistributedSimulator<TestCell<2> >(init)
     {}
 

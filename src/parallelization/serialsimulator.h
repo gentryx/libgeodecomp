@@ -6,7 +6,7 @@
 
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
-#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
 namespace LibGeoDecomp {
@@ -23,12 +23,11 @@ class SerialSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class SerialSimulatorTest;
-    typedef APITraits::SelectSoA<CELL_TYPE> GridTypeSelector;
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridBaseType;
     typedef typename MonolithicSimulator<CELL_TYPE>::Topology Topology;
     typedef typename MonolithicSimulator<CELL_TYPE>::WriterVector WriterVector;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
-    typedef typename SimulatorHelpers::GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
+    typedef typename GridTypeSelector<CELL_TYPE, Topology, false, SupportsSoA>::Value GridType;
     typedef typename Steerer<CELL_TYPE>::SteererFeedback SteererFeedback;
 
     static const int DIM = Topology::DIM;
@@ -45,7 +44,7 @@ public:
     /**
      * creates a SerialSimulator with the given initializer.
      */
-    SerialSimulator(Initializer<CELL_TYPE> *initializer) :
+    explicit SerialSimulator(Initializer<CELL_TYPE> *initializer) :
         MonolithicSimulator<CELL_TYPE>(initializer)
     {
         stepNum = initializer->startStep();
@@ -64,7 +63,7 @@ public:
         }
     }
 
-    ~SerialSimulator()
+    virtual ~SerialSimulator()
     {
         delete newGrid;
         delete curGrid;

@@ -33,7 +33,7 @@ namespace CxxTest
     class ErrorFormatter : public TestListener
     {
     public:
-        ErrorFormatter( OutputStream *o, const char *preLine = ":", const char *postLine = "" ) :
+        explicit ErrorFormatter( OutputStream *o, const char *preLine = ":", const char *postLine = "" ) :
             _dotting( true ),
             _reported( false ),
             _o(o),

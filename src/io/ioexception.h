@@ -17,7 +17,7 @@ public:
      * Initializes a new IOException object which means that an error described
      * by message occured.
      */
-    IOException(std::string message) :
+    explicit IOException(std::string message) :
         std::runtime_error(message)
     {}
 
@@ -32,7 +32,7 @@ public:
 class FileOpenException : public IOException
 {
 public:
-    FileOpenException(
+    explicit FileOpenException(
         std::string file) :
         IOException("Could not open file " + file)
     {}
@@ -45,7 +45,7 @@ public:
 class FileWriteException : public IOException
 {
 public:
-    FileWriteException(
+    explicit FileWriteException(
         std::string file) :
         IOException("Could not write file " + file)
     {}
@@ -58,7 +58,7 @@ public:
 class FileReadException : public IOException
 {
 public:
-    FileReadException(
+    explicit FileReadException(
         std::string file) :
         IOException("Could not read file " + file)
     {}

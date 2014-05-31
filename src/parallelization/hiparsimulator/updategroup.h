@@ -11,6 +11,7 @@
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/gridtypeselector.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
 
@@ -26,7 +27,8 @@ public:
     friend class UpdateGroupTest;
 
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
-    typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
+    typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
+    typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
     typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
     typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
     typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;

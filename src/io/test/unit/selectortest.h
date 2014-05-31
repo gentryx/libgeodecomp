@@ -14,7 +14,7 @@ public:
         public APITraits::HasSoA
     {};
 
-    MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
+    explicit MyDummyCell(const int x = 0, const double y = 0, const char z = 0) :
         x(x),
         y(y),
         z(z)

@@ -23,7 +23,7 @@ template<typename CELL_TYPE>
 class CollectingWriterPerfTest : public CPUBenchmark
 {
 public:
-    CollectingWriterPerfTest(const std::string& modelName) :
+    explicit CollectingWriterPerfTest(const std::string& modelName) :
         modelName(modelName)
     {}
 
@@ -44,7 +44,7 @@ public:
         if (mpiLayer.rank() == 0) {
             cargoWriter = new MemoryWriter<CELL_TYPE>(1);
         }
-        CollectingWriter<CELL_TYPE> writer(cargoWriter, 1, 0);
+        CollectingWriter<CELL_TYPE> writer(cargoWriter, 0);
 
         typedef typename CollectingWriter<CELL_TYPE>::StorageGridType StorageGridType;
 
@@ -99,7 +99,7 @@ template<typename CELL_TYPE>
 class PatchLinkPerfTest : public CPUBenchmark
 {
 public:
-    PatchLinkPerfTest(const std::string& modelName) :
+    explicit PatchLinkPerfTest(const std::string& modelName) :
         modelName(modelName)
     {}
 
@@ -184,7 +184,7 @@ template<typename PARTITION>
 class PartitionManagerBig3DPerfTest : public CPUBenchmark
 {
 public:
-    PartitionManagerBig3DPerfTest(const std::string& partitionName) :
+    explicit PartitionManagerBig3DPerfTest(const std::string& partitionName) :
         partitionName(partitionName)
     {}
 

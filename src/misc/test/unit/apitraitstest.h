@@ -10,7 +10,7 @@ std::ostringstream myTestEvents;
 class MySimpleDummyCell
 {
 public:
-    MySimpleDummyCell(int val = 0) :
+    explicit MySimpleDummyCell(int val = 0) :
         val(val)
     {};
 
@@ -47,7 +47,7 @@ public:
 
     static double staticData;
 
-    MyFancyDummyCell(int val = 0) :
+    explicit MyFancyDummyCell(int val = 0) :
         val(val)
     {};
 
@@ -76,7 +76,7 @@ public:
     {
         Coord<2> gridDim(10, 5);
         typedef APITraits::SelectTopology<MySimpleDummyCell>::Value Topology;
-        Grid<MySimpleDummyCell, Topology> gridOld(gridDim, 666, 31);
+        Grid<MySimpleDummyCell, Topology> gridOld(gridDim, MySimpleDummyCell(666), MySimpleDummyCell(31));
         Grid<MySimpleDummyCell, Topology> gridNew(gridDim);
 
         Streak<2> streak(Coord<2>(0, 0), 5);
@@ -99,7 +99,7 @@ public:
     {
         Coord<3> gridDim(10, 5, 10);
         typedef APITraits::SelectTopology<MyFancyDummyCell>::Value Topology;
-        Grid<MyFancyDummyCell, Topology> gridOld(gridDim, 666, 31);
+        Grid<MyFancyDummyCell, Topology> gridOld(gridDim, MyFancyDummyCell(666), MyFancyDummyCell(31));
         Grid<MyFancyDummyCell, Topology> gridNew(gridDim);
 
         Streak<3> streak(Coord<3>(0, 0, 0), 4);
