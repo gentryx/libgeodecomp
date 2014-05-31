@@ -102,6 +102,10 @@ private:
 
 }
 
+/**
+ * This Writer displays 2D data via a Qt GUI element. A plotter can be
+ * used to customize the rendering.
+ */
 template<typename CELL_TYPE, typename CELL_PLOTTER>
 class QtWidgetWriter : public Writer<CELL_TYPE>
 {
