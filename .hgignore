@@ -1,5 +1,6 @@
 syntax: glob
 *~
+*.swp
 ./**/test/**/*test.cpp
 ./**/test/**/*test.cu
 ./**/test/**/main.cpp
@@ -16,5 +17,6 @@ syntax: glob
 ./tools/typemapgenerator/sample/src/typemaps.h
 ./tools/typemapgenerator/sample/src/typemaps.cpp
 ./builddir
+./build
 syntax: regexp
 ^doc
