@@ -5,11 +5,13 @@
 #include <iostream>
 #include <cmath>
 
+#include <libgeodecomp.h>
+#include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/parallelization/stripingsimulator.h>
 
 using namespace LibGeoDecomp;
 
@@ -20,15 +22,22 @@ class Cell
 public:
     class API :
         public APITraits::HasStencil<Stencils::VonNeumann<2, 1> >,
-        public APITraits::HasNanoSteps<2>
+        public APITraits::HasNanoSteps<2>,
+        public APITraits::HasOpaqueMPIDataType<Cell>
     {};
+
+    static MPI_Datatype MPIDataType;
 
     inline Cell() :
         temp(0), type(BOUNDARY)
     {}
 
-    inline Cell(CellType cellType, double v = 0) :
+    inline Cell(CellType cellType, double v) :
         temp(v), type(cellType)
+    {}
+
+    inline Cell(double v) :
+        temp(v), type(RED)
     {}
 
     template<typename COORD_MAP>
@@ -41,7 +50,7 @@ public:
             temp = (neighborhood[Coord<2>( 0, -1 )].temp +
                     neighborhood[Coord<2>( 0, +1 )].temp +
                     neighborhood[Coord<2>(-1,  0 )].temp +
-                    neighborhood[Coord<2>(+1,  0 )].temp 
+                    neighborhood[Coord<2>(+1,  0 )].temp
                     ) * (1./4.);
         }
         //update Black in secound nanoStep
@@ -49,7 +58,7 @@ public:
             temp = (neighborhood[Coord<2>( 0, -1 )].temp +
                     neighborhood[Coord<2>( 0, +1 )].temp +
                     neighborhood[Coord<2>(-1,  0 )].temp +
-                    neighborhood[Coord<2>(+1,  0 )].temp 
+                    neighborhood[Coord<2>(+1,  0 )].temp
                     ) * (1./4.);
         }
     }
@@ -58,6 +67,8 @@ public:
     CellType type;
 
 };
+
+MPI_Datatype Cell::MPIDataType = MPI_DATATYPE_NULL;
 
 /**
  * range x=[0;1] y[0;1]
@@ -121,7 +132,9 @@ public:
             for (int x = 1+y%2; x < gridDimensions().x()-1; x+=2){
                 Coord<2> c (x,y);
 
-                ret->set( c, Cell(RED) );
+                if(bounding.inBounds(c)){
+                    ret->set( c, Cell(RED) );
+                }
             }
         }
 
@@ -130,7 +143,9 @@ public:
             for (int x = 2-y%2; x < gridDimensions().x()-1; x+=2){
                 Coord<2> c (x,y);
 
-                ret->set( c, Cell(BLACK) );
+                if(bounding.inBounds(c)){
+                    ret->set( c, Cell(BLACK) );
+                }
             }
         }
     }
@@ -161,22 +176,35 @@ public:
 
 void runSimulation()
 {
-    SerialSimulator<Cell> sim(new CellInitializer());
+    CellInitializer *init = new CellInitializer(256,256,30000);
+    StripingSimulator<Cell> sim(init,
+        MPILayer().rank() ? 0 : new NoOpBalancer());
 
     int outputFrequency = 100;
-    sim.addWriter(
-        new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-            "gausSidel", outputFrequency, 1, 1)
-        );
-    sim.addWriter(new TracingWriter<Cell>(outputFrequency, 100));
+
+    PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> > *ppmWriter = 0;
+    if (MPILayer().rank() == 0) {
+        ppmWriter = new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+            "gaussSeidel", outputFrequency, 1, 1);
+    }
+
+    CollectingWriter<Cell> *ppmAdapter = new CollectingWriter<Cell>(
+        ppmWriter);
+    sim.addWriter(ppmAdapter);
+
+    sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps() ));
+
 
     sim.run();
 }
 
 int main(int argc, char **argv)
 {
+    MPI_Init (&argc, &argv);
+    Typemaps::initializeMaps();
 
     runSimulation();
 
+    MPI_Finalize();
     return 0;
 }
