@@ -23,6 +23,7 @@ public:
     friend class ContainerCellTest;
 
     typedef CARGO Cargo;
+    typedef CARGO value_type;
     typedef KEY Key;
     typedef typename APITraits::SelectTopology<CARGO>::Value Topology;
     typedef Cargo *Iterator;
