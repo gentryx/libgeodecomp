@@ -125,9 +125,9 @@ public:
         TS_ASSERT_EQUALS(60,            (interfaceA.end(cell) - 1)->foo);
         TS_ASSERT_EQUALS(std::size_t(4), interfaceA.size(cell));
 
-        TS_ASSERT_EQUALS(51.5, interfaceB.begin(cell)->bar);
-        TS_ASSERT_EQUALS(53.5, (interfaceB.end(cell) - 1)->bar);
-        TS_ASSERT_EQUALS(3,  interfaceB.size(cell));
+        TS_ASSERT_EQUALS(51.5,           interfaceB.begin(cell)->bar);
+        TS_ASSERT_EQUALS(53.5,          (interfaceB.end(cell) - 1)->bar);
+        TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
     }
 };
 

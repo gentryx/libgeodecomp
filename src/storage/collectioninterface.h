@@ -64,18 +64,18 @@ public:
      */
     template<
         typename CELL,
-        typename CARGO,
-        typename ITERATOR = typename CARGO::iterator,
-        typename CONST_ITERATOR = typename CARGO::const_iterator>
+        typename CONTAINER,
+        typename ITERATOR = typename CONTAINER::iterator,
+        typename CONST_ITERATOR = typename CONTAINER::const_iterator>
     class Delegate
     {
     public:
         // CARGO corresponds to value_type in std::vector and friends.
-        typedef CARGO Cargo;
+        typedef typename CONTAINER::value_type Cargo;
         typedef ITERATOR Iterator;
         typedef CONST_ITERATOR ConstIterator;
 
-        Delegate(CARGO CELL:: *memberPointer) :
+        Delegate(CONTAINER CELL:: *memberPointer) :
             memberPointer(memberPointer)
         {}
 
@@ -105,7 +105,7 @@ public:
         }
 
     private:
-        CARGO CELL:: *memberPointer;
+        CONTAINER CELL:: *memberPointer;
     };
 
 };
