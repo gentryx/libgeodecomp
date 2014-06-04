@@ -7,6 +7,8 @@
 
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/storage/collectioninterface.h>
+
 #include <silo.h>
 
 namespace LibGeoDecomp {
@@ -17,17 +19,21 @@ namespace LibGeoDecomp {
  * unstructured grids, and point meshes, as well as variables defined
  * on those. Variables need to be defined by means of Selectors.
  *
+ * The SiloWriter needs a way to retrieve the items for output from
+ * your model. This interface is described via a helper class. See the
+ * unit tests of this class or CollectionInterface for further details.
+ *
  * Per default, all variables are scalar. If you need to write vectorial
  * data, add a selector for each vector component.
  */
-template<typename CELL>
+template<typename CELL, typename INTERFACE = CollectionInterface::PassThrough<CELL> >
 class SiloWriter : public Writer<CELL>
 {
 public:
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
     typedef CELL Cell;
-    typedef typename CELL::Cargo Cargo;
+    typedef typename INTERFACE::Cargo Cargo;
     typedef std::vector<Selector<Cargo> > CargoSelectorVec;
     typedef std::vector<Selector<Cell> > CellSelectorVec;
 
@@ -108,6 +114,7 @@ public:
     }
 
 private:
+    INTERFACE collectionInterface;
     int databaseType;
     std::vector<std::vector<double> > coords;
     std::vector<int> elementTypes;
@@ -201,7 +208,7 @@ private:
              ++i) {
 
             Cell cell = grid.get(*i);
-            addPoints(cell.begin(), cell.end());
+            addPoints(collectionInterface.begin(cell), collectionInterface.end(cell));
         }
     }
 
@@ -213,7 +220,7 @@ private:
              ++i) {
 
             Cell cell = grid.get(*i);
-            addShapes(cell.begin(), cell.end());
+            addShapes(collectionInterface.begin(cell), collectionInterface.end(cell));
         }
     }
 
@@ -238,9 +245,9 @@ private:
 
             Cell cell = grid.get(*i);
             std::size_t oldSize = variableData.size();
-            std::size_t newSize = oldSize + cell.size() * selector.sizeOfExternal();
+            std::size_t newSize = oldSize + collectionInterface.size(cell) * selector.sizeOfExternal();
             variableData.resize(newSize);
-            addVariable(cell.begin(), cell.end(), &variableData[0] + oldSize, selector);
+            addVariable(collectionInterface.begin(cell), collectionInterface.end(cell), &variableData[0] + oldSize, selector);
         }
     }
 

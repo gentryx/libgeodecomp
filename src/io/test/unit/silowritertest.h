@@ -48,7 +48,9 @@ typedef std::vector<DummyParticle> ParticleVec;
 class CellWithPointMesh
 {
 public:
-    typedef DummyParticle Cargo;
+    typedef DummyParticle value_type;
+    typedef ParticleVec::iterator iterator;
+    typedef ParticleVec::const_iterator const_iterator;
 
     class API :
         public APITraits::HasCustomRegularGrid,
@@ -71,9 +73,19 @@ public:
         dummyValue(dummyValue)
     {}
 
+    ParticleVec::iterator begin()
+    {
+        return particles.begin();
+    }
+
     ParticleVec::const_iterator begin() const
     {
         return particles.begin();
+    }
+
+    ParticleVec::iterator end()
+    {
+        return particles.end();
     }
 
     ParticleVec::const_iterator end() const
