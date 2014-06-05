@@ -71,6 +71,9 @@ DECLARE_MULTI_CONTAINER_CELL(MultiCell,                         \
                              ((SimpleCellA)(30)(cellA))         \
                              ((SimpleCellB)(50)(cellB)) )
 
+class MultiCellChild : public MultiCell
+{};
+
 class CollectionInterfaceTest : public CxxTest::TestSuite
 {
 public:
@@ -106,7 +109,7 @@ public:
         TS_ASSERT_EQUALS(std::size_t(6), interface.size(cell));
     }
 
-    void testDelegate()
+    void testDelegate1()
     {
         MultiCell cell;
         cell.cellA.insert(20, SimpleCellA());
@@ -127,6 +130,33 @@ public:
 
         TS_ASSERT_EQUALS(51.5,           interfaceB.begin(cell)->bar);
         TS_ASSERT_EQUALS(53.5,          (interfaceB.end(cell) - 1)->bar);
+        TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
+    }
+
+    void testDelegate2()
+    {
+        MultiCellChild cell;
+        cell.cellA.insert(20, SimpleCellA());
+        cell.cellA.insert(30, SimpleCellA());
+        cell.cellA.insert(40, SimpleCellA());
+        cell.cellA.insert(50, SimpleCellA());
+        cell.cellA.insert(55, SimpleCellA());
+ 
+        cell.cellB.insert(40, SimpleCellB());
+        cell.cellB.insert(50, SimpleCellB());
+        cell.cellB.insert(65, SimpleCellB());
+        cell.cellB.insert(65, SimpleCellB());
+        cell.cellB.insert(65, SimpleCellB());
+
+        CollectionInterface::Delegate<MultiCellChild, ContainerCell<SimpleCellA, 30, int> > interfaceA(&MultiCellChild::cellA);
+        CollectionInterface::Delegate<MultiCellChild, ContainerCell<SimpleCellB, 50, int> > interfaceB(&MultiCellChild::cellB);
+
+        TS_ASSERT_EQUALS(91,             interfaceA.begin(cell)->foo);
+        TS_ASSERT_EQUALS(95,            (interfaceA.end(cell) - 1)->foo);
+        TS_ASSERT_EQUALS(std::size_t(5), interfaceA.size(cell));
+
+        TS_ASSERT_EQUALS(104.5,          interfaceB.begin(cell)->bar);
+        TS_ASSERT_EQUALS(108.5,         (interfaceB.end(cell) - 1)->bar);
         TS_ASSERT_EQUALS(std::size_t(3), interfaceB.size(cell));
     }
 };
