@@ -455,8 +455,13 @@ public:
 
         // dump silo file
         SiloWriter<CellWithPointMesh> writerA(prefix, 1);
-        SiloWriter<MultiCellWithParticles,
-                   CollectionInterface::Delegate<MultiCellWithParticles, ContainerCell<DummyParticle, 30, int> > > writerB(&MultiCellWithParticles::particles, prefix, 1);
+
+        typedef ContainerCell<DummyParticle, 30> Container;
+        typedef CollectionInterface::Delegate<MultiCellWithParticles, Container> CollectionInterfaceType;
+        SiloWriter<MultiCellWithParticles, CollectionInterfaceType> writerB(
+            &MultiCellWithParticles::particles,
+            prefix,
+            1);
 
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
