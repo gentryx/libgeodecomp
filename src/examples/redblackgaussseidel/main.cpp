@@ -2,9 +2,6 @@
  * 2D Red-Black-Gauss-Sidel example
  * solving a heat transfer problem with Dirichlet-boundary cells
  */
-#include <iostream>
-#include <cmath>
-
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -12,6 +9,9 @@
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+
+#include <iostream>
+#include <cmath>
 
 using namespace LibGeoDecomp;
 
