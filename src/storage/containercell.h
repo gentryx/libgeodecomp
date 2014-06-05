@@ -48,16 +48,16 @@ public:
         Key *end = ids + numElements;
         Key *pos = std::upper_bound(ids, end, id);
 
+        int offset = pos - ids;
+        if (offset > 0 && ids[offset - 1] == id) {
+            cells[offset - 1] = cell;
+            return;
+        }
+
         if (pos == end) {
             checkSize();
             cells[numElements] = cell;
             ids[numElements++] = id;
-            return;
-        }
-
-        int offset = pos - ids;
-        if (offset > 0 && ids[offset - 1] == id) {
-            cells[offset - 1] = cell;
             return;
         }
 
