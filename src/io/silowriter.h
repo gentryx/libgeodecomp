@@ -59,6 +59,24 @@ public:
         pointMeshLabel(pointMeshLabel)
     {}
 
+    template<typename CONTAINER, typename CELL_TYPE>
+    SiloWriter(
+        CONTAINER CELL_TYPE:: *memberPointer,
+        const std::string& prefix,
+        const unsigned period,
+        const std::string& regularGridLabel = "regular_grid",
+        const std::string& unstructuredMeshLabel = "unstructured_mesh",
+        const std::string& pointMeshLabel = "point_mesh",
+        int databaseType = DB_PDB) :
+        Writer<Cell>(prefix, period),
+        collectionInterface(memberPointer),
+        databaseType(databaseType),
+        coords(DIM),
+        regularGridLabel(regularGridLabel),
+        unstructuredMeshLabel(unstructuredMeshLabel),
+        pointMeshLabel(pointMeshLabel)
+    {}
+
     /**
      * Adds another variable of the cargo data (e.g. the particles) to
      * this writer's output.
