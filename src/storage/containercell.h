@@ -54,14 +54,14 @@ public:
             return;
         }
 
+        checkSize();
+
         if (pos == end) {
-            checkSize();
             cells[numElements] = cell;
             ids[numElements++] = id;
             return;
         }
 
-        checkSize();
         for (int i = numElements; i > offset; --i) {
             cells[i] = cells[i - 1];
             ids[i] = ids[i - 1];

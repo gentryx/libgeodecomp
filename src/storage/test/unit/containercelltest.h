@@ -133,6 +133,16 @@ public:
         TS_ASSERT_EQUALS(std::size_t(2), container.size());
         container.insert(4, MockCell(2, &ids));
         TS_ASSERT_EQUALS(std::size_t(2), container.size());
+
+        container.insert(5, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(3), container.size());
+
+        container.insert(6, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(4), container.size());
+        container.insert(7, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(5), container.size());
+
+        TS_ASSERT_THROWS(container.insert(8, MockCell(2, &ids)), std::logic_error);
     }
 
     void testRemove()
