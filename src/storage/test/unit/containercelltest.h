@@ -118,6 +118,33 @@ public:
             TS_ASSERT_EQUALS(container.cells + i, container[ids[i]]);
     }
 
+    void testInsertAtEnd()
+    {
+        ContainerCell<MockCell, 5> container;
+        std::vector<int> ids;
+        ids << 1 << 2 << 4 << 5 << 6;
+
+        container.insert(2, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(1), container.size());
+
+        container.insert(4, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(2), container.size());
+        container.insert(4, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(2), container.size());
+        container.insert(4, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(2), container.size());
+
+        container.insert(5, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(3), container.size());
+
+        container.insert(6, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(4), container.size());
+        container.insert(7, MockCell(2, &ids));
+        TS_ASSERT_EQUALS(std::size_t(5), container.size());
+
+        TS_ASSERT_THROWS(container.insert(8, MockCell(2, &ids)), std::logic_error);
+    }
+
     void testRemove()
     {
         ContainerCell<MockCell, 5> container;

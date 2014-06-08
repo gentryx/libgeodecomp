@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/tempfile.h>
+#include <libgeodecomp/storage/multicontainercell.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #include <Python.h>
@@ -27,13 +28,14 @@
 
 #endif
 
+#include <fstream>
 
 using namespace LibGeoDecomp;
 
 class DummyParticle
 {
 public:
-    explicit DummyParticle(const FloatCoord<2> pos) :
+    explicit DummyParticle(const FloatCoord<2>& pos = FloatCoord<2>()) :
         pos(pos)
     {
         coords << pos + FloatCoord<2>(-5, -5)
@@ -61,7 +63,9 @@ typedef std::vector<DummyParticle> ParticleVec;
 class CellWithPointMesh
 {
 public:
-    typedef DummyParticle Cargo;
+    typedef DummyParticle value_type;
+    typedef ParticleVec::iterator iterator;
+    typedef ParticleVec::const_iterator const_iterator;
 
     class API :
         public APITraits::HasCustomRegularGrid,
@@ -72,21 +76,31 @@ public:
         static FloatCoord<2> getRegularGridSpacing()
         {
             return FloatCoord<2>(20, 10);
-        };
+        }
 
         static FloatCoord<2> getRegularGridOrigin()
         {
             return FloatCoord<2>(0, 0);
-        };
+        }
     };
 
     explicit CellWithPointMesh(double dummyValue = 0) :
         dummyValue(dummyValue)
     {}
 
+    ParticleVec::iterator begin()
+    {
+        return particles.begin();
+    }
+
     ParticleVec::const_iterator begin() const
     {
         return particles.begin();
+    }
+
+    ParticleVec::iterator end()
+    {
+        return particles.end();
     }
 
     ParticleVec::const_iterator end() const
@@ -101,6 +115,45 @@ public:
 
     ParticleVec particles;
     double dummyValue;
+};
+
+class SimpleCell
+{
+public:
+    SimpleCell() :
+        bar(++counter + 0.5)
+    {}
+
+    double bar;
+    static int counter;
+};
+
+int SimpleCell::counter = 0;
+
+DECLARE_MULTI_CONTAINER_CELL(MultiCellBase,                       \
+                             ((DummyParticle)(30)(particles))     \
+                             ((SimpleCell)(50)(cells)) )
+
+class MultiCellWithParticles : public MultiCellBase
+{
+public:
+    class API :
+        public APITraits::HasCustomRegularGrid,
+        public APITraits::HasPointMesh,
+        public APITraits::HasUnstructuredGrid
+    {
+    public:
+        static FloatCoord<2> getRegularGridSpacing()
+        {
+            return FloatCoord<2>(20, 10);
+        }
+
+        static FloatCoord<2> getRegularGridOrigin()
+        {
+            return FloatCoord<2>(0, 0);
+        }
+    };
+
 };
 
 class ParticleFilterBase : public Selector<DummyParticle>::Filter<FloatCoord<2>, double>
@@ -159,36 +212,38 @@ public:
 #endif
 
         prefix = TempFile::serial("silowriter_test") + "foo";
-        siloFile = prefix + ".00123.silo";
+        siloFile1 = prefix + ".00123.silo";
+        siloFile2 = prefix + ".00666.silo";
 
-        remove((prefix + "A.png").c_str());
-        remove((prefix + "B.png").c_str());
-        remove((prefix + "C.png").c_str());
-        remove((prefix + "D.png").c_str());
-        remove((prefix + "E.png").c_str());
+        removeFile(prefix + "A.png");
+        removeFile(prefix + "B.png");
+        removeFile(prefix + "C.png");
+        removeFile(prefix + "D.png");
+        removeFile(prefix + "E.png");
 
-        remove((prefix + "A0000.png").c_str());
-        remove((prefix + "B0000.png").c_str());
-        remove((prefix + "C0000.png").c_str());
-        remove((prefix + "D0000.png").c_str());
-        remove((prefix + "E0000.png").c_str());
+        removeFile(prefix + "A0000.png");
+        removeFile(prefix + "B0000.png");
+        removeFile(prefix + "C0000.png");
+        removeFile(prefix + "D0000.png");
+        removeFile(prefix + "E0000.png");
     }
 
     void tearDown()
     {
-        remove((prefix + "A.png").c_str());
-        remove((prefix + "B.png").c_str());
-        remove((prefix + "C.png").c_str());
-        remove((prefix + "D.png").c_str());
-        remove((prefix + "E.png").c_str());
+        removeFile(prefix + "A.png");
+        removeFile(prefix + "B.png");
+        removeFile(prefix + "C.png");
+        removeFile(prefix + "D.png");
+        removeFile(prefix + "E.png");
 
-        remove((prefix + "A0000.png").c_str());
-        remove((prefix + "B0000.png").c_str());
-        remove((prefix + "C0000.png").c_str());
-        remove((prefix + "D0000.png").c_str());
-        remove((prefix + "E0000.png").c_str());
+        removeFile(prefix + "A0000.png");
+        removeFile(prefix + "B0000.png");
+        removeFile(prefix + "C0000.png");
+        removeFile(prefix + "D0000.png");
+        removeFile(prefix + "E0000.png");
 
-        remove(siloFile.c_str());
+        removeFile(siloFile1);
+        removeFile(siloFile2);
 
 #ifdef LIBGEODECOMP_WITH_QT
         app.reset();
@@ -239,7 +294,7 @@ public:
         PyRun_SimpleString(visitScript.c_str());
         Py_Finalize();
 
-        remove(siloFile.c_str());
+        remove(siloFile1.c_str());
     }
 
     Histogram loadImage(const std::string suffix1, const std::string suffix2)
@@ -294,7 +349,7 @@ public:
             << "import os\n"
             << "import visit\n"
             << "\n"
-            << "simfile = \"" << siloFile << "\"\n"
+            << "simfile = \"" << siloFile1 << "\"\n"
             << "\n"
             << "visit.LaunchNowin ()\n"
             << "visit.OpenDatabase(simfile)\n"
@@ -377,12 +432,110 @@ public:
 #endif
     }
 
+    void testMemberExtraction()
+    {
+#ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_VISIT
+#ifdef LIBGEODECOMP_WITH_QT
+
+        // init grid
+        Coord<2> dim(10, 5);
+        CoordBox<2> box(Coord<2>(), dim);
+        FloatCoord<2> quadrantDim;
+        FloatCoord<2> origin;
+        APITraits::SelectRegularGrid<CellWithPointMesh>::value(&quadrantDim, &origin);
+
+        Grid<CellWithPointMesh> gridA(dim);
+        Grid<MultiCellWithParticles> gridB(dim);
+        int counter = 0;
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            gridA[*i] = CellWithPointMesh(counter++);
+            FloatCoord<2> center =
+                FloatCoord<2>(*i).scale(quadrantDim) +
+                quadrantDim * 0.5;
+            gridA[*i].particles << DummyParticle(center);
+
+            // copy over freshly created particles, so we can be sure
+            // each coordinate yields the same particles in both
+            // grids:
+            ParticleVec particles = gridA[*i].particles;
+            for (size_t c = 0; c < particles.size(); ++c) {
+                gridB[*i].particles.insert(c, particles[c]);
+            }
+        }
+
+        // dump silo file
+        SiloWriter<CellWithPointMesh> writerA(prefix, 1);
+
+        typedef ContainerCell<DummyParticle, 30> Container;
+        typedef CollectionInterface::Delegate<MultiCellWithParticles, Container> CollectionInterfaceType;
+        SiloWriter<MultiCellWithParticles, CollectionInterfaceType> writerB(
+            &MultiCellWithParticles::particles,
+            prefix,
+            1);
+
+        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
+        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
+
+        writerA.addSelectorForPointMesh(
+            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
+        writerA.addSelectorForUnstructuredGrid(
+            Selector<DummyParticle>(&DummyParticle::pos, "posY", filterY));
+
+        writerB.addSelectorForPointMesh(
+            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
+        writerB.addSelectorForUnstructuredGrid(
+            Selector<DummyParticle>(&DummyParticle::pos, "posY", filterY));
+
+        writerA.stepFinished(gridA, 123, WRITER_INITIALIZED);
+
+        std::ifstream infile(siloFile1.c_str());
+        if (!infile) {
+            throw std::logic_error("could not open silo archive");
+        }
+
+        std::size_t bufferSize = 1024 * 1024;
+        std::vector<char> bufferA(bufferSize);
+        std::vector<char> bufferB(bufferSize);
+        infile.read(&bufferA[0], bufferSize);
+        TS_ASSERT(!infile.good());
+        std::size_t sizeA = infile.gcount();
+
+        infile.close();
+        writerB.stepFinished(gridB, 666, WRITER_INITIALIZED);
+        infile.open(siloFile2.c_str());
+        infile.read(&bufferB[0], bufferSize);
+        TS_ASSERT(!infile.good());
+        std::size_t sizeB = infile.gcount();
+
+        TS_ASSERT_EQUALS(sizeA, sizeB);
+        for (std::size_t i = 0; i < sizeA; ++i) {
+            int delta = 0;
+            if (i == 187) {
+                // Byte 187 in the header is part of a version counter
+                delta = 1;
+            }
+
+            TS_ASSERT_EQUALS(bufferA[i] + delta, bufferB[i]);
+        }
+#endif
+#endif
+#endif
+    }
+
 private:
 #ifdef LIBGEODECOMP_WITH_QT
     boost::shared_ptr<QApplication> app;
 #endif
     std::string prefix;
-    std::string siloFile;
+    std::string siloFile1;
+    std::string siloFile2;
+
+    void removeFile(std::string name)
+    {
+        remove(name.c_str());
+    }
 };
 
 }
