@@ -423,9 +423,10 @@ public:
         TS_ASSERT(histogram4[red.rgb()  ] > 20);
 
         Histogram histogram5 = loadImage("E", "0000");
-
-        TS_ASSERT(histogram4[red.rgb()  ] > 20);
-        TS_ASSERT(histogram4[white.rgb()] < histogram1[white.rgb()]);
+        // we should at least get a little red square...
+        TS_ASSERT(histogram5[red.rgb()  ] > 20);
+        // ...and much less white (because of even more colored squares).
+        TS_ASSERT(histogram5[white.rgb()] < (histogram2[white.rgb()] - 200));
 
 #endif
 #endif
