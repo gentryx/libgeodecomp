@@ -469,9 +469,7 @@ public:
         // dump silo file
         SiloWriter<CellWithPointMesh> writerA(prefix, 1);
 
-        typedef ContainerCell<DummyParticle, 30> Container;
-        typedef CollectionInterface::Delegate<MultiCellWithParticles, Container> CollectionInterfaceType;
-        SiloWriter<MultiCellWithParticles, CollectionInterfaceType> writerB(
+        SiloWriter<MultiCellWithParticles> writerB(
             &MultiCellWithParticles::particles,
             prefix,
             1);

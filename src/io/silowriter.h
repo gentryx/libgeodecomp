@@ -144,7 +144,7 @@ public:
     {
         SelectorVec<Cargo> *mySelectors = static_cast<SelectorVec<Cargo>*>(selectors);
         for (typename SelectorVec<Cargo>::iterator i = mySelectors->begin(); i != mySelectors->end(); ++i) {
-            writer->handleVariableForUnstructuredGrid(dbfile, grid, *i);
+            writer->handleVariableForUnstructuredGrid(dbfile, grid, *i, collectionInterface);
         }
     }
 
@@ -152,7 +152,7 @@ public:
     {
         SelectorVec<Cargo> *mySelectors = static_cast<SelectorVec<Cargo>*>(selectors);
         for (typename SelectorVec<Cargo>::iterator i = mySelectors->begin(); i != mySelectors->end(); ++i) {
-            writer->handleVariableForPointMesh(dbfile, grid, *i);
+            writer->handleVariableForPointMesh(dbfile, grid, *i, collectionInterface);
         }
     }
 
@@ -168,14 +168,10 @@ private:
  * unstructured grids, and point meshes, as well as variables defined
  * on those. Variables need to be defined by means of Selectors.
  *
- * The SiloWriter needs a way to retrieve the items for output from
- * your model. This interface is described via a helper class. See the
- * unit tests of this class or CollectionInterface for further details.
- *
  * Per default, all variables are scalar. If you need to write vectorial
  * data, add a selector for each vector component.
  */
-template<typename CELL, typename INTERFACE = CollectionInterface::PassThrough<CELL> >
+template<typename CELL>
 class SiloWriter : public Writer<CELL>
 {
 public:
@@ -185,14 +181,21 @@ public:
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
     typedef CELL Cell;
-    typedef typename INTERFACE::Cargo Cargo;
-    typedef std::vector<Selector<Cargo> > CargoSelectorVec;
     typedef std::vector<Selector<Cell> > CellSelectorVec;
 
     using Writer<Cell>::DIM;
     using Writer<Cell>::prefix;
 
     /**
+     * This c-tor assumes that your class provides a default interface
+     * for accessing its items (e.g. particles), should there be any.
+     *
+     * Background: the SiloWriter needs a way to retrieve the items
+     * for output from your model. This interface is described via a
+     * helper class. See the unit tests of CollectionInterface for
+     * further details. See the unit tests if this class to see how
+     * this c-tor should be used.
+     *
      * databaseType can by anything which SILO's DBCreate() accepts
      * (e.g. DB_HDF5 or DB_PDB)
      */
@@ -206,13 +209,25 @@ public:
         Writer<Cell>(prefix, period),
         databaseType(databaseType),
         coords(DIM),
-        pointMeshSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE())),
-        unstructuredGridSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE())),
+        pointMeshSelectors(
+            new SiloWriterHelpers::SelectorContainerImplementation<
+            SiloWriter<CELL>,
+            CollectionInterface::PassThrough<CELL> >(
+                CollectionInterface::PassThrough<CELL>())),
+        unstructuredGridSelectors(
+            new SiloWriterHelpers::SelectorContainerImplementation<
+            SiloWriter<CELL>,
+            CollectionInterface::PassThrough<CELL> >(
+                CollectionInterface::PassThrough<CELL>())),
         regularGridLabel(regularGridLabel),
         unstructuredMeshLabel(unstructuredMeshLabel),
         pointMeshLabel(pointMeshLabel)
     {}
 
+    /**
+     * Unlike the previous constructor, this c-tor assumes that a
+     * member variable of your class holds the itms for output.
+     */
     template<typename CONTAINER, typename CELL_TYPE>
     SiloWriter(
         CONTAINER CELL_TYPE:: *memberPointer,
@@ -223,11 +238,18 @@ public:
         const std::string& pointMeshLabel = "point_mesh",
         int databaseType = DB_PDB) :
         Writer<Cell>(prefix, period),
-        collectionInterface(memberPointer),
         databaseType(databaseType),
         coords(DIM),
-        pointMeshSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE(memberPointer))),
-        unstructuredGridSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE(memberPointer))),
+        pointMeshSelectors(
+            new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<
+            CELL>,
+            CollectionInterface::Delegate<CELL, CONTAINER> >(
+                CollectionInterface::Delegate<CELL, CONTAINER>(memberPointer))),
+        unstructuredGridSelectors(
+            new SiloWriterHelpers::SelectorContainerImplementation<
+            SiloWriter<CELL>,
+            CollectionInterface::Delegate<CELL, CONTAINER> >(
+                CollectionInterface::Delegate<CELL, CONTAINER>(memberPointer))),
         regularGridLabel(regularGridLabel),
         unstructuredMeshLabel(unstructuredMeshLabel),
         pointMeshLabel(pointMeshLabel)
@@ -237,7 +259,8 @@ public:
      * Adds another variable of the cargo data (e.g. the particles) to
      * this writer's output.
      */
-    void addSelectorForPointMesh(const Selector<Cargo>& selector)
+    template<typename CARGO>
+    void addSelectorForPointMesh(const Selector<CARGO>& selector)
     {
         pointMeshSelectors->addSelector(selector);
     }
@@ -246,7 +269,8 @@ public:
      * Adds another variable of the cargo data, but associate it with
      * the unstructured grid.
      */
-    void addSelectorForUnstructuredGrid(const Selector<Cargo>& selector)
+    template<typename CARGO>
+    void addSelectorForUnstructuredGrid(const Selector<CARGO>& selector)
     {
         unstructuredGridSelectors->addSelector(selector);
     }
@@ -283,8 +307,6 @@ public:
     }
 
 private:
-    // fixme: kill this
-    INTERFACE collectionInterface;
     int databaseType;
     std::vector<std::vector<double> > coords;
     std::vector<int> elementTypes;
@@ -292,8 +314,8 @@ private:
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL, INTERFACE> > > pointMeshSelectors;
-    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL, INTERFACE> > > unstructuredGridSelectors;
+    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL> > > pointMeshSelectors;
+    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL> > > unstructuredGridSelectors;
     CellSelectorVec cellSelectors;
     Region<DIM> region;
     std::string regularGridLabel;
@@ -336,27 +358,27 @@ private:
         // intentinally left blank. not all meshfree codes may want to expose this.
     }
 
-    template<typename CELL_TYPE>
-    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<CELL_TYPE>& selector)
+    template<typename CARGO>
+    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<CARGO>& selector)
     {
         flushDataStores();
         collectVariable(grid, selector);
         outputVariable(dbfile, selector, grid.boundingBox());
     }
 
-    template<typename CELL_TYPE>
-    void handleVariableForPointMesh(DBfile *dbfile, const GridType& grid, const Selector<CELL_TYPE>& selector)
+    template<typename CARGO, typename COLLECTION_INTERFACE>
+    void handleVariableForPointMesh(DBfile *dbfile, const GridType& grid, const Selector<CARGO>& selector, const COLLECTION_INTERFACE& collectionInterface)
     {
         flushDataStores();
-        collectVariable(grid, selector);
+        collectVariable(grid, selector, collectionInterface);
         outputVariableForPointMesh(dbfile, selector);
     }
 
-    template<typename CELL_TYPE>
-    void handleVariableForUnstructuredGrid(DBfile *dbfile, const GridType& grid, const Selector<CELL_TYPE>& selector)
+    template<typename CARGO, typename COLLECTION_INTERFACE>
+    void handleVariableForUnstructuredGrid(DBfile *dbfile, const GridType& grid, const Selector<CARGO>& selector, const COLLECTION_INTERFACE& collectionInterface)
     {
         flushDataStores();
-        collectVariable(grid, selector);
+        collectVariable(grid, selector, collectionInterface);
         outputVariableForUnstructuredGrid(dbfile, selector);
     }
 
@@ -381,7 +403,7 @@ private:
              ++i) {
 
             Cell cell = grid.get(*i);
-            addPoints(collectionInterface.begin(cell), collectionInterface.end(cell));
+            pointMeshSelectors->callbackAddPoints(this, cell);
         }
     }
 
@@ -393,7 +415,7 @@ private:
              ++i) {
 
             Cell cell = grid.get(*i);
-            addShapes(collectionInterface.begin(cell), collectionInterface.end(cell));
+            unstructuredGridSelectors->callbackAddShapes(this, cell);
         }
     }
 
@@ -409,7 +431,8 @@ private:
         grid.saveMemberUnchecked(&variableData[0], selector, region);
     }
 
-    void collectVariable(const GridType& grid, const Selector<Cargo>& selector)
+    template<typename CARGO, typename COLLECTION_INTERFACE>
+    void collectVariable(const GridType& grid, const Selector<CARGO>& selector, const COLLECTION_INTERFACE& collectionInterface)
     {
         CoordBox<DIM> box = grid.boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin();
@@ -497,7 +520,8 @@ private:
             NULL, 0, selector.siloTypeID(), DB_ZONECENT, NULL);
     }
 
-    void outputVariableForPointMesh(DBfile *dbfile, const Selector<Cargo>& selector)
+    template<typename CARGO>
+    void outputVariableForPointMesh(DBfile *dbfile, const Selector<CARGO>& selector)
     {
         DBPutPointvar1(
             dbfile, selector.name().c_str(), pointMeshLabel.c_str(),
@@ -505,7 +529,8 @@ private:
             selector.siloTypeID(), NULL);
     }
 
-    void outputVariableForUnstructuredGrid(DBfile *dbfile, const Selector<Cargo>& selector)
+    template<typename CARGO>
+    void outputVariableForUnstructuredGrid(DBfile *dbfile, const Selector<CARGO>& selector)
     {
         DBPutUcdvar1(
             dbfile, selector.name().c_str(), unstructuredMeshLabel.c_str(),
@@ -550,8 +575,8 @@ private:
         }
     }
 
-    template<typename ITERATOR>
-    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target, const Selector<Cargo>& selector)
+    template<typename ITERATOR, typename CARGO>
+    inline void addVariable(const ITERATOR& start, const ITERATOR& end, char *target, const Selector<CARGO>& selector)
     {
         char *cursor = target;
 
