@@ -10,8 +10,157 @@
 #include <libgeodecomp/storage/collectioninterface.h>
 
 #include <silo.h>
+#include <typeinfo>
 
 namespace LibGeoDecomp {
+
+namespace SiloWriterHelpers {
+
+/**
+ * This is a helper class which decouples the SiloWriter from the
+ * actual type of the items for use with the Selectors.
+ */
+class SelectorVecBase
+{
+public:
+    virtual ~SelectorVecBase()
+    {}
+};
+
+/**
+ * Dito.
+ */
+template<typename CELL>
+class SelectorVec : public SelectorVecBase
+{
+public:
+    typedef std::vector<Selector<CELL> > SelectorVector;
+    typedef typename SelectorVector::iterator iterator;
+
+    SelectorVec() :
+        typeID(typeid(CELL))
+    {}
+
+    void addSelector(const Selector<CELL>& selector)
+    {
+        if (typeID != typeid(CELL)) {
+            throw std::logic_error("illegal cast detected");
+        }
+
+        selectors << selector;
+    }
+
+    iterator begin()
+    {
+        return selectors.begin();
+    }
+
+    iterator end()
+    {
+        return selectors.end();
+    }
+
+private:
+    const std::type_info& typeID;
+    SelectorVector selectors;
+};
+
+/**
+ * Dito.
+ */
+template<typename SILO_WRITER>
+class SelectorContainer
+{
+public:
+    typedef typename SILO_WRITER::Cell Cell;
+    typedef typename SILO_WRITER::GridType GridType;
+
+    template<typename CARGO>
+    SelectorContainer(CARGO * /*unused*/) :
+        selectors(new SelectorVec<CARGO>)
+    {}
+
+    virtual ~SelectorContainer()
+    {
+        delete selectors;
+    }
+
+    template<typename CARGO>
+    void addSelector(const Selector<CARGO>& selector)
+    {
+        static_cast<SelectorVec<CARGO>*>(selectors)->addSelector(selector);
+    }
+
+    virtual
+    void callbackAddPoints(SILO_WRITER *writer, const Cell& cell) = 0;
+
+    virtual
+    void callbackAddShapes(SILO_WRITER *writer, const Cell& cell) = 0;
+
+    virtual
+    void callbackHandleVariableForUnstructuredGrid(SILO_WRITER *writer, DBfile *dbfile, const GridType& grid) = 0;
+
+    virtual
+    void callbackHandleVariableForPointMesh(SILO_WRITER *writer, DBfile *dbfile, const GridType& grid) = 0;
+
+protected:
+    int typeId;
+    SelectorVecBase *selectors;
+};
+
+/**
+ * Dito.
+ */
+template<typename SILO_WRITER, typename COLLECTION_INTERFACE>
+class SelectorContainerImplementation : public SelectorContainer<SILO_WRITER>
+{
+public:
+    typedef typename SILO_WRITER::Cell Cell;
+    typedef typename SILO_WRITER::GridType GridType;
+    typedef typename COLLECTION_INTERFACE::Cargo Cargo;
+
+    using SelectorContainer<SILO_WRITER>::selectors;
+
+    SelectorContainerImplementation(const COLLECTION_INTERFACE& collectionInterface) :
+        SelectorContainer<SILO_WRITER>(static_cast<Cargo*>(0)),
+        collectionInterface(collectionInterface)
+    {}
+
+    void callbackAddPoints(SILO_WRITER *writer, const Cell& cell)
+    {
+        writer->addPoints(
+            collectionInterface.begin(cell),
+            collectionInterface.end(cell));
+    }
+
+    void callbackAddShapes(SILO_WRITER *writer, const Cell& cell)
+    {
+        writer->addShapes(
+            collectionInterface.begin(cell),
+            collectionInterface.end(cell));
+    }
+
+    void callbackHandleVariableForUnstructuredGrid(SILO_WRITER *writer, DBfile *dbfile, const GridType& grid)
+    {
+        SelectorVec<Cargo> *mySelectors = static_cast<SelectorVec<Cargo>*>(selectors);
+        for (typename SelectorVec<Cargo>::iterator i = mySelectors->begin(); i != mySelectors->end(); ++i) {
+            writer->handleVariableForUnstructuredGrid(dbfile, grid, *i);
+        }
+    }
+
+    void callbackHandleVariableForPointMesh(SILO_WRITER *writer, DBfile *dbfile, const GridType& grid)
+    {
+        SelectorVec<Cargo> *mySelectors = static_cast<SelectorVec<Cargo>*>(selectors);
+        for (typename SelectorVec<Cargo>::iterator i = mySelectors->begin(); i != mySelectors->end(); ++i) {
+            writer->handleVariableForPointMesh(dbfile, grid, *i);
+        }
+    }
+
+private:
+    COLLECTION_INTERFACE collectionInterface;
+};
+
+}
 
 /**
  * SiloWriter makes use of the Silo library (
@@ -30,6 +179,9 @@ template<typename CELL, typename INTERFACE = CollectionInterface::PassThrough<CE
 class SiloWriter : public Writer<CELL>
 {
 public:
+    template<typename SILO_WRITER, typename COLLECTION_INTERFACE>
+    friend class SiloWriterHelpers::SelectorContainerImplementation;
+
     typedef typename Writer<CELL>::GridType GridType;
     typedef typename Writer<CELL>::Topology Topology;
     typedef CELL Cell;
@@ -54,6 +206,8 @@ public:
         Writer<Cell>(prefix, period),
         databaseType(databaseType),
         coords(DIM),
+        pointMeshSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE())),
+        unstructuredGridSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE())),
         regularGridLabel(regularGridLabel),
         unstructuredMeshLabel(unstructuredMeshLabel),
         pointMeshLabel(pointMeshLabel)
@@ -72,6 +226,8 @@ public:
         collectionInterface(memberPointer),
         databaseType(databaseType),
         coords(DIM),
+        pointMeshSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE(memberPointer))),
+        unstructuredGridSelectors(new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<CELL, INTERFACE>, INTERFACE>(INTERFACE(memberPointer))),
         regularGridLabel(regularGridLabel),
         unstructuredMeshLabel(unstructuredMeshLabel),
         pointMeshLabel(pointMeshLabel)
@@ -83,7 +239,7 @@ public:
      */
     void addSelectorForPointMesh(const Selector<Cargo>& selector)
     {
-        pointMeshSelectors << selector;
+        pointMeshSelectors->addSelector(selector);
     }
 
     /**
@@ -92,7 +248,7 @@ public:
      */
     void addSelectorForUnstructuredGrid(const Selector<Cargo>& selector)
     {
-        unstructuredGridSelectors << selector;
+        unstructuredGridSelectors->addSelector(selector);
     }
 
     /**
@@ -120,18 +276,14 @@ public:
             handleVariable(dbfile, grid, *i);
         }
 
-        for (typename CargoSelectorVec::iterator i = unstructuredGridSelectors.begin(); i != unstructuredGridSelectors.end(); ++i) {
-            handleVariableForUnstructuredGrid(dbfile, grid, *i);
-        }
-
-        for (typename CargoSelectorVec::iterator i = pointMeshSelectors.begin(); i != pointMeshSelectors.end(); ++i) {
-            handleVariableForPointMesh(dbfile, grid, *i);
-        }
+        unstructuredGridSelectors->callbackHandleVariableForUnstructuredGrid(this, dbfile, grid);
+        pointMeshSelectors->callbackHandleVariableForUnstructuredGrid(this, dbfile, grid);
 
         DBClose(dbfile);
     }
 
 private:
+    // fixme: kill this
     INTERFACE collectionInterface;
     int databaseType;
     std::vector<std::vector<double> > coords;
@@ -140,8 +292,8 @@ private:
     std::vector<int> shapeCounts;
     std::vector<char> variableData;
     std::vector<int> nodeList;
-    CargoSelectorVec pointMeshSelectors;
-    CargoSelectorVec unstructuredGridSelectors;
+    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL, INTERFACE> > > pointMeshSelectors;
+    boost::shared_ptr<SiloWriterHelpers::SelectorContainer<SiloWriter<CELL, INTERFACE> > > unstructuredGridSelectors;
     CellSelectorVec cellSelectors;
     Region<DIM> region;
     std::string regularGridLabel;
@@ -184,21 +336,24 @@ private:
         // intentinally left blank. not all meshfree codes may want to expose this.
     }
 
-    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<Cell>& selector)
+    template<typename CELL_TYPE>
+    void handleVariable(DBfile *dbfile, const GridType& grid, const Selector<CELL_TYPE>& selector)
     {
         flushDataStores();
         collectVariable(grid, selector);
         outputVariable(dbfile, selector, grid.boundingBox());
     }
 
-    void handleVariableForPointMesh(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    template<typename CELL_TYPE>
+    void handleVariableForPointMesh(DBfile *dbfile, const GridType& grid, const Selector<CELL_TYPE>& selector)
     {
         flushDataStores();
         collectVariable(grid, selector);
         outputVariableForPointMesh(dbfile, selector);
     }
 
-    void handleVariableForUnstructuredGrid(DBfile *dbfile, const GridType& grid, const Selector<Cargo>& selector)
+    template<typename CELL_TYPE>
+    void handleVariableForUnstructuredGrid(DBfile *dbfile, const GridType& grid, const Selector<CELL_TYPE>& selector)
     {
         flushDataStores();
         collectVariable(grid, selector);
