@@ -298,15 +298,13 @@ public:
 
         // dump silo file
         SiloWriter<CellWithPointMesh> writer(prefix, 1);
-        writer.addSelector(Selector<CellWithPointMesh>(&CellWithPointMesh::dummyValue, "dummyValue"));
+        writer.addSelector(&CellWithPointMesh::dummyValue, "dummyValue");
 
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
 
-        writer.addSelectorForPointMesh(
-            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
-        writer.addSelectorForUnstructuredGrid(
-            Selector<DummyParticle>(&DummyParticle::pos, "posY", filterY));
+        writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writer.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
         writer.stepFinished(grid, 123, WRITER_INITIALIZED);
 
         // plot
@@ -497,15 +495,11 @@ public:
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
 
-        writerA.addSelectorForPointMesh(
-            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
-        writerA.addSelectorForUnstructuredGrid(
-            Selector<DummyParticle>(&DummyParticle::pos, "posY", filterY));
+        writerA.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writerA.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
 
-        writerB.addSelectorForPointMesh(
-            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
-        writerB.addSelectorForUnstructuredGrid(
-            Selector<DummyParticle>(&DummyParticle::pos, "posY", filterY));
+        writerB.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writerB.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
 
         writerA.stepFinished(gridA, 123, WRITER_INITIALIZED);
 
@@ -582,10 +576,8 @@ public:
             &CellWithPointMeshAndUnstructuredGrid::elements,
             prefix,
             1);
-        writer.addSelectorForPointMesh(
-            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
-        writer.addSelectorForUnstructuredGrid(
-            Selector<DummyElement>(&DummyElement::temp, "temp"));
+        writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writer.addSelectorForUnstructuredGrid(&DummyElement::temp, "temp");
         writer.stepFinished(grid, 256, WRITER_INITIALIZED);
 
         // render images:

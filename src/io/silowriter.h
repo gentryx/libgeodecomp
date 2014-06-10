@@ -291,31 +291,64 @@ public:
     /**
      * Adds another variable of the cargo data (e.g. the particles) to
      * this writer's output.
-     *
-     * fixme: can't we spare the user the instantiation of the selector? we could pass this function's arguments to a selector's c-tor... dito for addSelector() and addSelectorForUnstructuredGrid().
      */
-    template<typename CARGO>
-    void addSelectorForPointMesh(const Selector<CARGO>& selector)
+    template<typename MEMBER, typename CARGO>
+    void addSelectorForPointMesh(
+        MEMBER CARGO:: *memberPointer,
+        const std::string& memberName,
+        const boost::shared_ptr<typename Selector<CARGO>::FilterBase>& filter)
     {
-        pointMeshSelectors->addSelector(selector);
+        addSelectorForPointMesh(Selector<CARGO>(memberPointer, memberName, filter));
+    }
+
+
+    template<typename MEMBER, typename CARGO>
+    void addSelectorForPointMesh(
+        MEMBER CARGO:: *memberPointer,
+        const std::string& memberName)
+    {
+        addSelectorForPointMesh(Selector<CARGO>(memberPointer, memberName));
     }
 
     /**
      * Adds another variable of the cargo data, but associate it with
      * the unstructured grid.
      */
-    template<typename CARGO>
-    void addSelectorForUnstructuredGrid(const Selector<CARGO>& selector)
+    template<typename MEMBER, typename CARGO>
+    void addSelectorForUnstructuredGrid(
+        MEMBER CARGO:: *memberPointer,
+        const std::string& memberName,
+        const boost::shared_ptr<typename Selector<CARGO>::FilterBase>& filter)
     {
-        unstructuredGridSelectors->addSelector(selector);
+        addSelectorForUnstructuredGrid(Selector<CARGO>(memberPointer, memberName, filter));
+    }
+
+    template<typename MEMBER, typename CARGO>
+    void addSelectorForUnstructuredGrid(
+        MEMBER CARGO:: *memberPointer,
+        const std::string& memberName)
+    {
+        addSelectorForUnstructuredGrid(Selector<CARGO>(memberPointer, memberName));
     }
 
     /**
      * Adds another model variable of the cells to writer's output.
      */
-    void addSelector(const Selector<Cell>& selector)
+    template<typename MEMBER>
+    void addSelector(
+        MEMBER Cell:: *memberPointer,
+        const std::string& memberName,
+        const boost::shared_ptr<typename Selector<Cell>::FilterBase>& filter)
     {
-        cellSelectors << selector;
+        addSelector(Selector<Cell>(memberPointer, memberName, filter));
+    }
+
+    template<typename MEMBER>
+    void addSelector(
+        MEMBER Cell:: *memberPointer,
+        const std::string& memberName)
+    {
+        addSelector(Selector<Cell>(memberPointer, memberName));
     }
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -356,6 +389,23 @@ private:
     std::string regularGridLabel;
     std::string unstructuredMeshLabel;
     std::string pointMeshLabel;
+
+    void addSelector(const Selector<Cell>& selector)
+    {
+        cellSelectors << selector;
+    }
+
+    template<typename CARGO>
+    void addSelectorForPointMesh(const Selector<CARGO>& selector)
+    {
+        pointMeshSelectors->addSelector(selector);
+    }
+
+    template<typename CARGO>
+    void addSelectorForUnstructuredGrid(const Selector<CARGO>& selector)
+    {
+        unstructuredGridSelectors->addSelector(selector);
+    }
 
     void handleUnstructuredGrid(DBfile *dbfile, const GridType& grid, APITraits::TrueType)
     {
