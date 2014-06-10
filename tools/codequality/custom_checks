@@ -3,6 +3,10 @@
 require 'pathname'
 
 class TestBase
+  def log(message)
+    puts message if !SUMMARY_MODE
+  end
+
   def is_test_header?(filename)
     return true if filename =~ /test\.h$/
     return true if filename =~ /testguard\.h/
@@ -17,6 +21,7 @@ class TestBase
     return true if filename =~ /typemaps\.cpp/
     return true if filename =~ /serialization\.h/
     return true if filename =~ /test\.cpp$/
+    return true if filename =~ /test\.cu$/
 
     return false
   end
@@ -45,7 +50,7 @@ class FindUndocumentedClasses < TestBase
     ret = 0
 
     content.scan(/\n\n(#{template_pattern})?class (\w+)/) do
-      puts "#{filename}: found undocumented class »#{$6}«"
+      log "#{filename}: found undocumented class »#{$6}«"
       ret += 1
     end
 
@@ -57,7 +62,7 @@ class FindUnmatchedHeaderGuards < TestBase
   def test(filename, content)
     return 0 if is_commonly_excluded?(filename)
 
-    relative_path = Pathname.new(filename).relative_path_from(@@path)
+    relative_path = Pathname.new(filename).relative_path_from(PATH)
     macro = "LIBGEODECOMP_#{relative_path}".upcase.gsub(/[\/\.]/, "_")
     expected_guard = <<EOF
 #ifndef #{macro}
@@ -66,7 +71,7 @@ EOF
 
     if !(content =~ /#{expected_guard}/)
       first_line = content.split("\n")[0]
-      puts "#{filename}: could not find expected header guard (expected: #{expected_guard}, found: #{first_line})."
+      log "#{filename}: could not find expected header guard (expected: #{expected_guard}, found: #{first_line})."
       return 1
     end
 
@@ -78,9 +83,12 @@ class FindFixmes < TestBase
   def test(filename, content)
     ret = 0
 
-    content.scan(/.*fixme.*/i) do
-      puts "#{filename}: #{$&}"
-      ret += 1
+    begin
+      content.scan(/.*fixme.*/i) do
+        log "#{filename}: #{$&}"
+        ret += 1
+      end
+    rescue ArgumentError => e
     end
 
     return ret
@@ -93,9 +101,12 @@ class FindBadIncludes < TestBase
 
     ret = 0
 
-    content.scan(/^#include.*".*"/) do
-      ret += 1
-      puts "#{filename}: found malformed include »#{$&}«"
+    begin
+      content.scan(/^#include.*".*"/) do
+        ret += 1
+        log "#{filename}: found malformed include »#{$&}«"
+      end
+    rescue ArgumentError => e
     end
 
     return ret
@@ -106,11 +117,14 @@ class FindSizeTWithOutStd < TestBase
   def test(filename, content)
     ret = 0
 
-    content.scan(/(std::)?size_t[^_].*/) do
-      if $1.nil?
-        ret += 1
-        puts "#{filename}: size_t used when std::size_t should have been used: »#{$&}«"
+    begin
+      content.scan(/(std::)?size_t[^_].*/) do
+        if $1.nil?
+          ret += 1
+          log "#{filename}: size_t used when std::size_t should have been used: »#{$&}«"
+        end
       end
+    rescue ArgumentError => e
     end
 
     return ret
@@ -120,33 +134,36 @@ end
 def scour_files(tester)
   failures = 0
 
-  @files.each do |file|
+  FILES.each do |file|
     content = File.read(file)
     failures += tester.test(file, content)
   end
 
   delimiter = "=" * 80
-  puts delimiter
-  puts "#{tester.class}: #{failures}/#{@files.size} tests failed"
-  puts delimiter
+  puts delimiter if !SUMMARY_MODE
+  puts "#{tester.class}: #{failures}/#{FILES.size} tests failed"
+  puts delimiter if !SUMMARY_MODE
 end
 
-if ARGV.size != 1
+DEFAULT_PATH=Pathname.new($0).parent.parent.realpath + "src"
+
+if (ARGV.size > 2) || ((ARGV.size > 1) && (ARGV[0] != "-s"))
   STDERR.puts <<EOF
 A simple detector which scans for common patterns of poor coding style
 (e.g. undocumented classes or malformed header guards).
 
-Usage: #{$0} PATH
+Usage: #{$0} [-s] [PATH]
 
-...where PATH is the source directory you wish to check.
+...where PATH is the source directory you wish to check. Default path is #{DEFAULT_PATH.to_s}
 EOF
   exit 1
 end
 
-@@path = Pathname.new(ARGV[0])
+SUMMARY_MODE = (ARGV.size > 1)
+PATH = Pathname.new(ARGV.last || DEFAULT_PATH)
 
-pattern = @@path + "**" + "*.{h,cpp,cu}"
-@files = Dir.glob(pattern)
+pattern = PATH + "**" + "*.{h,cpp,cu}"
+FILES = Dir.glob(pattern)
 
 scour_files(FindUndocumentedClasses.new)
 scour_files(FindUnmatchedHeaderGuards.new)
