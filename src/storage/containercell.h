@@ -23,6 +23,7 @@ public:
     friend class ContainerCellTest;
 
     typedef CARGO Cargo;
+    typedef CARGO value_type;
     typedef KEY Key;
     typedef typename APITraits::SelectTopology<CARGO>::Value Topology;
     typedef Cargo *Iterator;
@@ -47,13 +48,6 @@ public:
         Key *end = ids + numElements;
         Key *pos = std::upper_bound(ids, end, id);
 
-        if (pos == end) {
-            checkSize();
-            cells[numElements] = cell;
-            ids[numElements++] = id;
-            return;
-        }
-
         int offset = pos - ids;
         if (offset > 0 && ids[offset - 1] == id) {
             cells[offset - 1] = cell;
@@ -61,6 +55,13 @@ public:
         }
 
         checkSize();
+
+        if (pos == end) {
+            cells[numElements] = cell;
+            ids[numElements++] = id;
+            return;
+        }
+
         for (int i = numElements; i > offset; --i) {
             cells[i] = cells[i - 1];
             ids[i] = ids[i - 1];

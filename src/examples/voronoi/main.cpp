@@ -185,13 +185,12 @@ int main(int argc, char **argv)
     SerialSimulator<ContainerCellType> sim(
         new VoronoiInitializer(dim, steps, numCells, quadrantSize, minDistance));
 
-    Selector<SimpleCell<FloatCoord> > selector(
-        &SimpleCell<FloatCoord>::temperature,
-        "SimpleCell_temperature");
 
     SiloWriter<ContainerCellType> *siloWriter =
         new SiloWriter<ContainerCellType>("voronoi", 1);
-    siloWriter->addSelectorForPointMesh(selector);
+    siloWriter->addSelectorForPointMesh(
+        &SimpleCell<FloatCoord>::temperature,
+        "SimpleCell_temperature");
     sim.addWriter(siloWriter);
 
     sim.run();

@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_IO_COLLECTINGWRITER_H
 #define LIBGEODECOMP_IO_COLLECTINGWRITER_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
+
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
 
@@ -119,5 +122,7 @@ private:
 };
 
 }
+
+#endif
 
 #endif

@@ -4,6 +4,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/tempfile.h>
+#include <libgeodecomp/storage/multicontainercell.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #include <Python.h>
@@ -27,19 +28,20 @@
 
 #endif
 
+#include <fstream>
 
 using namespace LibGeoDecomp;
 
 class DummyParticle
 {
 public:
-    explicit DummyParticle(const FloatCoord<2> pos) :
+    explicit DummyParticle(const FloatCoord<2>& pos = FloatCoord<2>(), double scale = 5) :
         pos(pos)
     {
-        coords << pos + FloatCoord<2>(-5, -5)
-               << pos + FloatCoord<2>( 5, -5)
-               << pos + FloatCoord<2>( 5,  5)
-               << pos + FloatCoord<2>(-5,  5);
+        coords << pos + FloatCoord<2>(-scale, -scale)
+               << pos + FloatCoord<2>( scale, -scale)
+               << pos + FloatCoord<2>( scale,  scale)
+               << pos + FloatCoord<2>(-scale,  scale);
     }
 
     FloatCoord<2> getPoint() const
@@ -56,12 +58,26 @@ public:
     std::vector<FloatCoord<2> > coords;
 };
 
+class DummyElement : public DummyParticle
+{
+public:
+    explicit DummyElement(const FloatCoord<2>& pos = FloatCoord<2>()) :
+        DummyParticle(pos, 8),
+        temp(pos[0] + pos[1])
+    {}
+
+    double temp;
+};
+
+typedef std::vector<DummyElement>  ElementVec;
 typedef std::vector<DummyParticle> ParticleVec;
 
 class CellWithPointMesh
 {
 public:
-    typedef DummyParticle Cargo;
+    typedef DummyParticle value_type;
+    typedef ParticleVec::iterator iterator;
+    typedef ParticleVec::const_iterator const_iterator;
 
     class API :
         public APITraits::HasCustomRegularGrid,
@@ -72,21 +88,31 @@ public:
         static FloatCoord<2> getRegularGridSpacing()
         {
             return FloatCoord<2>(20, 10);
-        };
+        }
 
         static FloatCoord<2> getRegularGridOrigin()
         {
             return FloatCoord<2>(0, 0);
-        };
+        }
     };
 
     explicit CellWithPointMesh(double dummyValue = 0) :
         dummyValue(dummyValue)
     {}
 
+    ParticleVec::iterator begin()
+    {
+        return particles.begin();
+    }
+
     ParticleVec::const_iterator begin() const
     {
         return particles.begin();
+    }
+
+    ParticleVec::iterator end()
+    {
+        return particles.end();
     }
 
     ParticleVec::const_iterator end() const
@@ -101,6 +127,51 @@ public:
 
     ParticleVec particles;
     double dummyValue;
+};
+
+class CellWithPointMeshAndUnstructuredGrid : public CellWithPointMesh
+{
+public:
+    ElementVec elements;
+};
+
+class SimpleCell
+{
+public:
+    SimpleCell() :
+        bar(++counter + 0.5)
+    {}
+
+    double bar;
+    static int counter;
+};
+
+int SimpleCell::counter = 0;
+
+DECLARE_MULTI_CONTAINER_CELL(MultiCellBase,                       \
+                             ((DummyParticle)(30)(particles))     \
+                             ((SimpleCell)(50)(cells)) )
+
+class MultiCellWithParticles : public MultiCellBase
+{
+public:
+    class API :
+        public APITraits::HasCustomRegularGrid,
+        public APITraits::HasPointMesh,
+        public APITraits::HasUnstructuredGrid
+    {
+    public:
+        static FloatCoord<2> getRegularGridSpacing()
+        {
+            return FloatCoord<2>(20, 10);
+        }
+
+        static FloatCoord<2> getRegularGridOrigin()
+        {
+            return FloatCoord<2>(0, 0);
+        }
+    };
+
 };
 
 class ParticleFilterBase : public Selector<DummyParticle>::Filter<FloatCoord<2>, double>
@@ -159,36 +230,40 @@ public:
 #endif
 
         prefix = TempFile::serial("silowriter_test") + "foo";
-        siloFile = prefix + ".00123.silo";
+        siloFile1 = prefix + ".00123.silo";
+        siloFile2 = prefix + ".00256.silo";
+        siloFile3 = prefix + ".00666.silo";
 
-        remove((prefix + "A.png").c_str());
-        remove((prefix + "B.png").c_str());
-        remove((prefix + "C.png").c_str());
-        remove((prefix + "D.png").c_str());
-        remove((prefix + "E.png").c_str());
+        removeFile(prefix + "A.png");
+        removeFile(prefix + "B.png");
+        removeFile(prefix + "C.png");
+        removeFile(prefix + "D.png");
+        removeFile(prefix + "E.png");
 
-        remove((prefix + "A0000.png").c_str());
-        remove((prefix + "B0000.png").c_str());
-        remove((prefix + "C0000.png").c_str());
-        remove((prefix + "D0000.png").c_str());
-        remove((prefix + "E0000.png").c_str());
+        removeFile(prefix + "A0000.png");
+        removeFile(prefix + "B0000.png");
+        removeFile(prefix + "C0000.png");
+        removeFile(prefix + "D0000.png");
+        removeFile(prefix + "E0000.png");
     }
 
     void tearDown()
     {
-        remove((prefix + "A.png").c_str());
-        remove((prefix + "B.png").c_str());
-        remove((prefix + "C.png").c_str());
-        remove((prefix + "D.png").c_str());
-        remove((prefix + "E.png").c_str());
+        removeFile(prefix + "A.png");
+        removeFile(prefix + "B.png");
+        removeFile(prefix + "C.png");
+        removeFile(prefix + "D.png");
+        removeFile(prefix + "E.png");
 
-        remove((prefix + "A0000.png").c_str());
-        remove((prefix + "B0000.png").c_str());
-        remove((prefix + "C0000.png").c_str());
-        remove((prefix + "D0000.png").c_str());
-        remove((prefix + "E0000.png").c_str());
+        removeFile(prefix + "A0000.png");
+        removeFile(prefix + "B0000.png");
+        removeFile(prefix + "C0000.png");
+        removeFile(prefix + "D0000.png");
+        removeFile(prefix + "E0000.png");
 
-        remove(siloFile.c_str());
+        removeFile(siloFile1);
+        removeFile(siloFile2);
+        removeFile(siloFile3);
 
 #ifdef LIBGEODECOMP_WITH_QT
         app.reset();
@@ -223,15 +298,13 @@ public:
 
         // dump silo file
         SiloWriter<CellWithPointMesh> writer(prefix, 1);
-        writer.addSelector(Selector<CellWithPointMesh>(&CellWithPointMesh::dummyValue, "dummyValue"));
+        writer.addSelector(&CellWithPointMesh::dummyValue, "dummyValue");
 
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
         boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
 
-        writer.addSelectorForPointMesh(
-            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
-        writer.addSelectorForUnstructuredGrid(
-            Selector<DummyParticle>(&DummyParticle::pos, "posY", filterY));
+        writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writer.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
         writer.stepFinished(grid, 123, WRITER_INITIALIZED);
 
         // plot
@@ -239,7 +312,7 @@ public:
         PyRun_SimpleString(visitScript.c_str());
         Py_Finalize();
 
-        remove(siloFile.c_str());
+        remove(siloFile1.c_str());
     }
 
     Histogram loadImage(const std::string suffix1, const std::string suffix2)
@@ -294,7 +367,7 @@ public:
             << "import os\n"
             << "import visit\n"
             << "\n"
-            << "simfile = \"" << siloFile << "\"\n"
+            << "simfile = \"" << siloFile1 << "\"\n"
             << "\n"
             << "visit.LaunchNowin ()\n"
             << "visit.OpenDatabase(simfile)\n"
@@ -368,10 +441,225 @@ public:
         TS_ASSERT(histogram4[red.rgb()  ] > 20);
 
         Histogram histogram5 = loadImage("E", "0000");
+        // we should at least get a little red square...
+        TS_ASSERT(histogram5[red.rgb()  ] > 20);
+        // ...and much less white (because of even more colored squares).
+        TS_ASSERT(histogram5[white.rgb()] < (histogram2[white.rgb()] - 200));
 
-        TS_ASSERT(histogram4[red.rgb()  ] > 20);
-        TS_ASSERT(histogram4[white.rgb()] < histogram1[white.rgb()]);
+#endif
+#endif
+#endif
+    }
 
+    void testMemberExtraction1()
+    {
+#ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_VISIT
+#ifdef LIBGEODECOMP_WITH_QT
+
+        // init grid
+        Coord<2> dim(10, 5);
+        CoordBox<2> box(Coord<2>(), dim);
+        FloatCoord<2> quadrantDim;
+        FloatCoord<2> origin;
+        APITraits::SelectRegularGrid<CellWithPointMesh>::value(&quadrantDim, &origin);
+
+        Grid<CellWithPointMesh> gridA(dim);
+        Grid<MultiCellWithParticles> gridB(dim);
+        int counter = 0;
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            gridA[*i] = CellWithPointMesh(counter++);
+            FloatCoord<2> center =
+                FloatCoord<2>(*i).scale(quadrantDim) +
+                quadrantDim * 0.5;
+            gridA[*i].particles << DummyParticle(center);
+
+            // copy over freshly created particles, so we can be sure
+            // each coordinate yields the same particles in both
+            // grids:
+            ParticleVec particles = gridA[*i].particles;
+            for (size_t c = 0; c < particles.size(); ++c) {
+                gridB[*i].particles.insert(c, particles[c]);
+            }
+        }
+
+        // dump silo file
+        SiloWriter<CellWithPointMesh> writerA(prefix, 1);
+
+        SiloWriter<MultiCellWithParticles> writerB(
+            &MultiCellWithParticles::particles,
+            prefix,
+            1);
+
+        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
+        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
+
+        writerA.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writerA.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
+
+        writerB.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writerB.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
+
+        writerA.stepFinished(gridA, 123, WRITER_INITIALIZED);
+
+        std::ifstream infile(siloFile1.c_str());
+        if (!infile) {
+            throw std::logic_error("could not open silo archive");
+        }
+
+        std::size_t bufferSize = 1024 * 1024;
+        std::vector<char> bufferA(bufferSize);
+        std::vector<char> bufferB(bufferSize);
+        infile.read(&bufferA[0], bufferSize);
+        TS_ASSERT(!infile.good());
+        std::size_t sizeA = infile.gcount();
+
+        infile.close();
+        writerB.stepFinished(gridB, 666, WRITER_INITIALIZED);
+        infile.open(siloFile3.c_str());
+        infile.read(&bufferB[0], bufferSize);
+        TS_ASSERT(!infile.good());
+        std::size_t sizeB = infile.gcount();
+
+        TS_ASSERT_EQUALS(sizeA, sizeB);
+        for (std::size_t i = 0; i < sizeA; ++i) {
+            int delta = 0;
+            if (i == 187) {
+                // Byte 187 in the header is part of a version counter
+                delta = 1;
+            }
+
+            TS_ASSERT_EQUALS(bufferA[i] + delta, bufferB[i]);
+        }
+#endif
+#endif
+#endif
+    }
+
+    void testMemberExtraction2()
+    {
+#ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_VISIT
+#ifdef LIBGEODECOMP_WITH_QT
+
+        // init grid
+        Coord<2> dim(2, 1);
+        CoordBox<2> box(Coord<2>(), dim);
+        FloatCoord<2> quadrantDim;
+        FloatCoord<2> origin;
+        APITraits::SelectRegularGrid<CellWithPointMeshAndUnstructuredGrid>::value(&quadrantDim, &origin);
+
+        Grid<CellWithPointMeshAndUnstructuredGrid> grid(dim);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            CellWithPointMeshAndUnstructuredGrid cell;
+
+            FloatCoord<2> center1 =
+                FloatCoord<2>(*i).scale(quadrantDim) +
+                quadrantDim * 0.5;
+
+            FloatCoord<2> center2 = center1 + quadrantDim * 0.5;
+
+            cell.particles << DummyParticle(center1);
+            cell.elements << DummyElement(center1)
+                          << DummyElement(center2);
+
+            grid[*i] = cell;
+        }
+
+        // dump to disk:
+        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
+
+        SiloWriter<CellWithPointMeshAndUnstructuredGrid> writer(
+            &CellWithPointMeshAndUnstructuredGrid::particles,
+            &CellWithPointMeshAndUnstructuredGrid::elements,
+            prefix,
+            1);
+        writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
+        writer.addSelectorForUnstructuredGrid(&DummyElement::temp, "temp");
+        writer.stepFinished(grid, 256, WRITER_INITIALIZED);
+
+        // render images:
+        QColor white(255, 255, 255);
+        QColor black(0, 0, 0);
+        QColor red(  255, 0, 0);
+        QColor green(0, 255, 0);
+        QColor blue( 0, 0, 255);
+
+        std::stringstream buf;
+        buf << "import re\n"
+            << "import os\n"
+            << "import visit\n"
+            << "\n"
+            << "simfile = \"" << siloFile2 << "\"\n"
+            << "\n"
+            << "visit.LaunchNowin ()\n"
+            << "visit.OpenDatabase(simfile)\n"
+            << "attributes = visit.SaveWindowAttributes()\n"
+            << "attributes.format = attributes.PNG\n"
+            << "attributes.width = 1024\n"
+            << "attributes.height = 1024\n"
+            << "attributes.outputToCurrentDirectory = 1\n";
+        // first image
+        buf << "attributes.fileName = \"" << prefix << "A\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        // second image
+        buf << "attributes.fileName = \"" << prefix << "B\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"posX\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        // third image
+        buf << "attributes.fileName = \"" << prefix << "C\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"posX\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"temp\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        // fourth image
+        buf << "attributes.fileName = \"" << prefix << "D\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"temp\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        std::string visitScript = buf.str();
+
+        // plot
+        Py_Initialize();
+        PyRun_SimpleString(visitScript.c_str());
+        Py_Finalize();
+
+        remove(siloFile2.c_str());
+
+        Histogram histogram1 = loadImage("A", "0000");
+        TS_ASSERT(histogram1[white.rgb()] > 900000);
+
+        Histogram histogram2 = loadImage("B", "0000");
+        TS_ASSERT(histogram1[white.rgb()] > (histogram2[white.rgb()] + 10000));
+        TS_ASSERT(histogram2[red.rgb()] > 10);
+        TS_ASSERT(histogram2[blue.rgb()] > 10);
+
+        Histogram histogram3 = loadImage("C", "0000");
+        // adds four giant squares, one of which is red:
+        TS_ASSERT(histogram3[red.rgb()  ] > (histogram2[red.rgb()  ] + 50000));
+        TS_ASSERT(histogram3[white.rgb()] < (histogram2[white.rgb()] - 50000 * 4));
+
+        Histogram histogram4 = loadImage("D", "0000");
+        // should only have added one pallette and one dot
+        TS_ASSERT(histogram3[red.rgb()] > (histogram4[red.rgb()] + 30));
+        // adds one giant square
+        TS_ASSERT((histogram2[red.rgb()] + 50000) < histogram4[red.rgb()]);
 #endif
 #endif
 #endif
@@ -382,7 +670,14 @@ private:
     boost::shared_ptr<QApplication> app;
 #endif
     std::string prefix;
-    std::string siloFile;
+    std::string siloFile1;
+    std::string siloFile2;
+    std::string siloFile3;
+
+    void removeFile(std::string name)
+    {
+        remove(name.c_str());
+    }
 };
 
 }
