@@ -16,7 +16,7 @@ namespace LibGeoDecomp {
 namespace SimulationParametersHelpers {
 
 /**
- * Virtual interface which allows the implementation of auto-tuniers
+ * Virtual interface which allows the implementation of auto-tuners
  * and parameter optimizers without them having to unterstand the
  * actual meaning of the parameters. For that all parameters are
  * mapped to an interval [min, max[ in R.
@@ -96,7 +96,6 @@ public:
     {
         throw std::logic_error("illegal cast to double");
     }
-
 
     virtual void operator=(const std::string& other)
     {
