@@ -69,6 +69,8 @@
  * again a sequence of member type, number of elements, and name.
  *
  * See the unit tests for examples of how to use this class.
+ *
+ * fixme: make sure this also works if used outside of namespace LibGeoDecomp
  */
 #define DECLARE_MULTI_CONTAINER_CELL(NAME, MEMBERS)                     \
     class NAME                                                          \
