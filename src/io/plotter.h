@@ -1,26 +1,30 @@
 #ifndef LIBGEODECOMP_IO_PLOTTER_H
 #define LIBGEODECOMP_IO_PLOTTER_H
 
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/image.h>
+
 #include <algorithm>
 #ifdef __CODEGEARC__
 #include <math.h>
 #else
 #include <cmath>
 #endif
-#include <vector>
 
-#include <libgeodecomp/io/writer.h>
-#include <libgeodecomp/storage/grid.h>
-#include <libgeodecomp/storage/image.h>
+#include <vector>
 
 namespace LibGeoDecomp {
 
-template<typename CELL, class CELL_PLOTTER>
+template<typename CELL, class CELL_PLOTTER = SimpleCellPlotter<CELL> >
 class Plotter
 {
 public:
-    explicit Plotter(Coord<2> cellDim = Coord<2>(32, 32)) :
-	cellDim(cellDim)
+    explicit Plotter(const Coord<2>& cellDim = Coord<2>(32, 32),
+                     const CELL_PLOTTER& cellPlotter = CELL_PLOTTER()) :
+	cellDim(cellDim),
+        cellPlotter(cellPlotter)
     {}
 
     template<typename PAINTER>
@@ -45,17 +49,18 @@ public:
     {
         int sx = viewport.origin.x() / cellDim.x();
         int sy = viewport.origin.y() / cellDim.y();
-        int ex = ceil(((double)viewport.origin.x() + viewport.dimensions.x()) / cellDim.x());
-        int ey = ceil(((double)viewport.origin.y() + viewport.dimensions.y()) / cellDim.y());
+        int ex = ceil((double(viewport.origin.x()) + viewport.dimensions.x()) / cellDim.x());
+        int ey = ceil((double(viewport.origin.y()) + viewport.dimensions.y()) / cellDim.y());
         ex = std::min(ex, grid.dimensions().x());
         ey = std::min(ey, grid.dimensions().y());
 
         for (int y = sy; y < ey; ++y) {
             for (int x = sx; x < ex; ++x) {
                 Coord<2> relativeUpperLeft =
-                    Coord<2>(x * cellDim.x(), y * cellDim.y()) - viewport.origin;
+                    Coord<2>(x * cellDim.x(),
+                             y * cellDim.y()) - viewport.origin;
                 painter.moveTo(relativeUpperLeft);
-                CELL_PLOTTER()(
+                cellPlotter(
                     grid.get(Coord<2>(x, y)),
 		    painter,
                     cellDim);
@@ -77,6 +82,7 @@ public:
 
 private:
     Coord<2> cellDim;
+    CELL_PLOTTER cellPlotter;
 };
 
 }

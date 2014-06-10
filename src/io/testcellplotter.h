@@ -13,7 +13,7 @@ public:
     void operator()(
         const TestCell<2>& cell,
         PAINTER painter,
-        const Coord<2>& cellDimensions)
+        const Coord<2>& cellDimensions) const
     {
         Color color((int)cell.testValue, 47, 11);
         painter.fillRect(0, 0, cellDimensions.x(), cellDimensions.y(), color);

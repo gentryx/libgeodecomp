@@ -4,6 +4,11 @@
 #ifndef LIBGEODECOMP_IO_QTWIDGETWRITER_H
 #define LIBGEODECOMP_IO_QTWIDGETWRITER_H
 
+#include <libgeodecomp/io/plotter.h>
+#include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/palette.h>
+#include <libgeodecomp/misc/quickpalette.h>
+
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
 #pragma warning push
@@ -17,9 +22,6 @@
 #ifdef __ICC
 #pragma warning pop
 #endif
-
-#include <libgeodecomp/io/plotter.h>
-#include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
 
@@ -106,15 +108,33 @@ private:
  * This Writer displays 2D data via a Qt GUI element. A plotter can be
  * used to customize the rendering.
  */
-template<typename CELL_TYPE, typename CELL_PLOTTER>
+template<typename CELL_TYPE, typename CELL_PLOTTER = SimpleCellPlotter<CELL_TYPE> >
 class QtWidgetWriter : public Writer<CELL_TYPE>
 {
 public:
     friend class QtWidgetWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    explicit QtWidgetWriter(const Coord<2>& cellDimensions = Coord<2>(8, 8), unsigned period = 1) :
+    template<typename MEMBER>
+    QtWidgetWriter(
+        MEMBER CELL_TYPE:: *member,
+        const Palette<MEMBER>& palette,
+        const Coord<2>& cellDimensions = Coord<2>(8, 8),
+        unsigned period = 1) :
         Writer<CELL_TYPE>("", period),
+        plotter(cellDimensions, CELL_PLOTTER(member, palette)),
+        cellDimensions(cellDimensions)
+    {}
+
+    template<typename MEMBER>
+    QtWidgetWriter(
+        MEMBER CELL_TYPE:: *member,
+        MEMBER minValue,
+        MEMBER maxValue,
+        const Coord<2>& cellDimensions = Coord<2>(8, 8),
+        unsigned period = 1) :
+        Writer<CELL_TYPE>("", period),
+        plotter(cellDimensions, CELL_PLOTTER(member, QuickPalette<MEMBER>(minValue, maxValue))),
         cellDimensions(cellDimensions)
     {}
 
@@ -130,7 +150,6 @@ public:
 
         {
             QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
-            Plotter<CELL_TYPE, CELL_PLOTTER> plotter(cellDimensions);
             CoordBox<2> viewport(Coord<2>(0, 0), myWidget.getImage()->size());
             plotter.plotGridInViewport(grid, painter, viewport);
         }
@@ -145,6 +164,7 @@ public:
     }
 
 private:
+    Plotter<CELL_TYPE, CELL_PLOTTER> plotter;
     Coord<2> cellDimensions;
     // we can't use multiple inheritance as Q_OBJECT doesn't support template classes.
     QtWidgetWriterHelpers::Widget myWidget;

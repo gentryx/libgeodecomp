@@ -243,7 +243,7 @@ void runSimulation()
     CellInitializer *init = new CellInitializer();
     SerialSimulator<Cell> sim(init);
     sim.addWriter(
-        new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+        new PPMWriter<Cell>(
             "./ants",
             outputFrequency,
             8,
