@@ -35,13 +35,13 @@ using namespace LibGeoDecomp;
 class DummyParticle
 {
 public:
-    explicit DummyParticle(const FloatCoord<2>& pos = FloatCoord<2>()) :
+    explicit DummyParticle(const FloatCoord<2>& pos = FloatCoord<2>(), double scale = 5) :
         pos(pos)
     {
-        coords << pos + FloatCoord<2>(-5, -5)
-               << pos + FloatCoord<2>( 5, -5)
-               << pos + FloatCoord<2>( 5,  5)
-               << pos + FloatCoord<2>(-5,  5);
+        coords << pos + FloatCoord<2>(-scale, -scale)
+               << pos + FloatCoord<2>( scale, -scale)
+               << pos + FloatCoord<2>( scale,  scale)
+               << pos + FloatCoord<2>(-scale,  scale);
     }
 
     FloatCoord<2> getPoint() const
@@ -58,6 +58,18 @@ public:
     std::vector<FloatCoord<2> > coords;
 };
 
+class DummyElement : public DummyParticle
+{
+public:
+    explicit DummyElement(const FloatCoord<2>& pos = FloatCoord<2>()) :
+        DummyParticle(pos, 8),
+        temp(pos[0] + pos[1])
+    {}
+
+    double temp;
+};
+
+typedef std::vector<DummyElement>  ElementVec;
 typedef std::vector<DummyParticle> ParticleVec;
 
 class CellWithPointMesh
@@ -115,6 +127,12 @@ public:
 
     ParticleVec particles;
     double dummyValue;
+};
+
+class CellWithPointMeshAndUnstructuredGrid : public CellWithPointMesh
+{
+public:
+    ElementVec elements;
 };
 
 class SimpleCell
@@ -213,7 +231,8 @@ public:
 
         prefix = TempFile::serial("silowriter_test") + "foo";
         siloFile1 = prefix + ".00123.silo";
-        siloFile2 = prefix + ".00666.silo";
+        siloFile2 = prefix + ".00256.silo";
+        siloFile3 = prefix + ".00666.silo";
 
         removeFile(prefix + "A.png");
         removeFile(prefix + "B.png");
@@ -244,6 +263,7 @@ public:
 
         removeFile(siloFile1);
         removeFile(siloFile2);
+        removeFile(siloFile3);
 
 #ifdef LIBGEODECOMP_WITH_QT
         app.reset();
@@ -433,7 +453,7 @@ public:
 #endif
     }
 
-    void testMemberExtraction()
+    void testMemberExtraction1()
     {
 #ifdef LIBGEODECOMP_WITH_SILO
 #ifdef LIBGEODECOMP_WITH_VISIT
@@ -503,7 +523,7 @@ public:
 
         infile.close();
         writerB.stepFinished(gridB, 666, WRITER_INITIALIZED);
-        infile.open(siloFile2.c_str());
+        infile.open(siloFile3.c_str());
         infile.read(&bufferB[0], bufferSize);
         TS_ASSERT(!infile.good());
         std::size_t sizeB = infile.gcount();
@@ -523,6 +543,136 @@ public:
 #endif
     }
 
+    void testMemberExtraction2()
+    {
+#ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_VISIT
+#ifdef LIBGEODECOMP_WITH_QT
+
+        // init grid
+        Coord<2> dim(2, 1);
+        CoordBox<2> box(Coord<2>(), dim);
+        FloatCoord<2> quadrantDim;
+        FloatCoord<2> origin;
+        APITraits::SelectRegularGrid<CellWithPointMeshAndUnstructuredGrid>::value(&quadrantDim, &origin);
+
+        Grid<CellWithPointMeshAndUnstructuredGrid> grid(dim);
+
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            CellWithPointMeshAndUnstructuredGrid cell;
+
+            FloatCoord<2> center1 =
+                FloatCoord<2>(*i).scale(quadrantDim) +
+                quadrantDim * 0.5;
+
+            FloatCoord<2> center2 = center1 + quadrantDim * 0.5;
+
+            cell.particles << DummyParticle(center1);
+            cell.elements << DummyElement(center1)
+                          << DummyElement(center2);
+
+            grid[*i] = cell;
+        }
+
+        // dump to disk:
+        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
+
+        SiloWriter<CellWithPointMeshAndUnstructuredGrid> writer(
+            &CellWithPointMeshAndUnstructuredGrid::particles,
+            &CellWithPointMeshAndUnstructuredGrid::elements,
+            prefix,
+            1);
+        writer.addSelectorForPointMesh(
+            Selector<DummyParticle>(&DummyParticle::pos, "posX", filterX));
+        writer.addSelectorForUnstructuredGrid(
+            Selector<DummyElement>(&DummyElement::temp, "temp"));
+        writer.stepFinished(grid, 256, WRITER_INITIALIZED);
+
+        // render images:
+        QColor white(255, 255, 255);
+        QColor black(0, 0, 0);
+        QColor red(  255, 0, 0);
+        QColor green(0, 255, 0);
+        QColor blue( 0, 0, 255);
+
+        std::stringstream buf;
+        buf << "import re\n"
+            << "import os\n"
+            << "import visit\n"
+            << "\n"
+            << "simfile = \"" << siloFile2 << "\"\n"
+            << "\n"
+            << "visit.LaunchNowin ()\n"
+            << "visit.OpenDatabase(simfile)\n"
+            << "attributes = visit.SaveWindowAttributes()\n"
+            << "attributes.format = attributes.PNG\n"
+            << "attributes.width = 1024\n"
+            << "attributes.height = 1024\n"
+            << "attributes.outputToCurrentDirectory = 1\n";
+        // first image
+        buf << "attributes.fileName = \"" << prefix << "A\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        // second image
+        buf << "attributes.fileName = \"" << prefix << "B\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"posX\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        // third image
+        buf << "attributes.fileName = \"" << prefix << "C\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"posX\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"temp\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        // fourth image
+        buf << "attributes.fileName = \"" << prefix << "D\"\n"
+            << "visit.SetSaveWindowAttributes(attributes)\n"
+            << "visit.AddPlot(\"Mesh\", \"regular_grid\")\n"
+            << "visit.AddPlot(\"Pseudocolor\", \"temp\")\n"
+            << "visit.DrawPlots()\n"
+            << "visit.SaveWindow()\n"
+            << "visit.DeleteAllPlots()\n";
+        std::string visitScript = buf.str();
+
+        // plot
+        Py_Initialize();
+        PyRun_SimpleString(visitScript.c_str());
+        Py_Finalize();
+
+        remove(siloFile2.c_str());
+
+        Histogram histogram1 = loadImage("A", "0000");
+        TS_ASSERT(histogram1[white.rgb()] > 900000);
+
+        Histogram histogram2 = loadImage("B", "0000");
+        TS_ASSERT(histogram1[white.rgb()] > (histogram2[white.rgb()] + 10000));
+        TS_ASSERT(histogram2[red.rgb()] > 10);
+        TS_ASSERT(histogram2[blue.rgb()] > 10);
+
+        Histogram histogram3 = loadImage("C", "0000");
+        // adds four giant squares, one of which is red:
+        TS_ASSERT(histogram3[red.rgb()  ] > (histogram2[red.rgb()  ] + 50000));
+        TS_ASSERT(histogram3[white.rgb()] < (histogram2[white.rgb()] - 50000 * 4));
+
+        Histogram histogram4 = loadImage("D", "0000");
+        // should only have added one pallette and one dot
+        TS_ASSERT(histogram3[red.rgb()] > (histogram4[red.rgb()] + 30));
+        // adds one giant square
+        TS_ASSERT((histogram2[red.rgb()] + 50000) < histogram4[red.rgb()]);
+#endif
+#endif
+#endif
+    }
+
 private:
 #ifdef LIBGEODECOMP_WITH_QT
     boost::shared_ptr<QApplication> app;
@@ -530,6 +680,7 @@ private:
     std::string prefix;
     std::string siloFile1;
     std::string siloFile2;
+    std::string siloFile3;
 
     void removeFile(std::string name)
     {

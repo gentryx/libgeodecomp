@@ -228,9 +228,9 @@ public:
      * Unlike the previous constructor, this c-tor assumes that a
      * member variable of your class holds the itms for output.
      */
-    template<typename CONTAINER, typename CELL_TYPE>
+    template<typename CONTAINER, typename CARGO>
     SiloWriter(
-        CONTAINER CELL_TYPE:: *memberPointer,
+        CONTAINER CARGO:: *memberPointer,
         const std::string& prefix,
         const unsigned period,
         const std::string& regularGridLabel = "regular_grid",
@@ -256,8 +256,43 @@ public:
     {}
 
     /**
+     * Same as above, but with support for two different member
+     * pointers -- one for the point mesh, one for the unstructured
+     * grid.
+     */
+    template<typename CONTAINER1, typename CONTAINER2, typename CARGO1, typename CARGO2>
+    SiloWriter(
+        CONTAINER1 CARGO1:: *memberPointerForPointMesh,
+        CONTAINER2 CARGO2:: *memberPointerForUnstructuredGrid,
+        const std::string& prefix,
+        const unsigned period,
+        const std::string& regularGridLabel = "regular_grid",
+        const std::string& unstructuredMeshLabel = "unstructured_mesh",
+        const std::string& pointMeshLabel = "point_mesh",
+        int databaseType = DB_PDB) :
+        Writer<Cell>(prefix, period),
+        databaseType(databaseType),
+        coords(DIM),
+        pointMeshSelectors(
+            new SiloWriterHelpers::SelectorContainerImplementation<SiloWriter<
+            CELL>,
+            CollectionInterface::Delegate<CELL, CONTAINER1> >(
+                CollectionInterface::Delegate<CELL, CONTAINER1>(memberPointerForPointMesh))),
+        unstructuredGridSelectors(
+            new SiloWriterHelpers::SelectorContainerImplementation<
+            SiloWriter<CELL>,
+            CollectionInterface::Delegate<CELL, CONTAINER2> >(
+                CollectionInterface::Delegate<CELL, CONTAINER2>(memberPointerForUnstructuredGrid))),
+        regularGridLabel(regularGridLabel),
+        unstructuredMeshLabel(unstructuredMeshLabel),
+        pointMeshLabel(pointMeshLabel)
+    {}
+
+    /**
      * Adds another variable of the cargo data (e.g. the particles) to
      * this writer's output.
+     *
+     * fixme: can't we spare the user the instantiation of the selector? we could pass this function's arguments to a selector's c-tor... dito for addSelector() and addSelectorForUnstructuredGrid().
      */
     template<typename CARGO>
     void addSelectorForPointMesh(const Selector<CARGO>& selector)
@@ -301,7 +336,7 @@ public:
         }
 
         unstructuredGridSelectors->callbackHandleVariableForUnstructuredGrid(this, dbfile, grid);
-        pointMeshSelectors->callbackHandleVariableForUnstructuredGrid(this, dbfile, grid);
+        pointMeshSelectors->callbackHandleVariableForPointMesh(this, dbfile, grid);
 
         DBClose(dbfile);
     }
