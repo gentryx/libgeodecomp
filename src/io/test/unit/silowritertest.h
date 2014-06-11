@@ -479,7 +479,7 @@ public:
             // each coordinate yields the same particles in both
             // grids:
             ParticleVec particles = gridA[*i].particles;
-            for (size_t c = 0; c < particles.size(); ++c) {
+            for (std::size_t c = 0; c < particles.size(); ++c) {
                 gridB[*i].particles.insert(c, particles[c]);
             }
         }
