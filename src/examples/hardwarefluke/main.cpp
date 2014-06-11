@@ -13,7 +13,7 @@ public:
         public APITraits::HasCubeTopology<2>
     {};
 
-    friend class BuggyCellToColor;
+    friend void runSimulation();
 
     explicit BuggyCell(const char val = 0) :
         val(val)
@@ -87,11 +87,11 @@ private:
 class BuggyCellToColor
 {
 public:
-    Color operator()(const BuggyCell& cell)
+    Color operator[](char val) const
     {
-        char r = ((cell.val >> 5) & 7) * 255 / 7;
-        char g = ((cell.val >> 2) & 7) * 255 / 7;
-        char b = ((cell.val >> 0) & 3) * 255 / 3;
+        char r = ((val >> 5) & 7) * 255 / 7;
+        char g = ((val >> 2) & 7) * 255 / 7;
+        char b = ((val >> 0) & 3) * 255 / 3;
         return Color(r, g, b);
     }
 };
@@ -103,11 +103,13 @@ void runSimulation()
     SerialSimulator<BuggyCell> sim(init);
 
     sim.addWriter(
-        new PPMWriter<BuggyCell, SimpleCellPlotter<BuggyCell, BuggyCellToColor> >(
+        new PPMWriter<BuggyCell>(
+            &BuggyCell::val,
+            BuggyCellToColor(),
             "./smiley",
             outputFrequency,
-            8,
-            8));
+            Coord<2>(8, 8)));
+
     sim.addWriter(
         new TracingWriter<BuggyCell>(
             outputFrequency,

@@ -18,7 +18,7 @@ Coord<2> NEIGHBORS[] = {Coord<2>(-1, -1),
 class Cell
 {
 public:
-    friend class CellToColor;
+    friend void runSimulation();
 
     class API :
         public APITraits::HasNanoSteps<3>
@@ -146,9 +146,9 @@ const double Cell::PI = 3.14159265;
 class CellToColor
 {
 public:
-    Color operator()(const Cell& cell)
+    Color operator[](const Cell::State& state) const
     {
-        switch (cell.state) {
+        switch (state) {
         case Cell::EMPTY:
             return Color::BLACK;
         case Cell::FOOD:
@@ -244,10 +244,11 @@ void runSimulation()
     SerialSimulator<Cell> sim(init);
     sim.addWriter(
         new PPMWriter<Cell>(
+            &Cell::state,
+            CellToColor(),
             "./ants",
             outputFrequency,
-            8,
-            8));
+            Coord<2>(8, 8)));
     sim.addWriter(
         new AntTracer(
             outputFrequency,

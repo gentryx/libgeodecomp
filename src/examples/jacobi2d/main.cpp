@@ -57,41 +57,20 @@ public:
     }
 };
 
-class CellToColor {
-public:
-    Color operator()(const Cell& cell)
-    {
-        if (cell.temp < 0) {
-            return Color(0, 0, 0);
-        }
-        if (cell.temp < 0.25) {
-            return Color(0, (cell.temp - 0.0) * 1020, 255);
-        }
-        if (cell.temp < 0.50) {
-            return Color(0, 255, 255 - (cell.temp - 0.25) * 1020);
-        }
-        if (cell.temp < 0.75) {
-            return Color((cell.temp - 0.5) * 1020, 255, 0);
-        }
-        if (cell.temp < 1.00) {
-            return Color(255, 255 - (cell.temp - 0.75) * 1020, 0);
-        }
-        return Color(255, 255, 255);
-    }
-};
-
 void runSimulation()
 {
-    SerialSimulator<Cell>
-        sim(new CellInitializer());
-
+    SerialSimulator<Cell> sim(new CellInitializer());
     int outputFrequency = 1;
+
     sim.addWriter(
-        new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
+        new PPMWriter<Cell>(
+            &Cell::temp,
+            0.0,
+            1.0,
             "jacobi",
             outputFrequency,
-            1,
-            1));
+            Coord<2>(1, 1)));
+
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, 100));
 
     sim.run();
