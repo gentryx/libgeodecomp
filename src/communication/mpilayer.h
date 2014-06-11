@@ -54,6 +54,15 @@ public:
         tag(tag)
     {}
 
+    explicit MPILayer(const MPILayer& other)
+    {
+        if (other.requests.size() > 0) {
+            throw std::logic_error("Can't clone MPILayer with pending MPI requests, as their duplication (and the subsequent doubled MPI_Wait())  would most likely break MPI");
+        }
+
+        *this = other;
+    }
+
     virtual ~MPILayer()
     {
         waitAll();
@@ -509,14 +518,6 @@ public:
             MPI_Bcast(&(buffer->front()), size, datatype, root, comm);
         }
     }
-
-protected:
-    // Remove default copy c-tor as the MPILayer cannot be safely
-    // copied. This is because it stores MPI requests and waits for
-    // those in its d-tor. If two instances held these handles then
-    // both could/would call MPI_Wait for these and break MPI while
-    // doing so.
-    MPILayer(const MPILayer&);
 
 private:
     MPI_Comm comm;
