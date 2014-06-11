@@ -6,6 +6,7 @@
 
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/palette.h>
 #include <libgeodecomp/misc/quickpalette.h>
 
@@ -109,7 +110,7 @@ private:
  * used to customize the rendering.
  */
 template<typename CELL_TYPE, typename CELL_PLOTTER = SimpleCellPlotter<CELL_TYPE> >
-class QtWidgetWriter : public Writer<CELL_TYPE>
+class QtWidgetWriter : public Clonable<Writer<CELL_TYPE>, QtWidgetWriter<CELL_TYPE, CELL_PLOTTER> >
 {
 public:
     friend class QtWidgetWriterTest;
@@ -130,9 +131,10 @@ public:
         MEMBER maxValue,
         const Coord<2>& cellDimensions = Coord<2>(8, 8),
         unsigned period = 1) :
-        Writer<CELL_TYPE>("", period),
+        Clonable<Writer<CELL_TYPE>, QtWidgetWriter<CELL_TYPE, CELL_PLOTTER> >("", period),
         plotter(cellDimensions, CELL_PLOTTER(member, QuickPalette<MEMBER>(minValue, maxValue))),
-        cellDimensions(cellDimensions)
+        cellDimensions(cellDimensions),
+        myWidget(new QtWidgetWriterHelpers::Widget)
     {}
 
     /**
@@ -146,15 +148,11 @@ public:
         const PALETTE& palette,
         const Coord<2>& cellDimensions = Coord<2>(8, 8),
         unsigned period = 1) :
-        Writer<CELL_TYPE>("", period),
+        Clonable<Writer<CELL_TYPE>, QtWidgetWriter<CELL_TYPE, CELL_PLOTTER> >("", period),
         plotter(cellDimensions, CELL_PLOTTER(member, palette)),
-        cellDimensions(cellDimensions)
+        cellDimensions(cellDimensions),
+        myWidget(new QtWidgetWriterHelpers::Widget)
     {}
-
-    Writer<CELL_TYPE> *clone() const
-    {
-        throw std::logic_error("can't clone QWidget, and thus not QtWidgetWriter");
-    }
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
@@ -162,30 +160,30 @@ public:
         Coord<2> imageSize(
             gridDim.x() * cellDimensions.x(),
             gridDim.y() * cellDimensions.y());
-        myWidget.resizeImage(imageSize);
+        myWidget->resizeImage(imageSize);
 
-        QPainter qPainter(myWidget.getImage());
+        QPainter qPainter(myWidget->getImage());
 
         {
             QtWidgetWriterHelpers::PainterWrapper painter(&qPainter);
-            CoordBox<2> viewport(Coord<2>(0, 0), myWidget.getImage()->size());
+            CoordBox<2> viewport(Coord<2>(0, 0), myWidget->getImage()->size());
             plotter.plotGridInViewport(grid, painter, viewport);
         }
 
-        myWidget.swapImages();
-        myWidget.update();
+        myWidget->swapImages();
+        myWidget->update();
     }
 
-    QtWidgetWriterHelpers::Widget *widget()
+    boost::shared_ptr<QtWidgetWriterHelpers::Widget> widget()
     {
-	return &myWidget;
+	return myWidget;
     }
 
 private:
     Plotter<CELL_TYPE, CELL_PLOTTER> plotter;
     Coord<2> cellDimensions;
     // we can't use multiple inheritance as Q_OBJECT doesn't support template classes.
-    QtWidgetWriterHelpers::Widget myWidget;
+    boost::shared_ptr<QtWidgetWriterHelpers::Widget> myWidget;
 };
 
 }

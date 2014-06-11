@@ -74,7 +74,7 @@ public:
         TS_ASSERT_EQUALS(palette[1.0], Color::YELLOW);
 
         QtWidgetWriter<MyQtTestCell> writer(&MyQtTestCell::temp, palette, cellDim);
-        QWidget *widget = writer.widget();
+        boost::shared_ptr<QWidget> widget = writer.widget();
         widget->resize(1200, 900);
 
         Grid<MyQtTestCell> grid(Coord<2>(100, 50));
@@ -126,7 +126,7 @@ public:
         Coord<2> cellDim(10, 20);
 
         QtWidgetWriter<MyQtTestCell> writer(&MyQtTestCell::temp, -10.0, 10.0, cellDim);
-        QWidget *widget = writer.widget();
+        boost::shared_ptr<QWidget> widget = writer.widget();
         widget->resize(1000, 1000);
 
         Grid<MyQtTestCell> grid(Coord<2>(10, 20));
