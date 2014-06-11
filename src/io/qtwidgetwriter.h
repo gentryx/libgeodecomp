@@ -1,8 +1,8 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_QT
-
 #ifndef LIBGEODECOMP_IO_QTWIDGETWRITER_H
 #define LIBGEODECOMP_IO_QTWIDGETWRITER_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_QT
 
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/io/writer.h>
@@ -150,6 +150,11 @@ public:
         plotter(cellDimensions, CELL_PLOTTER(member, palette)),
         cellDimensions(cellDimensions)
     {}
+
+    Writer<CELL_TYPE> *clone() const
+    {
+        throw std::logic_error("can't clone QWidget, and thus not QtWidgetWriter");
+    }
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {

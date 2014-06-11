@@ -6,11 +6,12 @@
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/clonable.h>
 
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE>
-class ParallelMPIIOWriter : public ParallelWriter<CELL_TYPE>
+class ParallelMPIIOWriter : public Clonable<ParallelWriter<CELL_TYPE>, ParallelMPIIOWriter<CELL_TYPE> >
 {
 public:
     friend class ParallelMPIIOWriterTest;
@@ -23,7 +24,7 @@ public:
         const unsigned period,
         const unsigned maxSteps,
         const MPI_Comm& communicator = MPI_COMM_WORLD) :
-        ParallelWriter<CELL_TYPE>(prefix, period),
+        Clonable<ParallelWriter<CELL_TYPE>, ParallelMPIIOWriter<CELL_TYPE> >(prefix, period),
         maxSteps(maxSteps),
         comm(communicator)
     {}

@@ -3,6 +3,7 @@
 
 #include <list>
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 
@@ -12,7 +13,7 @@ namespace LibGeoDecomp {
  * This class serves to verify the callback behavior of
  * implementations of DistributedSimulator.
  */
-class ParallelTestWriter : public ParallelWriter<TestCell<2> >
+class ParallelTestWriter : public Clonable<ParallelWriter<TestCell<2> >, ParallelTestWriter>
 {
 public:
     typedef ParallelWriter<TestCell<2> >::GridType GridType;
@@ -22,7 +23,7 @@ public:
         const unsigned period,
         const std::vector<unsigned>& expectedSteps,
         const std::vector<WriterEvent> expectedEvents)  :
-        ParallelWriter<TestCell<2> >("", period),
+        Clonable<ParallelWriter<TestCell<2> >, ParallelTestWriter>("", period),
         expectedSteps(expectedSteps),
         expectedEvents(expectedEvents),
         lastStep(-1)

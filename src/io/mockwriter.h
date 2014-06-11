@@ -5,6 +5,7 @@
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/testcell.h>
 
 #include <sstream>
@@ -61,7 +62,9 @@ namespace MockWriterHelpers {
     };
 }
 
-class MockWriter : public Writer<TestCell<2> >, public ParallelWriter<TestCell<2> >
+class MockWriter :
+        public Clonable<Writer<TestCell<2> >, MockWriter>,
+        public Clonable<ParallelWriter<TestCell<2> >, MockWriter>
 {
 public:
     static std::string staticEvents;
@@ -69,8 +72,8 @@ public:
     typedef std::vector<MockWriterHelpers::MockWriterEvent> EventVec;
 
     explicit MockWriter(const unsigned& period=1) :
-        Writer<TestCell<2> >("", period),
-        ParallelWriter<TestCell<2> >("", period)
+        Clonable<Writer<TestCell<2> >, MockWriter>("", period),
+        Clonable<ParallelWriter<TestCell<2> >, MockWriter>("", period)
     {}
 
     ~MockWriter()

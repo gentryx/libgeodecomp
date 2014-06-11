@@ -7,6 +7,7 @@
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 
 namespace boost {
 
@@ -30,7 +31,9 @@ namespace LibGeoDecomp {
  * bandwidth).
  */
 template<typename CELL_TYPE>
-class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
+class TracingWriter :
+        public Clonable<Writer<CELL_TYPE>, TracingWriter<CELL_TYPE> >,
+        public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
     friend class Serialization;
@@ -52,8 +55,8 @@ public:
         const unsigned maxSteps,
         int outputRank = OUTPUT_ON_ALL_RANKS,
         std::ostream& stream = std::cerr) :
-        Writer<CELL_TYPE>("", period),
-        ParallelWriter<CELL_TYPE>("", period),
+        Clonable<Writer<CELL_TYPE>, TracingWriter<CELL_TYPE> >("", period),
+        Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >("", period),
         outputRank(outputRank),
         stream(stream),
         lastStep(0),

@@ -8,6 +8,7 @@
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/selector.h>
+#include <libgeodecomp/misc/clonable.h>
 
 #include <iomanip>
 
@@ -19,7 +20,7 @@ namespace LibGeoDecomp {
  * primitive data type so that it can be fed into VisIt or ParaView.
  */
 template<typename CELL_TYPE>
-class BOVWriter : public ParallelWriter<CELL_TYPE>
+class BOVWriter : public Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >
 {
 public:
     friend class BOVWriterTest;
@@ -37,7 +38,7 @@ public:
         const unsigned period,
         const Coord<3>& brickletDim = Coord<3>(),
         const MPI_Comm& communicator = MPI_COMM_WORLD) :
-        ParallelWriter<CELL_TYPE>(prefix, period),
+        Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >(prefix, period),
         selector(selector),
         brickletDim(brickletDim),
         comm(communicator),

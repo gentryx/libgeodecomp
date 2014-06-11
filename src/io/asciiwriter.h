@@ -1,25 +1,26 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_IO_ASCIIWRITER_H
 #define LIBGEODECOMP_IO_ASCIIWRITER_H
+
+#include <libgeodecomp/io/ioexception.h>
+#include <libgeodecomp/io/plotter.h>
+#include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/storage/image.h>
 
 #include <string>
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
-#include <libgeodecomp/io/ioexception.h>
-#include <libgeodecomp/io/plotter.h>
-#include <libgeodecomp/io/writer.h>
-#include <libgeodecomp/storage/image.h>
 
 namespace LibGeoDecomp {
 
 /**
  * An output plugin for writing text files. Uses the same selector
  * infrastucture as the BOVWriter.
+ *
+ * fixme: actually use selector here as advertised
  */
 template<typename CELL_TYPE, typename ATTRIBUTE_SELECTOR>
-class ASCIIWriter : public Writer<CELL_TYPE>
+class ASCIIWriter : public Clonable<Writer<CELL_TYPE>, ASCIIWriter<CELL_TYPE, ATTRIBUTE_SELECTOR> >
 {
 public:
     friend class ASCIIWriterTest;
@@ -32,7 +33,7 @@ public:
     explicit ASCIIWriter(
         const std::string& prefix,
         const unsigned period = 1) :
-        Writer<CELL_TYPE>(prefix, period)
+        Clonable<Writer<CELL_TYPE>, ASCIIWriter<CELL_TYPE, ATTRIBUTE_SELECTOR> >(prefix, period)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -70,5 +71,4 @@ public:
 
 }
 
-#endif
 #endif

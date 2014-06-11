@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_IO_MEMORYWRITER_H
 
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/grid.h>
 
@@ -12,7 +13,7 @@ namespace LibGeoDecomp {
  * says, it will simply store all grids in memory for later inspection.
  */
 template<typename CELL_TYPE>
-class MemoryWriter : public Writer<CELL_TYPE>
+class MemoryWriter : public Clonable<Writer<CELL_TYPE>, MemoryWriter<CELL_TYPE> >
 {
 
 public:
@@ -22,7 +23,7 @@ public:
     using Writer<CELL_TYPE>::period;
 
     explicit MemoryWriter(unsigned period = 1) :
-        Writer<CELL_TYPE>("", period)
+        Clonable<Writer<CELL_TYPE>, MemoryWriter<CELL_TYPE> >("", period)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)

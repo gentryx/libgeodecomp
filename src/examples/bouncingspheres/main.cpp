@@ -251,7 +251,7 @@ void Boundary::update(
     }
 }
 
-class GasWriter : public Writer<Container>
+class GasWriter : public Clonable<Writer<Container>, GasWriter>
 {
 public:
     typedef APITraits::SelectTopology<Container>::Value Topology;
@@ -261,7 +261,7 @@ public:
     explicit GasWriter(
         const std::string& prefix,
         const unsigned period = 1) :
-        Writer<Container>(prefix, period)
+        Clonable<Writer<Container>, GasWriter>(prefix, period)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)

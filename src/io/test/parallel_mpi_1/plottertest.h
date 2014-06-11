@@ -2,25 +2,35 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/imagepainter.h>
 #include <libgeodecomp/io/plotter.h>
-#include <libgeodecomp/io/testcellplotter.h>
 #include <libgeodecomp/misc/testcell.h>
 
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+class TestCellPalette
+{
+public:
+    Color operator[](const double value) const
+    {
+        return Color(value, 47, 11);
+    }
+};
+
 class PlotterTest : public CxxTest::TestSuite
 {
 private:
     unsigned width;
     unsigned height;
-    Plotter<TestCell<2>, TestCellPlotter> *plotter;
+    Plotter<TestCell<2> > *plotter;
 public:
     void setUp()
     {
         width = 10;
         height = 24;
-        plotter = new Plotter<TestCell<2>, TestCellPlotter>(Coord<2>(width, height));
+        plotter = new Plotter<TestCell<2> >(
+            Coord<2>(width, height),
+            SimpleCellPlotter<TestCell<2> >(&TestCell<2>::testValue, TestCellPalette()));
     }
 
     void tearDown()
@@ -73,7 +83,8 @@ public:
                 ImagePainter painter(&expected);
                 painter.moveTo(Coord<2>(x * width, y * height));
 
-                TestCellPlotter()(testGrid[pos], painter, Coord<2>(width, height));
+                SimpleCellPlotter<TestCell<2> > plotty(&TestCell<2>::testValue, TestCellPalette());
+                plotty(testGrid[pos], painter, Coord<2>(width, height));
             }
         }
 

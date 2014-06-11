@@ -19,6 +19,7 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+// fixme: kill this
 class TestValueSelector
 {
 public:

@@ -36,6 +36,7 @@
 
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/storage/dataaccessor.h>
@@ -211,7 +212,7 @@ private:
 }
 
 template<typename CELL_TYPE, typename MESH_TYPE>
-class VisItWriter : public Writer<CELL_TYPE>
+class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE, MESH_TYPE> >
 {
 public:
     typedef std::vector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
@@ -228,7 +229,7 @@ public:
         const std::string& prefix,
         const unsigned& period = 1,
         const int& runMode = VISIT_SIMMODE_RUNNING) :
-        Writer<CELL_TYPE>(prefix, period),
+        Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE, MESH_TYPE> >(prefix, period),
         blocking(0),
         visItState(0),
         error(0),

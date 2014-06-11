@@ -6,6 +6,7 @@
 
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/clonable.h>
 
 namespace LibGeoDecomp {
 
@@ -16,7 +17,7 @@ namespace LibGeoDecomp {
  * serialized to that node. Use with care!
  */
 template<typename CELL_TYPE>
-class CollectingWriter : public ParallelWriter<CELL_TYPE>
+class CollectingWriter : public Clonable<ParallelWriter<CELL_TYPE>, CollectingWriter<CELL_TYPE> >
 {
 public:
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
@@ -32,7 +33,7 @@ public:
         int root = 0,
         MPI_Comm communicator = MPI_COMM_WORLD,
         MPI_Datatype mpiDatatype = APITraits::SelectMPIDataType<CELL_TYPE>::value()) :
-        ParallelWriter<CELL_TYPE>("",  1),
+        Clonable<ParallelWriter<CELL_TYPE>, CollectingWriter<CELL_TYPE> >("",  1),
         writer(writer),
         mpiLayer(communicator),
         root(root),

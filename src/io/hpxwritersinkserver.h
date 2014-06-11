@@ -17,6 +17,7 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
+// fixme: can we kill this?
 template <typename CELL_TYPE>
 class IdentityConverter
 {

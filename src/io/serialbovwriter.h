@@ -1,10 +1,10 @@
 #ifndef LIBGEODECOMP_IO_SERIALBOVWRITER_H
 #define LIBGEODECOMP_IO_SERIALBOVWRITER_H
 
-#include <iomanip>
-
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 
@@ -14,10 +14,12 @@ namespace LibGeoDecomp {
  * writes simulation snapshots compatible with VisIt's Brick of Values
  * (BOV) format using one file per partition. Uses a selector which maps a cell to a
  * primitive data type so that it can be fed into VisIt.
+ *
+ * fixme: use Selector here!
+ * fixme: needs test
  */
-
 template<typename CELL_TYPE, typename SELECTOR_TYPE>
-class SerialBOVWriter : public Writer<CELL_TYPE>
+class SerialBOVWriter : public Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE> >
 {
 public:
     friend class Serialization;
@@ -35,14 +37,9 @@ public:
         const std::string& prefix,
         const unsigned period,
         const Coord<3>& brickletDim = Coord<3>()) :
-        Writer<CELL_TYPE>(prefix, period),
+        Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE> >(prefix, period),
         brickletDim(brickletDim)
     {}
-
-    Writer<CELL_TYPE> *clone()
-    {
-        return new SerialBOVWriter(this->prefix, this->period, brickletDim);
-    }
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {

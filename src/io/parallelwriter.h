@@ -56,14 +56,16 @@ public:
     {}
 
     /**
-     * "Virtual Copy constructor"
-     * This function may be called whenever a copy of a writer is needed
-     * instead of a plain pointer copy. Must be implemented by t
-     **/
-    virtual ParallelWriter *clone()
-    {
-        throw std::logic_error("clone not implemented");
-    }
+     * "virtual copy constructor". This function may be called
+     * whenever a deep copy of a writer is needed instead of a plain
+     * pointer copy.
+     *
+     * Advice to implementers: use CRTP (
+     * http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
+     * ) to implemenent this automagically -- see other Writer
+     * implemenent for advice on this subject.
+     */
+    virtual ParallelWriter *clone() const = 0;
 
     /**
      * notifies the ParallelWriter that the supplied region is the

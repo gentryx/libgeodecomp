@@ -109,10 +109,11 @@ class HpxWriterCollector;
 namespace LibGeoDecomp {
 
 template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
-class HpxWriterCollector : public ParallelWriter<CELL_TYPE>
+class HpxWriterCollector : public ClonableParallelWriter<CELL_TYPE, >
 {
 public:
     friend class Serialization;
+    friend class boost::serialization::access;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
 
@@ -129,13 +130,7 @@ public:
     HpxWriterCollector(const SinkType& sink) :
         ParallelWriter<CELL_TYPE>("", sink.getPeriod()),
         sink(sink)
-    {
-    }
-
-    ParallelWriter<CELL_TYPE> * clone()
-    {
-        return new HpxWriterCollector(sink);
-    }
+    {}
 
     void stepFinished(
         const GridType& grid,
@@ -155,8 +150,6 @@ public:
 
 private:
     SinkType sink;
-
-    friend class boost::serialization::access;
 
     HpxWriterCollector() :
         ParallelWriter<CELL_TYPE>("", 1)
