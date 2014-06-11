@@ -545,13 +545,13 @@ install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfi
 
 #============= 11. TYPEMAPS GENERATION ===============================
 if (WITH_TYPEMAPS)
+  set_directory_properties(PROPERTIES CLEAN_NO_CUSTOM true)
+
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
     COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
     DEPENDS "${CMAKE_BINARY_DIR}/cache")
-
-  set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/communication" PROPERTY CLEAN_NO_CUSTOM true)
 
   list(REMOVE_ITEM ALL_HEADERS "communication/typemaps.h")
   set(CANDIDATES)
