@@ -12,11 +12,11 @@ namespace LibGeoDecomp {
 
 namespace SimpleCellPlotterHelpers {
 
-template<typename CELL, typename MEMBER, template<typename MEMBER2> class PALETTE>
+template<typename CELL, typename MEMBER, typename PALETTE>
 class CellToColor : public Selector<CELL>::template Filter<MEMBER, Color>
 {
 public:
-    CellToColor(const PALETTE<MEMBER>& palette) :
+    CellToColor(const PALETTE& palette) :
         palette(palette)
     {}
 
@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    PALETTE<MEMBER> palette;
+    PALETTE palette;
 };
 
 }
@@ -61,8 +61,8 @@ template<typename CELL_TYPE>
 class SimpleCellPlotter
 {
 public:
-    template<typename MEMBER, template<typename MEMBER2> class PALETTE>
-    explicit SimpleCellPlotter(MEMBER CELL_TYPE:: *memberPointer, const PALETTE<MEMBER>& palette) :
+    template<typename MEMBER, typename PALETTE>
+    explicit SimpleCellPlotter(MEMBER CELL_TYPE:: *memberPointer, const PALETTE& palette) :
         cellToColor(
             memberPointer,
             "unnamed parameter",
