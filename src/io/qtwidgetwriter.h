@@ -115,17 +115,14 @@ public:
     friend class QtWidgetWriterTest;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    template<typename MEMBER>
-    QtWidgetWriter(
-        MEMBER CELL_TYPE:: *member,
-        const Palette<MEMBER>& palette,
-        const Coord<2>& cellDimensions = Coord<2>(8, 8),
-        unsigned period = 1) :
-        Writer<CELL_TYPE>("", period),
-        plotter(cellDimensions, CELL_PLOTTER(member, palette)),
-        cellDimensions(cellDimensions)
-    {}
-
+    /**
+     * This QtWriter will render a given member (e.g. &Cell::fooBar).
+     * Colouring is handled by a predefined palette. The color range
+     * is mapped to the value range defined by [minValue, maxValue].
+     *
+     * cellDimensions controls the size of the tiles in which a cell
+     * will be rendered.
+     */
     template<typename MEMBER>
     QtWidgetWriter(
         MEMBER CELL_TYPE:: *member,
@@ -135,6 +132,22 @@ public:
         unsigned period = 1) :
         Writer<CELL_TYPE>("", period),
         plotter(cellDimensions, CELL_PLOTTER(member, QuickPalette<MEMBER>(minValue, maxValue))),
+        cellDimensions(cellDimensions)
+    {}
+
+    /**
+     * Creates a QtWriter which will render the values of the given
+     * member variable. Color mapping is done with the help of the
+     * custom palette object.
+     */
+    template<typename MEMBER, typename PALETTE>
+    QtWidgetWriter(
+        MEMBER CELL_TYPE:: *member,
+        const PALETTE& palette,
+        const Coord<2>& cellDimensions = Coord<2>(8, 8),
+        unsigned period = 1) :
+        Writer<CELL_TYPE>("", period),
+        plotter(cellDimensions, CELL_PLOTTER(member, palette)),
         cellDimensions(cellDimensions)
     {}
 
