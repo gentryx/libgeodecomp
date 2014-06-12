@@ -1003,11 +1003,11 @@ private:
     }
 };
 
-class ChromoWriter : public Writer<ContainerCell>
+class ChromoWriter : public Clonable<Writer<ContainerCell>, ChromoWriter>
 {
 public:
     explicit ChromoWriter(const unsigned& period = 1) :
-        Writer<ContainerCell>("chromo", period)
+        Clonable<Writer<ContainerCell>, ChromoWriter>("chromo", period)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)

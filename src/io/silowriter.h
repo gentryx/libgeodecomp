@@ -7,6 +7,7 @@
 
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/storage/collectioninterface.h>
 
 #include <silo.h>
@@ -172,7 +173,7 @@ private:
  * data, add a selector for each vector component.
  */
 template<typename CELL>
-class SiloWriter : public Writer<CELL>
+class SiloWriter : public Clonable<Writer<CELL>, SiloWriter<CELL> >
 {
 public:
     template<typename SILO_WRITER, typename COLLECTION_INTERFACE>
@@ -206,7 +207,7 @@ public:
         const std::string& unstructuredMeshLabel = "unstructured_mesh",
         const std::string& pointMeshLabel = "point_mesh",
         int databaseType = DB_PDB) :
-        Writer<Cell>(prefix, period),
+        Clonable<Writer<CELL>, SiloWriter<CELL> >(prefix, period),
         databaseType(databaseType),
         coords(DIM),
         pointMeshSelectors(
@@ -237,7 +238,7 @@ public:
         const std::string& unstructuredMeshLabel = "unstructured_mesh",
         const std::string& pointMeshLabel = "point_mesh",
         int databaseType = DB_PDB) :
-        Writer<Cell>(prefix, period),
+        Clonable<Writer<CELL>, SiloWriter<CELL> >(prefix, period),
         databaseType(databaseType),
         coords(DIM),
         pointMeshSelectors(
@@ -270,7 +271,7 @@ public:
         const std::string& unstructuredMeshLabel = "unstructured_mesh",
         const std::string& pointMeshLabel = "point_mesh",
         int databaseType = DB_PDB) :
-        Writer<Cell>(prefix, period),
+        Clonable<Writer<CELL>, SiloWriter<CELL> >(prefix, period),
         databaseType(databaseType),
         coords(DIM),
         pointMeshSelectors(
