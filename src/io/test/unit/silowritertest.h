@@ -312,7 +312,7 @@ public:
         PyRun_SimpleString(visitScript.c_str());
         Py_Finalize();
 
-        remove(siloFile1.c_str());
+        removeFile(siloFile1);
     }
 
     Histogram loadImage(const std::string suffix1, const std::string suffix2)
@@ -340,8 +340,8 @@ public:
             }
         }
 
-        remove(imageFile1.c_str());
-        remove(imageFile2.c_str());
+        removeFile(imageFile1);
+        removeFile(imageFile2);
 
         return ret;
     }
@@ -427,7 +427,7 @@ public:
 
         TS_ASSERT(histogram1[white.rgb()] > histogram2[white.rgb()]);
         // point mesh should add 50 dots a 2x2 pixels plus a label
-        TS_ASSERT((histogram1[white.rgb()] - histogram2[white.rgb()]) > 200);
+        TS_ASSERT((histogram1[white.rgb()] - histogram2[white.rgb()]) >= 200);
 
         Histogram histogram3 = loadImage("C", "0000");
 
@@ -640,13 +640,13 @@ public:
         PyRun_SimpleString(visitScript.c_str());
         Py_Finalize();
 
-        remove(siloFile2.c_str());
+        removeFile(siloFile2);
 
         Histogram histogram1 = loadImage("A", "0000");
         TS_ASSERT(histogram1[white.rgb()] > 900000);
 
         Histogram histogram2 = loadImage("B", "0000");
-        TS_ASSERT(histogram1[white.rgb()] > (histogram2[white.rgb()] + 10000));
+        TS_ASSERT(histogram1[white.rgb()] > (histogram2[white.rgb()] + 7000));
         TS_ASSERT(histogram2[red.rgb()] > 10);
         TS_ASSERT(histogram2[blue.rgb()] > 10);
 
