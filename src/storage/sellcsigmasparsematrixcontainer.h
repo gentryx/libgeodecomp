@@ -30,14 +30,17 @@ public:
         std::vector< std::pair<int, VALUETYPE> > vec;
         int const chunk (row/C);
         int const offset (row%C);
+        int index = chunkOffset[chunk] + offset;
 
 std::cout << "Get row: row="<< row << " chunk=" << chunk << " offset=" << offset << " chunkOffset=" << chunkOffset[chunk] << " Werte=";
-        for (int index = chunkOffset[chunk] + offset;
-                index < chunkOffset[chunk+1]; index += C){
+
+        for (int element = 0;
+                element < rowLength[row]; ++element, index += C){
             vec.push_back( std::pair<int, VALUETYPE>
                             (column[index], values[index]) );
 std::cout << "(" << vec.back().first << ","<< vec.back().second << "), ";
         }
+
 std::cout << std::endl;
         return vec;
     }
@@ -50,18 +53,18 @@ std::cout << std::endl;
 
 std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col << " val=" << value;
 
-        if ( row >= rowLength.size() ){
+        if ( (unsigned)row >= rowLength.size() ){
 //std::cout << "rezie row" << std::endl;
             rowLength.resize(row+1);
         }
-        if ( chunk >= chunkLength.size() ){
+        if ( (unsigned)chunk >= chunkLength.size() ){
 //std::cout << "rezie chunk" << std::endl;
             int oldNumberOfChunks = chunkLength.size();
 
             chunkLength.resize(chunk+1);
             chunkOffset.resize(chunk+2);
 
-            for( int i = oldNumberOfChunks; i < chunkOffset.size(); ++i ){
+            for( unsigned i = oldNumberOfChunks; i < chunkOffset.size(); ++i ){
                 chunkOffset[i] = values.size();
             }
         }
@@ -172,18 +175,18 @@ std::cout << "b" << std::endl;
 
             ++rowLength[row];
             chunkLength[chunk] = rowLength[row];
-            for (int ch = chunk+1; ch < chunkOffset.size(); ++ch){
+            for (unsigned ch = chunk+1; ch < chunkOffset.size(); ++ch){
                 chunkOffset[ch] += C;
             }
         }
 
 std::cout << "col: ";
-for (int i=0; i<column.size(); ++i){
+for (unsigned i=0; i<column.size(); ++i){
     std::cout << column[i] << " ";
 }
 std::cout << std::endl;
 std::cout << "values: ";
-for (int i=0; i<values.size(); ++i){
+for (unsigned i=0; i<values.size(); ++i){
     std::cout << values[i] << " ";
 }
 std::cout << std::endl;
