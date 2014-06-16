@@ -46,20 +46,18 @@ public:
     }
 
     // Row [0:N-1]; Col [0:N-1]
-    void addPoint(int const row , int const col, VALUETYPE value){
-        assert(row >= 0 && col >= 0);
+    void addPoint(int const row, int const col, VALUETYPE value){
+        if(row >= 0 && col >= 0);   //TODO exeption werfen
 
         int const chunk (row/C);
 
 //std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col << " val=" << value;
 
         if ( (unsigned)row >= rowLength.size() ){
-//std::cout << "rezie row" << std::endl;
             rowLength.resize(row+1);
         }
         if ( (unsigned)chunk >= chunkLength.size() ){
-//std::cout << "rezie chunk" << std::endl;
-            int oldNumberOfChunks = chunkLength.size();
+            unsigned oldNumberOfChunks = chunkLength.size();
 
             chunkLength.resize(chunk+1);
             chunkOffset.resize(chunk+2);
@@ -71,74 +69,71 @@ public:
 
 //std::cout << " row length: " << rowLength[row] << " chunk Length: " << chunkLength[chunk] << " chunkOffset: " << chunkOffset[chunk] << std::endl;
 
-        //// Fall 1: Zeile ist nicht die längste in Chunk
+        //// case 1: row is NOT the bigest in chunk
         if ( rowLength[row] < chunkLength[chunk] ){
-//std::cout << "fall 1";
+std::cout << "case 1";
             std::vector<int>::iterator itCol = column.begin()
                     + chunkOffset[chunk] + row % C;
 
             while ( col > *itCol && -1 != *itCol ){
                 itCol += C;
             }
-            assert(col != *itCol); // TODO fehler werfen? überschreiben?
+            if(col != *itCol); // TODO fehler werfen? überschreiben?
             
-            //// Fall 1.a Wert hinten in der Zeile einfügen auf "Auffüllwerte"
-            if ( -1 == *itCol ){
-//std::cout << "a" << std::endl;
-                values[itCol - column.begin()] = value;
-                *itCol = col;
-            }
-            else{
-            //// Fall 1.b Wert in die mitte Einfügen TODO fixen
-//std::cout << "b" << std::endl;
-                int index = itCol - column.begin();
+            if ( -1 != *itCol){
+            //// case 1.a add value in mid of row
+std::cout << ".a";
+                int lastElement = chunkOffset[chunk + 1] - C + (row%C);
+                int end   = itCol - column.begin();
 
-                for (int i = index + C; i < chunkOffset[chunk +1]; i+=C){
+                for (int i = lastElement; i > end; i-=C){
                     values[i] = values[i-C];
                     column[i] = column[i-C];
-
-                    //if ( column[i+C] == -1 )
-                        //break;
                 }
-
-                values[index] = value;
-                column[index] = col;
             }
+std::cout << std::endl;
+
+            values[itCol - column.begin()] = value;
+            *itCol = col;
 
             ++rowLength[row];
         }
         else{
-        //// Fall 2: Zeile ist die Längste in Chunk
-//std::cout << "fall 2";
+        //// case 2: row is the logest in chunk -> expend chunk
+std::cout << "fall 2";
 
-            int offset = chunkOffset[chunk] + row % C;
-            int offsetEnd = chunkOffset[chunk+1];
+            int const offset    = chunkOffset[chunk] + row % C;
+            int const offsetEnd = chunkOffset[chunk+1];
 
-            while (offset < offsetEnd && col > column[offset]){
-                offset += C;
+            int index = offset;
+            while (index < offsetEnd && col > column[index]){
+                index += C;
             }
-            if (offset >= offsetEnd ){ //TODO schöner mit einem fall schreiben
-//std::cout << "a" << std::endl;
-                offset = offsetEnd;
 
-                std::vector<int>::iterator itCol = column.begin() + offset;
+
+
+            if (index >= offsetEnd ){
+std::cout << ".a" << std::endl;
+                index = offsetEnd;
+
+                std::vector<int>::iterator itCol = column.begin() + index;
                 typename
-                std::vector<VALUETYPE>::iterator itVal = values.begin() + offset;
+                std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
 
-                for (int i=C; i > 0; --i){
+                for (int i=0; i < C; ++i){
                         itCol = column.insert(itCol, -1);               
                         itVal = values.insert(itVal, VALUETYPE());
                 }
                 *(itCol + (row%C)) = col;
                 *(itVal + (row%C)) = value;
             }
-            else if (offset < offsetEnd ){
-//std::cout << "b" << std::endl;
-                assert(col != column[offset]); //TODO fehler werfen?
+            else {
+std::cout << ".b" << std::endl;
+                if(col != column[index]); //TODO fehler werfen?
 
-                std::vector<int>::iterator itCol = column.begin() + offset;
+                std::vector<int>::iterator itCol = column.begin() + index;
                 typename
-                std::vector<VALUETYPE>::iterator itVal = values.begin() + offset;
+                std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
 
                 for (int i=0; i < C; ++i){
                     itCol = column.insert(itCol, -1);               
@@ -148,26 +143,16 @@ public:
                 *itCol = col;
 
                 //// fix order
-                int index = itVal - values.begin();
-                int i = 0;
-                while ( index < chunkOffset[chunk + 1] ){
-                    ++index;
-
-                    if (i < C-1){
-                        ++i;
+                for ( int i = index; i < offsetEnd; ++i ){
+                    if (i%C != row%C){
+                        values[i] = values[i + C];
+                        column[i] = column[i + C];
                     }
-                    else{
-                        i = 0;
-                        continue;
-                    }
-
-                    values[index] = values[index + C];
-                    column[index] = column[index + C];
                 }
-                for (i = 0; i < C; ++i ){
+                for (int i = 0; i < C; ++i ){
                     if(i != row % C){
-                        values[index + i] = VALUETYPE();
-                        column[index + i] = -1;
+                        values[offsetEnd + i] = VALUETYPE();
+                        column[offsetEnd + i] = -1;
                     }
                 }
             }
@@ -178,19 +163,19 @@ public:
                 chunkOffset[ch] += C;
             }
         }
-/*
-std::cout << "col: ";
-for (unsigned i=0; i<column.size(); ++i){
-    std::cout << column[i] << " ";
+
+//std::cout << "col: ";
+//for (unsigned i=0; i<column.size(); ++i){
+    //std::cout << column[i] << " ";
+//}
+//std::cout << std::endl;
+//std::cout << "values: ";
+//for (unsigned i=0; i<values.size(); ++i){
+    //std::cout << values[i] << " ";
+//}
+//std::cout << std::endl;
+
 }
-std::cout << std::endl;
-std::cout << "values: ";
-for (unsigned i=0; i<values.size(); ++i){
-    std::cout << values[i] << " ";
-}
-std::cout << std::endl;
-*/
-    }
 
 private:
     std::vector<VALUETYPE> values;

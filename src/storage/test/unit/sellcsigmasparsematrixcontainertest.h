@@ -379,23 +379,25 @@ public:
          * ----+-------------------------------
          *  6  | 0 0 0 K 0 0 0 0 0 |
          *  7  | L 0 M 0 N 0 O 0 P |-> chunk 2
-         *  8  | 0 0 0 0 0 Q 0 0 0 |
+         *  8  | 0 0 0 S 0 Q 0 R 0 |
          */
 
         smc.addPoint (4, 0, 'G');
-        smc.addPoint (8, 5, 'Q');
+        smc.addPoint (8, 7, 'R');
         smc.addPoint (6, 3, 'K');
-        smc.addPoint (7, 8, 'P');
-        smc.addPoint (7, 2, 'M');
+        smc.addPoint (7, 6, 'O');
         smc.addPoint (7, 4, 'N');
+        smc.addPoint (7, 2, 'M');
         smc.addPoint (0, 4, 'A');
         smc.addPoint (3, 8, 'F');
         smc.addPoint (7, 0, 'L');
         smc.addPoint (3, 7, 'E');
         smc.addPoint (2, 4, 'B');
         smc.addPoint (5, 1, 'I');
-        smc.addPoint (7, 6, 'O');
+        smc.addPoint (7, 8, 'P');
         smc.addPoint (3, 2, 'D');
+        smc.addPoint (8, 5, 'Q');
+        smc.addPoint (8, 3, 'S');
         smc.addPoint (5, 2, 'J');
         smc.addPoint (4, 5, 'H');
         smc.addPoint (2, 6, 'C');
@@ -450,7 +452,11 @@ public:
 
         std::vector< std::pair<int, char> > row8;
         std::pair<int, char> pair16 (5,'Q');
+        std::pair<int, char> pair17 (7,'R');
+        std::pair<int, char> pair18 (3,'S');
+        row8.push_back(pair18);
         row8.push_back(pair16);
+        row8.push_back(pair17);
 
 
         TS_ASSERT_EQUALS(
