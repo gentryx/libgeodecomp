@@ -13,7 +13,7 @@ public:
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     void testGetRow_one()
     {
-std::cout << "\n\n\nTEST 1: C=1 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
+//std::cout << "\n\n\nTEST 1: C=1 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
         SellCSigmaSparseMatrixContainer<int, 1, 1> smc;
 
         /* add a test 8x8 Matrix:
@@ -99,7 +99,7 @@ std::cout << "\n\n\nTEST 1: C=1 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
     // randome addPoints
     void testGetRow_two()
     {
-std::cout << "\n\n\nTEST 2: C=1 Sigma=1 Diagonalmatrix" <<std::endl;
+//std::cout << "\n\n\nTEST 2: C=1 Sigma=1 Diagonalmatrix" <<std::endl;
         SellCSigmaSparseMatrixContainer<int, 1, 1> smc;
 
         /* add a test 8x8 Matrix:
@@ -185,7 +185,7 @@ std::cout << "\n\n\nTEST 2: C=1 Sigma=1 Diagonalmatrix" <<std::endl;
     // randome addPoints
     void testGetRow_three()
     {
-std::cout << "\n\n\nTEST 3: C=2 Sigma=1 Diagonalmatrix" <<std::endl;
+//std::cout << "\n\n\nTEST 3: C=2 Sigma=1 Diagonalmatrix" <<std::endl;
 
         int const C (2);
         int const SIGMA (1);
@@ -273,7 +273,7 @@ std::cout << "\n\n\nTEST 3: C=2 Sigma=1 Diagonalmatrix" <<std::endl;
     // test with a 8x8 diagonal Matrix, C = 2; Sigma = 1
     void testGetRow_fore()
     {
-std::cout << "\n\n\nTEST 4 C=3 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
+//std::cout << "\n\n\nTEST 4 C=3 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
         int const C (3);
         int const SIGMA (1);
         SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc;
@@ -360,7 +360,7 @@ std::cout << "\n\n\nTEST 4 C=3 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
     // test with a 9x9 sparse Matrix, C = 3; Sigma = 1
     void testGetRow_five()
     {
-std::cout << "\n\n\nTEST 5 C=3 Sigma=1 sparse matrix" <<std::endl;
+//std::cout << "\n\n\nTEST 5 C=3 Sigma=1 sparse matrix" <<std::endl;
         int const C (3);
         int const SIGMA (1);
         SellCSigmaSparseMatrixContainer<char, C, SIGMA> smc;

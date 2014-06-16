@@ -32,16 +32,16 @@ public:
         int const offset (row%C);
         int index = chunkOffset[chunk] + offset;
 
-std::cout << "Get row: row="<< row << " chunk=" << chunk << " offset=" << offset << " chunkOffset=" << chunkOffset[chunk] << " Werte=";
+//std::cout << "Get row: row="<< row << " chunk=" << chunk << " offset=" << offset << " chunkOffset=" << chunkOffset[chunk] << " Werte=";
 
         for (int element = 0;
                 element < rowLength[row]; ++element, index += C){
             vec.push_back( std::pair<int, VALUETYPE>
                             (column[index], values[index]) );
-std::cout << "(" << vec.back().first << ","<< vec.back().second << "), ";
+//std::cout << "(" << vec.back().first << ","<< vec.back().second << "), ";
         }
 
-std::cout << std::endl;
+//std::cout << std::endl;
         return vec;
     }
 
@@ -51,7 +51,7 @@ std::cout << std::endl;
 
         int const chunk (row/C);
 
-std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col << " val=" << value;
+//std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col << " val=" << value;
 
         if ( (unsigned)row >= rowLength.size() ){
 //std::cout << "rezie row" << std::endl;
@@ -69,11 +69,11 @@ std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col 
             }
         }
 
-std::cout << " row length: " << rowLength[row] << " chunk Length: " << chunkLength[chunk] << " chunkOffset: " << chunkOffset[chunk] << std::endl;
+//std::cout << " row length: " << rowLength[row] << " chunk Length: " << chunkLength[chunk] << " chunkOffset: " << chunkOffset[chunk] << std::endl;
 
         //// Fall 1: Zeile ist nicht die längste in Chunk
         if ( rowLength[row] < chunkLength[chunk] ){
-std::cout << "fall 1";
+//std::cout << "fall 1";
             std::vector<int>::iterator itCol = column.begin()
                     + chunkOffset[chunk] + row % C;
 
@@ -84,13 +84,13 @@ std::cout << "fall 1";
             
             //// Fall 1.a Wert hinten in der Zeile einfügen auf "Auffüllwerte"
             if ( -1 == *itCol ){
-std::cout << "a" << std::endl;
+//std::cout << "a" << std::endl;
                 values[itCol - column.begin()] = value;
                 *itCol = col;
             }
             else{
             //// Fall 1.b Wert in die mitte Einfügen TODO fixen
-std::cout << "b" << std::endl;
+//std::cout << "b" << std::endl;
                 int index = itCol - column.begin();
 
                 for (int i = index + C; i < chunkOffset[chunk +1]; i+=C){
@@ -109,7 +109,7 @@ std::cout << "b" << std::endl;
         }
         else{
         //// Fall 2: Zeile ist die Längste in Chunk
-std::cout << "fall 2";
+//std::cout << "fall 2";
 
             int offset = chunkOffset[chunk] + row % C;
             int offsetEnd = chunkOffset[chunk+1];
@@ -117,9 +117,8 @@ std::cout << "fall 2";
             while (offset < offsetEnd && col > column[offset]){
                 offset += C;
             }
-//std::cout << "offset:" << offset << " offsetEnd:" << offsetEnd << std::endl;
             if (offset >= offsetEnd ){ //TODO schöner mit einem fall schreiben
-std::cout << "a" << std::endl;
+//std::cout << "a" << std::endl;
                 offset = offsetEnd;
 
                 std::vector<int>::iterator itCol = column.begin() + offset;
@@ -134,7 +133,7 @@ std::cout << "a" << std::endl;
                 *(itVal + (row%C)) = value;
             }
             else if (offset < offsetEnd ){
-std::cout << "b" << std::endl;
+//std::cout << "b" << std::endl;
                 assert(col != column[offset]); //TODO fehler werfen?
 
                 std::vector<int>::iterator itCol = column.begin() + offset;
@@ -179,7 +178,7 @@ std::cout << "b" << std::endl;
                 chunkOffset[ch] += C;
             }
         }
-
+/*
 std::cout << "col: ";
 for (unsigned i=0; i<column.size(); ++i){
     std::cout << column[i] << " ";
@@ -190,7 +189,7 @@ for (unsigned i=0; i<values.size(); ++i){
     std::cout << values[i] << " ";
 }
 std::cout << std::endl;
-
+*/
     }
 
 private:
