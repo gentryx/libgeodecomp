@@ -71,7 +71,7 @@ public:
 
         //// case 1: row is NOT the bigest in chunk
         if ( rowLength[row] < chunkLength[chunk] ){
-std::cout << "case 1";
+//std::cout << "case 1";
             std::vector<int>::iterator itCol = column.begin()
                     + chunkOffset[chunk] + row % C;
 
@@ -82,7 +82,7 @@ std::cout << "case 1";
             
             if ( -1 != *itCol){
             //// case 1.a add value in mid of row
-std::cout << ".a";
+//std::cout << ".a";
                 int lastElement = chunkOffset[chunk + 1] - C + (row%C);
                 int end   = itCol - column.begin();
 
@@ -91,7 +91,7 @@ std::cout << ".a";
                     column[i] = column[i-C];
                 }
             }
-std::cout << std::endl;
+//std::cout << std::endl;
 
             values[itCol - column.begin()] = value;
             *itCol = col;
@@ -100,7 +100,7 @@ std::cout << std::endl;
         }
         else{
         //// case 2: row is the logest in chunk -> expend chunk
-std::cout << "fall 2";
+//std::cout << "fall 2";
 
             int const offset    = chunkOffset[chunk] + row % C;
             int const offsetEnd = chunkOffset[chunk+1];
@@ -113,7 +113,7 @@ std::cout << "fall 2";
 
 
             if (index >= offsetEnd ){
-std::cout << ".a" << std::endl;
+//std::cout << ".a" << std::endl;
                 index = offsetEnd;
 
                 std::vector<int>::iterator itCol = column.begin() + index;
@@ -128,7 +128,7 @@ std::cout << ".a" << std::endl;
                 *(itVal + (row%C)) = value;
             }
             else {
-std::cout << ".b" << std::endl;
+//std::cout << ".b" << std::endl;
                 if(col != column[index]); //TODO fehler werfen?
 
                 std::vector<int>::iterator itCol = column.begin() + index;
