@@ -497,6 +497,56 @@ public:
                 );
     }
 
+    // test with a 3x3 diagonal Matrix, C = 2; Sigma = 1
+    // overwite a value
+    void testGetRow_six()
+    {
+//std::cout << "\n\n\nTEST 6: C=2 Sigma=1" <<std::endl;
+
+        int const C (2);
+        int const SIGMA (1);
+        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc;
+
+        /* add a test 8x8 Matrix:
+         * 1 0 4
+         * 0 5 0
+         * 0 0 6
+         */
+
+        smc.addPoint (0, 0, 1);
+        smc.addPoint (0, 2, 4);
+        smc.addPoint (1, 1, 2);
+        smc.addPoint (2, 2, 3);
+
+        smc.addPoint (1, 1, 5);
+        smc.addPoint (2, 2, 6);
+
+        std::vector< std::pair<int, int> > row0;
+        std::pair<int, int> pair0 (0,1);
+        std::pair<int, int> pair3 (2,4);
+        row0.push_back(pair0);
+        row0.push_back(pair3);
+        std::vector< std::pair<int, int> > row1;
+        std::pair<int, int> pair1 (1,5);
+        row1.push_back(pair1);
+        std::vector< std::pair<int, int> > row2;
+        std::pair<int, int> pair2 (2,6);
+        row2.push_back(pair2);
+
+        TS_ASSERT_EQUALS(
+                smc.getRow(0),
+                row0
+                );
+        TS_ASSERT_EQUALS(
+                smc.getRow(1),
+                row1
+                );
+        TS_ASSERT_EQUALS(
+                smc.getRow(2),
+                row2
+                );
+    }
+
 };
 
 }

@@ -4,11 +4,9 @@
 #include <vector>
 #include <utility>
 #include <assert.h>
+#include <stdexcept>
 
 #include <iostream>
-
-
-
 
 namespace LibGeoDecomp {
 
@@ -47,7 +45,9 @@ public:
 
     // Row [0:N-1]; Col [0:N-1]
     void addPoint(int const row, int const col, VALUETYPE value){
-        if(row >= 0 && col >= 0);   //TODO exeption werfen
+        if(row < 0 && col < 0){
+            throw std::invalid_argument("row and colum must be >= 0");
+        }
 
         int const chunk (row/C);
 
@@ -78,7 +78,11 @@ public:
             while ( col > *itCol && -1 != *itCol ){
                 itCol += C;
             }
-            if(col != *itCol); // TODO fehler werfen? überschreiben?
+            if(col == *itCol){
+                *itCol = col;
+                values[itCol - column.begin()] = value;
+                return;
+            }
             
             if ( -1 != *itCol){
             //// case 1.a add value in mid of row
@@ -129,7 +133,11 @@ public:
             }
             else {
 //std::cout << ".b" << std::endl;
-                if(col != column[index]); //TODO fehler werfen?
+                if(col == column[index]){
+                    column[index] = col;
+                    values[index] = value;
+                    return;
+                }
 
                 std::vector<int>::iterator itCol = column.begin() + index;
                 typename
