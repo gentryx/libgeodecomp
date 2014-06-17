@@ -8,8 +8,6 @@
 #include <iostream>
 
 
-
-
 namespace LibGeoDecomp {
 
 
@@ -90,7 +88,6 @@ std::cout << ".a";
                     values[i] = values[i-C];
                     column[i] = column[i-C];
                 }
-            }
 std::cout << std::endl;
 
             values[itCol - column.begin()] = value;
