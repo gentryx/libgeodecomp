@@ -1,4 +1,4 @@
-#============= 1. FIND PACKAGES WE DEPEND ON =========================
+#============ 1. FIND PACKAGES WE DEPEND ON =========================
 
 # find HPX
 if(NOT HPX_ROOT)

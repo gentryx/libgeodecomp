@@ -25,7 +25,7 @@ public:
         fitness(std::numeric_limits<double>::min())
     {}
 
-    void operator()(int maxSteps, Evaluator& eval)
+    virtual void operator()(int maxSteps, Evaluator& eval)
     {
         // fixme: this implementation is stupid!
 
@@ -49,6 +49,21 @@ private:
     double fitness;
 };
 
+class PatternOptimizer: public Optimizer
+{
+public:
+	
+private:
+	// TODO initiale stepwidth und min Stepwidth sollten automatisch aus der Dimensionsgröße generriert werden und optional von außen prametrisierbar sein.
+	std::vector<double> stepwidth;
+	std::vector<double> minStepwidth
+	bool reduceStepwidth(); 			// wenn alle parameter am minimum sind wird false zurueck gegeben
+	std::vector<SimulationParameters> genPattern(SimulationParameters middle);
+	SimulationParameters getMax(std::vector<SimulationParameters> pattern);
 }
+
+}
+
+
 
 #endif
