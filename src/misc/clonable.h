@@ -13,8 +13,7 @@ template<typename BASE, typename IMPLEMENTATION>
 class Clonable : public BASE
 {
 public:
-    Clonable()
-    {}
+    friend class Serialization;
 
     template<typename T1>
     explicit
