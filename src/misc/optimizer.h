@@ -3,7 +3,6 @@
 
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <limits>
-
 namespace LibGeoDecomp {
 
 class Optimizer
@@ -49,20 +48,8 @@ private:
     double fitness;
 };
 
-class PatternOptimizer: public Optimizer
-{
-public:
-	
-private:
-	// TODO initiale stepwidth und min Stepwidth sollten automatisch aus der Dimensionsgröße generriert werden und optional von außen prametrisierbar sein.
-	std::vector<double> stepwidth;
-	std::vector<double> minStepwidth
-	bool reduceStepwidth(); 			// wenn alle parameter am minimum sind wird false zurueck gegeben
-	std::vector<SimulationParameters> genPattern(SimulationParameters middle);
-	SimulationParameters getMax(std::vector<SimulationParameters> pattern);
-}
 
-}
+}//namespace LibGeoDecomp
 
 
 
