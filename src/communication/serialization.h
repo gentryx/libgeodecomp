@@ -162,12 +162,13 @@ public:
         archive & object.mySize;
     }
 
-    template<typename ARCHIVE, typename CELL_TYPE, typename SELECTOR_TYPE>
+    template<typename ARCHIVE, typename CELL_TYPE>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>& object, const unsigned /*version*/)
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE > > >(object);
+        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE > > >(object);
         archive & object.brickletDim;
+        archive & object.selector;
     }
 
     template<typename ARCHIVE, typename CELL_TYPE>
@@ -335,8 +336,8 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsign
     Serialization::serialize(archive, object, version);
 }
 
-template<class ARCHIVE, typename CELL_TYPE, typename SELECTOR_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>& object, const unsigned version)
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
