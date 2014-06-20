@@ -9,6 +9,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * CoordBox describes a rectangular, N-dimensional set of coordinates.
+ * If can be used for iteration and supports bounds checking. This
+ * makes it useful for writing code which is independed of the
+ * dimensionality of its data.
+ */
 template<int DIM>
 class CoordBox
 {
@@ -21,8 +27,9 @@ public:
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 
-    explicit CoordBox(const Coord<DIM>& origin = Coord<DIM>(),
-                      const Coord<DIM>& dimensions = Coord<DIM>()) :
+    explicit CoordBox(
+        const Coord<DIM>& origin = Coord<DIM>(),
+        const Coord<DIM>& dimensions = Coord<DIM>()) :
         origin(origin),
         dimensions(dimensions)
     {}
