@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_COORDBOX_H
 
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/topologies.h>
 
 #include <iostream>
@@ -23,6 +24,7 @@ public:
     friend class Typemaps;
 
     class Iterator;
+    class StreakIterator;
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
@@ -51,11 +53,23 @@ public:
         return Iterator(origin, origin, dimensions);
     }
 
+    inline StreakIterator beginStreak() const
+    {
+        return StreakIterator(origin, origin, dimensions);
+    }
+
     inline Iterator end() const
     {
         Coord<DIM> pos = origin;
         pos[DIM - 1] += dimensions[DIM - 1];
         return Iterator(origin, pos, dimensions);
+    }
+
+    inline StreakIterator endStreak() const
+    {
+        Coord<DIM> pos = origin;
+        pos[DIM - 1] += dimensions[DIM - 1];
+        return StreakIterator(origin, pos, dimensions);
     }
 
     /**
@@ -89,6 +103,8 @@ public:
     class Iterator
     {
     public:
+        friend class StreakIterator;
+
         inline Iterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& start,
@@ -146,6 +162,45 @@ public:
         Coord<DIM> cursor;
         Coord<DIM> origin;
         Coord<DIM> end;
+    };
+
+    class StreakIterator
+    {
+    public:
+        inline StreakIterator(
+            const Coord<DIM>& origin,
+            const Coord<DIM>& start,
+            const Coord<DIM>& dimensions) :
+            iter(origin, start, dimensions),
+            endX(origin.x() + dimensions.x())
+        {
+            iter.end.x() = origin.x() + 1;
+        }
+
+        inline bool operator==(const StreakIterator& other) const
+        {
+            return iter == other.iter;
+        }
+
+        inline bool operator!=(const StreakIterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        inline Streak<DIM> operator*() const
+        {
+            return Streak<DIM>(*iter, endX);
+        }
+
+        inline StreakIterator& operator++()
+        {
+            ++iter;
+            return *this;
+        }
+
+    private:
+        Iterator iter;
+        int endX;
     };
 };
 

@@ -116,7 +116,6 @@ private:
         std::size_t byteSize = length * selector.sizeOfExternal();
         buffer.resize(byteSize);
 
-        // fixme: add library support for this iteration scheme?
         CoordBox<DIM> boundingBox = grid.boundingBox();
         boundingBox.dimensions.x() = 1;
         for (typename CoordBox<DIM>::Iterator i = boundingBox.begin();

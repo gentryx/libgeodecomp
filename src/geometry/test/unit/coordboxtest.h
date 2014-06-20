@@ -156,6 +156,26 @@ public:
         TS_ASSERT_EQUALS(expected, actual);
     }
 
+    void testStreakIterator3D()
+    {
+        CoordBox<3> box(Coord<3>(10, 15, 20), Coord<3>(13, 11, 12));
+
+        std::vector<Streak<3> > expected;
+        std::vector<Streak<3> > actual;
+
+        for (int z = 20; z < 32; ++z) {
+            for (int y = 15; y < 26; ++y) {
+                expected << Streak<3>(Coord<3>(10, y, z), 23);
+            }
+        }
+
+        for (CoordBox<3>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            actual << *i;
+        }
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
 private:
     Coord<2> origin;
     int width;
