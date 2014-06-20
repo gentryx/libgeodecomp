@@ -15,6 +15,14 @@ class Clonable : public BASE
 public:
     friend class Serialization;
 
+    /**
+     * these c-tors simply delegate to the BASE type, which includes
+     * the default c-tor, sans parameters.
+     */
+    explicit
+    Clonable()
+    {}
+
     template<typename T1>
     explicit
     Clonable(const T1& p1) :
