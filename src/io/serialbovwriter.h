@@ -117,11 +117,10 @@ private:
         buffer.resize(byteSize);
 
         CoordBox<DIM> boundingBox = grid.boundingBox();
-        boundingBox.dimensions.x() = 1;
-        for (typename CoordBox<DIM>::Iterator i = boundingBox.begin();
-             i != boundingBox.end();
+        for (typename CoordBox<DIM>::StreakIterator i = boundingBox.beginStreak();
+             i != boundingBox.endStreak();
              ++i) {
-            Streak<DIM> s(*i, i->x() + dimensions.x());
+            Streak<DIM> s(*i);
 
             Region<DIM> tempRegion;
             tempRegion << s;

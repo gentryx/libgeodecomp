@@ -75,12 +75,9 @@ public:
         CoordBox<DIM> box = grid.boundingBox();
         StorageGridType localGrid(box);
 
-        int width = box.dimensions.x();
-        box.dimensions.x() = 1;
-
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            Streak<DIM> s(*i, i->x() + width);
-            grid.get(s, &localGrid[*i]);
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            Streak<DIM> s(*i);
+            grid.get(s, &localGrid[s.origin]);
         }
 
         for (int sender = 0; sender < mpiLayer.size(); ++sender) {

@@ -445,13 +445,10 @@ public:
 
             Coord<DIM> boxOrigin = streak.origin - dia;
             Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
-            boxDim.x() = 1;
-            int endX = streak.endX + width;
-            CoordBox<DIM> box(boxOrigin, boxDim);
+            boxDim.x() += streak.length() - 1;
 
-            for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-                ret << Streak<DIM>(*i, endX);
-            }
+            CoordBox<DIM> box(boxOrigin, boxDim);
+            ret << box;
         }
 
         return ret;
@@ -476,12 +473,12 @@ public:
 
             Coord<DIM> boxOrigin = streak.origin - dia;
             Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
-            boxDim.x() = 1;
-            int endX = streak.endX + width;
+            boxDim.x() += streak.length() - 1;
+
             CoordBox<DIM> box(boxOrigin, boxDim);
 
-            for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-                Streak<DIM> newStreak(*i, endX);
+            for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+                Streak<DIM> newStreak(*i);
                 if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
                     splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
                 } else {
@@ -551,13 +548,10 @@ public:
         return *this;
     }
 
-    inline Region& operator<<(CoordBox<DIM> box)
+    inline Region& operator<<(const CoordBox<DIM>& box)
     {
-        int width = box.dimensions.x();
-        box.dimensions.x() = 1;
-
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            *this << Streak<DIM>(*i, i->x() + width);
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            *this << *i;
         }
 
         return *this;
