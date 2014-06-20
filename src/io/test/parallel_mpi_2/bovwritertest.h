@@ -10,32 +10,6 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class TestValueSelector
-{
-public:
-    typedef double VariableType;
-
-    void operator()(const TestCell<3>& cell, double *storage)
-    {
-        *storage = cell.testValue;
-    }
-
-    static std::string varName()
-    {
-        return "val";
-    }
-
-    static std::string dataFormat()
-    {
-        return "DOUBLE";
-    }
-
-    static int dataComponents()
-    {
-        return 1;
-    }
-};
-
 class BOVWriterTest : public CxxTest::TestSuite
 {
 public:
