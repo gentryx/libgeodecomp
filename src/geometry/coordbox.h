@@ -10,9 +10,6 @@
 namespace LibGeoDecomp {
 
 template<int DIM>
-class CoordBoxSequence;
-
-template<int DIM>
 class CoordBox
 {
 public:
@@ -39,7 +36,7 @@ public:
 
     inline bool operator!=(const CoordBox& other) const
     {
-        return ! (*this == other);
+        return !(*this == other);
     }
 
     inline Iterator begin() const
