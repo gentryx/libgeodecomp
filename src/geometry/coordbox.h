@@ -55,7 +55,7 @@ public:
 
     inline StreakIterator beginStreak() const
     {
-        return StreakIterator(origin, origin, dimensions);
+        return StreakIterator(origin, dimensions);
     }
 
     inline Iterator end() const
@@ -67,9 +67,8 @@ public:
 
     inline StreakIterator endStreak() const
     {
-        Coord<DIM> pos = origin;
-        pos[DIM - 1] += dimensions[DIM - 1];
-        return StreakIterator(origin, pos, dimensions);
+        Coord<DIM> pos = endPos(origin, dimensions);
+        return StreakIterator(pos, dimensions);
     }
 
     /**
@@ -169,9 +168,8 @@ public:
     public:
         inline StreakIterator(
             const Coord<DIM>& origin,
-            const Coord<DIM>& start,
             const Coord<DIM>& dimensions) :
-            iter(origin, start, dimensions),
+            iter(origin, origin, dimensions),
             endX(origin.x() + dimensions.x())
         {
             iter.end.x() = origin.x() + 1;
@@ -202,6 +200,24 @@ public:
         Iterator iter;
         int endX;
     };
+
+private:
+    Coord<1> endPos(const Coord<1>& origin, const Coord<1>& dimensions) const
+    {
+        Coord<1> pos = origin;
+        pos[0] += 1;
+
+        return pos;
+    }
+
+    template<int DIM2>
+    Coord<DIM2> endPos(const Coord<DIM2>& origin, const Coord<DIM2>& dimensions) const
+    {
+        Coord<DIM2> pos = origin;
+        pos[DIM2 - 1] += dimensions[DIM2 - 1];
+
+        return pos;
+    }
 };
 
 /**
