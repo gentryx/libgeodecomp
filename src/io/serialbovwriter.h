@@ -40,7 +40,7 @@ public:
         brickletDim(brickletDim)
     {}
 
-    template<typename MEMBER = int>
+    template<typename MEMBER>
     SerialBOVWriter(
         MEMBER CELL_TYPE:: *member = 0,
         const std::string& prefix = "serial_bov_writer_output",
