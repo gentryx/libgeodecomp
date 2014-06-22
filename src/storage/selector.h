@@ -118,6 +118,15 @@ public:
         filter(new DefaultFilter<CELL, MEMBER, MEMBER>)
     {}
 
+    Selector() :
+        memberPointer(0),
+        memberSize(0),
+        externalSize(0),
+        memberOffset(0),
+        memberName("memberName not initialized"),
+        filter(0)
+    {}
+
     template<typename MEMBER>
     Selector(MEMBER CELL:: *memberPointer, const std::string& memberName, const boost::shared_ptr<FilterBase<CELL> >& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),

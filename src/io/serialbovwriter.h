@@ -31,9 +31,9 @@ public:
     using Writer<CELL_TYPE>::prefix;
 
     SerialBOVWriter(
-        const Selector<CELL_TYPE>& selector,
-        const std::string& prefix,
-        const unsigned period,
+        const Selector<CELL_TYPE>& selector = Selector<CELL_TYPE>(),
+        const std::string& prefix = "serial_bov_writer_output",
+        const unsigned period = 1,
         const Coord<3>& brickletDim = Coord<3>()) :
         Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
         selector(selector),
@@ -42,9 +42,9 @@ public:
 
     template<typename MEMBER>
     SerialBOVWriter(
-        MEMBER CELL_TYPE:: *member = 0,
-        const std::string& prefix = "serial_bov_writer_output",
-        const unsigned period = 1,
+        MEMBER CELL_TYPE:: *member,
+        const std::string& prefix,
+        const unsigned period,
         const Coord<3>& brickletDim = Coord<3>()) :
         Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
         selector(member, "var"),
