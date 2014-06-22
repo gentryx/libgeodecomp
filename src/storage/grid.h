@@ -6,9 +6,9 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/selector.h>
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)

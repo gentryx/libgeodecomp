@@ -1,6 +1,7 @@
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
@@ -119,7 +120,7 @@ public:
         }
     }
 
-    class MyDummyFilter : public Selector<MyDummyCell>::Filter<double, Color>
+    class MyDummyFilter : public Filter<MyDummyCell, double, Color>
     {
     public:
         void copyStreakInImpl(const Color *first, const Color *last, double *target)
@@ -153,7 +154,7 @@ public:
         }
     };
 
-    class MySimpleFilter : public Selector<MyDummyCell>::SimpleFilter<char, double>
+    class MySimpleFilter : public SimpleFilter<MyDummyCell, char, double>
     {
     public:
         void load(const double& source, char *target)
@@ -169,7 +170,7 @@ public:
 
     void testLocalFilter()
     {
-        class FancyFilter : public Selector<MyDummyCell>::SimpleFilter<char, double>
+        class FancyFilter : public SimpleFilter<MyDummyCell, char, double>
         {
         public:
             void load(const double& source, char *target)
@@ -183,8 +184,8 @@ public:
             }
         };
 
-        Selector<MyDummyCell>::FilterBase *filter1 = new FancyFilter();
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter2(filter1);
+        FilterBase<MyDummyCell> *filter1 = new FancyFilter();
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter2(filter1);
         Selector<MyDummyCell> selector(&MyDummyCell::z, "varZ", filter2);
 
         std::vector<MyDummyCell> vec;
@@ -204,7 +205,7 @@ public:
     void testFilterAoS1()
     {
         // test copyMemberOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -233,7 +234,7 @@ public:
     void testFilterAoS2()
     {
         // test copyMemberOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 
@@ -264,7 +265,7 @@ public:
     void testFilterSoA1()
     {
         // test copyStreakOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -293,7 +294,7 @@ public:
     void testFilterSoA2()
     {
         // test copyStreakOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -329,7 +330,7 @@ public:
     void testFilterSoA3()
     {
         // test copyStreakOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 

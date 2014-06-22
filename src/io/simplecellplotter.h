@@ -2,8 +2,9 @@
 #define LIBGEODECOMP_IO_SIMPLECELLPLOTTER_H
 
 #include <libgeodecomp/io/initializer.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/palette.h>
+#include <libgeodecomp/storage/filter.h>
+#include <libgeodecomp/storage/selector.h>
 
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
@@ -13,7 +14,7 @@ namespace LibGeoDecomp {
 namespace SimpleCellPlotterHelpers {
 
 template<typename CELL, typename MEMBER, typename PALETTE>
-class CellToColor : public Selector<CELL>::template Filter<MEMBER, Color>
+class CellToColor : public Filter<CELL, MEMBER, Color>
 {
 public:
     CellToColor(const PALETTE& palette) :
@@ -66,7 +67,7 @@ public:
         cellToColor(
             memberPointer,
             "unnamed parameter",
-            boost::shared_ptr<typename Selector<CELL_TYPE>::FilterBase>(
+            boost::shared_ptr<FilterBase<CELL_TYPE> >(
                 new SimpleCellPlotterHelpers::CellToColor<CELL_TYPE, MEMBER, PALETTE>(palette)))
     {}
 

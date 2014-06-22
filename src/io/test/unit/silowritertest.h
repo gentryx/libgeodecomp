@@ -1,10 +1,10 @@
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/multicontainercell.h>
+#include <libgeodecomp/storage/selector.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #include <Python.h>
@@ -174,7 +174,7 @@ public:
 
 };
 
-class ParticleFilterBase : public Selector<DummyParticle>::Filter<FloatCoord<2>, double>
+class ParticleFilterBase : public Filter<DummyParticle, FloatCoord<2>, double>
 {
 public:
     void copyStreakInImpl(const double *first, const double *last, FloatCoord<2> *target)
@@ -300,8 +300,8 @@ public:
         SiloWriter<CellWithPointMesh> writer(prefix, 1);
         writer.addSelector(&CellWithPointMesh::dummyValue, "dummyValue");
 
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterY(new ParticleFilterY());
 
         writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
         writer.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
@@ -492,8 +492,8 @@ public:
             prefix,
             1);
 
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterY(new ParticleFilterY());
 
         writerA.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
         writerA.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
@@ -569,7 +569,7 @@ public:
         }
 
         // dump to disk:
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
 
         SiloWriter<CellWithPointMeshAndUnstructuredGrid> writer(
             &CellWithPointMeshAndUnstructuredGrid::particles,

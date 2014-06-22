@@ -7,8 +7,8 @@
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/storage/selector.h>
 
 #include <iomanip>
 
@@ -31,6 +31,18 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::Topology Topology;
 
     static const int DIM = Topology::DIM;
+
+    template<typename MEMBER>
+    BOVWriter(
+        MEMBER CELL_TYPE:: *member,
+        const std::string& prefix,
+        const unsigned period,
+        const Coord<3>& brickletDim = Coord<3>(),
+        const MPI_Comm& communicator = MPI_COMM_WORLD) :
+        Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >(prefix, period),
+        selector(member, "var"),
+        brickletDim(brickletDim)
+    {}
 
     BOVWriter(
         const Selector<CELL_TYPE>& selector,

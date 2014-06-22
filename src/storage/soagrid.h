@@ -6,9 +6,9 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
 

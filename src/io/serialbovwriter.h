@@ -40,6 +40,17 @@ public:
         brickletDim(brickletDim)
     {}
 
+    template<typename MEMBER = int>
+    SerialBOVWriter(
+        MEMBER CELL_TYPE:: *member = 0,
+        const std::string& prefix = "serial_bov_writer_output",
+        const unsigned period = 1,
+        const Coord<3>& brickletDim = Coord<3>()) :
+        Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
+        selector(member, "var"),
+        brickletDim(brickletDim)
+    {}
+
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
         if ((event == WRITER_STEP_FINISHED) && (step % period != 0)) {
@@ -137,25 +148,6 @@ private:
 
 class Serialization;
 
-}
-
-
-namespace boost {
-namespace serialization {
-
-template<typename ARCHIVE, typename CELL_TYPE>
-inline
-static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned /*version*/);
-
-template<class Archive, typename CELL_TYPE>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE> *object, const unsigned version)
-{
-    ::new(object)LibGeoDecomp::SerialBOVWriter<CELL_TYPE>("", 1);
-    serialize(archive, *object, version);
-}
-
-}
 }
 
 #endif

@@ -104,41 +104,6 @@ public:
     }
 };
 
-class CellToColor {
-public:
-    Color operator()(const ConwayCell& cell)
-    {
-        int val = (int)cell.alive * 255;
-        return Color(val, val, val);
-    }
-};
-
-class StateSelector
-{
-public:
-    typedef double VariableType;
-
-    void operator()(const ConwayCell& in, double *out) const
-    {
-        *out = in.alive;
-    }
-
-    static std::string varName()
-    {
-        return "alive";
-    }
-
-    static int dataComponents()
-    {
-        return 1;
-    }
-
-    static std::string dataFormat()
-    {
-        return "DOUBLE";
-    }
-};
-
 typedef
     HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
     SimulatorType;
@@ -156,7 +121,7 @@ BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
 typedef LibGeoDecomp::TracingWriter<ConwayCell> TracingWriterType;
 BOOST_CLASS_EXPORT_GUID(TracingWriterType, "TracingWriterConwayCell");
 
-typedef LibGeoDecomp::SerialBOVWriter<ConwayCell, StateSelector> BovWriterType;
+typedef LibGeoDecomp::SerialBOVWriter<ConwayCell> BovWriterType;
 BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
 
 typedef
@@ -187,7 +152,7 @@ int hpx_main()
             );
 
         HpxWriterCollectorType::SinkType sink(
-            new BovWriterType("game", outputFrequency),
+            new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
             sim.numUpdateGroups());
 
         sim.addWriter(
