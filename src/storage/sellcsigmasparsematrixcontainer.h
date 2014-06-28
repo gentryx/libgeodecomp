@@ -11,13 +11,16 @@
 namespace LibGeoDecomp {
 
 
-//OHNE SORTIEREN! SIGMA =1
-//NICHT PARRALEL!
+//OHNE SORTIEREN! SIGMA =1 TODO
 template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
 public:
-    SellCSigmaSparseMatrixContainer(){}
+    SellCSigmaSparseMatrixContainer(){
+        if (SIGMA != 1 && SIGMA % C != 0){
+            throw std::invalid_argument("SIGMA must be '1' or multiple of C");
+        }
+    }
 
     void matVecMul (std::vector<double> lhs, std::vector<double> rhs){
         //TODO
@@ -113,8 +116,6 @@ public:
             while (index < offsetEnd && col > column[index]){
                 index += C;
             }
-
-
 
             if (index >= offsetEnd ){
 //std::cout << ".a" << std::endl;
