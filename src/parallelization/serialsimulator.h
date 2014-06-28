@@ -56,11 +56,7 @@ public:
 
         // fixme: refactor serialsim, cudasim to reduce code duplication
         CoordBox<DIM> box = curGrid->boundingBox();
-        unsigned endX = box.dimensions.x();
-        box.dimensions.x() = 1;
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            simArea << Streak<DIM>(*i, endX);
-        }
+        simArea << box;
     }
 
     virtual ~SerialSimulator()

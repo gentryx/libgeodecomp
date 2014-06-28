@@ -185,6 +185,8 @@ add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} 
 
 add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
+add_config_option(WITH_LAX_VISIT_TESTS "Remove some of the stricter assertions from VisIt related unit tests -- VisIt sometimes produces erroneous results when running on a remote machine (e.g. for autobuilds)" false true)
+
 add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
 
 add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)

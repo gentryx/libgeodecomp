@@ -6,9 +6,9 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
 
@@ -54,7 +54,7 @@ public:
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *unused)
+        int *unused) const
     {
         for (int z = 0; z < gridDim.z(); ++z) {
             bool onEdge1 = false;
@@ -337,6 +337,7 @@ public:
     {
         edgeCell = cell;
         CELL dummy;
+
         delegate.callback(
             SoAGridHelpers::SetContent<CELL, false>(
                 actualDimensions, edgeRadii, edgeCell, dummy));

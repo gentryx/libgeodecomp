@@ -9,6 +9,7 @@
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/storage/collectioninterface.h>
+#include <libgeodecomp/storage/filterbase.h>
 
 #include <silo.h>
 #include <typeinfo>
@@ -297,7 +298,7 @@ public:
     void addSelectorForPointMesh(
         MEMBER CARGO:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<typename Selector<CARGO>::FilterBase>& filter)
+        const boost::shared_ptr<FilterBase<CARGO> >& filter)
     {
         addSelectorForPointMesh(Selector<CARGO>(memberPointer, memberName, filter));
     }
@@ -319,7 +320,7 @@ public:
     void addSelectorForUnstructuredGrid(
         MEMBER CARGO:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<typename Selector<CARGO>::FilterBase>& filter)
+        const boost::shared_ptr<FilterBase<CARGO> >& filter)
     {
         addSelectorForUnstructuredGrid(Selector<CARGO>(memberPointer, memberName, filter));
     }
@@ -339,7 +340,7 @@ public:
     void addSelector(
         MEMBER Cell:: *memberPointer,
         const std::string& memberName,
-        const boost::shared_ptr<typename Selector<Cell>::FilterBase>& filter)
+        const boost::shared_ptr<FilterBase<Cell> >& filter)
     {
         addSelector(Selector<Cell>(memberPointer, memberName, filter));
     }

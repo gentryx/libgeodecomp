@@ -6,9 +6,9 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/storage/coordmap.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/selector.h>
 
 // CodeGear's C++ compiler isn't compatible with boost::multi_array
 // (at least the version that ships with C++ Builder 2009)
@@ -117,11 +117,11 @@ public:
         cellMatrix(dim.toExtents()),
         edgeCell(edgeCell)
     {
-        CoordBox<DIM> lineStarts(Coord<DIM>(), dim);
-        lineStarts.dimensions.x() = 1;
-        for (typename CoordBox<DIM>::Iterator i = lineStarts.begin(); i != lineStarts.end(); ++i) {
-            CELL_TYPE *start = &(*this)[*i];
-            CELL_TYPE *end   = start + dim.x();
+        CoordBox<DIM> box(Coord<DIM>(), dim);
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            Streak<DIM> s = *i;
+            CELL_TYPE *start = &(*this)[s.origin];
+            CELL_TYPE *end   = start + s.length();
             std::fill(start, end, defaultCell);
         }
     }
@@ -142,6 +142,7 @@ public:
         resize(other.getDimensions());
         std::copy(other.cellMatrix.begin(), other.cellMatrix.end(), cellMatrix.begin());
         edgeCell = other.edgeCell;
+
         return *this;
     }
 

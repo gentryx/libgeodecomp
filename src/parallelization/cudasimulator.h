@@ -85,11 +85,7 @@ public:
         cudaMalloc(&devGridNew, byteSize);
 
         CoordBox<DIM> box = grid.boundingBox();
-        unsigned endX = box.dimensions.x();
-        box.dimensions.x() = 1;
-        for(typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            simArea << Streak<DIM>(*i, endX);
-        }
+        simArea << box;
     }
 
     /**

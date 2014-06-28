@@ -50,9 +50,9 @@ public:
     static const int DIM = Topology::DIM;
     static const int OUTPUT_ON_ALL_RANKS = -1;
 
-    TracingWriter(
-        const unsigned period,
-        const unsigned maxSteps,
+    explicit TracingWriter(
+        const unsigned period = 1,
+        const unsigned maxSteps = 1,
         int outputRank = OUTPUT_ON_ALL_RANKS,
         std::ostream& stream = std::cerr) :
         Clonable<Writer<CELL_TYPE>, TracingWriter<CELL_TYPE> >("", period),
@@ -62,11 +62,6 @@ public:
         lastStep(0),
         maxSteps(maxSteps)
     {}
-
-    ParallelWriter<CELL_TYPE> * clone()
-    {
-        return new TracingWriter(Writer<CELL_TYPE>::period, maxSteps, outputRank);
-    }
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
@@ -157,12 +152,6 @@ private:
     {
         return boost::posix_time::microsec_clock::local_time();
     }
-
-    TracingWriter() :
-        Writer<CELL_TYPE>("", 1),
-        ParallelWriter<CELL_TYPE>("", 1),
-        stream(std::cerr)
-    {}
 };
 
 class Serialization;

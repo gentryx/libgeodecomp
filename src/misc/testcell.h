@@ -138,8 +138,15 @@ public:
         isEdgeCell = !inBounds(pos);
     }
 
+    // fixme: can't we get rid of this by adding an "soa_accessor::operator CELL_TYPE()" ?
     template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
     TestCell(const LibFlatArray::soa_accessor<TestCell, DIM_X, DIM_Y, DIM_Z, INDEX>& hood)
+    {
+        hood >> *this;
+    }
+
+    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    TestCell(const LibFlatArray::soa_accessor_light<TestCell, DIM_X, DIM_Y, DIM_Z, INDEX>& hood)
     {
         hood >> *this;
     }

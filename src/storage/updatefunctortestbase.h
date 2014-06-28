@@ -63,14 +63,15 @@ public:
         int halfWidth = dim.x() / 2;
 
         CoordBox<DIM> lineStarts = gridOld.boundingBox();
-        lineStarts.dimensions.x() = 1;
 
         for (int s = 0; s < steps; ++s) {
-            for (typename CoordBox<DIM>::Iterator i = lineStarts.begin();
-                 i != lineStarts.end();
+            for (typename CoordBox<DIM>::StreakIterator i = lineStarts.beginStreak();
+                 i != lineStarts.endStreak();
                  ++i) {
-                Coord<DIM> origin1 = *i;
-                Coord<DIM> origin2 = *i;
+                Streak<DIM> streak = *i;
+
+                Coord<DIM> origin1 = streak.origin;
+                Coord<DIM> origin2 = streak.origin;
                 origin2.x() = halfWidth;
                 Streak<DIM> s1(origin1, halfWidth);
                 Streak<DIM> s2(origin2, dim.x());

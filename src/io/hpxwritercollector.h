@@ -128,8 +128,10 @@ public:
 
     typedef HpxWriterSink<CELL_TYPE, CONVERTER> SinkType;
 
-    HpxWriterCollector(const SinkType& sink) :
-        Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE, CONVERTER> >("", sink.getPeriod()),
+    explicit HpxWriterCollector(const SinkType& sink = SinkType()) :
+        Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE, CONVERTER> >(
+            "",
+            sink.getPeriod()),
         sink(sink)
     {}
 
@@ -151,10 +153,6 @@ public:
 
 private:
     SinkType sink;
-
-    HpxWriterCollector() :
-        ParallelWriter<CELL_TYPE>("", 1)
-    {}
 };
 
 class Serialization;

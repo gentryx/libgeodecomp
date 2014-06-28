@@ -13,6 +13,13 @@ template<typename BASE, typename IMPLEMENTATION>
 class Clonable : public BASE
 {
 public:
+    friend class Serialization;
+
+    /**
+     * these c-tors simply delegate to the BASE type, which includes
+     * the default c-tor, sans parameters.
+     */
+    explicit
     Clonable()
     {}
 
