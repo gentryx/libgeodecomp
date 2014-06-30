@@ -11,8 +11,6 @@ namespace LibGeoDecomp {
  * for a macro-generated specialization (see DEFINE_DATAACCESSOR).
  */
 template<typename CELL_TYPE, typename MEMBER_TYPE>
-// fixme: unify this with BOVWriter infrastucture
-// fixme: move to src/io?
 class DataAccessor
 {
 public:
