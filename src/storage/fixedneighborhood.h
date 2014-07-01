@@ -26,22 +26,22 @@ public:
 template<
     typename CELL,
     typename TOPOLOGY,
-    int DIM_X,
-    int DIM_Y,
-    int DIM_Z,
-    int INDEX,
+    long DIM_X,
+    long DIM_Y,
+    long DIM_Z,
+    long INDEX,
     template<
         typename CELL2,
-        int DIM_X2,
-        int DIM_Y2,
-        int DIM_Z2,
-        int INDEX2> class SOA_ACCESSOR_IN = LibFlatArray::soa_accessor,
+        long DIM_X2,
+        long DIM_Y2,
+        long DIM_Z2,
+        long INDEX2> class SOA_ACCESSOR_IN = LibFlatArray::soa_accessor,
     template<
         typename CELL3,
-        int DIM_X3,
-        int DIM_Y3,
-        int DIM_Z3,
-        int INDEX3> class SOA_ACCESSOR_OUT = LibFlatArray::soa_accessor_light
+        long DIM_X3,
+        long DIM_Y3,
+        long DIM_Z3,
+        long INDEX3> class SOA_ACCESSOR_OUT = LibFlatArray::soa_accessor_light
 
 >
 class FixedNeighborhood
@@ -68,14 +68,14 @@ public:
 
     __host__ __device__
     inline
-    int& index()
+    long& index()
     {
         return accessor.index;
     }
 
     __host__ __device__
     inline
-    const int& index() const
+    const long& index() const
     {
         return accessor.index;
     }
