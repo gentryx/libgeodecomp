@@ -182,23 +182,23 @@ public:
         GridType *grid)
     {
         visit_handle handle = VISIT_INVALID_HANDLE;
-        // if (VisIt_VariableData_alloc(&handle) != VISIT_OKAY) {
-        //     throw std::runtime_error("Could not allocate variable buffer");
-        // }
+        if (VisIt_VariableData_alloc(&handle) != VISIT_OKAY) {
+            throw std::runtime_error("Could not allocate variable buffer");
+        }
 
-        // CoordBox<DIM> box = grid->getBoundingBox();
-        // std::size_t expectedSize = box.dimensions.prod();
+        CoordBox<DIM> box = grid->boundingBox();
+        std::size_t expectedSize = box.dimensions.prod();
 
-        // if (dataBuffer.size() != expectedSize) {
-        //     dataBuffer.resize(expectedSize);
-        // }
+        if (dataBuffer.size() != expectedSize) {
+            dataBuffer.resize(expectedSize);
+        }
 
         // std::size_t index = 0;
-        // for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-        //     accessor->get(grid->at(*i), &dataBuffer[index++]);
-        // }
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            // accessor->get(grid->at(*i), &dataBuffer[index++]);
+        }
 
-        // VisItSetData<MEMBER_TYPE>()(handle, VISIT_OWNER_SIM, 1, dataBuffer.size(), &dataBuffer[0]);
+        VisItSetData<MEMBER_TYPE>()(handle, VISIT_OWNER_SIM, 1, dataBuffer.size(), &dataBuffer[0]);
 
         return handle;
     }
@@ -307,6 +307,8 @@ public:
 
         dataAccessors << boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> >(
             bufferingAccessor);
+
+        variableMap[accessor->type()] = dataAccessors.size() - 1;
     }
 
     // fixme: why not private?
@@ -339,21 +341,27 @@ public:
      */
     void initVarMem(int i)
     {
-        unsigned int size = getGrid()->boundingBox().size();
+        std::cout << "initVarMem(" << i << ")\n";
+        std::size_t byteSize = getGrid()->boundingBox().size();
 
-        if (strcmp("DOUBLE", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i].resize(size * sizeof(double));
-        } else if (strcmp("INT", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i].resize(size * sizeof(int));
-        } else if (strcmp("FLOAT", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i].resize(size * sizeof(float));
-        } else if (strcmp("CHAR", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i].resize(size * sizeof(char));
-        } else if (strcmp("LONG", dataAccessors[i]->getType().c_str()) == 0) {
-            values[i].resize(size * sizeof(long));
+
+        if (strcmp("DOUBLE", dataAccessors[i]->type().c_str()) == 0) {
+            byteSize *= sizeof(double);
+        } else if (strcmp("INT", dataAccessors[i]->type().c_str()) == 0) {
+            byteSize *= sizeof(int);
+        } else if (strcmp("FLOAT", dataAccessors[i]->type().c_str()) == 0) {
+            byteSize *= sizeof(float);
+        } else if (strcmp("CHAR", dataAccessors[i]->type().c_str()) == 0) {
+            byteSize *= sizeof(char);
+        } else if (strcmp("LONG", dataAccessors[i]->type().c_str()) == 0) {
+            byteSize *= sizeof(long);
         } else {
             throw std::invalid_argument("unknown variable type");
         }
+
+        std::cout << "  byteSize = " << byteSize << "\n";
+        values[i].resize(byteSize);
+
     }
 
     void initialized()
@@ -370,6 +378,11 @@ public:
         VisItInitializeSocketAndDumpSimFile(filename.c_str(), "",
             buffer, NULL, NULL, NULL);
 
+        values.resize(dataAccessors.size());
+        for (int i=0; i < dataAccessors.size(); ++i) {
+            initVarMem(i);
+        }
+
         checkVisitState();
     }
 
@@ -383,58 +396,58 @@ public:
     {
         // // fixme: no do-loops
         // // fixme: function too long
-        // do {
-        //     if (error != 0) {
-        //         break;
-        //     }
-        //     blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
-        //     visItState = VisItDetectInput(blocking, -1);
-        //     if (visItState <= -1) {
-        //         std::cerr << "Can’t recover from error!" << std::endl;
-        //         error = visItState;
-        //         runMode = VISIT_SIMMODE_RUNNING;
-        //         break;
-        //     } else if (visItState == 0) {
-        //         /* There was no input from VisIt, return control to sim. */
-        //         break;
-        //     } else if (visItState == 1) {
-        //         /* VisIt is trying to connect to sim. */
-        //         if (VisItAttemptToCompleteConnection()) {
-        //             std::cout << "VisIt connected" << std::endl;
+        do {
+            if (error != 0) {
+                break;
+            }
+            blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
+            visItState = VisItDetectInput(blocking, -1);
+            if (visItState <= -1) {
+                std::cerr << "Can’t recover from error!" << std::endl;
+                error = visItState;
+                runMode = VISIT_SIMMODE_RUNNING;
+                break;
+            } else if (visItState == 0) {
+                /* There was no input from VisIt, return control to sim. */
+                break;
+            } else if (visItState == 1) {
+                /* VisIt is trying to connect to sim. */
+                if (VisItAttemptToCompleteConnection()) {
+                    std::cout << "VisIt connected" << std::endl;
 
-        //             VisItSetCommandCallback(VisItWriterHelpers::ControlCommandCallback<CELL_TYPE>,
-        //                     reinterpret_cast<void*>(this));
-        //             VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
+                    VisItSetCommandCallback(VisItWriterHelpers::ControlCommandCallback<CELL_TYPE>,
+                            reinterpret_cast<void*>(this));
+                    VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
 
-        //             typedef typename MESH_TYPE::template GetMesh<CELL_TYPE, DIMENSIONS> Mesh;
-        //             VisItSetGetMesh(Mesh::SimGetMesh, reinterpret_cast<void*>(this));
+                    typedef typename MESH_TYPE::template GetMesh<CELL_TYPE, DIMENSIONS> Mesh;
+                    VisItSetGetMesh(Mesh::SimGetMesh, reinterpret_cast<void*>(this));
 
-        //             VisItSetGetVariable(callSetGetVariable, reinterpret_cast<void*>(this));
-        //         } else {
-        //             char *visitError = VisItGetLastError();
-        //             std::cerr << "VisIt did not connect: " << visitError << std::endl;
-        //         }
-        //     } else if (visItState == 2) {
-        //         /* VisIt wants to tell the engine something. */
-        //         runMode = VISIT_SIMMODE_STOPPED;
-        //         if (!VisItProcessEngineCommand()) {
-        //             /* Disconnect on an error or closed connection. */
-        //             std::cout << "VisIt disconnected" << std::endl;
-        //             VisItDisconnect();
+                    VisItSetGetVariable(callSetGetVariable, reinterpret_cast<void*>(this));
+                } else {
+                    char *visitError = VisItGetLastError();
+                    std::cerr << "VisIt did not connect: " << visitError << std::endl;
+                }
+            } else if (visItState == 2) {
+                /* VisIt wants to tell the engine something. */
+                runMode = VISIT_SIMMODE_STOPPED;
+                if (!VisItProcessEngineCommand()) {
+                    /* Disconnect on an error or closed connection. */
+                    std::cout << "VisIt disconnected" << std::endl;
+                    VisItDisconnect();
 
-        //             deleteMemory();
+                    deleteMemory();
 
-        //             /* Start running again if VisIt closes. */
-        //             runMode = VISIT_SIMMODE_RUNNING;
-        //             break;
-        //         }
-        //         if (runMode == SIMMODE_STEP) {
-        //             runMode = VISIT_SIMMODE_STOPPED;
-        //             break;
-        //         }
-        //     }
-        // }
-        // while(true);
+                    /* Start running again if VisIt closes. */
+                    runMode = VISIT_SIMMODE_RUNNING;
+                    break;
+                }
+                if (runMode == SIMMODE_STEP) {
+                    runMode = VISIT_SIMMODE_STOPPED;
+                    break;
+                }
+            }
+        }
+        while(true);
     }
 
     /**
@@ -447,122 +460,149 @@ public:
         const char *name,
         void *cbdata)
     {
-        // typedef SetGetVariable<double, SetDataDouble> VisitDataDouble;
-        // typedef SetGetVariable<int, SetDataInt> VisitDataInt;
-        // typedef SetGetVariable<float, SetDataFloat> VisitDataFloat;
-        // typedef SetGetVariable<char, SetDataChar> VisitDataChar;
-        // typedef SetGetVariable<long, SetDataLong> VisitDataLong;
+        std::cout << "callSetGetVariable() A\n";
+        typedef SetGetVariable<double, SetDataDouble> VisitDataDouble;
+        typedef SetGetVariable<int, SetDataInt> VisitDataInt;
+        typedef SetGetVariable<float, SetDataFloat> VisitDataFloat;
+        typedef SetGetVariable<char, SetDataChar> VisitDataChar;
+        typedef SetGetVariable<long, SetDataLong> VisitDataLong;
 
-        // // fixme: this should be the writer
-        // SVW *simData = reinterpret_cast<SVW*>(cbdata);
+        // fixme: this should be the writer
+        SVW *simData = reinterpret_cast<SVW*>(cbdata);
 
-        // for (int i=0; i < simData->getNumVars(); ++i) {
-        //     if (strcmp("DOUBLE", simData->dataAccessors[i]->getType().c_str()) == 0) {
-        //         return VisitDataDouble::SimGetVariable(domain, name, simData);
-        //     } else if (strcmp("INT", simData->dataAccessors[i]->getType().c_str()) == 0) {
-        //         return VisitDataInt::SimGetVariable(domain, name, simData);
-        //     } else if (strcmp("FLOAT", simData->dataAccessors[i]->getType().c_str()) == 0) {
-        //         return VisitDataFloat::SimGetVariable(domain, name, simData);
-        //     } else if (strcmp("CHAR", simData->dataAccessors[i]->getType().c_str()) == 0) {
-        //         return VisitDataChar::SimGetVariable(domain, name, simData);
-        //     } else if (strcmp("LONG", simData->dataAccessors[i]->getType().c_str()) == 0) {
-        //         return VisitDataLong::SimGetVariable(domain, name, simData);
-        //     } else {
-        //         simData->setError(UNKNOWN_TYPE);
-        //     }
-        // }
+        std::cout << "callSetGetVariable() B\n";
+        for (int i=0; i < simData->getNumVars(); ++i) {
+            if (strcmp("DOUBLE", simData->dataAccessors[i]->type().c_str()) == 0) {
+                return VisitDataDouble::SimGetVariable(domain, name, simData);
+            } else if (strcmp("INT", simData->dataAccessors[i]->type().c_str()) == 0) {
+                return VisitDataInt::SimGetVariable(domain, name, simData);
+            } else if (strcmp("FLOAT", simData->dataAccessors[i]->type().c_str()) == 0) {
+                return VisitDataFloat::SimGetVariable(domain, name, simData);
+            } else if (strcmp("CHAR", simData->dataAccessors[i]->type().c_str()) == 0) {
+                return VisitDataChar::SimGetVariable(domain, name, simData);
+            } else if (strcmp("LONG", simData->dataAccessors[i]->type().c_str()) == 0) {
+                return VisitDataLong::SimGetVariable(domain, name, simData);
+            } else {
+                simData->setError(UNKNOWN_TYPE);
+            }
+        }
 
+        std::cout << "callSetGetVariable() C\n";
         return VISIT_INVALID_HANDLE;
     }
 
     /**
      *
      */
-    // template<typename T, typename SETDATAFUNC>
-    // class SetGetVariable
-    // {
-    // public:
-    //     // fixme: too long
-    //     // fixme: replace with getVariable from VisItDataAccessor
-    //     static visit_handle SimGetVariable(
-    //         int domain,
-    //         const char *name,
-    //         SVW *simData)
-    //     {
-    //         visit_handle h = VISIT_INVALID_HANDLE;
-    //         CoordBox<DIMENSIONS> box = simData->getGrid()->boundingBox();
-    //         unsigned int size = box.size();
+    template<typename T, typename SETDATAFUNC>
+    class SetGetVariable
+    {
+    public:
+        // fixme: too long
+        // fixme: replace with getVariable from VisItDataAccessor
+        static visit_handle SimGetVariable(
+            int domain,
+            const char *name,
+            SVW *simData)
+        {
+            std::cout << "SimGetVariable() A\n";
 
-    //         if(VisIt_VariableData_alloc(&h) == VISIT_OKAY) {
-    //             if(simData->variableMap.find(name) != simData->variableMap.end()) {
-    //                 int num = simData->variableMap[name];
-    //                 T *value  = (T *) &simData->values[num][0];
-    //                 unsigned j = 0;
-    //                 for (typename CoordBox<DIMENSIONS>::Iterator i = box.begin();
-    //                         i != box.end(); ++i) {
-    //                     simData->dataAccessors[num]->getFunction(
-    //                             simData->getGrid()->at(*i), reinterpret_cast<void*>(&value[j]));
-    //                     ++j;
-    //                 }
-    //                 SETDATAFUNC()(h, VISIT_OWNER_SIM, 1, size, value);
-    //             } else {
-    //                 VisIt_VariableData_free(h);
-    //                 h = VISIT_INVALID_HANDLE;
-    //             }
-    //         }
-    //         return h;
-    //     }
-    // };
+            visit_handle h = VISIT_INVALID_HANDLE;
+            CoordBox<DIMENSIONS> box = simData->getGrid()->boundingBox();
+            unsigned int size = box.size();
 
-    // // fixme: delete this dead code!
-    // class SetDataDouble
-    // {
-    // public:
-    //     void operator()(visit_handle obj, int owner, int ncomps, int ntuples, double *ptr)
-    //     {
-    //         VisIt_VariableData_setDataD(obj, owner, ncomps, ntuples, ptr);
-    //     }
-    // };
+            std::cout << "SimGetVariable() B\n";
 
-    // // fixme: delete this dead code!
-    // class SetDataInt
-    // {
-    // public:
-    //     void operator()(visit_handle obj, int owner, int ncomps, int ntuples, int  *ptr)
-    //     {
-    //         VisIt_VariableData_setDataI(obj, owner, ncomps, ntuples, ptr);
-    //     }
-    // };
+            if(VisIt_VariableData_alloc(&h) == VISIT_OKAY) {
+                std::cout << "SimGetVariable() C\n";
 
-    // // fixme: delete this dead code!
-    // class SetDataFloat
-    // {
-    // public:
-    //     void operator()(visit_handle obj, int owner, int ncomps, int ntuples, float *ptr)
-    //     {
-    //         VisIt_VariableData_setDataF(obj, owner, ncomps, ntuples, ptr);
-    //     }
-    // };
+                if(simData->variableMap.find(name) != simData->variableMap.end()) {
+                    std::cout << "SimGetVariable() D\n";
 
-    // // fixme: delete this dead code!
-    // class SetDataChar
-    // {
-    // public:
-    //     void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, char *ptr)
-    //     {
-    //         VisIt_VariableData_setDataC(obj, owner, ncomps, ntuples, ptr);
-    //     }
-    // };
+                    int num = simData->variableMap[name];
+                    std::cout << "SimGetVariable() D1\n";
+                    T *value  = (T *) &simData->values[num][0];
+                    std::cout << "SimGetVariable() D2\n";
+                    unsigned j = 0;
 
-    // // fixme: delete this dead code!
-    // class SetDataLong
-    // {
-    // public:
-    //     void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, long *ptr)
-    //     {
-    //         VisIt_VariableData_setDataL(obj, owner, ncomps, ntuples, ptr);
-    //     }
-    // };
+                    std::cout << "SimGetVariable() E\n";
+
+                    for (typename CoordBox<DIMENSIONS>::Iterator i = box.begin();
+                            i != box.end(); ++i) {
+                        std::cout << "SimGetVariable() F\n";
+
+                        // simData->dataAccessors[num]->getFunction(
+                        //         simData->getGrid()->at(*i), reinterpret_cast<void*>(&value[j]));
+                        ++j;
+                    }
+
+                    std::cout << "SimGetVariable() G\n";
+                    SETDATAFUNC()(h, VISIT_OWNER_SIM, 1, size, value);
+                } else {
+                    std::cout << "SimGetVariable() H\n";
+
+                    VisIt_VariableData_free(h);
+                    h = VISIT_INVALID_HANDLE;
+                }
+
+                std::cout << "SimGetVariable() I\n";
+            }
+
+            std::cout << "SimGetVariable() J\n";
+
+            return h;
+        }
+    };
+
+    // fixme: delete this dead code!
+    class SetDataDouble
+    {
+    public:
+        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, double *ptr)
+        {
+            VisIt_VariableData_setDataD(obj, owner, ncomps, ntuples, ptr);
+        }
+    };
+
+    // fixme: delete this dead code!
+    class SetDataInt
+    {
+    public:
+        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, int  *ptr)
+        {
+            VisIt_VariableData_setDataI(obj, owner, ncomps, ntuples, ptr);
+        }
+    };
+
+    // fixme: delete this dead code!
+    class SetDataFloat
+    {
+    public:
+        void operator()(visit_handle obj, int owner, int ncomps, int ntuples, float *ptr)
+        {
+            VisIt_VariableData_setDataF(obj, owner, ncomps, ntuples, ptr);
+        }
+    };
+
+    // fixme: delete this dead code!
+    class SetDataChar
+    {
+    public:
+        void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, char *ptr)
+        {
+            VisIt_VariableData_setDataC(obj, owner, ncomps, ntuples, ptr);
+        }
+    };
+
+    // fixme: delete this dead code!
+    class SetDataLong
+    {
+    public:
+        void operator()(visit_handle obj, int owner, int	ncomps, int ntuples, long *ptr)
+        {
+            VisIt_VariableData_setDataL(obj, owner, ncomps, ntuples, ptr);
+        }
+    };
 
     /**
      * set meta data for visit:
@@ -570,101 +610,104 @@ public:
      */
     static visit_handle SimGetMetaData(void *cbdata)
     {
-        return 0;
-        // visit_handle md = VISIT_INVALID_HANDLE;
-        // SVW *simData = reinterpret_cast<SVW*>(cbdata);
+        // return 0;
+        visit_handle md = VISIT_INVALID_HANDLE;
+        SVW *simData = reinterpret_cast<SVW*>(cbdata);
 
-        // // fixme: too long
-        // if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) {
-        //     if (simData->runMode == VISIT_SIMMODE_STOPPED) {
-        //         VisIt_SimulationMetaData_setMode(md, VISIT_SIMMODE_STOPPED);
-        //     } else if (simData->runMode == SIM_STOPPED) {
-        //         VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
-        //     } else {
-        //         VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
-        //     }
-        //     VisIt_SimulationMetaData_setCycleTime(md, simData->getStep(), 0);
+        // fixme: too long
+        if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) {
+            if (simData->runMode == VISIT_SIMMODE_STOPPED) {
+                VisIt_SimulationMetaData_setMode(md, VISIT_SIMMODE_STOPPED);
+            } else if (simData->runMode == SIM_STOPPED) {
+                VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
+            } else {
+                VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
+            }
+            VisIt_SimulationMetaData_setCycleTime(md, simData->getStep(), 0);
 
-        //     visit_handle m1 = VISIT_INVALID_HANDLE;
-        //     visit_handle m2 = VISIT_INVALID_HANDLE;
-        //     visit_handle vmd = VISIT_INVALID_HANDLE;
+            visit_handle m1 = VISIT_INVALID_HANDLE;
+            visit_handle m2 = VISIT_INVALID_HANDLE;
+            visit_handle vmd = VISIT_INVALID_HANDLE;
 
-        //     if (DIMENSIONS == 2) {
-        //         /* Set the first mesh's properties.*/
-        //         if (VisIt_MeshMetaData_alloc(&m1) == VISIT_OKAY) {
-        //             /* Set the mesh's properties for 2d.*/
-        //             VisIt_MeshMetaData_setName(m1, "mesh2d");
-        //             VisIt_MeshMetaData_setMeshType(m1, MESH_TYPE::getMeshType());
-        //             VisIt_MeshMetaData_setTopologicalDimension(m1, 0);
-        //             VisIt_MeshMetaData_setSpatialDimension(m1, 2);
-        //             VisIt_MeshMetaData_setXUnits(m1, "");
-        //             VisIt_MeshMetaData_setYUnits(m1, "");
-        //             VisIt_MeshMetaData_setXLabel(m1, "Width");
-        //             VisIt_MeshMetaData_setYLabel(m1, "Height");
+            if (DIMENSIONS == 2) {
+                /* Set the first mesh's properties.*/
+                if (VisIt_MeshMetaData_alloc(&m1) == VISIT_OKAY) {
+                    /* Set the mesh's properties for 2d.*/
+                    VisIt_MeshMetaData_setName(m1, "mesh2d");
+                    VisIt_MeshMetaData_setMeshType(m1, MESH_TYPE::getMeshType());
+                    VisIt_MeshMetaData_setTopologicalDimension(m1, 2);
+                    VisIt_MeshMetaData_setSpatialDimension(m1, 2);
+                    // FIXME: do we need any units here?
+                    VisIt_MeshMetaData_setXUnits(m1, "");
+                    VisIt_MeshMetaData_setYUnits(m1, "");
+                    VisIt_MeshMetaData_setXLabel(m1, "Width");
+                    VisIt_MeshMetaData_setYLabel(m1, "Height");
 
-        //             VisIt_SimulationMetaData_addMesh(md, m1);
-        //         }
+                    VisIt_SimulationMetaData_addMesh(md, m1);
+                }
 
-        //         /* Add a zonal scalar variable on mesh2d. */
-        //         for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
-        //             it != simData->variableMap.end(); ++it) {
-        //             if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
-        //                 VisIt_VariableMetaData_setName(vmd, it->first.c_str());
-        //                 VisIt_VariableMetaData_setMeshName(vmd, "mesh2d");
-        //                 VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
-        //                 VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
+                /* Add a zonal scalar variable on mesh2d. */
+                std::cout << "adding vars, " << simData->variableMap.size() << "\n";
+                for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
+                    it != simData->variableMap.end(); ++it) {
+                    std::cout << "  " << it->first << "\n";
+                    if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
+                        VisIt_VariableMetaData_setName(vmd, it->first.c_str());
+                        VisIt_VariableMetaData_setMeshName(vmd, "mesh2d");
+                        VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
+                        VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
 
-        //                 VisIt_SimulationMetaData_addVariable(md, vmd);
-        //             }
-        //         }
-        //     }
+                        VisIt_SimulationMetaData_addVariable(md, vmd);
+                    }
+                }
+            }
 
-        //     if (DIMENSIONS == 3) {
-        //         /* Set the second mesh's properties for 3d.*/
-        //         if (VisIt_MeshMetaData_alloc(&m2) == VISIT_OKAY) {
-        //             /* Set the mesh's properties.*/
-        //             VisIt_MeshMetaData_setName(m2, "mesh3d");
-        //             VisIt_MeshMetaData_setMeshType(m2, MESH_TYPE::getMeshType());
-        //             VisIt_MeshMetaData_setTopologicalDimension(m2, 0);
-        //             VisIt_MeshMetaData_setSpatialDimension(m2, 3);
-        //             VisIt_MeshMetaData_setXUnits(m2, "");
-        //             VisIt_MeshMetaData_setYUnits(m2, "");
-        //             VisIt_MeshMetaData_setZUnits(m2, "");
-        //             VisIt_MeshMetaData_setXLabel(m2, "Width");
-        //             VisIt_MeshMetaData_setYLabel(m2, "Height");
-        //             VisIt_MeshMetaData_setZLabel(m2, "Depth");
+            if (DIMENSIONS == 3) {
+                /* Set the second mesh's properties for 3d.*/
+                if (VisIt_MeshMetaData_alloc(&m2) == VISIT_OKAY) {
+                    /* Set the mesh's properties.*/
+                    VisIt_MeshMetaData_setName(m2, "mesh3d");
+                    VisIt_MeshMetaData_setMeshType(m2, MESH_TYPE::getMeshType());
+                    VisIt_MeshMetaData_setTopologicalDimension(m2, 0);
+                    VisIt_MeshMetaData_setSpatialDimension(m2, 3);
+                    VisIt_MeshMetaData_setXUnits(m2, "");
+                    VisIt_MeshMetaData_setYUnits(m2, "");
+                    VisIt_MeshMetaData_setZUnits(m2, "");
+                    VisIt_MeshMetaData_setXLabel(m2, "Width");
+                    VisIt_MeshMetaData_setYLabel(m2, "Height");
+                    VisIt_MeshMetaData_setZLabel(m2, "Depth");
 
-        //             VisIt_SimulationMetaData_addMesh(md, m2);
-        //         }
+                    VisIt_SimulationMetaData_addMesh(md, m2);
+                }
 
-        //         /* Add a zonal scalar variable on mesh3d. */
-        //         for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
-        //             it != simData->variableMap.end(); ++it) {
-        //             if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
-        //                 VisIt_VariableMetaData_setName(vmd, it->first.c_str());
-        //                 VisIt_VariableMetaData_setMeshName(vmd, "mesh3d");
-        //                 VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
-        //                 VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
+                /* Add a zonal scalar variable on mesh3d. */
+                for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
+                    it != simData->variableMap.end(); ++it) {
+                    if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
+                        VisIt_VariableMetaData_setName(vmd, it->first.c_str());
+                        VisIt_VariableMetaData_setMeshName(vmd, "mesh3d");
+                        VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
+                        VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
 
-        //                 VisIt_SimulationMetaData_addVariable(md, vmd);
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     return VISIT_INVALID_HANDLE;
-        // }
+                        VisIt_SimulationMetaData_addVariable(md, vmd);
+                    }
+                }
+            }
+        } else {
+            return VISIT_INVALID_HANDLE;
+        }
 
-        // const char *cmd_names[] = { "halt", "step", "run" };
-        // for (int i = 0; i < sizeof(cmd_names) / sizeof(const char *);
-        //         ++i) {
-        //     visit_handle cmd = VISIT_INVALID_HANDLE;
+        const char *cmd_names[] = { "halt", "step", "run" };
+        for (int i = 0; i < sizeof(cmd_names) / sizeof(const char *);
+                ++i) {
+            visit_handle cmd = VISIT_INVALID_HANDLE;
 
-        //     if (VisIt_CommandMetaData_alloc(&cmd) == VISIT_OKAY) {
-        //         VisIt_CommandMetaData_setName(cmd, cmd_names[i]);
-        //         VisIt_SimulationMetaData_addGenericCommand(md, cmd);
-        //     }
-        // }
-        // return md;
+            if (VisIt_CommandMetaData_alloc(&cmd) == VISIT_OKAY) {
+                VisIt_CommandMetaData_setName(cmd, cmd_names[i]);
+                VisIt_SimulationMetaData_addGenericCommand(md, cmd);
+            }
+        }
+        return md;
     }
 
 };
@@ -695,8 +738,8 @@ public:
             VisItWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
                     <VisItWriter<CELL, RectilinearMesh >*>(cdata);
 
-            int dim_x = simData->getGrid()->getDimensions().x() + 1;
-            int dim_y = simData->getGrid()->getDimensions().y() + 1;
+            int dim_x = simData->getGrid()->dimensions().x() + 1;
+            int dim_y = simData->getGrid()->dimensions().y() + 1;
 
             if(strcmp(name, "mesh2d") == 0) {
                 if(VisIt_RectilinearMesh_alloc(&h) != VISIT_ERROR) {
@@ -736,9 +779,9 @@ public:
             VisItWriter<CELL, RectilinearMesh >* simData = reinterpret_cast
                     <VisItWriter<CELL, RectilinearMesh >*>(cdata);
 
-            int dim_x = simData->getGrid()->getDimensions().x() + 1;
-            int dim_y = simData->getGrid()->getDimensions().y() + 1;
-            int dim_z = simData->getGrid()->getDimensions().z() + 1;
+            int dim_x = simData->getGrid()->dimensions().x() + 1;
+            int dim_y = simData->getGrid()->dimensions().y() + 1;
+            int dim_z = simData->getGrid()->dimensions().z() + 1;
 
             if(strcmp(name, "mesh3d") == 0) {
                 if(VisIt_RectilinearMesh_alloc(&h) != VISIT_ERROR) {
