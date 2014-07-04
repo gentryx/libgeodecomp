@@ -41,7 +41,7 @@ namespace LibGeoDecomp {
 
 class RectilinearMesh;
 
-template<typename CELL_TYPE , typename MESH_TYPE=RectilinearMesh>
+template<typename CELL_TYPE>
 class VisItWriter;
 
 namespace VisItWriterHelpers {
@@ -211,15 +211,14 @@ private:
  * This writer uses VisIt's Libsim so users can connect to a running
  * simulation job for in situ visualization.
  */
-template<typename CELL_TYPE, typename MESH_TYPE>
-class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE, MESH_TYPE> >
+template<typename CELL_TYPE>
+class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >
 {
 public:
     typedef std::vector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
-    typedef VisItWriter<CELL_TYPE, MESH_TYPE> SVW;
-    static const int DIMENSIONS = Topology::DIM;
+    static const int DIM = Topology::DIM;
 
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
@@ -229,7 +228,7 @@ public:
         const std::string& prefix,
         const unsigned& period = 1,
         const int& runMode = VISIT_SIMMODE_RUNNING) :
-        Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE, MESH_TYPE> >(prefix, period),
+        Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >(prefix, period),
         blocking(0),
         visItState(0),
         error(0),
@@ -248,9 +247,6 @@ public:
             VisItTimeStepChanged();
 
             if (((newStep % period) == 0) && (VisItIsConnected())) {
-                std::cout << "VisItWriter::stepFinished()" << std::endl;
-                std::cout << "  step: " << newStep << std::endl;
-                std::cout << "  event: " << int(newEvent) << std::endl;
                 if (VisItIsConnected()) {
                     VisItUpdatePlots();
                 }
@@ -311,21 +307,6 @@ public:
         variableMap[accessor->type()] = dataAccessors.size() - 1;
     }
 
-    std::vector<double>& getXCoords()
-    {
-        return xCoordinates;
-    }
-
-    std::vector<double>& getYCoords()
-    {
-        return yCoordinates;
-    }
-
-    std::vector<double>& getZCoords()
-    {
-        return zCoordinates;
-    }
-
   private:
     int blocking;
     int visItState;
@@ -338,9 +319,7 @@ public:
     const GridType *grid;
     unsigned step;
 
-    std::vector<double> xCoordinates;
-    std::vector<double> yCoordinates;
-    std::vector<double> zCoordinates;
+    std::vector<double> gridCoordinates[DIM];
 
     void deleteMemory()
     {
@@ -355,7 +334,6 @@ public:
      */
     void initVarMem(int i)
     {
-        std::cout << "initVarMem(" << i << ")\n";
         std::size_t byteSize = getGrid()->boundingBox().size();
 
 
@@ -373,9 +351,7 @@ public:
             throw std::invalid_argument("unknown variable type");
         }
 
-        std::cout << "  byteSize = " << byteSize << "\n";
         values[i].resize(byteSize);
-
     }
 
     void initialized()
@@ -434,8 +410,7 @@ public:
                             reinterpret_cast<void*>(this));
                     VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
 
-                    typedef typename MESH_TYPE::template GetMesh<CELL_TYPE, DIMENSIONS> Mesh;
-                    VisItSetGetMesh(Mesh::SimGetMesh, reinterpret_cast<void*>(this));
+                    VisItSetGetMesh(getRectilinearMesh, reinterpret_cast<void*>(this));
 
                     VisItSetGetVariable(callSetGetVariable, reinterpret_cast<void*>(this));
                 } else {
@@ -475,7 +450,6 @@ public:
         const char *name,
         void *cbdata)
     {
-        std::cout << "callSetGetVariable() A\n";
         typedef SetGetVariable<double, SetDataDouble> VisitDataDouble;
         typedef SetGetVariable<int, SetDataInt> VisitDataInt;
         typedef SetGetVariable<float, SetDataFloat> VisitDataFloat;
@@ -483,9 +457,8 @@ public:
         typedef SetGetVariable<long, SetDataLong> VisitDataLong;
 
         // fixme: this should be the writer
-        SVW *simData = reinterpret_cast<SVW*>(cbdata);
+        VisItWriter<CELL_TYPE> *simData = reinterpret_cast<VisItWriter<CELL_TYPE>*>(cbdata);
 
-        std::cout << "callSetGetVariable() B\n";
         for (int i=0; i < simData->getNumVars(); ++i) {
             if (strcmp("DOUBLE", simData->dataAccessors[i]->type().c_str()) == 0) {
                 return VisitDataDouble::SimGetVariable(domain, name, simData);
@@ -503,7 +476,6 @@ public:
             }
         }
 
-        std::cout << "callSetGetVariable() C\n";
         return VISIT_INVALID_HANDLE;
     }
 
@@ -519,54 +491,33 @@ public:
         static visit_handle SimGetVariable(
             int domain,
             const char *name,
-            SVW *simData)
+            VisItWriter<CELL_TYPE> *simData)
         {
-            std::cout << "SimGetVariable() A\n";
-
-            visit_handle h = VISIT_INVALID_HANDLE;
-            CoordBox<DIMENSIONS> box = simData->getGrid()->boundingBox();
+            visit_handle handle = VISIT_INVALID_HANDLE;
+            CoordBox<DIM> box = simData->getGrid()->boundingBox();
             unsigned int size = box.size();
 
-            std::cout << "SimGetVariable() B\n";
-
-            if(VisIt_VariableData_alloc(&h) == VISIT_OKAY) {
-                std::cout << "SimGetVariable() C\n";
-
+            if(VisIt_VariableData_alloc(&handle) == VISIT_OKAY) {
                 if(simData->variableMap.find(name) != simData->variableMap.end()) {
-                    std::cout << "SimGetVariable() D\n";
-
                     int num = simData->variableMap[name];
-                    std::cout << "SimGetVariable() D1\n";
                     T *value  = (T *) &simData->values[num][0];
-                    std::cout << "SimGetVariable() D2\n";
                     unsigned j = 0;
 
-                    std::cout << "SimGetVariable() E\n";
-
-                    for (typename CoordBox<DIMENSIONS>::Iterator i = box.begin();
+                    for (typename CoordBox<DIM>::Iterator i = box.begin();
                             i != box.end(); ++i) {
-                        std::cout << "SimGetVariable() F\n";
-
                         // simData->dataAccessors[num]->getFunction(
                         //         simData->getGrid()->at(*i), reinterpret_cast<void*>(&value[j]));
                         ++j;
                     }
 
-                    std::cout << "SimGetVariable() G\n";
-                    SETDATAFUNC()(h, VISIT_OWNER_SIM, 1, size, value);
+                    SETDATAFUNC()(handle, VISIT_OWNER_SIM, 1, size, value);
                 } else {
-                    std::cout << "SimGetVariable() H\n";
-
-                    VisIt_VariableData_free(h);
-                    h = VISIT_INVALID_HANDLE;
+                    VisIt_VariableData_free(handle);
+                    handle = VISIT_INVALID_HANDLE;
                 }
-
-                std::cout << "SimGetVariable() I\n";
             }
 
-            std::cout << "SimGetVariable() J\n";
-
-            return h;
+            return handle;
         }
     };
 
@@ -628,7 +579,7 @@ public:
     {
         // return 0;
         visit_handle md = VISIT_INVALID_HANDLE;
-        SVW *simData = reinterpret_cast<SVW*>(cbdata);
+        VisItWriter<CELL_TYPE> *simData = reinterpret_cast<VisItWriter<CELL_TYPE>*>(cbdata);
 
         // fixme: too long
         if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) {
@@ -645,12 +596,13 @@ public:
             visit_handle m2 = VISIT_INVALID_HANDLE;
             visit_handle vmd = VISIT_INVALID_HANDLE;
 
-            if (DIMENSIONS == 2) {
+            if (DIM == 2) {
                 /* Set the first mesh's properties.*/
                 if (VisIt_MeshMetaData_alloc(&m1) == VISIT_OKAY) {
                     /* Set the mesh's properties for 2d.*/
                     VisIt_MeshMetaData_setName(m1, "mesh2d");
-                    VisIt_MeshMetaData_setMeshType(m1, MESH_TYPE::getMeshType());
+                    // fixme: alternative: VISIT_MESHTYPE_POINT
+                    VisIt_MeshMetaData_setMeshType(m1, VISIT_MESHTYPE_RECTILINEAR);
                     VisIt_MeshMetaData_setTopologicalDimension(m1, 2);
                     VisIt_MeshMetaData_setSpatialDimension(m1, 2);
                     // FIXME: do we need any units here?
@@ -678,12 +630,13 @@ public:
                 }
             }
 
-            if (DIMENSIONS == 3) {
+            if (DIM == 3) {
                 /* Set the second mesh's properties for 3d.*/
                 if (VisIt_MeshMetaData_alloc(&m2) == VISIT_OKAY) {
                     /* Set the mesh's properties.*/
                     VisIt_MeshMetaData_setName(m2, "mesh3d");
-                    VisIt_MeshMetaData_setMeshType(m2, MESH_TYPE::getMeshType());
+                    // fixme: alternative: VISIT_MESHTYPE_POINT
+                    VisIt_MeshMetaData_setMeshType(m2, VISIT_MESHTYPE_RECTILINEAR);
                     VisIt_MeshMetaData_setTopologicalDimension(m2, 0);
                     VisIt_MeshMetaData_setSpatialDimension(m2, 3);
                     VisIt_MeshMetaData_setXUnits(m2, "");
@@ -726,238 +679,356 @@ public:
         return md;
     }
 
-};
-
-// fixme: move to dedicated file?
-class RectilinearMesh
-{
-public:
-    static int getMeshType()
+    static visit_handle getRectilinearMesh(
+        int domain,
+        const char *name,
+        void *connectionData)
     {
-        return VISIT_MESHTYPE_RECTILINEAR;
+        std::cout << "loom1\n";
+        std::cout << "getRectilinearMesh A\n";
+        visit_handle handle = VISIT_INVALID_HANDLE;
+
+        VisItWriter<CELL_TYPE> *writer =
+            reinterpret_cast<VisItWriter<CELL_TYPE>*>(connectionData);
+        // add (1, 1) or (1, 1, 1) as we're describing mesh nodes
+        // here, but our data is centered on zones (nodes make up the
+        // circumference of the zones).
+        Coord<DIM> dims = writer->getGrid()->dimensions() + Coord<DIM>::diagonal(1);
+
+        std::string expectedName = "mesh" + StringOps::itoa(DIM) + "d";
+        if (name != expectedName) {
+            return VISIT_INVALID_HANDLE;
+        }
+
+        if (VisIt_RectilinearMesh_alloc(&handle) == VISIT_ERROR) {
+            return VISIT_INVALID_HANDLE;
+        }
+
+        for (int d = 0; d < DIM; ++d) {
+            writer->gridCoordinates[d].resize(dims[d]);
+            for (int i = 0; i < dims[d]; ++i) {
+                // fixme: honor getRegularGridOrigin/getRegularGridOrigin here
+                writer->gridCoordinates[d][i] = i;
+            }
+        }
+
+        visit_handle coordHandles[DIM];
+        for (int d = 0; d < DIM; ++d) {
+            VisIt_VariableData_alloc(coordHandles + d);
+            VisIt_VariableData_setDataD(
+                coordHandles[d],
+                VISIT_OWNER_SIM,
+                1,
+                dims[d],
+                &writer->gridCoordinates[d][0]);
+        }
+
+        if (DIM == 2) {
+            VisIt_RectilinearMesh_setCoordsXY(handle, coordHandles[0], coordHandles[1]);
+        }
+
+        if (DIM == 3) {
+            VisIt_RectilinearMesh_setCoordsXYZ(handle, coordHandles[0], coordHandles[1], coordHandles[2]);
+        }
+
+        std::cout << "getRectilinearMesh Z\n";
+        return handle;
     }
 
-    template<typename CELL, int DIM>
-    class GetMesh;
-
-    template<typename CELL>
-    class GetMesh<CELL, 2>
+    static visit_handle getPointMesh(
+        int domain,
+        const char *name,
+        void *connectionData)
     {
-    public:
-        static visit_handle SimGetMesh(
-            int domain,
-            const char *name,
-            void *cdata)
-        {
-            // fixme: too long
-            visit_handle h = VISIT_INVALID_HANDLE;
-            VisItWriter<CELL, RectilinearMesh >* visItWriter = reinterpret_cast
-                    <VisItWriter<CELL, RectilinearMesh >*>(cdata);
+        std::cout << "boom1\n";
+        visit_handle handle = VISIT_INVALID_HANDLE;
 
-            int dimX = visItWriter->getGrid()->dimensions().x() + 1;
-            int dimY = visItWriter->getGrid()->dimensions().y() + 1;
+        VisItWriter<CELL_TYPE> *writer =
+            reinterpret_cast<VisItWriter<CELL_TYPE>*>(connectionData);
 
-            if(strcmp(name, "mesh2d") == 0) {
-                if(VisIt_RectilinearMesh_alloc(&h) != VISIT_ERROR) {
-                    std::vector<double>& x = visItWriter->getXCoords();
-                    std::vector<double>& y = visItWriter->getYCoords();
+        CoordBox<DIM> box = writer->getGrid()->boundingBox();
+        Coord<DIM> dims = writer->getGrid()->dimensions();
+        int size = dims.prod();
 
-                    x.resize(dimX);
-                    y.resize(dimY);
+        std::cout << "boom2\n";
 
-                    for (int i = 0; i < dimX; ++i) {
-                        x[i] = i;
-                    }
-                    for (int i = 0; i < dimY; ++i) {
-                        y[i] = i;
-                    }
-
-                    visit_handle handleXCoords;
-                    visit_handle handleYCoords;
-
-                    VisIt_VariableData_alloc(&handleXCoords);
-                    VisIt_VariableData_alloc(&handleYCoords);
-
-                    VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, dimX, &x[0]);
-                    VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, dimY, &y[0]);
-                    VisIt_RectilinearMesh_setCoordsXY(h, handleXCoords, handleYCoords);
-                }
-            }
-            return h;
+        std::string expectedName = "mesh" + StringOps::itoa(DIM) + "d";
+        if (name != expectedName) {
+            std::cout << "boom3\n";
+            return VISIT_INVALID_HANDLE;
         }
-    };
 
-    template<typename CELL>
-    class GetMesh<CELL, 3>
-    {
-    public:
-        // fixme: unify?
-        // fixme: too long
-        static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
-        {
-            visit_handle h = VISIT_INVALID_HANDLE;
-            VisItWriter<CELL, RectilinearMesh >* visItWriter = reinterpret_cast
-                    <VisItWriter<CELL, RectilinearMesh >*>(cdata);
-
-            int dimX = visItWriter->getGrid()->dimensions().x() + 1;
-            int dimY = visItWriter->getGrid()->dimensions().y() + 1;
-            int dimZ = visItWriter->getGrid()->dimensions().z() + 1;
-
-            if(strcmp(name, "mesh3d") == 0) {
-                if(VisIt_RectilinearMesh_alloc(&h) != VISIT_ERROR) {
-                    std::vector<double>& x = visItWriter->getXCoords();
-                    std::vector<double>& y = visItWriter->getYCoords();
-                    std::vector<double>& z = visItWriter->getZCoords();
-
-                    x.resize(dimX);
-                    y.resize(dimY);
-                    y.resize(dimZ);
-
-                    for (int i = 0; i < dimX; ++i) {
-                        x[i] = i;
-                    }
-                    for (int i = 0; i < dimY; ++i) {
-                        y[i] = i;
-                    }
-                    for (int i = 0; i < dimZ; ++i) {
-                        z[i] = i;
-                    }
-
-                    visit_handle handleXCoords;
-                    visit_handle handleYCoords;
-                    visit_handle handleZCoords;
-
-                    VisIt_VariableData_alloc(&handleXCoords);
-                    VisIt_VariableData_alloc(&handleYCoords);
-                    VisIt_VariableData_alloc(&handleZCoords);
-
-                    VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, dimX, &x[0]);
-                    VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, dimY, &y[0]);
-                    VisIt_VariableData_setDataD(handleZCoords, VISIT_OWNER_SIM, 1, dimZ, &z[0]);
-                    VisIt_RectilinearMesh_setCoordsXYZ(h, handleXCoords, handleYCoords, handleZCoords);
-                }
-            }
-            return h;
+            std::cout << "boom3\n";
+        if (VisIt_PointMesh_alloc(&handle) == VISIT_ERROR) {
+            return VISIT_INVALID_HANDLE;
         }
-    };
-};
 
-/*
- *
- */
-// fixme: move to dedicated file?
-class PointMesh
-{
-public:
-    static int getMeshType()
-    {
-        return VISIT_MESHTYPE_RECTILINEAR;
+        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+            Coord<DIM> coord = *i;
+            int index = 0;
+            // fixme: honor particle iterators here
+            for (int d = 0; d < DIM; ++d) {
+                writer->gridCoordinates[d][index] = coord[d];
+                ++index;
+            }
+        }
+
+        std::cout << "boom3\n";
+
+        visit_handle coordHandles[DIM];
+        for (int d = 0; d < DIM; ++d) {
+            VisIt_VariableData_alloc(coordHandles + d);
+            VisIt_VariableData_setDataD(
+                coordHandles[d],
+                VISIT_OWNER_SIM,
+                1,
+                size,
+                &writer->gridCoordinates[d][0]);
+        }
+
+        if (DIM == 2) {
+            VisIt_PointMesh_setCoordsXY(handle, coordHandles[0], coordHandles[1]);
+        }
+
+        if (DIM == 3) {
+            VisIt_PointMesh_setCoordsXYZ(handle, coordHandles[0], coordHandles[1], coordHandles[2]);
+        }
+        std::cout << "boom4\n";
+
+        return handle;
     }
-
-    template<typename CELL, int DIM>
-    class GetMesh;
-
-    template<typename CELL>
-    class GetMesh<CELL, 2>
-    {
-    public:
-        // fixme: too long
-        static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
-        {
-            visit_handle h = VISIT_INVALID_HANDLE;
-            VisItWriter<CELL, PointMesh >* visItWriter = reinterpret_cast
-                    <VisItWriter<CELL, PointMesh >*>(cdata);
-
-            int dimX = visItWriter->getGrid()->getDimensions().x();
-            int dimY = visItWriter->getGrid()->getDimensions().y();
-
-            unsigned size = visItWriter->getGrid()->boundingBox().size();
-
-            if(strcmp(name, "mesh2d") == 0) {
-                if(VisIt_PointMesh_alloc(&h) != VISIT_ERROR) {
-                    std::vector<double>& x = visItWriter->getXCoords();
-                    std::vector<double>& y = visItWriter->getYCoords();
-
-                    x.resize(size);
-                    y.resize(size);
-
-                    unsigned s = 0;
-                    for (int j = 0; j < dimY; ++j) {
-                        for (int k = 0; k < dimX; ++k) {
-                            x[s] = k;
-                            y[s] = j;
-                            ++s;
-                        }
-                    }
-
-                    visit_handle handleXCoords;
-                    visit_handle handleYCoords;
-
-                    VisIt_VariableData_alloc(&handleXCoords);
-                    VisIt_VariableData_alloc(&handleYCoords);
-
-                    VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, size, &x[0]);
-                    VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, size, &y[0]);
-                    VisIt_PointMesh_setCoordsXY(h, handleXCoords, handleYCoords);
-                }
-            }
-            return h;
-        }
-    };
-
-    template<typename CELL>
-    class GetMesh<CELL, 3>
-    {
-    public:
-        // fixme: too long
-        static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
-        {
-            visit_handle h = VISIT_INVALID_HANDLE;
-            VisItWriter<CELL, PointMesh >* visItWriter = reinterpret_cast
-                    <VisItWriter<CELL, PointMesh >*>(cdata);
-
-            unsigned size = visItWriter->getGrid()->boundingBox().size();
-
-            if(strcmp(name, "mesh3d") == 0) {
-                if(VisIt_PointMesh_alloc(&h) != VISIT_ERROR) {
-                    std::vector<double>& x = visItWriter->getXCoords();
-                    std::vector<double>& y = visItWriter->getYCoords();
-                    std::vector<double>& z = visItWriter->getZCoords();
-
-                    x.resize(size);
-                    y.resize(size);
-                    y.resize(size);
-
-                    CoordBox<3> box = visItWriter->getGrid()->boundingBox();
-
-                    unsigned j = 0;
-                    for (typename CoordBox<3>::Iterator i = box.begin();
-                         i != box.end();
-                         ++i) {
-                        x[j] = i->x();
-                        y[j] = i->y();
-                        z[j] = i->z();
-                        j++;
-                    }
-
-                    visit_handle handleXCoords;
-                    visit_handle handleYCoords;
-                    visit_handle handleZCoords;
-
-                    VisIt_VariableData_alloc(&handleXCoords);
-                    VisIt_VariableData_alloc(&handleYCoords);
-                    VisIt_VariableData_alloc(&handleZCoords);
-
-                    VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, size, &x[0]);
-                    VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, size, &y[0]);
-                    VisIt_VariableData_setDataD(handleZCoords, VISIT_OWNER_SIM, 1, size, &z[0]);
-                    VisIt_PointMesh_setCoordsXYZ(h, handleXCoords, handleYCoords, handleZCoords);
-                }
-            }
-            return h;
-        }
-    };
 };
+
+// // fixme: delete dead code
+// class RectilinearMesh
+// {
+// public:
+//     static int getMeshType()
+//     {
+//         return VISIT_MESHTYPE_RECTILINEAR;
+//     }
+
+//     template<typename CELL, int DIM>
+//     class GetMesh;
+
+//     template<typename CELL>
+//     class GetMesh<CELL, 2>
+//     {
+//     public:
+//         static visit_handle SimGetMesh(
+//             int domain,
+//             const char *name,
+//             void *cdata)
+//         {
+//             // fixme: too long
+//             visit_handle h = VISIT_INVALID_HANDLE;
+//             VisItWriter<CEL>* visItWriter = reinterpret_cast
+//                     <VisItWriter<CELL, RectilinearMesh >*>(cdata);
+
+//             int dimX = visItWriter->getGrid()->dimensions().x() + 1;
+//             int dimY = visItWriter->getGrid()->dimensions().y() + 1;
+
+//             if(strcmp(name, "mesh2d") == 0) {
+//                 if(VisIt_RectilinearMesh_alloc(&h) != VISIT_ERROR) {
+//                     std::vector<double>& x = visItWriter->getXCoords();
+//                     std::vector<double>& y = visItWriter->getYCoords();
+
+//                     x.resize(dimX);
+//                     y.resize(dimY);
+
+//                     for (int i = 0; i < dimX; ++i) {
+//                         x[i] = i;
+//                     }
+//                     for (int i = 0; i < dimY; ++i) {
+//                         y[i] = i;
+//                     }
+
+//                     visit_handle handleXCoords;
+//                     visit_handle handleYCoords;
+
+//                     VisIt_VariableData_alloc(&handleXCoords);
+//                     VisIt_VariableData_alloc(&handleYCoords);
+
+//                     VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, dimX, &x[0]);
+//                     VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, dimY, &y[0]);
+//                     VisIt_RectilinearMesh_setCoordsXY(h, handleXCoords, handleYCoords);
+//                 }
+//             }
+//             return h;
+//         }
+//     };
+
+//     template<typename CELL>
+//     class GetMesh<CELL, 3>
+//     {
+//     public:
+//         // fixme: unify?
+//         // fixme: too long
+//         static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
+//         {
+//             visit_handle h = VISIT_INVALID_HANDLE;
+//             VisItWriter<CELL, RectilinearMesh >* visItWriter = reinterpret_cast
+//                     <VisItWriter<CELL, RectilinearMesh >*>(cdata);
+
+//             int dimX = visItWriter->getGrid()->dimensions().x() + 1;
+//             int dimY = visItWriter->getGrid()->dimensions().y() + 1;
+//             int dimZ = visItWriter->getGrid()->dimensions().z() + 1;
+
+//             if(strcmp(name, "mesh3d") == 0) {
+//                 if(VisIt_RectilinearMesh_alloc(&h) != VISIT_ERROR) {
+//                     std::vector<double>& x = visItWriter->getXCoords();
+//                     std::vector<double>& y = visItWriter->getYCoords();
+//                     std::vector<double>& z = visItWriter->getZCoords();
+
+//                     x.resize(dimX);
+//                     y.resize(dimY);
+//                     y.resize(dimZ);
+
+//                     for (int i = 0; i < dimX; ++i) {
+//                         x[i] = i;
+//                     }
+//                     for (int i = 0; i < dimY; ++i) {
+//                         y[i] = i;
+//                     }
+//                     for (int i = 0; i < dimZ; ++i) {
+//                         z[i] = i;
+//                     }
+
+//                     visit_handle handleXCoords;
+//                     visit_handle handleYCoords;
+//                     visit_handle handleZCoords;
+
+//                     VisIt_VariableData_alloc(&handleXCoords);
+//                     VisIt_VariableData_alloc(&handleYCoords);
+//                     VisIt_VariableData_alloc(&handleZCoords);
+
+//                     VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, dimX, &x[0]);
+//                     VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, dimY, &y[0]);
+//                     VisIt_VariableData_setDataD(handleZCoords, VISIT_OWNER_SIM, 1, dimZ, &z[0]);
+//                     VisIt_RectilinearMesh_setCoordsXYZ(h, handleXCoords, handleYCoords, handleZCoords);
+//                 }
+//             }
+//             return h;
+//         }
+//     };
+// };
+
+// /*
+//  *
+//  */
+// // fixme: move to dedicated file?
+// class PointMesh
+// {
+// public:
+//     static int getMeshType()
+//     {
+//         return VISIT_MESHTYPE_RECTILINEAR;
+//     }
+
+//     template<typename CELL, int DIM>
+//     class GetMesh;
+
+//     template<typename CELL>
+//     class GetMesh<CELL, 2>
+//     {
+//     public:
+//         // fixme: too long
+//         static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
+//         {
+//             visit_handle h = VISIT_INVALID_HANDLE;
+//             VisItWriter<CELL, PointMesh >* visItWriter = reinterpret_cast
+//                     <VisItWriter<CELL, PointMesh >*>(cdata);
+
+//             int dimX = visItWriter->getGrid()->getDimensions().x();
+//             int dimY = visItWriter->getGrid()->getDimensions().y();
+
+//             unsigned size = visItWriter->getGrid()->boundingBox().size();
+
+//             if(strcmp(name, "mesh2d") == 0) {
+//                 if(VisIt_PointMesh_alloc(&h) != VISIT_ERROR) {
+//                     std::vector<double>& x = visItWriter->getXCoords();
+//                     std::vector<double>& y = visItWriter->getYCoords();
+
+//                     x.resize(size);
+//                     y.resize(size);
+
+//                     unsigned s = 0;
+//                     for (int j = 0; j < dimY; ++j) {
+//                         for (int k = 0; k < dimX; ++k) {
+//                             x[s] = k;
+//                             y[s] = j;
+//                             ++s;
+//                         }
+//                     }
+
+//                     visit_handle handleXCoords;
+//                     visit_handle handleYCoords;
+
+//                     VisIt_VariableData_alloc(&handleXCoords);
+//                     VisIt_VariableData_alloc(&handleYCoords);
+
+//                     VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, size, &x[0]);
+//                     VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, size, &y[0]);
+//                     VisIt_PointMesh_setCoordsXY(h, handleXCoords, handleYCoords);
+//                 }
+//             }
+//             return h;
+//         }
+//     };
+
+//     template<typename CELL>
+//     class GetMesh<CELL, 3>
+//     {
+//     public:
+//         // fixme: too long
+//         static visit_handle SimGetMesh(int domain, const char *name, void *cdata)
+//         {
+//             visit_handle h = VISIT_INVALID_HANDLE;
+//             VisItWriter<CELL, PointMesh >* visItWriter = reinterpret_cast
+//                     <VisItWriter<CELL, PointMesh >*>(cdata);
+
+//             unsigned size = visItWriter->getGrid()->boundingBox().size();
+
+//             if(strcmp(name, "mesh3d") == 0) {
+//                 if(VisIt_PointMesh_alloc(&h) != VISIT_ERROR) {
+//                     std::vector<double>& x = visItWriter->getXCoords();
+//                     std::vector<double>& y = visItWriter->getYCoords();
+//                     std::vector<double>& z = visItWriter->getZCoords();
+
+//                     x.resize(size);
+//                     y.resize(size);
+//                     y.resize(size);
+
+//                     CoordBox<3> box = visItWriter->getGrid()->boundingBox();
+
+//                     unsigned j = 0;
+//                     for (typename CoordBox<3>::Iterator i = box.begin();
+//                          i != box.end();
+//                          ++i) {
+//                         x[j] = i->x();
+//                         y[j] = i->y();
+//                         z[j] = i->z();
+//                         j++;
+//                     }
+
+//                     visit_handle handleXCoords;
+//                     visit_handle handleYCoords;
+//                     visit_handle handleZCoords;
+
+//                     VisIt_VariableData_alloc(&handleXCoords);
+//                     VisIt_VariableData_alloc(&handleYCoords);
+//                     VisIt_VariableData_alloc(&handleZCoords);
+
+//                     VisIt_VariableData_setDataD(handleXCoords, VISIT_OWNER_SIM, 1, size, &x[0]);
+//                     VisIt_VariableData_setDataD(handleYCoords, VISIT_OWNER_SIM, 1, size, &y[0]);
+//                     VisIt_VariableData_setDataD(handleZCoords, VISIT_OWNER_SIM, 1, size, &z[0]);
+//                     VisIt_PointMesh_setCoordsXYZ(h, handleXCoords, handleYCoords, handleZCoords);
+//                 }
+//             }
+//             return h;
+//         }
+//     };
+// };
 
 }
 
