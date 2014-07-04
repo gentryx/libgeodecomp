@@ -1,10 +1,12 @@
 #ifndef LIBGEODECOMP_IO_VISITWRITER_H
 #define LIBGEODECOMP_IO_VISITWRITER_H
 
+// fixme: sort this somewhere:
 #define SIM_STOPPED 0
 #define SIMMODE_STEP 3
 
-/*
+/**
+ * fixme: sort this somewhere:
  * VisItDetectInput RETURN CODES:
  * negative values are taken for error
  * -5: Logic error (fell through all cases)
@@ -34,6 +36,7 @@
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/storage/dataaccessor.h>
 
@@ -223,7 +226,6 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
-    // fixme: needs test
     explicit VisItWriter(
         const std::string& prefix,
         const unsigned& period = 1,
