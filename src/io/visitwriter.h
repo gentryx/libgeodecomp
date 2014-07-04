@@ -686,8 +686,6 @@ public:
         const char *name,
         void *connectionData)
     {
-        std::cout << "loom1\n";
-        std::cout << "getRectilinearMesh A\n";
         visit_handle handle = VISIT_INVALID_HANDLE;
 
         VisItWriter<CELL_TYPE> *writer =
@@ -706,11 +704,14 @@ public:
             return VISIT_INVALID_HANDLE;
         }
 
+        FloatCoord<DIM> origin;
+        FloatCoord<DIM> quadrantDim;
+        APITraits::SelectRegularGrid<CELL_TYPE>::value(&quadrantDim, &origin);
+
         for (int d = 0; d < DIM; ++d) {
             writer->gridCoordinates[d].resize(dims[d]);
             for (int i = 0; i < dims[d]; ++i) {
-                // fixme: honor getRegularGridOrigin/getRegularGridOrigin here
-                writer->gridCoordinates[d][i] = i;
+                writer->gridCoordinates[d][i] = origin[d] + quadrantDim[d] * i;
             }
         }
 
@@ -733,7 +734,6 @@ public:
             VisIt_RectilinearMesh_setCoordsXYZ(handle, coordHandles[0], coordHandles[1], coordHandles[2]);
         }
 
-        std::cout << "getRectilinearMesh Z\n";
         return handle;
     }
 
@@ -742,7 +742,6 @@ public:
         const char *name,
         void *connectionData)
     {
-        std::cout << "boom1\n";
         visit_handle handle = VISIT_INVALID_HANDLE;
 
         VisItWriter<CELL_TYPE> *writer =
@@ -752,15 +751,11 @@ public:
         Coord<DIM> dims = writer->getGrid()->dimensions();
         int size = dims.prod();
 
-        std::cout << "boom2\n";
-
         std::string expectedName = "mesh" + StringOps::itoa(DIM) + "d";
         if (name != expectedName) {
-            std::cout << "boom3\n";
             return VISIT_INVALID_HANDLE;
         }
 
-            std::cout << "boom3\n";
         if (VisIt_PointMesh_alloc(&handle) == VISIT_ERROR) {
             return VISIT_INVALID_HANDLE;
         }
@@ -774,8 +769,6 @@ public:
                 ++index;
             }
         }
-
-        std::cout << "boom3\n";
 
         visit_handle coordHandles[DIM];
         for (int d = 0; d < DIM; ++d) {
@@ -795,7 +788,6 @@ public:
         if (DIM == 3) {
             VisIt_PointMesh_setCoordsXYZ(handle, coordHandles[0], coordHandles[1], coordHandles[2]);
         }
-        std::cout << "boom4\n";
 
         return handle;
     }
