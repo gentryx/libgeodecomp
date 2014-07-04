@@ -60,7 +60,7 @@ public:
 class CellInitializer : public SimpleInitializer<ConwayCell>
 {
 public:
-    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 800)
+    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 80000)
     {}
 
     virtual void grid(GridBase<ConwayCell, 2> *ret)
@@ -111,7 +111,7 @@ DEFINE_DATAACCESSOR(CountAccessor, ConwayCell, int, count);
 
 void runSimulation()
 {
-    int outputFrequency = 10;
+    int outputFrequency = 1;
 
     SerialSimulator<ConwayCell> sim(
         new CellInitializer());
