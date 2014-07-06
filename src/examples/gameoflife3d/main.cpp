@@ -48,7 +48,7 @@ public:
         }
     }
 
-    bool alive;
+    char alive;
 };
 
 class CellInitializer : public SimpleInitializer<ConwayCell>
@@ -98,7 +98,7 @@ void runSimulation()
         "gameOfLife3D",
         outputFrequency,
         VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new AliveAccessor());
+    visItWriter->addVariable(&ConwayCell::alive, "alive");
 
     sim.addWriter(visItWriter);
 

@@ -53,7 +53,7 @@ public:
             count += 1;
     }
 
-    bool alive;
+    char alive;
     int count;
 };
 
@@ -119,8 +119,8 @@ void runSimulation()
 
     VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
         "gameOfLife", outputFrequency, VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new AliveAccessor());
-    visItWriter->addVariable(new CountAccessor());
+    visItWriter->addVariable(&ConwayCell::alive, "alive");
+    visItWriter->addVariable(&ConwayCell::count, "count");
 
     sim.addWriter(visItWriter);
 

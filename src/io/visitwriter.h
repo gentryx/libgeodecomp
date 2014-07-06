@@ -5,21 +5,6 @@
 #define SIM_STOPPED 0
 #define SIMMODE_STEP 3
 
-/**
- * fixme: sort this somewhere:
- * VisItDetectInput RETURN CODES:
- * negative values are taken for error
- * -5: Logic error (fell through all cases)
- * -4: Logic error (no descriptors but blocking)
- * -3: Logic error (a socket was selected but not one we set)
- * -2: Unknown error in select
- * -1: Interrupted by EINTR in select
- * 0: Okay - Timed out
- * 1: Listen socket input
- * 2: Engine socket input
- * 3: Console socket input
- */
-
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -38,23 +23,24 @@
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/simulator.h>
-#include <libgeodecomp/storage/dataaccessor.h>
+#include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
 
-class RectilinearMesh;
-
+// fixme: kill this
 template<typename CELL_TYPE>
 class VisItWriter;
 
 namespace VisItWriterHelpers {
 
+// fixme: move this to visitwriter
 template<typename CELL_TYPE>
 void ControlCommandCallback(
     const char *command,
     const char *arguments,
     void *data)
 {
+    LOG(INFO, "VisItWriter::controlCommandCallback(command: " << command << ", arguments: " << arguments << ")");
     VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>* >(data);
 
     if (command == std::string("halt")) {
@@ -139,18 +125,25 @@ public:
     virtual ~VisItDataAccessor()
     {}
 
-    const std::string& type()
+    const std::string& type() const
     {
         return myType;
     }
 
-    virtual void *dataField() = 0;
+    const std::string& name() const
+    {
+        return selector.name();
+    }
+
     virtual visit_handle getVariable(int domain, GridType *grid) = 0;
+
+    Selector<CELL_TYPE> selector;
 
 private:
     std::string myType;
 };
 
+// fixme: if member is bool, use std::vector<char> instead. reason: some implementations of std::vector<bool> are "optimized", so they don't use one char per boolean. that's OK, but fucks up our copy operations.
 template<typename CELL_TYPE, typename MEMBER_TYPE>
 class VisItDataBuffer : public VisItWriterHelpers::VisItDataAccessor<CELL_TYPE>
 {
@@ -160,24 +153,17 @@ public:
     static const int DIM = Topology::DIM;
 
     VisItDataBuffer(
-        DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor,
-        std::size_t gridVolume) :
-        VisItDataAccessor<CELL_TYPE>(accessor->type()),
-        accessor(accessor),
-        gridVolume(gridVolume),
-        dataBuffer(0)
-    {}
+        const Selector<CELL_TYPE>& newSelector) :
+        VisItDataAccessor<CELL_TYPE>(newSelector.typeName())
+    {
+        this->selector = newSelector;
+    }
 
     virtual ~VisItDataBuffer()
     {}
 
-    void *dataField()
-    {
-        return &dataBuffer[0];
-    }
-
     visit_handle getVariable(
-        int domain,
+        int /* unused: domain */,
         GridType *grid)
     {
         visit_handle handle = VISIT_INVALID_HANDLE;
@@ -187,25 +173,22 @@ public:
 
         CoordBox<DIM> box = grid->boundingBox();
         std::size_t expectedSize = box.dimensions.prod();
-
         if (dataBuffer.size() != expectedSize) {
             dataBuffer.resize(expectedSize);
+            region.clear();
+            region << box;
         }
 
-        // std::size_t index = 0;
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            // accessor->get(grid->at(*i), &dataBuffer[index++]);
-        }
-
+        MEMBER_TYPE *p = &(dataBuffer[0]);
+        grid->saveMember(p, this->selector, region);
         VisItSetData<MEMBER_TYPE>()(handle, VISIT_OWNER_SIM, 1, dataBuffer.size(), &dataBuffer[0]);
 
         return handle;
     }
 
 private:
-    boost::shared_ptr<DataAccessor<CELL_TYPE, MEMBER_TYPE> > accessor;
-    std::size_t gridVolume;
     std::vector<MEMBER_TYPE> dataBuffer;
+    Region<DIM> region;
 };
 
 }
@@ -233,6 +216,7 @@ public:
         Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >(prefix, period),
         blocking(0),
         visItState(0),
+        // fixme: don't use error states, just throw an exception
         error(0),
         runMode(runMode)
     {}
@@ -240,6 +224,8 @@ public:
     virtual void stepFinished(
         const GridType& newGrid, unsigned newStep, WriterEvent newEvent)
     {
+        LOG(DBG, "VisItWriter::stepFinished(" << newStep << ")");
+
         grid = &newGrid;
         step = newStep;
 
@@ -297,16 +283,17 @@ public:
     /**
      * Adds an accessor which allows the VisItWriter to observer another variable.
      */
-    template<typename MEMBER_TYPE>
-    void addVariable(DataAccessor<CELL_TYPE, MEMBER_TYPE> *accessor)
+    template<typename MEMBER>
+    void addVariable(MEMBER CELL_TYPE:: *memberPointer, const std::string& memberName)
     {
-        VisItWriterHelpers::VisItDataBuffer<CELL_TYPE, MEMBER_TYPE> *bufferingAccessor =
-            new VisItWriterHelpers::VisItDataBuffer<CELL_TYPE, MEMBER_TYPE>(accessor, /*fixme*/ 0);
+        Selector<CELL_TYPE> selector(memberPointer, memberName);
+        VisItWriterHelpers::VisItDataBuffer<CELL_TYPE, MEMBER> *bufferingAccessor =
+            new VisItWriterHelpers::VisItDataBuffer<CELL_TYPE, MEMBER>(selector);
 
         dataAccessors << boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> >(
             bufferingAccessor);
 
-        variableMap[accessor->type()] = dataAccessors.size() - 1;
+        variableMap[selector.name()] = dataAccessors.size() - 1;
     }
 
   private:
@@ -317,6 +304,7 @@ public:
     int dataNumber;
     DataAccessorVec dataAccessors;
     std::vector<std::vector<char> > values;
+    // fixme: get rid of this
     std::map<std::string, int> variableMap;
     const GridType *grid;
     unsigned step;
@@ -345,11 +333,12 @@ public:
             byteSize *= sizeof(int);
         } else if (strcmp("FLOAT", dataAccessors[i]->type().c_str()) == 0) {
             byteSize *= sizeof(float);
-        } else if (strcmp("CHAR", dataAccessors[i]->type().c_str()) == 0) {
+        } else if (strcmp("BYTE", dataAccessors[i]->type().c_str()) == 0) {
             byteSize *= sizeof(char);
         } else if (strcmp("LONG", dataAccessors[i]->type().c_str()) == 0) {
             byteSize *= sizeof(long);
         } else {
+            LOG(FATAL, "VisItWriter encountered unknown variable type " << dataAccessors[i]->type());
             throw std::invalid_argument("unknown variable type");
         }
 
@@ -394,7 +383,21 @@ public:
                 break;
             }
             blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
+
+            // VisItDetectInput return codes:
+            // - negative values are taken for error
+            // - -5: Logic error (fell through all cases)
+            // - -4: Logic error (no descriptors but blocking)
+            // - -3: Logic error (a socket was selected but not one we set)
+            // - -2: Unknown error in select
+            // - -1: Interrupted by EINTR in select
+            // - 0: Okay - Timed out
+            // - 1: Listen socket input
+            // - 2: Engine socket input
+            // - 3: Console socket input
             visItState = VisItDetectInput(blocking, -1);
+            LOG(DBG, "VisItDetectInput yields " << visItState);
+
             if (visItState <= -1) {
                 std::cerr << "Can’t recover from error!" << std::endl;
                 error = visItState;
@@ -406,7 +409,7 @@ public:
             } else if (visItState == 1) {
                 /* VisIt is trying to connect to sim. */
                 if (VisItAttemptToCompleteConnection()) {
-                    std::cout << "VisIt connected" << std::endl;
+                    LOG(INFO, "VisIt connected");
 
                     VisItSetCommandCallback(VisItWriterHelpers::ControlCommandCallback<CELL_TYPE>,
                             reinterpret_cast<void*>(this));
@@ -417,14 +420,14 @@ public:
                     VisItSetGetVariable(callSetGetVariable, reinterpret_cast<void*>(this));
                 } else {
                     char *visitError = VisItGetLastError();
-                    std::cerr << "VisIt did not connect: " << visitError << std::endl;
+                    LOG(WARN, "VisIt did not connect: " << visitError);
                 }
             } else if (visItState == 2) {
                 /* VisIt wants to tell the engine something. */
                 runMode = VISIT_SIMMODE_STOPPED;
                 if (!VisItProcessEngineCommand()) {
                     /* Disconnect on an error or closed connection. */
-                    std::cout << "VisIt disconnected" << std::endl;
+                    // fixme: is this actually called at disconnect?
                     VisItDisconnect();
 
                     deleteMemory();
@@ -433,6 +436,7 @@ public:
                     runMode = VISIT_SIMMODE_RUNNING;
                     break;
                 }
+                // fixme: remove this?
                 if (runMode == SIMMODE_STEP) {
                     runMode = VISIT_SIMMODE_STOPPED;
                     break;
@@ -443,14 +447,12 @@ public:
     }
 
     /**
-     * wrapper for callback functions needed by
-     * int VisItSetGetVariable (visit_handle(*)(int, const char *, void *) cb,
-     *         void *cbdata)
+     * wrapper for callback functions needed by VisItSetGetVariable()
      */
     static visit_handle callSetGetVariable(
         int domain,
         const char *name,
-        void *cbdata)
+        void *simData)
     {
         typedef SetGetVariable<double, SetDataDouble> VisitDataDouble;
         typedef SetGetVariable<int, SetDataInt> VisitDataInt;
@@ -459,22 +461,25 @@ public:
         typedef SetGetVariable<long, SetDataLong> VisitDataLong;
 
         // fixme: this should be the writer
-        VisItWriter<CELL_TYPE> *simData = reinterpret_cast<VisItWriter<CELL_TYPE>*>(cbdata);
+        VisItWriter<CELL_TYPE> *writer = reinterpret_cast<VisItWriter<CELL_TYPE>*>(simData);
 
-        for (int i=0; i < simData->getNumVars(); ++i) {
-            if (strcmp("DOUBLE", simData->dataAccessors[i]->type().c_str()) == 0) {
-                return VisitDataDouble::SimGetVariable(domain, name, simData);
-            } else if (strcmp("INT", simData->dataAccessors[i]->type().c_str()) == 0) {
-                return VisitDataInt::SimGetVariable(domain, name, simData);
-            } else if (strcmp("FLOAT", simData->dataAccessors[i]->type().c_str()) == 0) {
-                return VisitDataFloat::SimGetVariable(domain, name, simData);
-            } else if (strcmp("CHAR", simData->dataAccessors[i]->type().c_str()) == 0) {
-                return VisitDataChar::SimGetVariable(domain, name, simData);
-            } else if (strcmp("LONG", simData->dataAccessors[i]->type().c_str()) == 0) {
-                return VisitDataLong::SimGetVariable(domain, name, simData);
-            } else {
-                // unknown type:
-                simData->setError(1);
+        // fixme: do we really need to iterate here?
+        for (int i=0; i < writer->getNumVars(); ++i) {
+            if (name == writer->dataAccessors[i]->name()) {
+                if (strcmp("DOUBLE", writer->dataAccessors[i]->type().c_str()) == 0) {
+                    return VisitDataDouble::SimGetVariable(domain, name, writer);
+                } else if (strcmp("INT", writer->dataAccessors[i]->type().c_str()) == 0) {
+                    return VisitDataInt::SimGetVariable(domain, name, writer);
+                } else if (strcmp("FLOAT", writer->dataAccessors[i]->type().c_str()) == 0) {
+                    return VisitDataFloat::SimGetVariable(domain, name, writer);
+                } else if (strcmp("BYTE", writer->dataAccessors[i]->type().c_str()) == 0) {
+                    return VisitDataChar::SimGetVariable(domain, name, writer);
+                } else if (strcmp("LONG", writer->dataAccessors[i]->type().c_str()) == 0) {
+                    return VisitDataLong::SimGetVariable(domain, name, writer);
+                } else {
+                    // unknown type:
+                    writer->setError(1);
+                }
             }
         }
 
@@ -493,25 +498,22 @@ public:
         static visit_handle SimGetVariable(
             int domain,
             const char *name,
-            VisItWriter<CELL_TYPE> *simData)
+            VisItWriter<CELL_TYPE> *writer)
         {
             visit_handle handle = VISIT_INVALID_HANDLE;
-            CoordBox<DIM> box = simData->getGrid()->boundingBox();
+            CoordBox<DIM> box = writer->getGrid()->boundingBox();
             unsigned int size = box.size();
 
             if(VisIt_VariableData_alloc(&handle) == VISIT_OKAY) {
-                if(simData->variableMap.find(name) != simData->variableMap.end()) {
-                    int num = simData->variableMap[name];
-                    T *value  = (T *) &simData->values[num][0];
-                    unsigned j = 0;
+                if(writer->variableMap.find(name) != writer->variableMap.end()) {
+                    int num = writer->variableMap[name];
+                    T *value  = (T *) &(writer->values[num][0]);
 
-                    for (typename CoordBox<DIM>::Iterator i = box.begin();
-                            i != box.end(); ++i) {
-                        // simData->dataAccessors[num]->getFunction(
-                        //         simData->getGrid()->at(*i), reinterpret_cast<void*>(&value[j]));
-                        ++j;
-                    }
+                    // fixme: cache this region
+                    Region<DIM> region;
+                    region << box;
 
+                    writer->getGrid()->saveMember(value, writer->dataAccessors[num]->selector, region);
                     SETDATAFUNC()(handle, VISIT_OWNER_SIM, 1, size, value);
                 } else {
                     VisIt_VariableData_free(handle);
@@ -579,7 +581,6 @@ public:
      */
     static visit_handle SimGetMetaData(void *cbdata)
     {
-        // return 0;
         visit_handle md = VISIT_INVALID_HANDLE;
         VisItWriter<CELL_TYPE> *simData = reinterpret_cast<VisItWriter<CELL_TYPE>*>(cbdata);
 
@@ -617,10 +618,8 @@ public:
                 }
 
                 /* Add a zonal scalar variable on mesh2d. */
-                std::cout << "adding vars, " << simData->variableMap.size() << "\n";
                 for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
                     it != simData->variableMap.end(); ++it) {
-                    std::cout << "  " << it->first << "\n";
                     if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
                         VisIt_VariableMetaData_setName(vmd, it->first.c_str());
                         VisIt_VariableMetaData_setMeshName(vmd, "mesh2d");
@@ -668,6 +667,7 @@ public:
             return VISIT_INVALID_HANDLE;
         }
 
+        // fixme: rework this, e.g. unify with command callback
         const char *cmd_names[] = { "halt", "step", "run" };
         for (int i = 0; i < sizeof(cmd_names) / sizeof(const char *);
                 ++i) {
@@ -678,6 +678,7 @@ public:
                 VisIt_SimulationMetaData_addGenericCommand(md, cmd);
             }
         }
+
         return md;
     }
 
@@ -751,7 +752,7 @@ public:
         Coord<DIM> dims = writer->getGrid()->dimensions();
         int size = dims.prod();
 
-        std::string expectedName = "mesh" + StringOps::itoa(DIM) + "d";
+        std::string expectedName = "pointmesh" + StringOps::itoa(DIM) + "d";
         if (name != expectedName) {
             return VISIT_INVALID_HANDLE;
         }
