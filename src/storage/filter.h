@@ -169,6 +169,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<bool>
 {
@@ -179,6 +182,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<char>
 {
@@ -189,6 +195,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<float>
 {
@@ -199,6 +208,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<double>
 {
@@ -206,6 +218,32 @@ public:
     std::string operator()() const
     {
         return "DOUBLE";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<int>
+{
+public:
+    std::string operator()() const
+    {
+        return "INT";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<long>
+{
+public:
+    std::string operator()() const
+    {
+        return "LONG";
     }
 };
 

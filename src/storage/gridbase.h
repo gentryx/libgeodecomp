@@ -179,6 +179,7 @@ public:
         if (!selector.template checkTypeID<MEMBER>()) {
             throw std::invalid_argument("cannot save member as selector was created for different type");
         }
+
         saveMemberImplementation(reinterpret_cast<char*>(target), selector, region);
     }
 
