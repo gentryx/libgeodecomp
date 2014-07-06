@@ -27,38 +27,9 @@
 
 namespace LibGeoDecomp {
 
-// fixme: kill this
-template<typename CELL_TYPE>
-class VisItWriter;
-
 namespace VisItWriterHelpers {
 
-// fixme: move this to visitwriter
-template<typename CELL_TYPE>
-void ControlCommandCallback(
-    const char *command,
-    const char *arguments,
-    void *data)
-{
-    LOG(INFO, "VisItWriter::controlCommandCallback(command: " << command << ", arguments: " << arguments << ")");
-    VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>* >(data);
-
-    if (command == std::string("halt")) {
-        writer->setRunMode(VISIT_SIMMODE_STOPPED);
-        return;
-    }
-
-    if (command == std::string("step")) {
-        writer->setRunMode(SIMMODE_STEP);
-        return;
-    }
-
-    if (command == std::string("run")) {
-        writer->setRunMode(VISIT_SIMMODE_RUNNING);
-        return;
-    }
-}
-
+// fixme:
 template<typename MEMBER_TYPE>
 class VisItSetData;
 
@@ -411,8 +382,7 @@ public:
                 if (VisItAttemptToCompleteConnection()) {
                     LOG(INFO, "VisIt connected");
 
-                    VisItSetCommandCallback(VisItWriterHelpers::ControlCommandCallback<CELL_TYPE>,
-                            reinterpret_cast<void*>(this));
+                    VisItSetCommandCallback(controlCommandCallback, reinterpret_cast<void*>(this));
                     VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
 
                     VisItSetGetMesh(getRectilinearMesh, reinterpret_cast<void*>(this));
@@ -445,6 +415,31 @@ public:
         }
         while(true);
     }
+
+    static void controlCommandCallback(
+        const char *command,
+        const char *arguments,
+        void *data)
+    {
+        LOG(INFO, "VisItWriter::controlCommandCallback(command: " << command << ", arguments: " << arguments << ")");
+        VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>* >(data);
+
+        if (command == std::string("halt")) {
+            writer->setRunMode(VISIT_SIMMODE_STOPPED);
+            return;
+        }
+
+        if (command == std::string("step")) {
+            writer->setRunMode(SIMMODE_STEP);
+            return;
+        }
+
+        if (command == std::string("run")) {
+            writer->setRunMode(VISIT_SIMMODE_RUNNING);
+            return;
+        }
+    }
+
 
     /**
      * wrapper for callback functions needed by VisItSetGetVariable()
