@@ -382,12 +382,10 @@ public:
                 if (VisItAttemptToCompleteConnection()) {
                     LOG(INFO, "VisIt connected");
 
-                    VisItSetCommandCallback(controlCommandCallback, reinterpret_cast<void*>(this));
-                    VisItSetGetMetaData(SimGetMetaData, reinterpret_cast<void*>(this));
-
-                    VisItSetGetMesh(getRectilinearMesh, reinterpret_cast<void*>(this));
-
-                    VisItSetGetVariable(callSetGetVariable, reinterpret_cast<void*>(this));
+                    VisItSetCommandCallback(controlCommandCallback, this);
+                    VisItSetGetMetaData(SimGetMetaData, this);
+                    VisItSetGetMesh(getRectilinearMesh, this);
+                    VisItSetGetVariable(callSetGetVariable, this);
                 } else {
                     char *visitError = VisItGetLastError();
                     LOG(WARN, "VisIt did not connect: " << visitError);
