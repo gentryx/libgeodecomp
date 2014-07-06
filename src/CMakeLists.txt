@@ -165,7 +165,7 @@ add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPIL
 add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
 
 # setting DEBUG_LEVEL to "0 " is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
-add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "0 " true)
+add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" 3 true)
 
 add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
 
