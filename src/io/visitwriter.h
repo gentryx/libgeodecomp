@@ -374,19 +374,19 @@ public:
      * set meta data for visit:
      *      - variable type (only zonal scalar variable at the moment)
      */
-    static visit_handle SimGetMetaData(void *cbdata)
+    static visit_handle SimGetMetaData(void *simData)
     {
         visit_handle md = VISIT_INVALID_HANDLE;
-        VisItWriter<CELL_TYPE> *simData = reinterpret_cast<VisItWriter<CELL_TYPE>*>(cbdata);
+        VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(simData);
 
         // fixme: too long
         if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) {
-            if (simData->runMode == VISIT_SIMMODE_STOPPED) {
+            if (writer->runMode == VISIT_SIMMODE_STOPPED) {
                 VisIt_SimulationMetaData_setMode(md, VISIT_SIMMODE_STOPPED);
             } else {
                 VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
             }
-            VisIt_SimulationMetaData_setCycleTime(md, simData->getStep(), 0);
+            VisIt_SimulationMetaData_setCycleTime(md, writer->getStep(), 0);
 
             visit_handle m1 = VISIT_INVALID_HANDLE;
             visit_handle m2 = VISIT_INVALID_HANDLE;
@@ -411,8 +411,8 @@ public:
                 }
 
                 /* Add a zonal scalar variable on mesh2d. */
-                for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
-                    it != simData->variableMap.end(); ++it) {
+                for (std::map<std::string, int>::iterator it = writer->variableMap.begin();
+                    it != writer->variableMap.end(); ++it) {
                     if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
                         VisIt_VariableMetaData_setName(vmd, it->first.c_str());
                         VisIt_VariableMetaData_setMeshName(vmd, "mesh2d");
@@ -444,8 +444,8 @@ public:
                 }
 
                 /* Add a zonal scalar variable on mesh3d. */
-                for (std::map<std::string, int>::iterator it = simData->variableMap.begin();
-                    it != simData->variableMap.end(); ++it) {
+                for (std::map<std::string, int>::iterator it = writer->variableMap.begin();
+                    it != writer->variableMap.end(); ++it) {
                     if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
                         VisIt_VariableMetaData_setName(vmd, it->first.c_str());
                         VisIt_VariableMetaData_setMeshName(vmd, "mesh3d");
