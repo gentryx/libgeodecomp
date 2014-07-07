@@ -25,71 +25,17 @@ namespace LibGeoDecomp {
 
 namespace VisItWriterHelpers {
 
-// fixme:
-template<typename MEMBER_TYPE>
-class VisItSetData;
-
-template<>
-class VisItSetData<double>
-{
-public:
-    void operator()(visit_handle obj, int owner, int numComponents, int numTuples, double *data)
-    {
-        VisIt_VariableData_setDataD(obj, owner, numComponents, numTuples, data);
-    }
-};
-
-template<>
-class VisItSetData<int>
-{
-public:
-    void operator()(visit_handle obj, int owner, int numComponents, int numTuples, int  *data)
-    {
-        VisIt_VariableData_setDataI(obj, owner, numComponents, numTuples, data);
-    }
-};
-
-template<>
-class VisItSetData<float>
-{
-public:
-    void operator()(visit_handle obj, int owner, int numComponents, int numTuples, float *data)
-    {
-        VisIt_VariableData_setDataF(obj, owner, numComponents, numTuples, data);
-    }
-};
-
-template<>
-class VisItSetData<char>
-{
-public:
-    void operator()(visit_handle obj, int owner, int	numComponents, int numTuples, char *data)
-    {
-        VisIt_VariableData_setDataC(obj, owner, numComponents, numTuples, data);
-    }
-};
-
-template<>
-class VisItSetData<long>
-{
-public:
-    void operator()(visit_handle obj, int owner, int	numComponents, int numTuples, long *data)
-    {
-        VisIt_VariableData_setDataL(obj, owner, numComponents, numTuples, data);
-    }
-};
-
 template<typename CELL_TYPE>
-class VisItDataAccessor
+class DataBufferBase
 {
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    explicit VisItDataAccessor(const std::string& myType) :
+    explicit DataBufferBase(const std::string& myType) :
         myType(myType)
     {}
 
-    virtual ~VisItDataAccessor()
+    virtual ~DataBufferBase()
     {}
 
     const std::string& type() const
@@ -102,7 +48,7 @@ public:
         return selector.name();
     }
 
-    virtual visit_handle getVariable(int domain, const GridType *grid) = 0;
+    virtual visit_handle getVariable(const GridType *grid) = 0;
 
     Selector<CELL_TYPE> selector;
 
@@ -112,26 +58,24 @@ private:
 
 // fixme: if member is bool, use std::vector<char> instead. reason: some implementations of std::vector<bool> are "optimized", so they don't use one char per boolean. that's OK, but fucks up our copy operations.
 template<typename CELL_TYPE, typename MEMBER_TYPE>
-class VisItDataBuffer : public VisItWriterHelpers::VisItDataAccessor<CELL_TYPE>
+class DataBuffer : public DataBufferBase<CELL_TYPE>
 {
 public:
-    typedef typename VisItDataAccessor<CELL_TYPE>::GridType GridType;
+    typedef typename DataBufferBase<CELL_TYPE>::GridType GridType;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
 
-    VisItDataBuffer(
+    DataBuffer(
         const Selector<CELL_TYPE>& newSelector) :
-        VisItDataAccessor<CELL_TYPE>(newSelector.typeName())
+        DataBufferBase<CELL_TYPE>(newSelector.typeName())
     {
         this->selector = newSelector;
     }
 
-    virtual ~VisItDataBuffer()
+    virtual ~DataBuffer()
     {}
 
-    visit_handle getVariable(
-        int /* unused: domain */,
-        const GridType *grid)
+    visit_handle getVariable(const GridType *grid)
     {
         visit_handle handle = VISIT_INVALID_HANDLE;
         if (VisIt_VariableData_alloc(&handle) != VISIT_OKAY) {
@@ -150,7 +94,7 @@ public:
 
         MEMBER_TYPE *p = &(dataBuffer[0]);
         grid->saveMember(p, this->selector, region);
-        VisItSetData<MEMBER_TYPE>()(handle, VISIT_OWNER_SIM, 1, dataBuffer.size(), &dataBuffer[0]);
+        setData(handle, VISIT_OWNER_SIM, 1, dataBuffer.size(), &dataBuffer[0]);
 
         return handle;
     }
@@ -158,6 +102,31 @@ public:
 private:
     std::vector<MEMBER_TYPE> dataBuffer;
     Region<DIM> region;
+
+    void setData(visit_handle obj, int owner, int numComponents, int numTuples, double *data)
+    {
+        VisIt_VariableData_setDataD(obj, owner, numComponents, numTuples, data);
+    }
+
+    void setData(visit_handle obj, int owner, int numComponents, int numTuples, int  *data)
+    {
+        VisIt_VariableData_setDataI(obj, owner, numComponents, numTuples, data);
+    }
+
+    void setData(visit_handle obj, int owner, int numComponents, int numTuples, float *data)
+    {
+        VisIt_VariableData_setDataF(obj, owner, numComponents, numTuples, data);
+    }
+
+    void setData(visit_handle obj, int owner, int numComponents, int numTuples, char *data)
+    {
+        VisIt_VariableData_setDataC(obj, owner, numComponents, numTuples, data);
+    }
+
+    void setData(visit_handle obj, int owner, int numComponents, int numTuples, long *data)
+    {
+        VisIt_VariableData_setDataL(obj, owner, numComponents, numTuples, data);
+    }
 };
 
 }
@@ -170,7 +139,7 @@ template<typename CELL_TYPE>
 class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >
 {
 public:
-    typedef std::vector<boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> > > DataAccessorVec;
+    typedef std::vector<boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> > > DataAccessorVec;
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     static const int DIM = Topology::DIM;
@@ -242,14 +211,13 @@ public:
     template<typename MEMBER>
     void addVariable(MEMBER CELL_TYPE:: *memberPointer, const std::string& memberName)
     {
+        typedef VisItWriterHelpers::DataBuffer<CELL_TYPE, MEMBER> DataBuffer;
+
         Selector<CELL_TYPE> selector(memberPointer, memberName);
-        VisItWriterHelpers::VisItDataBuffer<CELL_TYPE, MEMBER> *bufferingAccessor =
-            new VisItWriterHelpers::VisItDataBuffer<CELL_TYPE, MEMBER>(selector);
+        DataBuffer *buffer = new DataBuffer(selector);
 
-        dataAccessors << boost::shared_ptr<VisItWriterHelpers::VisItDataAccessor<CELL_TYPE> >(
-            bufferingAccessor);
-
-        variableMap[selector.name()] = dataAccessors.size() - 1;
+        variableBuffers << boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >(buffer);
+        variableMap[selector.name()] = variableBuffers.size() - 1;
     }
 
   private:
@@ -258,7 +226,7 @@ public:
     int error;
     int runMode;
     int dataNumber;
-    DataAccessorVec dataAccessors;
+    DataAccessorVec variableBuffers;
     std::vector<std::vector<char> > values;
     // fixme: get rid of this
     std::map<std::string, int> variableMap;
@@ -269,7 +237,7 @@ public:
 
     void deleteMemory()
     {
-        for (int i=0; i < dataAccessors.size(); ++i) {
+        for (int i=0; i < variableBuffers.size(); ++i) {
             values[i].resize(0);
         }
     }
@@ -282,19 +250,19 @@ public:
     {
         std::size_t byteSize = getGrid()->boundingBox().size();
 
-
-        if (strcmp("DOUBLE", dataAccessors[i]->type().c_str()) == 0) {
+        // fixme: ugly, could/should be done in accessor
+        if (strcmp("DOUBLE", variableBuffers[i]->type().c_str()) == 0) {
             byteSize *= sizeof(double);
-        } else if (strcmp("INT", dataAccessors[i]->type().c_str()) == 0) {
+        } else if (strcmp("INT", variableBuffers[i]->type().c_str()) == 0) {
             byteSize *= sizeof(int);
-        } else if (strcmp("FLOAT", dataAccessors[i]->type().c_str()) == 0) {
+        } else if (strcmp("FLOAT", variableBuffers[i]->type().c_str()) == 0) {
             byteSize *= sizeof(float);
-        } else if (strcmp("BYTE", dataAccessors[i]->type().c_str()) == 0) {
+        } else if (strcmp("BYTE", variableBuffers[i]->type().c_str()) == 0) {
             byteSize *= sizeof(char);
-        } else if (strcmp("LONG", dataAccessors[i]->type().c_str()) == 0) {
+        } else if (strcmp("LONG", variableBuffers[i]->type().c_str()) == 0) {
             byteSize *= sizeof(long);
         } else {
-            LOG(FATAL, "VisItWriter encountered unknown variable type " << dataAccessors[i]->type());
+            LOG(FATAL, "VisItWriter encountered unknown variable type " << variableBuffers[i]->type());
             throw std::invalid_argument("unknown variable type");
         }
 
@@ -316,8 +284,8 @@ public:
         VisItInitializeSocketAndDumpSimFile(filename.c_str(), "",
             buffer, NULL, NULL, NULL);
 
-        values.resize(dataAccessors.size());
-        for (int i=0; i < dataAccessors.size(); ++i) {
+        values.resize(variableBuffers.size());
+        for (int i=0; i < variableBuffers.size(); ++i) {
             initVarMem(i);
         }
 
@@ -428,16 +396,16 @@ public:
      * wrapper for callback functions needed by VisItSetGetVariable()
      */
     static visit_handle callSetGetVariable(
-        int domain,
+        int /* unused: domain*/,
         const char *name,
         void *writerHandle)
     {
         VisItWriter<CELL_TYPE> *writer = reinterpret_cast<VisItWriter<CELL_TYPE>*>(writerHandle);
 
         // fixme: do we really need to iterate here?
-        for (int i=0; i < writer->dataAccessors.size(); ++i) {
-            if (name == writer->dataAccessors[i]->name()) {
-                return writer->dataAccessors[i]->getVariable(domain, writer->getGrid());
+        for (int i=0; i < writer->variableBuffers.size(); ++i) {
+            if (name == writer->variableBuffers[i]->name()) {
+                return writer->variableBuffers[i]->getVariable(writer->getGrid());
             }
         }
 
