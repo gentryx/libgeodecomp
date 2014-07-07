@@ -296,7 +296,7 @@ public:
                     LOG(INFO, "VisIt connected");
 
                     VisItSetCommandCallback(controlCommandCallback, this);
-                    VisItSetGetMetaData(SimGetMetaData, this);
+                    VisItSetGetMetaData(simGetMetaData, this);
                     VisItSetGetMesh(getRectilinearMesh, this);
                     VisItSetGetVariable(callSetGetVariable, this);
                 } else {
@@ -358,7 +358,7 @@ public:
         const char *name,
         void *writerHandle)
     {
-        VisItWriter<CELL_TYPE> *writer = reinterpret_cast<VisItWriter<CELL_TYPE>*>(writerHandle);
+        VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(writerHandle);
 
         // fixme: do we really need to iterate here?
         for (int i=0; i < writer->variableBuffers.size(); ++i) {
@@ -374,7 +374,7 @@ public:
      * set meta data for visit:
      *      - variable type (only zonal scalar variable at the moment)
      */
-    static visit_handle SimGetMetaData(void *simData)
+    static visit_handle simGetMetaData(void *simData)
     {
         visit_handle md = VISIT_INVALID_HANDLE;
         VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(simData);
@@ -482,8 +482,8 @@ public:
     {
         visit_handle handle = VISIT_INVALID_HANDLE;
 
-        VisItWriter<CELL_TYPE> *writer =
-            reinterpret_cast<VisItWriter<CELL_TYPE>*>(connectionData);
+        VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(connectionData);
+
         // add (1, 1) or (1, 1, 1) as we're describing mesh nodes
         // here, but our data is centered on zones (nodes make up the
         // circumference of the zones).
@@ -538,8 +538,7 @@ public:
     {
         visit_handle handle = VISIT_INVALID_HANDLE;
 
-        VisItWriter<CELL_TYPE> *writer =
-            reinterpret_cast<VisItWriter<CELL_TYPE>*>(connectionData);
+        VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(connectionData);
 
         CoordBox<DIM> box = writer->getGrid()->boundingBox();
         Coord<DIM> dims = writer->getGrid()->dimensions();
