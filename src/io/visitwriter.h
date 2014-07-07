@@ -102,7 +102,7 @@ public:
         return selector.name();
     }
 
-    virtual visit_handle getVariable(int domain, GridType *grid) = 0;
+    virtual visit_handle getVariable(int domain, const GridType *grid) = 0;
 
     Selector<CELL_TYPE> selector;
 
@@ -131,11 +131,13 @@ public:
 
     visit_handle getVariable(
         int /* unused: domain */,
-        GridType *grid)
+        const GridType *grid)
     {
         visit_handle handle = VISIT_INVALID_HANDLE;
         if (VisIt_VariableData_alloc(&handle) != VISIT_OKAY) {
-            throw std::runtime_error("Could not allocate variable buffer");
+            VisIt_VariableData_free(handle);
+            LOG(FATAL, "Could not allocate variable buffer");
+            return VISIT_INVALID_HANDLE;
         }
 
         CoordBox<DIM> box = grid->boundingBox();
@@ -430,6 +432,7 @@ public:
         const char *name,
         void *simData)
     {
+        // fixme: diaf
         typedef SetGetVariable<double, SetDataDouble> VisitDataDouble;
         typedef SetGetVariable<int, SetDataInt> VisitDataInt;
         typedef SetGetVariable<float, SetDataFloat> VisitDataFloat;
@@ -442,20 +445,22 @@ public:
         // fixme: do we really need to iterate here?
         for (int i=0; i < writer->dataAccessors.size(); ++i) {
             if (name == writer->dataAccessors[i]->name()) {
-                if (strcmp("DOUBLE", writer->dataAccessors[i]->type().c_str()) == 0) {
-                    return VisitDataDouble::SimGetVariable(domain, name, writer);
-                } else if (strcmp("INT", writer->dataAccessors[i]->type().c_str()) == 0) {
-                    return VisitDataInt::SimGetVariable(domain, name, writer);
-                } else if (strcmp("FLOAT", writer->dataAccessors[i]->type().c_str()) == 0) {
-                    return VisitDataFloat::SimGetVariable(domain, name, writer);
-                } else if (strcmp("BYTE", writer->dataAccessors[i]->type().c_str()) == 0) {
-                    return VisitDataChar::SimGetVariable(domain, name, writer);
-                } else if (strcmp("LONG", writer->dataAccessors[i]->type().c_str()) == 0) {
-                    return VisitDataLong::SimGetVariable(domain, name, writer);
-                } else {
-                    // unknown type:
-                    writer->setError(1);
-                }
+                return writer->dataAccessors[i]->getVariable(domain, writer->getGrid());
+                // fixme: remove?
+                // if (strcmp("DOUBLE", writer->dataAccessors[i]->type().c_str()) == 0) {
+                //     return VisitDataDouble::SimGetVariable(domain, name, writer);
+                // } else if (strcmp("INT", writer->dataAccessors[i]->type().c_str()) == 0) {
+                //     return VisitDataInt::SimGetVariable(domain, name, writer);
+                // } else if (strcmp("FLOAT", writer->dataAccessors[i]->type().c_str()) == 0) {
+                //     return VisitDataFloat::SimGetVariable(domain, name, writer);
+                // } else if (strcmp("BYTE", writer->dataAccessors[i]->type().c_str()) == 0) {
+                //     return VisitDataChar::SimGetVariable(domain, name, writer);
+                // } else if (strcmp("LONG", writer->dataAccessors[i]->type().c_str()) == 0) {
+                //     return VisitDataLong::SimGetVariable(domain, name, writer);
+                // } else {
+                //     // unknown type:
+                //     writer->setError(1);
+                // }
             }
         }
 
@@ -463,7 +468,7 @@ public:
     }
 
     /**
-     *
+     * fixme: DIAF
      */
     template<typename T, typename SETDATAFUNC>
     class SetGetVariable
