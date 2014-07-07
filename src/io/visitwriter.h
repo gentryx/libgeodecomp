@@ -150,8 +150,6 @@ public:
         Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >(prefix, period),
         blocking(0),
         visItState(0),
-        // fixme: don't use error states, just throw an exception
-        error(0),
         runMode(runMode)
     {}
 
@@ -164,29 +162,23 @@ public:
         step = newStep;
 
         if (newEvent == WRITER_INITIALIZED) {
-            initialized();
-        } else if (newEvent == WRITER_STEP_FINISHED) {
+            return initialized();
+        }
+
+        if (newEvent == WRITER_STEP_FINISHED) {
             VisItTimeStepChanged();
 
-            if (((newStep % period) == 0) && (VisItIsConnected())) {
-                if (VisItIsConnected()) {
-                    VisItUpdatePlots();
-                }
-            }
-
-            if (error != 0) {
+            if (((newStep % period) != 0) || (!VisItIsConnected())) {
                 return;
             }
 
+            VisItUpdatePlots();
             checkVisitState();
-        } else if (newEvent == WRITER_ALL_DONE) {
-            allDone();
         }
-    }
 
-    void setError(int e)
-    {
-        error = e;
+        if (newEvent == WRITER_ALL_DONE) {
+            return allDone();
+        }
     }
 
     unsigned getStep()
@@ -216,7 +208,6 @@ public:
   private:
     int blocking;
     int visItState;
-    int error;
     int runMode;
     int dataNumber;
     DataBufferVec variableBuffers;
@@ -228,17 +219,17 @@ public:
     void initialized()
     {
         VisItSetupEnvironment();
+
         char buffer[1024];
         if (getcwd(buffer, sizeof(buffer)) == NULL) {
-            // no curent working directory:
-            setError(1);
+            throw std::runtime_error("no current working directory");
         }
+
         std::string filename = "libgeodecomp";
         if (prefix.length() > 0) {
             filename += "_" + prefix;
         }
-        VisItInitializeSocketAndDumpSimFile(filename.c_str(), "",
-            buffer, NULL, NULL, NULL);
+        VisItInitializeSocketAndDumpSimFile(filename.c_str(), "", buffer, NULL, NULL, NULL);
 
         checkVisitState();
     }
@@ -254,13 +245,11 @@ public:
         // // fixme: no do-loops
         // // fixme: function too long
         do {
-            if (error != 0) {
-                break;
-            }
             blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
 
-            // VisItDetectInput return codes:
-            // - negative values are taken for error
+            // VisItDetectInput return codes.Negative values are
+            // regarded as errors:
+            //
             // - -5: Logic error (fell through all cases)
             // - -4: Logic error (no descriptors but blocking)
             // - -3: Logic error (a socket was selected but not one we set)
@@ -274,15 +263,14 @@ public:
             LOG(DBG, "VisItDetectInput yields " << visItState);
 
             if (visItState <= -1) {
-                std::cerr << "Can’t recover from error!" << std::endl;
-                error = visItState;
+                LOG(ERROR, "Can't recover from error, VisIt state: " << visItState);
                 runMode = VISIT_SIMMODE_RUNNING;
                 break;
             } else if (visItState == 0) {
-                /* There was no input from VisIt, return control to sim. */
+                // There was no input from VisIt, return control to sim.
                 break;
             } else if (visItState == 1) {
-                /* VisIt is trying to connect to sim. */
+                // VisIt is trying to connect to sim.
                 if (VisItAttemptToCompleteConnection()) {
                     LOG(INFO, "VisIt connected");
 
@@ -295,18 +283,16 @@ public:
                     LOG(WARN, "VisIt did not connect: " << visitError);
                 }
             } else if (visItState == 2) {
-                /* VisIt wants to tell the engine something. */
+                // VisIt wants to tell the engine something.
                 runMode = VISIT_SIMMODE_STOPPED;
                 if (!VisItProcessEngineCommand()) {
-                    /* Disconnect on an error or closed connection. */
-                    // fixme: is this actually called at disconnect?
+                    // Disconnect on an error or closed connection.
                     VisItDisconnect();
 
-                    /* Start running again if VisIt closes. */
+                    // Start running again if VisIt closes.
                     runMode = VISIT_SIMMODE_RUNNING;
                     break;
                 }
-                // fixme: remove this?
                 if (runMode == SIMMODE_STEP) {
                     runMode = VISIT_SIMMODE_STOPPED;
                     break;
@@ -351,10 +337,11 @@ public:
     {
         VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(writerHandle);
 
-        // fixme: do we really need to iterate here?
-        for (int i=0; i < writer->variableBuffers.size(); ++i) {
-            if (name == writer->variableBuffers[i]->name()) {
-                return writer->variableBuffers[i]->getVariable(writer->getGrid());
+        for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
+             i != writer->variableBuffers.end();
+             ++i) {
+            if (name == (*i)->name()) {
+                return (*i)->getVariable(writer->getGrid());
             }
         }
 
@@ -421,7 +408,7 @@ public:
             }
 
             if (DIM == 3) {
-                /* Set the second mesh's properties for 3d.*/
+                // Set the second mesh's properties for 3d
                 if (VisIt_MeshMetaData_alloc(&m2) != VISIT_OKAY) {
                     throw std::runtime_error("could not allocate 2D mesh meta data");
                 }
