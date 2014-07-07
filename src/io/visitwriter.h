@@ -1,10 +1,6 @@
 #ifndef LIBGEODECOMP_IO_VISITWRITER_H
 #define LIBGEODECOMP_IO_VISITWRITER_H
 
-// fixme: sort this somewhere:
-#define SIM_STOPPED 0
-#define SIMMODE_STEP 3
-
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -176,6 +172,8 @@ public:
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     static const int DIM = Topology::DIM;
+    static const int SIMMODE_STEP = 3;
+
 
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
@@ -219,21 +217,6 @@ public:
         } else if (newEvent == WRITER_ALL_DONE) {
             allDone();
         }
-    }
-
-    int getRunMode()
-    {
-        return runMode;
-    }
-
-    void setRunMode(int r)
-    {
-        runMode = r;
-    }
-
-    int getNumVars()
-    {
-        return dataAccessors.size();
     }
 
     void setError(int e)
@@ -423,17 +406,17 @@ public:
         VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>* >(data);
 
         if (command == std::string("halt")) {
-            writer->setRunMode(VISIT_SIMMODE_STOPPED);
+            writer->runMode = VISIT_SIMMODE_STOPPED;
             return;
         }
 
         if (command == std::string("step")) {
-            writer->setRunMode(SIMMODE_STEP);
+            writer->runMode = SIMMODE_STEP;
             return;
         }
 
         if (command == std::string("run")) {
-            writer->setRunMode(VISIT_SIMMODE_RUNNING);
+            writer->runMode = VISIT_SIMMODE_RUNNING;
             return;
         }
     }
@@ -457,7 +440,7 @@ public:
         VisItWriter<CELL_TYPE> *writer = reinterpret_cast<VisItWriter<CELL_TYPE>*>(simData);
 
         // fixme: do we really need to iterate here?
-        for (int i=0; i < writer->getNumVars(); ++i) {
+        for (int i=0; i < writer->dataAccessors.size(); ++i) {
             if (name == writer->dataAccessors[i]->name()) {
                 if (strcmp("DOUBLE", writer->dataAccessors[i]->type().c_str()) == 0) {
                     return VisitDataDouble::SimGetVariable(domain, name, writer);
@@ -581,8 +564,6 @@ public:
         if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) {
             if (simData->runMode == VISIT_SIMMODE_STOPPED) {
                 VisIt_SimulationMetaData_setMode(md, VISIT_SIMMODE_STOPPED);
-            } else if (simData->runMode == SIM_STOPPED) {
-                VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
             } else {
                 VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
             }
