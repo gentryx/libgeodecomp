@@ -227,47 +227,12 @@ public:
     int runMode;
     int dataNumber;
     DataAccessorVec variableBuffers;
-    std::vector<std::vector<char> > values;
     // fixme: get rid of this
     std::map<std::string, int> variableMap;
     const GridType *grid;
     unsigned step;
 
     std::vector<double> gridCoordinates[DIM];
-
-    void deleteMemory()
-    {
-        for (int i=0; i < variableBuffers.size(); ++i) {
-            values[i].resize(0);
-        }
-    }
-
-
-    /*
-     * get memory where variable data is stored
-     */
-    void initVarMem(int i)
-    {
-        std::size_t byteSize = getGrid()->boundingBox().size();
-
-        // fixme: ugly, could/should be done in accessor
-        if (strcmp("DOUBLE", variableBuffers[i]->type().c_str()) == 0) {
-            byteSize *= sizeof(double);
-        } else if (strcmp("INT", variableBuffers[i]->type().c_str()) == 0) {
-            byteSize *= sizeof(int);
-        } else if (strcmp("FLOAT", variableBuffers[i]->type().c_str()) == 0) {
-            byteSize *= sizeof(float);
-        } else if (strcmp("BYTE", variableBuffers[i]->type().c_str()) == 0) {
-            byteSize *= sizeof(char);
-        } else if (strcmp("LONG", variableBuffers[i]->type().c_str()) == 0) {
-            byteSize *= sizeof(long);
-        } else {
-            LOG(FATAL, "VisItWriter encountered unknown variable type " << variableBuffers[i]->type());
-            throw std::invalid_argument("unknown variable type");
-        }
-
-        values[i].resize(byteSize);
-    }
 
     void initialized()
     {
@@ -283,11 +248,6 @@ public:
         }
         VisItInitializeSocketAndDumpSimFile(filename.c_str(), "",
             buffer, NULL, NULL, NULL);
-
-        values.resize(variableBuffers.size());
-        for (int i=0; i < variableBuffers.size(); ++i) {
-            initVarMem(i);
-        }
 
         checkVisitState();
     }
@@ -350,8 +310,6 @@ public:
                     /* Disconnect on an error or closed connection. */
                     // fixme: is this actually called at disconnect?
                     VisItDisconnect();
-
-                    deleteMemory();
 
                     /* Start running again if VisIt closes. */
                     runMode = VISIT_SIMMODE_RUNNING;
