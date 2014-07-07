@@ -1,7 +1,8 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_IO_MPIIOWRITER_H
 #define LIBGEODECOMP_IO_MPIIOWRITER_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/writer.h>
@@ -10,6 +11,11 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This writer uses MPI I/O to dump simulation snapshots to disk. Use
+ * MPIIOInitializer for restarting from a checkpoint. Also consider
+ * ParallelMPIIOWriter for large-scale runs.
+ */
 template<typename CELL_TYPE>
 class MPIIOWriter : public Clonable<Writer<CELL_TYPE>, MPIIOWriter<CELL_TYPE> >
 {

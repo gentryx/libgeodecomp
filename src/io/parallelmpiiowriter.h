@@ -1,7 +1,8 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
 #define LIBGEODECOMP_IO_PARALLELMPIIOWRITER_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/mpiio.h>
@@ -10,6 +11,12 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Just like MPIIOWriter, this class will generate snapshots of the
+ * simulation for checkpoint/restart capabilities. Use this class for
+ * parallel runs. Consider MPIIOInitializer for restarting from a
+ * snapshot.
+ */
 template<typename CELL_TYPE>
 class ParallelMPIIOWriter : public Clonable<ParallelWriter<CELL_TYPE>, ParallelMPIIOWriter<CELL_TYPE> >
 {
