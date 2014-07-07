@@ -1,18 +1,6 @@
 #ifndef LIBGEODECOMP_IO_VISITWRITER_H
 #define LIBGEODECOMP_IO_VISITWRITER_H
 
-#include <boost/algorithm/string.hpp>
-#include <boost/shared_ptr.hpp>
-#include <string>
-#include <cerrno>
-#include <fstream>
-#include <iomanip>
-#include <VisItControlInterface_V2.h>
-#include <VisItDataInterface_V2.h>
-#include <map>
-#include <unistd.h>
-#include <stdio.h>
-
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
@@ -20,6 +8,15 @@
 #include <libgeodecomp/misc/stringops.h>
 #include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/storage/selector.h>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cerrno>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <VisItControlInterface_V2.h>
+#include <VisItDataInterface_V2.h>
 
 namespace LibGeoDecomp {
 
@@ -31,17 +28,12 @@ class DataBufferBase
 public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
-    explicit DataBufferBase(const std::string& myType) :
-        myType(myType)
+    explicit DataBufferBase(const Selector<CELL_TYPE>& selector) :
+        selector(selector)
     {}
 
     virtual ~DataBufferBase()
     {}
-
-    const std::string& type() const
-    {
-        return myType;
-    }
 
     const std::string& name() const
     {
@@ -50,13 +42,17 @@ public:
 
     virtual visit_handle getVariable(const GridType *grid) = 0;
 
+protected:
     Selector<CELL_TYPE> selector;
-
-private:
-    std::string myType;
 };
 
-// fixme: if member is bool, use std::vector<char> instead. reason: some implementations of std::vector<bool> are "optimized", so they don't use one char per boolean. that's OK, but fucks up our copy operations.
+/**
+ * This class will buffer grid data for a given member variable and can forward this data to VisIt.
+ *
+ * WARNING: this class is broken on some machines for members of type
+ * bool, as std::vector<bool>::operator[] may not necessarily return a
+ * bool& -- which is strictly necessary for us as saveMember() needs a bool*...
+ */
 template<typename CELL_TYPE, typename MEMBER_TYPE>
 class DataBuffer : public DataBufferBase<CELL_TYPE>
 {
@@ -66,11 +62,9 @@ public:
     static const int DIM = Topology::DIM;
 
     DataBuffer(
-        const Selector<CELL_TYPE>& newSelector) :
-        DataBufferBase<CELL_TYPE>(newSelector.typeName())
-    {
-        this->selector = newSelector;
-    }
+        const Selector<CELL_TYPE>& selector) :
+        DataBufferBase<CELL_TYPE>(selector)
+    {}
 
     virtual ~DataBuffer()
     {}
@@ -139,7 +133,7 @@ template<typename CELL_TYPE>
 class VisItWriter : public Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >
 {
 public:
-    typedef std::vector<boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> > > DataAccessorVec;
+    typedef std::vector<boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> > > DataBufferVec;
     typedef typename Writer<CELL_TYPE>::Topology Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     static const int DIM = Topology::DIM;
@@ -217,7 +211,6 @@ public:
         DataBuffer *buffer = new DataBuffer(selector);
 
         variableBuffers << boost::shared_ptr<VisItWriterHelpers::DataBufferBase<CELL_TYPE> >(buffer);
-        variableMap[selector.name()] = variableBuffers.size() - 1;
     }
 
   private:
@@ -226,9 +219,7 @@ public:
     int error;
     int runMode;
     int dataNumber;
-    DataAccessorVec variableBuffers;
-    // fixme: get rid of this
-    std::map<std::string, int> variableMap;
+    DataBufferVec variableBuffers;
     const GridType *grid;
     unsigned step;
 
@@ -388,72 +379,83 @@ public:
             }
             VisIt_SimulationMetaData_setCycleTime(md, writer->getStep(), 0);
 
+            // fixme: sanitize these variable names
             visit_handle m1 = VISIT_INVALID_HANDLE;
             visit_handle m2 = VISIT_INVALID_HANDLE;
             visit_handle vmd = VISIT_INVALID_HANDLE;
 
             if (DIM == 2) {
-                /* Set the first mesh's properties.*/
-                if (VisIt_MeshMetaData_alloc(&m1) == VISIT_OKAY) {
-                    /* Set the mesh's properties for 2d.*/
-                    VisIt_MeshMetaData_setName(m1, "mesh2d");
-                    // fixme: alternative: VISIT_MESHTYPE_POINT
-                    VisIt_MeshMetaData_setMeshType(m1, VISIT_MESHTYPE_RECTILINEAR);
-                    VisIt_MeshMetaData_setTopologicalDimension(m1, 2);
-                    VisIt_MeshMetaData_setSpatialDimension(m1, 2);
-                    // FIXME: do we need any units here?
-                    VisIt_MeshMetaData_setXUnits(m1, "");
-                    VisIt_MeshMetaData_setYUnits(m1, "");
-                    VisIt_MeshMetaData_setXLabel(m1, "Width");
-                    VisIt_MeshMetaData_setYLabel(m1, "Height");
-
-                    VisIt_SimulationMetaData_addMesh(md, m1);
+                // Set the first mesh's properties:
+                if (VisIt_MeshMetaData_alloc(&m1) != VISIT_OKAY) {
+                    throw std::runtime_error("could not allocate 2D mesh meta data");
                 }
+                // Set the mesh's properties for 2d:
+                VisIt_MeshMetaData_setName(m1, "mesh2d");
+                // fixme: alternative: VISIT_MESHTYPE_POINT
+                VisIt_MeshMetaData_setMeshType(m1, VISIT_MESHTYPE_RECTILINEAR);
+                VisIt_MeshMetaData_setTopologicalDimension(m1, 2);
+                VisIt_MeshMetaData_setSpatialDimension(m1, 2);
+                // FIXME: do we need any units here?
+                VisIt_MeshMetaData_setXUnits(m1, "");
+                VisIt_MeshMetaData_setYUnits(m1, "");
+                VisIt_MeshMetaData_setXLabel(m1, "Width");
+                VisIt_MeshMetaData_setYLabel(m1, "Height");
 
-                /* Add a zonal scalar variable on mesh2d. */
-                for (std::map<std::string, int>::iterator it = writer->variableMap.begin();
-                    it != writer->variableMap.end(); ++it) {
-                    if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
-                        VisIt_VariableMetaData_setName(vmd, it->first.c_str());
-                        VisIt_VariableMetaData_setMeshName(vmd, "mesh2d");
-                        VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
-                        VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
+                VisIt_SimulationMetaData_addMesh(md, m1);
 
-                        VisIt_SimulationMetaData_addVariable(md, vmd);
+                // Add zonal scalar variables on mesh2d:
+                for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
+                     i != writer->variableBuffers.end();
+                     ++i) {
+                    if (VisIt_VariableMetaData_alloc(&vmd) != VISIT_OKAY) {
+                        throw std::runtime_error("could not allocate variable meta data");
                     }
+
+                    VisIt_VariableMetaData_setName(vmd, (*i)->name().c_str());
+                    VisIt_VariableMetaData_setMeshName(vmd, "mesh2d");
+                    VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
+                    VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
+
+                    VisIt_SimulationMetaData_addVariable(md, vmd);
                 }
             }
 
             if (DIM == 3) {
                 /* Set the second mesh's properties for 3d.*/
-                if (VisIt_MeshMetaData_alloc(&m2) == VISIT_OKAY) {
-                    /* Set the mesh's properties.*/
-                    VisIt_MeshMetaData_setName(m2, "mesh3d");
-                    // fixme: alternative: VISIT_MESHTYPE_POINT
-                    VisIt_MeshMetaData_setMeshType(m2, VISIT_MESHTYPE_RECTILINEAR);
-                    VisIt_MeshMetaData_setTopologicalDimension(m2, 0);
-                    VisIt_MeshMetaData_setSpatialDimension(m2, 3);
-                    VisIt_MeshMetaData_setXUnits(m2, "");
-                    VisIt_MeshMetaData_setYUnits(m2, "");
-                    VisIt_MeshMetaData_setZUnits(m2, "");
-                    VisIt_MeshMetaData_setXLabel(m2, "Width");
-                    VisIt_MeshMetaData_setYLabel(m2, "Height");
-                    VisIt_MeshMetaData_setZLabel(m2, "Depth");
-
-                    VisIt_SimulationMetaData_addMesh(md, m2);
+                if (VisIt_MeshMetaData_alloc(&m2) != VISIT_OKAY) {
+                    throw std::runtime_error("could not allocate 2D mesh meta data");
                 }
 
-                /* Add a zonal scalar variable on mesh3d. */
-                for (std::map<std::string, int>::iterator it = writer->variableMap.begin();
-                    it != writer->variableMap.end(); ++it) {
-                    if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) {
-                        VisIt_VariableMetaData_setName(vmd, it->first.c_str());
-                        VisIt_VariableMetaData_setMeshName(vmd, "mesh3d");
-                        VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
-                        VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
+                // Set the mesh's properties:
+                VisIt_MeshMetaData_setName(m2, "mesh3d");
+                // fixme: alternative: VISIT_MESHTYPE_POINT
+                VisIt_MeshMetaData_setMeshType(m2, VISIT_MESHTYPE_RECTILINEAR);
+                VisIt_MeshMetaData_setTopologicalDimension(m2, 0);
+                VisIt_MeshMetaData_setSpatialDimension(m2, 3);
+                VisIt_MeshMetaData_setXUnits(m2, "");
+                VisIt_MeshMetaData_setYUnits(m2, "");
+                VisIt_MeshMetaData_setZUnits(m2, "");
+                VisIt_MeshMetaData_setXLabel(m2, "Width");
+                VisIt_MeshMetaData_setYLabel(m2, "Height");
+                VisIt_MeshMetaData_setZLabel(m2, "Depth");
 
-                        VisIt_SimulationMetaData_addVariable(md, vmd);
+                VisIt_SimulationMetaData_addMesh(md, m2);
+
+                // fixme: unify with 2d code?
+                // Add zonal scalar variables on mesh3d:
+                for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
+                     i != writer->variableBuffers.end();
+                     ++i) {
+                    if (VisIt_VariableMetaData_alloc(&vmd) != VISIT_OKAY) {
+                        throw std::runtime_error("could not allocate variable meta data");
                     }
+
+                    VisIt_VariableMetaData_setName(vmd, (*i)->name().c_str());
+                    VisIt_VariableMetaData_setMeshName(vmd, "mesh3d");
+                    VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
+                    VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_ZONE);
+
+                    VisIt_SimulationMetaData_addVariable(md, vmd);
                 }
             }
         } else {
