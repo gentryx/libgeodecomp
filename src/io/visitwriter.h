@@ -167,7 +167,6 @@ public:
         const bool blockStart = false) :
         Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >(prefix, period),
         blocking(0),
-        visItState(0),
         runMode(blockStart? VISIT_SIMMODE_STOPPED : VISIT_SIMMODE_RUNNING)
     {
         commandsToRunModes["halt"] = VISIT_SIMMODE_STOPPED;
@@ -229,7 +228,6 @@ public:
   private:
     std::map<std::string, int> commandsToRunModes;
     int blocking;
-    int visItState;
     int runMode;
     int dataNumber;
     DataBufferVec variableBuffers;
@@ -269,7 +267,7 @@ public:
         do {
             blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
 
-            // VisItDetectInput return codes.Negative values are
+            // VisItDetectInput return codes. Negative values are
             // regarded as errors:
             //
             // - -5: Logic error (fell through all cases)
@@ -281,7 +279,7 @@ public:
             // - 1: Listen socket input
             // - 2: Engine socket input
             // - 3: Console socket input
-            visItState = VisItDetectInput(blocking, -1);
+            int visItState = VisItDetectInput(blocking, -1);
             LOG(DBG, "VisItDetectInput yields " << visItState);
 
             if (visItState <= -1) {
@@ -382,11 +380,11 @@ public:
         visit_handle meshHandle = VISIT_INVALID_HANDLE;
         visit_handle variableHandle = VISIT_INVALID_HANDLE;
 
-
         // set up the mesh:
         if (VisIt_MeshMetaData_alloc(&meshHandle) != VISIT_OKAY) {
             // fixme: don't throw exceptions in VisIt callbacks, as VisIt can't handle these
-            throw std::runtime_error("could not allocate mesh meta data");
+            LOG(FATAL, "Could not allocate VisIt mesh meta data");
+            return VISIT_INVALID_HANDLE;
         }
         // Set the mesh's properties for 2d:
         std::string meshName = rectilinearMeshName();
@@ -411,7 +409,8 @@ public:
              i != writer->variableBuffers.end();
              ++i) {
             if (VisIt_VariableMetaData_alloc(&variableHandle) != VISIT_OKAY) {
-                throw std::runtime_error("could not allocate variable meta data");
+                LOG(FATAL, "Could not allocate VisIt variable meta data");
+                return VISIT_INVALID_HANDLE;
             }
 
             VisIt_VariableMetaData_setName(variableHandle, (*i)->name().c_str());
