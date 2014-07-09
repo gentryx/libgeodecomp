@@ -386,10 +386,16 @@ public:
         }
         VisIt_SimulationMetaData_setCycleTime(handle, writer->getStep(), 0);
 
-        // fixme: too long
+        handle = addMeshs(writer, handle);
+        handle = addVariables(writer, handle);
+        handle = addCommands(writer, handle);
 
+        return handle;
+    }
+
+    static visit_handle addMeshs(VisItWriter<CELL_TYPE> *writer, visit_handle handle)
+    {
         visit_handle meshHandle = VISIT_INVALID_HANDLE;
-        visit_handle variableHandle = VISIT_INVALID_HANDLE;
 
         // set up the mesh:
         if (VisIt_MeshMetaData_alloc(&meshHandle) != VISIT_OKAY) {
@@ -397,6 +403,7 @@ public:
             LOG(FATAL, "Could not allocate VisIt mesh meta data");
             return VISIT_INVALID_HANDLE;
         }
+
         // Set the mesh's properties for 2d:
         std::string meshName = rectilinearMeshName();
         VisIt_MeshMetaData_setName(meshHandle, meshName.c_str());
@@ -415,10 +422,18 @@ public:
         }
         VisIt_SimulationMetaData_addMesh(handle, meshHandle);
 
-        // add variables:
+        return handle;
+    }
+
+    static visit_handle addVariables(VisItWriter<CELL_TYPE> *writer, visit_handle handle)
+    {
+        std::string meshName = rectilinearMeshName();
+
         for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
              i != writer->variableBuffers.end();
              ++i) {
+            visit_handle variableHandle = VISIT_INVALID_HANDLE;
+
             if (VisIt_VariableMetaData_alloc(&variableHandle) != VISIT_OKAY) {
                 LOG(FATAL, "Could not allocate VisIt variable meta data");
                 return VISIT_INVALID_HANDLE;
@@ -432,7 +447,11 @@ public:
             VisIt_SimulationMetaData_addVariable(handle, variableHandle);
         }
 
-        // add commands:
+        return handle;
+    }
+
+    static visit_handle addCommands(VisItWriter<CELL_TYPE> *writer, visit_handle handle)
+    {
         for (std::map<std::string, int>::iterator i = writer->commandsToRunModes.begin();
              i != writer->commandsToRunModes.end();
              ++i) {
