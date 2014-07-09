@@ -6,9 +6,7 @@
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/tracingwriter.h>
-#ifdef LIBGEODECOMP_WITH_VISIT
 #include <libgeodecomp/io/visitwriter.h>
-#endif
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
