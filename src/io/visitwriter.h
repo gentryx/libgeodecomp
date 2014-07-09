@@ -262,9 +262,7 @@ public:
      */
     void checkVisitState()
     {
-        // // fixme: no do-loops
-        // // fixme: function too long
-        do {
+        for (;;) {
             blocking = (runMode == VISIT_SIMMODE_RUNNING) ? 0 : 1;
 
             // VisItDetectInput return codes. Negative values are
@@ -284,43 +282,56 @@ public:
 
             if (visItState <= -1) {
                 LOG(FATAL, "Can't recover from error, VisIt state: " << visItState);
-                runMode = VISIT_SIMMODE_RUNNING;
-                break;
-            } else if (visItState == 0) {
+                throw std::runtime_error("VisItDetectInput reported error");
+            }
+
+            if (visItState == 0) {
                 // There was no input from VisIt, return control to sim.
-                break;
-            } else if (visItState == 1) {
-                // VisIt is trying to connect to sim.
-                if (VisItAttemptToCompleteConnection()) {
-                    LOG(INFO, "VisIt connected");
+                return;
+            }
 
-                    VisItSetCommandCallback(controlCommandCallback, this);
-                    VisItSetGetMetaData(simGetMetaData, this);
-                    VisItSetGetMesh(getRectilinearMesh, this);
-                    VisItSetGetVariable(callSetGetVariable, this);
-                } else {
-                    char *visitError = VisItGetLastError();
-                    LOG(WARN, "VisIt did not connect: " << visitError);
-                }
-            } else if (visItState == 2) {
-                // VisIt wants to tell the engine something.
-                runMode = VISIT_SIMMODE_STOPPED;
-                if (!VisItProcessEngineCommand()) {
-                    // Disconnect on an error or closed connection.
-                    VisItDisconnect();
+            if (visItState == 1) {
+                handleVisItConnection();
+            }
 
-                    // Start running again if VisIt closes.
-                    runMode = VISIT_SIMMODE_RUNNING;
-                    break;
-                }
-                if (runMode == SIMMODE_STEP) {
-                    runMode = VISIT_SIMMODE_STOPPED;
-                    break;
-                }
+            if (visItState == 2) {
+                handleVisItInput();
             }
         }
-        while(true);
     }
+
+    void handleVisItConnection()
+    {
+        if (VisItAttemptToCompleteConnection()) {
+            LOG(INFO, "VisIt connected");
+
+            VisItSetCommandCallback(controlCommandCallback, this);
+            VisItSetGetMetaData(simGetMetaData, this);
+            VisItSetGetMesh(getRectilinearMesh, this);
+            VisItSetGetVariable(callSetGetVariable, this);
+        } else {
+            char *visitError = VisItGetLastError();
+            LOG(WARN, "VisIt did not connect: " << visitError);
+        }
+    }
+
+    void handleVisItInput()
+    {
+        // VisIt wants to tell the simulation engine something:
+        runMode = VISIT_SIMMODE_STOPPED;
+
+        if (!VisItProcessEngineCommand()) {
+            // Disconnect on an error or closed connection.
+            VisItDisconnect();
+
+            // Resume simulation if VisIt is gone:
+            runMode = VISIT_SIMMODE_RUNNING;
+        }
+
+        if (runMode == SIMMODE_STEP) {
+            runMode = VISIT_SIMMODE_STOPPED;
+        }
+     }
 
     static void controlCommandCallback(
         const char *command,
