@@ -53,9 +53,9 @@ public:
         TS_ASSERT_EQUALS(sizeof(double),    selectorY.sizeOfExternal());
         TS_ASSERT_EQUALS(sizeof(char),      selectorZ.sizeOfExternal());
 
-        TS_ASSERT_EQUALS(0,                                  selectorX.offset());
-        TS_ASSERT_EQUALS(sizeof(long long),                  selectorY.offset());
-        TS_ASSERT_EQUALS(sizeof(long long) + sizeof(double), selectorZ.offset());
+        TS_ASSERT_EQUALS(0,                                       selectorX.offset());
+        TS_ASSERT_EQUALS(int(sizeof(long long)),                  selectorY.offset());
+        TS_ASSERT_EQUALS(int(sizeof(long long) + sizeof(double)), selectorZ.offset());
 
         TS_ASSERT_EQUALS(1, selectorX.arity());
         TS_ASSERT_EQUALS(1, selectorY.arity());

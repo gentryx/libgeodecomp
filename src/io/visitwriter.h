@@ -399,7 +399,6 @@ public:
 
         // set up the mesh:
         if (VisIt_MeshMetaData_alloc(&meshHandle) != VISIT_OKAY) {
-            // fixme: don't throw exceptions in VisIt callbacks, as VisIt can't handle these
             LOG(FATAL, "Could not allocate VisIt mesh meta data");
             return VISIT_INVALID_HANDLE;
         }
