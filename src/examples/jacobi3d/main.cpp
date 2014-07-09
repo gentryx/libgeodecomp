@@ -4,8 +4,11 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/io/bovwriter.h>
-#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
+#ifdef LIBGEODECOMP_WITH_VISIT
+#include <libgeodecomp/io/visitwriter.h>
+#endif
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/loadbalancer/noopbalancer.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -81,7 +84,7 @@ void runSimulation()
     HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
-        1000,
+        10000,
         1);
 
     if (MPILayer().rank() == 0) {
@@ -94,6 +97,16 @@ void runSimulation()
             Selector<Cell>(&Cell::temp, "temperature"),
             "jacobi3d",
             outputFrequency));
+
+
+#ifdef LIBGEODECOMP_WITH_VISIT
+    VisItWriter<Cell> *visItWriter = 0;
+    if (MPILayer().rank() == 0) {
+        visItWriter = new VisItWriter<Cell>("jacobi", outputFrequency);
+        visItWriter->addVariable(&Cell::temp, "temperature");
+    }
+    sim.addWriter(new CollectingWriter<Cell>(visItWriter));
+#endif
 
     sim.run();
 }

@@ -22,6 +22,10 @@ namespace LibGeoDecomp {
 
 namespace VisItWriterHelpers {
 
+/**
+ * This base class hides the actual member type, so it's descendants
+ * can be stored more easily within the VisItWriter.
+ */
 template<typename CELL_TYPE>
 class DataBufferBase
 {
@@ -166,12 +170,11 @@ public:
         }
 
         if (newEvent == WRITER_STEP_FINISHED) {
-            VisItTimeStepChanged();
-
-            if (((newStep % period) != 0) || (!VisItIsConnected())) {
+            if (((newStep % period) != 0)) {
                 return;
             }
 
+            VisItTimeStepChanged();
             VisItUpdatePlots();
             checkVisitState();
         }
@@ -238,7 +241,7 @@ public:
     {}
 
     /**
-     * check if there is input from visit
+     * check if there is input from VisIt
      */
     void checkVisitState()
     {
@@ -349,102 +352,68 @@ public:
     }
 
     /**
-     * set meta data for visit:
-     *      - variable type (only zonal scalar variable at the moment)
+     * sets the meta data for VisIt: which meshes are available, and
+     * which variables are defined (on which mesh)?
      */
     static visit_handle simGetMetaData(void *simData)
     {
-        visit_handle md = VISIT_INVALID_HANDLE;
+        visit_handle handle = VISIT_INVALID_HANDLE;
         VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(simData);
 
-        // fixme: too long
-        if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) {
-            if (writer->runMode == VISIT_SIMMODE_STOPPED) {
-                VisIt_SimulationMetaData_setMode(md, VISIT_SIMMODE_STOPPED);
-            } else {
-                VisIt_SimulationMetaData_setMode(md,  VISIT_SIMMODE_RUNNING);
-            }
-            VisIt_SimulationMetaData_setCycleTime(md, writer->getStep(), 0);
-
-            visit_handle meshHandle = VISIT_INVALID_HANDLE;
-            visit_handle variableHandle = VISIT_INVALID_HANDLE;
-
-            if (DIM == 2) {
-                // Set the first mesh's properties:
-                if (VisIt_MeshMetaData_alloc(&meshHandle) != VISIT_OKAY) {
-                    throw std::runtime_error("could not allocate 2D mesh meta data");
-                }
-                // Set the mesh's properties for 2d:
-                VisIt_MeshMetaData_setName(meshHandle, "mesh2d");
-                // fixme: alternative: VISIT_MESHTYPE_POINT
-                VisIt_MeshMetaData_setMeshType(meshHandle, VISIT_MESHTYPE_RECTILINEAR);
-                VisIt_MeshMetaData_setTopologicalDimension(meshHandle, 2);
-                VisIt_MeshMetaData_setSpatialDimension(meshHandle, 2);
-                // FIXME: do we need any units here?
-                VisIt_MeshMetaData_setXUnits(meshHandle, "");
-                VisIt_MeshMetaData_setYUnits(meshHandle, "");
-                VisIt_MeshMetaData_setXLabel(meshHandle, "Width");
-                VisIt_MeshMetaData_setYLabel(meshHandle, "Height");
-
-                VisIt_SimulationMetaData_addMesh(md, meshHandle);
-
-                // Add zonal scalar variables on mesh2d:
-                for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
-                     i != writer->variableBuffers.end();
-                     ++i) {
-                    if (VisIt_VariableMetaData_alloc(&variableHandle) != VISIT_OKAY) {
-                        throw std::runtime_error("could not allocate variable meta data");
-                    }
-
-                    VisIt_VariableMetaData_setName(variableHandle, (*i)->name().c_str());
-                    VisIt_VariableMetaData_setMeshName(variableHandle, "mesh2d");
-                    VisIt_VariableMetaData_setType(variableHandle, VISIT_VARTYPE_SCALAR);
-                    VisIt_VariableMetaData_setCentering(variableHandle, VISIT_VARCENTERING_ZONE);
-
-                    VisIt_SimulationMetaData_addVariable(md, variableHandle);
-                }
-            }
-
-            if (DIM == 3) {
-                // Set the second mesh's properties for 3d
-                if (VisIt_MeshMetaData_alloc(&meshHandle) != VISIT_OKAY) {
-                    throw std::runtime_error("could not allocate 2D mesh meta data");
-                }
-
-                // Set the mesh's properties:
-                VisIt_MeshMetaData_setName(meshHandle, "mesh3d");
-                // fixme: alternative: VISIT_MESHTYPE_POINT
-                VisIt_MeshMetaData_setMeshType(meshHandle, VISIT_MESHTYPE_RECTILINEAR);
-                VisIt_MeshMetaData_setTopologicalDimension(meshHandle, 0);
-                VisIt_MeshMetaData_setSpatialDimension(meshHandle, 3);
-                VisIt_MeshMetaData_setXUnits(meshHandle, "");
-                VisIt_MeshMetaData_setYUnits(meshHandle, "");
-                VisIt_MeshMetaData_setZUnits(meshHandle, "");
-                VisIt_MeshMetaData_setXLabel(meshHandle, "Width");
-                VisIt_MeshMetaData_setYLabel(meshHandle, "Height");
-                VisIt_MeshMetaData_setZLabel(meshHandle, "Depth");
-
-                VisIt_SimulationMetaData_addMesh(md, meshHandle);
-
-                // fixme: unify with 2d code?
-                // Add zonal scalar variables on mesh3d:
-                for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
-                     i != writer->variableBuffers.end();
-                     ++i) {
-                    if (VisIt_VariableMetaData_alloc(&variableHandle) != VISIT_OKAY) {
-                        throw std::runtime_error("could not allocate variable meta data");
-                    }
-
-                    VisIt_VariableMetaData_setName(variableHandle, (*i)->name().c_str());
-                    VisIt_VariableMetaData_setMeshName(variableHandle, "mesh3d");
-                    VisIt_VariableMetaData_setType(variableHandle, VISIT_VARTYPE_SCALAR);
-                    VisIt_VariableMetaData_setCentering(variableHandle, VISIT_VARCENTERING_ZONE);
-
-                    VisIt_SimulationMetaData_addVariable(md, variableHandle);
-                }
-            }
-        } else {
+        if (VisIt_SimulationMetaData_alloc(&handle) != VISIT_OKAY) {
             return VISIT_INVALID_HANDLE;
+        }
+
+        if (writer->runMode == VISIT_SIMMODE_STOPPED) {
+            VisIt_SimulationMetaData_setMode(handle, VISIT_SIMMODE_STOPPED);
+        } else {
+            VisIt_SimulationMetaData_setMode(handle,  VISIT_SIMMODE_RUNNING);
+        }
+        VisIt_SimulationMetaData_setCycleTime(handle, writer->getStep(), 0);
+
+        // fixme: too long
+
+        visit_handle meshHandle = VISIT_INVALID_HANDLE;
+        visit_handle variableHandle = VISIT_INVALID_HANDLE;
+
+
+        // set up the mesh:
+        if (VisIt_MeshMetaData_alloc(&meshHandle) != VISIT_OKAY) {
+            // fixme: don't throw exceptions in VisIt callbacks, as VisIt can't handle these
+            throw std::runtime_error("could not allocate mesh meta data");
+        }
+        // Set the mesh's properties for 2d:
+        std::string meshName = rectilinearMeshName();
+        VisIt_MeshMetaData_setName(meshHandle, meshName.c_str());
+        // fixme: alternative: VISIT_MESHTYPE_POINT
+        VisIt_MeshMetaData_setMeshType(meshHandle, VISIT_MESHTYPE_RECTILINEAR);
+        VisIt_MeshMetaData_setTopologicalDimension(meshHandle, DIM);
+        VisIt_MeshMetaData_setSpatialDimension(meshHandle, DIM);
+        // FIXME: do we need any units here?
+        VisIt_MeshMetaData_setXUnits(meshHandle, "");
+        VisIt_MeshMetaData_setXLabel(meshHandle, "Width");
+        VisIt_MeshMetaData_setYUnits(meshHandle, "");
+        VisIt_MeshMetaData_setYLabel(meshHandle, "Height");
+        if (DIM >= 3) {
+            VisIt_MeshMetaData_setZUnits(meshHandle, "");
+            VisIt_MeshMetaData_setZLabel(meshHandle, "Depth");
+        }
+        VisIt_SimulationMetaData_addMesh(handle, meshHandle);
+
+        // add variables:
+        for (typename DataBufferVec::iterator i = writer->variableBuffers.begin();
+             i != writer->variableBuffers.end();
+             ++i) {
+            if (VisIt_VariableMetaData_alloc(&variableHandle) != VISIT_OKAY) {
+                throw std::runtime_error("could not allocate variable meta data");
+            }
+
+            VisIt_VariableMetaData_setName(variableHandle, (*i)->name().c_str());
+            VisIt_VariableMetaData_setMeshName(variableHandle, meshName.c_str());
+            VisIt_VariableMetaData_setType(variableHandle, VISIT_VARTYPE_SCALAR);
+            VisIt_VariableMetaData_setCentering(variableHandle, VISIT_VARCENTERING_ZONE);
+
+            VisIt_SimulationMetaData_addVariable(handle, variableHandle);
         }
 
         // fixme: rework this, e.g. unify with command callback
@@ -455,11 +424,16 @@ public:
 
             if (VisIt_CommandMetaData_alloc(&cmd) == VISIT_OKAY) {
                 VisIt_CommandMetaData_setName(cmd, cmd_names[i]);
-                VisIt_SimulationMetaData_addGenericCommand(md, cmd);
+                VisIt_SimulationMetaData_addGenericCommand(handle, cmd);
             }
         }
 
-        return md;
+        return handle;
+    }
+
+    static std::string rectilinearMeshName()
+    {
+        return "mesh" + StringOps::itoa(DIM) + "d";
     }
 
     static visit_handle getRectilinearMesh(
@@ -470,14 +444,12 @@ public:
         visit_handle handle = VISIT_INVALID_HANDLE;
 
         VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>*>(connectionData);
-
-        // add (1, 1) or (1, 1, 1) as we're describing mesh nodes
-        // here, but our data is centered on zones (nodes make up the
-        // circumference of the zones).
+        // add (1, 1) for 2D or (1, 1, 1) for 3D, as we're describing
+        // mesh nodes here, but our data is centered on zones (nodes
+        // make up the circumference of the zones).
         Coord<DIM> dims = writer->getGrid()->dimensions() + Coord<DIM>::diagonal(1);
 
-        std::string expectedName = "mesh" + StringOps::itoa(DIM) + "d";
-        if (name != expectedName) {
+        if (name != rectilinearMeshName()) {
             return VISIT_INVALID_HANDLE;
         }
 
