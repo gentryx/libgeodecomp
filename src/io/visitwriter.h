@@ -410,13 +410,18 @@ public:
         VisIt_MeshMetaData_setMeshType(meshHandle, VISIT_MESHTYPE_RECTILINEAR);
         VisIt_MeshMetaData_setTopologicalDimension(meshHandle, DIM);
         VisIt_MeshMetaData_setSpatialDimension(meshHandle, DIM);
-        // FIXME: do we need any units here?
-        VisIt_MeshMetaData_setXUnits(meshHandle, "");
+
+        Coord<DIM> unusedQuadrantDim;
+        Coord<DIM> unusedOrigin;
+        std::vector<std::string> axisUnits;
+        APITraits::SelectRegularGrid<CELL_TYPE>::value(&unusedQuadrantDim, &unusedOrigin, &axisUnits);
+
+        VisIt_MeshMetaData_setXUnits(meshHandle, axisUnits[0]);
         VisIt_MeshMetaData_setXLabel(meshHandle, "Width");
-        VisIt_MeshMetaData_setYUnits(meshHandle, "");
+        VisIt_MeshMetaData_setYUnits(meshHandle, axisUnits[1]);
         VisIt_MeshMetaData_setYLabel(meshHandle, "Height");
         if (DIM >= 3) {
-            VisIt_MeshMetaData_setZUnits(meshHandle, "");
+            VisIt_MeshMetaData_setZUnits(meshHandle, axisUnits[2]);
             VisIt_MeshMetaData_setZLabel(meshHandle, "Depth");
         }
         VisIt_SimulationMetaData_addMesh(handle, meshHandle);
