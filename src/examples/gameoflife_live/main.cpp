@@ -118,7 +118,7 @@ void runSimulation()
 
 
     VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
-        "gameOfLife", outputFrequency, VISIT_SIMMODE_STOPPED);
+        "gameOfLife", outputFrequency, true);
     visItWriter->addVariable(&ConwayCell::alive, "alive");
     visItWriter->addVariable(&ConwayCell::count, "count");
 

@@ -147,15 +147,33 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
+    /**
+     * By default, a VisItWriter will create a cookie file named with
+     * a time stamp and the given prefix in your home directiory (e.g.
+     * $HOME/.visit/simulations/001404890671.libgeodecomp_jacobi.sim2).
+     * The information in this cookie file can also be used to connect
+     * from remote machines.
+     *
+     * The VisItWriter will remain passive and only check every period
+     * time steps for inbound connections from VisIt. Set blockStart
+     * if you need your application to wait for VisIt to connect
+     * before starting the simulation. This is useful for debugging
+     * purposes where the user wishes to inspect every time step, but
+     * without having to write each and every to disk.
+     */
     explicit VisItWriter(
         const std::string& prefix,
-        const unsigned& period = 1,
-        const int& runMode = VISIT_SIMMODE_RUNNING) :
+        const unsigned period = 1,
+        const bool blockStart = false) :
         Clonable<Writer<CELL_TYPE>, VisItWriter<CELL_TYPE> >(prefix, period),
         blocking(0),
         visItState(0),
-        runMode(runMode)
-    {}
+        runMode(blockStart? VISIT_SIMMODE_STOPPED : VISIT_SIMMODE_RUNNING)
+    {
+        commandsToRunModes["halt"] = VISIT_SIMMODE_STOPPED;
+        commandsToRunModes["step"] = SIMMODE_STEP;
+        commandsToRunModes["run" ] = VISIT_SIMMODE_RUNNING;
+    }
 
     virtual void stepFinished(
         const GridType& newGrid, unsigned newStep, WriterEvent newEvent)
@@ -209,6 +227,7 @@ public:
     }
 
   private:
+    std::map<std::string, int> commandsToRunModes;
     int blocking;
     int visItState;
     int runMode;
@@ -266,7 +285,7 @@ public:
             LOG(DBG, "VisItDetectInput yields " << visItState);
 
             if (visItState <= -1) {
-                LOG(ERROR, "Can't recover from error, VisIt state: " << visItState);
+                LOG(FATAL, "Can't recover from error, VisIt state: " << visItState);
                 runMode = VISIT_SIMMODE_RUNNING;
                 break;
             } else if (visItState == 0) {
@@ -313,20 +332,7 @@ public:
         LOG(INFO, "VisItWriter::controlCommandCallback(command: " << command << ", arguments: " << arguments << ")");
         VisItWriter<CELL_TYPE> *writer = static_cast<VisItWriter<CELL_TYPE>* >(data);
 
-        if (command == std::string("halt")) {
-            writer->runMode = VISIT_SIMMODE_STOPPED;
-            return;
-        }
-
-        if (command == std::string("step")) {
-            writer->runMode = SIMMODE_STEP;
-            return;
-        }
-
-        if (command == std::string("run")) {
-            writer->runMode = VISIT_SIMMODE_RUNNING;
-            return;
-        }
+        writer->runMode = writer->commandsToRunModes[command];
     }
 
 
@@ -416,16 +422,19 @@ public:
             VisIt_SimulationMetaData_addVariable(handle, variableHandle);
         }
 
-        // fixme: rework this, e.g. unify with command callback
-        const char *cmd_names[] = { "halt", "step", "run" };
-        for (int i = 0; i < sizeof(cmd_names) / sizeof(const char *);
-                ++i) {
-            visit_handle cmd = VISIT_INVALID_HANDLE;
+        // add commands:
+        for (std::map<std::string, int>::iterator i = writer->commandsToRunModes.begin();
+             i != writer->commandsToRunModes.end();
+             ++i) {
+            visit_handle commandHandle = VISIT_INVALID_HANDLE;
 
-            if (VisIt_CommandMetaData_alloc(&cmd) == VISIT_OKAY) {
-                VisIt_CommandMetaData_setName(cmd, cmd_names[i]);
-                VisIt_SimulationMetaData_addGenericCommand(handle, cmd);
+            if (VisIt_CommandMetaData_alloc(&commandHandle) != VISIT_OKAY) {
+                LOG(FATAL, "Cold not allocate VisIt metadata handle for command");
+                return VISIT_INVALID_HANDLE;
             }
+
+            VisIt_CommandMetaData_setName(commandHandle, i->first.c_str());
+            VisIt_SimulationMetaData_addGenericCommand(handle, commandHandle);
         }
 
         return handle;

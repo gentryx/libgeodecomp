@@ -97,7 +97,7 @@ void runSimulation()
     VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
         "gameOfLife3D",
         outputFrequency,
-        VISIT_SIMMODE_STOPPED);
+        true);
     visItWriter->addVariable(&ConwayCell::alive, "alive");
 
     sim.addWriter(visItWriter);

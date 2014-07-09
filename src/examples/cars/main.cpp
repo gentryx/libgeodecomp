@@ -227,7 +227,7 @@ void runSimulation()
     int maxSteps = 1000000;
     SerialSimulator<Cell> sim(new CellInitializer(maxSteps));
 
-    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("cars", 1, VISIT_SIMMODE_STOPPED);
+    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("cars", 1, true);
     visItWriter->addVariable(&Cell::border,    "border");
     visItWriter->addVariable(&Cell::direction, "direction");
     visItWriter->addVariable(&Cell::rate,      "rate");
