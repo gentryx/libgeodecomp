@@ -106,9 +106,6 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(AliveAccessor, ConwayCell, char, alive);
-DEFINE_DATAACCESSOR(CountAccessor, ConwayCell, int, count);
-
 void runSimulation()
 {
     int outputFrequency = 1;
