@@ -5,7 +5,10 @@
 #include <iostream>
 #include <sstream>
 
+
 using namespace LibGeoDecomp;
+
+// fixme using namespace LibGeoDecomp;
 
 const int CONTAINER_SIZE = 30;
 const double CONTAINER_DIM = 3.0;
@@ -132,7 +135,11 @@ private:
     double col;
 };
 
-// fixme: rewrite this example with the multicontainercell
+DECLARE_MULTI_CONTAINER_CELL(
+    MyFixmeContainer,
+    ((Sphere)(30)(spheres))
+    ((Boundary)(30)(boundaries)))
+
 class Container
 {
 public:

@@ -411,17 +411,17 @@ public:
         VisIt_MeshMetaData_setTopologicalDimension(meshHandle, DIM);
         VisIt_MeshMetaData_setSpatialDimension(meshHandle, DIM);
 
-        Coord<DIM> unusedQuadrantDim;
-        Coord<DIM> unusedOrigin;
+        FloatCoord<DIM> unusedQuadrantDim;
+        FloatCoord<DIM> unusedOrigin;
         std::vector<std::string> axisUnits;
         APITraits::SelectRegularGrid<CELL_TYPE>::value(&unusedQuadrantDim, &unusedOrigin, &axisUnits);
 
-        VisIt_MeshMetaData_setXUnits(meshHandle, axisUnits[0]);
+        VisIt_MeshMetaData_setXUnits(meshHandle, axisUnits[0].c_str());
         VisIt_MeshMetaData_setXLabel(meshHandle, "Width");
-        VisIt_MeshMetaData_setYUnits(meshHandle, axisUnits[1]);
+        VisIt_MeshMetaData_setYUnits(meshHandle, axisUnits[1].c_str());
         VisIt_MeshMetaData_setYLabel(meshHandle, "Height");
         if (DIM >= 3) {
-            VisIt_MeshMetaData_setZUnits(meshHandle, axisUnits[2]);
+            VisIt_MeshMetaData_setZUnits(meshHandle, axisUnits[2].c_str());
             VisIt_MeshMetaData_setZLabel(meshHandle, "Depth");
         }
         VisIt_SimulationMetaData_addMesh(handle, meshHandle);

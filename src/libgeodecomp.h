@@ -34,5 +34,6 @@
 #include <libgeodecomp/parallelization/stripingsimulator.h>
 #include <libgeodecomp/storage/containercell.h>
 #include <libgeodecomp/storage/fixedarray.h>
+#include <libgeodecomp/storage/multicontainercell.h>
 
 #endif
