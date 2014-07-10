@@ -9,6 +9,9 @@
 #include <libgeodecomp/parallelization/simulator.h>
 #include <libgeodecomp/storage/selector.h>
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_VISIT
+
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cerrno>
@@ -588,5 +591,7 @@ public:
 };
 
 }
+
+#endif
 
 #endif
