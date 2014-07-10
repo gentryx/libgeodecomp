@@ -18,19 +18,20 @@
             const int& id) const                                        \
         {                                                               \
             const BOOST_PP_SEQ_ELEM(0, MEMBER) *res =                   \
-                (*hood)[Coord<DIM>()].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
+                (*hood)[LibGeoDecomp::Coord<DIM>()].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
                                                                         \
             if (res) {                                                  \
                 return res;                                             \
             }                                                           \
                                                                         \
-            CoordBox<DIM> box(Coord<DIM>::diagonal(-1),                 \
-                              Coord<DIM>::diagonal(3));                 \
-            for (CoordBox<DIM>::Iterator i = box.begin();               \
+            LibGeoDecomp::CoordBox<DIM> box(                            \
+                LibGeoDecomp::Coord<DIM>::diagonal(-1),                 \
+                LibGeoDecomp::Coord<DIM>::diagonal(3));                 \
+            for (LibGeoDecomp::CoordBox<DIM>::Iterator i = box.begin(); \
                  i != box.end();                                        \
                  ++i) {                                                 \
                                                                         \
-                if (*i != Coord<DIM>()) {                               \
+                if (*i != LibGeoDecomp::Coord<DIM>()) {                 \
                     res = (*hood)[*i].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
                     if (res) {                                          \
                         return res;                                     \
@@ -69,8 +70,6 @@
  * again a sequence of member type, number of elements, and name.
  *
  * See the unit tests for examples of how to use this class.
- *
- * fixme: make sure this also works if used outside of namespace LibGeoDecomp
  */
 #define DECLARE_MULTI_CONTAINER_CELL(NAME, MEMBERS)                     \
     class NAME                                                          \
@@ -78,7 +77,7 @@
     public:                                                             \
         friend class MultiContainerCellTest;                            \
                                                                         \
-        typedef APITraits::SelectTopology<NAME>::Value Topology;        \
+        typedef LibGeoDecomp::APITraits::SelectTopology<NAME>::Value Topology; \
         const static int DIM = Topology::DIM;                           \
                                                                         \
         template<typename NEIGHBORHOOD>                                 \
@@ -91,7 +90,8 @@
                 NAME,                                                   \
                 MEMBERS)                                                \
                                                                         \
-            explicit MultiNeighborhoodAdapter(const NEIGHBORHOOD *hood) : \
+            explicit MultiNeighborhoodAdapter(                          \
+                const NEIGHBORHOOD *hood) :                             \
                 BOOST_PP_SEQ_FOR_EACH(                                  \
                     DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT,            \
                     NAME,                                               \
@@ -116,7 +116,7 @@
         inline void update(const NEIGHBORHOOD& hood,                    \
                            const int& nanoStep)                         \
         {                                                               \
-            *this = hood[Coord<DIM>()];                                 \
+            *this = hood[LibGeoDecomp::Coord<DIM>()];                   \
             MultiNeighborhoodAdapter<NEIGHBORHOOD> multiHood(&hood);    \
                                                                         \
             BOOST_PP_SEQ_FOR_EACH(                                      \
