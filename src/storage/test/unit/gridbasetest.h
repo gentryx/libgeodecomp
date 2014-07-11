@@ -48,82 +48,81 @@ public:
 
     void testConstIterator()
     {
-    Grid<int> grid1(Coord<2>(5, 3));
-    for (int y = 0; y < 3; ++y) {
-        for (int x = 0; x < 5; ++x) {
-        grid1[Coord<2>(x, y)] =
+        Grid<int> grid1(Coord<2>(5, 3));
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 5; ++x) {
+                grid1[Coord<2>(x, y)] = x * 10 + y;
+            }
         }
-    }
-    
-    const Grid<int>& grid = grid1;
-    
-    GridBase<int, 2>::ConstIterator iter = grid.at(Coord<2>(2, 1));
-    for (int i = 0; i < 3; ++i) {
-        TS_ASSERT_EQUALS(*iter, (i + 2) * 10 + 1);
-    
-        ++iter;
-    }
-    
-    iter = grid.at(Coord<2>(2, 0));
-    for (int i = 0; i < 3; ++i) {
-        int res;
-        iter >> res;
-        TS_ASSERT_EQUALS(res, (i + 2) * 10 + 0);
-    }
-    
-    Grid<std::pair<int, char> > grid2(Coord<2>(2, 2), std::make_pair(123, 'a'));
-    TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->first, 123);
-    TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->second, 'a');
+
+        const Grid<int>& grid = grid1;
+
+        GridBase<int, 2>::ConstIterator iter = grid.at(Coord<2>(2, 1));
+        for (int i = 0; i < 3; ++i) {
+            TS_ASSERT_EQUALS(*iter, (i + 2) * 10 + 1);
+            ++iter;
+        }
+
+        iter = grid.at(Coord<2>(2, 0));
+        for (int i = 0; i < 3; ++i) {
+            int res;
+            iter >> res;
+            TS_ASSERT_EQUALS(res, (i + 2) * 10 + 0);
+        }
+
+        Grid<std::pair<int, char> > grid2(Coord<2>(2, 2),
+                std::make_pair(123, 'a'));
+        TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->first, 123);
+        TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->second, 'a');
     }
 
     void testIteratorRead()
     {
-    Grid<int> grid(Coord<2>(5, 3));
-    for (int y = 0; y < 3; ++y) {
-        for (int x = 0; x < 5; ++x) {
-        grid[Coord<2>(x, y)] = x * 10 + y;
+        Grid<int> grid(Coord<2>(5, 3));
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 5; ++x) {
+                grid[Coord<2>(x, y)] = x * 10 + y;
+            }
         }
-    }
-    
-    GridBase<int, 2>::Iterator iter = grid.at(Coord<2>(2, 1));
-    for (int i = 0; i < 3; ++i) {
-        TS_ASSERT_EQUALS(*iter, (i + 2) * 10 + 1);
-    
-        ++iter;
-    }
-    
-    iter = grid.at(Coord<2>(2, 0));
-    for (int i = 0; i < 3; ++i) {
-        int res;
-        iter >> res;
-        TS_ASSERT_EQUALS(res, (i + 2) * 10 + 0);
-    }
-    
-    Grid<std::pair<int, char> > grid2(Coord<2>(2, 2), std::make_pair(123, 'a'));
-    TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->first, 123);
-    TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->second, 'a');
+
+        GridBase<int, 2>::Iterator iter = grid.at(Coord<2>(2, 1));
+        for (int i = 0; i < 3; ++i) {
+            TS_ASSERT_EQUALS(*iter, (i + 2) * 10 + 1);
+            ++iter;
+        }
+
+        iter = grid.at(Coord<2>(2, 0));
+        for (int i = 0; i < 3; ++i) {
+            int res;
+            iter >> res;
+            TS_ASSERT_EQUALS(res, (i + 2) * 10 + 0);
+        }
+
+        Grid<std::pair<int, char> > grid2(Coord<2>(2, 2),
+                std::make_pair(123, 'a'));
+        TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->first, 123);
+        TS_ASSERT_EQUALS(grid2.at(Coord<2>(1, 1))->second, 'a');
     }
 
     void testIteratorWrite()
     {
-    Grid<int> grid1(Coord<2>(5, 3));
-    Grid<int> grid2(Coord<2>(5, 3));
-    
-    for (int y = 0; y < 3; ++y) {
-        GridBase<int, 2>::Iterator i = grid2.at(Coord<2>(0, y));
-    
-        for (int x = 0; x < 5; ++x) {
-        grid1[Coord<2>(x, y)] = x * 10 + y;
-        i << x * 10 + y;
+        Grid<int> grid1(Coord<2>(5, 3));
+        Grid<int> grid2(Coord<2>(5, 3));
+
+        for (int y = 0; y < 3; ++y) {
+            GridBase<int, 2>::Iterator i = grid2.at(Coord<2>(0, y));
+
+            for (int x = 0; x < 5; ++x) {
+                grid1[Coord<2>(x, y)] = x * 10 + y;
+                i << x * 10 + y;
+            }
         }
-    }
-    
-    for (int y = 0; y < 3; ++y) {
-        for (int x = 0; x < 5; ++x) {
-        TS_ASSERT_EQUALS(grid1[Coord<2>(x, y)],
-                 grid2[Coord<2>(x, y)]);
+
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 5; ++x) {
+                TS_ASSERT_EQUALS(grid1[Coord<2>(x, y)], grid2[Coord<2>(x, y)]);
+            }
         }
-    }
     }
 };
 
