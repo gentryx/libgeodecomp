@@ -62,7 +62,7 @@ public:
         SimulationParameters params;
         params.addParameter("x",   0, 20);
         params.addParameter("y", -10, 10);
-#define MATHIAS_DBG
+#ifdef MATHIAS_DBG
 std::cout<< std::endl <<"PatternOptimizer is running!"<< std::endl;
 #endif //MATHIAS_DBG
         PatternOptimizer optimizer(params);
