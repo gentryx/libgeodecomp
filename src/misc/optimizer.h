@@ -18,7 +18,7 @@ public:
 
         virtual double operator()(SimulationParameters params) = 0;
     };
-
+	virtual ~Optimizer(){};
     explicit Optimizer(SimulationParameters params) :
         params(params),
         fitness(std::numeric_limits<double>::min())
@@ -43,7 +43,7 @@ public:
         }
     }
 
-private:
+//private:
     SimulationParameters params;
     double fitness;
 };
