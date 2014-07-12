@@ -9,12 +9,13 @@ namespace LibGeoDecomp {
 
 class SellCSigmaSparseMatrixContainerTest : public CxxTest::TestSuite
 {
+    //TODO TEST FÜR NEUE DINGE
 public:
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     void testGetRow_one()
     {
 //std::cout << "\n\n\nTEST 1: C=1 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
-        SellCSigmaSparseMatrixContainer<int, 1, 1> smc;
+        SellCSigmaSparseMatrixContainer<int, 1, 1> smc (8);
 
         /* add a test 8x8 Matrix:
          * 1 0 0 0 0 0 0 0
@@ -100,7 +101,7 @@ public:
     void testGetRow_two()
     {
 //std::cout << "\n\n\nTEST 2: C=1 Sigma=1 Diagonalmatrix" <<std::endl;
-        SellCSigmaSparseMatrixContainer<int, 1, 1> smc;
+        SellCSigmaSparseMatrixContainer<int, 1, 1> smc (8);
 
         /* add a test 8x8 Matrix:
          * 1 0 0 0 0 0 0 0
@@ -189,7 +190,7 @@ public:
 
         int const C (2);
         int const SIGMA (1);
-        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc;
+        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc (8);
 
         /* add a test 8x8 Matrix:
          * 1 0 0 0 0 0 0 0
@@ -276,7 +277,7 @@ public:
 //std::cout << "\n\n\nTEST 4 C=3 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
         int const C (3);
         int const SIGMA (1);
-        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc;
+        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc (8);
 
         /* add a test 8x8 Matrix:
          * 1 0 0 0 0 0 0 0
@@ -363,7 +364,7 @@ public:
 //std::cout << "\n\n\nTEST 5 C=3 Sigma=1 sparse matrix" <<std::endl;
         int const C (3);
         int const SIGMA (1);
-        SellCSigmaSparseMatrixContainer<char, C, SIGMA> smc;
+        SellCSigmaSparseMatrixContainer<char, C, SIGMA> smc (9);
 
         /* add a test 8x8 Matrix:
          *              col
@@ -505,9 +506,9 @@ public:
 
         int const C (2);
         int const SIGMA (1);
-        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc;
+        SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc (3);
 
-        /* add a test 8x8 Matrix:
+        /* add a test 3x3 Matrix:
          * 1 0 4
          * 0 5 0
          * 0 0 6
@@ -546,6 +547,137 @@ public:
                 row2
                 );
     }
+
+    void testMatVecMul_diag(){
+
+        SellCSigmaSparseMatrixContainer<int, 4, 1> smc (8);
+
+        /* add a test 8x8 Matrix:
+         * 1       1 0 0 0 0 0 0 0      1
+         * 2       0 1 0 0 0 0 0 0      2
+         * 3       0 0 1 0 0 0 0 0      3
+         * 4       0 0 0 1 0 0 0 0      4
+         * 5   =   0 0 0 0 1 0 0 0  x   5
+         * 6       0 0 0 0 0 1 0 0      6
+         * 7       0 0 0 0 0 0 1 0      7
+         * 8       0 0 0 0 0 0 0 1      8
+         */
+
+        smc.addPoint (0, 0, 1);
+        smc.addPoint (1, 1, 1);
+        smc.addPoint (2, 2, 1);
+        smc.addPoint (3, 3, 1);
+        smc.addPoint (4, 4, 1);
+        smc.addPoint (5, 5, 1);
+        smc.addPoint (6, 6, 1);
+        smc.addPoint (7, 7, 1);
+
+        std::vector<int> lhs(8);
+        std::vector<int> rhs(8);
+        std::vector<int> expected(8);
+
+        for (int i=0; i<8; ++i){
+            rhs[i]      = i+1;
+            expected[i] = i+1;
+        }
+
+        smc.matVecMul(lhs, rhs);
+
+        TS_ASSERT_EQUALS(
+                lhs,
+                expected
+                );
+
+
+    }
+
+    void testMatVecMul_easy(){
+
+        SellCSigmaSparseMatrixContainer<int, 2, 1> smc (4);
+
+        /* add a test 4x4 Matrix:
+         * 3       0 0 1 0       1
+         * 1       1 0 0 0       2
+         * 4   =   0 0 0 1   x   3
+         * 2       0 1 0 0       4
+         */
+
+        smc.addPoint (0, 2, 1);
+        smc.addPoint (1, 0, 1);
+        smc.addPoint (2, 3, 1);
+        smc.addPoint (3, 1, 1);
+
+        std::vector<int> lhs(4);
+        std::vector<int> rhs(4);
+        std::vector<int> expected(4);
+
+        for (int i=0; i<4; ++i){
+            rhs[i]      = i+1;
+        }
+
+        expected[0] = 3;
+        expected[1] = 1;
+        expected[2] = 4;
+        expected[3] = 2;
+
+        smc.matVecMul(lhs, rhs);
+
+        TS_ASSERT_EQUALS(
+                lhs,
+                expected
+                );
+    }
+
+
+    void testMatVecMul_two(){
+
+        SellCSigmaSparseMatrixContainer<int, 2, 1> smc (4);
+
+        /* add a test 4x4 Matrix:
+         * -4       0 1 2 -3       1
+         * 12       -4 3 2 1       2
+         * 12   =   2 -3 4 1   x   3
+         * 13       3 4 2 -1       4
+         */
+
+        smc.addPoint (0, 0, 0);
+        smc.addPoint (0, 1, 1);
+        smc.addPoint (0, 2, 2);
+        smc.addPoint (0, 3, -3);
+        smc.addPoint (1, 0, -4);
+        smc.addPoint (1, 1, 3);
+        smc.addPoint (1, 2, 2);
+        smc.addPoint (1, 3, 1);
+        smc.addPoint (2, 0, 2);
+        smc.addPoint (2, 1, -3);
+        smc.addPoint (2, 2, 4);
+        smc.addPoint (2, 3, 1);
+        smc.addPoint (3, 0, 3);
+        smc.addPoint (3, 1, 4);
+        smc.addPoint (3, 2, 2);
+        smc.addPoint (3, 3, -1);
+
+        std::vector<int> lhs(4);
+        std::vector<int> rhs(4);
+        std::vector<int> expected(4);
+
+        for (int i=0; i<4; ++i){
+            rhs[i]      = i+1;
+        }
+
+        expected[0] = -4;
+        expected[1] = 12;
+        expected[2] = 12;
+        expected[3] = 13;
+
+        smc.matVecMul(lhs, rhs);
+
+        TS_ASSERT_EQUALS(
+                lhs,
+                expected
+                );
+    }
+
 
 };
 
