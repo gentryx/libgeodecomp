@@ -31,10 +31,10 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params):
 {
 	for(std::size_t i = 0; i < params.size();++i) {
 		// stepwith.size() == minStepwidth.size() == params.size() 
-		double dimsize = Optimizer::params[i].getMin()
-			- Optimizer::params[i].getMax();
+		double dimsize = Optimizer::params[i].getMax()
+			- Optimizer::params[i].getMin();
 		//stepwidth[i]= dimsize / STEP_FACTOR;// to rounding is parameters job!!!
-		stepwidth.push_back(dimsize);
+		stepwidth.push_back(dimsize/STEP_FACTOR);
 		//minStepwidth[i]=stepwidth[i] / std::pow(2, MAX_STEPS);
 		minStepwidth.push_back(stepwidth[i]);
 	}
@@ -70,12 +70,13 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
 		{
 			SimulationParameters tmp1(middle),tmp2(middle);
 			tmp1[i]+= stepwidth[i];
-			tmp2[i]+= stepwidth[i] * -1;
+			tmp2[i]+= (stepwidth[i] * -1.0);
 			result[1+i*2] = tmp1;
 			result[2+i*2] = tmp2;
-		for(std::size_t j = 0; j < middle.size(); ++j)
-			std::cout << " - " << result[1+i*2][j].getValue()<< " " <<result[2+i*2][j].getValue();
+			for(std::size_t j = 0; j < middle.size(); ++j)
+				std::cout << " - " << result[1+i*2][j].getValue()<< " " <<result[2+i*2][j].getValue();
 			std::cout<< std::endl;
+		std::cout<< "stepwidth " << stepwidth[i]<< std::endl; 
 		}	
 		return result;
 	}
@@ -103,18 +104,20 @@ void PatternOptimizer::operator()(int steps,Evaluator & eval)
 	SimulationParameters middle =Optimizer::params;
 	
 	std::vector<SimulationParameters> pattern = genPattern(middle);
-	for (int k = 0; k< 4; ++k)
+	for (int k = 0; k< 100; ++k)
 	{
 		pattern = genPattern(middle);
 		std::size_t maxPos = getMaxPos(pattern, eval);
 		if(maxPos == 0)			//center was the Maximum
 		{
-			std::cout<<"vor Segfault?" << std::endl;
-			if(!reduceStepwidth());	// abort ariterion
+			std::cout<<"reduceStepwidth" << std::endl;
+			if(reduceStepwidth())	// abort ariterion
 				break;	
 		}else{
-			std::cout<<"vor Segfault2? maxPos: "<< maxPos << std::endl;
-			middle = SimulationParameters(pattern[maxPos]);
+			std::cout<<"select next middle "<< maxPos << std::endl;
+			std::cout<< pattern[maxPos][0].getValue()<<" "<< pattern[maxPos][1].getValue()<< std::endl;
+			middle = pattern[maxPos];
+			std::cout<< middle[0].getValue()<<" "<< middle[1].getValue()<< std::endl;
 		}
 	}
 }
