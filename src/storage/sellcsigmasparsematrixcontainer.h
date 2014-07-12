@@ -4,11 +4,8 @@
 #include <vector>
 #include <utility>
 #include <assert.h>
-<<<<<<< local
 #include <stdexcept>
 
-=======
->>>>>>> other
 #include <iostream>
 
 namespace LibGeoDecomp {
