@@ -63,6 +63,9 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
 	{
 		std::vector<SimulationParameters> result(middle.size()*2+1);
 		result[0]=middle;
+		for(std::size_t j = 0; j < middle.size(); ++j)
+			std::cout << middle[j].getValue();
+		std::cout << std::endl;
 		for(std::size_t i = 0; i < middle.size(); ++i)
 		{
 			SimulationParameters tmp1(middle),tmp2(middle);
@@ -70,21 +73,25 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
 			tmp2[i]+= stepwidth[i] * -1;
 			result[1+i*2] = tmp1;
 			result[2+i*2] = tmp2;
+		for(std::size_t j = 0; j < middle.size(); ++j)
+			std::cout << " - " << result[1+i*2][j].getValue()<< " " <<result[2+i*2][j].getValue();
+			std::cout<< std::endl;
 		}	
 		return result;
 	}
 
 std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> pattern, Evaluator& eval)
-{
+{	
 	std::size_t retval=-1;
 	double newFitness;
 	for(std::size_t i = 0; i< pattern.size(); ++i)
 	{
+		//std::cout<< "Optimizer::fitness: "<< Optimizer::fitness <<"pattern " << i << " fitnes: " << eval(pattern[i])<< std::endl;
 		newFitness = eval(pattern[i]);
-		if(newFitness>Optimizer::fitness)
+		if(newFitness>=Optimizer::fitness)
 		{
 			retval = i;
-			fitness = newFitness;
+			Optimizer::fitness = newFitness;
 		}
 	}
 	return retval;
@@ -93,20 +100,26 @@ std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> patter
 void PatternOptimizer::operator()(int steps,Evaluator & eval)
 {
 	
-	SimulationParameters middle = Optimizer::params;
-	for (;;)
+	SimulationParameters middle =Optimizer::params;
+	
+	std::vector<SimulationParameters> pattern = genPattern(middle);
+	for (int k = 0; k< 4; ++k)
 	{
-		std::vector<SimulationParameters> pattern = genPattern(middle);
+		pattern = genPattern(middle);
 		std::size_t maxPos = getMaxPos(pattern, eval);
 		if(maxPos == 0)			//center was the Maximum
 		{
+			std::cout<<"vor Segfault?" << std::endl;
 			if(!reduceStepwidth());	// abort ariterion
 				break;	
 		}else{
-			middle = pattern[maxPos];
+			std::cout<<"vor Segfault2? maxPos: "<< maxPos << std::endl;
+			middle = SimulationParameters(pattern[maxPos]);
 		}
 	}
 }
+
+
 
 } // namespace LibGeoDecomp
 
