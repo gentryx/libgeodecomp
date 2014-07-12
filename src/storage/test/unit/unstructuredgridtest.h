@@ -11,11 +11,6 @@ class MyDummyElement
 public:
     MyDummyElement(int const val=0):val_(val){}
 
-    int const & operator() (int const & val) const{
-        val_ = val;
-        return val_;
-    }
-
     int& operator() (int const & val){
         val_ = val;
         return val_;
@@ -33,7 +28,7 @@ private:
 
 };
 
-ostream& operator<< (ostream& out, MyDummyElement const & val){
+std::ostream& operator<< (std::ostream& out, MyDummyElement const & val){
     out << val();
     return out;
 }
@@ -45,7 +40,7 @@ namespace LibGeoDecomp {
 
 class UnstructuredGridTest : public CxxTest::TestSuite
 {
-    UnstructuredGrid<MyDummyElement> grid
+    UnstructuredGrid<MyDummyElement> grid;
 public:
     void testFoo(){
     
