@@ -87,7 +87,7 @@ public:
      * Row [0:N-1]; Col [0:N-1]
      */
     void addPoint(int const row, int const col, VALUETYPE value){
-        if(row < 0 || col < 0 || row >= dimension){
+        if(row < 0 || col < 0 || (size_t)row >= dimension){
             throw std::invalid_argument("row and colum must be >= 0");
         }
 
