@@ -19,6 +19,10 @@ namespace FilterHelpers {
 
 #ifdef LIBGEODECOMP_WITH_SILO
 
+/**
+ * some helper classes required to set the type constant for SILO's
+ * library calls:
+ */
 template<typename MEMBER>
 class GetSiloTypeID
 {
@@ -30,6 +34,9 @@ public:
     }
 };
 
+/**
+ * ditto
+ */
 template<>
 class GetSiloTypeID<int>
 {
@@ -40,6 +47,9 @@ public:
     }
 };
 
+/**
+ * ditto
+ */
 template<>
 class GetSiloTypeID<short int>
 {
@@ -50,6 +60,9 @@ public:
     }
 };
 
+/**
+ * ditto
+ */
 template<>
 class GetSiloTypeID<float>
 {
@@ -60,6 +73,9 @@ public:
     }
 };
 
+/**
+ * ditto
+ */
 template<>
 class GetSiloTypeID<double>
 {
@@ -70,6 +86,9 @@ public:
     }
 };
 
+/**
+ * ditto
+ */
 template<>
 class GetSiloTypeID<char>
 {
@@ -80,6 +99,9 @@ public:
     }
 };
 
+/**
+ * ditto
+ */
 template<>
 class GetSiloTypeID<long long>
 {
@@ -94,12 +116,21 @@ public:
 
 #ifdef LIBGEODECOMP_WITH_MPI
 
+/**
+ * see below
+ */
 template<typename MEMBER, int FLAG>
 class GetMPIDatatype0;
 
+/**
+ * see below
+ */
 template<typename MEMBER, int FLAG>
 class GetMPIDatatype1;
 
+/**
+ * see below
+ */
 template<typename MEMBER>
 class GetMPIDatatype0<MEMBER, 0>
 {
@@ -110,6 +141,9 @@ public:
     }
 };
 
+/**
+ * see below
+ */
 template<typename MEMBER>
 class GetMPIDatatype0<MEMBER, 1>
 {
@@ -120,6 +154,9 @@ public:
     }
 };
 
+/**
+ * see below
+ */
 template<typename MEMBER>
 class GetMPIDatatype1<MEMBER, 0>
 {
@@ -130,6 +167,9 @@ public:
     }
 };
 
+/**
+ * see below
+ */
 template<typename MEMBER>
 class GetMPIDatatype1<MEMBER, 1>
 {
@@ -140,6 +180,9 @@ public:
     }
 };
 
+/**
+ * This class is a shim to deduce a member's MPI data type via, different methods are tried:
+ */
 template<typename MEMBER>
 class GetMPIDatatype
 {
@@ -169,6 +212,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<bool>
 {
@@ -179,6 +225,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<char>
 {
@@ -189,6 +238,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<float>
 {
@@ -199,6 +251,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class GetTypeName<double>
 {
@@ -206,6 +261,32 @@ public:
     std::string operator()() const
     {
         return "DOUBLE";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<int>
+{
+public:
+    std::string operator()() const
+    {
+        return "INT";
+    }
+};
+
+/**
+ * see above
+ */
+template<>
+class GetTypeName<long>
+{
+public:
+    std::string operator()() const
+    {
+        return "LONG";
     }
 };
 

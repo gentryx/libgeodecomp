@@ -53,14 +53,14 @@ public:
             count += 1;
     }
 
-    bool alive;
+    char alive;
     int count;
 };
 
 class CellInitializer : public SimpleInitializer<ConwayCell>
 {
 public:
-    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 800)
+    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 80000)
     {}
 
     virtual void grid(GridBase<ConwayCell, 2> *ret)
@@ -106,21 +106,18 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(AliveAccessor, ConwayCell, char, alive);
-DEFINE_DATAACCESSOR(CountAccessor, ConwayCell, int, count);
-
 void runSimulation()
 {
-    int outputFrequency = 10;
+    int outputFrequency = 1;
 
     SerialSimulator<ConwayCell> sim(
         new CellInitializer());
 
 
     VisItWriter<ConwayCell> *visItWriter = new VisItWriter<ConwayCell>(
-        "gameOfLife", outputFrequency, VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new AliveAccessor());
-    visItWriter->addVariable(new CountAccessor());
+        "gameOfLife", outputFrequency, true);
+    visItWriter->addVariable(&ConwayCell::alive, "alive");
+    visItWriter->addVariable(&ConwayCell::count, "count");
 
     sim.addWriter(visItWriter);
 

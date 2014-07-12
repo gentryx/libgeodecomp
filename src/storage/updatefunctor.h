@@ -35,10 +35,10 @@ public:
             nanoStep(nanoStep)
         {}
 
-        template<typename CELL1, int MY_DIM_X1, int MY_DIM_Y1, int MY_DIM_Z1, int INDEX1,
-                 typename CELL2, int MY_DIM_X2, int MY_DIM_Y2, int MY_DIM_Z2, int INDEX2>
-        void operator()(LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& hoodOld, int *unused1,
-                        LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew, int *unused2) const
+        template<typename CELL1, long MY_DIM_X1, long MY_DIM_Y1, long MY_DIM_Z1, long INDEX1,
+                 typename CELL2, long MY_DIM_X2, long MY_DIM_Y2, long MY_DIM_Z2, long INDEX2>
+        void operator()(LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& hoodOld, long *unused1,
+                        LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew, long *unused2) const
         {
             for (typename Region<DIM>::StreakIterator i = region.beginStreak();
                  i != region.endStreak();
@@ -53,7 +53,7 @@ public:
                     relativeSourceStreak.origin.y() * MY_DIM_X1 +
                     relativeSourceStreak.origin.x();
                 Coord<DIM> end = relativeSourceStreak.end();
-                int indexEnd =
+                long indexEnd =
                     end.z() * MY_DIM_X1 * MY_DIM_Y1 +
                     end.y() * MY_DIM_X1 +
                     end.x();

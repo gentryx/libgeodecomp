@@ -43,6 +43,16 @@ public:
         {
             return FloatCoord<3>(5, 6, 7);
         }
+
+        template<int UNUSED_DIM>
+        inline std::vector<std::string> getRegularGridAxisUnits()
+        {
+            std::vector<std::string> ret;
+            ret << "m"
+                << "nm"
+                << "km";
+            return ret;
+        }
     };
 
     static double staticData;
@@ -147,14 +157,34 @@ public:
         FloatCoord<2> originA;
         FloatCoord<3> originB;
 
-        APITraits::SelectRegularGrid<MySimpleDummyCell>::value(&quadrantDimA, &originA);
-        APITraits::SelectRegularGrid<MyFancyDummyCell >::value(&quadrantDimB, &originB);
+        std::vector<std::string> axisUnitsA;
+        std::vector<std::string> axisUnitsB;
+
+        std::vector<std::string> expectedUnitsA;
+        std::vector<std::string> expectedUnitsB;
+
+        expectedUnitsA << ""
+                       << "";
+
+        expectedUnitsB << "m"
+                       << "nm"
+                       << "km";
+
+        APITraits::SelectRegularGrid<MySimpleDummyCell>::value(&quadrantDimA, &originA, &axisUnitsA);
+        APITraits::SelectRegularGrid<MyFancyDummyCell >::value(&quadrantDimB, &originB, &axisUnitsB);
 
         TS_ASSERT_EQUALS(FloatCoord<2>(1, 1),       quadrantDimA);
         TS_ASSERT_EQUALS(FloatCoord<3>(30, 20, 10), quadrantDimB);
 
         TS_ASSERT_EQUALS(FloatCoord<2>(0, 0),    originA);
         TS_ASSERT_EQUALS(FloatCoord<3>(5, 6, 7), originB);
+
+        TS_ASSERT_EQUALS(axisUnitsA.size(), std::size_t(2));
+        TS_ASSERT_EQUALS(axisUnitsB.size(), std::size_t(3));
+
+        TS_ASSERT_EQUALS(axisUnitsA, expectedUnitsA);
+        TS_ASSERT_EQUALS(axisUnitsB, expectedUnitsB);
+
     }
 };
 

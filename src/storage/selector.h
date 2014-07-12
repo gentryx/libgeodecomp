@@ -123,8 +123,7 @@ public:
         memberSize(0),
         externalSize(0),
         memberOffset(0),
-        memberName("memberName not initialized"),
-        filter(0)
+        memberName("memberName not initialized")
     {}
 
     template<typename MEMBER>

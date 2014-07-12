@@ -21,14 +21,14 @@ public:
         z(z)
     {}
 
-    int x;
+    long long x;
     double y;
     char z;
 };
 
 }
 
-LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell, ((int)(x))((double)(y))((char)(z)) )
+LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell, ((long long)(x))((double)(y))((char)(z)) )
 
 namespace LibGeoDecomp {
 
@@ -45,17 +45,17 @@ public:
         TS_ASSERT_EQUALS("varY", selectorY.name());
         TS_ASSERT_EQUALS("varZ", selectorZ.name());
 
-        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOfMember());
-        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfMember());
-        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(long long), selectorX.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(double),    selectorY.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(char),      selectorZ.sizeOfMember());
 
-        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOfExternal());
-        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfExternal());
-        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(long long), selectorX.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(double),    selectorY.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(char),      selectorZ.sizeOfExternal());
 
-        TS_ASSERT_EQUALS( 0, selectorX.offset());
-        TS_ASSERT_EQUALS( 4, selectorY.offset());
-        TS_ASSERT_EQUALS(12, selectorZ.offset());
+        TS_ASSERT_EQUALS(0,                                       selectorX.offset());
+        TS_ASSERT_EQUALS(int(sizeof(long long)),                  selectorY.offset());
+        TS_ASSERT_EQUALS(int(sizeof(long long) + sizeof(double)), selectorZ.offset());
 
         TS_ASSERT_EQUALS(1, selectorX.arity());
         TS_ASSERT_EQUALS(1, selectorY.arity());
@@ -77,7 +77,7 @@ public:
             vec << MyDummyCell(i, 47.11 + i, 'a' + i);
         }
 
-        std::vector<int>    targetX(20, -1);
+        std::vector<long long>    targetX(20, -1);
         std::vector<double> targetY(20, -1);
         std::vector<char>   targetZ(20, 'A');
 
@@ -99,9 +99,9 @@ public:
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ");
 
         std::vector<MyDummyCell> vec(20);
-        std::vector<int>    targetX;
-        std::vector<double> targetY;
-        std::vector<char>   targetZ;
+        std::vector<long long> targetX;
+        std::vector<double>    targetY;
+        std::vector<char>      targetZ;
 
         for (int i = 0; i < 20; ++i) {
             targetX << i * 2 + 13;

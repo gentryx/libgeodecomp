@@ -5,6 +5,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The DefaultFilter just copies ofer the specified member -- sans
+ * modification.
+ */
 template<typename CELL, typename MEMBER, typename EXTERNAL>
 class DefaultFilter : public Filter<CELL, MEMBER, EXTERNAL>
 {

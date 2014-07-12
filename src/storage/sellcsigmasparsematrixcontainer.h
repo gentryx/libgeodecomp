@@ -1,11 +1,14 @@
-#ifndef LIBGEODECOMP_STORAGE_SELL_C_SIGMA_SPARSEMATRIX_CONTAINER_H
-#define LIBGEODECOMP_STORAGE_SELL_C_SIGMA_SPARSEMATRIX_CONTAINER_H
+#ifndef LIBGEODECOMP_STORAGE_SELLCSIGMASPARSEMATRIXCONTAINER_H
+#define LIBGEODECOMP_STORAGE_SELLCSIGMASPARSEMATRIXCONTAINER_H
 
 #include <vector>
 #include <utility>
 #include <assert.h>
+<<<<<<< local
 #include <stdexcept>
 
+=======
+>>>>>>> other
 #include <iostream>
 
 namespace LibGeoDecomp {
