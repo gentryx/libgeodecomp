@@ -73,16 +73,13 @@ public:
         int const offset (row%C);
         int index = chunkOffset[chunk] + offset;
 
-//std::cout << "Get row: row="<< row << " chunk=" << chunk << " offset=" << offset << " chunkOffset=" << chunkOffset[chunk] << " Werte=";
 
         for (int element = 0;
                 element < rowLength[row]; ++element, index += C){
             vec.push_back( std::pair<int, VALUETYPE>
                             (column[index], values[index]) );
-//std::cout << "(" << vec.back().first << ","<< vec.back().second << "), ";
         }
 
-//std::cout << std::endl;
         return vec;
     }
 
@@ -96,12 +93,9 @@ public:
 
         int const chunk (row/C);
 
-//std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col << " val=" << value;
-//std::cout << " row length: " << rowLength[row] << " chunk Length: " << chunkLength[chunk] << " chunkOffset: " << chunkOffset[chunk] << std::endl;
 
         //// case 1: row is NOT the bigest in chunk
         if ( rowLength[row] < chunkLength[chunk] ){
-//std::cout << "case 1";
             std::vector<int>::iterator itCol = column.begin()
                     + chunkOffset[chunk] + row % C;
 
@@ -116,7 +110,6 @@ public:
             
             if ( -1 != *itCol){
             //// case 1.a add value in mid of row
-//std::cout << ".a";
                 int lastElement = chunkOffset[chunk + 1] - C + (row%C);
                 int end   = itCol - column.begin();
 
@@ -125,7 +118,6 @@ public:
                     column[i] = column[i-C];
                 }
             }
-//std::cout << std::endl;
 
             values[itCol - column.begin()] = value;
             *itCol = col;
@@ -134,7 +126,6 @@ public:
         }
         else{
         //// case 2: row is the longest in chunk -> expend chunk
-//std::cout << "fall 2";
             int const offset    = chunkOffset[chunk] + row % C;
             int const offsetEnd = chunkOffset[chunk+1];
 
@@ -144,7 +135,6 @@ public:
             }
 
             if (index >= offsetEnd ){
-//std::cout << ".a" << std::endl;
                 index = offsetEnd;
 
                 std::vector<int>::iterator itCol = column.begin() + index;
@@ -159,7 +149,6 @@ public:
                 *(itVal + (row%C)) = value;
             }
             else {
-//std::cout << ".b" << std::endl;
                 if(col == column[index]){
                     column[index] = col;
                     values[index] = value;
@@ -198,19 +187,7 @@ public:
                 chunkOffset[ch] += C;
             }
         }
-
-//std::cout << "col: ";
-//for (unsigned i=0; i<column.size(); ++i){
-    //std::cout << column[i] << " ";
-//}
-//std::cout << std::endl;
-//std::cout << "values: ";
-//for (unsigned i=0; i<values.size(); ++i){
-    //std::cout << values[i] << " ";
-//}
-//std::cout << std::endl;
-
-}
+    }
 
 private:
     std::vector<VALUETYPE> values;
@@ -218,7 +195,7 @@ private:
     std::vector<int>       rowLength;   // = Non Zero Entres in Row
     std::vector<int>       chunkLength; // = Max rowLength in Chunk
     std::vector<int>       chunkOffset; // COffset[i+1]=COffset[i]+CLength[i]*C
-    size_t dimension;                      // = N
+    size_t dimension;                   // = N
 };
 
 }
