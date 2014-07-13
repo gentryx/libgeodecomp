@@ -15,8 +15,12 @@ namespace LibGeoDecomp {
  * adapter between the underlying, regular grid and the amorphous
  * structure of the model. Each entity of the model (of type CARGO)
  * needs to be assigned a unique KEY, which will be used for lookups.
+ *
+ * If your model doesn't access neighboring cells via IDs but rather
+ * all neighbors within a certain radius, then BoxCell is a better
+ * choice.
  */
-template<class CARGO, std::size_t SIZE, typename KEY=int>
+template<class CARGO, std::size_t SIZE, typename KEY = int>
 class ContainerCell
 {
 public:

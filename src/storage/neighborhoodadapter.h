@@ -4,7 +4,6 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/io/logger.h>
-#include <libgeodecomp/storage/neighborhoodadapter.h>
 
 namespace LibGeoDecomp {
 

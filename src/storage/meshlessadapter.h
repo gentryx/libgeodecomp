@@ -14,6 +14,9 @@ namespace LibGeoDecomp {
  * A utility class which supports users in porting meshless codes to
  * LibGeoDecomp by superimposing a stencil structure, even though the
  * actual cells may be connected by an irregular graph.
+ *
+ * Its purpose is mostly to aid with computing and verifying the grid
+ * geometry.
  */
 template<class TOPOLOGY=Topologies::Torus<2>::Topology>
 class MeshlessAdapter

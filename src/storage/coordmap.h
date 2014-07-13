@@ -18,6 +18,7 @@ class CoordMap
 {
 public:
     const static int DIM = GRID_TYPE::DIM;
+    typedef CELL_TYPE Cell;
 
     inline CoordMap(const Coord<DIM>& origin, const GRID_TYPE *grid) :
         origin(origin), grid(grid)

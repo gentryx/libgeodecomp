@@ -48,6 +48,7 @@ class FixedNeighborhood
 {
 public:
     typedef SOA_ACCESSOR_IN< CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessorIn;
+    typedef CELL Cell;
 
     __host__ __device__
     explicit FixedNeighborhood(SoAAccessorIn& accessor) :

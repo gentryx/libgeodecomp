@@ -283,6 +283,8 @@ public:
     using LinePointerNeighborhoodHelper::North< CELL, STENCIL, BOUNDARY_NORTH >::access;
     using LinePointerNeighborhoodHelper::South< CELL, STENCIL, BOUNDARY_SOUTH >::access;
 
+    typedef CELL Cell;
+
     LinePointerNeighborhood(const CELL **lines, long *offset) :
         lines(lines),
         offset(offset)
