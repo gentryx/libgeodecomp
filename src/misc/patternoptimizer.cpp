@@ -4,7 +4,7 @@
 
 //#define MATHIAS_DBG
 
-#define STEP_FACTOR 6
+#define STEP_FACTOR 2 
 #define MAX_STEPS 8
 namespace LibGeoDecomp{
 
@@ -47,7 +47,7 @@ bool PatternOptimizer::reduceStepwidth() 			{
 			stepwidth[i] = minStepwidth[i];
 		allWasMin = false;
 #ifdef MATHIAS_DBG
-		std::cout<< " --> " << stepwidth[i]<< std::endl;
+		std::cout<< " --> " << stepwidth[i]<< "; "<< std::endl;
 #endif // MATHIAS_DBG
 	}
 	return !allWasMin;
@@ -71,12 +71,12 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
 
 std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> pattern, Evaluator& eval)
 {	
-	std::size_t retval=-1;
+	std::size_t retval=0;
 	double newFitness;
-	for(std::size_t i = 0; i< pattern.size(); ++i)
+	for(std::size_t i = 1; i< pattern.size(); ++i) //i=1 weil die mitte im schritt zuvor schon berechnet wurde und fitness bekannt ist
 	{
 		newFitness = eval(pattern[i]);
-		if(newFitness>=Optimizer::fitness)
+		if(newFitness>Optimizer::fitness)
 		{
 			retval = i;
 			Optimizer::fitness = newFitness;
@@ -85,13 +85,13 @@ std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> patter
 	return retval;
 }
 
-void PatternOptimizer::operator()(int steps,Evaluator & eval)
+SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
 {
 	
 	SimulationParameters middle =Optimizer::params;
 	
 	std::vector<SimulationParameters> pattern = genPattern(middle);
-	for (int k = 0; k< 100; ++k)
+	for (int k = 0; k< steps; ++k)
 	{
 		pattern = genPattern(middle);
 #ifdef MATHIAS_DBG
@@ -101,7 +101,7 @@ void PatternOptimizer::operator()(int steps,Evaluator & eval)
 		if(maxPos == 0)			// center was the Maximum
 		{
 			if(!reduceStepwidth())	// abort test
-				break;
+				return middle;
 		}else{					// do next step
 			middle = pattern[maxPos];
 		}
@@ -115,7 +115,7 @@ void PatternOptimizer::printPattern(std::vector<SimulationParameters> pattern){
 		else
 			std::cout<< "Direction: " << i<< " :	";
 		for(std::size_t j = 0; j < pattern[i].size(); ++j)
-			std::cout <<  pattern[i][j].getValue()<< ", " <<pattern[i][j].getValue() << " - ";
+			std::cout <<  pattern[i][j].getValue()<< " - ";
 		std::cout<< std::endl;
 	}
 	std::cout<< std::endl;

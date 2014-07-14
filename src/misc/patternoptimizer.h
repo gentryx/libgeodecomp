@@ -9,9 +9,9 @@ namespace LibGeoDecomp {
 class PatternOptimizer: public Optimizer
 {
 public:
+	friend class PatternOptimizerTest;
 	explicit PatternOptimizer(SimulationParameters params);
-
-	virtual void operator()(int steps, Evaluator& eval);
+	virtual SimulationParameters operator()(int steps, Evaluator& eval);
 private:
 	// TODO initiale stepwidth und min Stepwidth sollten automatisch aus der Dimensionsgröße generriert werden und optional von außen prametrisierbar sein.
 	std::vector<double> stepwidth;

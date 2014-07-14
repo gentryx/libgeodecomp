@@ -13,10 +13,16 @@ public:
     class Evaluator
     {
     public:
-        virtual ~Evaluator()
-        {}
-
+        virtual ~Evaluator() {}
+		Evaluator():calls(0){}
         virtual double operator()(SimulationParameters params) = 0;
+		double getGlobalMax(){return maxima[0];}
+		std::vector<double> getLocalMax(){return maxima;}
+		int getCalls()const{return calls;}
+		void resetCalls(){calls=0;}
+	protected:
+		int calls;
+		std::vector<double> maxima; // first value is the global max
     };
 	virtual ~Optimizer(){};
     explicit Optimizer(SimulationParameters params) :
@@ -24,7 +30,7 @@ public:
         fitness(std::numeric_limits<double>::min())
     {}
 
-    virtual void operator()(int maxSteps, Evaluator& eval)
+    virtual SimulationParameters  operator()(int maxSteps, Evaluator& eval)
     {
         // fixme: this implementation is stupid!
 
@@ -41,9 +47,10 @@ public:
                 fitness = newFitness;
             }
         }
+		return params;
     }
 
-//private:
+protected:
     SimulationParameters params;
     double fitness;
 };
