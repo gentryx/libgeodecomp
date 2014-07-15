@@ -2,7 +2,7 @@
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
-#define LIBGEODECOMP_DEBUG_LEVEL 3
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -101,8 +101,8 @@ public:
     {
 	public:
         MultimodTwoDim(){
-            maxima.push_back(42);	//first value is global min
-            maxima.push_back(12);
+            maxima.push_back(4999.57);	//first value is global min
+            maxima.push_back(4687.77);
         }
         double operator()(SimulationParameters params)
         {

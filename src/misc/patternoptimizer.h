@@ -21,7 +21,7 @@ private:
     std::vector<double> minStepwidth;
     bool reduceStepwidth();
     std::vector<SimulationParameters> genPattern(SimulationParameters middle);
-    std::size_t getMaxPos(std::vector<SimulationParameters> pattern, Evaluator& eval);
+    std::size_t getMaxPos(std::vector<SimulationParameters> pattern, Evaluator& eval, std::size_t oldMiddle);
     std::string printPattern(std::vector<SimulationParameters> pattern);
 };
 } // namespace LibGeoDecomp
