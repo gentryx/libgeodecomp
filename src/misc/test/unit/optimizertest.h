@@ -1,4 +1,6 @@
+// vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/optimizer.h>
+#include <libgeodecomp/io/logger.h>
 
 using namespace LibGeoDecomp;
 
@@ -25,13 +27,13 @@ public:
         params.addParameter("x",   0, 20);
         params.addParameter("y", -10, 10);
 
+        LOG(Logger::INFO,"Optimizer is running! ");
+
         Optimizer optimizer(params);
         GoalFunction eval;
         optimizer(5000, eval);
 
         TS_ASSERT_EQUALS(1000, optimizer.fitness);
     }
-
 };
-
 }

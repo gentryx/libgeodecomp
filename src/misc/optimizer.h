@@ -1,3 +1,4 @@
+// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_MISC_OPTIMIZER_H
 #define LIBGEODECOMP_MISC_OPTIMIZER_H
 
@@ -16,16 +17,16 @@ public:
     public:
         virtual ~Evaluator()
         {}
-
         virtual double operator()(SimulationParameters params) = 0;
     };
-
+    virtual ~Optimizer()
+    {};
     explicit Optimizer(SimulationParameters params) :
         params(params),
         fitness(std::numeric_limits<double>::min())
     {}
 
-    void operator()(int maxSteps, Evaluator& eval)
+    virtual SimulationParameters  operator()(int maxSteps, Evaluator& eval)
     {
         // fixme: this implementation is stupid!
 
@@ -42,13 +43,16 @@ public:
                 fitness = newFitness;
             }
         }
+        return params;
     }
 
-private:
+protected:
     SimulationParameters params;
     double fitness;
 };
 
-}
+}//namespace LibGeoDecomp
+
+
 
 #endif
