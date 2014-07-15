@@ -1,10 +1,6 @@
+// vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/optimizer.h>
-//#include <libgeodecomp/misc/patternoptimizer.h>
-
-
-// Mathias is testing
-//#define MATHIAS_DBG
-
+#include <libgeodecomp/io/logger.h>
 
 using namespace LibGeoDecomp;
 
@@ -30,9 +26,9 @@ public:
         SimulationParameters params;
         params.addParameter("x",   0, 20);
         params.addParameter("y", -10, 10);
-#ifdef MATHIAS_DBG
-std::cout<< std::endl <<"Optimizer is running! "<< std::endl;
-#endif //MATHIAS_DBG
+
+        LOG(Logger::INFO,"Optimizer is running! ");
+
         Optimizer optimizer(params);
         GoalFunction eval;
         optimizer(5000, eval);

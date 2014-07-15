@@ -1,8 +1,10 @@
+// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_MISC_OPTIMIZER_H
 #define LIBGEODECOMP_MISC_OPTIMIZER_H
 
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <limits>
+
 namespace LibGeoDecomp {
 
 class Optimizer
@@ -13,18 +15,12 @@ public:
     class Evaluator
     {
     public:
-        virtual ~Evaluator() {}
-		Evaluator():calls(0){}
+        virtual ~Evaluator()
+        {}
         virtual double operator()(SimulationParameters params) = 0;
-		double getGlobalMax(){return maxima[0];}
-		std::vector<double> getLocalMax(){return maxima;}
-		int getCalls()const{return calls;}
-		void resetCalls(){calls=0;}
-	protected:
-		int calls;
-		std::vector<double> maxima; // first value is the global max
     };
-	virtual ~Optimizer(){};
+    virtual ~Optimizer()
+    {};
     explicit Optimizer(SimulationParameters params) :
         params(params),
         fitness(std::numeric_limits<double>::min())
@@ -47,14 +43,13 @@ public:
                 fitness = newFitness;
             }
         }
-		return params;
+        return params;
     }
 
 protected:
     SimulationParameters params;
     double fitness;
 };
-
 
 }//namespace LibGeoDecomp
 
