@@ -111,19 +111,12 @@ public:
     void testBasic()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
+        typedef NeighborhoodIterator<Neighborhood, double, 2> HoodIterator;
+
         Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
-
-        NeighborhoodIterator<Neighborhood, double, 2> begin(
-            hood,
-            Coord<2>(-1, -1),
-            grid[Coord<2>(0, 0)].begin());
-
-        NeighborhoodIterator<Neighborhood, double, 2> end(
-            hood,
-            Coord<2>(1, 1),
-            grid[Coord<2>(2, 2)].end());
-
-        NeighborhoodIterator<Neighborhood, double, 2> iter = begin;
+        HoodIterator begin = HoodIterator::begin(hood);
+        HoodIterator end = HoodIterator::end(hood);
+        HoodIterator iter = begin;
         TS_ASSERT_DIFFERS(iter, end);
 
         // cell -1, -1
@@ -244,6 +237,69 @@ public:
 
         ++iter;
         TS_ASSERT_EQUALS(iter, end);
+    }
+
+    void testSkippingOfEmptyCells()
+    {
+        typedef CoordMap<Container, Grid<Container> > Neighborhood;
+        typedef NeighborhoodIterator<Neighborhood, double, 2> HoodIterator;
+
+        grid[Coord<2>(0, 0)].clear();
+        grid[Coord<2>(0, 1)].clear();
+
+        Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
+        HoodIterator begin = HoodIterator::begin(hood);
+        HoodIterator iter = begin;
+
+        // skipping one value from (0, 0)
+
+        TS_ASSERT_EQUALS(*iter, 2);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 3);
+
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 4);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 5);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 6);
+
+        // skipping four values from (0, 1)
+
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 11);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 12);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 13);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 14);
+        ++iter;
+        TS_ASSERT_EQUALS(*iter, 15);
+    }
+
+    void testSkippingOfAllEmptyCells()
+    {
+        typedef CoordMap<Container, Grid<Container> > Neighborhood;
+        typedef NeighborhoodIterator<Neighborhood, double, 2> HoodIterator;
+
+        grid[Coord<2>(0, 0)].clear();
+        grid[Coord<2>(1, 0)].clear();
+        grid[Coord<2>(2, 0)].clear();
+        grid[Coord<2>(0, 1)].clear();
+        grid[Coord<2>(1, 1)].clear();
+        grid[Coord<2>(2, 1)].clear();
+        grid[Coord<2>(0, 2)].clear();
+        grid[Coord<2>(1, 2)].clear();
+        grid[Coord<2>(2, 2)].clear();
+
+
+        Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
+
+        HoodIterator begin = HoodIterator::begin(hood);
+        HoodIterator end = HoodIterator::end(hood);
+
+        TS_ASSERT_EQUALS(begin, end);
     }
 
 private:

@@ -33,7 +33,7 @@ public:
                 Coord<DIM>::diagonal(-1),
                 coord,
                 Coord<DIM>::diagonal(3))),
-        end(
+        endIterator(
             CoordBox<DIM>(
                 Coord<DIM>::diagonal(-1),
                 Coord<DIM>::diagonal(3)).end()),
@@ -41,24 +41,55 @@ public:
         iterator(iterator)
     {}
 
-    const Particle& operator*() const
+    static inline NeighborhoodIterator begin(const Neighborhood& hood)
+    {
+        CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
+
+        for (typename CoordBox<DIM>::Iterator i = box.begin();
+             i != box.end();
+             ++i) {
+            if (hood[*i].size() > 0) {
+                return NeighborhoodIterator(hood, *i, hood[*i].begin());
+            }
+        }
+
+        Coord<DIM> endCoord = Coord<DIM>::diagonal(1);
+        return NeighborhoodIterator(hood, endCoord, hood[endCoord].end());
+    }
+
+    static inline NeighborhoodIterator end(const Neighborhood& hood)
+    {
+        return NeighborhoodIterator(
+            hood,
+            Coord<DIM>::diagonal(1),
+            hood[Coord<DIM>::diagonal(1)].end());
+    }
+
+    inline const Particle& operator*() const
     {
         return *iterator;
+    }
+
+    inline CellIterator operator->() const
+    {
+        return iterator;
     }
 
     inline void operator++()
     {
         ++iterator;
 
-        if (iterator == cell->end()) {
+        while (iterator == cell->end()) {
             ++boxIterator;
 
             // this check is required to avoid dereferentiation of the
             // neighborhood with an out-of-range coordinate.
-            if (boxIterator != end) {
-                cell = &hood[*boxIterator];
-                iterator = cell->begin();
+            if (boxIterator == endIterator) {
+                return;
             }
+
+            cell = &hood[*boxIterator];
+            iterator = cell->begin();
         }
     }
 
@@ -76,7 +107,7 @@ public:
 private:
     const Neighborhood& hood;
     typename CoordBox<DIM>::Iterator boxIterator;
-    typename CoordBox<DIM>::Iterator end;
+    typename CoordBox<DIM>::Iterator endIterator;
     const Cell *cell;
     CellIterator iterator;
 
