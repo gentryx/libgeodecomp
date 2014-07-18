@@ -1,6 +1,6 @@
 // vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/patternoptimizer.h>
-#include "libgeodecomp/io/logger.h"
+#include <libgeodecomp/io/logger.h>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -88,7 +88,7 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
     std::size_t maxPos = 0;
     for (int k = 0; k < steps; ++k){
         pattern = genPattern(middle);
-        LOG(Logger::DBG, printPattern(pattern))
+        LOG(Logger::DBG, patternToString(pattern))
         std::size_t maxPos = getMaxPos(pattern, eval,maxPos);
         if(maxPos == 0){            // center was the Maximum
             if(!reduceStepwidth()){  // abort test
@@ -102,7 +102,7 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
     return middle;
 }
 
-std::string PatternOptimizer::printPattern(std::vector<SimulationParameters> pattern){
+std::string PatternOptimizer::patternToString(std::vector<SimulationParameters> pattern){
     std::stringstream result;
     result << "Pattern: " << std::endl;
     for(std::size_t i = 0; i<pattern.size(); ++i){
