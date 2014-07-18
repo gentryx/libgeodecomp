@@ -20,43 +20,28 @@ class SimplexOptimizer : public Optimizer
 public:
     friend class SimplexOptimizerTest;
     
-    class SimplexVertex
+    class SimplexVertex : public SimulationParameters
     {
     public:
         SimplexVertex(SimulationParameters point):
-            point(point),
+            SimulationParameters(point),
             fitness(-1)
         {}
-        SimulationParameters& getPoint() 
-        { 
-            return point;
-        }
         double getFitness()
         {
             return fitness;
         }
         double evaluate(Evaluator& eval)
         {   
-            fitness = eval(point);
-            return fitness;
-        }
-        void setPoint(SimulationParameters point)
-        {
-            fitness = -1;
-            point = point;
-        }
-        double setPoint(SimulationParameters point, Evaluator& eval)
-        {
-            this->point = point;
-            fitness = eval(point);
+            fitness = eval(*this);
             return fitness;
         }
         std::string toString()
         {
             std::stringstream result;
             result << std::endl;
-            for(std::size_t j = 0;j < point.size(); ++j){
-                result << point[j].getValue() << "; ";
+            for(std::size_t j = 0;j < this->size(); ++j){
+                result << this->operator[](j).getValue() << "; ";
             }
             result << "fitness: " << getFitness();
             result << std::endl;
@@ -66,7 +51,6 @@ public:
         
             
     private:
-        SimulationParameters point;
         double fitness;
     }; //SimplexVertex
 
@@ -101,7 +85,7 @@ SimplexOptimizer::SimplexOptimizer(SimulationParameters params) :
     simplex.push_back(SimplexVertex(params));
     for(std::size_t i = 0; i < params.size(); ++i){
         SimplexVertex tmp(params);
-        tmp.getPoint()[i].setValue(params[i].getValue() + c * s); 
+        tmp[i].setValue(params[i].getValue() + c * s); 
         simplex.push_back(tmp);
     }
 }
@@ -156,10 +140,8 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 log << newPoint.toString();
                 log << "default case, comperator value:  "<< comperator(newPoint.getFitness()); 
                 if(simplex[worst].getFitness() > newPoint.getFitness()){
-//                    log << "vor contraction:" << std::endl << simplexToString()<< std::endl;
                     totalContraction();
                     evalSimplex(eval);
-//                    log << "nach contraction:" << std::endl << simplexToString()<< std::endl;
 
                 }else{
                     simplex[worst]=newPoint;
@@ -171,12 +153,12 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
         fitness = simplex[best].getFitness();
 
     }
-    return simplex[0].getPoint();
+    return simplex[0];
 }
 
 void SimplexOptimizer::evalSimplex(Evaluator& eval){
     for(std::size_t i = 0; i < simplex.size(); ++i){
-        //if(simplex[i].getFitness()<0){
+        //if(simplex[i].getFitness()<0){ // don't work now
             simplex[i].evaluate(eval);
         //}
     }
@@ -211,16 +193,16 @@ std::size_t SimplexOptimizer::maxInSimplex()
 SimplexOptimizer::SimplexVertex SimplexOptimizer::reflection()
 {
     std::size_t worst = minInSimplex();
-    SimulationParameters retval = simplex[0].getPoint();
-    for(std::size_t j = 0; j<simplex[0].getPoint().size(); ++j){
+    SimulationParameters retval = simplex[0];
+    for(std::size_t j = 0; j<simplex[0].size(); ++j){
         double tmp=0.0;
         for(std::size_t i = 0; i < simplex.size(); ++i){
             if(i != worst){
-                tmp += simplex[i].getPoint()[j].getValue();
+                tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].getPoint().size()-1); 
-        tmp = 2 * tmp - simplex[worst].getPoint()[j].getValue();
+        tmp = tmp / (simplex[0].size()-1); 
+        tmp = 2 * tmp - simplex[worst][j].getValue();
         retval[j].setValue(tmp);
     }
     return SimplexVertex(retval);
@@ -229,78 +211,76 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::reflection()
 SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion(){
 
     std::size_t worst = minInSimplex();
-    SimulationParameters retval = simplex[0].getPoint();
-    for(std::size_t j = 0; j<simplex[0].getPoint().size(); ++j){
+    SimplexVertex retval = simplex[0];
+    for(std::size_t j = 0; j<simplex[0].size(); ++j){
         double tmp=0.0;
         double tmp2=0.0;
         for(std::size_t i = 0; i < simplex.size(); ++i){
             if(i != worst){
-                tmp += simplex[i].getPoint()[j].getValue();
+                tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].getPoint().size()-1); 
+        tmp = tmp / (simplex[0].size()-1); 
         tmp2 = tmp;
-        tmp = 2 * tmp - simplex[worst].getPoint()[j].getValue();
+        tmp = 2 * tmp - simplex[worst][j].getValue();
         retval[j].setValue(2 * tmp - tmp2);
     }
-    return SimplexVertex(retval);
+    return retval;
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction(){
     
     std::size_t worst = minInSimplex();
-    SimulationParameters retval = simplex[0].getPoint();
-    for(std::size_t j = 0; j<simplex[0].getPoint().size(); ++j){
+    SimplexVertex retval = simplex[0];
+    for(std::size_t j = 0; j<simplex[0].size(); ++j){
         double tmp=0.0;
         double tmp2=0.0;
         for(std::size_t i = 0; i < simplex.size(); ++i){
             if(i != worst){
-                tmp += simplex[i].getPoint()[j].getValue();
+                tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].getPoint().size()-1); 
+        tmp = tmp / (simplex[0].size()-1); 
         tmp2 = tmp; // xBar
-        tmp = 2 * tmp - simplex[worst].getPoint()[j].getValue();   //x'
+        tmp = 2 * tmp - simplex[worst][j].getValue();   //x'
         retval[j].setValue(0.5  * (tmp + tmp2));
     }
-    return SimplexVertex(retval);
+    return retval;
     
 }
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction(){
     std::size_t worst = minInSimplex();
-    SimulationParameters retval = simplex[0].getPoint();
-    for(std::size_t j = 0; j<simplex[0].getPoint().size(); ++j){
+    SimplexVertex retval = simplex[0];
+    for(std::size_t j = 0; j<simplex[0].size(); ++j){
         double tmp=0.0;
-        //double tmp2=0.0;
         for(std::size_t i = 0; i < simplex.size(); ++i){
             if(i != worst){
-                tmp += simplex[i].getPoint()[j].getValue();
+                tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].getPoint().size()-1); 
-        //tmp2 = tmp;
-        tmp = 2 * tmp - simplex[worst].getPoint()[j].getValue();
-        retval[j].setValue(2 * (tmp + simplex[worst].getPoint()[j].getValue()));
+        tmp = tmp / (simplex[0].size()-1); 
+        tmp = 2 * tmp - simplex[worst][j].getValue();
+        retval[j].setValue(2 * (tmp + simplex[worst][j].getValue()));
     }
-    return SimplexVertex(retval);
+    return retval;
 }
 
 void SimplexOptimizer::totalContraction(){
     SimplexVertex best = simplex[maxInSimplex()];
     for(std::size_t i = 0; i < simplex.size(); ++i){
-        for(std::size_t j = 0; j < simplex[i].getPoint().size(); ++j){  
-            simplex[i].getPoint()[j].setValue(
-                0.5 * (best.getPoint()[j].getValue()
-                +simplex[i].getPoint()[j].getValue()));
+        for(std::size_t j = 0; j < simplex[i].size(); ++j){  
+            simplex[i][j].setValue(
+                0.5 * (best[j].getValue()
+                +simplex[i][j].getValue()));
         }
     }
 }
 
 bool SimplexOptimizer::checkTermination(){
     // the mathematical criterium wouldn't work with descreat point!?!
-    for(std::size_t i = 0; i < simplex[0].getPoint().size(); ++i){
+    for(std::size_t i = 0; i < simplex[0].size(); ++i){
         for(std::size_t j = 1; j < simplex.size(); ++j){
-            if(simplex[0].getPoint()[i].getValue() != simplex[j].getPoint()[i].getValue()){
+            if(simplex[0][i].getValue() != simplex[j][i].getValue()){
                 return true;
             }
         }
@@ -329,8 +309,8 @@ std::string SimplexOptimizer::simplexToString(){
     result << std::endl;
     for(std::size_t i = 0; i < simplex.size(); ++i){
         result <<  "Vertex " << i << ": ";
-        for(std::size_t j = 0;j < simplex[i].getPoint().size(); ++j){
-            result << simplex[i].getPoint()[j].getValue() << "; ";
+        for(std::size_t j = 0;j < simplex[i].size(); ++j){
+            result << simplex[i][j].getValue() << "; ";
         }
         result << "fitness: " << simplex[i].getFitness();
         result << std::endl;

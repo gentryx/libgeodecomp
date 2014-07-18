@@ -20,7 +20,7 @@ public:
         double test = eval(params);
         SimplexOptimizer optimizer(params);
         optimizer(10,eval);
-        TS_ASSERT_EQUALS(1000, optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
     }
 
 };
