@@ -65,11 +65,15 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
 
 std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> pattern, Evaluator& eval, std::size_t oldMiddle)
 {	
-    std::size_t retval=0;
+    std::size_t retval = 0;
     double newFitness;
+    double oldFitness = Optimizer::fitness;
     for(std::size_t i = 1; i < pattern.size(); ++i){ //i = 1 middle don't need to be evaluate again
         // all pattern[i] with the same coordinates as middle, oldMiddle don't need to be evaluate
-        if(pattern[0][(i-1)/2].getValue() == pattern[i][(i-1)/2].getValue() || i == oldMiddle){
+        if(pattern[0][(i-1)/2].getValue() == pattern[i][(i-1)/2].getValue() || i ==oldMiddle){
+            if(oldMiddle == i && oldFitness > Optimizer::fitness){
+                retval = i;
+            }
             continue;
         }
         newFitness = eval(pattern[i]);
@@ -92,6 +96,7 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
         std::size_t maxPos = getMaxPos(pattern, eval,maxPos);
         if(maxPos == 0){            // center was the Maximum
             if(!reduceStepwidth()){  // abort test
+                LOG(Logger::DBG,  "fitness: " << Optimizer::fitness)
                 return middle;
             }
         }else{                      // do next step

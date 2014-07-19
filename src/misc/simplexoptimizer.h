@@ -10,8 +10,7 @@
 #include <cfloat>
 #include <libgeodecomp/io/logger.h>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
-// TODO (nice to have) Simplex can inherit from Simulation Parameters
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp {
 
@@ -64,6 +63,7 @@ private:
     std::size_t maxInSimplex();
     void totalContraction();
     bool checkTermination();
+    SimplexVertex partialReflection();
     SimplexVertex reflection();    
     SimplexVertex expansion();
     SimplexVertex partialOutsideContraction();
@@ -139,9 +139,16 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 std::stringstream log;
                 log << newPoint.toString();
                 log << "default case, comperator value:  "<< comperator(newPoint.getFitness()); 
-                if(simplex[worst].getFitness() > newPoint.getFitness()){
-                    totalContraction();
-                    evalSimplex(eval);
+                if(simplex[worst].getFitness() >= newPoint.getFitness()){
+                    SimplexVertex tmp = partialReflection();
+                    tmp.evaluate(eval);
+                    log<<"partial Reflected"<< std::endl << tmp.toString();
+//                    if(tmp.getFitness() < simplex[worst].getFitness()){
+//                        simplex[worst] = tmp;
+//                    }else{
+                        totalContraction();
+                        evalSimplex(eval);
+//                    }
 
                 }else{
                     simplex[worst]=newPoint;
@@ -189,6 +196,24 @@ std::size_t SimplexOptimizer::maxInSimplex()
     }
     return retval;
 }
+
+SimplexOptimizer::SimplexVertex SimplexOptimizer::partialReflection()
+{
+    std::size_t worst = minInSimplex();
+    SimulationParameters retval = simplex[0];
+    for(std::size_t j = 0; j<simplex[0].size(); ++j){
+        double tmp=0.0;
+        for(std::size_t i = 0; i < simplex.size(); ++i){
+            if(i != worst){
+                tmp += simplex[i][j].getValue();
+            }
+        }
+        tmp = tmp / (simplex[0].size()-1); 
+        retval[j].setValue(tmp);
+    }
+    return SimplexVertex(retval);
+}
+
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::reflection()
 {

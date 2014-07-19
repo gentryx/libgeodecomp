@@ -3,6 +3,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
 
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -132,6 +133,23 @@ public:
             }
         }
     };
+
+    class HimmelblauFunction : public TestableEvaluator
+    {   
+    public:
+        HimmelblauFunction(){
+            maxima.push_back(1000);    
+        }
+        double operator()(SimulationParameters params)
+        {
+            ++calls;
+            int x =  params["x"]; // range -5 - 5
+            int y =  params["y"];
+            // (x^2 + y -11)^2 + (x + y^2 - 7)^2 
+            return 1000 - ( (((x * x) + y - 11) * ( (x * x) + y - 11))
+                    + (( x + (y * y) - 7) * ( x + (y * y) - 7)));
+        }
+    };
     void testBasic()
     {
         LOG(Logger::INFO,"PatternOptimizer is running!"<< std::endl);
@@ -221,6 +239,21 @@ public:
                 << " x: " << (int)params5["x"]
                 << " y: " << (int)params5["y"]
                 << " z: " << (int)params5["z"]
+                << std::endl);
+
+        // Test 6, Himmelblau
+        SimulationParameters params6;
+        params6.addParameter("x", -5, 6);
+        params6.addParameter("y", -5, 6);
+        PatternOptimizer optimizer6(params6);
+        HimmelblauFunction eval6;
+        params6 = optimizer6(100, eval6);
+        TS_ASSERT_EQUALS(eval6.getGlobalMax(), optimizer6.fitness);
+        LOG(Logger::INFO, "Test 6, Himmelblau:" << std::endl
+                << "fitness: " << optimizer6.fitness
+                << " calls: " << eval6.getCalls() << std::endl
+                << " x: " << (int)params6["x"]
+                << " y: " << (int)params6["y"]
                 << std::endl);
     }
 };
