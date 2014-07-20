@@ -71,9 +71,6 @@ std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> patter
     for(std::size_t i = 1; i < pattern.size(); ++i){ //i = 1 middle don't need to be evaluate again
         // all pattern[i] with the same coordinates as middle, oldMiddle don't need to be evaluate
         if(pattern[0][(i-1)/2].getValue() == pattern[i][(i-1)/2].getValue() || i ==oldMiddle){
-            if(oldMiddle == i && oldFitness > Optimizer::fitness){
-                retval = i;
-            }
             continue;
         }
         newFitness = eval(pattern[i]);
