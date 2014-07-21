@@ -13,14 +13,14 @@ public:
     void testBasic()
     {
         SimulationParameters params;
-        params.addParameter("x", -5, 6);
-        params.addParameter("y", -5, 6);
-//        params["x"].setValue(0);
-//        params["y"].setValue(5);
+        params.addParameter("x", -500, 500);
+        params.addParameter("y", -500, 500);
+        params["x"].setValue(600);
+        params["y"].setValue(600);
         PatternOptimizerTest::HimmelblauFunction eval;
         double test = eval(params);
         SimplexOptimizer optimizer(params);
-        params =optimizer(20, eval);
+        params =optimizer(50, eval);
         TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
         std::cout << "x: " << (int) params["x"] << std::endl << "y: " << (int) params["y"] << "Calls: " << eval.getCalls() <<  std::endl;
     

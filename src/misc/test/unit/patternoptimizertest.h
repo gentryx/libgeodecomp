@@ -144,11 +144,13 @@ public:
         double operator()(SimulationParameters params)
         {
             ++calls;
-            int x =  params["x"]; // range -5 - 5
-            int y =  params["y"];
+            int xi =  params["x"]; // range -5 - 5
+            int yi =  params["y"];
+            double x = (double) xi / (double) 100;
+            double y = (double) xi / (double) 100;
             // (x^2 + y -11)^2 + (x + y^2 - 7)^2 
-            return 1000 - ( (((x * x) + y - 11) * ( (x * x) + y - 11))
-                    + (( x + (y * y) - 7) * ( x + (y * y) - 7)));
+            return 1000 - ( (((x * x) + y - (double) 11) * ( (x * x) + y - (double)11))
+                    + (( x + (y * y) -(double) 7) * ( x + (y * y) -(double) 7)));
         }
     };
     void testBasic()

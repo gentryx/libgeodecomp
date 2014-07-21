@@ -82,8 +82,8 @@ private:
 SimplexOptimizer::SimplexOptimizer(SimulationParameters params) : 
     Optimizer(params),
     s(1),
-    c(2),
-    epsilon(6)
+    c(8),
+   epsilon(1)
 {
     // n+1 vertices neded
     simplex.push_back(SimplexVertex(params));
@@ -105,7 +105,6 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
         std::size_t worst = minInSimplex();
         std::size_t best = maxInSimplex();
         SimplexVertex newPoint(reflection());
-        newPoint.evaluate(eval);
         // TODO it can  crash if a border is crossing
         switch(comperator(newPoint.evaluate(eval))){
             case -1 :{  // step 4 in Algo
@@ -124,7 +123,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 LOG(Logger::DBG, "case 1");
                 SimplexVertex casePoint(partialOutsideContraction());
                 if(casePoint.evaluate(eval) >= newPoint.getFitness() ){
-                    LOG(Logger::DBG, "patial outside ontraction")
+                    LOG(Logger::DBG, "patial outside contraction")
                     simplex[worst] = casePoint;
                 }else{
                     LOG(Logger::DBG, "total contraction")
@@ -139,15 +138,18 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 SimplexVertex casePoint(partialInsideContraction());
                 casePoint.evaluate(eval);
                 if(casePoint.getFitness() >= simplex[worst].getFitness()){
-                    LOG(Logger::DBG, "patrial inside contraction is set")
+                    LOG(Logger::DBG, "patrial inside contraction is set" << std::endl << casePoint.toString()<< std::endl)
                     simplex[worst]=casePoint;
                 }
                 break;
             }
             default :{
-                simplex[worst]= partialReflection();
-                simplex[worst].evaluate(eval);
-       /*(if(checkKonvergenz()){
+                SimplexVertex casePoint = partialReflection();
+                casePoint.evaluate(eval);
+                if(casePoint.getFitness() > simplex[worst].getFitness()){
+                    simplex[worst]= casePoint;
+                }
+       /* if(checkKonvergenz()){
             LOG(Logger::DBG, "checkKonvergenz succes! ")
             SimplexVertex tmp = simplex[maxInSimplex()];            
             simplex = vector<SimplexVertex>();
@@ -162,7 +164,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 if(c>1){
                     c = c * 0.5;
                 }else{
-              //      break;
+                    break;
                 }
             }
 
@@ -171,9 +173,8 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
 
 
         }
-        
         if(checkKonvergenz()){
-            LOG(Logger::DBG, "checkKonvergenz succes! ")
+            LOG(Logger::DBG, "checkConvergenze succes! ")
             SimplexVertex tmp = simplex[maxInSimplex()];            
             simplex = vector<SimplexVertex>();
             simplex.push_back(tmp);
@@ -187,6 +188,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 if(c>1){
                     c = c * 0.5;
                 }else{
+                    LOG(Logger::DBG, "succesful search!!")
                     break;
                 }
             }
@@ -255,7 +257,7 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::partialReflection()
                 tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].size()-1); 
+        tmp = tmp /(double) (simplex[0].size()-1); 
         retval[j].setValue(tmp);
     }
     return SimplexVertex(retval);
@@ -273,7 +275,7 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::reflection()
                 tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].size()-1); 
+        tmp = tmp / (simplex.size()-1); 
         tmp = 2 * tmp - simplex[worst][j].getValue();
         retval[j].setValue(tmp);
     }
@@ -292,7 +294,7 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion(){
                 tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].size()-1); 
+        tmp = tmp / (simplex.size()-1); 
         tmp2 = tmp;
         tmp = 2 * tmp - simplex[worst][j].getValue();
         retval[j].setValue(2 * tmp - tmp2);
@@ -312,7 +314,7 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction(){
                 tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp /(double) (simplex[0].size()-1); 
+        tmp = tmp /(double) (simplex.size()-1); 
         tmp2 = tmp; // xBar
         tmp = 2 * tmp - simplex[worst][j].getValue();   //x'
         retval[j].setValue(0.5  * (tmp + tmp2));
@@ -330,9 +332,8 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction(){
                 tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex[0].size()-1); 
-        tmp = 2 * tmp - simplex[worst][j].getValue();
-        retval[j].setValue(2 * (tmp + simplex[worst][j].getValue()));
+        tmp = tmp / (double) (simplex.size()-1); 
+        retval[j].setValue(0.5 * (tmp + simplex[worst][j].getValue()));
     }
     return retval;
 }
