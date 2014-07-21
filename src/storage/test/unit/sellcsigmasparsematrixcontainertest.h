@@ -1,6 +1,7 @@
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 #include <cxxtest/TestSuite.h>
 #include <iostream>
+#include <cstdlib>
 
 
 using namespace LibGeoDecomp;
@@ -9,7 +10,6 @@ namespace LibGeoDecomp {
 
 class SellCSigmaSparseMatrixContainerTest : public CxxTest::TestSuite
 {
-    //TODO TEST FÜR NEUE DINGE
 public:
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     void testGetRow_one()
@@ -100,7 +100,6 @@ public:
     // randome addPoints
     void testGetRow_two()
     {
-//std::cout << "\n\n\nTEST 2: C=1 Sigma=1 Diagonalmatrix" <<std::endl;
         SellCSigmaSparseMatrixContainer<int, 1, 1> smc (8);
 
         /* add a test 8x8 Matrix:
@@ -186,7 +185,6 @@ public:
     // randome addPoints
     void testGetRow_three()
     {
-//std::cout << "\n\n\nTEST 3: C=2 Sigma=1 Diagonalmatrix" <<std::endl;
 
         int const C (2);
         int const SIGMA (1);
@@ -274,7 +272,6 @@ public:
     // test with a 8x8 diagonal Matrix, C = 2; Sigma = 1
     void testGetRow_fore()
     {
-//std::cout << "\n\n\nTEST 4 C=3 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
         int const C (3);
         int const SIGMA (1);
         SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc (8);
@@ -361,7 +358,6 @@ public:
     // test with a 9x9 sparse Matrix, C = 3; Sigma = 1
     void testGetRow_five()
     {
-//std::cout << "\n\n\nTEST 5 C=3 Sigma=1 sparse matrix" <<std::endl;
         int const C (3);
         int const SIGMA (1);
         SellCSigmaSparseMatrixContainer<char, C, SIGMA> smc (9);
@@ -502,8 +498,6 @@ public:
     // overwite a value
     void testGetRow_six()
     {
-//std::cout << "\n\n\nTEST 6: C=2 Sigma=1" <<std::endl;
-
         int const C (2);
         int const SIGMA (1);
         SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc (3);
@@ -678,6 +672,30 @@ public:
                 );
     }
 
+    void testEqualOperator()
+    {
+        const int DIM = 128;
+        SellCSigmaSparseMatrixContainer<double,2,1> a (DIM);
+        SellCSigmaSparseMatrixContainer<double,2,1> b (DIM);
+
+        for (int i=0; i<DIM; ++i){
+            a.addPoint(i, abs(i*17+57)%DIM, (i*17+57)/DIM);
+            a.addPoint(i, abs(i*17-57)%DIM, (i*17-57)/DIM);
+            a.addPoint(i, abs(i*57+17)%DIM, (i*57+17)/DIM);
+
+            b.addPoint(i, abs(i*17+57)%DIM, (i*17+57)/DIM);
+            b.addPoint(i, abs(i*17-57)%DIM, (i*17-57)/DIM);
+            b.addPoint(i, abs(i*57+17)%DIM, (i*57+17)/DIM);
+        }
+
+        TS_ASSERT(a == a);
+        TS_ASSERT(a == b);
+
+        b.addPoint(DIM-17, DIM - 7, 0.666);
+
+        TS_ASSERT_EQUALS ((a == b), false);
+        
+    }
 
 };
 

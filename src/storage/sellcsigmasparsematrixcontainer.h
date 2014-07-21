@@ -189,6 +189,30 @@ public:
         }
     }
 
+    inline bool operator== (
+            const SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>& other
+            ) const{
+        return (dimension   == other.dimension  && 
+                values      == other.values     &&
+                column      == other.column     &&
+                chunkLength == other.chunkLength);
+    }
+
+    template<int O_C, int O_SIGMA>
+    inline bool operator== (
+            const SellCSigmaSparseMatrixContainer<VALUETYPE, O_C, O_SIGMA>& other
+            ) const{
+        if (dimension == other.dimension){
+            for (size_t i=0; i<dimension; ++i){
+                if (getRow(i) != other.getRow(i)){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 private:
     std::vector<VALUETYPE> values;
     std::vector<int>       column;

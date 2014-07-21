@@ -39,16 +39,24 @@ public:
         edgeElement(edgeElement),
         dimension(dim)
     {
-        matrices[0] = SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> (dim.x());
+        for (size_t i=0; i<MATRICES; ++i){
+            matrices[i] =
+                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> (dim.x());
+        }
     }
 
-    GridBase<ELEMENT_TYPE, DIM>&
-    operator=(const UnstructuredGrid& other)
+    template<typename O_ELEMENT_TYPE>
+    UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
+    operator=(const UnstructuredGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE,
+                                     C, SIGMA> & other)
     {
         elements = other.elements;
-        matrices = other.matrices;
         edgeElement = other.edgeElement;
         dimension = other.dimension;
+
+        for (size_t i=0; i<MATRICES; ++i){
+            matrices[i] = other.matrices[i];
+        }
 
         return *this;
     }
@@ -57,18 +65,20 @@ public:
      * iterator musst be an interator over pair< Coord<2>, VALUE_TYPE >
      */
     template<typename ITERATOR>
-    void addAdjacency(size_t  matrixID, ITERATOR & start, const ITERATOR & end){
+    void setAdjacency(size_t const  matrixID, ITERATOR start,
+                      const ITERATOR end){
         if (matrixID >= MATRICES){
             throw std::invalid_argument("matrixID not available");
         }
         for (ITERATOR i = start; i != end; ++i) {
+
             Coord<2> c = i->first;
             matrices[matrixID].addPoint(c.x(), c.y(), i->second);
         }
     }
 
     const SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacemcy(size_t matrixID){
+    getAdjacency(size_t const matrixID) const {
         if (matrixID >= MATRICES){
             throw std::invalid_argument("matrixID not available");
         }
@@ -76,6 +86,14 @@ public:
         return matrices[matrixID];
     }
 
+    SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
+    getAdjacency(size_t const matrixID){
+        if (matrixID >= MATRICES){
+            throw std::invalid_argument("matrixID not available");
+        }
+
+        return matrices[matrixID];
+    }
     /**
      * returns a list of pairs representing the neighborhood of center element.
      * the first element of the pair is the ELEMENT_TYPE
