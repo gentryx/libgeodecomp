@@ -20,7 +20,7 @@ public:
         PatternOptimizerTest::HimmelblauFunction eval;
         double test = eval(params);
         SimplexOptimizer optimizer(params);
-        params =optimizer(50, eval);
+        //params =optimizer(5, eval);
         TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
         LOG(Logger::INFO, "Test Himmelblau with simplexOptimizer" << std::endl
                 << "x: " << (int) params["x"] << std::endl 
@@ -31,11 +31,11 @@ public:
         params5.addParameter("v", -60, 60);
         params5.addParameter("w", -20, 40);
         params5.addParameter("x", -10, 10);
-        params5.addParameter("y", 0, 20);
+        params5.addParameter("y", 0, 2);
         params5.addParameter("z", -10, 40);
         SimplexOptimizer optimizer5(params5);
         PatternOptimizerTest::FiveDimFunction eval5;
-        params5 = optimizer5(40,eval5);
+        params5 = optimizer5(20 ,eval5);
         TS_ASSERT_EQUALS(eval5.getGlobalMax(), optimizer5.fitness);
         LOG(Logger::INFO,  "Test 5, five dimensions: "
                 << std::endl<< "fitness: " << optimizer5.fitness

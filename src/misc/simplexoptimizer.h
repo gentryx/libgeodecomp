@@ -9,6 +9,7 @@
 #include <sstream>
 #include <cfloat>
 #include <libgeodecomp/io/logger.h>
+#include <utility>
 
 #define LIBGEODECOMP_DEBUG_LEVEL 4
 #define ALTERN_CONVERGENCE_CRITERION
@@ -47,8 +48,63 @@ public:
             result << std::endl;
             return result.str();
         }
-        
-            
+        const SimplexVertex operator+(const SimplexVertex& b) 
+        {
+            SimplexVertex result(*this);
+            if (this->size()==b.size()){
+                for (std::size_t i = 0; i < b.size(); ++i) {
+                    result[i].setValue(this->operator[](i).getValue() + b[i].getValue());
+                }
+                result.setFitness(-1);
+                return result;
+            }
+            return b;
+        }
+        const SimplexVertex operator+(const double& b)
+        {
+            SimplexVertex result(*this);
+            for (std::size_t i = 0; i < this->size(); ++i) {
+                result[i].setValue(this->operator[](i).getValue() + b);
+            }
+            result.setFitness(-1);
+            return result;
+        }
+        const SimplexVertex operator-(const SimplexVertex& b)
+        {
+            SimplexVertex result(*this);
+            for (std::size_t i = 0; i < b.size(); ++i) {
+                result[i].setValue(this->operator[](i).getValue() - b[i].getValue());
+            }     
+            result.setFitness(-1);
+            return result;
+        }
+        const SimplexVertex operator*(const SimplexVertex& b) 
+        {
+            SimplexVertex result(*this);
+            if (this->size()==b.size()){
+                for (std::size_t i = 0; i < b.size(); ++i) {
+                    result[i].setValue(this->operator[](i).getValue() * b[i].getValue());
+                }
+                result.setFitness(-1);
+                return result;
+            }
+            return b;
+        }
+        const SimplexVertex operator*(const double& b)
+        {
+            SimplexVertex result(*this);
+            for (std::size_t i = 0; i < this->size(); ++i) {
+                result[i].setValue(this->operator[](i).getValue() * b);
+            }
+            result.setFitness(-1);
+            return result;
+        }
+
+    protected:
+        void setFitness(double fitness)
+        {
+            this->fitness = fitness;
+        }
     private:
         double fitness;
     }; //SimplexVertex
@@ -64,8 +120,7 @@ private:
     void totalContraction();
     bool checkTermination();
     bool checkConvergence();
-    SimplexVertex partialReflection();
-    SimplexVertex reflection();    
+    std::pair<SimplexVertex, SimplexVertex> reflection();
     SimplexVertex expansion();
     SimplexVertex partialOutsideContraction();
     SimplexVertex partialInsideContraction();
@@ -100,11 +155,13 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
     vector<SimplexVertex> old(simplex);
     evalSimplex(eval);
     for (int i = 0; i < steps && checkTermination(); ++i) {
+    
+    std::cout<< std::endl << " nach expansion " << std::endl << "simplex[0].getMin(): " << simplex[0][3].getMin() << " simplex[0].getMax: " << simplex[0][3].getMax() << std::endl;
         vector<SimplexVertex> old(simplex);
         LOG(Logger::DBG, simplexToString())
         std::size_t worst = minInSimplex();
         std::size_t best = maxInSimplex();
-        SimplexVertex newPoint(reflection());
+        SimplexVertex newPoint(reflection().second);
         // TODO it can  crash if a border is crossing
         switch (comperator(newPoint.evaluate(eval))) {
             case -1 :{  // step 4 in Algo
@@ -143,34 +200,12 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 break;
             }
             default :{
-                SimplexVertex casePoint = partialReflection();
+                SimplexVertex casePoint = reflection().first;
                 casePoint.evaluate(eval);
                 if (casePoint.getFitness() > simplex[worst].getFitness()) {
                     simplex[worst]= casePoint;
                 }
-       /* if(checkConvergence()){
-            LOG(Logger::DBG, "checkonvergence succes! ")
-            SimplexVertex tmp = simplex[maxInSimplex()];            
-            simplex = vector<SimplexVertex>();
-            simplex.push_back(tmp);
-            for(std::size_t i = 0; i < tmp.size(); ++i){
-                SimplexVertex tmp2(tmp);
-                tmp2[i].setValue(tmp[i].getValue() + c * s); 
-                tmp2.evaluate(eval);
-                simplex.push_back(tmp2);
             }
-            if(eq(old,simplex)){
-                if(c>1){
-                    c = c * 0.5;
-                }else{
-                    break;
-                }
-            }
-
-        }*/
-            }
-
-
         }
         if (checkConvergence()) {
             LOG(Logger::DBG, "checkConvergence succes! ")
@@ -246,29 +281,13 @@ std::size_t SimplexOptimizer::maxInSimplex()
     return retval;
 }
 
-SimplexOptimizer::SimplexVertex SimplexOptimizer::partialReflection()
+// returns T1 = overline{x}, T2 = x' from algorithm in the paper
+std::pair<SimplexOptimizer::SimplexVertex, SimplexOptimizer::SimplexVertex> SimplexOptimizer::reflection()
 {
     std::size_t worst = minInSimplex();
-    SimulationParameters retval = simplex[0];
-    for (std::size_t j = 0; j<simplex[0].size(); ++j) {
-        double tmp=0.0;
-        for (std::size_t i = 0; i < simplex.size(); ++i) {
-            if (i != worst) {
-                tmp += simplex[i][j].getValue();
-            }
-        }
-        tmp = tmp / (double) (simplex[0].size()-1); 
-        retval[j].setValue(tmp);
-    }
-    return SimplexVertex(retval);
-}
-
-
-SimplexOptimizer::SimplexVertex SimplexOptimizer::reflection()
-{
-    std::size_t worst = minInSimplex();
-    SimulationParameters retval = simplex[0];
-    for (std::size_t j = 0; j<simplex[0].size(); ++j) {
+    SimplexVertex t1(simplex[0]);
+    SimplexVertex t2(simplex[0]);
+    for (std::size_t j = 0; j < simplex[0].size(); ++j) {
         double tmp=0.0;
         for (std::size_t i = 0; i < simplex.size(); ++i) {
             if (i != worst) {
@@ -276,81 +295,50 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::reflection()
             }
         }
         tmp = tmp / (simplex.size()-1); 
+        t1[j].setValue(tmp);
         tmp = 2 * tmp - simplex[worst][j].getValue();
-        retval[j].setValue(tmp);
+        t2[j].setValue(tmp);
     }
-    return SimplexVertex(retval);
+    return std::pair<SimplexVertex, SimplexVertex>(t1, t2);
+    
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion()
 {
-
-    std::size_t worst = minInSimplex();
-    SimplexVertex retval = simplex[0];
-    for (std::size_t j = 0; j < simplex[0].size(); ++j) {
-        double tmp=0.0;
-        double tmp2=0.0;
-        for (std::size_t i = 0; i < simplex.size(); ++i) {
-            if (i != worst) {
-                tmp += simplex[i][j].getValue();
-            }
-        }
-        tmp = tmp / (simplex.size() - 1); 
-        tmp2 = tmp;
-        tmp = 2 * tmp - simplex[worst][j].getValue();
-        retval[j].setValue(2 * tmp - tmp2);
-    }
+    std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
+    SimplexVertex retval(simplex[0]);
+    retval = retval * 2.0;
+    retval = retval - reflRes.first;
     return retval;
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction() 
 {
-    
-    std::size_t worst = minInSimplex();
-    SimplexVertex retval = simplex[0];
-    for (std::size_t j = 0; j < simplex[0].size(); ++j) {
-        double tmp=0.0;
-        double tmp2=0.0;
-        for (std::size_t i = 0; i < simplex.size(); ++i) {
-            if (i != worst) {
-                tmp += simplex[i][j].getValue();
-            }
-        }
-        tmp = tmp / (double) (simplex.size() - 1); 
-        tmp2 = tmp; // xBar
-        tmp = 2 * tmp - simplex[worst][j].getValue();   //x'
-        retval[j].setValue(0.5  * (tmp + tmp2));
-    }
+    std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
+    SimplexVertex retval(simplex[0]);
+    retval = reflRes.first + reflRes.second;
+    retval = retval * 0.5;
     return retval;
-    
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction() 
 {
-    std::size_t worst = minInSimplex();
-    SimplexVertex retval = simplex[0];
-    for (std::size_t j = 0; j < simplex[0].size(); ++j) {
-        double tmp=0.0;
-        for (std::size_t i = 0; i < simplex.size(); ++i) {
-            if (i != worst) {
-                tmp += simplex[i][j].getValue();
-            }
-        }
-        tmp = tmp / (double) (simplex.size() - 1); 
-        retval[j].setValue(0.5 * (tmp + simplex[worst][j].getValue()));
-    }
+    std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
+    SimplexVertex retval(simplex[0]);
+    retval = reflRes.first + simplex[minInSimplex()];
+    retval = retval * 0.5;
     return retval;
+
 }
 
 void SimplexOptimizer::totalContraction() 
 {
     SimplexVertex best = simplex[maxInSimplex()];
     for (std::size_t i = 0; i < simplex.size(); ++i) {
-        for (std::size_t j = 0; j < simplex[i].size(); ++j) {  
-            simplex[i][j].setValue(
-                0.5 * (best[j].getValue()
-                +simplex[i][j].getValue()));
-        }
+        SimplexVertex result(simplex[0]);
+        result = best + simplex[i];
+        result = result *0.5;
+        simplex[i] = result;
     }
 }
 
