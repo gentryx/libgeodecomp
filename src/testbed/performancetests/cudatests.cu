@@ -1,15 +1,16 @@
-#include <cuda.h>
-#include <iostream>
-#include <stdexcept>
-
-#include <libflatarray/testbed/gpu_benchmark.hpp>
-#include <libflatarray/testbed/evaluate.hpp>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
 #include <libgeodecomp/storage/soagrid.h>
+
+#include <libflatarray/testbed/gpu_benchmark.hpp>
+#include <libflatarray/testbed/evaluate.hpp>
+
+#include <cuda.h>
+#include <iostream>
+#include <stdexcept>
 
 using namespace LibGeoDecomp;
 
