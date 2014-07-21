@@ -22,14 +22,16 @@ public:
         SimplexOptimizer optimizer(params);
         params =optimizer(50, eval);
         TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
-        std::cout << "x: " << (int) params["x"] << std::endl << "y: " << (int) params["y"] << "Calls: " << eval.getCalls() <<  std::endl;
-    
+        LOG(Logger::INFO, "Test Himmelblau with simplexOptimizer" << std::endl
+                << "x: " << (int) params["x"] << std::endl 
+                << "y: " << (int) params["y"] << std::endl 
+                << "Calls: " << eval.getCalls() <<  std::endl)    
 
         SimulationParameters params5;
         params5.addParameter("v", -60, 60);
         params5.addParameter("w", -20, 40);
         params5.addParameter("x", -10, 10);
-        params5.addParameter("y", 0, 2);
+        params5.addParameter("y", 0, 20);
         params5.addParameter("z", -10, 40);
         SimplexOptimizer optimizer5(params5);
         PatternOptimizerTest::FiveDimFunction eval5;

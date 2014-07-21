@@ -72,7 +72,7 @@ public:
             int y = params["y"];
             int z = params["z"];
             ++calls;
-            return 1000 - ((z + x - 5) * (z-x - 5)) - (y * y);
+            return 1000 - ((z + x - 5) * (z - x - 5)) - (y * y);
         }
     };
 
@@ -127,9 +127,9 @@ public:
             ++calls;
             int x = params["x"];
             int y = params["y"];
-            if(x < 10 && x >= 10){
+            if (x < 10 && x >= 10) {
                 return 1100 + ((x * x * -0.1)- 4 + y * -0.1);
-            }else{
+            } else {
                 return 1100 + ((x * x * -0.1) + y * 0.1);
             }
         }
@@ -150,7 +150,7 @@ public:
             double y = (double) xi / (double) 100;
             // (x^2 + y -11)^2 + (x + y^2 - 7)^2 
             return 1000 - ( (((x * x) + y - (double) 11) * ( (x * x) + y - (double)11))
-                    + (( x + (y * y) -(double) 7) * ( x + (y * y) -(double) 7)));
+                    + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
         }
     };
     void testBasic()
