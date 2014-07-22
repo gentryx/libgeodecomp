@@ -5,24 +5,48 @@
 #include <iostream>
 #include <sstream>
 
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
+
 namespace LibGeoDecomp{
 
 PatternOptimizer::PatternOptimizer(SimulationParameters params):
-    Optimizer(params),
-    stepFactor(2),
-    maxSteps(8)
+    Optimizer(params)
 {
     for (std::size_t i = 0; i < params.size(); ++i) {
         double dimsize = Optimizer::params[i].getMax()
             - Optimizer::params[i].getMin();
-        stepwidth.push_back(dimsize / stepFactor);
-        double tmp = stepwidth[i] / std::pow(2,maxSteps);
+        stepwidth.push_back(dimsize / 4);
+        params[i].setValue(dimsize / 2);
         // minStepwidht >= granularity
         // it will be used as abort criterion
-        if (tmp < params[i].getGranularity()) {
-            tmp = params[i].getGranularity();
-        }
-        minStepwidth.push_back(tmp);
+        minStepwidth.push_back(params[i].getGranularity());
+    }
+}
+
+PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth) :
+    Optimizer(params),
+    stepwidth(stepwidth)
+{
+    if( stepwidth.size() != params.size() ) {
+        // TODO exception
+        LOG(Logger::FATAL,"Wrong size of stepwidth in constructor, PatternOptimizer!")
+    }
+    for (std::size_t i = 0; i < params.size(); ++i) {
+        minStepwidth.push_back(params[i].getGranularity());
+    }
+}
+
+PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<double> stepwidht, std::vector<double> minStepwidth) :
+    Optimizer(params),
+    stepwidth(stepwidth),
+    minStepwidth(minStepwidth)
+{
+    if( stepwidth.size() != params.size() ) {
+        // TODO exception
+        LOG(Logger::FATAL,"Wrong size of stepwidth in constructor, PatternOptimizer!")
+    }
+    if (minStepwidth.size() != params.size()) {
+        LOG(Logger::FATAL,"Wrong size of minStepwidth in constructor, PatternOptimzer!")
     }
 }
 
@@ -72,11 +96,11 @@ std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> patter
     for (std::size_t i = 1; i < pattern.size(); ++i) { //i = 1 middle don't need to be evaluate again
         // all pattern[i] with the same coordinates as middle, oldMiddle don't need to be evaluate
         if (pattern[0][(i - 1) / 2].getValue() == pattern[i][(i - 1) / 2].getValue() 
-                || i ==oldMiddle) {
+                || (i%2==0 && i-1 == oldMiddle) || (i%2 != 0 && i+1 ==oldMiddle)) {
             continue;
         }
         newFitness = eval(pattern[i]);
-        if (newFitness > Optimizer::fitness) {
+        if (newFitness >= Optimizer::fitness) {
             retval = i;
             Optimizer::fitness = newFitness;
         }
@@ -91,8 +115,8 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
     std::size_t maxPos = 0;
     for (int k = 0; k < steps; ++k) {
         pattern = genPattern(middle);
-        LOG(Logger::DBG, patternToString(pattern))
         maxPos = getMaxPos(pattern, eval,maxPos);
+        LOG(Logger::DBG, patternToString(pattern) << "maxPos: " << maxPos )
         if (maxPos == 0) {            // center was the Maximum
             if (!reduceStepwidth()) {  // abort test
                 LOG(Logger::DBG,  "fitness: " << Optimizer::fitness)

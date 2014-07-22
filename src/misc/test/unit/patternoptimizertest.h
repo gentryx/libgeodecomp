@@ -199,6 +199,7 @@ public:
         PatternOptimizer optimizer3(params3);
         MultimodTwoDim eval3;
         params3 = optimizer3(100,eval3);
+        TS_ASSERT(((eval3.getGlobalMax() - 0,0001) < optimizer3.fitness));
         LOG(Logger::INFO,  "Test 3 multimodal function: "<< std::endl 
                  << "fitness: " << optimizer3.fitness
                  <<  " calls: " << eval3.getCalls() 
@@ -246,12 +247,12 @@ public:
 
         // Test 6, Himmelblau
         SimulationParameters params6;
-        params6.addParameter("x", -5, 6);
-        params6.addParameter("y", -5, 6);
+        params6.addParameter("x", -500, 500);
+        params6.addParameter("y", -500, 500);
         PatternOptimizer optimizer6(params6);
         HimmelblauFunction eval6;
         params6 = optimizer6(100, eval6);
-        TS_ASSERT_EQUALS(eval6.getGlobalMax(), optimizer6.fitness);
+        TS_ASSERT(((eval6.getGlobalMax() - 0,0001) < optimizer6.fitness));
         LOG(Logger::INFO, "Test 6, Himmelblau:" << std::endl
                 << "fitness: " << optimizer6.fitness
                 << " calls: " << eval6.getCalls() << std::endl

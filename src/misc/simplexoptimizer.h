@@ -67,7 +67,7 @@ private:
     double c;   // 
     double epsilon;
 };
-
+// Caution: SimplexVertex have borders.
 const SimplexOptimizer::SimplexVertex operator+(
         const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b); 
 const SimplexOptimizer::SimplexVertex operator+(

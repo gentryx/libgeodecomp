@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 
+
 //#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
@@ -99,7 +100,7 @@ SimplexOptimizer::SimplexOptimizer(SimulationParameters params) :
     Optimizer(params),
     s(std::vector<double>()),
     c(8),
-   epsilon(4)
+   epsilon(-1)
 {
     for (std::size_t i = 0; i < params.size(); ++i) {
        if (params[i].getGranularity() > 1) {
@@ -125,7 +126,8 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
 {
     vector<SimplexVertex> old(simplex);
     evalSimplex(eval);
-    for (int i = 0; i < steps && checkTermination(); ++i) {
+    int i;
+    for (i = 0; i < steps && checkTermination(); ++i) {
     
         vector<SimplexVertex> old(simplex);
         LOG(Logger::DBG, simplexToString())
@@ -178,31 +180,35 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 }
             }
         }
-
         // step 10
-        if (checkConvergence()) {
-            LOG(Logger::DBG, "checkConvergence succes! ")
-            initSimplex(simplex[maxInSimplex()]);
-            evalSimplex(eval);
-            if (eq(old,simplex)) {
+        if (epsilon > 0) {
+            if (checkConvergence()) {
+                LOG(Logger::DBG, "checkConvergence succes! ")
+                initSimplex(simplex[maxInSimplex()]);
+                evalSimplex(eval);
                 if (c >= 2) { 
-                    // factor from paper is not possible with granulatiry
                     c = c * 0.5;
-                } else {
-                    LOG(Logger::INFO, "succesful search!!")
-                    break;
                 }
             }
-        } else {
             if (eq(old, simplex)) {
                 LOG(Logger::INFO, "no more changes possible with this parameters!")
                 break;
             }
+        } else {
+            if (eq(old, simplex)) {
+                if (c >= 2) {
+                    c = c * 0.5;
+                    initSimplex(simplex[maxInSimplex()]);
+                    evalSimplex(eval);
+                } else {
+                    break;
+                }
+            }
         }
-        
         fitness = simplex[maxInSimplex()].getFitness();
-        
     }
+    LOG(Logger::DBG, "Done steps: " << i)
+    fitness = simplex[maxInSimplex()].getFitness();
     return simplex[maxInSimplex()];
 }
 
@@ -236,6 +242,10 @@ void SimplexOptimizer::initSimplex(SimulationParameters params)
     for (std::size_t i = 0; i < tmp.size(); ++i) {
         SimplexVertex tmp2(tmp);
         tmp2[i].setValue(tmp[i].getValue() + c * s[i]); 
+        // if init is called on a border, inverse the direction
+        if (tmp2[i].getValue() == tmp[i].getValue()) {
+            tmp2[i].setValue(tmp[i].getValue() - c * s[i]);
+        }
         tmp2.setFitness(-1);
         simplex.push_back(tmp2);
     }
@@ -259,7 +269,7 @@ std::size_t SimplexOptimizer::maxInSimplex()
     std::size_t retval = 0;
     double max = DBL_MIN;
     for (std::size_t i = 0; i < simplex.size(); ++i) {
-        if (max < simplex[i].getFitness()) {
+        if (max <= simplex[i].getFitness()) {
             max = simplex[i].getFitness();
             retval = i;
         }
@@ -292,32 +302,39 @@ std::pair<SimplexOptimizer::SimplexVertex, SimplexOptimizer::SimplexVertex> Simp
 SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion()
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
-    return reflRes.second * 2.0 - reflRes.first;
+    SimplexVertex retval = simplex[0];
+    // to use the overloaded operator is not possible here, about over/underflows
+    for (std::size_t i = 0; i < simplex[0].size(); ++i) {
+        retval[i].setValue(
+            reflRes.second[i].getValue()*2 - reflRes.first[i].getValue());
+    }
+    return retval;
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction() 
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
-    return (reflRes.first + reflRes.second)*0.5;
+    return (reflRes.first*0.5 + reflRes.second*0.5);
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction() 
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
-    return (reflRes.first + simplex[minInSimplex()]) * 0.5;
+    return (reflRes.first*0.5 + simplex[minInSimplex()]*0.5);
 }
 
 void SimplexOptimizer::totalContraction() 
 {
     SimplexVertex best = simplex[maxInSimplex()];
     for (std::size_t i = 0; i < simplex.size(); ++i) {
-        SimplexVertex result = (best + simplex[i]) * 0.5;
+        SimplexVertex result = (best *0.5 + simplex[i]*0.5) ;
         simplex[i] = result;
     }
 }
 
 bool SimplexOptimizer::checkConvergence() 
 {
+//#define ALTERN_CONVERGENCE_CRITERION
 #ifdef ALTERN_CONVERGENCE_CRITERION
     double a= 0.0;
     double b= 0.0;
