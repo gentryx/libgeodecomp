@@ -200,10 +200,11 @@ public:
     using TypedParameter<VALUE_TYPE>::current;
     using Parameter::sanitizeIndex;
 
-    Interval(const VALUE_TYPE minimum, const VALUE_TYPE maximum) :
+    Interval(const VALUE_TYPE minimum, const VALUE_TYPE maximum, const double granularity = 1) :
         TypedParameter<VALUE_TYPE>(minimum),
         minimum(minimum),
         maximum(maximum),
+        granularity(granularity),
         index(0)
     {}
 
@@ -235,9 +236,7 @@ public:
 
     double getGranularity() const
     {
-        // fixme: for now we only care for integer intervals. this
-        // needs to be fixed for real-valued intervals.
-        return 1;
+        return granularity;
     }
 
     void operator+=(double step)
@@ -251,6 +250,7 @@ public:
 private:
     VALUE_TYPE minimum;
     VALUE_TYPE maximum;
+    double granularity;
     int index;
 };
 
