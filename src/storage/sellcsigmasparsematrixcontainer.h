@@ -4,21 +4,66 @@
 #include <vector>
 #include <utility>
 #include <assert.h>
+#include <stdexcept>
+
 #include <iostream>
 
 namespace LibGeoDecomp {
 
 
-//OHNE SORTIEREN! SIGMA =1
-//NICHT PARRALEL!
+//OHNE SORTIEREN! SIGMA =1 TODO
 template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
 public:
-    SellCSigmaSparseMatrixContainer(){}
+    explicit SellCSigmaSparseMatrixContainer(){}
 
-    void matVecMul (std::vector<double> lhs, std::vector<double> rhs){
-        //TODO
+    SellCSigmaSparseMatrixContainer(int N):
+       values(), column(), rowLength(N, 0),
+       chunkLength((N-1)/C + 1, 0), chunkOffset((N-1)/C + 2, 0), dimension(N)
+    {
+        if (C < 1 || SIGMA != 1 ){
+            throw std::invalid_argument("SIGMA must be '1'; everithing else is not implemented jet");
+        }
+    }
+
+    // lhs = A   x rhs
+    // tmp = val x b
+    void matVecMul (std::vector<VALUETYPE> & lhs, std::vector<VALUETYPE> & rhs){
+        if(lhs.size() != rhs.size() || lhs.size() != dimension){
+            throw std::invalid_argument("lhs and rhs must be of size N");
+        }
+
+        // loop over chunks     TODO paralel omp
+        for(size_t chunk=0; chunk<chunkLength.size(); ++chunk){
+            int offs = chunkOffset[chunk];
+            VALUETYPE tmp[C];
+
+            // init tmp                     TODO vectorise
+            for(int row=0; row<C; ++row){
+                tmp[row] = lhs[chunk*C + row];
+            }
+
+            // loop over columns in chunk
+            for(int col=0; col<chunkLength[chunk]; ++col){
+
+                // loop over rows in chunks TODO vectorise
+                for(int row=0; row<C; ++row){
+                    VALUETYPE val = values[offs];
+                    int columnINDEX = column[offs++];
+                    if(columnINDEX != -1){
+                        VALUETYPE b   = rhs[columnINDEX];
+                        tmp[row] += val * b;
+                    }
+                }
+            }
+
+            // store tmp                     TODO vectorise
+            for(int row=0; row<C; ++row){
+                lhs[chunk*C + row] = tmp[row];
+            }
+        }
+
     }
 
     std::vector< std::pair<int, VALUETYPE> > getRow(int const row){
@@ -28,57 +73,43 @@ public:
         int const offset (row%C);
         int index = chunkOffset[chunk] + offset;
 
-//std::cout << "Get row: row="<< row << " chunk=" << chunk << " offset=" << offset << " chunkOffset=" << chunkOffset[chunk] << " Werte=";
 
         for (int element = 0;
                 element < rowLength[row]; ++element, index += C){
             vec.push_back( std::pair<int, VALUETYPE>
                             (column[index], values[index]) );
-//std::cout << "(" << vec.back().first << ","<< vec.back().second << "), ";
         }
 
-//std::cout << std::endl;
         return vec;
     }
 
-    // Row [0:N-1]; Col [0:N-1]
+    /**
+     * Row [0:N-1]; Col [0:N-1]
+     */
     void addPoint(int const row, int const col, VALUETYPE value){
-        if(row >= 0 && col >= 0);   //TODO exeption werfen
+        if(row < 0 || col < 0 || (size_t)row >= dimension){
+            throw std::invalid_argument("row and colum must be >= 0");
+        }
 
         int const chunk (row/C);
 
-//std::cout << "Add point: row: " << row << " chunk: " << chunk << " col=" << col << " val=" << value;
-
-        if ( (unsigned)row >= rowLength.size() ){
-            rowLength.resize(row+1);
-        }
-        if ( (unsigned)chunk >= chunkLength.size() ){
-            unsigned oldNumberOfChunks = chunkLength.size();
-
-            chunkLength.resize(chunk+1);
-            chunkOffset.resize(chunk+2);
-
-            for( unsigned i = oldNumberOfChunks; i < chunkOffset.size(); ++i ){
-                chunkOffset[i] = values.size();
-            }
-        }
-
-//std::cout << " row length: " << rowLength[row] << " chunk Length: " << chunkLength[chunk] << " chunkOffset: " << chunkOffset[chunk] << std::endl;
 
         //// case 1: row is NOT the bigest in chunk
         if ( rowLength[row] < chunkLength[chunk] ){
-//std::cout << "case 1";
             std::vector<int>::iterator itCol = column.begin()
                     + chunkOffset[chunk] + row % C;
 
             while ( col > *itCol && -1 != *itCol ){
                 itCol += C;
             }
-            if(col != *itCol); // TODO fehler werfen? überschreiben?
+            if(col == *itCol){
+                *itCol = col;
+                values[itCol - column.begin()] = value;
+                return;
+            }
             
             if ( -1 != *itCol){
             //// case 1.a add value in mid of row
-//std::cout << ".a";
                 int lastElement = chunkOffset[chunk + 1] - C + (row%C);
                 int end   = itCol - column.begin();
 
@@ -87,7 +118,6 @@ public:
                     column[i] = column[i-C];
                 }
             }
-//std::cout << std::endl;
 
             values[itCol - column.begin()] = value;
             *itCol = col;
@@ -95,9 +125,7 @@ public:
             ++rowLength[row];
         }
         else{
-        //// case 2: row is the logest in chunk -> expend chunk
-//std::cout << "fall 2";
-
+        //// case 2: row is the longest in chunk -> expend chunk
             int const offset    = chunkOffset[chunk] + row % C;
             int const offsetEnd = chunkOffset[chunk+1];
 
@@ -106,10 +134,7 @@ public:
                 index += C;
             }
 
-
-
             if (index >= offsetEnd ){
-//std::cout << ".a" << std::endl;
                 index = offsetEnd;
 
                 std::vector<int>::iterator itCol = column.begin() + index;
@@ -117,15 +142,18 @@ public:
                 std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
 
                 for (int i=0; i < C; ++i){
-                        itCol = column.insert(itCol, -1);               
+                        itCol = column.insert(itCol, -1);   //TODO für matvecmul flag array?
                         itVal = values.insert(itVal, VALUETYPE());
                 }
                 *(itCol + (row%C)) = col;
                 *(itVal + (row%C)) = value;
             }
             else {
-//std::cout << ".b" << std::endl;
-                if(col != column[index]); //TODO fehler werfen?
+                if(col == column[index]){
+                    column[index] = col;
+                    values[index] = value;
+                    return;
+                }
 
                 std::vector<int>::iterator itCol = column.begin() + index;
                 typename
@@ -159,19 +187,31 @@ public:
                 chunkOffset[ch] += C;
             }
         }
+    }
 
-//std::cout << "col: ";
-//for (unsigned i=0; i<column.size(); ++i){
-    //std::cout << column[i] << " ";
-//}
-//std::cout << std::endl;
-//std::cout << "values: ";
-//for (unsigned i=0; i<values.size(); ++i){
-    //std::cout << values[i] << " ";
-//}
-//std::cout << std::endl;
+    inline bool operator== (
+            const SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>& other
+            ) const{
+        return (dimension   == other.dimension  && 
+                values      == other.values     &&
+                column      == other.column     &&
+                chunkLength == other.chunkLength);
+    }
 
-}
+    template<int O_C, int O_SIGMA>
+    inline bool operator== (
+            const SellCSigmaSparseMatrixContainer<VALUETYPE, O_C, O_SIGMA>& other
+            ) const{
+        if (dimension == other.dimension){
+            for (size_t i=0; i<dimension; ++i){
+                if (getRow(i) != other.getRow(i)){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 
 private:
     std::vector<VALUETYPE> values;
@@ -179,6 +219,7 @@ private:
     std::vector<int>       rowLength;   // = Non Zero Entres in Row
     std::vector<int>       chunkLength; // = Max rowLength in Chunk
     std::vector<int>       chunkOffset; // COffset[i+1]=COffset[i]+CLength[i]*C
+    size_t dimension;                   // = N
 };
 
 }
