@@ -345,6 +345,77 @@ public:
         TS_ASSERT_EQUALS(FloatCoord<2>::diagonal(23.45), FloatCoord<2>(23.45, 23.45));
         TS_ASSERT_EQUALS(FloatCoord<3>::diagonal(34.56), FloatCoord<3>(34.56, 34.56, 34.56));
     }
+
+    void testDominates1D()
+    {
+        FloatCoord<1> f1(10.1);
+        FloatCoord<1> f2(11.1);
+        Coord<1> c1(10);
+        Coord<1> c2(11);
+
+        TS_ASSERT( f1.dominates(f1));
+        TS_ASSERT( f1.dominates(f2));
+        TS_ASSERT(!f1.dominates(c1));
+        TS_ASSERT( f1.dominates(c2));
+
+        TS_ASSERT(!f2.dominates(f1));
+        TS_ASSERT( f2.dominates(f2));
+        TS_ASSERT(!f2.dominates(c1));
+        TS_ASSERT(!f2.dominates(c2));
+    }
+
+    void testDominates2D()
+    {
+        FloatCoord<2> fC(10.1, 10.5);
+
+        FloatCoord<2> fR(11.1, 10.5);
+        FloatCoord<2> fT(10.1, 10.1);
+        FloatCoord<2> fL(10.0, 10.5);
+        FloatCoord<2> fB(10.1, 11.5);
+
+        Coord<2> c1(10, 10);
+        Coord<2> c2(11, 11);
+
+        TS_ASSERT( fC.dominates(fR));
+        TS_ASSERT( fC.dominates(fB));
+        TS_ASSERT(!fC.dominates(fL));
+        TS_ASSERT(!fC.dominates(fT));
+
+        TS_ASSERT(!fC.dominates(c1));
+        TS_ASSERT( fC.dominates(c2));
+    }
+
+    void testDominates3D()
+    {
+        FloatCoord<3> fC(10.1, 20.1, 30.1);
+
+        FloatCoord<3> fL(10.0, 20.1, 30.1);
+        FloatCoord<3> fR(10.9, 20.1, 30.1);
+
+        FloatCoord<3> fT(10.1, 20.0, 30.1);
+        FloatCoord<3> fB(10.1, 20.9, 30.1);
+
+        FloatCoord<3> fN(10.1, 20.1, 30.9);
+        FloatCoord<3> fS(10.1, 20.1, 30.0);
+
+        Coord<3> c1(10, 20, 30);
+        Coord<3> c2(11, 21, 31);
+        Coord<3> c3(10, 21, 30);
+        Coord<3> c4(11, 20, 30);
+
+        TS_ASSERT( fC.dominates(fC));
+        TS_ASSERT(!fC.dominates(fL));
+        TS_ASSERT( fC.dominates(fR));
+        TS_ASSERT(!fC.dominates(fT));
+        TS_ASSERT( fC.dominates(fB));
+        TS_ASSERT( fC.dominates(fN));
+        TS_ASSERT(!fC.dominates(fS));
+
+        TS_ASSERT(!fC.dominates(c1));
+        TS_ASSERT( fC.dominates(c2));
+        TS_ASSERT(!fC.dominates(c3));
+        TS_ASSERT(!fC.dominates(c4));
+    }
 };
 
 }
