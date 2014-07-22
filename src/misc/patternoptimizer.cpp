@@ -26,11 +26,13 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params):
     }
 }
 
-// returns false if all parameters alrady on minimum
+/**
+ * returns false if all parameters alrady on minimum
+ */
 bool PatternOptimizer::reduceStepwidth()
 {
     bool allWasMin = true;
-    std::stringstream log;   
+    std::stringstream log;
     log << "Reduce Stepwidth:" << std::endl;
     for (size_t i = 0;i < stepwidth.size(); ++i) {
         log << "Dimension "<< i << ": " << stepwidth[i];
@@ -60,27 +62,32 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
         tmp2[i] += (stepwidth[i] * -1.0);
         result[1 + i * 2] = tmp1;
         result[2 + i * 2] = tmp2;
-    }	
+    }
     return result;
 }
 
-std::size_t PatternOptimizer::getMaxPos(std::vector<SimulationParameters> pattern, 
-            Evaluator& eval, std::size_t oldMiddle)
-{	
+std::size_t PatternOptimizer::getMaxPos(
+    const std::vector<SimulationParameters>& pattern,
+    Evaluator& eval,
+    std::size_t oldMiddle)
+{
     std::size_t retval = 0;
     double newFitness;
+
     for (std::size_t i = 1; i < pattern.size(); ++i) { //i = 1 middle don't need to be evaluate again
         // all pattern[i] with the same coordinates as middle, oldMiddle don't need to be evaluate
-        if (pattern[0][(i - 1) / 2].getValue() == pattern[i][(i - 1) / 2].getValue() 
-                || i ==oldMiddle) {
+        if (pattern[0][(i - 1) / 2].getValue() == pattern[i][(i - 1) / 2].getValue() || (i ==oldMiddle)) {
             continue;
         }
+
         newFitness = eval(pattern[i]);
+
         if (newFitness > Optimizer::fitness) {
             retval = i;
             Optimizer::fitness = newFitness;
         }
     }
+
     return retval;
 }
 
@@ -92,7 +99,7 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
     for (int k = 0; k < steps; ++k) {
         pattern = genPattern(middle);
         LOG(Logger::DBG, patternToString(pattern))
-        maxPos = getMaxPos(pattern, eval,maxPos);
+        maxPos = getMaxPos(pattern, eval, maxPos);
         if (maxPos == 0) {            // center was the Maximum
             if (!reduceStepwidth()) {  // abort test
                 LOG(Logger::DBG,  "fitness: " << Optimizer::fitness)
@@ -109,9 +116,10 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
 std::string PatternOptimizer::patternToString(std::vector<SimulationParameters> pattern){
     std::stringstream result;
     result << "Pattern: " << std::endl;
+
     for (std::size_t i = 0; i < pattern.size(); ++i) {
         if (i == 0) {
-            result << "Middle:       ";
+            result << "Middle:         ";
         } else {
             result << "Direction: " << i << " :	";
         }
