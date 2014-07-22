@@ -2,7 +2,9 @@
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
-#define LIBGEODECOMP_DEBUG_LEVEL 3
+
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -70,7 +72,7 @@ public:
             int y = params["y"];
             int z = params["z"];
             ++calls;
-            return 1000 - ((z + x - 5) * (z-x - 5)) - (y * y);
+            return 1000 - ((z + x - 5) * (z - x - 5)) - (y * y);
         }
     };
 
@@ -101,8 +103,8 @@ public:
     {
 	public:
         MultimodTwoDim(){
-            maxima.push_back(42);	//first value is global min
-            maxima.push_back(12);
+            maxima.push_back(4999.57);	//first value is global min
+            maxima.push_back(4687.77);
         }
         double operator()(SimulationParameters params)
         {
@@ -125,11 +127,30 @@ public:
             ++calls;
             int x = params["x"];
             int y = params["y"];
-            if(x < 10 && x >= 10){
+            if (x < 10 && x >= 10) {
                 return 1100 + ((x * x * -0.1)- 4 + y * -0.1);
-            }else{
+            } else {
                 return 1100 + ((x * x * -0.1) + y * 0.1);
             }
+        }
+    };
+
+    class HimmelblauFunction : public TestableEvaluator
+    {   
+    public:
+        HimmelblauFunction(){
+            maxima.push_back(1000);    
+        }
+        double operator()(SimulationParameters params)
+        {
+            ++calls;
+            int xi =  params["x"]; // range -5 - 5
+            int yi =  params["y"];
+            double x = (double) xi / (double) 100;
+            double y = (double) yi / (double) 100;
+            // (x^2 + y -11)^2 + (x + y^2 - 7)^2 
+            return 1000 - ( (((x * x) + y - (double) 11) * ( (x * x) + y - (double)11))
+                    + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
         }
     };
     void testBasic()
@@ -221,6 +242,21 @@ public:
                 << " x: " << (int)params5["x"]
                 << " y: " << (int)params5["y"]
                 << " z: " << (int)params5["z"]
+                << std::endl);
+
+        // Test 6, Himmelblau
+        SimulationParameters params6;
+        params6.addParameter("x", -5, 6);
+        params6.addParameter("y", -5, 6);
+        PatternOptimizer optimizer6(params6);
+        HimmelblauFunction eval6;
+        params6 = optimizer6(100, eval6);
+        TS_ASSERT_EQUALS(eval6.getGlobalMax(), optimizer6.fitness);
+        LOG(Logger::INFO, "Test 6, Himmelblau:" << std::endl
+                << "fitness: " << optimizer6.fitness
+                << " calls: " << eval6.getCalls() << std::endl
+                << " x: " << (int)params6["x"]
+                << " y: " << (int)params6["y"]
                 << std::endl);
     }
 };

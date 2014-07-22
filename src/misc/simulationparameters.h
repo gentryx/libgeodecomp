@@ -367,7 +367,7 @@ public:
         return parameters.size();
     }
 
-private:
+protected: //for SimplexVertex 
     std::map<std::string, int> names;
     std::vector<ParamPointerType> parameters;
 };
