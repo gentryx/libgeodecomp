@@ -3,7 +3,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 using namespace LibGeoDecomp;
 
@@ -147,7 +147,7 @@ public:
             int xi =  params["x"]; // range -5 - 5
             int yi =  params["y"];
             double x = (double) xi / (double) 100;
-            double y = (double) xi / (double) 100;
+            double y = (double) yi / (double) 100;
             // (x^2 + y -11)^2 + (x + y^2 - 7)^2 
             return 1000 - ( (((x * x) + y - (double) 11) * ( (x * x) + y - (double)11))
                     + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));

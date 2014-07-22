@@ -18,7 +18,6 @@ public:
         params["x"].setValue(800);
         params["y"].setValue(400);
         PatternOptimizerTest::HimmelblauFunction eval;
-        double test = eval(params);
         SimplexOptimizer optimizer(params);
         params =optimizer(20, eval);
         TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);

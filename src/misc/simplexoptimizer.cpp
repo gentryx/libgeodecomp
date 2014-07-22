@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iostream>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
 
