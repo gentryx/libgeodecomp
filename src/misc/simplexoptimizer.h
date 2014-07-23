@@ -9,8 +9,6 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <utility>
 
-//#define ALTERN_CONVERGENCE_CRITERION
-
 namespace LibGeoDecomp {
 
 class SimplexOptimizer : public Optimizer
