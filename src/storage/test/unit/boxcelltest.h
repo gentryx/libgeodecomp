@@ -2,6 +2,7 @@
 #include <libgeodecomp/storage/boxcell.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/updatefunctor.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
@@ -16,6 +17,9 @@ template<int DIM>
 class SimpleParticle
 {
 public:
+    class API : public APITraits::HasCubeTopology<DIM>
+    {};
+
     SimpleParticle(
         const FloatCoord<DIM>& pos = FloatCoord<DIM>(),
         const double positionFactor = 1.0,
@@ -72,7 +76,7 @@ public:
 
     void setUp()
     {
-        gridDim = Coord<2> (10, 5);
+        gridDim = Coord<2>(10, 5);
         cellDim = FloatCoord<2>(2.0, 3.0);
         box = CoordBox<2>(Coord<2>(0, 0), gridDim);
         region.clear();
@@ -96,11 +100,9 @@ public:
             grid1[*i].insert(SimpleParticle<2>(origin10, posFactor, maxDistance));
             grid1[*i].insert(SimpleParticle<2>(origin11, posFactor, maxDistance));
         }
-
     }
 
     // fixme: add performance tests (both, regular and cuda)
-    // fixme: add 3d test
 
     void testBasic2D()
     {
@@ -215,6 +217,67 @@ public:
                 TS_ASSERT_EQUALS(grid1[Coord<2>(x, y)].size(), expected);
             }
         }
+    }
+
+    void test3D()
+    {
+        typedef BoxCell<FixedArray<SimpleParticle<3>, 30> > CellType;
+        typedef APITraits::SelectTopology<CellType>::Value Topology;
+
+        Coord<3> gridDim(10, 5, 4);
+        FloatCoord<3> cellDim(2.0, 3.0, 5.0);
+        CoordBox<3> box(Coord<3>(0, 0), gridDim);
+        Region<3> region;
+        region << box;
+
+        Grid<CellType, Topology> grid1(gridDim);
+        Grid<CellType, Topology> grid2(gridDim);
+
+        for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
+            FloatCoord<3> origin000 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.0, 0.0, 0.0));
+            FloatCoord<3> origin001 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.0, 0.0, 0.5));
+            FloatCoord<3> origin010 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.0, 0.5, 0.0));
+            FloatCoord<3> origin011 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.0, 0.5, 0.5));
+            FloatCoord<3> origin100 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.5, 0.0, 0.0));
+            FloatCoord<3> origin101 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.5, 0.0, 0.5));
+            FloatCoord<3> origin110 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.5, 0.5, 0.0));
+            FloatCoord<3> origin111 = cellDim.scale(*i) + cellDim.scale(FloatCoord<3>(0.5, 0.5, 0.5));
+
+            double posFactor = 0.95;
+            double maxDistance = 2.9;
+
+            grid1[*i] = CellType(origin000, cellDim);
+            grid1[*i].insert(SimpleParticle<3>(origin000, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin001, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin010, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin011, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin100, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin101, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin110, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<3>(origin111, posFactor, maxDistance));
+        }
+
+        UpdateFunctor<CellType>()(
+            region,
+            Coord<3>(),
+            Coord<3>(),
+            grid1,
+            &grid2,
+            0);
+
+        // we assume that after the first update step all four
+        // particles still reside in their original cell:
+        for (int z = 0; z < gridDim.z(); ++z) {
+            for (int y = 0; y < gridDim.y(); ++y) {
+                for (int x = 0; x < gridDim.x(); ++x) {
+                    int expected = 8;
+
+                    TS_ASSERT_EQUALS(grid2[Coord<3>(x, y, z)].size(), expected);
+
+                }
+            }
+        }
+
     }
 
 private:
