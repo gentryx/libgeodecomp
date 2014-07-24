@@ -3,7 +3,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
 
-//#define LIBGEODECOMP_DEBUG_LEVEL 4
+#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 using namespace LibGeoDecomp;
 
