@@ -165,13 +165,7 @@ public:
 
         expected << Streak<1>(Coord<1>(123), 579);
 
-        std::cout << actual << "\n"
-                  << *box.beginStreak() << "\n"
-                  << *box.endStreak() << "\n"
-                  << (box.beginStreak() == box.endStreak()) << "\n";
-
         for (CoordBox<1>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-            std::cout << "adding " << *i << "\n";
             actual << *i;
         }
 
