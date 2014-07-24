@@ -42,6 +42,11 @@ public:
         return neighbors;
     }
 
+    inline const FloatCoord<DIM>& getPos() const
+    {
+        return pos;
+    }
+
     std::string toString() const
     {
         std::stringstream buf;

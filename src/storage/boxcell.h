@@ -88,14 +88,30 @@ public:
     template<class NEIGHBORHOOD>
     inline void update(const NEIGHBORHOOD& hood, const int nanoStep)
     {
-        *this = hood[Coord<DIM>()];
-
-        CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
-
         typedef NeighborhoodIterator<NEIGHBORHOOD, Cargo, DIM> HoodIterator;
-
         HoodIterator begin = HoodIterator::begin(hood);
         HoodIterator end = HoodIterator::end(hood);
+
+        if (nanoStep == 0) {
+            origin    = hood[Coord<DIM>()].origin;
+            dimension = hood[Coord<DIM>()].dimension;
+            FloatCoord<DIM> oppositeCorner = origin + dimension;
+
+            particles.clear();
+
+            for (HoodIterator i = begin; i != end; ++i) {
+                FloatCoord<DIM> particlePos = i->getPos();
+
+                // a particle is withing our cell iff its position is
+                // contained in the rectangle/cube spanned by origin
+                // and dimension:
+                if (origin.dominates(particlePos) && particlePos.strictlyDominates(oppositeCorner)) {
+                    particles << *i;
+                }
+            }
+        } else {
+            *this = hood[Coord<DIM>()];
+        }
 
         for (typename Container::iterator i = particles.begin(); i != particles.end(); ++i) {
             i->update(begin, end, nanoStep);
@@ -106,7 +122,6 @@ public:
 private:
     FloatCoord<DIM> origin;
     FloatCoord<DIM> dimension;
-    CoordBox<DIM> coordBox;
     Container particles;
 };
 
