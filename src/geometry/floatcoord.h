@@ -61,6 +61,13 @@ public:
     }
 
     template<template<int> class OTHER_COORD>
+    inline bool
+    strictlyDominates(const OTHER_COORD<1>& other) const
+    {
+        return c[0] < other[0];
+    }
+
+    template<template<int> class OTHER_COORD>
     inline
     FloatCoord<1> operator+(const OTHER_COORD<1>& a) const
     {
@@ -242,6 +249,15 @@ public:
         return
             (c[0] <= other[0]) &&
             (c[1] <= other[1]);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline bool
+    strictlyDominates(const OTHER_COORD<2>& other) const
+    {
+        return
+            (c[0] < other[0]) &&
+            (c[1] < other[1]);
     }
 
     template<template<int> class OTHER_COORD>
@@ -445,6 +461,16 @@ public:
             (c[0] <= other[0]) &&
             (c[1] <= other[1]) &&
             (c[2] <= other[2]);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline bool
+    strictlyDominates(const OTHER_COORD<3>& other) const
+    {
+        return
+            (c[0] < other[0]) &&
+            (c[1] < other[1]) &&
+            (c[2] < other[2]);
     }
 
     template<template<int> class OTHER_COORD>
