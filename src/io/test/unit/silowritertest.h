@@ -149,6 +149,7 @@ public:
 int SimpleCell::counter = 0;
 
 DECLARE_MULTI_CONTAINER_CELL(MultiCellBase,                       \
+                             ContainerCell,                       \
                              ((DummyParticle)(30)(particles))     \
                              ((SimpleCell)(50)(cells)) )
 

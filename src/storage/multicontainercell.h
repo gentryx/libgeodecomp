@@ -54,8 +54,8 @@
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT(INDEX, CELL, MEMBER)    \
     BOOST_PP_SEQ_ELEM(2, MEMBER)(hood),
 
-#define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, CELL, MEMBER)        \
-    LibGeoDecomp::ContainerCell<BOOST_PP_SEQ_ELEM(0, MEMBER),           \
+#define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, STORAGE, MEMBER)     \
+    STORAGE<BOOST_PP_SEQ_ELEM(0, MEMBER),                               \
                                 BOOST_PP_SEQ_ELEM(1, MEMBER)>           \
         BOOST_PP_SEQ_ELEM(2, MEMBER);
 
@@ -71,7 +71,7 @@
  *
  * See the unit tests for examples of how to use this class.
  */
-#define DECLARE_MULTI_CONTAINER_CELL(NAME, MEMBERS)                     \
+#define DECLARE_MULTI_CONTAINER_CELL(NAME, STORAGE, MEMBERS)            \
     class NAME                                                          \
     {                                                                   \
     public:                                                             \
@@ -109,7 +109,7 @@
                                                                         \
         BOOST_PP_SEQ_FOR_EACH(                                          \
             DECLARE_MULTI_CONTAINER_CELL_MEMBER,                        \
-            NAME,                                                       \
+            STORAGE,                                                    \
             MEMBERS)                                                    \
                                                                         \
         template<class NEIGHBORHOOD>                                    \

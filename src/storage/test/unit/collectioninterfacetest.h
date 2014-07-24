@@ -68,6 +68,7 @@ int SimpleCellA::counter = 0;
 int SimpleCellB::counter = 0;
 
 DECLARE_MULTI_CONTAINER_CELL(MultiCell,                         \
+                             ContainerCell,                     \
                              ((SimpleCellA)(30)(cellA))         \
                              ((SimpleCellB)(50)(cellB)) )
 

@@ -9,6 +9,7 @@ using namespace LibGeoDecomp;
 namespace LibGeoDecomp {
 
 DECLARE_MULTI_CONTAINER_CELL(DummyContainer,            \
+                             ContainerCell,             \
                              ((std::string)(5)(labels)) \
                              ((double)(7)(prices))      \
                              )
@@ -78,6 +79,7 @@ void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
 }
 
 DECLARE_MULTI_CONTAINER_CELL(SimpleContainer,                   \
+                             ContainerCell,                     \
                              ((SimpleNode)(30)(nodes))          \
                              ((SimpleElement)(10)(elements))    \
                              )
