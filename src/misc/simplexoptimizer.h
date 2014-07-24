@@ -9,8 +9,6 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <utility>
 
-//#define ALTERN_CONVERGENCE_CRITERION
-
 namespace LibGeoDecomp {
 
 class SimplexOptimizer : public Optimizer
@@ -78,7 +76,7 @@ private:
     double c;   // fixme: documentation missing -- or better name should be found
     double epsilon;
 };
-
+// Caution: SimplexVertex have borders.
 const SimplexOptimizer::SimplexVertex operator+(
         const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b);
 const SimplexOptimizer::SimplexVertex operator+(

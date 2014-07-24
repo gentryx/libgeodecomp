@@ -27,7 +27,7 @@ public:
             return maxima[0];
         }
 
-        std::vector<double> getLocalMax(){
+        std::vector<double> getLocalMax() {
             return maxima;
         }
 
@@ -223,7 +223,8 @@ public:
         PatternOptimizer optimizer3(params3);
         MultimodTwoDim eval3;
         params3 = optimizer3(100,eval3);
-        LOG(Logger::INFO,  "Test 3 multimodal function: "<< std::endl
+        TS_ASSERT(((eval3.getGlobalMax() - 0,0001) < optimizer3.fitness));
+        LOG(Logger::INFO,  "Test 3 multimodal function: " << std::endl
                  << "fitness: " << optimizer3.fitness
                  <<  " calls: " << eval3.getCalls()
                  << std::endl
@@ -276,13 +277,14 @@ public:
     void testHimmelblau()
     {
         SimulationParameters params6;
-        params6.addParameter("x", -500, 501);
-        params6.addParameter("y", -500, 501);
+        params6.addParameter("x", -500, 500);
+        params6.addParameter("y", -500, 500);
+
         PatternOptimizer optimizer6(params6);
         HimmelblauFunction eval6;
         params6 = optimizer6(100, eval6);
+        TS_ASSERT(((eval6.getGlobalMax() - 0,0001) < optimizer6.fitness));
 
-        TS_ASSERT_EQUALS(optimizer6.fitness, eval6.getGlobalMax());
         LOG(Logger::INFO, "Test 6, Himmelblau:" << std::endl
                 << "fitness: " << optimizer6.fitness
                 << " calls: " << eval6.getCalls() << std::endl
