@@ -328,7 +328,6 @@ private:
     ID id;
     double area;
     double diameter;
-    // fixme: why not use a set here?
     std::vector<EquationType> limits;
 
     double relativeCoordToAngle(const COORD& delta, const std::vector<COORD >& cutPoints) const
