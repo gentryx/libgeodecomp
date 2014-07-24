@@ -185,6 +185,8 @@ add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} 
 
 add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
 
+add_config_option(WITH_LAX_VISIT_TESTS "Remove some of the stricter assertions from VisIt related unit tests -- VisIt sometimes produces erroneous results when running on a remote machine (e.g. for autobuilds)" false true)
+
 add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
 
 add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
@@ -545,13 +547,13 @@ install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfi
 
 #============= 11. TYPEMAPS GENERATION ===============================
 if (WITH_TYPEMAPS)
+  set_directory_properties(PROPERTIES CLEAN_NO_CUSTOM true)
+
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
     COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
     DEPENDS "${CMAKE_BINARY_DIR}/cache")
-
-  set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/communication" PROPERTY CLEAN_NO_CUSTOM true)
 
   list(REMOVE_ITEM ALL_HEADERS "communication/typemaps.h")
   set(CANDIDATES)

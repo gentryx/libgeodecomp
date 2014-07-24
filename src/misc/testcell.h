@@ -138,12 +138,6 @@ public:
         isEdgeCell = !inBounds(pos);
     }
 
-    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
-    TestCell(const LibFlatArray::soa_accessor<TestCell, DIM_X, DIM_Y, DIM_Z, INDEX>& hood)
-    {
-        hood >> *this;
-    }
-
     const bool& valid() const
     {
         return isValid;

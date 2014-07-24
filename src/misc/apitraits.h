@@ -10,6 +10,7 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/topologies.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <sstream>
@@ -701,7 +702,6 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-
     /**
      * All stencil codes are based on a regular grid, but even
      * particle-in-cell codes may use such a grid to organizing the
@@ -717,13 +717,28 @@ public:
     {
     public:
         typedef TrueType Value;
+        static const int DIM = SelectTopology<CELL>::Value::DIM;
+
+        static inline void value(
+            FloatCoord<DIM> *quadrantDim,
+            FloatCoord<DIM> *origin,
+            std::vector<std::string> *axisUnits)
+        {
+            *quadrantDim = FloatCoord<DIM>::diagonal(1.0);
+            *origin      = FloatCoord<DIM>::diagonal(0.0);
+
+            axisUnits->clear();
+            for (int i = 0; i < DIM; ++i) {
+                *axisUnits << std::string("");
+            }
+        }
 
         static inline void value(
             FloatCoord<SelectTopology<CELL>::Value::DIM> *quadrantDim,
             FloatCoord<SelectTopology<CELL>::Value::DIM> *origin)
         {
-            *quadrantDim = FloatCoord<SelectTopology<CELL>::Value::DIM>::diagonal(1.0);
-            *origin      = FloatCoord<SelectTopology<CELL>::Value::DIM>::diagonal(0.0);
+            std::vector<std::string> ignoredUnits;
+            value(quadrantDim, origin, &ignoredUnits);
         }
     };
 
@@ -732,13 +747,24 @@ public:
     {
     public:
         typedef TrueType Value;
+        static const int DIM = SelectTopology<CELL>::Value::DIM;
 
         static inline void value(
-            FloatCoord<SelectTopology<CELL>::Value::DIM> *quadrantDim,
-            FloatCoord<SelectTopology<CELL>::Value::DIM> *origin)
+            FloatCoord<DIM> *quadrantDim,
+            FloatCoord<DIM> *origin,
+            std::vector<std::string> *axisUnits)
         {
             *quadrantDim = typename CELL::API().getRegularGridSpacing();
             *origin      = typename CELL::API().getRegularGridOrigin();
+            *axisUnits   = typename CELL::API().template getRegularGridAxisUnits<DIM>();
+        }
+
+        static inline void value(
+            FloatCoord<DIM> *quadrantDim,
+            FloatCoord<DIM> *origin)
+        {
+            std::vector<std::string> ignoredUnits;
+            value(quadrantDim, origin, &ignoredUnits);
         }
     };
 
@@ -760,6 +786,21 @@ public:
     {
     public:
         typedef void SupportsCustomRegularGrid;
+
+        // provide a default here as only very few users will want to
+        // override it. Some components, e.g. the VisItWriter, will
+        // use this info to label plots accordingly.
+        template<int DIM>
+        std::vector<std::string> getRegularGridAxisUnits()
+        {
+            std::vector<std::string> axisUnits;
+
+            for (int i = 0; i < DIM; ++i) {
+                axisUnits << std::string("");
+            }
+
+            return axisUnits;
+        }
     };
 
     class HasNoRegularGrid

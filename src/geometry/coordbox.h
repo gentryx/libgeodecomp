@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_COORDBOX_H
 
 #include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/topologies.h>
 
 #include <iostream>
@@ -9,9 +10,12 @@
 
 namespace LibGeoDecomp {
 
-template<int DIM>
-class CoordBoxSequence;
-
+/**
+ * CoordBox describes a rectangular, N-dimensional set of coordinates.
+ * If can be used for iteration and supports bounds checking. This
+ * makes it useful for writing code which is independed of the
+ * dimensionality of its data.
+ */
 template<int DIM>
 class CoordBox
 {
@@ -20,12 +24,14 @@ public:
     friend class Typemaps;
 
     class Iterator;
+    class StreakIterator;
 
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 
-    explicit CoordBox(const Coord<DIM>& origin = Coord<DIM>(),
-                      const Coord<DIM>& dimensions = Coord<DIM>()) :
+    explicit CoordBox(
+        const Coord<DIM>& origin = Coord<DIM>(),
+        const Coord<DIM>& dimensions = Coord<DIM>()) :
         origin(origin),
         dimensions(dimensions)
     {}
@@ -39,7 +45,7 @@ public:
 
     inline bool operator!=(const CoordBox& other) const
     {
-        return ! (*this == other);
+        return !(*this == other);
     }
 
     inline Iterator begin() const
@@ -47,11 +53,22 @@ public:
         return Iterator(origin, origin, dimensions);
     }
 
+    inline StreakIterator beginStreak() const
+    {
+        return StreakIterator(origin, dimensions);
+    }
+
     inline Iterator end() const
     {
         Coord<DIM> pos = origin;
         pos[DIM - 1] += dimensions[DIM - 1];
         return Iterator(origin, pos, dimensions);
+    }
+
+    inline StreakIterator endStreak() const
+    {
+        Coord<DIM> pos = endPos(origin, dimensions);
+        return StreakIterator(pos, dimensions);
     }
 
     /**
@@ -85,6 +102,8 @@ public:
     class Iterator
     {
     public:
+        friend class StreakIterator;
+
         inline Iterator(
             const Coord<DIM>& origin,
             const Coord<DIM>& start,
@@ -143,6 +162,62 @@ public:
         Coord<DIM> origin;
         Coord<DIM> end;
     };
+
+    class StreakIterator
+    {
+    public:
+        inline StreakIterator(
+            const Coord<DIM>& origin,
+            const Coord<DIM>& dimensions) :
+            iter(origin, origin, dimensions),
+            endX(origin.x() + dimensions.x())
+        {
+            iter.end.x() = origin.x() + 1;
+        }
+
+        inline bool operator==(const StreakIterator& other) const
+        {
+            return iter == other.iter;
+        }
+
+        inline bool operator!=(const StreakIterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        inline Streak<DIM> operator*() const
+        {
+            return Streak<DIM>(*iter, endX);
+        }
+
+        inline StreakIterator& operator++()
+        {
+            ++iter;
+            return *this;
+        }
+
+    private:
+        Iterator iter;
+        int endX;
+    };
+
+private:
+    Coord<1> endPos(const Coord<1>& origin, const Coord<1>& dimensions) const
+    {
+        Coord<1> pos = origin;
+        pos[0] += 1;
+
+        return pos;
+    }
+
+    template<int DIM2>
+    Coord<DIM2> endPos(const Coord<DIM2>& origin, const Coord<DIM2>& dimensions) const
+    {
+        Coord<DIM2> pos = origin;
+        pos[DIM2 - 1] += dimensions[DIM2 - 1];
+
+        return pos;
+    }
 };
 
 /**

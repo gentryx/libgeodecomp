@@ -70,15 +70,15 @@ class Color
     }
 };
 
-}
-
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::Color& color)
+           const Color& color)
 {
     __os << color.toString();
     return __os;
+}
+
 }
 
 #endif

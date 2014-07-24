@@ -18,13 +18,13 @@ enum State {
     BLOCK = 1
 };
 
+void runSimulation();
+
 class Cell
 {
 public:
+    friend void runSimulation();
     friend class CellInitializer;
-    friend class BorderAccessor;
-    friend class DirectionAccessor;
-    friend class RateAccessor;
 
     class API :
         public APITraits::HasNanoSteps<2>
@@ -141,9 +141,9 @@ public:
     }
 };
 
-DEFINE_DATAACCESSOR(BorderAccessor,    Cell, int, border)
-DEFINE_DATAACCESSOR(DirectionAccessor, Cell, int, direction)
-DEFINE_DATAACCESSOR(RateAccessor,      Cell, int, rate)
+// DEFINE_DATAACCESSOR(BorderAccessor,    Cell, int, border)
+// DEFINE_DATAACCESSOR(DirectionAccessor, Cell, int, direction)
+// DEFINE_DATAACCESSOR(RateAccessor,      Cell, int, rate)
 
 // fixme: does this even do anything?
 // static void getStepFunction(
@@ -227,10 +227,10 @@ void runSimulation()
     int maxSteps = 1000000;
     SerialSimulator<Cell> sim(new CellInitializer(maxSteps));
 
-    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("cars", 1, VISIT_SIMMODE_STOPPED);
-    visItWriter->addVariable(new BorderAccessor());
-    visItWriter->addVariable(new DirectionAccessor());
-    visItWriter->addVariable(new RateAccessor());
+    VisItWriter<Cell> *visItWriter = new VisItWriter<Cell>("cars", 1, true);
+    visItWriter->addVariable(&Cell::border,    "border");
+    visItWriter->addVariable(&Cell::direction, "direction");
+    visItWriter->addVariable(&Cell::rate,      "rate");
     sim.addWriter(visItWriter);
 
     sim.addWriter(new TracingWriter<Cell>(1, maxSteps));

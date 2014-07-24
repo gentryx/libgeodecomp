@@ -97,7 +97,8 @@ public:
         public APITraits::HasSoA,
         public APITraits::HasUpdateLineX,
         public APITraits::HasStencil<Stencils::Moore<3, 1> >,
-        public APITraits::HasTorusTopology<3>
+        public APITraits::HasTorusTopology<3>,
+        public LibFlatArray::api_traits::has_asymmetric_dual_callback
     {};
 
     explicit MySoATestCell(

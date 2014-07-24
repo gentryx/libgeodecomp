@@ -7,6 +7,7 @@
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 
 namespace boost {
 
@@ -30,7 +31,9 @@ namespace LibGeoDecomp {
  * bandwidth).
  */
 template<typename CELL_TYPE>
-class TracingWriter : public Writer<CELL_TYPE>, public ParallelWriter<CELL_TYPE>
+class TracingWriter :
+        public Clonable<Writer<CELL_TYPE>, TracingWriter<CELL_TYPE> >,
+        public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
     friend class Serialization;
@@ -47,23 +50,18 @@ public:
     static const int DIM = Topology::DIM;
     static const int OUTPUT_ON_ALL_RANKS = -1;
 
-    TracingWriter(
-        const unsigned period,
-        const unsigned maxSteps,
+    explicit TracingWriter(
+        const unsigned period = 1,
+        const unsigned maxSteps = 1,
         int outputRank = OUTPUT_ON_ALL_RANKS,
         std::ostream& stream = std::cerr) :
-        Writer<CELL_TYPE>("", period),
-        ParallelWriter<CELL_TYPE>("", period),
+        Clonable<Writer<CELL_TYPE>, TracingWriter<CELL_TYPE> >("", period),
+        Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >("", period),
         outputRank(outputRank),
         stream(stream),
         lastStep(0),
         maxSteps(maxSteps)
     {}
-
-    ParallelWriter<CELL_TYPE> * clone()
-    {
-        return new TracingWriter(Writer<CELL_TYPE>::period, maxSteps, outputRank);
-    }
 
     virtual void stepFinished(const WriterGridType& grid, unsigned step, WriterEvent event)
     {
@@ -154,12 +152,6 @@ private:
     {
         return boost::posix_time::microsec_clock::local_time();
     }
-
-    TracingWriter() :
-        Writer<CELL_TYPE>("", 1),
-        ParallelWriter<CELL_TYPE>("", 1),
-        stream(std::cerr)
-    {}
 };
 
 class Serialization;

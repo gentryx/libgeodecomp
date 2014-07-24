@@ -1,12 +1,13 @@
 #ifndef LIBGEODECOMP_IO_SERIALBOVWRITER_H
 #define LIBGEODECOMP_IO_SERIALBOVWRITER_H
 
-#include <iomanip>
-
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 
+#include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 
 namespace LibGeoDecomp {
 
@@ -15,15 +16,13 @@ namespace LibGeoDecomp {
  * (BOV) format using one file per partition. Uses a selector which maps a cell to a
  * primitive data type so that it can be fed into VisIt.
  */
-
-template<typename CELL_TYPE, typename SELECTOR_TYPE>
-class SerialBOVWriter : public Writer<CELL_TYPE>
+template<typename CELL_TYPE>
+class SerialBOVWriter : public Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >
 {
 public:
     friend class Serialization;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
-    typedef typename SELECTOR_TYPE::VariableType VariableType;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
 
     static const int DIM = Topology::DIM;
@@ -32,17 +31,25 @@ public:
     using Writer<CELL_TYPE>::prefix;
 
     SerialBOVWriter(
-        const std::string& prefix,
-        const unsigned period,
+        const Selector<CELL_TYPE>& selector = Selector<CELL_TYPE>(),
+        const std::string& prefix = "serial_bov_writer_output",
+        const unsigned period = 1,
         const Coord<3>& brickletDim = Coord<3>()) :
-        Writer<CELL_TYPE>(prefix, period),
+        Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
+        selector(selector),
         brickletDim(brickletDim)
     {}
 
-    Writer<CELL_TYPE> *clone()
-    {
-        return new SerialBOVWriter(this->prefix, this->period, brickletDim);
-    }
+    template<typename MEMBER>
+    SerialBOVWriter(
+        MEMBER CELL_TYPE:: *member,
+        const std::string& prefix,
+        const unsigned period,
+        const Coord<3>& brickletDim = Coord<3>()) :
+        Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
+        selector(member, "var"),
+        brickletDim(brickletDim)
+    {}
 
     void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
@@ -51,11 +58,11 @@ public:
         }
 
         writeHeader(step, grid.dimensions());
-
         writeRegion(step, grid);
     }
 
 private:
+    Selector<CELL_TYPE> selector;
     Coord<3> brickletDim;
 
     std::string filename(unsigned step, const std::string& suffix) const
@@ -89,8 +96,8 @@ private:
              << "DATA_FILE: " << filename(step, "data") << "\n"
              << "DATA_SIZE: "
              << bovDim.x() << " " << bovDim.y() << " " << bovDim.z() << "\n"
-             << "DATA_FORMAT: " << SELECTOR_TYPE::dataFormat() << "\n"
-             << "VARIABLE: " << SELECTOR_TYPE::varName() << "\n"
+             << "DATA_FORMAT: " << selector.typeName() << "\n"
+             << "VARIABLE: " << selector.name() << "\n"
              << "DATA_ENDIAN: LITTLE\n"
              << "BRICK_ORIGIN: 0 0 0\n"
              << "BRICK_SIZE: "
@@ -98,7 +105,7 @@ private:
              << "DIVIDE_BRICK: true\n"
              << "DATA_BRICKLETS: "
              << bricDim.x() << " " << bricDim.y() << " " << bricDim.z() << "\n"
-             << "DATA_COMPONENTS: " << SELECTOR_TYPE::dataComponents() << "\n";
+             << "DATA_COMPONENTS: " << selector.arity() << "\n";
 
         file.close();
     }
@@ -109,33 +116,31 @@ private:
         const GRID_TYPE& grid)
     {
         std::ofstream file;
-
-        file.open(
-            filename(step, "data").c_str(), std::ios::binary);
-
-        std::vector<VariableType> buffer;
-
-        Coord<DIM> dimensions = grid.dimensions();
-
-        std::size_t dataComponents = SELECTOR_TYPE::dataComponents();
-        std::size_t length = dimensions.prod();
-        std::size_t effectiveLength = dataComponents * length;
-        buffer.resize(effectiveLength);
-
-        CoordBox<DIM> boundingBox = grid.boundingBox();
-        std::size_t j = 0;
-        for(
-            typename CoordBox<DIM>::Iterator i = boundingBox.begin();
-            i != boundingBox.end();
-            ++i)
-        {
-            SELECTOR_TYPE()(grid.get(*i), &buffer[j]);
-            j += dataComponents;
+        file.open(filename(step, "data").c_str(), std::ios::binary);
+        if (!file.good()) {
+            throw std::runtime_error("could not open output file");
         }
 
-        file.write(
-            reinterpret_cast<char *>(&buffer[0]),
-            effectiveLength * sizeof(VariableType));
+        std::vector<char> buffer;
+        Coord<DIM> dimensions = grid.dimensions();
+        std::size_t length = dimensions.x();
+        std::size_t byteSize = length * selector.sizeOfExternal();
+        buffer.resize(byteSize);
+
+        CoordBox<DIM> boundingBox = grid.boundingBox();
+        for (typename CoordBox<DIM>::StreakIterator i = boundingBox.beginStreak();
+             i != boundingBox.endStreak();
+             ++i) {
+            Streak<DIM> s(*i);
+
+            Region<DIM> tempRegion;
+            tempRegion << s;
+            grid.saveMemberUnchecked(&buffer[0], selector, tempRegion);
+
+            file.write(
+                &buffer[0],
+                byteSize);
+        }
 
         file.close();
     }
@@ -143,25 +148,6 @@ private:
 
 class Serialization;
 
-}
-
-
-namespace boost {
-namespace serialization {
-
-template<typename ARCHIVE, typename CELL_TYPE, typename SELECTOR_TYPE>
-inline
-static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>& object, const unsigned /*version*/);
-
-template<class Archive, typename CELL_TYPE, typename SELECTOR_TYPE>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE> *object, const unsigned version)
-{
-    ::new(object)LibGeoDecomp::SerialBOVWriter<CELL_TYPE, SELECTOR_TYPE>("", 1);
-    serialize(archive, *object, version);
-}
-
-}
 }
 
 #endif

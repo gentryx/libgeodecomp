@@ -16,7 +16,7 @@ public:
     {
         Coord<3> origin(0, 0, 0);
         Coord<3> dimensions(20, 20, 20);
-        std::vector<size_t> weights;
+        std::vector<std::size_t> weights;
         weights << 100 << 100 << 100 << 100 << 100 << 100 << 100 << 100;
         CheckerboardingPartition<3> p(origin, dimensions, 0, weights);
 

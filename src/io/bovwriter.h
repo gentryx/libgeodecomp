@@ -7,7 +7,8 @@
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/io/mpiio.h>
 #include <libgeodecomp/io/parallelwriter.h>
-#include <libgeodecomp/io/selector.h>
+#include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/storage/selector.h>
 
 #include <iomanip>
 
@@ -19,7 +20,7 @@ namespace LibGeoDecomp {
  * primitive data type so that it can be fed into VisIt or ParaView.
  */
 template<typename CELL_TYPE>
-class BOVWriter : public ParallelWriter<CELL_TYPE>
+class BOVWriter : public Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >
 {
 public:
     friend class BOVWriterTest;
@@ -31,13 +32,25 @@ public:
 
     static const int DIM = Topology::DIM;
 
+    template<typename MEMBER>
+    BOVWriter(
+        MEMBER CELL_TYPE:: *member,
+        const std::string& prefix,
+        const unsigned period,
+        const Coord<3>& brickletDim = Coord<3>(),
+        const MPI_Comm& communicator = MPI_COMM_WORLD) :
+        Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >(prefix, period),
+        selector(member, "var"),
+        brickletDim(brickletDim)
+    {}
+
     BOVWriter(
         const Selector<CELL_TYPE>& selector,
         const std::string& prefix,
         const unsigned period,
         const Coord<3>& brickletDim = Coord<3>(),
         const MPI_Comm& communicator = MPI_COMM_WORLD) :
-        ParallelWriter<CELL_TYPE>(prefix, period),
+        Clonable<ParallelWriter<CELL_TYPE>, BOVWriter<CELL_TYPE> >(prefix, period),
         selector(selector),
         brickletDim(brickletDim),
         comm(communicator),

@@ -13,7 +13,7 @@ namespace LibGeoDecomp{
 
 //------------------------ simplexVertex -------------------------
 
-std::string SimplexOptimizer::SimplexVertex::toString()
+std::string SimplexOptimizer::SimplexVertex::toString() const
 {
     std::stringstream result;
     result << std::endl;
@@ -27,7 +27,7 @@ std::string SimplexOptimizer::SimplexVertex::toString()
 
 const SimplexOptimizer::SimplexVertex operator+(
         const SimplexOptimizer::SimplexVertex& a,
-        const SimplexOptimizer::SimplexVertex& b) 
+        const SimplexOptimizer::SimplexVertex& b)
 {
     SimplexOptimizer::SimplexVertex result(a);
     if (a.size() == b.size()){
@@ -53,14 +53,14 @@ const SimplexOptimizer::SimplexVertex operator+(
 }
 
 const SimplexOptimizer::SimplexVertex operator-(
-        const SimplexOptimizer::SimplexVertex& a, 
+        const SimplexOptimizer::SimplexVertex& a,
         const SimplexOptimizer::SimplexVertex& b)
 {
     SimplexOptimizer::SimplexVertex result(a);
     if(a.size() == b.size()) {
         for (std::size_t i = 0; i < b.size(); ++i) {
             result[i].setValue(a.operator[](i).getValue() - b[i].getValue());
-        }     
+        }
         result.setFitness(-1);
         return result;
     }
@@ -69,7 +69,7 @@ const SimplexOptimizer::SimplexVertex operator-(
 
 const SimplexOptimizer::SimplexVertex operator*(
         const SimplexOptimizer::SimplexVertex& a,
-        const SimplexOptimizer::SimplexVertex& b) 
+        const SimplexOptimizer::SimplexVertex& b)
 {
     SimplexOptimizer::SimplexVertex result(a);
     if (a.size()==b.size()){
@@ -96,7 +96,7 @@ const SimplexOptimizer::SimplexVertex operator*(
 
 //------------------------simplexOptimizer-------------------------
 
-SimplexOptimizer::SimplexOptimizer(SimulationParameters params) : 
+SimplexOptimizer::SimplexOptimizer(const SimulationParameters& params) :
     Optimizer(params),
     s(std::vector<double>()),
     c(8),
@@ -110,10 +110,14 @@ SimplexOptimizer::SimplexOptimizer(SimulationParameters params) :
        }
     }
     // n+1 vertices needed
-    initSimplex(params);    
+    initSimplex(params);
 }
 
-SimplexOptimizer::SimplexOptimizer(SimulationParameters params, std::vector<double> s, double c, double epsilon) :
+SimplexOptimizer::SimplexOptimizer(
+    const SimulationParameters& params,
+    const std::vector<double>& s,
+    const double c,
+    const double epsilon) :
     Optimizer(params),
     s(s),
     c(c),
@@ -128,7 +132,6 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
     evalSimplex(eval);
     int i;
     for (i = 0; i < steps && checkTermination(); ++i) {
-    
         vector<SimplexVertex> old(simplex);
         LOG(Logger::DBG, simplexToString())
         std::size_t worst = minInSimplex();
@@ -141,7 +144,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 SimplexVertex casePoint(expansion());
                 if(casePoint.evaluate(eval) > simplex[best].getFitness()){
                     LOG(Logger::DBG, "double expansion ");
-                    simplex[worst] = casePoint; 
+                    simplex[worst] = casePoint;
                 }else{
                     LOG(Logger::DBG, "single expansion ");
                     simplex[worst] = normalReflectionPoint;
@@ -166,7 +169,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 SimplexVertex casePoint(partialInsideContraction());
                 casePoint.evaluate(eval);
                 if (casePoint.getFitness() >= simplex[worst].getFitness()) {
-                    LOG(Logger::DBG, "patrial inside contraction is set" << std::endl 
+                    LOG(Logger::DBG, "patrial inside contraction is set" << std::endl
                         << casePoint.toString()<< std::endl)
                     simplex[worst]=casePoint;
                 }
@@ -186,7 +189,7 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 LOG(Logger::DBG, "checkConvergence succes! ")
                 initSimplex(simplex[maxInSimplex()]);
                 evalSimplex(eval);
-                if (c >= 2) { 
+                if (c >= 2) {
                     c = c * 0.5;
                 }
             }
@@ -205,7 +208,9 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 }
             }
         }
+
         fitness = simplex[maxInSimplex()].getFitness();
+
     }
     LOG(Logger::DBG, "Done steps: " << i)
     fitness = simplex[maxInSimplex()].getFitness();
@@ -236,16 +241,18 @@ void SimplexOptimizer::evalSimplex(Evaluator& eval)
 
 void SimplexOptimizer::initSimplex(SimulationParameters params)
 {
-    SimplexVertex tmp(params); 
+    SimplexVertex tmp(params);
     simplex = vector<SimplexVertex>();
     simplex.push_back(tmp);
     for (std::size_t i = 0; i < tmp.size(); ++i) {
         SimplexVertex tmp2(tmp);
-        tmp2[i].setValue(tmp[i].getValue() + c * s[i]); 
+        tmp2[i].setValue(tmp[i].getValue() + c * s[i]);
+
         // if init is called on a border, inverse the direction
         if (tmp2[i].getValue() == tmp[i].getValue()) {
             tmp2[i].setValue(tmp[i].getValue() - c * s[i]);
         }
+
         tmp2.setFitness(-1);
         simplex.push_back(tmp2);
     }
@@ -290,13 +297,13 @@ std::pair<SimplexOptimizer::SimplexVertex, SimplexOptimizer::SimplexVertex> Simp
                 tmp += simplex[i][j].getValue();
             }
         }
-        tmp = tmp / (simplex.size()-1); 
+        tmp = tmp / (simplex.size()-1);
         t1[j].setValue(tmp);
         tmp = 2 * tmp - simplex[worst][j].getValue();
         t2[j].setValue(tmp);
     }
     return std::pair<SimplexVertex, SimplexVertex>(t1, t2);
-    
+
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion()
@@ -311,19 +318,19 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion()
     return retval;
 }
 
-SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction() 
+SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction()
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
     return (reflRes.first*0.5 + reflRes.second*0.5);
 }
 
-SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction() 
+SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction()
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
     return (reflRes.first*0.5 + simplex[minInSimplex()]*0.5);
 }
 
-void SimplexOptimizer::totalContraction() 
+void SimplexOptimizer::totalContraction()
 {
     SimplexVertex best = simplex[maxInSimplex()];
     for (std::size_t i = 0; i < simplex.size(); ++i) {
@@ -332,7 +339,7 @@ void SimplexOptimizer::totalContraction()
     }
 }
 
-bool SimplexOptimizer::checkConvergence() 
+bool SimplexOptimizer::checkConvergence()
 {
 //#define ALTERN_CONVERGENCE_CRITERION
 #ifdef ALTERN_CONVERGENCE_CRITERION
@@ -343,7 +350,7 @@ bool SimplexOptimizer::checkConvergence()
         b += simplex[i].getFitness();
     }
     b = b*b*((double)1/(double)(simplex.size()));
-    double tmp = (((double) 1 / (double) (simplex.size() - 1)) * (a - b));  
+    double tmp = (((double) 1 / (double) (simplex.size() - 1)) * (a - b));
 #else
     double f_ = 0.0;
     double n = simplex.size()-1;
@@ -357,7 +364,8 @@ bool SimplexOptimizer::checkConvergence()
     }
     tmp *= ((double) 1 / (n + 1.0));
 #endif
-    LOG(Logger::DBG, "Convergencecheck: " << tmp << " epsilonn^2: " << (epsilon *epsilon))
+
+    LOG(Logger::DBG, "Convergencecheck: " << tmp << " epsilon^2: " << (epsilon * epsilon))
     if(tmp < epsilon * epsilon){
         return true;
     }
@@ -365,7 +373,7 @@ bool SimplexOptimizer::checkConvergence()
 
 }
 
-bool SimplexOptimizer::checkTermination() 
+bool SimplexOptimizer::checkTermination()
 {
     // the mathematical criterium wouldn't work with descreat point!?!
     for (std::size_t i = 0; i < simplex[0].size(); ++i) {
@@ -378,10 +386,10 @@ bool SimplexOptimizer::checkTermination()
     return false;
 }
 
-// return == -1 => all fitness in vertex are lower as fitness 
-// return == 0  one fitness in vertex is equal all others are lower 
+// return == -1 => all fitness in vertex are lower as fitness
+// return == 0  one fitness in vertex is equal all others are lower
 // return > 0 Nr of Parameters are lower than fitness
-int SimplexOptimizer::comperator(double fitness) 
+int SimplexOptimizer::comperator(double fitness)
 {
     int retval = -1;
     for (std::size_t i = 0; i < simplex.size(); ++i) {
@@ -395,7 +403,7 @@ int SimplexOptimizer::comperator(double fitness)
     return retval;
 }
 
-std::string SimplexOptimizer::simplexToString() 
+std::string SimplexOptimizer::simplexToString() const
 {
     std::stringstream result;
     result << std::endl;
@@ -411,5 +419,3 @@ std::string SimplexOptimizer::simplexToString()
 }
 
 } // namespace LibGeoDecomp
-
-

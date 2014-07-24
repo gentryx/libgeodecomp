@@ -1,20 +1,29 @@
 #ifndef LIBGEODECOMP_IO_PPMWRITER_H
 #define LIBGEODECOMP_IO_PPMWRITER_H
 
+#include <libgeodecomp/io/imagepainter.h>
+#include <libgeodecomp/io/ioexception.h>
+#include <libgeodecomp/io/plotter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/misc/quickpalette.h>
+#include <libgeodecomp/storage/image.h>
+
 #include <cerrno>
 #include <fstream>
 #include <iomanip>
 #include <string>
-#include <libgeodecomp/io/imagepainter.h>
-#include <libgeodecomp/io/ioexception.h>
-#include <libgeodecomp/io/plotter.h>
-#include <libgeodecomp/io/writer.h>
-#include <libgeodecomp/storage/image.h>
 
 namespace LibGeoDecomp {
 
-template<typename CELL_TYPE, typename CELL_PLOTTER>
-class PPMWriter : public Writer<CELL_TYPE>
+/**
+ * This writer will periodically write images in PPM format. The
+ * CELL_PLOTTER is responsible for rendering individual cells into
+ * tiles. The default will render uniformly colored tiles.
+ */
+template<typename CELL_TYPE, typename CELL_PLOTTER = SimpleCellPlotter<CELL_TYPE> >
+class PPMWriter : public Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >
 {
 public:
     friend class PPMWriterTest;
@@ -22,13 +31,37 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
+    /**
+     * This PPMWriter will render a given member (e.g. &Cell::fooBar).
+     * Colouring is handled by a predefined palette. The color range
+     * is mapped to the value range defined by [minValue, maxValue].
+     */
+    template<typename MEMBER>
     explicit PPMWriter(
+        MEMBER CELL_TYPE:: *member,
+        MEMBER minValue,
+        MEMBER maxValue,
         const std::string& prefix,
         const unsigned period = 1,
-        const unsigned dimX = 20,
-        const unsigned dimY = 20) :
-        Writer<CELL_TYPE>(prefix, period),
-        plotter(Coord<2>(dimX, dimY))
+        const Coord<2>& cellDimensions = Coord<2>(8, 8)) :
+        Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >(prefix, period),
+        plotter(cellDimensions, CELL_PLOTTER(member, QuickPalette<MEMBER>(minValue, maxValue)))
+    {}
+
+    /**
+     * Creates a PPMWriter which will render the values of the given
+     * member variable. Color mapping is done with the help of the
+     * custom palette object.
+     */
+    template<typename MEMBER, typename PALETTE>
+    explicit PPMWriter(
+        MEMBER CELL_TYPE:: *member,
+        const PALETTE& palette,
+        const std::string& prefix,
+        const unsigned period = 1,
+        const Coord<2>& cellDimensions = Coord<2>(8, 8)) :
+        Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >(prefix, period),
+       plotter(cellDimensions, CELL_PLOTTER(member, palette))
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)

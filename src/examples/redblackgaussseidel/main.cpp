@@ -73,10 +73,10 @@ MPI_Datatype Cell::MPIDataType = MPI_DATATYPE_NULL;
 /**
  * range x=[0;1] y[0;1]
  *
- * set bounderi to sin(PI*x)*sinh(PI*y)
- * centerpints to 0
+ * set boundary to sin(PI*x)*sinh(PI*y),
+ * centerpoints to 0
  */
-inline double initCellVelu(Coord<2> c, Coord<2> gridDimensions){
+inline double initCellValue(Coord<2> c, Coord<2> gridDimensions){
 
         double xPos = ((double)c.x()) / gridDimensions.x();
         double yPos = ((double)c.y()) / gridDimensions.y();
@@ -90,9 +90,11 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    CellInitializer(const int nx=512, const int ny=512,
-                    const unsigned steps=30000)
-    : SimpleInitializer<Cell>(Coord<2>(nx, ny), steps)
+    CellInitializer(
+        const int nx = 512,
+        const int ny = 512,
+        const unsigned steps = 30000) :
+        SimpleInitializer<Cell>(Coord<2>(nx, ny), steps)
     {}
 
     virtual void grid(GridBase<Cell, 2> *ret)
@@ -106,11 +108,11 @@ public:
 
             if(bounding.inBounds(c0)){
                 ret->set( c0, Cell(BOUNDARY,
-                                   initCellVelu(c0, gridDimensions())) );
+                                   initCellValue(c0, gridDimensions())) );
             }
             if(bounding.inBounds(c1)){
                 ret->set( c1, Cell(BOUNDARY,
-                                   initCellVelu(c1, gridDimensions())) );
+                                   initCellValue(c1, gridDimensions())) );
             }
         }
         for (int y = 0; y < gridDimensions().y(); ++y) {
@@ -119,11 +121,11 @@ public:
 
             if(bounding.inBounds(c0)){
                 ret->set( c0, Cell(BOUNDARY,
-                                   initCellVelu(c0, gridDimensions())) );
+                                   initCellValue(c0, gridDimensions())) );
             }
             if(bounding.inBounds(c1)){
                 ret->set( c1, Cell(BOUNDARY,
-                                   initCellVelu(c1, gridDimensions())) );
+                                   initCellValue(c1, gridDimensions())) );
             }
         }
 
@@ -151,29 +153,6 @@ public:
     }
 };
 
-class CellToColor {
-public:
-    Color operator()(const Cell& cell)
-    {
-        if (cell.temp < 0) {
-            return Color(0, 0, 0);
-        }
-        if (cell.temp <= 2.5) {
-            return Color(0, (cell.temp - 0.0) * 102, 255);
-        }
-        if (cell.temp <= 5.0) {
-            return Color(0, 255, 255 - (cell.temp - 2.5) * 102);
-        }
-        if (cell.temp <= 7.5) {
-            return Color((cell.temp - 5.0) * 102, 255, 0);
-        }
-        if (cell.temp <= 10.0) {
-            return Color(255, 255 - (cell.temp - 7.5) * 102, 0);
-        }
-        return Color(255, 255, 255);
-    }
-};
-
 void runSimulation()
 {
     CellInitializer *init = new CellInitializer(256,256,30000);
@@ -182,18 +161,22 @@ void runSimulation()
 
     int outputFrequency = 100;
 
-    PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> > *ppmWriter = 0;
+    PPMWriter<Cell> *ppmWriter = 0;
     if (MPILayer().rank() == 0) {
-        ppmWriter = new PPMWriter<Cell, SimpleCellPlotter<Cell, CellToColor> >(
-            "gaussSeidel", outputFrequency, 1, 1);
+        ppmWriter = new PPMWriter<Cell>(
+            &Cell::temp,
+            0.0,
+            10.0,
+            "gaussSeidel",
+            outputFrequency,
+            Coord<2>(1, 1));
     }
-
-    outputFrequency = 1000;
 
     CollectingWriter<Cell> *ppmAdapter = new CollectingWriter<Cell>(
         ppmWriter);
     sim.addWriter(ppmAdapter);
 
+    outputFrequency = 1000;
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps() ));
 
 

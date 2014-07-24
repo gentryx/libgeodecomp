@@ -2,7 +2,7 @@
 #ifndef LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 #define LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 
-// This is a Implementation of the siplex algorithm, dicribet in "Evolution and Optimum 
+// This is a Implementation of the siplex algorithm, dicribet in "Evolution and Optimum
 // Seeking" written by Hans-Paul Schwefel.
 
 #include <libgeodecomp/misc/optimizer.h>
@@ -15,37 +15,48 @@ class SimplexOptimizer : public Optimizer
 {
 public:
     friend class SimplexOptimizerTest;
-    
+
     class SimplexVertex : public SimulationParameters
     {
     public:
-        SimplexVertex(SimulationParameters point):
+        SimplexVertex(const SimulationParameters& point):
             SimulationParameters(point),
             fitness(-1)
         {}
-        double getFitness()
+
+        double getFitness() const
         {
             return fitness;
         }
+
         double evaluate(Evaluator& eval)
-        {   
+        {
             fitness = eval(*this);
             return fitness;
         }
-        std::string toString();
-        void setFitness(double fitness)
+
+        std::string toString() const;
+
+        void setFitness(const double fitness)
         {
             this->fitness = fitness;
         }
+
     private:
         double fitness;
     }; //SimplexVertex
-    SimplexOptimizer(SimulationParameters params);
-    SimplexOptimizer(SimulationParameters params, std::vector<double> s, double c, double epsilon);
+
+    SimplexOptimizer(const SimulationParameters& params);
+
+    SimplexOptimizer(
+        const SimulationParameters& params,
+        const std::vector<double>& s,
+        const double c,
+        const double epsilon);
+
     virtual SimulationParameters operator()(int steps, Evaluator& eval);
 
 private:
-    
     void evalSimplex(Evaluator& eval);
     std::size_t minInSimplex();
     std::size_t maxInSimplex();
@@ -60,18 +71,18 @@ private:
     bool eq(vector<SimplexVertex> simplex1, vector<SimplexVertex> simplex2);
     std::vector<SimplexVertex> simplex;
     int comperator(double fitness);
-    std::string simplexToString();
-    std::vector<double> s;   // Stepsize
-    double c;   // 
+    std::string simplexToString() const;
+    std::vector<double> s;   // fixme: please rename this to "stepsizes"
+    double c;   // fixme: documentation missing -- or better name should be found
     double epsilon;
 };
 // Caution: SimplexVertex have borders.
 const SimplexOptimizer::SimplexVertex operator+(
-        const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b); 
+        const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b);
 const SimplexOptimizer::SimplexVertex operator+(
         const SimplexOptimizer::SimplexVertex& a, double b);
 const SimplexOptimizer::SimplexVertex operator-(
-        const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b); 
+        const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b);
 const SimplexOptimizer::SimplexVertex operator*(
         const SimplexOptimizer::SimplexVertex& a, const SimplexOptimizer::SimplexVertex& b);
 const SimplexOptimizer::SimplexVertex operator*(

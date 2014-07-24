@@ -21,6 +21,11 @@ public:
         Writer<CELL_TYPE>(prefix, period)
     {}
 
+    Writer<CELL_TYPE> *clone() const
+    {
+        return 0;
+    }
+
     virtual void stepFinished(const GridType&, unsigned, WriterEvent)
     {}
 };

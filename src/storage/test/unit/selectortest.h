@@ -1,6 +1,7 @@
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
@@ -20,14 +21,14 @@ public:
         z(z)
     {}
 
-    int x;
+    long long x;
     double y;
     char z;
 };
 
 }
 
-LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell, ((int)(x))((double)(y))((char)(z)) )
+LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell, ((long long)(x))((double)(y))((char)(z)) )
 
 namespace LibGeoDecomp {
 
@@ -44,17 +45,17 @@ public:
         TS_ASSERT_EQUALS("varY", selectorY.name());
         TS_ASSERT_EQUALS("varZ", selectorZ.name());
 
-        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOfMember());
-        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfMember());
-        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(long long), selectorX.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(double),    selectorY.sizeOfMember());
+        TS_ASSERT_EQUALS(sizeof(char),      selectorZ.sizeOfMember());
 
-        TS_ASSERT_EQUALS(sizeof(int),    selectorX.sizeOfExternal());
-        TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfExternal());
-        TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(long long), selectorX.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(double),    selectorY.sizeOfExternal());
+        TS_ASSERT_EQUALS(sizeof(char),      selectorZ.sizeOfExternal());
 
-        TS_ASSERT_EQUALS( 0, selectorX.offset());
-        TS_ASSERT_EQUALS( 4, selectorY.offset());
-        TS_ASSERT_EQUALS(12, selectorZ.offset());
+        TS_ASSERT_EQUALS(0,                                       selectorX.offset());
+        TS_ASSERT_EQUALS(int(sizeof(long long)),                  selectorY.offset());
+        TS_ASSERT_EQUALS(int(sizeof(long long) + sizeof(double)), selectorZ.offset());
 
         TS_ASSERT_EQUALS(1, selectorX.arity());
         TS_ASSERT_EQUALS(1, selectorY.arity());
@@ -76,7 +77,7 @@ public:
             vec << MyDummyCell(i, 47.11 + i, 'a' + i);
         }
 
-        std::vector<int>    targetX(20, -1);
+        std::vector<long long>    targetX(20, -1);
         std::vector<double> targetY(20, -1);
         std::vector<char>   targetZ(20, 'A');
 
@@ -98,9 +99,9 @@ public:
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ");
 
         std::vector<MyDummyCell> vec(20);
-        std::vector<int>    targetX;
-        std::vector<double> targetY;
-        std::vector<char>   targetZ;
+        std::vector<long long> targetX;
+        std::vector<double>    targetY;
+        std::vector<char>      targetZ;
 
         for (int i = 0; i < 20; ++i) {
             targetX << i * 2 + 13;
@@ -119,7 +120,7 @@ public:
         }
     }
 
-    class MyDummyFilter : public Selector<MyDummyCell>::Filter<double, Color>
+    class MyDummyFilter : public Filter<MyDummyCell, double, Color>
     {
     public:
         void copyStreakInImpl(const Color *first, const Color *last, double *target)
@@ -153,7 +154,7 @@ public:
         }
     };
 
-    class MySimpleFilter : public Selector<MyDummyCell>::SimpleFilter<char, double>
+    class MySimpleFilter : public SimpleFilter<MyDummyCell, char, double>
     {
     public:
         void load(const double& source, char *target)
@@ -169,7 +170,7 @@ public:
 
     void testLocalFilter()
     {
-        class FancyFilter : public Selector<MyDummyCell>::SimpleFilter<char, double>
+        class FancyFilter : public SimpleFilter<MyDummyCell, char, double>
         {
         public:
             void load(const double& source, char *target)
@@ -183,8 +184,8 @@ public:
             }
         };
 
-        Selector<MyDummyCell>::FilterBase *filter1 = new FancyFilter();
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter2(filter1);
+        FilterBase<MyDummyCell> *filter1 = new FancyFilter();
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter2(filter1);
         Selector<MyDummyCell> selector(&MyDummyCell::z, "varZ", filter2);
 
         std::vector<MyDummyCell> vec;
@@ -204,7 +205,7 @@ public:
     void testFilterAoS1()
     {
         // test copyMemberOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -233,7 +234,7 @@ public:
     void testFilterAoS2()
     {
         // test copyMemberOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 
@@ -264,7 +265,7 @@ public:
     void testFilterSoA1()
     {
         // test copyStreakOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -293,7 +294,7 @@ public:
     void testFilterSoA2()
     {
         // test copyStreakOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
@@ -329,7 +330,7 @@ public:
     void testFilterSoA3()
     {
         // test copyStreakOut:
-        boost::shared_ptr<Selector<MyDummyCell>::FilterBase> filter(
+        boost::shared_ptr<FilterBase<MyDummyCell> > filter(
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 

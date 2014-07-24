@@ -3,7 +3,6 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/ioexception.h>
 #include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/testcellplotter.h>
 #include <libgeodecomp/io/testinitializer.h>
 
 #include <cxxtest/TestSuite.h>
@@ -13,6 +12,15 @@ using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
+
+class TestCellPalette
+{
+public:
+    Color operator[](const double value) const
+    {
+        return Color(value, 47, 11);
+    }
+};
 
 class PPMWriterTest : public CxxTest::TestSuite
 {
@@ -39,7 +47,9 @@ public:
 
     void testWritePPM()
     {
-        simulator->addWriter(new PPMWriter<TestCell<2>, TestCellPlotter>(tempFile));
+        simulator->addWriter(
+            new PPMWriter<TestCell<2> >(
+                &TestCell<2>::testValue, TestCellPalette(), tempFile, 1, Coord<2>(20, 20)));
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
@@ -59,14 +69,17 @@ public:
             0x32, 0x35, 0x35, 0x0a;   // and maxcolor (space separated)
         // each cell gets plotted as a tile. we check the first lines
         // of the two leftmost cells in the upper grid line
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 20; i++) {
             expected += 0x01, 0x2f, 0x0b; // rgb rgb...
-        for (int i = 0; i < 20; i++)
+        }
+        for (int i = 0; i < 20; i++) {
             expected += 0x02, 0x2f, 0x0b; // rgb rgb...
+        }
 
         std::vector<char> content;
-        for (unsigned i = 0; i < expected.size(); i++)
+        for (unsigned i = 0; i < expected.size(); i++) {
             content.push_back(infile.get());
+        }
 
         TS_ASSERT_EQUALS(content, expected);
     }
@@ -74,7 +87,9 @@ public:
     void testWritePPMPeriod()
     {
         int period = 2;
-        simulator->addWriter(new PPMWriter<TestCell<2>, TestCellPlotter>(tempFile, period));
+        simulator->addWriter(
+            new PPMWriter<TestCell<2> >(
+                &TestCell<2>::testValue, TestCellPalette(), tempFile, period));
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
@@ -93,8 +108,9 @@ public:
     {
         std::string path("/non/existent/path/prefix1");
         std::string expectedErrorMessage("Could not open file " + path);
-        PPMWriter<TestCell<2>, TestCellPlotter> *writer =
-            new PPMWriter<TestCell<2>, TestCellPlotter>(path);
+        PPMWriter<TestCell<2> > *writer =
+            new PPMWriter<TestCell<2> >(
+                &TestCell<2>::testValue, TestCellPalette(), path);
         TS_ASSERT_THROWS_ASSERT(
             writer->stepFinished(
                 *simulator->getGrid(),

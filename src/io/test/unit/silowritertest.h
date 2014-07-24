@@ -1,10 +1,10 @@
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/multicontainercell.h>
+#include <libgeodecomp/storage/selector.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #include <Python.h>
@@ -174,7 +174,7 @@ public:
 
 };
 
-class ParticleFilterBase : public Selector<DummyParticle>::Filter<FloatCoord<2>, double>
+class ParticleFilterBase : public Filter<DummyParticle, FloatCoord<2>, double>
 {
 public:
     void copyStreakInImpl(const double *first, const double *last, FloatCoord<2> *target)
@@ -300,8 +300,8 @@ public:
         SiloWriter<CellWithPointMesh> writer(prefix, 1);
         writer.addSelector(&CellWithPointMesh::dummyValue, "dummyValue");
 
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterY(new ParticleFilterY());
 
         writer.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
         writer.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
@@ -312,7 +312,7 @@ public:
         PyRun_SimpleString(visitScript.c_str());
         Py_Finalize();
 
-        remove(siloFile1.c_str());
+        removeFile(siloFile1);
     }
 
     Histogram loadImage(const std::string suffix1, const std::string suffix2)
@@ -340,8 +340,8 @@ public:
             }
         }
 
-        remove(imageFile1.c_str());
-        remove(imageFile2.c_str());
+        removeFile(imageFile1);
+        removeFile(imageFile2);
 
         return ret;
     }
@@ -427,7 +427,7 @@ public:
 
         TS_ASSERT(histogram1[white.rgb()] > histogram2[white.rgb()]);
         // point mesh should add 50 dots a 2x2 pixels plus a label
-        TS_ASSERT((histogram1[white.rgb()] - histogram2[white.rgb()]) > 200);
+        TS_ASSERT((histogram1[white.rgb()] - histogram2[white.rgb()]) >= 200);
 
         Histogram histogram3 = loadImage("C", "0000");
 
@@ -479,7 +479,7 @@ public:
             // each coordinate yields the same particles in both
             // grids:
             ParticleVec particles = gridA[*i].particles;
-            for (size_t c = 0; c < particles.size(); ++c) {
+            for (std::size_t c = 0; c < particles.size(); ++c) {
                 gridB[*i].particles.insert(c, particles[c]);
             }
         }
@@ -492,8 +492,8 @@ public:
             prefix,
             1);
 
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterY(new ParticleFilterY());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterY(new ParticleFilterY());
 
         writerA.addSelectorForPointMesh(&DummyParticle::pos, "posX", filterX);
         writerA.addSelectorForUnstructuredGrid(&DummyParticle::pos, "posY", filterY);
@@ -569,7 +569,7 @@ public:
         }
 
         // dump to disk:
-        boost::shared_ptr<Selector<DummyParticle>::FilterBase> filterX(new ParticleFilterX());
+        boost::shared_ptr<FilterBase<DummyParticle> > filterX(new ParticleFilterX());
 
         SiloWriter<CellWithPointMeshAndUnstructuredGrid> writer(
             &CellWithPointMeshAndUnstructuredGrid::particles,
@@ -640,26 +640,32 @@ public:
         PyRun_SimpleString(visitScript.c_str());
         Py_Finalize();
 
-        remove(siloFile2.c_str());
+        removeFile(siloFile2);
 
         Histogram histogram1 = loadImage("A", "0000");
         TS_ASSERT(histogram1[white.rgb()] > 900000);
 
         Histogram histogram2 = loadImage("B", "0000");
-        TS_ASSERT(histogram1[white.rgb()] > (histogram2[white.rgb()] + 10000));
+        TS_ASSERT(histogram1[white.rgb()] > (histogram2[white.rgb()] + 7000));
         TS_ASSERT(histogram2[red.rgb()] > 10);
         TS_ASSERT(histogram2[blue.rgb()] > 10);
 
         Histogram histogram3 = loadImage("C", "0000");
+        // Work around occasional bugs when VisIt is rendering on a remote display:
+#ifndef LIBGEODECOMP_WITH_LAX_VISIT_TESTS
         // adds four giant squares, one of which is red:
         TS_ASSERT(histogram3[red.rgb()  ] > (histogram2[red.rgb()  ] + 50000));
         TS_ASSERT(histogram3[white.rgb()] < (histogram2[white.rgb()] - 50000 * 4));
+#endif
 
         Histogram histogram4 = loadImage("D", "0000");
         // should only have added one pallette and one dot
         TS_ASSERT(histogram3[red.rgb()] > (histogram4[red.rgb()] + 30));
+#ifndef LIBGEODECOMP_WITH_LAX_VISIT_TESTS
         // adds one giant square
         TS_ASSERT((histogram2[red.rgb()] + 50000) < histogram4[red.rgb()]);
+#endif
+
 #endif
 #endif
 #endif

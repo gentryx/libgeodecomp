@@ -146,19 +146,11 @@ private:
         */
     }
 
-    // remove this function and compilation with g++ 4.7.3 fails. scary!
-    template<typename T>
-    void tock(double t)
-    {
-        std::cout << "toc(" << t << ")\n";
-    }
-
-
     hpx::future<void> updateGhostZones(const Region<DIM>& region)
     //void updateGhostZones(const Region<DIM>& region)
     {
         std::swap(oldGrid, newGrid);
-        chronometer.tock<TimeComputeInner>(startTimeUpdate);
+        chronometer.template tock<TimeComputeInner>(startTimeUpdate);
 
         return
             notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep()).then(

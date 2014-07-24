@@ -16,7 +16,7 @@ namespace LibGeoDecomp {
 namespace SimulationParametersHelpers {
 
 /**
- * Virtual interface which allows the implementation of auto-tuniers
+ * Virtual interface which allows the implementation of auto-tuners
  * and parameter optimizers without them having to unterstand the
  * actual meaning of the parameters. For that all parameters are
  * mapped to an interval [min, max[ in R.
@@ -96,7 +96,6 @@ public:
     {
         throw std::logic_error("illegal cast to double");
     }
-
 
     virtual void operator=(const std::string& other)
     {
@@ -201,10 +200,11 @@ public:
     using TypedParameter<VALUE_TYPE>::current;
     using Parameter::sanitizeIndex;
 
-    Interval(const VALUE_TYPE minimum, const VALUE_TYPE maximum) :
+    Interval(const VALUE_TYPE minimum, const VALUE_TYPE maximum, const double granularity = 1) :
         TypedParameter<VALUE_TYPE>(minimum),
         minimum(minimum),
         maximum(maximum),
+        granularity(granularity),
         index(0)
     {}
 
@@ -236,9 +236,7 @@ public:
 
     double getGranularity() const
     {
-        // fixme: for now we only care for integer intervals. this
-        // needs to be fixed for real-valued intervals.
-        return 1;
+        return granularity;
     }
 
     void operator+=(double step)
@@ -252,6 +250,7 @@ public:
 private:
     VALUE_TYPE minimum;
     VALUE_TYPE maximum;
+    double granularity;
     int index;
 };
 

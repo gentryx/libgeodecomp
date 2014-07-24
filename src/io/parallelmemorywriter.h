@@ -6,6 +6,7 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/clonable.h>
 
 namespace LibGeoDecomp {
 
@@ -15,9 +16,8 @@ namespace LibGeoDecomp {
  * nothing else.
  */
 template<typename CELL_TYPE>
-class ParallelMemoryWriter : public ParallelWriter<CELL_TYPE>
+class ParallelMemoryWriter : public Clonable<ParallelWriter<CELL_TYPE>, ParallelMemoryWriter<CELL_TYPE> >
 {
-
 public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
@@ -29,7 +29,7 @@ public:
     explicit ParallelMemoryWriter(
         int period = 1,
         MPI_Comm communicator = MPI_COMM_WORLD) :
-        ParallelWriter<CELL_TYPE>("", period),
+        Clonable<ParallelWriter<CELL_TYPE>, ParallelMemoryWriter<CELL_TYPE> >("", period),
         mpiLayer(communicator, MPILayer::PARALLEL_MEMORY_WRITER)
     {}
 

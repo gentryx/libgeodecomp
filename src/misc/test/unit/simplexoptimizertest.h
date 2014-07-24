@@ -12,7 +12,7 @@ namespace LibGeoDecomp {
 class SimplexOptimizerTest :  public CxxTest::TestSuite
 {
 public:
-    void testBasic()
+    void testHimmelblau()
     {
         LOG(Logger::INFO,"SimplexOptimizer is running!"<< std::endl);
         // Test 1
@@ -29,9 +29,9 @@ public:
             PatternOptimizerTest::GoalFunction eval;
             params = optimizer(5000, eval);
             TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
-            LOG(Logger::INFO, "Test 1: " 
+            LOG(Logger::INFO, "Test 1: "
                      << std::endl << "fitness: " << optimizer.fitness
-                     <<  " calls: " << eval.getCalls() 
+                     <<  " calls: " << eval.getCalls()
                      << std::endl
                      << "x: "<< (int)params["x"]
                      <<" y: " << (int)params["y"]
@@ -49,11 +49,11 @@ public:
             TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
             LOG(Logger::INFO, "Test 2, dependend parameters:"
                      << std::endl << "fitness: " << optimizer.fitness
-                     <<  " calls: " << eval.getCalls() 
+                     <<  " calls: " << eval.getCalls()
                      << std::endl
                      << "x: "<< (int)params["x"]
-                     << " y: " << (int)params["y"] 
-                     << " z: " << (int)params["z"] 
+                     << " y: " << (int)params["y"]
+                     << " z: " << (int)params["z"]
                      << std::endl);
         }
         {
@@ -69,9 +69,9 @@ public:
             PatternOptimizerTest::MultimodTwoDim eval;
             params = optimizer(100,eval);
             TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.fitness));
-            LOG(Logger::INFO,  "Test 3 multimodal function: "<< std::endl 
+            LOG(Logger::INFO,  "Test 3 multimodal function: "<< std::endl
                      << "fitness: " << optimizer.fitness
-                     <<  " calls: " << eval.getCalls() 
+                     <<  " calls: " << eval.getCalls()
                      << std::endl
                      << "x: "<< (int)params["x"]
                      <<" y: " << (int)params["y"]
@@ -88,7 +88,7 @@ public:
             TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
             LOG(Logger::INFO,  "Test 4 discontinuous function:"
                      << std::endl << "fitness: "
-                     << optimizer.fitness<<  " calls: " << eval.getCalls() 
+                     << optimizer.fitness<<  " calls: " << eval.getCalls()
                      << std::endl
                      << "x: "<< (int)params["x"]
                      <<" y: " << (int)params["y"]
@@ -114,8 +114,8 @@ public:
                     << " y: " << (int)params5["y"]
                     << " z: " << (int)params5["z"]
                     << std::endl);
-
         }
+
         {
             SimulationParameters params5;
             params5.addParameter("v", -60, 60);
@@ -141,8 +141,8 @@ public:
                     << " y: " << (int)params5["y"]
                     << " z: " << (int)params5["z"]
                     << std::endl);
-
         }
+
         {
             SimulationParameters params;
             params.addParameter("x", -500, 500);
@@ -160,10 +160,11 @@ public:
             TS_ASSERT(((eval.getGlobalMax() -0,0001) < optimizer.fitness));
             LOG(Logger::INFO, "Test Himmelblau with simplexOptimizer" << std::endl
                     << std::endl << "fitness: " << optimizer.fitness << std::endl
-                    << "Calls: " << eval.getCalls() <<  std::endl    
-                    << "x: " << (int) params["x"]  
+                    << "Calls: " << eval.getCalls() <<  std::endl
+                    << "x: " << (int) params["x"]
                     << "y: " << (int) params["y"] << std::endl)
         }
+
         {
             SimulationParameters params;
             params.addParameter("x", -500, 500);
@@ -175,13 +176,12 @@ public:
             SimplexOptimizer optimizer(params);
             params =optimizer(40, eval);
             TS_ASSERT((eval.getGlobalMax() -0,0001 < optimizer.fitness));
-            LOG(Logger::INFO, "Test Himmelblau with simplexOptimizer and default Values:" 
+            LOG(Logger::INFO, "Test Himmelblau with simplexOptimizer and default Values:"
                     << std::endl << "fitness: " << optimizer.fitness << std::endl
-                    << "Calls: " << eval.getCalls() <<  std::endl    
-                    << "x: " << (int) params["x"] 
-                    << "y: " << (int) params["y"] << std::endl) 
+                    << "Calls: " << eval.getCalls() <<  std::endl
+                    << "x: " << (int) params["x"]
+                    << "y: " << (int) params["y"] << std::endl)
         }
     }
 };
 } // namespace LibGeoDecomp
-

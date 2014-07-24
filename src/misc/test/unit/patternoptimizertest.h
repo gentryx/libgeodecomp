@@ -3,8 +3,6 @@
 #include <libgeodecomp/io/logger.h>
 #include <cmath>
 
-//#define LIBGEODECOMP_DEBUG_LEVEL 4
-
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -19,21 +17,25 @@ public:
         virtual ~TestableEvaluator()
         {}
         virtual double operator()(SimulationParameters params) = 0;
-        
+
         TestableEvaluator():
             calls(0)
         {}
+
         double getGlobalMax()
         {
             return maxima[0];
         }
-        std::vector<double> getLocalMax(){
+
+        std::vector<double> getLocalMax() {
             return maxima;
         }
+
         int getCalls() const
         {
             return calls;
         }
+
         void resetCalls()
         {
             calls = 0;
@@ -42,8 +44,8 @@ public:
         int calls;
         std::vector<double> maxima;
     };
-   
-   
+
+
     class GoalFunction : public TestableEvaluator
     {
     public:
@@ -51,6 +53,7 @@ public:
         {
             maxima.push_back(1000);
         }
+
         double operator()(SimulationParameters params)
         {
             int x = params["x"];
@@ -59,6 +62,7 @@ public:
             return 1000 - ((x - 5) * (x - 5)) - (y * y);
         }
     };
+
     class ThreeDimFunction : public TestableEvaluator
     {
     public:
@@ -66,6 +70,7 @@ public:
         {
             maxima.push_back(2600);
         }
+
         double operator()(SimulationParameters params)
         {
             int x = params["x"];
@@ -83,6 +88,7 @@ public:
         {
             maxima.push_back(5000);
         }
+
         double operator()(SimulationParameters params)
         {
             ++calls;
@@ -91,42 +97,49 @@ public:
             int x = params["x"];
             int y = params["y"];
             int z = params["z"];
-            return 5000-((v + 42) * ( v + 42) * 0.01)
-                        -(( 10 + w) * ( 10 + w))
-                        -(x * x)
-                        -(1 - y)
-                        -((z - 8) * (z - 8) * 0.1);
-        }	
+            return
+                5000 -
+                ((v + 42) * ( v + 42) * 0.01) -
+                (( 10 + w) * ( 10 + w)) -
+                (x * x) -
+                (1 - y) -
+                ((z - 8) * (z - 8) * 0.1);
+        }
     };
 
     class MultimodTwoDim : public TestableEvaluator
     {
-	public:
-        MultimodTwoDim(){
+    public:
+        MultimodTwoDim()
+        {
             maxima.push_back(4999.57);	//first value is global min
             maxima.push_back(4687.77);
         }
+
         double operator()(SimulationParameters params)
         {
             int x = params["x"];
             int y = params["y"];
             ++calls;
             return 4000 + (sin(x * 0.1) * 1000 * -1)+ y * y * -1;
-        }	
+        }
     };
 
     class JumpingFunction : public TestableEvaluator
     {
     public:
-        JumpingFunction(){
+        JumpingFunction()
+        {
             maxima.push_back(1103.9);
             maxima.push_back(1096);
         }
+
         double operator()(SimulationParameters params)
         {
             ++calls;
             int x = params["x"];
             int y = params["y"];
+
             if (x < 10 && x >= 10) {
                 return 1100 + ((x * x * -0.1)- 4 + y * -0.1);
             } else {
@@ -135,12 +148,17 @@ public:
         }
     };
 
+    /**
+     * for reference, please see http://en.wikipedia.org/wiki/Himmelblau%27s_function
+     */
     class HimmelblauFunction : public TestableEvaluator
-    {   
+    {
     public:
-        HimmelblauFunction(){
-            maxima.push_back(1000);    
+        HimmelblauFunction()
+        {
+            maxima.push_back(1000);
         }
+
         double operator()(SimulationParameters params)
         {
             ++calls;
@@ -148,15 +166,17 @@ public:
             int yi =  params["y"];
             double x = (double) xi / (double) 100;
             double y = (double) yi / (double) 100;
-            // (x^2 + y -11)^2 + (x + y^2 - 7)^2 
+
+            // (x^2 + y -11)^2 + (x + y^2 - 7)^2
             return 1000 - ( (((x * x) + y - (double) 11) * ( (x * x) + y - (double)11))
                     + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
         }
     };
+
     void testBasic()
     {
         LOG(Logger::INFO,"PatternOptimizer is running!"<< std::endl);
-        // Test 1
+
         SimulationParameters params;
         params.addParameter("x",   0, 20);
         params.addParameter("y", -10, 10);
@@ -164,15 +184,17 @@ public:
         GoalFunction eval;
         params = optimizer(5000, eval);
         TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
-        LOG(Logger::INFO, "Test 1: " 
+        LOG(Logger::INFO, "Test 1: "
                  << std::endl << "fitness: " << optimizer.fitness
-                 <<  " calls: " << eval.getCalls() 
+                 <<  " calls: " << eval.getCalls()
                  << std::endl
                  << "x: "<< (int)params["x"]
                  <<" y: " << (int)params["y"]
                  << std::endl);
-		
-        // Test2 3d, dependent parameters
+    }
+
+    void test3DwithDependetParameters()
+    {
         SimulationParameters params2;
         params2.addParameter("x", -40, 20);
         params2.addParameter("y", -10, 10);
@@ -181,18 +203,20 @@ public:
         ThreeDimFunction eval2;
         params2 = optimizer2(100,eval2);
         TS_ASSERT_EQUALS(eval2.getGlobalMax(), optimizer2.fitness);
-		
-		
+
+
         LOG(Logger::INFO, "Test 2, dependend parameters:"
                  << std::endl << "fitness: " << optimizer2.fitness
-                 <<  " calls: " << eval2.getCalls() 
+                 <<  " calls: " << eval2.getCalls()
                  << std::endl
                  << "x: "<< (int)params2["x"]
-                 << " y: " << (int)params2["y"] 
-                 << " z: " << (int)params2["z"] 
+                 << " y: " << (int)params2["y"]
+                 << " z: " << (int)params2["z"]
                  << std::endl);
+    }
 
-        // Test3 Multimodal 2d
+    void testMultimodal2D()
+    {
         SimulationParameters params3;
         params3.addParameter("x", -40, 40);
         params3.addParameter("y", -50, 50);
@@ -200,15 +224,17 @@ public:
         MultimodTwoDim eval3;
         params3 = optimizer3(100,eval3);
         TS_ASSERT(((eval3.getGlobalMax() - 0,0001) < optimizer3.fitness));
-        LOG(Logger::INFO,  "Test 3 multimodal function: "<< std::endl 
+        LOG(Logger::INFO,  "Test 3 multimodal function: " << std::endl
                  << "fitness: " << optimizer3.fitness
-                 <<  " calls: " << eval3.getCalls() 
+                 <<  " calls: " << eval3.getCalls()
                  << std::endl
                  << "x: "<< (int)params3["x"]
                  <<" y: " << (int)params3["y"]
                  << std::endl);
+    }
 
-        //Test4 discontinuous function:
+    void testDiscontinousFunction()
+    {
         SimulationParameters params4;
         params4.addParameter("x", -60, 60);
         params4.addParameter("y", 0, 40);
@@ -218,13 +244,15 @@ public:
         TS_ASSERT_EQUALS(eval4.getGlobalMax(), optimizer4.fitness);
         LOG(Logger::INFO,  "Test 4 discontinuous function:"
                  << std::endl << "fitness: "
-                 << optimizer4.fitness<<  " calls: " << eval4.getCalls() 
+                 << optimizer4.fitness<<  " calls: " << eval4.getCalls()
                  << std::endl
                  << "x: "<< (int)params4["x"]
                  <<" y: " << (int)params4["y"]
                  << std::endl);
+    }
 
-        // Test 5, 5 dimensions
+    void test5Dimensions()
+    {
         SimulationParameters params5;
         params5.addParameter("v", -60, 60);
         params5.addParameter("w", -20, 40);
@@ -244,15 +272,19 @@ public:
                 << " y: " << (int)params5["y"]
                 << " z: " << (int)params5["z"]
                 << std::endl);
+    }
 
-        // Test 6, Himmelblau
+    void testHimmelblau()
+    {
         SimulationParameters params6;
         params6.addParameter("x", -500, 500);
         params6.addParameter("y", -500, 500);
+
         PatternOptimizer optimizer6(params6);
         HimmelblauFunction eval6;
         params6 = optimizer6(100, eval6);
         TS_ASSERT(((eval6.getGlobalMax() - 0,0001) < optimizer6.fitness));
+
         LOG(Logger::INFO, "Test 6, Himmelblau:" << std::endl
                 << "fitness: " << optimizer6.fitness
                 << " calls: " << eval6.getCalls() << std::endl

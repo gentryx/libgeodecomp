@@ -8,7 +8,7 @@ using namespace LibGeoDecomp;
 class CircleCell
 {
 public:
-    friend class CellToColor;
+    friend void runSimulation();
     enum State {LIQUID, SOLIDIFYING, SOLID};
     typedef std::pair<double, double> DPair;
 
@@ -139,12 +139,12 @@ public:
 class CellToColor
 {
 public:
-    Color operator()(const CircleCell& cell)
+    Color operator[](const CircleCell::State& state) const
     {
-        if (cell.state == CircleCell::SOLID) {
+        if (state == CircleCell::SOLID) {
             return Color::RED;
         }
-        if (cell.state == CircleCell::SOLIDIFYING) {
+        if (state == CircleCell::SOLIDIFYING) {
             return Color::GREEN;
         }
         return Color::BLACK;
@@ -157,11 +157,12 @@ void runSimulation()
     CircleCellInitializer *init = new CircleCellInitializer();
     SerialSimulator<CircleCell> sim(init);
     sim.addWriter(
-        new PPMWriter<CircleCell, SimpleCellPlotter<CircleCell, CellToColor> >(
+        new PPMWriter<CircleCell>(
+            &CircleCell::state,
+            CellToColor(),
             "./circle",
             outputFrequency,
-            8,
-            8));
+            Coord<2>(8, 8)));
     sim.addWriter(
         new TracingWriter<CircleCell>(
             1,

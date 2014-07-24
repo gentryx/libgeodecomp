@@ -61,27 +61,27 @@ namespace LibGeoDecomp {
 class CheckCellValues
 {
 public:
-    CheckCellValues(int startOffset, int endOffset, int expected) :
+    CheckCellValues(long startOffset, long endOffset, long expected) :
         startOffset(startOffset),
         endOffset(endOffset),
         expected(expected)
     {}
 
     template<typename ACCESSOR>
-    void operator()(ACCESSOR accessor, int *index)
+    void operator()(ACCESSOR accessor, long *index)
     {
         *index += startOffset;
 
-        for (int offset = startOffset; offset < endOffset; ++offset) {
+        for (long offset = startOffset; offset < endOffset; ++offset) {
             TS_ASSERT_EQUALS(expected, accessor.v());
             ++*index;
         }
     }
 
 private:
-    int startOffset;
-    int endOffset;
-    int expected;
+    long startOffset;
+    long endOffset;
+    long expected;
 };
 
 class SoAGridTest : public CxxTest::TestSuite

@@ -20,6 +20,7 @@ public:
     friend class Typemaps;
     typedef T* iterator;
     typedef const T* const_iterator;
+    typedef T value_type;
 
     explicit FixedArray(std::size_t elements = 0) :
         elements(elements)

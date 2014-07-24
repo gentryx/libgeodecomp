@@ -6,9 +6,9 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/topologies.h>
-#include <libgeodecomp/io/selector.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
 
@@ -51,10 +51,10 @@ public:
         innerCell(innerCell)
     {}
 
-    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *unused)
+        long *unused) const
     {
         for (int z = 0; z < gridDim.z(); ++z) {
             bool onEdge1 = false;
@@ -163,10 +163,10 @@ public:
         edgeRadii(edgeRadii)
     {}
 
-    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *unused) const
+        long *unused) const
     {
         char *currentTarget = target;
 
@@ -187,7 +187,7 @@ private:
     const Region<DIM>& region;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
-    int memberOffset;
+    long memberOffset;
 };
 
 template<typename CELL, int DIM>
@@ -207,10 +207,10 @@ public:
         edgeRadii(edgeRadii)
     {}
 
-    template<int DIM_X, int DIM_Y, int DIM_Z, int INDEX>
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(
         LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        int *unused) const
+        long *unused) const
     {
         const char *currentSource = source;
 
@@ -233,7 +233,7 @@ private:
     const Region<DIM>& region;
     const Coord<DIM>& origin;
     const Coord<3>& edgeRadii;
-    int memberOffset;
+    long memberOffset;
 };
 
 }
@@ -337,6 +337,7 @@ public:
     {
         edgeCell = cell;
         CELL dummy;
+
         delegate.callback(
             SoAGridHelpers::SetContent<CELL, false>(
                 actualDimensions, edgeRadii, edgeCell, dummy));

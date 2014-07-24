@@ -26,24 +26,38 @@ public:
 template<
     typename CELL,
     typename TOPOLOGY,
-    int DIM_X,
-    int DIM_Y,
-    int DIM_Z,
-    int INDEX,
-    template<typename CELL2, int DIM_X2, int DIM_Y2, int DIM_Z2, int INDEX2> class SOA_ACCESSOR = LibFlatArray::soa_accessor>
+    long DIM_X,
+    long DIM_Y,
+    long DIM_Z,
+    long INDEX,
+    template<
+        typename CELL2,
+        long DIM_X2,
+        long DIM_Y2,
+        long DIM_Z2,
+        long INDEX2> class SOA_ACCESSOR_IN = LibFlatArray::soa_accessor,
+    template<
+        typename CELL3,
+        long DIM_X3,
+        long DIM_Y3,
+        long DIM_Z3,
+        long INDEX3> class SOA_ACCESSOR_OUT = LibFlatArray::soa_accessor_light
+
+>
 class FixedNeighborhood
 {
 public:
-    typedef SOA_ACCESSOR<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
+    typedef SOA_ACCESSOR_IN< CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessorIn;
+    typedef CELL Cell;
 
     __host__ __device__
-    explicit FixedNeighborhood(SoAAccessor& accessor) :
+    explicit FixedNeighborhood(SoAAccessorIn& accessor) :
         accessor(accessor)
     {}
 
     template<int X, int Y, int Z>
     __host__ __device__
-    const SOA_ACCESSOR<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
+    const SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
     {
         return accessor[LibFlatArray::coord<X, Y, Z>()];
     }
@@ -55,20 +69,20 @@ public:
 
     __host__ __device__
     inline
-    int& index()
+    long& index()
     {
         return accessor.index;
     }
 
     __host__ __device__
     inline
-    const int& index() const
+    const long& index() const
     {
         return accessor.index;
     }
 
 private:
-    SoAAccessor& accessor;
+    SoAAccessorIn& accessor;
 };
 
 }

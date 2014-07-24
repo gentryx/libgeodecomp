@@ -5,7 +5,10 @@
 #include <iostream>
 #include <sstream>
 
+
 using namespace LibGeoDecomp;
+
+// fixme using namespace LibGeoDecomp;
 
 const int CONTAINER_SIZE = 30;
 const double CONTAINER_DIM = 3.0;
@@ -132,7 +135,11 @@ private:
     double col;
 };
 
-// fixme: rewrite this example with the multicontainercell
+DECLARE_MULTI_CONTAINER_CELL(
+    MyFixmeContainer,
+    ((Sphere)(30)(spheres))
+    ((Boundary)(30)(boundaries)))
+
 class Container
 {
 public:
@@ -251,7 +258,7 @@ void Boundary::update(
     }
 }
 
-class GasWriter : public Writer<Container>
+class GasWriter : public Clonable<Writer<Container>, GasWriter>
 {
 public:
     typedef APITraits::SelectTopology<Container>::Value Topology;
@@ -261,7 +268,7 @@ public:
     explicit GasWriter(
         const std::string& prefix,
         const unsigned period = 1) :
-        Writer<Container>(prefix, period)
+        Clonable<Writer<Container>, GasWriter>(prefix, period)
     {}
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)

@@ -3,6 +3,7 @@
 
 #include <list>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>
 
@@ -12,7 +13,7 @@ namespace LibGeoDecomp {
  * This class serves to verify the callback behavior of
  * implementations of MonolithicSimulator.
  */
-class TestWriter : public Writer<TestCell<2> >
+class TestWriter : public Clonable<Writer<TestCell<2> >, TestWriter>
 {
 public:
     typedef Writer<TestCell<2> >::GridType GridType;
@@ -21,7 +22,7 @@ public:
         const unsigned& period,
         const std::vector<unsigned>& expectedSteps,
         const std::vector<WriterEvent> expectedEvents)  :
-        Writer<TestCell<2> >("", period),
+        Clonable<Writer<TestCell<2> >, TestWriter>("", period),
         expectedSteps(expectedSteps),
         expectedEvents(expectedEvents)
     {}

@@ -247,15 +247,15 @@ __global__ void updateLBMClassic(int dimX, int dimY, int dimZ, double *gridOld, 
     hoodOld[LibFlatArray::coord<X, Y, Z>()]
 
 template<int DIM_X, int DIM_Y, int DIM_Z>
-__global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
+__global__ void updateRTMSoA(long dimX, long dimY, long dimZ, double *gridOld, double *gridNew)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x + 2;
-    int y = blockIdx.y * blockDim.y + threadIdx.y + 2;
-    int z = 2;
+    long x = blockIdx.x * blockDim.x + threadIdx.x + 2;
+    long y = blockIdx.y * blockDim.y + threadIdx.y + 2;
+    long z = 2;
 
-    int index = z * DIM_X * DIM_Y + y * DIM_X + x;
-    int offset = DIM_X * DIM_Y;
-    int end = DIM_X * DIM_Y * (dimZ - 2);
+    long index = z * DIM_X * DIM_Y + y * DIM_X + x;
+    long offset = DIM_X * DIM_Y;
+    long end = DIM_X * DIM_Y * (dimZ - 2);
 
     LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
     LibFlatArray::soa_accessor_light<Cell, DIM_X, DIM_Y, DIM_Z, 0> hoodOld((char*)gridOld, index);
@@ -300,13 +300,13 @@ __global__ void updateRTMSoA(int dimX, int dimY, int dimZ, double *gridOld, doub
 template<int DIM_X, int DIM_Y, int DIM_Z>
 __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, double *gridNew)
 {
-    int myX = blockIdx.x * blockDim.x + threadIdx.x + 2;
-    int myY = blockIdx.y * blockDim.y + threadIdx.y + 2;
-    int myZ = 2;
+    long myX = blockIdx.x * blockDim.x + threadIdx.x + 2;
+    long myY = blockIdx.y * blockDim.y + threadIdx.y + 2;
+    long myZ = 2;
 
-    int index = myZ * DIM_X * DIM_Y + myY * DIM_X + myX;
-    int offset = DIM_X * DIM_Y;
-    int end = DIM_X * DIM_Y * (dimZ - 2);
+    long index = myZ * DIM_X * DIM_Y + myY * DIM_X + myX;
+    long offset = DIM_X * DIM_Y;
+    long end = DIM_X * DIM_Y * (dimZ - 2);
 
     LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
     LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOldInternal((char*)gridOld, index);
@@ -323,9 +323,9 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
         const double omega_w1 = 3.0*1.0/18.0*omega;
         const double omega_w2 = 3.0*1.0/36.0*omega;
         const double one_third = 1.0 / 3.0;
-        const int x = 0;
-        const int y = 0;
-        const int z = 0;
+        const long x = 0;
+        const long y = 0;
+        const long z = 0;
         double velX, velY, velZ;
 
         velX  =
