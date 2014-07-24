@@ -54,6 +54,7 @@ public:
                 for(int row=0; row<C; ++row) {
                     VALUETYPE val = values[offs];
                     int columnINDEX = column[offs++];
+                    // fixme: get rid of this conditional by making -1 a valid address within the source data structure. -1 should be a symbol for "empty field", perhaps edge cell.
                     if(columnINDEX != -1) {
                         VALUETYPE b   = rhs[columnINDEX];
                         tmp[row] += val * b;
@@ -188,6 +189,7 @@ public:
 
             ++rowLength[row];
             chunkLength[chunk] = rowLength[row];
+
             for (unsigned ch = chunk+1; ch < chunkOffset.size(); ++ch) {
                 chunkOffset[ch] += C;
             }

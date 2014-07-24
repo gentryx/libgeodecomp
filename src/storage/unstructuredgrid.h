@@ -26,15 +26,14 @@ class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
     typedef std::list<std::pair<ELEMENT_TYPE, VALUE_TYPE> > NeighborList;
-    typedef typename std::list<std::pair<ELEMENT_TYPE, VALUE_TYPE> >::iterator 
+    typedef typename std::list<std::pair<ELEMENT_TYPE, VALUE_TYPE> >::iterator
         NeighborListIterator;
     const static int DIM = 1;
 
     explicit UnstructuredGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()
-        ):
+        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
         elements(dim.x(), defaultElement),
         edgeElement(edgeElement),
         dimension(dim)
@@ -106,9 +105,9 @@ public:
     {
         NeighborList neighborhood;
 
-        if (boundingBox().inBounds(center)){
+        if (boundingBox().inBounds(center)) {
             neighborhood.push_back( std::make_pair( *this[center], -1 ) );
-            
+
             std::vector< std::pair<int, VALUE_TYPE> > neighbor =
                 matrices[0].getRow(center.x());
 
@@ -117,8 +116,8 @@ public:
                 neighborhood.push_back(
                         std::make_pair( (*this)[it->first], it->second ) );
             }
-        }
-        else{
+
+        } else {
             neighborhood.push_back( std::make_pair( getEdgeElement(), -1) );
         }
 
@@ -134,8 +133,7 @@ public:
     {
         if ( y < 0 || y >= dimension.x()){
             return getEdgeElement();
-        }
-        else{
+        } else {
             return elements[y];
         }
     }
@@ -144,8 +142,7 @@ public:
     {
         if ( y < 0 || y >= dimension.x()){
             return getEdgeElement();
-        }
-        else{
+        } else {
             return elements[y];
         }
     }
@@ -167,10 +164,10 @@ public:
             return true;
         }
 
-        return (edgeElement      == other.edgeElement) &&
-               (elements         == other.elements)    &&
-               //(matrices         == other.matrices)    &&
-               (matrices[0] == other.matrices[0]);
+        return
+            (edgeElement == other.edgeElement) &&
+            (elements    == other.elements)    &&
+            (matrices    == other.matrices);
     }
 
     inline bool operator==(const GridBase<ELEMENT_TYPE, DIM>& other) const
