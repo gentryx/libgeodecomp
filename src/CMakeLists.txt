@@ -169,6 +169,8 @@ add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" "
 
 add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
 
+add_config_option(LIB_DIR "Library subdirectory (e.g. lib, lib32, lib64), useful for multilib builds" "lib" false)
+
 add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
 
 add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
@@ -239,7 +241,7 @@ if(WITH_HPX)
   include_directories(${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
-  set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/lib/hpx:${CMAKE_BINARY_DIR}/lib/hpx:${CMAKE_BINARY_DIR}/src")
+  set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
 endif()
 
 if(WITH_MPI)
@@ -534,7 +536,7 @@ foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
 endforeach()
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
-libdir=${CMAKE_INSTALL_PREFIX}/lib
+libdir=${CMAKE_INSTALL_PREFIX}/${LIB_DIR}
 includedir=${CMAKE_INSTALL_PREFIX}/include
 
 Name: LibGeoDecomp
@@ -543,7 +545,7 @@ Version: ${PACKAGE_VERSION}
 Libs: ${INSTALLER_LINK_FLAGS}
 Cflags: -I\${includedir}
 ")
-install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "lib/pkgconfig")
+install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "${LIB_DIR}/pkgconfig")
 
 #============= 11. TYPEMAPS GENERATION ===============================
 if (WITH_TYPEMAPS)
