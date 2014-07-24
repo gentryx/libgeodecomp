@@ -1,6 +1,7 @@
 // vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/simplexoptimizer.h>
-#include <libgeodecomp/misc/test/unit/patternoptimizertest.h>
+//#include <libgeodecomp/misc/test/unit/patternoptimizertest.h>
+#include <libgeodecomp/misc/test/unit/optimizertestfunctions.h>
 #include <libgeodecomp/io/logger.h>
 
 #define LIBGEODECOMP_DEBUG_LEVEL 4
@@ -26,7 +27,7 @@ public:
                 s.push_back(1.0);
             }
             SimplexOptimizer optimizer(params, s, 4.0, -1.0);
-            PatternOptimizerTest::GoalFunction eval;
+            OptimizerTestFunctions::GoalFunction eval;
             params = optimizer(5000, eval);
             TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
             LOG(Logger::INFO, "Test 1: "
@@ -44,7 +45,7 @@ public:
             params.addParameter("y", -10, 10);
             params.addParameter("z", -10, 10);
             SimplexOptimizer optimizer(params);
-            PatternOptimizerTest::ThreeDimFunction eval;
+            OptimizerTestFunctions::ThreeDimFunction eval;
             params = optimizer(100,eval);
             TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
             LOG(Logger::INFO, "Test 2, dependend parameters:"
@@ -66,7 +67,7 @@ public:
                 s.push_back(1.0);
             }
             SimplexOptimizer optimizer(params,s , 16, -1);
-            PatternOptimizerTest::MultimodTwoDim eval;
+            OptimizerTestFunctions::MultimodTwoDim eval;
             params = optimizer(100,eval);
             TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.fitness));
             LOG(Logger::INFO,  "Test 3 multimodal function: "<< std::endl
@@ -83,7 +84,7 @@ public:
             params.addParameter("x", -60, 60);
             params.addParameter("y", 0, 40);
             SimplexOptimizer optimizer(params);
-            PatternOptimizerTest::JumpingFunction eval;
+            OptimizerTestFunctions::JumpingFunction eval;
             params = optimizer(100,eval);
             TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
             LOG(Logger::INFO,  "Test 4 discontinuous function:"
@@ -102,7 +103,7 @@ public:
             params5.addParameter("y", 0, 2);
             params5.addParameter("z", -10, 40);
             SimplexOptimizer optimizer5(params5);
-            PatternOptimizerTest::FiveDimFunction eval5;
+            OptimizerTestFunctions::FiveDimFunction eval5;
             params5 = optimizer5(20 ,eval5);
             TS_ASSERT_EQUALS(eval5.getGlobalMax(), optimizer5.fitness);
             LOG(Logger::INFO,  "Test 5, five dimensions with default Parameters: "
@@ -129,7 +130,7 @@ public:
             }
             SimplexOptimizer optimizer5(params5, s, 8.0, 17.0);
           // SimplexOptimizer optimizer5(params5);
-            PatternOptimizerTest::FiveDimFunction eval5;
+            OptimizerTestFunctions::FiveDimFunction eval5;
             params5 = optimizer5(20 ,eval5);
             TS_ASSERT_EQUALS(eval5.getGlobalMax(), optimizer5.fitness);
             LOG(Logger::INFO,  "Test 5, five dimensions with individual Parameters: "
@@ -149,7 +150,7 @@ public:
             params.addParameter("y", -500, 500);
             params["x"].setValue(20);
             params["y"].setValue(20);
-            PatternOptimizerTest::HimmelblauFunction eval;
+            OptimizerTestFunctions::HimmelblauFunction eval;
             double test = eval(params);
             std::vector<double> s;
             for(std::size_t i = 0; i < params.size(); ++i) {
@@ -171,7 +172,7 @@ public:
             params.addParameter("y", -500, 500);
             params["x"].setValue(20);
             params["y"].setValue(20);
-            PatternOptimizerTest::HimmelblauFunction eval;
+            OptimizerTestFunctions::HimmelblauFunction eval;
             double test = eval(params);
             SimplexOptimizer optimizer(params);
             params =optimizer(40, eval);
