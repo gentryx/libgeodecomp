@@ -17,8 +17,11 @@ class SimpleParticle
 {
 public:
     SimpleParticle(
-        const FloatCoord<DIM>& pos = FloatCoord<DIM>(), double maxDistance = 0) :
+        const FloatCoord<DIM>& pos = FloatCoord<DIM>(),
+        const double positionFactor = 1.0,
+        const double maxDistance = 0) :
         pos(pos),
+        positionFactor(positionFactor),
         maxDistance2(maxDistance * maxDistance)
     {}
 
@@ -35,6 +38,7 @@ public:
             }
         }
 
+        pos *= positionFactor;
     }
 
     int getNeighbors() const
@@ -56,6 +60,7 @@ public:
 
 private:
     FloatCoord<DIM> pos;
+    double positionFactor;
     double maxDistance2;
     int neighbors;
 };
@@ -63,20 +68,18 @@ private:
 class BoxCellTest : public CxxTest::TestSuite
 {
 public:
+    typedef BoxCell<FixedArray<SimpleParticle<2>, 30> > CellType;
 
-    // fixme: add performance tests (both, regular and cuda)
-
-    void test2D()
+    void setUp()
     {
-        Coord<2> gridDim(10, 5);
-        FloatCoord<2> cellDim(2.0, 3.0);
-        CoordBox<2> box(Coord<2>(0, 0), gridDim);
-        Region<2> region;
+        gridDim = Coord<2> (10, 5);
+        cellDim = FloatCoord<2>(2.0, 3.0);
+        box = CoordBox<2>(Coord<2>(0, 0), gridDim);
+        region.clear();
         region << box;
 
-        typedef BoxCell<FixedArray<SimpleParticle<2>, 30> > CellType;
-        Grid<CellType> grid1(gridDim);
-        Grid<CellType> grid2(gridDim);
+        grid1 = Grid<CellType>(gridDim);
+        grid2 = Grid<CellType>(gridDim);
 
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
             FloatCoord<2> origin00 = cellDim.scale(*i);
@@ -84,13 +87,23 @@ public:
             FloatCoord<2> origin10 = cellDim.scale(*i) + cellDim.scale(FloatCoord<2>(0.5, 0.0));
             FloatCoord<2> origin11 = cellDim.scale(*i) + cellDim.scale(FloatCoord<2>(0.5, 0.5));
 
+            double posFactor = 0.95;
+            double maxDistance = 2.9;
+
             grid1[*i] = CellType(origin00, cellDim);
-            grid1[*i].insert(SimpleParticle<2>(origin00, 2.9));
-            grid1[*i].insert(SimpleParticle<2>(origin01, 2.9));
-            grid1[*i].insert(SimpleParticle<2>(origin10, 2.9));
-            grid1[*i].insert(SimpleParticle<2>(origin11, 2.9));
+            grid1[*i].insert(SimpleParticle<2>(origin00, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<2>(origin01, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<2>(origin10, posFactor, maxDistance));
+            grid1[*i].insert(SimpleParticle<2>(origin11, posFactor, maxDistance));
         }
 
+    }
+
+    // fixme: add performance tests (both, regular and cuda)
+    // fixme: add 3d test
+
+    void testBasic2D()
+    {
         UpdateFunctor<CellType>()(
             region,
             Coord<2>(),
@@ -145,6 +158,73 @@ public:
         }
     }
 
+    void test2DCellTransport()
+    {
+        Coord<2> dim = box.dimensions;
+
+        UpdateFunctor<CellType>()(
+            region,
+            Coord<2>(),
+            Coord<2>(),
+            grid1,
+            &grid2,
+            0);
+
+        // we assume that after the first update step all four
+        // particles still reside in their original cell:
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                int expected = 4;
+
+                TS_ASSERT_EQUALS(grid2[Coord<2>(x, y)].size(), expected);
+
+            }
+        }
+
+        UpdateFunctor<CellType>()(
+            region,
+            Coord<2>(),
+            Coord<2>(),
+            grid2,
+            &grid1,
+            0);
+
+        // after the second iteration we assume that those particles
+        // on the left and upper cell boundaries have transitioned to
+        // the corresponding neighbor cells:
+        for (int y = 0; y < dim.y(); ++y) {
+            int fieldDimY = 2;
+            if (y == 0) {
+                fieldDimY = 3;
+            }
+            if (y == (dim.y() - 1)) {
+                fieldDimY = 1;
+            }
+
+            for (int x = 0; x < dim.x(); ++x) {
+                int fieldDimX = 2;
+                if (x == 0) {
+                    fieldDimX = 3;
+                }
+                if (x == (dim.x() - 1)) {
+                    fieldDimX = 1;
+                }
+
+                int expected = fieldDimX * fieldDimY;
+
+                TS_ASSERT_EQUALS(grid1[Coord<2>(x, y)].size(), expected);
+            }
+        }
+    }
+
+private:
+    Coord<2> gridDim;
+    FloatCoord<2> cellDim;
+    CoordBox<2> box;
+    Region<2> region;
+
+    Grid<CellType> grid1;
+    Grid<CellType> grid2;
 };
 
 }
