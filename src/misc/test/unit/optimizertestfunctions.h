@@ -166,5 +166,56 @@ public:
                     + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
         }
     };
+
+    /**
+     * for reference, please see http://en.wikipedia.org/wiki/Rosenbrock_function
+     * tesfunction is valid for -1000 <= x <= 1000, -500 <= y 1500
+     */
+    class Rosenbrock2DFunction : public TestableEvaluator
+    {
+    public:
+        Rosenbrock2DFunction()
+        {
+            maxima.push_back(3000);
+        }
+        double operator()(SimulationParameters params)
+        {
+            ++calls;
+            int xi = params["x"];
+            int yi = params["y"];
+            double x = (double) xi / (double)500;
+            double y = (double) yi / (double)500;
+            return 3000 - (100 * (y - x * x) * (y -x * x)
+                + (x - 1) * (x - 1));
+        }
+    };
+    class Rosenbrock5DFunction : public TestableEvaluator
+    {
+    public:
+        Rosenbrock5DFunction()
+        {
+            maxima.push_back(10000);
+        }
+        double operator()(SimulationParameters params)
+        {
+            ++calls;
+            int vi = params["v"];
+            int wi = params["w"];
+            int xi = params["x"];
+            int yi = params["y"];
+            int zi = params["z"];
+            double v = (double) vi / (double) 500;
+            double w = (double) wi / (double) 500;
+            double x = (double) xi / (double) 500;
+            double y = (double) yi / (double) 500;
+            double z = (double) zi / (double) 500;
+            return 100000 - ( 
+                  (100 * (w - v * v) * (w - v * v) + (1 - v)*(1 - v))
+                + (100 * (x - w * w) * (x - w * w) + (1 - w)*(1 - w))
+                + (100 * (y - x * x) * (y - x + x) + (1 - x)*(1 - x))
+                + (100 * (z - y * y) * (z - y * y) + (1 - z)*(1 - z)));
+        }
+    };
+
 };
 } // namespace LibGeoDecomp

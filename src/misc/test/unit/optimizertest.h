@@ -25,8 +25,8 @@ public:
     {
         LOG(Logger::INFO,"Calls: " << eval.getCalls()
                  << std::endl
-                 << "x: "<< (int)params["x"]
-                 <<" y: " << (int)params["y"]
+                 << "x: "<< (int) params["x"]
+                 <<" y: " << (int) params["y"]
                  << std::endl)
     }
     void testPatternDefault()
@@ -76,9 +76,9 @@ public:
     {
         LOG(Logger::INFO, "Calls: " << eval.getCalls()
                  << std::endl
-                 << "x: "<< (int)params["x"]
-                 << " y: " << (int)params["y"]
-                 << " z: " << (int)params["z"]
+                 << "x: "<< (int) params["x"]
+                 << " y: " << (int) params["y"]
+                 << " z: " << (int) params["z"]
                  << std::endl);
     }
     void testPatternDefault() 
@@ -116,8 +116,8 @@ public:
      {   
         LOG(Logger::INFO, "Calls: " << eval.getCalls()
                  << std::endl
-                 << "x: "<< (int)params["x"]
-                 <<" y: " << (int)params["y"]
+                 << "x: "<< (int) params["x"]
+                 <<" y: " << (int) params["y"]
                  << std::endl);
     }
     void testPatternDefault() 
@@ -155,8 +155,8 @@ public:
     {
         LOG(Logger::INFO, "Calls: " << eval.getCalls()
                  << std::endl
-                 << "x: "<< (int)params["x"]
-                 <<" y: " << (int)params["y"]
+                 << "x: "<< (int) params["x"]
+                 <<" y: " << (int) params["y"]
                  << std::endl);
     }
 
@@ -198,11 +198,11 @@ public:
     void tearDown()
     {
         LOG(Logger::INFO, "calls: " << eval.getCalls() << std::endl
-                << "v:"   << (int)params["v"]
-                << " w: " << (int)params["w"]
-                << " x: " << (int)params["x"]
-                << " y: " << (int)params["y"]
-                << " z: " << (int)params["z"]
+                << "v:"   << (int) params["v"]
+                << " w: " << (int) params["w"]
+                << " x: " << (int) params["x"]
+                << " y: " << (int) params["y"]
+                << " z: " << (int) params["z"]
                 << std::endl);
     }
     void testPatternDefault() 
@@ -255,7 +255,7 @@ private:
     OptimizerTestFunctions::FiveDimFunction eval;
 };
 
-class HimmelBlauTest : public CxxTest::TestSuite
+class HimmelblauTest : public CxxTest::TestSuite
 {
 public:
     void setUp()
@@ -268,9 +268,9 @@ public:
     }
     void tearDown()
     {
-        LOG(Logger::INFO, "calls: " << eval.getCalls() << std::endl
-                << " x: " << (int)params["x"]
-                << " y: " << (int)params["y"]
+        LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
+                << "x: " << (int) params["x"]
+                << " y: " << (int) params["y"]
                 << std::endl);
     }
     void testPatternDefault() 
@@ -293,5 +293,99 @@ private:
     SimulationParameters params;
     OptimizerTestFunctions::HimmelblauFunction eval;
 
+};
+class Rosenbrock2DTest : public CxxTest::TestSuite
+{
+public:
+    void setUp()
+    {
+        eval = OptimizerTestFunctions::Rosenbrock2DFunction();
+        params = SimulationParameters();
+        params.addParameter("x", -1000, 1000);
+        params.addParameter("y", -500, 1500);
+        LOG(Logger::INFO, "Rosenbrock-Function 2D:")
+    }
+    void tearDown()
+    {
+        LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
+                   << "x: " << (int) params["x"]
+                   << " y: " << (int) params["y"]
+                   << std::endl)
+    }
+    void testPatternDefault() 
+    {
+        PatternOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
+        LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testSimplexDefault() 
+    {
+        SimplexOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
+        LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }       
+private:
+    SimulationParameters params;
+    OptimizerTestFunctions::Rosenbrock2DFunction eval;
+};
+class Rosenbrock5DTest : public CxxTest::TestSuite
+{
+public:
+    void setUp()
+    {
+        eval = OptimizerTestFunctions::Rosenbrock5DFunction();
+        params = SimulationParameters();
+        params.addParameter("v", -1000, 1000);
+        params.addParameter("w", -1000, 1000);
+        params.addParameter("x", -1000, 1000);
+        params.addParameter("y", -500, 1500);
+        params.addParameter("z", -1000, 1000);
+        LOG(Logger::INFO, "Rosenbrock-Function 5D:")
+    }
+    void tearDown()
+    {
+        LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
+                   << "v: " << (int) params["v"]
+                   << " w: " << (int) params["W"]
+                   << " x: " << (int) params["x"]
+                   << " y: " << (int) params["y"]
+                   << " z: " << (int) params["z"]
+                   << std::endl)
+    }
+    void testPatternDefault() 
+    {
+        PatternOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
+        LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testSimplexDefault() 
+    {
+        SimplexOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
+        LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }       
+    void testSimplexOptimizedParameters()
+    {
+        std::vector<double> s;
+        for(std::size_t i = 0; i < params.size(); ++i) {
+            s.push_back(1.0);
+        }
+        SimplexOptimizer optimizer(params, s, 16.0, -17.0);
+        params = optimizer(20 ,eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
+        LOG(Logger::INFO, "SimplexOptimizertest with optimized parameters: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+private:
+    SimulationParameters params;
+    OptimizerTestFunctions::Rosenbrock5DFunction eval;
 };
 }
