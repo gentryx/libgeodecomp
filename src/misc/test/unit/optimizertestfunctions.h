@@ -43,7 +43,7 @@ public:
     class GoalFunction : public TestableEvaluator
     {
     public:
-        GoalFunction()
+        GoalFunction():TestableEvaluator()
         {
             maxima.push_back(1000);
         }

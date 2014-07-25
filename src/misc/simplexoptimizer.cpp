@@ -263,7 +263,7 @@ std::size_t SimplexOptimizer::minInSimplex()
     std::size_t retval = 0;
     double min = DBL_MAX;
     for (std::size_t i = 0; i < simplex.size(); ++i) {
-        if (min > simplex[i].getFitness()) {
+        if (min >= simplex[i].getFitness()) {
             min = simplex[i].getFitness();
             retval = i;
         }

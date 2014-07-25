@@ -11,7 +11,6 @@ class Optimizer
 {
 public:
     friend class OptimizerTest;
-
     class Evaluator
     {
     public:
@@ -48,7 +47,7 @@ public:
 
 protected:
     SimulationParameters params;
-    double fitness;
+public:    double fitness;
 };
 
 }//namespace LibGeoDecomp

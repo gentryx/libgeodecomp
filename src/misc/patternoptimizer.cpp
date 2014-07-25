@@ -10,7 +10,9 @@
 namespace LibGeoDecomp{
 
 PatternOptimizer::PatternOptimizer(SimulationParameters params):
-    Optimizer(params)
+    Optimizer(params),
+    stepwidth(std::vector<double>()),
+    minStepwidth(std::vector<double>())
 {
     for (std::size_t i = 0; i < params.size(); ++i) {
         double dimsize = Optimizer::params[i].getMax()
