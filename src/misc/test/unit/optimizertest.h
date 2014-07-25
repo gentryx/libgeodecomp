@@ -4,12 +4,11 @@
 #include <libgeodecomp/misc/test/unit/optimizertestfunctions.h>
 #include <libgeodecomp/io/logger.h>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
-
 
 class GoalFunctionOptimizerTest : public CxxTest::TestSuite
 {
@@ -34,17 +33,17 @@ public:
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
-                         << std::endl << "fitness: " << optimizer.fitness)
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexChangedStart()
     {
@@ -52,9 +51,9 @@ public:
         params["y"].setValue(8);
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax()-1, optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax()-1, optimizer.getFitness());
         LOG(Logger::INFO, "SimplexOptimizertest with other start values: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }
 private:
     SimulationParameters params;
@@ -86,17 +85,17 @@ public:
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
-                         << std::endl << "fitness: " << optimizer.fitness)
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexDefault() 
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }
 private:
     SimulationParameters params;
@@ -125,17 +124,17 @@ public:
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.fitness));
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
-                         << std::endl << "fitness: " << optimizer.fitness)
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexDefault() 
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.fitness));
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }
 private:
     SimulationParameters params;
@@ -165,17 +164,17 @@ public:
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
-                         << std::endl << "fitness: " << optimizer.fitness)
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexDefault() 
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }
 
 private:
@@ -210,17 +209,17 @@ public:
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
-                         << std::endl << "fitness: " << optimizer.fitness)
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexDefault() 
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.fitness));
+        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }       
 
     void testSimplexOptimizedParameters()
@@ -231,9 +230,9 @@ public:
         }
         SimplexOptimizer optimizer(params, s, 8.0, 17.0);
         params = optimizer(20 ,eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.fitness));
+        TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with optimized parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testHybridVersion()
     {
@@ -246,9 +245,9 @@ public:
         }
         PatternOptimizer pattOptimizer(params,s);
         params = pattOptimizer(100, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax(), pattOptimizer.fitness);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), pattOptimizer.getFitness());
         LOG(Logger::INFO, "Simplex and Pattern Seach Hybrid: "
-                        << std::endl << "fitness: " << pattOptimizer.fitness)
+                        << std::endl << "getFitness(): " << pattOptimizer.getFitness())
     }
 
 private:
@@ -278,22 +277,21 @@ public:
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.fitness));
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
-                         << std::endl << "fitness: " << optimizer.fitness)
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
     void testSimplexDefault() 
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.fitness));
+        TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
-                        << std::endl << "fitness: " << optimizer.fitness)
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
     }       
 private:
     SimulationParameters params;
     OptimizerTestFunctions::HimmelblauFunction eval;
 
 };
-    
 }

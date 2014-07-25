@@ -14,8 +14,6 @@ namespace LibGeoDecomp {
 class SimplexOptimizer : public Optimizer
 {
 public:
-    friend class SimplexOptimizerTest;
-
     class SimplexVertex : public SimulationParameters
     {
     public:

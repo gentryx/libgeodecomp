@@ -44,10 +44,15 @@ public:
         }
         return params;
     }
+    
+    double getFitness()
+    {
+        return fitness;
+    }
 
 protected:
     SimulationParameters params;
-public:    double fitness;
+    double fitness;
 };
 
 }//namespace LibGeoDecomp
