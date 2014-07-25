@@ -194,7 +194,7 @@ public:
     public:
         Rosenbrock5DFunction()
         {
-            maxima.push_back(10000);
+            maxima.push_back(100000);
         }
         double operator()(SimulationParameters params)
         {
@@ -212,7 +212,7 @@ public:
             return 100000 - ( 
                   (100 * (w - v * v) * (w - v * v) + (1 - v)*(1 - v))
                 + (100 * (x - w * w) * (x - w * w) + (1 - w)*(1 - w))
-                + (100 * (y - x * x) * (y - x + x) + (1 - x)*(1 - x))
+                + (100 * (y - x * x) * (y - x * x) + (1 - x)*(1 - x))
                 + (100 * (z - y * y) * (z - y * y) + (1 - z)*(1 - z)));
         }
     };
