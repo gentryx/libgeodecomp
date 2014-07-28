@@ -220,7 +220,8 @@ public:
         int index = 0;
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             message << "\nCoord " << *i << ":\n"
-                    << (*this)[*i] << "\nneighbor: ";
+                    << (*this)[*i] << "\n"
+                    << "neighbor: ";
 
             std::vector<std::pair<int, VALUE_TYPE> > neighbor =
                 matrices[0].getRow(index++);
@@ -238,8 +239,7 @@ public:
 
     virtual void set(const Streak<DIM>& streak, const ELEMENT_TYPE *element)
     {
-        Coord<DIM> cursor = streak.origin;
-        for (; cursor.x() < streak.endX; ++cursor.x()) {
+        for (Coord<DIM> cursor = streak.origin; cursor.x() < streak.endX; ++cursor.x()) {
             (*this)[cursor] = *element;
             ++element;
         }
