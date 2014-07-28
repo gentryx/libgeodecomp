@@ -70,7 +70,8 @@ public:
 
     }
 
-    std::vector< std::pair<int, VALUETYPE> > getRow(int const row)
+    // fixme: is this efficient?
+    std::vector< std::pair<int, VALUETYPE> > getRow(int const row) const
     {
 
         std::vector< std::pair<int, VALUETYPE> > vec;
@@ -80,7 +81,8 @@ public:
 
 
         for (int element = 0;
-                element < rowLength[row]; ++element, index += C) {
+             element < rowLength[row];
+             ++element, index += C) {
             vec.push_back( std::pair<int, VALUETYPE>
                             (column[index], values[index]) );
         }
@@ -218,6 +220,12 @@ public:
         }
 
         return true;
+    }
+
+    template<typename OTHER>
+    inline bool operator!=(const OTHER& other) const
+    {
+        return !(*this == other);
     }
 
 private:
