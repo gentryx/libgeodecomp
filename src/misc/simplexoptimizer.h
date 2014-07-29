@@ -8,7 +8,7 @@
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <utility>
-#include <cfloat>
+
 namespace LibGeoDecomp {
 
 class SimplexOptimizer : public Optimizer
