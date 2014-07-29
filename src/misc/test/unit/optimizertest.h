@@ -49,7 +49,7 @@ public:
         params["y"].setValue(8);
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT_EQUALS(eval.getGlobalMax()-1, optimizer.getFitness());
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
         LOG(Logger::INFO, "SimplexOptimizertest with other start values: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
