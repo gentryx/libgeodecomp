@@ -50,7 +50,7 @@ public:
         const SimulationParameters& params,
         const double epsilon = -1.0, //DBL_MIN,
         const double c = 8.0,
-        const std::vector<double>& s = std::vector<double>());
+        const std::vector<double>& stepsizes = std::vector<double>());
 
     virtual SimulationParameters operator()(int steps, Evaluator& eval);
 
@@ -71,8 +71,8 @@ private:
     int comperator(double fitness);
     std::string simplexToString() const;
     double epsilon;
-    double c;   // fixme: documentation missing -- or better name should be found
-    std::vector<double> s;   // fixme: please rename this to "stepsizes"
+    double stepMultiplicator;       // stepMultiplicator = c in Algo 
+    std::vector<double> stepsizes;  // stepsizes = s_i in Algo
 
     SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };

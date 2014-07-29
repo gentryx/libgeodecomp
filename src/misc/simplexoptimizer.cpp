@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
 
@@ -99,20 +99,20 @@ const SimplexOptimizer::SimplexVertex operator*(
 SimplexOptimizer::SimplexOptimizer(
         const SimulationParameters& params,
         const double epsilion,
-        const double c,
-        const std::vector<double>& s) :
+        const double stepMultiplicator,
+        const std::vector<double>& stepsizes) :
     Optimizer(params),
     epsilon(epsilon),
-    c(c),
-    s(s)
+    stepMultiplicator(stepMultiplicator),
+    stepsizes(stepsizes)
 {
-    LOG(Logger::INFO, "this->epsilon: " << this->epsilon << " this->c: " << this->c)
-    if (s.size() == 0) {
+    LOG(Logger::INFO, "this->epsilon: " << this->epsilon << " this->stepMultiplicator: " << this->stepMultiplicator)
+    if (stepsizes.size() == 0) {
         for (std::size_t i = 0; i < params.size(); ++i) {
            if (params[i].getGranularity() > 1) {
-               this->s.push_back(params[i].getGranularity());
+               this->stepsizes.push_back(params[i].getGranularity());
            } else {
-               this->s.push_back(1);
+               this->stepsizes.push_back(1);
            }
         }
     }
@@ -182,8 +182,8 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 LOG(Logger::DBG, "checkConvergence succes! ")
                 initSimplex(simplex[maxInSimplex()]);
                 evalSimplex(eval);
-                if (c >= 2) {
-                    c = c * 0.5;
+                if (stepMultiplicator >= 2) {
+                    stepMultiplicator = stepMultiplicator * 0.5;
                 }
             }
             if (eq(old, simplex)) {
@@ -192,8 +192,8 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
             }
         } else {
             if (eq(old, simplex)) {
-                if (c >= 2) {
-                    c = c * 0.5;
+                if (stepMultiplicator >= 2) {
+                    stepMultiplicator = stepMultiplicator * 0.5;
                     initSimplex(simplex[maxInSimplex()]);
                     evalSimplex(eval);
                 } else {
@@ -240,11 +240,11 @@ void SimplexOptimizer::initSimplex(SimulationParameters params)
     simplex.push_back(tmp);
     for (std::size_t i = 0; i < tmp.size(); ++i) {
         SimplexVertex tmp2(tmp);
-        tmp2[i].setValue(tmp[i].getValue() + c * s[i]);
+        tmp2[i].setValue(tmp[i].getValue() + stepMultiplicator * stepsizes[i]);
 
         // if init is called on a border, inverse the direction
         if (tmp2[i].getValue() == tmp[i].getValue()) {
-            tmp2[i].setValue(tmp[i].getValue() - c * s[i]);
+            tmp2[i].setValue(tmp[i].getValue() - stepMultiplicator * stepsizes[i]);
         }
 
         tmp2.setFitness(-1);
