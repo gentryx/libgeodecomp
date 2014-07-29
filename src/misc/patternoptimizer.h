@@ -11,9 +11,9 @@ class PatternOptimizer : public Optimizer
 {
 public:
     explicit
-    PatternOptimizer(SimulationParameters params);
-    PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth);
-    PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth, std::vector<double> minStepwidth);
+    PatternOptimizer(SimulationParameters params, 
+            std::vector<double> stepwidth = std::vector<double>(), 
+            std::vector<double> minStepwidth = std::vector<double>());
     virtual SimulationParameters operator()(int steps, Evaluator& eval);
 private:
     std::vector<double> stepwidth;

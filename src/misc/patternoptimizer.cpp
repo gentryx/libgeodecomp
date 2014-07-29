@@ -8,46 +8,33 @@
 //#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
-
-PatternOptimizer::PatternOptimizer(SimulationParameters params):
-    Optimizer(params),
-    stepwidth(std::vector<double>()),
-    minStepwidth(std::vector<double>())
-{
-    for (std::size_t i = 0; i < params.size(); ++i) {
-        double dimsize = Optimizer::params[i].getMax()
-            - Optimizer::params[i].getMin();
-        stepwidth.push_back(dimsize / 4);
-        params[i].setValue(dimsize / 2);
-        // minStepwidht >= granularity
-        // it will be used as abort criterion
-        minStepwidth.push_back(params[i].getGranularity());
-    }
-}
-
-PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth) :
-    Optimizer(params),
-    stepwidth(stepwidth)
-{
-    if( stepwidth.size() != params.size() ) {
-        // TODO exception
-        LOG(Logger::FATAL,"Wrong size of stepwidth in constructor, PatternOptimizer!")
-    }
-    for (std::size_t i = 0; i < params.size(); ++i) {
-        minStepwidth.push_back(params[i].getGranularity());
-    }
-}
-
 PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth, std::vector<double> minStepwidth) :
     Optimizer(params),
     stepwidth(stepwidth),
     minStepwidth(minStepwidth)
 {
-    if( stepwidth.size() != params.size() ) {
+    LOG(Logger::DBG, "Constructor call PatternOptimizer")
+    if (stepwidth.size() == 0 && minStepwidth.size() == 0) {
+        for (std::size_t i = 0; i < params.size(); ++i) {
+            double dimsize = Optimizer::params[i].getMax()
+                - Optimizer::params[i].getMin();
+            this->stepwidth.push_back(dimsize / 4);
+            this->params[i].setValue(dimsize / 2);
+            // minStepwidht >= granularity
+            // it will be used as abort criterion
+            this->minStepwidth.push_back(params[i].getGranularity());
+        }
+    }
+    if (minStepwidth.size() == 0 && stepwidth.size() == params.size()) {
+        for (std::size_t i = 0; i < params.size(); ++i) {
+            this->minStepwidth.push_back(params[i].getGranularity());
+        }
+    }
+    if(this->stepwidth.size() != this->params.size() ) {
         // TODO exception
         LOG(Logger::FATAL,"Wrong size of stepwidth in constructor, PatternOptimizer!")
     }
-    if (minStepwidth.size() != params.size()) {
+    if (this->minStepwidth.size() != this->params.size()) {
         LOG(Logger::FATAL,"Wrong size of minStepwidth in constructor, PatternOptimzer!")
     }
 }
