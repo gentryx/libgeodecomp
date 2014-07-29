@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-//#define LIBGEODECOMP_DEBUG_LEVEL 4
+#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
 
@@ -96,33 +96,26 @@ const SimplexOptimizer::SimplexVertex operator*(
 
 //------------------------simplexOptimizer-------------------------
 
-SimplexOptimizer::SimplexOptimizer(const SimulationParameters& params) :
-    Optimizer(params),
-    s(std::vector<double>()),
-    c(8),
-    epsilon(-1)
-{
-    for (std::size_t i = 0; i < params.size(); ++i) {
-       if (params[i].getGranularity() > 1) {
-           s.push_back(params[i].getGranularity());
-       } else {
-           s.push_back(1);
-       }
-    }
-    // n+1 vertices needed
-    initSimplex(params);
-}
-
 SimplexOptimizer::SimplexOptimizer(
         const SimulationParameters& params,
-        const std::vector<double>& s,
+        const double epsilion,
         const double c,
-        const double epsilon) :
+        const std::vector<double>& s) :
     Optimizer(params),
-    s(s),
+    epsilon(epsilon),
     c(c),
-    epsilon(epsilon)
+    s(s)
 {
+    LOG(Logger::INFO, "this->epsilon: " << this->epsilon << " this->c: " << this->c)
+    if (s.size() == 0) {
+        for (std::size_t i = 0; i < params.size(); ++i) {
+           if (params[i].getGranularity() > 1) {
+               this->s.push_back(params[i].getGranularity());
+           } else {
+               this->s.push_back(1);
+           }
+        }
+    }
     initSimplex(params);
 }
 

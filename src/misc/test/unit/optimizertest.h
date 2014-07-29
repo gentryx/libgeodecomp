@@ -4,7 +4,7 @@
 #include <libgeodecomp/misc/test/unit/optimizertestfunctions.h>
 #include <libgeodecomp/io/logger.h>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
+//#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 using namespace LibGeoDecomp;
 
@@ -142,7 +142,7 @@ public:
         for(std::size_t i = 0; i < params.size(); ++i) {
             s.push_back(2.0);
         }
-        SimplexOptimizer optimizer(params, s, 8.0, -17.0);
+        SimplexOptimizer optimizer(params, -17, 8.0, s);
         params = optimizer(5000,eval);
         TS_ASSERT(((eval.getGlobalMax() - 2.0) < optimizer.getFitness()));
         LOG(Logger::INFO, "Patternoptimizertest with chaneged parameters: "
@@ -243,7 +243,7 @@ public:
         for(std::size_t i = 0; i < params.size(); ++i) {
             s.push_back(1.0);
         }
-        SimplexOptimizer optimizer(params, s, 8.0, 17.0);
+        SimplexOptimizer optimizer(params, 17.0 , 8.0, s);
         params = optimizer(20 ,eval);
         TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with optimized parameters: "
@@ -399,7 +399,7 @@ public:
         for(std::size_t i = 0; i < params.size(); ++i) {
             s.push_back(4.0);
         }
-        SimplexOptimizer optimizer(params, s, 250.0, -0.1);
+        SimplexOptimizer optimizer(params, -0.1, 250.0, s);
         params = optimizer(20 ,eval);
         TS_ASSERT((eval.getGlobalMax() - 6.0 ) < optimizer.getFitness());
         LOG(Logger::INFO, "SimplexOptimizertest with optimized parameters: "

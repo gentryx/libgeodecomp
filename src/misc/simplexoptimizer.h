@@ -8,7 +8,7 @@
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <utility>
-
+#include <cfloat>
 namespace LibGeoDecomp {
 
 class SimplexOptimizer : public Optimizer
@@ -46,13 +46,11 @@ public:
     }; //SimplexVertex
 
     explicit
-    SimplexOptimizer(const SimulationParameters& params);
-
     SimplexOptimizer(
         const SimulationParameters& params,
-        const std::vector<double>& s,
-        const double c,
-        const double epsilon);
+        const double epsilon = -1.0, //DBL_MIN,
+        const double c = 8.0,
+        const std::vector<double>& s = std::vector<double>());
 
     virtual SimulationParameters operator()(int steps, Evaluator& eval);
 
@@ -72,9 +70,9 @@ private:
     std::vector<SimplexVertex> simplex;
     int comperator(double fitness);
     std::string simplexToString() const;
-    std::vector<double> s;   // fixme: please rename this to "stepsizes"
-    double c;   // fixme: documentation missing -- or better name should be found
     double epsilon;
+    double c;   // fixme: documentation missing -- or better name should be found
+    std::vector<double> s;   // fixme: please rename this to "stepsizes"
 
     SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };
