@@ -73,6 +73,8 @@ private:
     std::vector<double> s;   // fixme: please rename this to "stepsizes"
     double c;   // fixme: documentation missing -- or better name should be found
     double epsilon;
+
+    SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };
 // Caution: SimplexVertex have borders.
 const SimplexOptimizer::SimplexVertex operator+(
