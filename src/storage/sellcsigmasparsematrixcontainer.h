@@ -16,6 +16,7 @@ template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
 public:
+    explicit
     SellCSigmaSparseMatrixContainer(const int N = 0) :
         values(),
         column(),

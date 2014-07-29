@@ -9,6 +9,7 @@
 class MyDummyElement
 {
 public:
+    explicit
     MyDummyElement(int const val=0) :
         val_(val)
     {}

@@ -17,6 +17,7 @@ public:
     class SimplexVertex : public SimulationParameters
     {
     public:
+        explicit
         SimplexVertex(const SimulationParameters& point):
             SimulationParameters(point),
             fitness(-1)
@@ -44,6 +45,7 @@ public:
         double fitness;
     }; //SimplexVertex
 
+    explicit
     SimplexOptimizer(const SimulationParameters& params);
 
     SimplexOptimizer(
