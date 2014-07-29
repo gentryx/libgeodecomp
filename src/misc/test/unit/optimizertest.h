@@ -4,8 +4,6 @@
 #include <libgeodecomp/misc/test/unit/optimizertestfunctions.h>
 #include <libgeodecomp/io/logger.h>
 
-//#define LIBGEODECOMP_DEBUG_LEVEL 4
-
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -72,6 +70,7 @@ public:
         params.addParameter("z", -10, 10);
         LOG(Logger::INFO,"ThreeDimFunction with dependend Parameters")
     }
+
     void tearDown()
     {
         LOG(Logger::INFO, "Calls: " << eval.getCalls()
@@ -81,7 +80,8 @@ public:
                  << " z: " << (int) params["z"]
                  << std::endl);
     }
-    void testPatternDefault() 
+
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -89,7 +89,8 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -97,10 +98,12 @@ public:
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
+
 private:
     SimulationParameters params;
     OptimizerTestFunctions::ThreeDimFunction eval;
 };
+
 class Multimodal2DTest : public CxxTest::TestSuite
 {
 public:
@@ -113,14 +116,15 @@ public:
         LOG(Logger::INFO, "Multimodal 2D Test:")
     }
      void tearDown()
-     {   
+     {
         LOG(Logger::INFO, "Calls: " << eval.getCalls()
                  << std::endl
                  << "x: "<< (int) params["x"]
                  <<" y: " << (int) params["y"]
                  << std::endl);
     }
-    void testPatternDefault() 
+
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -128,7 +132,8 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -136,6 +141,7 @@ public:
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
+
 private:
     SimulationParameters params;
     OptimizerTestFunctions::MultimodTwoDim eval;
@@ -146,7 +152,7 @@ public:
     void setUp()
     {
         eval = OptimizerTestFunctions::JumpingFunction();
-        params = SimulationParameters(); 
+        params = SimulationParameters();
         params.addParameter("x", -60, 60);
         params.addParameter("y", 0, 40);
         LOG(Logger::INFO, "Discontinous function test:")
@@ -160,7 +166,7 @@ public:
                  << std::endl);
     }
 
-    void testPatternDefault() 
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -168,7 +174,8 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -181,6 +188,7 @@ private:
     SimulationParameters params;
     OptimizerTestFunctions::JumpingFunction eval;
 };
+
 class FiveDimensionsTest : public CxxTest::TestSuite
 {
 public:
@@ -205,7 +213,7 @@ public:
                 << " z: " << (int) params["z"]
                 << std::endl);
     }
-    void testPatternDefault() 
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -213,14 +221,14 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
         TS_ASSERT(((eval.getGlobalMax() - 0,1) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
-    }       
+    }
 
     void testSimplexOptimizedParameters()
     {
@@ -273,7 +281,7 @@ public:
                 << " y: " << (int) params["y"]
                 << std::endl);
     }
-    void testPatternDefault() 
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -281,14 +289,14 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
         TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
-    }       
+    }
 private:
     SimulationParameters params;
     OptimizerTestFunctions::HimmelblauFunction eval;
@@ -312,7 +320,7 @@ public:
                    << " y: " << (int) params["y"]
                    << std::endl)
     }
-    void testPatternDefault() 
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -320,14 +328,14 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
         TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
-    }       
+    }
 private:
     SimulationParameters params;
     OptimizerTestFunctions::Rosenbrock2DFunction eval;
@@ -356,7 +364,7 @@ public:
                    << " z: " << (int) params["z"]
                    << std::endl)
     }
-    void testPatternDefault() 
+    void testPatternDefault()
     {
         PatternOptimizer optimizer(params);
         params = optimizer(5000, eval);
@@ -364,14 +372,14 @@ public:
         LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
                          << std::endl << "getFitness(): " << optimizer.getFitness())
     }
-    void testSimplexDefault() 
+    void testSimplexDefault()
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
         TS_ASSERT(((eval.getGlobalMax() - 0,0001) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
-    }       
+    }
     void testSimplexOptimizedParameters()
     {
         std::vector<double> s;
@@ -388,4 +396,5 @@ private:
     SimulationParameters params;
     OptimizerTestFunctions::Rosenbrock5DFunction eval;
 };
+
 }
