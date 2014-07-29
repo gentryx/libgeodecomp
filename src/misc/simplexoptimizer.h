@@ -48,8 +48,8 @@ public:
     explicit
     SimplexOptimizer(
         const SimulationParameters& params,
-        const double epsilon = -1.0, //DBL_MIN,
-        const double c = 8.0,
+        const double epsilon = -1.0,
+        const double stepMultiplicator = 8.0,
         const std::vector<double>& stepsizes = std::vector<double>());
 
     virtual SimulationParameters operator()(int steps, Evaluator& eval);
@@ -73,7 +73,6 @@ private:
     double epsilon;
     double stepMultiplicator;       // stepMultiplicator = c in Algo 
     std::vector<double> stepsizes;  // stepsizes = s_i in Algo
-
     SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };
 // Caution: SimplexVertex have borders.

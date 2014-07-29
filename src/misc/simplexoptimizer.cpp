@@ -36,6 +36,8 @@ const SimplexOptimizer::SimplexVertex operator+(
         }
         result.setFitness(-1);
         return result;
+    } else {
+        throw std::invalid_argument("different size of SimplexVertex in operator+ call");
     }
     return b;
 }
@@ -63,6 +65,8 @@ const SimplexOptimizer::SimplexVertex operator-(
         }
         result.setFitness(-1);
         return result;
+    } else {
+        throw std::invalid_argument("different size of SimplexVertex in operator- call");
     }
     return b;
 }
@@ -78,6 +82,8 @@ const SimplexOptimizer::SimplexVertex operator*(
         }
         result.setFitness(-1);
         return result;
+    } else {
+        throw std::invalid_argument("different size of SimplexVertex in operator* call");
     }
     return b;
 }
@@ -98,7 +104,7 @@ const SimplexOptimizer::SimplexVertex operator*(
 
 SimplexOptimizer::SimplexOptimizer(
         const SimulationParameters& params,
-        const double epsilion,
+        const double epsilon,
         const double stepMultiplicator,
         const std::vector<double>& stepsizes) :
     Optimizer(params),
@@ -115,6 +121,9 @@ SimplexOptimizer::SimplexOptimizer(
                this->stepsizes.push_back(1);
            }
         }
+    }
+    if (this->stepsizes.size() != params.size()) {
+        throw std::invalid_argument("stepsize.size() =! params.size()");
     }
     initSimplex(params);
 }
@@ -284,6 +293,8 @@ std::pair<SimplexOptimizer::SimplexVertex, SimplexOptimizer::SimplexVertex> Simp
     std::size_t worst = minInSimplex();
     SimplexVertex t1(simplex[0]);
     SimplexVertex t2(simplex[0]);
+    t1.setFitness(-1);
+    t2.setFitness(-1);
     for (std::size_t j = 0; j < simplex[0].size(); ++j) {
         double tmp=0.0;
         for (std::size_t i = 0; i < simplex.size(); ++i) {
@@ -304,6 +315,7 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion()
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
     SimplexVertex retval = simplex[0];
+    retval.setFitness(-1);
     // to use the overloaded operator is not possible here, about over/underflows
     for (std::size_t i = 0; i < simplex[0].size(); ++i) {
         retval[i].setValue(
@@ -401,12 +413,11 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::merge(
     const SimplexVertex& b) const
 {
     SimplexOptimizer::SimplexVertex result(a);
-
+    result.setFitness(-1);
     for (std::size_t i = 0; i < result.size(); ++i) {
         double newValue = (a[i].getValue() + b[i].getValue()) * 0.5;
         result[i].setValue(newValue);
     }
-
     return result;
 }
 
