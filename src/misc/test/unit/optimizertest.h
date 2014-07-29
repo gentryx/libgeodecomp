@@ -204,7 +204,9 @@ public:
         params.addParameter("v", -60, 60);
         params.addParameter("w", -20, 40);
         params.addParameter("x", -10, 10);
-        params.addParameter("y",   0, 2);
+        std::vector<bool> set;
+        set << false << true;
+        params.addParameter("y", set);
         params.addParameter("z", -10, 40);
         LOG(Logger::INFO, "Five dimensions function:")
     }
@@ -214,7 +216,7 @@ public:
                 << "v:"   << (int) params["v"]
                 << " w: " << (int) params["w"]
                 << " x: " << (int) params["x"]
-                << " y: " << (int) params["y"]
+                << " y: " << (bool) params["y"]
                 << " z: " << (int) params["z"]
                 << std::endl);
     }

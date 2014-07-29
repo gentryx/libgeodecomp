@@ -100,7 +100,7 @@ SimplexOptimizer::SimplexOptimizer(const SimulationParameters& params) :
     Optimizer(params),
     s(std::vector<double>()),
     c(8),
-   epsilon(-1)
+    epsilon(-1)
 {
     for (std::size_t i = 0; i < params.size(); ++i) {
        if (params[i].getGranularity() > 1) {
@@ -114,10 +114,10 @@ SimplexOptimizer::SimplexOptimizer(const SimulationParameters& params) :
 }
 
 SimplexOptimizer::SimplexOptimizer(
-    const SimulationParameters& params,
-    const std::vector<double>& s,
-    const double c,
-    const double epsilon) :
+        const SimulationParameters& params,
+        const std::vector<double>& s,
+        const double c,
+        const double epsilon) :
     Optimizer(params),
     s(s),
     c(c),

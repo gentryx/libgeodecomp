@@ -89,8 +89,12 @@ public:
             int v = params["v"];
             int w = params["w"];
             int x = params["x"];
-            int y = params["y"];
+            bool  by = params["y"];
+            int y = 0;
             int z = params["z"];
+                if (by) {
+                    y = 1;
+                }
             return
                 5000 -
                 ((v + 42) * ( v + 42) * 0.01) -
