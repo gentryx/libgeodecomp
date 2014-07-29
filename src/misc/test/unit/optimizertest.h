@@ -300,7 +300,7 @@ public:
     {
         SimplexOptimizer optimizer(params);
         params = optimizer(5000, eval);
-        TS_ASSERT(((eval.getGlobalMax() - 0.01) < optimizer.getFitness()));
+        TS_ASSERT(((eval.getGlobalMax() - 0.2) < optimizer.getFitness()));
         LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
