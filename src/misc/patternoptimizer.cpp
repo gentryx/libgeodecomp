@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 //#define LIBGEODECOMP_DEBUG_LEVEL 4
 
@@ -32,10 +33,10 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<doub
     }
     if(this->stepwidth.size() != this->params.size() ) {
         // TODO exception
-        LOG(Logger::FATAL,"Wrong size of stepwidth in constructor, PatternOptimizer!")
+        throw std::invalid_argument("Wrong size of Stepwidth in PatternOptimizer Constructor!");
     }
     if (this->minStepwidth.size() != this->params.size()) {
-        LOG(Logger::FATAL,"Wrong size of minStepwidth in constructor, PatternOptimzer!")
+        throw std::invalid_argument("Wrong size of i minStepwidth in PatternOptimizer Constructor!");
     }
 }
 

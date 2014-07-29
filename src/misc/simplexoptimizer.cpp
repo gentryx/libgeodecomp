@@ -4,7 +4,7 @@
 #include <libgeodecomp/io/logger.h>
 #include <sstream>
 #include <iostream>
-
+#include <stdexcept>
 
 //#define LIBGEODECOMP_DEBUG_LEVEL 4
 
