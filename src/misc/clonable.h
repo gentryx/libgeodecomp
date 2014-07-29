@@ -19,7 +19,6 @@ public:
      * these c-tors simply delegate to the BASE type, which includes
      * the default c-tor, sans parameters.
      */
-    explicit
     Clonable()
     {}
 

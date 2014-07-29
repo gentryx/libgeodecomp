@@ -123,6 +123,7 @@ public:
 
     using SelectorContainer<SILO_WRITER>::selectors;
 
+    explicit
     SelectorContainerImplementation(const COLLECTION_INTERFACE& collectionInterface) :
         SelectorContainer<SILO_WRITER>(static_cast<Cargo*>(0)),
         collectionInterface(collectionInterface)

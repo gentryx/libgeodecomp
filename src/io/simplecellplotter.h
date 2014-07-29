@@ -17,6 +17,7 @@ template<typename CELL, typename MEMBER, typename PALETTE>
 class CellToColor : public Filter<CELL, MEMBER, Color>
 {
 public:
+    explicit
     CellToColor(const PALETTE& palette) :
         palette(palette)
     {}

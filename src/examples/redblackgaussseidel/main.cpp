@@ -36,6 +36,7 @@ public:
         temp(v), type(cellType)
     {}
 
+    explicit
     inline Cell(double v) :
         temp(v), type(RED)
     {}
@@ -90,6 +91,7 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
+    explicit
     CellInitializer(
         const int nx = 512,
         const int ny = 512,

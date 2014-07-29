@@ -212,7 +212,8 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
         fitness = simplex[maxInSimplex()].getFitness();
 
     }
-    LOG(Logger::DBG, "Done steps: " << i)
+    LOG(Logger::DBG, "Done steps: " << i);
+
     fitness = simplex[maxInSimplex()].getFitness();
     return simplex[maxInSimplex()];
 }
@@ -321,21 +322,20 @@ SimplexOptimizer::SimplexVertex SimplexOptimizer::expansion()
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialOutsideContraction()
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
-    return (reflRes.first*0.5 + reflRes.second*0.5);
+    return merge(reflRes.first, reflRes.second);
 }
 
 SimplexOptimizer::SimplexVertex SimplexOptimizer::partialInsideContraction()
 {
     std::pair<SimplexVertex, SimplexVertex> reflRes = reflection();
-    return (reflRes.first*0.5 + simplex[minInSimplex()]*0.5);
+    return merge(reflRes.first, simplex[minInSimplex()]);
 }
 
 void SimplexOptimizer::totalContraction()
 {
     SimplexVertex best = simplex[maxInSimplex()];
     for (std::size_t i = 0; i < simplex.size(); ++i) {
-        SimplexVertex result = (best *0.5 + simplex[i]*0.5) ;
-        simplex[i] = result;
+        simplex[i] = merge(best, simplex[i]);
     }
 }
 
@@ -401,6 +401,20 @@ int SimplexOptimizer::comperator(double fitness)
         }
     }
     return retval;
+}
+
+SimplexOptimizer::SimplexVertex SimplexOptimizer::merge(
+    const SimplexVertex& a,
+    const SimplexVertex& b) const
+{
+    SimplexOptimizer::SimplexVertex result(a);
+
+    for (std::size_t i = 0; i < result.size(); ++i) {
+        double newValue = (a[i].getValue() + b[i].getValue()) * 0.5;
+        result[i].setValue(newValue);
+    }
+
+    return result;
 }
 
 std::string SimplexOptimizer::simplexToString() const

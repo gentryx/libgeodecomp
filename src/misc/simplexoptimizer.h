@@ -17,6 +17,7 @@ public:
     class SimplexVertex : public SimulationParameters
     {
     public:
+        explicit
         SimplexVertex(const SimulationParameters& point):
             SimulationParameters(point),
             fitness(-1)
@@ -44,6 +45,7 @@ public:
         double fitness;
     }; //SimplexVertex
 
+    explicit
     SimplexOptimizer(const SimulationParameters& params);
 
     SimplexOptimizer(
@@ -73,6 +75,8 @@ private:
     std::vector<double> s;   // fixme: please rename this to "stepsizes"
     double c;   // fixme: documentation missing -- or better name should be found
     double epsilon;
+
+    SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };
 // Caution: SimplexVertex have borders.
 const SimplexOptimizer::SimplexVertex operator+(

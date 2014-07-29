@@ -16,6 +16,7 @@ template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
 public:
+    explicit
     SellCSigmaSparseMatrixContainer(const int N = 0) :
         values(),
         column(),
@@ -37,12 +38,12 @@ public:
             throw std::invalid_argument("lhs and rhs must be of size N");
         }
 
-        // loop over chunks     TODO paralel omp
+        // loop over chunks     TODO parallel omp
         for(size_t chunk=0; chunk<chunkLength.size(); ++chunk) {
             int offs = chunkOffset[chunk];
             VALUETYPE tmp[C];
 
-            // init tmp                     TODO vectorise
+            // init tmp                     TODO vectorize
             for(int row=0; row<C; ++row) {
                 tmp[row] = lhs[chunk*C + row];
             }
@@ -50,7 +51,7 @@ public:
             // loop over columns in chunk
             for(int col=0; col<chunkLength[chunk]; ++col) {
 
-                // loop over rows in chunks TODO vectorise
+                // loop over rows in chunks TODO vectorize
                 for(int row=0; row<C; ++row) {
                     VALUETYPE val = values[offs];
                     int columnINDEX = column[offs++];
@@ -62,7 +63,7 @@ public:
                 }
             }
 
-            // store tmp                     TODO vectorise
+            // store tmp                     TODO vectorize
             for(int row=0; row<C; ++row) {
                 lhs[chunk*C + row] = tmp[row];
             }
@@ -70,7 +71,8 @@ public:
 
     }
 
-    std::vector< std::pair<int, VALUETYPE> > getRow(int const row)
+    // fixme: is this mainly used for constructing the neighborhood in UnstructuredGrid::getNeighborhood. drop this code once we have an efficient neighborhood-object for UnstructuredGrid
+    std::vector< std::pair<int, VALUETYPE> > getRow(int const row) const
     {
 
         std::vector< std::pair<int, VALUETYPE> > vec;
@@ -78,9 +80,9 @@ public:
         int const offset (row%C);
         int index = chunkOffset[chunk] + offset;
 
-
         for (int element = 0;
-                element < rowLength[row]; ++element, index += C) {
+             element < rowLength[row];
+             ++element, index += C) {
             vec.push_back( std::pair<int, VALUETYPE>
                             (column[index], values[index]) );
         }
@@ -218,6 +220,12 @@ public:
         }
 
         return true;
+    }
+
+    template<typename OTHER>
+    inline bool operator!=(const OTHER& other) const
+    {
+        return !(*this == other);
     }
 
 private:

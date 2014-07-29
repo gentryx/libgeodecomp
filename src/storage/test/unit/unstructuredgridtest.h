@@ -9,28 +9,42 @@
 class MyDummyElement
 {
 public:
-    MyDummyElement(int const val=0):val_(val){}
+    explicit
+    MyDummyElement(int const val=0) :
+        val_(val)
+    {}
 
-    int& operator() (int const & val){
+    int& operator() (int const & val)
+    {
         val_ = val;
         return val_;
     }
 
-    int const & operator() ()const{
-        return val_;
-    }
-    int& operator() (){
+    int const & operator() () const
+    {
         return val_;
     }
 
-    inline bool operator== (const MyDummyElement& other)const {
+    // fixme: rename val_ to val?
+    int& operator() ()
+    {
+        return val_;
+    }
+
+    inline bool operator==(const MyDummyElement& other) const
+    {
 
         return val_ == other.val_;
     }
 
+    inline bool operator!=(const MyDummyElement& other) const
+    {
+
+        return val_ != other.val_;
+    }
+
 private:
     int val_;
-
 };
 
 std::ostream& operator<< (std::ostream& out, MyDummyElement const & val){
@@ -77,14 +91,14 @@ public:
         UnstructuredGrid<MyDummyElement> other =
             UnstructuredGrid<MyDummyElement>(Coord<1>(dim));
 
-        for(int i=0; i<dim; ++i){
+        for(int i = 0; i < dim; ++i) {
             other[i] = testGrid->get(Coord<1>(i));
         }
+
         TS_ASSERT(*testGrid == other);
 
         other[2](-100);
         TS_ASSERT(*testGrid != other);
-
     }
 
     void testAssimentOperator(){
@@ -103,7 +117,7 @@ public:
         TS_ASSERT_DIFFERS(a,b);
     }
 
-    void testSeterGeter(){
+    void testSetterGetter(){
         UnstructuredGrid<int> a (Coord<1>(100));
         for (int i = 0; i<100; i++){
             a[Coord<1>(i)] = i * 200;

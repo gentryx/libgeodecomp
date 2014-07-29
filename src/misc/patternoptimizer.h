@@ -10,6 +10,7 @@ namespace LibGeoDecomp {
 class PatternOptimizer : public Optimizer
 {
 public:
+    explicit
     PatternOptimizer(SimulationParameters params);
     PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth);
     PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth, std::vector<double> minStepwidth);

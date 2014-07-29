@@ -68,6 +68,7 @@ public:
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
 
+    explicit
     DataBuffer(
         const Selector<CELL_TYPE>& selector) :
         DataBufferBase<CELL_TYPE>(selector)
