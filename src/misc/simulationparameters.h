@@ -230,7 +230,14 @@ public:
 
     void setValue(double newValue)
     {
-        index = sanitizeIndex(newValue);
+        if (granularity > 0.0) {
+	       index = newValue;
+		   long nrOfSteps = index / granularity;
+		   index = nrOfSteps * granularity;
+           index = sanitizeIndex(index);
+        } else {
+            index = sanitizeIndex(newValue);
+        }
         current = minimum + index;
     }
 
@@ -241,9 +248,15 @@ public:
 
     void operator+=(double step)
     {
-        index += step;
-        index = sanitizeIndex(index);
-
+        if (granularity > 0.0) {
+            index = index + step;
+			long nrOfSteps = index / granularity;
+            index = nrOfSteps * granularity;
+			index = sanitizeIndex(index);
+        } else {
+            index += step;
+            index = sanitizeIndex(index);
+        }
         current = minimum + index;
     }
 
@@ -251,7 +264,7 @@ private:
     VALUE_TYPE minimum;
     VALUE_TYPE maximum;
     double granularity;
-    int index;
+    VALUE_TYPE index;
 };
 
 template<typename VALUE_TYPE>
@@ -330,12 +343,12 @@ public:
     }
 
     template<typename VALUE_TYPE>
-    void addParameter(const std::string& name, const VALUE_TYPE& minimum, const VALUE_TYPE& maximum)
+    void addParameter(const std::string& name, const VALUE_TYPE& minimum, const VALUE_TYPE& maximum, const double granularity = 1.0)
     {
         names[name] = parameters.size();
         parameters.push_back(
             ParamPointerType(
-                new SimulationParametersHelpers::Interval<VALUE_TYPE>(minimum, maximum)));
+                new SimulationParametersHelpers::Interval<VALUE_TYPE>(minimum, maximum, granularity)));
     }
 
     template<typename VALUE_TYPE>

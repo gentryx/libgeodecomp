@@ -19,7 +19,11 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<doub
         for (std::size_t i = 0; i < params.size(); ++i) {
             double dimsize = Optimizer::params[i].getMax()
                 - Optimizer::params[i].getMin();
-            this->stepwidth.push_back(dimsize / 4);
+            if (dimsize / 4 >= 1) {
+                this->stepwidth.push_back(dimsize / 4);
+            } else {
+                this->stepwidth.push_back(params[i].getGranularity());
+            }
             this->params[i].setValue(dimsize / 2);
             // minStepwidht >= granularity
             // it will be used as abort criterion

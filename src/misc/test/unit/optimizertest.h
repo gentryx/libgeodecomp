@@ -309,6 +309,56 @@ private:
     OptimizerTestFunctions::HimmelblauFunction eval;
 
 };
+
+class HimmelblauDoubleTest : public CxxTest::TestSuite
+{
+public:
+    void setUp()
+    {
+        eval = OptimizerTestFunctions::HimmelblauFunctionDouble();
+        params = SimulationParameters();
+        params.addParameter("x",(double)-5.0, (double)5.0, (double)0.00001);
+        params.addParameter("y", (double)-5.0, (double)5.0, (double)0.00001);
+        LOG(Logger::INFO, "HimmelblauFunctionDouble:")
+    }
+    void tearDown()
+    {
+        LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
+                << "x: " <<  (double) params["x"].getValue()
+                << " y: " << (double) params["y"].getValue()
+                << " granulatity from x " << params["x"].getGranularity() 
+                << std::endl);
+    }
+    void testPatternDefault()
+    {
+        PatternOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0.01) < optimizer.getFitness()));
+        LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testSimplexDefault()
+    {
+        SimplexOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0.01) < optimizer.getFitness()));
+        LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testSimplexChangedParameters()
+    {
+        SimplexOptimizer optimizer(params, 0.01, 4);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 0.2) < optimizer.getFitness()));
+        LOG(Logger::INFO, "SimplexOptimizertest with optimized parameters: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+private:
+    SimulationParameters params;
+    OptimizerTestFunctions::HimmelblauFunctionDouble eval;
+
+};
+
 class Rosenbrock2DTest : public CxxTest::TestSuite
 {
 public:

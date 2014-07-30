@@ -193,11 +193,9 @@ SimulationParameters SimplexOptimizer::operator()(int steps, Evaluator& eval)
                 evalSimplex(eval);
                 if (stepMultiplicator >= 2) {
                     stepMultiplicator = stepMultiplicator * 0.5;
+                } else {
+                    break;
                 }
-            }
-            if (eq(old, simplex)) {
-                LOG(Logger::INFO, "no more changes possible with this parameters!")
-                break;
             }
         } else {
             if (eq(old, simplex)) {

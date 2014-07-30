@@ -170,7 +170,25 @@ public:
                     + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
         }
     };
+    
+    class HimmelblauFunctionDouble : public TestableEvaluator
+    {
+    public:
+        HimmelblauFunctionDouble() {
+            maxima.push_back(1000);
+        }
 
+        double operator()(SimulationParameters params) {
+            ++calls;
+            double x = params["x"];
+            double y = params["y"];
+            //x = x / (double) 100;
+            //y = y / (double) 100;
+            // (x^2 + y -11)^2 + (x + y^2 - 7)^2
+            return 1000 - ( (((x * x) + y - (double) 11) * ( (x * x) + y - (double)11))
+                    + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
+        }
+    };
     /**
      * for reference, please see http://en.wikipedia.org/wiki/Rosenbrock_function
      * tesfunction is valid for -1000 <= x <= 1000, -500 <= y 1500
