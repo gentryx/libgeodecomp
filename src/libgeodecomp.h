@@ -32,6 +32,7 @@
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/parallelization/stripingsimulator.h>
+#include <libgeodecomp/storage/boxcell.h>
 #include <libgeodecomp/storage/containercell.h>
 #include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/storage/multicontainercell.h>
