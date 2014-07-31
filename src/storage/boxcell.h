@@ -38,6 +38,35 @@ public:
 
     const static int DIM = Topology::DIM;
 
+    template<typename NEIGHBORHOOD>
+    class NeighborhoodAdapter
+    {
+    public:
+        typedef NeighborhoodIterator<NEIGHBORHOOD, Cargo, DIM> Iterator;
+
+        inline
+        NeighborhoodAdapter(const NEIGHBORHOOD& hood) :
+            myBegin(Iterator::begin(hood)),
+            myEnd(Iterator::end(hood))
+        {}
+
+        inline
+        const Iterator& begin() const
+        {
+            return myBegin;
+        }
+
+        inline
+        const Iterator& end() const
+        {
+            return myEnd;
+        }
+
+    private:
+        Iterator myBegin;
+        Iterator myEnd;
+    };
+
     inline BoxCell(
         const FloatCoord<DIM>& origin = Coord<DIM>(),
         const FloatCoord<DIM>& dimension = Coord<DIM>()) :
@@ -75,48 +104,63 @@ public:
         return particles.size();
     }
 
-    inline const Container& container() const
+    inline
+    const Cargo& operator[](const std::size_t i) const
     {
-        return particles;
+        return particles[i];
     }
 
-    inline Container& container()
+    inline
+    Cargo& operator[](const std::size_t i)
     {
-        return particles;
+        return particles[i];
     }
 
-    template<class NEIGHBORHOOD>
-    inline void update(const NEIGHBORHOOD& hood, const int nanoStep)
+    inline
+    BoxCell& operator<<(const Cargo& cargo)
     {
-        typedef NeighborhoodIterator<NEIGHBORHOOD, Cargo, DIM> HoodIterator;
-        HoodIterator begin = HoodIterator::begin(hood);
-        HoodIterator end = HoodIterator::end(hood);
+        particles << cargo;
+        return *this;
+    }
+
+    template<class HOOD>
+    inline void update(const HOOD& hood, const int nanoStep)
+    {
+        NeighborhoodAdapter<HOOD> adapter(hood);
 
         if (nanoStep == 0) {
             origin    = hood[Coord<DIM>()].origin;
             dimension = hood[Coord<DIM>()].dimension;
             FloatCoord<DIM> oppositeCorner = origin + dimension;
-
             particles.clear();
 
-            for (HoodIterator i = begin; i != end; ++i) {
+            typedef typename NeighborhoodAdapter<HOOD>::Iterator Iterator;
+
+            for (Iterator i = adapter.begin(); i != adapter.end(); ++i) {
                 FloatCoord<DIM> particlePos = i->getPos();
 
                 // a particle is withing our cell iff its position is
                 // contained in the rectangle/cube spanned by origin
                 // and dimension:
-                if (origin.dominates(particlePos) && particlePos.strictlyDominates(oppositeCorner)) {
+                if (origin.dominates(particlePos) &&
+                    particlePos.strictlyDominates(oppositeCorner)) {
                     particles << *i;
                 }
             }
+
         } else {
             *this = hood[Coord<DIM>()];
         }
 
-        for (typename Container::iterator i = particles.begin(); i != particles.end(); ++i) {
-            i->update(begin, end, nanoStep);
-        }
+        updateCargo(adapter, nanoStep);
+    }
 
+    template<class NEIGHBORHOOD_ADAPTER>
+    inline void updateCargo(NEIGHBORHOOD_ADAPTER& neighbors, const int nanoStep)
+    {
+        for (typename Container::iterator i = particles.begin(); i != particles.end(); ++i) {
+            i->update(neighbors, nanoStep);
+        }
     }
 
 private:

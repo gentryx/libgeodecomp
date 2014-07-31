@@ -29,12 +29,12 @@ public:
         maxDistance2(maxDistance * maxDistance)
     {}
 
-    template<class ITERATOR>
-    inline void update(const ITERATOR& begin, const ITERATOR& end, const int nanoStep)
+    template<class HOOD>
+    inline void update(const HOOD& hood, const int nanoStep)
     {
         neighbors = 0;
 
-        for (ITERATOR i = begin; i != end; ++i) {
+        for (typename HOOD::Iterator i = hood.begin(); i != hood.end(); ++i) {
             FloatCoord<DIM> delta = i->pos - pos;
             double distance2 = delta * delta;
             if (distance2 < maxDistance2) {
