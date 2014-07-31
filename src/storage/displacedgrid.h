@@ -23,7 +23,7 @@ class DisplacedGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 public:
     const static int DIM = TOPOLOGY::DIM;
 
-    typedef CELL_TYPE CellType;
+    typedef CELL_TYPE Cell;
     typedef TOPOLOGY Topology;
     typedef typename boost::multi_array<CELL_TYPE, DIM>::index Index;
     typedef Grid<CELL_TYPE, TOPOLOGY> Delegate;

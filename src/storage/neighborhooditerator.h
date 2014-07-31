@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/storage/collectioninterface.h>
 
 namespace LibGeoDecomp {
 

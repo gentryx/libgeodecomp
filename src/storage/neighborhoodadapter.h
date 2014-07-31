@@ -13,12 +13,13 @@ namespace LibGeoDecomp {
  * LibGeoDecomp. It can retrieve cells matching a certain id from the
  * ContainerCells in the current neighborhood.
  */
-template<class NEIGHBORHOOD, typename CELL, int DIM, typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<CELL> >
+template<class NEIGHBORHOOD, int DIM, typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<typename NEIGHBORHOOD::Cell> >
 class NeighborhoodAdapter
 {
 public:
-    typedef typename CELL::Key Key;
-    typedef typename CELL::Cargo Cargo;
+    typedef typename NEIGHBORHOOD::Cell Cell;
+    typedef typename Cell::Key Key;
+    typedef typename Cell::Cargo Cargo;
 
     explicit NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
         neighbors(neighbors)

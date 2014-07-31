@@ -106,7 +106,7 @@ public:
 #endif
 
     typedef TOPOLOGY Topology;
-    typedef CELL_TYPE CellType;
+    typedef CELL_TYPE Cell;
     typedef CoordMap<CELL_TYPE, Grid<CELL_TYPE, TOPOLOGY> > CoordMapType;
 
     explicit Grid(

@@ -155,7 +155,7 @@ public:
     {
         *this = neighbors[Coord<DIM>()];
 
-        NeighborhoodAdapter<NEIGHBORHOOD, ContainerCell, DIM> adapter(&neighbors);
+        NeighborhoodAdapter<NEIGHBORHOOD, DIM> adapter(&neighbors);
         updateCargo(adapter, nanoStep);
     }
 
