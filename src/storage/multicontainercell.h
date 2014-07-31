@@ -14,11 +14,11 @@
             hood(hood)                                                  \
         {}                                                              \
                                                                         \
-        const BOOST_PP_SEQ_ELEM(0, MEMBER) *operator[](                 \
+        const BOOST_PP_SEQ_ELEM(0, MEMBER)::value_type *operator[](     \
             const int& id) const                                        \
         {                                                               \
-            const BOOST_PP_SEQ_ELEM(0, MEMBER) *res =                   \
-                (*hood)[LibGeoDecomp::Coord<DIM>()].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
+            const BOOST_PP_SEQ_ELEM(0, MEMBER)::value_type *res =      \
+                (*hood)[LibGeoDecomp::Coord<DIM>()].BOOST_PP_SEQ_ELEM(1, MEMBER)[id]; \
                                                                         \
             if (res) {                                                  \
                 return res;                                             \
@@ -32,7 +32,7 @@
                  ++i) {                                                 \
                                                                         \
                 if (*i != LibGeoDecomp::Coord<DIM>()) {                 \
-                    res = (*hood)[*i].BOOST_PP_SEQ_ELEM(2, MEMBER)[id]; \
+                    res = (*hood)[*i].BOOST_PP_SEQ_ELEM(1, MEMBER)[id]; \
                     if (res) {                                          \
                         return res;                                     \
                     }                                                   \
@@ -49,35 +49,35 @@
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER(INDEX, CELL, MEMBER)  \
     AdapterHelper ## INDEX                                              \
-        BOOST_PP_SEQ_ELEM(2, MEMBER);
+        BOOST_PP_SEQ_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_INIT(INDEX, CELL, MEMBER)    \
-    BOOST_PP_SEQ_ELEM(2, MEMBER)(hood),
+    BOOST_PP_SEQ_ELEM(1, MEMBER)(hood),
 
-#define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, STORAGE, MEMBER)     \
-    STORAGE<BOOST_PP_SEQ_ELEM(0, MEMBER),                               \
-                                BOOST_PP_SEQ_ELEM(1, MEMBER)>           \
-        BOOST_PP_SEQ_ELEM(2, MEMBER);
+#define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, UNUSED, MEMBER)      \
+    BOOST_PP_SEQ_ELEM(0, MEMBER) BOOST_PP_SEQ_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
-    BOOST_PP_SEQ_ELEM(2, MEMBER).updateCargo(multiHood, nanoStep);
+    BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood, nanoStep);
 
 /**
  * This cell is a wrapper around ContainerCell to allow user code to
  * compose containers with different element types. It expects MEMBERS
  * to be a sequence of member specifications (adhering to the format
  * expected by the Boost Preprocessor library), where each spec is
- * again a sequence of member type, number of elements, and name.
+ * again a sequence of member type and name.
  *
  * See the unit tests for examples of how to use this class.
  */
-#define DECLARE_MULTI_CONTAINER_CELL(NAME, STORAGE, MEMBERS)            \
+#define DECLARE_MULTI_CONTAINER_CELL(NAME, API_PROVIDER, MEMBERS)       \
     class NAME                                                          \
     {                                                                   \
     public:                                                             \
         friend class MultiContainerCellTest;                            \
                                                                         \
-        typedef LibGeoDecomp::APITraits::SelectTopology<NAME>::Value Topology; \
+        typedef LibGeoDecomp::APITraits::SelectAPI<API_PROVIDER>::Value API; \
+        typedef LibGeoDecomp::APITraits::SelectTopology<API_PROVIDER>::Value \
+            Topology;                                                   \
         const static int DIM = Topology::DIM;                           \
                                                                         \
         template<typename NEIGHBORHOOD>                                 \
@@ -109,7 +109,7 @@
                                                                         \
         BOOST_PP_SEQ_FOR_EACH(                                          \
             DECLARE_MULTI_CONTAINER_CELL_MEMBER,                        \
-            STORAGE,                                                    \
+            NAME,                                                       \
             MEMBERS)                                                    \
                                                                         \
         template<class NEIGHBORHOOD>                                    \
