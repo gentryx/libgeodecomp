@@ -28,6 +28,16 @@ public:
         typedef ITERATOR Iterator;
         typedef CONST_ITERATOR ConstIterator;
 
+        CELL& operator()(CELL& cell) const
+        {
+            return cell;
+        }
+
+        const CELL& operator()(const CELL& cell) const
+        {
+            return cell;
+        }
+
         ITERATOR begin(CELL& cell) const
         {
             return cell.begin();

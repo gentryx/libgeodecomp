@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/storage/collectioninterface.h>
 
 namespace LibGeoDecomp {
 
@@ -12,12 +13,12 @@ namespace LibGeoDecomp {
  * LibGeoDecomp. It can retrieve cells matching a certain id from the
  * ContainerCells in the current neighborhood.
  */
-template<class NEIGHBORHOOD, typename KEY, typename CARGO, int DIM>
+template<class NEIGHBORHOOD, typename CELL, int DIM, typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<CELL> >
 class NeighborhoodAdapter
 {
 public:
-    typedef KEY Key;
-    typedef CARGO Cargo;
+    typedef typename CELL::Key Key;
+    typedef typename CELL::Cargo Cargo;
 
     explicit NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
         neighbors(neighbors)
@@ -29,7 +30,7 @@ public:
      */
     const Cargo& operator[](const Key& id) const
     {
-        const Cargo *res = (*neighbors)[Coord<DIM>()][id];
+        const Cargo *res = COLLECTION_INTERFACE()((*neighbors)[Coord<DIM>()])[id];
 
         if (res) {
             return *res;
@@ -38,7 +39,7 @@ public:
         CoordBox<DIM> box(Coord<DIM>::diagonal(-1), Coord<DIM>::diagonal(3));
         for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
             if (*i != Coord<DIM>()) {
-                res = (*neighbors)[*i][id];
+                res = COLLECTION_INTERFACE()((*neighbors)[*i])[id];
                 if (res) {
                     return *res;
                 }
