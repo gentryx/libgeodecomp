@@ -151,7 +151,7 @@ public:
      * updating.
      */
     template<class NEIGHBORHOOD>
-    inline void update(const NEIGHBORHOOD& neighbors, const int& nanoStep)
+    inline void update(const NEIGHBORHOOD& neighbors, const int nanoStep)
     {
         *this = neighbors[Coord<DIM>()];
 
@@ -165,7 +165,7 @@ public:
      * updateCargo(), which doesn't copy over the old state:
      */
     template<class NEIGHBORHOOD>
-    inline void updateCargo(NEIGHBORHOOD& neighbors, const int& nanoStep)
+    inline void updateCargo(NEIGHBORHOOD& neighbors, const int nanoStep)
     {
         for (std::size_t i = 0; i < numElements; ++i) {
             cells[i].update(neighbors, nanoStep);
