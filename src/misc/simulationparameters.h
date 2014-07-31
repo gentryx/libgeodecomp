@@ -231,9 +231,9 @@ public:
     void setValue(double newValue)
     {
         if (granularity > 0.0) {
-	       index = newValue;
-		   long nrOfSteps = index / granularity;
-		   index = nrOfSteps * granularity;
+           index = newValue;
+           long nrOfSteps = index / granularity;
+           index = nrOfSteps * granularity;
            index = sanitizeIndex(index);
         } else {
             index = sanitizeIndex(newValue);
@@ -250,9 +250,9 @@ public:
     {
         if (granularity > 0.0) {
             index = index + step;
-			long nrOfSteps = index / granularity;
+            long nrOfSteps = index / granularity;
             index = nrOfSteps * granularity;
-			index = sanitizeIndex(index);
+            index = sanitizeIndex(index);
         } else {
             index += step;
             index = sanitizeIndex(index);

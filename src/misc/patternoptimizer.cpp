@@ -15,11 +15,11 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<doub
     minStepwidth(minStepwidth)
 {
     LOG(Logger::DBG, "Constructor call PatternOptimizer")
-    if (stepwidth.size() == 0 && minStepwidth.size() == 0) {
+    if ((stepwidth.size() == 0) && (minStepwidth.size() == 0)) {
         for (std::size_t i = 0; i < params.size(); ++i) {
             double dimsize = Optimizer::params[i].getMax()
                 - Optimizer::params[i].getMin();
-            if (dimsize / 4 >= 1) {
+            if ((dimsize / 4) >= 1) {
                 this->stepwidth.push_back(dimsize / 4);
             } else {
                 this->stepwidth.push_back(params[i].getGranularity());
@@ -30,12 +30,12 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<doub
             this->minStepwidth.push_back(params[i].getGranularity());
         }
     }
-    if (minStepwidth.size() == 0 && stepwidth.size() == params.size()) {
+    if ((minStepwidth.size() == 0) && (stepwidth.size() == params.size())) {
         for (std::size_t i = 0; i < params.size(); ++i) {
             this->minStepwidth.push_back(params[i].getGranularity());
         }
     }
-    if(this->stepwidth.size() != this->params.size() ) {
+    if (this->stepwidth.size() != this->params.size() ) {
         // TODO exception
         throw std::invalid_argument("Wrong size of Stepwidth in PatternOptimizer Constructor!");
     }
