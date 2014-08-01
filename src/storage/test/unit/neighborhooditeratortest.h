@@ -111,7 +111,7 @@ public:
     void testBasic()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
-        typedef NeighborhoodIterator<Neighborhood, double, 2> HoodIterator;
+        typedef NeighborhoodIterator<Neighborhood, 2> HoodIterator;
 
         Neighborhood hood = grid.getNeighborhood(Coord<2>(1, 1));
         HoodIterator begin = HoodIterator::begin(hood);
@@ -242,7 +242,7 @@ public:
     void testSkippingOfEmptyCells()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
-        typedef NeighborhoodIterator<Neighborhood, double, 2> HoodIterator;
+        typedef NeighborhoodIterator<Neighborhood, 2> HoodIterator;
 
         grid[Coord<2>(0, 0)].clear();
         grid[Coord<2>(0, 1)].clear();
@@ -281,7 +281,7 @@ public:
     void testSkippingOfAllEmptyCells()
     {
         typedef CoordMap<Container, Grid<Container> > Neighborhood;
-        typedef NeighborhoodIterator<Neighborhood, double, 2> HoodIterator;
+        typedef NeighborhoodIterator<Neighborhood, 2> HoodIterator;
 
         grid[Coord<2>(0, 0)].clear();
         grid[Coord<2>(1, 0)].clear();

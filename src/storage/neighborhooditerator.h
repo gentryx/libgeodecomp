@@ -13,7 +13,7 @@ namespace LibGeoDecomp {
  * models to transparently traverse all particles in their neighboring
  * containers.
  */
-template<class NEIGHBORHOOD, typename CARGO, int DIM>
+template<class NEIGHBORHOOD, int DIM, typename COLLECTION_INTERFACE=CollectionInterface::PassThrough<typename NEIGHBORHOOD::Cell> >
 class NeighborhoodIterator
 {
 public:
@@ -49,13 +49,13 @@ public:
         for (typename CoordBox<DIM>::Iterator i = box.begin();
              i != box.end();
              ++i) {
-            if (hood[*i].size() > 0) {
-                return NeighborhoodIterator(hood, *i, hood[*i].begin());
+            if (COLLECTION_INTERFACE()(hood[*i]).size() > 0) {
+                return NeighborhoodIterator(hood, *i, COLLECTION_INTERFACE()(hood[*i]).begin());
             }
         }
 
         Coord<DIM> endCoord = Coord<DIM>::diagonal(1);
-        return NeighborhoodIterator(hood, endCoord, hood[endCoord].end());
+        return NeighborhoodIterator(hood, endCoord, COLLECTION_INTERFACE()(hood[endCoord]).end());
     }
 
     static inline NeighborhoodIterator end(const Neighborhood& hood)
@@ -63,7 +63,7 @@ public:
         return NeighborhoodIterator(
             hood,
             Coord<DIM>::diagonal(1),
-            hood[Coord<DIM>::diagonal(1)].end());
+            COLLECTION_INTERFACE()(hood[Coord<DIM>::diagonal(1)]).end());
     }
 
     inline const Particle& operator*() const
@@ -80,7 +80,7 @@ public:
     {
         ++iterator;
 
-        while (iterator == cell->end()) {
+        while (iterator == COLLECTION_INTERFACE()(*cell).end()) {
             ++boxIterator;
 
             // this check is required to avoid dereferentiation of the
@@ -90,7 +90,7 @@ public:
             }
 
             cell = &hood[*boxIterator];
-            iterator = cell->begin();
+            iterator = COLLECTION_INTERFACE()(*cell).begin();
         }
     }
 

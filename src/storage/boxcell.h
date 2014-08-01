@@ -42,7 +42,7 @@ public:
     class NeighborhoodAdapter
     {
     public:
-        typedef NeighborhoodIterator<NEIGHBORHOOD, Cargo, DIM> Iterator;
+        typedef NeighborhoodIterator<NEIGHBORHOOD, DIM> Iterator;
 
         inline
         NeighborhoodAdapter(const NEIGHBORHOOD& hood) :
