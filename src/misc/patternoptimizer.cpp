@@ -36,7 +36,6 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<doub
         }
     }
     if (this->stepwidth.size() != this->params.size() ) {
-        // TODO exception
         throw std::invalid_argument("Wrong size of Stepwidth in PatternOptimizer Constructor!");
     }
     if (this->minStepwidth.size() != this->params.size()) {
@@ -118,6 +117,7 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
     SimulationParameters middle = Optimizer::params;
     std::vector<SimulationParameters> pattern = genPattern(middle);
     std::size_t maxPos = 0;
+    fitness = eval(middle);
     for (int k = 0; k < steps; ++k) {
         pattern = genPattern(middle);
         maxPos = getMaxPos(pattern, eval,maxPos);
