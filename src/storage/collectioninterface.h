@@ -86,6 +86,7 @@ public:
         typedef ITERATOR Iterator;
         typedef CONST_ITERATOR ConstIterator;
 
+        explicit
         Delegate(CONTAINER CELL:: *memberPointer) :
             memberPointer(memberPointer)
         {}

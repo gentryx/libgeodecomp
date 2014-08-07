@@ -11,7 +11,6 @@ class Optimizer
 {
 public:
     friend class OptimizerTest;
-
     class Evaluator
     {
     public:
@@ -44,6 +43,11 @@ public:
             }
         }
         return params;
+    }
+    
+    double getFitness()
+    {
+        return fitness;
     }
 
 protected:

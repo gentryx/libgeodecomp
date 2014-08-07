@@ -18,6 +18,7 @@ public:
 class Derived : public Clonable<Base, Derived>
 {
 public:
+    explicit
     Derived(int v = 0) :
         v(v)
     {}

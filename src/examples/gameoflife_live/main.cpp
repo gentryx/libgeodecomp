@@ -134,9 +134,6 @@ void runSimulation()
     // myData->addVariable(new aliveDataAccessor());
     // myData->addVariable(new countDataAccessor());
 
-    // fixme: class names must start with capitals
-    // fixme: too long template instantiation
-
     // Steerer<ConwayCell> *steerer =
     //     new RemoteSteerer<ConwayCell>(
     //         1,

@@ -30,6 +30,7 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
+    explicit
     SerialBOVWriter(
         const Selector<CELL_TYPE>& selector = Selector<CELL_TYPE>(),
         const std::string& prefix = "serial_bov_writer_output",
