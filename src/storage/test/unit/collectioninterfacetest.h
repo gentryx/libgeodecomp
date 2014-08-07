@@ -67,14 +67,11 @@ public:
 int SimpleCellA::counter = 0;
 int SimpleCellB::counter = 0;
 
-// fixme: this is ugly
-typedef ContainerCell<SimpleCellA, 30> MemberType1;
-typedef ContainerCell<SimpleCellB, 50> MemberType2;
-
-DECLARE_MULTI_CONTAINER_CELL(MultiCell,                 \
-                             MultiCell,                 \
-                             ((MemberType1)(cellA))     \
-                             ((MemberType2)(cellB)) )
+DECLARE_MULTI_CONTAINER_CELL(
+    MultiCell,
+    MultiCell,
+    (((ContainerCell<SimpleCellB, 50>))(cellA))
+    (((ContainerCell<SimpleCellA, 30>))(cellB)) )
 
 class MultiCellChild : public MultiCell
 {};

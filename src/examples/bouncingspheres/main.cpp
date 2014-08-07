@@ -157,17 +157,11 @@ private:
     double col;
 };
 
-// fixme: ugly
-typedef BoxCell<FixedArray<Sphere,   30> > MemberTypeA;
-typedef BoxCell<FixedArray<Boundary, 30> > MemberTypeB;
-
-class Container;
-
 DECLARE_MULTI_CONTAINER_CELL(
     BaseContainer,
     Sphere,
-    ((MemberTypeA)(spheres))
-    ((MemberTypeB)(boundaries)))
+    (((BoxCell<FixedArray<Sphere,   30> >))(spheres))
+    (((BoxCell<FixedArray<Boundary, 30> >))(boundaries)))
 
 class Container : public BaseContainer
 {

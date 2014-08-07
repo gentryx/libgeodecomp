@@ -8,15 +8,11 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-typedef ContainerCell<std::string, 5> MemberType1;
-typedef ContainerCell<double, 7> MemberType2;
-
-// fixme: ugly
-DECLARE_MULTI_CONTAINER_CELL(DummyContainer,              \
-                             DummyContainer,              \
-                             ((MemberType1)(labels))      \
-                             ((MemberType2)(prices))      \
-                             )
+DECLARE_MULTI_CONTAINER_CELL(
+    DummyContainer,
+    DummyContainer,
+    (((ContainerCell<std::string, 5>))(labels))
+    (((ContainerCell<double,      7>))(prices)) )
 
 typedef std::vector<std::pair<std::string, std::string> > LogType;
 LogType multiContainerCellTestLog;
@@ -90,14 +86,11 @@ void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
     }
 }
 
-typedef ContainerCell<SimpleNode,    30> MemberType3;
-typedef ContainerCell<SimpleElement, 10> MemberType4;
-
-DECLARE_MULTI_CONTAINER_CELL(SimpleContainer,                           \
-                             SimpleContainer,                           \
-                             ((MemberType3)(nodes))                     \
-                             ((MemberType4)(elements))                  \
-                             )
+DECLARE_MULTI_CONTAINER_CELL(
+    SimpleContainer,
+    SimpleContainer,
+    (((ContainerCell<SimpleNode,    30>))(nodes))
+    (((ContainerCell<SimpleElement, 10>))(elements)) )
 
 
 class MultiContainerCellTest : public CxxTest::TestSuite

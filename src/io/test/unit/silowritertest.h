@@ -148,15 +148,13 @@ public:
 
 int SimpleCell::counter = 0;
 
-typedef ContainerCell<DummyParticle, 30> MemberType5;
-typedef ContainerCell<SimpleCell,    50> MemberType6;
-
 class MultiCellWithParticles;
 
-DECLARE_MULTI_CONTAINER_CELL(MultiCellBase,                 \
-                             MultiCellWithParticles,        \
-                             ((MemberType5)(particles))     \
-                             ((MemberType6)(cells)) )
+DECLARE_MULTI_CONTAINER_CELL(
+    MultiCellBase,
+    MultiCellWithParticles,
+    (((ContainerCell<DummyParticle, 30>))(particles))
+    (((ContainerCell<SimpleCell,    50>))(cells)) )
 
 class MultiCellWithParticles : public MultiCellBase
 {

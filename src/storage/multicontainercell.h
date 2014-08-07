@@ -5,14 +5,34 @@
 #include <libgeodecomp/storage/containercell.h>
 #include <boost/preprocessor/seq.hpp>
 
+namespace LibGeoDecomp {
+
+namespace MultiContainerCellHelpers {
+
+template<typename Type>
+class ArgumentType
+{};
+
+template<typename ReturnType, typename Argument>
+class ArgumentType<ReturnType(Argument)>
+{
+public:
+    typedef Argument Value;
+};
+
+}
+
+}
+
 #define DECLARE_MULTI_NEIGHBORHOOD_COLLECTION_INTERFACE(INDEX, CELL, MEMBER) \
     class CollectionInterface ## INDEX                                  \
     {                                                                   \
     public:                                                             \
-        typedef BOOST_PP_SEQ_ELEM(0, MEMBER) Container;                 \
+        typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<  \
+            void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value Container;      \
                                                                         \
         inline                                                          \
-        const BOOST_PP_SEQ_ELEM(0, MEMBER)& operator()(                 \
+        const Container& operator()(                                    \
             const CELL& cell)                                           \
         {                                                               \
             return cell.BOOST_PP_SEQ_ELEM(1, MEMBER);                   \
@@ -21,7 +41,7 @@
     };
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER(INDEX, CELL, MEMBER) \
-    typedef typename BOOST_PP_SEQ_ELEM(0, MEMBER)::NeighborhoodAdapter<NEIGHBORHOOD, CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
+    typedef typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value::NeighborhoodAdapter<NEIGHBORHOOD, CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER(INDEX, CELL, MEMBER)  \
     AdapterHelper ## INDEX                                              \
@@ -31,7 +51,7 @@
     BOOST_PP_SEQ_ELEM(1, MEMBER)(hood),
 
 #define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, UNUSED, MEMBER)      \
-    BOOST_PP_SEQ_ELEM(0, MEMBER) BOOST_PP_SEQ_ELEM(1, MEMBER);
+    typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value BOOST_PP_SEQ_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
     BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood.BOOST_PP_SEQ_ELEM(1, MEMBER), multiHood, nanoStep);
