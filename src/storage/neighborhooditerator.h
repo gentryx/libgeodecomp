@@ -21,8 +21,8 @@ public:
 
     typedef NEIGHBORHOOD Neighborhood;
     typedef typename Neighborhood::Cell Cell;
-    typedef typename Cell::const_iterator CellIterator;
-    typedef typename Cell::value_type Particle;
+    typedef typename COLLECTION_INTERFACE::Container::const_iterator CellIterator;
+    typedef typename COLLECTION_INTERFACE::Container::value_type Particle;
 
     inline NeighborhoodIterator(
         const Neighborhood& hood,

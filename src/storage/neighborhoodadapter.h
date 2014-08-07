@@ -18,8 +18,8 @@ class NeighborhoodAdapter
 {
 public:
     typedef typename NEIGHBORHOOD::Cell Cell;
-    typedef typename Cell::Key Key;
-    typedef typename Cell::Cargo Cargo;
+    typedef typename COLLECTION_INTERFACE::Container::Key Key;
+    typedef typename COLLECTION_INTERFACE::Container::Cargo Cargo;
 
     explicit NeighborhoodAdapter(const NEIGHBORHOOD *neighbors) :
         neighbors(neighbors)
