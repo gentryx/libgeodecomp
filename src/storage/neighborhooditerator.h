@@ -24,6 +24,40 @@ public:
     typedef typename COLLECTION_INTERFACE::Container::const_iterator CellIterator;
     typedef typename COLLECTION_INTERFACE::Container::value_type Particle;
 
+    /**
+     * This is a shim to let MultiContainerCell handle members of type
+     * BoxCell (which use this NeighborhoodIterator for accessing the
+     * surrounding particles) identically to ContainerCells (which
+     * rely on NeighborhoodAdapter)
+     */
+    class Adapter
+    {
+    public:
+        typedef NeighborhoodIterator Iterator;
+
+        inline
+        Adapter(const NEIGHBORHOOD *hood) :
+            myBegin(NeighborhoodIterator::begin(*hood)),
+            myEnd(NeighborhoodIterator::end(*hood))
+        {}
+
+        inline
+        const NeighborhoodIterator& begin() const
+        {
+            return myBegin;
+        }
+
+        inline
+        const NeighborhoodIterator& end() const
+        {
+            return myEnd;
+        }
+
+    private:
+        NeighborhoodIterator myBegin;
+        NeighborhoodIterator myEnd;
+    };
+
     inline NeighborhoodIterator(
         const Neighborhood& hood,
         const Coord<DIM>& coord,

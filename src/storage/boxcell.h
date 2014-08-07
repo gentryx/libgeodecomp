@@ -43,34 +43,7 @@ public:
     class NeighborhoodAdapter
     {
     public:
-        // fixme: extract this class to NeighborhoodIterator or such
-        class Value
-        {
-        public:
-            typedef NeighborhoodIterator<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE> Iterator;
-
-            inline
-            Value(const NEIGHBORHOOD *hood) :
-                myBegin(Iterator::begin(*hood)),
-                myEnd(Iterator::end(*hood))
-            {}
-
-            inline
-            const Iterator& begin() const
-            {
-                return myBegin;
-            }
-
-            inline
-            const Iterator& end() const
-            {
-                return myEnd;
-            }
-
-        private:
-            Iterator myBegin;
-            Iterator myEnd;
-        };
+        typedef typename NeighborhoodIterator<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE>::Adapter Value;
     };
 
     inline BoxCell(
