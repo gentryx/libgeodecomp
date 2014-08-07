@@ -70,8 +70,8 @@ int SimpleCellB::counter = 0;
 DECLARE_MULTI_CONTAINER_CELL(
     MultiCell,
     MultiCell,
-    (((ContainerCell<SimpleCellB, 50>))(cellA))
-    (((ContainerCell<SimpleCellA, 30>))(cellB)) )
+    (((ContainerCell<SimpleCellA, 30>))(cellA))
+    (((ContainerCell<SimpleCellB, 50>))(cellB)) )
 
 class MultiCellChild : public MultiCell
 {};
