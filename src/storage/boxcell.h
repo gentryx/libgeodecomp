@@ -141,14 +141,7 @@ private:
         FloatCoord<DIM> oppositeCorner = origin + dimension;
 
         for (ITERATOR i = begin; i != end; ++i) {
-            // fixme: is there a way to do this more efficiently, if ContainerType is a SoAArray?
-            FloatCoord<DIM> particlePos = i->getPos();
-
-            // a particle is withing our cell iff its position is
-            // contained in the rectangle/cube spanned by origin
-            // and dimension:
-            if (origin.dominates(particlePos) &&
-                particlePos.strictlyDominates(oppositeCorner)) {
+            if (APITraits::SelectPositionChecker<Cargo>::value(*i, origin, oppositeCorner)) {
                 particles << *i;
             }
         }

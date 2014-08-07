@@ -840,6 +840,76 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_TEMPLATE_NAME = void>
+    class SelectPositionChecker
+    {
+    public:
+        template<int DIM>
+        inline
+        static bool value(
+            const CELL& particle,
+            const FloatCoord<DIM>& origin,
+            const FloatCoord<DIM>& oppositeCorner)
+        {
+            return
+                origin.dominates(particle.getPos()) &&
+                particle.getPos().strictlyDominates(oppositeCorner);
+        }
+    };
+
+    template<typename CELL>
+    class SelectPositionChecker<CELL, typename CELL::API::SupportsCustomPositionChecker>
+    {
+    public:
+        /**
+         * User code is expected to return true iff a particle's
+         * position falls into the cubic domain described by the two
+         * coordinates (container dimensions = oppositeCorner - origin).
+         */
+        template<int DIM>
+        inline
+        static bool value(
+            const CELL& particle,
+            const FloatCoord<DIM>& origin,
+            const FloatCoord<DIM>& oppositeCorner)
+        {
+            return CELL::API::checkPosition(particle, origin, oppositeCorner);
+        }
+    };
+
+    /**
+     * This is a hook which allows user code to provide its own
+     * position checker. See the classes above for which kind of
+     * function the user's API should provide.
+     *
+     * This is used by container cells such as BoxCell to determine
+     * whether a given particle resides within their domain. The
+     * edges/faces on the opposite side are considered to belong to
+     * the next container.
+     *
+     * Example:
+     * - origin: (10, 20)
+     * - dimension: (8, 5)
+     * - oppositeCorner: (18, 25)
+     *
+     * - point (10, 20) -> in
+     * - point (10, 22) -> in
+     * - point (11, 20) -> in
+     * - point (14, 24) -> in
+     * - point (18, 21) -> out
+     * - point (11, 25) -> out
+     * - point (18, 25) -> out
+     */
+    class HasCustomPositionChecker
+    {
+    public:
+        typedef void SupportsCustomPositionChecker;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    // Trait Template:
+
     // template<typename CELL, typename HAS_TEMPLATE_NAME = void>
     // class SelectTemplateName
     // {
