@@ -176,7 +176,7 @@ public:
         // particles still reside in their original cell:
         for (int y = 0; y < dim.y(); ++y) {
             for (int x = 0; x < dim.x(); ++x) {
-                int expected = 4;
+                std::size_t expected = 4;
 
                 TS_ASSERT_EQUALS(grid2[Coord<2>(x, y)].size(), expected);
 
@@ -212,7 +212,7 @@ public:
                     fieldDimX = 1;
                 }
 
-                int expected = fieldDimX * fieldDimY;
+                std::size_t expected = fieldDimX * fieldDimY;
 
                 TS_ASSERT_EQUALS(grid1[Coord<2>(x, y)].size(), expected);
             }
@@ -270,7 +270,7 @@ public:
         for (int z = 0; z < gridDim.z(); ++z) {
             for (int y = 0; y < gridDim.y(); ++y) {
                 for (int x = 0; x < gridDim.x(); ++x) {
-                    int expected = 8;
+                    std::size_t expected = 8;
 
                     TS_ASSERT_EQUALS(grid2[Coord<3>(x, y, z)].size(), expected);
 
