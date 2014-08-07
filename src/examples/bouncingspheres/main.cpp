@@ -157,11 +157,14 @@ private:
     double col;
 };
 
+typedef BoxCell<FixedArray<Sphere,   30> > SpheresContainer;
+typedef BoxCell<FixedArray<Boundary, 30> > BoundariesContainer;
+
 DECLARE_MULTI_CONTAINER_CELL(
     BaseContainer,
     Sphere,
-    (((BoxCell<FixedArray<Sphere,   30> >))(spheres))
-    (((BoxCell<FixedArray<Boundary, 30> >))(boundaries)))
+    ((SpheresContainer)(spheres))
+    ((BoundariesContainer)(boundaries)) )
 
 class Container : public BaseContainer
 {
@@ -174,8 +177,8 @@ public:
         const FloatCoord<3>& origin = FloatCoord<3>(),
         const FloatCoord<3>& dimensions = FloatCoord<3>())
     {
-        spheres    = MemberTypeA(origin, dimensions);
-        boundaries = MemberTypeB(origin, dimensions);
+        spheres    = BoxCell<FixedArray<Sphere,   30> >(origin, dimensions);
+        boundaries = BoxCell<FixedArray<Boundary, 30> >(origin, dimensions);
     }
 
 };
