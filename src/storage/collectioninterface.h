@@ -27,6 +27,7 @@ public:
         typedef CARGO Cargo;
         typedef ITERATOR Iterator;
         typedef CONST_ITERATOR ConstIterator;
+        typedef CELL Container;
 
         CELL& operator()(CELL& cell) const
         {
