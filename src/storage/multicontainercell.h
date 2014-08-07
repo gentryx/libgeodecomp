@@ -51,7 +51,7 @@ public:
     BOOST_PP_SEQ_ELEM(1, MEMBER)(hood),
 
 #define DECLARE_MULTI_CONTAINER_CELL_MEMBER(INDEX, UNUSED, MEMBER)      \
-    typename LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value BOOST_PP_SEQ_ELEM(1, MEMBER);
+    LibGeoDecomp::MultiContainerCellHelpers::ArgumentType<void (BOOST_PP_SEQ_ELEM(0, MEMBER))>::Value BOOST_PP_SEQ_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
     BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood.BOOST_PP_SEQ_ELEM(1, MEMBER), multiHood, nanoStep);
