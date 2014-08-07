@@ -47,16 +47,20 @@ public:
     void update(const NEIGHBORHOOD& hood, int nanoStep)
     {
         for (int i = 0; i < 20; ++i) {
-            const SimpleNode *node = hood.nodes[i];
-            if (node != 0) {
-                multiContainerCellTestLog << std::make_pair(cargo, node->cargo);
+            try {
+                const SimpleNode& node = hood.nodes[i];
+                multiContainerCellTestLog << std::make_pair(cargo, node.cargo);
+            } catch(const std::logic_error& exception) {
+                // intentionally left blank
             }
         }
 
         for (int i = 0; i < 20; ++i) {
-            const SimpleElement *element = hood.elements[i];
-            if (element != 0) {
-                multiContainerCellTestLog << std::make_pair(cargo, element->cargo);
+            try {
+                const SimpleElement& element = hood.elements[i];
+                multiContainerCellTestLog << std::make_pair(cargo, element.cargo);
+            } catch(const std::logic_error& exception) {
+                // intentionally left blank
             }
         }
     }
@@ -68,16 +72,20 @@ template<typename NEIGHBORHOOD>
 void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
 {
     for (int i = 0; i < 20; ++i) {
-        const SimpleNode *node = hood.nodes[i];
-        if (node != 0) {
-            multiContainerCellTestLog << std::make_pair(cargo, node->cargo);
+        try {
+            const SimpleNode& node = hood.nodes[i];
+            multiContainerCellTestLog << std::make_pair(cargo, node.cargo);
+        } catch(const std::logic_error& exception) {
+            // intentionally left blank
         }
     }
 
     for (int i = 0; i < 20; ++i) {
-        const SimpleElement *element = hood.elements[i];
-        if (element != 0) {
-            multiContainerCellTestLog << std::make_pair(cargo, element->cargo);
+        try {
+            const SimpleElement& element = hood.elements[i];
+            multiContainerCellTestLog << std::make_pair(cargo, element.cargo);
+        } catch(const std::logic_error& exception) {
+            // intentionally left blank
         }
     }
 }

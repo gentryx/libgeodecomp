@@ -5,47 +5,23 @@
 #include <libgeodecomp/storage/containercell.h>
 #include <boost/preprocessor/seq.hpp>
 
-#define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER(INDEX, CELL, MEMBER) \
-    class AdapterHelper ## INDEX                                        \
+#define DECLARE_MULTI_NEIGHBORHOOD_COLLECTION_INTERFACE(INDEX, CELL, MEMBER) \
+    class CollectionInterface ## INDEX                                  \
     {                                                                   \
     public:                                                             \
-        explicit AdapterHelper ## INDEX(                                \
-            const NEIGHBORHOOD *hood) :                                 \
-            hood(hood)                                                  \
-        {}                                                              \
+        typedef BOOST_PP_SEQ_ELEM(0, MEMBER) Container;                 \
                                                                         \
-        const BOOST_PP_SEQ_ELEM(0, MEMBER)::value_type *operator[](     \
-            const int& id) const                                        \
+        inline                                                          \
+        const BOOST_PP_SEQ_ELEM(0, MEMBER)& operator()(                 \
+            const CELL& cell)                                           \
         {                                                               \
-            const BOOST_PP_SEQ_ELEM(0, MEMBER)::value_type *res =      \
-                (*hood)[LibGeoDecomp::Coord<DIM>()].BOOST_PP_SEQ_ELEM(1, MEMBER)[id]; \
-                                                                        \
-            if (res) {                                                  \
-                return res;                                             \
-            }                                                           \
-                                                                        \
-            LibGeoDecomp::CoordBox<DIM> box(                            \
-                LibGeoDecomp::Coord<DIM>::diagonal(-1),                 \
-                LibGeoDecomp::Coord<DIM>::diagonal(3));                 \
-            for (LibGeoDecomp::CoordBox<DIM>::Iterator i = box.begin(); \
-                 i != box.end();                                        \
-                 ++i) {                                                 \
-                                                                        \
-                if (*i != LibGeoDecomp::Coord<DIM>()) {                 \
-                    res = (*hood)[*i].BOOST_PP_SEQ_ELEM(1, MEMBER)[id]; \
-                    if (res) {                                          \
-                        return res;                                     \
-                    }                                                   \
-                }                                                       \
-            }                                                           \
-                                                                        \
-            return 0;                                                   \
+            return cell.BOOST_PP_SEQ_ELEM(1, MEMBER);                   \
         }                                                               \
                                                                         \
-    private:                                                            \
-        const NEIGHBORHOOD *hood;                                       \
-                                                                        \
     };
+
+#define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER(INDEX, CELL, MEMBER) \
+    typedef typename BOOST_PP_SEQ_ELEM(0, MEMBER)::NeighborhoodAdapter<NEIGHBORHOOD, CollectionInterface ## INDEX>::Value AdapterHelper ## INDEX;
 
 #define DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_MEMBER(INDEX, CELL, MEMBER)  \
     AdapterHelper ## INDEX                                              \
@@ -58,7 +34,7 @@
     BOOST_PP_SEQ_ELEM(0, MEMBER) BOOST_PP_SEQ_ELEM(1, MEMBER);
 
 #define DECLARE_MULTI_CONTAINER_CELL_UPDATE(INDEX, CELL, MEMBER)        \
-    BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood, nanoStep);
+    BOOST_PP_SEQ_ELEM(1, MEMBER).updateCargo(multiHood.BOOST_PP_SEQ_ELEM(1, MEMBER), multiHood, nanoStep);
 
 /**
  * This cell is a wrapper around ContainerCell to allow user code to
@@ -84,6 +60,11 @@
         class MultiNeighborhoodAdapter                                  \
         {                                                               \
         public:                                                         \
+                                                                        \
+            BOOST_PP_SEQ_FOR_EACH(                                      \
+                DECLARE_MULTI_NEIGHBORHOOD_COLLECTION_INTERFACE,        \
+                NAME,                                                   \
+                MEMBERS)                                                \
                                                                         \
             BOOST_PP_SEQ_FOR_EACH(                                      \
                 DECLARE_MULTI_NEIGHBORHOOD_ADAPTER_ADAPTER,             \

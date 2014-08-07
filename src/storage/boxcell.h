@@ -22,6 +22,7 @@ template<typename CONTAINER>
 class BoxCell
 {
 public:
+    // fixme: test this container with MultiContainerCell
     friend class BoxCellTest;
 
     typedef CONTAINER Container;
@@ -38,33 +39,38 @@ public:
 
     const static int DIM = Topology::DIM;
 
-    template<typename NEIGHBORHOOD>
+    template<typename NEIGHBORHOOD, typename COLLECTION_INTERFACE>
     class NeighborhoodAdapter
     {
     public:
-        typedef NeighborhoodIterator<NEIGHBORHOOD, DIM> Iterator;
-
-        inline
-        NeighborhoodAdapter(const NEIGHBORHOOD& hood) :
-            myBegin(Iterator::begin(hood)),
-            myEnd(Iterator::end(hood))
-        {}
-
-        inline
-        const Iterator& begin() const
+        // fixme: extract this class to NeighborhoodIterator or such
+        class Value
         {
-            return myBegin;
-        }
+        public:
+            typedef NeighborhoodIterator<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE> Iterator;
 
-        inline
-        const Iterator& end() const
-        {
-            return myEnd;
-        }
+            inline
+            Value(const NEIGHBORHOOD *hood) :
+                myBegin(Iterator::begin(*hood)),
+                myEnd(Iterator::end(*hood))
+            {}
 
-    private:
-        Iterator myBegin;
-        Iterator myEnd;
+            inline
+            const Iterator& begin() const
+            {
+                return myBegin;
+            }
+
+            inline
+            const Iterator& end() const
+            {
+                return myEnd;
+            }
+
+        private:
+            Iterator myBegin;
+            Iterator myEnd;
+        };
     };
 
     inline BoxCell(
@@ -126,40 +132,28 @@ public:
     template<class HOOD>
     inline void update(const HOOD& hood, const int nanoStep)
     {
-        NeighborhoodAdapter<HOOD> adapter(hood);
+        *this = hood[Coord<DIM>()];
 
-        if (nanoStep == 0) {
-            origin    = hood[Coord<DIM>()].origin;
-            dimension = hood[Coord<DIM>()].dimension;
-            FloatCoord<DIM> oppositeCorner = origin + dimension;
-            particles.clear();
+        typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
+        typedef typename NeighborhoodAdapter<HOOD, PassThroughType>::Value NeighborhoodAdapterType;
+        NeighborhoodAdapterType adapter(&hood);
 
-            typedef typename NeighborhoodAdapter<HOOD>::Iterator Iterator;
-
-            for (Iterator i = adapter.begin(); i != adapter.end(); ++i) {
-                FloatCoord<DIM> particlePos = i->getPos();
-
-                // a particle is withing our cell iff its position is
-                // contained in the rectangle/cube spanned by origin
-                // and dimension:
-                if (origin.dominates(particlePos) &&
-                    particlePos.strictlyDominates(oppositeCorner)) {
-                    particles << *i;
-                }
-            }
-
-        } else {
-            *this = hood[Coord<DIM>()];
-        }
-
-        updateCargo(adapter, nanoStep);
+        updateCargo(adapter, adapter, nanoStep);
     }
 
-    template<class NEIGHBORHOOD_ADAPTER>
-    inline void updateCargo(NEIGHBORHOOD_ADAPTER& neighbors, const int nanoStep)
+    template<class NEIGHBORHOOD_ADAPTER_SELF, class NEIGHBORHOOD_ADAPTER_ALL>
+    inline void updateCargo(
+        const NEIGHBORHOOD_ADAPTER_SELF& ownNeighbors,
+        const NEIGHBORHOOD_ADAPTER_ALL& allNeighbors,
+        const int nanoStep)
     {
+        if (nanoStep == 0) {
+            particles.clear();
+            addContainedParticles(ownNeighbors.begin(), ownNeighbors.end());
+        }
+
         for (typename Container::iterator i = particles.begin(); i != particles.end(); ++i) {
-            i->update(neighbors, nanoStep);
+            i->update(allNeighbors, nanoStep);
         }
     }
 
@@ -167,6 +161,26 @@ private:
     FloatCoord<DIM> origin;
     FloatCoord<DIM> dimension;
     Container particles;
+
+    template<typename ITERATOR>
+    void addContainedParticles(const ITERATOR& begin, const ITERATOR& end)
+    {
+        FloatCoord<DIM> oppositeCorner = origin + dimension;
+
+        for (ITERATOR i = begin; i != end; ++i) {
+            // fixme: is there a way to do this more efficiently, if ContainerType is a SoAArray?
+            FloatCoord<DIM> particlePos = i->getPos();
+
+            // a particle is withing our cell iff its position is
+            // contained in the rectangle/cube spanned by origin
+            // and dimension:
+            if (origin.dominates(particlePos) &&
+                particlePos.strictlyDominates(oppositeCorner)) {
+                particles << *i;
+            }
+        }
+    }
+
 };
 
 }

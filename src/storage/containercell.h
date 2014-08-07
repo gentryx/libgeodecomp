@@ -38,6 +38,15 @@ public:
     const static int DIM = Topology::DIM;
     const static std::size_t MAX_SIZE = SIZE;
 
+    template<
+        typename NEIGHBORHOOD,
+        typename COLLECTION_INTERFACE>
+    class NeighborhoodAdapter
+    {
+    public:
+        typedef typename LibGeoDecomp::NeighborhoodAdapter<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE> Value;
+    };
+
     class API :
         public APITraits::SelectAPI<CARGO>::Value,
         public APITraits::HasStencil<Stencils::Moore<Topology::DIM, 1> >
@@ -150,13 +159,16 @@ public:
      * container wouldn't even know the IDs of the items which need
      * updating.
      */
-    template<class NEIGHBORHOOD>
-    inline void update(const NEIGHBORHOOD& neighbors, const int nanoStep)
+    template<class HOOD>
+    inline void update(const HOOD& neighbors, const int nanoStep)
     {
         *this = neighbors[Coord<DIM>()];
 
-        NeighborhoodAdapter<NEIGHBORHOOD, DIM> adapter(&neighbors);
-        updateCargo(adapter, nanoStep);
+        typedef CollectionInterface::PassThrough<typename HOOD::Cell> PassThroughType;
+        typedef typename NeighborhoodAdapter<HOOD, PassThroughType>::Value NeighborhoodAdapterType;
+        NeighborhoodAdapterType adapter(&neighbors);
+
+        updateCargo(adapter, adapter, nanoStep);
     }
 
     /**
@@ -164,11 +176,11 @@ public:
      * initializing this container's cargo, we also provide
      * updateCargo(), which doesn't copy over the old state:
      */
-    template<class NEIGHBORHOOD>
-    inline void updateCargo(NEIGHBORHOOD& neighbors, const int nanoStep)
+    template<class HOOD_SELF, class HOOD_ALL>
+    inline void updateCargo(HOOD_SELF& ownNeighbors, HOOD_ALL& allNeighbors, const int nanoStep)
     {
         for (std::size_t i = 0; i < numElements; ++i) {
-            cells[i].update(neighbors, nanoStep);
+            cells[i].update(allNeighbors, nanoStep);
         }
     }
 

@@ -8,13 +8,17 @@
 
 using namespace LibGeoDecomp;
 
-// fixme using namespace LibGeoDecomp;
-
 const int CONTAINER_SIZE = 30;
 const double CONTAINER_DIM = 3.0;
 const double SPHERE_RADIUS = 0.6;
 const double BOUNDARY_DIM  = 3.0;
 const double DELTA_T = 0.01;
+
+class MyAPI :
+    public APITraits::HasCubeTopology<3>,
+    public APITraits::HasStencil<Stencils::Moore<3, 1> >,
+    public APITraits::HasNanoSteps<2>
+{};
 
 class Sphere;
 
@@ -24,6 +28,8 @@ public:
     friend class Sphere;
     friend class GasWriter;
 
+    typedef MyAPI API;
+
     explicit Boundary(
         const FloatCoord<3>& myCenter = FloatCoord<3>(),
         const FloatCoord<3>& myNormal = FloatCoord<3>()) :
@@ -32,9 +38,31 @@ public:
         glow(0)
     {}
 
-    void update(
-        const Sphere **neighborSpheres,
-        const int *numSpheres);
+    template<typename HOOD>
+    void update(const HOOD& hood, const int nanoStep)
+    {
+        glow -= DELTA_T * 0.04;
+        if (glow < 0) {
+            glow = 0;
+        }
+
+        checkForCollisions(hood.spheres.begin(), hood.spheres.end());
+    }
+
+    template<typename ITERATOR>
+    void checkForCollisions(const ITERATOR& begin, const ITERATOR& end)
+    {
+        for (ITERATOR i = begin; i != end; ++i) {
+            if (i->force(*this) != FloatCoord<3>()) {
+                glow = 1;
+            }
+        }
+    }
+
+    const FloatCoord<3> getPos() const
+    {
+        return center;
+    }
 
 private:
     FloatCoord<3> center;
@@ -49,6 +77,8 @@ public:
     friend class GasWriter;
     friend class Container;
 
+    typedef MyAPI API;
+
     explicit Sphere(
         const int& myID = 0,
         const FloatCoord<3>& myPos = FloatCoord<3>(),
@@ -58,37 +88,26 @@ public:
         vel(myVel)
     {}
 
-    void update(
-        const FloatCoord<3>& parentOrigin,
-        const Sphere **neighborSpheres,
-        const int *numSpheres,
-        const Boundary **neighborBoundaries,
-        const int *numBoundaries)
+    template<typename HOOD>
+    void update(const HOOD& hood, const int nanoStep)
     {
-        for (int i = 0; i < 27; ++i) {
-            for (int j = 0; j < numSpheres[i]; ++j) {
-                if (neighborSpheres[i][j].id != id) {
-                    vel += force(neighborSpheres[i][j]) * DELTA_T;
-                }
-            }
+        addForces(hood.spheres.begin(),    hood.spheres.end());
+        addForces(hood.boundaries.begin(), hood.boundaries.end());
 
-            for (int j = 0; j < numBoundaries[i]; ++j) {
-                vel += force(neighborBoundaries[i][j]) * DELTA_T;
-            }
-        }
         pos += vel * DELTA_T;
+    }
 
-        // need to determine to which container to move next
-        for (int d = 0; d < 3; ++d) {
-            int val = 0;
-            if (pos[d] < parentOrigin[d]) {
-                val = -1;
-            }
-            if (pos[d] >= (parentOrigin[d] + CONTAINER_DIM)) {
-                val = 1;
-            }
-            targetContainer[d] = val;
+    template<typename ITERATOR>
+    void addForces(const ITERATOR& begin, const ITERATOR& end)
+    {
+        for (ITERATOR i = begin; i != end; ++i) {
+            vel += force(*i) * DELTA_T;
         }
+    }
+
+    const FloatCoord<3> getPos() const
+    {
+        return pos;
     }
 
     FloatCoord<3> force(const Sphere& other) const
@@ -96,6 +115,10 @@ public:
         FloatCoord<3> ret;
         FloatCoord<3> delta = pos - other.pos;
         double distance = delta.length();
+
+        if (distance == 0) {
+            return ret;
+        }
 
         if (distance < (2.0 * SPHERE_RADIUS)) {
             double scale = (SPHERE_RADIUS * SPHERE_RADIUS) / distance / distance;
@@ -131,132 +154,37 @@ private:
     int id;
     FloatCoord<3> pos;
     FloatCoord<3> vel;
-    Coord<3> targetContainer;
     double col;
 };
 
-DECLARE_MULTI_CONTAINER_CELL(
-    MyFixmeContainer,
-    ((Sphere)(30)(spheres))
-    ((Boundary)(30)(boundaries)))
+// fixme: ugly
+typedef BoxCell<FixedArray<Sphere,   30> > MemberTypeA;
+typedef BoxCell<FixedArray<Boundary, 30> > MemberTypeB;
 
-class Container
+class Container;
+
+DECLARE_MULTI_CONTAINER_CELL(
+    BaseContainer,
+    Sphere,
+    ((MemberTypeA)(spheres))
+    ((MemberTypeB)(boundaries)))
+
+class Container : public BaseContainer
 {
 public:
     friend class GasWriter;
 
-    class API :
-        public APITraits::HasCubeTopology<3>,
-        public APITraits::HasStencil<Stencils::Moore<3, 1> >,
-        public APITraits::HasNanoSteps<2>
-    {};
+    typedef MyAPI API;
 
-    explicit Container(const FloatCoord<3>& myOrigin = FloatCoord<3>()) :
-        origin(myOrigin),
-        numSpheres(0),
-        numBoundaries(0)
-    {}
-
-    template<typename COORD_MAP>
-    void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    explicit Container(
+        const FloatCoord<3>& origin = FloatCoord<3>(),
+        const FloatCoord<3>& dimensions = FloatCoord<3>())
     {
-        *this = neighborhood[Coord<3>()];
-
-        if (nanoStep == 0) {
-            updateCargo(neighborhood);
-        } else {
-            moveSpheres(neighborhood);
-        }
-    }
-
-    void addSphere(const Sphere& s)
-    {
-        if (numSpheres >= CONTAINER_SIZE)
-            throw std::logic_error("too many spheres");
-        spheres[numSpheres] = s;
-        ++numSpheres;
-    }
-
-    void addBoundary(const Boundary& b)
-    {
-        if (numBoundaries >= CONTAINER_SIZE)
-            throw std::logic_error("too many boundaries");
-        boundaries[numBoundaries] = b;
-        ++numBoundaries;
-    }
-
-private:
-    Sphere spheres[CONTAINER_SIZE];
-    Boundary boundaries[CONTAINER_SIZE];
-    FloatCoord<3> origin;
-    int numSpheres;
-    int numBoundaries;
-
-    template<typename COORD_MAP>
-    void updateCargo(const COORD_MAP& neighborhood)
-    {
-        const Sphere *hoodS[27];
-        const Boundary *hoodB[27];
-        int numS[27];
-        int numB[27];
-        CoordBox<3> box(Coord<3>::diagonal(-1), Coord<3>::diagonal(3));
-        int i = 0;
-
-        for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            hoodS[i] = neighborhood[*j].spheres;
-            hoodB[i] = neighborhood[*j].boundaries;
-            numS[i] = neighborhood[*j].numSpheres;
-            numB[i] = neighborhood[*j].numBoundaries;
-            ++i;
-        }
-
-        for (int i = 0; i < numSpheres; ++i) {
-            spheres[i].update(origin, hoodS, numS, hoodB, numB);
-        }
-
-        for (int i = 0; i < numBoundaries; ++i) {
-            boundaries[i].update(hoodS, numS);
-        }
-    }
-
-    template<typename COORD_MAP>
-    void moveSpheres(const COORD_MAP& neighborhood)
-    {
-        CoordBox<3> box(Coord<3>::diagonal(-1), Coord<3>::diagonal(3));
-        numSpheres = 0;
-
-        for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            const Container& other = neighborhood[*j];
-            for (int i = 0; i < other.numSpheres; ++i) {
-                if (other.spheres[i].targetContainer == -*j) {
-                    spheres[numSpheres] = other.spheres[i];
-                    ++numSpheres;
-                }
-            }
-        }
-
+        spheres    = MemberTypeA(origin, dimensions);
+        boundaries = MemberTypeB(origin, dimensions);
     }
 
 };
-
-void Boundary::update(
-    const Sphere **neighborSpheres,
-    const int *numSpheres)
-{
-    glow -= DELTA_T * 0.04;
-
-    if (glow < 0) {
-        glow = 0;
-    }
-
-    for (int i = 0; i < 27; ++i) {
-        for (int j = 0; j < numSpheres[i]; ++j) {
-            if (neighborSpheres[i][j].force(*this) != FloatCoord<3>()) {
-                glow = 1;
-            }
-        }
-    }
-}
 
 class GasWriter : public Clonable<Writer<Container>, GasWriter>
 {
@@ -299,11 +227,11 @@ public:
         for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
             const Container& container = grid.get(*j);
 
-            for (int i = 0; i < container.numSpheres; ++i) {
+            for (std::size_t i = 0; i < container.spheres.size(); ++i) {
                 file << sphereToPOV(container.spheres[i]);
             }
 
-            for (int i = 0; i < container.numBoundaries; ++i) {
+            for (std::size_t i = 0; i < container.boundaries.size(); ++i) {
                 file << boundaryToPOV(container.boundaries[i]);
             }
         }
@@ -392,16 +320,16 @@ public:
                 (j->y() + 0.5) * CONTAINER_DIM,
                 (j->z() + 0.5) * CONTAINER_DIM);
 
-            Container container(FloatCoord<3>(*j) * CONTAINER_DIM);
+            Container container(FloatCoord<3>(*j) * CONTAINER_DIM,
+                                FloatCoord<3>(CONTAINER_DIM, CONTAINER_DIM, CONTAINER_DIM));
 
-            container.addSphere(
-                Sphere(
-                    *j * Coord<3>(1, 100, 10000),
-                    center,
-                    FloatCoord<3>(
-                        pseudo_rand1,
-                        pseudo_rand2,
-                        pseudo_rand3)));
+            container.spheres << Sphere(
+                *j * Coord<3>(1, 100, 10000),
+                center,
+                FloatCoord<3>(
+                    pseudo_rand1,
+                    pseudo_rand2,
+                    pseudo_rand3));
 
             // Bounday elements should align centered to the outsides
             // of the cells. I prefer this slightly complicated code
@@ -446,8 +374,8 @@ private:
         const FloatCoord<3>& containerCenter,
         const FloatCoord<3>& normal)
     {
-        FloatCoord<3> boundaryCenter = containerCenter - normal * (CONTAINER_DIM * 0.5);
-        container->addBoundary(Boundary(boundaryCenter, normal));
+        FloatCoord<3> boundaryCenter = containerCenter - normal * (CONTAINER_DIM * 0.4);
+        container->boundaries << Boundary(boundaryCenter, normal);
     }
 
 };
@@ -457,7 +385,7 @@ int main(int argc, char **argv)
     SerialSimulator<Container> sim(
         new GasInitializer(
             Coord<3>(10, 10, 10),
-            40000));
+            80000));
     sim.addWriter(
         new GasWriter(
             "sim",
