@@ -8,14 +8,15 @@ function(dump_config outfile)
   set(CONTENT "#ifndef LIBGEODECOMP_CONFIG_H\n\n")
   set(CONTENT "${CONTENT}${CONFIG_HEADER}\n")
   set(CONTENT "${CONTENT}#endif\n")
-  file(WRITE "${outfile}.new" "${CONTENT}")
+  file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}.new" "${CONTENT}")
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}" "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}.new" RESULT_VARIABLE res)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files  "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}" "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}.new" RESULT_VARIABLE res)
   if(res GREATER 0)
-    file(WRITE "${outfile}" "${CONTENT}")
+    file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}" "${CONTENT}")
   endif()
 
-  file(REMOVE "${outfile}.new")
+  file(REMOVE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}.new")
 endfunction(dump_config)
 
 # generic function to add user-configurable options. add_to_header may be used to propagate the option to a header file.
