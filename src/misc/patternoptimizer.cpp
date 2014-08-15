@@ -132,7 +132,7 @@ SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
             middle = pattern[maxPos];
         }
     }
-    //unreachable
+    // unreachable if steps is big enough
     return middle;
 }
 
