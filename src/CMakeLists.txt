@@ -226,7 +226,7 @@ set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${ADDITIONAL_COMPILE_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 generate_sourcelists("./")
 
 if(WITH_BOOST_MPI)
@@ -238,7 +238,7 @@ if(WITH_CUDA)
 endif()
 
 if(WITH_HPX)
-  include_directories(${HPX_INCLUDE_DIR})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${HPX_INCLUDE_DIR})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
@@ -246,22 +246,22 @@ endif()
 
 if(WITH_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
-  include_directories(${MPI_INCLUDE_PATH})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${MPI_INCLUDE_PATH})
 endif()
 
 if(WITH_SCOTCH)
-  include_directories(${SCOTCH_INCLUDE_DIRS})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${SCOTCH_INCLUDE_DIRS})
 endif()
 
 if(WITH_SILO)
-  include_directories(${Silo_INCLUDE_DIR})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Silo_INCLUDE_DIR})
 endif()
 
 if(WITH_THREADS)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-include_directories(${Boost_INCLUDE_DIRS})
+list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 
 #============= 5. SANITY CHECKS ======================================
 # import settings detected by packages to decouple from their
@@ -334,7 +334,7 @@ if(WITH_VISIT)
     message(FATAL_ERROR "WITH_VISIT selected, but no Python libraries/headers could not be detected")
   endif()
 
-  include_directories(${VisIt_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${VisIt_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 endif()
 
 if(WIN32)
@@ -353,7 +353,10 @@ endif()
 if(WITH_QT)
   include(${QT_USE_FILE})
   add_definitions(-DQT_NO_KEYWORDS)
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${QT_HEADERS_DIR})
 endif()
+
+include_directories(${INSTALL_INCLUDE_DIRECTORIES} ${BUILD_INCLUDE_DIRECTORIES})
 
 #============= 6. TOP-LEVEL TARGETS ==================================
 add_custom_target(test echo "Tests passed.")
@@ -430,6 +433,7 @@ set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
+target_include_directories(geodecomp INTERFACE ${INSTALL_INCLUDE_DIRECTORIES})
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
 set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
@@ -546,6 +550,38 @@ Libs: ${INSTALLER_LINK_FLAGS}
 Cflags: -I\${includedir}
 ")
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "${LIB_DIR}/pkgconfig")
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
+  VERSION ${PACKAGE_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+export(TARGETS geodecomp
+  NAMESPACE Upstream::
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake"
+)
+
+set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
+install(
+  FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake"
+  DESTINATION
+    ${ConfigPackageLocation}
+  COMPONENT
+    Devel
+)
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
+
+"
+include(\"${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake\")
+include_directories(${BUILD_INCLUDE_DIRECTORIES})
+")
+
 
 #============= 11. TYPEMAPS GENERATION ===============================
 if (WITH_TYPEMAPS)
