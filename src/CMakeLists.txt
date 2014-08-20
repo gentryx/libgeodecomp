@@ -493,7 +493,7 @@ endif()
 target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 
 #============= 10. INSTALLER CONFIG ==================================
-install(TARGETS geodecomp DESTINATION lib)
+install(TARGETS geodecomp DESTINATION lib EXPORT libgeodecomp-targets)
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/config.h" DESTINATION include/${PACKAGE_NAME})
 install(FILES libgeodecomp.h DESTINATION include)
 
@@ -560,7 +560,7 @@ write_basic_package_version_file(
 
 export(TARGETS geodecomp
   NAMESPACE Upstream::
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake"
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}-targets.cmake"
 )
 
 # this config includes the current build tree and is meant for
@@ -569,7 +569,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
 
 "
 get_filename_component(LIBGEODECOMP_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
-include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}Targets.cmake\")
+include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}-targets.cmake\")
 include_directories(${BUILD_INCLUDE_DIRECTORIES})
 ")
 
@@ -579,7 +579,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
 
 "
 get_filename_component(LIBGEODECOMP_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
-include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}Targets.cmake\")
+include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}-targets.cmake\")
 include_directories(\"\${LIBGEODECOMP_CMAKE_DIR}/../../../include\")
 ")
 
@@ -588,13 +588,13 @@ install(
   FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake"
   DESTINATION
     ${ConfigPackageLocation}
   COMPONENT
     Devel
 )
 
+install(EXPORT libgeodecomp-targets DESTINATION ${ConfigPackageLocation})
 
 #============= 11. TYPEMAPS GENERATION ===============================
 if (WITH_TYPEMAPS)
