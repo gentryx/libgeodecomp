@@ -563,10 +563,30 @@ export(TARGETS geodecomp
   FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake"
 )
 
+# this config includes the current build tree and is meant for
+# downstream projects which wish to include/link against a live build tree:
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
+
+"
+get_filename_component(LIBGEODECOMP_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
+include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}Targets.cmake\")
+include_directories(${BUILD_INCLUDE_DIRECTORIES})
+")
+
+# conversely, the to-be-installed config should not contain any
+# references to the build tree:
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
+
+"
+get_filename_component(LIBGEODECOMP_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
+include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}Targets.cmake\")
+include_directories(\"\${LIBGEODECOMP_CMAKE_DIR}/../../../include\")
+")
+
 set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
 install(
   FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake"
   DESTINATION
@@ -574,13 +594,6 @@ install(
   COMPONENT
     Devel
 )
-
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
-
-"
-include(\"${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Targets.cmake\")
-include_directories(${BUILD_INCLUDE_DIRECTORIES})
-")
 
 
 #============= 11. TYPEMAPS GENERATION ===============================
