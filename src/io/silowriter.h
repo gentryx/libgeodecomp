@@ -229,7 +229,7 @@ public:
 
     /**
      * Unlike the previous constructor, this c-tor assumes that a
-     * member variable of your class holds the itms for output.
+     * member variable of your class holds the items for output.
      */
     template<typename CONTAINER, typename CARGO>
     SiloWriter(
