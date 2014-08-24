@@ -127,10 +127,6 @@ endif()
 set(RELEASE false)
 detect_distro()
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
-endif()
-
 # compute default flags:
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
 
@@ -493,7 +489,11 @@ endif()
 target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 
 #============= 10. INSTALLER CONFIG ==================================
-install(TARGETS geodecomp DESTINATION lib EXPORT libgeodecomp-targets)
+install(
+  TARGETS geodecomp
+  EXPORT ${PACKAGE_NAME}-targets
+  LIBRARY DESTINATION lib)
+
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/config.h" DESTINATION include/${PACKAGE_NAME})
 install(FILES libgeodecomp.h DESTINATION include)
 
@@ -559,7 +559,6 @@ write_basic_package_version_file(
 )
 
 export(TARGETS geodecomp
-  NAMESPACE Upstream::
   FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}-targets.cmake"
 )
 
@@ -594,7 +593,7 @@ install(
     Devel
 )
 
-install(EXPORT libgeodecomp-targets DESTINATION ${ConfigPackageLocation})
+install(EXPORT ${PACKAGE_NAME}-targets DESTINATION ${ConfigPackageLocation})
 
 #============= 11. TYPEMAPS GENERATION ===============================
 if (WITH_TYPEMAPS)
