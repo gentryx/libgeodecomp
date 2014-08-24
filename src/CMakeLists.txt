@@ -429,7 +429,12 @@ set(ALL_SOURCES ${SOURCES})
 set(ALL_HEADERS ${HEADERS})
 
 add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
-target_include_directories(geodecomp INTERFACE ${INSTALL_INCLUDE_DIRECTORIES})
+# CMake <2.8.11 doesn't have target_include_directories()
+if(CMAKE_VERSION VERSION_LESS 2.8.11)
+  set_target_properties(geodecomp PROPERTIES INCLUDE_DIRECTORIES "${INSTALL_INCLUDE_DIRECTORIES}")
+else()
+  target_include_directories(geodecomp INTERFACE ${INSTALL_INCLUDE_DIRECTORIES})
+endif()
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
 set(LIBGEODECOMP_LINK_LIBRARIES ${ALL_BOOST_LIBS})
@@ -551,16 +556,24 @@ Cflags: -I\${includedir}
 ")
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "${LIB_DIR}/pkgconfig")
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
-  VERSION ${PACKAGE_VERSION}
-  COMPATIBILITY AnyNewerVersion
-)
+set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
 
-export(TARGETS geodecomp
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}-targets.cmake"
-)
+if(CMAKE_VERSION VERSION_GREATER 2.8.10)
+  include(CMakePackageConfigHelpers)
+
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
+    VERSION ${PACKAGE_VERSION}
+    COMPATIBILITY AnyNewerVersion)
+
+  install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
+    DESTINATION "${ConfigPackageLocation}")
+endif()
+
+export(
+  TARGETS geodecomp
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}-targets.cmake")
 
 # this config includes the current build tree and is meant for
 # downstream projects which wish to include/link against a live build tree:
@@ -584,14 +597,8 @@ include_directories(\"\${LIBGEODECOMP_CMAKE_DIR}/../../../include\")
 
 set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
 install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}ConfigVersion.cmake"
-  DESTINATION
-    ${ConfigPackageLocation}
-  COMPONENT
-    Devel
-)
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
+  DESTINATION "${ConfigPackageLocation}")
 
 install(EXPORT ${PACKAGE_NAME}-targets DESTINATION ${ConfigPackageLocation})
 
