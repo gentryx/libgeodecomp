@@ -523,10 +523,13 @@ foreach(i ${HEADERS})
 endforeach()
 
 # link against the libs we need
-set(INSTALLER_LINK_FLAGS "-L\${libdir} -lgeodecomp ")
+set(INSTALLER_LINK_FLAGS "-L${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -lgeodecomp ")
 foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   get_filename_component(path "${lib}" PATH)
-  get_filename_component(name "${lib}" NAME_WE)
+  get_filename_component(name "${lib}" NAME)
+  string(REGEX REPLACE "\\.so.*$" "" name "${name}")
+  string(REGEX REPLACE "\\.a.*$" "" name "${name}")
+  string(REGEX REPLACE "\\.dll.*$" "" name "${name}")
 
   if(name MATCHES ^lib)
     # this dirty trick is required to prevent REGEX REPLACE matching
@@ -542,15 +545,17 @@ foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${name}")
 endforeach()
 
-file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
-libdir=${CMAKE_INSTALL_PREFIX}/${LIB_DIR}
-includedir=${CMAKE_INSTALL_PREFIX}/include
+set(PKG_CONFIG_INCLUDE_FLAGS "")
+foreach(dir ${INSTALL_INCLUDE_DIRECTORIES})
+  set(PKG_CONFIG_INCLUDE_FLAGS "${PKG_CONFIG_INCLUDE_FLAGS} -I${dir}")
+endforeach()
 
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
 Libs: ${INSTALLER_LINK_FLAGS}
-Cflags: -I\${includedir}
+Cflags: -I${CMAKE_INSTALL_PREFIX}/include ${PKG_CONFIG_INCLUDE_FLAGS}
 ")
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "${LIB_DIR}/pkgconfig")
 
