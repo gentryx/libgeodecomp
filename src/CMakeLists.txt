@@ -550,7 +550,7 @@ foreach(dir ${INSTALL_INCLUDE_DIRECTORIES})
   set(PKG_CONFIG_INCLUDE_FLAGS "${PKG_CONFIG_INCLUDE_FLAGS} -I${dir}")
 endforeach()
 
-file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
