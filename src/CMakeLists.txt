@@ -523,7 +523,7 @@ foreach(i ${HEADERS})
 endforeach()
 
 # link against the libs we need
-set(INSTALLER_LINK_FLAGS "-L${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -lgeodecomp ")
+set(INSTALLER_LINK_FLAGS "-L${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -Wl,-rpath,${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -lgeodecomp ")
 foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   get_filename_component(path "${lib}" PATH)
   get_filename_component(name "${lib}" NAME)
@@ -540,7 +540,7 @@ foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   endif()
 
   if (path)
-    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -L${path}")
+    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -L${path} -Wl,-rpath,${path}")
   endif()
   set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${name}")
 endforeach()
