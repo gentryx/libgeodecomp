@@ -252,7 +252,6 @@ public:
  * essence, we go through the pain of having such many parameters to
  * resolve runtime conditionals for range checking at compile time.
  *
- * fixme:
  * BOUNDARY_WEST:
  *   X == -1 -> use WEST pointers
  =   X >=  0 -> use center pointers + X
