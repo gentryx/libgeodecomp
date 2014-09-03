@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 
 set(PACKAGE_NAME libgeodecomp)
-set(PACKAGE_VERSION "0.3.0")
+set(PACKAGE_VERSION "0.3.1")
 set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
 set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
