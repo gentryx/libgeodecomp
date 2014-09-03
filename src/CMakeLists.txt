@@ -234,7 +234,7 @@ if(WITH_CUDA)
 endif()
 
 if(WITH_HPX)
-  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${HPX_INCLUDE_DIR})
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${HPX_INCLUDE_DIRS})
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
@@ -550,7 +550,7 @@ foreach(dir ${INSTALL_INCLUDE_DIRECTORIES})
   set(PKG_CONFIG_INCLUDE_FLAGS "${PKG_CONFIG_INCLUDE_FLAGS} -I${dir}")
 endforeach()
 
-file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "prefix=${CMAKE_INSTALL_PREFIX}
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
