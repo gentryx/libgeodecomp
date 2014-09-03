@@ -1,9 +1,7 @@
-
-#include <libgeodecomp.h>
-
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 
+#include <libgeodecomp.h>
 #include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;

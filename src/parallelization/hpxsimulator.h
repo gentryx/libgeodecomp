@@ -248,7 +248,7 @@ public:
         for(std::size_t i = 0; i < numPartitions; i += steps) {
             boundingBoxesFutures.push_back(
                 hpx::async(
-                    HPX_STD_BIND(
+                    hpx::util::bind(
                         &HpxSimulator::calculateBoundingBoxes,
                         this,
                         boost::ref(boundingBoxes),
