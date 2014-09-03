@@ -52,9 +52,7 @@ public:
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(
-        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        long *unused) const
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
         for (int z = 0; z < gridDim.z(); ++z) {
             bool onEdge1 = false;
@@ -164,9 +162,7 @@ public:
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(
-        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        long *unused) const
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
         char *currentTarget = target;
 
@@ -208,9 +204,7 @@ public:
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(
-        LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor,
-        long *unused) const
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
         const char *currentSource = source;
 
