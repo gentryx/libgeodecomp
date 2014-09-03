@@ -56,6 +56,13 @@ endif()
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
+# search for external LibFlatArray, but -- if none was found -- default to bundled version:
+find_package(libflatarray QUIET)
+if(NOT libflatarray_FOUND)
+  set(libflatarray_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray")
+  find_package(libflatarray)
+endif()
+
 # currently VisIt only supports Python 2.x. This (undocumented?)
 # feature of CMake allows us to avoid Python 3.y.
 set(PythonLibs_FIND_VERSION 2)
