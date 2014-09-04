@@ -1,16 +1,6 @@
 #============= 1. FIND PACKAGES WE DEPEND ON =========================
 
-# find HPX
-if(NOT HPX_ROOT)
-  if(NOT $ENV{HPX_ROOT} STREQUAL "")
-    set(HPX_ROOT $ENV{HPX_ROOT})
-  endif()
-endif()
-
-if(HPX_ROOT)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HPX_ROOT}/share/cmake-2.8/Modules)
-  find_package(HPX)
-endif()
+find_package(HPX)
 
 if(NOT HPX_FOUND)
   if(NOT DEFINED BOOST_ROOT)
