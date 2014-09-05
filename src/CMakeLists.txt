@@ -593,6 +593,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}Config.cmake"
 get_filename_component(LIBGEODECOMP_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
 include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}-targets.cmake\")
 include_directories(\"\${LIBGEODECOMP_CMAKE_DIR}/../../../include\")
+include_directories(${BUILD_INCLUDE_DIRECTORIES} ${INSTALL_INCLUDE_DIRECTORIES})
 ")
 
 set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
