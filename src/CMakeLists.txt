@@ -437,6 +437,7 @@ add_library(geodecomp ${LIB_LINKAGE_TYPE} ${SOURCES})
 # CMake <2.8.11 doesn't have target_include_directories()
 if(CMAKE_VERSION VERSION_GREATER 2.8.11)
   target_include_directories(geodecomp INTERFACE ${INSTALL_INCLUDE_DIRECTORIES})
+  target_include_directories(geodecomp PRIVATE ${INSTALL_INCLUDE_DIRECTORIES} ${BUILD_INCLUDE_DIRECTORIES})
 endif()
 
 # link 3rd party libraries to main lib and add them to pkg-config file down below
