@@ -53,6 +53,8 @@ if(NOT libflatarray_FOUND)
   find_package(libflatarray)
 endif()
 
+list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
+
 # currently VisIt only supports Python 2.x. This (undocumented?)
 # feature of CMake allows us to avoid Python 3.y.
 set(PythonLibs_FIND_VERSION 2)
@@ -582,7 +584,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/../${PACKAGE_NAME}Config.cmake"
 "
 get_filename_component(LIBGEODECOMP_CMAKE_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)
 include(\"\${LIBGEODECOMP_CMAKE_DIR}/${PACKAGE_NAME}-targets.cmake\")
-include_directories(${BUILD_INCLUDE_DIRECTORIES} ${INSTALL_INCLUDE_DIRECTORIES})
+include_directories(${BUILD_INCLUDE_DIRECTORIES};${INSTALL_INCLUDE_DIRECTORIES})
 ")
 
 # conversely, the to-be-installed config should not contain any
