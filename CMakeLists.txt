@@ -17,4 +17,5 @@ endif()
 
 add_subdirectory(src)
 
-
+# export this for users who bundle a checkout of LibGeoDecomp in their own CMake source tree
+set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
