@@ -1,8 +1,10 @@
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_THREADS
-#ifdef LIBGEODECOMP_WITH_MPI
 #ifndef LIBGEODECOMP_IO_REMOTESTEERER_H
 #define LIBGEODECOMP_IO_REMOTESTEERER_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_BOOST_ASIO
+#ifdef LIBGEODECOMP_WITH_THREADS
+#ifdef LIBGEODECOMP_WITH_MPI
 
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/communication/mpilayer.h>
@@ -139,4 +141,6 @@ private:
 
 #endif
 #endif
+#endif
+
 #endif

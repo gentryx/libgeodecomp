@@ -176,6 +176,8 @@ add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests
 
 add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
 
+add_config_option(WITH_BOOST_ASIO "Some Boost distributions ship too old versions of ASIO which are not compatible with LibGeoDecomp. Use this flag to switch ASIO-related code off." true true)
+
 add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
 
 add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
