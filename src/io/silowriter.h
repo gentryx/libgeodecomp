@@ -401,11 +401,27 @@ private:
     template<typename CARGO>
     void addSelectorForPointMesh(const Selector<CARGO>& selector)
     {
+        addSelectorForPointMeshTypeCheck(
+            selector,
+            typename APITraits::SelectPointMesh<Cell>::Value());
+    }
+
+    template<typename CARGO>
+    void addSelectorForPointMeshTypeCheck(const Selector<CARGO>& selector, APITraits::TrueType)
+    {
         pointMeshSelectors->addSelector(selector);
     }
 
     template<typename CARGO>
     void addSelectorForUnstructuredGrid(const Selector<CARGO>& selector)
+    {
+        addSelectorForUnstructuredGridTypeCheck(
+            selector,
+            typename APITraits::SelectUnstructuredGrid<Cell>::Value());
+    }
+
+    template<typename CARGO>
+    void addSelectorForUnstructuredGridTypeCheck(const Selector<CARGO>& selector, APITraits::TrueType)
     {
         unstructuredGridSelectors->addSelector(selector);
     }
