@@ -2,8 +2,8 @@
 
 using namespace LibGeoDecomp;
 
-#define SUBLEVEL_DIM_X 32
-#define SUBLEVEL_DIM_Y 32
+#define SUBLEVEL_DIM_X 4
+#define SUBLEVEL_DIM_Y SUBLEVEL_DIM_X
 #define SUBLEVEL_TILE_SIZE (SUBLEVEL_DIM_X * SUBLEVEL_DIM_Y)
 
 /**
@@ -20,7 +20,7 @@ using namespace LibGeoDecomp;
 class AMRDiffusionCell
 {
 public:
-    static const double DELTA_MAX = 1.0;
+    static const double DELTA_MAX = 100.0;
 
     typedef AMRDiffusionCell value_type;
 
@@ -32,6 +32,80 @@ public:
     // const static int BASE_DIM_BITS = 20;
     // const static int BASE_DIM = 1 << BASE_DIM_BITS;
     // const static int BASE_DIM_BITMASK = BASE_DIM - 1;
+
+    // fixme: move this to dedicated class/file
+    template<typename NEIGHBORHOOD>
+    class HoodAdapter
+    {
+    public:
+        inline HoodAdapter(const NEIGHBORHOOD& hood) :
+            hood(hood)
+        {}
+
+        template<int X, int Y>
+        const AMRDiffusionCell *operator()(FixedCoord<X, Y, 0>, const AMRDiffusionCell& origin) const
+        {
+            Coord<2> searchPoint = origin.logicalCoord +
+                Coord<2>(X * origin.logicalOffset,
+                         Y * origin.logicalOffset);
+
+            std::cout << "looking for " << searchPoint << "\n";
+            const AMRDiffusionCell *res = 0;
+
+            // most accesses go to (0, 0)
+            res = hood[FixedCoord<0, 0>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            res = hood[FixedCoord<-1, -1>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            res = hood[FixedCoord< 0, -1>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            res = hood[FixedCoord< 1, -1>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            // same row:
+            res = hood[FixedCoord<-1,  0>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            res = hood[FixedCoord< 1,  0>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            // lower row:
+            res = hood[FixedCoord<-1,  1>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            res = hood[FixedCoord< 0,  1>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            res = hood[FixedCoord< 1,  1>()].lookup(searchPoint);
+            if (res) {
+                return res;
+            }
+
+            throw std::logic_error("neighbor not found");
+        }
+
+    private:
+        const NEIGHBORHOOD& hood;
+    };
 
     // fixme: move this to dedicated class/file
     class Iterator
@@ -48,8 +122,10 @@ public:
 
         void operator++()
         {
+            // std::cout << "operator++1\n";
             if (cursors.back()->sublevel.size() != 0) {
                 cursors.push_back(&cursors.back()->sublevel[0][0]);
+                // std::cout << "operator++2b\n";
                 return;
             }
 
@@ -62,6 +138,7 @@ public:
                 cursors.pop_back();
                 cursors.back()++;
             }
+            // std::cout << "operator++2a\n";
         }
 
         inline bool operator==(const Iterator& other) const
@@ -145,16 +222,22 @@ public:
     inline AMRDiffusionCell(
         const FloatCoord<2>& pos = FloatCoord<2>(0, 0),
         const FloatCoord<2>& dim = FloatCoord<2>(1, 1),
+        const Coord<2>& logicalCoord = Coord<2>(),
+        const int logicalOffset = 0,
         const double value = 0,
         const double influx = 0,
         const int depth = 0,
-        const int maxDepth = 0) :
+        const int maxDepth = 0,
+        const bool edgeCell = false) :
         pos(pos),
         dim(dim),
+        logicalCoord(logicalCoord),
+        logicalOffset(logicalOffset),
         value(value),
         influx(influx),
         depth(depth),
-        maxDepth(maxDepth)
+        maxDepth(maxDepth),
+        edgeCell(edgeCell)
     {}
 
     class API : public APITraits::HasUnstructuredGrid
@@ -162,54 +245,12 @@ public:
 
     // fixme: use 2 nano steps to avoid refinement/coarseing to create gaps of 2 refinement levels
 
-#define HOOD(X, Y) hood[FixedCoord<X, Y>()]
-
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, int)
     {
-        *this = HOOD(0, 0);
-
-        // fixme
-        value =
-            influx +
-            0.25 *
-            (HOOD( 0, -1).value +
-             HOOD(-1,  0).value +
-             HOOD( 1,  0).value +
-             HOOD( 0,  1).value);
-
-        if (sublevel.size()) {
-            // fixme
-            // regularUpdate(hood);
-        } else {
-            // check for refinement, fixme: extract into method
-            double delta = 0;
-            delta = std::max(delta, std::abs(value - HOOD(0, -1).value));
-            delta = std::max(delta, std::abs(value - HOOD(0,  1).value));
-            delta = std::max(delta, std::abs(value - HOOD(-1, 0).value));
-            delta = std::max(delta, std::abs(value - HOOD( 1, 0).value));
-
-            if (delta > DELTA_MAX) {
-                sublevel.resize(1);
-                FloatCoord<2> sublevelDim(
-                    dim[0] / SUBLEVEL_DIM_X,
-                    dim[1] / SUBLEVEL_DIM_Y);
-
-                for (int y = 0; y < SUBLEVEL_DIM_Y; ++y) {
-                    for (int x = 0; x < SUBLEVEL_DIM_X; ++x) {
-                        FloatCoord<2> newPos = pos + sublevelDim.scale(Coord<2>(x, y));
-
-                        sublevel[0] << AMRDiffusionCell(
-                            newPos,
-                            sublevelDim,
-                            value,
-                            influx,
-                            depth + 1,
-                            maxDepth);
-                    }
-                }
-            }
-        }
+        *this = hood[FixedCoord<0, 0>()];
+        HoodAdapter<NEIGHBORHOOD> adapter(hood);
+        actualUpdate(adapter);
     }
 
     Iterator begin() const
@@ -254,13 +295,113 @@ public:
     std::vector<FixedArray<AMRDiffusionCell, SUBLEVEL_TILE_SIZE> > sublevel;
     FloatCoord<2> pos;
     FloatCoord<2> dim;
+    Coord<2> logicalCoord;
+    int logicalOffset;
     double value;
     double influx;
     int depth;
     int maxDepth;
+    bool edgeCell;
 
-    // template<typename NEIGHBORHOOD>
-    // void actualUpdate(const NEIGHBORHOOD& hood)
+#define HOOD(X, Y) hood(FixedCoord<X, Y>(), *this)
+
+    template<typename NEIGHBORHOOD>
+    void actualUpdate(const NEIGHBORHOOD& hood)
+    {
+        // std::cout << "update(" << logicalCoord << ", " << logicalOffset << " @ " << depth << ")\n";
+        if (sublevel.size()) {
+            for (int i = 0; i < sublevel[0].size(); ++i) {
+                sublevel[0][i].actualUpdate(hood);
+            }
+        }
+
+        // fixme
+        value =
+            influx +
+            0.25 *
+            (HOOD( 0, -1)->value +
+             HOOD(-1,  0)->value +
+             HOOD( 1,  0)->value +
+             HOOD( 0,  1)->value);
+
+        value += 1;
+
+        if (sublevel.size()) {
+            // fixme
+            // regularUpdate(hood);
+        } else {
+            if (depth < maxDepth) {
+                // check for refinement, fixme: extract into method
+                double delta = 0;
+                delta = std::max(delta, std::abs(value - HOOD(0, -1)->value));
+                delta = std::max(delta, std::abs(value - HOOD(0,  1)->value));
+                delta = std::max(delta, std::abs(value - HOOD(-1, 0)->value));
+                delta = std::max(delta, std::abs(value - HOOD( 1, 0)->value));
+
+                if (delta > DELTA_MAX) {
+                    sublevel.resize(1);
+                    FloatCoord<2> sublevelDim(
+                        dim[0] / SUBLEVEL_DIM_X,
+                        dim[1] / SUBLEVEL_DIM_Y);
+
+                    int newLogicalOffset = logicalOffset / SUBLEVEL_DIM_X;
+
+                    for (int y = 0; y < SUBLEVEL_DIM_Y; ++y) {
+                        for (int x = 0; x < SUBLEVEL_DIM_X; ++x) {
+                            Coord<2> index(x, y);
+                            FloatCoord<2> newPos = pos + sublevelDim.scale(index);
+                            Coord<2> newLogicalCoord = logicalCoord + index * newLogicalOffset;
+
+                            sublevel[0] << AMRDiffusionCell(
+                                newPos,
+                                sublevelDim,
+                                newLogicalCoord,
+                                newLogicalOffset,
+                                value,
+                                influx,
+                                depth + 1,
+                                maxDepth);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const AMRDiffusionCell *lookup(const Coord<2>& searchPoint) const
+    {
+        Coord<2> oppositeSide = logicalCoord + Coord<2>(logicalOffset, logicalOffset);
+        bool outside =
+            (searchPoint.x() <  logicalCoord.x()) ||
+            (searchPoint.x() >= oppositeSide.x()) ||
+            (searchPoint.y() <  logicalCoord.y()) ||
+            (searchPoint.y() >= oppositeSide.y());
+
+        if (edgeCell && outside) {
+            return this;
+        }
+
+        if (outside) {
+            std::cout << "  outside(" << searchPoint << ")\n";
+            return 0;
+        }
+
+        if (sublevel.size() == 0) {
+            std::cout << "  no more sublevels\n";
+            return this;
+        }
+
+        for (std::size_t i = 0; i < sublevel[0].size(); ++i) {
+            const AMRDiffusionCell *ret = sublevel[0][i].lookup(searchPoint);
+            if (ret) {
+                std::cout << "  child hit\n";
+                return ret;
+            }
+        }
+
+        return 0;
+    }
+
     // {
     //     double delta = 0;
     //     delta = std::max(std::abs(HOOD(0, 1) - HOOD( 0, -1)),
@@ -364,6 +505,29 @@ public:
     virtual void grid(GridBase<AMRDiffusionCell, 2> *ret)
     {
         CoordBox<2> box = ret->boundingBox();
+        int depth = 0;
+        int maxDepth = 2;
+
+        int logicalIndex = 1;
+        for (int j = 0; j < maxDepth; ++j) {
+            logicalIndex *= SUBLEVEL_DIM_X;
+        }
+
+        Coord<2> logicalEdgePos = box.origin * logicalIndex;
+        int logicalEdgeIndex = logicalIndex * std::max(box.dimensions.x(), box.dimensions.y());
+
+        ret->setEdge(AMRDiffusionCell(
+                         // fixme:
+                         FloatCoord<2>(-1, -1),
+                         FloatCoord<2>( 2,  2),
+                         logicalEdgePos,
+                         logicalEdgeIndex,
+                         0.0,
+                         0.0,
+                         0,
+                         0,
+                         true));
+
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
             double influx = 0;
             if (i->y() == 0) {
@@ -378,8 +542,9 @@ public:
             FloatCoord<2> dim(1, 1);
             FloatCoord<2> pos = dim.scale(*i);
 
-            int depth = 0;
-            int maxDepth = 4;
+            Coord<2> logicalPos = *i * logicalIndex;
+
+
             // fixme: kill this?
             // // no refinement on boundary
             // if ((i->y() == 0) || (i->y() == (box.dimensions.y() - 1)) ||
@@ -387,7 +552,7 @@ public:
             //     maxDepth = 0;
             // }
 
-            ret->set(*i, AMRDiffusionCell(pos, dim, 0, influx, depth, maxDepth));
+            ret->set(*i, AMRDiffusionCell(pos, dim, logicalPos, logicalIndex, 0, influx, depth, maxDepth));
         }
     }
 };
@@ -422,7 +587,7 @@ int main(int argc, char **argv)
     // SiloWriter<FooBar> writer("foobar", 1);
     // writer.stepFinished(grid, 14, WRITER_INITIALIZED);
 
-    Coord<2> gridDim(20, 10);
+    Coord<2> gridDim(15, 10);
     int maxSteps = 1000;
     SerialSimulator<AMRDiffusionCell> sim(new AMRInitializer(gridDim, maxSteps));
 
