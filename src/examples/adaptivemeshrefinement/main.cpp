@@ -51,60 +51,76 @@ public:
         const AMRDiffusionCell *operator()(FixedCoord<X, Y, 0>, const AMRDiffusionCell& origin) const
         {
             Coord<2> searchPoint = origin.logicalCoord +
-                Coord<2>(X * origin.logicalOffset,
-                         Y * origin.logicalOffset);
+                Coord<2>(X * origin.logicalOffset.x(),
+                         Y * origin.logicalOffset.y());
 
-            std::cout << "looking for " << searchPoint << "\n";
+            // std::cout << "looking for " << searchPoint << "\n";
             const AMRDiffusionCell *res = 0;
+
+            if (origin.logicalCoord == Coord<2>(16, 0)) {
+                // std::cout << "  looking for " << searchPoint << "\n"
+                //           << "  FixedCoord<" << X << ", " << Y << ">\n";
+            }
 
             // most accesses go to (0, 0)
             res = hood[FixedCoord<0, 0>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at A\n";
                 return res;
             }
 
             res = hood[FixedCoord<-1, -1>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at B\n";
                 return res;
             }
 
             res = hood[FixedCoord< 0, -1>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at C\n";
                 return res;
             }
 
             res = hood[FixedCoord< 1, -1>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at D\n";
                 return res;
             }
 
             // same row:
             res = hood[FixedCoord<-1,  0>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at E\n";
                 return res;
             }
 
             res = hood[FixedCoord< 1,  0>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at F\n";
                 return res;
             }
 
             // lower row:
             res = hood[FixedCoord<-1,  1>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at G\n";
                 return res;
             }
 
             res = hood[FixedCoord< 0,  1>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at H\n";
                 return res;
             }
 
             res = hood[FixedCoord< 1,  1>()].lookup(searchPoint);
             if (res) {
+                // if (origin.logicalCoord == Coord<2>(16, 0)) std::cout << "    found at I\n";
                 return res;
             }
 
+            // std::cout << "searchPoint: " << searchPoint << "\n"
+            //           << "origin: " << origin.logicalCoord << ", " << origin.logicalOffset << "\n";
             throw std::logic_error("neighbor not found");
         }
 
@@ -113,6 +129,7 @@ public:
     };
 
     // fixme: move this to dedicated class/file
+    // fixme: ignore non-leaf nodes in size calculation and visitor pattern?
     class Iterator
     {
     public:
@@ -228,12 +245,13 @@ public:
         const FloatCoord<2>& pos = FloatCoord<2>(0, 0),
         const FloatCoord<2>& dim = FloatCoord<2>(1, 1),
         const Coord<2>& logicalCoord = Coord<2>(),
-        const int logicalOffset = 0,
+        const Coord<2>& logicalOffset = Coord<2>(0, 0),
         const double value = 0,
         const double influx = 0,
         const int depth = 0,
         const int maxDepth = 0,
-        const bool edgeCell = false) :
+        const bool edgeCell = false,
+        const double contagiousFlag = 0) :
         pos(pos),
         dim(dim),
         logicalCoord(logicalCoord),
@@ -242,7 +260,8 @@ public:
         influx(influx),
         depth(depth),
         maxDepth(maxDepth),
-        edgeCell(edgeCell)
+        edgeCell(edgeCell),
+        contagiousFlag(contagiousFlag)
     {}
 
     class API : public APITraits::HasUnstructuredGrid
@@ -301,25 +320,19 @@ public:
     FloatCoord<2> pos;
     FloatCoord<2> dim;
     Coord<2> logicalCoord;
-    int logicalOffset;
+    Coord<2> logicalOffset;
     double value;
     double influx;
     int depth;
     int maxDepth;
     bool edgeCell;
+    double contagiousFlag;
 
 #define HOOD(X, Y) hood(FixedCoord<X, Y>(), *this)
 
     template<typename NEIGHBORHOOD>
     void actualUpdate(const NEIGHBORHOOD& hood)
     {
-        // std::cout << "update(" << logicalCoord << ", " << logicalOffset << " @ " << depth << ")\n";
-        if (sublevel.size()) {
-            for (int i = 0; i < sublevel[0].size(); ++i) {
-                sublevel[0][i].actualUpdate(hood);
-            }
-        }
-
         // fixme
         value =
             influx +
@@ -329,11 +342,31 @@ public:
              HOOD( 1,  0)->value +
              HOOD( 0,  1)->value);
 
-        value += 1;
+        // if (contagiousFlag == 1.0) {
+        //     std::cout << "infection at " << logicalCoord << ", " << logicalOffset << "\n";
+        // }
+
+        // if (logicalCoord == Coord<2>(16, 0)) {
+        //     const AMRDiffusionCell *c = HOOD(-1, 0);
+        //     std::cout << "state at " << logicalCoord << " is " << contagiousFlag
+        //               << ", left neighbor is " << c->logicalCoord
+        //               << " of size " << c->logicalOffset
+        //               << " with " << c->contagiousFlag
+        //               << " and edge: " << c->edgeCell
+        //               << "\n";
+        // }
+
+        contagiousFlag =
+            std::max(contagiousFlag,
+                     std::max(HOOD(0, -1)->contagiousFlag,
+                              std::max(HOOD(-1, 0)->contagiousFlag,
+                                       std::max(HOOD(1, 0)->contagiousFlag,
+                                                HOOD(0, 1)->contagiousFlag))));
 
         if (sublevel.size()) {
-            // fixme
-            // regularUpdate(hood);
+            for (int i = 0; i < sublevel[0].size(); ++i) {
+                sublevel[0][i].actualUpdate(hood);
+            }
         } else {
             if (depth < maxDepth) {
                 // check for refinement, fixme: extract into method
@@ -349,13 +382,15 @@ public:
                         dim[0] / Params<double>::SUBLEVEL_DIM_X,
                         dim[1] / Params<double>::SUBLEVEL_DIM_Y);
 
-                    int newLogicalOffset = logicalOffset / Params<double>::SUBLEVEL_DIM_X;
+                    Coord<2> newLogicalOffset(
+                        logicalOffset.x() / Params<double>::SUBLEVEL_DIM_X,
+                        logicalOffset.y() / Params<double>::SUBLEVEL_DIM_Y);
 
                     for (int y = 0; y < Params<double>::SUBLEVEL_DIM_Y; ++y) {
                         for (int x = 0; x < Params<double>::SUBLEVEL_DIM_X; ++x) {
                             Coord<2> index(x, y);
                             FloatCoord<2> newPos = pos + sublevelDim.scale(index);
-                            Coord<2> newLogicalCoord = logicalCoord + index * newLogicalOffset;
+                            Coord<2> newLogicalCoord = logicalCoord + index.scale(newLogicalOffset);
 
                             sublevel[0] << AMRDiffusionCell(
                                 newPos,
@@ -365,7 +400,9 @@ public:
                                 value,
                                 influx,
                                 depth + 1,
-                                maxDepth);
+                                maxDepth,
+                                edgeCell,
+                                contagiousFlag);
                         }
                     }
                 }
@@ -375,7 +412,7 @@ public:
 
     const AMRDiffusionCell *lookup(const Coord<2>& searchPoint) const
     {
-        Coord<2> oppositeSide = logicalCoord + Coord<2>(logicalOffset, logicalOffset);
+        Coord<2> oppositeSide = logicalCoord + logicalOffset;
         bool outside =
             (searchPoint.x() <  logicalCoord.x()) ||
             (searchPoint.x() >= oppositeSide.x()) ||
@@ -383,23 +420,26 @@ public:
             (searchPoint.y() >= oppositeSide.y());
 
         if (edgeCell && outside) {
+            // std::cout << "  edgeCell, searchPoint : " << searchPoint  << "\n"
+            //           << "  edgeCell, logicalCoord: " << logicalCoord << "\n"
+            //           << "  edgeCell, oppositeSide: " << oppositeSide << "\n\n";
             return this;
         }
 
-        if (outside) {
-            std::cout << "  outside(" << searchPoint << ")\n";
+        if (edgeCell || outside) {
+            // std::cout << "  outside(" << searchPoint << ")\n";
             return 0;
         }
 
         if (sublevel.size() == 0) {
-            std::cout << "  no more sublevels\n";
+            // std::cout << "  no more sublevels\n";
             return this;
         }
 
         for (std::size_t i = 0; i < sublevel[0].size(); ++i) {
             const AMRDiffusionCell *ret = sublevel[0][i].lookup(searchPoint);
             if (ret) {
-                std::cout << "  child hit\n";
+                // std::cout << "  child hit\n";
                 return ret;
             }
         }
@@ -513,20 +553,25 @@ public:
         int depth = 0;
         int maxDepth = 2;
 
-        int logicalIndex = 1;
+        Coord<2> logicalOffset(1, 1);
         for (int j = 0; j < maxDepth; ++j) {
-            logicalIndex *= Params<double>::SUBLEVEL_DIM_X;
+            logicalOffset = logicalOffset.scale(
+                Coord<2>(
+                    Params<double>::SUBLEVEL_DIM_X,
+                    Params<double>::SUBLEVEL_DIM_Y));
         }
 
-        Coord<2> logicalEdgePos = box.origin * logicalIndex;
-        int logicalEdgeIndex = logicalIndex * std::max(box.dimensions.x(), box.dimensions.y());
+        Coord<2> logicalEdgePos = box.origin.scale(logicalOffset);
+        Coord<2> logicalEdgeOffset = Coord<2>(
+            logicalOffset.x() * box.dimensions.x(),
+            logicalOffset.y() * box.dimensions.y());
 
         ret->setEdge(AMRDiffusionCell(
                          // fixme:
                          FloatCoord<2>(-1, -1),
                          FloatCoord<2>( 2,  2),
                          logicalEdgePos,
-                         logicalEdgeIndex,
+                         logicalEdgeOffset,
                          0.0,
                          0.0,
                          0,
@@ -547,7 +592,7 @@ public:
             FloatCoord<2> dim(1, 1);
             FloatCoord<2> pos = dim.scale(*i);
 
-            Coord<2> logicalPos = *i * logicalIndex;
+            Coord<2> logicalPos = i->scale(logicalOffset);
 
 
             // fixme: kill this?
@@ -557,7 +602,12 @@ public:
             //     maxDepth = 0;
             // }
 
-            ret->set(*i, AMRDiffusionCell(pos, dim, logicalPos, logicalIndex, 0, influx, depth, maxDepth));
+            double flag = 0;
+            if (*i == Coord<2>(0, 0)) {
+                flag = 1;
+            }
+            AMRDiffusionCell cell(pos, dim, logicalPos, logicalOffset, 0, influx, depth, maxDepth, false, flag);
+            ret->set(*i, cell);
         }
     }
 };
@@ -599,6 +649,8 @@ int main(int argc, char **argv)
     SiloWriter<AMRDiffusionCell> *siloWriter = new SiloWriter<AMRDiffusionCell>("AMR", 1);
     siloWriter->addSelectorForUnstructuredGrid(
         &AMRDiffusionCell::value, "value");
+    siloWriter->addSelectorForUnstructuredGrid(
+        &AMRDiffusionCell::contagiousFlag, "flag");
     sim.addWriter(siloWriter);
 
     sim.run();
