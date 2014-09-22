@@ -3,16 +3,6 @@
 using namespace LibGeoDecomp;
 
 
-template<typename ACCURACY>
-class Params
-{
-public:
-    static const int SUBLEVEL_DIM_X = 4;
-    static const int SUBLEVEL_DIM_Y = SUBLEVEL_DIM_X;
-    static const int SUBLEVEL_TILE_SIZE = (SUBLEVEL_DIM_X * SUBLEVEL_DIM_Y);
-    static const double DELTA_MAX = 10.0;
-};
-
 /**
  * A simple Adaptive Mesh Refinement (AMR) demo with automatic grid
  * adaptation. It computes a simple heat dissipation with fixed
@@ -27,6 +17,11 @@ public:
 class AMRDiffusionCell
 {
 public:
+    static const int SUBLEVEL_DIM_X = 4;
+    static const int SUBLEVEL_DIM_Y = SUBLEVEL_DIM_X;
+    static const int SUBLEVEL_TILE_SIZE = (SUBLEVEL_DIM_X * SUBLEVEL_DIM_Y);
+    static const int DELTA_MAX = 10.0;
+
     typedef AMRDiffusionCell value_type;
 
     // const static int PATCH_DIM_BITS = 3;
@@ -316,7 +311,7 @@ public:
 
 // fixme: private:
 
-    std::vector<FixedArray<AMRDiffusionCell, Params<double>::SUBLEVEL_TILE_SIZE> > sublevel;
+    std::vector<FixedArray<AMRDiffusionCell, SUBLEVEL_TILE_SIZE> > sublevel;
     FloatCoord<2> pos;
     FloatCoord<2> dim;
     Coord<2> logicalCoord;
@@ -376,18 +371,18 @@ public:
                 delta = std::max(delta, std::abs(value - HOOD(-1, 0)->value));
                 delta = std::max(delta, std::abs(value - HOOD( 1, 0)->value));
 
-                if (delta > Params<double>::DELTA_MAX) {
+                if (delta > DELTA_MAX) {
                     sublevel.resize(1);
                     FloatCoord<2> sublevelDim(
-                        dim[0] / Params<double>::SUBLEVEL_DIM_X,
-                        dim[1] / Params<double>::SUBLEVEL_DIM_Y);
+                        dim[0] / SUBLEVEL_DIM_X,
+                        dim[1] / SUBLEVEL_DIM_Y);
 
                     Coord<2> newLogicalOffset(
-                        logicalOffset.x() / Params<double>::SUBLEVEL_DIM_X,
-                        logicalOffset.y() / Params<double>::SUBLEVEL_DIM_Y);
+                        logicalOffset.x() / SUBLEVEL_DIM_X,
+                        logicalOffset.y() / SUBLEVEL_DIM_Y);
 
-                    for (int y = 0; y < Params<double>::SUBLEVEL_DIM_Y; ++y) {
-                        for (int x = 0; x < Params<double>::SUBLEVEL_DIM_X; ++x) {
+                    for (int y = 0; y < SUBLEVEL_DIM_Y; ++y) {
+                        for (int x = 0; x < SUBLEVEL_DIM_X; ++x) {
                             Coord<2> index(x, y);
                             FloatCoord<2> newPos = pos + sublevelDim.scale(index);
                             Coord<2> newLogicalCoord = logicalCoord + index.scale(newLogicalOffset);
@@ -557,8 +552,8 @@ public:
         for (int j = 0; j < maxDepth; ++j) {
             logicalOffset = logicalOffset.scale(
                 Coord<2>(
-                    Params<double>::SUBLEVEL_DIM_X,
-                    Params<double>::SUBLEVEL_DIM_Y));
+                    AMRDiffusionCell::SUBLEVEL_DIM_X,
+                    AMRDiffusionCell::SUBLEVEL_DIM_Y));
         }
 
         Coord<2> logicalEdgePos = box.origin.scale(logicalOffset);
