@@ -20,7 +20,7 @@ using namespace LibGeoDecomp;
 class AMRDiffusionCell
 {
 public:
-    static const double DELTA_MAX = 100.0;
+    static const double DELTA_MAX = 10.0;
 
     typedef AMRDiffusionCell value_type;
 
