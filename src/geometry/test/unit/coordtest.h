@@ -97,15 +97,50 @@ public:
 
     void testAdd()
     {
-        Coord<2> base(5, 7);
-        Coord<2> addend(13, 17);
-        TS_ASSERT_EQUALS(Coord<2>(18, 24), base + addend);
+        {
+            Coord<1> base(7);
+            Coord<1> addend(13);
+            TS_ASSERT_EQUALS(Coord<1>(20), base + addend);
+        }
+        {
+            Coord<2> base(5, 7);
+            Coord<2> addend(13, 17);
+            TS_ASSERT_EQUALS(Coord<2>(18, 24), base + addend);
+        }
+        {
+            Coord<3> base(11, 13, 17);
+            Coord<3> addend(19, 23, 29);
+            TS_ASSERT_EQUALS(Coord<3>(30, 36, 46), base + addend);
+        }
     }
 
     void testScale()
     {
-        Coord<2> base(5, 7);
-        TS_ASSERT_EQUALS(Coord<2>(15, 21), base * 3);
+        {
+            Coord<1> base(5);
+            TS_ASSERT_EQUALS(Coord<1>(15), base * 3);
+        }
+        {
+            Coord<2> base(5, 7);
+            TS_ASSERT_EQUALS(Coord<2>(15, 21), base * 3);
+        }
+        {
+            Coord<3> base(5, 7, 6);
+            TS_ASSERT_EQUALS(Coord<3>(15, 21, 18), base * 3);
+        }
+    }
+
+    void testScaleWithCoord()
+    {
+        {
+            TS_ASSERT_EQUALS(Coord<1>(15), Coord<1>(5).scale(Coord<1>(3)));
+        }
+        {
+            TS_ASSERT_EQUALS(Coord<2>(15, 8), Coord<2>(5, 4).scale(Coord<2>(3, 2)));
+        }
+        {
+            TS_ASSERT_EQUALS(Coord<3>(15, 8, 42), Coord<3>(5, 4, 7).scale(Coord<3>(3, 2, 6)));
+        }
     }
 
     void testBinaryMinus()

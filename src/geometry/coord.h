@@ -197,6 +197,12 @@ public:
     }
 
     __host__ __device__
+    inline Coord scale(const Coord<1>& scale) const
+    {
+        return Coord(scale.x() * x());
+    }
+
+    __host__ __device__
     inline const int& prod() const
     {
         return x();
@@ -392,6 +398,13 @@ public:
     inline Coord operator/(const int& divisor) const
     {
         return Coord(x()/ divisor, y() / divisor);
+    }
+
+    __host__ __device__
+    inline Coord scale(const Coord<2>& scale) const
+    {
+        return Coord(scale.x() * x(),
+                     scale.y() * y());
     }
 
     __host__ __device__
@@ -611,6 +624,14 @@ public:
     inline Coord operator/(const int& divisor) const
     {
         return Coord(x()/ divisor, y() / divisor, z() / divisor);
+    }
+
+    __host__ __device__
+    inline Coord scale(const Coord<3>& scale) const
+    {
+        return Coord(scale.x() * x(),
+                     scale.y() * y(),
+                     scale.z() * z());
     }
 
     __host__ __device__
