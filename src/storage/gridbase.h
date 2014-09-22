@@ -51,19 +51,19 @@ public:
         ++(*this);
         return *this;
     }
-    
+
     void operator++()
     {
         ++cursor.x();
         cell = grid->get(cursor);
     }
-    
+
     private:
     const GridBase<CELL, DIM> *grid;
     Coord<DIM> cursor;
     CELL cell;
     };
-    
+
     /**
      * Convenice class for reading/writing multiple cells. Incurs
      * overhead due to copying cells -- probably more often than
@@ -78,24 +78,24 @@ public:
     {
         cell = grid->get(cursor);
     }
-    
+
     const CELL& operator*() const
     {
         return cell;
     }
-    
+
     const CELL *operator->() const
     {
         return &cell;
     }
-    
+
     Iterator& operator>>(CELL& target)
     {
         target = cell;
         ++(*this);
         return *this;
     }
-    
+
     Iterator& operator<<(const CELL& source)
     {
         cell = source;
@@ -103,13 +103,13 @@ public:
         ++(*this);
         return *this;
     }
-    
+
     void operator++()
     {
         ++cursor.x();
         cell = grid->get(cursor);
     }
-    
+
     private:
     GridBase<CELL, DIM> *grid;
     Coord<DIM> cursor;
