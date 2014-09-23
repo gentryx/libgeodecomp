@@ -14,15 +14,20 @@ using namespace LibGeoDecomp;
  * memory footprint. The code has been optimized for brevity and
  * legibility, not performance.
  */
+template<
+    int PARAM_SUBLEVEL_DIM_X = 4,
+    int PARAM_SUBLEVEL_DIM_Y = PARAM_SUBLEVEL_DIM_X,
+    int PARAM_SUBLEVEL_TILE_SIZE = (PARAM_SUBLEVEL_DIM_X * PARAM_SUBLEVEL_DIM_Y),
+    int PARAM_DELTA_MAX = 10>
 class AMRDiffusionCell
 {
 public:
-    static const int SUBLEVEL_DIM_X = 4;
-    static const int SUBLEVEL_DIM_Y = SUBLEVEL_DIM_X;
-    static const int SUBLEVEL_TILE_SIZE = (SUBLEVEL_DIM_X * SUBLEVEL_DIM_Y);
-    static const int DELTA_MAX = 10.0;
-
     typedef AMRDiffusionCell value_type;
+
+    static const int SUBLEVEL_DIM_X = PARAM_SUBLEVEL_DIM_X;
+    static const int SUBLEVEL_DIM_Y = PARAM_SUBLEVEL_DIM_Y;
+    static const int SUBLEVEL_TILE_SIZE = PARAM_SUBLEVEL_TILE_SIZE;
+    static const double DELTA_MAX = PARAM_DELTA_MAX;
 
     // const static int PATCH_DIM_BITS = 3;
     // // sublevel patches (refined grids) are PATCH_DIM x PATCH_DIM in size.
@@ -533,16 +538,16 @@ public:
 #undef HOOD
 };
 
-class AMRInitializer : public SimpleInitializer<AMRDiffusionCell>
+class AMRInitializer : public SimpleInitializer<AMRDiffusionCell<> >
 {
 public:
     explicit AMRInitializer(
         const Coord<2> dim,
         const unsigned steps) :
-        SimpleInitializer<AMRDiffusionCell>(dim, steps)
+        SimpleInitializer<AMRDiffusionCell<> >(dim, steps)
     {}
 
-    virtual void grid(GridBase<AMRDiffusionCell, 2> *ret)
+    virtual void grid(GridBase<AMRDiffusionCell<>, 2> *ret)
     {
         CoordBox<2> box = ret->boundingBox();
         int depth = 0;
@@ -552,8 +557,8 @@ public:
         for (int j = 0; j < maxDepth; ++j) {
             logicalOffset = logicalOffset.scale(
                 Coord<2>(
-                    AMRDiffusionCell::SUBLEVEL_DIM_X,
-                    AMRDiffusionCell::SUBLEVEL_DIM_Y));
+                    AMRDiffusionCell<>::SUBLEVEL_DIM_X,
+                    AMRDiffusionCell<>::SUBLEVEL_DIM_Y));
         }
 
         Coord<2> logicalEdgePos = box.origin.scale(logicalOffset);
@@ -561,7 +566,7 @@ public:
             logicalOffset.x() * box.dimensions.x(),
             logicalOffset.y() * box.dimensions.y());
 
-        ret->setEdge(AMRDiffusionCell(
+        ret->setEdge(AMRDiffusionCell<>(
                          // fixme:
                          FloatCoord<2>(-1, -1),
                          FloatCoord<2>( 2,  2),
@@ -601,7 +606,7 @@ public:
             if (*i == Coord<2>(0, 0)) {
                 flag = 1;
             }
-            AMRDiffusionCell cell(pos, dim, logicalPos, logicalOffset, 0, influx, depth, maxDepth, false, flag);
+            AMRDiffusionCell<> cell(pos, dim, logicalPos, logicalOffset, 0, influx, depth, maxDepth, false, flag);
             ret->set(*i, cell);
         }
     }
@@ -639,13 +644,13 @@ int main(int argc, char **argv)
 
     Coord<2> gridDim(15, 10);
     int maxSteps = 1000;
-    SerialSimulator<AMRDiffusionCell> sim(new AMRInitializer(gridDim, maxSteps));
+    SerialSimulator<AMRDiffusionCell<> > sim(new AMRInitializer(gridDim, maxSteps));
 
-    SiloWriter<AMRDiffusionCell> *siloWriter = new SiloWriter<AMRDiffusionCell>("AMR", 1);
+    SiloWriter<AMRDiffusionCell<> > *siloWriter = new SiloWriter<AMRDiffusionCell<> >("AMR", 1);
     siloWriter->addSelectorForUnstructuredGrid(
-        &AMRDiffusionCell::value, "value");
+        &AMRDiffusionCell<>::value, "value");
     siloWriter->addSelectorForUnstructuredGrid(
-        &AMRDiffusionCell::contagiousFlag, "flag");
+        &AMRDiffusionCell<>::contagiousFlag, "flag");
     sim.addWriter(siloWriter);
 
     sim.run();
