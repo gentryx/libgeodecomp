@@ -15,23 +15,28 @@ using namespace LibGeoDecomp;
  * legibility, not performance.
  */
 template<
-    int PARAM_SUBLEVEL_DIM_X = 4,
-    int PARAM_SUBLEVEL_DIM_Y = PARAM_SUBLEVEL_DIM_X,
-    int PARAM_SUBLEVEL_TILE_SIZE = (PARAM_SUBLEVEL_DIM_X * PARAM_SUBLEVEL_DIM_Y),
-    int PARAM_DELTA_MAX = 10>
+    int SUBLEVEL_DIM_X = 4,
+    int SUBLEVEL_DIM_Y = SUBLEVEL_DIM_X,
+    int SUBLEVEL_TILE_SIZE = (SUBLEVEL_DIM_X * SUBLEVEL_DIM_Y),
+    int DELTA_MAX = 10>
 class AMRDiffusionCell
 {
 public:
     typedef AMRDiffusionCell value_type;
 
-    static const int SUBLEVEL_DIM_X = PARAM_SUBLEVEL_DIM_X;
-    static const int SUBLEVEL_DIM_Y = PARAM_SUBLEVEL_DIM_Y;
-    static const int SUBLEVEL_TILE_SIZE = PARAM_SUBLEVEL_TILE_SIZE;
-    static const double DELTA_MAX = PARAM_DELTA_MAX;
+    inline static int sublevelDimX()
+    {
+        return SUBLEVEL_DIM_X;
+    }
+
+    inline static int sublevelDimY()
+    {
+        return SUBLEVEL_DIM_Y;
+    }
 
     // const static int PATCH_DIM_BITS = 3;
     // // sublevel patches (refined grids) are PATCH_DIM x PATCH_DIM in size.
-    // const static int PATCH_DIM = 1 << PATCH_DIM_BITS;
+    // const static int PATCH_DIM = 1 >< PATCH_DIM_BITS;
     // const static int PATCH_DIM_BITMASK = PATCH_DIM - 1;
 
     // const static int BASE_DIM_BITS = 20;
@@ -557,8 +562,8 @@ public:
         for (int j = 0; j < maxDepth; ++j) {
             logicalOffset = logicalOffset.scale(
                 Coord<2>(
-                    AMRDiffusionCell<>::SUBLEVEL_DIM_X,
-                    AMRDiffusionCell<>::SUBLEVEL_DIM_Y));
+                    AMRDiffusionCell<>::sublevelDimX(),
+                    AMRDiffusionCell<>::sublevelDimY()));
         }
 
         Coord<2> logicalEdgePos = box.origin.scale(logicalOffset);

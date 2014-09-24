@@ -195,7 +195,7 @@ private:
 
         // weird: GCC 4.7.3 refuses to let me use chronometer.ratio<Foo, Bar> directly.
         Chronometer& c = chronometer;
-        double myRatio = c.ratio<TimeCompute, TimeTotal>();
+        double myRatio = c.template ratio<TimeCompute, TimeTotal>();
         chronometer.reset();
         LoadVec loads = mpilayer.gather(myRatio, 0);
         WeightVec newPartitionsSendBuffer;
