@@ -64,6 +64,8 @@ endif()
 # currently VisIt only supports Python 2.x. This (undocumented?)
 # feature of CMake allows us to avoid Python 3.y.
 set(PythonLibs_FIND_VERSION 2)
+# setting this variable is required since CMake 3.0
+set(PythonLibs_FIND_VERSION_MAJOR 2)
 
 find_package(CUDA)
 find_package(OpenCL)
