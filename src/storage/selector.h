@@ -100,7 +100,7 @@ public:
  * Wallace for pointing this out:
  * http://madebyevan.com/obscure-cpp-features/#pointer-to-member-operators
  *
- * fixme: use this class in RemoteSteerer, VisItWriter...
+ * fixme: use this class in RemoteSteerer...
  */
 template<typename CELL>
 class Selector
