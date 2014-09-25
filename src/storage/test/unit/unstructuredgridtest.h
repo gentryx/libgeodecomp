@@ -10,41 +10,40 @@ class MyDummyElement
 {
 public:
     explicit
-    MyDummyElement(int const val=0) :
+    MyDummyElement(int const val = 0) :
         val_(val)
     {}
 
-    int& operator() (int const & val)
+    int& operator()(const int& newVal)
     {
-        val_ = val;
-        return val_;
+        val = newVal;
+        return val;
     }
 
-    int const & operator() () const
+    const int operator()() const
     {
-        return val_;
+        return val;
     }
 
-    // fixme: rename val_ to val?
-    int& operator() ()
+    int& operator()()
     {
-        return val_;
+        return val;
     }
 
     inline bool operator==(const MyDummyElement& other) const
     {
 
-        return val_ == other.val_;
+        return val == other.val;
     }
 
     inline bool operator!=(const MyDummyElement& other) const
     {
 
-        return val_ != other.val_;
+        return val != other.val;
     }
 
 private:
-    int val_;
+    int val;
 };
 
 std::ostream& operator<< (std::ostream& out, MyDummyElement const & val){
