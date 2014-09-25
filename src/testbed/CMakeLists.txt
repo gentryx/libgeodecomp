@@ -1,6 +1,5 @@
 generate_sourcelists("./")
 
-add_subdirectory(boostmpi)
 add_subdirectory(parallelperformancetests)
 add_subdirectory(performancetests)
 add_subdirectory(opencl)
