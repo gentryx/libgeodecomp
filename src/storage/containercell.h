@@ -184,6 +184,12 @@ public:
         }
     }
 
+    template<class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+{
+  ar & ids & cells & numElements;
+}
+
     inline const Key *getIDs() const
     {
         return ids;
