@@ -972,7 +972,7 @@ void runSimulation()
     quadrantDim = FloatCoord<2>(quadrantSize, quadrantSize);
 
     // Hardcoded link to the directory
-    std::string prunedDirname("/home/zbyerly/research/libgeodecomp/src/examples/gameoflife_adcirc/meshes/shin32");
+    std::string prunedDirname("/home/zbyerly/research/meshes/shin32");
 
     // Hardcoded number of simulation steps
     int steps = 100;
