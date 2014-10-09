@@ -54,7 +54,7 @@ public:
 
         if (state == BURNING) {
             temperature += 40.0;
-            fuel -= 0.03;
+            fuel -= 0.0225;
             // quenching:
             if ((temperature <= 50) || (fuel <= 0) || (humidity >= 0.33)) {
                 state = GUTTED;
@@ -277,14 +277,16 @@ public:
         bool lastCall,
         SteererFeedback *feedback)
     {
-        if (waterAvailable && (trigger->averageTemperature() > 200)) {
-            std::cout << "WARNING: initiating rain at time step " << step << "\n";
+        if (waterAvailable && (trigger->averageTemperature() > 250)) {
+            std::cout << "WARNING---------------------------------------------------\n"
+                      << "WARNING: initiating rain at time step " << step << "\n"
+                      << "WARNING---------------------------------------------------\n";
 
             for (Region<Topology::DIM>::Iterator i = validRegion.begin();
                  i != validRegion.end();
                  ++i) {
                 BushFireCell cell = grid->get(*i);
-                cell.humidity += 0.1;
+                cell.humidity += 0.25;
                 grid->set(*i, cell);
             }
 
