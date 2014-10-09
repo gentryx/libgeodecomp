@@ -2,10 +2,13 @@
 
 using namespace LibGeoDecomp;
 
+class TemperatureRecorder;
+
 class BushFireCell
 {
 public:
     friend void runSimulation();
+    friend TemperatureRecorder;
 
     enum State {BURNING, GUTTED};
 
@@ -217,23 +220,56 @@ private:
     }
 };
 
+class TemperatureRecorder : public Clonable<Writer<BushFireCell>, TemperatureRecorder>
+{
+public:
+    typedef typename Writer<BushFireCell>::GridType GridType;
+
+    TemperatureRecorder(const int outputPeriod) :
+        Clonable<Writer<BushFireCell>, TemperatureRecorder>("", outputPeriod),
+        avrgTemperature(0)
+    {}
+
+    void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
+    {
+        avrgTemperature = 0;
+
+        CoordBox<2> box = grid.boundingBox();
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            avrgTemperature += grid.get(*i).temperature;
+        }
+
+        avrgTemperature /= box.dimensions.prod();
+        std::cout << "averageTemperature(" << step << ") = " << avrgTemperature << "\n";
+    }
+
+    double averageTemperature() const
+    {
+        return avrgTemperature;
+    }
+
+private:
+    double avrgTemperature;
+};
+
 void runSimulation()
 {
     Coord<2> dim(1000, 500);
     int maxSteps = 5000;
-    int outputFrequency = 5;
+    int outputPeriod = 5;
 
     SerialSimulator<BushFireCell> sim(new BushFireInitializer(dim, maxSteps));
 
     sim.addWriter(new SerialBOVWriter<BushFireCell>(&BushFireCell::humidity,    "humidity",
-                      outputFrequency));
+                      outputPeriod));
     sim.addWriter(new SerialBOVWriter<BushFireCell>(&BushFireCell::fuel,        "fuel",
-                      outputFrequency));
+                      outputPeriod));
     sim.addWriter(new SerialBOVWriter<BushFireCell>(&BushFireCell::temperature, "temperature",
-                      outputFrequency));
+                      outputPeriod));
     sim.addWriter(new SerialBOVWriter<BushFireCell>(&BushFireCell::state,       "state",
-                      outputFrequency));
-    sim.addWriter(new TracingWriter<BushFireCell>(outputFrequency, maxSteps));
+                      outputPeriod));
+    sim.addWriter(new TracingWriter<BushFireCell>(500, maxSteps));
+    sim.addWriter(new TemperatureRecorder(100));
 
     sim.run();
 }
