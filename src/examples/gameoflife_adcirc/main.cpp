@@ -598,7 +598,7 @@ public:
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, unsigned)
   {
-    ar & meshDir & maxDiameter & minCoord & maxCoord;
+    ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this);
   }
     
     
@@ -969,11 +969,11 @@ SimulatorType;
 
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
 						SimulatorType,
-						ConwayCellSimulator
+						DomainCellSimulator
 )
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
 				    SimulatorType,
-				    ConwayCellSimulator
+				    DomainCellSimulator
 				    )
 //BOOST_CLASS_EXPORT(ADCIRCInitializer);
 //BOOST_CLASS_EXPORT(DomainCell);
@@ -1010,9 +1010,10 @@ void runSimulation()
         "DomainCell_alive");
     sim.addWriter(writer);
     */
+    ADCIRCInitializer *init = new ADCIRCInitializer(prunedDirname, steps);
 
     SimulatorType sim(
-		      new ADCIRCInitializer(prunedDirname, steps),
+		      init,
 		      1, //overcommitFactor
 		      new TracingBalancer(new OozeBalancer()),
 		      10, //balancingPeriod
