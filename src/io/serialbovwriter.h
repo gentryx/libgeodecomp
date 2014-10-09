@@ -48,7 +48,7 @@ public:
         const unsigned period,
         const Coord<3>& brickletDim = Coord<3>()) :
         Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >(prefix, period),
-        selector(member, "var"),
+        selector(member, prefix),
         brickletDim(brickletDim)
     {}
 
