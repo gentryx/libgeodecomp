@@ -3,12 +3,14 @@
 using namespace LibGeoDecomp;
 
 class TemperatureRecorder;
+class RainMaker;
 
 class BushFireCell
 {
 public:
     friend void runSimulation();
     friend TemperatureRecorder;
+    friend RainMaker;
 
     enum State {BURNING, GUTTED};
 
@@ -52,7 +54,7 @@ public:
 
         if (state == BURNING) {
             temperature += 40.0;
-            fuel -= 0.05;
+            fuel -= 0.03;
             // quenching:
             if ((temperature <= 50) || (fuel <= 0) || (humidity >= 0.33)) {
                 state = GUTTED;
@@ -225,7 +227,7 @@ class TemperatureRecorder : public Clonable<Writer<BushFireCell>, TemperatureRec
 public:
     typedef typename Writer<BushFireCell>::GridType GridType;
 
-    TemperatureRecorder(const int outputPeriod) :
+    TemperatureRecorder(const unsigned outputPeriod) :
         Clonable<Writer<BushFireCell>, TemperatureRecorder>("", outputPeriod),
         avrgTemperature(0)
     {}
@@ -252,6 +254,51 @@ private:
     double avrgTemperature;
 };
 
+class RainMaker : public Steerer<BushFireCell>
+{
+public:
+    using Steerer<BushFireCell>::CoordType;
+    using Steerer<BushFireCell>::GridType;
+    using Steerer<BushFireCell>::Topology;
+
+    RainMaker(const unsigned ioPeriod, TemperatureRecorder *trigger) :
+        Steerer<BushFireCell>(ioPeriod),
+        waterAvailable(true),
+        trigger(trigger)
+    {}
+
+    void nextStep(
+        GridType *grid,
+        const Region<Topology::DIM>& validRegion,
+        const CoordType& globalDimensions,
+        unsigned step,
+        SteererEvent event,
+        std::size_t rank,
+        bool lastCall,
+        SteererFeedback *feedback)
+    {
+        if (waterAvailable && (trigger->averageTemperature() > 200)) {
+            std::cout << "WARNING: initiating rain at time step " << step << "\n";
+
+            for (Region<Topology::DIM>::Iterator i = validRegion.begin();
+                 i != validRegion.end();
+                 ++i) {
+                BushFireCell cell = grid->get(*i);
+                cell.humidity += 0.1;
+                grid->set(*i, cell);
+            }
+
+            if (lastCall) {
+                waterAvailable = 0;
+            }
+        }
+    }
+
+private:
+    bool waterAvailable;
+    TemperatureRecorder *trigger;
+};
+
 void runSimulation()
 {
     Coord<2> dim(1000, 500);
@@ -268,8 +315,12 @@ void runSimulation()
                       outputPeriod));
     sim.addWriter(new SerialBOVWriter<BushFireCell>(&BushFireCell::state,       "state",
                       outputPeriod));
+
     sim.addWriter(new TracingWriter<BushFireCell>(500, maxSteps));
-    sim.addWriter(new TemperatureRecorder(100));
+
+    TemperatureRecorder *temperatureRecorder = new TemperatureRecorder(100);
+    sim.addWriter(temperatureRecorder);
+    sim.addSteerer(new RainMaker(100, temperatureRecorder));
 
     sim.run();
 }
