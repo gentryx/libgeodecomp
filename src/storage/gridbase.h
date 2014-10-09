@@ -130,12 +130,12 @@ public:
 
     ConstIterator at(const Coord<DIM>& coord) const
     {
-    return ConstIterator(this, coord);
+        return ConstIterator(this, coord);
     }
 
     Iterator at(const Coord<DIM>& coord)
     {
-    return Iterator(this, coord);
+        return Iterator(this, coord);
     }
 
     Coord<DIM> dimensions() const
