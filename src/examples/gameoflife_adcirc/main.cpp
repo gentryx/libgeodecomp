@@ -19,6 +19,11 @@
 #include <math.h>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/export.hpp>
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/stencils.h>
@@ -410,12 +415,18 @@ public:
     using SimpleInitializer<ContainerCellType>::dimensions;    
 
     ADCIRCInitializer(const std::string& meshDir, const int steps) :
-        SimpleInitializer<ContainerCellType>(Coord<2>(), steps),
-        meshDir(meshDir)
+      //        SimpleInitializer<ContainerCellType>(Coord<2>(), steps),
+	SimpleInitializer<ContainerCellType>(Coord<2>(2, 2), steps),        
+	meshDir(meshDir)
     {
         determineGridDimensions();
     }
     
+  ADCIRCInitializer()
+  {
+  }
+  
+
     virtual void grid(GridType *grid)
     {
         std::ifstream fort80File;
@@ -584,6 +595,11 @@ public:
     }
     
     
+  template <class ARCHIVE>
+  void serialize(ARCHIVE& ar, unsigned)
+  {
+    ar & meshDir & maxDiameter & minCoord & maxCoord;
+  }
     
     
     
@@ -959,7 +975,11 @@ LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
 				    SimulatorType,
 				    ConwayCellSimulator
 				    )
+//BOOST_CLASS_EXPORT(ADCIRCInitializer);
+//BOOST_CLASS_EXPORT(DomainCell);
 
+BOOST_CLASS_EXPORT_GUID(ADCIRCInitializer, "ADCIRCInitializer");
+BOOST_CLASS_EXPORT_GUID(DomainCell, "DomainCell");
 
 void runSimulation()
 {
