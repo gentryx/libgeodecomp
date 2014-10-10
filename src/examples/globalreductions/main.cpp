@@ -40,7 +40,9 @@ public:
             hood[FixedCoord< 1, 0>()].temperature +
             hood[FixedCoord<0,  1>()].temperature);
 
-        double evaporation = std::min(1.0, 0.993 + 0.7/ (0.001 + temperature));
+        const double evaporationTemperature = 100.0;
+        const double evaporationSpeed = 1.0;
+        double evaporation = std::min(1.0, (1.0 - evaporationSpeed / evaporationTemperature) + evaporationSpeed / (0.0001 + temperature));
         humidity = hood[FixedCoord<>()].humidity * evaporation;
 
         double lostHumidity = hood[FixedCoord<>()].humidity - humidity;
@@ -304,7 +306,7 @@ private:
 void runSimulation()
 {
     Coord<2> dim(1000, 500);
-    int maxSteps = 5000;
+    int maxSteps = 15000;
     int outputPeriod = 5;
 
     SerialSimulator<BushFireCell> sim(new BushFireInitializer(dim, maxSteps));
