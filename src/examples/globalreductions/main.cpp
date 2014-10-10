@@ -288,7 +288,9 @@ public:
                  i != validRegion.end();
                  ++i) {
                 BushFireCell cell = grid->get(*i);
-                cell.humidity += 0.2;
+                if ((cell.fuel > 0) && (cell.temperature > 0.0001)) {
+                    cell.humidity += 0.5;
+                }
                 grid->set(*i, cell);
             }
 
