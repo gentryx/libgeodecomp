@@ -445,7 +445,7 @@ private:
 
 /**
  * VoronoiMesher is a utility class which helps when setting up an
- * unstructured grid based on a Voronoi diagram. It is meant to
+ * unstructured grid based on a Voronoi diagram. It is meant to be
  * embedded into an Initializer for setting up neighberhood
  * relationships, element shapes, boundary lenghts and aeras.
  *
