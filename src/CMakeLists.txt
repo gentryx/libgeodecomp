@@ -350,8 +350,9 @@ endif(WIN32)
 
 if(WITH_HPX)
   set(HPX_LIB_SUFFIX "")
-  if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
+    add_definitions(-DHPX_DEBUG)
   endif()
 endif()
 
