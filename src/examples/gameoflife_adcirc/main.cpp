@@ -268,7 +268,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     int domainID = domainCell->id;
     int numNeighbors = myNeighborTable.myNeighbors.size();
 
-    std::cerr << "step = " << outputStep << std::endl;
+    std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;
 
     if (outputStep == 0) 
     {
@@ -598,7 +598,7 @@ public:
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, unsigned)
   {
-    ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this);
+    ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this) & meshDir & maxDiameter & minCoord & maxCoord;
   }
     
     
@@ -992,7 +992,7 @@ void runSimulation()
     quadrantDim = FloatCoord<2>(quadrantSize, quadrantSize);
 
     // Hardcoded link to the directory
-    std::string prunedDirname("/home/zbyerly/research/meshes/shin32");
+    std::string prunedDirname("/home/zbyerly/research/meshes/qah4");
 
     // Hardcoded number of simulation steps
     int steps = 100;
@@ -1014,7 +1014,7 @@ void runSimulation()
 
     SimulatorType sim(
 		      init,
-		      1, //overcommitFactor
+		      2, //overcommitFactor
 		      new TracingBalancer(new OozeBalancer()),
 		      10, //balancingPeriod
 		      1 // ghostZoneWidth
