@@ -38,6 +38,7 @@
 #include <libgeodecomp/storage/image.h>
 
 #include "hull.h"
+#include "kernel.h"
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
