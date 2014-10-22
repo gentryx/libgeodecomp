@@ -27,6 +27,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/ppmwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>
@@ -38,13 +39,18 @@
 #include <libgeodecomp/storage/image.h>
 
 #include "hull.h"
-#include "kernel.h"
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
 
 FloatCoord<2> origin;
 FloatCoord<2> quadrantDim;
+
+/*
+extern "C"{
+  void avgdepth_(int *numnodes, float depth[], float *avg);
+}
+*/
 
 struct neighbor
 {
@@ -271,8 +277,10 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 
     std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;
 
+
     if (outputStep == 0) 
     {
+
         //Initial Output
         std::ostringstream filename;
         filename << "data/output" << domainID << "." << nanoStep << ".dat";
@@ -965,7 +973,7 @@ private:
 };    
 
 typedef
-HpxSimulator::HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > 
+HpxSimulator::HpxSimulator<ContainerCellType, ZCurvePartition<2> > 
 SimulatorType;
 
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
@@ -1015,7 +1023,7 @@ void runSimulation()
 
     SimulatorType sim(
 		      init,
-		      2, //overcommitFactor
+		      1, //overcommitFactor
 		      new TracingBalancer(new OozeBalancer()),
 		      10, //balancingPeriod
 		      1 // ghostZoneWidth
@@ -1026,9 +1034,21 @@ void runSimulation()
 
 int hpx_main()
 {
-    runSimulation();
+
+  /*
+  //FORTRAN interface testing
+  {
+    int numnodes = 5;
+    float depth[numnodes] = {1.0, 2.0, 3.0, 4.0, 5.0};	
+    float avg = 0.0;       
+    avgdepth_(&numnodes, depth, &avg);	
+	std::cout << "average depth = " << avg << std::endl;	
+  }
+  */
+
+  runSimulation();
     
-    return hpx::finalize();
+  return hpx::finalize();
 }
 
 int main(int argc, char *argv[])
