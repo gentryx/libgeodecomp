@@ -46,11 +46,11 @@ using namespace LibGeoDecomp;
 FloatCoord<2> origin;
 FloatCoord<2> quadrantDim;
 
-/*
+
 extern "C"{
   void avgdepth_(int *numnodes, float depth[], float *avg);
 }
-*/
+
 
 struct neighbor
 {
@@ -277,6 +277,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 
     std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;
 
+    
 
     if (outputStep == 0) 
     {
@@ -298,6 +299,33 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
         file.close();
     }
     
+    //FORTRAN interface testing
+    {
+      int numnodes = 0;
+        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+        {
+            if (i->second.globalID != -1) 
+            {
+	      int localID = i->second.localID;
+              float xlocation = i->second.location[0];
+              float ylocation = i->second.location[1];
+              int alive = i->second.alive;
+	      numnodes++;	      
+            }
+        }
+      float depth[numnodes];
+      int count = 0;
+      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+        {
+	  if (i->second.globalID != -1) 
+            {
+	      depth[count++] = i->second.location[2];
+            }
+        }
+      float avg = 0.0;       
+      avgdepth_(&numnodes, depth, &avg);	
+      std::cout << "average depth = " << avg << std::endl;	
+    }
 
 
      //Debugging
@@ -974,6 +1002,7 @@ private:
 
 typedef
 HpxSimulator::HpxSimulator<ContainerCellType, ZCurvePartition<2> > 
+//HpxSimulator::HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > 
 SimulatorType;
 
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
@@ -1033,19 +1062,7 @@ void runSimulation()
 }
 
 int hpx_main()
-{
-
-  /*
-  //FORTRAN interface testing
-  {
-    int numnodes = 5;
-    float depth[numnodes] = {1.0, 2.0, 3.0, 4.0, 5.0};	
-    float avg = 0.0;       
-    avgdepth_(&numnodes, depth, &avg);	
-	std::cout << "average depth = " << avg << std::endl;	
-  }
-  */
-
+{  
   runSimulation();
     
   return hpx::finalize();

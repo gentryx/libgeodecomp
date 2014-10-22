@@ -11,4 +11,5 @@
          AVG = AVG + DEPTH(I)
       END DO
       AVG = AVG/N
+
       END SUBROUTINE
