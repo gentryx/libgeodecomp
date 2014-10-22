@@ -145,7 +145,7 @@ public:
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, unsigned)
   {
-    ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes;
+    ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes & outputStep;
     /*
     LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
                                         // of the Domain
