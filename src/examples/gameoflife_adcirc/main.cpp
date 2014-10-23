@@ -48,7 +48,7 @@ FloatCoord<2> quadrantDim;
 
 
 extern "C"{
-  void avgdepth_(int *numnodes, float depth[], float *avg);
+  void kernel_(int *sum);
 }
 
 
@@ -275,13 +275,10 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     int domainID = domainCell->id;
     int numNeighbors = myNeighborTable.myNeighbors.size();
 
-    std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;
-
+    std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;    
     
-
     if (outputStep == 0) 
     {
-
         //Initial Output
         std::ostringstream filename;
         filename << "data/output" << domainID << "." << nanoStep << ".dat";
@@ -299,35 +296,6 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
         file.close();
     }
     
-    //FORTRAN interface testing
-    {
-      int numnodes = 0;
-        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-        {
-            if (i->second.globalID != -1) 
-            {
-	      int localID = i->second.localID;
-              float xlocation = i->second.location[0];
-              float ylocation = i->second.location[1];
-              int alive = i->second.alive;
-	      numnodes++;	      
-            }
-        }
-      float depth[numnodes];
-      int count = 0;
-      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-        {
-	  if (i->second.globalID != -1) 
-            {
-	      depth[count++] = i->second.location[2];
-            }
-        }
-      float avg = 0.0;       
-      avgdepth_(&numnodes, depth, &avg);	
-      std::cout << "average depth = " << avg << std::endl;	
-    }
-
-
      //Debugging
     /*
     std::cerr << "I am domain number " << domainID << ", ";
@@ -388,38 +356,47 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
         }
     }
 
-//    std::vector<FloatCoord<2> > points = getShape();
-    
-    //TODO: Interact with a C-style kernel subroutine in another file
-
-    //Simple Kernel
-    //Loop over local points
-    for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-    {        
-        int my_alive = i->second.lastAlive;
-        if (my_alive == 1)
+    //FORTRAN interface testing
+    {
+      int numnodes = 0;
+        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
         {
-            //In this kernel, if the cell was alive previously, it
-            //will die the next timestep.
-            my_alive = 0;
-        } else {
-            //Count up neighbor alives
-            int sum = 0;
-//            std::cerr << "id = " << i->second.localID << ", neighbors =";
-            for (int j=0; j<i->second.neighboringNodes.size(); j++) {
-                sum += localNodes[i->second.neighboringNodes[j]].lastAlive;
-//                std::cerr << " " << i->second.neighboringNodes[j];
-           }            
-//            std::cerr << ", sum = " << sum << std::endl;
-            if (sum > 0)
+            if (i->second.globalID != -1) 
             {
-                my_alive = 1;
+	      numnodes++;	      
             }
         }
+      float old_alive[numnodes];
+      float new_alive[numnodes];
+      int count = 0;
+      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+        {
+	  if (i->second.globalID != -1) 
+            {
+	      int index = count++;
+	      old_alive[index] = i->second.alive;	      
+	      new_alive[index] = 0;
+            }
+        }
+      float avg = 0.0;
+      int sum = 1;
+      //Transfer vectors via common block?
+      
+      struct variables {
+	int n;
+      };
+      extern "C" {
+	extern struct variables vari_;
+      };
+      
 
-        i->second.alive = my_alive;
+      kernel_(&sum);
+	
+      std::cout << "sum of alives = " << vari_.n << std::endl;	
     }
-    
+
+
+
     //Output
     std::ostringstream filename;
     filename << "data/output" << domainID << "." << outputStep+1 << ".dat";

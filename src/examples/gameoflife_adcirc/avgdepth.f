@@ -1,15 +1,21 @@
-      SUBROUTINE AVGDEPTH(N, DEPTH, AVG)
+      SUBROUTINE KERNEL(SUM)
       IMPLICIT NONE
-      INTEGER, INTENT(IN) :: N 
-      REAL, DIMENSION(N) :: DEPTH
-      REAL, INTENT(OUT) :: AVG
+!      INTEGER, INTENT(OUT) :: SUM 
+      INTEGER, INTENT(IN) :: SUM 
+
+      INTEGER N
+      COMMON /TEST/ N
+
+!      REAL, DIMENSION(N), INTENT(IN) :: OLD_ALIVE
+!      REAL, DIMENSION(N), INTENT(OUT) :: NEW_ALIVE
       
       INTEGER :: I
-
-      AVG = 0.0
+      
       DO I=1,N
-         AVG = AVG + DEPTH(I)
+         !do nothing
       END DO
-      AVG = AVG/N
+
+!      SUM = N
+      N=SUM
 
       END SUBROUTINE
