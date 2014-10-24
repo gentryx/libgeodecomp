@@ -50,8 +50,9 @@ FloatCoord<2> quadrantDim;
 extern "C"{
   void kernel_(
 	       int *n, 
-	       float alive[],
-	       int *sum
+	       int alive[],
+	       int numneighbors[],
+	       int neighbors[][20]
 	       );
 }
 
@@ -324,7 +325,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     }
     std::cerr << "\n";
     */
-
+    
     for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
     {        
         i->second.lastAlive = i->second.alive;
@@ -363,44 +364,54 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 
     //FORTRAN interface testing
     {
+
+      //Loop over all SubNodes to determine number of nodes
       int numnodes = 0;
-        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
         {
-            if (i->second.globalID != -1) 
-            {
-	      numnodes++;	      
-            }
+	  numnodes++;	      
         }
-      float alive[numnodes];
+
+
+      //Declare arrays
+      int alive[numnodes];
+      int numneighbors[numnodes];
+      int neighbors[numnodes][20]; //20 = max neighbors
+      
+      //Fill arrays with values from SubNode objects
       int count = 0;
       for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
         {
-	  if (i->second.globalID != -1) 
-            {
 	      int index = count++;
-	      alive[index] = i->second.alive;	      
-            }
+	      
+	      //	      std::cout << "index = " << index << std::endl;
+	      //	      std::cout << "count = " << count << std::endl;
+	      alive[index] = i->second.alive;
+	      numneighbors[index] = i->second.neighboringNodes.size();
+
+	      for (int j=0; j<numneighbors[index]; j++) {
+		neighbors[index][j] = i->second.neighboringNodes[j];
+	      }
+	      //	      std::cout << "C++: numneighbors[" << index << "] = " << numneighbors[index] << std::endl;
         }
 
-      std::cout << "C++: numnodes = " << numnodes << std::endl;	      
-
-      int sum=0;
       //Call FORTRAN subroutine
       kernel_(
-	      &numnodes, 
+	      &numnodes,
 	      alive,
-	      &sum
+	      numneighbors,
+	      neighbors
 	      );
 	
-      std::cout << "C++: sum = " << sum << std::endl;	
+      
+      //      std::cout << "C++: sum = " << sum << std::endl;
     }
-
-
 
     //Output
     std::ostringstream filename;
     filename << "data/output" << domainID << "." << outputStep+1 << ".dat";
     std::ofstream file(filename.str().c_str());
+    /*
     for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
     {
         if (i->second.globalID != -1) 
@@ -411,8 +422,9 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
             file << i->second.alive << std::endl;
         }        
     }
+    */
     file.close();
-    outputStep++;    
+    outputStep++;
 
 }
 
@@ -1007,7 +1019,7 @@ void runSimulation()
     std::string prunedDirname("/home/zbyerly/research/meshes/qah4");
 
     // Hardcoded number of simulation steps
-    int steps = 100;
+    int steps = 3;
 
     //    SerialSimulator<ContainerCellType> sim(
 
