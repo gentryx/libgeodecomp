@@ -48,7 +48,11 @@ FloatCoord<2> quadrantDim;
 
 
 extern "C"{
-  void kernel_(int *sum);
+  void kernel_(
+	       int *n, 
+	       float alive[],
+	       int *sum
+	       );
 }
 
 
@@ -327,7 +331,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     }
 
 
-    //Exchange boundary values
+    //Exchange boundary values **********************************************
     //Loop over neighbors
     for (int i=0; i<numNeighbors; i++)
     {
@@ -355,6 +359,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
             localNodes[myLocalID].lastAlive = incomingNodes[j].alive;
         }
     }
+    // Done exchange boundary values *************************************
 
     //FORTRAN interface testing
     {
@@ -366,33 +371,28 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 	      numnodes++;	      
             }
         }
-      float old_alive[numnodes];
-      float new_alive[numnodes];
+      float alive[numnodes];
       int count = 0;
       for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
         {
 	  if (i->second.globalID != -1) 
             {
 	      int index = count++;
-	      old_alive[index] = i->second.alive;	      
-	      new_alive[index] = 0;
+	      alive[index] = i->second.alive;	      
             }
         }
-      float avg = 0.0;
-      int sum = 1;
-      //Transfer vectors via common block?
-      
-      struct variables {
-	int n;
-      };
-      extern "C" {
-	extern struct variables vari_;
-      };
-      
 
-      kernel_(&sum);
+      std::cout << "C++: numnodes = " << numnodes << std::endl;	      
+
+      int sum=0;
+      //Call FORTRAN subroutine
+      kernel_(
+	      &numnodes, 
+	      alive,
+	      &sum
+	      );
 	
-      std::cout << "sum of alives = " << vari_.n << std::endl;	
+      std::cout << "C++: sum = " << sum << std::endl;	
     }
 
 
@@ -412,10 +412,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
         }        
     }
     file.close();
-    outputStep++;
-    
-
-    
+    outputStep++;    
 
 }
 
