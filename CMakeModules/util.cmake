@@ -40,7 +40,7 @@ function(generate_sourcelists relative_dir)
   get_filename_component(dir ${relative_dir} ABSOLUTE)
   # message("generate_sourcelists ${dir}")
 
-  file(GLOB RAW_SOURCES "${dir}/*.cu" "${dir}/*.cpp")
+  file(GLOB RAW_SOURCES "${dir}/*.cu" "${dir}/*.cpp" "${dir}/*.f")
   file(GLOB RAW_HEADERS "${dir}/*.h")
 
   if(RAW_SOURCES OR RAW_HEADERS)
