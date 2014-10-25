@@ -164,7 +164,7 @@ public:
 
     template<template<int> class OTHER_COORD>
     inline
-    FloatCoord scale(const OTHER_COORD<1> other)
+    FloatCoord scale(const OTHER_COORD<1>& other)
     {
         return FloatCoord(c[0] * other[0]);
     }
@@ -366,7 +366,7 @@ public:
 
     template<template<int> class OTHER_COORD>
     inline
-    FloatCoord scale(const OTHER_COORD<2> other)
+    FloatCoord scale(const OTHER_COORD<2>& other)
     {
         return FloatCoord(c[0] * other[0],
                           c[1] * other[1]);
@@ -587,7 +587,7 @@ public:
 
     template<template<int> class OTHER_COORD>
     inline
-    FloatCoord scale(const OTHER_COORD<3> other)
+    FloatCoord scale(const OTHER_COORD<3>& other)
     {
         return FloatCoord(c[0] * other[0],
                           c[1] * other[1],
