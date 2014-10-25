@@ -356,7 +356,6 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
             {
                 throw std::runtime_error("boundary node location mismatch!");
             }
-
             localNodes[myLocalID].lastAlive = incomingNodes[j].alive;
         }
     }
@@ -386,7 +385,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 	      
 	      //	      std::cout << "index = " << index << std::endl;
 	      //	      std::cout << "count = " << count << std::endl;
-	      alive[index] = i->second.alive;
+	      alive[index] = i->second.lastAlive;
 	      numneighbors[index] = i->second.neighboringNodes.size();
 
 	      for (int j=0; j<numneighbors[index]; j++) {
@@ -403,15 +402,20 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 	      neighbors
 	      );
 	
-      
-      //      std::cout << "C++: sum = " << sum << std::endl;
+      //Fill SubNode objects with arrays
+      count = 0;
+      for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+        {
+	      int index = count++;
+	      i->second.alive = alive[index];
+        }
     }
 
     //Output
     std::ostringstream filename;
     filename << "data/output" << domainID << "." << outputStep+1 << ".dat";
     std::ofstream file(filename.str().c_str());
-    /*
+    
     for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
     {
         if (i->second.globalID != -1) 
@@ -420,9 +424,9 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
             file << i->second.location[0] << " ";
             file << i->second.location[1] << " ";
             file << i->second.alive << std::endl;
-        }        
+        }
     }
-    */
+    
     file.close();
     outputStep++;
 
@@ -1016,10 +1020,10 @@ void runSimulation()
     quadrantDim = FloatCoord<2>(quadrantSize, quadrantSize);
 
     // Hardcoded link to the directory
-    std::string prunedDirname("/home/zbyerly/research/meshes/qah4");
+    std::string prunedDirname("/home/zbyerly/research/meshes/shin32");
 
     // Hardcoded number of simulation steps
-    int steps = 3;
+    int steps = 100;
 
     //    SerialSimulator<ContainerCellType> sim(
 
