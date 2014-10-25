@@ -175,11 +175,11 @@ public:
         std::vector<int> outgoingNodeIDs;        
         std::vector<SubNode> outgoingNodes;        
         DomainCell domainCell = *this;
-        for (int i=0; i<domainCell.myNeighborTable.myNeighbors.size(); i++)
+        for (std::size_t i=0; i<domainCell.myNeighborTable.myNeighbors.size(); i++)
         {
             if (domainCell.myNeighborTable.myNeighbors[i].neighborID == domainID)
             {
-                for (int j=0; j<domainCell.myNeighborTable.myNeighbors[i].sendNodes.size(); j++)
+                for (std::size_t j=0; j<domainCell.myNeighborTable.myNeighbors[i].sendNodes.size(); j++)
                 {
                     outgoingNodeIDs.push_back(domainCell.myNeighborTable.myNeighbors[i].sendNodes[j]);
                 }
@@ -187,7 +187,7 @@ public:
             
         }
 
-        for (int i=0; i<outgoingNodeIDs.size(); i++)
+        for (std::size_t i=0; i<outgoingNodeIDs.size(); i++)
         {
             outgoingNodes.push_back(domainCell.localNodes[outgoingNodeIDs[i]]);
         }
@@ -459,9 +459,8 @@ public:
         determineGridDimensions();
     }
     
-  ADCIRCInitializer()
-  {
-  }
+    ADCIRCInitializer()
+    {}
   
 
     virtual void grid(GridType *grid)
@@ -532,7 +531,7 @@ public:
             }            
 
             // What does this loop do??
-            for (int j=0; j<ownerTable.size(); j++)
+            for (std::size_t j=0; j<ownerTable.size(); j++)
             {
                 if (ownerTable[j].ownerID == nodeID)
                 {
@@ -547,7 +546,7 @@ public:
             std::vector<element> myElements = readElements(fort14File, numberOfElements);
 
             // Loop through all local nodes
-            for (int j=0; j<points.size(); j++)
+            for (std::size_t j=0; j<points.size(); j++)
             {
                 SubNode thissubnode;
                 thissubnode.location = points[j];
@@ -563,7 +562,7 @@ public:
                 
                 
                 // Loop through all global nodes                
-                for (int k=0; k<ownerTable.size(); k++)
+                for (std::size_t k=0; k<ownerTable.size(); k++)
                 {
                     // If the global node is owned by the current domain,
                     if (nodeID == ownerTable[k].ownerID)
@@ -580,15 +579,15 @@ public:
             
             //Assemble local linking information
             //Loop over all Elements
-            for (int j=0; j<myElements.size(); j++)
+            for (std::size_t j=0; j<myElements.size(); j++)
             {
                 //std::cerr << "elementid = " << j << std::endl;
                 //Loop over nodes associated with the element
-                for (int k=0; k<myElements[j].nodeIDs.size(); k++)
+                for (std::size_t k=0; k<myElements[j].nodeIDs.size(); k++)
                 {
                     int outer_nodeID = node.localNodes[myElements[j].nodeIDs[k]].localID;
                     //std::cerr << "outer_nodeID = " << outer_nodeID << std::endl;
-                    for (int l=0; l<myElements[k].nodeIDs.size(); l++)
+                    for (std::size_t l=0; l<myElements[k].nodeIDs.size(); l++)
                     {
                         int inner_nodeID = node.localNodes[myElements[j].nodeIDs[l]].localID;
                         //std::cerr << "inner_nodeID = " << inner_nodeID << std::endl;
@@ -722,7 +721,7 @@ private:
     FloatCoord<2> determineCenter(std::vector<FloatCoord<3> > *points) 
     {
         FloatCoord<2> center;
-        for (int i=0; i < points->size(); i++){
+        for (std::size_t i=0; i < points->size(); i++){
             FloatCoord<2> coord(points[0][i][0],points[0][i][1]);
             center += coord;
         }
