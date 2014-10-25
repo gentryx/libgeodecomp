@@ -19,9 +19,8 @@ public:
     const static int DIM = Topology::DIM;
 
     SimpleInitializer()
-      {
-      }
-    
+    { }
+
     // fixme: writers AND initializers should have a clone() function, preferably implemented via CRTP
     explicit SimpleInitializer(
         const Coord<DIM>& dimensions,
