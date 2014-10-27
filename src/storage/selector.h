@@ -106,8 +106,18 @@ template<typename CELL>
 class Selector
 {
 public:
+    Selector() :
+        memberPointer(0),
+        memberSize(0),
+        externalSize(0),
+        memberOffset(0),
+        memberName("memberName not initialized")
+    {}
+
     template<typename MEMBER>
-    Selector(MEMBER CELL:: *memberPointer, const std::string& memberName) :
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        const std::string& memberName) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         externalSize(sizeof(MEMBER)),
@@ -118,16 +128,11 @@ public:
         filter(new DefaultFilter<CELL, MEMBER, MEMBER>)
     {}
 
-    Selector() :
-        memberPointer(0),
-        memberSize(0),
-        externalSize(0),
-        memberOffset(0),
-        memberName("memberName not initialized")
-    {}
-
     template<typename MEMBER>
-    Selector(MEMBER CELL:: *memberPointer, const std::string& memberName, const boost::shared_ptr<FilterBase<CELL> >& filter) :
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        const std::string& memberName,
+        const boost::shared_ptr<FilterBase<CELL> >& filter) :
         memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
         memberSize(sizeof(MEMBER)),
         externalSize(filter->sizeOf()),
@@ -227,8 +232,8 @@ public:
         return filter->arity();
     }
 
-    template<class Archive>
-    void serialize(Archive& archive, const unsigned int version)
+    template<class ARCHIVE>
+    void serialize(ARCHIVE& archive, const unsigned int version)
     {
         std::size_t *buf =
             reinterpret_cast<std::size_t*>(
