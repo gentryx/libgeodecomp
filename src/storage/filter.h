@@ -296,7 +296,7 @@ public:
  * Derive from this class if you wish to add custom data
  * adapters/converters to your Selector.
  */
-template<typename CELL, typename MEMBER, typename EXTERNAL>
+template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY = 1>
 class Filter : public FilterBase<CELL>
 {
 public:
@@ -328,7 +328,7 @@ public:
 
     virtual int arity() const
     {
-        return 1;
+        return ARITY;
     }
 
     /**
