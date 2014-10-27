@@ -7,6 +7,46 @@
 
 namespace LibGeoDecomp {
 
+namespace NeighborhoodIteratorHelpers {
+
+/**
+ * This is a shim to let MultiContainerCell handle members of type
+ * BoxCell (which use this NeighborhoodIterator for accessing the
+ * surrounding particles) identically to ContainerCells (which
+ * rely on NeighborhoodAdapter)
+ */
+template<typename NEIGHBORHOOD_ITERATOR>
+class Adapter
+{
+ public:
+    typedef NEIGHBORHOOD_ITERATOR Iterator;
+
+    inline
+    Adapter(const typename Iterator::Neighborhood *hood) :
+        myBegin(Iterator::begin(*hood)),
+        myEnd(Iterator::end(*hood))
+    {}
+
+    inline
+    const Iterator& begin() const
+    {
+        return myBegin;
+    }
+
+    inline
+    const Iterator& end() const
+    {
+        return myEnd;
+    }
+
+ private:
+    Iterator myBegin;
+    Iterator myEnd;
+};
+
+
+}
+
 /**
  * This class is meant to be used with BoxCell and alike to interface
  * MD and n-body codes with our standard neighborhood types. It allows
@@ -23,40 +63,7 @@ public:
     typedef typename Neighborhood::Cell Cell;
     typedef typename COLLECTION_INTERFACE::Container::const_iterator CellIterator;
     typedef typename COLLECTION_INTERFACE::Container::value_type Particle;
-
-    /**
-     * This is a shim to let MultiContainerCell handle members of type
-     * BoxCell (which use this NeighborhoodIterator for accessing the
-     * surrounding particles) identically to ContainerCells (which
-     * rely on NeighborhoodAdapter)
-     */
-    class Adapter
-    {
-    public:
-        typedef NeighborhoodIterator Iterator;
-
-        inline
-        Adapter(const NEIGHBORHOOD *hood) :
-            myBegin(NeighborhoodIterator::begin(*hood)),
-            myEnd(NeighborhoodIterator::end(*hood))
-        {}
-
-        inline
-        const NeighborhoodIterator& begin() const
-        {
-            return myBegin;
-        }
-
-        inline
-        const NeighborhoodIterator& end() const
-        {
-            return myEnd;
-        }
-
-    private:
-        NeighborhoodIterator myBegin;
-        NeighborhoodIterator myEnd;
-    };
+    typedef NeighborhoodIteratorHelpers::Adapter<NeighborhoodIterator> Adapter;
 
     inline NeighborhoodIterator(
         const Neighborhood& hood,
