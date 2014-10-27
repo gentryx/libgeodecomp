@@ -506,6 +506,7 @@ target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 install(
   TARGETS geodecomp
   EXPORT ${PACKAGE_NAME}-targets
+  ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib)
 
 install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/config.h" DESTINATION include/${PACKAGE_NAME})
