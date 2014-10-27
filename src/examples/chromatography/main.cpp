@@ -1,6 +1,8 @@
 // fixme: ATM out of order. make it use the SiloWriter and repair
 // fixme: refactor this demo by extracting the mesh generator and container cell
+#include <libgeodecomp/geometry/voronoimesher.h>
 #include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
@@ -20,13 +22,11 @@ using namespace LibGeoDecomp;
 #if SETUP==NOZZLE
 const std::size_t MAX_X   = 2000;
 const std::size_t MAX_Y   = 8000;
-const unsigned LIQUID_CELLS = 8000;
 #endif
 
 #if SETUP==CHROMO
 const std::size_t MAX_X   = 4000;
 const std::size_t MAX_Y   = 10000;
-const unsigned LIQUID_CELLS = 40000;
 #endif
 
 enum State {LIQUID=0, SOLID=1, COAL=2};
@@ -83,8 +83,7 @@ public:
         center(center),
         id(_id),
         area(0),
-        numNeighbors(0),
-        shapeSize(0)
+        numNeighbors(0)
     {
         for (std::size_t i = 0; i < SUBSTANCES; ++i) {
             quantities[i] = 0;
@@ -269,25 +268,49 @@ public:
     void pushNeighbor(
         const ID& id,
         const double& length,
-        const Coord<2>& dir)
+        const FloatCoord<2>& dir)
     {
         if (numNeighbors >= MAX_NEIGHBORS) {
             throw std::logic_error("too many neighbors");
         }
         neighborIDs[numNeighbors] = id;
         borderLengths[numNeighbors] = length;
-        borderDirections[numNeighbors] = dir;
+        // fixme: use FloatCoord here...
+        borderDirections[numNeighbors] = Coord<2>(dir[0], dir[1]);
         ++numNeighbors;
     }
 
-    void setShape(const std::vector<Coord<2> >& newShape)
+    std::size_t numberOfNeighbors() const
+    {
+        return numNeighbors;
+    }
+
+    void setShape(const std::vector<FloatCoord<2> >& newShape)
     {
         if (newShape.size() > MAX_NEIGHBORS) {
             throw std::logic_error("shape too large");
         }
 
-        shapeSize = newShape.size();
-        std::copy(newShape.begin(), newShape.end(), shape);
+        // fixme: replace these with FloatCoord?
+        shape.clear();
+        for (std::size_t i = 0; i < newShape.size(); ++i) {
+            shape << Coord<2>(newShape[i][0], newShape[i][1]);
+        }
+    }
+
+    void setArea(const double newArea)
+    {
+        area = newArea;
+    }
+
+    const Coord<2>& getPoint() const
+    {
+        return center;
+    }
+
+    const FixedArray<Coord<2>, MAX_NEIGHBORS>& getShape() const
+    {
+        return shape;
     }
 
     State state;
@@ -304,24 +327,31 @@ public:
     ID id;
     double area;
     unsigned numNeighbors;
-    int shapeSize;
 
     ID neighborIDs[MAX_NEIGHBORS];
     double borderLengths[MAX_NEIGHBORS];
     double fluxesFlow[MAX_NEIGHBORS];
     double fluxesPressure[MAX_NEIGHBORS];
     Coord<2> borderDirections[MAX_NEIGHBORS];
-    Coord<2> shape[MAX_NEIGHBORS];
+    FixedArray<Coord<2>, MAX_NEIGHBORS> shape;
 };
 
 class ContainerCell
 {
 public:
-    const static unsigned MAX_CELLS = 100;
+    const static std::size_t MAX_CELLS = 100;
+    typedef Cell Cargo;
+    typedef Cell value_type;
+    typedef Cell* Iterator;
+    typedef Cell* iterator;
+    typedef const Cell* const_iterator;
 
     class API :
         public APITraits::HasCubeTopology<2>,
-        public APITraits::HasNanoSteps<2>
+        public APITraits::HasNanoSteps<2>,
+        public APITraits::HasIDType<ID>,
+        public APITraits::HasUnstructuredGrid,
+        public APITraits::HasPointMesh
     {};
 
     typedef Grid<ContainerCell> GridType;
@@ -339,12 +369,33 @@ public:
 
     ContainerCell& operator<<(const Cell& cell)
     {
+        std::cout << "ContainerCell(" << coord << ") << " << cell.center << "\n";
         if (numCells >= MAX_CELLS) {
             throw std::logic_error("too many cells");
         }
 
         cells[numCells++] = cell;
         return *this;
+    }
+
+    Cell *begin()
+    {
+        return cells;
+    }
+
+    const Cell *begin() const
+    {
+        return cells;
+    }
+
+    Cell *end()
+    {
+        return cells + numCells;
+    }
+
+    const Cell *end() const
+    {
+        return cells + numCells;
     }
 
     void update(const CoordMapType& neighborhood, const unsigned& nanoStep)
@@ -355,328 +406,25 @@ public:
         }
     }
 
+    std::size_t size() const
+    {
+        return numCells;
+    }
+
     Coord<2> coord;
     Cell cells[MAX_CELLS];
-    unsigned numCells;
+    std::size_t numCells;
     const CoordMapType *neighbors;
 };
 
-class Equation
-{
-public:
-    Equation(const Coord<2>& base, const Coord<2>& dir, ID id = ID()) :
-        base(base),
-        dir(dir),
-        neighborID(id),
-        length(-1)
-    {}
-
-    bool includes(const Coord<2>& point) const
-    {
-        return (point - base) * dir > 0;
-    }
-
-    Coord<2> base;
-    Coord<2> dir;
-    ID neighborID;
-    double length;
-};
-
-class Element
-{
-public:
-    explicit Element(const Coord<2> center = Coord<2>(1, 1), ID id = ID()) :
-        center(center),
-        id(id)
-    {
-        limits << Equation(Coord<2>(center.x(), 0),     Coord<2>(0, 1))
-               << Equation(Coord<2>(0, center.y()),     Coord<2>(1, 0))
-               << Equation(Coord<2>(MAX_X, center.y()), Coord<2>(-1, 0))
-               << Equation(Coord<2>(center.x(), MAX_Y), Coord<2>(0, -1));
-    }
-
-    Element& operator<<(const Equation& eq)
-    {
-        limits << eq;
-        std::vector<Coord<2> > cutPoints = generateCutPoints();
-        std::set<int> deleteSet;
-
-        for (std::size_t i = 0; i < limits. size(); ++i) {
-            Coord<2> leftDir = turnLeft90(limits[i].dir);
-            int dist1 = (cutPoints[2 * i + 0] - limits[i].base) * leftDir;
-            int dist2 = (cutPoints[2 * i + 1] - limits[i].base) * leftDir;
-            if (dist2 >= dist1) {
-                // twisted differences, deleting
-                deleteSet.insert(i);
-            }
-
-            for (std::size_t j = 0; j < limits.size(); ++j)
-                if (i != j) {
-                    // parallel lines, deleting...
-                    if (cutPoint(limits[i], limits[j]) == FarAway) {
-                        if (limits[i].dir * limits[j].dir > 0) {
-                            int dist1 = (center - limits[i].base) *
-                                limits[i].dir;
-                            int dist2 = (center - limits[j].base) *
-                                limits[i].dir;
-                            if (dist2 >= dist1) {
-                                deleteSet.insert(j);
-                            }
-                        }
-                    }
-                }
-        }
-
-        std::vector<Equation> newLimits;
-        for (std::size_t i = 0; i < limits.size(); ++i) {
-            if (!deleteSet.count(i)) {
-                newLimits << limits[i];
-            }
-        }
-        limits = newLimits;
-
-        return *this;
-    }
-
-    Element& operator<<(const Element& e)
-    {
-        Coord<2> base = (center + e.center) / 2;
-        Coord<2> dir = center - e.center;
-        *this << Equation(base, dir, e.id);
-        return *this;
-    }
-
-    Element& operator<<(const Cell& c)
-    {
-        Coord<2> base = (center + c.center) / 2;
-        Coord<2> dir = center - c.center;
-        *this << Equation(base, dir, c.id);
-        return *this;
-    }
-
-    std::vector<Coord<2> > generateCutPoints()
-    {
-        std::vector<Coord<2> > buf(2 * limits.size(), FarAway);
-
-        for (std::size_t i = 0; i < limits.size(); ++i) {
-            for (std::size_t j = 0; j < limits.size(); ++j) {
-                if (i != j) {
-                    Coord<2> cut = cutPoint(limits[i], limits[j]);
-                    int offset = 2 * i;
-                    Coord<2> delta = cut - limits[i].base;
-                    Coord<2> turnedDir = turnLeft90(limits[i].dir);
-                    double distance =
-                        1.0 * delta.x() * turnedDir.x() +
-                        1.0 * delta.y() * turnedDir.y();
-
-
-                    bool isLeftCandidate = true;
-                    if (limits[j].dir * turnLeft90(limits[i].dir) > 0) {
-                        isLeftCandidate = false;
-                        offset += 1;
-                    }
-
-                    delta = buf[offset] - limits[i].base;
-                    double referenceDist =
-                        1.0 * delta.x() * turnedDir.x() +
-                        1.0 * delta.y() * turnedDir.y();
-                    bool flag = false;
-                    if (buf[offset] == FarAway) {
-                        flag = true;
-                    }
-                    if (isLeftCandidate  && (distance < referenceDist)) {
-                        flag = true;
-                    }
-                    if (!isLeftCandidate && (distance > referenceDist)) {
-                        flag = true;
-                    }
-                    if (cut == FarAway) {
-                        flag = false;
-                    }
-                    if (flag) {
-                        buf[offset] = cut;
-                    }
-                }
-            }
-        }
-
-        return buf;
-    }
-
-    std::vector<Coord<2> > getShape()
-    {
-        std::vector<Coord<2> > cutPoints = generateCutPoints();
-
-        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            if (cutPoints[i] == FarAway) {
-                throw std::logic_error("invalid cut point");
-            }
-        }
-
-        std::map<double, Coord<2> > points;
-        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            Coord<2> delta = cutPoints[i] - center;
-            double length = sqrt(delta.x() * delta.x() + delta.y() * delta.y());
-            double dY = delta.y() / length;
-            double angle = asin(dY);
-            if (delta.x() < 0) {
-                angle = M_PI - angle;
-            }
-            points[angle] = cutPoints[i];
-        }
-
-        std::vector<Coord<2> > res;
-        for (std::map<double, Coord<2> >::iterator i = points.begin();
-             i != points.end(); ++i) {
-            res << i->second;
-        }
-
-        if (res.size() < 3) {
-            throw std::logic_error("cycle too short");
-        }
-
-        return res;
-    }
-
-    bool includes(const Coord<2>& c)
-    {
-        for (std::size_t i = 0; i < limits.size(); ++i) {
-            if (!limits[i].includes(c)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void updateGeometryData()
-    {
-        std::vector<Coord<2> > cutPoints = generateCutPoints();
-
-        for (std::size_t i = 0; i < limits. size(); ++i) {
-            Coord<2> delta = cutPoints[2 * i + 0] - cutPoints[2 * i + 1];
-            limits[i].length = sqrt(delta.x() * delta.x() + delta.y() * delta.y());
-        }
-
-        Coord<2> min(MAX_X, MAX_Y);
-        Coord<2> max(0, 0);
-        for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            Coord<2>& c = cutPoints[i];
-            max = c.max(max);
-            min = c.min(min);
-        }
-        Coord<2> delta = max - min;
-
-        int hits = 0;
-        for (std::size_t i = 0; i < SAMPLES; ++i) {
-            Coord<2> p = Coord<2>(rand() % delta.x(),
-                                  rand() % delta.y()) + min;
-            if (includes(p)) {
-                ++hits;
-            }
-        }
-        area = 1.0 * hits / SAMPLES * delta.prod();
-
-        diameter = std::max(delta.x(), delta.y());
-        if (diameter > CELL_SPACING/2) {
-            std::cout << "my diameter: " << diameter << "\n"
-                      << "min: " << min << "\n"
-                      << "max: " << max << "\n";
-            throw std::logic_error("element too large");
-        }
-    }
-
-    const Coord<2>& getCenter() const
-    {
-        return center;
-    }
-
-    const double& getArea() const
-    {
-        return area;
-    }
-
-    const std::vector<Equation>& getLimits() const
-    {
-        return limits;
-    }
-
-    const double& getDiameter() const
-    {
-        return diameter;
-    }
-
-private:
-    Coord<2> center;
-    ID id;
-    double area;
-    double diameter;
-    std::vector<Equation> limits;
-
-    Coord<2> turnLeft90(const Coord<2>& c)
-    {
-        return Coord<2>(-c.y(), c.x());
-    }
-
-    Coord<2> cutPoint(Equation eq1, Equation eq2)
-    {
-        if (eq1.dir.y() == 0) {
-            if (eq2.dir.y() == 0) {
-                // throw std::invalid_argument("both lines are vertical")
-                return FarAway;
-            }
-            std::swap(eq1, eq2);
-        }
-
-        Coord<2> dir1 = turnLeft90(eq1.dir);
-        double m1 = 1.0 * dir1.y() / dir1.x();
-        double d1 = eq1.base.y() - m1 * eq1.base.x();
-
-        if (eq2.dir.y() == 0) {
-            return Coord<2>(eq2.base.x(), eq2.base.x() * m1 + d1);
-        }
-
-        Coord<2> dir2 = turnLeft90(eq2.dir);
-        double m2 = 1.0 * dir2.y() / dir2.x();
-        double d2 = eq2.base.y() - m2 * eq2.base.x();
-
-        if (m1 == m2) {
-            // throw std::invalid_argument("parallel lines")
-            return FarAway;
-        }
-
-        double x = (d2 - d1) / (m1 - m2);
-        double y = d1 + x * m1;
-
-        if ((x < (-10 * MAX_X)) ||
-            (x > ( 10 * MAX_X)) ||
-            (y < (-10 * MAX_Y)) ||
-            (y > ( 10 * MAX_Y))) {
-            return FarAway;
-        }
-
-        return Coord<2>(x, y);
-    }
-};
-
-Coord<2> randCoord()
-{
-    int x = ELEMENT_SPACING / 2 + rand() % (MAX_X - ELEMENT_SPACING);
-    int y = ELEMENT_SPACING / 2 + rand() % (MAX_Y - ELEMENT_SPACING);
-    return Coord<2>(x, y);
-}
-
-Coord<2> pointToContainerCoord(const Coord<2>& c)
-{
-    return Coord<2>(c.x() / CELL_SPACING, c.y() / CELL_SPACING);
-}
-
-class ChromoInitializer : public SimpleInitializer<ContainerCell>
+class ChromoInitializer : public SimpleInitializer<ContainerCell>, VoronoiMesher<ContainerCell>
 {
 public:
     ChromoInitializer(
         const Coord<2>& dim,
         const unsigned& steps) :
-        SimpleInitializer<ContainerCell>(dim, steps)
+        SimpleInitializer<ContainerCell>(dim, steps),
+        VoronoiMesher<ContainerCell>(dim, FloatCoord<2>(CELL_SPACING, CELL_SPACING), ELEMENT_SPACING)
     {}
 
     virtual void grid(GridBase<ContainerCell, 2> *ret)
@@ -687,7 +435,7 @@ public:
         Grid<ContainerCell> grid = createBasicGrid();
         fillGeometryData(&grid);
 
-        for (CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
             ContainerCell c = grid[*i];
             c.coord = *i;
             ret->set(*i, c);
@@ -702,6 +450,12 @@ private:
         Coord<2> cellDim(ceil(1.0 * MAX_X / CELL_SPACING),
                          ceil(1.0 * MAX_Y / CELL_SPACING));
         Grid<ContainerCell> grid(cellDim);
+        for (int y = 0; y < cellDim.y(); ++y) {
+            for (int x = 0; x < cellDim.x(); ++x) {
+                Coord<2> c(x, y);
+                grid[c].coord = c;
+            }
+        }
 
 #if SETUP==NOZZLE
         addInletOutlet(&grid);
@@ -732,7 +486,7 @@ private:
 
         srand(0);
         for (int i = 0; i < 30; ++i) {
-            Coord<2> c = randCoord();
+            Coord<2> c = randomCoalCoord();
             c.y() = MAX_Y * 0.8 + c.y() * 0.1;
             double radius = (0.05 + (rand() % 100) * 0.001) * MAX_X;
             addCoal(&grid, c.x(), c.y(), radius);
@@ -744,11 +498,23 @@ private:
         return grid;
     }
 
+    Coord<2> randomCoalCoord() const
+    {
+        int x = ELEMENT_SPACING / 2 + rand() % (MAX_X - ELEMENT_SPACING);
+        int y = ELEMENT_SPACING / 2 + rand() % (MAX_Y - ELEMENT_SPACING);
+        return Coord<2>(x, y);
+    }
+
+    Coord<2> pointToContainerCoord(const Coord<2>& c) const
+    {
+        return Coord<2>(c.x() / CELL_SPACING, c.y() / CELL_SPACING);
+    }
+
     void addLiquidCells(Grid<ContainerCell> *grid)
     {
-        for (std::size_t i = 0; i < LIQUID_CELLS; ++i) {
-            Coord<2> center = randCoord();
-            addCell(grid, center, ZERO_INFLUXES, 0, LIQUID);
+        CoordBox<2> box = grid->boundingBox();
+        for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
+            addRandomCells(grid, *i, ContainerCell::MAX_CELLS);
         }
     }
 
@@ -914,6 +680,17 @@ private:
         addCell(grid, Coord<2>(x, y), ZERO_INFLUXES, 0, SOLID);
     }
 
+    void addCell(ContainerCell *container, const FloatCoord<2>& center)
+    {
+        Coord<2> integerCoord(center[0], center[1]);
+        (*container) << Cell(
+            integerCoord,
+            ID(container->coord, container->numCells),
+            ZERO_INFLUXES,
+            0,
+            LIQUID);
+    }
+
     void addCell(Grid<ContainerCell> *grid,
                  const Coord<2>& center,
                  const double influxes[SUBSTANCES],
@@ -942,65 +719,6 @@ private:
         }
     }
 
-    void fillGeometryData(Grid<ContainerCell> *grid)
-    {
-        int maxShape = 0;
-        unsigned maxNeighbors = 0;
-        unsigned maxCells = 0;
-        double maxDiameter = 0;
-
-        CoordBox<2> box(Coord<2>(), grid->getDimensions());
-        for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
-            Coord<2> containerCoord = *iter;
-            ContainerCell& container = (*grid)[containerCoord];
-            maxCells = std::max(maxCells, container.numCells);
-
-            for (std::size_t i = 0; i < container.numCells; ++i) {
-                Cell& cell = container.cells[i];
-                Element e(cell.center, cell.id);
-
-                for (int y = -1; y < 2; ++y) {
-                    for (int x = -1; x < 2; ++x) {
-                        ContainerCell& container = (*grid)[containerCoord +
-                                                           Coord<2>(x, y)];
-                        for (unsigned j = 0; j < container.numCells; ++j) {
-                            if (cell.center != container.cells[j].center) {
-                                e << container.cells[j];
-                            }
-                        }
-                    }
-                }
-
-                e.updateGeometryData();
-                cell.area = e.getArea();
-                cell.quantities[0] = e.getArea();
-                for (std::size_t i = 1; i < SUBSTANCES; ++i) {
-                    cell.quantities[i] = 0;
-                }
-
-                cell.updatePressures();
-                cell.setShape(e.getShape());
-
-                for (std::vector<Equation>::const_iterator l =
-                         e.getLimits().begin();
-                     l != e.getLimits().end(); ++l) {
-                    if (l->neighborID.container != FarAway) {
-                        cell.pushNeighbor(l->neighborID, l->length, l->dir);
-                    }
-                }
-
-                maxShape     = std::max(maxShape,     cell.shapeSize);
-                maxNeighbors = std::max(maxNeighbors, cell.numNeighbors);
-                maxDiameter  = std::max(maxDiameter,  e.getDiameter());
-            }
-
-        }
-
-        std::cout << "maxShape:     " << maxShape << "\n"
-                  << "maxNeighbors: " << maxNeighbors << "\n"
-                  << "maxCells:     " << maxCells << "\n"
-                  << "maxDiameter:  " << maxDiameter << "\n\n";
-    }
 };
 
 class ChromoWriter : public Clonable<Writer<ContainerCell>, ChromoWriter>
@@ -1064,15 +782,13 @@ private:
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             const ContainerCell container = grid.get(*iter);
             for (std::size_t i = 0; i < container.numCells; ++i) {
-                std::vector<Coord<2> > coords(container.cells[i].shapeSize);
-                std::copy(container.cells[i].shape,
-                          container.cells[i].shape + container.cells[i].shapeSize,
-                          &coords[0]);
-                shapeSizes << coords.size();
-                int nodeOffset = nodes.size() + 1;
-                for (std::size_t k = 0; k < coords.size(); ++k) {
-                    x << coords[k].x();
-                    y << coords[k].y();
+                const FixedArray<Coord<2>, Cell::MAX_NEIGHBORS>& shape = container.cells[i].shape;
+
+                shapeSizes << shape.size();
+                int nodeOffset = shape.size() + 1;
+                for (std::size_t k = 0; k < shape.size(); ++k) {
+                    x << shape[k].x();
+                    y << shape[k].y();
                     nodes << nodeOffset + k;
                 }
             }
@@ -1185,8 +901,19 @@ int main(int argc, char *argv[])
             Coord<2>(ceil(1.0 * MAX_X / CELL_SPACING),
                      ceil(1.0 * MAX_Y / CELL_SPACING)),
             maxSteps));
-    sim.addWriter(new ChromoWriter(100));
     sim.addWriter(new TracingWriter<ContainerCell>(100, maxSteps));
+
+    SiloWriter<ContainerCell> *siloWriter = new SiloWriter<ContainerCell>("chromatography", 100);
+
+    siloWriter->addSelectorForUnstructuredGrid(&Cell::pressure, "pressure");
+    siloWriter->addSelectorForUnstructuredGrid(&Cell::absorbedVolume, "absorbed_volume");
+    // fixme: velocity
+    // fixme: ratio[0]
+    // fixme: ratio[1]
+
+
+    sim.addWriter(siloWriter);
+
     sim.run();
 
     return 0;

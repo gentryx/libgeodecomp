@@ -81,6 +81,11 @@ public:
         neighborBorderLengths << length;
     }
 
+    std::size_t numberOfNeighbors() const
+    {
+        return neighborIDs.size();
+    }
+
     const FixedArray<COORD<2>, MAX_NEIGHBORS>& getShape() const
     {
         return shape;
