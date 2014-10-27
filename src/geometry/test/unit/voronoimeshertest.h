@@ -33,6 +33,11 @@ public:
         neighborDirections << dir;
     }
 
+    std::size_t numberOfNeighbors() const
+    {
+        return neighborIDs.size();
+    }
+
     FloatCoord<2> center;
     int id;
     double area;

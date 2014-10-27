@@ -70,7 +70,7 @@ public:
 
     const static std::size_t SAMPLES = 1000;
 
-    typedef Equation<COORD> EquationType;
+    typedef Equation<COORD, ID> EquationType;
 
     Element(const COORD& center,
             const COORD& quadrantSize,
@@ -495,6 +495,11 @@ public:
 
         for (std::size_t i = 0; i < numCells; ++i) {
             ContainerCellType container = grid->get(coord);
+
+            if (container.size() >= numCells) {
+                break;
+            }
+
             FloatCoord<DIM> origin = quadrantSize.scale(coord);
             FloatCoord<DIM> location = origin + randCoord();
             insertCell(&container, location, container.begin(), container.end());
@@ -523,10 +528,10 @@ public:
 
                 for (int y = -1; y < 2; ++y) {
                     for (int x = -1; x < 2; ++x) {
-                        ContainerCellType container =
+                        ContainerCellType container2 =
                             grid->get(containerCoord + Coord<2>(x, y));
-                        for (typename ContainerCellType::Iterator j = container.begin();
-                             j != container.end();
+                        for (typename ContainerCellType::Iterator j = container2.begin();
+                             j != container2.end();
                              ++j) {
                             if (cell.center != j->center) {
                                 e << *j;
@@ -546,7 +551,7 @@ public:
                 }
 
                 maxShape     = std::max(maxShape,     cell.shape.size());
-                maxNeighbors = std::max(maxNeighbors, cell.neighborIDs.size());
+                maxNeighbors = std::max(maxNeighbors, cell.numberOfNeighbors());
                 maxDiameter  = std::max(maxDiameter,  e.getDiameter());
             }
 
