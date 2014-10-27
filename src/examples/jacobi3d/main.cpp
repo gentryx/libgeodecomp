@@ -20,7 +20,7 @@ public:
     class API :
         public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
-        public APITraits::HasCubeTopology<3>,
+        public APITraits::HasTorusTopology<3>,
         public APITraits::HasPredefinedMPIDataType<double>
     {};
 
@@ -46,9 +46,9 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    explicit CellInitializer(int num) :
+    explicit CellInitializer(int size, int maxSteps) :
         SimpleInitializer<Cell>(
-            Coord<3>::diagonal(128) * num, 1000)
+            Coord<3>::diagonal(128) * size, maxSteps)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)
@@ -75,14 +75,15 @@ public:
 void runSimulation()
 {
     int outputFrequency = 100;
+    int numSteps = 10000;
     int factor = pow(MPILayer().size(), 1.0 / 3.0);
 
-    CellInitializer *init = new CellInitializer(factor);
+    CellInitializer *init = new CellInitializer(factor, numSteps);
 
     HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
         init,
         MPILayer().rank() ? 0 : new TracingBalancer(new NoOpBalancer()),
-        10000,
+        numSteps,
         1);
 
     if (MPILayer().rank() == 0) {
