@@ -184,12 +184,24 @@ public:
         }
     }
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    template<class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar &
+            boost::serialization::make_array(ids, SIZE) &
+            boost::serialization::make_array(cells, SIZE) &
+            numElements;
+    }
+#endif
+
     inline const Key *getIDs() const
     {
         return ids;
     }
 
 private:
+
     Key ids[SIZE];
     Cargo cells[SIZE];
     std::size_t numElements;

@@ -55,7 +55,7 @@ public:
         for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
-
+	std::cout << initializer.get() << std::flush << initializer->gridDimensions() << "\n";
         hpx::async(&HpxStepper::initGrids, this).wait();
     }
 
@@ -257,7 +257,9 @@ private:
 
     inline void initGrids()
     {
+        std::cout << "welcome to initGrids()" << std::endl;
         const Coord<DIM>& topoDim = initializer->gridDimensions();
+	std::cout << "topoDim = " << topoDim << std::endl;
         CoordBox<DIM> gridBox;
         guessOffset(&gridBox.origin, &gridBox.dimensions);
         oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));

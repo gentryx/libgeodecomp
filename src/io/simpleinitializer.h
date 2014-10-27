@@ -18,6 +18,9 @@ public:
     typedef typename Initializer<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
 
+    SimpleInitializer()
+    { }
+
     // fixme: writers AND initializers should have a clone() function, preferably implemented via CRTP
     explicit SimpleInitializer(
         const Coord<DIM>& dimensions,
@@ -25,6 +28,7 @@ public:
         dimensions(dimensions),
         steps(steps)
     {}
+
 
     Coord<DIM> gridDimensions() const
     {

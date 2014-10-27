@@ -15,7 +15,11 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+get_directory_property(lgd_has_parent PARENT_DIRECTORY)
+
 add_subdirectory(src)
 
-# export this for users who bundle a checkout of LibGeoDecomp in their own CMake source tree
-set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+if(lgd_has_parent)
+  # export this for users who bundle a checkout of LibGeoDecomp in their own CMake source tree
+  set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+endif()

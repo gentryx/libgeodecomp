@@ -350,8 +350,9 @@ endif(WIN32)
 
 if(WITH_HPX)
   set(HPX_LIB_SUFFIX "")
-  if("${HPX_BUILD_TYPE}" STREQUAL "Debug")
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
+    add_definitions(-DHPX_DEBUG)
   endif()
 endif()
 
@@ -364,7 +365,7 @@ endif()
 include_directories(${INSTALL_INCLUDE_DIRECTORIES} ${BUILD_INCLUDE_DIRECTORIES})
 
 #============= 6. TOP-LEVEL TARGETS ==================================
-add_custom_target(test echo "Tests passed.")
+add_custom_target(check echo "Tests passed.")
 add_custom_target(code_generation ALL echo "Code generation done.")
 add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
 

@@ -198,7 +198,7 @@ public:
             patchAcceptersInner.push_back(adapterInnerSet);
         }
 
-
+	std::cout << initializer.get() << std::flush << initializer->gridDimensions() << "\n";
         stepper.reset(new STEPPER(
                           partitionManager,
                           initializer,
