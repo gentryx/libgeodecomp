@@ -86,9 +86,9 @@ public:
         archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL > >(object);
     }
 
-    template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
+    template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
     {
         archive & boost::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
     }
@@ -307,8 +307,8 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTER
     Serialization::serialize(archive, object, version);
 }
 
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
