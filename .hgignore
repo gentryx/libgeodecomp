@@ -1,10 +1,10 @@
 syntax: glob
 *~
 *.swp
-./**/test/**/*test.cpp
-./**/test/**/*test.cu
-./**/test/**/main.cpp
-./**/auto.cmake
+./src/**/test/**/*test.cpp
+./src/**/test/**/*test.cu
+./src/**/test/**/main.cpp
+./src/**/auto.cmake
 ./build
 ./conf.yaml
 ./src/conf.cmake
