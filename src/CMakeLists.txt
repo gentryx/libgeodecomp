@@ -188,6 +188,8 @@ add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serializati
 
 add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
 
+add_config_option(WITH_FORTRAN "Build Fortran examples/utilities, too" false true)
+
 add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
 
 add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
@@ -240,6 +242,10 @@ endif()
 
 if(WITH_CUDA)
   set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
+endif()
+
+if(WITH_FORTRAN)
+  enable_language(Fortran)
 endif()
 
 if(WITH_HPX)

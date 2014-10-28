@@ -2,9 +2,7 @@ generate_sourcelists("./")
 set(RELATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/")
 include(auto.cmake)
 
-if(WITH_HPX)
-  enable_language(Fortran)
-
+if(WITH_HPX AND WITH_FORTRAN)
   add_hpx_executable(gameoflife_adcirc
                      SOURCES ${SOURCES})
 
