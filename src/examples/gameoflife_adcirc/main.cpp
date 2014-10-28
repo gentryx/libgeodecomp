@@ -407,6 +407,8 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
       for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
         {
 	      int index = count++;
+	      if ((alive[index] > 1)||(alive[index]<0)) {
+		throw std::runtime_error("alive not valid! alive="+alive[index]);}
 	      i->second.alive = alive[index];
         }
     }
