@@ -9,8 +9,8 @@ class BushFireCell
 {
 public:
     friend void runSimulation();
-    friend TemperatureRecorder;
-    friend RainMaker;
+    friend class TemperatureRecorder;
+    friend class RainMaker;
 
     enum State {BURNING, GUTTED};
 
@@ -227,7 +227,7 @@ private:
 class TemperatureRecorder : public Clonable<Writer<BushFireCell>, TemperatureRecorder>
 {
 public:
-    typedef typename Writer<BushFireCell>::GridType GridType;
+    typedef Writer<BushFireCell>::GridType GridType;
 
     TemperatureRecorder(const unsigned outputPeriod) :
         Clonable<Writer<BushFireCell>, TemperatureRecorder>("", outputPeriod),
