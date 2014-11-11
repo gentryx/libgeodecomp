@@ -1,7 +1,8 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
 
-#include <libgeodecomp/geometryy/fixedcoord.h>
+#include <libgeodecomp/geometry/fixedcoord.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/storage/grid.h>
@@ -69,13 +70,16 @@ public:
     friend class CudaSimulatorTest;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef Grid<CELL_TYPE, Topology> GridType;
-    static const int DIM = Topology::DIMENSIONS;
+    static const int DIM = Topology::DIM;
 
     /**
      * creates a CudaSimulator with the given initializer.
      */
-    CudaSimulator(Initializer<CELL_TYPE> *initializer) :
-        MonolithicSimulator<CELL_TYPE>(initializer)
+    CudaSimulator(
+        Initializer<CELL_TYPE> *initializer,
+        Coord<3> blockSize = Coord<3>(128, 4, 1)) :
+        MonolithicSimulator<CELL_TYPE>(initializer),
+        blockSize(blockSize)
     {
         stepNum = initializer->startStep();
         Coord<DIM> dim = initializer->gridBox().dimensions;
@@ -96,11 +100,11 @@ public:
         // notify all registered Steerers
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(&grid, simArea, stepNum);
+                steerers[i]->nextStep(&grid, simArea, simArea.boundingBox().dimensions, stepNum, STEERER_NEXT_STEP, 0, true, 0);
             }
         }
 
-        for (unsigned i = 0; i < NANO_STEPS; ++i) {
+        for (unsigned i = 0; i < APITraits::SelectNanoSteps<CELL_TYPE>::VALUE; ++i) {
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
         }
@@ -156,6 +160,7 @@ public:
     }
 
 private:
+    Coord<3> blockSize;
     GridType grid;
     CELL_TYPE *devGridOld;
     CELL_TYPE *devGridNew;
@@ -169,11 +174,11 @@ private:
     using MonolithicSimulator<CELL_TYPE>::writers;
     using MonolithicSimulator<CELL_TYPE>::getStep;
 
-    void nanoStep(const unsigned& nanoStep)
+    void nanoStep(const unsigned nanoStep)
     {
         Coord<DIM> d = initializer->gridDimensions();
         dim3 dim(d.x(), d.y(), d.z());
-        dim3 dimBlock(128, 4, 1);
+        dim3 dimBlock(blockSize.x(), blockSize.y(), blockSize.z());
         dim3 dimGrid(dim.x / dimBlock.x, dim.y / dimBlock.y, 1);
         int dimZ = dim.z / dimGrid.z;
         kernel<CELL_TYPE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, dim, dimZ);
