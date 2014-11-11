@@ -73,7 +73,9 @@ public:
     static const int DIM = Topology::DIM;
 
     /**
-     * creates a CudaSimulator with the given initializer.
+     * creates a CudaSimulator with the given initializer. The
+     * blockSize will heavily influence the performance and should be
+     * chosen on a per GPU basis -- GPU architectures vary greatly.
      */
     CudaSimulator(
         Initializer<CELL_TYPE> *initializer,
