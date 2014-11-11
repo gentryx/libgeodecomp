@@ -38,6 +38,7 @@ public:
         int pipelineLength,
         const Coord<DIM - 1>& wavefrontDim) :
         MonolithicSimulator<CELL>(initializer),
+        buffers(omp_get_max_threads()),
         pipelineLength(pipelineLength),
         wavefrontDim(wavefrontDim)
     {
@@ -48,13 +49,16 @@ public:
         initializer->grid(newGrid);
 
         Coord<DIM> bufferDim;
+
         for (int i = 0; i < DIM - 1; ++i) {
             bufferDim[i] = wavefrontDim[i] + 2 * pipelineLength - 2;
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
-        for (int i = 0; i < 4; ++i) {
+
+        for (int i = 0; i < buffers.size(); ++i) {
             buffers[i] = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
         }
+        LOG(DBG, "created " << buffers.size() << " buffers");
 
         generateFrames();
         nanoStep = 0;
@@ -111,7 +115,7 @@ private:
 
     GridType *curGrid;
     GridType *newGrid;
-    BufferType buffers[4];
+    std::vector<BufferType> buffers;
     int pipelineLength;
     Coord<DIM - 1> wavefrontDim;
     Grid<WavefrontFrames> frames;
