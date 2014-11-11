@@ -4,6 +4,7 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
+#include <libgeodecomp/parallelization/cudasimulator.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 namespace LibGeoDecomp {
@@ -20,11 +21,15 @@ public:
     {
         std::vector<std::string> simulatorTypes;
         simulatorTypes << "SerialSimulator"
-                       << "CacheBlockingSimulator";
+                       << "CacheBlockingSimulator"
+                       << "CudaSimulator";
         params.addParameter("Simulator", simulatorTypes);
         params.addParameter("WavefrontWidth",  10, 1000);
         params.addParameter("WavefrontHeight", 10, 1000);
-        params.addParameter("PipelineLength",  1,  30);
+        params.addParameter("PipelineLength",   1,   30);
+        params.addParameter("BlockDimX",        1,  128);
+        params.addParameter("BlockDimX",        1,    8);
+        params.addParameter("BlockDimX",        1,    8);
     }
 
     void addWriter(const ParallelWriter<CELL>& writer)
@@ -70,6 +75,11 @@ private:
             int wavefrontHeight = params["WavefrontHeight"];
             Coord<2> wavefrontDim(wavefrontWidth, wavefrontHeight);
             return new CacheBlockingSimulator<CELL>(initializer, pipelineLength, wavefrontDim);
+        }
+
+        if (params["Simulator"] == "CudaSimulator") {
+            Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
+            return new CudaSimulator<CELL>(initializer, blockSize);
         }
 
         throw std::invalid_argument("unknown Simulator type");
