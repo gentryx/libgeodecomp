@@ -67,6 +67,12 @@ public:
      * below granularity may have no effect.
      */
     virtual void operator+=(double step) = 0;
+
+    /**
+     * Pretty-printed string repesentation of parameter (domain and
+     * value), most useful for debug output
+     */
+    virtual std::string toString() const = 0;
 };
 
 class Parameter : public OptimizableParameter
@@ -260,6 +266,13 @@ public:
         current = minimum + index;
     }
 
+    std::string toString() const
+    {
+        std::stringstream buf;
+        buf << "Interval([" << minimum << ", " << maximum << "], " << index << ")";
+        return buf.str();
+    }
+
 private:
     VALUE_TYPE minimum;
     VALUE_TYPE maximum;
@@ -319,6 +332,13 @@ public:
         current = elements[index];
     }
 
+    std::string toString() const
+    {
+        std::stringstream buf;
+        buf << "DiscreteSet(" << elements << ", " << index << ")";
+        return buf.str();
+    }
+
 private:
     std::vector<VALUE_TYPE> elements;
     int index;
@@ -360,6 +380,20 @@ public:
                 new SimulationParametersHelpers::DiscreteSet<VALUE_TYPE>(elements)));
     }
 
+    template<typename VALUE_TYPE>
+    void replaceParameter(const std::string& name, const VALUE_TYPE& minimum, const VALUE_TYPE& maximum, const double granularity = 1.0)
+    {
+        parameters[names[name]] = ParamPointerType(
+            new SimulationParametersHelpers::Interval<VALUE_TYPE>(minimum, maximum, granularity));
+    }
+
+    template<typename VALUE_TYPE>
+    void replaceParameter(const std::string& name, const std::vector<VALUE_TYPE>& elements)
+    {
+        parameters[names[name]] = ParamPointerType(
+            new SimulationParametersHelpers::DiscreteSet<VALUE_TYPE>(elements));
+    }
+
     SimulationParametersHelpers::Parameter& operator[](const std::string& name)
     {
         return *parameters[names[name]];
@@ -380,7 +414,7 @@ public:
         return parameters.size();
     }
 
-protected: //for SimplexVertex 
+protected:
     std::map<std::string, int> names;
     std::vector<ParamPointerType> parameters;
 };

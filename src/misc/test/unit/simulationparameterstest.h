@@ -1,5 +1,7 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/stringops.h>
+#include <cuda.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
@@ -164,6 +166,28 @@ public:
         TS_ASSERT(params["bar4"] != 3);
         TS_ASSERT(params["bar4"] == 2.2);
 
+    }
+
+    void testReplaceParameterAndToString()
+    {
+        SimulationParameters params;
+        params.addParameter("foo", 1, 5);
+
+        TS_ASSERT_EQUALS("Interval([1, 5], 0)", params["foo"].toString());
+
+        params.replaceParameter("foo", 6, 9);
+        int val = params["foo"];
+        TS_ASSERT_EQUALS("Interval([6, 9], 0)", params["foo"].toString());
+
+        std::vector<char> values;
+        values << 'a'
+               << 'b'
+               << 'c';
+        params.replaceParameter("foo", values);
+        TS_ASSERT_EQUALS("DiscreteSet([a, b, c], 0)", params["foo"].toString());
+
+        params["foo"] += 2;
+        TS_ASSERT_EQUALS("DiscreteSet([a, b, c], 2)", params["foo"].toString());
     }
 };
 

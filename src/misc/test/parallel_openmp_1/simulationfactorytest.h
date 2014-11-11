@@ -1,6 +1,6 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
-
+#include <cuda.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
@@ -21,6 +21,8 @@ public:
     {}
 
     template<typename COORD_MAP>
+    __device__
+    __host__
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
     {
         temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
