@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/cudasimulator.h>
@@ -14,7 +15,7 @@ namespace LibGeoDecomp {
  * steerers) necessary for conduction a simulation.
  */
 template<typename CELL>
-class SimulationFactory
+class SimulationFactory : public Optimizer::Evaluator
 {
 public:
     SimulationFactory()
@@ -23,13 +24,13 @@ public:
         simulatorTypes << "SerialSimulator"
                        << "CacheBlockingSimulator"
                        << "CudaSimulator";
-        params.addParameter("Simulator", simulatorTypes);
-        params.addParameter("WavefrontWidth",  10, 1000);
-        params.addParameter("WavefrontHeight", 10, 1000);
-        params.addParameter("PipelineLength",   1,   30);
-        params.addParameter("BlockDimX",        1,  128);
-        params.addParameter("BlockDimX",        1,    8);
-        params.addParameter("BlockDimX",        1,    8);
+        parameterSet.addParameter("Simulator", simulatorTypes);
+        parameterSet.addParameter("WavefrontWidth",  10, 1000);
+        parameterSet.addParameter("WavefrontHeight", 10, 1000);
+        parameterSet.addParameter("PipelineLength",   1,   30);
+        parameterSet.addParameter("BlockDimX",        1,  128);
+        parameterSet.addParameter("BlockDimX",        1,    8);
+        parameterSet.addParameter("BlockDimX",        1,    8);
     }
 
     void addWriter(const ParallelWriter<CELL>& writer)
@@ -48,22 +49,29 @@ public:
      */
     Simulator<CELL> *operator()(Initializer<CELL> *initializer)
     {
-        Simulator<CELL> *sim = buildSimulator(initializer);
+        Simulator<CELL> *sim = buildSimulator(initializer, parameterSet);
         // FIXME: add writers here?
         return sim;
     }
 
+    double operator()(const SimulationParameters& params)
+    {
+        return 0;
+    }
+
     SimulationParameters& parameters()
     {
-        return params;
+        return parameterSet;
     }
 
 private:
-    SimulationParameters params;
+    SimulationParameters parameterSet;
     std::vector<boost::shared_ptr<ParallelWriter<CELL> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL> > > writers;
 
-    Simulator<CELL> *buildSimulator(Initializer<CELL> *initializer)
+    Simulator<CELL> *buildSimulator(
+        Initializer<CELL> *initializer,
+        const SimulationParameters& params) const
     {
         if (params["Simulator"] == "SerialSimulator") {
             return new SerialSimulator<CELL>(initializer);

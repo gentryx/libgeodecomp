@@ -8,13 +8,18 @@
 
 //#define LIBGEODECOMP_DEBUG_LEVEL 4
 
-namespace LibGeoDecomp{
-PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<double> stepwidth, std::vector<double> minStepwidth) :
+namespace LibGeoDecomp {
+
+PatternOptimizer::PatternOptimizer(
+    SimulationParameters params,
+    std::vector<double> stepwidth,
+    std::vector<double> minStepwidth) :
     Optimizer(params),
     stepwidth(stepwidth),
     minStepwidth(minStepwidth)
 {
     LOG(Logger::DBG, "Constructor call PatternOptimizer")
+
     if ((stepwidth.size() == 0) && (minStepwidth.size() == 0)) {
         for (std::size_t i = 0; i < params.size(); ++i) {
             double dimsize = Optimizer::params[i].getMax()
@@ -30,15 +35,19 @@ PatternOptimizer::PatternOptimizer(SimulationParameters params, std::vector<doub
             this->minStepwidth.push_back(params[i].getGranularity());
         }
     }
+
     if ((minStepwidth.size() == 0) && (stepwidth.size() == params.size())) {
         for (std::size_t i = 0; i < params.size(); ++i) {
             this->minStepwidth.push_back(params[i].getGranularity());
         }
     }
+
+    // fixme: exceptions in c-tor are evil!
     if (this->stepwidth.size() != this->params.size() ) {
         // TODO exception
         throw std::invalid_argument("Wrong size of Stepwidth in PatternOptimizer Constructor!");
     }
+
     if (this->minStepwidth.size() != this->params.size()) {
         throw std::invalid_argument("Wrong size of i minStepwidth in PatternOptimizer Constructor!");
     }
@@ -52,6 +61,7 @@ bool PatternOptimizer::reduceStepwidth()
     bool allWasMin = true;
     std::stringstream log;
     log << "Reduce Stepwidth:" << std::endl;
+
     for (size_t i = 0;i < stepwidth.size(); ++i) {
         log << "Dimension "<< i << ": " << stepwidth[i];
         if (stepwidth[i] <= minStepwidth[i]) {
@@ -66,6 +76,7 @@ bool PatternOptimizer::reduceStepwidth()
         allWasMin = false;
         log << " --> " << stepwidth[i] << "; " << std::endl;
     }
+
     LOG(Logger::DBG, log.str())
     return !allWasMin;
 }
@@ -74,6 +85,7 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
 {
     std::vector<SimulationParameters> result(middle.size() * 2 + 1);
     result[0]=middle;
+
     for (std::size_t i = 0; i < middle.size(); ++i) {
         SimulationParameters tmp1(middle),tmp2(middle);
         tmp1[i] += stepwidth[i];
@@ -81,6 +93,7 @@ std::vector<SimulationParameters> PatternOptimizer::genPattern(SimulationParamet
         result[1 + i * 2] = tmp1;
         result[2 + i * 2] = tmp2;
     }
+
     return result;
 }
 
@@ -113,7 +126,7 @@ std::size_t PatternOptimizer::getMaxPos(
     return retval;
 }
 
-SimulationParameters PatternOptimizer::operator()(int steps,Evaluator & eval)
+SimulationParameters PatternOptimizer::operator()(int steps, Evaluator& eval)
 {
     SimulationParameters middle = Optimizer::params;
     std::vector<SimulationParameters> pattern = genPattern(middle);
@@ -151,7 +164,10 @@ std::string PatternOptimizer::patternToString(std::vector<SimulationParameters> 
         }
         result << std::endl;
     }
+
     result << std::endl;
+
     return result.str();
 }
-} //namespace LibGeoDecomp
+
+}

@@ -399,6 +399,11 @@ public:
         return *parameters[names[name]];
     }
 
+    const SimulationParametersHelpers::Parameter& operator[](const std::string& name) const
+    {
+        return *parameters[names.find(name)->second];
+    }
+
     SimulationParametersHelpers::Parameter& operator[](std::size_t index)
     {
         return *parameters[index];

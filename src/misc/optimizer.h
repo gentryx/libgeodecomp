@@ -11,12 +11,14 @@ class Optimizer
 {
 public:
     friend class OptimizerTest;
+
     class Evaluator
     {
     public:
         virtual ~Evaluator()
         {}
-        virtual double operator()(SimulationParameters params) = 0;
+
+        virtual double operator()(const SimulationParameters& params) = 0;
     };
     virtual ~Optimizer()
     {};
@@ -25,7 +27,7 @@ public:
         fitness(std::numeric_limits<double>::min())
     {}
 
-    virtual SimulationParameters  operator()(int maxSteps, Evaluator& eval)
+    virtual SimulationParameters operator()(int maxSteps, Evaluator& eval)
     {
         // fixme: this implementation is stupid!
 
@@ -42,9 +44,10 @@ public:
                 fitness = newFitness;
             }
         }
+
         return params;
     }
-    
+
     double getFitness()
     {
         return fitness;

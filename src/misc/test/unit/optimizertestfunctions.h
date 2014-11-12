@@ -11,7 +11,6 @@ public:
     public:
         virtual ~TestableEvaluator()
         {}
-        virtual double operator()(SimulationParameters params) = 0;
 
         TestableEvaluator():
             calls(0)
@@ -22,7 +21,8 @@ public:
             return maxima[0];
         }
 
-        std::vector<double> getLocalMax() {
+        std::vector<double> getLocalMax()
+        {
             return maxima;
         }
 
@@ -35,6 +35,7 @@ public:
         {
             calls = 0;
         }
+
     protected:
         int calls;
         std::vector<double> maxima;
@@ -48,7 +49,7 @@ public:
             maxima.push_back(1000);
         }
 
-        double operator()(SimulationParameters params)
+        double operator()(const SimulationParameters& params)
         {
             int x = params["x"];
             int y = params["y"];
@@ -65,7 +66,7 @@ public:
             maxima.push_back(2600);
         }
 
-        double operator()(SimulationParameters params)
+        double operator()(const SimulationParameters& params)
         {
             int x = params["x"];
             int y = params["y"];
@@ -78,12 +79,13 @@ public:
     class FiveDimFunction : public TestableEvaluator
     {
     public:
+
         FiveDimFunction()
         {
             maxima.push_back(5000);
         }
 
-        double operator()(SimulationParameters params)
+        double operator()(const SimulationParameters& params)
         {
             ++calls;
             int v = params["v"];
@@ -92,9 +94,10 @@ public:
             bool  by = params["y"];
             int y = 0;
             int z = params["z"];
-                if (by) {
-                    y = 1;
-                }
+            if (by) {
+                y = 1;
+            }
+
             return
                 5000 -
                 ((v + 42) * ( v + 42) * 0.01) -
@@ -114,7 +117,7 @@ public:
             maxima.push_back(4687.77);
         }
 
-        double operator()(SimulationParameters params)
+        double operator()(const SimulationParameters& params)
         {
             int x = params["x"];
             int y = params["y"];
@@ -132,7 +135,7 @@ public:
             maxima.push_back(1096);
         }
 
-        double operator()(SimulationParameters params)
+        double operator()(const SimulationParameters& params)
         {
             ++calls;
             int x = params["x"];
@@ -157,7 +160,7 @@ public:
             maxima.push_back(1000);
         }
 
-        double operator()(SimulationParameters params)
+        double operator()(const SimulationParameters& params)
         {
             ++calls;
             int xi =  params["x"]; // range -5 - 5
@@ -170,15 +173,17 @@ public:
                     + (( x + (y * y) - (double) 7) * ( x + (y * y) - (double) 7)));
         }
     };
-    
+
     class HimmelblauFunctionDouble : public TestableEvaluator
     {
     public:
-        HimmelblauFunctionDouble() {
+        HimmelblauFunctionDouble()
+        {
             maxima.push_back(1000);
         }
 
-        double operator()(SimulationParameters params) {
+        double operator()(const SimulationParameters& params)
+        {
             ++calls;
             double x = params["x"];
             double y = params["y"];
@@ -200,7 +205,8 @@ public:
         {
             maxima.push_back(3000);
         }
-        double operator()(SimulationParameters params)
+
+        double operator()(const SimulationParameters& params)
         {
             ++calls;
             int xi = params["x"];
@@ -218,7 +224,8 @@ public:
         {
             maxima.push_back(100000);
         }
-        double operator()(SimulationParameters params)
+
+        double operator()(const SimulationParameters& params)
         {
             ++calls;
             int vi = params["v"];
@@ -231,7 +238,7 @@ public:
             double x = (double) xi / (double) 500;
             double y = (double) yi / (double) 500;
             double z = (double) zi / (double) 500;
-            return 100000 - ( 
+            return 100000 - (
                   (100 * (w - v * v) * (w - v * v) + (1 - v)*(1 - v))
                 + (100 * (x - w * w) * (x - w * w) + (1 - w)*(1 - w))
                 + (100 * (y - x * x) * (y - x * x) + (1 - x)*(1 - x))
@@ -240,4 +247,5 @@ public:
     };
 
 };
-} // namespace LibGeoDecomp
+
+}
