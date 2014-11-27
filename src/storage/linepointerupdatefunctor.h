@@ -105,6 +105,9 @@ public:
     }
 };
 
+/**
+ * see class above for documentation
+ */
 template<typename CELL, int DIM, bool BOUNDARY_TOP, bool BOUNDARY_BOTTOM, bool BOUNDARY_SOUTH, bool BOUNDARY_NORTH>
 class LinePointerUpdateFunctor<CELL, DIM, true, 0, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH>
 {
@@ -123,33 +126,50 @@ public:
         long endX = streak.endX - streak.origin.x();
 
         if (streak.endX == (streak.origin.x() + 1)) {
-            LinePointerNeighborhood<CELL, Stencil, true, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-            newLine[x].update(hood, nanoStep);
+            LinePointerNeighborhood<
+                CELL, Stencil, true, true,
+                BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
+            updateWrapper(newLine, &x, long(endX), hood, nanoStep, UpdateLineXFlag());
             return;
         }
 
-        LinePointerNeighborhood<CELL, Stencil, true, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
-        newLine[x].update(hoodWest, nanoStep);
-        ++x;
+        LinePointerNeighborhood<
+            CELL, Stencil, true, false,
+            BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodWest(pointers, &x);
+        updateWrapper(newLine, &x, 1, hoodWest, nanoStep, UpdateLineXFlag());
 
-        LinePointerNeighborhood<CELL, Stencil, false, false, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
-        updateMain(newLine, &x, long(endX - 1), hood, nanoStep, UpdateLineXFlag());
+        LinePointerNeighborhood<
+            CELL, Stencil, false, false,
+            BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hood(pointers, &x);
+        updateWrapper(newLine, &x, long(endX - 1), hood, nanoStep, UpdateLineXFlag());
 
-        LinePointerNeighborhood<CELL, Stencil, false, true, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
-        newLine[x].update(hoodEast, nanoStep);
+        LinePointerNeighborhood<
+            CELL, Stencil, false, true,
+            BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_SOUTH, BOUNDARY_NORTH> hoodEast(pointers, &x);
+        updateWrapper(newLine, &x, endX, hoodEast, nanoStep, UpdateLineXFlag());
     }
 
 private:
+    /**
+     * serves as a fork to select update() and updateLineX(),
+     * depending on the Cell's API. This specialization will delegate
+     * to update() calls for single cells.
+     */
     template<typename NEIGHBORHOOD>
-    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::FalseType)
+    void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::FalseType)
     {
         for (; *x < endX; ++*x) {
             newLine[(*x)].update(hood, nanoStep);
         }
     }
 
+    /**
+     * serves as a fork to select update() and updateLineX(),
+     * depending on the Cell's API. This specialization will delegate
+     * to updateLineX() for streaks of cells.
+     */
     template<typename NEIGHBORHOOD>
-    void updateMain(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::TrueType)
+    void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::TrueType)
     {
         CELL::updateLineX(newLine, x, endX, hood, nanoStep);
     }

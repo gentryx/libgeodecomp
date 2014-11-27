@@ -46,7 +46,7 @@ public:
     static void updateLineX(LineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
         myLog << "LineUpdateCell::updateLineX(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
-
+        *x = endX;
     }
 };
 
@@ -76,16 +76,10 @@ public:
     {};
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, int nanoStep)
-    {
-        myLog << "FixedLineUpdateCell::update(nanoStep = " << nanoStep << ")\n";
-    }
-
-    template<typename NEIGHBORHOOD>
     static void updateLineX(FixedLineUpdateCell *target, long *x, long endX, const NEIGHBORHOOD& hood, int nanoStep)
     {
         myLog << "FixedLineUpdateCell::updateLine(x = " << *x << ", endX = " << endX << ", nanoStep = " << nanoStep << ")\n";
-
+        *x = endX;
     }
 };
 
@@ -164,7 +158,7 @@ public:
         checkSelector<FixedCell>(
             "FixedCell::update(nanoStep = 0)\n", 8);
         checkSelector<FixedLineUpdateCell>(
-            "FixedLineUpdateCell::update(nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 1, endX = 7, nanoStep = 0)\nFixedLineUpdateCell::update(nanoStep = 0)\n", 1);
+            "FixedLineUpdateCell::updateLine(x = 0, endX = 1, nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 1, endX = 7, nanoStep = 0)\nFixedLineUpdateCell::updateLine(x = 7, endX = 8, nanoStep = 0)\n", 1);
     }
 
     void testMoore2D()
