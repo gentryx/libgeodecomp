@@ -30,35 +30,20 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& hood, const int /*nanoStep */)
-    {
-        temp = (hood[FixedCoord< 0,  0, -1>()].temp +
-                hood[FixedCoord< 0, -1,  0>()].temp +
-                hood[FixedCoord<-1,  0,  0>()].temp +
-                hood[FixedCoord< 1,  0,  0>()].temp +
-                hood[FixedCoord< 0,  1,  0>()].temp +
-                hood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 6.0);
-    }
-
-    // fixme: use locally defined var for x-offset?
-    template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int nanoStep)
     {
-        typedef LibFlatArray::short_vec<double, 8> Double;
-        long remainder = *x % Double::ARITY;
-        long nextStop = remainder? *x + Double::ARITY - remainder : *x;
+        typedef LibFlatArray::short_vec<double, 8> ShortVecType;
+        typedef LibFlatArray::short_vec<double, 1> Double;
 
-        // loop peeling: peel unaligned loops
-        for (; *x < nextStop; ++*x) {
-            target[*x].update(hood, nanoStep);
-        }
+        long remainder = *x % ShortVecType::ARITY;
+        long nextStop = remainder? *x + ShortVecType::ARITY - remainder : *x;
 
-        updateLineImplmentation<Double>(target, x, endX, hood, nanoStep);
-
-        // loop peeling: end of loop
-        for (; *x < endX; ++*x) {
-            target[*x].update(hood, nanoStep);
-        }
+        // loop peeling: peel off unaligned loops
+        updateLineImplmentation<Double      >(target, x, nextStop, hood, nanoStep);
+        // main loop
+        updateLineImplmentation<ShortVecType>(target, x, endX,     hood, nanoStep);
+        // loop peeling: unaligned, scalar iterations at end of loop
+        updateLineImplmentation<Double      >(target, x, endX,     hood, nanoStep);
     }
 
     template<typename DOUBLE, typename NEIGHBORHOOD>
