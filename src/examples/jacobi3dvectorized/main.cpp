@@ -32,22 +32,16 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int nanoStep)
     {
-        typedef LibFlatArray::short_vec<double, 8> ShortVecType;
-        typedef LibFlatArray::short_vec<double, 1> Double;
-
-        long remainder = *x % ShortVecType::ARITY;
-        long nextStop = remainder? *x + ShortVecType::ARITY - remainder : *x;
-
-        // loop peeling: peel off unaligned loops
-        updateLineImplmentation<Double      >(target, x, nextStop, hood, nanoStep);
-        // main loop
-        updateLineImplmentation<ShortVecType>(target, x, endX,     hood, nanoStep);
-        // loop peeling: unaligned, scalar iterations at end of loop
-        updateLineImplmentation<Double      >(target, x, endX,     hood, nanoStep);
+        LIBFLATARRAY_LOOP_PEELER(double, 8, long, x, endX, updateLineImplmentation, target, hood, nanoStep);
     }
 
     template<typename DOUBLE, typename NEIGHBORHOOD>
-    static void updateLineImplmentation(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int /* nanoStep */)
+    static void updateLineImplmentation(
+        long *x,
+        long endX,
+        Cell *target,
+        const NEIGHBORHOOD& hood,
+        const int /* nanoStep */)
     {
         DOUBLE oneSixth = 1.0 / 6.0;
 
