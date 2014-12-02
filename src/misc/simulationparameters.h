@@ -352,7 +352,6 @@ private:
 
 }
 
-// fixme: move non-template code to source file
 class SimulationParameters
 {
 public:
