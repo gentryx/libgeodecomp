@@ -1,4 +1,6 @@
 #include <libgeodecomp.h>
+#include <libgeodecomp/misc/patternoptimizer.h>
+#include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/cudasimulator.h>
 
@@ -20,7 +22,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    __device__
+    // __device__
     __host__
     void update(const NEIGHBORHOOD& hood, const unsigned& nanoStep)
     {
@@ -54,9 +56,13 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    explicit CellInitializer(int num) : SimpleInitializer<Cell>(
-        Coord<3>::diagonal(256) * num,
-        1000)
+    explicit
+    CellInitializer(
+        int num,
+        int maxSteps) :
+        SimpleInitializer<Cell>(
+            Coord<3>::diagonal(256) * num,
+            maxSteps)
     {}
 
     virtual void grid(GridBase<Cell, 3> *ret)
@@ -82,10 +88,28 @@ public:
 
 void runSimulation()
 {
-    int outputFrequency = 100;
-    int factor = pow(MPILayer().size(), 1.0 / 3.0);
+    int outputFrequency = 1000;
+    int maxSteps = 1000;
+    CellInitializer *init = new CellInitializer(1, maxSteps);
 
-    CellInitializer *init = new CellInitializer(factor);
+
+    SimulationFactory<Cell> fab;
+
+    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
+
+    std::vector<std::string> simulatorTypes;
+    simulatorTypes << "CudaSimulator";
+    fab.parameters()["Simulator"] = SimulationParametersHelpers::DiscreteSet<std::string>(
+        simulatorTypes);
+
+    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
+
+    std::vector<double> stepWidths(fab.parameters().size(), 1);
+    std::vector<double> minStepwidths(fab.parameters().size(), 1);
+
+    PatternOptimizer optimizer(fab.parameters(), stepWidths, minStepwidths);
+    optimizer(10, fab);
+    std::cout << "-----------------\n";
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
     //     init,
@@ -97,7 +121,7 @@ void runSimulation()
     // SerialSimulator<Cell> sim(
     //     init);
 
-    // CudaSimulator<Cell> sim(init);
+    // CudaSimulator<Cell> sim(init, Coord<3>(128, 4, 1));
 
     CacheBlockingSimulator<Cell> sim(
         init,
