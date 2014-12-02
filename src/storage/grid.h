@@ -350,15 +350,15 @@ private:
     CELL_TYPE edgeCell;
 };
 
-}
-
 template<typename _CharT, typename _Traits, typename _CellT, typename _TopologyT>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::Grid<_CellT, _TopologyT>& grid)
+           const Grid<_CellT, _TopologyT>& grid)
 {
     __os << grid.toString();
     return __os;
+}
+
 }
 
 #endif
