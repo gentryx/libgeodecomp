@@ -176,6 +176,12 @@ template<typename VALUE_TYPE>
 class TypedParameter : public Parameter
 {
 public:
+    // These are required to silence nvcc's warnings. We intend to
+    // both, override and overload these operators. More explanations
+    // here: http://stackoverflow.com/questions/12871711/virtual-function-override-intended-error
+    using Parameter::operator=;
+    using Parameter::operator==;
+
     explicit TypedParameter(const VALUE_TYPE& current) :
         current(current)
     {}
