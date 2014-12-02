@@ -5,22 +5,20 @@
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_QPX_DOUBLE_4_HPP
-#define FLAT_ARRAY_DETAIL_SHORT_VEC_QPX_DOUBLE_4_HPP
+#ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_SSE_DOUBLE_4_HPP
+#define FLAT_ARRAY_DETAIL_SHORT_VEC_SSE_DOUBLE_4_HPP
 
-#ifdef __VECTOR4DOUBLE__
+#ifdef __SSE__
 
-#include <libflatarray/detail/sqrt_reference.hpp>
+#include <emmintrin.h>
 
+#ifndef __AVX__
 #ifndef __CUDA_ARCH__
 
 namespace LibFlatArray {
 
 template<typename CARGO, int ARITY>
 class short_vec;
-
-template<typename CARGO, int ARITY>
-class sqrt_reference;
 
 #ifdef __ICC
 // disabling this warning as implicit type conversion is exactly our goal here:
@@ -34,97 +32,109 @@ class short_vec<double, 4>
 public:
     static const int ARITY = 4;
 
+    typedef short_vec_strategy::sse strategy;
+
+    template<typename _CharT, typename _Traits>
+    friend std::basic_ostream<_CharT, _Traits>& operator<<(
+        std::basic_ostream<_CharT, _Traits>& __os,
+        const short_vec<double, 4>& vec);
+
     inline
     short_vec(const double data = 0) :
-        val1(vec_splats(data))
+        val1(_mm_set1_pd(data)),
+        val2(_mm_set1_pd(data))
     {}
 
     inline
     short_vec(const double *data) :
-        val1(vec_ld(0, const_cast<double*>(data)))
+        val1(_mm_loadu_pd(data + 0)),
+        val2(_mm_loadu_pd(data + 2))
     {}
 
     inline
-    short_vec(const vector4double& val1) :
-        val1(val1)
+    short_vec(const __m128d& val1, const __m128d& val2) :
+        val1(val1),
+        val2(val2)
     {}
-
-    inline
-    short_vec(const sqrt_reference<double, 4> other);
 
     inline
     void operator-=(const short_vec<double, 4>& other)
     {
-        val1 = vec_sub(val1, other.val1);
+        val1 = _mm_sub_pd(val1, other.val1);
+        val2 = _mm_sub_pd(val2, other.val2);
     }
 
     inline
     short_vec<double, 4> operator-(const short_vec<double, 4>& other) const
     {
         return short_vec<double, 4>(
-            vec_sub(val1, other.val1));
+            _mm_sub_pd(val1, other.val1),
+            _mm_sub_pd(val2, other.val2));
     }
 
     inline
     void operator+=(const short_vec<double, 4>& other)
     {
-        val1 = vec_add(val1, other.val1);
+        val1 = _mm_add_pd(val1, other.val1);
+        val2 = _mm_add_pd(val2, other.val2);
     }
 
     inline
     short_vec<double, 4> operator+(const short_vec<double, 4>& other) const
     {
         return short_vec<double, 4>(
-            vec_add(val1, other.val1));
+            _mm_add_pd(val1, other.val1),
+            _mm_add_pd(val2, other.val2));
     }
 
     inline
     void operator*=(const short_vec<double, 4>& other)
     {
-        val1 = vec_add(val1, other.val1);
+        val1 = _mm_mul_pd(val1, other.val1);
+        val2 = _mm_mul_pd(val2, other.val2);
     }
 
     inline
     short_vec<double, 4> operator*(const short_vec<double, 4>& other) const
     {
         return short_vec<double, 4>(
-           vec_mul(val1, other.val1));
+            _mm_mul_pd(val1, other.val1),
+            _mm_mul_pd(val2, other.val2));
     }
-
-    inline
-    void operator/=(const sqrt_reference<double, 4>& other);
 
     inline
     void operator/=(const short_vec<double, 4>& other)
     {
-        val1 = vec_swdiv_nochk(val1, other.val1);
+        val1 = _mm_div_pd(val1, other.val1);
+        val2 = _mm_div_pd(val2, other.val2);
     }
 
     inline
     short_vec<double, 4> operator/(const short_vec<double, 4>& other) const
     {
         return short_vec<double, 4>(
-            vec_swdiv_nochk(val1, other.val1));
+            _mm_div_pd(val1, other.val1),
+            _mm_div_pd(val2, other.val2));
     }
-
-    inline
-    short_vec<double, 4> operator/(const sqrt_reference<double, 4>& other) const;
 
     inline
     short_vec<double, 4> sqrt() const
     {
         return short_vec<double, 4>(
-            vec_swsqrt(val1));
+            _mm_sqrt_pd(val1),
+            _mm_sqrt_pd(val2));
     }
 
     inline
     void store(double *data) const
     {
-        vec_st(val1, 0, data);
+        _mm_storeu_pd(data + 0, val1);
+        _mm_storeu_pd(data + 2, val2);
     }
 
 private:
-    vector4double val1;
+    __m128d val1;
+    __m128d val2;
 };
 
 #ifdef __ICC
@@ -137,41 +147,9 @@ void operator<<(double *data, const short_vec<double, 4>& vec)
     vec.store(data);
 }
 
-template<>
-class sqrt_reference<double, 4>
+short_vec<double, 4> sqrt(const short_vec<double, 4>& vec)
 {
-public:
-    template<typename OTHER_CARGO, int OTHER_ARITY>
-    friend class short_vec;
-
-    sqrt_reference(const short_vec<double, 4>& vec) :
-        vec(vec)
-    {}
-
-private:
-    short_vec<double, 4> vec;
-};
-
-inline
-short_vec<double, 4>::short_vec(const sqrt_reference<double, 4> other) :
-    val1(vec_swsqrt(other.vec.val1))
-{}
-
-inline
-void short_vec<double, 4>::operator/=(const sqrt_reference<double, 4>& other)
-{
-    val1 = vec_mul(val1, vec_rsqrte(other.vec.val1));
-}
-
-inline
-short_vec<double, 4> short_vec<double, 4>::operator/(const sqrt_reference<double, 4>& other) const
-{
-    return vec_mul(val1, vec_rsqrte(other.vec.val1));
-}
-
-sqrt_reference<double, 4> sqrt(const short_vec<double, 4>& vec)
-{
-    return sqrt_reference<double, 4>(vec);
+    return vec.sqrt();
 }
 
 template<typename _CharT, typename _Traits>
@@ -180,12 +158,14 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
            const short_vec<double, 4>& vec)
 {
     const double *data1 = reinterpret_cast<const double *>(&vec.val1);
-    __os << "[" << data1[0] << ", " << data1[1]  << ", " << data1[2]  << ", " << data1[3] << "]";
+    const double *data2 = reinterpret_cast<const double *>(&vec.val2);
+    __os << "[" << data1[0] << ", " << data1[1]  << ", " << data2[0]  << ", " << data2[1]  << "]";
     return __os;
 }
 
 }
 
+#endif
 #endif
 #endif
 

@@ -12,6 +12,7 @@
 
 #include <emmintrin.h>
 
+#ifndef __AVX__
 #ifndef __CUDA_ARCH__
 
 namespace LibFlatArray {
@@ -31,8 +32,15 @@ class short_vec<double, 8>
 public:
     static const int ARITY = 8;
 
+    typedef short_vec_strategy::sse strategy;
+
+    template<typename _CharT, typename _Traits>
+    friend std::basic_ostream<_CharT, _Traits>& operator<<(
+        std::basic_ostream<_CharT, _Traits>& __os,
+        const short_vec<double, 8>& vec);
+
     inline
-    short_vec(const double& data) :
+    short_vec(const double data = 0) :
         val1(_mm_set1_pd(data)),
         val2(_mm_set1_pd(data)),
         val3(_mm_set1_pd(data)),
@@ -172,8 +180,22 @@ short_vec<double, 8> sqrt(const short_vec<double, 8>& vec)
     return vec.sqrt();
 }
 
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const short_vec<double, 8>& vec)
+{
+    const double *data1 = reinterpret_cast<const double *>(&vec.val1);
+    const double *data2 = reinterpret_cast<const double *>(&vec.val2);
+    const double *data3 = reinterpret_cast<const double *>(&vec.val3);
+    const double *data4 = reinterpret_cast<const double *>(&vec.val4);
+    __os << "[" << data1[0] << ", " << data1[1]  << ", " << data2[0]  << ", " << data2[1]  << ", " << data3[0]  << ", " << data3[1]  << ", " << data4[0]  << ", " << data4[1] << "]";
+    return __os;
 }
 
+}
+
+#endif
 #endif
 #endif
 

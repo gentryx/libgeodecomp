@@ -5,8 +5,8 @@
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_AVX_HPP
-#define FLAT_ARRAY_DETAIL_SHORT_VEC_AVX_HPP
+#ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_AVX_FLOAT_8_HPP
+#define FLAT_ARRAY_DETAIL_SHORT_VEC_AVX_FLOAT_8_HPP
 
 #ifdef __AVX__
 
@@ -35,9 +35,15 @@ class short_vec<float, 8>
 public:
     static const int ARITY = 8;
 
-    // fixme: test default c-tors for all implementations of short_vec
+    typedef short_vec_strategy::avx strategy;
+
+    template<typename _CharT, typename _Traits>
+    friend std::basic_ostream<_CharT, _Traits>& operator<<(
+        std::basic_ostream<_CharT, _Traits>& __os,
+        const short_vec<float, 8>& vec);
+
     inline
-    short_vec(const float& data = 0) :
+    short_vec(const float data = 0) :
         val1(_mm256_broadcast_ss(&data))
     {}
 
@@ -169,6 +175,16 @@ short_vec<float, 8> short_vec<float, 8>::operator/(const sqrt_reference<float, 8
 sqrt_reference<float, 8> sqrt(const short_vec<float, 8>& vec)
 {
     return sqrt_reference<float, 8>(vec);
+}
+
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const short_vec<float, 8>& vec)
+{
+    const float *data1 = reinterpret_cast<const float *>(&vec.val1);
+    __os << "[" << data1[0] << ", " << data1[1]  << ", " << data1[2]  << ", " << data1[3]  << ", " << data1[4]  << ", " << data1[5]  << ", " << data1[6]  << ", " << data1[7] << "]";
+    return __os;
 }
 
 }
