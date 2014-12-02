@@ -346,6 +346,7 @@ private:
 
 }
 
+// fixme: move non-template code to source file
 class SimulationParameters
 {
 public:
@@ -412,6 +413,15 @@ public:
     const SimulationParametersHelpers::Parameter& operator[](std::size_t index) const
     {
         return *parameters[index];
+    }
+
+    std::string toString() const
+    {
+        std::stringstream buf;
+        buf << "SimulationParameters(\n"
+            << names << ",\n"
+            << parameters << ")\n";
+        return buf.str();
     }
 
     std::size_t size() const
