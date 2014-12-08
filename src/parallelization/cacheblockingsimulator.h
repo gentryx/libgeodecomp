@@ -55,7 +55,7 @@ public:
         }
         bufferDim[DIM - 1] = pipelineLength * 4 - 4;
 
-        for (int i = 0; i < buffers.size(); ++i) {
+        for (std::size_t i = 0; i < buffers.size(); ++i) {
             buffers[i] = BufferType(CoordBox<DIM>(Coord<DIM>(), bufferDim), curGrid->getEdgeCell(), curGrid->getEdgeCell());
         }
         LOG(DBG, "created " << buffers.size() << " buffers");
