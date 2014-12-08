@@ -189,6 +189,19 @@ public:
         params["foo"] += 2;
         TS_ASSERT_EQUALS("DiscreteSet([a, b, c], 2)", params["foo"].toString());
     }
+
+    void testToString()
+    {
+        std::stringstream buf;
+
+        SimulationParameters params;
+        params.addParameter("foo", 1, 5);
+        params.addParameter("bar", 2, 4);
+        buf << params;
+
+        std::string expected = "SimulationParameters(\n  bar => Interval([2, 4], 0)\n  foo => Interval([1, 5], 0)\n)\n";
+        TS_ASSERT_EQUALS(expected, buf.str());
+    }
 };
 
 }

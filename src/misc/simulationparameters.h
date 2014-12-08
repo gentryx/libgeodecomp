@@ -423,9 +423,12 @@ public:
     std::string toString() const
     {
         std::stringstream buf;
-        buf << "SimulationParameters(\n"
-            << names << ",\n"
-            << parameters << ")\n";
+        buf << "SimulationParameters(\n";
+        for (std::map<std::string, int>::const_iterator i = names.begin(); i != names.end(); ++i) {
+            buf << "  " << i->first << " => " << parameters[i->second]->toString() << "\n";
+        }
+        buf << ")\n";
+
         return buf.str();
     }
 
@@ -438,6 +441,15 @@ protected:
     std::map<std::string, int> names;
     std::vector<ParamPointerType> parameters;
 };
+
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& __os,
+           const SimulationParameters& params)
+{
+    __os << params.toString();
+    return __os;
+}
 
 }
 
