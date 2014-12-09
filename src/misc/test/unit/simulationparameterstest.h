@@ -176,8 +176,10 @@ public:
         TS_ASSERT_EQUALS("Interval([1, 5], 0)", params["foo"].toString());
 
         params.replaceParameter("foo", 6, 9);
-        int val = params["foo"];
         TS_ASSERT_EQUALS("Interval([6, 9], 0)", params["foo"].toString());
+
+        int val = params["foo"];
+        TS_ASSERT_EQUALS(6, val);
 
         std::vector<char> values;
         values << 'a'

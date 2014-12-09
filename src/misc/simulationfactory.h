@@ -18,7 +18,8 @@ template<typename CELL>
 class SimulationFactory : public Optimizer::Evaluator
 {
 public:
-    SimulationFactory()
+    SimulationFactory(Initializer<CELL> *initializer) :
+        initializer(initializer)
     {
         std::vector<std::string> simulatorTypes;
         simulatorTypes << "SerialSimulator"
@@ -29,8 +30,14 @@ public:
         parameterSet.addParameter("WavefrontHeight", 10, 1000);
         parameterSet.addParameter("PipelineLength",   1,   30);
         parameterSet.addParameter("BlockDimX",        1,  128);
-        parameterSet.addParameter("BlockDimX",        1,    8);
-        parameterSet.addParameter("BlockDimX",        1,    8);
+        parameterSet.addParameter("BlockDimY",        1,    8);
+        parameterSet.addParameter("BlockDimz",        1,    8);
+    }
+
+    ~SimulationFactory()
+    {
+        // fixme: we can't delete the initializer here because of the missing clone() in initializer
+        // delete initializer;
     }
 
     void addWriter(const ParallelWriter<CELL>& writer)
@@ -47,16 +54,24 @@ public:
      * Returns a new simulator according to the previously specified
      * parameters. The user is expected to delete the simulator.
      */
-    Simulator<CELL> *operator()(Initializer<CELL> *initializer)
+    Simulator<CELL> *operator()()
     {
         Simulator<CELL> *sim = buildSimulator(initializer, parameterSet);
-        // FIXME: add writers here?
         return sim;
     }
 
     double operator()(const SimulationParameters& params)
     {
-        return 0;
+        Simulator<CELL> *sim = buildSimulator(initializer, params);
+        Chronometer chrono;
+
+        {
+            TimeCompute t(&chrono);
+            sim->run();
+        }
+
+        delete sim;
+        return chrono.interval<TimeCompute>();
     }
 
     SimulationParameters& parameters()
@@ -65,6 +80,8 @@ public:
     }
 
 private:
+    // fixme: implement CRTP in initializers and get rid of pointer here
+    Initializer<CELL> *initializer;
     SimulationParameters parameterSet;
     std::vector<boost::shared_ptr<ParallelWriter<CELL> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL> > > writers;
@@ -89,6 +106,8 @@ private:
             Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
             return new CudaSimulator<CELL>(initializer, blockSize);
         }
+
+        // FIXME: add writers here?
 
         throw std::invalid_argument("unknown Simulator type");
 

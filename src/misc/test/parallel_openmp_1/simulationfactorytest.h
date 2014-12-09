@@ -63,12 +63,26 @@ public:
         Coord<3> dim(100, 100, 100);
         int maxSteps = 250;
 
-        SimulationFactory<SimFabTestCell> fab;
+        SimulationFactory<SimFabTestCell> fab(new SimFabTestInitializer(dim, maxSteps));
         fab.parameters()["Simulator"] = "CacheBlockingSimulator";
 
-        Simulator<SimFabTestCell> *sim = fab(new SimFabTestInitializer(dim, maxSteps));
+        Simulator<SimFabTestCell> *sim = fab();
         sim->run();
         delete sim;
+    }
+
+    void testFitness()
+    {
+        SimulationParameters params;
+        std::vector<std::string> types;
+        types << "SerialSimulator";
+        params.addParameter("Simulator", types);
+
+        Coord<3> dim(50, 50, 50);
+        int maxSteps = 400;
+        SimulationFactory<SimFabTestCell> fab(new SimFabTestInitializer(dim, maxSteps));
+        double fitness = fab(params);
+        std::cout << "fitness: " << fitness << "\n";
     }
 };
 
