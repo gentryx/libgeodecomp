@@ -22,7 +22,7 @@ public:
     {}
 
     template<typename NEIGHBORHOOD>
-    // __device__
+    __device__
     __host__
     void update(const NEIGHBORHOOD& hood, const unsigned& nanoStep)
     {
@@ -92,8 +92,7 @@ void runSimulation()
     int maxSteps = 1000;
     CellInitializer *init = new CellInitializer(1, maxSteps);
 
-
-    SimulationFactory<Cell> fab;
+    SimulationFactory<Cell> fab(init);
 
     std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
 
@@ -102,13 +101,14 @@ void runSimulation()
     fab.parameters()["Simulator"] = SimulationParametersHelpers::DiscreteSet<std::string>(
         simulatorTypes);
 
-    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
+    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n\n";
+    std::cout << "fab: " << fab.parameters() << "\n";
 
     std::vector<double> stepWidths(fab.parameters().size(), 1);
     std::vector<double> minStepwidths(fab.parameters().size(), 1);
 
     PatternOptimizer optimizer(fab.parameters(), stepWidths, minStepwidths);
-    optimizer(10, fab);
+    // optimizer(10, fab);
     std::cout << "-----------------\n";
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
