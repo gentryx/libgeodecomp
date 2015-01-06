@@ -1,5 +1,4 @@
-// fixme: ATM out of order. make it use the SiloWriter and repair
-// fixme: refactor this demo by extracting the mesh generator and container cell
+// fixme: refactor this demo by extracting the container cell
 #include <libgeodecomp/geometry/voronoimesher.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/silowriter.h>
@@ -65,12 +64,12 @@ public:
     int num;
 };
 
-class Cell
+class MyCell
 {
 public:
     static const unsigned MAX_NEIGHBORS = 20;
 
-    explicit Cell(const Coord<2>& center=FarAway, const ID& _id=ID(),
+    explicit MyCell(const Coord<2>& center=FarAway, const ID& _id=ID(),
          const double presetInfluxes[SUBSTANCES] = ZERO_INFLUXES,
          const double& efflux = 0,
          const State& state = LIQUID) :
@@ -116,7 +115,7 @@ public:
         double totalFlux = 0;
 
         for (unsigned i = 0; i < numNeighbors; ++i) {
-            const Cell& other = container->cell(neighborIDs[i]);
+            const MyCell& other = container->cell(neighborIDs[i]);
             if (other.state == SOLID) {
                 fluxesFlow[i] = 0;
                 fluxesPressure[i] = 0;
@@ -164,7 +163,7 @@ public:
         double fluxVelocityY = 0;
 
         for (unsigned i = 0; i < numNeighbors; ++i) {
-            const Cell& other = container->cell(neighborIDs[i]);
+            const MyCell& other = container->cell(neighborIDs[i]);
             if (other.state != SOLID) {
                 const Coord<2>& dir = borderDirections[i];
                 double length = 1.0 / sqrt(dir.x() * dir.x() +
@@ -340,11 +339,11 @@ class ContainerCell
 {
 public:
     const static std::size_t MAX_CELLS = 100;
-    typedef Cell Cargo;
-    typedef Cell value_type;
-    typedef Cell* Iterator;
-    typedef Cell* iterator;
-    typedef const Cell* const_iterator;
+    typedef MyCell Cargo;
+    typedef MyCell value_type;
+    typedef MyCell* Iterator;
+    typedef MyCell* iterator;
+    typedef const MyCell* const_iterator;
 
     class API :
         public APITraits::HasCubeTopology<2>,
@@ -361,13 +360,13 @@ public:
         numCells(0)
     {}
 
-    const Cell& cell(const ID id)
+    const MyCell& cell(const ID id)
     {
         Coord<2> delta = id.container - coord;
         return (*neighbors)[delta].cells[id.num];
     }
 
-    ContainerCell& operator<<(const Cell& cell)
+    ContainerCell& operator<<(const MyCell& cell)
     {
         std::cout << "ContainerCell(" << coord << ") << " << cell.center << "\n";
         if (numCells >= MAX_CELLS) {
@@ -378,22 +377,22 @@ public:
         return *this;
     }
 
-    Cell *begin()
+    MyCell *begin()
     {
         return cells;
     }
 
-    const Cell *begin() const
+    const MyCell *begin() const
     {
         return cells;
     }
 
-    Cell *end()
+    MyCell *end()
     {
         return cells + numCells;
     }
 
-    const Cell *end() const
+    const MyCell *end() const
     {
         return cells + numCells;
     }
@@ -412,7 +411,7 @@ public:
     }
 
     Coord<2> coord;
-    Cell cells[MAX_CELLS];
+    MyCell cells[MAX_CELLS];
     std::size_t numCells;
     const CoordMapType *neighbors;
 };
@@ -683,7 +682,7 @@ private:
     void addCell(ContainerCell *container, const FloatCoord<2>& center)
     {
         Coord<2> integerCoord(center[0], center[1]);
-        (*container) << Cell(
+        (*container) << MyCell(
             integerCoord,
             ID(container->coord, container->numCells),
             ZERO_INFLUXES,
@@ -711,7 +710,7 @@ private:
 
         if (numCells < ContainerCell::MAX_CELLS) {
             (*grid)[containerCoord] <<
-                Cell(center,
+                MyCell(center,
                      ID(containerCoord, numCells),
                      influxes,
                      efflux,
@@ -782,7 +781,7 @@ private:
         for (CoordBox<DIM>::Iterator iter = box.begin(); iter != box.end(); ++iter) {
             const ContainerCell container = grid.get(*iter);
             for (std::size_t i = 0; i < container.numCells; ++i) {
-                const FixedArray<Coord<2>, Cell::MAX_NEIGHBORS>& shape = container.cells[i].shape;
+                const FixedArray<Coord<2>, MyCell::MAX_NEIGHBORS>& shape = container.cells[i].shape;
 
                 shapeSizes << shape.size();
                 int nodeOffset = shape.size() + 1;
@@ -905,8 +904,8 @@ int main(int argc, char *argv[])
 
     SiloWriter<ContainerCell> *siloWriter = new SiloWriter<ContainerCell>("chromatography", 100);
 
-    siloWriter->addSelectorForUnstructuredGrid(&Cell::pressure, "pressure");
-    siloWriter->addSelectorForUnstructuredGrid(&Cell::absorbedVolume, "absorbed_volume");
+    siloWriter->addSelectorForUnstructuredGrid(&MyCell::pressure, "pressure");
+    siloWriter->addSelectorForUnstructuredGrid(&MyCell::absorbedVolume, "absorbed_volume");
     // fixme: velocity
     // fixme: ratio[0]
     // fixme: ratio[1]
