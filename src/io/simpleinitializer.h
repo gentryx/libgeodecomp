@@ -21,14 +21,12 @@ public:
     SimpleInitializer()
     { }
 
-    // fixme: writers AND initializers should have a clone() function, preferably implemented via CRTP
     explicit SimpleInitializer(
         const Coord<DIM>& dimensions,
         const unsigned steps = 300) :
         dimensions(dimensions),
         steps(steps)
     {}
-
 
     Coord<DIM> gridDimensions() const
     {
