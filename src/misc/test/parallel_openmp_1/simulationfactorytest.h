@@ -63,7 +63,7 @@ public:
         Coord<3> dim(100, 100, 100);
         int maxSteps = 250;
 
-        SimulationFactory<SimFabTestCell> fab(new SimFabTestInitializer(dim, maxSteps));
+        SimulationFactory<SimFabTestCell> fab(SimFabTestInitializer(dim, maxSteps));
         fab.parameters()["Simulator"] = "CacheBlockingSimulator";
 
         Simulator<SimFabTestCell> *sim = fab();
@@ -80,7 +80,7 @@ public:
 
         Coord<3> dim(50, 50, 50);
         int maxSteps = 400;
-        SimulationFactory<SimFabTestCell> fab(new SimFabTestInitializer(dim, maxSteps));
+        SimulationFactory<SimFabTestCell> fab(SimFabTestInitializer(dim, maxSteps));
         double fitness = fab(params);
         std::cout << "fitness: " << fitness << "\n";
     }

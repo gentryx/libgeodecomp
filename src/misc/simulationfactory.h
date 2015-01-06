@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 #define LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 
+#include <libgeodecomp/io/clonableinitializerwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
@@ -18,8 +19,9 @@ template<typename CELL>
 class SimulationFactory : public Optimizer::Evaluator
 {
 public:
-    SimulationFactory(Initializer<CELL> *initializer) :
-        initializer(initializer)
+    template<typename INITIALIZER>
+    SimulationFactory(INITIALIZER initializer) :
+        initializer(ClonableInitializerWrapper<INITIALIZER>::wrap(initializer))
     {
         std::vector<std::string> simulatorTypes;
         simulatorTypes << "SerialSimulator"
@@ -80,8 +82,7 @@ public:
     }
 
 private:
-    // fixme: implement CRTP in initializers and get rid of pointer here
-    Initializer<CELL> *initializer;
+    ClonableInitializer<CELL> *initializer;
     SimulationParameters parameterSet;
     std::vector<boost::shared_ptr<ParallelWriter<CELL> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL> > > writers;

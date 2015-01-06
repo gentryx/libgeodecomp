@@ -90,7 +90,7 @@ void runSimulation()
 {
     int outputFrequency = 1000;
     int maxSteps = 1000;
-    CellInitializer *init = new CellInitializer(1, maxSteps);
+    CellInitializer init(1, maxSteps);
 
     SimulationFactory<Cell> fab(init);
 
@@ -123,17 +123,17 @@ void runSimulation()
 
     // CudaSimulator<Cell> sim(init, Coord<3>(128, 4, 1));
 
-    CacheBlockingSimulator<Cell> sim(
-        init,
-        2,
-        Coord<2>(10, 10));
+    // CacheBlockingSimulator<Cell> sim(
+    //     init,
+    //     2,
+    //     Coord<2>(10, 10));
 
-    if (MPILayer().rank() == 0) {
-        sim.addWriter(
-            new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
-    }
+    // if (MPILayer().rank() == 0) {
+    //     sim.addWriter(
+    //         new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
+    // }
 
-    sim.run();
+    // sim.run();
 }
 
 
