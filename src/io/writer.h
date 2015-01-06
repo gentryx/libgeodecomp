@@ -65,13 +65,13 @@ public:
 
     /**
      * "virtual copy constructor". This function may be called
-     * whenever a deep copy of a writer is needed instead of a plain
+     * whenever a deep copy of a Writer is needed instead of a plain
      * pointer copy.
      *
      * Advice to implementers: use CRTP (
      * http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
-     * ) to implemenent this automagically -- see other Writer
-     * implemenent for advice on this subject.
+     * ) to implement this automagically -- see other Writer
+     * implementations for advice on this subject.
      */
     virtual Writer *clone() const = 0;
 
