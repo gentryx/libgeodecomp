@@ -7,7 +7,9 @@
 #include <libgeodecomp/storage/selector.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
+#ifdef LIBGEODECOMP_WITH_VISIT
 #include <Python.h>
+#endif
 #endif
 
 #ifdef LIBGEODECOMP_WITH_QT
