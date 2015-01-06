@@ -19,7 +19,9 @@ class Initializer
 {
 public:
     friend class Serialization;
+
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
+    typedef CELL Cell;
 
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL>::VALUE;
     static const int DIM = Topology::DIM;
