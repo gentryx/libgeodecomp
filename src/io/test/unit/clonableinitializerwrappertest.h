@@ -63,7 +63,8 @@ public:
         TS_ASSERT_EQUALS(11, wrapper.startStep());
 
         std::stringstream expected;
-        expected << "grid(0)\n"
+        int *dummy = 0;
+        expected << "grid(" << dummy << ")\n"
                  << "gridDimensions()\n"
                  << "gridBox()\n"
                  << "maxSteps()\n"
