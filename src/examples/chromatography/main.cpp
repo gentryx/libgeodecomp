@@ -120,11 +120,10 @@ public:
                 fluxesFlow[i] = 0;
                 fluxesPressure[i] = 0;
             } else {
-                const Coord<2>& dir = -borderDirections[i];
-                double length = 1.0 / sqrt(dir.x() * dir.x() +
-                                           dir.y() * dir.y());
-                double fluxFlow = (dir.x() * velocityX +
-                                   dir.y() * velocityY) *
+                const FloatCoord<2>& dir = -borderDirections[i];
+                double length = 1.0 / sqrt(dir * dir);
+                double fluxFlow = (dir[0] * velocityX +
+                                   dir[1] * velocityY) *
                     length * pressure * borderLengths[i] * FLOW_DIFFUSION;
                 double fluxPressure = 0;
                 if (pressure > other.pressure)
@@ -165,9 +164,8 @@ public:
         for (unsigned i = 0; i < numNeighbors; ++i) {
             const MyCell& other = container->cell(neighborIDs[i]);
             if (other.state != SOLID) {
-                const Coord<2>& dir = borderDirections[i];
-                double length = 1.0 / sqrt(dir.x() * dir.x() +
-                                           dir.y() * dir.y());
+                const FloatCoord<2>& dir = borderDirections[i];
+                double length = 1.0 / sqrt(dir * dir);
 
                 for (unsigned j = 0; j < other.numNeighbors; ++j) {
                     if (other.neighborIDs[j] == id) {
@@ -181,8 +179,8 @@ public:
                             fluxVelocityY += other.fluxesFlow[j] * other.velocityY;
                             double pressureCoefficient =
                                 other.fluxesPressure[j] * length * PRESSURE_SPEED;
-                            fluxVelocityX += dir.x() * pressureCoefficient;
-                            fluxVelocityY += dir.y() * pressureCoefficient;
+                            fluxVelocityX += dir[0] * pressureCoefficient;
+                            fluxVelocityY += dir[1] * pressureCoefficient;
                         }
                         break;
                     }
@@ -274,7 +272,6 @@ public:
         }
         neighborIDs[numNeighbors] = id;
         borderLengths[numNeighbors] = length;
-        // fixme: use FloatCoord here...
         borderDirections[numNeighbors] = Coord<2>(dir[0], dir[1]);
         ++numNeighbors;
     }
@@ -331,7 +328,7 @@ public:
     double borderLengths[MAX_NEIGHBORS];
     double fluxesFlow[MAX_NEIGHBORS];
     double fluxesPressure[MAX_NEIGHBORS];
-    Coord<2> borderDirections[MAX_NEIGHBORS];
+    FloatCoord<2> borderDirections[MAX_NEIGHBORS];
     FixedArray<Coord<2>, MAX_NEIGHBORS> shape;
 };
 
@@ -909,7 +906,7 @@ int main(int argc, char *argv[])
     // fixme: velocity
     // fixme: ratio[0]
     // fixme: ratio[1]
-
+    // siloWriter->addSelectorForUnstructuredGrid(&MyCell::ratios, "ration0");
 
     sim.addWriter(siloWriter);
 
