@@ -1,5 +1,5 @@
-#ifndef HULL_H
-#define HULL_H
+#ifndef LIBGEODECOMP_EXAMPLES_GAMEOFLIFE_ADCIRC_HULL_H
+#define LIBGEODECOMP_EXAMPLES_GAMEOFLIFE_ADCIRC_HULL_H
 
 #include <libgeodecomp/communication/typemaps.h>
 #include <libgeodecomp/communication/mpilayer.h>

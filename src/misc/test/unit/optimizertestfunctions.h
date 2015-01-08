@@ -1,10 +1,14 @@
-// vim: noai:ts=4:sw=4:expandtab
+#ifndef LIBGEODECOMP_MISC_TEST_UNIT_OPTIMIZERTESTFUNCTIONS_H
+#define LIBGEODECOMP_MISC_TEST_UNIT_OPTIMIZERTESTFUNCTIONS_H
+
 #include <libgeodecomp/misc/optimizer.h>
 #include <cmath>
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
-class OptimizerTestFunctions{
+
+class OptimizerTestFunctions
+{
 public:
     class TestableEvaluator : public Optimizer::Evaluator
     {
@@ -249,3 +253,5 @@ public:
 };
 
 }
+
+#endif
