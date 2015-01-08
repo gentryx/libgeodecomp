@@ -81,6 +81,11 @@ public:
         return FloatCoord<1>(c[0] - a[0]);
     }
 
+    inline FloatCoord<1> operator-() const
+    {
+        return FloatCoord<1>(-c[0]);
+    }
+
     template<template<int> class OTHER_COORD>
     inline
     FloatCoord<1>& operator+=(const OTHER_COORD<1>& a)
@@ -274,6 +279,11 @@ public:
     {
         return FloatCoord<2>(c[0] - a[0],
                              c[1] - a[1]);
+    }
+
+    inline FloatCoord<2> operator-() const
+    {
+        return FloatCoord<2>(-c[0], -c[1]);
     }
 
     template<template<int> class OTHER_COORD>
@@ -489,6 +499,11 @@ public:
         return FloatCoord<3>(c[0] - a[0],
                              c[1] - a[1],
                              c[2] - a[2]);
+    }
+
+    inline FloatCoord<3> operator-() const
+    {
+        return FloatCoord<3>(-c[0], -c[1], -c[2]);
     }
 
     template<template<int> class OTHER_COORD>

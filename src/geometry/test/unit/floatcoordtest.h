@@ -202,6 +202,18 @@ public:
         }
     }
 
+    void testOperatorUnaryMinus()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(-1), -FloatCoord<1>( 1));
+        TS_ASSERT_EQUALS(FloatCoord<1>( 6), -FloatCoord<1>(-6));
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(-1,  5), -FloatCoord<2>( 1, -5));
+        TS_ASSERT_EQUALS(FloatCoord<2>( 6, -8), -FloatCoord<2>(-6,  8));
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(-1,  5, 6), -FloatCoord<3>( 1, -5, -6));
+        TS_ASSERT_EQUALS(FloatCoord<3>( 6, -8, 9), -FloatCoord<3>(-6,  8, -9));
+    }
+
     void testOperatorMultiply()
     {
         TS_ASSERT_EQUALS(FloatCoord<1>(4),
