@@ -1,6 +1,6 @@
 require 'test/unit'
-require 'mpigenerator'
-require 'mpiparser'
+load 'mpigenerator.rb'
+load 'mpiparser.rb'
 
 class TestMPIGenerator < Test::Unit::TestCase
   def setup
@@ -34,14 +34,6 @@ class TestMPIGenerator < Test::Unit::TestCase
     actual_header.gsub!(  /(#include <).*\/(\w+\.h>)/) { |m| $1+$2 }
 
     assert_equal(expected_header, actual_header)
-  end
-
-  def test_generate_source
-    source_pattern = File.read("./test/fixtures/references/typemaps.cpp")
-    actual_source = @generator.generate_source(@topological_class_sortation,
-                                               @datatype_map,
-                                               @resolved_classes)
-    assert_match(/#{source_pattern}/m, actual_source)
   end
 
   def test_generate_forest

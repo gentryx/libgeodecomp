@@ -1,4 +1,4 @@
-require 'basicgenerator'
+load 'basicgenerator.rb'
 
 # Here we generate the C++ code that will in turn create the typemaps
 # for Boost Serialization.

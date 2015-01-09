@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'timeout'
-require 'mpiparser'
-require 'typemapgenerator'
+load 'mpiparser.rb'
+load 'typemapgenerator.rb'
 
 class TestMPIParser < Test::Unit::TestCase
   def setup

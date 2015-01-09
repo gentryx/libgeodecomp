@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'datatype'
+load 'datatype.rb'
 
 class DatatypeTest < Test::Unit::TestCase
   def setup

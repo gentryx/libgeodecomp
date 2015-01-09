@@ -1,8 +1,8 @@
 require 'test/unit'
-require 'boostgenerator'
-require 'mpiparser'
+load 'boostgenerator.rb'
+load 'mpiparser.rb'
 
-class TestMPIGenerator < Test::Unit::TestCase
+class TestBoostGenerator < Test::Unit::TestCase
   def setup
     @generator = BoostGenerator.new("./")
     @parser = MPIParser.new("./test/fixtures/doc/xml/")

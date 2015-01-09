@@ -1,7 +1,7 @@
-require 'mpiparser'
-require 'mpigenerator'
-require 'boostgenerator'
-require 'datatype'
+load 'mpiparser.rb'
+load 'mpigenerator.rb'
+load 'boostgenerator.rb'
+load 'datatype.rb'
 
 class TypemapGenerator
   class << self

@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'typemapgenerator'
+load 'typemapgenerator.rb'
 
 class TestTypeParser < Test::Unit::TestCase
   def setup

@@ -2,9 +2,9 @@
 require 'rexml/document'
 require 'logger'
 require 'set'
-require 'datatype'
 require 'pp'
 require 'stringio'
+load 'datatype.rb'
 
 # This class is responsible for extracting all the information we need
 # from Doxygen's XML output.
@@ -161,11 +161,15 @@ class MPIParser
   def template_parameters(klass)
     @log.debug "template_parameters(#{klass})"
     xpath = "doxygen/compounddef/templateparamlist/param"
-    doc = get_xml(@filename_cache[klass])
-
+    filename = @filename_cache[klass]
+    doc = get_xml(filename)
+    @log.debug "scouring file #{filename}"
     template_params = []
+
     doc.elements.each(xpath) do |spec|
       type = spec.get_elements("type")[0].text
+      @log.debug "  type: #{type}"
+
       if type.nil?
         type = spec.get_elements("type")[0].get_elements("ref")[0].text
       end
@@ -174,11 +178,18 @@ class MPIParser
       name = nil
 
       if declname_elem.nil?
-        if type =~ /typename (\w)+/
+        if type =~ /typename (\w+)/
+          @log.debug "    path1"
           name = $1
           type = "typename"
         else
-          raise "faled to parse template parameter #{type} for class #{klass}"
+          if type.to_s =~ /^\s*typename\s*$/
+            @log.debug "    path2"
+            name = type.to_s
+            type = "typename"
+          else
+            raise "failed to parse template parameter #{type} for class #{klass}"
+          end
         end
       else
         name = declname_elem.text
@@ -193,6 +204,7 @@ class MPIParser
     end
 
     @log.debug "template_parameters(#{klass}) done"
+    @log.debug "template_parameters: #{template_params}"
     return template_params
   end
 
@@ -211,10 +223,13 @@ class MPIParser
 
       members.each do |name, spec|
         @log.debug "  - name: #{name}"
+        @log.debug "    type: #{spec[:type]}"
+        @log.debug "    regex: ^(#@namespace::|)#{class_name}<(.+)>"
         @log.debug "    spec: "
         @log.debug pp(spec)
 
         if spec[:type] =~ /^(#@namespace::|)#{class_name}<(.+)>/
+          @log.debug "  match!"
           # fixme: this will fail for constructs like Foo<Bar<int,int>,int>
           values = $2.split(",")
           values.map! { |v| v.strip }
@@ -229,7 +244,7 @@ class MPIParser
     end
 
     ret = params.sort.uniq
-    @log.debug "used_template_parameters returns"
+    @log.debug "used_template_parameters(#{klass}) returns"
     @log.debug pp(ret)
     return ret
   end
@@ -289,6 +304,7 @@ class MPIParser
       @log.debug ""
 
       if template_params.empty?
+        @log.debug "  simple path"
         resolve_class_simple(klass, members, parents,
                              classes,
                              resolved_classes, resolved_parents,
@@ -296,7 +312,7 @@ class MPIParser
       else
         used_params = used_template_parameters(klass)
 
-        @log.debug "used_params"
+        @log.debug "  used_params"
         @log.debug pp(used_params)
 
         used_params.each do |values|
@@ -319,6 +335,7 @@ class MPIParser
   end
 
   def prune_unresolvable_members(members)
+    @log.debug("prune_unresolvable_members(#{members})")
     ret = {}
 
     members.each do |klass, spec|
@@ -396,6 +413,7 @@ class MPIParser
   # tries to map all members to mpi datatypes (using datatype_map as a
   # dictionary). Returns nil if a type could not be found.
   def map_types_to_MPI_Datatypes(members)
+    @log.debug("map_types_to_MPI_Datatypes(#{members})")
     resolved = { }
 
     members.each do |name, map_orig|
@@ -417,6 +435,8 @@ class MPIParser
   # tries to map all parent types to mpi datatypes. Returns nil if a
   # type could not be found.
   def map_parent_types_to_MPI_Datatypes(parents)
+    @log.debug("map_parent_types_to_MPI_Datatypes(#{parents})")
+
     resolved = { }
     parents.each do |name|
       lookup = lookup_type(name)
@@ -490,13 +510,25 @@ class MPIParser
     argsString = member.elements["argsstring"]
 
     # easy case: non-array member
-    return 1 unless argsString.has_text?
+    if !argsString.has_text?
+      @log.debug("resolve_cardinality -> non-array member")
+      return 1
+    end
+
     # more difficult: array members...
-    raise "illegal cardinality" unless argsString.text =~ /\[(.+)\]/
+    if !(argsString.text =~ /\[(.+)\]/)
+      @log.debug("resolve_cardinality -> illegal cardinality found in member definition")
+      raise "illegal cardinality"
+    end
+
     # numeric constant as array size:
-    return $1.to_i if argsString.text =~ /\[(\d+)\]/
+    if argsString.text =~ /\[(\d+)\]/
+      @log.debug("resolve_cardinality -> numeric constant")
+      return $1.to_i
+    end
+
     # gotta search a little longer for symbolic sizes:
-    @log.debug "  non-trivial cardinality"
+    @log.debug "resolve_cardinality -> non-trivial cardinality"
     member_id = member.attributes["id"]
     cardinality_id = resolve_cardinality_id(member_id)
     return resolve_cardinality_declaration(cardinality_id)
