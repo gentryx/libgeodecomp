@@ -37,13 +37,13 @@ private:
     class Power;
 
     /**
-     * Computes \sigma_{i=0}^{INDEX} ADDEND<i, PARAM2>::VOLUME
+     * Computes \f$\Sigma_{i=0}^{INDEX} ADDEND<i, PARAM2>::VOLUME\f$
      */
     template<template<int, int> class ADDEND, int INDEX, int PARAM2>
     class Sum1;
 
     /**
-     * Computes \sigma_{i=0}^{INDEX} ADDEND<PARAM1, i>::VOLUME
+     * Computes \f$\Sigma_{i=0}^{INDEX} ADDEND<PARAM1, i>::VOLUME\f$
      */
     template<template<int, int> class ADDEND, int INDEX, int PARAM1>
     class Sum2;
