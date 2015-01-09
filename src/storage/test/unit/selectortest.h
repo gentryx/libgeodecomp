@@ -1,5 +1,6 @@
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/storage/soagrid.h>
@@ -24,6 +25,25 @@ public:
     long long x;
     double y;
     char z;
+};
+
+class MyOtherDummyCell
+{
+public:
+    explicit MyOtherDummyCell(
+        const int x = 0,
+        const double y1 = 0,
+        const double y2 = 0,
+        const double y3 = 0) :
+        x(x)
+    {
+        y[0] = y1;
+        y[1] = y2;
+        y[2] = y3;
+    }
+
+    int x;
+    double y[3];
 };
 
 }
@@ -362,6 +382,64 @@ public:
             char expected = i;
             expected += 30 + 'a';
             TS_ASSERT_EQUALS(grid.get(Coord<2>(i, 0)).z, expected);
+        }
+    }
+
+    void testArrayMemberWithDefaultFilter()
+    {
+        Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY");
+
+        Coord<2> dim(20, 10);
+
+        // test copyMemberOut
+        Region<2> region;
+        region << Streak<2>(Coord<2>(5, 0), 15)
+               << Streak<2>(Coord<2>(7, 6), 19)
+               << Streak<2>(Coord<2>(0, 9), 20);
+        TS_ASSERT_EQUALS(42, region.size());
+
+        std::vector<double> targetY(3 * region.size(), -1);
+        Grid<MyOtherDummyCell> grid(dim);
+
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                grid[Coord<2>(x, y)].y[0] = x;
+                grid[Coord<2>(x, y)].y[1] = y;
+                grid[Coord<2>(x, y)].y[2] = 47.11;
+            }
+        }
+
+        grid.saveMember(&targetY[0], selectorY, region);
+
+        Region<2>::Iterator i = region.begin();
+        for (std::size_t j = 0; j < targetY.size(); j += 3) {
+            TS_ASSERT_EQUALS(targetY[j + 0], i->x());
+            TS_ASSERT_EQUALS(targetY[j + 1], i->y());
+            TS_ASSERT_EQUALS(targetY[j + 2], 47.11);
+            ++i;
+        }
+
+        // test copyMemberIn
+        region.clear();
+        region << Streak<2>(Coord<2>(0, 4), 10)
+               << Streak<2>(Coord<2>(5, 9), 20);
+        TS_ASSERT_EQUALS(25, region.size());
+
+        std::vector<double> sourceY(3 * region.size(), -1);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            sourceY[i * 3 + 0] = i;
+            sourceY[i * 3 + 1] = 12.34;
+            sourceY[i * 3 + 2] = i * 3.0 + 5.0;
+        }
+
+        grid.loadMember(&sourceY[0], selectorY, region);
+
+        i = region.begin();
+        for (std::size_t j = 0; j < region.size(); ++j) {
+            TS_ASSERT_EQUALS(grid[*i].y[0], j);
+            TS_ASSERT_EQUALS(grid[*i].y[1], 12.34);
+            TS_ASSERT_EQUALS(grid[*i].y[2], j * 3.0 + 5.0);
+            ++i;
         }
     }
 };

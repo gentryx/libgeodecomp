@@ -4,6 +4,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libflatarray/flat_array.hpp>
@@ -32,7 +33,20 @@ public:
         return LibFlatArray::member_ptr_to_offset()(memberPointer);
     }
 
+    /**
+     * Dummy return value, won't ever be used as the model doesn't
+     * support SoA anyway.
+     */
     int operator()(MEMBER CELL:: *memberPointer, APITraits::FalseType)
+    {
+        return -1;
+    }
+
+    /**
+     * Same as above, but for array members.
+     */
+    template<int ARITY>
+    int operator()(MEMBER (CELL:: *memberPointer)[ARITY], APITraits::FalseType)
     {
         return -1;
     }
@@ -126,6 +140,20 @@ public:
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
         filter(new DefaultFilter<CELL, MEMBER, MEMBER>)
+    {}
+
+    template<typename MEMBER, int ARITY>
+    Selector(
+        MEMBER (CELL:: *memberPointer)[ARITY],
+        const std::string& memberName) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBER) * ARITY),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
     {}
 
     template<typename MEMBER>
