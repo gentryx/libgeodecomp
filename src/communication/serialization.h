@@ -3,12 +3,14 @@
 #ifndef LIBGEODECOMP_SERIALIZATION_H
 #define LIBGEODECOMP_SERIALIZATION_H
 
+#include <libgeodecomp/storage/arrayfilter.h>
 #include <libgeodecomp/misc/chronometer.h>
 #include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filter.h>
 #include <libgeodecomp/storage/filterbase.h>
@@ -36,6 +38,13 @@ namespace LibGeoDecomp {
 class Serialization
 {
 public:
+    template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
+    }
+
     template<typename ARCHIVE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned /*version*/)
@@ -79,6 +88,13 @@ public:
         archive & object.origin;
     }
 
+    template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
+    }
+
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
@@ -86,9 +102,9 @@ public:
         archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL > >(object);
     }
 
-    template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+    template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
     {
         archive & boost::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
     }
@@ -265,6 +281,12 @@ namespace serialization {
 
 using namespace LibGeoDecomp;
 
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned version)
 {
@@ -301,14 +323,20 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::CoordBox<DIM>& object, const unsi
     Serialization::serialize(archive, object, version);
 }
 
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
 
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
