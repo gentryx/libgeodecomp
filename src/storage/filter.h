@@ -294,9 +294,10 @@ public:
 
 /**
  * Derive from this class if you wish to add custom data
- * adapters/converters to your Selector.
+ * adapters/converters to your Selector. Useful for scalar members,
+ * refer to ArrayFilter for array members (e.g. int Cell::foo[4]).
  */
-template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY = 1>
+template<typename CELL, typename MEMBER, typename EXTERNAL>
 class Filter : public FilterBase<CELL>
 {
 public:
@@ -328,7 +329,7 @@ public:
 
     virtual int arity() const
     {
-        return ARITY;
+        return 1;
     }
 
     /**
