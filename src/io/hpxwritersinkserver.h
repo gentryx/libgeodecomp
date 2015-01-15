@@ -154,7 +154,7 @@ public:
             }
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, stepFinished, StepFinishedAction);
+    HPX_DEFINE_COMPONENT_ACTION(HpxWriterSinkServer, stepFinished, StepFinishedAction);
 
     std::size_t connectParallelWriter(
         boost::shared_ptr<ParallelWriter<CellType> > parallelWriter)
@@ -164,7 +164,7 @@ public:
         parallelWriters.insert(std::make_pair(id, parallelWriter));
         return id;
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, connectParallelWriter, ConnectParallelWriterAction);
+    HPX_DEFINE_COMPONENT_ACTION(HpxWriterSinkServer, connectParallelWriter, ConnectParallelWriterAction);
 
     std::size_t connectSerialWriter(
         boost::shared_ptr<Writer<CellType> > serialWriter)
@@ -174,7 +174,7 @@ public:
         serialWriters.insert(std::make_pair(id, serialWriter));
         return id;
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, connectSerialWriter, ConnectSerialWriterAction);
+    HPX_DEFINE_COMPONENT_ACTION(HpxWriterSinkServer, connectSerialWriter, ConnectSerialWriterAction);
 
     void disconnectWriter(std::size_t id)
     {
@@ -196,13 +196,13 @@ public:
             }
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, disconnectWriter, DisconnectWriterAction);
+    HPX_DEFINE_COMPONENT_ACTION(HpxWriterSinkServer, disconnectWriter, DisconnectWriterAction);
 
     std::size_t getNumUpdateGroups()
     {
         return numUpdateGroups;
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(HpxWriterSinkServer, getNumUpdateGroups, NumUpdateGroupsAction);
+    HPX_DEFINE_COMPONENT_ACTION(HpxWriterSinkServer, getNumUpdateGroups, NumUpdateGroupsAction);
 
 private:
     GridMapType gridMap;
