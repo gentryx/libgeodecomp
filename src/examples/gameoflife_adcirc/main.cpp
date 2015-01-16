@@ -150,7 +150,7 @@ public:
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, unsigned)
   {
-    ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes & outputStep;
+    ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes;
     /*
     LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
                                         // of the Domain
@@ -249,7 +249,7 @@ public:
     LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
                                         // of the Domain
     int id; // ID of the domain
-    int alive;
+  int alive; // not being used currently 
 
     int outputStep;
 
@@ -280,7 +280,9 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     int domainID = domainCell->id;
     int numNeighbors = myNeighborTable.myNeighbors.size();
 
-    std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;    
+    int localityID = hpx::get_locality_id();
+
+    std::cerr << "domainID = " << domainID << " step = " << outputStep << " locality = " << localityID << std::endl;    
     
     if (outputStep == 0) 
     {
@@ -394,6 +396,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 	      //	      std::cout << "C++: numneighbors[" << index << "] = " << numneighbors[index] << std::endl;
         }
 
+      /*
       //Call FORTRAN subroutine
       kernel_(
 	      &numnodes,
@@ -401,7 +404,8 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 	      numneighbors,
 	      neighbors
 	      );
-	
+      */
+
       //Fill SubNode objects with arrays
       count = 0;
       for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
@@ -1025,7 +1029,7 @@ void runSimulation()
     std::string prunedDirname("/home/zbyerly/research/meshes/shin32");
 
     // Hardcoded number of simulation steps
-    int steps = 100;
+    int steps = 10;
 
     //    SerialSimulator<ContainerCellType> sim(
 
