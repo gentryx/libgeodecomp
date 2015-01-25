@@ -33,14 +33,14 @@ public:
     typedef hpx::lcos::local::spinlock MutexType;
 
     typedef
-        hpx::components::server::create_component_action1<
+        hpx::components::server::create_component_action<
             ComponentType,
             std::size_t
         >
         ComponentCreateActionType;
 
     typedef
-        hpx::components::server::create_component_action2<
+        hpx::components::server::create_component_action<
             ComponentType,
             boost::shared_ptr<Writer<CellType> >,
             std::size_t
@@ -48,7 +48,7 @@ public:
         ComponentWriterCreateActionType;
 
     typedef
-        hpx::components::server::create_component_action2<
+        hpx::components::server::create_component_action<
             ComponentType,
             boost::shared_ptr<ParallelWriter<CellType> >,
             std::size_t
