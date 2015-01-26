@@ -134,7 +134,7 @@ public:
             }
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, initPartitions, InitPartitionsAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, initPartitions, InitPartitionsAction);
 
     void init()
     {
@@ -246,7 +246,7 @@ public:
 
         initEvents();
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, init, InitAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, init, InitAction);
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,
@@ -271,7 +271,7 @@ public:
             return std::make_pair(initializer->startStep(), 0u);
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, currentStep, CurrentStepAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, currentStep, CurrentStepAction);
 
     std::size_t getStep() const
     {
@@ -294,13 +294,13 @@ public:
         chrono += stepper->statistics();
         return chrono;
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, nanoStep, NanoStepAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, nanoStep, NanoStepAction);
 
     void stop()
     {
         stopped = true;
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, stop, StopAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, stop, StopAction);
 
     void setOuterGhostZone(
         std::size_t srcRank,
@@ -321,7 +321,7 @@ public:
 
         patchlinkIter->second->setBuffer(buffer, nanoStep);
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
 
     double getCellSpeed(APITraits::FalseType) const
     {
@@ -337,7 +337,7 @@ public:
     {
         return getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
     }
-    HPX_DEFINE_COMPONENT_ACTION_TPL(UpdateGroupServer, speed, SpeedAction);
+    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, speed, SpeedAction);
 
     std::size_t getRank() const
     {
