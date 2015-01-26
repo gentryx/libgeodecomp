@@ -59,8 +59,8 @@ public:
 
         TS_ASSERT_EQUALS(Coord<2>(40, 30),                                wrapper.gridDimensions());
         TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(10, 20), Coord<2>(40, 30)), wrapper.gridBox());
-        TS_ASSERT_EQUALS(47, wrapper.maxSteps());
-        TS_ASSERT_EQUALS(11, wrapper.startStep());
+        TS_ASSERT_EQUALS(std::size_t(47), wrapper.maxSteps());
+        TS_ASSERT_EQUALS(std::size_t(11), wrapper.startStep());
 
         std::stringstream expected;
         int *dummy = 0;
