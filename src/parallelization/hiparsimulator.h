@@ -20,6 +20,7 @@ enum EventPoint {LOAD_BALANCING, END};
 typedef std::set<EventPoint> EventSet;
 typedef std::map<long, EventSet> EventMap;
 
+// fixme: check if code runs with a communicator which is merely a subset of MPI_COMM_WORLD
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER = VanillaStepper<CELL_TYPE> >
 class HiParSimulator : public DistributedSimulator<CELL_TYPE>
 {

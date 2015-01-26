@@ -376,6 +376,8 @@ public:
             comm);
     }
 
+    // fixme: add mpi_allreduce for minighost, add global reduction api for production code
+
     template<typename T>
     inline std::vector<T> gather(
         const T& item,
