@@ -576,22 +576,22 @@ foreach(dir ${INSTALL_INCLUDE_DIRECTORIES})
   set(PKG_CONFIG_INCLUDE_FLAGS "${PKG_CONFIG_INCLUDE_FLAGS} -I${dir}")
 endforeach()
 
-file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}-live.pc" "
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "
 Name: LibGeoDecomp
-Description: High performance stencil code library
+Description: Live LibGeoDecomp build tree
 Version: ${PACKAGE_VERSION}
 Libs: ${LIVE_LINK_FLAGS}
 Cflags: -I${CMAKE_CURRENT_SOURCE_DIR} ${PKG_CONFIG_INCLUDE_FLAGS}
 ")
 
-file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}.pc" "
 Name: LibGeoDecomp
 Description: High performance stencil code library
 Version: ${PACKAGE_VERSION}
 Libs: ${INSTALLER_LINK_FLAGS}
 Cflags: -I${CMAKE_INSTALL_PREFIX}/include ${PKG_CONFIG_INCLUDE_FLAGS}
 ")
-install(FILES "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "${LIB_DIR}/pkgconfig")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}.pc" DESTINATION "${LIB_DIR}/pkgconfig")
 
 set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
 
