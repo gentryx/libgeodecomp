@@ -544,6 +544,7 @@ endforeach()
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -Wl,-rpath,${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -lgeodecomp ")
+set(LIVE_LINK_FLAGS      "-L${CMAKE_CURRENT_BINARY_DIR}        -Wl,-rpath,${CMAKE_CURRENT_BINARY_DIR}        -lgeodecomp ")
 foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   get_filename_component(path "${lib}" PATH)
   get_filename_component(name "${lib}" NAME)
@@ -560,15 +561,28 @@ foreach(lib ${LIBGEODECOMP_LINK_LIBRARIES})
   endif()
 
   if (path)
-    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -L${path} -Wl,-rpath,${path}")
+    set(postfix "-L${path} -Wl,-rpath,${path}")
+    set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} ${postfix}")
+    set(LIVE_LINK_FLAGS      "${LIVE_LINK_FLAGS}      ${postfix}")
   endif()
-  set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} -l${name}")
+
+  set(postfix "-l${name}")
+  set(INSTALLER_LINK_FLAGS "${INSTALLER_LINK_FLAGS} ${postfix}")
+  set(LIVE_LINK_FLAGS      "${LIVE_LINK_FLAGS}      ${postfix}")
 endforeach()
 
 set(PKG_CONFIG_INCLUDE_FLAGS "")
 foreach(dir ${INSTALL_INCLUDE_DIRECTORIES})
   set(PKG_CONFIG_INCLUDE_FLAGS "${PKG_CONFIG_INCLUDE_FLAGS} -I${dir}")
 endforeach()
+
+file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}-live.pc" "
+Name: LibGeoDecomp
+Description: High performance stencil code library
+Version: ${PACKAGE_VERSION}
+Libs: ${LIVE_LINK_FLAGS}
+Cflags: -I${CMAKE_CURRENT_SOURCE_DIR} ${PKG_CONFIG_INCLUDE_FLAGS}
+")
 
 file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}.pc" "
 Name: LibGeoDecomp
