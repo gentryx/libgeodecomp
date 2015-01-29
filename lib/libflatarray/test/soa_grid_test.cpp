@@ -65,22 +65,19 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
 class MemberAccessChecker1
 {
 public:
-    MemberAccessChecker1(int dimX, int dimY, int dimZ) :
-	dimX(dimX),
-	dimY(dimY),
-	dimZ(dimZ)
+    MemberAccessChecker1(int dim_x, int dim_y, int dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
     {}
 
     template<typename ACCESSOR>
     void operator()(ACCESSOR& accessor) const
     {
-        for (long z = 0; z < dimZ; ++z) {
-            for (long y = 0; y < dimY; ++y) {
-                for (long x = 0; x < dimX; ++x) {
-                    accessor.index =
-                        ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
-                        ACCESSOR::DIM_X * y +
-                        x;
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    accessor.index = accessor.gen_index(x, y, z);
 
                     double actualA = accessor.template access_member<double, 0>();
                     bool actualB = accessor.template access_member<bool, 1>();
@@ -96,30 +93,27 @@ public:
     }
 
 private:
-    long dimX;
-    long dimY;
-    long dimZ;
+    long dim_x;
+    long dim_y;
+    long dim_z;
 };
 
 class MemberAccessChecker2
 {
 public:
-    MemberAccessChecker2(long dimX, long dimY, long dimZ) :
-	dimX(dimX),
-	dimY(dimY),
-	dimZ(dimZ)
+    MemberAccessChecker2(long dim_x, long dim_y, long dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
     {}
 
     template<typename ACCESSOR>
     void operator()(ACCESSOR& accessor) const
     {
-        for (long z = 0; z < dimZ; ++z) {
-            for (long y = 0; y < dimY; ++y) {
-                for (long x = 0; x < dimX; ++x) {
-                    accessor.index =
-                        ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
-                        ACCESSOR::DIM_X * y +
-                        x;
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    accessor.index = accessor.gen_index(x, y, z);
 
                     double actualA = *reinterpret_cast<double*>(accessor.access_member(8, 0));
                     bool actualB = *reinterpret_cast<bool*>(accessor.access_member(1, 8));
@@ -135,26 +129,26 @@ public:
     }
 
 private:
-    long dimX;
-    long dimY;
-    long dimZ;
+    long dim_x;
+    long dim_y;
+    long dim_z;
 };
 
 class InvertTemperature
 {
 public:
-    InvertTemperature(long dimX, long dimY, long dimZ) :
-	dimX(dimX),
-	dimY(dimY),
-	dimZ(dimZ)
+    InvertTemperature(long dim_x, long dim_y, long dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
     {}
 
     template<typename ACCESSOR>
     void operator()(ACCESSOR& accessor) const
     {
-        for (long z = 0; z < dimZ; ++z) {
-            for (long y = 0; y < dimY; ++y) {
-                for (long x = 0; x < dimX; ++x) {
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
                     accessor.index =
                         ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
                         ACCESSOR::DIM_X * y +
@@ -166,9 +160,9 @@ public:
     }
 
 private:
-    long dimX;
-    long dimY;
-    long dimZ;
+    long dim_x;
+    long dim_y;
+    long dim_z;
 };
 
 class CopyTemperatureNativeStyle
@@ -262,27 +256,199 @@ private:
     long endZ;
 };
 
+class ArrayParticle
+{
+public:
+    ArrayParticle(
+        float mass = 0,
+        float charge = 0,
+        float pos0 = 0,
+        float pos1 = 0,
+        float pos2 = 0,
+        float vel0 = 0,
+        float vel1 = 0,
+        float vel2 = 0,
+        int state = 0) :
+        mass(mass),
+        charge(charge),
+        state(state)
+    {
+        pos[0] = pos0;
+        pos[1] = pos1;
+        pos[2] = pos2;
+        vel[0] = vel0;
+        vel[1] = vel1;
+        vel[2] = vel2;
+    }
+
+    float mass;
+    float charge;
+    float pos[3];
+    float vel[3];
+    int state;
+};
+
+LIBFLATARRAY_REGISTER_SOA(
+    ArrayParticle,
+    ((float)(mass))
+    ((float)(charge))
+    ((float)(pos)(3))
+    ((float)(vel)(3))
+    ((int)(state)))
+
+class MultiplyVelocityArrayStyle
+{
+public:
+    MultiplyVelocityArrayStyle(long dim_x, long dim_y, long dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
+    {}
+
+    template<typename ACCESSOR>
+    void operator()(ACCESSOR& accessor) const
+    {
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    accessor.index =
+                        ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
+                        ACCESSOR::DIM_X * y +
+                        x;
+                    for (int i = 0; i < 3; ++i) {
+                        accessor.vel()[i] *= (3 + i);
+                    }
+		}
+	    }
+	}
+    }
+
+private:
+    long dim_x;
+    long dim_y;
+    long dim_z;
+};
+
+class MultiplyVelocityFunctionStyle
+{
+public:
+    MultiplyVelocityFunctionStyle(long dim_x, long dim_y, long dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
+    {}
+
+    template<typename ACCESSOR>
+    void operator()(ACCESSOR& accessor) const
+    {
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    accessor.index =
+                        ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
+                        ACCESSOR::DIM_X * y +
+                        x;
+                    accessor.template vel<0>() *= 6;
+                    accessor.template vel<1>() *= 7;
+                    accessor.template vel<2>() *= 8;
+		}
+	    }
+	}
+    }
+
+private:
+    long dim_x;
+    long dim_y;
+    long dim_z;
+};
+
+class OffsetPositionArrayStyle
+{
+public:
+    OffsetPositionArrayStyle(long dim_x, long dim_y, long dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
+    {}
+
+    template<typename ACCESSOR>
+    void operator()(ACCESSOR& accessor) const
+    {
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    accessor.index =
+                        ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
+                        ACCESSOR::DIM_X * y +
+                        x;
+		    accessor.pos()[0] += x * 1000;
+		    accessor.pos()[1] += y * 2000;
+		    accessor.pos()[2] += z * 3000;
+		}
+	    }
+	}
+    }
+
+private:
+    long dim_x;
+    long dim_y;
+    long dim_z;
+};
+
+class OffsetPositionFunctionStyle
+{
+public:
+    OffsetPositionFunctionStyle(long dim_x, long dim_y, long dim_z) :
+	dim_x(dim_x),
+	dim_y(dim_y),
+	dim_z(dim_z)
+    {}
+
+    template<typename ACCESSOR>
+    void operator()(ACCESSOR& accessor) const
+    {
+        for (long z = 0; z < dim_z; ++z) {
+            for (long y = 0; y < dim_y; ++y) {
+                for (long x = 0; x < dim_x; ++x) {
+                    accessor.index =
+                        ACCESSOR::DIM_X * ACCESSOR::DIM_Y * z +
+                        ACCESSOR::DIM_X * y +
+                        x;
+		    accessor.template pos<0>() += x * 1001;
+		    accessor.template pos<1>() += y * 2001;
+		    accessor.template pos<2>() += z * 3001;
+		}
+	    }
+	}
+    }
+
+private:
+    long dim_x;
+    long dim_y;
+    long dim_z;
+};
+
 namespace LibFlatArray {
 
 ADD_TEST(TestSingleGetSet)
 {
-    long dimX = 5;
-    long dimY = 3;
-    long dimZ = 10;
+    long dim_x = 5;
+    long dim_y = 3;
+    long dim_z = 10;
 
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
                 grid.set(x, y, z, HeatedGameOfLifeCell(temp, false));
 	    }
 	}
     }
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
 		HeatedGameOfLifeCell cell(temp, false);
 		BOOST_TEST(cell == grid.get(x, y, z));
@@ -293,31 +459,31 @@ ADD_TEST(TestSingleGetSet)
 
 ADD_TEST(TestArrayGetSet)
 {
-    long dimX = 15;
-    long dimY = 3;
-    long dimZ = 10;
+    long dim_x = 15;
+    long dim_y = 3;
+    long dim_z = 10;
 
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-	    std::vector<HeatedGameOfLifeCell> cells(dimX);
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+	    std::vector<HeatedGameOfLifeCell> cells(dim_x);
 
-	    for (long x = 0; x < dimX; ++x) {
+	    for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
 		cells[x] = HeatedGameOfLifeCell(temp, false);
 	    }
 
-	    grid.set(0, y, z, &cells[0], dimX);
+	    grid.set(0, y, z, &cells[0], dim_x);
 	}
     }
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-	    std::vector<HeatedGameOfLifeCell> cells(dimX);
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+	    std::vector<HeatedGameOfLifeCell> cells(dim_x);
 
-	    grid.get(0, y, z, &cells[0], dimX);
+	    grid.get(0, y, z, &cells[0], dim_x);
 
-            for (long x = 0; x < dimX; ++x) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
 		HeatedGameOfLifeCell cell(temp, false);
 		BOOST_TEST(cell == cells[x]);
@@ -328,45 +494,44 @@ ADD_TEST(TestArrayGetSet)
 
 ADD_TEST(TestResizeAndByteSize)
 {
-    long dimX = 2;
-    long dimY = 2;
-    long dimZ = 2;
+    long dim_x = 2;
+    long dim_y = 2;
+    long dim_z = 2;
     long cellSize = 9; // 1 double, 1 bool
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
     BOOST_TEST(grid.byte_size() == (32 * 32 * 32 * cellSize));
 
-    dimX = 10;
-    dimY = 20;
-    dimZ = 40;
-    grid.resize(dimX, dimY, dimZ);
-    grid.set(dimX - 1, dimY - 1, dimZ - 1, HeatedGameOfLifeCell(4711));
-    BOOST_TEST(grid.get(dimX - 1, dimY - 1, dimZ - 1) == HeatedGameOfLifeCell(4711));
+    dim_x = 10;
+    dim_y = 20;
+    dim_z = 40;
+    grid.resize(dim_x, dim_y, dim_z);
+    grid.set(dim_x - 1, dim_y - 1, dim_z - 1, HeatedGameOfLifeCell(4711));
+    BOOST_TEST(grid.get(dim_x - 1, dim_y - 1, dim_z - 1) == HeatedGameOfLifeCell(4711));
     BOOST_TEST(grid.byte_size() == (64 * 64 * 64 * cellSize));
 
 }
 
 ADD_TEST(TestSingleCallback)
 {
-    long dimX = 5;
-    long dimY = 3;
-    long dimZ = 10;
+    long dim_x = 5;
+    long dim_y = 3;
+    long dim_z = 10;
 
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
                 grid.set(x, y, z, HeatedGameOfLifeCell(temp, false));
 	    }
 	}
     }
 
-    long index = 0;
-    grid.callback(InvertTemperature(dimX, dimY, dimZ));
+    grid.callback(InvertTemperature(dim_x, dim_y, dim_z));
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
 		HeatedGameOfLifeCell cell(-temp, false);
 		BOOST_TEST(cell == grid.get(x, y, z));
@@ -378,28 +543,28 @@ ADD_TEST(TestSingleCallback)
 template<typename COPY_FUNCTOR>
 void testDualCallback()
 {
-    long dimX = 5;
-    long dimY = 3;
-    long dimZ = 2;
+    long dim_x = 5;
+    long dim_y = 3;
+    long dim_z = 2;
 
-    soa_grid<HeatedGameOfLifeCell> gridOld(dimX, dimY, dimZ);
-    soa_grid<HeatedGameOfLifeCell> gridNew(dimX, dimY, dimZ);
+    soa_grid<HeatedGameOfLifeCell> gridOld(dim_x, dim_y, dim_z);
+    soa_grid<HeatedGameOfLifeCell> gridNew(dim_x, dim_y, dim_z);
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
                 gridOld.set(x, y, z, HeatedGameOfLifeCell(temp, false));
             }
         }
     }
 
-    COPY_FUNCTOR functor(0, 0, 0, dimX, dimY, dimZ);
+    COPY_FUNCTOR functor(0, 0, 0, dim_x, dim_y, dim_z);
     gridOld.callback(&gridNew, functor);
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
                 HeatedGameOfLifeCell cell = gridOld.get(x, y, z);
 		double temp = z * 100 + y + x * 0.01;
 		BOOST_TEST(cell.temperature == temp);
@@ -437,25 +602,25 @@ ADD_TEST(TestAssignment)
 
 ADD_TEST(TestSwap)
 {
-    long dimX = 5;
-    long dimY = 3;
-    long dimZ = 2;
+    long dim_x = 5;
+    long dim_y = 3;
+    long dim_z = 2;
 
-    soa_grid<HeatedGameOfLifeCell> gridOld(dimX, dimY, dimZ);
-    soa_grid<HeatedGameOfLifeCell> gridNew(dimX, dimY, dimZ);
+    soa_grid<HeatedGameOfLifeCell> gridOld(dim_x, dim_y, dim_z);
+    soa_grid<HeatedGameOfLifeCell> gridNew(dim_x, dim_y, dim_z);
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
                 gridOld.set(x, y, z, HeatedGameOfLifeCell(4711));
                 gridNew.set(x, y, z, HeatedGameOfLifeCell(666));
             }
         }
     }
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
 		BOOST_TEST(gridOld.get(x, y, z).temperature == 4711);
 		BOOST_TEST(gridNew.get(x, y, z).temperature == 666);
@@ -465,9 +630,9 @@ ADD_TEST(TestSwap)
 
     std::swap(gridOld, gridNew);
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
 		double temp = z * 100 + y + x * 0.01;
 		BOOST_TEST(gridOld.get(x, y, z).temperature == 666);
 		BOOST_TEST(gridNew.get(x, y, z).temperature == 4711);
@@ -478,11 +643,11 @@ ADD_TEST(TestSwap)
 
 ADD_TEST(TestCopyArrayIn)
 {
-    long dimX = 5;
-    long dimY = 3;
-    long dimZ = 2;
+    long dim_x = 5;
+    long dim_y = 3;
+    long dim_z = 2;
 
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
     std::vector<char> store0(1024);
     double *store1 = reinterpret_cast<double*>(&store0[0]);
     store1[ 0] = 47.11;
@@ -509,13 +674,13 @@ ADD_TEST(TestCopyArrayIn)
 
 ADD_TEST(TestCopyArrayOut)
 {
-    long dimX = 5;
-    long dimY = 3;
-    long dimZ = 2;
+    long dim_x = 5;
+    long dim_y = 3;
+    long dim_z = 2;
 
     std::vector<char> store0(1024);
     double *store1 = reinterpret_cast<double*>(&store0[0]);
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
 
     grid.set(0, 0, 0, HeatedGameOfLifeCell(47.11, true));
     grid.set(1, 0, 0, HeatedGameOfLifeCell(1.234, false));
@@ -552,15 +717,15 @@ ADD_TEST(TestAggregatedMemberSize)
 
 ADD_TEST(TestAccessMember)
 {
-    long dimX = 15;
-    long dimY = 13;
-    long dimZ = 19;
+    long dim_x = 15;
+    long dim_y = 13;
+    long dim_z = 19;
 
-    soa_grid<HeatedGameOfLifeCell> grid(dimX, dimY, dimZ);
+    soa_grid<HeatedGameOfLifeCell> grid(dim_x, dim_y, dim_z);
 
-    for (long z = 0; z < dimZ; ++z) {
-        for (long y = 0; y < dimY; ++y) {
-            for (long x = 0; x < dimX; ++x) {
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
                 grid.set(x, y, z, HeatedGameOfLifeCell(x * 1000.0 + y + z * 0.001, (x % 2 == 0)));
             }
         }
@@ -571,8 +736,8 @@ ADD_TEST(TestAccessMember)
     BOOST_TEST(grid.get(11, 12, 13).alive == false);
     BOOST_TEST(grid.get(12, 12, 13).alive == true);
 
-    grid.callback(MemberAccessChecker1(dimX, dimY, dimZ));
-    grid.callback(MemberAccessChecker2(dimX, dimY, dimZ));
+    grid.callback(MemberAccessChecker1(dim_x, dim_y, dim_z));
+    grid.callback(MemberAccessChecker2(dim_x, dim_y, dim_z));
 }
 
 ADD_TEST(TestMemberPtrToOffset)
@@ -583,6 +748,113 @@ ADD_TEST(TestMemberPtrToOffset)
     BOOST_TEST( 0 == member_ptr_to_offset()(&CellWithMultipleMembersOfSameType::memberA));
     BOOST_TEST( 8 == member_ptr_to_offset()(&CellWithMultipleMembersOfSameType::memberB));
     BOOST_TEST(16 == member_ptr_to_offset()(CellWithMultipleMembersOfSameType::getMemberCPointer()));
+}
+
+ADD_TEST(TestArrayMember)
+{
+    long dim_x = 40;
+    long dim_y = 15;
+    long dim_z = 10;
+
+    soa_grid<ArrayParticle> grid(dim_x, dim_y, dim_z);
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
+                ArrayParticle particle(
+                    0.1 + x,
+                    0.2 + x,
+                    0.3 + x,
+                    0.4 + y,
+                    0.5 + z,
+                    0.6 + x,
+                    0.7 + y,
+                    0.9 + z,
+                    x + y + z);
+                grid.set(x, y, z, particle);
+            }
+        }
+    }
+
+    grid.callback(MultiplyVelocityArrayStyle(dim_x, dim_y, dim_z));
+
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
+                ArrayParticle particle = grid.get(x, y, z);
+
+                BOOST_TEST(particle.mass   == float(0.1 + x));
+                BOOST_TEST(particle.charge == (float(0.2 + x)));
+                BOOST_TEST(particle.pos[0] == (float(0.3 + x)));
+                BOOST_TEST(particle.pos[1] == (float(0.4 + y)));
+                BOOST_TEST(particle.pos[2] == (float(0.5 + z)));
+                BOOST_TEST(particle.vel[0] == (float(0.6 + x) * 3));
+                BOOST_TEST(particle.vel[1] == (float(0.7 + y) * 4));
+                BOOST_TEST(particle.vel[2] == (float(0.9 + z) * 5));
+                BOOST_TEST(particle.state  == int(x + y + z));
+            }
+        }
+    }
+
+    grid.callback(MultiplyVelocityFunctionStyle(dim_x, dim_y, dim_z));
+
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
+                ArrayParticle particle = grid.get(x, y, z);
+
+                BOOST_TEST(particle.mass   == float(0.1 + x));
+                BOOST_TEST(particle.charge == (float(0.2 + x)));
+                BOOST_TEST(particle.pos[0] == (float(0.3 + x)));
+                BOOST_TEST(particle.pos[1] == (float(0.4 + y)));
+                BOOST_TEST(particle.pos[2] == (float(0.5 + z)));
+                BOOST_TEST(particle.vel[0] == (float(0.6 + x) * 3 * 6));
+                BOOST_TEST(particle.vel[1] == (float(0.7 + y) * 4 * 7));
+                BOOST_TEST(particle.vel[2] == (float(0.9 + z) * 5 * 8));
+                BOOST_TEST(particle.state  == int(x + y + z));
+            }
+        }
+    }
+
+    grid.callback(OffsetPositionArrayStyle(dim_x, dim_y, dim_z));
+
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
+                ArrayParticle particle = grid.get(x, y, z);
+
+                BOOST_TEST(particle.mass   == float(0.1 + x));
+                BOOST_TEST(particle.charge == (float(0.2 + x)));
+                BOOST_TEST(particle.pos[0] == (float(0.3 + x) + x * 1000));
+                BOOST_TEST(particle.pos[1] == (float(0.4 + y) + y * 2000));
+                BOOST_TEST(particle.pos[2] == (float(0.5 + z) + z * 3000));
+                BOOST_TEST(particle.vel[0] == (float(0.6 + x) * 3 * 6));
+                BOOST_TEST(particle.vel[1] == (float(0.7 + y) * 4 * 7));
+                BOOST_TEST(particle.vel[2] == (float(0.9 + z) * 5 * 8));
+                BOOST_TEST(particle.state  == int(x + y + z));
+            }
+        }
+    }
+
+    grid.callback(OffsetPositionFunctionStyle(dim_x, dim_y, dim_z));
+
+    for (long z = 0; z < dim_z; ++z) {
+        for (long y = 0; y < dim_y; ++y) {
+            for (long x = 0; x < dim_x; ++x) {
+                ArrayParticle particle = grid.get(x, y, z);
+
+                BOOST_TEST(particle.mass   == float(0.1 + x));
+                BOOST_TEST(particle.charge == (float(0.2 + x)));
+                BOOST_TEST(particle.pos[0] == (float(0.3 + x) + x * 1000 + x * 1001));
+                BOOST_TEST(particle.pos[1] == (float(0.4 + y) + y * 2000 + y * 2001));
+                BOOST_TEST(particle.pos[2] == (float(0.5 + z) + z * 3000 + z * 3001));
+                BOOST_TEST(particle.vel[0] == (float(0.6 + x) * 3 * 6));
+                BOOST_TEST(particle.vel[1] == (float(0.7 + y) * 4 * 7));
+                BOOST_TEST(particle.vel[2] == (float(0.9 + z) * 5 * 8));
+                BOOST_TEST(particle.state  == int(x + y + z));
+            }
+        }
+    }
+
 }
 
 }
