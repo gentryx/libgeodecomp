@@ -103,7 +103,7 @@ private:
             }
         }
 
-        notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
@@ -122,7 +122,7 @@ private:
             ParentType::GHOST,
             globalNanoStep());
         notifyPatchAccepters(
-            innerSet(0),
+            innerSet(ghostZoneWidth()),
             ParentType::INNER_SET,
             globalNanoStep());
 
@@ -187,7 +187,7 @@ private:
                 ++curGlobalNanoStep;
             }
 
-            notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep);
+            notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST, curGlobalNanoStep);
         }
 
         {

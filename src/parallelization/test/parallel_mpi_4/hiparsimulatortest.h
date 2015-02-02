@@ -20,6 +20,49 @@ using namespace LibGeoDecomp;
 using namespace HiParSimulator;
 
 namespace LibGeoDecomp {
+
+// fixme: use this writer in simulator verification tests in simulation factory
+class AccumulatingWriter : public Clonable<ParallelWriter<TestCell<2> >, AccumulatingWriter>
+{
+public:
+    using ParallelWriter::GridType;
+    using ParallelWriter::RegionType;
+    using ParallelWriter::CoordType;
+    using ParallelWriter::region;
+
+    AccumulatingWriter() :
+        Clonable("", 1),
+        cellsSeen(0)
+    {}
+
+    virtual void setRegion(const Region<Topology::DIM>& newRegion)
+    {
+        Clonable<ParallelWriter<TestCell<2> >, AccumulatingWriter>::setRegion(newRegion);
+        domainSize = newRegion.size();
+    }
+
+    virtual void stepFinished(
+        const GridType& grid,
+        const RegionType& validRegion,
+        const CoordType& globalDimensions,
+        unsigned step,
+        WriterEvent event,
+        std::size_t rank,
+        bool lastCall)
+    {
+        cellsSeen += validRegion.size();
+
+        if (lastCall) {
+            TS_ASSERT_EQUALS(cellsSeen, domainSize);
+            cellsSeen = 0;
+        }
+    }
+
+private:
+    std::size_t domainSize;
+    std::size_t cellsSeen;
+};
+
 namespace HiParSimulator {
 
 class HiParSimulatorTest : public CxxTest::TestSuite
@@ -221,7 +264,6 @@ public:
         sim->run();
     }
 
-
     void testNonPoDCell()
     {
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
@@ -236,6 +278,12 @@ public:
         sim.run();
 
 #endif
+    }
+
+    void testIO( )
+    {
+        sim->addWriter(new AccumulatingWriter());
+        sim->run();
     }
 
 private:
