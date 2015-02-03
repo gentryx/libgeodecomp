@@ -25,13 +25,13 @@ namespace LibGeoDecomp {
 class AccumulatingWriter : public Clonable<ParallelWriter<TestCell<2> >, AccumulatingWriter>
 {
 public:
-    using ParallelWriter::GridType;
-    using ParallelWriter::RegionType;
-    using ParallelWriter::CoordType;
-    using ParallelWriter::region;
+    using ParallelWriter<TestCell<2> >::GridType;
+    using ParallelWriter<TestCell<2> >::RegionType;
+    using ParallelWriter<TestCell<2> >::CoordType;
+    using ParallelWriter<TestCell<2> >::region;
 
     AccumulatingWriter() :
-        Clonable("", 1),
+        Clonable<ParallelWriter<TestCell<2> >, AccumulatingWriter>("", 1),
         cellsSeen(0)
     {}
 
