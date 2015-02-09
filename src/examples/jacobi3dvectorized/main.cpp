@@ -32,7 +32,7 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, const int nanoStep)
     {
-        LIBFLATARRAY_LOOP_PEELER(double, 8, long, x, endX, updateLineImplmentation, target, hood, nanoStep);
+        LIBFLATARRAY_LOOP_PEELER(double, 16, long, x, endX, updateLineImplmentation, target, hood, nanoStep);
     }
 
     template<typename DOUBLE, typename NEIGHBORHOOD>
@@ -45,7 +45,7 @@ public:
     {
         DOUBLE oneSixth = 1.0 / 6.0;
 
-        for (; *x < (endX - DOUBLE::ARITY + 1); x += DOUBLE::ARITY) {
+        for (; *x < (endX - DOUBLE::ARITY + 1); *x += DOUBLE::ARITY) {
             DOUBLE buf = &hood[FixedCoord< 0,  0, -1>()].temp;
             buf += &hood[FixedCoord< 0,  -1,  0>()].temp;
             buf += &hood[FixedCoord<-1,   0,  0>()].temp;
