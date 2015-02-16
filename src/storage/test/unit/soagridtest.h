@@ -1,7 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/geometry/stencils.h>
+#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/soagrid.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
 
 using namespace LibGeoDecomp;
 
@@ -55,6 +57,47 @@ public:
 
 LIBFLATARRAY_REGISTER_SOA(MyDummyCell, ((int)(x))((double)(y))((char)(z)) )
 
+class CellWithArrayMember
+{
+public:
+    class API :
+          public LibGeoDecomp::APITraits::HasFixedCoordsOnlyUpdate,
+          public LibGeoDecomp::APITraits::HasUpdateLineX,
+          public LibGeoDecomp::APITraits::HasStencil<LibGeoDecomp::Stencils::Moore<3, 1> >,
+          public LibGeoDecomp::APITraits::HasOpaqueMPIDataType<CellWithArrayMember>,
+          public LibGeoDecomp::APITraits::HasTorusTopology<3>,
+          public LibGeoDecomp::APITraits::HasSoA
+    {};
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, const int nanoStep)
+    {}
+
+    template<typename HOOD_OLD, typename HOOD_NEW>
+    static void updateLineX(HOOD_OLD& hoodOld, int indexEnd,
+                            HOOD_NEW& hoodNew, int /* nanoStep */)
+    {}
+
+    double temp[40];
+};
+
+
+LIBFLATARRAY_REGISTER_SOA(
+    CellWithArrayMember,
+    ((double)(temp)(40)) )
+
+class VoidInitializer : public SimpleInitializer<CellWithArrayMember>
+{
+public:
+    VoidInitializer() :
+        SimpleInitializer<CellWithArrayMember>(Coord<3>(30, 20, 10), 10)
+    {}
+
+    virtual void grid(LibGeoDecomp::GridBase<Cell, 3> *ret)
+    {
+        // intentionally left empty
+    }
+};
 
 namespace LibGeoDecomp {
 
@@ -466,6 +509,12 @@ public:
             TS_ASSERT_EQUALS(grid.get(*i).pos, expected);
             ++counter;
         }
+    }
+
+    void testSimulatorCreation()
+    {
+        SerialSimulator<CellWithArrayMember> sim(new VoidInitializer());
+        sim.run();
     }
 };
 
