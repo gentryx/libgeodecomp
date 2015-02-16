@@ -35,9 +35,9 @@ public:
     }
 
     Region<DIM> getRegion(const std::size_t node) const
-        {
-            return regions[node];
-        }
+    {
+        return regions[node];
+    }
 
 private:
     Coord<DIM> origin;
@@ -59,19 +59,12 @@ private:
 
         SCOTCH_Strat *straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
-        /*SCOTCH_stratGraphMapBuild(straptr,SCOTCH_STRATRECURSIVE,vertnbrArch,0);
-          if(SCOTCH_stratGraphMap(straptr,"d")!=0){
-          std::cerr << "stratGraphMap failed" << std::endl;
-          }*/
-
 
         SCOTCH_Graph grafdat;
         SCOTCH_graphInit (&grafdat);
 
-        SCOTCH_Num edgenbrGra = 2 * (dimensions[0] *
-                                     (dimensions[1] - 1) +
-                                     (dimensions[0] - 1) *
-                                     dimensions[1]);
+        SCOTCH_Num edgenbrGra = 2 * (dimensions[0] * (dimensions[1] - 1) +
+                                     (dimensions[0] - 1) * dimensions[1]);
 
         if(DIM == 3){
             edgenbrGra = edgenbrGra
@@ -86,49 +79,48 @@ private:
         verttabGra = new SCOTCH_Num[cellNbr + 1];
         edgetabGra = new SCOTCH_Num[edgenbrGra];
 
-        int pointer = 0;
+        int index = 0;
         int xyArea = dimensions[0] * dimensions[1];
         for(int i = 0; i < cellNbr; ++i){
-            verttabGra[i] = pointer;
+            verttabGra[i] = index;
             if(i%dimensions[0] != 0){
-                edgetabGra[pointer] = i-1;
-                pointer++;
+                edgetabGra[index] = i-1;
+                index++;
             }
             if(i%dimensions[0] != (dimensions[0] - 1)){
-                edgetabGra[pointer] = i+1;
-                pointer++;
+                edgetabGra[index] = i+1;
+                index++;
             }
             if(!((i % xyArea) < dimensions[0])){
-                edgetabGra[pointer] = i - dimensions[0];
-                pointer++;
+                edgetabGra[index] = i - dimensions[0];
+                index++;
             }
             if(!((i % xyArea) >= dimensions[0] * (dimensions[1] - 1))){
-                edgetabGra[pointer] = i + dimensions[0];
-                pointer++;
+                edgetabGra[index] = i + dimensions[0];
+                index++;
             }
             if(DIM == 3 && i >= (dimensions[0] * dimensions[1])){
-                edgetabGra[pointer] = i - (dimensions[0] * dimensions[1]);
-                pointer++;
+                edgetabGra[index] = i - (dimensions[0] * dimensions[1]);
+                index++;
             }
             if(DIM == 3 && i < (dimensions[0] * dimensions[1]) * (dimensions[2] - 1)){
-                edgetabGra[pointer] = i + (dimensions[0] * dimensions[1]);
-                pointer++;
+                edgetabGra[index] = i + (dimensions[0] * dimensions[1]);
+                index++;
             }
         }
-        verttabGra[cellNbr] = pointer;
+        verttabGra[cellNbr] = index;
 
         SCOTCH_graphBuild(
-                          &grafdat,
-                          0,
-                          cellNbr,
-                          verttabGra,
-                          verttabGra +1,
-                          NULL,
-                          NULL,
-                          edgenbrGra,
-                          edgetabGra,
-                          NULL
-                          );
+            &grafdat,
+            0,
+            cellNbr,
+            verttabGra,
+            verttabGra +1,
+            NULL,
+            NULL,
+            edgenbrGra,
+            edgetabGra,
+            NULL);
 
         SCOTCH_graphMap(&grafdat, &arch, straptr, indices);
 
