@@ -107,7 +107,6 @@ public:
 
         if (boundingBox().inBounds(center)) {
             neighborhood.push_back( std::make_pair( *this[center], -1 ) );
-
             std::vector< std::pair<int, VALUE_TYPE> > neighbor =
                 matrices[0].getRow(center.x());
 

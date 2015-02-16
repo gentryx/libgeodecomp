@@ -83,8 +83,7 @@ public:
         for (int element = 0;
              element < rowLength[row];
              ++element, index += C) {
-            vec.push_back( std::pair<int, VALUETYPE>
-                            (column[index], values[index]) );
+            vec.push_back(std::pair<int, VALUETYPE>(column[index], values[index]) );
         }
 
         return vec;

@@ -151,7 +151,7 @@ public:
 
     void testAdjacencyMatrix(){
         const int DIM = 128;
-        UnstructuredGrid<int, 2, double, 4, 1> *grid = 
+        UnstructuredGrid<int, 2, double, 4, 1> *grid =
             new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
         std::map<Coord<2>,int> adjacenc0;
         std::map<Coord<2>,int> adjacenc1;
