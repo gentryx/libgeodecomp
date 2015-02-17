@@ -64,7 +64,9 @@ public:
           public LibGeoDecomp::APITraits::HasFixedCoordsOnlyUpdate,
           public LibGeoDecomp::APITraits::HasUpdateLineX,
           public LibGeoDecomp::APITraits::HasStencil<LibGeoDecomp::Stencils::Moore<3, 1> >,
+#ifdef LIBGEODECOMP_WITH_MPI
           public LibGeoDecomp::APITraits::HasOpaqueMPIDataType<CellWithArrayMember>,
+#endif
           public LibGeoDecomp::APITraits::HasTorusTopology<3>,
           public LibGeoDecomp::APITraits::HasSoA
     {};
