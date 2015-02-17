@@ -20,35 +20,18 @@ public:
 
         virtual double operator()(const SimulationParameters& params) = 0;
     };
-    virtual ~Optimizer()
-    {};
+
     explicit Optimizer(SimulationParameters params) :
         params(params),
         fitness(std::numeric_limits<double>::min())
     {}
 
-    virtual SimulationParameters operator()(int maxSteps, Evaluator& eval)
-    {
-        // fixme: this implementation is stupid!
+    virtual ~Optimizer()
+    {}
 
-        for (int i = 0; i < maxSteps; ++i) {
-            SimulationParameters newParams = params;
-            for (std::size_t i = 0; i < params.size(); ++i) {
-                newParams[i] += ((rand() % 11) - 5) * newParams[i].getGranularity();
-            }
+    virtual SimulationParameters operator()(int maxSteps, Evaluator& eval) = 0;
 
-            double newFitness = eval(newParams);
-
-            if (newFitness > fitness) {
-                params = newParams;
-                fitness = newFitness;
-            }
-        }
-
-        return params;
-    }
-
-    double getFitness()
+    double getFitness() const
     {
         return fitness;
     }
@@ -58,7 +41,7 @@ protected:
     double fitness;
 };
 
-}//namespace LibGeoDecomp
+}
 
 
 
