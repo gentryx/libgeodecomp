@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
 
 namespace LibGeoDecomp {
@@ -66,6 +67,34 @@ public:
      * finally update to t=8.
      */
     virtual unsigned maxSteps() const = 0;
+
+    Coord<DIM> normalize(const Coord<DIM>& coord) const
+    {
+        return Topology::normalize(coord, gridDimensions());
+    }
+
+    /**
+     * This seeds the pseudo random number generator (see class
+     * Random) with a seed unique to the coordinate. This is handy if
+     * an Initializer needs to randomize parameters, but requires
+     * these random values to be identical if multiple processes are
+     * initializing the same logical grid cell.
+     */
+    void seedRNG(const Coord<DIM>& coord) const
+    {
+        // normalization is mandatory as coordinates may lie outside
+        // of the grid's bounding box if a model is using periodic
+        // boundary conditions (e.g. the torus topology). example: a
+        // node is assigned a rectangular region from (0,0) to
+        // (50,50). with periodic boundary conditions, its left outer
+        // ghost zone would be on the x-coordinate -1, ranging from -1
+        // to 51 on the y-axis. the value -1 would then be wrapped
+        // around thanks to the torus topology, to align with the
+        // grid's dimension.
+        std::size_t index = normalize(coord).toIndex(gridDimensions());
+        Random::seed(index);
+    }
+
 
 };
 

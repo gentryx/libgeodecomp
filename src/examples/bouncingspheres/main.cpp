@@ -304,13 +304,13 @@ public:
         CoordBox<3> box = target->boundingBox();
 
         for (CoordBox<3>::Iterator j = box.begin(); j != box.end(); ++j) {
-            // We use bad pseudo random numbers as we need to ensure
-            // that all cells get initialized the same way on all MPI
-            // nodes. This would be hard with a stateful pseudo random
-            // number generator.
-            double pseudo_rand1 = (j->sum() * 11 % 16 - 8) / 256.0;
-            double pseudo_rand2 = (j->sum() * 31 % 16 - 8) / 256.0;
-            double pseudo_rand3 = (j->sum() * 41 % 16 - 8) / 256.0;
+            // use the Initializer's seeding feature to ensure
+            // consistent initialization of overlapping cells on all
+            // nodes.
+            seedRNG(*j);
+            double pseudo_rand1 = (Random::rand() - 0.5) / 16.0;
+            double pseudo_rand2 = (Random::rand() - 0.5) / 16.0;
+            double pseudo_rand3 = (Random::rand() - 0.5) / 16.0;
 
             FloatCoord<3> center(
                 (j->x() + 0.5) * CONTAINER_DIM,

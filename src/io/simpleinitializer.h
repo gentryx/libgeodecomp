@@ -18,9 +18,6 @@ public:
     typedef typename Initializer<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
 
-    SimpleInitializer()
-    { }
-
     explicit SimpleInitializer(
         const Coord<DIM>& dimensions,
         const unsigned steps = 300) :
