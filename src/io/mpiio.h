@@ -97,7 +97,7 @@ public:
         getLengths<DIM>(&headerLength, &cellLength, mpiDatatype);
         int rank;
         MPI_Comm_rank(comm, &rank);
-        
+
         if (rank == 0) {
             CELL_TYPE cell = grid.getEdge();
             MPI_File_write(file, const_cast<Coord<DIM>*>(&dimensions),
