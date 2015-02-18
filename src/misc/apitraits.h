@@ -480,7 +480,6 @@ public:
         typedef void SupportsMPIDataType;
         typedef void SupportsCustomMPIDataType;
 
-
 #ifdef LIBGEODECOMP_WITH_MPI
         static inline MPI_Datatype getMPIDataType()
         {
