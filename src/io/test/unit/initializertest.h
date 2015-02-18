@@ -17,7 +17,7 @@ class DummyInitializer : public SimpleInitializer<DummyCell>
 {
 public:
     DummyInitializer() :
-        SimpleInitializer(Coord<3>(200, 100, 50), 1000)
+        SimpleInitializer<DummyCell>(Coord<3>(200, 100, 50), 1000)
     {}
 
     void grid(GridBase<DummyCell, 3> *grid)
