@@ -65,8 +65,6 @@ public:
 class CellC
 {
 public:
-    static MPI_Datatype MPIDataType;
-
     class API : public APITraits::HasOpaqueMPIDataType<CellC>
     {};
 
@@ -94,8 +92,30 @@ public:
     char valC;
 };
 
+class CellD
+{
+public:
+    class API : public APITraits::HasOpaqueMPIDataType<CellD>
+    {};
+
+    CellD(char valA) :
+        valA(valA)
+    {}
+
+    bool operator==(const CellD& other) const
+    {
+        return (valA == other.valA);
+    }
+
+    bool operator!=(const CellD& other) const
+    {
+        return !(*this == other);
+    }
+
+    char valA;
+};
+
 MPI_Datatype CellA::MPIDataType = MPI_DATATYPE_NULL;
-MPI_Datatype CellC::MPIDataType = MPI_DATATYPE_NULL;
 
 class APITraitsTest : public CxxTest::TestSuite
 {
@@ -201,6 +221,37 @@ public:
         mpiLayer.recv(&cell2, 0, 1, 4711, t1);
         mpiLayer.wait(4711);
         TS_ASSERT_EQUALS(cell1, cell2);
+    }
+
+    void testMPIDatatypeCreationWithCellCD()
+    {
+        MPI_Datatype t1 = MPI_DATATYPE_NULL;
+        MPI_Datatype t2 = MPI_DATATYPE_NULL;
+        MPILayer mpiLayer;
+
+        t1 = APITraits::SelectMPIDataType<CellC>::value();
+        t2 = APITraits::SelectMPIDataType<CellD>::value();
+        TS_ASSERT_DIFFERS(t1, t2);
+        TS_ASSERT_DIFFERS(t1, MPI_DATATYPE_NULL);
+        TS_ASSERT_DIFFERS(t2, MPI_DATATYPE_NULL);
+
+        CellC cell1(1.23, 45678901234, 5.67);
+        CellC cell2(0, 0, 0);
+        TS_ASSERT_DIFFERS(cell1, cell2);
+
+        mpiLayer.send(&cell1, 0, 1, 4711, t1);
+        mpiLayer.recv(&cell2, 0, 1, 4711, t1);
+        mpiLayer.wait(4711);
+        TS_ASSERT_EQUALS(cell1, cell2);
+
+        CellD cell3('4');
+        CellD cell4('5');
+        TS_ASSERT_DIFFERS(cell3, cell4);
+
+        mpiLayer.send(&cell3, 0, 1, 69, t2);
+        mpiLayer.recv(&cell4, 0, 1, 69, t2);
+        mpiLayer.wait(69);
+        TS_ASSERT_EQUALS(cell3, cell4);
     }
 };
 

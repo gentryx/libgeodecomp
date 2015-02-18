@@ -14,8 +14,6 @@ public:
     class API : public APITraits::HasOpaqueMPIDataType<FooCell>
     {};
 
-    static MPI_Datatype MPIDataType;
-
     double d;
     char c;
     int i;

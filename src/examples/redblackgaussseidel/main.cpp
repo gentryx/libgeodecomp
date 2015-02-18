@@ -26,8 +26,6 @@ public:
         public APITraits::HasOpaqueMPIDataType<Cell>
     {};
 
-    static MPI_Datatype MPIDataType;
-
     inline Cell() :
         temp(0), type(BOUNDARY)
     {}
@@ -68,8 +66,6 @@ public:
     CellType type;
 
 };
-
-MPI_Datatype Cell::MPIDataType = MPI_DATATYPE_NULL;
 
 /**
  * range x=[0;1] y[0;1]

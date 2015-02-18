@@ -482,12 +482,13 @@ public:
 #ifdef LIBGEODECOMP_WITH_MPI
         static inline MPI_Datatype getMPIDataType()
         {
-            if (CELL::MPIDataType == MPI_DATATYPE_NULL) {
-                MPI_Type_contiguous(sizeof(CELL), MPI_CHAR, &CELL::MPIDataType);
-                MPI_Type_commit(&CELL::MPIDataType);
+            static MPI_Datatype datatype = MPI_DATATYPE_NULL;
+            if (datatype == MPI_DATATYPE_NULL) {
+                MPI_Type_contiguous(sizeof(CELL), MPI_CHAR, &datatype);
+                MPI_Type_commit(&datatype);
             }
-            // fixme: use a static data object internal to this function
-            return CELL::MPIDataType;
+
+            return datatype;
         }
 #endif
     };
