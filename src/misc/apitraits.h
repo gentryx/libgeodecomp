@@ -369,7 +369,6 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-#ifdef LIBGEODECOMP_WITH_MPI
     template<typename CELL,
              typename HAS_MPI_DATA_TYPE = void,
              typename MPI_DATA_TYPE_RETRIEVAL = void>
@@ -378,6 +377,7 @@ public:
     public:
     };
 
+#ifdef LIBGEODECOMP_WITH_MPI
     template<typename CELL>
     class SelectMPIDataType<
         CELL,
@@ -400,8 +400,10 @@ public:
     public:
         static inline MPI_Datatype value()
         {
-            return
-                APITraitsHelpers::DefaultMPIDataTypeLookup<typename CELL::API::MPIDataTypeProvider, CELL>::value();
+            return APITraitsHelpers::
+                DefaultMPIDataTypeLookup<
+                typename CELL::API::MPIDataTypeProvider,
+                CELL>::value();
         }
     };
 
@@ -437,6 +439,7 @@ public:
             return CELL::MPIDataType;
         }
     };
+#endif
 
     /**
      * This specifier indicates that some PROVIDER class can deliver
@@ -476,6 +479,7 @@ public:
         typedef void SupportsCustomMPIDataType;
 
 
+#ifdef LIBGEODECOMP_WITH_MPI
         static inline MPI_Datatype getMPIDataType()
         {
             if (CELL::MPIDataType == MPI_DATATYPE_NULL) {
@@ -485,8 +489,8 @@ public:
             // fixme: use a static data object internal to this function
             return CELL::MPIDataType;
         }
-    };
 #endif
+    };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 

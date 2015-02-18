@@ -14,8 +14,11 @@ const double SPHERE_RADIUS = 0.6;
 const double BOUNDARY_DIM  = 3.0;
 const double DELTA_T = 0.01;
 
+class BaseContainer;
+
 class MyAPI :
     public APITraits::HasCubeTopology<3>,
+    public APITraits::HasOpaqueMPIDataType<BaseContainer>,
     public APITraits::HasStencil<Stencils::Moore<3, 1> >,
     public APITraits::HasNanoSteps<2>
 {};
