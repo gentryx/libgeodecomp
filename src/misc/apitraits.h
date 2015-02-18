@@ -464,7 +464,9 @@ public:
     public:
         typedef void SupportsMPIDataType;
         typedef void SupportsPredefinedMPIDataType;
+#ifdef LIBGEODECOMP_WITH_MPI
         typedef Typemaps MPIDataTypeProvider;
+#endif
         typedef BASE_TYPE MPIDataTypeBase;
     };
 
