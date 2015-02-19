@@ -48,7 +48,7 @@ FloatCoord<2> quadrantDim;
 
 
 extern "C"{
-  void avgdepth_(int *numnodes, float depth[], float *avg);
+    void avgdepth_(int *numnodes, float depth[], float *avg);
 }
 
 
@@ -58,11 +58,11 @@ struct neighbor
     std::vector<int> sendNodes;
     std::vector<int> recvNodes;
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & neighborID & sendNodes & recvNodes;
-  }
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & neighborID & sendNodes & recvNodes;
+    }
 
 };
 
@@ -70,11 +70,11 @@ struct neighborTable
 {
     std::vector<neighbor> myNeighbors;
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & myNeighbors;
-  }
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & myNeighbors;
+    }
 
 };
 
@@ -84,23 +84,23 @@ struct ownerTableEntry
     int localID;
     int ownerID;
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & globalID & localID & ownerID;
-  }
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & globalID & localID & ownerID;
+    }
 
 };
 
 struct element
 {
-  std::vector<int> nodeIDs;
+    std::vector<int> nodeIDs;
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & nodeIDs;
-  }
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & nodeIDs;
+    }
 };
 
 
@@ -113,11 +113,11 @@ struct SubNode
     FloatCoord<3> location;
     std::vector<int> neighboringNodes;
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & globalID & localID & alive & lastAlive & location & neighboringNodes;
-  }
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & globalID & localID & alive & lastAlive & location & neighboringNodes;
+    }
 };
 
 
@@ -127,8 +127,8 @@ class DomainCell
 public:
     class API:
         public::APITraits::HasCustomRegularGrid,
-        public::APITraits::HasUnstructuredGrid,
-        public::APITraits::HasPointMesh
+            public::APITraits::HasUnstructuredGrid,
+            public::APITraits::HasPointMesh
     {
     public:
         inline FloatCoord<2> getRegularGridSpacing()
@@ -142,26 +142,26 @@ public:
         }
     };
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes & outputStep;
-    /*
-    LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
-                                        // of the Domain
-    int id; // ID of the domain
-    int alive;
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes & outputStep;
+        /*
+          LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
+          // of the Domain
+          int id; // ID of the domain
+          int alive;
 
-    int outputStep;
+          int outputStep;
 
-    std::vector<int> neighboringNodes;   //IDs of neighboring nodes
-    neighborTable myNeighborTable;
+          std::vector<int> neighboringNodes;   //IDs of neighboring nodes
+          neighborTable myNeighborTable;
 
-    std::map<int,SubNode> localNodes;
-    */
-  }
+          std::map<int,SubNode> localNodes;
+        */
+    }
 
-  DomainCell(const LibGeoDecomp::FloatCoord<2>& center = FloatCoord<2>(), int id = 0, int outputStep = 0) :
+    DomainCell(const LibGeoDecomp::FloatCoord<2>& center = FloatCoord<2>(), int id = 0, int outputStep = 0) :
         center(center), // Coordinates of the center of the domain
         id(id),         // Integer ID of the domain
         outputStep(outputStep)
@@ -176,21 +176,21 @@ public:
         std::vector<SubNode> outgoingNodes;
         DomainCell domainCell = *this;
         for (std::size_t i=0; i<domainCell.myNeighborTable.myNeighbors.size(); i++)
-        {
-            if (domainCell.myNeighborTable.myNeighbors[i].neighborID == domainID)
             {
-                for (std::size_t j=0; j<domainCell.myNeighborTable.myNeighbors[i].sendNodes.size(); j++)
-                {
-                    outgoingNodeIDs.push_back(domainCell.myNeighborTable.myNeighbors[i].sendNodes[j]);
-                }
+                if (domainCell.myNeighborTable.myNeighbors[i].neighborID == domainID)
+                    {
+                        for (std::size_t j=0; j<domainCell.myNeighborTable.myNeighbors[i].sendNodes.size(); j++)
+                            {
+                                outgoingNodeIDs.push_back(domainCell.myNeighborTable.myNeighbors[i].sendNodes[j]);
+                            }
+                    }
+
             }
 
-        }
-
         for (std::size_t i=0; i<outgoingNodeIDs.size(); i++)
-        {
-            outgoingNodes.push_back(domainCell.localNodes[outgoingNodeIDs[i]]);
-        }
+            {
+                outgoingNodes.push_back(domainCell.localNodes[outgoingNodeIDs[i]]);
+            }
 
         return outgoingNodes;
     }
@@ -255,6 +255,7 @@ public:
 
 
 };
+
 // ContainerCell translates between the unstructured grid and the
 // regular grid currently required by LGD
 typedef ContainerCell<DomainCell, 1000> ContainerCellType;
@@ -277,19 +278,14 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 
     std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;
 
-
-
-    if (outputStep == 0)
-    {
+    if (outputStep == 0) {
 
         //Initial Output
         std::ostringstream filename;
         filename << "data/output" << domainID << "." << nanoStep << ".dat";
         std::ofstream file(filename.str().c_str());
-        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-        {
-            if (i->second.globalID != -1)
-            {
+        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
+            if (i->second.globalID != -1) {
                 file << i->second.localID << " ";
                 file << i->second.location[0] << " ";
                 file << i->second.location[1] << " ";
@@ -302,10 +298,8 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     //FORTRAN interface testing
     {
       int numnodes = 0;
-        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-        {
-            if (i->second.globalID != -1)
-            {
+        for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
+            if (i->second.globalID != -1) {
 	      int localID = i->second.localID;
               float xlocation = i->second.location[0];
               float ylocation = i->second.location[1];
@@ -315,13 +309,12 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
         }
       float depth[numnodes];
       int count = 0;
-      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-        {
-	  if (i->second.globalID != -1)
-            {
+      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
+	  if (i->second.globalID != -1) {
 	      depth[count++] = i->second.location[2];
-            }
-        }
+          }
+      }
+
       float avg = 0.0;
       avgdepth_(&numnodes, depth, &avg);
       std::cout << "average depth = " << avg << std::endl;
@@ -353,34 +346,29 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     std::cerr << "\n";
     */
 
-    for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-    {
+    for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
         i->second.lastAlive = i->second.alive;
     }
 
 
     //Exchange boundary values
     //Loop over neighbors
-    for (int i=0; i<numNeighbors; i++)
-    {
+    for (int i=0; i<numNeighbors; i++) {
         std::vector<SubNode> incomingNodes;
         int neighborID = myNeighborTable.myNeighbors[i].neighborID;
         incomingNodes = neighborhood[0][neighborID].getBoundaryNodes(domainID);
 
         // Verify we get the number of nodes we think we should be getting
-        if (incomingNodes.size() != myNeighborTable.myNeighbors[i].recvNodes.size())
-        {
+        if (incomingNodes.size() != myNeighborTable.myNeighbors[i].recvNodes.size()) {
             throw std::runtime_error("boundary node number mismatch!");
         }
 
         // Verify each node has the same location
-        for (int j=0; j<incomingNodes.size(); j++)
-        {
+        for (int j=0; j<incomingNodes.size(); j++) {
             int myLocalID = myNeighborTable.myNeighbors[i].recvNodes[j];
             FloatCoord<3> localCoords = localNodes[myLocalID].location;
             FloatCoord<3> remoteCoords = incomingNodes[j].location;
-            if (localCoords != remoteCoords)
-            {
+            if (localCoords != remoteCoords) {
                 throw std::runtime_error("boundary node location mismatch!");
             }
 
@@ -394,11 +382,9 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 
     //Simple Kernel
     //Loop over local points
-    for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-    {
+    for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
         int my_alive = i->second.lastAlive;
-        if (my_alive == 1)
-        {
+        if (my_alive == 1) {
             //In this kernel, if the cell was alive previously, it
             //will die the next timestep.
             my_alive = 0;
@@ -411,8 +397,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 //                std::cerr << " " << i->second.neighboringNodes[j];
            }
 //            std::cerr << ", sum = " << sum << std::endl;
-            if (sum > 0)
-            {
+            if (sum > 0) {
                 my_alive = 1;
             }
         }
@@ -424,22 +409,17 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     std::ostringstream filename;
     filename << "data/output" << domainID << "." << outputStep+1 << ".dat";
     std::ofstream file(filename.str().c_str());
-    for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
-    {
-        if (i->second.globalID != -1)
-        {
+    for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
+        if (i->second.globalID != -1) {
             file << i->second.localID << " ";
             file << i->second.location[0] << " ";
             file << i->second.location[1] << " ";
             file << i->second.alive << std::endl;
         }
     }
+
     file.close();
     outputStep++;
-
-
-
-
 }
 
 
@@ -452,13 +432,11 @@ public:
 
     ADCIRCInitializer(const std::string& meshDir = "", const int steps = 0) :
 	SimpleInitializer<ContainerCellType>(Coord<2>(2, 2), steps),
-	meshDir(meshDir)
-    {
+	meshDir(meshDir) {
         determineGridDimensions();
     }
 
-    virtual void grid(GridType *grid)
-    {
+    virtual void grid(GridType *grid) {
         std::ifstream fort80File;
 
         int numberOfDomains;
@@ -484,7 +462,7 @@ public:
 
 
         // piece together domain node cells:
-        for (int i=0; i< numberOfDomains; i++){
+        for (int i=0; i< numberOfDomains; i++) {
             neighborTable myNeighborTable;
             std::ifstream fort18File;
             int numberOfNeighbors=0;
@@ -509,7 +487,7 @@ public:
 
             // Load neighboringDomains with myNeighborTables
             std::vector<int> neighbors;
-            for (int j=0; j<numberOfNeighbors; j++){
+            for (int j=0; j<numberOfNeighbors; j++) {
                 neighbors.push_back(myNeighborTable.myNeighbors[j].neighborID);
             }
             neighboringDomains.push_back(neighbors);
@@ -519,16 +497,13 @@ public:
 
             node.pushNeighborTable(myNeighborTable);
 
-            for (int j=0; j<numberOfNeighbors; j++)
-            {
+            for (int j=0; j<numberOfNeighbors; j++) {
                 node.pushNeighborNode(neighbors[j]);
             }
 
             // What does this loop do??
-            for (std::size_t j=0; j<ownerTable.size(); j++)
-            {
-                if (ownerTable[j].ownerID == nodeID)
-                {
+            for (std::size_t j=0; j<ownerTable.size(); j++) {
+                if (ownerTable[j].ownerID == nodeID) {
                     SubNode thissubnode;
                     thissubnode.location = points[ownerTable[j].localID+1]; //FIXME
                     thissubnode.localID = ownerTable[j].localID;
@@ -540,8 +515,7 @@ public:
             std::vector<element> myElements = readElements(fort14File, numberOfElements);
 
             // Loop through all local nodes
-            for (std::size_t j=0; j<points.size(); j++)
-            {
+            for (std::size_t j=0; j<points.size(); j++) {
                 SubNode thissubnode;
                 thissubnode.location = points[j];
                 thissubnode.localID = localIDs[j];
@@ -549,21 +523,17 @@ public:
                 thissubnode.alive = 0;
 
                 // Initial Seed
-                if ( (nodeID == 0) && (thissubnode.localID == 5) )
-                {
+                if ((nodeID == 0) && (thissubnode.localID == 5)) {
                     thissubnode.alive = 1;
                 }
 
 
                 // Loop through all global nodes
-                for (std::size_t k=0; k<ownerTable.size(); k++)
-                {
+                for (std::size_t k=0; k<ownerTable.size(); k++) {
                     // If the global node is owned by the current domain,
-                    if (nodeID == ownerTable[k].ownerID)
-                    {
+                    if (nodeID == ownerTable[k].ownerID) {
                         //Then
-                        if (localIDs[j] == ownerTable[k].localID)
-                        {
+                        if (localIDs[j] == ownerTable[k].localID) {
                             thissubnode.globalID = ownerTable[k].globalID;
                         }
                     }
@@ -573,31 +543,25 @@ public:
 
             //Assemble local linking information
             //Loop over all Elements
-            for (std::size_t j=0; j<myElements.size(); j++)
-            {
+            for (std::size_t j=0; j<myElements.size(); j++) {
                 //std::cerr << "elementid = " << j << std::endl;
                 //Loop over nodes associated with the element
-                for (std::size_t k=0; k<myElements[j].nodeIDs.size(); k++)
-                {
+                for (std::size_t k=0; k<myElements[j].nodeIDs.size(); k++) {
                     int outer_nodeID = node.localNodes[myElements[j].nodeIDs[k]].localID;
                     //std::cerr << "outer_nodeID = " << outer_nodeID << std::endl;
-                    for (std::size_t l=0; l<myElements[k].nodeIDs.size(); l++)
-                    {
+                    for (std::size_t l=0; l<myElements[k].nodeIDs.size(); l++) {
                         int inner_nodeID = node.localNodes[myElements[j].nodeIDs[l]].localID;
                         //std::cerr << "inner_nodeID = " << inner_nodeID << std::endl;
                         bool notAlreadyThere = (std::count(
                             node.localNodes[inner_nodeID].neighboringNodes.begin(),
                             node.localNodes[inner_nodeID].neighboringNodes.end(),
                             outer_nodeID) == 0);
-                        if ( (outer_nodeID != inner_nodeID) && notAlreadyThere)
-                        {
+                        if ( (outer_nodeID != inner_nodeID) && notAlreadyThere) {
                             node.localNodes[inner_nodeID].neighboringNodes.push_back(outer_nodeID);
                             //std::cerr << node.localNodes[inner_nodeID].neighboringNodes;
                         }
                     }
-
                 }
-
             }
 
             //Debug
@@ -616,20 +580,15 @@ public:
             ContainerCellType container = grid->get(gridCoord);
             container.insert(node.id, node);
             grid->set(gridCoord, container);
-
-
-
-
         }
-
     }
 
 
-  template <class ARCHIVE>
-  void serialize(ARCHIVE& ar, unsigned)
-  {
-    ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this) & meshDir & maxDiameter & minCoord & maxCoord;
-  }
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+        ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this) & meshDir & maxDiameter & minCoord & maxCoord;
+    }
 
 private:
     std::string meshDir;
@@ -651,7 +610,7 @@ private:
 
         std::vector<FloatCoord<2> > centers;
 
-        for (int i=0; i< numberOfDomains; i++){
+        for (int i=0; i< numberOfDomains; i++) {
             neighborTable myNeighborTable;
             std::ifstream fort18File;
             int numberOfNeighbors=0;
@@ -713,10 +672,11 @@ private:
     FloatCoord<2> determineCenter(std::vector<FloatCoord<3> > *points)
     {
         FloatCoord<2> center;
-        for (std::size_t i=0; i < points->size(); i++){
+        for (std::size_t i=0; i < points->size(); i++) {
             FloatCoord<2> coord(points[0][i][0],points[0][i][1]);
             center += coord;
         }
+
         return center;
     }
 
@@ -729,7 +689,7 @@ private:
         int numPoints = points->size();
         for (int point = 0; point < numPoints; ++point) {
             int numNeighbors = myNeighborTables[point].myNeighbors.size();
-            for (int i=0; i<numNeighbors; i++){
+            for (int i=0; i<numNeighbors; i++) {
                 int neighborID = myNeighborTables[point].myNeighbors[i].neighborID;
                 double dist = getDistance(points[0][point],points[0][neighborID]);
                 maxDiameter = std::max(maxDiameter,dist);
@@ -741,8 +701,8 @@ private:
 
     double getDistance(FloatCoord<2> a, FloatCoord<2> b)
     {
-        FloatCoord<2> c = a-b;
-        return sqrt(c[0]*c[0]+c[1]*c[1]);
+        FloatCoord<2> c = a - b;
+        return sqrt(c[0] * c[0] + c[1] * c[1]);
     }
 
     void openfort80File(std::ifstream& meshFile)
@@ -751,7 +711,7 @@ private:
         meshFileName.append("/fort.80");
         meshFile.open(meshFileName.c_str());
         if (!meshFile) {
-            throw std::runtime_error("could not open fort.80 file "+meshFileName);
+            throw std::runtime_error("could not open fort.80 file " + meshFileName);
         }
     }
 
@@ -845,30 +805,32 @@ private:
         neighborTable myNeighborTable;
         int numNeighbors;
         std::string buffer(1024, ' ');
-        while (buffer != "COMM")
-        {
+        while (buffer != "COMM") {
             meshFile >> buffer;
         }
         meshFile >> buffer; // PE
             if (buffer != "PE"){
-                throw std::runtime_error("buffer does not match!");}
+                throw std::runtime_error("buffer does not match!");
+            }
         meshFile >> numNeighbors;
 
-        for (int i=0; i<numNeighbors; i++){
+        for (int i=0; i<numNeighbors; i++) {
             neighbor neighbor;
             int numberOfRecvNodes;
             meshFile >> buffer; //RECV
-            if (buffer != "RECV"){
-                throw std::runtime_error("buffer does not match!");}
+            if (buffer != "RECV") {
+                throw std::runtime_error("buffer does not match!");
+            }
             meshFile >> buffer; //PE
-            if (buffer != "PE"){
-                throw std::runtime_error("buffer does not match!");}
+            if (buffer != "PE") {
+                throw std::runtime_error("buffer does not match!");
+            }
             meshFile >> neighbor.neighborID;
             meshFile >> numberOfRecvNodes;
             std::getline(meshFile, buffer);//discard rest of the line
 
             //Assemble arrays of nodes to be received
-            for (int j=0; j<numberOfRecvNodes; j++){
+            for (int j=0; j<numberOfRecvNodes; j++) {
                 int receiveNode;
                 meshFile >> receiveNode;
                 neighbor.recvNodes.push_back(receiveNode);
@@ -877,27 +839,28 @@ private:
             myNeighborTable.myNeighbors.push_back(neighbor);
         }
 
-        for (int i=0; i<numNeighbors; i++){
+        for (int i=0; i<numNeighbors; i++) {
             int neighbor;
             int numberOfSendNodes;
             meshFile >> buffer; //SEND
             if (buffer != "SEND"){
-                throw std::runtime_error("buffer does not match!");}
+                throw std::runtime_error("buffer does not match!");
+            }
             meshFile >> buffer; //PE
             if (buffer != "PE"){
-                throw std::runtime_error("buffer does not match!");}
+                throw std::runtime_error("buffer does not match!");
+            }
             meshFile >> neighbor;
             meshFile >> numberOfSendNodes;
             std::getline(meshFile, buffer);//discard rest of the line
             //Assemble arrays of nodes to be sent
-            for (int j=0; j<numberOfSendNodes; j++){
+            for (int j=0; j<numberOfSendNodes; j++) {
                 int sendNode;
                 meshFile >> sendNode;
                 myNeighborTable.myNeighbors[i].sendNodes.push_back(sendNode);
             }
             std::getline(meshFile, buffer);//discard rest of the line
         }
-
 
         return myNeighborTable;
     }
@@ -993,26 +956,20 @@ private:
 
 typedef
 HpxSimulator::HpxSimulator<ContainerCellType, ZCurvePartition<2> >
-//HpxSimulator::HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> >
 SimulatorType;
 
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
-						SimulatorType,
-						DomainCellSimulator
-)
+    SimulatorType,
+    DomainCellSimulator)
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
-				    SimulatorType,
-				    DomainCellSimulator
-				    )
-//BOOST_CLASS_EXPORT(ADCIRCInitializer);
-//BOOST_CLASS_EXPORT(DomainCell);
+    SimulatorType,
+    DomainCellSimulator)
 
 BOOST_CLASS_EXPORT_GUID(ADCIRCInitializer, "ADCIRCInitializer");
 BOOST_CLASS_EXPORT_GUID(DomainCell, "DomainCell");
 
 void runSimulation()
 {
-
     // TODO: figure out what the stuff below is
     Coord<2> dim(3, 2);
     std::size_t numCells = 100;
@@ -1042,11 +999,11 @@ void runSimulation()
     ADCIRCInitializer *init = new ADCIRCInitializer(prunedDirname, steps);
 
     SimulatorType sim(
-		      init,
-		      1, //overcommitFactor
-		      new TracingBalancer(new OozeBalancer()),
-		      10, //balancingPeriod
-		      1 // ghostZoneWidth
+        init,
+        1, //overcommitFactor
+        new TracingBalancer(new OozeBalancer()),
+        10, //balancingPeriod
+        1 // ghostZoneWidth
 		      );
 
     sim.run();
@@ -1054,12 +1011,12 @@ void runSimulation()
 
 int hpx_main()
 {
-  runSimulation();
+    runSimulation();
 
-  return hpx::finalize();
+    return hpx::finalize();
 }
 
 int main(int argc, char *argv[])
 {
-  return hpx::init(argc, argv);
+    return hpx::init(argc, argv);
 }
