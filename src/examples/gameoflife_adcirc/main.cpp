@@ -450,7 +450,7 @@ public:
     typedef GridBase<ContainerCellType, 2> GridType;
     using SimpleInitializer<ContainerCellType>::dimensions;
 
-    ADCIRCInitializer(const std::string& meshDir, const int steps) :
+    ADCIRCInitializer(const std::string& meshDir = "", const int steps = 0) :
 	SimpleInitializer<ContainerCellType>(Coord<2>(2, 2), steps),
 	meshDir(meshDir)
     {
@@ -630,8 +630,6 @@ public:
   {
     ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this) & meshDir & maxDiameter & minCoord & maxCoord;
   }
-
-
 
 private:
     std::string meshDir;
