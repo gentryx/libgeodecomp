@@ -52,8 +52,8 @@ public:
 
         CoordBox<DIM> box = grid.boundingBox();
         GridType localGrid(box);
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            localGrid[*i] = grid.get(*i);
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            grid.get(*i, &localGrid[(*i).origin]);
         }
 
         grids[step].paste(grid, validRegion);

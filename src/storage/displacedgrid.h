@@ -148,9 +148,7 @@ public:
     inline void paste(const GridBase<CELL_TYPE, DIM>& grid, const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            for (Coord<DIM> c = i->origin; c.x() < i->endX; ++c.x()) {
-                (*this)[c] = grid.get(c);
-            }
+            grid.get(*i, &(*this)[i->origin]);
         }
     }
 

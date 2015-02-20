@@ -54,12 +54,7 @@ public:
             std::vector<CELL_TYPE> vec(length);
 
             MPI_File_read(file, &vec[0], length, mpiDatatype, MPI_STATUS_IGNORE);
-
-            Coord<DIM> c = i->origin;
-            for (int index = 0; index < length; ++index) {
-                grid->set(c, vec[index]);
-                ++c.x();
-            }
+            grid->set(*i, &vec[0]);
         }
 
         MPI_File_close(&file);
@@ -127,12 +122,8 @@ public:
 
             int length = i->endX - i->origin.x();
             std::vector<CELL_TYPE> vec(length);
+            grid.get(*i, &vec[0]);
 
-            Coord<DIM> c = i->origin;
-            for (int index = 0; index < length; ++index) {
-                vec[index] = grid.get(c);
-                ++c.x();
-            }
             MPI_File_write(file, &vec[0], length, mpiDatatype, MPI_STATUS_IGNORE);
         }
 

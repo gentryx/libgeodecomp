@@ -119,7 +119,6 @@ public:
     virtual ~GridBase()
     {}
 
-    // fixme: use functions for getting/setting streaks of cells in mpiio.h, writers, steerers, mpilayer...
     virtual void set(const Coord<DIM>&, const CELL&) = 0;
     virtual void set(const Streak<DIM>&, const CELL*) = 0;
     virtual CELL get(const Coord<DIM>&) const = 0;
