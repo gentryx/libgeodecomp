@@ -144,11 +144,11 @@ public:
         archive & object.c;
     }
 
-    template<typename ARCHIVE, typename CELL_TYPE, typename CONVERTER>
+    template<typename ARCHIVE, typename CELL_TYPE>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>& object, const unsigned /*version*/)
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, HpxWriterCollector<CELL_TYPE, CONVERTER > > >(object);
+        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, HpxWriterCollector<CELL_TYPE > > >(object);
         archive & object.sink;
     }
 
@@ -371,8 +371,8 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const uns
     Serialization::serialize(archive, object, version);
 }
 
-template<class ARCHIVE, typename CELL_TYPE, typename CONVERTER>
-void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE, CONVERTER>& object, const unsigned version)
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }

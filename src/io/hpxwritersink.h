@@ -17,15 +17,14 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
-// fixme: remove CONVERTER argument: no one is using it, plus this is a Selector/Filter's job
-template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
+template<typename CELL_TYPE>
 class HpxWriterSink
 {
 public:
     friend class boost::serialization::access;
 
-    typedef HpxWriterSinkServer<CELL_TYPE, CONVERTER> ComponentType;
-    typedef typename CONVERTER::CellType CellType;
+    typedef HpxWriterSinkServer<CELL_TYPE> ComponentType;
+    typedef CELL_TYPE CellType;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename DistributedSimulator<CellType>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;
@@ -143,8 +142,8 @@ public:
 
         for (typename Region<Topology::DIM>::Iterator i = validRegion.begin();
              i != validRegion.end(); ++i) {
-            // drop CONVERTER and use streak-wise get()
-            *dest = CONVERTER()(grid.get(*i), globalDimensions, step, rank);
+            // fixme: use streak-wise get()
+            *dest = grid.get(*i);
             ++dest;
         }
 

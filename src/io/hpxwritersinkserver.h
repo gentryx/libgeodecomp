@@ -17,35 +17,14 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
-// fixme: can we kill this?
-template <typename CELL_TYPE>
-class IdentityConverter
+template<typename CELL_TYPE>
+class HpxWriterSinkServer :
+        public hpx::components::managed_component_base<HpxWriterSinkServer<CELL_TYPE> >
 {
+private:
+    class RegionInfo;
 public:
     typedef CELL_TYPE CellType;
-    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
-
-    const CellType& operator()(
-        const CellType& cell,
-        const Coord<Topology::DIM>& globalDimensions,
-        unsigned step,
-        std::size_t rank)
-    {
-        return cell;
-    }
-};
-
-template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
-class HpxWriterSinkServer
-  : public hpx::components::managed_component_base<
-        HpxWriterSinkServer<CELL_TYPE, CONVERTER>
-    >
-{
-
-    class RegionInfo;
-
-public:
-    typedef typename CONVERTER::CellType CellType;
     typedef typename APITraits::SelectTopology<CellType>::Value Topology;
     static const int DIM = Topology::DIM;
     typedef DisplacedGrid<CellType, Topology> GridType;

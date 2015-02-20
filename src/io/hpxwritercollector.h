@@ -3,7 +3,7 @@
 
 namespace LibGeoDecomp {
 
-template<typename CELL_TYPE, typename CONVERTER>
+template<typename CELL_TYPE>
 class HpxWriterCollector;
 
 }
@@ -109,9 +109,8 @@ class HpxWriterCollector;
 
 namespace LibGeoDecomp {
 
-// fixme: remove CONVERTER argument: no one is using it, plus this is a Selector/Filter's job
-template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
-class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE, CONVERTER> >
+template<typename CELL_TYPE>
+class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >
 {
 public:
     friend class Serialization;
@@ -127,10 +126,10 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::RegionType RegionType;
     typedef typename ParallelWriter<CELL_TYPE>::CoordType CoordType;
 
-    typedef HpxWriterSink<CELL_TYPE, CONVERTER> SinkType;
+    typedef HpxWriterSink<CELL_TYPE> SinkType;
 
     explicit HpxWriterCollector(const SinkType& sink = SinkType()) :
-        Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE, CONVERTER> >(
+        Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >(
             "",
             sink.getPeriod()),
         sink(sink)
