@@ -25,9 +25,9 @@ public:
     {
     public:
         SoARegionUpdateHelper(
-            const Region<DIM>& region,
-            const Coord<DIM>& sourceOffset,
-            const Coord<DIM>& targetOffset,
+            const Region<DIM> *region,
+            Coord<DIM>& sourceOffset,
+            Coord<DIM>& targetOffset,
             const unsigned nanoStep) :
             region(region),
             sourceOffset(sourceOffset),
@@ -42,8 +42,8 @@ public:
             LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& hoodOld,
             LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& hoodNew) const
         {
-            for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                 i != region.endStreak();
+            for (typename Region<DIM>::StreakIterator i = region->beginStreak();
+                 i != region->endStreak();
                  ++i) {
                 Streak<DIM> relativeSourceStreak(
                     i->origin + sourceOffset,
@@ -75,10 +75,9 @@ public:
         }
 
     private:
-        const Region<DIM>& region;
-        // fixme: this breaks easily if c-tor params were just temporary variables
-        const Coord<DIM>& sourceOffset;
-        const Coord<DIM>& targetOffset;
+        const Region<DIM> *region;
+        Coord<DIM>& sourceOffset;
+        Coord<DIM>& targetOffset;
         const unsigned nanoStep;
     };
 
@@ -105,7 +104,7 @@ public:
 
         gridOld.callback(
             gridNew,
-            SoARegionUpdateHelper(region, realSourceOffset, realTargetOffset, nanoStep));
+            SoARegionUpdateHelper(&region, realSourceOffset, realTargetOffset, nanoStep));
     }
 
     template<typename GRID1, typename GRID2, typename ANY_API>

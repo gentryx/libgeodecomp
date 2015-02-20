@@ -1013,7 +1013,7 @@ public:
                 typedef UpdateFunctorHelpers::Selector<JacobiCellStreakUpdate>::SoARegionUpdateHelper Updater;
 
                 Coord<3> offset(1, 1, 1);
-                Updater updater(region, offset, offset, 0);
+                Updater updater(&region, offset, offset, 0);
                 gridNew->callback(gridOld, updater);
                 std::swap(gridOld, gridNew);
             }
