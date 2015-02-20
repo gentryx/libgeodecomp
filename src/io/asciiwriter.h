@@ -16,11 +16,9 @@ namespace LibGeoDecomp {
 /**
  * An output plugin for writing text files. Uses the same selector
  * infrastucture as the BOVWriter.
- *
- * fixme: actually use selector here as advertised
  */
-template<typename CELL_TYPE, typename ATTRIBUTE_SELECTOR>
-class ASCIIWriter : public Clonable<Writer<CELL_TYPE>, ASCIIWriter<CELL_TYPE, ATTRIBUTE_SELECTOR> >
+template<typename CELL_TYPE>
+class ASCIIWriter : public Clonable<Writer<CELL_TYPE>, ASCIIWriter<CELL_TYPE> >
 {
 public:
     friend class ASCIIWriterTest;
@@ -30,11 +28,21 @@ public:
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
 
+    template<typename MEMBER>
     explicit ASCIIWriter(
         const std::string& prefix,
+        MEMBER CELL_TYPE:: *memberPointer,
         const unsigned period = 1) :
-        Clonable<Writer<CELL_TYPE>, ASCIIWriter<CELL_TYPE, ATTRIBUTE_SELECTOR> >(prefix, period)
-    {}
+        Clonable<Writer<CELL_TYPE>, ASCIIWriter<CELL_TYPE> >(prefix, period)
+    {
+        FileDumpingFilter<CELL_TYPE, MEMBER, char> *dumpingFilter =
+            new FileDumpingFilter<CELL_TYPE, MEMBER, char>();
+        filter = dumpingFilter;
+        selector = Selector<CELL_TYPE>(
+            memberPointer,
+            "unused member name",
+            boost::shared_ptr<Filter<CELL_TYPE, MEMBER, char> >(dumpingFilter));
+    }
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
     {
@@ -43,23 +51,26 @@ public:
         }
 
         std::ostringstream filename;
-        filename << prefix << "." << std::setfill('0') << std::setw(4)
-                 << step << ".ascii";
+        filename << prefix << "." << std::setfill('0') << std::setw(4) << step << ".ascii";
         std::ofstream outfile(filename.str().c_str());
         if (!outfile) {
             throw FileOpenException(filename.str());
         }
+        filter->setFile(&outfile);
 
         CoordBox<DIM> box = grid.boundingBox();
-        for (typename CoordBox<DIM>::Iterator i = box.begin(); i != box.end(); ++i) {
-            if ((*i)[0] == 0) {
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            if ((*i).origin[0] == 0) {
                 for (int d = 0; d < DIM; ++d) {
-                    if ((*i)[d] == 0) {
+                    if ((*i).origin[d] == 0) {
                         outfile << "\n";
                     }
                 }
             }
-            outfile << ATTRIBUTE_SELECTOR()(grid.get(*i)) << " ";
+
+            Region<DIM> region;
+            region << *i;
+            grid.saveMemberUnchecked(0, selector, region);
         }
 
         if (!outfile.good()) {
@@ -67,6 +78,60 @@ public:
         }
         outfile.close();
     }
+
+private:
+    class OutputDelegate
+    {
+    public:
+        OutputDelegate() :
+            outfile(0)
+        {}
+
+        void setFile(std::ofstream *newOutfile)
+        {
+            outfile = newOutfile;
+        }
+
+    protected:
+        std::ofstream *outfile;
+    };
+
+    template<typename CELL, typename MEMBER, typename EXTERNAL>
+    class FileDumpingFilter : public Filter<CELL, MEMBER, EXTERNAL>, public OutputDelegate
+    {
+    public:
+        using OutputDelegate::outfile;
+
+        void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+        {
+            throw std::logic_error("this filter is meant for output only");
+        }
+
+        void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL */*target*/)
+        {
+            for (const MEMBER *i = first; i != last; ++i) {
+                *outfile << *i << " ";
+            }
+        }
+
+        void copyMemberInImpl(
+            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+        {
+            throw std::logic_error("this filter is meant for output only");
+        }
+
+        void copyMemberOutImpl(
+            const CELL *source, EXTERNAL */*target*/, int num, MEMBER CELL:: *memberPointer)
+        {
+            for (int i = 0; i < num; ++i) {
+                *outfile << source[i].*memberPointer << " ";
+            }
+        }
+    };
+
+    OutputDelegate *filter;
+    Selector<CELL_TYPE> selector;
+
 };
 
 }
