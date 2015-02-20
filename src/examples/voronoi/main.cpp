@@ -26,7 +26,11 @@ public:
         }
     };
 
-    explicit SimpleCell(const COORD<2>& center = COORD<2>(), const int id = 0, const double temperature = 0, const double influx = 0) :
+    explicit SimpleCell(
+        const COORD<2>& center = COORD<2>(),
+        const int id = 0,
+        const double temperature = 0,
+        const double influx = 0) :
         center(center),
         id(id),
         temperature(temperature),
@@ -147,6 +151,7 @@ public:
             ContainerCellType cell = grid->get(*i);
             cell.clear();
             grid->set(*i, cell);
+
             if (*i == Coord<2>(0, 0)) {
                 // add a single cell with an influx of 1. this will
                 // make the whole system heat up over time.
@@ -163,7 +168,12 @@ private:
     std::size_t numCells;
     int counter;
 
-    void addHeater(GridType *grid, const Coord<2>& coord, const FloatCoord<2>& center, double temp, double influx)
+    void addHeater(
+        GridType *grid,
+        const Coord<2>& coord,
+        const FloatCoord<2>& center,
+        const double temp,
+        const double influx)
     {
         ContainerCellType cell = grid->get(coord);
         int id = counter++;

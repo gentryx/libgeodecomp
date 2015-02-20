@@ -369,7 +369,7 @@ public:
                                                 HOOD(0, 1)->contagiousFlag))));
 
         if (sublevel.size()) {
-            for (int i = 0; i < sublevel[0].size(); ++i) {
+            for (std::size_t i = 0; i < sublevel[0].size(); ++i) {
                 sublevel[0][i].actualUpdate(hood);
             }
         } else {
