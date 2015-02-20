@@ -109,6 +109,7 @@ class HpxWriterCollector;
 
 namespace LibGeoDecomp {
 
+// fixme: remove CONVERTER argument: no one is using it, plus this is a Selector/Filter's job
 template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE, CONVERTER> >
 {

@@ -17,6 +17,7 @@ namespace LibGeoDecomp {
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
+// fixme: remove CONVERTER argument: no one is using it, plus this is a Selector/Filter's job
 template<typename CELL_TYPE, typename CONVERTER = IdentityConverter<CELL_TYPE> >
 class HpxWriterSink
 {
@@ -142,6 +143,7 @@ public:
 
         for (typename Region<Topology::DIM>::Iterator i = validRegion.begin();
              i != validRegion.end(); ++i) {
+            // drop CONVERTER and use streak-wise get()
             *dest = CONVERTER()(grid.get(*i), globalDimensions, step, rank);
             ++dest;
         }
