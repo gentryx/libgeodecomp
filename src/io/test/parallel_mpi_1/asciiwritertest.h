@@ -19,16 +19,6 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-// fixme: kill this
-class TestValueSelector
-{
-public:
-    inline double operator()(const TestCell<2>& c)
-    {
-        return c.testValue;
-    }
-};
-
 class ASCIIWriterTest : public CxxTest::TestSuite
 {
 public:
@@ -36,11 +26,11 @@ public:
     void setUp()
     {
         tempFile = TempFile::parallel("libGeoDecompTempfile");
-        simulator = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<TestCell<2> >(Coord<2>(2, 3)));
+        simulator = new SerialSimulator<TestCell<2> >(new TestInitializer<TestCell<2> >(Coord<2>(2, 3)));
     }
 
-    void tearDown() {
+    void tearDown()
+    {
         delete simulator;
 
         for (int i = 0; i < 100; i++) {
@@ -53,13 +43,13 @@ public:
     void testWriteASCII()
     {
         simulator->addWriter(
-            new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile));
+            new ASCIIWriter<TestCell<2> >(tempFile, &TestCell<2>::testValue));
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
             std::ostringstream filename;
-            filename << tempFile << "." << std::setfill('0') << std::setw(4)
-                     << i << ".ascii";
+            filename << tempFile << "." << std::setfill('0')
+                     << std::setw(4) << i << ".ascii";
             TS_ASSERT_FILE(filename.str());
         }
 
@@ -79,8 +69,7 @@ public:
     void testWriteASCIIEveryN()
     {
         int period = 2;
-        simulator->addWriter(
-            new ASCIIWriter<TestCell<2>, TestValueSelector>(tempFile, period));
+        simulator->addWriter(new ASCIIWriter<TestCell<2> >(tempFile, &TestCell<2>::testValue, period));
         simulator->run();
 
         for (int i = 0; i <= 3; i++) {
@@ -99,9 +88,10 @@ public:
     {
         std::string path("/non/existent/path/prefix2");
         std::string expectedErrorMessage("Could not open file " + path);
-        ASCIIWriter<TestCell<2>, TestValueSelector> *writer =
-            new ASCIIWriter<TestCell<2>, TestValueSelector>(path);
+
+        ASCIIWriter<TestCell<2> > *writer = new ASCIIWriter<TestCell<2> >(path, &TestCell<2>::testValue);
         simulator->addWriter(writer);
+
         TS_ASSERT_THROWS_ASSERT(
             writer->stepFinished(*simulator->getGrid(), simulator->getStep(), WRITER_INITIALIZED),
             FileOpenException& exception,
