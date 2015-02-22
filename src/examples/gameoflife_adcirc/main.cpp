@@ -38,7 +38,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/image.h>
 
-#include "hull.h"
+#include <libgeodecomp/examples/hull.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;

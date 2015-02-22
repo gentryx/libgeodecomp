@@ -62,7 +62,7 @@ bool PatternOptimizer::reduceStepwidth()
     std::stringstream log;
     log << "Reduce Stepwidth:" << std::endl;
 
-    for (size_t i = 0;i < stepwidth.size(); ++i) {
+    for (std::size_t i = 0;i < stepwidth.size(); ++i) {
         log << "Dimension "<< i << ": " << stepwidth[i];
         if (stepwidth[i] <= minStepwidth[i]) {
             log << " --> " << stepwidth[i] << "; " << std::endl;

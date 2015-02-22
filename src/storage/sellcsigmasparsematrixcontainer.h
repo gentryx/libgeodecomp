@@ -39,7 +39,7 @@ public:
         }
 
         // loop over chunks     TODO parallel omp
-        for(size_t chunk=0; chunk<chunkLength.size(); ++chunk) {
+        for(std::size_t chunk=0; chunk<chunkLength.size(); ++chunk) {
             int offs = chunkOffset[chunk];
             VALUETYPE tmp[C];
 
@@ -94,7 +94,7 @@ public:
      */
     void addPoint(int const row, int const col, VALUETYPE value)
     {
-        if(row < 0 || col < 0 || (size_t)row >= dimension) {
+        if(row < 0 || col < 0 || (std::size_t)row >= dimension) {
             throw std::invalid_argument("row and colum must be >= 0");
         }
 
@@ -212,7 +212,7 @@ public:
             return false;
         }
 
-        for (size_t i=0; i<dimension; ++i) {
+        for (std::size_t i=0; i<dimension; ++i) {
             if (getRow(i) != other.getRow(i)) {
                 return false;
             }
@@ -233,7 +233,7 @@ private:
     std::vector<int>       rowLength;   // = Non Zero Entres in Row
     std::vector<int>       chunkLength; // = Max rowLength in Chunk
     std::vector<int>       chunkOffset; // COffset[i+1]=COffset[i]+CLength[i]*C
-    size_t dimension;                   // = N
+    std::size_t dimension;              // = N
 };
 
 }

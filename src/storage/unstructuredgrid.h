@@ -21,7 +21,7 @@ namespace LibGeoDecomp {
 /**
  * A unstructuredgrid for irregular structures
  */
-template<typename ELEMENT_TYPE, size_t MATRICES=1,
+template<typename ELEMENT_TYPE, std::size_t MATRICES=1,
          typename VALUE_TYPE=double, int C=64, int SIGMA=1>
 class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1>
 {
@@ -38,7 +38,7 @@ public:
         edgeElement(edgeElement),
         dimension(dim)
     {
-        for (size_t i=0; i < MATRICES; ++i) {
+        for (std::size_t i=0; i < MATRICES; ++i) {
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> (dim.x());
         }
@@ -53,7 +53,7 @@ public:
         edgeElement = other.edgeElement;
         dimension = other.dimension;
 
-        for (size_t i=0; i<MATRICES; ++i){
+        for (std::size_t i=0; i<MATRICES; ++i){
             matrices[i] = other.matrices[i];
         }
 
@@ -64,7 +64,7 @@ public:
      * iterator musst be an interator over pair< Coord<2>, VALUE_TYPE >
      */
     template<typename ITERATOR>
-    void setAdjacency(size_t const  matrixID, ITERATOR start,
+    void setAdjacency(std::size_t const  matrixID, ITERATOR start,
                       const ITERATOR end){
         if (matrixID >= MATRICES){
             throw std::invalid_argument("matrixID not available");
@@ -77,7 +77,7 @@ public:
     }
 
     const SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacency(size_t const matrixID) const {
+    getAdjacency(std::size_t const matrixID) const {
         if (matrixID >= MATRICES){
             throw std::invalid_argument("matrixID not available");
         }
@@ -86,7 +86,7 @@ public:
     }
 
     SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacency(size_t const matrixID){
+    getAdjacency(std::size_t const matrixID){
         if (matrixID >= MATRICES){
             throw std::invalid_argument("matrixID not available");
         }
@@ -315,7 +315,7 @@ private:
 
 };
 
-template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
            const LibGeoDecomp::UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid)
