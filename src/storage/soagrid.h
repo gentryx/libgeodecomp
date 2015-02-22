@@ -168,11 +168,9 @@ public:
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
-            std::size_t byteSize = selector.sizeOfMember() * i->length();
-            const char *first = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            const char *last = first + byteSize;
-            selector.copyStreakOut(first, last, currentTarget);
+            const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
 
+            selector.copyStreakOut(data, currentTarget, i->length(), DIM_X * DIM_Y * DIM_Z);
             currentTarget += selector.sizeOfExternal() * i->length();
         }
     }
@@ -211,13 +209,10 @@ public:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
-            std::size_t byteSize = selector.sizeOfExternal() * i->length();
-            const char *first = currentSource;
-            const char *last = currentSource + byteSize;
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakIn(first, last, currentTarget);
+            selector.copyStreakIn(currentSource, currentTarget, i->length(), DIM_X * DIM_Y * DIM_Z);
 
-            currentSource += byteSize;
+            currentSource += selector.sizeOfMember() * selector.arity() * i->length();
         }
     }
 
@@ -232,6 +227,11 @@ private:
 
 }
 
+/**
+ * Grid class which corresponds to DisplacedGrid, but utilizes an
+ * "Struct of Arrays" (SoA) memory layout. This is beneficial for
+ * vectorization.
+ */
 template<typename CELL,
          typename TOPOLOGY = Topologies::Cube<2>::Topology,
          bool TOPOLOGICALLY_CORRECT = false>
@@ -239,6 +239,7 @@ class SoAGrid : public GridBase<CELL, TOPOLOGY::DIM>
 {
 public:
     friend class SoAGridTest;
+    friend class SelectorTest;
 
     const static int DIM = TOPOLOGY::DIM;
     /**

@@ -15,20 +15,28 @@ class DefaultArrayFilter : public ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>
 public:
     friend class Serialization;
 
-    void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+    void copyStreakInImpl(
+        const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
     {
-        // fixme: needs test
-        std::copy(first, last, target);
+        for (std::size_t i = 0; i < num; ++i) {
+            for (std::size_t j = 0; j < ARITY; ++j) {
+                target[j * stride + i] = source[i * ARITY + j];
+            }
+        }
     }
 
-    void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target)
+    void copyStreakOutImpl(
+        const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride)
     {
-        // fixme: needs test
-        std::copy(first, last, target);
+        for (std::size_t i = 0; i < num; ++i) {
+            for (std::size_t j = 0; j < ARITY; ++j) {
+                target[i * ARITY + j] = source[j * stride + i];
+            }
+        }
     }
 
     void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
     {
         copyMemberInImpl(
             source,
@@ -38,9 +46,9 @@ public:
     }
 
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, int num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             std::copy(
                 source + i * ARITY,
                 source + (i + 1) * ARITY,
@@ -49,7 +57,7 @@ public:
     }
 
     void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer)
+        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER CELL:: *memberPointer)
     {
         copyMemberOutImpl(
             source,
@@ -59,9 +67,9 @@ public:
     }
 
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, int num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             std::copy(
                 (source[i].*memberPointer) + 0,
                 (source[i].*memberPointer) + ARITY,

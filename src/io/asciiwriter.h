@@ -102,28 +102,28 @@ private:
     public:
         using OutputDelegate::outfile;
 
-        void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+        void copyStreakInImpl(const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
         {
             throw std::logic_error("this filter is meant for output only");
         }
 
-        void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL */*target*/)
+        void copyStreakOutImpl(const MEMBER *source, EXTERNAL */*target*/, const std::size_t num, const std::size_t stride)
         {
-            for (const MEMBER *i = first; i != last; ++i) {
-                *outfile << *i << " ";
+            for (std::size_t i = 0; i < num; ++i) {
+                *outfile << source[i] << " ";
             }
         }
 
         void copyMemberInImpl(
-            const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+            const EXTERNAL *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
         {
             throw std::logic_error("this filter is meant for output only");
         }
 
         void copyMemberOutImpl(
-            const CELL *source, EXTERNAL */*target*/, int num, MEMBER CELL:: *memberPointer)
+            const CELL *source, EXTERNAL */*target*/, std::size_t num, MEMBER CELL:: *memberPointer)
         {
-            for (int i = 0; i < num; ++i) {
+            for (std::size_t i = 0; i < num; ++i) {
                 *outfile << source[i].*memberPointer << " ";
             }
         }

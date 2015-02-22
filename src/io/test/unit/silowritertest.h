@@ -183,18 +183,18 @@ public:
 class ParticleFilterBase : public Filter<DummyParticle, FloatCoord<2>, double>
 {
 public:
-    void copyStreakInImpl(const double *first, const double *last, FloatCoord<2> *target)
+    void copyStreakInImpl(const double *source, FloatCoord<2> *target, const std::size_t num, const std::size_t stride)
     {
         // left blank as it's not needed in our tests
     }
 
-    void copyStreakOutImpl(const FloatCoord<2> *first, const FloatCoord<2> *last, double *target)
+    void copyStreakOutImpl(const FloatCoord<2> *source, double *target, const std::size_t num, const std::size_t stride)
     {
         // left blank as it's not needed in our tests
     }
 
     void copyMemberInImpl(
-        const double *source, DummyParticle *target, int num, FloatCoord<2> DummyParticle:: *memberPointer)
+        const double *source, DummyParticle *target, std::size_t num, FloatCoord<2> DummyParticle:: *memberPointer)
     {
         // left blank as it's not needed in our tests
     }
@@ -203,9 +203,9 @@ public:
 class ParticleFilterX : public ParticleFilterBase
 {
     void copyMemberOutImpl(
-        const DummyParticle *source, double *target, int num, FloatCoord<2> DummyParticle:: *memberPointer)
+        const DummyParticle *source, double *target, std::size_t num, FloatCoord<2> DummyParticle:: *memberPointer)
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             target[i] = (source[i].*memberPointer)[0];
         }
     }
@@ -214,9 +214,9 @@ class ParticleFilterX : public ParticleFilterBase
 class ParticleFilterY : public ParticleFilterBase
 {
     void copyMemberOutImpl(
-        const DummyParticle *source, double *target, int num, FloatCoord<2> DummyParticle:: *memberPointer)
+        const DummyParticle *source, double *target, std::size_t num, FloatCoord<2> DummyParticle:: *memberPointer)
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             target[i] = (source[i].*memberPointer)[1];
         }
     }

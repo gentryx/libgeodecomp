@@ -22,29 +22,29 @@ public:
         palette(palette)
     {}
 
-    void copyStreakInImpl(const Color *first, const Color *last, MEMBER *target)
+    void copyStreakInImpl(const Color *source, MEMBER *target, const std::size_t num, const std::size_t stride)
     {
         throw std::logic_error("undefined behavior: can only convert members to colors, not the other way around");
     }
 
-    void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, Color *target)
+    void copyStreakOutImpl(const MEMBER *source, Color *target, const std::size_t num, const std::size_t stride)
     {
-        for (const MEMBER *i = first; i != last; ++i) {
-            *target = palette[*i];
+        for (std::size_t i = 0; i < num; ++i) {
+            target[i] = palette[source[i]];
         }
     }
 
     void copyMemberInImpl(
-        const Color *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+        const Color *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
     {
 
         throw std::logic_error("undefined behavior: can only convert cells to colors, not the other way around");
     }
 
     void copyMemberOutImpl(
-        const CELL *source, Color *target, int num, MEMBER CELL:: *memberPointer)
+        const CELL *source, Color *target, std::size_t num, MEMBER CELL:: *memberPointer)
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             target[i] = palette[source[i].*memberPointer];
         }
     }

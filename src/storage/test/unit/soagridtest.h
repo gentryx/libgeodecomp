@@ -71,6 +71,33 @@ public:
           public LibGeoDecomp::APITraits::HasSoA
     {};
 
+    CellWithArrayMember(Coord<3> var0 = Coord<3>(), Coord<3> var1 = Coord<3>(), int var2 = 0, int var3 = 0)
+    {
+        temp[0] = var0[0];
+        temp[1] = var0[1];
+        temp[2] = var0[2];
+        temp[3] = var1[0];
+        temp[4] = var1[1];
+        temp[5] = var1[2];
+        temp[6] = var2;
+        temp[7] = var3;
+
+        for (int i = 8; i < 40; ++i) {
+            temp[i] = -1;
+        }
+    }
+
+    bool operator==(const CellWithArrayMember& other)
+    {
+        for (int i = 8; i < 40; ++i) {
+            if (temp[i] != other.temp[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     template<typename NEIGHBORHOOD>
     void update(const NEIGHBORHOOD& hood, const int nanoStep)
     {}
@@ -328,6 +355,66 @@ public:
 
                     TestCellType2 actual = grid.get(c);
                     TestCellType2 expected(c, dim, 0, testValue);
+
+                    TS_ASSERT_EQUALS(expected, actual);
+                    ++counter;
+                }
+            }
+        }
+    }
+
+    // test load/save region with an array member
+    void testSoA2()
+    {
+        Coord<3> dim(30, 20, 10);
+        SoAGrid<CellWithArrayMember, Topology2> grid(CoordBox<3>(Coord<3>(), dim));
+        Region<3> region;
+        region << Streak<3>(Coord<3>(0,  0, 0), 30)
+               << Streak<3>(Coord<3>(5, 11, 0), 24)
+               << Streak<3>(Coord<3>(2,  5, 5), 20);
+        std::vector<char> buffer(
+            SoAGrid<CellWithArrayMember, Topology2>::AGGREGATED_MEMBER_SIZE *
+            region.size());
+
+        int counter = 444;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    CellWithArrayMember cell(c, dim, 0, counter);
+                    grid.set(c, cell);
+                    ++counter;
+                }
+            }
+        }
+
+        grid.saveRegion(&buffer[0], region);
+
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    CellWithArrayMember cell = grid.get(c);
+                    cell.temp[7] = 666;
+                    grid.set(c, cell);
+                }
+            }
+        }
+
+        grid.loadRegion(&buffer[0], region);
+
+        counter = 444;
+        for (int z = 0; z < dim.z(); ++z) {
+            for (int y = 0; y < dim.y(); ++y) {
+                for (int x = 0; x < dim.x(); ++x) {
+                    Coord<3> c(x, y, z);
+                    double testValue = 666;
+                    if (region.count(c)) {
+                        testValue = counter;
+                    }
+
+                    CellWithArrayMember actual = grid.get(c);
+                    CellWithArrayMember expected(c, dim, 0, testValue);
 
                     TS_ASSERT_EQUALS(expected, actual);
                     ++counter;

@@ -44,12 +44,20 @@ public:
 #endif
     virtual std::string typeName() const = 0;
     virtual int arity() const = 0;
-    virtual void copyStreakIn(const char *first, const char *last, char *target) = 0;
-    virtual void copyStreakOut(const char *first, const char *last, char *target) = 0;
+
+    /**
+     * The stride denotes by how many elements two components of an
+     * array member (vector) are separated. In an SoA layout a member
+     * "double foo[3]" will be stored as a field of foo[0] of size
+     * "stride", followed by all values for "foo[1]" and finally
+     * "foo[2]".
+     */
+    virtual void copyStreakIn( const char *source, char *target, const std::size_t num, const std::size_t stride) = 0;
+    virtual void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride) = 0;
     virtual void copyMemberIn(
-        const char *source, CELL *target, int num, char CELL:: *memberPointer) = 0;
+        const char *source, CELL *target, std::size_t num, char CELL:: *memberPointer) = 0;
     virtual void copyMemberOut(
-        const CELL *source, char *target, int num, char CELL:: *memberPointer) = 0;
+        const CELL *source, char *target, std::size_t num, char CELL:: *memberPointer) = 0;
     virtual bool checkExternalTypeID(const std::type_info& otherID) const = 0;
 };
 

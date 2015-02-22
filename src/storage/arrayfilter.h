@@ -5,6 +5,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This filter can be used to extract/manipulate member arrays (e.g.
+ * double foo[3]) in user-supplied models (cell classes).
+ */
 template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY = 1>
 class ArrayFilter : public FilterBase<CELL>
 {
@@ -43,52 +47,54 @@ public:
     /**
      * Copy a streak of variables to an AoS layout.
      */
-    virtual void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target) = 0;
+    virtual void copyStreakInImpl(const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride) = 0;
 
     /**
      * Extract a steak of members from an AoS layout.
      */
-    virtual void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target) = 0;
+    virtual void copyStreakOutImpl(const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride) = 0;
 
     /**
      * Copy a streak of variables to the members of a streak of cells.
      */
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, int num, MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
+        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
 
     /**
      * Extract a streak of members from a streak of cells.
      */
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, int num, MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
+        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
 
     /**
      * Do not override this function! It is final.
      */
-    void copyStreakIn(const char *first, const char *last, char *target)
+    void copyStreakIn(const char *source, char *target, const std::size_t num, const std::size_t stride)
     {
         copyStreakInImpl(
-            reinterpret_cast<const EXTERNAL*>(first),
-            reinterpret_cast<const EXTERNAL*>(last),
-            reinterpret_cast<MEMBER*>(target));
+            reinterpret_cast<const EXTERNAL*>(source),
+            reinterpret_cast<MEMBER*>(target),
+            num,
+            stride);
     }
 
     /**
      * Do not override this function! It is final.
      */
-    void copyStreakOut(const char *first, const char *last, char *target)
+    void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride)
     {
         copyStreakOutImpl(
-            reinterpret_cast<const MEMBER*>(first),
-            reinterpret_cast<const MEMBER*>(last),
-            reinterpret_cast<EXTERNAL*>(target));
+            reinterpret_cast<const MEMBER*>(source),
+            reinterpret_cast<EXTERNAL*>(target),
+            num,
+            stride);
     }
 
     /**
      * Do not override this function! It is final.
      */
     void copyMemberIn(
-        const char *source, CELL *target, int num, char CELL:: *memberPointer)
+        const char *source, CELL *target, std::size_t num, char CELL:: *memberPointer)
     {
         copyMemberInImpl(
             reinterpret_cast<const EXTERNAL*>(source),
@@ -101,7 +107,7 @@ public:
      * Do not override this function! It is final.
      */
     void copyMemberOut(
-        const CELL *source, char *target, int num, char CELL:: *memberPointer)
+        const CELL *source, char *target, std::size_t num, char CELL:: *memberPointer)
     {
         copyMemberOutImpl(
             source,

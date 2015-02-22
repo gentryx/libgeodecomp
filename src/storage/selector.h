@@ -24,11 +24,23 @@ class APITraits;
 
 namespace SelectorHelpers {
 
+/**
+ * A member's offset is basically the sum of all its preceeding
+ * members (storage-order-wise). To calculate an actuall address, this
+ * offset then needs to be scaled by the number of elements in the
+ * grid/array.
+ */
 template<typename CELL, typename MEMBER>
 class GetMemberOffset
 {
 public:
     int operator()(MEMBER CELL:: *memberPointer, APITraits::TrueType)
+    {
+        return LibFlatArray::member_ptr_to_offset()(memberPointer);
+    }
+
+    template<int ARITY>
+    int operator()(MEMBER (CELL:: *memberPointer)[ARITY], APITraits::TrueType)
     {
         return LibFlatArray::member_ptr_to_offset()(memberPointer);
     }
@@ -222,18 +234,18 @@ public:
      * This is a helper function for writing members of a SoA memory
      * layout.
      */
-    inline void copyStreakIn(const char *first, const char *last, char *target) const
+    inline void copyStreakIn(const char *source, char *target, const std::size_t num, const std::size_t stride) const
     {
-        filter->copyStreakIn(first, last, target);
+        filter->copyStreakIn(source, target, num, stride);
     }
 
     /**
      * This is a helper function for reading members from a SoA memory
      * layout.
      */
-    inline void copyStreakOut(const char *first, const char *last, char *target) const
+    inline void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride) const
     {
-        filter->copyStreakOut(first, last, target);
+        filter->copyStreakOut(source, target, num, stride);
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO

@@ -30,6 +30,10 @@ public:
 class MyOtherDummyCell
 {
 public:
+    class API :
+        public APITraits::HasSoA
+    {};
+
     explicit MyOtherDummyCell(
         const int x = 0,
         const double y1 = 0,
@@ -48,7 +52,8 @@ public:
 
 }
 
-LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell, ((long long)(x))((double)(y))((char)(z)) )
+LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyDummyCell,      ((long long)(x))((double)(y))((char)(z)) )
+LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::MyOtherDummyCell, ((int)(x))((double)(y)(3)) )
 
 namespace LibGeoDecomp {
 
@@ -143,32 +148,32 @@ public:
     class MyDummyFilter : public Filter<MyDummyCell, double, Color>
     {
     public:
-        void copyStreakInImpl(const Color *first, const Color *last, double *target)
+        void copyStreakInImpl(const Color *source, double *target, const std::size_t num, const std::size_t stride)
         {
-            for (const Color *i = first; i != last; ++i, ++target) {
-                *target = i->red() * 2 + 10;
+            for (std::size_t i = 0; i < num; ++i) {
+                target[i] = source[i].red() * 2 + 10;
             }
         }
 
-        void copyStreakOutImpl(const double *first, const double *last, Color *target)
+        void copyStreakOutImpl(const double *source, Color *target, const std::size_t num, const std::size_t stride)
         {
-            for (const double *i = first; i != last; ++i, ++target) {
-                *target = Color(*i, 47, 11);
+            for (std::size_t i = 0; i < num; ++i) {
+                target[i] = Color(source[i], 47, 11);
             }
         }
 
         void copyMemberInImpl(
-            const Color *source, MyDummyCell *target, int num, double MyDummyCell:: *memberPointer)
+            const Color *source, MyDummyCell *target, std::size_t num, double MyDummyCell:: *memberPointer)
         {
-            for (int i = 0; i < num; ++i) {
+            for (std::size_t i = 0; i < num; ++i) {
                 target[i].*memberPointer = source[i].red() * 2 + 10;
             }
         }
 
         void copyMemberOutImpl(
-            const MyDummyCell *source, Color *target, int num, double MyDummyCell:: *memberPointer)
+            const MyDummyCell *source, Color *target, std::size_t num, double MyDummyCell:: *memberPointer)
         {
-            for (int i = 0; i < num; ++i) {
+            for (std::size_t i = 0; i < num; ++i) {
                 target[i] = Color(source[i].*memberPointer, 47, 11);
             }
         }
@@ -297,14 +302,14 @@ public:
         }
 
         std::vector<Color> targetY(20);
-        selectorY.copyStreakOut((char*)&vec[0], (char*)(&vec[0] + 20), (char*)&targetY[0]);
+        selectorY.copyStreakOut((char*)&vec[0], (char*)&targetY[0], 20, 0);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
         }
 
         // test copyStreakIn:
-        selectorY.copyStreakIn((char*)&targetY[0], (char*)(&targetY[0] + 20), (char*)&vec[0]);
+        selectorY.copyStreakIn((char*)&targetY[0], (char*)&vec[0], 20, 0);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(vec[i], (50 + i) * 2 + 10);
@@ -385,7 +390,7 @@ public:
         }
     }
 
-    void testArrayMemberWithDefaultFilter()
+    void testArrayMemberWithDefaultFilter1()
     {
         Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY");
 
@@ -396,7 +401,7 @@ public:
         region << Streak<2>(Coord<2>(5, 0), 15)
                << Streak<2>(Coord<2>(7, 6), 19)
                << Streak<2>(Coord<2>(0, 9), 20);
-        TS_ASSERT_EQUALS(42, region.size());
+        TS_ASSERT_EQUALS(std::size_t(42), region.size());
 
         std::vector<double> targetY(3 * region.size(), -1);
         Grid<MyOtherDummyCell> grid(dim);
@@ -439,6 +444,67 @@ public:
             TS_ASSERT_EQUALS(grid[*i].y[0], j);
             TS_ASSERT_EQUALS(grid[*i].y[1], 12.34);
             TS_ASSERT_EQUALS(grid[*i].y[2], j * 3.0 + 5.0);
+            ++i;
+        }
+    }
+
+    void testArrayMemberWithDefaultFilter2()
+    {
+        Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY");
+
+        Coord<2> dim(20, 10);
+
+        // test copyStreakOut
+        Region<2> region;
+        region << Streak<2>(Coord<2>(5, 0), 15)
+               << Streak<2>(Coord<2>(7, 6), 19)
+               << Streak<2>(Coord<2>(0, 9), 20);
+        TS_ASSERT_EQUALS(42, region.size());
+
+        std::vector<double> targetY(3 * region.size(), -1);
+        SoAGrid<MyOtherDummyCell> grid(CoordBox<2>(Coord<2>(), dim));
+
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                MyOtherDummyCell cell;
+                cell.y[0] = y;
+                cell.y[1] = x;
+                cell.y[2] = 42.23;
+                grid.set(Coord<2>(x, y), cell);
+            }
+        }
+
+        grid.saveMember(&targetY[0], selectorY, region);
+
+        Region<2>::Iterator i = region.begin();
+        for (std::size_t j = 0; j < targetY.size(); j += 3) {
+            TS_ASSERT_EQUALS(targetY[j + 0], i->y());
+            TS_ASSERT_EQUALS(targetY[j + 1], i->x());
+            TS_ASSERT_EQUALS(targetY[j + 2], 42.23);
+            ++i;
+        }
+
+        // test copyStreakIn
+        region.clear();
+        region << Streak<2>(Coord<2>(0, 4), 10)
+               << Streak<2>(Coord<2>(5, 9), 20);
+        TS_ASSERT_EQUALS(25, region.size());
+
+        std::vector<double> sourceY(3 * region.size(), -1);
+        for (std::size_t i = 0; i < region.size(); ++i) {
+            sourceY[i * 3 + 0] = i + 1000;
+            sourceY[i * 3 + 1] = 56.78;
+            sourceY[i * 3 + 2] = i * 7.0 + 555.0;
+        }
+
+        grid.loadMember(&sourceY[0], selectorY, region);
+
+        i = region.begin();
+        for (std::size_t j = 0; j < region.size(); ++j) {
+            MyOtherDummyCell cell = grid.get(*i);
+            TS_ASSERT_EQUALS(cell.y[0], j + 1000);
+            TS_ASSERT_EQUALS(cell.y[1], 56.78);
+            TS_ASSERT_EQUALS(cell.y[2], j * 7.0 + 555.0);
             ++i;
         }
     }

@@ -15,28 +15,32 @@ class DefaultFilter : public Filter<CELL, MEMBER, EXTERNAL>
 public:
     friend class Serialization;
 
-    void copyStreakInImpl(const EXTERNAL *first, const EXTERNAL *last, MEMBER *target)
+    void copyStreakInImpl(
+        const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
     {
-        std::copy(first, last, target);
+        const EXTERNAL *end = source + num;
+        std::copy(source, end, target);
     }
 
-    void copyStreakOutImpl(const MEMBER *first, const MEMBER *last, EXTERNAL *target)
+    void copyStreakOutImpl(
+        const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride)
     {
-        std::copy(first, last, target);
+        const MEMBER *end = source + num;
+        std::copy(source, end, target);
     }
 
     void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, int num, MEMBER CELL:: *memberPointer)
+        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             target[i].*memberPointer = source[i];
         }
     }
 
     void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, int num, MEMBER CELL:: *memberPointer)
+        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER CELL:: *memberPointer)
     {
-        for (int i = 0; i < num; ++i) {
+        for (std::size_t i = 0; i < num; ++i) {
             target[i] = source[i].*memberPointer;
         }
     }
