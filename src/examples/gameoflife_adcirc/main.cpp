@@ -502,10 +502,10 @@ public:
             }
 
             // What does this loop do??
-            for (std::size_t j=0; j<ownerTable.size(); j++) {
+            for (std::size_t j=0; j < ownerTable.size(); ++j) {
                 if (ownerTable[j].ownerID == nodeID) {
                     SubNode thissubnode;
-                    thissubnode.location = points[ownerTable[j].localID+1]; //FIXME
+                    thissubnode.location = points[ownerTable[j].localID+1];
                     thissubnode.localID = ownerTable[j].localID;
                     thissubnode.globalID = ownerTable[j].globalID;
                 }
@@ -529,7 +529,7 @@ public:
 
 
                 // Loop through all global nodes
-                for (std::size_t k=0; k<ownerTable.size(); k++) {
+                for (std::size_t k=0; k < ownerTable.size(); ++k) {
                     // If the global node is owned by the current domain,
                     if (nodeID == ownerTable[k].ownerID) {
                         //Then
