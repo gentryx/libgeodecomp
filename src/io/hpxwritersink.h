@@ -63,9 +63,9 @@ public:
     {
         std::size_t retry = 0;
 
-        while(thisId == hpx::naming::invalid_id) {
+        while (thisId == hpx::naming::invalid_id) {
             hpx::agas::resolve_name_sync(name, thisId);
-            if(retry > 10) {
+            if (retry > 10) {
                 throw std::logic_error("Can't find the Writer Sink name");
             }
             hpx::this_thread::suspend();
@@ -79,10 +79,9 @@ public:
         const std::string& name) :
         period(period)
     {
-        thisId
-            = hpx::components::new_<ComponentType>(
-                hpx::find_here(),
-                numUpdateGroups).get();
+        thisId = hpx::components::new_<ComponentType>(
+            hpx::find_here(),
+            numUpdateGroups).get();
         hpx::agas::register_name(name, thisId);
     }
 
@@ -93,11 +92,10 @@ public:
         period(parallelWriter->getPeriod())
     {
         boost::shared_ptr<ParallelWriter<CellType> > writer(parallelWriter);
-        thisId
-            = hpx::components::new_<ComponentType>(
-                hpx::find_here(),
-                writer,
-                numUpdateGroups).move();
+        thisId = hpx::components::new_<ComponentType>(
+            hpx::find_here(),
+            writer,
+            numUpdateGroups).move();
         if(name != "") {
             hpx::agas::register_name(name, thisId);
         }
@@ -110,12 +108,11 @@ public:
         period(serialWriter->getPeriod())
     {
         boost::shared_ptr<Writer<CellType> > writer(serialWriter);
-        thisId
-            = hpx::components::new_<ComponentType>(
-                hpx::find_here(),
-                writer,
-                numUpdateGroups).get();
-        if(name != "") {
+        thisId = hpx::components::new_<ComponentType>(
+            hpx::find_here(),
+            writer,
+            numUpdateGroups).get();
+        if (name != "") {
             hpx::agas::register_name(name, thisId);
         }
     }
@@ -134,7 +131,9 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        if(validRegion.size() == 0) return;
+        if (validRegion.size() == 0) {
+            return;
+        }
 
         boost::shared_ptr<BufferType> buffer(new BufferType(validRegion.size()));
 
@@ -147,22 +146,20 @@ public:
             ++dest;
         }
 
-        hpx::future<void> stepFinishedFuture
-            = hpx::async<typename ComponentType::StepFinishedAction>(
-                thisId,
-                buffer,
-                validRegion,
-                globalDimensions,
-                step,
-                event,
-                rank,
-                lastCall
-            );
+        hpx::future<void> stepFinishedFuture = hpx::async<typename ComponentType::StepFinishedAction>(
+            thisId,
+            buffer,
+            validRegion,
+            globalDimensions,
+            step,
+            event,
+            rank,
+            lastCall);
 
-        if(stepFinishedFutures.size() > 10) {
+        if (stepFinishedFutures.size() > 10) {
             hpx::wait_any(stepFinishedFutures);
             BOOST_FOREACH(hpx::future<void>& f, stepFinishedFutures) {
-                if(f.is_ready()) {
+                if (f.is_ready()) {
                     f = std::move(stepFinishedFuture);
                     break;
                 }

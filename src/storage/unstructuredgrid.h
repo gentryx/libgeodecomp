@@ -168,7 +168,7 @@ public:
             return false;
         }
 
-        for (int i = 0; i < MATRICES; ++i) {
+        for (std::size_t i = 0; i < MATRICES; ++i) {
             if (matrices[i] != other.matrices[i]) {
                 return false;
             }
