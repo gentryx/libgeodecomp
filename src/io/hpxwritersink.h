@@ -139,11 +139,10 @@ public:
 
         CellType *dest = &(*buffer)[0];
 
-        for (typename Region<Topology::DIM>::Iterator i = validRegion.begin();
-             i != validRegion.end(); ++i) {
-            // fixme: use streak-wise get()
-            *dest = grid.get(*i);
-            ++dest;
+        for (typename Region<Topology::DIM>::StreakIterator i = validRegion.beginStreak();
+             i != validRegion.endStreak(); ++i) {
+            grid.get(*i, dest);
+            dest += i->length();
         }
 
         hpx::future<void> stepFinishedFuture = hpx::async<typename ComponentType::StepFinishedAction>(
