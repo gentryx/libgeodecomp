@@ -169,7 +169,6 @@ public:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
-
             selector.copyStreakOut(data, currentTarget, i->length(), DIM_X * DIM_Y * DIM_Z);
             currentTarget += selector.sizeOfExternal() * i->length();
         }
@@ -212,7 +211,7 @@ public:
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
             selector.copyStreakIn(currentSource, currentTarget, i->length(), DIM_X * DIM_Y * DIM_Z);
 
-            currentSource += selector.sizeOfMember() * selector.arity() * i->length();
+            currentSource += selector.sizeOfExternal() * i->length();
         }
     }
 
