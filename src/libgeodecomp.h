@@ -38,5 +38,7 @@
 #include <libgeodecomp/storage/containercell.h>
 #include <libgeodecomp/storage/fixedarray.h>
 #include <libgeodecomp/storage/multicontainercell.h>
+#include <libgeodecomp/storage/simplearrayfilter.h>
+#include <libgeodecomp/storage/simplefilter.h>
 
 #endif
