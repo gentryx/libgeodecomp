@@ -6,8 +6,8 @@
 namespace LibGeoDecomp {
 
 /**
- * The DefaultFilter just copies ofer the specified member -- sans
- * modification.
+ * The DefaultArrayFilter is the counter piece to the DefaultFilter,
+ * just for member arrays.
  */
 template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 class DefaultArrayFilter : public ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>
