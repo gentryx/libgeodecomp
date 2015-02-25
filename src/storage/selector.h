@@ -183,6 +183,21 @@ public:
         filter(filter)
     {}
 
+    template<typename MEMBER, int ARITY>
+    Selector(
+        MEMBER (CELL:: *memberPointer)[ARITY],
+        const std::string& memberName,
+        const boost::shared_ptr<FilterBase<CELL> >& filter) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(filter->sizeOf()),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(filter)
+    {}
+
     inline const std::string& name() const
     {
         return memberName;
