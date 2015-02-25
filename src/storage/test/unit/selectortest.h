@@ -3,6 +3,7 @@
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/simplefilter.h>
+#include <libgeodecomp/storage/simplearrayfilter.h>
 #include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
@@ -200,12 +201,12 @@ public:
         public:
             void load(const double& source, char *target)
             {
-                *target = source + 11;
+                *target = source + 10;
             }
 
             void save(const char& source, double *target)
             {
-                *target = source + 21;
+                *target = source + 20;
             }
         };
 
@@ -215,16 +216,27 @@ public:
 
         std::vector<MyDummyCell> vec;
         for (int i = 0; i < 13; ++i) {
-            vec << MyDummyCell(i, i, 'a' + i);
+            vec << MyDummyCell(i, i, 'A' + i);
         }
 
         std::vector<double> target(13);
         selector.copyMemberOut(&vec[0], (char*)&target[0], 13);
         for (int i = 0; i < 13; ++i) {
-            // expecting 'a' + offset from save() + index
-            double expected = 97 + 21 + i;
+            // expecting 'A' + "offset from save()" + index
+            double expected = 65 + 20 + i;
             TS_ASSERT_EQUALS(expected, target[i]);
         }
+
+        selector.copyMemberIn((char*)&target[0], &vec[0], 10);
+        for (int i = 0; i < 13; ++i) {
+            // expecting 'A' + "offset from save()" + "offset from load()" + index
+            char expected = 65 + i;
+            if (i < 10) {
+                expected += 10 + 20;
+            }
+            TS_ASSERT_EQUALS(expected, vec[i].z);
+        }
+
     }
 
     void testFilterAoS1()
@@ -234,7 +246,7 @@ public:
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
-        selectorY.checkTypeID<Color>();
+        TS_ASSERT(selectorY.checkTypeID<Color>());
 
         std::vector<MyDummyCell> vec;
         for (int i = 0; i < 20; ++i) {
@@ -263,7 +275,7 @@ public:
             new MySimpleFilter());
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ", filter);
 
-        selectorZ.checkTypeID<double>();
+        TS_ASSERT(selectorZ.checkTypeID<double>());
 
         std::vector<MyDummyCell> vec;
         for (int i = 0; i < 20; ++i) {
@@ -294,7 +306,7 @@ public:
             new MyDummyFilter());
         Selector<MyDummyCell> selectorY(&MyDummyCell::y, "varY", filter);
 
-        selectorY.checkTypeID<Color>();
+        TS_ASSERT(selectorY.checkTypeID<Color>());
 
         std::vector<double> vec;
         for (int i = 0; i < 20; ++i) {
@@ -326,7 +338,7 @@ public:
         TS_ASSERT_EQUALS(sizeof(double), selectorY.sizeOfMember());
         TS_ASSERT_EQUALS(sizeof(Color),  selectorY.sizeOfExternal());
 
-        selectorY.checkTypeID<Color>();
+        TS_ASSERT(selectorY.checkTypeID<Color>());
 
         CoordBox<2> box(Coord<2>(), Coord<2>(20, 1));
         Region<2> region;
@@ -362,7 +374,7 @@ public:
         TS_ASSERT_EQUALS(sizeof(char),   selectorZ.sizeOfMember());
         TS_ASSERT_EQUALS(sizeof(double), selectorZ.sizeOfExternal());
 
-        selectorZ.checkTypeID<double>();
+        TS_ASSERT(selectorZ.checkTypeID<double>());
 
         CoordBox<2> box(Coord<2>(), Coord<2>(20, 1));
         Region<2> region;
@@ -428,7 +440,7 @@ public:
         region.clear();
         region << Streak<2>(Coord<2>(0, 4), 10)
                << Streak<2>(Coord<2>(5, 9), 20);
-        TS_ASSERT_EQUALS(25, region.size());
+        TS_ASSERT_EQUALS(std::size_t(25), region.size());
 
         std::vector<double> sourceY(3 * region.size(), -1);
         for (std::size_t i = 0; i < region.size(); ++i) {
@@ -459,7 +471,7 @@ public:
         region << Streak<2>(Coord<2>(5, 0), 15)
                << Streak<2>(Coord<2>(7, 6), 19)
                << Streak<2>(Coord<2>(0, 9), 20);
-        TS_ASSERT_EQUALS(42, region.size());
+        TS_ASSERT_EQUALS(std::size_t(42), region.size());
 
         std::vector<double> targetY(3 * region.size(), -1);
         SoAGrid<MyOtherDummyCell> grid(CoordBox<2>(Coord<2>(), dim));
@@ -488,7 +500,7 @@ public:
         region.clear();
         region << Streak<2>(Coord<2>(0, 4), 10)
                << Streak<2>(Coord<2>(5, 9), 20);
-        TS_ASSERT_EQUALS(25, region.size());
+        TS_ASSERT_EQUALS(std::size_t(25), region.size());
 
         std::vector<double> sourceY(3 * region.size(), -1);
         for (std::size_t i = 0; i < region.size(); ++i) {
@@ -506,6 +518,116 @@ public:
             TS_ASSERT_EQUALS(cell.y[1], 56.78);
             TS_ASSERT_EQUALS(cell.y[2], j * 7.0 + 555.0);
             ++i;
+        }
+    }
+
+    class MySimpleArrayFilter : public SimpleArrayFilter<MyOtherDummyCell, double, int, 3>
+    {
+    public:
+        void load(const int *source, double *target)
+        {
+            target[0] = source[0] + 100000;
+            target[1] = source[1] + 200000;
+            target[2] = source[2] + 300000;
+        }
+
+        void save(const double *source, int *target)
+        {
+            target[0] = source[0] + 20000;
+            target[1] = source[1] + 30000;
+            target[2] = source[2] + 40000;
+        }
+    };
+
+    void testSimpleArrayFilter1()
+    {
+        // test copyMemberOut:
+        boost::shared_ptr<FilterBase<MyOtherDummyCell> > filter(
+            new MySimpleArrayFilter());
+        Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY", filter);
+
+        TS_ASSERT(selectorY.checkTypeID<int>());
+
+        std::vector<MyOtherDummyCell> vec;
+        for (int i = 0; i < 40; ++i) {
+            vec << MyOtherDummyCell(i + 1000, i + 2000, i + 3000, i + 4000);
+        }
+
+        std::vector<int> targetY(120);
+        selectorY.copyMemberOut(&vec[0], (char*)&targetY[0], 40);
+
+        for (int i = 0; i < 40; ++i) {
+            TS_ASSERT_EQUALS(i + 2000 + 20000, targetY[i * 3 + 0]);
+            TS_ASSERT_EQUALS(i + 3000 + 30000, targetY[i * 3 + 1]);
+            TS_ASSERT_EQUALS(i + 4000 + 40000, targetY[i * 3 + 2]);
+        }
+
+        // test copyMemberIn:
+        selectorY.copyMemberIn((char*)&targetY[0], &vec[0], 40);
+
+        for (int i = 0; i < 40; ++i) {
+            TS_ASSERT_EQUALS(vec[i].y[0], i + 2000 + 20000 + 100000);
+            TS_ASSERT_EQUALS(vec[i].y[1], i + 3000 + 30000 + 200000);
+            TS_ASSERT_EQUALS(vec[i].y[2], i + 4000 + 40000 + 300000);
+        }
+    }
+
+    void testSimpleArrayFilter2()
+    {
+        // test copyStreakOut:
+        boost::shared_ptr<FilterBase<MyOtherDummyCell> > filter(
+            new MySimpleArrayFilter());
+        Selector<MyOtherDummyCell> selectorY(&MyOtherDummyCell::y, "varY", filter);
+
+        TS_ASSERT(selectorY.checkTypeID<int>());
+
+        SoAGrid<MyOtherDummyCell> grid(CoordBox<2>(Coord<2>(), Coord<2>(20, 10)));
+        for (int y = 0; y < 10; ++y) {
+            for (int x = 0; x < 20; ++x) {
+                grid.set(Coord<2>(x, y),
+                         MyOtherDummyCell(
+                             y * 100 + x + 1000,
+                             y * 100 + x + 2000,
+                             y * 100 + x + 3000,
+                             y * 100 + x + 4000));
+            }
+        }
+        for (int y = 0; y < 10; ++y) {
+            for (int x = 0; x < 20; ++x) {
+                MyOtherDummyCell cell = grid.get(Coord<2>(x, y));
+                TS_ASSERT_EQUALS(cell.x,    y * 100 + x + 1000);
+                TS_ASSERT_EQUALS(cell.y[0], y * 100 + x + 2000);
+                TS_ASSERT_EQUALS(cell.y[1], y * 100 + x + 3000);
+                TS_ASSERT_EQUALS(cell.y[2], y * 100 + x + 4000);
+            }
+        }
+
+        std::vector<int> targetY(3 * 25);
+        Region<2> region;
+        region << Streak<2>(Coord<2>( 0, 0), 10)
+               << Streak<2>(Coord<2>( 0, 5), 10)
+               << Streak<2>(Coord<2>(10, 9), 15);
+
+        grid.saveMember(&targetY[0], selectorY, region);
+
+        int counter = 0;
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 2000 + 20000, targetY[counter * 3 + 0]);
+            TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 3000 + 30000, targetY[counter * 3 + 1]);
+            TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 4000 + 40000, targetY[counter * 3 + 2]);
+            ++counter;
+        }
+
+        // test copyStreakIn:
+        grid.loadMember(&targetY[0], selectorY, region);
+
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            MyOtherDummyCell cell = grid.get(*i);
+            int expected = i->y() * 100 + i->x() + 2000 + 20000 + 100000;
+            int delta =  cell.y[0] - expected;
+            TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 2000 + 20000 + 100000, cell.y[0]);
+            TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 3000 + 30000 + 200000, cell.y[1]);
+            TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 4000 + 40000 + 300000, cell.y[2]);
         }
     }
 };
