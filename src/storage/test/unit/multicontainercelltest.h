@@ -1,4 +1,5 @@
 #include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/boxcell.h>
 #include <libgeodecomp/storage/multicontainercell.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
@@ -86,10 +87,57 @@ void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
     }
 }
 
+class SimpleParticle
+{
+public:
+    SimpleParticle(const double x = 0, const double y = 0) :
+        pos(x, y)
+    {}
+
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& hood, int nanoStep)
+    {
+        seenNeighbors = 0;
+        seenElements = 0;
+
+        for (typename NEIGHBORHOOD::AdapterHelper3::Iterator i = hood.particles.begin();
+             i != hood.particles.end();
+             ++i) {
+            ++seenNeighbors;
+        }
+
+        try {
+            const SimpleElement& elem = hood.elements[1024];
+            ++seenElements;
+        }  catch(const std::logic_error& exception) {
+            // intentionally left blank
+        }
+    }
+
+    const FloatCoord<2>& getPos() const
+    {
+        return pos;
+    }
+
+    int seenNeighbors;
+    int seenElements;
+
+private:
+    FloatCoord<2> pos;
+};
+
+
 DECLARE_MULTI_CONTAINER_CELL(
     SimpleContainer,
     SimpleContainer,
     (((ContainerCell<SimpleNode,    30>))(nodes))
+    (((ContainerCell<SimpleElement, 10>))(elements)) )
+
+DECLARE_MULTI_CONTAINER_CELL(
+    AnotherSimpleContainer,
+    AnotherSimpleContainer,
+    (((ContainerCell<SimpleNode,    30>))(nodes))
+    (((BoxCell<FixedArray<SimpleParticle, 20> >))(particles))
     (((ContainerCell<SimpleElement, 10>))(elements)) )
 
 
@@ -206,6 +254,56 @@ public:
 
         TS_ASSERT_EQUALS(expectedLog, multiContainerCellTestLog);
     }
+
+    void testBoxCell()
+    {
+        Coord<2> dim(10, 5);
+        Grid<AnotherSimpleContainer> gridOld(dim);
+        Grid<AnotherSimpleContainer> gridNew(dim);
+
+        gridOld[Coord<2>(0, 0)].elements.insert(1024, SimpleElement("kiloblaster"));
+
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                gridOld[Coord<2>(x, y)].particles << SimpleParticle(x + 0.5, y + 0.5);
+            }
+        }
+
+        Region<2> region;
+        region << CoordBox<2>(Coord<2>(), dim);
+        UpdateFunctor<AnotherSimpleContainer>()(region, Coord<2>(), Coord<2>(), gridOld, &gridNew, 12345);
+
+        for (int y = 0; y < dim.y(); ++y) {
+            for (int x = 0; x < dim.x(); ++x) {
+                int expectedNeighbors = 9;
+                if (y == 0) {
+                    expectedNeighbors -= 3;
+                }
+                if (y == (dim.y() - 1)) {
+                    expectedNeighbors -= 3;
+                }
+                if (x == 0) {
+                    expectedNeighbors -= 3;
+                }
+                if (x == (dim.x() - 1)) {
+                    expectedNeighbors -= 3;
+                }
+                // need to correct for doubly removed corner
+                if (expectedNeighbors == 3) {
+                    expectedNeighbors += 1;
+                }
+
+                int expectedElements = 0;
+                if ((x <= 1) && (y <= 1)) {
+                    expectedElements = 1;
+                }
+
+                TS_ASSERT_EQUALS(gridNew[Coord<2>(x, y)].particles[0].seenNeighbors, expectedNeighbors);
+                TS_ASSERT_EQUALS(gridNew[Coord<2>(x, y)].particles[0].seenElements,  expectedElements);
+            }
+        }
+    }
+
 };
 
 }
