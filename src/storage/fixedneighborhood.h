@@ -6,16 +6,6 @@
 
 namespace LibGeoDecomp {
 
-namespace FixedNeighborhoodHelpers {
-
-template<int DIM, int DISTANCE>
-class NormalizeCoord
-{
-public:
-};
-
-}
-
 /**
  * Similar to LinePointerNeighborhood, this class serves as a proxy
  * for cells to acccess their neighbors during update. In contrast to
@@ -25,11 +15,19 @@ public:
  */
 template<
     typename CELL,
-    typename TOPOLOGY,
     long DIM_X,
     long DIM_Y,
     long DIM_Z,
     long INDEX,
+    // X axis
+    long OFFSET_WEST = -1,
+    long OFFSET_EAST = 1,
+    // Y axis
+    long OFFSET_TOP = -1,
+    long OFFSET_BOTTOM = 1,
+    // Z axis
+    long OFFSET_NORTH = 1,
+    long OFFSET_SOUTH = -1,
     template<
         typename CELL2,
         long DIM_X2,
@@ -59,7 +57,13 @@ public:
     __host__ __device__
     const SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
     {
-        return accessor[LibFlatArray::coord<X, Y, Z>()];
+        return accessor[LibFlatArray::coord<
+                        ((X < 0) ? (OFFSET_WEST   + X + 1) : 0) +
+                        ((X > 0) ? (OFFSET_EAST   + X - 1) : 0),
+                        ((Y < 0) ? (OFFSET_TOP    + Y + 1) : 0) +
+                        ((Y > 0) ? (OFFSET_BOTTOM + Y - 1) : 0),
+                        ((Z < 0) ? (OFFSET_SOUTH  + Z + 1) : 0) +
+                        ((Z > 0) ? (OFFSET_NORTH  + Z - 1) : 0)>()];
     }
 
     void operator>>(CELL& cell) const
