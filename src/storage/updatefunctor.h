@@ -64,7 +64,8 @@ public:
                     relativeTargetOrigin.y() * MY_DIM_X2 +
                     relativeTargetOrigin.x();
 
-                FixedNeighborhood<CELL, Topology, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1> hoodOldWrapped(hoodOld);
+                FixedNeighborhood<CELL, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1> hoodOldWrapped(
+                    hoodOld);
 
                 CELL::updateLineX(
                     hoodOldWrapped,
