@@ -26,8 +26,8 @@ template<
     long OFFSET_TOP = -1,
     long OFFSET_BOTTOM = 1,
     // Z axis
-    long OFFSET_NORTH = 1,
     long OFFSET_SOUTH = -1,
+    long OFFSET_NORTH = 1,
     template<
         typename CELL2,
         long DIM_X2,

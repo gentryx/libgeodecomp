@@ -26,9 +26,11 @@ public:
     {}
 
     template<typename HOOD_OLD, typename HOOD_NEW>
-    static void updateLineX(HOOD_OLD& hoodOld, int indexEnd,
-                            HOOD_NEW& hoodNew, int /* nanoStep */)
-    {}
+    static void updateLineX(HOOD_OLD& hoodOld, long indexEnd,
+                            HOOD_NEW& hoodNew, long /* nanoStep */)
+    {
+        std::cout << "foobar " << hoodOld.index << " -> " << indexEnd << "\n";
+    }
 
     double valA;
     double valB;
@@ -69,10 +71,13 @@ public:
                << Streak<3>(Coord<3>(25, 119, 50), 200)
                << Streak<3>(Coord<3>(10,  30, 79), 210);
 
-        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCell>(&region, gridOld.boundingBox()));
+        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCell>(&region, gridOld.boundingBox(), 0));
 
         std::cout << "BOOOOOOOOOOOOOOOOOOOOOOOOOMER\n";
     }
+
+    // fixme: test with cube topo
+    // fixme: test with torus topo and displacements (as the z-curve would imply them with pars of the region sitting on opposite edges of the simulation space)
 };
 
 }
