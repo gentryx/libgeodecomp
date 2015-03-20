@@ -198,7 +198,6 @@ public:
             patchAcceptersInner.push_back(adapterInnerSet);
         }
 
-	std::cout << initializer.get() << std::flush << initializer->gridDimensions() << "\n";
         stepper.reset(new STEPPER(
                           partitionManager,
                           initializer,
@@ -280,19 +279,14 @@ public:
 
     Chronometer nanoStep(std::size_t remainingNanoSteps)
     {
-        Chronometer chrono;
-        {
-            TimeTotal t(&chrono);
-            stopped = false;
-            while (remainingNanoSteps > 0 && !stopped) {
-                std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
-                stepper->update(hop);
-                handleEvents();
-                remainingNanoSteps -= hop;
-            }
+        stopped = false;
+        while (remainingNanoSteps > 0 && !stopped) {
+            std::size_t hop = std::min(remainingNanoSteps, timeToNextEvent());
+            stepper->update(hop);
+            handleEvents();
+            remainingNanoSteps -= hop;
         }
-        chrono += stepper->statistics();
-        return chrono;
+        return stepper->statistics();
     }
     HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, nanoStep, NanoStepAction);
 
