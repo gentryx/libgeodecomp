@@ -48,7 +48,12 @@ FloatCoord<2> quadrantDim;
 
 
 extern "C"{
-    void avgdepth_(int *numnodes, float depth[], float *avg);
+  void kernel_(
+	       int *n, 
+	       int alive[],
+	       int numneighbors[],
+	       int neighbors[][20]
+	       );
 }
 
 
@@ -142,15 +147,15 @@ public:
         }
     };
 
-    template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-        ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes & outputStep;
-        /*
-          LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
-          // of the Domain
-          int id; // ID of the domain
-          int alive;
+  template <class ARCHIVE>
+  void serialize(ARCHIVE& ar, unsigned)
+  {
+    ar & center & id & alive & outputStep & neighboringNodes & myNeighborTable & localNodes;
+    /*
+    LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
+                                        // of the Domain
+    int id; // ID of the domain
+    int alive;
 
           int outputStep;
 
@@ -244,7 +249,7 @@ public:
     LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
                                         // of the Domain
     int id; // ID of the domain
-    int alive;
+  int alive; // not being used currently 
 
     int outputStep;
 
@@ -276,10 +281,12 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     int domainID = domainCell->id;
     int numNeighbors = myNeighborTable.myNeighbors.size();
 
-    std::cerr << "domainID = " << domainID << " step = " << outputStep << std::endl;
+    int localityID = hpx::get_locality_id();
 
-    if (outputStep == 0) {
-
+    std::cerr << "domainID = " << domainID << " step = " << outputStep << " locality = " << localityID << std::endl;    
+    
+    if (outputStep == 0) 
+    {
         //Initial Output
         std::ostringstream filename;
         filename << "data/output" << domainID << "." << nanoStep << ".dat";
@@ -351,7 +358,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     }
 
 
-    //Exchange boundary values
+    //Exchange boundary values **********************************************
     //Loop over neighbors
     for (int i=0; i<numNeighbors; i++) {
         std::vector<SubNode> incomingNodes;
@@ -371,10 +378,10 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
             if (localCoords != remoteCoords) {
                 throw std::runtime_error("boundary node location mismatch!");
             }
-
             localNodes[myLocalID].lastAlive = incomingNodes[j].alive;
         }
     }
+    // Done exchange boundary values *************************************
 
 //    std::vector<FloatCoord<2> > points = getShape();
 
@@ -402,7 +409,48 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
             }
         }
 
-        i->second.alive = my_alive;
+
+      //Declare arrays
+      int alive[numnodes];
+      int numneighbors[numnodes];
+      int neighbors[numnodes][20]; //20 = max neighbors
+      
+      //Fill arrays with values from SubNode objects
+      int count = 0;
+      for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+        {
+	      int index = count++;
+	      
+	      //	      std::cout << "index = " << index << std::endl;
+	      //	      std::cout << "count = " << count << std::endl;
+	      alive[index] = i->second.lastAlive;
+	      numneighbors[index] = i->second.neighboringNodes.size();
+
+	      for (int j=0; j<numneighbors[index]; j++) {
+		neighbors[index][j] = i->second.neighboringNodes[j];
+	      }
+	      //	      std::cout << "C++: numneighbors[" << index << "] = " << numneighbors[index] << std::endl;
+        }
+
+      /*
+      //Call FORTRAN subroutine
+      kernel_(
+	      &numnodes,
+	      alive,
+	      numneighbors,
+	      neighbors
+	      );
+      */
+
+      //Fill SubNode objects with arrays
+      count = 0;
+      for (std::map<int, SubNode>::iterator i=localNodes.begin(); i!=localNodes.end(); ++i)
+        {
+	      int index = count++;
+	      if ((alive[index] > 1)||(alive[index]<0)) {
+		throw std::runtime_error("alive not valid! alive="+alive[index]);}
+	      i->second.alive = alive[index];
+        }
     }
 
     //Output
@@ -420,6 +468,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
 
     file.close();
     outputStep++;
+
 }
 
 
@@ -978,10 +1027,10 @@ void runSimulation()
     quadrantDim = FloatCoord<2>(quadrantSize, quadrantSize);
 
     // Hardcoded link to the directory
-    std::string prunedDirname("/home/zbyerly/research/meshes/qah4");
+    std::string prunedDirname("/home/zbyerly/research/meshes/shin32");
 
     // Hardcoded number of simulation steps
-    int steps = 100;
+    int steps = 10;
 
     //    SerialSimulator<ContainerCellType> sim(
 
