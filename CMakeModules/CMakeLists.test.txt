@@ -10,6 +10,7 @@ set(TARGET_UNIT_TEST_EXE test_${BUFFER2})
 set(TARGET_RUN_UNIT_TEST run_${BUFFER2})
 
 get_filename_component(DIRNAME ${PWD} NAME)
+string(REGEX MATCH "^parallel_hpx"    is_hpx_test    ${DIRNAME})
 string(REGEX MATCH "^parallel_mpi"    is_mpi_test    ${DIRNAME})
 string(REGEX MATCH "^parallel_openmp" is_openmp_test ${DIRNAME})
 string(REGEX MATCH "^unit"            is_unit_test   ${DIRNAME})
@@ -21,16 +22,25 @@ if (is_unit_test)
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${UNITEXEC} ./test")
 endif()
 
-if (is_openmp_test AND WITH_THREADS)
+if (is_hpx_test AND WITH_HPX)
   set(allowed_test true)
-  string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
+  string(REPLACE "parallel_hpx_" "" NUM_PROC "${DIRNAME}")
+  string(REGEX REPLACE "_.+" "" NUM_LOCALITIES "${NUM_PROC}")
+  string(REGEX REPLACE ".+_" "" NUM_THREADS    "${NUM_PROC}")
+
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && "${HPXRUN}" -v --localities=${NUM_LOCALITIES} -t ${NUM_THREADS} ./test -- -Ihpx.stacks.large_size=0x2000000 -Ihpx.stacks.medium_size=0x2000000 -Ihpx.stacks.small_size=0x2000000)
 endif()
 
 if (is_mpi_test AND WITH_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS})
+endif()
+
+if (is_openmp_test AND WITH_THREADS)
+  set(allowed_test true)
+  string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
 endif()
 
 # check whether LIMIT_TESTS selected this path, too

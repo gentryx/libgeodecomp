@@ -253,6 +253,7 @@ if(WITH_HPX)
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
+  set(HPXRUN "${HPX_PREFIX}/bin/hpxrun.py")
 endif()
 
 if(WITH_MPI)
@@ -348,6 +349,7 @@ if(WITH_VISIT)
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${VisIt_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 endif()
 
+#fixme: move this section up to general configuration?
 if(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB local_libgeodecomp_lib)
 else(WIN32)
@@ -360,6 +362,7 @@ if(WITH_HPX)
     set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
     add_definitions(-DHPX_DEBUG)
   endif()
+
 endif()
 
 if(WITH_QT)
