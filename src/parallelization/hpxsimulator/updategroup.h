@@ -43,8 +43,8 @@ public:
     UpdateGroup()
     {}
 
-    UpdateGroup(hpx::id_type thisId)
-      : thisId(thisId)
+    UpdateGroup(hpx::id_type thisId) :
+        thisId(thisId)
     {}
 
     struct InitData

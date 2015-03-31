@@ -67,10 +67,9 @@ public:
             partitionManager,
             initializer,
             ghostZonePatchAccepters,
-            innerSetPatchAccepters)
-      , asyncThreshold(
-            boost::lexical_cast<std::size_t>(hpx::get_config_entry("LibGeoDecomp.asyncThreshold", "0"))
-        )
+            innerSetPatchAccepters),
+        asyncThreshold(boost::lexical_cast<std::size_t>(
+                           hpx::get_config_entry("LibGeoDecomp.asyncThreshold", "0")))
     {
         hpx::async(&HpxStepper::initGrids, this).wait();
     }
@@ -248,7 +247,7 @@ private:
              i != region.endStreak();
              ++i) {
 
-            if(i->length() > asyncThreshold) {
+            if(std::size_t(i->length()) > asyncThreshold) {
                 Region<DIM> r;
                 r << *i;
                 updateFutures.push_back(
