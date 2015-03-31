@@ -109,16 +109,15 @@ if(allowed_test AND selected_test)
 
 int run_tests(int argc, char **argv);
 
-int my_hpx_main(int argc, char **argv)
+int hpx_main(int argc, char **argv)
 {
-    // use 1 instead of argc so CxxTest won't see HPX related options...
-    run_tests(1, argv);
+    run_tests(argc, argv);
     return hpx::finalize();
 }
 
 int main(int argc, char **argv)
 {
-    return hpx::init(&my_hpx_main, \"libgeodecomp_tests\", argc, argv);
+    return hpx::init(argc, argv);
 }
 ")
   endif()
