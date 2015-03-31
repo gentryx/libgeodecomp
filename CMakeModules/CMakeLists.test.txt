@@ -86,7 +86,7 @@ if(allowed_test AND selected_test)
       # included beforehand).
       add_custom_command(
         OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-        COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+        COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
 	COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
@@ -96,9 +96,78 @@ if(allowed_test AND selected_test)
 
   # ...and main()
   list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
+  list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp")
   add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
-    COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp" --root --error-printer )
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
+    COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp" --root --main run_tests --error-printer )
+
+  # set(main_function "int run_tests(int argc, char** argv); int main(int argc, char** argv) { return run_tests(argc, argv); }")
+
+  if(is_hpx_test)
+    set(main_function "
+#include <hpx/hpx.hpp>
+
+int run_tests(int argc, char **argv);
+
+int my_hpx_main(int argc, char **argv)
+{
+    // use 1 instead of argc so CxxTest won't see HPX related options...
+    run_tests(1, argv);
+    return hpx::finalize();
+}
+
+int main(int argc, char **argv)
+{
+    return hpx::init(&my_hpx_main, \"libgeodecomp_tests\", argc, argv);
+}
+")
+  endif()
+
+  if(is_mpi_test)
+    set(main_function "
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <mpi.h>
+#include <libgeodecomp/communication/typemaps.h>
+
+int run_tests(int argc, char **argv);
+
+int main(int argc, char **argv)
+{
+    MPI_Init(&argc, &argv);
+    LibGeoDecomp::Typemaps::initializeMaps();
+    int res = run_tests(argc, argv);
+    MPI_Finalize();
+    return res;
+}
+
+#endif
+")
+  endif()
+
+  if(is_openmp_test)
+    set(main_function "
+int run_tests(int argc, char **argv);
+
+int main(int argc, char **argv)
+{
+    return run_tests(argc, argv);
+}
+")
+  endif()
+  if(is_unit_test)
+    set(main_function "
+int run_tests(int argc, char **argv);
+
+int main(int argc, char **argv)
+{
+    return run_tests(argc, argv);
+}
+")
+  endif()
+
+
+  file(WRITE "main.cpp" "${main_function}")
 
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})

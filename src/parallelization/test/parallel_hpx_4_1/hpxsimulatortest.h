@@ -13,6 +13,7 @@ public:
     void testBasic()
     {
         std::cout << "andi1\n";
+        std::cout << "andi2\n";
     }
 };
 
