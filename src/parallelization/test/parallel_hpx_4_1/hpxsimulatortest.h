@@ -117,9 +117,6 @@ LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
 
 BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
 
-typedef LibGeoDecomp::TracingWriter<ConwayCell> TracingWriterType;
-BOOST_CLASS_EXPORT_GUID(TracingWriterType, "TracingWriterConwayCell");
-
 typedef LibGeoDecomp::SerialBOVWriter<ConwayCell> BovWriterType;
 BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
 
@@ -176,16 +173,7 @@ public:
             new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
             sim.numUpdateGroups());
 
-        sim.addWriter(
-            new HpxWriterCollectorType(
-                sink
-                                       ));
-
-        sim.addWriter(
-            new TracingWriterType(
-                1,
-                init->maxSteps(),
-                1));
+        sim.addWriter(new HpxWriterCollectorType(sink));
 
         sim.run();
     }
