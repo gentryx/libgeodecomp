@@ -49,7 +49,8 @@ public:
 class CellInitializer : public SimpleInitializer<ConwayCell>
 {
 public:
-    CellInitializer() : SimpleInitializer<ConwayCell>(Coord<2>(160, 90), 10)
+    CellInitializer(int maxTimeSteps = 100) :
+        SimpleInitializer<ConwayCell>(Coord<2>(160, 90), maxTimeSteps)
     {}
 
     virtual void grid(GridBase<ConwayCell, 2> *ret)
@@ -140,40 +141,71 @@ namespace LibGeoDecomp {
 class HpxSimulatorTest : public CxxTest::TestSuite
 {
 public:
+    void setUp()
+    {
+        outputFrequency = 1;
+        maxTimeSteps = 10;
+    }
+
+    void tearDown()
+    {
+        int i;
+        for (i = 0; i < maxTimeSteps; i += outputFrequency) {
+            removeFiles(i);
+        }
+
+        if (i > maxTimeSteps) {
+            i = maxTimeSteps;
+        }
+        removeFiles(i);
+    }
+
     void testBasic()
     {
-        std::cout << "andi1\n";
-        {
-            int outputFrequency = 1;
-            CellInitializer *init = new CellInitializer();
+        CellInitializer *init = new CellInitializer(maxTimeSteps);
 
-            SimulatorType sim(
-                init,
-                1, // overcommitFactor
-                new TracingBalancer(new OozeBalancer()),
-                10, // balancingPeriod
-                1 // ghostZoneWidth
-                              );
+        SimulatorType sim(
+            init,
+            1, // overcommitFactor
+            new TracingBalancer(new OozeBalancer()),
+            10, // balancingPeriod
+            1 // ghostZoneWidth
+                          );
 
-            HpxWriterCollectorType::SinkType sink(
-                new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
-                sim.numUpdateGroups());
+        HpxWriterCollectorType::SinkType sink(
+            new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
+            sim.numUpdateGroups());
 
-            sim.addWriter(
-                new HpxWriterCollectorType(
-                    sink
-                                           ));
+        sim.addWriter(
+            new HpxWriterCollectorType(
+                sink
+                                       ));
 
-            // sim.addWriter(
-            //     new TracingWriterType(
-            //         1,
-            //         init->maxSteps(),
-            //         1));
+        sim.addWriter(
+            new TracingWriterType(
+                1,
+                init->maxSteps(),
+                1));
 
-            sim.run();
-        }
-        std::cout << "andi2\n";
+        sim.run();
     }
+
+    void removeFile(std::string name)
+    {
+        remove(name.c_str());
+    }
+
+    void removeFiles(int timestep)
+    {
+        std::stringstream buf;
+        buf << "game." << std::setfill('0') << std::setw(5) << timestep;
+        removeFile(buf.str() + ".bov");
+        removeFile(buf.str() + ".data");
+    }
+
+    int outputFrequency;
+    int maxTimeSteps;
+
 };
 
 }
