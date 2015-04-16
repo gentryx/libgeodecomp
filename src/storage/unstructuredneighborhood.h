@@ -10,7 +10,6 @@
 
 namespace LibGeoDecomp {
 
-
 template<typename VALUE_TYPE>
 class WeightIterator final :
         public std::iterator<std::input_iterator_tag, std::pair<int, VALUE_TYPE> >

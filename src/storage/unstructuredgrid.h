@@ -38,7 +38,7 @@ public:
         edgeElement(edgeElement),
         dimension(dim)
     {
-        for (std::size_t i=0; i < MATRICES; ++i) {
+        for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dim.x());
         }
@@ -53,7 +53,7 @@ public:
         edgeElement = other.edgeElement;
         dimension = other.dimension;
 
-        for (std::size_t i=0; i<MATRICES; ++i) {
+        for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] = other.matrices[i];
         }
 
@@ -96,12 +96,13 @@ public:
 
         return matrices[matrixID];
     }
+
     /**
-     * returns a list of pairs representing the neighborhood of center element.
-     * the first element of the pair is the ELEMENT_TYPE
+     * Returns a list of pairs representing the neighborhood of center element.
+     * The first element of the pair is the ELEMENT_TYPE
      * and the secound the ADJACENCY_TYPE.
      * The first Element of the list is the center element it self.
-     * if center element does not exist the EdggeElement is returned.
+     * If center element does not exist the EdggeElement is returned.
      * In both cases ADJACENCY_TYPE = -1
      */
     inline NeighborList getNeighborhood(const Coord<DIM>& center) const
@@ -110,7 +111,7 @@ public:
 
         if (boundingBox().inBounds(center)) {
             neighborhood.push_back(std::make_pair(*this[center], -1));
-            std::vector< std::pair<int, VALUE_TYPE> > neighbor =
+            std::vector<std::pair<int, VALUE_TYPE> > neighbor =
                 matrices[0].getRow(center.x());
 
             for (NeighborListIterator it = neighbor.begin();
@@ -307,11 +308,10 @@ protected:
         }
     }
 
-
 private:
     std::vector<ELEMENT_TYPE> elements;
     // TODO wrapper for different types of sell c sigma containers
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>  matrices[MATRICES];
+    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 };
