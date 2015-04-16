@@ -100,9 +100,9 @@ public:
      * returns a list of pairs representing the neighborhood of center element.
      * the first element of the pair is the ELEMENT_TYPE
      * and the secound the ADJACENCY_TYPE.
-     * The first Element of the list is the center element it selfe.
-     * if center element does not exist the EdggeElement ist reurnt.
-     * In bothe cases ADJACENCY_TYPE = -1
+     * The first Element of the list is the center element it self.
+     * if center element does not exist the EdggeElement is returned.
+     * In both cases ADJACENCY_TYPE = -1
      */
     inline NeighborList getNeighborhood(const Coord<DIM>& center) const
     {
