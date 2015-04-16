@@ -10,143 +10,13 @@
 
 namespace LibGeoDecomp {
 
-template<typename VALUE_TYPE>
-class WeightIterator final :
-        public std::iterator<std::input_iterator_tag, std::pair<int, VALUE_TYPE> >
-{
-private:
-    std::pair<int, VALUE_TYPE> *data;
-public:
-    inline explicit
-    WeightIterator(std::pair<int, VALUE_TYPE> *_data) :
-        data(_data)
-    {}
-
-    inline
-    WeightIterator(const WeightIterator& other) :
-        data(other.data)
-    {}
-
-    inline
-    WeightIterator& operator++()
-    {
-        ++data;
-        return *this;
-    }
-
-    inline
-    WeightIterator operator++(int)
-    {
-        WeightIterator tmp(*this);
-        operator++();
-        return tmp;
-    }
-
-    inline
-    WeightIterator operator+(int value) const
-    {
-        return WeightIterator(data + value);
-    }
-
-    inline
-    WeightIterator operator-(int value) const
-    {
-        return WeightIterator(data - value);
-    }
-
-    inline
-    WeightIterator& operator+=(int value)
-    {
-        data += value;
-        return *this;
-    }
-
-    inline
-    WeightIterator& operator-=(int value)
-    {
-        data -= value;
-        return *this;
-    }
-
-    inline
-    bool operator==(const WeightIterator& rhs)
-    {
-        return data == rhs.data;
-    }
-
-    inline
-    bool operator!=(const WeightIterator& rhs)
-    {
-        return data != rhs.data;
-    }
-
-    inline
-    std::pair<int, VALUE_TYPE>& operator*()
-    {
-        return *data;
-    }
-
-    inline
-    const std::pair<int, VALUE_TYPE>& operator*() const
-    {
-        return *data;
-    }
-
-    inline
-    const std::pair<int, VALUE_TYPE>* operator->() const
-    {
-        return data;
-    }
-};
-
-template<typename VALUE_TYPE>
-class WeightContainer
-{
-private:
-    std::vector<std::pair<int, VALUE_TYPE> > neighbors;
-public:
-    inline explicit
-    WeightContainer(const std::vector<std::pair<int, VALUE_TYPE> >& data) :
-        neighbors(data)
-    {}
-
-    inline explicit
-    WeightContainer(std::vector<std::pair<int, VALUE_TYPE> >&& data) :
-        neighbors(data)
-    {}
-
-    inline
-    WeightIterator<VALUE_TYPE> begin()
-    {
-        return WeightIterator<VALUE_TYPE>(neighbors.size() > 0 ? neighbors.data() : nullptr);
-    }
-
-    inline
-    const WeightIterator<VALUE_TYPE> begin() const
-    {
-        return WeightIterator<VALUE_TYPE>(neighbors.size() > 0 ? neighbors.data() : nullptr);
-    }
-
-    inline
-    WeightIterator<VALUE_TYPE> end()
-    {
-        return WeightIterator<VALUE_TYPE>(begin() + neighbors.size());
-    }
-
-    inline
-    const WeightIterator<VALUE_TYPE> end() const
-    {
-        return WeightIterator<VALUE_TYPE>(begin() + neighbors.size());
-    }
-};
-
 /**
  * Simple neighborhood for UnstructuredGrid.
  *
  * Usage:
  *  for (const auto& i: hoodOld.weights()) {
- *    CELL cell = hoodOld[i.first];
- *    cell.sum += cell.sum * i.second;
+ *    const CELL& cell  = hoodOld[i.first];
+ *    VALUE_TYPE weight = i.second;
  *  }
  */
 template<typename CELL, std::size_t MATRICES = 1,
@@ -155,7 +25,7 @@ class UnstructuredNeighborhood
 {
 private:
     UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& grid;
-    long long xOffset;
+    long long xOffset;          /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
     int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
 
@@ -254,14 +124,14 @@ public:
     long& index() { return xOffset; }
 
     inline
-    WeightContainer<VALUE_TYPE> weights() const
+    std::vector<std::pair<int, VALUE_TYPE> > weights() const
     {
         // FIXME: this is only the neighborhood for matrices[0]
         return weights(0);
     }
 
     inline
-    WeightContainer<VALUE_TYPE> weights(std::size_t matrixID) const
+    std::vector<std::pair<int, VALUE_TYPE> > weights(std::size_t matrixID) const
     {
         std::vector<std::pair<int, VALUE_TYPE> > neighbors;
 
@@ -272,7 +142,7 @@ public:
         if (!grid.boundingBox().inBounds(Coord<1>(xOffset))) {
             // FIXME: what id to return for edgeCell?
             neighbors.emplace_back(-1, static_cast<VALUE_TYPE>(-1));
-            return WeightContainer<VALUE_TYPE>(std::move(neighbors));
+            return neighbors;
         }
 
         // get actual neighborhood
@@ -281,7 +151,7 @@ public:
         for (int element = 0; element < matrix.rowLengthVec()[xOffset]; ++element, index += C)
             neighbors.emplace_back(matrix.columnVec()[index], matrix.valuesVec()[index]);
 
-        return WeightContainer<VALUE_TYPE>(std::move(neighbors));
+        return neighbors;
     }
 };
 
