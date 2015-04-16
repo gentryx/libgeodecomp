@@ -156,11 +156,39 @@ class UnstructuredNeighborhood
 private:
     UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& grid;
     long long xOffset;
+    int currentChunk;           /**< current chunk */
+    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
+
+    /**
+     * If xOffset is changed, the current chunk and chunkOffset
+     * may change. This function updates the internal data structures
+     * accordingly.
+     *
+     * @param difference amount which is added or subtracted from xOffset
+     */
+    void updateIndices(int difference)
+    {
+        xOffset += difference;
+        const int newChunkOffset = chunkOffset + difference;
+
+        // update chunk and offset, if necessary
+        if (newChunkOffset < 0) {
+            --currentChunk;
+            chunkOffset = C - 1;
+            return;
+        } else if (newChunkOffset >= C) {
+            ++currentChunk;
+            chunkOffset = 0;
+            return;
+        }
+
+        chunkOffset += difference;
+    }
 public:
     inline explicit
     UnstructuredNeighborhood(UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& _grid,
                              long long startX) :
-        grid(_grid), xOffset(startX)
+        grid(_grid), xOffset(startX), currentChunk(startX / C), chunkOffset(startX % C)
     {}
 
     inline
@@ -178,7 +206,7 @@ public:
     inline
     UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator++()
     {
-        ++xOffset;
+        updateIndices(1);
         return *this;
     }
 
@@ -186,14 +214,14 @@ public:
     UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> operator++(int)
     {
         UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
-        ++xOffset;
+        operator++();
         return tmp;
     }
 
     inline
     UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator--()
     {
-        --xOffset;
+        updateIndices(-1);
         return *this;
     }
 
@@ -201,21 +229,21 @@ public:
     UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> operator--(int)
     {
         UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
-        --xOffset;
+        operator--();
         return tmp;
     }
 
     inline
     UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator+=(int value)
     {
-        xOffset += value;
+        updateIndices(value);
         return *this;
     }
 
     inline
     UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator-=(int value)
     {
-        xOffset -= value;
+        updateIndices(-value);
         return *this;
     }
 
@@ -235,8 +263,25 @@ public:
     inline
     WeightContainer<VALUE_TYPE> weights(std::size_t matrixID) const
     {
-        auto row = grid.getAdjacency(matrixID).getRow(xOffset);
-        return WeightContainer<VALUE_TYPE>(std::move(row));
+        std::vector<std::pair<int, VALUE_TYPE> > neighbors;
+
+        // preallocate some memory: reduces memory allocations via emplace_back
+        neighbors.reserve(20);
+
+        // in bounds?
+        if (!grid.boundingBox().inBounds(Coord<1>(xOffset))) {
+            // FIXME: what id to return for edgeCell?
+            neighbors.emplace_back(-1, static_cast<VALUE_TYPE>(-1));
+            return WeightContainer<VALUE_TYPE>(std::move(neighbors));
+        }
+
+        // get actual neighborhood
+        const auto& matrix = grid.getAdjacency(matrixID);
+        int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
+        for (int element = 0; element < matrix.rowLengthVec()[xOffset]; ++element, index += C)
+            neighbors.emplace_back(matrix.columnVec()[index], matrix.valuesVec()[index]);
+
+        return WeightContainer<VALUE_TYPE>(std::move(neighbors));
     }
 };
 
