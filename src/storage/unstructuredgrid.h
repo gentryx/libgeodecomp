@@ -40,7 +40,7 @@ public:
     {
         for (std::size_t i=0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> (dim.x());
+                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dim.x());
         }
     }
 
@@ -53,7 +53,7 @@ public:
         edgeElement = other.edgeElement;
         dimension = other.dimension;
 
-        for (std::size_t i=0; i<MATRICES; ++i){
+        for (std::size_t i=0; i<MATRICES; ++i) {
             matrices[i] = other.matrices[i];
         }
 
@@ -65,8 +65,9 @@ public:
      */
     template<typename ITERATOR>
     void setAdjacency(std::size_t const  matrixID, ITERATOR start,
-                      const ITERATOR end){
-        if (matrixID >= MATRICES){
+                      const ITERATOR end)
+    {
+        if (matrixID >= MATRICES) {
             throw std::invalid_argument("matrixID not available");
         }
         for (ITERATOR i = start; i != end; ++i) {
@@ -77,8 +78,9 @@ public:
     }
 
     const SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacency(std::size_t const matrixID) const {
-        if (matrixID >= MATRICES){
+    getAdjacency(std::size_t const matrixID) const
+    {
+        if (matrixID >= MATRICES) {
             throw std::invalid_argument("matrixID not available");
         }
 
@@ -86,8 +88,9 @@ public:
     }
 
     SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacency(std::size_t const matrixID){
-        if (matrixID >= MATRICES){
+    getAdjacency(std::size_t const matrixID)
+    {
+        if (matrixID >= MATRICES) {
             throw std::invalid_argument("matrixID not available");
         }
 
@@ -106,7 +109,7 @@ public:
         NeighborList neighborhood;
 
         if (boundingBox().inBounds(center)) {
-            neighborhood.push_back( std::make_pair( *this[center], -1 ) );
+            neighborhood.push_back(std::make_pair(*this[center], -1));
             std::vector< std::pair<int, VALUE_TYPE> > neighbor =
                 matrices[0].getRow(center.x());
 
@@ -115,9 +118,8 @@ public:
                  ++it) {
                 neighborhood.push_back(std::make_pair((*this)[it->first], it->second));
             }
-
         } else {
-            neighborhood.push_back( std::make_pair( getEdgeElement(), -1) );
+            neighborhood.push_back(std::make_pair(getEdgeElement(), -1));
         }
 
         return neighborhood;
@@ -130,7 +132,7 @@ public:
 
     inline const ELEMENT_TYPE& operator[](const int y) const
     {
-        if ( y < 0 || y >= dimension.x()){
+        if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
         } else {
             return elements[y];
@@ -139,7 +141,7 @@ public:
 
     inline ELEMENT_TYPE& operator[](const int y)
     {
-        if ( y < 0 || y >= dimension.x()){
+        if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
         } else {
             return elements[y];
@@ -189,7 +191,7 @@ public:
 
         CoordBox<DIM> box = boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin();
-                i != box.end(); ++i) {
+             i != box.end(); ++i) {
             if ((*this)[*i] != other.get(*i)) {
                 return false;
             }
@@ -280,7 +282,7 @@ public:
 
     virtual CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIM>( Coord<DIM>(), dimension );
+        return CoordBox<DIM>(Coord<DIM>(), dimension);
     }
 
 protected:
@@ -299,7 +301,7 @@ protected:
         const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                i != region.endStreak(); ++i) {
+             i != region.endStreak(); ++i) {
             selector.copyMemberIn(source, &(*this)[i->origin], i->length());
             source += selector.sizeOfExternal() * i->length();
         }
@@ -312,7 +314,6 @@ private:
     SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>  matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
-
 };
 
 template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
