@@ -36,9 +36,9 @@ public:
 
         std::string toString() const;
 
-        void setFitness(const double fitness)
+        void resetFitness()
         {
-            this->fitness = fitness;
+            this->fitness = -1;
         }
 
     private:
@@ -59,7 +59,6 @@ private:
     std::size_t minInSimplex();
     std::size_t maxInSimplex();
     void totalContraction();
-    bool checkTermination();
     bool checkConvergence();
     std::pair<SimplexVertex, SimplexVertex> reflection();
     void initSimplex(SimulationParameters param);
