@@ -2407,11 +2407,11 @@ int main(int argc, char **argv)
 
         eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
         eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
-        // eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
 
         eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
         eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
-        // eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
 
         eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
         eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
