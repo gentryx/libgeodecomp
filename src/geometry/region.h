@@ -769,6 +769,7 @@ private:
     inline void determineGeometry() const
     {
         if (empty()) {
+            mySize = 0;
             myBoundingBox = CoordBox<DIM>();
         } else {
             Streak<DIM> someStreak = *beginStreak();
@@ -931,10 +932,20 @@ public:
     typedef Region<1>::VecType VecType;
 
     template<int MY_DIM>
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
+    {
+        const VecType& indices = region.indices[0];
+        return (*this)(region, s, 0, indices.size());
+    }
+
+    template<int MY_DIM>
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
         const VecType& indices = region.indices[0];
+        if (indices.empty()) {
+            return false;
+        }
 
         VecType::const_iterator cursor =
             std::upper_bound(indices.begin() + start, indices.begin() + end,
@@ -1038,6 +1049,13 @@ public:
     friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
     typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        VecType& indices = region->indices[0];
+        (*this)(region, s, 0, indices.size());
+    }
 
     template<int MY_DIM>
     inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
@@ -1174,6 +1192,13 @@ public:
     friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
     typedef Region<1>::VecType VecType;
+
+    template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        VecType& indices = region->indices[0];
+        (*this)(region, s, 0, indices.size());
+    }
 
     template<int MY_DIM>
     int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
