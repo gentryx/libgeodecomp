@@ -227,6 +227,18 @@ public:
         return !(*this == other);
     }
 
+    inline const std::vector<VALUETYPE>& valuesVec() const { return values; }
+
+    inline const std::vector<int>& columnVec() const { return column; }
+
+    inline const std::vector<int>& rowLengthVec() const { return rowLength; }
+
+    inline const std::vector<int>& chunkLengthVec() const { return chunkLength; }
+
+    inline const std::vector<int>& chunkOffsetVec() const { return chunkOffset; }
+
+    inline std::size_t dim() const { return dimension; }
+
 private:
     std::vector<VALUETYPE> values;
     std::vector<int>       column;
