@@ -27,15 +27,15 @@ public:
 
 protected:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
-    inline void incRemainder(const VecType::iterator& start, const VecType::iterator& end, const int& inserts)
+    inline void incRemainder(const IndexVectorType::iterator& start, const IndexVectorType::iterator& end, const int& inserts)
     {
         if (inserts == 0) {
             return;
         }
 
-        for (VecType::iterator incrementer = start;
+        for (IndexVectorType::iterator incrementer = start;
              incrementer != end; ++incrementer) {
             incrementer->second += inserts;
         }
@@ -47,10 +47,10 @@ class ConstructStreakFromIterators
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators)
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators)
     {
         ConstructStreakFromIterators<DIM - 1>()(streak, iterators);
         streak->origin[DIM] = iterators[DIM]->first;
@@ -62,10 +62,10 @@ class ConstructStreakFromIterators<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators)
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators)
     {
         streak->origin[0] = iterators[0]->first;
         streak->endX      = iterators[0]->second;
@@ -77,19 +77,19 @@ class StreakIteratorInitSingleOffset
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     explicit StreakIteratorInitSingleOffset(const std::size_t& offset) :
         offset(offset)
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline std::size_t operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         StreakIteratorInitSingleOffset<DIM - 1> delegate(offset);
         std::size_t newOffset = delegate(streak, iterators, region);
 
-        VecType::const_iterator upperBound =
+        IndexVectorType::const_iterator upperBound =
             std::upper_bound(region.indicesBegin(DIM),
                              region.indicesEnd(DIM),
                              IntPair(0, newOffset),
@@ -109,14 +109,14 @@ class StreakIteratorInitSingleOffset<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     explicit StreakIteratorInitSingleOffset(const std::size_t& offset) :
         offset(offset)
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline std::size_t operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesBegin(0) + offset;
         return offset;
@@ -131,14 +131,14 @@ class StreakIteratorInitSingleOffsetWrapper
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t& offset) :
         offset(offset)
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         StreakIteratorInitSingleOffset<DIM> delegate(offset);
         delegate(streak, iterators, region);
@@ -154,14 +154,14 @@ class StreakIteratorInitOffsets
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
         offsets(offsets)
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         iterators[DIM] = region.indicesBegin(DIM) + offsets[DIM];
 
@@ -178,14 +178,14 @@ class StreakIteratorInitOffsets<0, COORD_DIM>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
         offsets(offsets)
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesBegin(0) + offsets[0];
 
@@ -203,10 +203,10 @@ class StreakIteratorInitBegin
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         iterators[DIM] = region.indicesBegin(DIM);
         StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
@@ -218,10 +218,10 @@ class StreakIteratorInitBegin<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesBegin(0);
 
@@ -236,10 +236,10 @@ class StreakIteratorInitEnd
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region);
         iterators[DIM] = region.indicesEnd(DIM);
@@ -251,10 +251,10 @@ class StreakIteratorInitEnd<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, VecType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
         iterators[0] = region.indicesEnd(0);
     }
@@ -336,8 +336,10 @@ public:
     friend class LibGeoDecomp::RegionTest;
 
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
     typedef RegionStreakIterator<DIM, Region<DIM> > StreakIterator;
+    typedef Coord<DIM> vector_type;
+    typedef CoordBox<DIM> cube_type;
 
     class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const Coord<DIM> >
@@ -422,12 +424,17 @@ public:
         return myBoundingBox;
     }
 
-    inline const std::size_t& size() const
+    inline std::size_t size() const
     {
         if (geometryCacheTainted) {
             resetGeometryCache();
         }
         return mySize;
+    }
+
+    inline const Coord<DIM>& dimension() const
+    {
+        return boundingBox().dimensions;
     }
 
     inline std::size_t numStreaks() const
@@ -798,23 +805,23 @@ public:
         return indices[dim].size();
     }
 
-    inline VecType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
+    inline IndexVectorType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
     {
         return indices[dim].begin() + offset;
     }
 
-    inline VecType::const_iterator indicesBegin(std::size_t dim) const
+    inline IndexVectorType::const_iterator indicesBegin(std::size_t dim) const
     {
         return indices[dim].begin();
     }
 
-    inline VecType::const_iterator indicesEnd(std::size_t dim) const
+    inline IndexVectorType::const_iterator indicesEnd(std::size_t dim) const
     {
         return indices[dim].end();
     }
 
 private:
-    VecType indices[DIM];
+    IndexVectorType indices[DIM];
     mutable CoordBox<DIM> myBoundingBox;
     mutable std::size_t mySize;
     mutable bool geometryCacheTainted;
@@ -927,12 +934,12 @@ class RegionLookupHelper : public RegionCommonHelper
 {
 public:
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
     {
-        const VecType& indices = region.indices[DIM];
+        const IndexVectorType& indices = region.indices[DIM];
         return (*this)(region, s, 0, indices.size());
     }
 
@@ -940,9 +947,9 @@ public:
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, const int& end)
     {
         int c = s.origin[DIM];
-        const VecType& indices = region.indices[DIM];
+        const IndexVectorType& indices = region.indices[DIM];
 
-        VecType::const_iterator i =
+        IndexVectorType::const_iterator i =
             std::upper_bound(
                 indices.begin() + start,
                 indices.begin() + end,
@@ -953,7 +960,7 @@ public:
         int nextLevelEnd = 0;
 
         if (i != (indices.begin() + start)) {
-            VecType::const_iterator entry = i;
+            IndexVectorType::const_iterator entry = i;
             --entry;
 
             // recurse if found
@@ -981,15 +988,15 @@ class RegionLookupHelper<0> : public RegionCommonHelper
 {
 public:
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
-        const VecType& indices = region.indices[0];
+        const IndexVectorType& indices = region.indices[0];
 
-        VecType::const_iterator cursor =
+        IndexVectorType::const_iterator cursor =
             std::upper_bound(indices.begin() + start, indices.begin() + end,
                              curStreak, RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
@@ -1012,12 +1019,12 @@ class RegionInsertHelper : public RegionCommonHelper
 {
 public:
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
-        VecType& indices = region->indices[DIM];
+        IndexVectorType& indices = region->indices[DIM];
         (*this)(region, s, 0, indices.size());
     }
 
@@ -1025,9 +1032,9 @@ public:
     int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
     {
         int c = s.origin[DIM];
-        VecType& indices = region->indices[DIM];
+        IndexVectorType& indices = region->indices[DIM];
 
-        VecType::iterator i =
+        IndexVectorType::iterator i =
             std::upper_bound(
                 indices.begin() + start,
                 indices.begin() + end,
@@ -1038,7 +1045,7 @@ public:
         int nextLevelEnd = 0;
 
         if (i != (indices.begin() + start)) {
-            VecType::iterator entry = i;
+            IndexVectorType::iterator entry = i;
             --entry;
 
             // short-cut: no need to insert if index already present
@@ -1067,7 +1074,7 @@ public:
 
         nextLevelEnd = nextLevelStart;
 
-        VecType::iterator followingEntries;
+        IndexVectorType::iterator followingEntries;
 
         if (i == indices.end()) {
             indices << IntPair(c, nextLevelStart);
@@ -1090,15 +1097,15 @@ class RegionInsertHelper<0>
 public:
     friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
     inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
-        VecType& indices = region->indices[0];
+        IndexVectorType& indices = region->indices[0];
 
-        VecType::iterator cursor =
+        IndexVectorType::iterator cursor =
             std::upper_bound(indices.begin() + start, indices.begin() + end,
                              curStreak, RegionCommonHelper::pairCompareFirst);
         // This will yield the streak AFTER the current origin
@@ -1154,12 +1161,12 @@ class RegionRemoveHelper : public RegionCommonHelper
 {
 public:
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
-        VecType& indices = region->indices[DIM];
+        IndexVectorType& indices = region->indices[DIM];
         (*this)(region, s, 0, indices.size());
     }
 
@@ -1171,9 +1178,9 @@ public:
     int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, const int& end)
     {
         int c = s.origin[DIM];
-        VecType& indices = region->indices[DIM];
+        IndexVectorType& indices = region->indices[DIM];
 
-        VecType::iterator i =
+        IndexVectorType::iterator i =
             std::upper_bound(
                 indices.begin() + start,
                 indices.begin() + end,
@@ -1185,7 +1192,7 @@ public:
             return 0;
         }
 
-        VecType::iterator entry = i;
+        IndexVectorType::iterator entry = i;
         --entry;
 
         // ditto
@@ -1226,20 +1233,20 @@ class RegionRemoveHelper<0>
 public:
     friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
     int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)
     {
         int c = s.origin[0];
-        VecType& indices = region->indices[0];
+        IndexVectorType& indices = region->indices[0];
         int inserts = 0;
 
         // This will yield the streak AFTER the current origin
         // c. We can't really use lower_bound() as this doesn't
         // replace the < operator by >= but rather by <=, which is
         // IMO really sick...
-        VecType::iterator cursor =
+        IndexVectorType::iterator cursor =
             std::upper_bound(
                 indices.begin() + start,
                 indices.begin() + end,
@@ -1255,13 +1262,13 @@ public:
 
         while (cursor != (indices.begin() + end)) {
             if (intersect(curStreak, *cursor)) {
-                VecType newStreaks(substract(*cursor, curStreak));
+                IndexVectorType newStreaks(substract(*cursor, curStreak));
                 cursor = indices.erase(cursor);
                 int delta = newStreaks.size() - 1;
                 end += delta;
                 inserts += delta;
 
-                for (VecType::iterator i = newStreaks.begin(); i != newStreaks.end(); ++i) {
+                for (IndexVectorType::iterator i = newStreaks.begin(); i != newStreaks.end(); ++i) {
                     cursor = indices.insert(cursor, *i);
                     ++cursor;
                 }
@@ -1285,7 +1292,7 @@ private:
              (b.first <= a.first && a.first < b.second));
     }
 
-    inline VecType substract(const IntPair& base, const IntPair& minuend) const
+    inline IndexVectorType substract(const IntPair& base, const IntPair& minuend) const
     {
         if (!intersect(base, minuend)) {
             return std::vector<IntPair>(1, base);

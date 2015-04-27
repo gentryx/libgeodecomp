@@ -15,7 +15,7 @@ class RegionTest : public CxxTest::TestSuite
 public:
     typedef std::vector<Coord<2> > CoordVector;
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     void setUp()
     {
@@ -150,7 +150,7 @@ public:
     void testSubstract()
     {
         RegionHelpers::RegionRemoveHelper<0> h;
-        Region<2>::VecType expected;
+        Region<2>::IndexVectorType expected;
 
         TS_ASSERT_EQUALS(
             expected, h.substract(IntPair(40, 50),
@@ -569,6 +569,18 @@ public:
         TS_ASSERT_EQUALS(std::size_t(88), c.size());
     }
 
+    void testDimension()
+    {
+        Region<3> r;
+        TS_ASSERT_EQUALS(Coord<3>(), r.dimension());
+
+        r << Streak<3>(Coord<3>(-100, -90, -80), 200);
+        TS_ASSERT_EQUALS(Coord<3>(300, 1, 1), r.dimension());
+
+        r << Coord<3>(10, 20, 30);
+        TS_ASSERT_EQUALS(Coord<3>(300, 111, 111), r.dimension());
+    }
+
     void testExpand1()
     {
         //
@@ -638,7 +650,7 @@ public:
 
     void testDelete()
     {
-        Region<2>::VecType expected;
+        Region<2>::IndexVectorType expected;
         expected << IntPair(0, 10)  // 0
                                     // 1
                  << IntPair(0, 10)  // 2

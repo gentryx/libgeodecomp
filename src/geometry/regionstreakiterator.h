@@ -14,9 +14,9 @@ class Compare
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
-    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
+    inline bool operator()(const IndexVectorType::const_iterator *a, const IndexVectorType::const_iterator *b)
     {
         if (a[DIM] != b[DIM]) {
             return false;
@@ -31,9 +31,9 @@ class Compare<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
-    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
+    inline bool operator()(const IndexVectorType::const_iterator *a, const IndexVectorType::const_iterator *b)
     {
         return a[0] == b[0];
     }
@@ -52,7 +52,7 @@ public:
     template<int> friend class InitIterators;
     template<int> friend class Region;
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<typename INIT_HELPER>
     inline RegionStreakIterator(const REGION *region, INIT_HELPER initHelper) :
@@ -83,7 +83,7 @@ public:
                 return;
             }
 
-            VecType::const_iterator nextEnd =
+            IndexVectorType::const_iterator nextEnd =
                 region->indicesBegin(i - 1) + (iterators[i] + 1)->second;
 
             if (iterators[i - 1] != nextEnd) {
@@ -121,7 +121,7 @@ public:
     }
 
 private:
-    VecType::const_iterator iterators[DIM];
+    IndexVectorType::const_iterator iterators[DIM];
     Streak<DIM> streak;
     const REGION *region;
 };
