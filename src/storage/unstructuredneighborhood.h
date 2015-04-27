@@ -1,5 +1,8 @@
-#ifndef _UNSTRUCTUREDNEIGHBORHOOD_H_
-#define _UNSTRUCTUREDNEIGHBORHOOD_H_
+#ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDNEIGHBORHOOD_H
+#define LIBGEODECOMP_STORAGE_UNSTRUCTUREDNEIGHBORHOOD_H
+
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_CPP14
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
@@ -157,4 +160,5 @@ public:
 
 }
 
-#endif /* _UNSTRUCTUREDNEIGHBORHOOD_H_ */
+#endif
+#endif

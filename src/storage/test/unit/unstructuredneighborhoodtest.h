@@ -33,6 +33,7 @@ class UntructuredNeighborhoodTest : public CxxTest::TestSuite
 public:
     void testSquareBracketsOperator()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(4), MyCell(), MyCell());
 
         // init elements
@@ -49,10 +50,12 @@ public:
         TS_ASSERT_EQUALS(nb[1], MyCell(1.5));
         TS_ASSERT_EQUALS(nb[2], MyCell(2.5));
         TS_ASSERT_EQUALS(nb[3], MyCell(3.5));
+#endif
     }
 
     void testNeighborhoodSimple()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(4), MyCell(), MyCell());
 
         // init elements
@@ -104,10 +107,12 @@ public:
         TS_ASSERT_EQUALS(it1->second, 2);
         TS_ASSERT_EQUALS(it2->second, 3);
         TS_ASSERT_EQUALS(it3->second, 4);
+#endif
     }
 
     void testNeighborhood()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<MyCell, 1, double, 1, 1> grid(Coord<1>(8), MyCell(), MyCell());
 
         // init adjacency
@@ -169,6 +174,7 @@ public:
             // should never executed
             TS_ASSERT_EQUALS(1, 2);
         }
+#endif
     }
 };
 
