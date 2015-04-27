@@ -289,7 +289,7 @@ endif()
 
 if(WITH_CPP14)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11 -ccbin=g++-4.6.4")
+  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
 endif()
 
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
