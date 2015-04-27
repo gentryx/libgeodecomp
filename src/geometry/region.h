@@ -582,10 +582,8 @@ public:
 
     inline void operator-=(const Region& other)
     {
-        if(other.empty()) return;
-        for (StreakIterator i = other.beginStreak(); i != other.endStreak(); ++i) {
-            *this >> *i;
-        }
+        Region newValue = *this - other;
+        *this = newValue;
     }
 
     /**
@@ -594,8 +592,62 @@ public:
      */
     inline Region operator-(const Region& other) const
     {
-        Region ret(*this);
-        ret -= other;
+        Region ret;
+        // these conditionals are less a shortcut but more a guarantee
+        // that the derefernce below will succeed:
+        if (this->empty()) {
+            return ret;
+        }
+        if (other.empty()) {
+            return *this;
+        }
+
+        StreakIterator myIter = beginStreak();
+        StreakIterator otherIter = other.beginStreak();
+
+        StreakIterator myEnd = endStreak();
+        StreakIterator otherEnd = other.endStreak();
+
+        Streak<DIM> otherIterStreak = *otherIter;
+        Streak<DIM> cursor = *myIter;
+
+        for (;;) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(cursor, otherIterStreak)) {
+                int intersectionOriginX = (std::max)(cursor.origin.x(), otherIter->origin.x());
+                int intersectionEndX = (std::min)(cursor.endX, otherIter->endX);
+
+                ret << Streak<DIM>(cursor.origin, intersectionOriginX);
+                cursor.origin.x() = intersectionEndX;
+            }
+
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, otherIterStreak)) {
+                ret << cursor;
+                ++myIter;
+
+                if (myIter == myEnd) {
+                    break;
+                } else {
+                    cursor = *myIter;
+                }
+            } else {
+                ++otherIter;
+                if (otherIter == otherEnd) {
+                    break;
+                } else {
+                    otherIterStreak = *otherIter;
+                }
+            }
+        }
+
+        // don't loose the remainder
+        ret << cursor;
+        if (myIter != myEnd) {
+            ++myIter;
+            for (; myIter != myEnd; ++myIter) {
+                ret << *myIter;
+            }
+        }
+
         return ret;
     }
 
@@ -650,6 +702,7 @@ public:
 
     inline Region operator+(const Region& other) const
     {
+        // fixme: speedup!
         Region ret(*this);
         ret += other;
         return ret;

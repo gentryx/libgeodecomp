@@ -713,7 +713,8 @@ public:
         }
 
         expanded = c.expand();
-        TS_ASSERT_EQUALS(expected, expanded -c);
+        Region<2> ring = expanded - c;
+        TS_ASSERT_EQUALS(expected, ring);
     }
 
     void testAndAssignmentOperator()
