@@ -163,6 +163,145 @@ public:
     }
 };
 
+class RegionSubtract : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "RegionSubtract";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Region<3> r1;
+            Region<3> r2;
+
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            for (int z = 1; z < (dim.z() - 1); ++z) {
+                for (int y = 1; y < (dim.y() - 1); ++y) {
+                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+                }
+            }
+
+            Region<3> r3 = r1 - r2;
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class RegionUnion : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "RegionUnion";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Region<3> r1;
+            Region<3> r2;
+
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            for (int z = 1; z < (dim.z() - 1); ++z) {
+                for (int y = 1; y < (dim.y() - 1); ++y) {
+                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+                }
+            }
+
+            Region<3> r3 = r1 + r2;
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class RegionExpand : public CPUBenchmark
+{
+public:
+    RegionExpand(int expansionWidth) :
+        expansionWidth(expansionWidth)
+    {}
+
+    std::string family()
+    {
+        std::stringstream buf;
+        buf << "RegionExpand" << expansionWidth;
+        return buf.str();
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Region<3> r1;
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            Region<3> r2 = r1.expand(expansionWidth);
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    int expansionWidth;
+};
+
 class CoordEnumerationVanilla : public CPUBenchmark
 {
 public:
@@ -2265,6 +2404,22 @@ int main(int argc, char **argv)
         eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
         eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
         eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
+
+        eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
+        // eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
+
+        eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
+        // eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
+
+        eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
+        eval(RegionExpand(1), toVector(Coord<3>(2048, 2048, 2048)));
+
+        eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
+        eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
+        // eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
 
         eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
         eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
