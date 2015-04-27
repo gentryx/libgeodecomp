@@ -14,11 +14,8 @@
 // (at least the version that ships with C++ Builder 2009)
 #ifndef __CODEGEARC__
 #include <boost/multi_array.hpp>
-#else
-#include <libgeodecomp/misc/supervector.h>
 #endif
 
-#include <boost/foreach.hpp>
 #include <iostream>
 
 namespace LibGeoDecomp {
