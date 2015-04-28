@@ -50,10 +50,10 @@ public:
     typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators)
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const Coord<STREAK_DIM>& offset)
     {
-        ConstructStreakFromIterators<DIM - 1>()(streak, iterators);
-        streak->origin[DIM] = iterators[DIM]->first;
+        ConstructStreakFromIterators<DIM - 1>()(streak, iterators, offset);
+        streak->origin[DIM] = iterators[DIM]->first + offset[DIM];
     }
 };
 
@@ -65,10 +65,10 @@ public:
     typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators)
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const Coord<STREAK_DIM>& offset)
     {
-        streak->origin[0] = iterators[0]->first;
-        streak->endX      = iterators[0]->second;
+        streak->origin[0] = iterators[0]->first  + offset[0];
+        streak->endX      = iterators[0]->second + offset[0];
     }
 };
 
@@ -79,14 +79,14 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffset(const std::size_t& offset) :
-        offset(offset)
+    explicit StreakIteratorInitSingleOffset(const std::size_t& offsetIndex) :
+        offsetIndex(offsetIndex)
     {}
 
     template<int STREAK_DIM, typename REGION>
     inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
-        StreakIteratorInitSingleOffset<DIM - 1> delegate(offset);
+        StreakIteratorInitSingleOffset<DIM - 1> delegate(offsetIndex);
         std::size_t newOffset = delegate(streak, iterators, region);
 
         IndexVectorType::const_iterator upperBound =
@@ -101,7 +101,7 @@ public:
     }
 
 private:
-    const std::size_t& offset;
+    const std::size_t& offsetIndex;
 };
 
 template<>
@@ -111,19 +111,19 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffset(const std::size_t& offset) :
-        offset(offset)
+    explicit StreakIteratorInitSingleOffset(const std::size_t& offsetIndex) :
+        offsetIndex(offsetIndex)
     {}
 
     template<int STREAK_DIM, typename REGION>
     inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
     {
-        iterators[0] = region.indicesBegin(0) + offset;
-        return offset;
+        iterators[0] = region.indicesBegin(0) + offsetIndex;
+        return offsetIndex;
     }
 
 private:
-    const std::size_t& offset;
+    const std::size_t& offsetIndex;
 };
 
 template<int DIM>
@@ -133,20 +133,20 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t& offset) :
-        offset(offset)
+    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t& offsetIndex) :
+        offsetIndex(offsetIndex)
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
-        StreakIteratorInitSingleOffset<DIM> delegate(offset);
+        StreakIteratorInitSingleOffset<DIM> delegate(offsetIndex);
         delegate(streak, iterators, region);
-        ConstructStreakFromIterators<DIM>()(streak, iterators);
+        ConstructStreakFromIterators<DIM>()(streak, iterators, offset);
     }
 
 private:
-    const std::size_t& offset;
+    const std::size_t& offsetIndex;
 };
 
 template<int DIM, int COORD_DIM>
@@ -161,12 +161,12 @@ public:
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
         iterators[DIM] = region.indicesBegin(DIM) + offsets[DIM];
 
         StreakIteratorInitOffsets<DIM - 1, COORD_DIM> delegate(offsets);
-        delegate(streak, iterators, region);
+        delegate(streak, iterators, region, offset);
     }
 
 private:
@@ -185,12 +185,12 @@ public:
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
         iterators[0] = region.indicesBegin(0) + offsets[0];
 
         if (int(region.indicesSize(0)) > offsets[0]) {
-            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators);
+            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators, offset);
         }
     }
 
@@ -206,10 +206,10 @@ public:
     typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
         iterators[DIM] = region.indicesBegin(DIM);
-        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region);
+        StreakIteratorInitBegin<DIM - 1>()(streak, iterators, region, offset);
     }
 };
 
@@ -221,12 +221,12 @@ public:
     typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
         iterators[0] = region.indicesBegin(0);
 
         if (region.indicesSize(0) > 0) {
-            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators);
+            ConstructStreakFromIterators<STREAK_DIM - 1>()(streak, iterators, offset);
         }
     }
 };
@@ -239,9 +239,9 @@ public:
     typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
-        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region);
+        StreakIteratorInitEnd<DIM - 1>()(streak, iterators, region, offset);
         iterators[DIM] = region.indicesEnd(DIM);
     }
 };
@@ -254,7 +254,7 @@ public:
     typedef std::vector<IntPair> IndexVectorType;
 
     template<int STREAK_DIM, typename REGION>
-    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& offset) const
     {
         iterators[0] = region.indicesEnd(0);
     }
@@ -796,14 +796,14 @@ public:
         return (indices[0].size() == 0);
     }
 
-    inline StreakIterator beginStreak() const
+    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>());
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
     }
 
-    inline StreakIterator endStreak() const
+    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>()) const
     {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>());
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset);
     }
 
     /**

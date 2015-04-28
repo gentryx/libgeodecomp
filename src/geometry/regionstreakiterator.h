@@ -51,14 +51,20 @@ public:
 
     template<int> friend class InitIterators;
     template<int> friend class Region;
+    friend class RegionStreakIteratorTest;
+
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
     template<typename INIT_HELPER>
-    inline RegionStreakIterator(const REGION *region, INIT_HELPER initHelper) :
+    inline RegionStreakIterator(
+        const REGION *region,
+        INIT_HELPER initHelper,
+        const Coord<DIM>& offset = Coord<DIM>()) :
+        offset(offset),
         region(region)
     {
-        initHelper(&streak, iterators, *region);
+        initHelper(&streak, iterators, *region, offset);
     }
 
     inline void operator++()
@@ -70,8 +76,8 @@ public:
             }
             return;
         } else {
-            streak.origin[0] = iterators[0]->first;
-            streak.endX = iterators[0]->second;
+            streak.origin[0] = iterators[0]->first + offset[0];
+            streak.endX = iterators[0]->second + offset[0];
         }
 
         for (int i = 1; i < DIM; ++i) {
@@ -91,7 +97,7 @@ public:
             }
 
             ++iterators[i];
-            streak.origin[i] = iterators[i]->first;
+            streak.origin[i] = iterators[i]->first + offset[i];
         }
     }
 
@@ -123,6 +129,7 @@ public:
 private:
     IndexVectorType::const_iterator iterators[DIM];
     Streak<DIM> streak;
+    Coord<DIM> offset;
     const REGION *region;
 };
 
