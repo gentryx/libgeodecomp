@@ -2419,7 +2419,7 @@ int main(int argc, char **argv)
 
         eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
         eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
-        // eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
+        eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
 
         eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
         eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
