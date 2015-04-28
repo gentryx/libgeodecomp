@@ -330,6 +330,7 @@ class Region
 public:
     friend class Serialization;
 
+    template<int MY_DIM> friend void swap(Region<MY_DIM>&, Region<MY_DIM>&);
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionRemoveHelper;
@@ -444,23 +445,47 @@ public:
 
     inline Region expand(const unsigned& width=1) const
     {
-        Region ret;
-        Coord<DIM> dia = Coord<DIM>::diagonal(width);
+        return expand(Coord<DIM>::diagonal(width));
+    }
+
+    /**
+     * Expands the region in each dimension d by radii[d] cells.
+     */
+    inline Region expand(const Coord<DIM>& radii) const
+    {
+        using std::swap;
+        Region bufferA;
+        Region bufferB;
+        Region bufferC;
 
         for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
-
-            Coord<DIM> boxOrigin = streak.origin - dia;
-            Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
-            boxDim.x() += streak.length() - 1;
-
-            CoordBox<DIM> box(boxOrigin, boxDim);
-            ret << box;
+            streak.origin[0] -= radii[0];
+            streak.endX += radii[0];
+            bufferA << streak;
         }
 
-        return ret;
+        for (int d = 1; d < DIM; ++d) {
+            for (int i = -radii[d]; i <= radii[d]; ++i) {
+                Coord<DIM> offset;
+                offset[d] = i;
+                merge(
+                    bufferC,
+                    bufferA.beginStreak(offset),
+                    bufferA.endStreak(offset),
+                    bufferB.beginStreak(),
+                    bufferB.endStreak());
+                swap(bufferB, bufferC);
+            }
+
+            swap(bufferA, bufferB);
+            bufferB.clear();
+        }
+
+        return bufferA;
     }
 
+    // fixme: slow
     /**
      * does the same as expand, but will wrap overlap at edges
      * correctly. The instance of the TOPOLOGY is actually unused, but
@@ -705,53 +730,74 @@ public:
         *this = newValue;
     }
 
-    inline Region operator+(const Region& other) const
+    inline static void merge(
+        Region& ret,
+        const StreakIterator& beginA, const StreakIterator& endA,
+        const StreakIterator& beginB, const StreakIterator& endB)
     {
-        Region ret;
-        // these conditionals are less a shortcut but more a guarantee
-        // that the derefernce below will succeed:
-        if (this->empty()) {
-            return other;
+        ret.clear();
+
+        // fixme: test this!
+        if (beginA == endA) {
+            for (StreakIterator i = beginB; i != endB; ++i) {
+                ret << *i;
+            }
+            return;
         }
-        if (other.empty()) {
-            return *this;
+
+        // fixme: test this!
+        if (beginB == endB) {
+            for (StreakIterator i = beginA; i != endA; ++i) {
+                ret << *i;
+            }
+            return;
         }
 
-        StreakIterator myIter = beginStreak();
-        StreakIterator otherIter = other.beginStreak();
+        StreakIterator iterA = beginA;
+        StreakIterator iterB = beginB;
 
-        StreakIterator myEnd = endStreak();
-        StreakIterator otherEnd = other.endStreak();
+        StreakIterator myEnd = endA;
+        StreakIterator otherEnd = endB;
 
-        Streak<DIM> otherIterStreak = *otherIter;
-        Streak<DIM> cursor = *myIter;
+        Streak<DIM> iterBStreak = *iterB;
+        Streak<DIM> cursor = *iterA;
 
         for (;;) {
-            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, otherIterStreak)) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, iterBStreak)) {
                 ret << cursor;
-                ++myIter;
-                if (myIter == myEnd) {
+                ++iterA;
+                if (iterA == endA) {
                     break;
                 } else {
-                    cursor = *myIter;
+                    cursor = *iterA;
                 }
             } else {
-                ret << otherIterStreak;
-                ++otherIter;
-                if (otherIter == otherEnd) {
+                ret << iterBStreak;
+                ++iterB;
+                if (iterB == endB) {
                     break;
                 } else {
-                    otherIterStreak = *otherIter;
+                    iterBStreak = *iterB;
                 }
             }
         }
 
-        for (; myIter != myEnd; ++myIter) {
-            ret << *myIter;
+        for (; iterA != endA; ++iterA) {
+            ret << *iterA;
         }
-        for (; otherIter != otherEnd; ++otherIter) {
-            ret << *otherIter;
+        for (; iterB != endB; ++iterB) {
+            ret << *iterB;
         }
+    }
+
+    inline Region operator+(const Region& other) const
+    {
+        Region ret;
+
+        merge(
+            ret,
+            this->beginStreak(), this->endStreak(),
+            other.beginStreak(), other.endStreak());
 
         return ret;
     }
@@ -1141,6 +1187,13 @@ public:
     typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        IndexVectorType& indices = region->indices[0];
+        (*this)(region, s, 0, indices.size());
+    }
+
+    template<int MY_DIM>
     inline int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, int start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
@@ -1352,6 +1405,17 @@ private:
         return ret;
     }
 };
+
+}
+
+template<int DIM>
+inline void swap(Region<DIM>& regionA, Region<DIM>& regionB)
+{
+    using std::swap;
+    swap(regionA.indices,              regionB.indices);
+    swap(regionA.myBoundingBox,        regionB.myBoundingBox);
+    swap(regionA.mySize,               regionB.mySize);
+    swap(regionA.geometryCacheTainted, regionB.geometryCacheTainted);
 
 }
 

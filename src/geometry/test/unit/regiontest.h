@@ -1071,6 +1071,50 @@ public:
         TS_ASSERT_EQUALS(actual, expected);
     }
 
+    void testExpandWithRadius1D()
+    {
+        Region<1> r;
+        r << Streak<1>(Coord<1>( 10),  30)
+          << Streak<1>(Coord<1>( 45),  55)
+          << Streak<1>(Coord<1>(100), 130);
+
+        Region<1> actual = r.expand(Coord<1>(10));
+
+        Region<1> expected;
+        expected << Streak<1>(Coord<1>( 0),  65)
+                 << Streak<1>(Coord<1>(90), 140);
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testExpandWithRadius2D()
+    {
+        Region<2> r;
+        r << CoordBox<2>(Coord<2>(10, 20), Coord<2>(5, 6));
+
+        Region<2> actual = r.expand(Coord<2>(2, 1));
+
+        Region<2> expected;
+        expected << CoordBox<2>(Coord<2>(8, 19), Coord<2>(9, 8));
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testExpandWithRadius3D()
+    {
+        Region<3> r;
+        r << CoordBox<3>(Coord<3>(100, 120, 140), Coord<3>(50, 20, 10))
+          << CoordBox<3>(Coord<3>(300, 300, 300), Coord<3>(20, 40, 30));
+
+        Region<3> actual = r.expand(Coord<3>(5, 6, 7));
+
+        Region<3> expected;
+        expected << CoordBox<3>(Coord<3>( 95, 114, 133), Coord<3>(60, 32, 24))
+                 << CoordBox<3>(Coord<3>(295, 294, 293), Coord<3>(30, 52, 44));
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
     void testBoolean3D()
     {
         Region<3> leftCube, rightCube, frontCube, mergerLR, mergerFL;
@@ -1099,6 +1143,11 @@ public:
         TS_ASSERT_EQUALS(leftCube + frontCube, mergerFL);
         TS_ASSERT_EQUALS(mergerFL - frontCube, leftCube);
         TS_ASSERT_EQUALS(mergerFL - leftCube,  frontCube);
+    }
+
+    void testSwap()
+    {
+        // fixme
     }
 
     void testRemove3D()
