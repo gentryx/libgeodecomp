@@ -724,7 +724,6 @@ public:
         const StreakIterator& beginA, const StreakIterator& endA,
         const StreakIterator& beginB, const StreakIterator& endB)
     {
-        // fixme: test this!
         if (beginA == endA) {
             for (StreakIterator i = beginB; i != endB; ++i) {
                 ret << *i;
@@ -768,7 +767,6 @@ public:
         StreakIterator iterB = beginB;
         StreakIterator iterC = beginC;
 
-        // fixme: test this!
         if (iterA == endA) {
             merge2way(
                 ret,

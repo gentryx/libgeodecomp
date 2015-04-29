@@ -1242,7 +1242,28 @@ public:
 
     void testSwap()
     {
-        // fixme
+        using std::swap;
+        Region<2> region1;
+        Region<2> region2;
+
+        region1 << Streak<2>(Coord<2>(10, 10), 20);
+        region2 << Coord<2>(11, 12);
+
+        TS_ASSERT_EQUALS(region1.size(), 10);
+        TS_ASSERT_EQUALS(region2.size(),  1);
+        TS_ASSERT_EQUALS(region1.boundingBox(), CoordBox<2>(Coord<2>(10, 10), Coord<2>(10, 1)));
+        TS_ASSERT_EQUALS(region2.boundingBox(), CoordBox<2>(Coord<2>(11, 12), Coord<2>( 1, 1)));
+        TS_ASSERT_EQUALS(*region1.beginStreak(), Streak<2>(Coord<2>(10, 10), 20));
+        TS_ASSERT_EQUALS(*region2.beginStreak(), Streak<2>(Coord<2>(11, 12), 12));
+
+        swap(region1, region2);
+
+        TS_ASSERT_EQUALS(region2.size(), 10);
+        TS_ASSERT_EQUALS(region1.size(),  1);
+        TS_ASSERT_EQUALS(region2.boundingBox(), CoordBox<2>(Coord<2>(10, 10), Coord<2>(10, 1)));
+        TS_ASSERT_EQUALS(region1.boundingBox(), CoordBox<2>(Coord<2>(11, 12), Coord<2>( 1, 1)));
+        TS_ASSERT_EQUALS(*region2.beginStreak(), Streak<2>(Coord<2>(10, 10), 20));
+        TS_ASSERT_EQUALS(*region1.beginStreak(), Streak<2>(Coord<2>(11, 12), 12));
     }
 
     void testRemove1D()
@@ -1312,6 +1333,136 @@ public:
         TS_ASSERT_EQUALS(r.indices[0].size(), std::size_t(0));
         TS_ASSERT_EQUALS(r.indices[1].size(), std::size_t(0));
         TS_ASSERT_EQUALS(r.indices[2].size(), std::size_t(0));
+    }
+
+    void testMerge2way()
+    {
+        Region<2> r1;
+        Region<2> r2;
+
+        for (int y = 0; y < 10; ++y) {
+            r1 << Streak<2>(Coord<2>(10, y), 20);
+        }
+
+        Region<2> r3;
+        Region<2>::merge2way(r3, r1.beginStreak(), r1.endStreak(), r2.beginStreak(), r2.endStreak());
+        TS_ASSERT_EQUALS(r3, r1);
+
+        r3.clear();
+        Region<2>::merge2way(r3, r2.beginStreak(), r2.endStreak(), r1.beginStreak(), r1.endStreak());
+        TS_ASSERT_EQUALS(r3, r1);
+
+        Region<2>::merge2way(r2, r3.beginStreak(), r3.endStreak(), r1.beginStreak(), r1.endStreak());
+        TS_ASSERT_EQUALS(r2, r1);
+    }
+    void testMerge3way()
+    {
+        Region<2> r1;
+        Region<2> r2;
+        Region<2> r3;
+
+        for (int y = 0; y < 10; ++y) {
+            r1 << Streak<2>(Coord<2>(10, y), 20);
+            r2 << Streak<2>(Coord<2>(20, y), 20);
+            r3 << Streak<2>(Coord<2>(30, y), 20);
+        }
+
+        Region<2> empty;
+        Region<2> actual;
+        Region<2> expected;
+
+        actual.clear();
+        expected = r1 + r2 + r3;
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(), r1.endStreak(),
+            r2.beginStreak(), r2.endStreak(),
+            r3.beginStreak(), r3.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(), r1.endStreak(),
+            r3.beginStreak(), r3.endStreak(),
+            r2.beginStreak(), r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r3.beginStreak(), r3.endStreak(),
+            r1.beginStreak(), r1.endStreak(),
+            r2.beginStreak(), r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected = r1 + r2;
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(),    r1.endStreak(),
+            r2.beginStreak(),    r2.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(),    r1.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            r2.beginStreak(),    r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            r1.beginStreak(),    r1.endStreak(),
+            r2.beginStreak(),    r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected = r3;
+        Region<2>::merge3way(
+            actual,
+            r3.beginStreak(),    r3.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r3.beginStreak(),    r3.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            r3.beginStreak(),    r3.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
     }
 
     void testStreakIterator()
