@@ -653,11 +653,10 @@ public:
         StreakIterator myEnd = endStreak();
         StreakIterator otherEnd = other.endStreak();
 
-        Streak<DIM> otherIterStreak = *otherIter;
         Streak<DIM> cursor = *myIter;
 
         for (;;) {
-            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(cursor, otherIterStreak)) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(cursor, *otherIter)) {
                 int intersectionOriginX = (std::max)(cursor.origin.x(), otherIter->origin.x());
                 int intersectionEndX = (std::min)(cursor.endX, otherIter->endX);
 
@@ -665,7 +664,7 @@ public:
                 cursor.origin.x() = intersectionEndX;
             }
 
-            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, otherIterStreak)) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, *otherIter)) {
                 ret << cursor;
                 ++myIter;
 
@@ -678,8 +677,6 @@ public:
                 ++otherIter;
                 if (otherIter == otherEnd) {
                     break;
-                } else {
-                    otherIterStreak = *otherIter;
                 }
             }
         }
@@ -766,35 +763,26 @@ public:
 
         StreakIterator iterA = beginA;
         StreakIterator iterB = beginB;
-
-        Streak<DIM> streakB = *iterB;
-        Streak<DIM> streakA = *iterA;
         Streak<DIM> lastInsert;
 
         for (;;) {
-            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(streakA, streakB)) {
-                if (streakA != lastInsert) {
-                    ret << streakA;
-                    lastInsert = streakA;
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterA, *iterB)) {
+                if (*iterA != lastInsert) {
+                    ret << *iterA;
+                    lastInsert = *iterA;
                 }
                 ++iterA;
-
                 if (iterA == endA) {
                     break;
-                } else {
-                    streakA = *iterA;
                 }
             } else {
-                if (streakB != lastInsert) {
-                    ret << streakB;
-                    lastInsert = streakB;
+                if (*iterB != lastInsert) {
+                    ret << *iterB;
+                    lastInsert = *iterB;
                 }
                 ++iterB;
-
                 if (iterB == endB) {
                     break;
-                } else {
-                    streakB = *iterB;
                 }
             }
         }
