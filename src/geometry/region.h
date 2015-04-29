@@ -774,19 +774,28 @@ public:
 
         Streak<DIM> iterBStreak = *iterB;
         Streak<DIM> cursor = *iterA;
+        Streak<DIM> lastInsert;
 
         for (;;) {
             if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, iterBStreak)) {
-                ret << cursor;
+                if (cursor != lastInsert) {
+                    ret << cursor;
+                    lastInsert = cursor;
+                }
                 ++iterA;
+
                 if (iterA == endA) {
                     break;
                 } else {
                     cursor = *iterA;
                 }
             } else {
-                ret << iterBStreak;
+                if (iterBStreak != lastInsert) {
+                    ret << iterBStreak;
+                    lastInsert = iterBStreak;
+                }
                 ++iterB;
+
                 if (iterB == endB) {
                     break;
                 } else {
