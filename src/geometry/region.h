@@ -454,24 +454,23 @@ public:
     inline Region expand(const Coord<DIM>& radii) const
     {
         using std::swap;
-        Region bufferA;
-        Region bufferB;
-        Region bufferC;
+        Region accumulator;
+        Region buffer;
 
         // expansion in X dimension is a simple 1-pass operation:
         for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
             streak.origin[0] -= radii[0];
             streak.endX += radii[0];
-            bufferA << streak;
+            accumulator << streak;
         }
 
         // expand into other dimensions, one after another
         for (int d = 1; d < DIM; ++d) {
-            expandInOneDimension(d, radii[d], bufferA, bufferB, bufferC);
+            expandInOneDimension(d, radii[d], accumulator, buffer);
         }
 
-        return bufferA;
+        return accumulator;
     }
 
     // fixme: slow
@@ -975,6 +974,7 @@ private:
             myBoundingBox = CoordBox<DIM>();
         } else {
             Streak<DIM> someStreak = *beginStreak();
+            // fixme: names...
             Coord<DIM> min = someStreak.origin;
             Coord<DIM> max = someStreak.origin;
 
@@ -1070,37 +1070,52 @@ private:
     }
 
     static inline void expandInOneDimension(
-        int dim, int radius, Region<DIM>& bufferA, Region<DIM>& bufferB, Region<DIM>& bufferC)
+        int dim, int radius, Region<DIM>& accumulator, Region<DIM>& buffer)
     {
-        for (int i = 1; i <= radius; ++i) {
-            Coord<DIM> offsetA;
-            Coord<DIM> offsetB;
-            offsetA[dim] = -i;
-            offsetB[dim] =  i;
+        using std::swap;
+        int targetWidth = 2 * radius + 1;
+        int width = 1;
 
-            bufferC.clear();
+        for (; width < ((targetWidth + 2) / 3); width *= 3) {
+            Coord<DIM> offset;
+            offset[dim] = width;
+            buffer.clear();
+
             merge3way(
-                bufferC,
-                bufferA.beginStreak(offsetA),
-                bufferA.endStreak(offsetA),
-                bufferA.beginStreak(offsetB),
-                bufferA.endStreak(offsetB),
-                bufferB.beginStreak(),
-                bufferB.endStreak());
-            swap(bufferB, bufferC);
+                buffer,
+                accumulator.beginStreak(-offset),
+                accumulator.endStreak(-offset),
+                accumulator.beginStreak(),
+                accumulator.endStreak(),
+                accumulator.beginStreak(offset),
+                accumulator.endStreak(offset));
+            swap(accumulator, buffer);
         }
 
-        bufferC.clear();
-        merge2way(
-            bufferC,
-            bufferA.beginStreak(),
-            bufferA.endStreak(),
-            bufferB.beginStreak(),
-            bufferB.endStreak());
-        swap(bufferA, bufferC);
+        if (width < targetWidth) {
+            Coord<DIM> finalOffset;
+            finalOffset[dim] = radius - width / 2;
+            buffer.clear();
 
-        bufferB.clear();
-        bufferC.clear();
+            if ((width * 2) < targetWidth) {
+                merge3way(
+                    buffer,
+                    accumulator.beginStreak(-finalOffset),
+                    accumulator.endStreak(-finalOffset),
+                    accumulator.beginStreak(),
+                    accumulator.endStreak(),
+                    accumulator.beginStreak(finalOffset),
+                    accumulator.endStreak(finalOffset));
+            } else {
+                merge2way(
+                    buffer,
+                    accumulator.beginStreak(-finalOffset),
+                    accumulator.endStreak(-finalOffset),
+                    accumulator.beginStreak(finalOffset),
+                    accumulator.endStreak(finalOffset));
+            }
+            swap(buffer, accumulator);
+        }
     }
 };
 
