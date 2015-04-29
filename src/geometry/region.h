@@ -466,19 +466,32 @@ public:
         }
 
         for (int d = 1; d < DIM; ++d) {
-            for (int i = -radii[d]; i <= radii[d]; ++i) {
-                Coord<DIM> offset;
-                offset[d] = i;
+            for (int i = 1; i <= radii[d]; ++i) {
+                Coord<DIM> offsetA;
+                Coord<DIM> offsetB;
+                offsetA[d] = -i;
+                offsetB[d] =  i;
                 merge(
                     bufferC,
-                    bufferA.beginStreak(offset),
-                    bufferA.endStreak(offset),
+                    bufferA.beginStreak(offsetA),
+                    bufferA.endStreak(offsetA),
                     bufferB.beginStreak(),
                     bufferB.endStreak());
-                swap(bufferB, bufferC);
+                merge(
+                    bufferB,
+                    bufferA.beginStreak(offsetB),
+                    bufferA.endStreak(offsetB),
+                    bufferC.beginStreak(),
+                    bufferC.endStreak());
             }
 
-            swap(bufferA, bufferB);
+            merge(
+                bufferC,
+                bufferA.beginStreak(),
+                bufferA.endStreak(),
+                bufferB.beginStreak(),
+                bufferB.endStreak());
+            swap(bufferA, bufferC);
             bufferB.clear();
         }
 
