@@ -612,6 +612,8 @@ public:
      */
     inline Region operator-(const Region& other) const
     {
+        using std::max;
+        using std::min;
         Region ret;
         // these conditionals are less a shortcut but more a guarantee
         // that the derefernce below will succeed:
@@ -632,8 +634,8 @@ public:
 
         for (;;) {
             if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(cursor, *otherIter)) {
-                int intersectionOriginX = (std::max)(cursor.origin.x(), otherIter->origin.x());
-                int intersectionEndX = (std::min)(cursor.endX, otherIter->endX);
+                int intersectionOriginX = max(cursor.origin.x(), otherIter->origin.x());
+                int intersectionEndX = min(cursor.endX, otherIter->endX);
 
                 ret << Streak<DIM>(cursor.origin, intersectionOriginX);
                 cursor.origin.x() = intersectionEndX;
@@ -679,6 +681,8 @@ public:
      */
     inline Region operator&(const Region& other) const
     {
+        using std::max;
+        using std::min;
         Region ret;
         StreakIterator myIter = beginStreak();
         StreakIterator otherIter = other.beginStreak();
@@ -694,8 +698,8 @@ public:
 
             if (RegionHelpers::RegionIntersectHelper<DIM - 1>::intersects(*myIter, *otherIter)) {
                 Streak<DIM> intersection = *myIter;
-                intersection.origin.x() = (std::max)(myIter->origin.x(), otherIter->origin.x());
-                intersection.endX = (std::min)(myIter->endX, otherIter->endX);
+                intersection.origin.x() = max(myIter->origin.x(), otherIter->origin.x());
+                intersection.endX = min(myIter->endX, otherIter->endX);
                 ret << intersection;
             }
 
@@ -974,9 +978,8 @@ private:
             myBoundingBox = CoordBox<DIM>();
         } else {
             Streak<DIM> someStreak = *beginStreak();
-            // fixme: names...
-            Coord<DIM> min = someStreak.origin;
-            Coord<DIM> max = someStreak.origin;
+            Coord<DIM> minCoord = someStreak.origin;
+            Coord<DIM> maxCoord = someStreak.origin;
 
             mySize = 0;
             for (StreakIterator i = beginStreak();
@@ -985,13 +988,13 @@ private:
                 Coord<DIM> right = i->origin;
                 right.x() = i->endX - 1;
 
-                min = (min.min)(left);
-                max = (max.max)(right);
+                minCoord = (minCoord.min)(left);
+                maxCoord = (maxCoord.max)(right);
                 mySize += i->endX - i->origin.x();
             }
 
             myBoundingBox =
-                CoordBox<DIM>(min, max - min + Coord<DIM>::diagonal(1));
+                CoordBox<DIM>(minCoord, maxCoord - minCoord + Coord<DIM>::diagonal(1));
         }
     }
 
@@ -1005,10 +1008,12 @@ private:
         const Streak<DIM>& s,
         const Coord<DIM>& dimensions) const
     {
+        using std::max;
+        using std::min;
         int width = dimensions.x();
         Streak<DIM> buf = s;
-        buf.origin.x() = (std::max)(buf.origin.x(), 0);
-        buf.endX = (std::min)(width, buf.endX);
+        buf.origin.x() = max(buf.origin.x(), 0);
+        buf.endX = min(width, buf.endX);
         return buf;
     }
 
@@ -1018,12 +1023,13 @@ private:
         Region *target,
         const Coord<DIM>& dimensions) const
     {
+        using std::min;
         int width = dimensions.x();
 
         int currentX = streak.origin.x();
         if (currentX < 0) {
             Streak<DIM> section = streak;
-            section.endX = (std::min)(streak.endX, 0);
+            section.endX = min(streak.endX, 0);
             currentX = section.endX;
 
             // normalize left overhang
@@ -1035,7 +1041,7 @@ private:
         if (currentX < streak.endX) {
             Streak<DIM> section = streak;
             section.origin.x() = currentX;
-            section.endX = (std::min)(streak.endX, width);
+            section.endX = min(streak.endX, width);
             currentX = section.endX;
 
             normalizeStreak<TOPOLOGY>(section, target, dimensions);
@@ -1360,8 +1366,10 @@ private:
 
     inline IntPair fuse(const IntPair& a, const IntPair& b) const
     {
-        return IntPair((std::min)(a.first, b.first),
-                       (std::max)(a.second, b.second));
+        using std::min;
+        using std::max;
+        return IntPair(min(a.first,  b.first),
+                       max(a.second, b.second));
     }
 };
 
