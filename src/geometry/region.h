@@ -458,6 +458,7 @@ public:
         Region bufferB;
         Region bufferC;
 
+        // expansion in X dimension is a simple 1-pass operation:
         for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
             Streak<DIM> streak = *i;
             streak.origin[0] -= radii[0];
@@ -465,36 +466,9 @@ public:
             bufferA << streak;
         }
 
+        // expand into other dimensions, one after another
         for (int d = 1; d < DIM; ++d) {
-            for (int i = 1; i <= radii[d]; ++i) {
-                Coord<DIM> offsetA;
-                Coord<DIM> offsetB;
-                offsetA[d] = -i;
-                offsetB[d] =  i;
-
-                bufferC.clear();
-                merge3way(
-                    bufferC,
-                    bufferA.beginStreak(offsetA),
-                    bufferA.endStreak(offsetA),
-                    bufferA.beginStreak(offsetB),
-                    bufferA.endStreak(offsetB),
-                    bufferB.beginStreak(),
-                    bufferB.endStreak());
-                swap(bufferB, bufferC);
-            }
-
-            bufferC.clear();
-            merge2way(
-                bufferC,
-                bufferA.beginStreak(),
-                bufferA.endStreak(),
-                bufferB.beginStreak(),
-                bufferB.endStreak());
-            swap(bufferA, bufferC);
-
-            bufferB.clear();
-            bufferC.clear();
+            expandInOneDimension(d, radii[d], bufferA, bufferB, bufferC);
         }
 
         return bufferA;
@@ -1093,6 +1067,40 @@ private:
         if (ret.origin != Coord<DIM>::diagonal(-1)) {
             (*target) << ret;
         }
+    }
+
+    static inline void expandInOneDimension(
+        int dim, int radius, Region<DIM>& bufferA, Region<DIM>& bufferB, Region<DIM>& bufferC)
+    {
+        for (int i = 1; i <= radius; ++i) {
+            Coord<DIM> offsetA;
+            Coord<DIM> offsetB;
+            offsetA[dim] = -i;
+            offsetB[dim] =  i;
+
+            bufferC.clear();
+            merge3way(
+                bufferC,
+                bufferA.beginStreak(offsetA),
+                bufferA.endStreak(offsetA),
+                bufferA.beginStreak(offsetB),
+                bufferA.endStreak(offsetB),
+                bufferB.beginStreak(),
+                bufferB.endStreak());
+            swap(bufferB, bufferC);
+        }
+
+        bufferC.clear();
+        merge2way(
+            bufferC,
+            bufferA.beginStreak(),
+            bufferA.endStreak(),
+            bufferB.beginStreak(),
+            bufferB.endStreak());
+        swap(bufferA, bufferC);
+
+        bufferB.clear();
+        bufferC.clear();
     }
 };
 
