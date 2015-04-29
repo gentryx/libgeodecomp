@@ -473,7 +473,6 @@ public:
         return accumulator;
     }
 
-    // fixme: slow
     /**
      * does the same as expand, but will wrap overlap at edges
      * correctly. The instance of the TOPOLOGY is actually unused, but
@@ -485,26 +484,17 @@ public:
         const Coord<DIM>& dimensions,
         TOPOLOGY /* unused */) const
     {
-        Region ret;
         Coord<DIM> dia = Coord<DIM>::diagonal(width);
+        Region buffer = expand(dia);
+        Region ret;
 
-        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+        for (StreakIterator i = buffer.beginStreak(); i != buffer.endStreak(); ++i) {
             Streak<DIM> streak = *i;
-
-            Coord<DIM> boxOrigin = streak.origin - dia;
-            Coord<DIM> boxDim = Coord<DIM>::diagonal(2 * width + 1);
-            boxDim.x() += streak.length() - 1;
-
-            CoordBox<DIM> box(boxOrigin, boxDim);
-
-            for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
-                Streak<DIM> newStreak(*i);
-                if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
-                    splitStreak<TOPOLOGY>(newStreak, &ret, dimensions);
-                } else {
-                    normalizeStreak<TOPOLOGY>(
-                        trimStreak(newStreak, dimensions), &ret, dimensions);
-                }
+            if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
+                splitStreak<TOPOLOGY>(streak, &ret, dimensions);
+            } else {
+                normalizeStreak<TOPOLOGY>(
+                    trimStreak(streak, dimensions), &ret, dimensions);
             }
         }
 
