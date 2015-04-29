@@ -1094,7 +1094,7 @@ public:
     template<int MY_DIM>
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
     {
-        const VecType& indices = region.indices[0];
+        const IndexVectorType& indices = region.indices[0];
         return (*this)(region, s, 0, indices.size());
     }
 
@@ -1102,14 +1102,10 @@ public:
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
-<<<<<<< /home/gentryx/libgeodecomp4/src/geometry/region.h
         const IndexVectorType& indices = region.indices[0];
-=======
-        const VecType& indices = region.indices[0];
         if (indices.empty()) {
             return false;
         }
->>>>>>> /tmp/region.h~other.62Io8q
 
         IndexVectorType::const_iterator cursor =
             std::upper_bound(indices.begin() + start, indices.begin() + end,
@@ -1218,13 +1214,6 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[0];
-        (*this)(region, s, 0, indices.size());
-    }
-
-    template<int MY_DIM>
-    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
-    {
-        VecType& indices = region->indices[0];
         (*this)(region, s, 0, indices.size());
     }
 
@@ -1367,7 +1356,7 @@ public:
     template<int MY_DIM>
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
-        VecType& indices = region->indices[0];
+        IndexVectorType& indices = region->indices[0];
         (*this)(region, s, 0, indices.size());
     }
 
