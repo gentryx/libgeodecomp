@@ -471,20 +471,20 @@ public:
                 Coord<DIM> offsetB;
                 offsetA[d] = -i;
                 offsetB[d] =  i;
-                merge2way(
+
+                bufferC.clear();
+                merge3way(
                     bufferC,
                     bufferA.beginStreak(offsetA),
                     bufferA.endStreak(offsetA),
-                    bufferB.beginStreak(),
-                    bufferB.endStreak());
-                merge2way(
-                    bufferB,
                     bufferA.beginStreak(offsetB),
                     bufferA.endStreak(offsetB),
-                    bufferC.beginStreak(),
-                    bufferC.endStreak());
+                    bufferB.beginStreak(),
+                    bufferB.endStreak());
+                swap(bufferB, bufferC);
             }
 
+            bufferC.clear();
             merge2way(
                 bufferC,
                 bufferA.beginStreak(),
@@ -492,7 +492,9 @@ public:
                 bufferB.beginStreak(),
                 bufferB.endStreak());
             swap(bufferA, bufferC);
+
             bufferB.clear();
+            bufferC.clear();
         }
 
         return bufferA;
@@ -740,13 +742,21 @@ public:
         *this = newValue;
     }
 
+#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)            \
+            if (*ITERATOR != lastInsert) {         \
+                ret << *ITERATOR;                  \
+                lastInsert = *ITERATOR;            \
+            }                                      \
+            ++ITERATOR;                            \
+            if (ITERATOR == END) {                 \
+                break;                             \
+            }
+
     inline static void merge2way(
         Region& ret,
         const StreakIterator& beginA, const StreakIterator& endA,
         const StreakIterator& beginB, const StreakIterator& endB)
     {
-        ret.clear();
-
         // fixme: test this!
         if (beginA == endA) {
             for (StreakIterator i = beginB; i != endB; ++i) {
@@ -767,23 +777,9 @@ public:
 
         for (;;) {
             if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterA, *iterB)) {
-                if (*iterA != lastInsert) {
-                    ret << *iterA;
-                    lastInsert = *iterA;
-                }
-                ++iterA;
-                if (iterA == endA) {
-                    break;
-                }
+                LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterA, endA);
             } else {
-                if (*iterB != lastInsert) {
-                    ret << *iterB;
-                    lastInsert = *iterB;
-                }
-                ++iterB;
-                if (iterB == endB) {
-                    break;
-                }
+                LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterB, endB);
             }
         }
 
@@ -794,6 +790,86 @@ public:
             ret << *iterB;
         }
     }
+
+    inline static void merge3way(
+        Region& ret,
+        const StreakIterator& beginA, const StreakIterator& endA,
+        const StreakIterator& beginB, const StreakIterator& endB,
+        const StreakIterator& beginC, const StreakIterator& endC)
+    {
+        StreakIterator iterA = beginA;
+        StreakIterator iterB = beginB;
+        StreakIterator iterC = beginC;
+
+        // fixme: test this!
+        if (iterA == endA) {
+            merge2way(
+                ret,
+                iterB, endB,
+                iterC, endC);
+            return;
+        }
+
+        if (iterB == endB) {
+            merge2way(
+                ret,
+                iterA, endA,
+                iterC, endC);
+            return;
+        }
+
+        if (iterC == endC) {
+            merge2way(
+                ret,
+                iterA, endA,
+                iterB, endB);
+            return;
+        }
+
+        Streak<DIM> lastInsert;
+
+        for (;;) {
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterA, *iterB)) {
+                if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterA, *iterC)) {
+                    LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterA, endA);
+                } else {
+                    LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterC, endC);
+                }
+            } else {
+                if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(*iterB, *iterC)) {
+                    LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterB, endB);
+                } else {
+                    LIBGEODECOMP_REGION_ADVANCE_ITERATOR(iterC, endC);
+                }
+            }
+        }
+
+        if (iterA == endA) {
+            merge2way(
+                ret,
+                iterB, endB,
+                iterC, endC);
+            return;
+        }
+
+        if (iterB == endB) {
+            merge2way(
+                ret,
+                iterA, endA,
+                iterC, endC);
+            return;
+        }
+
+        if (iterC == endC) {
+            merge2way(
+                ret,
+                iterA, endA,
+                iterB, endB);
+            return;
+        }
+    }
+
+#undef LIBGEODECOMP_REGION_ADVANCE_ITERATOR
 
     inline Region operator+(const Region& other) const
     {
