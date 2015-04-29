@@ -721,6 +721,28 @@ public:
         TS_ASSERT_EQUALS(actual, expected);
     }
 
+    void testExpand3()
+    {
+        for(int x = 0; x < 10; ++x) {
+            for(int y = 0; y < 20; ++y) {
+                c << Coord<2>(x, y);
+            }
+        }
+
+        for (int radius = 0; radius < 30; ++radius) {
+            Region<2> actual = c.expand(radius);
+            Region<2> expected;
+
+            for(int x = -radius; x < (10 + radius); ++x) {
+                for(int y = -radius; y < (20 + radius); ++y) {
+                    expected << Coord<2>(x, y);
+                }
+            }
+
+            TS_ASSERT_EQUALS(actual, expected);
+        }
+    }
+
     void testDelete()
     {
         Region<2>::IndexVectorType expected;
