@@ -20,5 +20,6 @@ syntax: glob
 ./tools/typemapgenerator/sample/src/typemaps.cpp
 ./builddir
 ./build
+./lib/cxxtest/python/python3/cxxtest/**/*.pyc
 syntax: regexp
 ^doc

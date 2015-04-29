@@ -929,6 +929,7 @@ private:
     inline void determineGeometry() const
     {
         if (empty()) {
+            mySize = 0;
             myBoundingBox = CoordBox<DIM>();
         } else {
             Streak<DIM> someStreak = *beginStreak();
@@ -1091,10 +1092,24 @@ public:
     typedef Region<1>::IndexVectorType IndexVectorType;
 
     template<int MY_DIM>
+    inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s)
+    {
+        const VecType& indices = region.indices[0];
+        return (*this)(region, s, 0, indices.size());
+    }
+
+    template<int MY_DIM>
     inline bool operator()(const Region<MY_DIM>& region, const Streak<MY_DIM>& s, const int& start, int end)
     {
         IntPair curStreak(s.origin.x(), s.endX);
+<<<<<<< /home/gentryx/libgeodecomp4/src/geometry/region.h
         const IndexVectorType& indices = region.indices[0];
+=======
+        const VecType& indices = region.indices[0];
+        if (indices.empty()) {
+            return false;
+        }
+>>>>>>> /tmp/region.h~other.62Io8q
 
         IndexVectorType::const_iterator cursor =
             std::upper_bound(indices.begin() + start, indices.begin() + end,
@@ -1203,6 +1218,13 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[0];
+        (*this)(region, s, 0, indices.size());
+    }
+
+    template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        VecType& indices = region->indices[0];
         (*this)(region, s, 0, indices.size());
     }
 
@@ -1341,6 +1363,13 @@ public:
     friend class LibGeoDecomp::RegionTest;
     typedef Region<1>::IntPair IntPair;
     typedef Region<1>::IndexVectorType IndexVectorType;
+
+    template<int MY_DIM>
+    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
+    {
+        VecType& indices = region->indices[0];
+        (*this)(region, s, 0, indices.size());
+    }
 
     template<int MY_DIM>
     int operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s, const int& start, int end)

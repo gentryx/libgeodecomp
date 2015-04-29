@@ -2,7 +2,6 @@
 #define LIBGEODECOMP_STORAGE_SELECTOR_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>

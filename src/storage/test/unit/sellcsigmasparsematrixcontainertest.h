@@ -697,7 +697,7 @@ public:
         b.addPoint(DIM-17, DIM - 7, 0.666);
 
         TS_ASSERT_EQUALS((a == b), false);
-        
+
     }
 
 };

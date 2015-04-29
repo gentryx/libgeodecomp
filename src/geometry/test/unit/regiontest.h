@@ -197,6 +197,13 @@ public:
         TS_ASSERT_EQUALS(10, c.indices[0][0].first);
     }
 
+    void testInsert1c()
+    {
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0),  50)
+               << Streak<1>(Coord<1>(50), 90);
+        TS_ASSERT_EQUALS(region.size(), 90);
+    }
 
     void testInsert2()
     {
@@ -230,7 +237,54 @@ public:
         TS_ASSERT_EQUALS(std::size_t(7), c.indices[0].size());
     }
 
-    void testInsertCoordBox()
+    void testInsert3()
+    {
+        Region<1> r;
+        r << Coord<1>(10)
+          << Coord<1>( 9)
+          << Coord<1>(15)
+          << Coord<1>( 5)
+          << Coord<1>( 7)
+          << Coord<1>( 8)
+          << Coord<1>( 6);
+
+        TS_ASSERT_EQUALS(7, r.size());
+
+        Region<1>::StreakIterator iter = r.beginStreak();
+        TS_ASSERT_EQUALS(Streak<1>(Coord<1>( 5), 11), *iter);
+        ++iter;
+        TS_ASSERT_EQUALS(Streak<1>(Coord<1>(15), 16), *iter);
+        ++iter;
+        TS_ASSERT_EQUALS(r.endStreak(), iter);
+    }
+
+    void testInsertCoordBox1D()
+    {
+        Region<1> expected, actual;
+
+        for (int x = -5; x < 15; ++x) {
+            expected << Coord<1>(x);
+        }
+
+        actual << CoordBox<1>(Coord<1>(-5), Coord<1>(20));
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testInsertCoordBox2D()
+    {
+        Region<2> expected, actual;
+
+        for (int x = 0; x < 10; ++x) {
+            for (int y = 5; y < 12; ++y) {
+                    expected << Coord<2>(x, y);
+            }
+        }
+
+        actual << CoordBox<2>(Coord<2>(0, 5), Coord<2>(10, 7));
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testInsertCoordBox3D()
     {
         Region<3> expected, actual;
 
@@ -245,6 +299,7 @@ public:
         actual << CoordBox<3>(Coord<3>(0, 5, 3), Coord<3>(10, 7, 14));
         TS_ASSERT_EQUALS(expected, actual);
     }
+
 
     void testInsert3D()
     {
@@ -304,6 +359,24 @@ public:
 
     void testCount()
     {
+        Region<1> r0;
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>(-1), 2)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 1), 2)));
+
+        r0 << Coord<1>(1);
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>(-1), 2)));
+        TS_ASSERT_EQUALS(1, r0.count(Streak<1>(Coord<1>( 1), 2)));
+
+        r0 << Coord<1>(-1);
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>(-1), 2)));
+
+        r0 << Coord<1>(0);
+        TS_ASSERT_EQUALS(1, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(1, r0.count(Streak<1>(Coord<1>(-1), 2)));
+
         Region<2> r1;
         TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
 
@@ -1148,6 +1221,20 @@ public:
     void testSwap()
     {
         // fixme
+    }
+
+    void testRemove1D()
+    {
+        Region<1> r;
+
+        r << Coord<1>(10);
+        TS_ASSERT_EQUALS(1, r.size());
+
+        r >> Streak<1>(Coord<1>(10), 11);
+        TS_ASSERT_EQUALS(0, r.size());
+
+        r << Streak<1>(Coord<1>(0), 20);
+        TS_ASSERT_EQUALS(20, r.size());
     }
 
     void testRemove3D()

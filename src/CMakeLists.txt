@@ -216,6 +216,8 @@ add_config_option(WITH_TYPEMAPS "Controls whether the build system should regene
 
 add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
+add_config_option(WITH_CPP14 "LibGeoDecomp is largely written in C++98, but some components use language features from a newer standard. This option will enable those." false true)
+
 print_options()
 dump_config("config.h")
 
@@ -282,7 +284,12 @@ if(WITH_SILO)
 endif()
 
 if(WITH_THREADS)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+if(WITH_CPP14)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
 endif()
 
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
