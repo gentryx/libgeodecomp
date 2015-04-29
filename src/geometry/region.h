@@ -471,13 +471,13 @@ public:
                 Coord<DIM> offsetB;
                 offsetA[d] = -i;
                 offsetB[d] =  i;
-                merge(
+                merge2way(
                     bufferC,
                     bufferA.beginStreak(offsetA),
                     bufferA.endStreak(offsetA),
                     bufferB.beginStreak(),
                     bufferB.endStreak());
-                merge(
+                merge2way(
                     bufferB,
                     bufferA.beginStreak(offsetB),
                     bufferA.endStreak(offsetB),
@@ -485,7 +485,7 @@ public:
                     bufferC.endStreak());
             }
 
-            merge(
+            merge2way(
                 bufferC,
                 bufferA.beginStreak(),
                 bufferA.endStreak(),
@@ -743,7 +743,7 @@ public:
         *this = newValue;
     }
 
-    inline static void merge(
+    inline static void merge2way(
         Region& ret,
         const StreakIterator& beginA, const StreakIterator& endA,
         const StreakIterator& beginB, const StreakIterator& endB)
@@ -757,8 +757,6 @@ public:
             }
             return;
         }
-
-        // fixme: test this!
         if (beginB == endB) {
             for (StreakIterator i = beginA; i != endA; ++i) {
                 ret << *i;
@@ -769,37 +767,34 @@ public:
         StreakIterator iterA = beginA;
         StreakIterator iterB = beginB;
 
-        StreakIterator myEnd = endA;
-        StreakIterator otherEnd = endB;
-
-        Streak<DIM> iterBStreak = *iterB;
-        Streak<DIM> cursor = *iterA;
+        Streak<DIM> streakB = *iterB;
+        Streak<DIM> streakA = *iterA;
         Streak<DIM> lastInsert;
 
         for (;;) {
-            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(cursor, iterBStreak)) {
-                if (cursor != lastInsert) {
-                    ret << cursor;
-                    lastInsert = cursor;
+            if (RegionHelpers::RegionIntersectHelper<DIM - 1>::lessThan(streakA, streakB)) {
+                if (streakA != lastInsert) {
+                    ret << streakA;
+                    lastInsert = streakA;
                 }
                 ++iterA;
 
                 if (iterA == endA) {
                     break;
                 } else {
-                    cursor = *iterA;
+                    streakA = *iterA;
                 }
             } else {
-                if (iterBStreak != lastInsert) {
-                    ret << iterBStreak;
-                    lastInsert = iterBStreak;
+                if (streakB != lastInsert) {
+                    ret << streakB;
+                    lastInsert = streakB;
                 }
                 ++iterB;
 
                 if (iterB == endB) {
                     break;
                 } else {
-                    iterBStreak = *iterB;
+                    streakB = *iterB;
                 }
             }
         }
@@ -816,7 +811,7 @@ public:
     {
         Region ret;
 
-        merge(
+        merge2way(
             ret,
             this->beginStreak(), this->endStreak(),
             other.beginStreak(), other.endStreak());
