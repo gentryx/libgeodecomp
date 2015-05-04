@@ -46,6 +46,20 @@ public:
         }
     }
 
+    explicit
+    UnstructuredGrid(const CoordBox<DIM> box,
+                     const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
+                     const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        elements(box.dimensions.x(), defaultElement),
+        edgeElement(edgeElement),
+        dimension(box.dimensions)
+    {
+        for (std::size_t i = 0; i < MATRICES; ++i) {
+            matrices[i] =
+                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
+        }
+    }
+
     template<typename O_ELEMENT_TYPE>
     UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
     operator=(const UnstructuredGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE,
@@ -423,6 +437,26 @@ public:
 
         // init soa_grid
         for (int i = 0; i < dim.x(); ++i) {
+            set(i, defaultElement);
+        }
+    }
+
+    explicit
+    UnstructuredGridSoA(const CoordBox<DIM> box,
+                        const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
+                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        elements(box.dimensions.x(), 1, 1),
+        edgeElement(edgeElement),
+        dimension(box.dimensions)
+    {
+        // init matrices
+        for (std::size_t i = 0; i < MATRICES; ++i) {
+            matrices[i] =
+                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
+        }
+
+        // init soa_grid
+        for (int i = 0; i < dimension.x(); ++i) {
             set(i, defaultElement);
         }
     }
