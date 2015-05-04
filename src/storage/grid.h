@@ -20,14 +20,23 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration, both classes depend on each other
+ */
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
 namespace GridHelpers {
 
+/**
+ * Helper for setting a cuboid domain within a grid.
+ */
 template<int DIM>
 class FillCoordBox;
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<1>
 {
@@ -40,6 +49,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<2>
 {
@@ -56,6 +68,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<3>
 {

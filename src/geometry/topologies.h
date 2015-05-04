@@ -9,9 +9,16 @@ namespace LibGeoDecomp {
 
 namespace TopologiesHelpers {
 
+/**
+ * Helper class for checking whether a given topology has periodic
+ * boundary conditions in a given dimension.
+ */
 template<int DIM, class TOPOLOGY>
 class WrapsAxis;
 
+/**
+ * see above
+ */
 template<class TOPOLOGY>
 class WrapsAxis<0, TOPOLOGY>
 {
@@ -19,6 +26,9 @@ public:
     static const bool VALUE = TOPOLOGY::WRAP_AXIS0;
 };
 
+/**
+ * see above
+ */
 template<class TOPOLOGY>
 class WrapsAxis<1, TOPOLOGY>
 {
@@ -26,6 +36,9 @@ public:
     static const bool VALUE = TOPOLOGY::WRAP_AXIS1;
 };
 
+/**
+ * see above
+ */
 template<class TOPOLOGY>
 class WrapsAxis<2, TOPOLOGY>
 {
@@ -33,6 +46,9 @@ public:
     static const bool VALUE = TOPOLOGY::WRAP_AXIS2;
 };
 
+/**
+ * Helper for mapping coords into a defined range (dimension)
+ */
 template<class TOPOLOGY>
 class NormalizeEdges
 {
@@ -61,6 +77,7 @@ public:
 private:
     inline int wrap(int x, int dim)
     {
+        // fixme: drop this conditional as it's more expensive than the additional addition?
         if (x < 0) {
             return (x + dim) % dim;
         }
@@ -72,6 +89,9 @@ private:
     }
 };
 
+/**
+ * Helper for checking whether a given coord is outside of a defined range
+ */
 template<class TOPOLOGY>
 class OutOfBounds
 {
@@ -98,6 +118,9 @@ public:
     }
 };
 
+/**
+ * Maps coord to range depending on topology
+ */
 template<class TOPOLOGY>
 class NormalizeCoord
 {
@@ -113,9 +136,17 @@ public:
     }
 };
 
+/**
+ * Helper class which performs the access to an n-dimensional
+ * container from an n-dimensional coord by means of chaned square
+ * brackets operators.
+ */
 template<int DIM>
 class Accessor;
 
+/**
+ * see above
+ */
 template<>
 class Accessor<1>
 {
@@ -133,6 +164,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class Accessor<2>
 {
@@ -150,6 +184,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class Accessor<3>
 {
@@ -167,6 +204,9 @@ public:
     }
 };
 
+/**
+ * Helper class for direct access to topology specs
+ */
 template<int DIMENSIONS, bool WRAP_DIM0, bool WRAP_DIM1, bool WRAP_DIM2>
 class RawTopology
 {
@@ -177,6 +217,9 @@ public:
     const static bool WRAP_AXIS2 = WRAP_DIM2;
 };
 
+/**
+ * The actual topology class delived by factory class Topologies
+ */
 template<int DIMENSIONS, bool WRAP_DIM0=false, bool WRAP_DIM1=false, bool WRAP_DIM2=false>
 class Topology
 {
@@ -252,6 +295,12 @@ public:
 
 }
 
+/**
+ * This class is a type factory which can be used to describe the
+ * boundary conditions of a simulation model. Per axis a user may
+ * choose whether to wrap accesses (periodic boundary condition) or to
+ * cut accesses off (constant boundary).
+ */
 class Topologies
 {
 public:
