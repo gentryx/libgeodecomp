@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDUPDATEFUNCTOR_H
 #define LIBGEODECOMP_STORAGE_UNSTRUCTUREDUPDATEFUNCTOR_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 
@@ -53,4 +56,5 @@ public:
 
 }
 
+#endif
 #endif

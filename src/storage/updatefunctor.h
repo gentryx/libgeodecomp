@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/fixedneighborhood.h>
@@ -163,6 +164,7 @@ public:
         }
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Region<DIM>& region,
@@ -185,6 +187,7 @@ public:
             UnstructuredUpdateFunctor<CELL>()(sourceStreak, gridOld, gridNew, nanoStep);
         }
     }
+#endif
 };
 
 }
