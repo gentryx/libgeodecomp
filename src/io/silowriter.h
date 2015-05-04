@@ -178,6 +178,9 @@ template<typename CELL>
 class SiloWriter : public Clonable<Writer<CELL>, SiloWriter<CELL> >
 {
 public:
+    friend class Serialization;
+    friend class boost::serialization::access;
+
     template<typename SILO_WRITER, typename COLLECTION_INTERFACE>
     friend class SiloWriterHelpers::SelectorContainerImplementation;
 

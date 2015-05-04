@@ -26,6 +26,7 @@
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/serialbovwriter.h>
+#include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
 #include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -210,6 +211,27 @@ public:
         archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE > > >(object);
         archive & object.brickletDim;
         archive & object.selector;
+    }
+
+    template<typename ARCHIVE, typename CELL>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SiloWriter<CELL>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL >, SiloWriter<CELL > > >(object);
+        archive & object.cellSelectors;
+        archive & object.coords;
+        archive & object.databaseType;
+        archive & object.elementTypes;
+        archive & object.nodeList;
+        archive & object.pointMeshLabel;
+        archive & object.pointMeshSelectors;
+        archive & object.region;
+        archive & object.regularGridLabel;
+        archive & object.shapeCounts;
+        archive & object.shapeSizes;
+        archive & object.unstructuredGridSelectors;
+        archive & object.unstructuredMeshLabel;
+        archive & object.variableData;
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
@@ -423,6 +445,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsign
 
 template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SiloWriter<CELL>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
