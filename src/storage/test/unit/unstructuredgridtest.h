@@ -1,4 +1,5 @@
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <fstream>
@@ -6,9 +7,15 @@
 #include <map>
 #include <cstdlib>
 
+using namespace LibGeoDecomp;
+
 class MyDummyElement
 {
 public:
+    class API :
+        public APITraits::HasSoA
+    {};
+
     explicit
     MyDummyElement(int const val = 0) :
         val(val)
@@ -42,7 +49,6 @@ public:
         return val != other.val;
     }
 
-private:
     int val;
 };
 
@@ -51,8 +57,38 @@ std::ostream& operator<< (std::ostream& out, MyDummyElement const & val){
     return out;
 }
 
+LIBFLATARRAY_REGISTER_SOA(MyDummyElement, ((int)(val)))
 
-using namespace LibGeoDecomp;
+class MySoACell
+{
+public:
+    class API :
+        public APITraits::HasSoA
+    {};
+
+    explicit
+    MySoACell(int x = 0, double y = 0, char z = 0) :
+        x(x), y(y), z(z)
+    {}
+
+    inline bool operator==(const MySoACell& other) const
+    {
+        return x == other.x &&
+            y == other.y &&
+            z == other.z;
+    }
+
+    inline bool operator!=(const MySoACell& other) const
+    {
+        return !(*this == other);
+    }
+
+    int x;
+    double y;
+    char z;
+};
+
+LIBFLATARRAY_REGISTER_SOA(MySoACell, ((int)(x))((double)(y))((char)(z)))
 
 namespace LibGeoDecomp {
 
@@ -185,6 +221,117 @@ public:
         delete grid;
     }
 
+    void testUnstructuredGridSoABasic()
+    {
+        // test constructor
+        {
+            MyDummyElement defaultCell(5);
+            MyDummyElement edgeCell(-1);
+            Coord<1> dim(100);
+
+            UnstructuredGridSoA<MyDummyElement> grid(dim, defaultCell, edgeCell);
+
+            for (int i = 0; i < 100; ++i) {
+                TS_ASSERT_EQUALS(grid[i], defaultCell);
+            }
+
+            TS_ASSERT_EQUALS(grid.getEdgeElement(), edgeCell);
+            TS_ASSERT_EQUALS(grid[-1], edgeCell);
+        }
+
+        // test set and get
+        {
+            UnstructuredGridSoA<MyDummyElement> grid(Coord<1>(10));
+            MyDummyElement elem1(1);
+            MyDummyElement elem2(2);
+            grid.set(Coord<1>(5), elem1);
+            grid.set(Coord<1>(6), elem2);
+
+            TS_ASSERT_EQUALS(grid.get(Coord<1>(5)), elem1);
+            TS_ASSERT_EQUALS(grid.get(Coord<1>(6)), elem2);
+        }
+
+        // test save and load member with one member
+        {
+            Selector<MyDummyElement> valSelector(&MyDummyElement::val, "val");
+            MyDummyElement defaultCell(5);
+            MyDummyElement edgeCell(-1);
+            Coord<1> dim(100);
+            UnstructuredGridSoA<MyDummyElement> grid(dim, defaultCell, edgeCell);
+
+            Region<1> region;
+            region << Streak<1>(Coord<1>(0), 50)
+                   << Streak<1>(Coord<1>(50), 100);
+
+            std::vector<int> valVector(region.size(), 0xdeadbeef);
+
+            // copy default data back
+            grid.saveMember(valVector.data(), valSelector, region);
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                TS_ASSERT_EQUALS(valVector[i], 5);
+            }
+
+            // modify a bit and test again
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                grid.set(Coord<1>(i), MyDummyElement(i));
+            }
+            grid.saveMember(valVector.data(), valSelector, region);
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                TS_ASSERT_EQUALS(valVector[i], i);
+            }
+
+            // test load member
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                valVector[i] = -i;
+            }
+            grid.loadMember(valVector.data(), valSelector, region);
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), MyDummyElement(-i));
+            }
+        }
+
+        // test save and load member with a little more complex cell
+        {
+            Selector<MySoACell> valSelector(&MySoACell::y, "y");
+            MySoACell defaultCell(5, 6, 7);
+            MySoACell edgeCell(-1, -2, -3);
+            Coord<1> dim(100);
+            UnstructuredGridSoA<MySoACell> grid(dim, defaultCell, edgeCell);
+
+            Region<1> region;
+            region << Streak<1>(Coord<1>(0), 50)
+                   << Streak<1>(Coord<1>(50), 100);
+
+            std::vector<double> valVector(region.size(), 0xdeadbeef);
+
+            // copy default data back
+            grid.saveMember(valVector.data(), valSelector, region);
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                TS_ASSERT_EQUALS(valVector[i], 6);
+            }
+
+            // modify a bit and test again
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                grid.set(Coord<1>(i), MySoACell(i, i + 1, i + 2));
+            }
+            grid.saveMember(valVector.data(), valSelector, region);
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                TS_ASSERT_EQUALS(valVector[i], i + 1);
+            }
+
+            // test load member
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                grid.set(Coord<1>(i), defaultCell);
+            }
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                valVector[i] = -i;
+            }
+            grid.loadMember(valVector.data(), valSelector, region);
+            for (int i = 0; i < static_cast<int>(region.size()); ++i) {
+                TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), MySoACell(5, -i, 7));
+            }
+        }
+    }
 };
 
 }
