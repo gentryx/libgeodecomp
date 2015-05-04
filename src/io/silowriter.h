@@ -3,6 +3,17 @@
 
 #include <libgeodecomp/config.h>
 
+namespace LibGeoDecomp {
+
+/**
+ * forward declaration required to let class Serialization function
+ * properly even if building without Silo.
+ */
+template<typename CELL>
+class SiloWriter;
+
+}
+
 #ifdef LIBGEODECOMP_WITH_SILO
 
 #include <libgeodecomp/io/logger.h>
