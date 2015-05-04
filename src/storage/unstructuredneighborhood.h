@@ -121,10 +121,10 @@ public:
     }
 
     inline
-    const long& index() const { return xOffset; }
+    const long long& index() const { return xOffset; }
 
     inline
-    long& index() { return xOffset; }
+    long long& index() { return xOffset; }
 
     inline
     std::vector<std::pair<int, VALUE_TYPE> > weights() const
