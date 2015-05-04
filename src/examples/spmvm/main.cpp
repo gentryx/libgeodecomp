@@ -39,6 +39,15 @@ public:
         }
     }
 
+    template<typename NEIGHBORHOOD>
+    void update(const NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    {
+        sum = 0.;
+        for (const auto& j: neighborhood.weights(0)) {
+            sum += neighborhood[j.first].value * j.second;
+        }
+    }
+
     double value;
     double sum;
 };

@@ -1,6 +1,7 @@
-#ifndef _UNSTRUCTUREDUPDATEFUNCTOR_H_
-#define _UNSTRUCTUREDUPDATEFUNCTOR_H_
+#ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDUPDATEFUNCTOR_H
+#define LIBGEODECOMP_STORAGE_UNSTRUCTUREDUPDATEFUNCTOR_H
 
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 
 namespace LibGeoDecomp {
@@ -19,13 +20,31 @@ public:
         GRID2 *gridNew,
         unsigned nanoStep)
     {
+        typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
+
         UnstructuredNeighborhood<CELL> hoodOld(const_cast<GRID1&>(gridOld), streak.origin.x());
         UnstructuredNeighborhood<CELL> hoodNew(*gridNew, 0);
 
-        CELL::updateLineX(hoodNew, streak.endX, hoodOld, nanoStep);
+        // switch between updateLineX() and update()
+        updateWrapper(hoodNew, streak.endX, hoodOld, nanoStep, UpdateLineXFlag());
+    }
+
+private:
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    void updateWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::FalseType)
+    {
+        for (int i = hoodOld.index(); i < endX; ++i, ++hoodOld) {
+            hoodNew[i].update(hoodOld, nanoStep);
+        }
+    }
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    void updateWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::TrueType)
+    {
+        CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
     }
 };
 
 }
 
-#endif /* _UNSTRUCTUREDUPDATEFUNCTOR_H_ */
+#endif

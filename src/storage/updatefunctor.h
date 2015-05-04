@@ -163,7 +163,7 @@ public:
         }
     }
 
-    template<typename GRID1, typename GRID2>
+    template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -176,7 +176,7 @@ public:
         // SelectSoA
         APITraits::FalseType,
         // SelectUpdateLineX
-        APITraits::TrueType,
+        ANY_API,
         // SelectTopology
         TopologiesHelpers::UnstructuredTopology<1>)
     {
