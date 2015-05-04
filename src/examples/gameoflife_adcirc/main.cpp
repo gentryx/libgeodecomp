@@ -43,10 +43,6 @@
 using namespace boost::assign;
 using namespace LibGeoDecomp;
 
-FloatCoord<2> origin;
-FloatCoord<2> quadrantDim;
-
-
 extern "C"{
   void kernel_(
 	       int *n,
@@ -138,12 +134,12 @@ public:
     public:
         inline FloatCoord<2> getRegularGridSpacing()
         {
-            return quadrantDim;
+            return DomainCell::quadrantDim;
         }
 
         inline FloatCoord<2> getRegularGridOrigin()
         {
-            return origin;
+            return DomainCell::quadrantOrigin;
         }
     };
 
@@ -246,10 +242,13 @@ public:
         return ret;
     }
 
+    static FloatCoord<2> quadrantOrigin;
+    static FloatCoord<2> quadrantDim;
+
     LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
                                         // of the Domain
     int id; // ID of the domain
-  int alive; // not being used currently
+    int alive; // not being used currently
 
     int outputStep;
 
@@ -260,6 +259,10 @@ public:
 
 
 };
+
+FloatCoord<2> DomainCell::quadrantOrigin;
+FloatCoord<2> DomainCell::quadrantDim;
+
 // ContainerCell translates between the unstructured grid and the
 // regular grid currently required by LGD
 typedef ContainerCell<DomainCell, 1000> ContainerCellType;
@@ -454,6 +457,7 @@ public:
 
     virtual void grid(GridType *grid)
     {
+        std::cout << "ADCIRCInitializer::init(" << grid->boundingBox() << ")\n";
         std::ifstream fort80File;
 
         int numberOfDomains;
@@ -606,7 +610,17 @@ public:
 
             FloatCoord<2> gridCoordFloat = (node.center - minCoord) / quadrantDim;
             Coord<2> gridCoord(gridCoordFloat[0], gridCoordFloat[1]);
+            std::cout << "node.center: " << node.center << "\n"
+                      << "minCoord: " << minCoord << "\n"
+                      << "quadrantDim: " << quadrantDim << "\n"
+                      << "gridCoord: " << gridCoord << "\n"
+                      << "gridCoordFloat: " << gridCoordFloat << "\n\n";
 
+            // fixme
+            if (gridCoord.x() < 0) {
+                gridCoord = Coord<2>(1, 1);
+            }
+            std::cout << "  inserting at " << gridCoord << " id " << node.id << "\n";
             ContainerCellType container = grid->get(gridCoord);
             container.insert(node.id, node);
             grid->set(gridCoord, container);
@@ -622,16 +636,16 @@ public:
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, unsigned)
   {
-    ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this) & meshDir & maxDiameter & minCoord & maxCoord;
+    ar & boost::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this) & meshDir & maxDiameter & minCoord & maxCoord & quadrantOrigin & quadrantDim;
   }
-
-
 
 private:
     std::string meshDir;
     double maxDiameter;
     FloatCoord<2> minCoord;
     FloatCoord<2> maxCoord;
+    FloatCoord<2> quadrantOrigin;
+    FloatCoord<2> quadrantDim;
 
     void determineGridDimensions()
     {
@@ -687,10 +701,14 @@ private:
             maxCoord = maxCoord.max(p);
         }
 
-        origin = minCoord;
+        quadrantOrigin = minCoord;
         // add a safety factor for the cell spacing so we can be sure
         // neighboring elements are never more than 1 cell apart in the grid:
         quadrantDim = FloatCoord<2>(maxDiameter * 2.0, maxDiameter * 2.0);
+
+        DomainCell::quadrantOrigin = quadrantOrigin;
+        DomainCell::quadrantDim = quadrantDim;
+
         FloatCoord<2> floatDimensions = (maxCoord - minCoord) / quadrantDim;
         dimensions = Coord<2>(
             ceil(floatDimensions[0]),
@@ -993,18 +1011,34 @@ HpxSimulator::HpxSimulator<ContainerCellType, ZCurvePartition<2> >
 SimulatorType;
 
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
-						SimulatorType,
-						DomainCellSimulator
+    SimulatorType,
+    DomainCellSimulator
 )
 LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
-				    SimulatorType,
-				    DomainCellSimulator
+    SimulatorType,
+    DomainCellSimulator
 				    )
 //BOOST_CLASS_EXPORT(ADCIRCInitializer);
 //BOOST_CLASS_EXPORT(DomainCell);
 
 BOOST_CLASS_EXPORT_GUID(ADCIRCInitializer, "ADCIRCInitializer");
-BOOST_CLASS_EXPORT_GUID(DomainCell, "DomainCell");
+BOOST_CLASS_EXPORT_GUID(ContainerCellType, "DomainCell");
+typedef LibGeoDecomp::SiloWriter<ContainerCellType> SiloWriterType;
+BOOST_CLASS_EXPORT_GUID(SiloWriterType, "SiloWriterConwayCell");
+
+typedef
+    LibGeoDecomp::HpxWriterCollector<ContainerCellType>
+    HpxWriterCollectorType;
+
+
+LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
+    HpxWriterCollectorType,
+    DomainCellWriterCollector
+)
+// LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(
+//     HpxWriterCollectorType,
+//     DomainCellWriterCollector
+// )
 
 void runSimulation()
 {
@@ -1019,14 +1053,6 @@ void runSimulation()
 
     //sim(new ADCIRCInitializer(prunedDirname, steps));
 
-    /*
-    int ioPeriod = 1;
-    SiloWriter<ContainerCellType> *writer = new SiloWriter<ContainerCellType>("mesh", *ioPeriod);
-    writer->addSelectorForUnstructuredGrid(
-        &DomainCell::alive,
-        "DomainCell_alive");
-    sim.addWriter(writer);
-    */
     ADCIRCInitializer *init = new ADCIRCInitializer(prunedDirname, steps);
 
     SimulatorType sim(
@@ -1036,6 +1062,18 @@ void runSimulation()
 		      10, //balancingPeriod
 		      1 // ghostZoneWidth
 		      );
+
+    int ioPeriod = 1;
+    SiloWriterType *writer = new SiloWriter<ContainerCellType>("mesh", ioPeriod);
+    writer->addSelectorForUnstructuredGrid(
+        &DomainCell::alive,
+        "DomainCell_alive");
+
+    // HpxWriterCollectorType::SinkType sink(
+    //     writer,
+    //     sim.numUpdateGroups(),
+    //     "fancyFixme");
+    // sim.addWriter(new HpxWriterCollectorType(sink));
 
     sim.run();
 }
