@@ -135,12 +135,15 @@ class FindUnprefixedTargetNames < TestBase
   def test(filename, content)
     return 0 unless filename =~ /(testbed|examples)/
 
+    expected_name = Pathname.new(filename).parent.to_s.gsub(/^src/, "libgeodecomp").gsub(/\//, "_")
     ret = 0
+
     ["executable", "library"].each do |target_token|
-      content.scan(/add_#{target_token}\((.*)\)/i) do
+      content.scan(/add_#{target_token}\((\S*) /i) do
         match = $1
-        unless (match =~ /^libgeodecomp_.+/)
-          log "#{filename}: non-safeguarded #{target_token} target name »#{match}« found (may clash with user targets if LibGeoDecomp is a subproject of other CMake projects)"
+        unless (match =~ /^#{expected_name}/)
+          # warn user, may clash with user targets if LibGeoDecomp is a subproject of other CMake projects:
+          log "#{filename}: non-safeguarded #{target_token} target name »#{match}« found"
           ret += 1
         end
       end
