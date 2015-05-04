@@ -338,8 +338,7 @@ public:
     /**
      * Unstructured topology.
      */
-    template<int DIM>
-    class HasUnstructuredTopology: public HasTopology<typename Topologies::Unstructured<DIM>::Topology>
+    class HasUnstructuredTopology: public HasTopology<Topologies::Unstructured::Topology>
     {};
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

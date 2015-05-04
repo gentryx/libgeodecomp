@@ -26,7 +26,7 @@ public:
 };
 
 template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
-class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology<1>,
+class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology,
                        TOPOLOGICALLY_CORRECT, APITraits::FalseType>
 {
 public:
@@ -34,7 +34,7 @@ public:
 };
 
 template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
-class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology<1>,
+class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology,
                        TOPOLOGICALLY_CORRECT, APITraits::TrueType>
 {
 public:

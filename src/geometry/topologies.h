@@ -250,11 +250,10 @@ public:
     }
 };
 
-template<int DIMENSIONS>
 class UnstructuredTopology
 {
 public:
-    static const int DIM = DIMENSIONS;
+    static const int DIM = 1;
 };
 
 }
@@ -276,11 +275,10 @@ public:
         typedef TopologiesHelpers::Topology<DIM, true, true, true> Topology;
     };
 
-    template<int DIM>
     class Unstructured
     {
     public:
-        typedef TopologiesHelpers::UnstructuredTopology<DIM> Topology;
+        typedef TopologiesHelpers::UnstructuredTopology Topology;
     };
 };
 

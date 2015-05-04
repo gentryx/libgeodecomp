@@ -20,7 +20,7 @@ class Cell
 public:
     class API :
         public APITraits::HasUpdateLineX,
-        public APITraits::HasUnstructuredTopology<1>,
+        public APITraits::HasUnstructuredTopology,
         public APITraits::HasPredefinedMPIDataType<double>
     {};
 

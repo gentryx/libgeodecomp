@@ -178,7 +178,7 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        TopologiesHelpers::UnstructuredTopology<1>)
+        TopologiesHelpers::UnstructuredTopology)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
