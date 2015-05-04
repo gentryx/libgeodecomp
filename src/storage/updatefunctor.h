@@ -182,7 +182,7 @@ public:
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-            UnstrutucturedUpdateFunctor<CELL>()(sourceStreak, gridOld, gridNew, nanoStep);
+            UnstructuredUpdateFunctor<CELL>()(sourceStreak, gridOld, gridNew, nanoStep);
         }
     }
 };

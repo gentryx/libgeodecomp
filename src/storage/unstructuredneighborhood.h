@@ -27,7 +27,8 @@ template<typename CELL, std::size_t MATRICES = 1,
 class UnstructuredNeighborhood
 {
 private:
-    UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& grid;
+    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    const Grid& grid;
     long long xOffset;          /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
     int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
@@ -59,19 +60,15 @@ private:
     }
 public:
     inline explicit
-    UnstructuredNeighborhood(UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& _grid,
-                             long long startX) :
-        grid(_grid), xOffset(startX), currentChunk(startX / C), chunkOffset(startX % C)
+    UnstructuredNeighborhood(const Grid& grid, long long startX) :
+        grid(grid),
+        xOffset(startX),
+        currentChunk(startX / C),
+        chunkOffset(startX % C)
     {}
 
     inline
     const CELL& operator[](int index) const
-    {
-        return grid[index];
-    }
-
-    inline
-    CELL& operator[](int index)
     {
         return grid[index];
     }
@@ -155,6 +152,36 @@ public:
             neighbors.emplace_back(matrix.columnVec()[index], matrix.valuesVec()[index]);
 
         return neighbors;
+    }
+};
+
+/**
+ * Simple neighborhood which is used for hoodNew in updateLineX().
+ * Provides access to cells via an identifier.
+ */
+template<typename CELL, std::size_t MATRICES = 1,
+         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+class CellIDNeighborhood
+{
+private:
+    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    Grid& grid;
+public:
+    inline explicit
+    CellIDNeighborhood(Grid& grid) :
+        grid(grid)
+    {}
+
+    inline
+    CELL& operator[](int index)
+    {
+        return grid[index];
+    }
+
+    inline
+    const CELL& operator[](int index) const
+    {
+        return grid[index];
     }
 };
 

@@ -7,7 +7,7 @@
 namespace LibGeoDecomp {
 
 template<typename CELL>
-class UnstrutucturedUpdateFunctor
+class UnstructuredUpdateFunctor
 {
 private:
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
@@ -42,9 +42,9 @@ public:
         typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
 
         UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodOld(const_cast<GRID1&>(gridOld), streak.origin.x());
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodNew(*gridNew, 0);
+            hoodOld(gridOld, streak.origin.x());
+        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodNew(*gridNew);
 
         // switch between updateLineX() and update()
         updateWrapper(hoodNew, streak.endX, hoodOld, nanoStep, UpdateLineXFlag());
