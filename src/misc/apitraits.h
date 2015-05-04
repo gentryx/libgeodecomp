@@ -335,6 +335,13 @@ public:
     class HasTorusTopology : public HasTopology<typename Topologies::Torus<DIM>::Topology>
     {};
 
+    /**
+     * Unstructured topology.
+     */
+    template<int DIM>
+    class HasUnstructuredTopology: public HasTopology<typename Topologies::Unstructured<DIM>::Topology>
+    {};
+
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
     /**

@@ -3,6 +3,8 @@
 
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/soagrid.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/geometry/topologies.h>
 
 namespace LibGeoDecomp {
 
@@ -21,6 +23,22 @@ class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::Tr
 {
 public:
     typedef SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
+};
+
+template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
+class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology<1>,
+                       TOPOLOGICALLY_CORRECT, APITraits::FalseType>
+{
+public:
+    typedef UnstructuredGrid<CELL_TYPE> Value;
+};
+
+template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
+class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology<1>,
+                       TOPOLOGICALLY_CORRECT, APITraits::TrueType>
+{
+public:
+    typedef UnstructuredGridSoA<CELL_TYPE> Value;
 };
 
 }
