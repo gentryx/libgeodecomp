@@ -15,13 +15,23 @@
 
 using namespace LibGeoDecomp;
 
+// defining settings for SELL-C-q
+typedef double ValueType;
+static const std::size_t MATRICES = 1;
+static const int C = 4;
+static const int SIGMA = 1;
+
 class Cell
 {
 public:
     class API :
         public APITraits::HasUpdateLineX,
         public APITraits::HasUnstructuredTopology,
-        public APITraits::HasPredefinedMPIDataType<double>
+        public APITraits::HasPredefinedMPIDataType<double>,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
     {};
 
     inline explicit Cell(double v = 0) :
@@ -55,7 +65,7 @@ public:
 class CellInitializerDiagonal : public SimpleInitializer<Cell>
 {
 public:
-    using SimpleInitializer<Cell>::gridDimensions;
+    typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
 
     explicit CellInitializerDiagonal() : SimpleInitializer<Cell>(Coord<1>(100), 1)
     {}
@@ -63,13 +73,13 @@ public:
     virtual void grid(GridBase<Cell, 1> *ret)
     {
         // setup diagonal matrix, one neighbor per cell
-        UnstructuredGrid<Cell, 1> *grid = dynamic_cast<UnstructuredGrid<Cell, 1> *>(ret);
+        Grid *grid = dynamic_cast<Grid *>(ret);
 
-        std::map<Coord<2>, double> adjacency;
+        std::map<Coord<2>, ValueType> adjacency;
 
         for (int i = 0; i < 100; ++i) {
             grid->set(Coord<1>(i), Cell(static_cast<double>(i) + 0.1));
-            adjacency[Coord<2>(i, i)] = static_cast<double>(i) + 0.1;
+            adjacency[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
         }
 
         grid->setAdjacency(0, adjacency.begin(), adjacency.end());
@@ -79,7 +89,7 @@ public:
 class CellInitializerMatrix : public SimpleInitializer<Cell>
 {
 public:
-    using SimpleInitializer<Cell>::gridDimensions;
+    typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
 
     explicit CellInitializerMatrix(const std::string& rhsFile,
                                    const std::string& matrixFile) :
@@ -90,8 +100,8 @@ public:
     virtual void grid(GridBase<Cell, 1> *ret)
     {
         // read rhs and matrix from file
-        UnstructuredGrid<Cell, 1> *grid = dynamic_cast<UnstructuredGrid<Cell, 1> *>(ret);
-        std::map<Coord<2>, double> adjacency;
+        Grid *grid = dynamic_cast<Grid *>(ret);
+        std::map<Coord<2>, ValueType> adjacency;
         std::ifstream rhsIfs;
         std::ifstream matrixIfs;
 
@@ -120,6 +130,7 @@ public:
 
         for (unsigned row = 0; row < rows; ++row) {
             for (unsigned col = 0; col < cols; ++col) {
+                ValueType tmp;
                 if (!(matrixIfs >> tmp)) {
                     throw std::logic_error("Failed to read data from matrix");
                 }
