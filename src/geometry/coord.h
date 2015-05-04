@@ -623,7 +623,9 @@ public:
     __host__ __device__
     inline Coord operator/(const int& divisor) const
     {
-        return Coord(x()/ divisor, y() / divisor, z() / divisor);
+        return Coord(x() / divisor,
+                     y() / divisor,
+                     z() / divisor);
     }
 
     __host__ __device__
