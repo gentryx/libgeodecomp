@@ -74,7 +74,7 @@ public:
         int index;
         std::pair<int, O_VALUE_TYPE> currentPair;
     public:
-        inline explicit
+        inline
         Iterator(const Matrix& matrix, int startIndex) :
             matrix(matrix), index(startIndex),
             currentPair(std::make_pair(matrix.columnVec()[index],
@@ -111,7 +111,7 @@ public:
         }
     };
 
-    inline explicit
+    inline
     UnstructuredNeighborhood(const Grid& grid, long long startX) :
         grid(grid),
         xOffset(startX),
@@ -153,20 +153,6 @@ public:
         UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
         operator--();
         return tmp;
-    }
-
-    inline
-    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator+=(int value)
-    {
-        updateIndices(value);
-        return *this;
-    }
-
-    inline
-    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator-=(int value)
-    {
-        updateIndices(-value);
-        return *this;
     }
 
     inline
