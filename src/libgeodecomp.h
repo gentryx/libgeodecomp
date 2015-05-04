@@ -20,6 +20,7 @@
 #endif
 
 #include <libgeodecomp/communication/serialization.h>
+#include <libgeodecomp/communication/serializationhelpers.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/geometry/voronoimesher.h>
