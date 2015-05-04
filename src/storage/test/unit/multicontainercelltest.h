@@ -107,7 +107,7 @@ public:
         }
 
         try {
-            const SimpleElement& elem = hood.elements[1024];
+            hood.elements[1024];
             ++seenElements;
         }  catch(const std::logic_error& exception) {
             // intentionally left blank
