@@ -4,9 +4,10 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
-#include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+#include <libgeodecomp/parallelization/hpxsimulator.h>
 #endif
 
 #ifdef LIBGEODECOMP_WITH_MPI
