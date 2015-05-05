@@ -14,6 +14,9 @@ namespace LibGeoDecomp {
 
 namespace SoAGridHelpers {
 
+/**
+ * See below:
+ */
 template<typename CELL, bool INIT_INTERIOR>
 class SetContent
 {
@@ -144,6 +147,9 @@ public:
     }
 };
 
+/**
+ * Extract a single member variable from a SoA grid
+ */
 template<typename CELL, int DIM>
 class SaveMember
 {
@@ -183,6 +189,9 @@ private:
     long memberOffset;
 };
 
+/**
+ * Counterpart to SaveMember
+ */
 template<typename CELL, int DIM>
 class LoadMember
 {

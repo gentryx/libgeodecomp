@@ -2,5 +2,6 @@ generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
-add_executable(bouncingspheres ${SOURCES})
-target_link_libraries(bouncingspheres ${LOCAL_LIBGEODECOMP_LINK_LIB})
+add_executable(libgeodecomp_examples_bouncingspheres ${SOURCES})
+set_target_properties(libgeodecomp_examples_bouncingspheres PROPERTIES OUTPUT_NAME bouncingspheres)
+target_link_libraries(libgeodecomp_examples_bouncingspheres ${LOCAL_LIBGEODECOMP_LINK_LIB})

@@ -19,6 +19,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward-declaration to resolve cyclic dependency
+ */
 class APITraits;
 
 namespace SelectorHelpers {
@@ -319,21 +322,33 @@ class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 {
