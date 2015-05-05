@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_COMMUNICATION_SERIALIZATIONHELPERS_H
 #define LIBGEODECOMP_COMMUNICATION_SERIALIZATIONHELPERS_H
 
+#include<libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+
 #include <libgeodecomp/communication/serialization.h>
 
 namespace boost {
@@ -30,5 +33,7 @@ inline void load_construct_data(
 
 }
 }
+
+#endif
 
 #endif
