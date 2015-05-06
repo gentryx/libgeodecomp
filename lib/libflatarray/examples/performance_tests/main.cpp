@@ -10,7 +10,14 @@
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
+
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
+
+#ifdef __AVX__
 #include <immintrin.h>
+#endif
 
 #define WEIGHT_S 0.11
 #define WEIGHT_T 0.12
@@ -117,6 +124,8 @@ private:
         }
     }
 };
+
+#ifdef __SSE__
 
 class JacobiD3Q7Pepper : public JacobiD3Q7
 {
@@ -293,6 +302,8 @@ private:
     }
 };
 
+#endif
+
 class JacobiCell
 {
 public:
@@ -413,6 +424,8 @@ private:
         }
     }
 };
+
+#ifdef __SSE__
 
 class JacobiD3Q7Silver : public JacobiD3Q7
 {
@@ -631,6 +644,8 @@ private:
         }
     }
 };
+
+#endif
 
 class Particle
 {
@@ -1623,7 +1638,7 @@ int main(int argc, char **argv)
         eval(JacobiD3Q7Vanilla(), *i);
     }
 
-#ifdef __AVX__
+#ifdef __SSE__
     for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
         eval(JacobiD3Q7Pepper(), *i);
     }
@@ -1633,9 +1648,11 @@ int main(int argc, char **argv)
         eval(JacobiD3Q7Bronze(), *i);
     }
 
+#ifdef __SSE__
     for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
         eval(JacobiD3Q7Silver(), *i);
     }
+#endif
 
     sizes.clear();
 
