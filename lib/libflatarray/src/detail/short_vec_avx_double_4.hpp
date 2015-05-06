@@ -12,6 +12,12 @@
 
 #include <immintrin.h>
 #include <libflatarray/detail/sqrt_reference.hpp>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 #ifndef __CUDA_ARCH__
 
@@ -45,14 +51,26 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1(_mm256_loadu_pd(data + 0))
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m256d& val1) :
         val1(val1)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        static const unsigned indices[] = { 0, 1, 2, 3 };
+        const double   *ptr = reinterpret_cast<const double *>(&(*il.begin()));
+        const unsigned *ind = static_cast<const unsigned *>(indices);
+        gather(ptr, ind);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 4>& other)
@@ -114,13 +132,49 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = _mm256_loadu_pd(data);
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        val1 = _mm256_load_pd(data);
+    }
+
+    inline
     void store(double *data) const
     {
         _mm256_storeu_pd(data +  0, val1);
     }
 
     inline
-    void gather(const double *ptr, unsigned *offsets)
+    void store_aligned(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_store_pd(data, val1);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_stream_pd(data, val1);
+    }
+
+#ifdef __AVX2__
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        __m128i indices;
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets));
+        val1    = _mm256_i32gather_pd(ptr, indices, 8);
+    }
+#else
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
     {
         __m128d tmp;
         tmp  = _mm_loadl_pd(tmp, ptr + offsets[0]);
@@ -130,9 +184,10 @@ public:
         tmp  = _mm_loadh_pd(tmp, ptr + offsets[3]);
         val1 = _mm256_insertf128_pd(val1, tmp, 1);
     }
+#endif
 
     inline
-    void scatter(double *ptr, unsigned *offsets) const
+    void scatter(double *ptr, const unsigned *offsets) const
     {
         __m128d tmp;
         tmp = _mm256_extractf128_pd(val1, 0);
