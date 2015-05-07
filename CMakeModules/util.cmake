@@ -1,26 +1,27 @@
-function(print_options)
+function(lgd_print_options)
   message("-- The following options have been configured:")
   message(${OPTIONS_LIST})
   message("")
-endfunction(print_options)
+endfunction(lgd_print_options)
 
-function(dump_config outfile)
+function(lgd_dump_config outfile)
   set(CONTENT "#ifndef LIBGEODECOMP_CONFIG_H\n\n")
   set(CONTENT "${CONTENT}${CONFIG_HEADER}\n")
   set(CONTENT "${CONTENT}#endif\n")
-  file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}.new" "${CONTENT}")
+  set(PATHNAME "${CMAKE_BINARY_DIR}/libgeodecomp/${outfile}")
+  file(WRITE "${PATHNAME}.new" "${CONTENT}")
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files  "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}" "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}.new" RESULT_VARIABLE res)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/libgeodecomp")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files  "${PATHNAME}" "${PATHNAME}.new" RESULT_VARIABLE res)
   if(res GREATER 0)
-    file(WRITE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}" "${CONTENT}")
+    file(WRITE "${PATHNAME}" "${CONTENT}")
   endif()
 
-  file(REMOVE "${CMAKE_BINARY_DIR}/${PACKAGE_NAME}/${outfile}.new")
-endfunction(dump_config)
+  file(REMOVE "${PATHNAME}.new")
+endfunction(lgd_dump_config)
 
 # generic function to add user-configurable options. add_to_header may be used to propagate the option to a header file.
-function(add_config_option name help_message default add_to_header)
+function(lgd_add_config_option name help_message default add_to_header)
   if(NOT DEFINED ${name})
     set(${name} "${default}")
     set(${name} "${default}" CACHE STRING "${help_message}" FORCE)
@@ -33,12 +34,11 @@ function(add_config_option name help_message default add_to_header)
       set(CONFIG_HEADER "${CONFIG_HEADER}#define LIBGEODECOMP_${name} ${${name}}\n" PARENT_SCOPE)
     endif()
   endif()
-endfunction(add_config_option)
+endfunction(lgd_add_config_option)
 
 # list headers/source files in "auto.cmake"
-function(generate_sourcelists relative_dir)
+function(lgd_generate_sourcelists relative_dir)
   get_filename_component(dir ${relative_dir} ABSOLUTE)
-  # message("generate_sourcelists ${dir}")
 
   file(GLOB RAW_SOURCES "${dir}/*.cu" "${dir}/*.cpp" "${dir}/*.f")
   file(GLOB RAW_HEADERS "${dir}/*.h")
@@ -91,19 +91,19 @@ function(generate_sourcelists relative_dir)
       file(WRITE "${dir}/auto.cmake" ${MY_AUTO})
     endif(regen_auto)
   endif(RAW_SOURCES OR RAW_HEADERS)
-endfunction(generate_sourcelists)
+endfunction(lgd_generate_sourcelists)
 
 # creates a string constant from a source file, handy for e.g.
 # just-in-time compilation of OpenCL kernels
-function(escape_kernel outfile infile)
+function(lgd_escape_kernel outfile infile)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${outfile}"
     COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${infile}" | sed 's/"/\\\\"/g' | sed s/.*/\\"\\&\\\\\\\\n\\"/ >"${CMAKE_CURRENT_SOURCE_DIR}/${outfile}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${infile}"
     )
-endfunction(escape_kernel)
+endfunction(lgd_escape_kernel)
 
-function(detect_distro)
+function(lgd_detect_distro)
   if(EXISTS "/etc/lsb-release")
     file(READ "/etc/lsb-release" lsb_release)
 
@@ -133,4 +133,4 @@ function(detect_distro)
   endif()
 
   set(distro ${distro} PARENT_SCOPE)
-endfunction(detect_distro)
+endfunction(lgd_detect_distro)

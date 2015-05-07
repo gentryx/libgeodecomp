@@ -8,7 +8,14 @@
 #ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_FLOAT_32_HPP
 #define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_FLOAT_32_HPP
 
+#ifndef __AVX512F__
 #ifndef __AVX__
+
+#include <libflatarray/config.h>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 namespace LibFlatArray {
 
@@ -71,40 +78,10 @@ public:
     {}
 
     inline
-    short_vec(const float *data) :
-        val1( *(data +  0)),
-        val2( *(data +  1)),
-        val3( *(data +  2)),
-        val4( *(data +  3)),
-        val5( *(data +  4)),
-        val6( *(data +  5)),
-        val7( *(data +  6)),
-        val8( *(data +  7)),
-        val9( *(data +  8)),
-        val10(*(data +  9)),
-        val11(*(data + 10)),
-        val12(*(data + 11)),
-        val13(*(data + 12)),
-        val14(*(data + 13)),
-        val15(*(data + 14)),
-        val16(*(data + 15)),
-        val17(*(data + 16)),
-        val18(*(data + 17)),
-        val19(*(data + 18)),
-        val20(*(data + 19)),
-        val21(*(data + 20)),
-        val22(*(data + 21)),
-        val23(*(data + 22)),
-        val24(*(data + 23)),
-        val25(*(data + 24)),
-        val26(*(data + 25)),
-        val27(*(data + 26)),
-        val28(*(data + 27)),
-        val29(*(data + 28)),
-        val30(*(data + 29)),
-        val31(*(data + 30)),
-        val32(*(data + 31))
-    {}
+    short_vec(const float *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(
@@ -173,6 +150,20 @@ public:
         val31(val31),
         val32(val32)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<float>& il)
+    {
+        static const unsigned indices[] = { 0, 1, 2, 3, 4, 5, 6, 7,
+                                            8, 9, 10, 11, 12, 13, 14, 15,
+                                            16, 17, 18, 19, 20, 21, 22, 23,
+                                            24, 25, 26, 27, 28, 29, 30, 31 };
+        const float    *ptr = reinterpret_cast<const float *>(&(*il.begin()));
+        const unsigned *ind = static_cast<const unsigned *>(indices);
+        gather(ptr, ind);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<float, 32>& other)
@@ -513,6 +504,49 @@ public:
     }
 
     inline
+    void load(const float *data)
+    {
+        val1  = data[ 0];
+        val2  = data[ 1];
+        val3  = data[ 2];
+        val4  = data[ 3];
+        val5  = data[ 4];
+        val6  = data[ 5];
+        val7  = data[ 6];
+        val8  = data[ 7];
+        val9  = data[ 8];
+        val10 = data[ 9];
+        val11 = data[10];
+        val12 = data[11];
+        val13 = data[12];
+        val14 = data[13];
+        val15 = data[14];
+        val16 = data[15];
+        val17 = data[16];
+        val18 = data[17];
+        val19 = data[18];
+        val20 = data[19];
+        val21 = data[20];
+        val22 = data[21];
+        val23 = data[22];
+        val24 = data[23];
+        val25 = data[24];
+        val26 = data[25];
+        val27 = data[26];
+        val28 = data[27];
+        val29 = data[28];
+        val30 = data[29];
+        val31 = data[30];
+        val32 = data[31];
+    }
+
+    inline
+    void load_aligned(const float *data)
+    {
+        load(data);
+    }
+
+    inline
     void store(float *data) const
     {
         *(data +  0) = val1;
@@ -550,7 +584,19 @@ public:
     }
 
     inline
-    void gather(const float *ptr, unsigned *offsets)
+    void store_aligned(float *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void store_nt(float *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
     {
         val1  = ptr[offsets[ 0]];
         val2  = ptr[offsets[ 1]];
@@ -587,7 +633,7 @@ public:
     }
 
     inline
-    void scatter(float *ptr, unsigned *offsets) const
+    void scatter(float *ptr, const unsigned *offsets) const
     {
         ptr[offsets[0]]  = val1;
         ptr[offsets[1]]  = val2;
@@ -693,6 +739,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif
 
 #endif

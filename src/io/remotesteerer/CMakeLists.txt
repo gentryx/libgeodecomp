@@ -1,4 +1,4 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 
 if (WITH_THREADS AND WITH_BOOST_ASIO)
   add_subdirectory(test/parallel_mpi_2)

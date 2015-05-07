@@ -9,6 +9,11 @@
 #define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_1_HPP
 
 #include <cmath>
+#include <libflatarray/config.h>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 namespace LibFlatArray {
 
@@ -40,9 +45,21 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1(*data)
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        static const unsigned indices[] = { 0 };
+        const double   *ptr = reinterpret_cast<const double *>(&(*il.begin()));
+        const unsigned *ind = static_cast<const unsigned *>(indices);
+        gather(ptr, ind);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 1>& other)
@@ -104,19 +121,43 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = data[0];
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        load(data);
+    }
+
+    inline
     void store(double *data) const
     {
         *(data + 0) = val1;
     }
 
     inline
-    void gather(const double *ptr, unsigned *offsets)
+    void store_aligned(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
     {
         val1 = ptr[offsets[0]];
     }
 
     inline
-    void scatter(double *ptr, unsigned *offsets) const
+    void scatter(double *ptr, const unsigned *offsets) const
     {
         ptr[offsets[0]] = val1;
     }

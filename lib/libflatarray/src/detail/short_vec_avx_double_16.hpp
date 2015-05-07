@@ -12,7 +12,14 @@
 
 #include <immintrin.h>
 #include <libflatarray/detail/sqrt_reference.hpp>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
 
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
+#ifndef __AVX512F__
 #ifndef __CUDA_ARCH__
 
 namespace LibFlatArray {
@@ -48,12 +55,10 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1(_mm256_loadu_pd(data + 0)),
-        val2(_mm256_loadu_pd(data + 4)),
-        val3(_mm256_loadu_pd(data + 8)),
-        val4(_mm256_loadu_pd(data + 12))
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m256d& val1, const __m256d& val2, const __m256d& val3, const __m256d& val4) :
@@ -62,6 +67,18 @@ public:
         val3(val3),
         val4(val4)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        static const unsigned indices[] = { 0, 1, 2, 3, 4, 5, 6, 7,
+                                            8, 9, 10, 11, 12, 13, 14, 15 };
+        const double   *ptr = reinterpret_cast<const double *>(&(*il.begin()));
+        const unsigned *ind = static_cast<const unsigned *>(indices);
+        gather(ptr, ind);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 16>& other)
@@ -150,6 +167,25 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = _mm256_loadu_pd(data +  0);
+        val2 = _mm256_loadu_pd(data +  4);
+        val3 = _mm256_loadu_pd(data +  8);
+        val4 = _mm256_loadu_pd(data + 12);
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        val1 = _mm256_load_pd(data +  0);
+        val2 = _mm256_load_pd(data +  4);
+        val3 = _mm256_load_pd(data +  8);
+        val4 = _mm256_load_pd(data + 12);
+    }
+
+    inline
     void store(double *data) const
     {
         _mm256_storeu_pd(data +  0, val1);
@@ -159,7 +195,42 @@ public:
     }
 
     inline
-    void gather(const double *ptr, unsigned *offsets)
+    void store_aligned(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_store_pd(data +  0, val1);
+        _mm256_store_pd(data +  4, val2);
+        _mm256_store_pd(data +  8, val3);
+        _mm256_store_pd(data + 12, val4);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_stream_pd(data +  0, val1);
+        _mm256_stream_pd(data +  4, val2);
+        _mm256_stream_pd(data +  8, val3);
+        _mm256_stream_pd(data + 12, val4);
+    }
+
+#ifdef __AVX2__
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        __m128i indices;
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets));
+        val1    = _mm256_i32gather_pd(ptr, indices, 8);
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets + 4));
+        val2    = _mm256_i32gather_pd(ptr, indices, 8);
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets + 8));
+        val3    = _mm256_i32gather_pd(ptr, indices, 8);
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets + 12));
+        val4    = _mm256_i32gather_pd(ptr, indices, 8);
+    }
+#else
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
     {
         __m128d tmp;
         tmp  = _mm_loadl_pd(tmp, ptr + offsets[0]);
@@ -187,9 +258,10 @@ public:
         tmp  = _mm_loadh_pd(tmp, ptr + offsets[15]);
         val4 = _mm256_insertf128_pd(val4, tmp, 1);
     }
+#endif
 
     inline
-    void scatter(double *ptr, unsigned *offsets) const
+    void scatter(double *ptr, const unsigned *offsets) const
     {
         __m128d tmp;
         tmp = _mm256_extractf128_pd(val1, 0);
@@ -261,6 +333,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif
 #endif
 

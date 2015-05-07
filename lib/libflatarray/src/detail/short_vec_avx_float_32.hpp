@@ -13,7 +13,13 @@
 #include <immintrin.h>
 #include <libflatarray/detail/sqrt_reference.hpp>
 #include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
 
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
+#ifndef __AVX512F__
 #ifndef __CUDA_ARCH__
 
 namespace LibFlatArray {
@@ -52,12 +58,10 @@ public:
     {}
 
     inline
-    short_vec(const float *data) :
-        val1(_mm256_loadu_ps(data + 0)),
-        val2(_mm256_loadu_ps(data + 8)),
-        val3(_mm256_loadu_ps(data + 16)),
-        val4(_mm256_loadu_ps(data + 24))
-    {}
+    short_vec(const float *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m256& val1, const __m256& val2, const __m256& val3, const __m256& val4) :
@@ -67,8 +71,22 @@ public:
         val4(val4)
     {}
 
+#ifdef LIBFLATARRAY_WITH_CPP14
     inline
-    short_vec(const sqrt_reference<float, 32> other);
+    short_vec(const std::initializer_list<float>& il)
+    {
+        static const unsigned indices[] = { 0, 1, 2, 3, 4, 5, 6, 7,
+                                            8, 9, 10, 11, 12, 13, 14, 15,
+                                            16, 17, 18, 19, 20, 21, 22, 23,
+                                            24, 25, 26, 27, 28, 29, 30, 31 };
+        const float    *ptr = reinterpret_cast<const float *>(&(*il.begin()));
+        const unsigned *ind = static_cast<const unsigned *>(indices);
+        gather(ptr, ind);
+    }
+#endif
+
+    inline
+    short_vec(const sqrt_reference<float, 32>& other);
 
     inline
     void operator-=(const short_vec<float, 32>& other)
@@ -163,6 +181,25 @@ public:
     }
 
     inline
+    void load(const float *data)
+    {
+        val1 = _mm256_loadu_ps(data +  0);
+        val2 = _mm256_loadu_ps(data +  8);
+        val3 = _mm256_loadu_ps(data + 16);
+        val4 = _mm256_loadu_ps(data + 24);
+    }
+
+    inline
+    void load_aligned(const float *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        val1 = _mm256_load_ps(data +  0);
+        val2 = _mm256_load_ps(data +  8);
+        val3 = _mm256_load_ps(data + 16);
+        val4 = _mm256_load_ps(data + 24);
+    }
+
+    inline
     void store(float *data) const
     {
         _mm256_storeu_ps(data +  0, val1);
@@ -172,53 +209,89 @@ public:
     }
 
     inline
-    void gather(const float *ptr, unsigned *offsets)
+    void store_aligned(float *data) const
     {
-        __m128 tmp;
-        tmp  = _mm_load_ss(ptr + offsets[0]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[1], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[2], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[3], _MM_MK_INSERTPS_NDX(0,3,0));
-        val1 = _mm256_insertf128_ps(val1, tmp, 0);
-        tmp  = _mm_load_ss(ptr + offsets[4]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[5], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[6], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[7], _MM_MK_INSERTPS_NDX(0,3,0));
-        val1 = _mm256_insertf128_ps(val1, tmp, 1);
-        tmp  = _mm_load_ss(ptr + offsets[8]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[ 9], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[10], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[11], _MM_MK_INSERTPS_NDX(0,3,0));
-        val2 = _mm256_insertf128_ps(val2, tmp, 0);
-        tmp  = _mm_load_ss(ptr + offsets[12]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[13], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[14], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[15], _MM_MK_INSERTPS_NDX(0,3,0));
-        val2 = _mm256_insertf128_ps(val2, tmp, 1);
-        tmp  = _mm_load_ss(ptr + offsets[16]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[17], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[18], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[19], _MM_MK_INSERTPS_NDX(0,3,0));
-        val3 = _mm256_insertf128_ps(val3, tmp, 0);
-        tmp  = _mm_load_ss(ptr + offsets[20]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[21], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[22], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[23], _MM_MK_INSERTPS_NDX(0,3,0));
-        val3 = _mm256_insertf128_ps(val3, tmp, 1);
-        tmp  = _mm_load_ss(ptr + offsets[24]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[25], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[26], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[27], _MM_MK_INSERTPS_NDX(0,3,0));
-        val4 = _mm256_insertf128_ps(val4, tmp, 0);
-        tmp  = _mm_load_ss(ptr + offsets[28]);
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[29], _MM_MK_INSERTPS_NDX(0,1,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[30], _MM_MK_INSERTPS_NDX(0,2,0));
-        ShortVecHelpers::_mm_insert_ps2_avx(tmp, ptr, offsets[31], _MM_MK_INSERTPS_NDX(0,3,0));
-        val4 = _mm256_insertf128_ps(val4, tmp, 1);
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_store_ps(data +  0, val1);
+        _mm256_store_ps(data +  8, val2);
+        _mm256_store_ps(data + 16, val3);
+        _mm256_store_ps(data + 24, val4);
     }
 
     inline
-    void scatter(float *ptr, unsigned *offsets) const
+    void store_nt(float *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_stream_ps(data +  0, val1);
+        _mm256_stream_ps(data +  8, val2);
+        _mm256_stream_ps(data + 16, val3);
+        _mm256_stream_ps(data + 24, val4);
+    }
+
+#ifdef __AVX2__
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        __m256i indices;
+        indices = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(offsets));
+        val1    = _mm256_i32gather_ps(ptr, indices, 4);
+        indices = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(offsets + 8));
+        val2    = _mm256_i32gather_ps(ptr, indices, 4);
+        indices = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(offsets + 16));
+        val3    = _mm256_i32gather_ps(ptr, indices, 4);
+        indices = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(offsets + 24));
+        val4    = _mm256_i32gather_ps(ptr, indices, 4);
+    }
+#else
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        __m128 tmp;
+        tmp  = _mm_load_ss(ptr + offsets[0]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[1], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[2], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[3], _MM_MK_INSERTPS_NDX(0,3,0));
+        val1 = _mm256_insertf128_ps(val1, tmp, 0);
+        tmp  = _mm_load_ss(ptr + offsets[4]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[5], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[6], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[7], _MM_MK_INSERTPS_NDX(0,3,0));
+        val1 = _mm256_insertf128_ps(val1, tmp, 1);
+        tmp  = _mm_load_ss(ptr + offsets[8]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[ 9], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[10], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[11], _MM_MK_INSERTPS_NDX(0,3,0));
+        val2 = _mm256_insertf128_ps(val2, tmp, 0);
+        tmp  = _mm_load_ss(ptr + offsets[12]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[13], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[14], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[15], _MM_MK_INSERTPS_NDX(0,3,0));
+        val2 = _mm256_insertf128_ps(val2, tmp, 1);
+        tmp  = _mm_load_ss(ptr + offsets[16]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[17], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[18], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[19], _MM_MK_INSERTPS_NDX(0,3,0));
+        val3 = _mm256_insertf128_ps(val3, tmp, 0);
+        tmp  = _mm_load_ss(ptr + offsets[20]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[21], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[22], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[23], _MM_MK_INSERTPS_NDX(0,3,0));
+        val3 = _mm256_insertf128_ps(val3, tmp, 1);
+        tmp  = _mm_load_ss(ptr + offsets[24]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[25], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[26], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[27], _MM_MK_INSERTPS_NDX(0,3,0));
+        val4 = _mm256_insertf128_ps(val4, tmp, 0);
+        tmp  = _mm_load_ss(ptr + offsets[28]);
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[29], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[30], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS_AVX(tmp, ptr, offsets[31], _MM_MK_INSERTPS_NDX(0,3,0));
+        val4 = _mm256_insertf128_ps(val4, tmp, 1);
+    }
+#endif
+
+    inline
+    void scatter(float *ptr, const unsigned *offsets) const
     {
         __m128 tmp;
         tmp = _mm256_extractf128_ps(val1, 0);
@@ -296,7 +369,7 @@ private:
 #endif
 
 inline
-short_vec<float, 32>::short_vec(const sqrt_reference<float, 32> other) :
+short_vec<float, 32>::short_vec(const sqrt_reference<float, 32>& other) :
     val1(_mm256_sqrt_ps(other.vec.val1)),
     val2(_mm256_sqrt_ps(other.vec.val2)),
     val3(_mm256_sqrt_ps(other.vec.val3)),
@@ -352,6 +425,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif
 #endif
 

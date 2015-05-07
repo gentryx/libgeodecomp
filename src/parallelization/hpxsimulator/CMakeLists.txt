@@ -1,1 +1,1 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
