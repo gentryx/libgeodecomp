@@ -135,7 +135,7 @@ class FindUnprefixedTargetNames < TestBase
   def test(filename, content)
     return 0 unless filename =~ /(testbed|examples)/
 
-    expected_name = Pathname.new(filename).parent.to_s.gsub(/^src/, "libgeodecomp").gsub(/\//, "_")
+    expected_name = "libgeodecomp_" + Pathname.new(filename).parent.relative_path_from(PATH).to_s.gsub(/\//, "_")
     ret = 0
 
     ["executable", "library"].each do |target_token|
@@ -167,7 +167,7 @@ def scour_files(files, tester)
   puts delimiter if !SUMMARY_MODE
 end
 
-DEFAULT_PATH=Pathname.new($0).parent.parent.realpath + "src"
+DEFAULT_PATH=Pathname.new($0).parent.parent.parent.realpath + "src"
 
 if (ARGV.size > 2) || ((ARGV.size > 1) && (ARGV[0] != "-s"))
   STDERR.puts <<EOF
@@ -186,7 +186,6 @@ PATH = Pathname.new(ARGV.last || DEFAULT_PATH)
 
 pattern = PATH + "**" + "*.{h,cpp,cu}"
 cpp_files = Dir.glob(pattern)
-
 scour_files(cpp_files, FindUndocumentedClasses.new)
 scour_files(cpp_files, FindUnmatchedHeaderGuards.new)
 scour_files(cpp_files, FindFixmes.new)
