@@ -9,9 +9,17 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class can be used by Simulators to deduce from a cell's API a
+ * suitable grid type for internal storage of the simulation state.
+ * SFINAE is used to differentiate between types at compile time.
+ */
 template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT, typename SUPPORTS_SOA>
 class GridTypeSelector;
 
+/**
+ * see above.
+ */
 template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
 class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::FalseType>
 {
@@ -19,6 +27,9 @@ public:
     typedef DisplacedGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
 };
 
+/**
+ * see above.
+ */
 template<typename CELL_TYPE, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
 class GridTypeSelector<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT, APITraits::TrueType>
 {
@@ -26,6 +37,9 @@ public:
     typedef SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
 };
 
+/**
+ * see above.
+ */
 template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
 class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology,
                        TOPOLOGICALLY_CORRECT, APITraits::FalseType>
@@ -39,6 +53,9 @@ public:
     typedef UnstructuredGrid<CELL_TYPE, MATRICES, ValueType, C, SIGMA> Value;
 };
 
+/**
+ * see above.
+ */
 template<typename CELL_TYPE, bool TOPOLOGICALLY_CORRECT>
 class GridTypeSelector<CELL_TYPE, TopologiesHelpers::UnstructuredTopology,
                        TOPOLOGICALLY_CORRECT, APITraits::TrueType>

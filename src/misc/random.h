@@ -11,6 +11,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * LibGeoDecomp's internal wrapper for generating pseudo random
+ * numbers.
+ */
 class Random
 {
 public:

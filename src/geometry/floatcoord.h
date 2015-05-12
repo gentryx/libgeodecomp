@@ -20,6 +20,9 @@ namespace LibGeoDecomp {
 template<int DIM>
 class FloatCoord;
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<1>
 {
@@ -209,6 +212,9 @@ public:
     double c[1];
 };
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<2>
 {
@@ -421,6 +427,9 @@ public:
     double c[2];
 };
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<3>
 {

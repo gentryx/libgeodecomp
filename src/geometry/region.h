@@ -8,10 +8,16 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Unit test class
+ */
 class RegionTest;
 
 namespace RegionHelpers {
 
+/**
+ * internal helper class
+ */
 class RegionCommonHelper
 {
 public:
@@ -42,6 +48,9 @@ protected:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class ConstructStreakFromIterators
 {
@@ -57,6 +66,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class ConstructStreakFromIterators<0>
 {
@@ -72,6 +84,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class StreakIteratorInitSingleOffset
 {
@@ -104,6 +119,9 @@ private:
     const std::size_t& offsetIndex;
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class StreakIteratorInitSingleOffset<0>
 {
@@ -126,6 +144,9 @@ private:
     const std::size_t& offsetIndex;
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class StreakIteratorInitSingleOffsetWrapper
 {
@@ -149,6 +170,9 @@ private:
     const std::size_t& offsetIndex;
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM, int COORD_DIM>
 class StreakIteratorInitOffsets
 {
@@ -173,6 +197,9 @@ private:
     const Coord<COORD_DIM>& offsets;
 };
 
+/**
+ * internal helper class
+ */
 template<int COORD_DIM>
 class StreakIteratorInitOffsets<0, COORD_DIM>
 {
@@ -198,6 +225,9 @@ private:
     const Coord<COORD_DIM>& offsets;
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class StreakIteratorInitBegin
 {
@@ -213,6 +243,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class StreakIteratorInitBegin<0>
 {
@@ -231,6 +264,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class StreakIteratorInitEnd
 {
@@ -246,6 +282,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class StreakIteratorInitEnd<0>
 {
@@ -260,6 +299,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionIntersectHelper
 {
@@ -288,6 +330,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class RegionIntersectHelper<0>
 {
@@ -307,12 +352,21 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionLookupHelper;
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionInsertHelper;
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionRemoveHelper;
 
@@ -1115,6 +1169,9 @@ private:
 
 namespace RegionHelpers {
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionLookupHelper : public RegionCommonHelper
 {
@@ -1169,6 +1226,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class RegionLookupHelper<0> : public RegionCommonHelper
 {
@@ -1210,6 +1270,9 @@ public:
 
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionInsertHelper : public RegionCommonHelper
 {
@@ -1287,6 +1350,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class RegionInsertHelper<0>
 {
@@ -1361,6 +1427,9 @@ private:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<int DIM>
 class RegionRemoveHelper : public RegionCommonHelper
 {
@@ -1432,6 +1501,9 @@ public:
     }
 };
 
+/**
+ * internal helper class
+ */
 template<>
 class RegionRemoveHelper<0>
 {

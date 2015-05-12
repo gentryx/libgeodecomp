@@ -6,33 +6,10 @@
 
 namespace LibGeoDecomp {
 
-template<int DIM>
-class TestInitializerHelper;
-
-template<>
-class TestInitializerHelper<2>
-{
-public:
-    static Coord<2> getDimensions()
-    {
-        return Coord<2>(17, 12);
-    }
-
-    static const int maxSteps = 31;
-};
-
-template<>
-class TestInitializerHelper<3>
-{
-public:
-    static Coord<3> getDimensions()
-    {
-        return Coord<3>(13, 12, 11);
-    }
-
-    static const int maxSteps = 21;
-};
-
+/**
+ * Helper class which sets up grids for use with various variants of
+ * TestCell.
+ */
 template<class TEST_CELL>
 class TestInitializer : public Initializer<TEST_CELL>
 {
@@ -42,8 +19,8 @@ public:
     static const int DIM = TEST_CELL::DIMENSIONS;
 
     explicit TestInitializer(
-        const Coord<DIM>& dim = TestInitializerHelper<DIM>::getDimensions(),
-        const unsigned& maxSteps = TestInitializerHelper<DIM>::maxSteps ,
+        const Coord<DIM>& dim = defaultDimensions(Coord<DIM>()),
+        const unsigned& maxSteps = defaultTimeSteps(Coord<DIM>()),
         const unsigned& startStep = 0) :
         dimensions(dim),
         maximumSteps(maxSteps),
@@ -89,6 +66,27 @@ private:
     Coord<DIM> dimensions;
     unsigned maximumSteps;
     unsigned step1;
+
+    static Coord<2> defaultDimensions(const Coord<2>&)
+    {
+        return Coord<2>(17, 12);
+    }
+
+    static Coord<3> defaultDimensions(const Coord<3>&)
+    {
+        return Coord<3>(13, 12, 11);
+    }
+
+    static int defaultTimeSteps(const Coord<2>&)
+    {
+        return 31;
+    }
+
+    static int defaultTimeSteps(const Coord<3>&)
+    {
+        return 21;
+    }
+
 };
 
 }
