@@ -166,3 +166,5 @@ the number of cores in your system. For more details please refer to:
 
   http://www.libgeodecomp.org/documentation.html#userguide and
   http://www.libgeodecomp.org/faq.html
+
+fixme: mention make check/make install
