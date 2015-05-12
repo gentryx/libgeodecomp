@@ -130,7 +130,7 @@ if(WITH_SILO AND NOT Silo_FOUND)
 endif()
 
 if(WITH_THREADS AND NOT OPENMP_FOUND)
-message(FATAL_ERROR "WITH_THREADs selected, but no OpenMP support detected.")
+message(FATAL_ERROR "WITH_THREADS selected, but no OpenMP support detected.")
 endif()
 
 if(WITH_VISIT)
