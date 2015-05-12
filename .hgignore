@@ -6,6 +6,7 @@ syntax: glob
 ./src/**/test/**/main.cpp
 ./src/**/test/**/run_tests.cpp
 ./src/**/auto.cmake
+./src/auto.cmake
 ./build
 ./conf.yaml
 ./lib/cxxtest/python/cxxtest/*.pyc
