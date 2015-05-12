@@ -293,6 +293,12 @@ public:
     }
 };
 
+class UnstructuredTopology
+{
+public:
+    static const int DIM = 1;
+};
+
 }
 
 /**
@@ -316,6 +322,12 @@ public:
     {
     public:
         typedef TopologiesHelpers::Topology<DIM, true, true, true> Topology;
+    };
+
+    class Unstructured
+    {
+    public:
+        typedef TopologiesHelpers::UnstructuredTopology Topology;
     };
 };
 

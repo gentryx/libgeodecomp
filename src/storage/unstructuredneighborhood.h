@@ -27,10 +27,12 @@ template<typename CELL, std::size_t MATRICES = 1,
 class UnstructuredNeighborhood
 {
 private:
-    UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& grid;
+    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    const Grid& grid;
     long long xOffset;          /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
     int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
+    int currentMatrixID;        /**< current id for matrices */
 
     /**
      * If xOffset is changed, the current chunk and chunkOffset
@@ -58,20 +60,67 @@ private:
         chunkOffset += difference;
     }
 public:
-    inline explicit
-    UnstructuredNeighborhood(UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& _grid,
-                             long long startX) :
-        grid(_grid), xOffset(startX), currentChunk(startX / C), chunkOffset(startX % C)
+
+    /**
+     * Used for iterating over neighboring cells.
+     */
+    template<typename O_VALUE_TYPE, int O_C, int O_SIGMA>
+    class Iterator : public std::iterator<std::forward_iterator_tag,
+                                          const std::pair<int, O_VALUE_TYPE> >
+    {
+    private:
+        typedef SellCSigmaSparseMatrixContainer<O_VALUE_TYPE, O_C, O_SIGMA> Matrix;
+        const Matrix& matrix;
+        int index;
+        std::pair<int, O_VALUE_TYPE> currentPair;
+    public:
+        inline
+        Iterator(const Matrix& matrix, int startIndex) :
+            matrix(matrix), index(startIndex),
+            currentPair(std::make_pair(matrix.columnVec()[index],
+                                       matrix.valuesVec()[index]))
+        {}
+
+        inline void operator++()
+        {
+            index += O_C;
+            std::get<0>(currentPair) = matrix.columnVec()[index];
+            std::get<1>(currentPair) = matrix.valuesVec()[index];
+        }
+
+        inline bool operator==(const Iterator& other) const
+        {
+            // matrix is ignored, since in general it's not useful to compare iterators
+            // pointing to different matrices
+            return index == other.index;
+        }
+
+        inline bool operator!=(const Iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        inline const std::pair<int, VALUE_TYPE>& operator*() const
+        {
+            return currentPair;
+        }
+
+        inline const std::pair<int, VALUE_TYPE> *operator->() const
+        {
+            return &currentPair;
+        }
+    };
+
+    inline
+    UnstructuredNeighborhood(const Grid& grid, long long startX) :
+        grid(grid),
+        xOffset(startX),
+        currentChunk(startX / C),
+        chunkOffset(startX % C)
     {}
 
     inline
     const CELL& operator[](int index) const
-    {
-        return grid[index];
-    }
-
-    inline
-    CELL& operator[](int index)
     {
         return grid[index];
     }
@@ -107,54 +156,71 @@ public:
     }
 
     inline
-    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator+=(int value)
+    const long long& index() const { return xOffset; }
+
+    inline
+    long long& index() { return xOffset; }
+
+    inline
+    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& weights()
     {
-        updateIndices(value);
-        return *this;
-    }
-
-    inline
-    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator-=(int value)
-    {
-        updateIndices(-value);
-        return *this;
-    }
-
-    inline
-    const long& index() const { return xOffset; }
-
-    inline
-    long& index() { return xOffset; }
-
-    inline
-    std::vector<std::pair<int, VALUE_TYPE> > weights() const
-    {
-        // FIXME: this is only the neighborhood for matrices[0]
+        // default neighborhood is for matrix 0
         return weights(0);
     }
 
     inline
-    std::vector<std::pair<int, VALUE_TYPE> > weights(std::size_t matrixID) const
+    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& weights(std::size_t matrixID)
     {
-        std::vector<std::pair<int, VALUE_TYPE> > neighbors;
+        currentMatrixID = matrixID;
 
-        // preallocate some memory: reduces memory allocations via emplace_back
-        neighbors.reserve(20);
+        return *this;
+    }
 
-        // in bounds?
-        if (!grid.boundingBox().inBounds(Coord<1>(xOffset))) {
-            // FIXME: what id to return for edgeCell?
-            neighbors.emplace_back(-1, static_cast<VALUE_TYPE>(-1));
-            return neighbors;
-        }
-
-        // get actual neighborhood
-        const auto& matrix = grid.getAdjacency(matrixID);
+    inline
+    Iterator<VALUE_TYPE, C, SIGMA> begin() const
+    {
+        const auto& matrix = grid.getAdjacency(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        for (int element = 0; element < matrix.rowLengthVec()[xOffset]; ++element, index += C)
-            neighbors.emplace_back(matrix.columnVec()[index], matrix.valuesVec()[index]);
+        return Iterator<VALUE_TYPE, C, SIGMA>(matrix, index);
+    }
 
-        return neighbors;
+    inline
+    const Iterator<VALUE_TYPE, C, SIGMA> end() const
+    {
+        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
+        index += C * matrix.rowLengthVec()[xOffset];
+        return Iterator<VALUE_TYPE, C, SIGMA>(matrix, index);
+    }
+};
+
+/**
+ * Simple neighborhood which is used for hoodNew in updateLineX().
+ * Provides access to cells via an identifier.
+ */
+template<typename CELL, std::size_t MATRICES = 1,
+         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+class CellIDNeighborhood
+{
+private:
+    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    Grid& grid;
+public:
+    inline explicit
+    CellIDNeighborhood(Grid& grid) :
+        grid(grid)
+    {}
+
+    inline
+    CELL& operator[](int index)
+    {
+        return grid[index];
+    }
+
+    inline
+    const CELL& operator[](int index) const
+    {
+        return grid[index];
     }
 };
 

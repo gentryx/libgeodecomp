@@ -230,21 +230,21 @@ public:
             }
         }
 
-	SoATestCell cells[5];
-	testGrid.get(Streak<2>(Coord<2>(21, 18), 26), cells);
+        SoATestCell cells[5];
+        testGrid.get(Streak<2>(Coord<2>(21, 18), 26), cells);
 
-	for (int i = 0; i < 5; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
-	}
+        for (int i = 0; i < 5; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+        }
 
-	for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; ++i) {
             cells[i].v = i + 1234;
         }
         testGrid.set(Streak<2>(Coord<2>(21, 18), 26), cells);
 
-	for (int i = 0; i < 5; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
-	}
+        for (int i = 0; i < 5; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+        }
     }
 
     void testInitialization()
