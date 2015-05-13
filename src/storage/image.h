@@ -7,6 +7,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Simple, stupid utility class to draw images without pulling in
+ * external dependencies (e.g. Qt).
+ */
 class Image : public Grid<Color>
 {
  public:

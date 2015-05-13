@@ -343,6 +343,9 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 namespace UnstructuredGridSoAHelpers {
 
+/**
+ * Internal helper class
+ */
 template<typename CELL, int DIM>
 class SaveMember
 {
@@ -375,6 +378,9 @@ private:
     const Region<DIM>& region;
 };
 
+/**
+ * Internal helper class
+ */
 template<typename CELL, int DIM>
 class LoadMember
 {

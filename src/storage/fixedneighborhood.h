@@ -8,6 +8,9 @@ namespace LibGeoDecomp {
 
 namespace FixedNeighborhoodHelpers {
 
+/**
+ * Internal helper class
+ */
 template<int DIM, int DISTANCE>
 class NormalizeCoord
 {

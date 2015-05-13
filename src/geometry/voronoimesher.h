@@ -11,8 +11,6 @@
 
 namespace LibGeoDecomp {
 
-class VoronoiMesherTest;
-
 namespace VoronoiMesherHelpers {
 
 template<int DIM>
@@ -21,6 +19,9 @@ Coord<DIM> farAway()
     return Coord<DIM>::diagonal(-1);
 }
 
+/**
+ * Internal helper class
+ */
 template<typename COORD, typename ID = int>
 class Equation
 {
@@ -62,11 +63,14 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
     return os;
 }
 
+/**
+ * Internal helper class
+ */
 template<typename COORD, typename ID = int>
 class Element
 {
 public:
-    friend class LibGeoDecomp::VoronoiMesherTest;
+    friend class VoronoiMesherTest;
 
     const static std::size_t SAMPLES = 1000;
 

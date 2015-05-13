@@ -9,6 +9,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Unsurprisingly, this update functor negotiates between cells that
+ * support unstructured grids and the actual grid implementation.
+ */
 template<typename CELL>
 class UnstructuredUpdateFunctor
 {
