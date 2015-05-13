@@ -7,7 +7,6 @@ public:
     void initParams(int argc, char **argv)
     {
         // fixme: parse command line!
-
         modelWidth = 512;
         modelHeight = 256;
         modelSize = modelWidth * modelHeight;
@@ -59,7 +58,7 @@ public:
     // defines for each of the 2^7 flow states which particle moves to
     // which position. stores four variants since the FHP-II model
     // sometimes requires a probabilistic selection. Don't pad to 8
-    // bytes to reduce bank conflicts on Nvidia GPUs.
+    // bytes to reduce bank conflicts on NVIDIA GPUs.
     char transportTable[128][4][7];
     unsigned char palette[256][3];
     int randomFields[3][1024];
