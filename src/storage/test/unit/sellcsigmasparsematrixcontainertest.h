@@ -735,10 +735,10 @@ public:
 
         a.initFromMatrix(4, matrix);
 
-        const std::vector<double>& val = a.valuesVec();
-        const std::vector<int>&    col = a.columnVec();
-        const std::vector<int>&    cl  = a.chunkLengthVec();
-        const std::vector<int>&    cs  = a.chunkOffsetVec();
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
 
         TS_ASSERT_EQUALS(2, std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(2, std::distance(begin(cl),  end(cl)));
@@ -794,10 +794,10 @@ public:
 
         a.initFromMatrix(5, matrix);
 
-        const std::vector<double>& val = a.valuesVec();
-        const std::vector<int>&    col = a.columnVec();
-        const std::vector<int>&    cl  = a.chunkLengthVec();
-        const std::vector<int>&    cs  = a.chunkOffsetVec();
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
 
         TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
@@ -875,10 +875,10 @@ public:
 
         a.initFromMatrix(5, matrix);
 
-        const std::vector<double>& val = a.valuesVec();
-        const std::vector<int>&    col = a.columnVec();
-        const std::vector<int>&    cl  = a.chunkLengthVec();
-        const std::vector<int>&    cs  = a.chunkOffsetVec();
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
 
         TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
@@ -948,10 +948,10 @@ public:
 
         a.initFromMatrix(5, matrix);
 
-        const std::vector<double>& val = a.valuesVec();
-        const std::vector<int>&    col = a.columnVec();
-        const std::vector<int>&    cl  = a.chunkLengthVec();
-        const std::vector<int>&    cs  = a.chunkOffsetVec();
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
 
         TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
