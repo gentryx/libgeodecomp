@@ -72,20 +72,15 @@ public:
         typedef SellCSigmaSparseMatrixContainer<O_VALUE_TYPE, O_C, O_SIGMA> Matrix;
         const Matrix& matrix;
         int index;
-        std::pair<int, O_VALUE_TYPE> currentPair;
     public:
         inline
         Iterator(const Matrix& matrix, int startIndex) :
-            matrix(matrix), index(startIndex),
-            currentPair(std::make_pair(matrix.columnVec()[index],
-                                       matrix.valuesVec()[index]))
+            matrix(matrix), index(startIndex)
         {}
 
         inline void operator++()
         {
             index += O_C;
-            std::get<0>(currentPair) = matrix.columnVec()[index];
-            std::get<1>(currentPair) = matrix.valuesVec()[index];
         }
 
         inline bool operator==(const Iterator& other) const
@@ -100,14 +95,9 @@ public:
             return !(*this == other);
         }
 
-        inline const std::pair<int, VALUE_TYPE>& operator*() const
+        inline const std::pair<int, VALUE_TYPE> operator*() const
         {
-            return currentPair;
-        }
-
-        inline const std::pair<int, VALUE_TYPE> *operator->() const
-        {
-            return &currentPair;
+            return std::make_pair(matrix.columnVec()[index], matrix.valuesVec()[index]);
         }
     };
 
