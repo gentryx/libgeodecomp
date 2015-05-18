@@ -11,7 +11,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
 
 using namespace LibGeoDecomp;
 
@@ -26,6 +26,7 @@ class Cell
 public:
     class API :
         public APITraits::HasUpdateLineX,
+        public APITraits::HasSoA,
         public APITraits::HasUnstructuredTopology,
         public APITraits::HasPredefinedMPIDataType<double>,
         public APITraits::HasSellType<ValueType>,
@@ -42,19 +43,11 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            hoodNew[i].sum = 0.;
+            auto tmp = hoodNew[i].sum;
             for (const auto& j: hoodOld.weights(0)) {
-                hoodNew[i].sum += hoodOld[j.first].value * j.second;
+                tmp += hoodOld[j.first].value * j.second;
             }
-        }
-    }
-
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            hoodNew[i].sum = tmp;
         }
     }
 
@@ -62,10 +55,12 @@ public:
     double sum;
 };
 
+LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(sum))((double)(value)))
+
 class CellInitializerDiagonal : public SimpleInitializer<Cell>
 {
 public:
-    typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
+    typedef UnstructuredSoAGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
 
     inline explicit
     CellInitializerDiagonal(unsigned steps)
@@ -91,7 +86,7 @@ public:
 class CellInitializerMatrix : public SimpleInitializer<Cell>
 {
 private:
-    typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
+    typedef UnstructuredSoAGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
     std::size_t size;           // size of matrix and rhs vector
     std::string rhsFile;        // matrix file name
     std::string matrixFile;     // rhs vector file name
