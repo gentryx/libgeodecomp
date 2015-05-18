@@ -64,12 +64,11 @@ public:
     /**
      * Used for iterating over neighboring cells.
      */
-    template<typename O_VALUE_TYPE, int O_C, int O_SIGMA>
     class Iterator : public std::iterator<std::forward_iterator_tag,
-                                          const std::pair<int, O_VALUE_TYPE> >
+                                          const std::pair<int, VALUE_TYPE> >
     {
     private:
-        typedef SellCSigmaSparseMatrixContainer<O_VALUE_TYPE, O_C, O_SIGMA> Matrix;
+        typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
         const Matrix& matrix;
         int index;
     public:
@@ -80,7 +79,7 @@ public:
 
         inline void operator++()
         {
-            index += O_C;
+            index += C;
         }
 
         inline bool operator==(const Iterator& other) const
@@ -167,20 +166,20 @@ public:
     }
 
     inline
-    Iterator<VALUE_TYPE, C, SIGMA> begin() const
+    Iterator begin() const
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        return Iterator<VALUE_TYPE, C, SIGMA>(matrix, index);
+        return Iterator(matrix, index);
     }
 
     inline
-    const Iterator<VALUE_TYPE, C, SIGMA> end() const
+    const Iterator end() const
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         index += C * matrix.rowLengthVec()[xOffset];
-        return Iterator<VALUE_TYPE, C, SIGMA>(matrix, index);
+        return Iterator(matrix, index);
     }
 };
 
