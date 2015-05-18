@@ -2468,7 +2468,8 @@ public:
             }
         }
 
-        grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+        // grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+        grid->setCompleteAdjacency(0, size, adjacency);
 
         // setup rhs: not needed, since the grid is intialized with default cells
         // default value of SPMVMCell is 8.0

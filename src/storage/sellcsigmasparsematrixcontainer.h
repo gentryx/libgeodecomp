@@ -1,10 +1,18 @@
 #ifndef LIBGEODECOMP_STORAGE_SELLCSIGMASPARSEMATRIXCONTAINER_H
 #define LIBGEODECOMP_STORAGE_SELLCSIGMASPARSEMATRIXCONTAINER_H
 
+#include <libgeodecomp/config.h>
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+
+#include <libgeodecomp/geometry/coord.h>
+
+#include <map>
 #include <vector>
 #include <utility>
 #include <assert.h>
 #include <stdexcept>
+#include <algorithm>
 
 #include <iostream>
 
@@ -87,6 +95,89 @@ public:
         }
 
         return vec;
+    }
+
+    /**
+     * This method can be used, if this container should be initialized from a
+     * _complete_ matrix. Matrix is represented as map, key is Coord<2> which contains
+     * (row, column). value_type of map contains the actual value.
+     */
+    void initFromMatrix(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix)
+    {
+        // calculate size for arrays
+        const int matrixRows = matrixSize;
+        int numberOfValues = 0;
+        int numberOfChunks = matrixRows / C;
+        int numberOfSigmas = matrixRows / SIGMA;
+
+        // last chunk might be padded to C rows
+        if ((matrixRows % C) != 0) {
+            ++numberOfChunks;
+        }
+        if ((matrixRows % SIGMA) != 0) {
+            ++numberOfSigmas;
+        }
+
+        const int rowsPadded = numberOfChunks * C;
+        // allocate memory
+        chunkOffset.resize(numberOfChunks);
+        chunkLength.resize(numberOfChunks);
+        rowLength.resize(rowsPadded);
+
+        // get row lengths
+        std::fill(begin(rowLength), end(rowLength), 0);
+        for (const auto& pair: matrix) {
+            ++rowLength[pair.first.x()];
+        }
+
+        // save chunk lengths and offsets
+        chunkOffset[0] = 0;
+        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
+                                                    rowLength.begin() + (nChunk + 1) * C);
+            if (nChunk > 0) {
+                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
+            }
+            numberOfValues += chunkLength[nChunk] * C;
+        }
+
+        // save values
+        values.resize(numberOfValues);
+        column.resize(numberOfValues);
+        std::fill(begin(values), end(values), 0);
+        std::fill(begin(column), end(column), 0);
+        int currentRow = 0;
+        int index = 0;
+        for (const auto& pair: matrix) {
+            if (pair.first.x() != currentRow) {
+                currentRow = pair.first.x();
+                index = 0;
+            }
+            const int chunk  = pair.first.x() / C;
+            const int row    = pair.first.x() % C;
+            const int start  = chunkOffset[chunk];
+            const int length = chunkLength[chunk];
+            const int idx    = start + row * length + index;
+            values[idx]      = pair.second;
+            column[idx]      = pair.first.y();
+            ++index;
+        }
+
+        // transpose chunks
+        std::vector<VALUETYPE> valCopy(values);
+        std::vector<int> colCopy(column);
+        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+            const int chunkLen = chunkLength[nChunk];
+            const int start    = chunkOffset[nChunk];
+            for (int i = 0; i < C; ++i) {
+                for (int j = 0; j < chunkLen; ++j) {
+                    const int idx0 = start + i * chunkLen + j;
+                    const int idx1 = start + j * C + i;
+                    values[idx1] = valCopy[idx0];
+                    column[idx1] = colCopy[idx0];
+                }
+            }
+        }
     }
 
     /**
@@ -240,6 +331,7 @@ public:
     inline std::size_t dim() const { return dimension; }
 
 private:
+
     std::vector<VALUETYPE> values;
     std::vector<int>       column;
     std::vector<int>       rowLength;   // = Non Zero Entres in Row
@@ -250,4 +342,5 @@ private:
 
 }
 
+#endif
 #endif

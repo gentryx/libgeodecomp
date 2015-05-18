@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <vector>
-#include <list>
+#include <map>
 #include <utility>
 
 namespace LibGeoDecomp {
@@ -71,6 +71,15 @@ public:
         }
 
         return *this;
+    }
+
+    void setCompleteAdjacency(std::size_t matrixID, unsigned matrixSize,
+                              const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    {
+        if (matrixID >= MATRICES) {
+            throw std::invalid_argument("matrixID not available");
+        }
+        matrices[matrixID].initFromMatrix(matrixSize, matrix);
     }
 
     /**
