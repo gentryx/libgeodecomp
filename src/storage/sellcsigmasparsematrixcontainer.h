@@ -33,9 +33,7 @@ public:
         chunkOffset((N-1)/C + 2, 0),
         dimension(N)
     {
-        if ((C < 1) || (SIGMA != 1 )) {
-            throw std::invalid_argument("SIGMA must be '1'; everithing else is not implemented yet");
-        }
+        static_assert(C >= 1 && SIGMA == 1, "SIGMA must be '1'; everything else is not implemented yet!");
     }
 
     // lhs = A   x rhs
