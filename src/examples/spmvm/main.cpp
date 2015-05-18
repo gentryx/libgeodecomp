@@ -50,7 +50,7 @@ public:
     }
 
     template<typename NEIGHBORHOOD>
-    void update(const NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
     {
         sum = 0.;
         for (const auto& j: neighborhood.weights(0)) {
@@ -67,7 +67,9 @@ class CellInitializerDiagonal : public SimpleInitializer<Cell>
 public:
     typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
 
-    explicit CellInitializerDiagonal() : SimpleInitializer<Cell>(Coord<1>(100), 1)
+    inline explicit
+    CellInitializerDiagonal(unsigned steps)
+        : SimpleInitializer<Cell>(Coord<1>(100), steps)
     {}
 
     virtual void grid(GridBase<Cell, 1> *ret)
@@ -88,13 +90,19 @@ public:
 
 class CellInitializerMatrix : public SimpleInitializer<Cell>
 {
-public:
+private:
     typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
+    std::size_t size;           // size of matrix and rhs vector
+    std::string rhsFile;        // matrix file name
+    std::string matrixFile;     // rhs vector file name
 
-    explicit CellInitializerMatrix(const std::string& rhsFile,
-                                   const std::string& matrixFile) :
-        SimpleInitializer<Cell>(Coord<1>(1000), 1),
-        rhsFile(rhsFile), matrixFile(matrixFile)
+public:
+    inline
+    CellInitializerMatrix(std::size_t size, unsigned steps,
+                          const std::string& rhsFile,
+                          const std::string& matrixFile) :
+        SimpleInitializer<Cell>(Coord<1>(size), steps),
+        size(size), rhsFile(rhsFile), matrixFile(matrixFile)
     {}
 
     virtual void grid(GridBase<Cell, 1> *ret)
@@ -124,7 +132,7 @@ public:
         if (!(matrixIfs >> rows >> cols)) {
             throw std::logic_error("Failed to read from matrix file");
         }
-        if (rows != cols && rows != i) {
+        if (rows != cols && rows != i && rows != size) {
             throw std::logic_error("Dimensions do not match");
         }
 
@@ -134,7 +142,9 @@ public:
                 if (!(matrixIfs >> tmp)) {
                     throw std::logic_error("Failed to read data from matrix");
                 }
-                adjacency[Coord<2>(row, col)] = tmp;
+                if (tmp != 0.0) {
+                    adjacency[Coord<2>(row, col)] = tmp;
+                }
             }
         }
 
@@ -143,27 +153,26 @@ public:
 
         grid->setAdjacency(0, adjacency.begin(), adjacency.end());
     }
-
-private:
-    std::string rhsFile;
-    std::string matrixFile;
 };
 
+static
 void runSimulation(int argc, char *argv[])
 {
     SimpleInitializer<Cell> *init;
+    unsigned steps = 1;
     int outputFrequency = 1;
 
     // init
     if (argc > 1) {
-        if (argc != 3) {
-            throw std::logic_error("Number of arguments is wrong");
+        if (argc != 4) {
+            throw std::logic_error("usage: spmvm [size] [rhs] [matrix]");
         }
-        std::string rhsFile = argv[1];
-        std::string matrixFile = argv[2];
-        init = new CellInitializerMatrix(rhsFile, matrixFile);
+        std::size_t size = static_cast<std::size_t>(std::stoul(argv[1]));
+        std::string rhsFile = argv[2];
+        std::string matrixFile = argv[3];
+        init = new CellInitializerMatrix(size, steps, rhsFile, matrixFile);
     } else {
-        init = new CellInitializerDiagonal();
+        init = new CellInitializerDiagonal(steps);
     }
     SerialSimulator<Cell> sim(init);
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
