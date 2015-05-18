@@ -18,21 +18,51 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredSoANeighborhoodHelpers {
 
+// FIXME: this classes should be automatically generated according
+//        to Cell's members
+/**
+ * Helper class to get the pointer to Cell's
+ * sum variable in SoA grid.
+ */
 template<typename CELL, typename VALUE_TYPE>
-class GetMemberPointer
+class GetSumPointer
 {
 private:
     VALUE_TYPE **memberPointer;
 public:
-    inline GetMemberPointer(VALUE_TYPE **ptr) :
+    inline GetSumPointer(VALUE_TYPE **ptr) :
         memberPointer(ptr)
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor)
     {
+        // FIXME: index?
         // save member pointer
         *memberPointer = static_cast<VALUE_TYPE *>(&accessor.sum());
+    }
+};
+
+/**
+ * Helper class to get the pointer to Cell's
+ * value variable in SoA grid.
+ */
+template<typename CELL, typename VALUE_TYPE>
+class GetValuePointer
+{
+private:
+    VALUE_TYPE **memberPointer;
+public:
+    inline GetValuePointer(VALUE_TYPE **ptr) :
+        memberPointer(ptr)
+    {}
+
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor)
+    {
+        // FIXME: index?
+        // save member pointer
+        *memberPointer = static_cast<VALUE_TYPE *>(&accessor.value());
     }
 };
 
@@ -40,8 +70,8 @@ public:
 
 /**
  * Neighborhood using vectorization for UnstructuredSoAGrid.
- * Weights() returns a pair of LFA short_vec classes to update
- * current chunk of SELL-C-q.
+ * Weights() returns a pair of offset inside current chunk
+ * and LFA short_vec object loaded with C matrix values.
  */
 template<typename CELL, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
@@ -59,7 +89,7 @@ private:
 
 public:
     /**
-     * This iterator returns LFA short_vec classes needed to update
+     * This iterator returns objects/values needed to update
      * the current chunk. Iterator consists of a pair: offset for hoodOld
      * and ShortVec of consisting of matrix values.
      */
@@ -69,7 +99,7 @@ public:
     private:
         typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
         const Matrix& matrix;   /**< matrix to use */
-        int offset;             /**< where are we right now?  */
+        int offset;             /**< Where are we right now inside chunk?  */
 
     public:
         inline
@@ -86,7 +116,7 @@ public:
         inline
         bool operator==(const Iterator& other) const
         {
-            // offset is indicater here
+            // offset is indicator here
             return offset == other.offset;
         }
 
@@ -112,7 +142,7 @@ public:
     {
         // save member pointer
         grid.callback(UnstructuredSoANeighborhoodHelpers::
-                      GetMemberPointer<CELL, VALUE_TYPE>(&valuePtr));
+                      GetValuePointer<CELL, VALUE_TYPE>(&valuePtr));
     }
 
     inline
@@ -193,7 +223,6 @@ public:
     const Iterator end() const
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
-        // FIXME
         return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1]);
     }
 
@@ -220,26 +249,33 @@ public:
         grid(grid)
     {
         grid.callback(UnstructuredSoANeighborhoodHelpers::
-                      GetMemberPointer<CELL, VALUE_TYPE>(&sumPtr));
+                      GetSumPointer<CELL, VALUE_TYPE>(&sumPtr));
     }
 
     inline
-    UnstructuredSoANeighborhoodNew& operator[](int index)
+    UnstructuredSoANeighborhoodNew& operator[](int chunk)
     {
         // setup sum vector
-        sum = sumPtr + index * C;
+        sum = sumPtr + chunk * C;
         return *this;
     }
 
     inline
-    const UnstructuredSoANeighborhoodNew& operator[](int index) const
+    const UnstructuredSoANeighborhoodNew& operator[](int chunk) const
     {
         // setup sum vector
-        sum = sumPtr + index * C;
+        sum = sumPtr + chunk * C;
         return *this;
     }
 
-    // public cell members as ShortVecs
+    // FIXME
+    inline
+    void storeSum(int chunk)
+    {
+        sum.store(sumPtr + chunk * C);
+    }
+
+    // public cell members
     ShortVec sum;
 };
 

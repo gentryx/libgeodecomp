@@ -56,11 +56,11 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            auto tmp = hoodNew[i].sum;
+            auto& tmp = hoodNew[i].sum;
             for (const auto& j: hoodOld.weights(0)) {
                 tmp += hoodOld[j.first].value * j.second;
             }
-            hoodNew[i].sum = tmp;
+            hoodNew.storeSum(i);
         }
     }
 

@@ -59,6 +59,7 @@ private:
                     GRID2 *gridNew, unsigned nanoStep, APITraits::TrueType)
     {
         typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
+        static const int SELLC = APITraits::SelectSellC<CELL>::VALUE;
 
         UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
             hoodOld(gridOld, streak.origin.x());
@@ -66,7 +67,7 @@ private:
             hoodNew(*gridNew);
 
         // switch between updateLineX() and update()
-        apiWrapper(hoodNew, streak.endX, hoodOld, nanoStep, UpdateLineXFlag());
+        apiWrapper(hoodNew, streak.endX / SELLC, hoodOld, nanoStep, UpdateLineXFlag());
     }
 
 public:
