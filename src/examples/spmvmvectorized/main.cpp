@@ -13,7 +13,11 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 
+#include <libflatarray/api_traits.hpp>
+#include <libflatarray/macros.hpp>
+
 using namespace LibGeoDecomp;
+using namespace LibFlatArray;
 
 // defining settings for SELL-C-q
 typedef double ValueType;
@@ -33,7 +37,16 @@ public:
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
         public APITraits::HasSellSigma<SIGMA>
-    {};
+    {
+    public:
+        // uniform sizes lead to std::bad_alloc,
+        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
+        // as dimension (DIM = 1)
+        LIBFLATARRAY_CUSTOM_SIZES(
+            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192),
+            (1),
+            (1))
+    };
 
     inline explicit Cell(double v = 0) :
         value(v), sum(0)
