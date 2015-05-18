@@ -41,10 +41,8 @@ public:
     void operator()(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
                     std::vector<VALUETYPE>& values, std::vector<int>& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength)
+                    std::vector<int>& rowLength, std::vector<int>& rowIndices)
     {
-        // mapping between rowIndices and real rowIndices, used for SIGMA
-        std::vector<int> rowIndices;
         // calculate size for arrays
         const int matrixRows = matrixSize;
         int numberOfValues = 0;
@@ -150,7 +148,7 @@ public:
     void operator()(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
                     std::vector<VALUETYPE>& values, std::vector<int>& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength)
+                    std::vector<int>& rowLength, std::vector<int>& /* rowIndices */)
     {
         // calculate size for arrays
         const int matrixRows = matrixSize;
@@ -313,7 +311,8 @@ public:
     {
         SellHelpers::InitFromMatrix<SIGMA>().
             template operator()<VALUETYPE, C>(matrixSize, matrix, values, column,
-                                              chunkLength, chunkOffset, rowLength);
+                                              chunkLength, chunkOffset, rowLength,
+                                              rowIndices);
     }
 
     /**
@@ -456,17 +455,40 @@ public:
         return !(*this == other);
     }
 
-    inline const std::vector<VALUETYPE>& valuesVec() const { return values; }
+    inline const std::vector<VALUETYPE>& valuesVec() const
+    {
+        return values;
+    }
 
-    inline const std::vector<int>& columnVec() const { return column; }
+    inline const std::vector<int>& columnVec() const
+    {
+        return column;
+    }
 
-    inline const std::vector<int>& rowLengthVec() const { return rowLength; }
+    inline const std::vector<int>& rowLengthVec() const
+    {
+        return rowLength;
+    }
 
-    inline const std::vector<int>& chunkLengthVec() const { return chunkLength; }
+    inline const std::vector<int>& chunkLengthVec() const
+    {
+        return chunkLength;
+    }
 
-    inline const std::vector<int>& chunkOffsetVec() const { return chunkOffset; }
+    inline const std::vector<int>& chunkOffsetVec() const
+    {
+        return chunkOffset;
+    }
 
-    inline std::size_t dim() const { return dimension; }
+    inline const std::vector<int>& rowIndicesVec() const
+    {
+        return rowIndices;
+    }
+
+    inline std::size_t dim() const
+    {
+        return dimension;
+    }
 
 private:
 
@@ -475,6 +497,7 @@ private:
     std::vector<int>       rowLength;   // = Non Zero Entres in Row
     std::vector<int>       chunkLength; // = Max rowLength in Chunk
     std::vector<int>       chunkOffset; // COffset[i+1]=COffset[i]+CLength[i]*C
+    std::vector<int>       rowIndices;  // mapping between rows and real rows, used for SIGMA
     std::size_t dimension;              // = N
 };
 
