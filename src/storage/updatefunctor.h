@@ -165,7 +165,7 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    template<typename GRID1, typename GRID2, typename ANY_API>
+    template<typename GRID1, typename GRID2, typename ANY_API, typename ANY_GRID_TYPE>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -176,7 +176,7 @@ public:
         // SelectFixedCoordsOnlyUpdate
         APITraits::FalseType,
         // SelectSoA
-        APITraits::FalseType,
+        ANY_GRID_TYPE,
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
