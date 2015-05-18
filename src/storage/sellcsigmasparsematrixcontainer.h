@@ -247,37 +247,37 @@ public:
     // tmp = val x b
     void matVecMul (std::vector<VALUETYPE>& lhs, std::vector<VALUETYPE>& rhs)
     {
-        if(lhs.size() != rhs.size() || lhs.size() != dimension) {
+        if (lhs.size() != rhs.size() || lhs.size() != dimension) {
             throw std::invalid_argument("lhs and rhs must be of size N");
         }
 
         // loop over chunks     TODO parallel omp
-        for(std::size_t chunk=0; chunk<chunkLength.size(); ++chunk) {
+        for (std::size_t chunk = 0; chunk < chunkLength.size(); ++chunk) {
             int offs = chunkOffset[chunk];
             VALUETYPE tmp[C];
 
             // init tmp                     TODO vectorize
-            for(int row=0; row<C; ++row) {
+            for (int row = 0; row<C; ++row) {
                 tmp[row] = lhs[chunk*C + row];
             }
 
             // loop over columns in chunk
-            for(int col=0; col<chunkLength[chunk]; ++col) {
+            for (int col = 0; col < chunkLength[chunk]; ++col) {
 
                 // loop over rows in chunks TODO vectorize
-                for(int row=0; row<C; ++row) {
+                for (int row = 0; row < C; ++row) {
                     VALUETYPE val = values[offs];
                     int columnINDEX = column[offs++];
                     // fixme: get rid of this conditional by making -1 a valid address within the source data structure. -1 should be a symbol for "empty field", perhaps edge cell.
-                    if(columnINDEX != -1) {
-                        VALUETYPE b   = rhs[columnINDEX];
+                    if (columnINDEX != -1) {
+                        VALUETYPE b = rhs[columnINDEX];
                         tmp[row] += val * b;
                     }
                 }
             }
 
             // store tmp                     TODO vectorize
-            for(int row=0; row<C; ++row) {
+            for (int row = 0; row < C; ++row) {
                 lhs[chunk*C + row] = tmp[row];
             }
         }
@@ -287,7 +287,6 @@ public:
     // fixme: is this mainly used for constructing the neighborhood in UnstructuredGrid::getNeighborhood. drop this code once we have an efficient neighborhood-object for UnstructuredGrid
     std::vector< std::pair<int, VALUETYPE> > getRow(int const row) const
     {
-
         std::vector< std::pair<int, VALUETYPE> > vec;
         int const chunk (row/C);
         int const offset (row%C);
@@ -296,7 +295,7 @@ public:
         for (int element = 0;
              element < rowLength[row];
              ++element, index += C) {
-            vec.push_back(std::pair<int, VALUETYPE>(column[index], values[index]) );
+            vec.push_back(std::pair<int, VALUETYPE>(column[index], values[index]));
         }
 
         return vec;
@@ -322,33 +321,32 @@ public:
     {
         static_assert(SIGMA == 1, "SIGMA must be '1'; everything else is not implemented yet!");
 
-        if(row < 0 || col < 0 || (std::size_t)row >= dimension) {
+        if (row < 0 || col < 0 || (std::size_t)row >= dimension) {
             throw std::invalid_argument("row and colum must be >= 0");
         }
 
         int const chunk (row/C);
 
-
         //// case 1: row is NOT the bigest in chunk
-        if ( rowLength[row] < chunkLength[chunk] ) {
+        if (rowLength[row] < chunkLength[chunk]) {
             std::vector<int>::iterator itCol = column.begin()
                     + chunkOffset[chunk] + row % C;
 
-            while ( col > *itCol && -1 != *itCol ) {
+            while (col > *itCol && -1 != *itCol) {
                 itCol += C;
             }
-            if(col == *itCol) {
+            if (col == *itCol) {
                 *itCol = col;
                 values[itCol - column.begin()] = value;
                 return;
             }
 
-            if ( -1 != *itCol) {
-            //// case 1.a add value in mid of row
+            if (-1 != *itCol) {
+                //// case 1.a add value in mid of row
                 int lastElement = chunkOffset[chunk + 1] - C + (row%C);
-                int end   = itCol - column.begin();
+                int end = itCol - column.begin();
 
-                for (int i = lastElement; i > end; i-=C) {
+                for (int i = lastElement; i > end; i -= C) {
                     values[i] = values[i-C];
                     column[i] = column[i-C];
                 }
@@ -358,9 +356,8 @@ public:
             *itCol = col;
 
             ++rowLength[row];
-        }
-        else{
-        //// case 2: row is the longest in chunk -> expend chunk
+        } else {
+            //// case 2: row is the longest in chunk -> expend chunk
             int const offset    = chunkOffset[chunk] + row % C;
             int const offsetEnd = chunkOffset[chunk+1];
 
@@ -369,22 +366,21 @@ public:
                 index += C;
             }
 
-            if (index >= offsetEnd ) {
+            if (index >= offsetEnd) {
                 index = offsetEnd;
 
                 std::vector<int>::iterator itCol = column.begin() + index;
                 typename
                 std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
 
-                for (int i=0; i < C; ++i) {
-                        itCol = column.insert(itCol, -1);   //TODO für matvecmul flag array?
-                        itVal = values.insert(itVal, VALUETYPE());
+                for (int i = 0; i < C; ++i) {
+                    itCol = column.insert(itCol, -1);   //TODO für matvecmul flag array?
+                    itVal = values.insert(itVal, VALUETYPE());
                 }
                 *(itCol + (row%C)) = col;
                 *(itVal + (row%C)) = value;
-            }
-            else {
-                if(col == column[index]) {
+            } else {
+                if (col == column[index]) {
                     column[index] = col;
                     values[index] = value;
                     return;
@@ -394,7 +390,7 @@ public:
                 typename
                 std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
 
-                for (int i=0; i < C; ++i) {
+                for (int i = 0; i < C; ++i) {
                     itCol = column.insert(itCol, -1);
                     itVal = values.insert(itVal, VALUETYPE());
                 }
@@ -402,14 +398,14 @@ public:
                 *itCol = col;
 
                 //// fix order
-                for ( int i = index; i < offsetEnd; ++i ) {
+                for (int i = index; i < offsetEnd; ++i) {
                     if (i%C != row%C) {
                         values[i] = values[i + C];
                         column[i] = column[i + C];
                     }
                 }
                 for (int i = 0; i < C; ++i ) {
-                    if(i != row % C) {
+                    if (i != row % C) {
                         values[offsetEnd + i] = VALUETYPE();
                         column[offsetEnd + i] = -1;
                     }
