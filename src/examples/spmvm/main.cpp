@@ -45,9 +45,7 @@ public:
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
             auto tmp = hoodNew[i].sum;
             for (const auto& j: hoodOld.weights(0)) {
-                auto rhs   = j.first;
-                auto value = j.second;
-                tmp += rhs * value;
+                tmp += hoodOld[j.first].value * j.second;
             }
             hoodNew[i].sum = tmp;
         }

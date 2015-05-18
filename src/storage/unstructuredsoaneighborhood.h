@@ -51,17 +51,17 @@ private:
     typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
     typedef LibFlatArray::short_vec<VALUE_TYPE, C> ShortVec;
     typedef LibFlatArray::short_vec<VALUE_TYPE, C> ShortVecScalar;
-    typedef std::pair<ShortVec, ShortVec> IteratorPair;
+    typedef std::pair<int, ShortVec> IteratorPair;
     const Grid& grid;
     int currentChunk;           /**< current chunk */
     int currentMatrixID;        /**< current id for matrices */
-    VALUE_TYPE *sumPtr;         /**< pointer to sum member of CELL */
+    VALUE_TYPE *valuePtr;       /**< pointer to sum member of CELL */
 
 public:
     /**
      * This iterator returns LFA short_vec classes needed to update
-     * the current chunk. Itherators goes through:
-     *    j = 0; j < chunkLength[currentChunk]; ++j
+     * the current chunk. Iterator consists of a pair: offset for hoodOld
+     * and ShortVec of consisting of matrix values.
      */
     class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const IteratorPair>
@@ -70,12 +70,11 @@ public:
         typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
         const Matrix& matrix;   /**< matrix to use */
         int offset;             /**< where are we right now?  */
-        VALUE_TYPE *sumPtr;     /**< pointer to sum data */
 
     public:
         inline
-        Iterator(const Matrix& matrix, int offset, VALUE_TYPE *memberPtr) :
-            matrix(matrix), offset(offset), sumPtr(memberPtr)
+        Iterator(const Matrix& matrix, int offset) :
+            matrix(matrix), offset(offset)
         {}
 
         inline
@@ -100,13 +99,9 @@ public:
         inline
         const IteratorPair operator*() const
         {
-            // load next vectors
-            // get indices for rhs gather -> corresponds to column vector
-            const unsigned *indices = reinterpret_cast<const unsigned *>(matrix.columnVec().data()) + offset;
-            ShortVec cellValues;
-            cellValues.gather(sumPtr, const_cast<unsigned *>(indices));
+            // load matrix value vector
             ShortVec matrixValues = matrix.valuesVec().data() + offset;
-            return std::make_pair(cellValues, matrixValues);
+            return std::make_pair(offset, matrixValues);
         }
     };
 
@@ -117,24 +112,28 @@ public:
     {
         // save member pointer
         grid.callback(UnstructuredSoANeighborhoodHelpers::
-                      GetMemberPointer<CELL, VALUE_TYPE>(&sumPtr));
+                      GetMemberPointer<CELL, VALUE_TYPE>(&valuePtr));
     }
 
     inline
-    const CELL& operator[](int index) const
+    const UnstructuredSoANeighborhood& operator[](int index)
     {
-        return grid[index];
+        // rhs gather load
+        const auto& matrix = grid.getAdjacency(currentMatrixID);
+        const unsigned *indices = reinterpret_cast<const unsigned *>(matrix.columnVec().data()) + index;
+        value.gather(valuePtr, const_cast<unsigned *>(indices));
+        return *this;
     }
 
     inline
-    UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator++()
+    UnstructuredSoANeighborhood& operator++()
     {
         ++currentChunk;
         return *this;
     }
 
     inline
-    UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> operator++(int)
+    UnstructuredSoANeighborhood operator++(int)
     {
         UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
         operator++();
@@ -142,14 +141,14 @@ public:
     }
 
     inline
-    UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator--()
+    UnstructuredSoANeighborhood& operator--()
     {
         --currentChunk;
         return *this;
     }
 
     inline
-    UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> operator--(int)
+    UnstructuredSoANeighborhood operator--(int)
     {
         UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
         operator--();
@@ -169,7 +168,7 @@ public:
     }
 
     inline
-    UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& weights()
+    UnstructuredSoANeighborhood& weights()
     {
         // default neighborhood is for matrix 0
         return weights(0);
@@ -187,9 +186,7 @@ public:
     Iterator begin() const
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
-        return Iterator(matrix,
-                        matrix.chunkOffsetVec()[currentChunk],
-                        sumPtr);
+        return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk]);
     }
 
     inline
@@ -197,10 +194,11 @@ public:
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
         // FIXME
-        return Iterator(matrix,
-                        matrix.chunkOffsetVec()[currentChunk + 1],
-                        sumPtr);
+        return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1]);
     }
+
+    // public cell members
+    ShortVec value;
 };
 
 /**
