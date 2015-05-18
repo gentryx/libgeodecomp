@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDGRID_H
 #define LIBGEODECOMP_STORAGE_UNSTRUCTUREDGRID_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
@@ -349,4 +352,5 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif

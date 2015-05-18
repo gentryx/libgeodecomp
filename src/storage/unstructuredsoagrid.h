@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDSOAGRID_H
 #define LIBGEODECOMP_STORAGE_UNSTRUCTUREDSOAGRID_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 #include <libflatarray/flat_array.hpp>
 
 #include <libgeodecomp/geometry/coord.h>
@@ -409,4 +412,5 @@ std::ostream& operator<<(std::ostream& os,
 
 }
 
+#endif
 #endif

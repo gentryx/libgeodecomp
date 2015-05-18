@@ -1,3 +1,4 @@
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <cxxtest/TestSuite.h>
@@ -9,6 +10,7 @@
 
 using namespace LibGeoDecomp;
 
+#ifdef LIBGEODECOMP_WITH_CPP14
 class MySoACell1
 {
 public:
@@ -68,6 +70,7 @@ public:
 };
 
 LIBFLATARRAY_REGISTER_SOA(MySoACell2, ((int)(x))((double)(y))((char)(z)))
+#endif
 
 namespace LibGeoDecomp {
 
@@ -76,6 +79,7 @@ class UnstructuredSoAGridTest : public CxxTest::TestSuite
 public:
     void testConstructor()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         MySoACell1 defaultCell(5);
         MySoACell1 edgeCell(-1);
         Coord<1> dim(100);
@@ -88,10 +92,12 @@ public:
 
         TS_ASSERT_EQUALS(grid.getEdgeElement(), edgeCell);
         TS_ASSERT_EQUALS(grid[-1], edgeCell);
+#endif
     }
 
     void testGetAndSet()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredSoAGrid<MySoACell1> grid(Coord<1>(10));
         MySoACell1 elem1(1);
         MySoACell1 elem2(2);
@@ -100,10 +106,12 @@ public:
 
         TS_ASSERT_EQUALS(grid.get(Coord<1>(5)), elem1);
         TS_ASSERT_EQUALS(grid.get(Coord<1>(6)), elem2);
+#endif
     }
 
     void testSaveAndLoadMemberBasic()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         Selector<MySoACell1> valSelector(&MySoACell1::val, "val");
         MySoACell1 defaultCell(5);
         MySoACell1 edgeCell(-1);
@@ -139,10 +147,12 @@ public:
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {
             TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), MySoACell1(-i));
         }
+#endif
     }
 
     void testSaveAndLoadMember()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         Selector<MySoACell2> valSelector(&MySoACell2::y, "y");
         MySoACell2 defaultCell(5, 6, 7);
         MySoACell2 edgeCell(-1, -2, -3);
@@ -181,6 +191,7 @@ public:
         for (int i = 0; i < static_cast<int>(region.size()); ++i) {
             TS_ASSERT_EQUALS(grid.get(Coord<1>(i)), MySoACell2(5, -i, 7));
         }
+#endif
     }
 };
 
