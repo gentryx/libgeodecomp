@@ -76,7 +76,7 @@ public:
         return *this;
     }
 
-    void setCompleteAdjacency(std::size_t matrixID, unsigned matrixSize,
+    void setCompleteAdjacency(std::size_t matrixID, std::size_t matrixSize,
                               const std::map<Coord<2>, VALUE_TYPE>& matrix)
     {
         if (matrixID >= MATRICES) {

@@ -38,10 +38,10 @@ class InitFromMatrix
 {
 public:
     template<typename VALUETYPE, int C>
-    void operator()(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
+    void operator()(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
                     std::vector<VALUETYPE>& values, std::vector<int>& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength, std::vector<int>& rowIndices)
+                    std::vector<int>& rowLength, std::vector<int>& realRowToSorted)
     {
         std::vector<int> chunkRowToReal;
         // calculate size for arrays
@@ -63,7 +63,7 @@ public:
         chunkOffset.resize(numberOfChunks);
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
-        rowIndices.resize(rowsPadded);
+        realRowToSorted.resize(rowsPadded);
         chunkRowToReal.resize(rowsPadded);
 
         // get row lengths
@@ -74,7 +74,7 @@ public:
 
         // map sorting scope
         for (int i = 0; i < rowsPadded; ++i) {
-            rowIndices[i] = i;
+            realRowToSorted[i] = i;
         }
         for (int nSigma = 0; nSigma < numberOfSigmas; ++nSigma) {
             const int numberOfRows = std::min(SIGMA, rowsPadded - nSigma * SIGMA);
@@ -87,8 +87,8 @@ public:
                              [] (const SortItem& a, const SortItem& b) -> bool
                              { return a.rowLength > b.rowLength; });
             for (int i = 0; i < numberOfRows; ++i) {
-                chunkRowToReal[nSigma * SIGMA + i] = lengths[i].rowIndex;
-                rowIndices[lengths[i].rowIndex]    = nSigma * SIGMA + i;
+                chunkRowToReal[nSigma * SIGMA + i]   = lengths[i].rowIndex;
+                realRowToSorted[lengths[i].rowIndex] = nSigma * SIGMA + i;
             }
         }
 
@@ -118,8 +118,8 @@ public:
                 currentRow = pair.first.x();
                 index = 0;
             }
-            const int chunk  = rowIndices[pair.first.x()] / C;
-            const int row    = rowIndices[pair.first.x()] % C;
+            const int chunk  = realRowToSorted[pair.first.x()] / C;
+            const int row    = realRowToSorted[pair.first.x()] % C;
             const int start  = chunkOffset[chunk];
             const int length = chunkLength[chunk];
             const int idx    = start + row * length + index;
@@ -151,10 +151,10 @@ class InitFromMatrix<1>
 {
 public:
     template<typename VALUETYPE, int C>
-    void operator()(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
+    void operator()(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
                     std::vector<VALUETYPE>& values, std::vector<int>& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength, std::vector<int>& /* rowIndices */)
+                    std::vector<int>& rowLength, std::vector<int>& /* realRowToSorted */)
     {
         // calculate size for arrays
         const int matrixRows = matrixSize;
@@ -312,12 +312,12 @@ public:
      * _complete_ matrix. Matrix is represented as map, key is Coord<2> which contains
      * (row, column). value_type of map contains the actual value.
      */
-    void initFromMatrix(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix)
+    void initFromMatrix(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix)
     {
         SellHelpers::InitFromMatrix<SIGMA>().
             template operator()<VALUETYPE, C>(matrixSize, matrix, values, column,
                                               chunkLength, chunkOffset, rowLength,
-                                              rowIndices);
+                                              realRowToSorted);
     }
 
     /**
@@ -482,9 +482,9 @@ public:
         return chunkOffset;
     }
 
-    inline const std::vector<int>& rowIndicesVec() const
+    inline const std::vector<int>& realRowToSortedVec() const
     {
-        return rowIndices;
+        return realRowToSorted;
     }
 
     inline std::size_t dim() const
@@ -496,11 +496,11 @@ private:
 
     std::vector<VALUETYPE> values;
     std::vector<int>       column;
-    std::vector<int>       rowLength;   // = Non Zero Entres in Row
-    std::vector<int>       chunkLength; // = Max rowLength in Chunk
-    std::vector<int>       chunkOffset; // COffset[i+1]=COffset[i]+CLength[i]*C
-    std::vector<int>       rowIndices;  // mapping between rows and real rows, used for SIGMA
-    std::size_t dimension;              // = N
+    std::vector<int>       rowLength;       // = Non Zero Entres in Row
+    std::vector<int>       chunkLength;     // = Max rowLength in Chunk
+    std::vector<int>       chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
+    std::vector<int>       realRowToSorted; // mapping between rows and real rows, used for SIGMA
+    std::size_t dimension;                  // = N
 };
 
 }

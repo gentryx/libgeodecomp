@@ -146,8 +146,8 @@ public:
     Iterator begin()
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
-        currentChunk = matrix.rowIndicesVec()[xOffset] / C;
-        chunkOffset  = matrix.rowIndicesVec()[xOffset] % C;
+        currentChunk = matrix.realRowToSortedVec()[xOffset] / C;
+        chunkOffset  = matrix.realRowToSortedVec()[xOffset] % C;
         int index    = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         return Iterator(matrix, index);
     }
