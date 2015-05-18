@@ -202,6 +202,36 @@ public:
     }
 };
 
+/**
+ * Neighborhood which is used for hoodNew in updateLineX().
+ * Provides access to member pointers of the new grid.
+ */
+template<typename CELL, std::size_t MATRICES = 1,
+         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+class UnstructuredSoANeighborhoodNew
+{
+private:
+    typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    Grid& grid;
+public:
+    inline explicit
+    UnstructuredSoANeighborhoodNew(Grid& grid) :
+        grid(grid)
+    {}
+
+    inline
+    CELL& operator[](int index)
+    {
+        return grid[index];
+    }
+
+    inline
+    const CELL& operator[](int index) const
+    {
+        return grid[index];
+    }
+};
+
 }
 
 #endif
