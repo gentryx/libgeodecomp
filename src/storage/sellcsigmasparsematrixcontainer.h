@@ -43,6 +43,7 @@ public:
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
                     std::vector<int>& rowLength, std::vector<int>& rowIndices)
     {
+        std::vector<int> chunkRowToReal;
         // calculate size for arrays
         const int matrixRows = matrixSize;
         int numberOfValues = 0;
@@ -63,6 +64,7 @@ public:
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
         rowIndices.resize(rowsPadded);
+        chunkRowToReal.resize(rowsPadded);
 
         // get row lengths
         std::fill(begin(rowLength), end(rowLength), 0);
@@ -85,15 +87,19 @@ public:
                              [] (const SortItem& a, const SortItem& b) -> bool
                              { return a.rowLength > b.rowLength; });
             for (int i = 0; i < numberOfRows; ++i) {
-                rowIndices[nSigma * SIGMA + i] = lengths[i].rowIndex;
+                chunkRowToReal[nSigma * SIGMA + i] = lengths[i].rowIndex;
+                rowIndices[lengths[i].rowIndex]    = nSigma * SIGMA + i;
             }
         }
 
         // save chunk lengths and offsets
         chunkOffset[0] = 0;
         for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
-                                                    rowLength.begin() + (nChunk + 1) * C);
+            std::vector<int> lengths(C);
+            for (auto i = 0u; i < lengths.size(); ++i) {
+                lengths[i] = rowLength[chunkRowToReal[nChunk * C + i]];
+            }
+            chunkLength[nChunk] = *std::max_element(begin(lengths), end(lengths));
             if (nChunk > 0) {
                 chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
             }

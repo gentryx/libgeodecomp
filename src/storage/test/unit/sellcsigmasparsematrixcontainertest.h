@@ -851,7 +851,7 @@ public:
 #endif
     }
 
-    void testInitFromMatrixWithSIGMA()
+    void testInitFromMatrixWithSIGMA1()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<double, 2, 4> a(5);
@@ -920,6 +920,79 @@ public:
         TS_ASSERT(col[10] == 3);
         TS_ASSERT(col[11] == 0);
         TS_ASSERT(col[12] == 4);
+        TS_ASSERT(col[13] == 0);
+#endif
+    }
+
+    void testInitFromMatrixWithSIGMA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        SellCSigmaSparseMatrixContainer<double, 2, 8> a(5);
+        std::map<Coord<2>, double> matrix;
+        // 0 1 0 0 0
+        // 0 5 0 8 7
+        // 1 4 0 3 2
+        // 0 0 5 0 0
+        // 0 0 0 2 3
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(1, 1)] = 5;
+        matrix[Coord<2>(1, 3)] = 8;
+        matrix[Coord<2>(1, 4)] = 7;
+        matrix[Coord<2>(2, 0)] = 1;
+        matrix[Coord<2>(2, 1)] = 4;
+        matrix[Coord<2>(2, 3)] = 3;
+        matrix[Coord<2>(2, 4)] = 2;
+        matrix[Coord<2>(3, 2)] = 5;
+        matrix[Coord<2>(4, 3)] = 2;
+        matrix[Coord<2>(4, 4)] = 3;
+
+        a.initFromMatrix(5, matrix);
+
+        const std::vector<double>& val = a.valuesVec();
+        const std::vector<int>&    col = a.columnVec();
+        const std::vector<int>&    cl  = a.chunkLengthVec();
+        const std::vector<int>&    cs  = a.chunkOffsetVec();
+
+        TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
+        TS_ASSERT_EQUALS(14, std::distance(begin(val), end(val)));
+        TS_ASSERT_EQUALS(14, std::distance(begin(col), end(col)));
+
+        TS_ASSERT(cs[0] ==  0);
+        TS_ASSERT(cs[1] ==  8);
+        TS_ASSERT(cs[2] == 12);
+        TS_ASSERT(cl[0] == 4);
+        TS_ASSERT(cl[1] == 2);
+        TS_ASSERT(cl[2] == 1);
+
+        TS_ASSERT(val[ 0] == 1);
+        TS_ASSERT(val[ 1] == 5);
+        TS_ASSERT(val[ 2] == 4);
+        TS_ASSERT(val[ 3] == 8);
+        TS_ASSERT(val[ 4] == 3);
+        TS_ASSERT(val[ 5] == 7);
+        TS_ASSERT(val[ 6] == 2);
+        TS_ASSERT(val[ 7] == 0);
+        TS_ASSERT(val[ 8] == 2);
+        TS_ASSERT(val[ 9] == 1);
+        TS_ASSERT(val[10] == 3);
+        TS_ASSERT(val[11] == 0);
+        TS_ASSERT(val[12] == 5);
+        TS_ASSERT(val[13] == 0);
+
+        TS_ASSERT(col[ 0] == 0);
+        TS_ASSERT(col[ 1] == 1);
+        TS_ASSERT(col[ 2] == 1);
+        TS_ASSERT(col[ 3] == 3);
+        TS_ASSERT(col[ 4] == 3);
+        TS_ASSERT(col[ 5] == 4);
+        TS_ASSERT(col[ 6] == 4);
+        TS_ASSERT(col[ 7] == 0);
+        TS_ASSERT(col[ 8] == 3);
+        TS_ASSERT(col[ 9] == 1);
+        TS_ASSERT(col[10] == 4);
+        TS_ASSERT(col[11] == 0);
+        TS_ASSERT(col[12] == 2);
         TS_ASSERT(col[13] == 0);
 #endif
     }
