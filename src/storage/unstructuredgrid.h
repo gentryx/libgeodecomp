@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include <cassert>
 
 namespace LibGeoDecomp {
 
@@ -79,9 +80,7 @@ public:
     void setCompleteAdjacency(std::size_t matrixID, std::size_t matrixSize,
                               const std::map<Coord<2>, VALUE_TYPE>& matrix)
     {
-        if (matrixID >= MATRICES) {
-            throw std::invalid_argument("matrixID not available");
-        }
+        assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrixSize, matrix);
     }
 
@@ -89,36 +88,28 @@ public:
      * iterator musst be an interator over pair< Coord<2>, VALUE_TYPE >
      */
     template<typename ITERATOR>
-    void setAdjacency(std::size_t const  matrixID, ITERATOR start,
-                      const ITERATOR end)
+    void setAdjacency(std::size_t const  matrixID, const ITERATOR& start,
+                      const ITERATOR& end)
     {
-        if (matrixID >= MATRICES) {
-            throw std::invalid_argument("matrixID not available");
-        }
+        assert(matrixID < MATRICES);
         for (ITERATOR i = start; i != end; ++i) {
-
             Coord<2> c = i->first;
             matrices[matrixID].addPoint(c.x(), c.y(), i->second);
         }
     }
 
-    const SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
+    inline
+    const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
     getAdjacency(std::size_t const matrixID) const
     {
-        if (matrixID >= MATRICES) {
-            throw std::invalid_argument("matrixID not available");
-        }
-
+        assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
 
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
+    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
     getAdjacency(std::size_t const matrixID)
     {
-        if (matrixID >= MATRICES) {
-            throw std::invalid_argument("matrixID not available");
-        }
-
+        assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
 
