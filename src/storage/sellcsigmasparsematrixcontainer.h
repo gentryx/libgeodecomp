@@ -118,30 +118,13 @@ public:
                 currentRow = pair.first.x();
                 index = 0;
             }
-            const int chunk  = realRowToSorted[pair.first.x()] / C;
-            const int row    = realRowToSorted[pair.first.x()] % C;
-            const int start  = chunkOffset[chunk];
-            const int length = chunkLength[chunk];
-            const int idx    = start + row * length + index;
-            values[idx]      = pair.second;
-            column[idx]      = pair.first.y();
+            const int chunk = realRowToSorted[pair.first.x()] / C;
+            const int row   = realRowToSorted[pair.first.x()] % C;
+            const int start = chunkOffset[chunk];
+            const int idx   = start + index * C + row;
+            values[idx]     = pair.second;
+            column[idx]     = pair.first.y();
             ++index;
-        }
-
-        // transpose chunks
-        std::vector<VALUETYPE> valCopy(values);
-        std::vector<int> colCopy(column);
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            const int chunkLen = chunkLength[nChunk];
-            const int start    = chunkOffset[nChunk];
-            for (int i = 0; i < C; ++i) {
-                for (int j = 0; j < chunkLen; ++j) {
-                    const int idx0 = start + i * chunkLen + j;
-                    const int idx1 = start + j * C + i;
-                    values[idx1] = valCopy[idx0];
-                    column[idx1] = colCopy[idx0];
-                }
-            }
         }
     }
 };
@@ -201,30 +184,13 @@ public:
                 currentRow = pair.first.x();
                 index = 0;
             }
-            const int chunk  = pair.first.x() / C;
-            const int row    = pair.first.x() % C;
-            const int start  = chunkOffset[chunk];
-            const int length = chunkLength[chunk];
-            const int idx    = start + row * length + index;
-            values[idx]      = pair.second;
-            column[idx]      = pair.first.y();
+            const int chunk = pair.first.x() / C;
+            const int row   = pair.first.x() % C;
+            const int start = chunkOffset[chunk];
+            const int idx   = start + index * C + row;
+            values[idx]     = pair.second;
+            column[idx]     = pair.first.y();
             ++index;
-        }
-
-        // transpose chunks
-        std::vector<VALUETYPE> valCopy(values);
-        std::vector<int> colCopy(column);
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            const int chunkLen = chunkLength[nChunk];
-            const int start    = chunkOffset[nChunk];
-            for (int i = 0; i < C; ++i) {
-                for (int j = 0; j < chunkLen; ++j) {
-                    const int idx0 = start + i * chunkLen + j;
-                    const int idx1 = start + j * C + i;
-                    values[idx1] = valCopy[idx0];
-                    column[idx1] = colCopy[idx0];
-                }
-            }
         }
     }
 };
