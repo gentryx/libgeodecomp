@@ -2429,9 +2429,6 @@ public:
     double sum;
 };
 
-#include <random>
-#include <ctime>
-
 // setup a sparse matrix
 template<typename CELL>
 class SparseMatrixInitializer : public SimpleInitializer<CELL>
@@ -2439,7 +2436,6 @@ class SparseMatrixInitializer : public SimpleInitializer<CELL>
 private:
     typedef UnstructuredGrid<CELL, MATRICES, ValueType, C, SIGMA> Grid;
     int size;
-    constexpr static const float ZERO_PROBABILITY = 0.6f; // 60 percent zeros
 
 public:
     inline
@@ -2450,21 +2446,14 @@ public:
 
     virtual void grid(GridBase<CELL, 1> *ret)
     {
-        // setup sparse matrix (random)
+        // setup sparse matrix
         Grid *grid = dynamic_cast<Grid *>(ret);
         std::map<Coord<2>, ValueType> adjacency;
 
-        // create random generators
-        std::default_random_engine rndZero(time(0));
-        std::bernoulli_distribution distZero(ZERO_PROBABILITY);
-
-        // setup matrix
+        // setup matrix: ~1 % non zero entries
         for (int row = 0; row < size; ++row) {
-            for (int col = 0; col < size; ++col) {
-                bool zero = distZero(rndZero);
-                if (!zero) {
-                    adjacency[Coord<2>(row, col)] = 5.0;
-                }
+            for (int col = 0; col < size / 100; ++col) {
+                adjacency[Coord<2>(row, col * 100)] = 5.0;
             }
         }
 
@@ -2473,6 +2462,102 @@ public:
 
         // setup rhs: not needed, since the grid is intialized with default cells
         // default value of SPMVMCell is 8.0
+    }
+};
+
+class SellMatrixInitializer : public CPUBenchmark
+{
+    public:
+    std::string family()
+    {
+        return "SELLInit";
+    }
+
+    std::string species()
+    {
+        return "point";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        Coord<1> dim1d(dim.x() * dim.y() * dim.z());
+        int size = dim.x() * dim.y() * dim.z();
+        UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
+        std::map<Coord<2>, ValueType> adjacency;
+
+        // setup matrix: ~1 % non zero entries
+        for (int row = 0; row < size; ++row) {
+            for (int col = 0; col < size / 100; ++col) {
+                adjacency[Coord<2>(row, col * 100)] = 5.0;
+            }
+        }
+
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            grid.setAdjacency(0, adjacency.begin(), adjacency.end());
+        }
+
+        if (grid.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class SellAddPointInitializer : public CPUBenchmark
+{
+    public:
+    std::string family()
+    {
+        return "SELLInit";
+    }
+
+    std::string species()
+    {
+        return "matrix";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        Coord<1> dim1d(dim.x() * dim.y() * dim.z());
+        int size = dim.x() * dim.y() * dim.z();
+        UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
+        std::map<Coord<2>, ValueType> adjacency;
+
+        // setup matrix: ~1 % non zero entries
+        for (int row = 0; row < size; ++row) {
+            for (int col = 0; col < size / 100; ++col) {
+                adjacency[Coord<2>(row, col * 100)] = 5.0;
+            }
+        }
+
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            grid.setCompleteAdjacency(0, size, adjacency);
+        }
+
+        if (grid.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
     }
 };
 
@@ -2506,15 +2591,12 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 1e-9 * updates / seconds;
-
-        return gLUPS;
+        return seconds;
     }
 
     std::string unit()
     {
-        return "GLUPS";
+        return "s";
     }
 };
 
@@ -2528,7 +2610,7 @@ public:
 
     std::string species()
     {
-        return "vanilla_streak";
+        return "streak";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2548,15 +2630,12 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        double updates = 1.0 * maxT * dim.prod();
-        double gLUPS = 1e-9 * updates / seconds;
-
-        return gLUPS;
+        return seconds;
     }
 
     std::string unit()
     {
-        return "GLUPS";
+        return "s";
     }
 };
 #endif
@@ -2590,6 +2669,33 @@ int main(int argc, char **argv)
 
     LibFlatArray::evaluate eval(revision);
     eval.print_header();
+
+    std::vector<Coord<3> > sizes;
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    if (!quick) {
+        sizes << Coord<3>(22, 22, 22)
+              << Coord<3>(33, 33, 33)
+              << Coord<3>(44, 44, 44)
+              << Coord<3>(55, 55, 55);
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SellMatrixInitializer(), toVector(sizes[i]));
+        }
+
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SellAddPointInitializer(), toVector(sizes[i]));
+        }
+
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
+        }
+
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SparseMatrixVectorMultiplicationStreak(), toVector(sizes[i]));
+        }
+        sizes.clear();
+    }
+#endif
 
     if (!quick) {
         eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
@@ -2635,8 +2741,6 @@ int main(int argc, char **argv)
 
     eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    std::vector<Coord<3> > sizes;
-
     if (!quick) {
         sizes << Coord<3>(22, 22, 22)
               << Coord<3>(64, 64, 64)
@@ -2674,16 +2778,6 @@ int main(int argc, char **argv)
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(Jacobi3DStreakUpdateFunctor(), toVector(sizes[i]));
     }
-
-#ifdef LIBGEODECOMP_WITH_CPP14
-    for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
-    }
-
-    for (std::size_t i = 0; i < sizes.size(); ++i) {
-        eval(SparseMatrixVectorMultiplicationStreak(), toVector(sizes[i]));
-    }
-#endif
 
     sizes.clear();
 
