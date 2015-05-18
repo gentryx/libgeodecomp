@@ -16,6 +16,8 @@
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredneighborhood.h>
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
@@ -2362,6 +2364,202 @@ private:
     std::string name;
 };
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+typedef double ValueType;
+static const std::size_t MATRICES = 1;
+static const int C = 4;
+static const int SIGMA = 1;
+
+class SPMVMCell
+{
+public:
+    class API :
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {};
+
+    inline explicit SPMVMCell(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename NEIGHBORHOOD>
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    {
+        sum = 0.;
+        for (const auto& j: neighborhood.weights(0)) {
+            sum += neighborhood[j.first].value * j.second;
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+class SPMVMCellStreak
+{
+public:
+    class API :
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {};
+
+    inline explicit SPMVMCellStreak(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            hoodNew[i].sum = 0.;
+            for (const auto& j: hoodOld.weights(0)) {
+                hoodNew[i].sum += hoodOld[j.first].value * j.second;
+            }
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+#include <random>
+#include <ctime>
+
+// setup a sparse matrix
+template<typename CELL>
+class SparseMatrixInitializer : public SimpleInitializer<CELL>
+{
+private:
+    typedef UnstructuredGrid<CELL, MATRICES, ValueType, C, SIGMA> Grid;
+    int size;
+    constexpr static const float ZERO_PROBABILITY = 0.6f; // 60 percent zeros
+
+public:
+    inline
+    SparseMatrixInitializer(const Coord<3>& dim, int maxT) :
+        SimpleInitializer<CELL>(Coord<1>(dim.x() * dim.y() * dim.z()), maxT),
+        size(dim.x() * dim.y() * dim.z())
+    {}
+
+    virtual void grid(GridBase<CELL, 1> *ret)
+    {
+        // setup sparse matrix (random)
+        Grid *grid = dynamic_cast<Grid *>(ret);
+        std::map<Coord<2>, ValueType> adjacency;
+
+        // create random generators
+        std::default_random_engine rndZero(time(0));
+        std::bernoulli_distribution distZero(ZERO_PROBABILITY);
+
+        // setup matrix
+        for (int row = 0; row < size; ++row) {
+            for (int col = 0; col < size; ++col) {
+                bool zero = distZero(rndZero);
+                if (!zero) {
+                    adjacency[Coord<2>(row, col)] = 5.0;
+                }
+            }
+        }
+
+        grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+
+        // setup rhs: not needed, since the grid is intialized with default cells
+        // default value of SPMVMCell is 8.0
+    }
+};
+
+class SparseMatrixVectorMultiplication : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "vanilla";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        int maxT = 1;
+        SerialSimulator<SPMVMCell> sim(new SparseMatrixInitializer<SPMVMCell>(dim, maxT));
+
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
+
+        if (sim.getGrid()->get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        double updates = 1.0 * maxT * dim.prod();
+        double gLUPS = 1e-9 * updates / seconds;
+
+        return gLUPS;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+};
+
+class SparseMatrixVectorMultiplicationStreak : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "vanilla_streak";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        int maxT = 1;
+        SerialSimulator<SPMVMCellStreak> sim(new SparseMatrixInitializer<SPMVMCellStreak>(dim, maxT));
+
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
+
+        if (sim.getGrid()->get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        double updates = 1.0 * maxT * dim.prod();
+        double gLUPS = 1e-9 * updates / seconds;
+
+        return gLUPS;
+    }
+
+    std::string unit()
+    {
+        return "GLUPS";
+    }
+};
+#endif
+
 #ifdef LIBGEODECOMP_WITH_CUDA
 void cudaTests(std::string revision, bool quick, int cudaDevice);
 #endif
@@ -2475,6 +2673,16 @@ int main(int argc, char **argv)
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(Jacobi3DStreakUpdateFunctor(), toVector(sizes[i]));
     }
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationStreak(), toVector(sizes[i]));
+    }
+#endif
 
     sizes.clear();
 
