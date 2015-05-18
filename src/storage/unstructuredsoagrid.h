@@ -363,6 +363,12 @@ public:
         return CoordBox<DIM>(Coord<DIM>(), dimension);
     }
 
+    template<typename FUNCTOR>
+    void callback(FUNCTOR functor) const
+    {
+        elements.callback(functor);
+    }
+
 protected:
     void saveMemberImplementation(
         char *target, const Selector<ELEMENT_TYPE>& selector, const Region<DIM>& region) const
