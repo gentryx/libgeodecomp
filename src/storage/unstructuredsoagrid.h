@@ -116,8 +116,13 @@ public:
                 SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dim.x());
         }
 
+        // the grid size should be padded to the total number of chunks
+        // -> no border cases for vectorization
+        const std::size_t rowsPadded = ((dim.x() - 1) / C + 1) * C;
+        elements.resize(rowsPadded, 1, 1);
+
         // init soa_grid
-        for (int i = 0; i < dim.x(); ++i) {
+        for (std::size_t i = 0; i < rowsPadded; ++i) {
             set(i, defaultElement);
         }
     }
@@ -136,8 +141,13 @@ public:
                 SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
         }
 
+        // the grid size should be padded to the total number of chunks
+        // -> no border cases for vectorization
+        const std::size_t rowsPadded = ((dimension.x() - 1) / C + 1) * C;
+        elements.resize(rowsPadded, 1, 1);
+
         // init soa_grid
-        for (int i = 0; i < dimension.x(); ++i) {
+        for (std::size_t i = 0; i < rowsPadded; ++i) {
             set(i, defaultElement);
         }
     }
