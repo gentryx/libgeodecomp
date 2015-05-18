@@ -740,13 +740,14 @@ public:
         const auto& cl  = a.chunkLengthVec();
         const auto& cs  = a.chunkOffsetVec();
 
-        TS_ASSERT_EQUALS(2, std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(3, std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(2, std::distance(begin(cl),  end(cl)));
         TS_ASSERT_EQUALS(8, std::distance(begin(val), end(val)));
         TS_ASSERT_EQUALS(8, std::distance(begin(col), end(col)));
 
         TS_ASSERT(cs[0] == 0);
         TS_ASSERT(cs[1] == 4);
+        TS_ASSERT(cs[2] == 8);
         TS_ASSERT(cl[0] == 2);
         TS_ASSERT(cl[1] == 2);
 
@@ -799,7 +800,7 @@ public:
         const auto& cl  = a.chunkLengthVec();
         const auto& cs  = a.chunkOffsetVec();
 
-        TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(4,  std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
         TS_ASSERT_EQUALS(18, std::distance(begin(val), end(val)));
         TS_ASSERT_EQUALS(18, std::distance(begin(col), end(col)));
@@ -807,6 +808,7 @@ public:
         TS_ASSERT(cs[0] ==  0);
         TS_ASSERT(cs[1] ==  6);
         TS_ASSERT(cs[2] == 14);
+        TS_ASSERT(cs[3] == 18);
         TS_ASSERT(cl[0] == 3);
         TS_ASSERT(cl[1] == 4);
         TS_ASSERT(cl[2] == 2);
@@ -880,7 +882,7 @@ public:
         const auto& cl  = a.chunkLengthVec();
         const auto& cs  = a.chunkOffsetVec();
 
-        TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(4,  std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
         TS_ASSERT_EQUALS(14, std::distance(begin(val), end(val)));
         TS_ASSERT_EQUALS(14, std::distance(begin(col), end(col)));
@@ -888,6 +890,7 @@ public:
         TS_ASSERT(cs[0] ==  0);
         TS_ASSERT(cs[1] ==  8);
         TS_ASSERT(cs[2] == 10);
+        TS_ASSERT(cs[3] == 14);
         TS_ASSERT(cl[0] == 4);
         TS_ASSERT(cl[1] == 1);
         TS_ASSERT(cl[2] == 2);
@@ -953,7 +956,7 @@ public:
         const auto& cl  = a.chunkLengthVec();
         const auto& cs  = a.chunkOffsetVec();
 
-        TS_ASSERT_EQUALS(3,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(4,  std::distance(begin(cs),  end(cs)));
         TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
         TS_ASSERT_EQUALS(14, std::distance(begin(val), end(val)));
         TS_ASSERT_EQUALS(14, std::distance(begin(col), end(col)));
@@ -961,6 +964,7 @@ public:
         TS_ASSERT(cs[0] ==  0);
         TS_ASSERT(cs[1] ==  8);
         TS_ASSERT(cs[2] == 12);
+        TS_ASSERT(cs[3] == 14);
         TS_ASSERT(cl[0] == 4);
         TS_ASSERT(cl[1] == 2);
         TS_ASSERT(cl[2] == 1);

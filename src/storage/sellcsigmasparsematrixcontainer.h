@@ -62,7 +62,7 @@ public:
 
         const int rowsPadded = numberOfChunks * C;
         // allocate memory
-        chunkOffset.resize(numberOfChunks);
+        chunkOffset.resize(numberOfChunks + 1);
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
         realRowToSorted.resize(rowsPadded);
@@ -107,6 +107,8 @@ public:
             }
             numberOfValues += chunkLength[nChunk] * C;
         }
+        chunkOffset[numberOfChunks] = chunkOffset[numberOfChunks - 1] +
+            chunkLength[numberOfChunks - 1] * C;
 
         // save values
         values.resize(numberOfValues);
@@ -154,7 +156,7 @@ public:
 
         const int rowsPadded = numberOfChunks * C;
         // allocate memory
-        chunkOffset.resize(numberOfChunks);
+        chunkOffset.resize(numberOfChunks + 1);
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
 
@@ -174,6 +176,8 @@ public:
             }
             numberOfValues += chunkLength[nChunk] * C;
         }
+        chunkOffset[numberOfChunks] = chunkOffset[numberOfChunks - 1] +
+            chunkLength[numberOfChunks - 1] * C;
 
         // save values
         values.resize(numberOfValues);
