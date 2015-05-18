@@ -5,6 +5,7 @@
 
 #ifdef LIBGEODECOMP_WITH_CPP14
 
+#include <libflatarray/aligned_allocator.hpp>
 #include <libgeodecomp/geometry/coord.h>
 
 #include <map>
@@ -39,7 +40,8 @@ class InitFromMatrix
 public:
     template<typename VALUETYPE, int C>
     void operator()(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
-                    std::vector<VALUETYPE>& values, std::vector<int>& column,
+                    std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >& values,
+                    std::vector<int, LibFlatArray::aligned_allocator<int, 64> >& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
                     std::vector<int>& rowLength, std::vector<int>& realRowToSorted)
     {
@@ -135,7 +137,8 @@ class InitFromMatrix<1>
 public:
     template<typename VALUETYPE, int C>
     void operator()(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
-                    std::vector<VALUETYPE>& values, std::vector<int>& column,
+                    std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >& values,
+                    std::vector<int, LibFlatArray::aligned_allocator<int, 64> >& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
                     std::vector<int>& rowLength, std::vector<int>& /* realRowToSorted */)
     {
@@ -201,6 +204,10 @@ public:
 template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
+private:
+    using AlignedValueVector = std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >;
+    using AlignedIntVector   = std::vector<int, LibFlatArray::aligned_allocator<int, 64> >;
+
 public:
     explicit
     SellCSigmaSparseMatrixContainer(const int N = 0) :
@@ -301,8 +308,7 @@ public:
 
         //// case 1: row is NOT the bigest in chunk
         if (rowLength[row] < chunkLength[chunk]) {
-            std::vector<int>::iterator itCol = column.begin()
-                    + chunkOffset[chunk] + row % C;
+            auto itCol = column.begin() + chunkOffset[chunk] + row % C;
 
             while (col > *itCol && -1 != *itCol) {
                 itCol += C;
@@ -341,9 +347,8 @@ public:
             if (index >= offsetEnd) {
                 index = offsetEnd;
 
-                std::vector<int>::iterator itCol = column.begin() + index;
-                typename
-                std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
+                auto itCol = column.begin() + index;
+                auto itVal = values.begin() + index;
 
                 for (int i = 0; i < C; ++i) {
                     itCol = column.insert(itCol, -1);   //TODO für matvecmul flag array?
@@ -358,9 +363,8 @@ public:
                     return;
                 }
 
-                std::vector<int>::iterator itCol = column.begin() + index;
-                typename
-                std::vector<VALUETYPE>::iterator itVal = values.begin() + index;
+                auto itCol = column.begin() + index;
+                auto itVal = values.begin() + index;
 
                 for (int i = 0; i < C; ++i) {
                     itCol = column.insert(itCol, -1);
@@ -423,12 +427,12 @@ public:
         return !(*this == other);
     }
 
-    inline const std::vector<VALUETYPE>& valuesVec() const
+    inline const AlignedValueVector& valuesVec() const
     {
         return values;
     }
 
-    inline const std::vector<int>& columnVec() const
+    inline const AlignedIntVector& columnVec() const
     {
         return column;
     }
@@ -459,14 +463,13 @@ public:
     }
 
 private:
-
-    std::vector<VALUETYPE> values;
-    std::vector<int>       column;
-    std::vector<int>       rowLength;       // = Non Zero Entres in Row
-    std::vector<int>       chunkLength;     // = Max rowLength in Chunk
-    std::vector<int>       chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
-    std::vector<int>       realRowToSorted; // mapping between rows and real rows, used for SIGMA
-    std::size_t dimension;                  // = N
+    AlignedValueVector values;
+    AlignedIntVector   column;
+    std::vector<int>   rowLength;       // = Non Zero Entres in Row
+    std::vector<int>   chunkLength;     // = Max rowLength in Chunk
+    std::vector<int>   chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
+    std::vector<int>   realRowToSorted; // mapping between rows and real rows, used for SIGMA
+    std::size_t dimension;              // = N
 };
 
 }
