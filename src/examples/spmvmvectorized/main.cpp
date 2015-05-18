@@ -24,6 +24,7 @@ typedef double ValueType;
 static const std::size_t MATRICES = 1;
 static const int C = 4;
 static const int SIGMA = 1;
+typedef short_vec<ValueType, C> ShortVec;
 
 class Cell
 {
@@ -56,11 +57,14 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            auto& tmp = hoodNew[i].sum;
+            ShortVec tmp = hoodNew.sumPtr + i * C;
             for (const auto& j: hoodOld.weights(0)) {
-                tmp += hoodOld[j.first].value * j.second;
+                ShortVec weights = j.second;
+                ShortVec values;
+                values.gather(hoodOld.valuePtr, j.first);
+                tmp += values * weights;
             }
-            hoodNew.storeSum(i);
+            tmp.store(hoodNew.sumPtr + i * C);
         }
     }
 
