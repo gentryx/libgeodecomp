@@ -54,7 +54,7 @@ public:
         value(v), sum(0)
     {}
 
-    template<typename HOOD_NEW, typename HOOD_OLD> __attribute__((noinline))
+    template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
