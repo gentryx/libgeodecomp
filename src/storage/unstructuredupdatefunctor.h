@@ -60,10 +60,9 @@ private:
     {
         typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
 
-        // FIXME
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+        UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
             hoodOld(gridOld, streak.origin.x());
-        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+        UnstructuredSoANeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
             hoodNew(*gridNew);
 
         // switch between updateLineX() and update()

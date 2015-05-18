@@ -18,13 +18,13 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredSoANeighborhoodHelpers {
 
-template<typename CELL>
+template<typename CELL, typename VALUE_TYPE>
 class GetMemberPointer
 {
 private:
-    char **memberPointer;
+    VALUE_TYPE **memberPointer;
 public:
-    inline GetMemberPointer(char **ptr) :
+    inline GetMemberPointer(VALUE_TYPE **ptr) :
         memberPointer(ptr)
     {}
 
@@ -32,7 +32,7 @@ public:
     void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor)
     {
         // save member pointer
-        *memberPointer = static_cast<char *>(&accessor.sum());
+        *memberPointer = static_cast<VALUE_TYPE *>(&accessor.sum());
     }
 };
 
@@ -102,11 +102,11 @@ public:
         {
             // load next vectors
             // get indices for rhs gather -> corresponds to column vector
-            const unsigned *indices = static_cast<const unsigned *>(matrix.columnVec().data()) + offset;
+            const unsigned *indices = reinterpret_cast<const unsigned *>(matrix.columnVec().data()) + offset;
             ShortVec cellValues;
-            cellValues.gather(sumPtr, indices);
+            cellValues.gather(sumPtr, const_cast<unsigned *>(indices));
             ShortVec matrixValues = matrix.valuesVec().data() + offset;
-            return make_pair(cellValues, matrixValues);
+            return std::make_pair(cellValues, matrixValues);
         }
     };
 
@@ -116,7 +116,8 @@ public:
         currentChunk(startX / C)
     {
         // save member pointer
-        grid.callback(UnstructuredSoANeighborhoodHelpers::GetMemberPointer<CELL>(&sumPtr));
+        grid.callback(UnstructuredSoANeighborhoodHelpers::
+                      GetMemberPointer<CELL, VALUE_TYPE>(&sumPtr));
     }
 
     inline
@@ -212,24 +213,36 @@ class UnstructuredSoANeighborhoodNew
 {
 private:
     typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    typedef LibFlatArray::short_vec<VALUE_TYPE, C> ShortVec;
     Grid& grid;
+    VALUE_TYPE *sumPtr;
 public:
     inline explicit
     UnstructuredSoANeighborhoodNew(Grid& grid) :
         grid(grid)
-    {}
-
-    inline
-    CELL& operator[](int index)
     {
-        return grid[index];
+        grid.callback(UnstructuredSoANeighborhoodHelpers::
+                      GetMemberPointer<CELL, VALUE_TYPE>(&sumPtr));
     }
 
     inline
-    const CELL& operator[](int index) const
+    UnstructuredSoANeighborhoodNew& operator[](int index)
     {
-        return grid[index];
+        // setup sum vector
+        sum = sumPtr + index * C;
+        return *this;
     }
+
+    inline
+    const UnstructuredSoANeighborhoodNew& operator[](int index) const
+    {
+        // setup sum vector
+        sum = sumPtr + index * C;
+        return *this;
+    }
+
+    // public cell members as ShortVecs
+    ShortVec sum;
 };
 
 }
