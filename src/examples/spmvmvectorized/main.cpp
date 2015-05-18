@@ -57,14 +57,15 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            ShortVec tmp = hoodNew.sumPtr + i * C;
+            ShortVec tmp;
+            tmp.load_aligned(hoodNew.sumPtr + i * C);
             for (const auto& j: hoodOld.weights(0)) {
-                ShortVec weights = j.second;
-                ShortVec values;
+                ShortVec weights, values;
+                weights.load_aligned(j.second);
                 values.gather(hoodOld.valuePtr, j.first);
                 tmp += values * weights;
             }
-            tmp.store(hoodNew.sumPtr + i * C);
+            tmp.store_aligned(hoodNew.sumPtr + i * C);
         }
     }
 
