@@ -24,6 +24,9 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredSoAGridHelpers {
 
+/**
+ * Internal helper class to save a region of a cell member.
+ */
 template<typename CELL, int DIM>
 class SaveMember
 {
@@ -56,6 +59,9 @@ private:
     const Region<DIM>& region;
 };
 
+/**
+ * Internal helper class to load a region of a cell member.
+ */
 template<typename CELL, int DIM>
 class LoadMember
 {
@@ -91,15 +97,13 @@ private:
 }
 
 /**
- * A unstructuredgrid for irregular structures using SoA layout.
+ * A unstructured grid for irregular structures using SoA memory layout.
  */
 template<typename ELEMENT_TYPE, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
-class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
+class UnstructuredSoAGrid final : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
-    typedef std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> > NeighborList;
-    typedef typename std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> >::iterator NeighborListIterator;
     const static int DIM = 1;
 
     explicit UnstructuredSoAGrid(
@@ -154,8 +158,7 @@ public:
 
     template<typename O_ELEMENT_TYPE>
     UnstructuredSoAGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
-    operator=(const UnstructuredSoAGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE,
-                                     C, SIGMA> & other)
+    operator=(const UnstructuredSoAGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& other)
     {
         elements    = other.elements;
         edgeElement = other.edgeElement;
@@ -204,35 +207,6 @@ public:
     {
         assert(matrixID < MATRICES);
         return matrices[matrixID];
-    }
-
-    /**
-     * Returns a list of pairs representing the neighborhood of center element.
-     * The first element of the pair is the ELEMENT_TYPE
-     * and the secound the ADJACENCY_TYPE.
-     * The first Element of the list is the center element it self.
-     * If center element does not exist the EdggeElement is returned.
-     * In both cases ADJACENCY_TYPE = -1
-     */
-    inline NeighborList getNeighborhood(const Coord<DIM>& center) const
-    {
-        NeighborList neighborhood;
-
-        if (boundingBox().inBounds(center)) {
-            neighborhood.push_back(std::make_pair(*this[center], -1));
-            std::vector<std::pair<int, VALUE_TYPE> > neighbor =
-                matrices[0].getRow(center.x());
-
-            for (NeighborListIterator it = neighbor.begin();
-                 it != neighbor.end();
-                 ++it) {
-                neighborhood.push_back(std::make_pair((*this)[it->first], it->second));
-            }
-        } else {
-            neighborhood.push_back(std::make_pair(getEdgeElement(), -1));
-        }
-
-        return neighborhood;
     }
 
     inline const Coord<DIM>& getDimensions() const

@@ -15,6 +15,7 @@
 
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
+#include <libflatarray/short_vec.hpp>
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;

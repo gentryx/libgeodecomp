@@ -30,7 +30,7 @@ class UnstructuredNeighborhood
 {
 private:
     typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
-    const Grid& grid;
+    const Grid& grid;           /**< old grid */
     long long xOffset;          /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
     int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
@@ -189,6 +189,7 @@ private:
      *
      * @param difference amount which is added or subtracted from xOffset
      */
+    inline
     void updateIndices(int difference)
     {
         xOffset += difference;
@@ -334,7 +335,8 @@ public:
 
 /**
  * Simple neighborhood which is used for hoodNew in updateLineX().
- * Provides access to cells via an identifier.
+ * Provides access to cells via an identifier which is returned by
+ * hoodOld (see Iterator classes above).
  */
 template<typename CELL, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
@@ -342,7 +344,7 @@ class CellIDNeighborhood
 {
 private:
     typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
-    Grid& grid;
+    Grid& grid;                 /**< new grid */
 public:
     inline explicit
     CellIDNeighborhood(Grid& grid) :

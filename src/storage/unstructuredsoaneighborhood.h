@@ -5,7 +5,6 @@
 #ifdef LIBGEODECOMP_WITH_CPP14
 
 #include <libflatarray/flat_array.hpp>
-#include <libflatarray/short_vec.hpp>
 #include <libflatarray/soa_accessor.hpp>
 
 #include <libgeodecomp/geometry/coord.h>
@@ -69,11 +68,10 @@ public:
 }
 
 /**
- * Neighborhood using vectorization for UnstructuredSoAGrid.
- * Weights() returns a pair of two pointers. One points to
- * the array where the indices for gather are stored and the
- * seconds points the matrix values. Both pointers can be used
- * to load LFA short_vec classes accordingly.
+ * Neighborhood providing pointers for vectorization of UnstructuredSoAGrid.
+ * Weights(id) returns a pair of two pointers. One points to the array where
+ * the indices for gather are stored and the seconds points the matrix values.
+ * Both pointers can be used to load LFA short_vec classes accordingly.
  */
 template<typename CELL, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
@@ -81,10 +79,8 @@ class UnstructuredSoANeighborhood
 {
 private:
     typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
-    typedef LibFlatArray::short_vec<VALUE_TYPE, C> ShortVec;
-    typedef LibFlatArray::short_vec<VALUE_TYPE, C> ShortVecScalar;
     typedef std::pair<const unsigned *, const VALUE_TYPE *> IteratorPair;
-    const Grid& grid;
+    const Grid& grid;           /**< old grid */
     int currentChunk;           /**< current chunk */
     int currentMatrixID;        /**< current id for matrices */
 
@@ -94,7 +90,7 @@ public:
      * the current chunk. Iterator consists of a pair: indices pointer
      * and matrix values pointer.
      */
-    class Iterator : public std::iterator<std::forward_iterator_tag,
+    class Iterator final : public std::iterator<std::forward_iterator_tag,
                                           const IteratorPair>
     {
     private:
@@ -133,7 +129,7 @@ public:
             // load indices and matrix values pointers
             const VALUE_TYPE *weights = matrix.valuesVec().data() + offset;
             const unsigned *indices =
-                reinterpret_cast<const unsigned *>(matrix.columnVec().data()) + offset;
+                reinterpret_cast<const unsigned *>(matrix.columnVec().data() + offset);
             return std::make_pair(indices, weights);
         }
     };
@@ -233,8 +229,7 @@ class UnstructuredSoANeighborhoodNew
 {
 private:
     typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
-    typedef LibFlatArray::short_vec<VALUE_TYPE, C> ShortVec;
-    Grid& grid;
+    Grid& grid;                 /**< new grid */
 public:
     inline explicit
     UnstructuredSoANeighborhoodNew(Grid& grid) :
