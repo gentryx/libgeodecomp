@@ -8,11 +8,43 @@ HEADERS
 CLASS_VARS
 
 NAMESPACE_BEGIN
+/**
+ * Utility class which can set up and yield MPI datatypes for custom datatypes.
+ *
+ * AUTO-GENERATED CODE. DO NOT EDIT. CHANGES WILL BE LOST. Refer to
+ * typemapgenerator for further reference.
+ */
 class Typemaps
 {
 public:
+    /**
+     * Sets up MPI datatypes for all registered types.
+     */
     static void initializeMaps();
 
+    /**
+     * Avoids duplicate initialization
+     */
+    static inline bool initializeMapsIfUninitialized()
+    {
+        if (!initialized()) {
+            initializeMaps();
+        }
+    }
+
+    /**
+     * Query initialization state
+     */
+    static inline bool initialized()
+    {
+        return mapsCreated;
+    }
+
+    /**
+     * Performs an internal lookup. Works for custom, registered types
+     * and for built-in types (char, int, size_t...). Compilation will
+     * fail for unknown types.
+     */
     template<typename T>
     static inline MPI_Datatype lookup()
     {
@@ -27,6 +59,8 @@ private:
         MPI_Get_address(address, &ret);
         return ret;
     }
+
+    static bool mapsCreated;
 
     MAPGEN_DECLARATIONS
 

@@ -27,13 +27,22 @@ bool addressLower(MemberSpec a, MemberSpec b)
 }
 
 METHOD_DEFINITIONS
+
 void Typemaps::initializeMaps()
 {
+    if (mapsCreated) {
+        throw std::logic_error("Typemaps already initialized, duplicate initialization would leak memory");
+    }
+
     if (sizeof(std::size_t) != sizeof(unsigned long)) {
         throw std::logic_error("MPI_UNSIGNED_LONG not suited for communication of std::size_t, needs to be redefined");
     }
 
     ASSIGNMENTS
+
+    mapsCreated = true;
 }
+
+bool Typemaps::mapsCreated = false;
 
 NAMESPACE_END
