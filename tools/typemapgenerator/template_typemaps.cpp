@@ -38,6 +38,12 @@ void Typemaps::initializeMaps()
         throw std::logic_error("MPI_UNSIGNED_LONG not suited for communication of std::size_t, needs to be redefined");
     }
 
+    int mpiInitState = 0;
+    MPI_Initialized(&mpiInitState);
+    if (!mpiInitState) {
+        throw std::logic_error("MPI needs to be initialized prior to setting up Typemaps");
+    }
+
     ASSIGNMENTS
 
     mapsCreated = true;
