@@ -121,7 +121,7 @@ public:
         // rhs gather load
         const auto& matrix = grid.getAdjacency(currentMatrixID);
         const unsigned *indices = reinterpret_cast<const unsigned *>(matrix.columnVec().data()) + index;
-        value.gather(valuePtr, const_cast<unsigned *>(indices));
+        value.gather(valuePtr, indices);
         return *this;
     }
 
