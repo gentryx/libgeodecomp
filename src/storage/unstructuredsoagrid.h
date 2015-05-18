@@ -1,5 +1,7 @@
-#ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDGRID_H
-#define LIBGEODECOMP_STORAGE_UNSTRUCTUREDGRID_H
+#ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDSOAGRID_H
+#define LIBGEODECOMP_STORAGE_UNSTRUCTUREDSOAGRID_H
+
+#include <libflatarray/flat_array.hpp>
 
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
@@ -12,59 +14,139 @@
 
 #include <iostream>
 #include <vector>
-#include <list>
 #include <utility>
+#include <cassert>
 
 namespace LibGeoDecomp {
 
+namespace UnstructuredSoAGridHelpers {
+
+template<typename CELL, int DIM>
+class SaveMember
+{
+public:
+    SaveMember(
+        char *target,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) :
+        target(target),
+        selector(selector),
+        region(region)
+    {}
+
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
+    {
+        char *currentTarget = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            accessor.index = i->origin.x();
+            const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            selector.copyStreakOut(data, currentTarget, i->length(), DIM_X);
+            currentTarget += selector.sizeOfExternal() * i->length();
+        }
+    }
+
+private:
+    char *target;
+    const Selector<CELL>& selector;
+    const Region<DIM>& region;
+};
+
+template<typename CELL, int DIM>
+class LoadMember
+{
+public:
+    LoadMember(
+        const char *source,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) :
+        source(source),
+        selector(selector),
+        region(region)
+    {}
+
+    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
+    {
+        const char *currentSource = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            accessor.index = i->origin.x();
+            char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
+            selector.copyStreakIn(currentSource, currentTarget, i->length(), DIM_X);
+            currentSource += selector.sizeOfExternal() * i->length();
+        }
+    }
+
+private:
+    const char *source;
+    const Selector<CELL>& selector;
+    const Region<DIM>& region;
+};
+
+}
+
 /**
- * A unstructuredgrid for irregular structures
+ * A unstructuredgrid for irregular structures using SoA layout.
  */
-template<typename ELEMENT_TYPE, std::size_t MATRICES=1,
-         typename VALUE_TYPE=double, int C=64, int SIGMA=1>
-class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1>
+template<typename ELEMENT_TYPE, std::size_t MATRICES = 1,
+         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
     typedef std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> > NeighborList;
     typedef typename std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> >::iterator NeighborListIterator;
     const static int DIM = 1;
 
-    explicit UnstructuredGrid(
+    explicit UnstructuredSoAGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
         const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
-        elements(dim.x(), defaultElement),
+        elements(dim.x(), 1, 1),
         edgeElement(edgeElement),
         dimension(dim)
     {
+        // init matrices
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dim.x());
         }
+
+        // init soa_grid
+        for (int i = 0; i < dim.x(); ++i) {
+            set(i, defaultElement);
+        }
     }
 
     explicit
-    UnstructuredGrid(const CoordBox<DIM> box,
-                     const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-                     const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
-        elements(box.dimensions.x(), defaultElement),
+    UnstructuredSoAGrid(const CoordBox<DIM> box,
+                        const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
+                        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        elements(box.dimensions.x(), 1, 1),
         edgeElement(edgeElement),
         dimension(box.dimensions)
     {
+        // init matrices
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
                 SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
         }
+
+        // init soa_grid
+        for (int i = 0; i < dimension.x(); ++i) {
+            set(i, defaultElement);
+        }
     }
 
     template<typename O_ELEMENT_TYPE>
-    UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
-    operator=(const UnstructuredGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE,
+    UnstructuredSoAGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>&
+    operator=(const UnstructuredSoAGrid<O_ELEMENT_TYPE, MATRICES, VALUE_TYPE,
                                      C, SIGMA> & other)
     {
-        elements = other.elements;
+        elements    = other.elements;
         edgeElement = other.edgeElement;
-        dimension = other.dimension;
+        dimension   = other.dimension;
 
         for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] = other.matrices[i];
@@ -83,8 +165,8 @@ public:
         if (matrixID >= MATRICES) {
             throw std::invalid_argument("matrixID not available");
         }
-        for (ITERATOR i = start; i != end; ++i) {
 
+        for (ITERATOR i = start; i != end; ++i) {
             Coord<2> c = i->first;
             matrices[matrixID].addPoint(c.x(), c.y(), i->second);
         }
@@ -144,35 +226,21 @@ public:
         return dimension;
     }
 
-    inline const ELEMENT_TYPE& operator[](const int y) const
+    inline const ELEMENT_TYPE operator[](const int y) const
     {
         if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
         } else {
-            return elements[y];
+            return get(y);
         }
     }
 
-    inline ELEMENT_TYPE& operator[](const int y)
-    {
-        if (y < 0 || y >= dimension.x()) {
-            return getEdgeElement();
-        } else {
-            return elements[y];
-        }
-    }
-
-    inline ELEMENT_TYPE& operator[](const Coord<DIM>& coord)
+    inline ELEMENT_TYPE operator[](const Coord<DIM>& coord) const
     {
         return (*this)[coord.x()];
     }
 
-    inline const ELEMENT_TYPE& operator[](const Coord<DIM>& coord) const
-    {
-        return (*this)[coord.x()];
-    }
-
-    inline bool operator==(const UnstructuredGrid& other) const
+    inline bool operator==(const UnstructuredSoAGrid& other) const
     {
         if (boundingBox() == CoordBox<DIM>() &&
             other.boundingBox() == CoordBox<DIM>()) {
@@ -214,7 +282,7 @@ public:
         return true;
     }
 
-    inline bool operator!=(const UnstructuredGrid& other) const
+    inline bool operator!=(const UnstructuredSoAGrid& other) const
     {
         return !(*this == other);
     }
@@ -227,7 +295,7 @@ public:
     inline std::string toString() const
     {
         std::ostringstream message;
-        message << "Unstructured Grid <" << DIM << ">(" << dimension.x() << ")\n"
+        message << "Unstructured Grid SoA<" << DIM << ">(" << dimension.x() << ")\n"
                 << "boundingBox: " << boundingBox()  << "\n"
                 << "edgeElement: " << edgeElement;
 
@@ -249,29 +317,22 @@ public:
 
     virtual void set(const Coord<DIM>& coord, const ELEMENT_TYPE& element)
     {
-        (*this)[coord] = element;
+        set(coord.x(), element);
     }
 
-    virtual void set(const Streak<DIM>& streak, const ELEMENT_TYPE *element)
+    virtual void set(const Streak<DIM>& streak, const ELEMENT_TYPE *cells)
     {
-        for (Coord<DIM> cursor = streak.origin; cursor.x() < streak.endX; ++cursor.x()) {
-            (*this)[cursor] = *element;
-            ++element;
-        }
+        elements.set(streak.origin.x(), 0, 0, cells, streak.length());
     }
 
     virtual ELEMENT_TYPE get(const Coord<DIM>& coord) const
     {
-        return (*this)[coord];
+        return get(coord.x());
     }
 
-    virtual void get(const Streak<DIM>& streak, ELEMENT_TYPE *element) const
+    virtual void get(const Streak<DIM>& streak, ELEMENT_TYPE *cells) const
     {
-        Coord<DIM> cursor = streak.origin;
-        for (; cursor.x() < streak.endX; ++cursor.x()) {
-            *element = (*this)[cursor];
-            ++element;
-        }
+        elements.get(streak.origin.x(), 0, 0, cells, streak.length());
     }
 
     inline ELEMENT_TYPE& getEdgeElement()
@@ -303,39 +364,47 @@ protected:
     void saveMemberImplementation(
         char *target, const Selector<ELEMENT_TYPE>& selector, const Region<DIM>& region) const
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                i != region.endStreak(); ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], target, i->length());
-            target += selector.sizeOfExternal() * i->length();
-        }
+        elements.callback(
+            UnstructuredSoAGridHelpers::SaveMember<ELEMENT_TYPE, DIM>(
+                target, selector, region));
     }
 
     void loadMemberImplementation(
         const char *source, const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak(); ++i) {
-            selector.copyMemberIn(source, &(*this)[i->origin], i->length());
-            source += selector.sizeOfExternal() * i->length();
-        }
+        elements.callback(
+            UnstructuredSoAGridHelpers::LoadMember<ELEMENT_TYPE, DIM>(
+                source, selector, region));
     }
 
 private:
-    std::vector<ELEMENT_TYPE> elements;
+    inline ELEMENT_TYPE get(int x) const
+    {
+        assert(x >= 0);
+        return elements.get(x, 0, 0);
+    }
+
+    inline void set(int x, const ELEMENT_TYPE& cell)
+    {
+        assert(x >= 0);
+        elements.set(x, 0, 0, cell);
+    }
+
+    LibFlatArray::soa_grid<ELEMENT_TYPE> elements;
     // TODO wrapper for different types of sell c sigma containers
     SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
 };
 
-template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid)
+template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+inline
+std::ostream& operator<<(std::ostream& os,
+                         const UnstructuredSoAGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid)
 {
-    __os << grid.toString();
-    return __os;
+    os << grid.toString();
+    return os;
 }
 
 }
