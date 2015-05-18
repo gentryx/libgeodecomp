@@ -18,6 +18,214 @@
 
 namespace LibGeoDecomp {
 
+namespace SellHelpers {
+
+struct SortItem
+{
+public:
+    SortItem() :
+        rowLength(0), rowIndex(0)
+    {}
+    SortItem(int length, int index) :
+        rowLength(length), rowIndex(index)
+    {}
+    int rowLength;
+    int rowIndex;
+};
+
+template<int SIGMA>
+class InitFromMatrix
+{
+public:
+    template<typename VALUETYPE, int C>
+    void operator()(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
+                    std::vector<VALUETYPE>& values, std::vector<int>& column,
+                    std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
+                    std::vector<int>& rowLength)
+    {
+        // mapping between rowIndices and real rowIndices, used for SIGMA
+        std::vector<int> rowIndices;
+        // calculate size for arrays
+        const int matrixRows = matrixSize;
+        int numberOfValues = 0;
+        int numberOfChunks = matrixRows / C;
+        int numberOfSigmas = matrixRows / SIGMA;
+
+        // last chunk might be padded to C rows
+        if ((matrixRows % C) != 0) {
+            ++numberOfChunks;
+        }
+        if ((matrixRows % SIGMA) != 0) {
+            ++numberOfSigmas;
+        }
+
+        const int rowsPadded = numberOfChunks * C;
+        // allocate memory
+        chunkOffset.resize(numberOfChunks);
+        chunkLength.resize(numberOfChunks);
+        rowLength.resize(rowsPadded);
+        rowIndices.resize(rowsPadded);
+
+        // get row lengths
+        std::fill(begin(rowLength), end(rowLength), 0);
+        for (const auto& pair: matrix) {
+            ++rowLength[pair.first.x()];
+        }
+
+        // map sorting scope
+        for (int i = 0; i < rowsPadded; ++i) {
+            rowIndices[i] = i;
+        }
+        for (int nSigma = 0; nSigma < numberOfSigmas; ++nSigma) {
+            const int numberOfRows = std::min(SIGMA, rowsPadded - nSigma * SIGMA);
+            std::vector<SortItem> lengths(numberOfRows);
+            for (int i = 0; i < numberOfRows; ++i) {
+                const int row = nSigma * SIGMA + i;
+                lengths[i] = SortItem(rowLength[row], row);
+            }
+            std::stable_sort(begin(lengths), end(lengths),
+                             [] (const SortItem& a, const SortItem& b) -> bool
+                             { return a.rowLength > b.rowLength; });
+            for (int i = 0; i < numberOfRows; ++i) {
+                rowIndices[nSigma * SIGMA + i] = lengths[i].rowIndex;
+            }
+        }
+
+        // save chunk lengths and offsets
+        chunkOffset[0] = 0;
+        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
+                                                    rowLength.begin() + (nChunk + 1) * C);
+            if (nChunk > 0) {
+                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
+            }
+            numberOfValues += chunkLength[nChunk] * C;
+        }
+
+        // save values
+        values.resize(numberOfValues);
+        column.resize(numberOfValues);
+        std::fill(begin(values), end(values), 0);
+        std::fill(begin(column), end(column), 0);
+        int currentRow = 0;
+        int index = 0;
+        for (const auto& pair: matrix) {
+            if (pair.first.x() != currentRow) {
+                currentRow = pair.first.x();
+                index = 0;
+            }
+            const int chunk  = rowIndices[pair.first.x()] / C;
+            const int row    = rowIndices[pair.first.x()] % C;
+            const int start  = chunkOffset[chunk];
+            const int length = chunkLength[chunk];
+            const int idx    = start + row * length + index;
+            values[idx]      = pair.second;
+            column[idx]      = pair.first.y();
+            ++index;
+        }
+
+        // transpose chunks
+        std::vector<VALUETYPE> valCopy(values);
+        std::vector<int> colCopy(column);
+        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+            const int chunkLen = chunkLength[nChunk];
+            const int start    = chunkOffset[nChunk];
+            for (int i = 0; i < C; ++i) {
+                for (int j = 0; j < chunkLen; ++j) {
+                    const int idx0 = start + i * chunkLen + j;
+                    const int idx1 = start + j * C + i;
+                    values[idx1] = valCopy[idx0];
+                    column[idx1] = colCopy[idx0];
+                }
+            }
+        }
+    }
+};
+
+template<>
+class InitFromMatrix<1>
+{
+public:
+    template<typename VALUETYPE, int C>
+    void operator()(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
+                    std::vector<VALUETYPE>& values, std::vector<int>& column,
+                    std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
+                    std::vector<int>& rowLength)
+    {
+        // calculate size for arrays
+        const int matrixRows = matrixSize;
+        int numberOfValues = 0;
+        int numberOfChunks = matrixRows / C;
+
+        // last chunk might be padded to C rows
+        if ((matrixRows % C) != 0) {
+            ++numberOfChunks;
+        }
+
+        const int rowsPadded = numberOfChunks * C;
+        // allocate memory
+        chunkOffset.resize(numberOfChunks);
+        chunkLength.resize(numberOfChunks);
+        rowLength.resize(rowsPadded);
+
+        // get row lengths
+        std::fill(begin(rowLength), end(rowLength), 0);
+        for (const auto& pair: matrix) {
+            ++rowLength[pair.first.x()];
+        }
+
+        // save chunk lengths and offsets
+        chunkOffset[0] = 0;
+        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
+                                                    rowLength.begin() + (nChunk + 1) * C);
+            if (nChunk > 0) {
+                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
+            }
+            numberOfValues += chunkLength[nChunk] * C;
+        }
+
+        // save values
+        values.resize(numberOfValues);
+        column.resize(numberOfValues);
+        std::fill(begin(values), end(values), 0);
+        std::fill(begin(column), end(column), 0);
+        int currentRow = 0;
+        int index = 0;
+        for (const auto& pair: matrix) {
+            if (pair.first.x() != currentRow) {
+                currentRow = pair.first.x();
+                index = 0;
+            }
+            const int chunk  = pair.first.x() / C;
+            const int row    = pair.first.x() % C;
+            const int start  = chunkOffset[chunk];
+            const int length = chunkLength[chunk];
+            const int idx    = start + row * length + index;
+            values[idx]      = pair.second;
+            column[idx]      = pair.first.y();
+            ++index;
+        }
+
+        // transpose chunks
+        std::vector<VALUETYPE> valCopy(values);
+        std::vector<int> colCopy(column);
+        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
+            const int chunkLen = chunkLength[nChunk];
+            const int start    = chunkOffset[nChunk];
+            for (int i = 0; i < C; ++i) {
+                for (int j = 0; j < chunkLen; ++j) {
+                    const int idx0 = start + i * chunkLen + j;
+                    const int idx1 = start + j * C + i;
+                    values[idx1] = valCopy[idx0];
+                    column[idx1] = colCopy[idx0];
+                }
+            }
+        }
+    }
+};
+
+}
 
 //OHNE SORTIEREN! SIGMA =1 TODO
 template<typename VALUETYPE, int C = 1, int SIGMA = 1>
@@ -33,7 +241,8 @@ public:
         chunkOffset((N-1)/C + 2, 0),
         dimension(N)
     {
-        static_assert(C >= 1 && SIGMA == 1, "SIGMA must be '1'; everything else is not implemented yet!");
+        static_assert(C >= 1, "C should be greater or equal to 1!");
+        static_assert(SIGMA >= 1, "SIGMA should be greater or equal to 1!");
     }
 
     // lhs = A   x rhs
@@ -102,80 +311,9 @@ public:
      */
     void initFromMatrix(unsigned matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix)
     {
-        // calculate size for arrays
-        const int matrixRows = matrixSize;
-        int numberOfValues = 0;
-        int numberOfChunks = matrixRows / C;
-        int numberOfSigmas = matrixRows / SIGMA;
-
-        // last chunk might be padded to C rows
-        if ((matrixRows % C) != 0) {
-            ++numberOfChunks;
-        }
-        if ((matrixRows % SIGMA) != 0) {
-            ++numberOfSigmas;
-        }
-
-        const int rowsPadded = numberOfChunks * C;
-        // allocate memory
-        chunkOffset.resize(numberOfChunks);
-        chunkLength.resize(numberOfChunks);
-        rowLength.resize(rowsPadded);
-
-        // get row lengths
-        std::fill(begin(rowLength), end(rowLength), 0);
-        for (const auto& pair: matrix) {
-            ++rowLength[pair.first.x()];
-        }
-
-        // save chunk lengths and offsets
-        chunkOffset[0] = 0;
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            chunkLength[nChunk] = *std::max_element(rowLength.begin() + nChunk * C,
-                                                    rowLength.begin() + (nChunk + 1) * C);
-            if (nChunk > 0) {
-                chunkOffset[nChunk] = chunkOffset[nChunk - 1] + chunkLength[nChunk - 1] * C;
-            }
-            numberOfValues += chunkLength[nChunk] * C;
-        }
-
-        // save values
-        values.resize(numberOfValues);
-        column.resize(numberOfValues);
-        std::fill(begin(values), end(values), 0);
-        std::fill(begin(column), end(column), 0);
-        int currentRow = 0;
-        int index = 0;
-        for (const auto& pair: matrix) {
-            if (pair.first.x() != currentRow) {
-                currentRow = pair.first.x();
-                index = 0;
-            }
-            const int chunk  = pair.first.x() / C;
-            const int row    = pair.first.x() % C;
-            const int start  = chunkOffset[chunk];
-            const int length = chunkLength[chunk];
-            const int idx    = start + row * length + index;
-            values[idx]      = pair.second;
-            column[idx]      = pair.first.y();
-            ++index;
-        }
-
-        // transpose chunks
-        std::vector<VALUETYPE> valCopy(values);
-        std::vector<int> colCopy(column);
-        for (int nChunk = 0; nChunk < numberOfChunks; ++nChunk) {
-            const int chunkLen = chunkLength[nChunk];
-            const int start    = chunkOffset[nChunk];
-            for (int i = 0; i < C; ++i) {
-                for (int j = 0; j < chunkLen; ++j) {
-                    const int idx0 = start + i * chunkLen + j;
-                    const int idx1 = start + j * C + i;
-                    values[idx1] = valCopy[idx0];
-                    column[idx1] = colCopy[idx0];
-                }
-            }
-        }
+        SellHelpers::InitFromMatrix<SIGMA>().
+            template operator()<VALUETYPE, C>(matrixSize, matrix, values, column,
+                                              chunkLength, chunkOffset, rowLength);
     }
 
     /**
@@ -183,6 +321,8 @@ public:
      */
     void addPoint(int const row, int const col, VALUETYPE value)
     {
+        static_assert(SIGMA == 1, "SIGMA must be '1'; everything else is not implemented yet!");
+
         if(row < 0 || col < 0 || (std::size_t)row >= dimension) {
             throw std::invalid_argument("row and colum must be >= 0");
         }
