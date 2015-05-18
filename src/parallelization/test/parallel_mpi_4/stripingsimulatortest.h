@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/typemaps.h>
+#include <libgeodecomp/io/clonableinitializerwrapper.h>
 #include <libgeodecomp/io/memorywriter.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/paralleltestwriter.h>
@@ -34,49 +35,36 @@ public:
 
 class ParallelStripingSimulatorTest : public CxxTest::TestSuite
 {
-private:
+public:
     typedef GridBase<TestCell<2>, 2> GridBaseType;
     typedef TestSteerer<2 > TestSteererType;
 
-    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
-
-    MonolithicSimulator<TestCell<2> > *referenceSim;
-    StripingSimulator<TestCell<2> > *testSim;
-    int rank;
-    int size;
-    int width;
-    int height;
-    int maxSteps;
-    int firstStep;
-    int firstCycle;
-    Initializer<TestCell<2> > *init;
-    MPILayer layer;
-
-public:
     void setUp()
     {
-        rank = layer.rank();
-        size = layer.size();
+        layer.reset(new MPILayer());
+        rank = layer->rank();
+        size = layer->size();
 
         width = 17;
         height = 12;
+        dim = Coord<2>(width, height);
         maxSteps = 50;
         firstStep = 20;
         firstCycle = firstStep * NANO_STEPS;
-        init = new TestInitializer<TestCell<2> >(
-            Coord<2>(width, height), maxSteps, firstStep);
+        init.reset(ClonableInitializerWrapper<TestInitializer<TestCell<2> > >::wrap(
+                       TestInitializer<TestCell<2> >(dim, maxSteps, firstStep)));
 
-        referenceSim = new SerialSimulator<TestCell<2> >(
-            new TestInitializer<TestCell<2> >(
-                Coord<2>(width, height), maxSteps, firstStep));
+        referenceSim.reset(new SerialSimulator<TestCell<2> >(init->clone()));
+
         LoadBalancer *balancer = rank == 0? new NoOpBalancer : 0;
-        testSim = new StripingSimulator<TestCell<2> >(init, balancer);
+        testSim.reset(new StripingSimulator<TestCell<2> >(init, balancer));
     }
 
     void tearDown()
     {
-        delete referenceSim;
-        delete testSim;
+        referenceSim.reset();
+        testSim.reset();
+        layer.reset();
     }
 
     void testGhostHeight()
@@ -118,15 +106,15 @@ public:
     {
         Region<2> regions[4];
         if (rank != 0) {
-            layer.sendRegion(testSim->region, 0);
+            layer->sendRegion(testSim->region, 0);
         }
         else {
             regions[0] = testSim->region;
             for (int i = 1; i < 4; ++i) {
-                layer.recvRegion(&regions[i], i);
+                layer->recvRegion(&regions[i], i);
             }
         }
-        layer.waitAll();
+        layer->waitAll();
 
         if (rank == 0) {
             Region<2> whole;
@@ -332,8 +320,7 @@ public:
     {
         LoadBalancer *balancer = rank? 0 : new RandomBalancer;
         StripingSimulator<TestCell<2> > localTestSim(
-            new TestInitializer<TestCell<2> >(
-                Coord<2>(width, height), maxSteps, firstStep),
+            new TestInitializer<TestCell<2> >(dim, maxSteps, firstStep),
             balancer,
             balanceEveryN);
 
@@ -461,6 +448,20 @@ public:
     }
 
 private:
+    static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
+    boost::shared_ptr<MPILayer> layer;
+    boost::shared_ptr<MonolithicSimulator<TestCell<2> > > referenceSim;
+    boost::shared_ptr<StripingSimulator<TestCell<2> > > testSim;
+    boost::shared_ptr<ClonableInitializer<TestCell<2> > > init;
+    int rank;
+    int size;
+    int width;
+    int height;
+    Coord<2> dim;
+    int maxSteps;
+    int firstStep;
+    int firstCycle;
+
 
     // just a boring partition: everything on _one_ node
     NoOpBalancer::WeightVec toMonoPartitions(NoOpBalancer::WeightVec weights1)

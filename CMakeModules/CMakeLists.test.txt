@@ -134,7 +134,6 @@ int run_tests(int argc, char **argv);
 int main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
-    LibGeoDecomp::Typemaps::initializeMaps();
     int res = run_tests(argc, argv);
     MPI_Finalize();
     return res;

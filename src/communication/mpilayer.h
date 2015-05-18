@@ -52,7 +52,9 @@ public:
     explicit MPILayer(MPI_Comm communicator = MPI_COMM_WORLD, int tag = 0) :
         comm(communicator),
         tag(tag)
-    {}
+    {
+        Typemaps::initializeMapsIfUninitialized();
+    }
 
     explicit MPILayer(const MPILayer& other)
     {
