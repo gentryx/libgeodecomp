@@ -41,6 +41,12 @@ public:
         gridDim(initializer->gridDimensions())
     {}
 
+    inline explicit Simulator(const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer) :
+        stepNum(0),
+        initializer(initializer),
+        gridDim(initializer->gridDimensions())
+    {}
+
     inline virtual ~Simulator()
     {}
 

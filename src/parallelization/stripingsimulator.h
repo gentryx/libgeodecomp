@@ -56,33 +56,31 @@ public:
         const unsigned& loadBalancingPeriod = 1):
         DistributedSimulator<CELL_TYPE>(initializer),
         balancer(balancer),
+        partitions(partition(initializer->gridDimensions()[DIM - 1], MPILayer().size())),
         loadBalancingPeriod(loadBalancingPeriod)
     {
-        if (loadBalancingPeriod  < 1) {
-            throw std::invalid_argument(
-                "loadBalancingPeriod ( " + StringOps::itoa(loadBalancingPeriod) +
-                ") must be positive");
-        }
+        validateConstructorParams();
 
-        // node 0 needs a (central) LoadBalancer...
-        if (mpilayer.rank() == 0 && balancer == 0) {
-            throw std::invalid_argument(
-                "Rank " + StringOps::itoa(mpilayer.rank()) +
-                "(Root) needs a non-empty LoadBalancer");
-        }
-        // ...while the others shouldn't have one (they rely on the central one).
-        if (mpilayer.rank() != 0 && balancer != 0) {
-            throw std::invalid_argument(
-                "Rank " + StringOps::itoa(mpilayer.rank()) +
-                "(Non-Root) needs an empty LoadBalancer");
-        }
-
-        int height = gridDimensions()[DIM - 1];
-        partitions = partition(height, mpilayer.size());
         CoordBox<DIM> box = adaptDimensions(partitions);
         curStripe = new GridType(box);
         newStripe = new GridType(box);
+        initSimulation();
+    }
 
+    explicit StripingSimulator(
+        const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer,
+        LoadBalancer *balancer = 0,
+        const unsigned& loadBalancingPeriod = 1):
+        DistributedSimulator<CELL_TYPE>(initializer),
+        balancer(balancer),
+        partitions(partition(initializer->gridDimensions()[DIM - 1], MPILayer().size())),
+        loadBalancingPeriod(loadBalancingPeriod)
+    {
+        validateConstructorParams();
+
+        CoordBox<DIM> box = adaptDimensions(partitions);
+        curStripe = new GridType(box);
+        newStripe = new GridType(box);
         initSimulation();
     }
 
@@ -174,7 +172,7 @@ private:
      * "partition()[i]" is the first row for which node i is
      * responsible, "partition()[i + 1] - 1" is the last one.
      */
-    WeightVec partition(unsigned gridHeight, unsigned size) const
+    static WeightVec partition(unsigned gridHeight, unsigned size)
     {
         WeightVec ret(size + 1);
         for (unsigned i = 0; i < size; i++) {
@@ -614,6 +612,28 @@ private:
     inline Coord<DIM> gridDimensions() const
     {
         return initializer->gridDimensions();
+    }
+
+    void validateConstructorParams()
+    {
+        if (loadBalancingPeriod  < 1) {
+            throw std::invalid_argument(
+                "loadBalancingPeriod ( " + StringOps::itoa(loadBalancingPeriod) +
+                ") must be positive");
+        }
+
+        // node 0 needs a (central) LoadBalancer...
+        if (mpilayer.rank() == 0 && balancer == 0) {
+            throw std::invalid_argument(
+                "Rank " + StringOps::itoa(mpilayer.rank()) +
+                "(Root) needs a non-empty LoadBalancer");
+        }
+        // ...while the others shouldn't have one (they rely on the central one).
+        if (mpilayer.rank() != 0 && balancer != 0) {
+            throw std::invalid_argument(
+                "Rank " + StringOps::itoa(mpilayer.rank()) +
+                "(Non-Root) needs an empty LoadBalancer");
+        }
     }
 };
 
