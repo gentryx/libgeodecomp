@@ -140,7 +140,7 @@ public:
         }
     }
 
-    template<typename GRID1, typename GRID2, typename ANY_API, typename ANY_TOPOLOGY>
+    template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -155,7 +155,7 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        ANY_TOPOLOGY)
+        TopologiesHelpers::Topology<DIM, false, false, false>)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
@@ -164,7 +164,6 @@ public:
         }
     }
 
-#ifdef LIBGEODECOMP_WITH_CPP14
     template<typename GRID1, typename GRID2, typename ANY_API>
     void operator()(
         const Region<DIM>& region,
@@ -177,6 +176,31 @@ public:
         APITraits::FalseType,
         // SelectSoA
         APITraits::FalseType,
+        // SelectUpdateLineX
+        ANY_API,
+        // SelectTopology
+        TopologiesHelpers::Topology<DIM, true, true, true>)
+    {
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
+            Coord<DIM> targetOrigin = i->origin + targetOffset;
+            VanillaUpdateFunctor<CELL>()(sourceStreak, targetOrigin, gridOld, gridNew, nanoStep);
+        }
+    }
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    template<typename GRID1, typename GRID2, typename ANY_API, typename ANY_GRID_TYPE>
+    void operator()(
+        const Region<DIM>& region,
+        const Coord<DIM>& sourceOffset,
+        const Coord<DIM>& targetOffset,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
+        unsigned nanoStep,
+        // SelectFixedCoordsOnlyUpdate
+        APITraits::FalseType,
+        // SelectSoA
+        ANY_GRID_TYPE,
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology

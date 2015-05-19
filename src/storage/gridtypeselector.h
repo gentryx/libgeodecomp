@@ -1,9 +1,12 @@
 #ifndef LIBGEODECOMP_STORAGE_GRIDTYPESELECTOR_H
 #define LIBGEODECOMP_STORAGE_GRIDTYPESELECTOR_H
 
+#include <libgeodecomp/config.h>
+
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/soagrid.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/apitraits.h>
 
@@ -37,6 +40,7 @@ public:
     typedef SoAGrid<CELL_TYPE, TOPOLOGY, TOPOLOGICALLY_CORRECT> Value;
 };
 
+#ifdef LIBGEODECOMP_WITH_CPP14
 /**
  * see above.
  */
@@ -66,8 +70,9 @@ private:
     static const int C = APITraits::SelectSellC<CELL_TYPE>::VALUE;
     static const int SIGMA = APITraits::SelectSellSigma<CELL_TYPE>::VALUE;
 public:
-    typedef UnstructuredGridSoA<CELL_TYPE, MATRICES, ValueType, C, SIGMA> Value;
+    typedef UnstructuredSoAGrid<CELL_TYPE, MATRICES, ValueType, C, SIGMA> Value;
 };
+#endif
 
 }
 
