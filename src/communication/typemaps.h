@@ -67,7 +67,7 @@ public:
     /**
      * Avoids duplicate initialization
      */
-    static inline bool initializeMapsIfUninitialized()
+    static inline void initializeMapsIfUninitialized()
     {
         if (!initialized()) {
             initializeMaps();
