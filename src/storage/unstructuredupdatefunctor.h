@@ -6,6 +6,7 @@
 
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
+#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 
 namespace LibGeoDecomp {
 
@@ -25,7 +26,7 @@ private:
     static const int DIM = Topology::DIM;
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    void updateWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::FalseType)
+    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::FalseType)
     {
         for (int i = hoodOld.index(); i < endX; ++i, ++hoodOld) {
             hoodNew[i].update(hoodOld, nanoStep);
@@ -33,9 +34,40 @@ private:
     }
 
     template<typename HOOD_NEW, typename HOOD_OLD>
-    void updateWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::TrueType)
+    void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::TrueType)
     {
         CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
+    }
+
+    template<typename GRID1, typename GRID2>
+    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld,
+                    GRID2 *gridNew, unsigned nanoStep, APITraits::FalseType)
+    {
+        typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
+
+        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodOld(gridOld, streak.origin.x());
+        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodNew(*gridNew);
+
+        // switch between updateLineX() and update()
+        apiWrapper(hoodNew, streak.endX, hoodOld, nanoStep, UpdateLineXFlag());
+    }
+
+    template<typename GRID1, typename GRID2>
+    void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld,
+                    GRID2 *gridNew, unsigned nanoStep, APITraits::TrueType)
+    {
+        typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
+        static const int SELLC = APITraits::SelectSellC<CELL>::VALUE;
+
+        UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodOld(gridOld, streak.origin.x());
+        UnstructuredSoANeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodNew(*gridNew);
+
+        // switch between updateLineX() and update()
+        apiWrapper(hoodNew, streak.endX / SELLC, hoodOld, nanoStep, UpdateLineXFlag());
     }
 
 public:
@@ -46,15 +78,10 @@ public:
         GRID2 *gridNew,
         unsigned nanoStep)
     {
-        typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
+        typedef typename APITraits::SelectSoA<CELL>::Value SoAFlag;
 
-        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodOld(gridOld, streak.origin.x());
-        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodNew(*gridNew);
-
-        // switch between updateLineX() and update()
-        updateWrapper(hoodNew, streak.endX, hoodOld, nanoStep, UpdateLineXFlag());
+        // switch between SoA and non-SoA code
+        soaWrapper(streak, gridOld, gridNew, nanoStep, SoAFlag());
     }
 };
 

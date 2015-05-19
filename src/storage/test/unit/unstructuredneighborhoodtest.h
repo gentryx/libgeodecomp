@@ -94,19 +94,19 @@ public:
         TS_ASSERT_EQUALS(1, std::distance(weights3.begin(), weights3.end()));
 
         // check cells and weights
-        auto it0 = weights0.begin();
-        auto it1 = weights1.begin();
-        auto it2 = weights2.begin();
-        auto it3 = weights3.begin();
-        TS_ASSERT_EQUALS(it0->first, 0);
-        TS_ASSERT_EQUALS(it1->first, 1);
-        TS_ASSERT_EQUALS(it2->first, 2);
-        TS_ASSERT_EQUALS(it3->first, 3);
+        auto it0 = *weights0.begin();
+        auto it1 = *weights1.begin();
+        auto it2 = *weights2.begin();
+        auto it3 = *weights3.begin();
+        TS_ASSERT_EQUALS(it0.first, 0);
+        TS_ASSERT_EQUALS(it1.first, 1);
+        TS_ASSERT_EQUALS(it2.first, 2);
+        TS_ASSERT_EQUALS(it3.first, 3);
 
-        TS_ASSERT_EQUALS(it0->second, 1);
-        TS_ASSERT_EQUALS(it1->second, 2);
-        TS_ASSERT_EQUALS(it2->second, 3);
-        TS_ASSERT_EQUALS(it3->second, 4);
+        TS_ASSERT_EQUALS(it0.second, 1);
+        TS_ASSERT_EQUALS(it1.second, 2);
+        TS_ASSERT_EQUALS(it2.second, 3);
+        TS_ASSERT_EQUALS(it3.second, 4);
 #endif
     }
 

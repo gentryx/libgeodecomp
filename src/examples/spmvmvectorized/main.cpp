@@ -11,28 +11,44 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
-#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+
+#include <libflatarray/api_traits.hpp>
+#include <libflatarray/macros.hpp>
+#include <libflatarray/short_vec.hpp>
 
 using namespace LibGeoDecomp;
+using namespace LibFlatArray;
 
 // defining settings for SELL-C-q
 typedef double ValueType;
 static const std::size_t MATRICES = 1;
 static const int C = 4;
 static const int SIGMA = 1;
+typedef short_vec<ValueType, C> ShortVec;
 
 class Cell
 {
 public:
     class API :
         public APITraits::HasUpdateLineX,
+        public APITraits::HasSoA,
         public APITraits::HasUnstructuredTopology,
         public APITraits::HasPredefinedMPIDataType<double>,
         public APITraits::HasSellType<ValueType>,
         public APITraits::HasSellMatrices<MATRICES>,
         public APITraits::HasSellC<C>,
         public APITraits::HasSellSigma<SIGMA>
-    {};
+    {
+    public:
+        // uniform sizes lead to std::bad_alloc,
+        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
+        // as dimension (DIM = 1)
+        LIBFLATARRAY_CUSTOM_SIZES(
+            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192),
+            (1),
+            (1))
+    };
 
     inline explicit Cell(double v = 0) :
         value(v), sum(0)
@@ -42,19 +58,15 @@ public:
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
-            hoodNew[i].sum = 0.;
+            ShortVec tmp;
+            tmp.load_aligned(hoodNew.sumPtr + i * C);
             for (const auto& j: hoodOld.weights(0)) {
-                hoodNew[i].sum += hoodOld[j.first].value * j.second;
+                ShortVec weights, values;
+                weights.load_aligned(j.second);
+                values.gather(hoodOld.valuePtr, j.first);
+                tmp += values * weights;
             }
-        }
-    }
-
-    template<typename NEIGHBORHOOD>
-    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
-    {
-        sum = 0.;
-        for (const auto& j: neighborhood.weights(0)) {
-            sum += neighborhood[j.first].value * j.second;
+            tmp.store_aligned(hoodNew.sumPtr + i * C);
         }
     }
 
@@ -62,10 +74,12 @@ public:
     double sum;
 };
 
+LIBFLATARRAY_REGISTER_SOA(Cell, ((double)(sum))((double)(value)))
+
 class CellInitializerDiagonal : public SimpleInitializer<Cell>
 {
 public:
-    typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
+    typedef UnstructuredSoAGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
 
     inline explicit
     CellInitializerDiagonal(unsigned steps)
@@ -84,14 +98,15 @@ public:
             adjacency[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
         }
 
-        grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+        // grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+        grid->setCompleteAdjacency(0, 100, adjacency);
     }
 };
 
 class CellInitializerMatrix : public SimpleInitializer<Cell>
 {
 private:
-    typedef UnstructuredGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
+    typedef UnstructuredSoAGrid<Cell, MATRICES, ValueType, C, SIGMA> Grid;
     std::size_t size;           // size of matrix and rhs vector
     std::string rhsFile;        // matrix file name
     std::string matrixFile;     // rhs vector file name
@@ -151,7 +166,8 @@ public:
         rhsIfs.close();
         matrixIfs.close();
 
-        grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+        // grid->setAdjacency(0, adjacency.begin(), adjacency.end());
+        grid->setCompleteAdjacency(0, size, adjacency);
     }
 };
 
