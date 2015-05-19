@@ -29,7 +29,7 @@ class CoordMap;
 namespace GridHelpers {
 
 /**
- * Helper for setting a cuboid domain within a grid.
+ * Helper for setting a cuboid domain within a grid
  */
 template<int DIM>
 class FillCoordBox;

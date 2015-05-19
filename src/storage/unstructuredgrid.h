@@ -22,7 +22,7 @@
 namespace LibGeoDecomp {
 
 /**
- * A unstructuredgrid for irregular structures.
+ * A grid type for irregular structures
  */
 template<typename ELEMENT_TYPE, std::size_t MATRICES=1,
          typename VALUE_TYPE=double, int C=64, int SIGMA=1>
