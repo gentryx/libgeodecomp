@@ -19,9 +19,9 @@ endif()
 get_directory_property(lgd_has_parent PARENT_DIRECTORY)
 
 #============= 1. FIND PACKAGES WE DEPEND ON =========================
-find_package(HPX)
-
 if(NOT HPX_FOUND)
+  find_package(HPX)
+
   if(NOT DEFINED BOOST_ROOT)
     # deduce Boost location from environment (e.g. on woody.rrze.uni-erlangen.de)
     set(BOOST_ENV_LIBDIR "$ENV{BOOST_LIBDIR}")
