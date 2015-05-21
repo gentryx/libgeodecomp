@@ -35,12 +35,12 @@ std::vector<FloatCoord<2> > convexHull(std::vector<FloatCoord<2> > *points)
     std::vector<FloatCoord<2> > points_sorted = *points;
     std::vector<FloatCoord<2> > hull(2*points_sorted.size());
     int leftMostID=0;
-    
+
     std::sort(points_sorted.begin(), points_sorted.end(), floatCoordCompare);
 
     int n = points_sorted.size();
 
-    for (int i=0; i<n; i++){        
+    for (int i=0; i<n; i++){
         while (k >= 2 && cross(hull[k-2], hull[k-1], points_sorted[i]) <= 0) k--;
         hull[k++] = points_sorted[i];
     }
@@ -54,4 +54,3 @@ std::vector<FloatCoord<2> > convexHull(std::vector<FloatCoord<2> > *points)
 
     return hull;
 }
-    
