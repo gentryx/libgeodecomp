@@ -29,7 +29,16 @@ public:
     static void updateLineX(HOOD_OLD& hoodOld, long indexEnd,
                             HOOD_NEW& hoodNew, long /* nanoStep */)
     {
-        std::cout << "foobar " << hoodOld.index << " -> " << indexEnd << "\n";
+        for (; hoodOld.index() < indexEnd; hoodOld += 1, hoodNew += 1) {
+            double akku =
+                hoodOld[FixedCoord< 0,  0, -1>()].valA() +
+                hoodOld[FixedCoord< 0, -1,  0>()].valA() +
+                hoodOld[FixedCoord<-1,  0,  0>()].valA() +
+                hoodOld[FixedCoord< 1,  0,  0>()].valA() +
+                hoodOld[FixedCoord< 0,  1,  0>()].valA() +
+                hoodOld[FixedCoord< 0,  0,  1>()].valA();
+            hoodNew.valB() = akku;
+        }
     }
 
     double valA;
@@ -51,7 +60,7 @@ public:
     void testBasic()
     {
         CoordBox<3> box(Coord<3>(10, 20, 30), Coord<3>(200, 100, 50));
-        std::cout << "BOOOOOOOOOOOOOOOOOOOOOOOOOMER\n";
+
         MySoATestCell defaultCell(666, 777);
         MySoATestCell edgeCell(-1, -1);
         SoAGrid<MySoATestCell, Topologies::Torus<3>::Topology> gridOld(box, defaultCell, edgeCell);
@@ -61,23 +70,48 @@ public:
             gridOld.set(*i, MySoATestCell(i->x() + i->y() * 1000.0 + i->z() * 1000 * 1000.0));
         }
 
-        std::cout << "BOOOOOOOOOOOOOOOOOOOOOOOOOMER\n";
-
         Region<3> region;
-        region << Streak<3>(Coord<3>(10,  20, 30), 210)
-               << Streak<3>(Coord<3>(10,  30, 30), 210)
-               << Streak<3>(Coord<3>(10,  30, 50), 210)
-               << Streak<3>(Coord<3>(25,  31, 50), 200)
-               << Streak<3>(Coord<3>(25, 119, 50), 200)
-               << Streak<3>(Coord<3>(10,  30, 79), 210);
+        region
+            << Streak<3>(Coord<3>(10,  20, 30), 209)
+            << Streak<3>(Coord<3>(10,  21, 30), 210)
+            << Streak<3>(Coord<3>(10,  30, 30), 210)
+            << Streak<3>(Coord<3>(10,  30, 40), 210)
+            << Streak<3>(Coord<3>(25,  31, 40), 200)
+            << Streak<3>(Coord<3>(25, 119, 40), 200)
+            << Streak<3>(Coord<3>(10,  30, 49), 210);
 
-        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCell>(&region, gridOld.boundingBox(), 0));
+        CoordBox<3> boxNew = gridNew.boundingBox();
+        CoordBox<3> boxOld = gridOld.boundingBox();
+        Coord<3> offsetOld = -boxOld.origin;
+        Coord<3> offsetNew = -boxNew.origin;
+        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCell>(
+                             &region, &offsetOld, &offsetNew, &boxNew.dimensions, 0));
 
-        std::cout << "BOOOOOOOOOOOOOOOOOOOOOOOOOMER\n";
+        for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
+            MySoATestCell cell = gridNew.get(*i);
+
+            Coord<3> sum;
+            sum += normalize(*i + Coord<3>( 0,  0, -1), box);
+            sum += normalize(*i + Coord<3>( 0, -1,  0), box);
+            sum += normalize(*i + Coord<3>(-1,  0,  0), box);
+            sum += normalize(*i + Coord<3>( 1,  0,  0), box);
+            sum += normalize(*i + Coord<3>( 0,  1,  0), box);
+            sum += normalize(*i + Coord<3>( 0,  0,  1), box);
+
+            double expected = sum.x() + sum.y() * 1000.0 + sum.z() * 1000 * 1000.0;
+            double delta = cell.valB - expected;
+            TS_ASSERT_EQUALS(cell.valB, expected);
+        }
     }
 
     // fixme: test with cube topo
     // fixme: test with torus topo and displacements (as the z-curve would imply them with pars of the region sitting on opposite edges of the simulation space)
+
+private:
+    Coord<3> normalize(const Coord<3>& coord, const CoordBox<3>& box)
+    {
+        return box.origin + Topologies::Torus<3>::Topology::normalize(coord - box.origin, box.dimensions);
+    }
 };
 
 }

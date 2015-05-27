@@ -19,15 +19,6 @@ template<
     long DIM_Y,
     long DIM_Z,
     long INDEX,
-    // X axis
-    long OFFSET_WEST = -1,
-    long OFFSET_EAST = 1,
-    // Y axis
-    long OFFSET_TOP = -1,
-    long OFFSET_BOTTOM = 1,
-    // Z axis
-    long OFFSET_SOUTH = -1,
-    long OFFSET_NORTH = 1,
     template<
         typename CELL2,
         long DIM_X2,
@@ -49,21 +40,46 @@ public:
     typedef CELL Cell;
 
     __host__ __device__
-    explicit FixedNeighborhood(SoAAccessorIn& accessor) :
-        accessor(accessor)
+    explicit FixedNeighborhood(
+        SoAAccessorIn& accessor,
+        long& tempIndex,
+        // X axis
+        const long& offsetWest = 0,
+        const long& offsetEast = 0,
+        // Y axis
+        const long& offsetTop = 0,
+        const long& offsetBottom = 0,
+        // Z axis
+        const long& offsetSouth = 0,
+        const long& offsetNorth = 0) :
+        accessor(accessor),
+        tempIndex(tempIndex),
+        offsetWest(offsetWest),
+        offsetEast(offsetEast),
+        offsetTop(offsetTop),
+        offsetBottom(offsetBottom),
+        offsetSouth(offsetSouth),
+        offsetNorth(offsetNorth)
     {}
 
     template<int X, int Y, int Z>
     __host__ __device__
-    const SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS> operator[](FixedCoord<X, Y, Z>) const
+    const SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)>
+    operator[](FixedCoord<X, Y, Z>) const
     {
-        return accessor[LibFlatArray::coord<
-                        ((X < 0) ? (OFFSET_WEST   + X + 1) : 0) +
-                        ((X > 0) ? (OFFSET_EAST   + X - 1) : 0),
-                        ((Y < 0) ? (OFFSET_TOP    + Y + 1) : 0) +
-                        ((Y > 0) ? (OFFSET_BOTTOM + Y - 1) : 0),
-                        ((Z < 0) ? (OFFSET_SOUTH  + Z + 1) : 0) +
-                        ((Z > 0) ? (OFFSET_NORTH  + Z - 1) : 0)>()];
+        typedef SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)> ACCESSOR;
+        ACCESSOR tempAccessor = accessor[LibFlatArray::coord<X, Y, Z>()];
+        //fixme: use gen_index from ACCESSOR?
+        tempIndex =
+            *tempAccessor.get_index() +
+            (((X < 0) ? offsetWest                   : 0) +
+             ((X > 0) ? offsetEast                   : 0)) +
+            (((Y < 0) ? offsetTop    * DIM_X         : 0) +
+             ((Y > 0) ? offsetBottom * DIM_X         : 0)) +
+            (((Z < 0) ? offsetSouth  * DIM_X * DIM_Y : 0) +
+             ((Z > 0) ? offsetNorth  * DIM_X * DIM_Y : 0));
+
+        return ACCESSOR(tempAccessor.get_data(), tempIndex);
     }
 
     void operator>>(CELL& cell) const
@@ -85,8 +101,22 @@ public:
         return accessor.index;
     }
 
+    __host__ __device__
+    inline
+    void operator+=(const long offset)
+    {
+        accessor += offset;
+    }
+
 private:
     SoAAccessorIn& accessor;
+    long& tempIndex;
+    const long& offsetWest;
+    const long& offsetEast;
+    const long& offsetTop;
+    const long& offsetBottom;
+    const long& offsetSouth;
+    const long& offsetNorth;
 };
 
 }
