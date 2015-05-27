@@ -12,7 +12,14 @@
 
 #include <immintrin.h>
 #include <libflatarray/detail/sqrt_reference.hpp>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
 
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
+#ifndef __AVX512F__
 #ifndef __CUDA_ARCH__
 
 namespace LibFlatArray {
@@ -48,12 +55,10 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1(_mm256_loadu_pd(data + 0)),
-        val2(_mm256_loadu_pd(data + 4)),
-        val3(_mm256_loadu_pd(data + 8)),
-        val4(_mm256_loadu_pd(data + 12))
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m256d& val1, const __m256d& val2, const __m256d& val3, const __m256d& val4) :
@@ -62,6 +67,15 @@ public:
         val3(val3),
         val4(val4)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        const double *ptr = static_cast<const double *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 16>& other)
@@ -150,12 +164,127 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = _mm256_loadu_pd(data +  0);
+        val2 = _mm256_loadu_pd(data +  4);
+        val3 = _mm256_loadu_pd(data +  8);
+        val4 = _mm256_loadu_pd(data + 12);
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        val1 = _mm256_load_pd(data +  0);
+        val2 = _mm256_load_pd(data +  4);
+        val3 = _mm256_load_pd(data +  8);
+        val4 = _mm256_load_pd(data + 12);
+    }
+
+    inline
     void store(double *data) const
     {
         _mm256_storeu_pd(data +  0, val1);
         _mm256_storeu_pd(data +  4, val2);
         _mm256_storeu_pd(data +  8, val3);
         _mm256_storeu_pd(data + 12, val4);
+    }
+
+    inline
+    void store_aligned(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_store_pd(data +  0, val1);
+        _mm256_store_pd(data +  4, val2);
+        _mm256_store_pd(data +  8, val3);
+        _mm256_store_pd(data + 12, val4);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        _mm256_stream_pd(data +  0, val1);
+        _mm256_stream_pd(data +  4, val2);
+        _mm256_stream_pd(data +  8, val3);
+        _mm256_stream_pd(data + 12, val4);
+    }
+
+#ifdef __AVX2__
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        __m128i indices;
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets));
+        val1    = _mm256_i32gather_pd(ptr, indices, 8);
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets + 4));
+        val2    = _mm256_i32gather_pd(ptr, indices, 8);
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets + 8));
+        val3    = _mm256_i32gather_pd(ptr, indices, 8);
+        indices = _mm_loadu_si128(reinterpret_cast<const __m128i *>(offsets + 12));
+        val4    = _mm256_i32gather_pd(ptr, indices, 8);
+    }
+#else
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        __m128d tmp;
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[0]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[1]);
+        val1 = _mm256_insertf128_pd(val1, tmp, 0);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[2]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[3]);
+        val1 = _mm256_insertf128_pd(val1, tmp, 1);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[4]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[5]);
+        val2 = _mm256_insertf128_pd(val2, tmp, 0);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[6]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[7]);
+        val2 = _mm256_insertf128_pd(val2, tmp, 1);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[8]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[9]);
+        val3 = _mm256_insertf128_pd(val3, tmp, 0);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[10]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[11]);
+        val3 = _mm256_insertf128_pd(val3, tmp, 1);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[12]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[13]);
+        val4 = _mm256_insertf128_pd(val4, tmp, 0);
+        tmp  = _mm_loadl_pd(tmp, ptr + offsets[14]);
+        tmp  = _mm_loadh_pd(tmp, ptr + offsets[15]);
+        val4 = _mm256_insertf128_pd(val4, tmp, 1);
+    }
+#endif
+
+    inline
+    void scatter(double *ptr, const unsigned *offsets) const
+    {
+        __m128d tmp;
+        tmp = _mm256_extractf128_pd(val1, 0);
+        _mm_storel_pd(ptr + offsets[0], tmp);
+        _mm_storeh_pd(ptr + offsets[1], tmp);
+        tmp = _mm256_extractf128_pd(val1, 1);
+        _mm_storel_pd(ptr + offsets[2], tmp);
+        _mm_storeh_pd(ptr + offsets[3], tmp);
+        tmp = _mm256_extractf128_pd(val2, 0);
+        _mm_storel_pd(ptr + offsets[4], tmp);
+        _mm_storeh_pd(ptr + offsets[5], tmp);
+        tmp = _mm256_extractf128_pd(val2, 1);
+        _mm_storel_pd(ptr + offsets[6], tmp);
+        _mm_storeh_pd(ptr + offsets[7], tmp);
+        tmp = _mm256_extractf128_pd(val3, 0);
+        _mm_storel_pd(ptr + offsets[8], tmp);
+        _mm_storeh_pd(ptr + offsets[9], tmp);
+        tmp = _mm256_extractf128_pd(val3, 1);
+        _mm_storel_pd(ptr + offsets[10], tmp);
+        _mm_storeh_pd(ptr + offsets[11], tmp);
+        tmp = _mm256_extractf128_pd(val4, 0);
+        _mm_storel_pd(ptr + offsets[12], tmp);
+        _mm_storeh_pd(ptr + offsets[13], tmp);
+        tmp = _mm256_extractf128_pd(val4, 1);
+        _mm_storel_pd(ptr + offsets[14], tmp);
+        _mm_storeh_pd(ptr + offsets[15], tmp);
     }
 
 private:
@@ -201,6 +330,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif
 #endif
 

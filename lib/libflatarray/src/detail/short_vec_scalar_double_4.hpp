@@ -11,6 +11,12 @@
 #ifndef __SSE__
 #ifndef __AVX__
 
+#include <libflatarray/config.h>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
 namespace LibFlatArray {
 
 template<typename CARGO, int ARITY>
@@ -44,12 +50,10 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1( *(data +  0)),
-        val2( *(data +  1)),
-        val3( *(data +  2)),
-        val4( *(data +  3))
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(
@@ -62,6 +66,15 @@ public:
         val3( val3),
         val4( val4)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        const double *ptr = static_cast<const double *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 4>& other)
@@ -150,12 +163,57 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = data[0];
+        val2 = data[1];
+        val3 = data[2];
+        val4 = data[3];
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        load(data);
+    }
+
+    inline
     void store(double *data) const
     {
         *(data +  0) = val1;
         *(data +  1) = val2;
         *(data +  2) = val3;
         *(data +  3) = val4;
+    }
+
+    inline
+    void store_aligned(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        val1 = ptr[offsets[0]];
+        val2 = ptr[offsets[1]];
+        val3 = ptr[offsets[2]];
+        val4 = ptr[offsets[3]];
+    }
+
+    inline
+    void scatter(double *ptr, const unsigned *offsets) const
+    {
+        ptr[offsets[0]] = val1;
+        ptr[offsets[1]] = val2;
+        ptr[offsets[2]] = val3;
+        ptr[offsets[3]] = val4;
     }
 
 private:

@@ -12,7 +12,18 @@
 
 #include <emmintrin.h>
 #include <libflatarray/detail/sqrt_reference.hpp>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
 
+#ifdef __SSE4_1__
+#include <smmintrin.h>
+#endif
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
+#ifndef __AVX512F__
 #ifndef __AVX__
 #ifndef __CUDA_ARCH__
 
@@ -52,12 +63,10 @@ public:
     {}
 
     inline
-    short_vec(const float *data) :
-        val1(_mm_loadu_ps(data +  0)),
-        val2(_mm_loadu_ps(data +  4)),
-        val3(_mm_loadu_ps(data +  8)),
-        val4(_mm_loadu_ps(data + 12))
-    {}
+    short_vec(const float *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m128& val1, const __m128& val2, const __m128& val3, const __m128& val4) :
@@ -67,8 +76,17 @@ public:
         val4(val4)
     {}
 
+#ifdef LIBFLATARRAY_WITH_CPP14
     inline
-    short_vec(const sqrt_reference<float, 16> other);
+    short_vec(const std::initializer_list<float>& il)
+    {
+        const float *ptr = static_cast<const float *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
+
+    inline
+    short_vec(const sqrt_reference<float, 16>& other);
 
     inline
     void operator-=(const short_vec<float, 16>& other)
@@ -163,6 +181,25 @@ public:
     }
 
     inline
+    void load(const float *data)
+    {
+        val1 = _mm_loadu_ps(data +  0);
+        val2 = _mm_loadu_ps(data +  4);
+        val3 = _mm_loadu_ps(data +  8);
+        val4 = _mm_loadu_ps(data + 12);
+    }
+
+    inline
+    void load_aligned(const float *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        val1 = _mm_load_ps(data +  0);
+        val2 = _mm_load_ps(data +  4);
+        val3 = _mm_load_ps(data +  8);
+        val4 = _mm_load_ps(data + 12);
+    }
+
+    inline
     void store(float *data) const
     {
         _mm_storeu_ps(data +  0, val1);
@@ -170,6 +207,158 @@ public:
         _mm_storeu_ps(data +  8, val3);
         _mm_storeu_ps(data + 12, val4);
     }
+
+    inline
+    void store_aligned(float *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        _mm_store_ps(data +  0, val1);
+        _mm_store_ps(data +  4, val2);
+        _mm_store_ps(data +  8, val3);
+        _mm_store_ps(data + 12, val4);
+    }
+
+    inline
+    void store_nt(float *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        _mm_stream_ps(data +  0, val1);
+        _mm_stream_ps(data +  4, val2);
+        _mm_stream_ps(data +  8, val3);
+        _mm_stream_ps(data + 12, val4);
+    }
+
+#ifdef __SSE4_1__
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        val1 = _mm_load_ss(ptr + offsets[0]);
+        SHORTVEC_INSERT_PS(val1, ptr, offsets[ 1], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS(val1, ptr, offsets[ 2], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS(val1, ptr, offsets[ 3], _MM_MK_INSERTPS_NDX(0,3,0));
+        val2 = _mm_load_ss(ptr + offsets[4]);
+        SHORTVEC_INSERT_PS(val2, ptr, offsets[ 5], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS(val2, ptr, offsets[ 6], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS(val2, ptr, offsets[ 7], _MM_MK_INSERTPS_NDX(0,3,0));
+        val3 = _mm_load_ss(ptr + offsets[8]);
+        SHORTVEC_INSERT_PS(val3, ptr, offsets[ 9], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS(val3, ptr, offsets[10], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS(val3, ptr, offsets[11], _MM_MK_INSERTPS_NDX(0,3,0));
+        val4 = _mm_load_ss(ptr + offsets[12]);
+        SHORTVEC_INSERT_PS(val4, ptr, offsets[13], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS(val4, ptr, offsets[14], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS(val4, ptr, offsets[15], _MM_MK_INSERTPS_NDX(0,3,0));
+    }
+
+    inline
+    void scatter(float *ptr, const unsigned *offsets) const
+    {
+        ShortVecHelpers::ExtractResult r1, r2, r3, r4;
+        r1.i = _mm_extract_ps(val1, 0);
+        r2.i = _mm_extract_ps(val1, 1);
+        r3.i = _mm_extract_ps(val1, 2);
+        r4.i = _mm_extract_ps(val1, 3);
+        ptr[offsets[0]] = r1.f;
+        ptr[offsets[1]] = r2.f;
+        ptr[offsets[2]] = r3.f;
+        ptr[offsets[3]] = r4.f;
+        r1.i = _mm_extract_ps(val2, 0);
+        r2.i = _mm_extract_ps(val2, 1);
+        r3.i = _mm_extract_ps(val2, 2);
+        r4.i = _mm_extract_ps(val2, 3);
+        ptr[offsets[4]] = r1.f;
+        ptr[offsets[5]] = r2.f;
+        ptr[offsets[6]] = r3.f;
+        ptr[offsets[7]] = r4.f;
+        r1.i = _mm_extract_ps(val3, 0);
+        r2.i = _mm_extract_ps(val3, 1);
+        r3.i = _mm_extract_ps(val3, 2);
+        r4.i = _mm_extract_ps(val3, 3);
+        ptr[offsets[ 8]] = r1.f;
+        ptr[offsets[ 9]] = r2.f;
+        ptr[offsets[10]] = r3.f;
+        ptr[offsets[11]] = r4.f;
+        r1.i = _mm_extract_ps(val4, 0);
+        r2.i = _mm_extract_ps(val4, 1);
+        r3.i = _mm_extract_ps(val4, 2);
+        r4.i = _mm_extract_ps(val4, 3);
+        ptr[offsets[12]] = r1.f;
+        ptr[offsets[13]] = r2.f;
+        ptr[offsets[14]] = r3.f;
+        ptr[offsets[15]] = r4.f;
+    }
+#else
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        __m128 f1, f2, f3, f4;
+        f1   = _mm_load_ss(ptr + offsets[0]);
+        f2   = _mm_load_ss(ptr + offsets[2]);
+        f1   = _mm_unpacklo_ps(f1, f2);
+        f3   = _mm_load_ss(ptr + offsets[1]);
+        f4   = _mm_load_ss(ptr + offsets[3]);
+        f3   = _mm_unpacklo_ps(f3, f4);
+        val1 = _mm_unpacklo_ps(f1, f3);
+        f1   = _mm_load_ss(ptr + offsets[4]);
+        f2   = _mm_load_ss(ptr + offsets[6]);
+        f1   = _mm_unpacklo_ps(f1, f2);
+        f3   = _mm_load_ss(ptr + offsets[5]);
+        f4   = _mm_load_ss(ptr + offsets[7]);
+        f3   = _mm_unpacklo_ps(f3, f4);
+        val2 = _mm_unpacklo_ps(f1, f3);
+        f1   = _mm_load_ss(ptr + offsets[ 8]);
+        f2   = _mm_load_ss(ptr + offsets[10]);
+        f1   = _mm_unpacklo_ps(f1, f2);
+        f3   = _mm_load_ss(ptr + offsets[ 9]);
+        f4   = _mm_load_ss(ptr + offsets[11]);
+        f3   = _mm_unpacklo_ps(f3, f4);
+        val3 = _mm_unpacklo_ps(f1, f3);
+        f1   = _mm_load_ss(ptr + offsets[12]);
+        f2   = _mm_load_ss(ptr + offsets[14]);
+        f1   = _mm_unpacklo_ps(f1, f2);
+        f3   = _mm_load_ss(ptr + offsets[13]);
+        f4   = _mm_load_ss(ptr + offsets[15]);
+        f3   = _mm_unpacklo_ps(f3, f4);
+        val4 = _mm_unpacklo_ps(f1, f3);
+    }
+
+    inline
+    void scatter(float *ptr, const unsigned *offsets) const
+    {
+        __m128 tmp = val1;
+        _mm_store_ss(ptr + offsets[0], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[1], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[2], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[3], tmp);
+        tmp = val2;
+        _mm_store_ss(ptr + offsets[4], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[5], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[6], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[7], tmp);
+        tmp = val3;
+        _mm_store_ss(ptr + offsets[8], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[9], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[10], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[11], tmp);
+        tmp = val4;
+        _mm_store_ss(ptr + offsets[12], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[13], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[14], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[15], tmp);
+   }
+#endif
 
 private:
     __m128 val1;
@@ -204,7 +393,7 @@ private:
 #endif
 
 inline
-short_vec<float, 16>::short_vec(const sqrt_reference<float, 16> other) :
+short_vec<float, 16>::short_vec(const sqrt_reference<float, 16>& other) :
     val1(_mm_sqrt_ps(other.vec.val1)),
     val2(_mm_sqrt_ps(other.vec.val2)),
     val3(_mm_sqrt_ps(other.vec.val3)),
@@ -255,6 +444,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif
 #endif
 #endif

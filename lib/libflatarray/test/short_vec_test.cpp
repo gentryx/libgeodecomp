@@ -13,6 +13,7 @@
 #include <libflatarray/short_vec.hpp>
 #include <stdexcept>
 #include <vector>
+#include <cstring>
 
 #include "test.hpp"
 
@@ -55,6 +56,7 @@ void testImplementation()
 
     // tests scalar load, vector add:
     ShortVec w = vec1[0];
+
     for (int i = 0; i < (numElements - ShortVec::ARITY + 1); i += ShortVec::ARITY) {
         ShortVec v = &vec1[i];
         &vec2[i] << (v + w);
@@ -189,6 +191,146 @@ void testImplementation()
     buf2 << (ShortVec::ARITY - 1 + 0.1) << "]";
 
     BOOST_TEST(buf1.str() == buf2.str());
+
+    // test gather
+    {
+        CARGO array[ARITY * 10];
+        unsigned indices[ARITY] __attribute__((aligned (64)));
+        CARGO actual[ARITY];
+        CARGO expected[ARITY];
+        std::memset(array, '\0', sizeof(CARGO) * ARITY * 10);
+
+        for (unsigned i = 0; i < ARITY * 10; ++i) {
+            if (i % 10 == 0) {
+                array[i] = i * 0.75;
+            }
+        }
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            indices[i] = i * 10;
+            expected[i] = (i * 10) * 0.75;
+        }
+
+        ShortVec vec;
+        vec.gather(array, indices);
+        actual << vec;
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(actual[i], expected[i], 0.001);
+        }
+    }
+
+#ifdef SHORTVEC_HAS_CPP11
+    // test gather via initializer_list
+    {
+        unsigned indices[ARITY] __attribute__((aligned (64)));
+        CARGO actual[ARITY];
+        CARGO expected[ARITY];
+        for (unsigned i = 0; i < ARITY; ++i) {
+            indices[i] = i * 10;
+            expected[i] = (i * 10) * 0.75;
+        }
+
+        // max: 32
+        ShortVec vec = { 0.0, 7.5, 15.0, 22.50, 30.0, 37.5, 45.0, 52.5,
+                         60.0, 67.5, 75.0, 82.5, 90.0, 97.5, 105.0, 112.5,
+                         120.0, 127.5, 135.0, 142.5, 150.0, 157.5, 165.0, 172.5,
+                         180.0, 187.5, 195.0, 202.5, 210.0, 217.5, 225.0, 232.5 };
+        actual << vec;
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(actual[i], expected[i], 0.001);
+        }
+    }
+#endif
+
+    // test scatter
+    {
+        ShortVec vec;
+        CARGO array[ARITY * 10];
+        CARGO expected[ARITY * 10];
+        unsigned indices[ARITY] __attribute__((aligned (64)));
+        std::memset(array,    '\0', sizeof(CARGO) * ARITY * 10);
+        std::memset(expected, '\0', sizeof(CARGO) * ARITY * 10);
+        for (unsigned i = 0; i < ARITY * 10; ++i) {
+            if (i % 10 == 0) {
+                expected[i] = i * 0.75;
+            }
+        }
+        for (unsigned i = 0; i < ARITY; ++i) {
+            indices[i] = i * 10;
+        }
+
+        vec.gather(expected, indices);
+        vec.scatter(array, indices);
+        for (unsigned i = 0; i < ARITY * 10; ++i) {
+            TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
+        }
+    }
+
+    // test non temporal stores
+    {
+        CARGO array[ARITY] __attribute__((aligned(64)));
+        CARGO expected[ARITY] __attribute__((aligned(64)));
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            expected[i] = 5.0;
+        }
+        ShortVec v1 = 5.0;
+        v1.store_nt(array);
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
+        }
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            expected[i] = i + 0.1;
+        }
+        ShortVec v2 = expected;
+        v2.store_nt(array);
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
+        }
+    }
+
+    // test aligned stores
+    {
+        CARGO array[ARITY] __attribute__((aligned(64)));
+        CARGO expected[ARITY] __attribute__((aligned(64)));
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            expected[i] = 5.0;
+        }
+        ShortVec v1 = 5.0;
+        v1.store_aligned(array);
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
+        }
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            expected[i] = i + 0.1;
+        }
+        ShortVec v2 = expected;
+        v2.store_aligned(array);
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
+        }
+    }
+
+    // test aligned loads
+    {
+        CARGO array[ARITY] __attribute__((aligned(64)));
+        CARGO expected[ARITY] __attribute__((aligned(64)));
+
+        for (unsigned i = 0; i < ARITY; ++i) {
+            array[i]    = i + 0.1;
+            expected[i] = 0;
+        }
+        ShortVec v1;
+        v1.load_aligned(array);
+        v1.store(expected);
+        for (unsigned i = 0; i < ARITY; ++i) {
+            TEST_REAL_ACCURACY(array[i], expected[i], 0.001);
+        }
+    }
 }
 
 ADD_TEST(TestBasic)
@@ -240,7 +382,11 @@ ADD_TEST(TestImplementationStrategyDouble)
 
 #ifdef __SSE__
 #ifdef __AVX__
+#ifdef __AVX512F__
+#define EXPECTED_TYPE short_vec_strategy::avx512
+#else
 #define EXPECTED_TYPE short_vec_strategy::avx
+#endif
 #else
 #define EXPECTED_TYPE short_vec_strategy::sse
 #endif
@@ -251,15 +397,23 @@ ADD_TEST(TestImplementationStrategyDouble)
 #undef EXPECTED_TYPE
 
 #ifdef __AVX__
+#ifdef __AVX512F__
+#define EXPECTED_TYPE short_vec_strategy::avx512
+#else
 #define EXPECTED_TYPE short_vec_strategy::avx
+#endif
 #else
 #define EXPECTED_TYPE short_vec_strategy::scalar
 #endif
     checkForStrategy(short_vec<double, 16>::strategy(), EXPECTED_TYPE());
 #undef EXPECTED_TYPE
 
+#ifdef __AVX512F__
+#define EXPECTED_TYPE short_vec_strategy::avx512
+#else
 #define EXPECTED_TYPE short_vec_strategy::scalar
     checkForStrategy(short_vec<double, 32>::strategy(), EXPECTED_TYPE());
+#endif
 #undef EXPECTED_TYPE
 }
 
@@ -292,7 +446,11 @@ ADD_TEST(TestImplementationStrategyFloat)
 
 #ifdef __SSE__
 #ifdef __AVX__
+#ifdef __AVX512F__
+#define EXPECTED_TYPE short_vec_strategy::avx512
+#else
 #define EXPECTED_TYPE short_vec_strategy::avx
+#endif
 #else
 #define EXPECTED_TYPE short_vec_strategy::sse
 #endif
@@ -303,7 +461,11 @@ ADD_TEST(TestImplementationStrategyFloat)
 #undef EXPECTED_TYPE
 
 #ifdef __AVX__
+#ifdef __AVX512F__
+#define EXPECTED_TYPE short_vec_strategy::avx512
+#else
 #define EXPECTED_TYPE short_vec_strategy::avx
+#endif
 #else
 #define EXPECTED_TYPE short_vec_strategy::scalar
 #endif

@@ -11,6 +11,12 @@
 #ifndef __SSE__
 #ifndef __AVX__
 
+#include <libflatarray/config.h>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
 namespace LibFlatArray {
 
 template<typename CARGO, int ARITY>
@@ -48,16 +54,10 @@ public:
     {}
 
     inline
-    short_vec(const float *data) :
-        val1( *(data +  0)),
-        val2( *(data +  1)),
-        val3( *(data +  2)),
-        val4( *(data +  3)),
-        val5( *(data +  4)),
-        val6( *(data +  5)),
-        val7( *(data +  6)),
-        val8( *(data +  7))
-    {}
+    short_vec(const float *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(
@@ -78,6 +78,15 @@ public:
         val7( val7),
         val8( val8)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<float>& il)
+    {
+        const float *ptr = static_cast<const float *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<float, 8>& other)
@@ -202,6 +211,25 @@ public:
     }
 
     inline
+    void load(const float *data)
+    {
+        val1 = data[0];
+        val2 = data[1];
+        val3 = data[2];
+        val4 = data[3];
+        val5 = data[4];
+        val6 = data[5];
+        val7 = data[6];
+        val8 = data[7];
+    }
+
+    inline
+    void load_aligned(const float *data)
+    {
+        load(data);
+    }
+
+    inline
     void store(float *data) const
     {
         *(data +  0) = val1;
@@ -212,6 +240,44 @@ public:
         *(data +  5) = val6;
         *(data +  6) = val7;
         *(data +  7) = val8;
+    }
+
+    inline
+    void store_aligned(float *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void store_nt(float *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        val1 = ptr[offsets[0]];
+        val2 = ptr[offsets[1]];
+        val3 = ptr[offsets[2]];
+        val4 = ptr[offsets[3]];
+        val5 = ptr[offsets[4]];
+        val6 = ptr[offsets[5]];
+        val7 = ptr[offsets[6]];
+        val8 = ptr[offsets[7]];
+    }
+
+    inline
+    void scatter(float *ptr, const unsigned *offsets) const
+    {
+        ptr[offsets[0]] = val1;
+        ptr[offsets[1]] = val2;
+        ptr[offsets[2]] = val3;
+        ptr[offsets[3]] = val4;
+        ptr[offsets[4]] = val5;
+        ptr[offsets[5]] = val6;
+        ptr[offsets[6]] = val7;
+        ptr[offsets[7]] = val8;
     }
 
 private:
