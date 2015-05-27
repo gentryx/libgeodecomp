@@ -16,16 +16,25 @@ namespace LibGeoDecomp {
 
 namespace TestCellHelpers {
 
+/**
+ * We'll use the TestCell with different API specs. This is one of
+ * them...
+ */
 class EmptyAPI
-{
-};
+{};
 
+/**
+ * ...and this another.
+ */
 class SoAAPI :
         public APITraits::HasSoA,
         public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasUpdateLineX
 {};
 
+/**
+ * Various topologies are to be tested, too.
+ */
 template<int DIM>
 class TopologyType
 {
@@ -33,7 +42,9 @@ public:
     typedef typename Topologies::Cube<DIM>::Topology Topology;
 };
 
-// make the 3D TestCell use a torus topology for a change...
+/**
+ * Make the 3D TestCell use a torus topology for a change...
+ */
 template<>
 class TopologyType<3>
 {
@@ -41,6 +52,10 @@ public:
     typedef Topologies::Torus<3>::Topology Topology;
 };
 
+/**
+ * We'll use this class to enble debug output on host code and disable
+ * it on CUDA devices (where std::cout isn't available).
+ */
 class StdOutput
 {
 public:
@@ -52,6 +67,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 class NoOutput
 {
 public:
@@ -62,6 +80,9 @@ public:
     }
 };
 
+/**
+ * Helps with iterating through a stencil shape
+ */
 template<class STENCIL, int INDEX>
 class CheckNeighbor
 {

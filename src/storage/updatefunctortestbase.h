@@ -7,6 +7,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class is used to build test suites for our various UpdateFunctor types.
+ */
 template<class STENCIL>
 class UpdateFunctorTestBase
 {

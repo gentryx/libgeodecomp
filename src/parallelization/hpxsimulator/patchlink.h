@@ -83,6 +83,11 @@ public:
             dest = UPDATE_GROUP(hpx::id_type(gid, hpx::id_type::unmanaged));
         }
 
+        ~Accepter()
+        {
+            putFuture.wait();
+        }
+
         void charge(std::size_t next, std::size_t last, std::size_t newStride)
         {
             Link::charge(last, newStride);

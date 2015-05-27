@@ -20,6 +20,9 @@ namespace LibGeoDecomp {
 template<int DIM>
 class FloatCoord;
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<1>
 {
@@ -157,6 +160,13 @@ public:
         return !(*this == a);
     }
 
+    template<template<int> class OTHER_COORD>
+    inline
+    bool operator<(const OTHER_COORD<1>& comp) const
+    {
+        return (c[0] < comp[0]);
+    }
+
     inline double& operator[](const int i)
     {
         return c[i];
@@ -209,6 +219,9 @@ public:
     double c[1];
 };
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<2>
 {
@@ -364,6 +377,15 @@ public:
         return !(*this == a);
     }
 
+    template<template<int> class OTHER_COORD>
+    inline
+    bool operator<(const OTHER_COORD<2>& comp) const
+    {
+        return
+            (c[0] <  comp[0]) ||
+            ((c[0] == comp[0]) && (c[1] <  comp[1]));
+    }
+
     inline double& operator[](const int i)
     {
         return c[i];
@@ -421,6 +443,9 @@ public:
     double c[2];
 };
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<3>
 {
@@ -588,6 +613,16 @@ public:
     bool operator!=(const OTHER_COORD<3>& a) const
     {
         return !(*this == a);
+    }
+
+    template<template<int> class OTHER_COORD>
+    inline
+    bool operator<(const OTHER_COORD<3>& comp) const
+    {
+        return
+            (c[0] <  comp[0]) ||
+            ((c[0] == comp[0]) && (c[1] <  comp[1])) ||
+            ((c[0] == comp[0]) && (c[1] == comp[1]) && (c[2] <  comp[2]));
     }
 
     inline double& operator[](const int i)

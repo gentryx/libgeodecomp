@@ -184,7 +184,6 @@ void runSimulation()
 int main(int argc, char **argv)
 {
     MPI_Init (&argc, &argv);
-    Typemaps::initializeMaps();
 
     runSimulation();
 

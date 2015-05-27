@@ -100,6 +100,30 @@ public:
             TS_ASSERT_EQUALS(*newIter, *iterators[i]);
         }
     }
+
+    void testOffset()
+    {
+        typedef RegionStreakIterator<2, Region<2> >MyIter;
+        Region<2> region;
+        Region<2> translatedRegion;
+        MyIter i = region.beginStreak(Coord<2>(-10, -20));
+        TS_ASSERT_EQUALS(i, region.endStreak());
+
+        region << Streak<2>(Coord<2>(10, 20), 30)
+               << Streak<2>(Coord<2>(11, 21), 30)
+               << Streak<2>(Coord<2>(12, 22), 30);
+
+        translatedRegion << Streak<2>(Coord<2>(13, 25), 33)
+                         << Streak<2>(Coord<2>(14, 26), 33)
+                         << Streak<2>(Coord<2>(15, 27), 33);
+        MyIter j = translatedRegion.beginStreak();
+
+        for (MyIter i = region.beginStreak(Coord<2>(3, 5)); i != region.endStreak(); ++i) {
+            TS_ASSERT_EQUALS(*i, *j);
+            ++j;
+        }
+    }
+
 };
 
 }

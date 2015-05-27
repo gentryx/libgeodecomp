@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXSTEPPER_H
 #define LIBGEODECOMP_PARALLELIZATION_HPXSIMULATOR_HPXSTEPPER_H
 
-#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
+#include <libgeodecomp/parallelization/hiparsimulator/commonstepper.h>
 #include <libgeodecomp/storage/patchbufferfixed.h>
 #include <libgeodecomp/storage/updatefunctor.h>
 
@@ -11,170 +11,118 @@
 namespace LibGeoDecomp {
 namespace HiParSimulator {
 
-template<typename CELL_TYPE>
-class HpxStepper : public Stepper<CELL_TYPE>
+template <typename CELL_TYPE>
+class HpxStepper : public CommonStepper<CELL_TYPE>
 {
     friend class HpxStepperRegionTest;
     friend class HpxStepperBasicTest;
     friend class HpxStepperTest;
 public:
+
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
     const static unsigned NANO_STEPS = APITraits::SelectNanoSteps<CELL_TYPE>::VALUE;
 
-    typedef class Stepper<CELL_TYPE> ParentType;
+    typedef class CommonStepper<CELL_TYPE> ParentType;
     typedef typename ParentType::GridType GridType;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
-    typedef typename ParentType::PatchProviderPtr PatchProviderPtr;
 
-    using Stepper<CELL_TYPE>::addPatchAccepter;
-    using Stepper<CELL_TYPE>::chronometer;
-    using Stepper<CELL_TYPE>::initializer;
-    using Stepper<CELL_TYPE>::guessOffset;
-    using Stepper<CELL_TYPE>::patchAccepters;
-    using Stepper<CELL_TYPE>::patchProviders;
-    using Stepper<CELL_TYPE>::partitionManager;
+    using CommonStepper<CELL_TYPE>::initializer;
+    using CommonStepper<CELL_TYPE>::patchAccepters;
+    using CommonStepper<CELL_TYPE>::patchProviders;
+    using CommonStepper<CELL_TYPE>::partitionManager;
+    using CommonStepper<CELL_TYPE>::chronometer;
+
+    using CommonStepper<CELL_TYPE>::innerSet;
+    using CommonStepper<CELL_TYPE>::saveKernel;
+    using CommonStepper<CELL_TYPE>::restoreRim;
+    using CommonStepper<CELL_TYPE>::globalNanoStep;
+    using CommonStepper<CELL_TYPE>::rim;
+    using CommonStepper<CELL_TYPE>::resetValidGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::initGridsCommon;
+    using CommonStepper<CELL_TYPE>::getVolatileKernel;
+    using CommonStepper<CELL_TYPE>::saveRim;
+    using CommonStepper<CELL_TYPE>::getInnerRim;
+    using CommonStepper<CELL_TYPE>::restoreKernel;
+
+    using CommonStepper<CELL_TYPE>::curStep;
+    using CommonStepper<CELL_TYPE>::curNanoStep;
+    using CommonStepper<CELL_TYPE>::validGhostZoneWidth;
+    using CommonStepper<CELL_TYPE>::ghostZoneWidth;
+    using CommonStepper<CELL_TYPE>::oldGrid;
+    using CommonStepper<CELL_TYPE>::newGrid;
+    using CommonStepper<CELL_TYPE>::rimBuffer;
+    using CommonStepper<CELL_TYPE>::kernelBuffer;
+    using CommonStepper<CELL_TYPE>::kernelFraction;
 
     inline HpxStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
         const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        ParentType(partitionManager, initializer),
-        asyncThreshold(boost::lexical_cast<std::size_t>(hpx::get_config_entry("LibGeoDecomp.asyncThreshold", "0")))
+        CommonStepper<CELL_TYPE>(
+            partitionManager,
+            initializer,
+            ghostZonePatchAccepters,
+            innerSetPatchAccepters),
+        asyncThreshold(boost::lexical_cast<std::size_t>(
+                           hpx::get_config_entry("LibGeoDecomp.asyncThreshold", "0")))
     {
-        curStep = initializer->startStep();
-        curNanoStep = 0;
-
-        for (std::size_t i = 0; i < ghostZonePatchAccepters.size(); ++i) {
-            addPatchAccepter(ghostZonePatchAccepters[i], ParentType::GHOST);
-        }
-        for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
-            addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
-        }
-	std::cout << initializer.get() << std::flush << initializer->gridDimensions() << "\n";
         hpx::async(&HpxStepper::initGrids, this).wait();
     }
-
-    inline void update(std::size_t nanoSteps)
-    {
-        for (std::size_t i = 0; i < nanoSteps; ++i)
-        {
-            update().wait();
-        }
-    }
-
-    inline virtual std::pair<std::size_t, std::size_t> currentStep() const
-    {
-        return std::make_pair(curStep, curNanoStep);
-    }
-
-    inline virtual const GridType& grid() const
-    {
-        return *oldGrid;
-    }
-
 private:
-    std::size_t asyncThreshold;
-    std::size_t curStep;
-    std::size_t curNanoStep;
-    unsigned validGhostZoneWidth;
-    boost::shared_ptr<GridType> oldGrid;
-    boost::shared_ptr<GridType> newGrid;
-    std::shared_ptr<PatchBufferType2> rimBuffer;
-    std::shared_ptr<PatchBufferType1> kernelBuffer;
-    Region<DIM> kernelFraction;
     hpx::lcos::local::spinlock gridMutex;
-    double startTimeUpdate;
-    std::vector<PatchProviderPtr> steererVector;
+    std::size_t asyncThreshold;
 
-    inline hpx::future<void> update()
-    //inline void update()
+    void update1()
     {
-        startTimeUpdate = ScopedTimer::time();
-
+        TimeTotal t(&chronometer);
         unsigned index = ghostZoneWidth() - --validGhostZoneWidth;
-        Region<DIM> region = partitionManager->innerSet(index);
+        const Region<DIM>& region = innerSet(index);
+        {
+            TimeComputeInner t(&chronometer);
 
-        std::vector<hpx::future<void> > updateFutures;
-        updateFutures.reserve(region.numStreaks());
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-             i != region.endStreak();
-             ++i) {
-            Region<DIM> r;
-            r << *i;
-            Coord<DIM> null;
-            if(std::size_t(i->length()) > asyncThreshold) {
-                updateFutures.push_back(
-                    hpx::async(
-                        hpx::util::bind(
-                            UpdateFunctor<CELL_TYPE>(),
-                            r,
-                            null,
-                            null,
-                            boost::cref(*oldGrid),
-                            &*newGrid,
-                            curNanoStep
-                        )
-                    )
-                );
-            }
-            else {
-                UpdateFunctor<CELL_TYPE>()(r, null, null, *oldGrid, &*newGrid, curNanoStep);
+            updateRegion(innerSet(index), curNanoStep);
+            std::swap(oldGrid, newGrid);
+
+            ++curNanoStep;
+            if (curNanoStep == NANO_STEPS) {
+                curNanoStep = 0;
+                ++curStep;
             }
         }
-        if(updateFutures.empty()) {
-            updateFutures.push_back(hpx::make_ready_future());
-        }
 
-        ++curNanoStep;
-        if (curNanoStep == NANO_STEPS) {
-            curNanoStep = 0;
-            curStep++;
-        }
-
-        return
-            hpx::when_all(updateFutures).then(
-                hpx::util::bind(&HpxStepper::updateGhostZones, this, region)
-            );
-        /*
-        hpx::wait_all(updateFutures);
-        updateGhostZones(region);
-        */
-    }
-
-    hpx::future<void> updateGhostZones(const Region<DIM>& region)
-    //void updateGhostZones(const Region<DIM>& region)
-    {
-        std::swap(oldGrid, newGrid);
-        chronometer.template tock<TimeComputeInner>(startTimeUpdate);
-
-        return
-            notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep()).then(
-                hpx::util::bind(&HpxStepper::updateGhostZones2, this, region)
-            );
-    }
-
-    hpx::future<void> updateGhostZones2(const Region<DIM>& region)
-    {
-        //notifyPatchAccepters(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchAccepters(innerSet(ghostZoneWidth()), ParentType::INNER_SET, globalNanoStep());
 
         if (validGhostZoneWidth == 0) {
             updateGhost();
             resetValidGhostZoneWidth();
         }
 
-        return notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
+        notifyPatchProviders(region, ParentType::INNER_SET, globalNanoStep());
     }
 
-    // helper function to turn a vector of futures into a void future...
-    static void void_() {}
+    inline void initGrids()
+    {
+        initGridsCommon();
 
-    //inline void notifyPatchAccepters(
-    inline hpx::future<void> notifyPatchAccepters(
+        notifyPatchAccepters(
+            rim(),
+            ParentType::GHOST,
+            globalNanoStep());
+        notifyPatchAccepters(
+            innerSet(ghostZoneWidth()),
+            ParentType::INNER_SET,
+            globalNanoStep());
+
+        saveRim(globalNanoStep());
+        updateGhost();
+    }
+
+    inline void notifyPatchAccepters(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -191,24 +139,19 @@ private:
             if (nanoStep == (*i)->nextRequiredNanoStep()) {
                 patchAcceptersFutures.push_back(
                     hpx::async(
-                        hpx::util::bind(
-                            &PatchAccepter<GridType>::put,
-                            *i,
-                            boost::cref(*oldGrid),
-                            region,
-                            nanoStep
-                        )
+                        [this, i, region, nanoStep]()
+                        {
+                            (*i)->put(*oldGrid, region, nanoStep);
+                        }
                     )
                 );
             }
         }
 
-        //hpx::wait_all(patchAcceptersFutures);
-        return hpx::when_all(patchAcceptersFutures).then(hpx::util::bind(void_));
+        hpx::wait_all(patchAcceptersFutures);
     }
 
-    //inline void notifyPatchProviders(
-    inline hpx::future<void> notifyPatchProviders(
+    inline void notifyPatchProviders(
         const Region<DIM>& region,
         const typename ParentType::PatchType& patchType,
         std::size_t nanoStep)
@@ -217,12 +160,6 @@ private:
 
         std::vector<hpx::future<void> > patchProvidersFutures;
         patchProvidersFutures.reserve(patchProviders[patchType].size());
-        void (PatchProvider<GridType>::*get)(
-            GridType*,
-            const Region<DIM>&,
-            const std::size_t,
-            hpx::lcos::local::spinlock&,
-            bool) = &PatchProvider<GridType>::get;
 
         for (typename ParentType::PatchProviderList::iterator i =
                  patchProviders[patchType].begin();
@@ -230,69 +167,17 @@ private:
              ++i) {
                 patchProvidersFutures.push_back(
                     hpx::async(
-                        hpx::util::bind(
-                            get,
-                            *i,
-                            &*oldGrid,
-                            region,
-                            nanoStep,
-                            boost::ref(gridMutex),
-                            true
-                        )
+                        [this, i, region, nanoStep]() mutable
+                        {
+                            (*i)->get(&*oldGrid, region, nanoStep, gridMutex, true);
+                        }
                     )
                 );
-            /*
-            (*i)->get(&*oldGrid, region, nanoStep, gridMutex, true);
-            */
         }
 
-        //hpx::wait_all(patchProvidersFutures);
-        return hpx::when_all(patchProvidersFutures).then(hpx::util::bind(void_));
+        hpx::wait_all(patchProvidersFutures);
     }
 
-    inline std::size_t globalNanoStep() const
-    {
-        return curStep * NANO_STEPS + curNanoStep;
-    }
-
-    inline void initGrids()
-    {
-        std::cout << "welcome to initGrids()" << std::endl;
-        const Coord<DIM>& topoDim = initializer->gridDimensions();
-	std::cout << "topoDim = " << topoDim << std::endl;
-        CoordBox<DIM> gridBox;
-        guessOffset(&gridBox.origin, &gridBox.dimensions);
-        oldGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-        newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
-        initializer->grid(&*oldGrid);
-        newGrid->getEdgeCell() = oldGrid->getEdgeCell();
-        resetValidGhostZoneWidth();
-
-        const Region<DIM>& rimRegion = rim();
-        notifyPatchAccepters(
-            rimRegion,
-            ParentType::GHOST,
-            globalNanoStep()).wait();
-        notifyPatchAccepters(
-            partitionManager->innerSet(0),
-            ParentType::INNER_SET,
-            globalNanoStep()).wait();
-
-        kernelBuffer.reset(new PatchBufferType1(partitionManager->getVolatileKernel()));
-        rimBuffer.reset(new PatchBufferType2(rimRegion));
-        saveRim(globalNanoStep());
-        updateGhost();
-    }
-
-    /**
-     * computes the next ghost zone at time "t_1 = globalNanoStep() +
-     * ghostZoneWidth()". Expects that oldGrid has its kernel and its
-     * outer ghostzone updated to time "globalNanoStep()" and that the
-     * inner ghostzones (rim) at time t_1 can be retrieved from the
-     * internal patch buffer. Will leave oldgrid in a state so that
-     * its whole ownRegion() will be at time t_1 and the rim will be
-     * saved to the patchBuffer at "t2 = t1 + ghostZoneWidth()".
-     */
     inline void updateGhost()
     {
         {
@@ -316,44 +201,12 @@ private:
         std::size_t curGlobalNanoStep = globalNanoStep();
 
         for (std::size_t t = 0; t < ghostZoneWidth(); ++t) {
-            notifyPatchProviders(
-                partitionManager->rim(t), ParentType::GHOST, globalNanoStep()).wait();
+            notifyPatchProviders(rim(t), ParentType::GHOST, globalNanoStep());
 
             {
                 TimeComputeGhost timer(&chronometer);
 
-                const Region<DIM>& region = partitionManager->rim(t + 1);
-
-                std::vector<hpx::future<void> > updateFutures;
-                updateFutures.reserve(region.numStreaks());
-                for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                     i != region.endStreak();
-                     ++i) {
-                    Region<DIM> r;
-                    r << *i;
-                    Coord<DIM> null;
-                    if (std::size_t(i->length()) > asyncThreshold) {
-                        updateFutures.push_back(
-                            hpx::async(
-                                hpx::util::bind(
-                                    UpdateFunctor<CELL_TYPE>(),
-                                    r,
-                                    null,
-                                    null,
-                                    boost::cref(*oldGrid),
-                                    &*newGrid,
-                                    curNanoStep
-                                )
-                            )
-                        );
-                    } else {
-                        UpdateFunctor<CELL_TYPE>()(r, null, null, *oldGrid, &*newGrid, curNanoStep);
-                    }
-                }
-
-                if (updateFutures.empty()) {
-                    updateFutures.push_back(hpx::make_ready_future());
-                }
+                updateRegion(rim(t + 1), curNanoStep);
 
                 ++curNanoStep;
                 if (curNanoStep == NANO_STEPS) {
@@ -361,18 +214,16 @@ private:
                     curStep++;
                 }
 
-                hpx::wait_all(updateFutures);
                 std::swap(oldGrid, newGrid);
 
                 ++curGlobalNanoStep;
             }
 
-            notifyPatchAccepters(rim(), ParentType::GHOST, curGlobalNanoStep).wait();
+            notifyPatchAccepters(rim(ghostZoneWidth()), ParentType::GHOST, curGlobalNanoStep);
         }
 
         {
             TimeComputeGhost t(&chronometer);
-
             curNanoStep = oldNanoStep;
             curStep = oldStep;
 
@@ -386,49 +237,65 @@ private:
             restoreKernel();
         }
     }
-private:
 
-    inline unsigned ghostZoneWidth() const
+    void updateRegion(const Region<DIM>& region, std::size_t curNanoStep)
     {
-        return partitionManager->getGhostZoneWidth();
-    }
+        std::vector<hpx::future<void> > updateFutures;
+        updateFutures.reserve(region.numStreaks());
+        Region<DIM> small_region;
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
 
-    inline const Region<DIM>& rim() const
-    {
-        return partitionManager->rim(ghostZoneWidth());
-    }
+            if(std::size_t(i->length()) > asyncThreshold) {
+                Region<DIM> r;
+                r << *i;
+                updateFutures.push_back(
+                    hpx::async(
+                        hpx::util::bind(
+                            UpdateFunctor<CELL_TYPE>(),
+                            r,
+                            Coord<DIM>(),
+                            Coord<DIM>(),
+                            boost::cref(*oldGrid),
+                            &*newGrid,
+                            curNanoStep
+                        )
+                    )
+                );
+            }
+            else {
+                small_region << *i;
+                if(small_region.size() > asyncThreshold) {
+                    updateFutures.push_back(
+                        hpx::async(
+                            hpx::util::bind(
+                                UpdateFunctor<CELL_TYPE>(),
+                                small_region,
+                                Coord<DIM>(),
+                                Coord<DIM>(),
+                                boost::cref(*oldGrid),
+                                &*newGrid,
+                                curNanoStep
+                            )
+                        )
+                    );
+                    small_region.clear();
+                }
+            }
+        }
 
-    inline void resetValidGhostZoneWidth()
-    {
-        validGhostZoneWidth = ghostZoneWidth();
-    }
+        if(!small_region.empty()) {
+            UpdateFunctor<CELL_TYPE>()(
+                small_region,
+                Coord<DIM>(),
+                Coord<DIM>(),
+                *oldGrid,
+                &*newGrid,
+                curNanoStep);
+        }
 
-    inline void saveRim(std::size_t nanoStep)
-    {
-        rimBuffer->pushRequest(nanoStep);
-        rimBuffer->put(*oldGrid, rim(), nanoStep);
-    }
-
-    inline void restoreRim(bool remove)
-    {
-        rimBuffer->get(&*oldGrid, rim(), globalNanoStep(), remove);
-    }
-
-    inline void saveKernel()
-    {
-        kernelBuffer->pushRequest(globalNanoStep());
-        kernelBuffer->put(*oldGrid,
-                         partitionManager->innerSet(ghostZoneWidth()),
-                         globalNanoStep());
-    }
-
-    inline void restoreKernel()
-    {
-        kernelBuffer->get(
-            &*oldGrid,
-            partitionManager->getVolatileKernel(),
-            globalNanoStep(),
-            true);
+        hpx::wait_all(updateFutures);
     }
 };
 

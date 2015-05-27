@@ -75,6 +75,9 @@ public:
     virtual std::string toString() const = 0;
 };
 
+/**
+ * Base class which is implemented by TypedParameter.
+ */
 class Parameter : public OptimizableParameter
 {
 public:
@@ -172,6 +175,11 @@ public:
     }
 };
 
+/**
+ * A TypedParameter allows retrieval of the stored value. This can be
+ * used by user code (e.g. a simulation factory) to utilize the
+ * parameters determined by an Optimizer.
+ */
 template<typename VALUE_TYPE>
 class TypedParameter : public Parameter
 {
@@ -205,6 +213,11 @@ protected:
     VALUE_TYPE current;
 };
 
+/**
+ * An interval is a parameter that can take on any value withing range
+ * a certain minimum (included) and maximum (excluded) value:
+ * [minimum, maximum[
+ */
 template<typename VALUE_TYPE>
 class Interval : public TypedParameter<VALUE_TYPE>
 {
@@ -286,6 +299,11 @@ private:
     VALUE_TYPE index;
 };
 
+/**
+ * Such a parameter may take on any value contained in the vector.
+ * Their values are encoded via their relative index within the
+ * vector.
+ */
 template<typename VALUE_TYPE>
 class DiscreteSet : public TypedParameter<VALUE_TYPE>
 {
@@ -352,6 +370,11 @@ private:
 
 }
 
+/**
+ * Encapsulates a set of parameters (ranges and values) which form the
+ * input for an Optimizer and which will in turn forward them to an
+ * objective function (goal function).
+ */
 class SimulationParameters
 {
 public:

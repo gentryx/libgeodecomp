@@ -1,4 +1,4 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 set(RELATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/")
 include(auto.cmake)
 

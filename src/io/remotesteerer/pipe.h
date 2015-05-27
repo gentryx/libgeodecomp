@@ -154,6 +154,7 @@ private:
         for (int i = 0; i < numRequests; ++i) {
             mpiLayer.broadcast(&steeringRequestsQueue[i][0], requestSizes[i], root);
         }
+
         append(steeringRequests, steeringRequestsQueue);
         steeringRequestsQueue.clear();
         LOG(DBG, "  steeringRequests: " << steeringRequests);

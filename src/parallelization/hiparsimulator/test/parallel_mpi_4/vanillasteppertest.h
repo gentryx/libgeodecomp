@@ -27,9 +27,15 @@ public:
     typedef boost::shared_ptr<PatchLinkType::Accepter> PatchAccepterPtrType;
     typedef boost::shared_ptr<PatchLinkType::Provider> PatchProviderPtrType;
 
+    void setUp()
+    {
+        mpiLayer.reset(new MPILayer());
+    }
+
     void tearDown()
     {
         stepper.reset();
+        mpiLayer.reset();
     }
 
     void testFoo()
@@ -50,7 +56,7 @@ public:
         partitionManager->resetRegions(
             box,
             partition,
-            mpiLayer.rank(),
+            mpiLayer->rank(),
             ghostZoneWidth);
 
         std::vector<CoordBox<3> > boundingBoxes;
@@ -64,7 +70,7 @@ public:
         // verify that the grids got set up properly
         Coord<3> expectedOffset;
         Coord<3> expectedDimensions;
-        switch (mpiLayer.rank()) {
+        switch (mpiLayer->rank()) {
         case 0:
             expectedOffset = Coord<3>(0, 0, -4);
             expectedDimensions = Coord<3>(55, 47, 12);
@@ -96,26 +102,26 @@ public:
 
         // ensure that the ghostzones we're about to send/receive do
         // actually match
-        for (int sender = 0; sender < mpiLayer.size(); ++sender) {
-            for (int recver = 0; recver < mpiLayer.size(); ++recver) {
+        for (int sender = 0; sender < mpiLayer->size(); ++sender) {
+            for (int recver = 0; recver < mpiLayer->size(); ++recver) {
                 if (sender != recver) {
-                    if (sender == mpiLayer.rank()) {
+                    if (sender == mpiLayer->rank()) {
                         PartitionManagerType::RegionVecMap m =
                             stepper->partitionManager->getInnerGhostZoneFragments();
                         Region<3> region;
                         if (m.count(recver) > 0)
                             region = m[recver][ghostZoneWidth];
-                        mpiLayer.sendRegion(region, recver);
+                        mpiLayer->sendRegion(region, recver);
                     }
 
-                    if (recver == mpiLayer.rank()) {
+                    if (recver == mpiLayer->rank()) {
                         PartitionManagerType::RegionVecMap m =
                             stepper->partitionManager->getOuterGhostZoneFragments();
                         Region<3> expected;
                         if (m.count(sender) > 0)
                             expected = m[sender][ghostZoneWidth];
                         Region<3> actual;
-                        mpiLayer.recvRegion(&actual, sender);
+                        mpiLayer->recvRegion(&actual, sender);
                         TS_ASSERT_EQUALS(actual, expected);
                     }
                 }
@@ -200,7 +206,7 @@ private:
     boost::shared_ptr<TestInitializer<TestCell<3> > > init;
     boost::shared_ptr<PartitionManagerType> partitionManager;
     boost::shared_ptr<StepperType> stepper;
-    MPILayer mpiLayer;
+    boost::shared_ptr<MPILayer> mpiLayer;
 
     void checkInnerSet(
         const unsigned& shrink,

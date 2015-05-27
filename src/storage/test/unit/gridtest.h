@@ -226,21 +226,21 @@ public:
 
     void testGetSetManyCells()
     {
-	TestCell<2> cells[2];
-	testGrid->get(Streak<2>(Coord<2>(1, 3), 3), cells);
+        TestCell<2> cells[2];
+        testGrid->get(Streak<2>(Coord<2>(1, 3), 3), cells);
 
-	for (int i = 0; i < 2; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
-	}
+        for (int i = 0; i < 2; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
+        }
 
-	for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 2; ++i) {
             cells[i].testValue = i + 1234;
         }
         testGrid->set(Streak<2>(Coord<2>(1, 3), 3), cells);
 
-	for (int i = 0; i < 2; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
-	}
+        for (int i = 0; i < 2; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
+        }
     }
 
     void testToString()

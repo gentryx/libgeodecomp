@@ -282,21 +282,46 @@ public:
     {
         TS_ASSERT_EQUALS(FloatCoord<1>(4), FloatCoord<1>(4));
         TS_ASSERT(!(FloatCoord<1>(4) == FloatCoord<1>(5)));
+        TS_ASSERT( (FloatCoord<1>(4) != FloatCoord<1>(5)));
 
         TS_ASSERT_EQUALS(FloatCoord<2>(4, 1), FloatCoord<2>(4, 1));
         TS_ASSERT(!(FloatCoord<2>(4, 4) == FloatCoord<2>(5, 4)));
+        TS_ASSERT( (FloatCoord<2>(4, 4) != FloatCoord<2>(5, 4)));
 
         TS_ASSERT_EQUALS(FloatCoord<3>(4, 1, 5), FloatCoord<3>(4, 1, 5));
         TS_ASSERT(!(FloatCoord<3>(4, 4, 4) == FloatCoord<3>(4, 4, 3)));
+        TS_ASSERT( (FloatCoord<3>(4, 4, 4) != FloatCoord<3>(4, 4, 3)));
 
         TS_ASSERT(FloatCoord<1>(1) != FloatCoord<1>(2));
         TS_ASSERT(!(FloatCoord<1>(1) != FloatCoord<1>(1)));
+        TS_ASSERT( (FloatCoord<1>(1) == FloatCoord<1>(1)));
 
         TS_ASSERT(FloatCoord<2>(1, 2) != FloatCoord<2>(1, 9));
         TS_ASSERT(!(FloatCoord<2>(1, 2) != FloatCoord<2>(1, 2)));
+        TS_ASSERT( (FloatCoord<2>(1, 2) == FloatCoord<2>(1, 2)));
 
         TS_ASSERT(FloatCoord<3>(1, 2, 3) != FloatCoord<3>(1, 2, 4));
         TS_ASSERT(!(FloatCoord<3>(1, 2, 3) != FloatCoord<3>(1, 2, 3)));
+        TS_ASSERT( (FloatCoord<3>(1, 2, 3) == FloatCoord<3>(1, 2, 3)));
+    }
+
+    void testOperatorLess()
+    {
+        TS_ASSERT(  FloatCoord<1>(4.0) < FloatCoord<1>(4.1));
+        TS_ASSERT(!(FloatCoord<1>(4.2) < FloatCoord<1>(4.1)));
+
+        TS_ASSERT(  FloatCoord<2>(3.9, 4.0) < FloatCoord<2>(4.0, 4.0));
+        TS_ASSERT(  FloatCoord<2>(4.0, 3.9) < FloatCoord<2>(4.0, 4.0));
+        TS_ASSERT(!(FloatCoord<2>(4.0, 4.0) < FloatCoord<2>(4.0, 4.0)));
+
+        TS_ASSERT(  FloatCoord<3>(3.9, 4.0, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0));
+        TS_ASSERT(  FloatCoord<3>(4.0, 3.9, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0));
+        TS_ASSERT(  FloatCoord<3>(4.0, 4.0, 3.9) < FloatCoord<3>(4.0, 4.0, 4.0));
+        TS_ASSERT(!(FloatCoord<3>(4.0, 4.0, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0)));
+
+        TS_ASSERT(!(FloatCoord<3>(4.1, 4.0, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0)));
+        TS_ASSERT(!(FloatCoord<3>(4.0, 4.1, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0)));
+        TS_ASSERT(!(FloatCoord<3>(4.0, 4.0, 4.1) < FloatCoord<3>(4.0, 4.0, 4.0)));
     }
 
     void testOperatorEqualsWithOtherCoordType()

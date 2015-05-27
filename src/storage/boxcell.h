@@ -22,7 +22,6 @@ template<typename CONTAINER>
 class BoxCell
 {
 public:
-    // fixme: test this container with MultiContainerCell
     friend class BoxCellTest;
 
     typedef CONTAINER Container;

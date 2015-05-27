@@ -4,9 +4,12 @@ syntax: glob
 ./src/**/test/**/*test.cpp
 ./src/**/test/**/*test.cu
 ./src/**/test/**/main.cpp
+./src/**/test/**/run_tests.cpp
 ./src/**/auto.cmake
+./src/auto.cmake
 ./build
 ./conf.yaml
+./lib/cxxtest/python/cxxtest/*.pyc
 ./src/conf.cmake
 ./src/boost
 ./src/config.h
@@ -18,5 +21,6 @@ syntax: glob
 ./tools/typemapgenerator/sample/src/typemaps.cpp
 ./builddir
 ./build
+./lib/cxxtest/python/python3/cxxtest/**/*.pyc
 syntax: regexp
 ^doc

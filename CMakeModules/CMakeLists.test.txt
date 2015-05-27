@@ -1,4 +1,4 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
@@ -10,6 +10,7 @@ set(TARGET_UNIT_TEST_EXE test_${BUFFER2})
 set(TARGET_RUN_UNIT_TEST run_${BUFFER2})
 
 get_filename_component(DIRNAME ${PWD} NAME)
+string(REGEX MATCH "^parallel_hpx"    is_hpx_test    ${DIRNAME})
 string(REGEX MATCH "^parallel_mpi"    is_mpi_test    ${DIRNAME})
 string(REGEX MATCH "^parallel_openmp" is_openmp_test ${DIRNAME})
 string(REGEX MATCH "^unit"            is_unit_test   ${DIRNAME})
@@ -21,16 +22,25 @@ if (is_unit_test)
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${UNITEXEC} ./test")
 endif()
 
-if (is_openmp_test AND WITH_THREADS)
+if (is_hpx_test AND WITH_HPX)
   set(allowed_test true)
-  string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
+  string(REPLACE "parallel_hpx_" "" NUM_PROC "${DIRNAME}")
+  string(REGEX REPLACE "_.+" "" NUM_LOCALITIES "${NUM_PROC}")
+  string(REGEX REPLACE ".+_" "" NUM_THREADS    "${NUM_PROC}")
+
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1)
 endif()
 
 if (is_mpi_test AND WITH_MPI)
   set(allowed_test true)
   string(REPLACE "parallel_mpi_" "" NUM_PROC ${DIRNAME})
   add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_PROC} ${MPIEXEC_PREFLAGS} ./test ${MPIEXEC_POSTFLAGS})
+endif()
+
+if (is_openmp_test AND WITH_THREADS)
+  set(allowed_test true)
+  string(REPLACE "parallel_openmp_" "" NUM_THREADS ${DIRNAME})
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "OMP_NUM_THREADS=${NUM_THREADS} ${UNITEXEC} ./test")
 endif()
 
 # check whether LIMIT_TESTS selected this path, too
@@ -76,7 +86,7 @@ if(allowed_test AND selected_test)
       # included beforehand).
       add_custom_command(
         OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
-        COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
+        COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" --part "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
 	COMMAND cat "${CMAKE_SOURCE_DIR}/CMakeModules/testguard.h" >"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND cat "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp" >>"${CMAKE_CURRENT_SOURCE_DIR}/${source}"
 	COMMAND rm -f "${CMAKE_CURRENT_SOURCE_DIR}/${source}.tmp"
@@ -86,9 +96,76 @@ if(allowed_test AND selected_test)
 
   # ...and main()
   list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
+  list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp")
   add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
-    COMMAND "${CXX_TEST_DIR}/cxxtestgen.pl" -o "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp" --root --error-printer )
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp"
+    COMMAND "${CXX_TEST_DIR}/bin/cxxtestgen" -o "${CMAKE_CURRENT_SOURCE_DIR}/run_tests.cpp" --root --main run_tests --error-printer )
+
+  # set(main_function "int run_tests(int argc, char** argv); int main(int argc, char** argv) { return run_tests(argc, argv); }")
+
+  if(is_hpx_test)
+    set(main_function "
+#include <hpx/hpx.hpp>
+
+int run_tests(int argc, char **argv);
+
+int hpx_main(int argc, char **argv)
+{
+    run_tests(argc, argv);
+    return hpx::finalize();
+}
+
+int main(int argc, char **argv)
+{
+    return hpx::init(argc, argv);
+}
+")
+  endif()
+
+  if(is_mpi_test)
+    set(main_function "
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_MPI
+#include <mpi.h>
+#include <libgeodecomp/communication/typemaps.h>
+
+int run_tests(int argc, char **argv);
+
+int main(int argc, char **argv)
+{
+    MPI_Init(&argc, &argv);
+    int res = run_tests(argc, argv);
+    MPI_Finalize();
+    return res;
+}
+
+#endif
+")
+  endif()
+
+  if(is_openmp_test)
+    set(main_function "
+int run_tests(int argc, char **argv);
+
+int main(int argc, char **argv)
+{
+    return run_tests(argc, argv);
+}
+")
+  endif()
+  if(is_unit_test)
+    set(main_function "
+int run_tests(int argc, char **argv);
+
+int main(int argc, char **argv)
+{
+    return run_tests(argc, argv);
+}
+")
+  endif()
+
+
+  file(WRITE "main.cpp" "${main_function}")
 
   if(HAS_CUDA_TESTS AND WITH_CUDA)
     cuda_add_executable(${TARGET_UNIT_TEST_EXE} EXCLUDE_FROM_ALL ${HEADERS} ${SOURCES})

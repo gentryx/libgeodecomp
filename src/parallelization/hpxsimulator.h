@@ -161,7 +161,6 @@ public:
 
     static const int DIM = Topology::DIM;
 
-public:
     inline HpxSimulator(
         Initializer<CELL_TYPE> *initializer,
         const float overcommitFactor,

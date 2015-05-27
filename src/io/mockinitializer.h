@@ -5,6 +5,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This Initializer will record basic events.
+ */
 class MockInitializer : public TestInitializer<TestCell<2> >
 {
 public:

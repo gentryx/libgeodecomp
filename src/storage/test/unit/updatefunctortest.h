@@ -126,29 +126,30 @@ LIBFLATARRAY_REGISTER_SOA(MySoATestCell, ((double)(temp))((bool)(alive)))
 
 namespace LibGeoDecomp {
 
+template<class STENCIL>
+class UpdateFunctorTestHelper : public UpdateFunctorTestBase<STENCIL>
+{
+public:
+    using UpdateFunctorTestBase<STENCIL>::DIM;
+    typedef typename UpdateFunctorTestBase<STENCIL>::TestCellType TestCellType;
+    typedef typename UpdateFunctorTestBase<STENCIL>::GridType GridType;
+    typedef STENCIL Stencil;
+
+    virtual void callFunctor(
+        const Region<DIM>& region,
+        const GridType& gridOld,
+        GridType *gridNew,
+        unsigned nanoStep)
+    {
+        UpdateFunctor<TestCellType>()(
+            region, Coord<DIM>(), Coord<DIM>(), gridOld, gridNew, nanoStep);
+    }
+};
+
+
 class UpdateFunctorTest : public CxxTest::TestSuite
 {
 public:
-    template<class STENCIL>
-    class UpdateFunctorTestHelper : public UpdateFunctorTestBase<STENCIL>
-    {
-    public:
-        using UpdateFunctorTestBase<STENCIL>::DIM;
-        typedef typename UpdateFunctorTestBase<STENCIL>::TestCellType TestCellType;
-        typedef typename UpdateFunctorTestBase<STENCIL>::GridType GridType;
-        typedef STENCIL Stencil;
-
-        virtual void callFunctor(
-            const Region<DIM>& region,
-            const GridType& gridOld,
-            GridType *gridNew,
-            unsigned nanoStep)
-        {
-            UpdateFunctor<TestCellType>()(
-                region, Coord<DIM>(), Coord<DIM>(), gridOld, gridNew, nanoStep);
-        }
-    };
-
     void testSelector()
     {
         checkSelector<BasicCell>(

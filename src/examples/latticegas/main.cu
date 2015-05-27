@@ -9,8 +9,6 @@
 #include <libgeodecomp/examples/latticegas/framegrabber.h>
 #include <libgeodecomp/examples/latticegas/flowwidget.h>
 #include <libgeodecomp/examples/latticegas/interactivesimulator.h>
-#include <libgeodecomp/examples/latticegas/interactivesimulatorcpu.h>
-#include <libgeodecomp/examples/latticegas/interactivesimulatorgpu.h>
 #include <libgeodecomp/examples/latticegas/simparams.h>
 
 void testModel()
@@ -90,7 +88,7 @@ int runQtApp(int argc, char **argv)
     flow.resize(1200, 900);
 
     //fixme: make this configurable via simparams
-    InteractiveSimulator *sim = new InteractiveSimulatorGPU(&flow);
+    // InteractiveSimulator *sim = new InteractiveSimulatorGPU(&flow);
     FrameGrabber *grabber = new FrameGrabber(simParamsHost.fakeCamera, &flow);
 
     QTimer *timerFlow = new QTimer(&flow);
@@ -99,18 +97,18 @@ int runQtApp(int argc, char **argv)
 
     QObject::connect(timerInfo, SIGNAL(timeout()),           &flow,   SLOT(info()));
     QObject::connect(timerInfo, SIGNAL(timeout()),           grabber, SLOT(info()));
-    QObject::connect(timerInfo, SIGNAL(timeout()),           sim,     SLOT(info()));
+    // QObject::connect(timerInfo, SIGNAL(timeout()),           sim,     SLOT(info()));
     QObject::connect(timerFlow, SIGNAL(timeout()),           &flow,   SLOT(ping()));
     QObject::connect(timerGrab, SIGNAL(timeout()),           grabber, SLOT(grab()));
 
-    QObject::connect(grabber,   SIGNAL(newFrame(char*, unsigned, unsigned)), 
-                     sim,       SLOT(updateCam( char*, unsigned, unsigned)));
-    QObject::connect(&flow,     SIGNAL(updateImage(unsigned*, unsigned, unsigned)),
-                     sim,       SLOT(renderImage(unsigned*, unsigned, unsigned)));
+    // QObject::connect(grabber,   SIGNAL(newFrame(char*, unsigned, unsigned)), 
+    //                  sim,       SLOT(updateCam( char*, unsigned, unsigned)));
+    // QObject::connect(&flow,     SIGNAL(updateImage(unsigned*, unsigned, unsigned)),
+    //                  sim,       SLOT(renderImage(unsigned*, unsigned, unsigned)));
     QObject::connect(&app,      SIGNAL(lastWindowClosed()),  sim,     SLOT(quit()));
 
     QThreadPool *threadPool = QThreadPool::globalInstance();
-    threadPool->start(sim);
+    // threadPool->start(sim);
 
     grabber->grab();
     timerFlow->start(10);

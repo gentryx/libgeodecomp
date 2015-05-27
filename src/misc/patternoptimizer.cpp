@@ -44,7 +44,6 @@ PatternOptimizer::PatternOptimizer(
 
     // fixme: exceptions in c-tor are evil!
     if (this->stepwidth.size() != this->params.size() ) {
-        // TODO exception
         throw std::invalid_argument("Wrong size of Stepwidth in PatternOptimizer Constructor!");
     }
 
@@ -131,6 +130,7 @@ SimulationParameters PatternOptimizer::operator()(int steps, Evaluator& eval)
     SimulationParameters middle = Optimizer::params;
     std::vector<SimulationParameters> pattern = genPattern(middle);
     std::size_t maxPos = 0;
+    fitness = eval(middle);
     for (int k = 0; k < steps; ++k) {
         pattern = genPattern(middle);
         maxPos = getMaxPos(pattern, eval,maxPos);
@@ -145,7 +145,7 @@ SimulationParameters PatternOptimizer::operator()(int steps, Evaluator& eval)
             middle = pattern[maxPos];
         }
     }
-    //unreachable
+    // unreachable if steps is big enough
     return middle;
 }
 

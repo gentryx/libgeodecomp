@@ -250,7 +250,6 @@ private:
 int main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
-    Typemaps::initializeMaps();
 
     if (MPILayer().size() != 2) {
         std::cerr << "Please run with two MPI processes\n";

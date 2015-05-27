@@ -1,10 +1,14 @@
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <map>
 #include <cstdlib>
+
+using namespace LibGeoDecomp;
 
 class MyDummyElement
 {
@@ -46,51 +50,65 @@ private:
     int val;
 };
 
-std::ostream& operator<< (std::ostream& out, MyDummyElement const & val){
+std::ostream& operator<< (std::ostream& out, const MyDummyElement& val)
+{
     out << val();
     return out;
 }
-
-
-using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
 class UnstructuredGridTest : public CxxTest::TestSuite
 {
+#ifdef LIBGEODECOMP_WITH_CPP14
     UnstructuredGrid<MyDummyElement>* testGrid;
+#endif
 public:
-    void setUp(){
+    void setUp()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         testGrid = new UnstructuredGrid<MyDummyElement>(Coord<1>(10));
 
-        for (int i=0; i < testGrid->getDimensions().x(); ++i){
+        for (int i = 0; i < testGrid->getDimensions().x(); ++i) {
             (*testGrid)[Coord<1>(i)] = MyDummyElement(i);
         }
+#endif
     }
 
-    void tearDown(){
+    void tearDown()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         delete testGrid;
+#endif
     }
 
 
-    void testDefaultConstructor(){
+    void testDefaultConstructor()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<MyDummyElement> g;
         TS_ASSERT_EQUALS(0, (int)g.getDimensions().x());
+#endif
     }
 
-    void testConstructorDefaultInit(){
-        UnstructuredGrid<int> g (Coord<1>(10), 1, -1);
+    void testConstructorDefaultInit()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<int> g(Coord<1>(10), 1, -1);
         TS_ASSERT_EQUALS(Coord<1>(10), g.getDimensions());
         TS_ASSERT_EQUALS(1,  g[4 ]);
         TS_ASSERT_EQUALS(-1, g[11]);
+#endif
     }
 
-    void testOperatorEqual1(){
+    void testOperatorEqual1()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         int dim = testGrid->getDimensions().x();
         UnstructuredGrid<MyDummyElement> other =
             UnstructuredGrid<MyDummyElement>(Coord<1>(dim));
 
-        for(int i = 0; i < dim; ++i) {
+        for (int i = 0; i < dim; ++i) {
             other[i] = testGrid->get(Coord<1>(i));
         }
 
@@ -98,45 +116,53 @@ public:
 
         other[2](-100);
         TS_ASSERT(*testGrid != other);
+#endif
     }
 
-    void testAssimentOperator(){
+    void testAssimentOperator()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         UnstructuredGrid<int> a (Coord<1>(100));
-        for (int i = 0; i<100; i++){
+        for (int i = 0; i < 100; ++i) {
             a[Coord<1>(i)] = i * 200;
         }
 
         UnstructuredGrid<int> b;
         b = a;
 
-        TS_ASSERT_EQUALS(a,a);
-        TS_ASSERT_EQUALS(a,b);
+        TS_ASSERT_EQUALS(a, a);
+        TS_ASSERT_EQUALS(a, b);
 
         b[Coord<1>(55)] = -666;
-        TS_ASSERT_DIFFERS(a,b);
+        TS_ASSERT_DIFFERS(a, b);
+#endif
     }
 
-    void testSetterGetter(){
-        UnstructuredGrid<int> a (Coord<1>(100));
-        for (int i = 0; i<100; i++){
+    void testSetterGetter()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<int> a(Coord<1>(100));
+        for (int i = 0; i < 100; ++i) {
             a[Coord<1>(i)] = i * 200;
         }
 
         UnstructuredGrid<int> b;
         b = a;
 
-        TS_ASSERT_EQUALS(a,a);
-        TS_ASSERT_EQUALS(a,b);
+        TS_ASSERT_EQUALS(a, a);
+        TS_ASSERT_EQUALS(a, b);
 
         b.set(Coord<1>(55),-666);
-        TS_ASSERT_DIFFERS(a,b);
+        TS_ASSERT_DIFFERS(a, b);
 
-        TS_ASSERT_EQUALS(-666,b.get(Coord<1>(55)));
-
+        TS_ASSERT_EQUALS(-666, b.get(Coord<1>(55)));
+#endif
     }
 
-    void testEdgeCell(){
-        UnstructuredGrid<int> foo (Coord<1>(100), 1, -1);
+    void testEdgeCell()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        UnstructuredGrid<int> foo(Coord<1>(100), 1, -1);
         TS_ASSERT_EQUALS(foo.getEdgeElement(), -1);
         TS_ASSERT_EQUALS(foo[Coord<1>(-1)], -1);
 
@@ -147,9 +173,12 @@ public:
         foo.setEdge(-3);
         TS_ASSERT_EQUALS(foo.getEdge(), -3);
         TS_ASSERT_EQUALS(foo[Coord<1>(-1)],-3);
+#endif
     }
 
-    void testAdjacencyMatrix(){
+    void testAdjacencyMatrix()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 128;
         UnstructuredGrid<int, 2, double, 4, 1> *grid =
             new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
@@ -158,7 +187,7 @@ public:
         SellCSigmaSparseMatrixContainer<double,4,1> matrix0 (DIM);
         SellCSigmaSparseMatrixContainer<double,4,1> matrix1 (DIM);
 
-        for (int i=0; i<DIM; ++i){
+        for (int i = 0; i < DIM; ++i) {
             grid->set(Coord<1>(i), i);
 
             adjacenc0 [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
@@ -183,8 +212,8 @@ public:
         TS_ASSERT_EQUALS(matrix1, grid->getAdjacency(1));
 
         delete grid;
+#endif
     }
-
 };
 
 }

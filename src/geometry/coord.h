@@ -61,6 +61,9 @@ namespace LibGeoDecomp {
 template<int DIMENSIONS>
 class Coord;
 
+/**
+ * see above
+ */
 template<>
 class Coord<1>
 {
@@ -240,6 +243,9 @@ private:
     int c[1];
 };
 
+/**
+ * see above
+ */
 template<>
 class Coord<2>
 {
@@ -449,6 +455,9 @@ private:
     int c[2];
 };
 
+/**
+ * see above
+ */
 template<>
 class Coord<3>
 {
@@ -623,7 +632,9 @@ public:
     __host__ __device__
     inline Coord operator/(const int& divisor) const
     {
-        return Coord(x()/ divisor, y() / divisor, z() / divisor);
+        return Coord(x() / divisor,
+                     y() / divisor,
+                     z() / divisor);
     }
 
     __host__ __device__

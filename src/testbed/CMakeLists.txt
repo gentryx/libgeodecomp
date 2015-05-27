@@ -1,4 +1,4 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 
 add_subdirectory(jacobituning)
 add_subdirectory(parallelperformancetests)

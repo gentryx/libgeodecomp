@@ -40,11 +40,8 @@ public:
 
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
-    UpdateGroup()
-    {}
-
-    UpdateGroup(hpx::id_type thisId)
-      : thisId(thisId)
+    UpdateGroup(hpx::id_type thisId = hpx::id_type()) :
+        thisId(thisId)
     {}
 
     struct InitData

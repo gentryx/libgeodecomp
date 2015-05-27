@@ -14,23 +14,29 @@
 // (at least the version that ships with C++ Builder 2009)
 #ifndef __CODEGEARC__
 #include <boost/multi_array.hpp>
-#else
-#include <libgeodecomp/misc/supervector.h>
 #endif
 
-#include <boost/foreach.hpp>
 #include <iostream>
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration, both classes depend on each other
+ */
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
 namespace GridHelpers {
 
+/**
+ * Helper for setting a cuboid domain within a grid
+ */
 template<int DIM>
 class FillCoordBox;
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<1>
 {
@@ -43,6 +49,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<2>
 {
@@ -59,6 +68,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<3>
 {

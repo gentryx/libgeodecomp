@@ -2,7 +2,6 @@
 #define LIBGEODECOMP_STORAGE_SELECTOR_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
@@ -20,6 +19,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward-declaration to resolve cyclic dependency
+ */
 class APITraits;
 
 namespace SelectorHelpers {
@@ -320,21 +322,33 @@ class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 {

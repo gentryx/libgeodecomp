@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_STORAGE_UNSTRUCTUREDGRID_H
 #define LIBGEODECOMP_STORAGE_UNSTRUCTUREDGRID_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
@@ -12,18 +15,18 @@
 
 #include <iostream>
 #include <vector>
-#include <list>
+#include <map>
 #include <utility>
-
+#include <cassert>
 
 namespace LibGeoDecomp {
 
 /**
- * A unstructuredgrid for irregular structures
+ * A grid type for irregular structures
  */
 template<typename ELEMENT_TYPE, std::size_t MATRICES=1,
          typename VALUE_TYPE=double, int C=64, int SIGMA=1>
-class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1>
+class UnstructuredGrid final : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
     typedef std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> > NeighborList;
@@ -38,9 +41,23 @@ public:
         edgeElement(edgeElement),
         dimension(dim)
     {
-        for (std::size_t i=0; i < MATRICES; ++i) {
+        for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] =
-                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> (dim.x());
+                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dim.x());
+        }
+    }
+
+    explicit
+    UnstructuredGrid(const CoordBox<DIM> box,
+                     const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
+                     const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        elements(box.dimensions.x(), defaultElement),
+        edgeElement(edgeElement),
+        dimension(box.dimensions)
+    {
+        for (std::size_t i = 0; i < MATRICES; ++i) {
+            matrices[i] =
+                SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA>(dimension.x());
         }
     }
 
@@ -53,61 +70,64 @@ public:
         edgeElement = other.edgeElement;
         dimension = other.dimension;
 
-        for (std::size_t i=0; i<MATRICES; ++i){
+        for (std::size_t i = 0; i < MATRICES; ++i) {
             matrices[i] = other.matrices[i];
         }
 
         return *this;
     }
 
+    void setCompleteAdjacency(std::size_t matrixID, std::size_t matrixSize,
+                              const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    {
+        assert(matrixID < MATRICES);
+        matrices[matrixID].initFromMatrix(matrixSize, matrix);
+    }
+
     /**
      * iterator musst be an interator over pair< Coord<2>, VALUE_TYPE >
      */
     template<typename ITERATOR>
-    void setAdjacency(std::size_t const  matrixID, ITERATOR start,
-                      const ITERATOR end){
-        if (matrixID >= MATRICES){
-            throw std::invalid_argument("matrixID not available");
-        }
+    void setAdjacency(std::size_t const  matrixID, const ITERATOR& start,
+                      const ITERATOR& end)
+    {
+        assert(matrixID < MATRICES);
         for (ITERATOR i = start; i != end; ++i) {
-
             Coord<2> c = i->first;
             matrices[matrixID].addPoint(c.x(), c.y(), i->second);
         }
     }
 
-    const SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacency(std::size_t const matrixID) const {
-        if (matrixID >= MATRICES){
-            throw std::invalid_argument("matrixID not available");
-        }
-
+    inline
+    const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
+    getAdjacency(std::size_t const matrixID) const
+    {
+        assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
 
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE,C,SIGMA> &
-    getAdjacency(std::size_t const matrixID){
-        if (matrixID >= MATRICES){
-            throw std::invalid_argument("matrixID not available");
-        }
-
+    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>&
+    getAdjacency(std::size_t const matrixID)
+    {
+        assert(matrixID < MATRICES);
         return matrices[matrixID];
     }
+
     /**
-     * returns a list of pairs representing the neighborhood of center element.
-     * the first element of the pair is the ELEMENT_TYPE
+     * Returns a list of pairs representing the neighborhood of center element.
+     * The first element of the pair is the ELEMENT_TYPE
      * and the secound the ADJACENCY_TYPE.
-     * The first Element of the list is the center element it selfe.
-     * if center element does not exist the EdggeElement ist reurnt.
-     * In bothe cases ADJACENCY_TYPE = -1
+     * The first Element of the list is the center element it self.
+     * If center element does not exist the EdggeElement is returned.
+     * In both cases ADJACENCY_TYPE = -1
      */
     inline NeighborList getNeighborhood(const Coord<DIM>& center) const
     {
         NeighborList neighborhood;
 
         if (boundingBox().inBounds(center)) {
-            neighborhood.push_back( std::make_pair( *this[center], -1 ) );
-            std::vector< std::pair<int, VALUE_TYPE> > neighbor =
+            neighborhood.push_back(std::make_pair(*this[center], -1));
+            std::vector<std::pair<int, VALUE_TYPE> > neighbor =
                 matrices[0].getRow(center.x());
 
             for (NeighborListIterator it = neighbor.begin();
@@ -115,9 +135,8 @@ public:
                  ++it) {
                 neighborhood.push_back(std::make_pair((*this)[it->first], it->second));
             }
-
         } else {
-            neighborhood.push_back( std::make_pair( getEdgeElement(), -1) );
+            neighborhood.push_back(std::make_pair(getEdgeElement(), -1));
         }
 
         return neighborhood;
@@ -130,7 +149,7 @@ public:
 
     inline const ELEMENT_TYPE& operator[](const int y) const
     {
-        if ( y < 0 || y >= dimension.x()){
+        if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
         } else {
             return elements[y];
@@ -139,7 +158,7 @@ public:
 
     inline ELEMENT_TYPE& operator[](const int y)
     {
-        if ( y < 0 || y >= dimension.x()){
+        if (y < 0 || y >= dimension.x()) {
             return getEdgeElement();
         } else {
             return elements[y];
@@ -189,7 +208,7 @@ public:
 
         CoordBox<DIM> box = boundingBox();
         for (typename CoordBox<DIM>::Iterator i = box.begin();
-                i != box.end(); ++i) {
+             i != box.end(); ++i) {
             if ((*this)[*i] != other.get(*i)) {
                 return false;
             }
@@ -280,7 +299,7 @@ public:
 
     virtual CoordBox<DIM> boundingBox() const
     {
-        return CoordBox<DIM>( Coord<DIM>(), dimension );
+        return CoordBox<DIM>(Coord<DIM>(), dimension);
     }
 
 protected:
@@ -299,20 +318,18 @@ protected:
         const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
-                i != region.endStreak(); ++i) {
+             i != region.endStreak(); ++i) {
             selector.copyMemberIn(source, &(*this)[i->origin], i->length());
             source += selector.sizeOfExternal() * i->length();
         }
     }
 
-
 private:
     std::vector<ELEMENT_TYPE> elements;
     // TODO wrapper for different types of sell c sigma containers
-    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>  matrices[MATRICES];
+    SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> matrices[MATRICES];
     ELEMENT_TYPE edgeElement;
     Coord<DIM> dimension;
-
 };
 
 template<typename _CharT, typename _Traits, typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
@@ -326,4 +343,5 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif

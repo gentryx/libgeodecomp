@@ -1,225 +1,4 @@
-#============= 1. FIND PACKAGES WE DEPEND ON =========================
-
-find_package(HPX)
-
-if(NOT HPX_FOUND)
-  if(NOT DEFINED BOOST_ROOT)
-    # deduce Boost location from environment (e.g. on woody.rrze.uni-erlangen.de)
-    set(BOOST_ENV_LIBDIR "$ENV{BOOST_LIBDIR}")
-    if(BOOST_ENV_LIBDIR)
-      set(Boost_NO_SYSTEM_PATHS true)
-      set(BOOST_ROOT "$ENV{BOOST_LIBDIR}/../")
-      set(Boost_LIBRARY_DIRS "$ENV{BOOST_LIBDIR}")
-      set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
-    endif()
-  endif()
-
-  # mandatory Boost libs go into the first line, optional ones into
-  # their own call. This avoids leaving out any available lib during
-  # link time. The reason for this ugly multi-stage discovery is the
-  # following: since CMAKE 2.8.11 each call to find_package(Boost...)
-  # will reset Boost_LIBRARIES.
-  find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
-  set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS serialization)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS thread)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS move)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-else()
-  # If HPX was found, we use the Boost libraries found by HPX
-  set(ALL_BOOST_LIBS
-    ${HPX_BOOST_DATE_TIME_LIBRARY}
-    ${HPX_BOOST_FILESYSTEM_LIBRARY}
-    ${HPX_BOOST_SYSTEM_LIBRARY}
-    ${HPX_BOOST_SERIALIZATION_LIBRARY}
-    ${HPX_BOOST_THREAD_LIBRARY}
-  )
-  set(Boost_DATE_TIME_FOUND true)
-  set(Boost_FILESYSTEM_FOUND true)
-  set(Boost_SYSTEM_FOUND true)
-  set(Boost_SERIALIZATION_FOUND true)
-  set(Boost_THREAD_FOUND true)
-endif()
-
-find_package(Boost COMPONENTS mpi)
-set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
-
-# search for external LibFlatArray, but -- if none was found -- default to bundled version:
-find_package(libflatarray QUIET)
-if(NOT libflatarray_FOUND)
-  set(libflatarray_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray")
-  find_package(libflatarray)
-  # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
-  # not be exported during install in any case (the build tree must be
-  # considered a temporary directory, and CMake would complain).
-  list(APPEND BUILD_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
-else()
-  # if LibFlatArray was found outside, we'll assume we're not using
-  # the bundled version and we need export the relevant directory:
-  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
-endif()
-
-# currently VisIt only supports Python 2.x. This (undocumented?)
-# feature of CMake allows us to avoid Python 3.y.
-set(PythonLibs_FIND_VERSION 2)
-# setting this variable is required since CMake 3.0
-set(PythonLibs_FIND_VERSION_MAJOR 2)
-
-find_package(CUDA)
-find_package(OpenCL)
-find_package(MPI)
-find_package(OpenCV)
-find_package(OpenMP)
-find_package(PythonLibs)
-find_package(Ruby)
-find_package(SCOTCH)
-find_package(Silo)
-find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
-find_package(VisIt)
-
-# if a package was not found it's safer to set the corresponding
-# variable to false, this avoids undefined/unintended behavior in some
-# cases.
-if(NOT DEFINED Boost_SERIALIZATION_FOUND)
-  set(Boost_SERIALIZATION_FOUND false)
-endif()
-
-if(NOT DEFINED Boost_MPI_FOUND)
-  set(Boost_MPI_FOUND false)
-endif()
-
-if(NOT DEFINED Boost_MOVE_FOUND)
-  set(Boost_MOVE_FOUND false)
-endif()
-
-if(NOT DEFINED CUDA_FOUND)
-  set(CUDA_FOUND false)
-endif()
-
-if(NOT DEFINED HPX_FOUND)
-  set(HPX_FOUND false)
-endif()
-
-if(NOT DEFINED OpenCV_FOUND)
-  set(OpenCV_FOUND false)
-endif()
-
-if(NOT DEFINED OpenMP_FOUND)
-  set(OpenMP_FOUND false)
-endif()
-
-if(NOT DEFINED PYTHONLIBS_FOUND)
-  set(PYTHONLIBS_FOUND false)
-endif()
-
-if(NOT DEFINED QT4_FOUND)
-  set(QT4_FOUND false)
-endif()
-
-if(NOT DEFINED RUBY_FOUND)
-  set(RUBY_FOUND false)
-endif()
-
-if(NOT DEFINED SCOTCH_FOUND)
-  set(SCOTCH_FOUND false)
-endif()
-
-if(NOT DEFINED Silo_FOUND)
-  set(Silo_FOUND false)
-endif()
-
-#============= 2. DETECT DEFAULTS ====================================
-set(RELEASE false)
-detect_distro()
-
-# compute default flags:
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
-
-check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
-if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
-  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
-endif()
-
-# configure whether the dreaded typemap-generator will run:
-set(DEFAULT_TYPEMAP_GENERATION false)
-if(NOT RELEASE)
-  set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
-endif()
-
-execute_process(
-  COMMAND uname -m
-  OUTPUT_VARIABLE MACHINE_ARCH
-  ERROR_QUIET)
-
-set(AMD64_LINUX false)
-if (MACHINE_ARCH MATCHES "x86_64")
-  set(AMD64_LINUX true)
-endif()
-
-#============= 3. CONFIGURABLE BUILD OPTIONS =========================
-add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
-
-add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
-
-add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
-
-add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
-
-# setting DEBUG_LEVEL to " 0" is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
-add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" " 0" true)
-
-add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
-
-add_config_option(LIB_DIR "Library subdirectory (e.g. lib, lib32, lib64), useful for multilib builds" "lib" false)
-
-add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
-
-add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
-
-add_config_option(WITH_BOOST_ASIO "Some Boost distributions ship too old versions of ASIO which are not compatible with LibGeoDecomp. Use this flag to switch ASIO-related code off." true true)
-
-add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
-
-add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
-
-add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
-
-add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
-
-add_config_option(WITH_FORTRAN "Build Fortran examples/utilities, too" false true)
-
-add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
-
-add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
-
-add_config_option(WITH_LAX_VISIT_TESTS "Remove some of the stricter assertions from VisIt related unit tests -- VisIt sometimes produces erroneous results when running on a remote machine (e.g. for autobuilds)" false true)
-
-add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
-
-add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
-
-add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
-
-add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
-
-add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
-
-add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
-
-add_config_option(WITH_SILO "Silo is a flexible output library developed by LLNL." ${Silo_FOUND} true)
-
-add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
-
-add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
-
-add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
-
-print_options()
-dump_config("config.h")
-
-#============= 4. GENERAL CONFIGURATION ==============================
+#============= 0. GENERAL CONFIGURATION ==============================
 # LIBDIRS is used to find source files and headers
 set(LIBDIRS communication io geometry geometry/partitions loadbalancer misc parallelization parallelization/hiparsimulator parallelization/hiparsimulator parallelization/hpxsimulator storage)
 # AUXDIRS lists auxiliary directories to be included in the main
@@ -234,7 +13,7 @@ set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${ADDITIONAL_COMPILE_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
 
 list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 
 if(WITH_BOOST_MPI)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
@@ -253,11 +32,24 @@ if(WITH_HPX)
   link_directories(${HPX_LIBRARY_DIR})
   add_definitions(-DHPX_LIMIT=10 ${HPX_CXX_COMPILE_FLAGS})
   set(HPX_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/${LIB_DIR}/hpx:${CMAKE_BINARY_DIR}/src")
+  set(HPXRUN "${HPX_PREFIX}/bin/hpxrun.py")
+
+  set(HPX_LIB_SUFFIX "")
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
+    add_definitions(-DHPX_DEBUG)
+  endif()
 endif()
 
 if(WITH_MPI)
   add_definitions(${MPI_COMPILE_FLAGS})
   list(APPEND INSTALL_INCLUDE_DIRECTORIES ${MPI_INCLUDE_PATH})
+endif()
+
+if(WITH_QT)
+  include(${QT_USE_FILE})
+  add_definitions(-DQT_NO_KEYWORDS)
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${QT_HEADERS_DIR})
 endif()
 
 if(WITH_SCOTCH)
@@ -269,12 +61,17 @@ if(WITH_SILO)
 endif()
 
 if(WITH_THREADS)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+if(WITH_CPP14)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
 endif()
 
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 
-#============= 5. SANITY CHECKS ======================================
+#============= 1. SANITY CHECKS ======================================
 # import settings detected by packages to decouple from their
 # interfaces, perform sanity checks to match selected options and
 # detected environment...
@@ -333,7 +130,7 @@ if(WITH_SILO AND NOT Silo_FOUND)
 endif()
 
 if(WITH_THREADS AND NOT OPENMP_FOUND)
-message(FATAL_ERROR "WITH_THREADs selected, but no OpenMP support detected.")
+message(FATAL_ERROR "WITH_THREADS selected, but no OpenMP support detected.")
 endif()
 
 if(WITH_VISIT)
@@ -354,28 +151,16 @@ else(WIN32)
   set(LOCAL_LIBGEODECOMP_LINK_LIB geodecomp)
 endif(WIN32)
 
-if(WITH_HPX)
-  set(HPX_LIB_SUFFIX "")
-  if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    set(HPX_LIB_SUFFIX ${HPX_DEBUG_POSTFIX})
-    add_definitions(-DHPX_DEBUG)
-  endif()
-endif()
-
-if(WITH_QT)
-  include(${QT_USE_FILE})
-  add_definitions(-DQT_NO_KEYWORDS)
-  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${QT_HEADERS_DIR})
-endif()
-
 include_directories(${INSTALL_INCLUDE_DIRECTORIES} ${BUILD_INCLUDE_DIRECTORIES})
 
-#============= 6. TOP-LEVEL TARGETS ==================================
-add_custom_target(check echo "Tests passed.")
+#============= 2. TOP-LEVEL TARGETS ==================================
+if(NOT TARGET check)
+  add_custom_target(check echo "Tests passed.")
+endif()
 add_custom_target(code_generation ALL echo "Code generation done.")
 add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
 
-#============= 7. CPACK INSTALLER STUFF ==============================
+#============= 3. CPACK INSTALLER STUFF ==============================
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${PACKAGE_NAME})
 set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
@@ -414,7 +199,7 @@ endif(WIN32 AND NOT UNIX)
 
 include(CPack)
 
-#============= 8. RECURSE SUBDIRS ====================================
+#============= 4. RECURSE SUBDIRS ====================================
 set(HEADERS "")
 set(SOURCES "")
 
@@ -428,7 +213,7 @@ foreach(dir ${AUXDIRS})
   include(${dir}/aux.cmake)
 endforeach(dir)
 
-#============= 9. ADD THE MAIN LIBRARY ===============================
+#============= 5. ADD THE MAIN LIBRARY ===============================
 if(WIN32)
   add_library(local_libgeodecomp_lib STATIC IMPORTED)
   set_property(TARGET local_libgeodecomp_lib PROPERTY IMPORTED_LOCATION ${LIBGEODECOMP_BINARY_DIR}/libgeodecomp/geodecomp.lib)
@@ -510,7 +295,7 @@ endif()
 
 target_link_libraries(geodecomp ${LIBGEODECOMP_LINK_LIBRARIES})
 
-#============= 10. INSTALLER CONFIG ==================================
+#============= 6. INSTALLER CONFIG ===================================
 install(
   TARGETS geodecomp
   EXPORT ${PACKAGE_NAME}-targets
@@ -527,20 +312,6 @@ foreach(dir ${LIBDIRS})
   include(${dir}/auto.cmake)
   install(FILES ${HEADERS} DESTINATION include/${PACKAGE_NAME}/${dir})
 endforeach(dir)
-
-# install libflatarray, too
-file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/*.hpp")
-foreach(i ${HEADERS})
-  install(FILES ${i} DESTINATION include/libflatarray)
-endforeach()
-file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/detail/*.hpp")
-foreach(i ${HEADERS})
-  install(FILES ${i} DESTINATION include/libflatarray/detail)
-endforeach()
-file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libflatarray/src/testbed/*.hpp")
-foreach(i ${HEADERS})
-  install(FILES ${i} DESTINATION include/libflatarray/testbed)
-endforeach()
 
 # link against the libs we need
 set(INSTALLER_LINK_FLAGS "-L${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -Wl,-rpath,${CMAKE_INSTALL_PREFIX}/${LIB_DIR} -lgeodecomp ")
@@ -652,7 +423,7 @@ install(
 
 install(EXPORT ${PACKAGE_NAME}-targets DESTINATION ${ConfigPackageLocation})
 
-#============= 11. TYPEMAPS GENERATION ===============================
+#============= 7. TYPEMAPS GENERATION ================================
 if (WITH_TYPEMAPS)
   set_directory_properties(PROPERTIES CLEAN_NO_CUSTOM true)
 

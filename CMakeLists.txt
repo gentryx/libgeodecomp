@@ -1,8 +1,9 @@
+#============= 0. GENERIC CONFIGURATION ==============================
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 
 set(PACKAGE_NAME libgeodecomp)
 set(PACKAGE_VERSION "0.4.0")
-set(PACKAGE_VENDOR "Chair for Computer Science 3, FAU Erlangen, Germany")
+set(PACKAGE_VENDOR "Ste||ar Group")
 set(PACKAGE_HOMEPAGE "http:\\\\www.libgeodecomp.org")
 set(PACKAGE_EMAIL "users@libgeodecomp.org")
 project(${PACKAGE_NAME})
@@ -17,8 +18,231 @@ endif()
 
 get_directory_property(lgd_has_parent PARENT_DIRECTORY)
 
+#============= 1. FIND PACKAGES WE DEPEND ON =========================
+if(NOT HPX_FOUND)
+  find_package(HPX)
+
+  if(NOT DEFINED BOOST_ROOT)
+    # deduce Boost location from environment (e.g. on woody.rrze.uni-erlangen.de)
+    set(BOOST_ENV_LIBDIR "$ENV{BOOST_LIBDIR}")
+    if(BOOST_ENV_LIBDIR)
+      set(Boost_NO_SYSTEM_PATHS true)
+      set(BOOST_ROOT "$ENV{BOOST_LIBDIR}/../")
+      set(Boost_LIBRARY_DIRS "$ENV{BOOST_LIBDIR}")
+      set(Boost_INCLUDE_DIR  "$ENV{BOOST_INCDIR}")
+    endif()
+  endif()
+
+  # mandatory Boost libs go into the first line, optional ones into
+  # their own call. This avoids leaving out any available lib during
+  # link time. The reason for this ugly multi-stage discovery is the
+  # following: since CMAKE 2.8.11 each call to find_package(Boost...)
+  # will reset Boost_LIBRARIES.
+  find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
+  set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
+  find_package(Boost COMPONENTS serialization)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+  find_package(Boost COMPONENTS thread)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+  find_package(Boost COMPONENTS move)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+else()
+  # If HPX was found, we use the Boost libraries found by HPX
+  set(ALL_BOOST_LIBS
+    ${HPX_BOOST_DATE_TIME_LIBRARY}
+    ${HPX_BOOST_FILESYSTEM_LIBRARY}
+    ${HPX_BOOST_SYSTEM_LIBRARY}
+    ${HPX_BOOST_SERIALIZATION_LIBRARY}
+    ${HPX_BOOST_THREAD_LIBRARY}
+  )
+  set(Boost_DATE_TIME_FOUND true)
+  set(Boost_FILESYSTEM_FOUND true)
+  set(Boost_SYSTEM_FOUND true)
+  set(Boost_SERIALIZATION_FOUND true)
+  set(Boost_THREAD_FOUND true)
+endif()
+
+find_package(Boost COMPONENTS mpi)
+set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
+
+# search for external LibFlatArray, but -- if none was found -- default to bundled version:
+find_package(libflatarray QUIET)
+if(NOT libflatarray_FOUND)
+  add_subdirectory(lib/libflatarray)
+  # # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
+  # # not be exported during install in any case (the build tree must be
+  # # considered a temporary directory, and CMake would complain).
+  list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/src")
+else()
+  # if LibFlatArray was found outside, we'll assume we're not using
+  # the bundled version and we need export the relevant directory:
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
+endif()
+
+# currently VisIt only supports Python 2.x. This (undocumented?)
+# feature of CMake allows us to avoid Python 3.y.
+set(PythonLibs_FIND_VERSION 2)
+# setting this variable is required since CMake 3.0
+set(PythonLibs_FIND_VERSION_MAJOR 2)
+
+find_package(CUDA)
+find_package(OpenCL)
+find_package(MPI)
+find_package(OpenCV)
+find_package(OpenMP)
+find_package(PythonLibs)
+find_package(Ruby)
+find_package(SCOTCH)
+find_package(Silo)
+find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
+find_package(VisIt)
+
+# if a package was not found it's safer to set the corresponding
+# variable to false, this avoids undefined/unintended behavior in some
+# cases.
+if(NOT DEFINED Boost_SERIALIZATION_FOUND)
+  set(Boost_SERIALIZATION_FOUND false)
+endif()
+
+if(NOT DEFINED Boost_MPI_FOUND)
+  set(Boost_MPI_FOUND false)
+endif()
+
+if(NOT DEFINED Boost_MOVE_FOUND)
+  set(Boost_MOVE_FOUND false)
+endif()
+
+if(NOT DEFINED CUDA_FOUND)
+  set(CUDA_FOUND false)
+endif()
+
+if(NOT DEFINED HPX_FOUND)
+  set(HPX_FOUND false)
+endif()
+
+if(NOT DEFINED OpenCV_FOUND)
+  set(OpenCV_FOUND false)
+endif()
+
+if(NOT DEFINED OpenMP_FOUND)
+  set(OpenMP_FOUND false)
+endif()
+
+if(NOT DEFINED PYTHONLIBS_FOUND)
+  set(PYTHONLIBS_FOUND false)
+endif()
+
+if(NOT DEFINED QT4_FOUND)
+  set(QT4_FOUND false)
+endif()
+
+if(NOT DEFINED RUBY_FOUND)
+  set(RUBY_FOUND false)
+endif()
+
+if(NOT DEFINED SCOTCH_FOUND)
+  set(SCOTCH_FOUND false)
+endif()
+
+if(NOT DEFINED Silo_FOUND)
+  set(Silo_FOUND false)
+endif()
+
+#============= 2. DETECT DEFAULTS ====================================
+set(RELEASE false)
+lgd_detect_distro()
+
+# compute default flags:
+set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
+
+check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
+if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
+  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
+endif()
+
+# configure whether the dreaded typemap-generator will run:
+set(DEFAULT_TYPEMAP_GENERATION false)
+if(NOT RELEASE)
+  set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+endif()
+
+execute_process(
+  COMMAND uname -m
+  OUTPUT_VARIABLE MACHINE_ARCH
+  ERROR_QUIET)
+
+set(AMD64_LINUX false)
+if (MACHINE_ARCH MATCHES "x86_64")
+  set(AMD64_LINUX true)
+endif()
+
+#============= 3. CONFIGURABLE BUILD OPTIONS =========================
+lgd_add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
+
+lgd_add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
+
+lgd_add_config_option(CAKE_CXX_COMPILER "Select the C++ compiler" ${CMAKE_CXX_COMPILER} false)
+
+lgd_add_config_option(CMAKE_INSTALL_PREFIX "Path for installation" "/usr/local" false)
+
+# setting DEBUG_LEVEL to " 0" is a hack to ensure it's included in the config header, as just "0" would evaluate to false (see util.cmake)
+lgd_add_config_option(DEBUG_LEVEL "Configure the amount/verbosity of debug output" " 0" true)
+
+lgd_add_config_option(LIB_LINKAGE_TYPE "Controls which type of library to build. Suggested: SHARED on Linux (creates a shared object \"libgeodecomp.so\"), STATIC should work for builds on Cray and Windows." "SHARED" false)
+
+lgd_add_config_option(LIB_DIR "Library subdirectory (e.g. lib, lib32, lib64), useful for multilib builds" "lib" false)
+
+lgd_add_config_option(LIMIT_TESTS "Limit the directories of tests to run. Only tests matching the specified pattern will be run." false false)
+
+lgd_add_config_option(UNITEXEC "May be used to specify a wrapper which then calls a unit test executable. Handy if for instance the unit tests shall be run on a remote machine." "" false)
+
+lgd_add_config_option(WITH_BOOST_ASIO "Some Boost distributions ship too old versions of ASIO which are not compatible with LibGeoDecomp. Use this flag to switch ASIO-related code off." true true)
+
+lgd_add_config_option(WITH_BOOST_MOVE "Enable/disable Boost.Move for move semantics (e.g. to avoid copies of vectors)." ${Boost_MOVE_FOUND} true)
+
+lgd_add_config_option(WITH_BOOST_MPI "Enable/disable Boost.MPI related code." ${Boost_MPI_FOUND} true)
+
+lgd_add_config_option(WITH_BOOST_SERIALIZATION "Explicitly disable Boost.Serialization, which isn't available on some machines (e.g. woody.rrze.uni-erlangen.de). Don't do this if you need the HPX backend." ${Boost_SERIALIZATION_FOUND} true)
+
+lgd_add_config_option(WITH_CUDA "Enable modules which harness Nvidia CUDA GPUs" ${CUDA_FOUND} true)
+
+lgd_add_config_option(WITH_FORTRAN "Build Fortran examples/utilities, too" false true)
+
+lgd_add_config_option(WITH_HPX "Build those modules which require HPX" ${HPX_FOUND} true)
+
+lgd_add_config_option(WITH_INTRINSICS "Switch on/off the code parts which require SSE or AVX intrinsics" ${AMD64_LINUX} true)
+
+lgd_add_config_option(WITH_LAX_VISIT_TESTS "Remove some of the stricter assertions from VisIt related unit tests -- VisIt sometimes produces erroneous results when running on a remote machine (e.g. for autobuilds)" false true)
+
+lgd_add_config_option(WITH_LIBPTHREAD "Use this option to avoid linking against libpthread but instead adding -pthread to the compiler options (the former is required for CUDA when using nvcc, the latter for Android with gcc)." true false)
+
+lgd_add_config_option(WITH_MPI "If set, all MPI related components will be built. This option is required for the MPI unit tests." ${MPI_FOUND} true)
+
+lgd_add_config_option(WITH_OPENCL "Enable modules for delegating to OpenCL devices" false true)
+
+lgd_add_config_option(WITH_OPENCV "Build those modules which require OpenCV" ${OpenCV_FOUND} false)
+
+lgd_add_config_option(WITH_QT "Build example codes which rely on QT4 for the GUI" ${QT4_FOUND} true)
+
+lgd_add_config_option(WITH_SCOTCH "Enables LibGeoDecomp to use Scotch and PT-Scotch for domain decomposition." ${SCOTCH_FOUND} true)
+
+lgd_add_config_option(WITH_SILO "Silo is a flexible output library developed by LLNL." ${Silo_FOUND} true)
+
+lgd_add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g. boost::thread)" true true)
+
+lgd_add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
+
+lgd_add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
+
+lgd_add_config_option(WITH_CPP14 "LibGeoDecomp is largely written in C++98, but some components use language features from a newer standard. This option will enable those." false true)
+
+lgd_print_options()
+lgd_dump_config("config.h")
+
+#============= 4. RECURSE INTO SUBDIRECTORIES ========================
 add_subdirectory(src)
 
+#============= 5. EXPORT SETTINGS FOR NESTED USE =====================
 if(lgd_has_parent)
   # export this for users who bundle a checkout of LibGeoDecomp in their own CMake source tree
   set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)

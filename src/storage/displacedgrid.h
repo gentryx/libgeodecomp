@@ -113,9 +113,9 @@ public:
 
     virtual void set(const Streak<DIM>& streak, const CELL_TYPE *cells)
     {
-	delegate.set(Streak<DIM>(streak.origin - origin,
-				 streak.endX - origin.x()),
-		     cells);
+        delegate.set(Streak<DIM>(streak.origin - origin,
+                                 streak.endX - origin.x()),
+                     cells);
     }
 
     virtual CELL_TYPE get(const Coord<DIM>& coord) const
@@ -125,9 +125,9 @@ public:
 
     virtual void get(const Streak<DIM>& streak, CELL_TYPE *cells) const
     {
-	delegate.get(Streak<DIM>(streak.origin - origin,
-				 streak.endX - origin.x()),
-		     cells);
+        delegate.get(Streak<DIM>(streak.origin - origin,
+                                 streak.endX - origin.x()),
+                     cells);
     }
 
     virtual void setEdge(const CELL_TYPE& cell)

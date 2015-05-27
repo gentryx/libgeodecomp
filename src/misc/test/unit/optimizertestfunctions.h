@@ -221,6 +221,27 @@ public:
                 + (x - 1) * (x - 1));
         }
     };
+
+    class Rosenbrock2DFunctionDouble : public TestableEvaluator
+    {
+    public:
+        Rosenbrock2DFunctionDouble()
+        {
+            maxima.push_back(3000);
+        }
+
+        double operator()(const SimulationParameters& params)
+        {
+            ++calls;
+            double x = params["x"];
+            double y = params["y"];
+            x = x/500;
+            y = y/500;
+            return 3000 - (100 * (y - x * x) * (y -x * x)
+                + (x - 1) * (x - 1));
+        }
+    };
+
     class Rosenbrock5DFunction : public TestableEvaluator
     {
     public:

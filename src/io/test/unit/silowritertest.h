@@ -315,9 +315,11 @@ public:
 
         // plot
         Py_Initialize();
-        PyRun_SimpleString(visitScript.c_str());
-        Py_Finalize();
 
+        int rc = PyRun_SimpleString(visitScript.c_str());
+        TS_ASSERT_EQUALS(rc, 0);
+
+        Py_Finalize();
         removeFile(siloFile1);
     }
 

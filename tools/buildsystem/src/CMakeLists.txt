@@ -24,7 +24,7 @@ set(AUXDIRS)
 # set(AUXDIRS misc/testbed/cell/spustuff)
 set(SUBDIRS examples io loadbalancer misc mpilayer parallelization testbed)
 
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 
 if(WIN32)
   add_library(local_libgeodecomp_lib STATIC IMPORTED)

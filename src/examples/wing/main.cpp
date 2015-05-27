@@ -461,7 +461,6 @@ private:
 int main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
-    Typemaps::initializeMaps();
 
     MPI_Aint displacements[] = { 0 };
     MPI_Datatype memberTypes[] = { MPI_CHAR };
