@@ -4,7 +4,7 @@
 
 using namespace LibGeoDecomp;
 
-class MySoATestCell
+class MySoATestCellWithTwoDoubles
 {
 public:
     class API :
@@ -16,7 +16,7 @@ public:
     {};
 
     inline
-    MySoATestCell(const double valA = 0, const double valB = 0) :
+    MySoATestCellWithTwoDoubles(const double valA = 0, const double valB = 0) :
         valA(valA),
         valB(valB)
     {}
@@ -46,7 +46,7 @@ public:
 };
 
 LIBFLATARRAY_REGISTER_SOA(
-    MySoATestCell,
+    MySoATestCellWithTwoDoubles,
     ((double)(valA))
     ((double)(valB)))
 
@@ -61,13 +61,13 @@ public:
     {
         CoordBox<3> box(Coord<3>(10, 20, 30), Coord<3>(200, 100, 50));
 
-        MySoATestCell defaultCell(666, 777);
-        MySoATestCell edgeCell(-1, -1);
-        SoAGrid<MySoATestCell, Topologies::Torus<3>::Topology> gridOld(box, defaultCell, edgeCell);
-        SoAGrid<MySoATestCell, Topologies::Torus<3>::Topology> gridNew(box, defaultCell, edgeCell);
+        MySoATestCellWithTwoDoubles defaultCell(666, 777);
+        MySoATestCellWithTwoDoubles edgeCell(-1, -1);
+        SoAGrid<MySoATestCellWithTwoDoubles, Topologies::Torus<3>::Topology> gridOld(box, defaultCell, edgeCell);
+        SoAGrid<MySoATestCellWithTwoDoubles, Topologies::Torus<3>::Topology> gridNew(box, defaultCell, edgeCell);
 
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
-            gridOld.set(*i, MySoATestCell(i->x() + i->y() * 1000.0 + i->z() * 1000 * 1000.0));
+            gridOld.set(*i, MySoATestCellWithTwoDoubles(i->x() + i->y() * 1000.0 + i->z() * 1000 * 1000.0));
         }
 
         Region<3> region;
@@ -84,11 +84,11 @@ public:
         CoordBox<3> boxOld = gridOld.boundingBox();
         Coord<3> offsetOld = -boxOld.origin;
         Coord<3> offsetNew = -boxNew.origin;
-        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCell>(
+        gridOld.callback(&gridNew, FixedNeighborhoodUpdateFunctor<MySoATestCellWithTwoDoubles>(
                              &region, &offsetOld, &offsetNew, &boxNew.dimensions, 0));
 
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {
-            MySoATestCell cell = gridNew.get(*i);
+            MySoATestCellWithTwoDoubles cell = gridNew.get(*i);
 
             Coord<3> sum;
             sum += normalize(*i + Coord<3>( 0,  0, -1), box);
