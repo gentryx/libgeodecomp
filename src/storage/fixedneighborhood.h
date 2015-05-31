@@ -62,8 +62,8 @@ public:
         offsetNorth(offsetNorth)
     {}
 
-    __host__ __device__
     template<int X, int Y, int Z>
+    __host__ __device__
     const SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)>
     operator[](FixedCoord<X, Y, Z>) const
     {
