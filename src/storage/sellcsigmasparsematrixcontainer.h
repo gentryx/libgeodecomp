@@ -67,9 +67,6 @@ public:
         }
 
         // map sorting scope
-        for (int i = 0; i < rowsPadded; ++i) {
-            realRowToSorted[i] = i;
-        }
         for (int nSigma = 0; nSigma < numberOfSigmas; ++nSigma) {
             const int numberOfRows = std::min(SIGMA, rowsPadded - nSigma * SIGMA);
             std::vector<SortItem> lengths(numberOfRows);
