@@ -371,18 +371,13 @@ std::string ML   = "ML_Geer.mtx";
 
 int main(int argc, char **argv)
 {
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << " [-q,--quick] REVISION CUDA_DEVICE\n";
+    if (argc != 2) {
+        std::cerr << "usage: " << argv[0] << "REVISION\n";
         return 1;
     }
 
     int argumentIndex = 1;
     std::string revision = argv[argumentIndex + 0];
-
-    std::stringstream s;
-    s << argv[argumentIndex + 1];
-    int cudaDevice;
-    s >> cudaDevice;
 
     LibFlatArray::evaluate eval(revision);
     eval.print_header();
