@@ -129,6 +129,9 @@ SOA_CELL(16, 128)
 SOA_CELL(4 , 256)
 SOA_CELL(8 , 256)
 SOA_CELL(16, 256)
+SOA_CELL(4 , 512)
+SOA_CELL(8 , 512)
+SOA_CELL(16, 512)
 
 // initializer, which reads in matrices in matrix market format
 // using mmc.h, mmc.c
@@ -258,6 +261,9 @@ public:
 #endif
 
 std::string RM07 = "RM07R.mtx";
+std::string KKT  = "kkt_power.mtx";
+std::string HAM  = "Hamrle3.mtx";
+std::string ML   = "ML_Geer.mtx";
 
 int main(int argc, char **argv)
 {
@@ -338,6 +344,195 @@ int main(int argc, char **argv)
         eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_256, RM07, NZ, 8, 256>(),
              toVector(Coord<3>(DIM, 1, 1)));
         eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_256, RM07, NZ, 16, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_512, RM07, NZ, 4, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_512, RM07, NZ, 8, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, RM07, NZ, 16, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+    }
+
+    // matrix: kkt_power
+    {
+        const int NZ  = 8130343;
+        const int DIM = 2063494;
+
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_1, KKT, NZ, 4, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_1, KKT, NZ, 8, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_1, KKT, NZ, 16, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_2, KKT, NZ, 4, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_2, KKT, NZ, 8, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_2, KKT, NZ, 16, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_4, KKT, NZ, 4, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_4, KKT, NZ, 8, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_4, KKT, NZ, 16, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_16, KKT, NZ, 4, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_16, KKT, NZ, 8, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_16, KKT, NZ, 16, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_32, KKT, NZ, 4, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_32, KKT, NZ, 8, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_32, KKT, NZ, 16, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_64, KKT, NZ, 4, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_64, KKT, NZ, 8, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_64, KKT, NZ, 16, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_128, KKT, NZ, 4, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_128, KKT, NZ, 8, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_128, KKT, NZ, 16, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_256, KKT, NZ, 4, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_256, KKT, NZ, 8, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_256, KKT, NZ, 16, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_512, KKT, NZ, 4, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_512, KKT, NZ, 8, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, KKT, NZ, 16, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+    }
+
+    // matrix: Hamrle3
+    {
+        const int NZ  = 5514242;
+        const int DIM = 1447360;
+
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_1, HAM, NZ, 4, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_1, HAM, NZ, 8, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_1, HAM, NZ, 16, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_2, HAM, NZ, 4, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_2, HAM, NZ, 8, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_2, HAM, NZ, 16, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_4, HAM, NZ, 4, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_4, HAM, NZ, 8, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_4, HAM, NZ, 16, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_16, HAM, NZ, 4, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_16, HAM, NZ, 8, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_16, HAM, NZ, 16, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_32, HAM, NZ, 4, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_32, HAM, NZ, 8, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_32, HAM, NZ, 16, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_64, HAM, NZ, 4, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_64, HAM, NZ, 8, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_64, HAM, NZ, 16, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_128, HAM, NZ, 4, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_128, HAM, NZ, 8, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_128, HAM, NZ, 16, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_256, HAM, NZ, 4, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_256, HAM, NZ, 8, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_256, HAM, NZ, 16, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_512, HAM, NZ, 4, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_512, HAM, NZ, 8, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, HAM, NZ, 16, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+    }
+
+    // matrix: ML_Geer
+    {
+        const int NZ  = 110879972;
+        const int DIM = 1504002;
+
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_1, ML, NZ, 4, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_1, ML, NZ, 8, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_1, ML, NZ, 16, 1>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_2, ML, NZ, 4, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_2, ML, NZ, 8, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_2, ML, NZ, 16, 2>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_4, ML, NZ, 4, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_4, ML, NZ, 8, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_4, ML, NZ, 16, 4>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_16, ML, NZ, 4, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_16, ML, NZ, 8, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_16, ML, NZ, 16, 16>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_32, ML, NZ, 4, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_32, ML, NZ, 8, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_32, ML, NZ, 16, 32>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_64, ML, NZ, 4, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_64, ML, NZ, 8, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_64, ML, NZ, 16, 64>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_128, ML, NZ, 4, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_128, ML, NZ, 8, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_128, ML, NZ, 16, 128>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_256, ML, NZ, 4, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_256, ML, NZ, 8, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_256, ML, NZ, 16, 256>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_4_512, ML, NZ, 4, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_8_512, ML, NZ, 8, 512>(),
+             toVector(Coord<3>(DIM, 1, 1)));
+        eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, ML, NZ, 16, 512>(),
              toVector(Coord<3>(DIM, 1, 1)));
     }
 #endif
