@@ -2503,8 +2503,8 @@ private:
 public:
     inline
     SparseMatrixInitializer(const Coord<3>& dim, int maxT) :
-        SimpleInitializer<CELL>(Coord<1>(dim.x() * dim.y() * dim.z()), maxT),
-        size(dim.x() * dim.y() * dim.z())
+        SimpleInitializer<CELL>(Coord<1>(dim.x()), maxT),
+        size(dim.x())
     {}
 
     virtual void grid(GridBase<CELL, 1> *ret)
@@ -2542,8 +2542,8 @@ class SellMatrixInitializer : public CPUBenchmark
 
     double performance2(const Coord<3>& dim)
     {
-        Coord<1> dim1d(dim.x() * dim.y() * dim.z());
-        int size = dim.x() * dim.y() * dim.z();
+        const Coord<1> dim1d(dim.x());
+        const int size = dim.x();
         UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
         std::map<Coord<2>, ValueType> adjacency;
 
@@ -2608,7 +2608,7 @@ public:
     {
         // 1. create grids
         typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
-        const Coord<1> size(dim.x() * dim.y() * dim.z());
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -2714,7 +2714,7 @@ public:
     {
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
-        const Coord<1> size(dim.x() * dim.y() * dim.z());
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -2766,7 +2766,7 @@ public:
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
-        const Coord<1> size(dim.x() * dim.y() * dim.z());
+        const Coord<1> size(dim.x());
         Grid gridOld(size);
         Grid gridNew(size);
 
@@ -2862,10 +2862,10 @@ int main(int argc, char **argv)
 
 #ifdef LIBGEODECOMP_WITH_CPP14
     if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(33, 33, 33)
-              << Coord<3>(44, 44, 44)
-              << Coord<3>(55, 55, 55);
+        sizes << Coord<3>(10648 , 1, 1)
+              << Coord<3>(35937 , 1, 1)
+              << Coord<3>(85184 , 1, 1)
+              << Coord<3>(166375, 1, 1);
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SellMatrixInitializer(), toVector(sizes[i]));
         }
