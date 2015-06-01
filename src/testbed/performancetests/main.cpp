@@ -2630,12 +2630,14 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        return seconds;
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
     }
 
     std::string unit()
     {
-        return "s";
+        return "GFLOP/s";
     }
 };
 
@@ -2734,12 +2736,14 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        return seconds;
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
     }
 
     std::string unit()
     {
-        return "s";
+        return "GFLOP/s";
     }
 };
 
@@ -2811,12 +2815,14 @@ public:
                       << "optimizing away the loops above\n";
         }
 
-        return seconds;
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
     }
 
     std::string unit()
     {
-        return "s";
+        return "GFLOP/s";
     }
 };
 #endif
