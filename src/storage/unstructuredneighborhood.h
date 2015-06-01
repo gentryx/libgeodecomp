@@ -13,6 +13,51 @@
 
 namespace LibGeoDecomp {
 
+namespace UnstructuredGridHelpers {
+
+/**
+ * Used for iterating over neighboring cells.
+ */
+template<typename VALUE_TYPE, int C, int SIGMA>
+class Iterator : public std::iterator<std::forward_iterator_tag,
+                                      const std::pair<int, VALUE_TYPE> >
+{
+private:
+    typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
+    const Matrix& matrix;
+    int index;
+public:
+    inline
+    Iterator(const Matrix& matrix, int startIndex) :
+        matrix(matrix), index(startIndex)
+    {}
+
+    inline void operator++()
+    {
+        index += C;
+    }
+
+    inline bool operator==(const Iterator& other) const
+    {
+        // matrix is ignored, since in general it's not useful to compare iterators
+        // pointing to different matrices
+        return index == other.index;
+    }
+
+    inline bool operator!=(const Iterator& other) const
+    {
+        return !(*this == other);
+    }
+
+    inline const std::pair<int, VALUE_TYPE> operator*() const
+    {
+        return std::make_pair(matrix.columnVec()[index],
+                              matrix.valuesVec()[index]);
+    }
+};
+
+}
+
 /**
  * Simple neighborhood for UnstructuredGrid. This implementation
  * takes SIGMA into account. This is slower than using SIGMA = 1,
@@ -29,56 +74,17 @@ template<typename CELL, std::size_t MATRICES = 1,
 class UnstructuredNeighborhood
 {
 private:
-    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
+    using Iterator = UnstructuredGridHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
     const Grid& grid;           /**< old grid */
-    long long xOffset;          /**< initial offset for updateLineX function */
+    long xOffset;               /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
     int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
     int currentMatrixID;        /**< current id for matrices */
 
 public:
-    /**
-     * Used for iterating over neighboring cells.
-     */
-    class Iterator : public std::iterator<std::forward_iterator_tag,
-                                          const std::pair<int, VALUE_TYPE> >
-    {
-    private:
-        typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
-        const Matrix& matrix;
-        int index;
-    public:
-        inline
-        Iterator(const Matrix& matrix, int startIndex) :
-            matrix(matrix), index(startIndex)
-        {}
-
-        inline void operator++()
-        {
-            index += C;
-        }
-
-        inline bool operator==(const Iterator& other) const
-        {
-            // matrix is ignored, since in general it's not useful to compare iterators
-            // pointing to different matrices
-            return index == other.index;
-        }
-
-        inline bool operator!=(const Iterator& other) const
-        {
-            return !(*this == other);
-        }
-
-        inline const std::pair<int, VALUE_TYPE> operator*() const
-        {
-            return std::make_pair(matrix.columnVec()[index],
-                                  matrix.valuesVec()[index]);
-        }
-    };
-
     inline
-    UnstructuredNeighborhood(const Grid& grid, long long startX) :
+    UnstructuredNeighborhood(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
         currentChunk(0),
@@ -107,7 +113,7 @@ public:
     }
 
     inline
-    UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& operator--()
+    UnstructuredNeighborhood& operator--()
     {
         --xOffset;
         return *this;
@@ -122,10 +128,10 @@ public:
     }
 
     inline
-    const long long& index() const { return xOffset; }
+    const long& index() const { return xOffset; }
 
     inline
-    long long& index() { return xOffset; }
+    long& index() { return xOffset; }
 
     inline
     UnstructuredNeighborhood& weights()
@@ -175,9 +181,10 @@ template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C>
 class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1>
 {
 private:
-    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1> Grid;
+    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>;
+    using Iterator = UnstructuredGridHelpers::Iterator<VALUE_TYPE, C, 1>;
     const Grid& grid;
-    long long xOffset;          /**< initial offset for updateLineX function */
+    long xOffset;               /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
     int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
     int currentMatrixID;        /**< current id for matrices */
@@ -209,49 +216,8 @@ private:
         chunkOffset += difference;
     }
 public:
-
-    /**
-     * Used for iterating over neighboring cells.
-     */
-    class Iterator : public std::iterator<std::forward_iterator_tag,
-                                          const std::pair<int, VALUE_TYPE> >
-    {
-    private:
-        typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, 1> Matrix;
-        const Matrix& matrix;
-        int index;
-    public:
-        inline
-        Iterator(const Matrix& matrix, int startIndex) :
-            matrix(matrix), index(startIndex)
-        {}
-
-        inline void operator++()
-        {
-            index += C;
-        }
-
-        inline bool operator==(const Iterator& other) const
-        {
-            // matrix is ignored, since in general it's not useful to compare iterators
-            // pointing to different matrices
-            return index == other.index;
-        }
-
-        inline bool operator!=(const Iterator& other) const
-        {
-            return !(*this == other);
-        }
-
-        inline const std::pair<int, VALUE_TYPE> operator*() const
-        {
-            return std::make_pair(matrix.columnVec()[index],
-                                  matrix.valuesVec()[index]);
-        }
-    };
-
     inline
-    UnstructuredNeighborhood(const Grid& grid, long long startX) :
+    UnstructuredNeighborhood(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
         currentChunk(startX / C),
@@ -295,10 +261,10 @@ public:
     }
 
     inline
-    const long long& index() const { return xOffset; }
+    const long& index() const { return xOffset; }
 
     inline
-    long long& index() { return xOffset; }
+    long& index() { return xOffset; }
 
     inline
     UnstructuredNeighborhood& weights()
