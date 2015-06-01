@@ -12,6 +12,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/io/sellsortingwriter.h>
 
 #include <libflatarray/api_traits.hpp>
 #include <libflatarray/macros.hpp>
@@ -24,7 +25,7 @@ using namespace LibFlatArray;
 typedef double ValueType;
 static const std::size_t MATRICES = 1;
 static const int C = 4;
-static const int SIGMA = 1;
+static const int SIGMA = 16;
 typedef short_vec<ValueType, C> ShortVec;
 
 class Cell
@@ -77,6 +78,16 @@ public:
         for (const auto& j: neighborhood.weights(0)) {
             sum += neighborhood[j.first].value * j.second;
         }
+    }
+
+    inline bool operator==(const Cell& cell) const
+    {
+        return cell.sum == sum && cell.value == value;
+    }
+
+    inline bool operator!=(const Cell& cell) const
+    {
+        return !(*this == cell);
     }
 
     double value;
@@ -156,7 +167,7 @@ public:
         if (!(matrixIfs >> rows >> cols)) {
             throw std::logic_error("Failed to read from matrix file");
         }
-        if (rows != cols && rows != i && rows != size) {
+        if (rows != cols || rows != i || rows != size) {
             throw std::logic_error("Dimensions do not match");
         }
 
@@ -201,7 +212,10 @@ void runSimulation(int argc, char *argv[])
     }
     SerialSimulator<Cell> sim(init);
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
-    sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
+    // sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
+    auto asciiWriter = ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency);
+    sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
+                      asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
     sim.run();
 }
 

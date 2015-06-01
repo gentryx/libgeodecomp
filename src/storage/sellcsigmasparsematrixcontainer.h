@@ -43,9 +43,9 @@ public:
                     std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >& values,
                     std::vector<int, LibFlatArray::aligned_allocator<int, 64> >& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength, std::vector<int>& realRowToSorted)
+                    std::vector<int>& rowLength, std::vector<int>& realRowToSorted,
+                    std::vector<int>& chunkRowToReal)
     {
-        std::vector<int> chunkRowToReal;
         // calculate size for arrays
         const int matrixRows = matrixSize;
         const int numberOfChunks = (matrixRows - 1) / C + 1;
@@ -131,7 +131,8 @@ public:
                     std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >& values,
                     std::vector<int, LibFlatArray::aligned_allocator<int, 64> >& column,
                     std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength, std::vector<int>& /* realRowToSorted */)
+                    std::vector<int>& rowLength, std::vector<int>& /* realRowToSorted */,
+                    std::vector<int>& /* chunkRowToReal */)
     {
         // calculate size for arrays
         const int matrixRows = matrixSize;
@@ -278,7 +279,7 @@ public:
         SellHelpers::InitFromMatrix<SIGMA>().
             template operator()<VALUETYPE, C>(matrixSize, matrix, values, column,
                                               chunkLength, chunkOffset, rowLength,
-                                              realRowToSorted);
+                                              realRowToSorted, chunkRowToReal);
     }
 
     /**
@@ -445,6 +446,11 @@ public:
         return realRowToSorted;
     }
 
+    inline const std::vector<int>& chunkRowToRealVec() const
+    {
+        return chunkRowToReal;
+    }
+
     inline std::size_t dim() const
     {
         return dimension;
@@ -457,6 +463,7 @@ private:
     std::vector<int>   chunkLength;     // = Max rowLength in Chunk
     std::vector<int>   chunkOffset;     // COffset[i+1]=COffset[i]+CLength[i]*C
     std::vector<int>   realRowToSorted; // mapping between rows and real rows, used for SIGMA
+    std::vector<int>   chunkRowToReal;  // and the other way around
     std::size_t dimension;              // = N
 };
 
