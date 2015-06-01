@@ -101,7 +101,7 @@ private:
  */
 template<typename ELEMENT_TYPE, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
-class UnstructuredSoAGrid final : public GridBase<ELEMENT_TYPE, 1>
+class UnstructuredSoAGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
     const static int DIM = 1;

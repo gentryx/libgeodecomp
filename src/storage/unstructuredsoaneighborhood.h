@@ -91,7 +91,7 @@ public:
      * the current chunk. Iterator consists of a pair: indices pointer
      * and matrix values pointer.
      */
-    class Iterator final : public std::iterator<std::forward_iterator_tag,
+    class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const IteratorPair>
     {
     private:

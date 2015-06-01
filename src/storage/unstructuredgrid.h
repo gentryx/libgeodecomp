@@ -26,7 +26,7 @@ namespace LibGeoDecomp {
  */
 template<typename ELEMENT_TYPE, std::size_t MATRICES=1,
          typename VALUE_TYPE=double, int C=64, int SIGMA=1>
-class UnstructuredGrid final : public GridBase<ELEMENT_TYPE, 1>
+class UnstructuredGrid : public GridBase<ELEMENT_TYPE, 1>
 {
 public:
     typedef std::vector<std::pair<ELEMENT_TYPE, VALUE_TYPE> > NeighborList;
