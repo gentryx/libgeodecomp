@@ -18,10 +18,14 @@
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
+#include <libflatarray/api_traits.hpp>
+#include <libflatarray/macros.hpp>
 
 #include <emmintrin.h>
 #ifdef __AVX__
@@ -33,6 +37,7 @@
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
+using namespace LibFlatArray;
 
 class RegionCount : public CPUBenchmark
 {
@@ -2367,8 +2372,9 @@ private:
 #ifdef LIBGEODECOMP_WITH_CPP14
 typedef double ValueType;
 static const std::size_t MATRICES = 1;
-static const int C = 4;
+static const int C = 4;         // AVX
 static const int SIGMA = 1;
+typedef short_vec<ValueType, C> ShortVec;
 
 class SPMVMCell
 {
@@ -2429,12 +2435,60 @@ public:
     double sum;
 };
 
+class SPMVMSoACell
+{
+public:
+    class API :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {
+    public:
+        // uniform sizes lead to std::bad_alloc,
+        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
+        // as dimension (DIM = 1)
+        LIBFLATARRAY_CUSTOM_SIZES(
+            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
+            (65536)(131072)(262144)(524288)(1048576),
+            (1),
+            (1))
+    };
+
+    inline explicit SPMVMSoACell(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            ShortVec tmp;
+            tmp.load_aligned(hoodNew.sumPtr + i * C);
+            for (const auto& j: hoodOld.weights(0)) {
+                ShortVec weights, values;
+                weights.load_aligned(j.second);
+                values.gather(hoodOld.valuePtr, j.first);
+                tmp += values * weights;
+            }
+            tmp.store_aligned(hoodNew.sumPtr + i * C);
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+LIBFLATARRAY_REGISTER_SOA(SPMVMSoACell, ((double)(sum))((double)(value)))
+
 // setup a sparse matrix
-template<typename CELL>
+template<typename CELL, typename GRID>
 class SparseMatrixInitializer : public SimpleInitializer<CELL>
 {
 private:
-    typedef UnstructuredGrid<CELL, MATRICES, ValueType, C, SIGMA> Grid;
     int size;
 
 public:
@@ -2447,7 +2501,7 @@ public:
     virtual void grid(GridBase<CELL, 1> *ret)
     {
         // setup sparse matrix
-        Grid *grid = dynamic_cast<Grid *>(ret);
+        GRID *grid = dynamic_cast<GRID *>(ret);
         std::map<Coord<2>, ValueType> adjacency;
 
         // setup matrix: ~1 % non zero entries
@@ -2576,8 +2630,10 @@ public:
 
     double performance2(const Coord<3>& dim)
     {
+        typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
         int maxT = 1;
-        SerialSimulator<SPMVMCell> sim(new SparseMatrixInitializer<SPMVMCell>(dim, maxT));
+        SerialSimulator<SPMVMCell> sim(
+            new SparseMatrixInitializer<SPMVMCell, Grid>(dim, maxT));
 
         double seconds = 0;
         {
@@ -2616,7 +2672,50 @@ public:
     double performance2(const Coord<3>& dim)
     {
         int maxT = 1;
-        SerialSimulator<SPMVMCellStreak> sim(new SparseMatrixInitializer<SPMVMCellStreak>(dim, maxT));
+        typedef UnstructuredGrid<SPMVMCellStreak, MATRICES, ValueType, C, SIGMA> Grid;
+        SerialSimulator<SPMVMCellStreak> sim(
+            new SparseMatrixInitializer<SPMVMCellStreak, Grid>(dim, maxT));
+
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            sim.run();
+        }
+
+        if (sim.getGrid()->get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "vectorized";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
+        int maxT = 1;
+        SerialSimulator<SPMVMSoACell> sim(
+            new SparseMatrixInitializer<SPMVMSoACell, Grid>(dim, maxT));
 
         double seconds = 0;
         {
@@ -2692,6 +2791,10 @@ int main(int argc, char **argv)
 
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SparseMatrixVectorMultiplicationStreak(), toVector(sizes[i]));
+        }
+
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
         }
         sizes.clear();
     }
