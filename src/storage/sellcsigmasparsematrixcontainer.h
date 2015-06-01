@@ -48,19 +48,11 @@ public:
         std::vector<int> chunkRowToReal;
         // calculate size for arrays
         const int matrixRows = matrixSize;
-        int numberOfValues = 0;
-        int numberOfChunks = matrixRows / C;
-        int numberOfSigmas = matrixRows / SIGMA;
-
-        // last chunk might be padded to C rows
-        if ((matrixRows % C) != 0) {
-            ++numberOfChunks;
-        }
-        if ((matrixRows % SIGMA) != 0) {
-            ++numberOfSigmas;
-        }
-
+        const int numberOfChunks = (matrixRows - 1) / C + 1;
+        const int numberOfSigmas = (matrixRows - 1) / SIGMA + 1;
         const int rowsPadded = numberOfChunks * C;
+        int numberOfValues = 0;
+
         // allocate memory
         chunkOffset.resize(numberOfChunks + 1);
         chunkLength.resize(numberOfChunks);
@@ -146,15 +138,10 @@ public:
     {
         // calculate size for arrays
         const int matrixRows = matrixSize;
-        int numberOfValues = 0;
-        int numberOfChunks = matrixRows / C;
-
-        // last chunk might be padded to C rows
-        if ((matrixRows % C) != 0) {
-            ++numberOfChunks;
-        }
-
+        const int numberOfChunks = (matrixRows - 1) / C + 1;
         const int rowsPadded = numberOfChunks * C;
+        int numberOfValues = 0;
+
         // allocate memory
         chunkOffset.resize(numberOfChunks + 1);
         chunkLength.resize(numberOfChunks);
