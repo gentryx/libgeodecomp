@@ -2792,6 +2792,84 @@ public:
         return "s";
     }
 };
+
+#ifdef __AVX__
+class SparseMatrixVectorMultiplicationNative : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "native";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        // 1. create grids
+        typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
+        typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
+        const Coord<1> size(dim.x() * dim.y() * dim.z());
+        Grid gridOld(size);
+        Grid gridNew(size);
+
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. native kernel
+        UnstructuredSoANeighborhood<SPMVMSoACell, MATRICES, ValueType, C, SIGMA>
+            hoodOld(gridOld, 0);
+        UnstructuredSoANeighborhoodNew<SPMVMSoACell, MATRICES, ValueType, C, SIGMA>
+            hoodNew(gridNew);
+        const Matrix& matrix = gridOld.getAdjacency(0);
+        const ValueType *values = matrix.valuesVec().data();
+        const int *cl = matrix.chunkLengthVec().data();
+        const int *cs = matrix.chunkOffsetVec().data();
+        const int *col = matrix.columnVec().data();
+        const ValueType *rhsPtr = hoodOld.valuePtr;
+        ValueType *resPtr = hoodNew.sumPtr;
+        const int rowsPadded = ((size.x() - 1) / C + 1) * C;
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+            for (int i = 0; i < rowsPadded / C; ++i) {
+                int offs = cs[i];
+                __m256d tmp = _mm256_load_pd(resPtr + i*C);
+                for (int j = 0; j < cl[i]; ++j) {
+                    __m128d rhstmp;
+                    __m256d rhs, val;
+                    val    = _mm256_load_pd(values + offs);
+                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 0);
+                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 1);
+                    tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
+                }
+                _mm256_store_pd(resPtr + i*C, tmp);
+            }
+        }
+
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+#endif
 #endif
 
 #ifdef LIBGEODECOMP_WITH_CUDA
@@ -2843,6 +2921,12 @@ int main(int argc, char **argv)
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
         }
+
+#ifdef __AVX__
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SparseMatrixVectorMultiplicationNative(), toVector(sizes[i]));
+        }
+#endif
 
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
