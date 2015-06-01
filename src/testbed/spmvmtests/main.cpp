@@ -41,65 +41,64 @@ using namespace LibGeoDecomp;
 using namespace LibFlatArray;
 
 // VALUE_TYPE = double, MATRICES = 1
-// FIXME: Indention is broken
-#define SOA_CELL(C, SIGMA)                                              \
-    class SPMVMSoACell ## _ ## C ## _ ## SIGMA                          \
-    {                                                                   \
-    public:                                                             \
-        class API :                                                     \
-            public APITraits::HasSoA,                                   \
-            public APITraits::HasUpdateLineX,                           \
-            public APITraits::HasUnstructuredTopology,                  \
-            public APITraits::HasSellType<double>,                      \
-            public APITraits::HasSellMatrices<1>,                       \
-            public APITraits::HasSellC<C>,                              \
-            public APITraits::HasSellSigma<SIGMA>                       \
-            {                                                           \
-            public:                                                     \
-    LIBFLATARRAY_CUSTOM_SIZES(                                          \
-        (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768) \
-        (65536)(131072)(262144)(524288)(1048576)(2097152)(4194304),     \
-        (1),                                                            \
-        (1))                                                            \
-        };                                                              \
-                                                                        \
-typedef short_vec<double, C> ShortVec;                                  \
-                                                                        \
-inline explicit SPMVMSoACell ## _ ## C ## _ ## SIGMA(double v = 8.0) :  \
-    value(v), sum(0)                                                    \
-{}                                                                      \
-                                                                        \
-template<typename HOOD_NEW, typename HOOD_OLD>                          \
-static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */) \
-{                                                                       \
-    const auto& membersOld = hoodOld.accessor;                          \
-    auto& membersNew = hoodNew.accessor;                                \
-    for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {       \
-        ShortVec tmp;                                                   \
-        tmp.load_aligned(&membersNew.sum() + i * C);                    \
-        for (const auto& j: hoodOld.weights(0)) {                       \
-            ShortVec weights, values;                                   \
-            weights.load_aligned(j.second);                             \
-            values.gather(&membersOld.value(), j.first);                \
-            tmp += values * weights;                                    \
-        }                                                               \
-        tmp.store_aligned(&membersNew.sum() + i * C);                   \
-    }                                                                   \
-}                                                                       \
-                                                                        \
-template<typename NEIGHBORHOOD>                                         \
-void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)        \
-{                                                                       \
-    sum = 0.;                                                           \
-    for (const auto& j: neighborhood.weights(0)) {                      \
-        sum += neighborhood[j.first].value * j.second;                  \
-    }                                                                   \
-}                                                                       \
-                                                                        \
-double value;                                                           \
-double sum;                                                             \
-    };                                                                  \
-                                                                        \
+#define SOA_CELL(C, SIGMA)                                                  \
+    class SPMVMSoACell ## _ ## C ## _ ## SIGMA                              \
+    {                                                                       \
+    public:                                                                 \
+        class API :                                                         \
+            public APITraits::HasSoA,                                       \
+            public APITraits::HasUpdateLineX,                               \
+            public APITraits::HasUnstructuredTopology,                      \
+            public APITraits::HasSellType<double>,                          \
+            public APITraits::HasSellMatrices<1>,                           \
+            public APITraits::HasSellC<C>,                                  \
+            public APITraits::HasSellSigma<SIGMA>                           \
+            {                                                               \
+            public:                                                         \
+                LIBFLATARRAY_CUSTOM_SIZES(                                  \
+                (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768) \
+                (65536)(131072)(262144)(524288)(1048576)(2097152)(4194304), \
+                (1),                                                        \
+                (1))                                                        \
+            };                                                              \
+                                                                            \
+    typedef short_vec<double, C> ShortVec;                                  \
+                                                                            \
+    inline explicit SPMVMSoACell ## _ ## C ## _ ## SIGMA(double v = 8.0) :  \
+        value(v), sum(0)                                                    \
+    {}                                                                      \
+                                                                            \
+    template<typename HOOD_NEW, typename HOOD_OLD>                          \
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */) \
+    {                                                                       \
+        const auto& membersOld = hoodOld.accessor;                          \
+        auto& membersNew = hoodNew.accessor;                                \
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {       \
+            ShortVec tmp;                                                   \
+            tmp.load_aligned(&membersNew.sum() + i * C);                    \
+            for (const auto& j: hoodOld.weights(0)) {                       \
+                ShortVec weights, values;                                   \
+                weights.load_aligned(j.second);                             \
+                values.gather(&membersOld.value(), j.first);                \
+                tmp += values * weights;                                    \
+            }                                                               \
+            tmp.store_aligned(&membersNew.sum() + i * C);                   \
+        }                                                                   \
+    }                                                                       \
+                                                                            \
+    template<typename NEIGHBORHOOD>                                         \
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)        \
+    {                                                                       \
+        sum = 0.;                                                           \
+        for (const auto& j: neighborhood.weights(0)) {                      \
+            sum += neighborhood[j.first].value * j.second;                  \
+        }                                                                   \
+    }                                                                       \
+                                                                            \
+    double value;                                                           \
+    double sum;                                                             \
+    };                                                                      \
+                                                                            \
     LIBFLATARRAY_REGISTER_SOA(SPMVMSoACell ## _ ## C ## _ ## SIGMA, ((double)(sum))((double)(value))) \
 
 
