@@ -212,7 +212,7 @@ public:
 
     // lhs = A   x rhs
     // tmp = val x b
-    void matVecMul (std::vector<VALUETYPE>& lhs, std::vector<VALUETYPE>& rhs)
+    void matVecMul(std::vector<VALUETYPE>& lhs, std::vector<VALUETYPE>& rhs)
     {
         if (lhs.size() != rhs.size() || lhs.size() != dimension) {
             throw std::invalid_argument("lhs and rhs must be of size N");
@@ -252,7 +252,7 @@ public:
     }
 
     // fixme: is this mainly used for constructing the neighborhood in UnstructuredGrid::getNeighborhood. drop this code once we have an efficient neighborhood-object for UnstructuredGrid
-    std::vector< std::pair<int, VALUETYPE> > getRow(int const row) const
+    std::vector<std::pair<int, VALUETYPE> > getRow(int const row) const
     {
         std::vector< std::pair<int, VALUETYPE> > vec;
         int const chunk (row/C);
