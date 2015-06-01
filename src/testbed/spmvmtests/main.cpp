@@ -41,6 +41,7 @@ using namespace LibGeoDecomp;
 using namespace LibFlatArray;
 
 // VALUE_TYPE = double, MATRICES = 1
+// FIXME: Indention is broken
 #define SOA_CELL(C, SIGMA)                                              \
     class SPMVMSoACell ## _ ## C ## _ ## SIGMA                          \
     {                                                                   \
