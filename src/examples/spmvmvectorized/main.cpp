@@ -212,10 +212,13 @@ void runSimulation(int argc, char *argv[])
     }
     SerialSimulator<Cell> sim(init);
     sim.addWriter(new TracingWriter<Cell>(outputFrequency, init->maxSteps()));
-    // sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
-    auto asciiWriter = ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency);
-    sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
-                      asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
+    if (SIGMA == 1) {
+        sim.addWriter(new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency));
+    } else {
+        auto asciiWriter = new ASCIIWriter<Cell>("sum", &Cell::sum, outputFrequency);
+        sim.addWriter(new SellSortingWriter<Cell, ASCIIWriter<Cell> >(
+                          asciiWriter, 0, "sum", &Cell::sum, outputFrequency));
+    }
     sim.run();
 }
 

@@ -89,7 +89,7 @@ public:
     using SoAGrid = UnstructuredSoAGrid<CELL, MATRICES, ValueType, C, SIGMA>;
 
     template<typename MEMBER>
-    SellSortingWriter(WRITER& proxy,
+    SellSortingWriter(WRITER *proxy,
                       std::size_t matrixID,
                       const std::string& prefix,
                       MEMBER CELL:: *memberPointer,
@@ -99,7 +99,14 @@ public:
         selector(memberPointer, "unused name"),
         matrixID(matrixID)
     {
-        static_assert(SIGMA > 1, "The SortingWriter makes only sense to use with a SIGMA greater 1.");
+        if (SIGMA <= 1) {
+            throw std::logic_error("The SortingWriter makes only sense to use with a SIGMA greater 1.");
+        }
+    }
+
+    ~SellSortingWriter()
+    {
+        delete delegate;
     }
 
     virtual void stepFinished(const GridType& grid, unsigned step, WriterEvent event)
@@ -110,7 +117,7 @@ public:
 
         // sort forward for output
         sort(grid, true);
-        delegate.stepFinished(grid, step, event);
+        delegate->stepFinished(grid, step, event);
         // sort back for further computations
         sort(grid, false);
     }
@@ -130,7 +137,7 @@ private:
                           SortMember<CELL, ValueType, C, SIGMA>(selector, matrix, size, forward));
     }
 
-    WRITER& delegate;
+    WRITER *delegate;
     Selector<CELL> selector;
     std::size_t matrixID;
 };
