@@ -32,7 +32,7 @@ public:
     inline
     SortMember(const Selector<CELL>& selector,
                const SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>& matrix,
-               std::size_t size, bool forward) :
+               bool forward) :
         selector(selector),
         matrix(matrix),
         forward(forward)
@@ -132,9 +132,8 @@ private:
         }
 
         const auto& matrix = soaGrid->getAdjacency(matrixID);
-        std::size_t size = soaGrid->boundingBox().dimensions.x();
         soaGrid->callback(SellSortingWriterHelpers::
-                          SortMember<CELL, ValueType, C, SIGMA>(selector, matrix, size, forward));
+                          SortMember<CELL, ValueType, C, SIGMA>(selector, matrix, forward));
     }
 
     WRITER *delegate;

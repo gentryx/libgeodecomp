@@ -253,18 +253,20 @@ template<typename CELL, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
 class UnstructuredSoAScalarNeighborhood :
         public UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>, MATRICES, VALUE_TYPE, C, SIGMA>
+        UnstructuredNeighborhoodBase<CELL, UnstructuredSoAGrid<CELL, MATRICES,
+                                                               VALUE_TYPE, C, SIGMA>,
+                                     MATRICES, VALUE_TYPE, C, SIGMA, false>
 {
 private:
     using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     using UnstructuredNeighborhoodHelpers::
-    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
+    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, false>::grid;
 
 public:
     inline
     UnstructuredSoAScalarNeighborhood(const Grid& grid, long startX) :
         UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
+        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, false>(grid, startX)
     {}
 
     CELL operator[](int index) const

@@ -46,6 +46,7 @@ public:
                     std::vector<int>& rowLength, std::vector<int>& realRowToSorted,
                     std::vector<int>& chunkRowToReal)
     {
+        std::vector<int> rowLengthCopy;
         // calculate size for arrays
         const int matrixRows = matrixSize;
         const int numberOfChunks = (matrixRows - 1) / C + 1;
@@ -57,6 +58,7 @@ public:
         chunkOffset.resize(numberOfChunks + 1);
         chunkLength.resize(numberOfChunks);
         rowLength.resize(rowsPadded);
+        rowLengthCopy.resize(rowsPadded);
         realRowToSorted.resize(rowsPadded);
         chunkRowToReal.resize(rowsPadded);
 
@@ -80,6 +82,7 @@ public:
             for (int i = 0; i < numberOfRows; ++i) {
                 chunkRowToReal[nSigma * SIGMA + i]   = lengths[i].rowIndex;
                 realRowToSorted[lengths[i].rowIndex] = nSigma * SIGMA + i;
+                rowLengthCopy[nSigma * SIGMA + i] = lengths[i].rowLength;
             }
         }
 
@@ -100,6 +103,7 @@ public:
             chunkLength[numberOfChunks - 1] * C;
 
         // save values
+        rowLength = std::move(rowLengthCopy);
         values.resize(numberOfValues);
         column.resize(numberOfValues);
         std::fill(begin(values), end(values), 0);

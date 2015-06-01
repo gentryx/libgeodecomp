@@ -57,15 +57,24 @@ public:
 };
 
 /**
+ * Empty dummy class.
+ */
+template<typename CELL, typename GRID, std::size_t MATRICES = 1,
+         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1,
+         bool SORT = false>
+class UnstructuredNeighborhoodBase
+{};
+
+/**
  * Base class for UnstructuredNeighborhoods. There are two implementations:
- * this is used if SIGMA is greater than one which is slower. For SIGMA = 1,
- * see class specialization below.
+ * One NeighborHood corrects the sorting given by the SELL matrix. This one
+ * does, the one below does not.
  * Moreover this class is also used for scalar updates in vectorized case.
  * This is why the GRID is a template parameter.
  */
-template<typename CELL, typename GRID, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
-class UnstructuredNeighborhoodBase
+template<typename CELL, typename GRID, std::size_t MATRICES,
+         typename VALUE_TYPE, int C, int SIGMA>
+class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, true>
 {
 protected:
     using Grid = GRID;
@@ -136,21 +145,22 @@ public:
     {
         const auto& matrix = grid.getAdjacency(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
-        index    += C * matrix.rowLengthVec()[xOffset];
+        const int realRow = matrix.realRowToSortedVec()[xOffset];
+        index    += C * matrix.rowLengthVec()[realRow];
         return Iterator(matrix, index);
     }
 };
 
 /**
- * Same as above, except SIGMA = 1 which is faster.
+ * Same as above, except SORT = false which is faster.
  */
 template<typename CELL, typename GRID, std::size_t MATRICES,
-         typename VALUE_TYPE, int C>
-class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, 1>
+         typename VALUE_TYPE, int C, int SIGMA>
+class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>
 {
 protected:
     using Grid = GRID;
-    using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, 1>;
+    using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
     const Grid& grid;
     long xOffset;               /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
@@ -246,7 +256,8 @@ public:
 
 /**
  * Simple neighborhood for UnstructuredGrid. This is used as hoodOld in update()
- * or updateLineX().
+ * or updateLineX(). There are also two implementations: if SIGMA = 1 -> SORT = false,
+ * else SIGMA > 1 -> SORT = true.
  *
  * Usage:
  *  for (const auto& i: hoodOld.weights()) {
@@ -258,18 +269,49 @@ template<typename CELL, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhood :
         public UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>, MATRICES, VALUE_TYPE, C, SIGMA>
+        UnstructuredNeighborhoodBase<CELL, UnstructuredGrid<CELL, MATRICES,
+                                                            VALUE_TYPE, C, SIGMA>,
+                                     MATRICES, VALUE_TYPE, C, SIGMA, true>
 {
 private:
     using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     using UnstructuredNeighborhoodHelpers::
-    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
+    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>::grid;
 
 public:
     inline
     UnstructuredNeighborhood(const Grid& grid, long startX) :
         UnstructuredNeighborhoodHelpers::
-        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
+        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>(grid, startX)
+    {}
+
+    const CELL& operator[](int index) const
+    {
+        return grid[index];
+    }
+};
+
+/**
+ * Same as above (see doc).
+ */
+template<typename CELL, std::size_t MATRICES,
+         typename VALUE_TYPE, int C>
+class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1> :
+        public UnstructuredNeighborhoodHelpers::
+        UnstructuredNeighborhoodBase<CELL, UnstructuredGrid<CELL, MATRICES,
+                                                            VALUE_TYPE, C, 1>,
+                                     MATRICES, VALUE_TYPE, C, 1, false>
+{
+private:
+    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>;
+    using UnstructuredNeighborhoodHelpers::
+    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>::grid;
+
+public:
+    inline
+    UnstructuredNeighborhood(const Grid& grid, long startX) :
+        UnstructuredNeighborhoodHelpers::
+        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>(grid, startX)
     {}
 
     const CELL& operator[](int index) const
