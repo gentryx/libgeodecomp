@@ -5,6 +5,10 @@
 #ifdef LIBGEODECOMP_WITH_CPP14
 
 #include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 
@@ -18,8 +22,8 @@ template<typename CELL>
 class UnstructuredUpdateFunctor
 {
 private:
-    typedef typename APITraits::SelectTopology<CELL>::Value Topology;
-    typedef typename APITraits::SelectSellType<CELL>::Value ValueType;
+    using Topology = typename APITraits::SelectTopology<CELL>::Value;
+    using ValueType = typename APITraits::SelectSellType<CELL>::Value;
     static const std::size_t MATRICES = APITraits::SelectSellMatrices<CELL>::VALUE;
     static const int C = APITraits::SelectSellC<CELL>::VALUE;
     static const int SIGMA = APITraits::SelectSellSigma<CELL>::VALUE;
@@ -58,16 +62,55 @@ private:
     void soaWrapper(const Streak<DIM>& streak, const GRID1& gridOld,
                     GRID2 *gridNew, unsigned nanoStep, APITraits::TrueType)
     {
-        typedef typename APITraits::SelectUpdateLineX<CELL>::Value UpdateLineXFlag;
-        static const int SELLC = APITraits::SelectSellC<CELL>::VALUE;
+        // Assumption: Cell has both (updateLineX and update())
 
+        // loop peeling: streak's start might point to middle of chunks
+        // if so: vectorization cannot be done -> solution: additionally
+        // update the first and last chunk of complete streak scalar by
+        // calling update() instead
+        int startX = streak.origin.x();
+        if ((startX % C) != 0) {
+            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+                hoodOld(gridOld, startX);
+            const int cellsToUpdate = C - (startX % C);
+            CELL cells[cellsToUpdate];
+            Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
+
+            // update SoA grid: copy cells to local buffer, update, copy data back to grid
+            gridNew->get(cellStreak, cells);
+            // call update
+            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+                cells[i].update(hoodOld, nanoStep);
+            }
+            gridNew->set(cellStreak, cells);
+
+            startX += cellsToUpdate;
+        }
+
+        // call updateLineX with adjusted indices
         UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodOld(gridOld, streak.origin.x());
+            hoodOld(gridOld, startX);
         UnstructuredSoANeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
             hoodNew(*gridNew);
+        const int endX = streak.endX / C;
+        CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
 
-        // switch between updateLineX() and update()
-        apiWrapper(hoodNew, streak.endX / SELLC, hoodOld, nanoStep, UpdateLineXFlag());
+        // call scalar updates for last chunk
+        if ((streak.endX % C) != 0) {
+            const int cellsToUpdate = streak.endX % C;
+            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+                hoodOld(gridOld, streak.endX - cellsToUpdate);
+            CELL cells[cellsToUpdate];
+            Streak<1> cellStreak(Coord<1>(streak.endX - cellsToUpdate), streak.endX);
+
+            // update SoA grid: copy cells to local buffer, update, copy data back to grid
+            gridNew->get(cellStreak, cells);
+            // call update
+            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+                cells[i].update(hoodOld, nanoStep);
+            }
+            gridNew->set(cellStreak, cells);
+        }
     }
 
 public:
