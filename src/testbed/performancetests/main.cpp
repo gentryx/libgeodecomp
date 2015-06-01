@@ -2626,6 +2626,22 @@ class SellAddPointInitializer : public CPUBenchmark
 
 class SparseMatrixVectorMultiplication : public CPUBenchmark
 {
+private:
+    template<typename CELL, typename GRID>
+    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+                       GRID *gridNew, unsigned nanoStep)
+    {
+        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodOld(gridOld, streak.origin.x());
+        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodNew(*gridNew);
+
+        // call update()
+        for (int i = hoodOld.index(); i < streak.endX; ++i, ++hoodOld) {
+            hoodNew[i].update(hoodOld, nanoStep);
+        }
+    }
+
 public:
     std::string family()
     {
@@ -2634,65 +2650,32 @@ public:
 
     std::string species()
     {
+        // FIXME
         return "vanilla";
     }
 
     double performance2(const Coord<3>& dim)
     {
+        // 1. create grids
         typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
-        int maxT = 1;
-        SerialSimulator<SPMVMCell> sim(
-            new SparseMatrixInitializer<SPMVMCell, Grid>(dim, maxT));
+        const Coord<1> size(dim.x() * dim.y() * dim.z());
+        Grid gridOld(size);
+        Grid gridNew(size);
 
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. call updateFunctor()
         double seconds = 0;
+        Streak<1> streak(Coord<1>(0), size.x());
         {
             ScopedTimer t(&seconds);
-
-            sim.run();
+            updateFunctor<SPMVMCell, Grid>(streak, gridOld, &gridNew, 0);
         }
 
-        if (sim.getGrid()->get(Coord<1>(1)).sum == 4711) {
-            std::cout << "this statement just serves to prevent the compiler from"
-                      << "optimizing away the loops above\n";
-        }
-
-        return seconds;
-    }
-
-    std::string unit()
-    {
-        return "s";
-    }
-};
-
-class SparseMatrixVectorMultiplicationStreak : public CPUBenchmark
-{
-public:
-    std::string family()
-    {
-        return "SPMVM";
-    }
-
-    std::string species()
-    {
-        return "streak";
-    }
-
-    double performance2(const Coord<3>& dim)
-    {
-        int maxT = 1;
-        typedef UnstructuredGrid<SPMVMCellStreak, MATRICES, ValueType, C, SIGMA> Grid;
-        SerialSimulator<SPMVMCellStreak> sim(
-            new SparseMatrixInitializer<SPMVMCellStreak, Grid>(dim, maxT));
-
-        double seconds = 0;
-        {
-            ScopedTimer t(&seconds);
-
-            sim.run();
-        }
-
-        if (sim.getGrid()->get(Coord<1>(1)).sum == 4711) {
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -2708,6 +2691,62 @@ public:
 
 class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
 {
+private:
+    template<typename CELL, typename GRID>
+    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+                       GRID *gridNew, unsigned nanoStep)
+    {
+        // Assumption: Cell has both (updateLineX and update())
+
+        // loop peeling: streak's start might point to middle of chunks
+        // if so: vectorization cannot be done -> solution: additionally
+        // update the first and last chunk of complete streak scalar by
+        // calling update() instead
+        int startX = streak.origin.x();
+        if ((startX % C) != 0) {
+            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+                hoodOld(gridOld, startX);
+            const int cellsToUpdate = C - (startX % C);
+            CELL cells[cellsToUpdate];
+            Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
+
+            // update SoA grid: copy cells to local buffer, update, copy data back to grid
+            gridNew->get(cellStreak, cells);
+            // call update
+            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+                cells[i].update(hoodOld, nanoStep);
+            }
+            gridNew->set(cellStreak, cells);
+
+            startX += cellsToUpdate;
+        }
+
+        // call updateLineX with adjusted indices
+        UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodOld(gridOld, startX);
+        UnstructuredSoANeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodNew(*gridNew);
+        const int endX = streak.endX / C;
+        CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
+
+        // call scalar updates for last chunk
+        if ((streak.endX % C) != 0) {
+            const int cellsToUpdate = streak.endX % C;
+            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+                hoodOld(gridOld, streak.endX - cellsToUpdate);
+            CELL cells[cellsToUpdate];
+            Streak<1> cellStreak(Coord<1>(streak.endX - cellsToUpdate), streak.endX);
+
+            // update SoA grid: copy cells to local buffer, update, copy data back to grid
+            gridNew->get(cellStreak, cells);
+            // call update
+            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+                cells[i].update(hoodOld, nanoStep);
+            }
+            gridNew->set(cellStreak, cells);
+        }
+    }
+
 public:
     std::string family()
     {
@@ -2716,24 +2755,31 @@ public:
 
     std::string species()
     {
-        return "vectorized";
+        return "SoA";
     }
 
     double performance2(const Coord<3>& dim)
     {
+        // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
-        int maxT = 1;
-        SerialSimulator<SPMVMSoACell> sim(
-            new SparseMatrixInitializer<SPMVMSoACell, Grid>(dim, maxT));
+        const Coord<1> size(dim.x() * dim.y() * dim.z());
+        Grid gridOld(size);
+        Grid gridNew(size);
 
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. call updateFunctor()
         double seconds = 0;
+        Streak<1> streak(Coord<1>(0), size.x());
         {
             ScopedTimer t(&seconds);
-
-            sim.run();
+            updateFunctor<SPMVMSoACell, Grid>(streak, gridOld, &gridNew, 0);
         }
 
-        if (sim.getGrid()->get(Coord<1>(1)).sum == 4711) {
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
             std::cout << "this statement just serves to prevent the compiler from"
                       << "optimizing away the loops above\n";
         }
@@ -2796,10 +2842,6 @@ int main(int argc, char **argv)
 
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
-        }
-
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationStreak(), toVector(sizes[i]));
         }
 
         for (std::size_t i = 0; i < sizes.size(); ++i) {
