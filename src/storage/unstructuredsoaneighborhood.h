@@ -35,7 +35,7 @@ public:
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor)
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
         // FIXME: index?
         // save member pointer
@@ -58,7 +58,7 @@ public:
     {}
 
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor)
+    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
     {
         // FIXME: index?
         // save member pointer
