@@ -453,6 +453,7 @@ int main(int argc, char **argv)
         // eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, RM07, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
 
+#ifdef __AVX__
         eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_4_1, RM07, NZ, 4, 1>(),
              toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_8_1, RM07, NZ, 8, 1>(),
@@ -507,6 +508,7 @@ int main(int argc, char **argv)
         //      toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_16_512, RM07, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
+#endif
     }
 
     // matrix: kkt_power
@@ -569,6 +571,7 @@ int main(int argc, char **argv)
         // eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, KKT, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
 
+#ifdef __AVX__
         eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_4_1, KKT, NZ, 4, 1>(),
              toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_8_1, KKT, NZ, 8, 1>(),
@@ -623,6 +626,7 @@ int main(int argc, char **argv)
         //      toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_16_512, KKT, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
+#endif
     }
 
     // matrix: Hamrle3
@@ -685,6 +689,7 @@ int main(int argc, char **argv)
         // eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, HAM, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
 
+#ifdef __AVX__
         eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_4_1, HAM, NZ, 4, 1>(),
              toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_8_1, HAM, NZ, 8, 1>(),
@@ -739,6 +744,7 @@ int main(int argc, char **argv)
         //      toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_16_512, HAM, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
+#endif
     }
 
     // matrix: ML_Geer
@@ -801,6 +807,7 @@ int main(int argc, char **argv)
         // eval(SparseMatrixVectorMultiplicationMM<SPMVMSoACell_16_512, ML, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
 
+#ifdef __AVX__
         eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_4_1, ML, NZ, 4, 1>(),
              toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_8_1, ML, NZ, 8, 1>(),
@@ -855,6 +862,7 @@ int main(int argc, char **argv)
         //      toVector(Coord<3>(DIM, 1, 1)));
         // eval(SparseMatrixVectorMultiplicationMMNative<SPMVMSoACell_16_512, ML, NZ, 16, 512>(),
         //      toVector(Coord<3>(DIM, 1, 1)));
+#endif
     }
 
     return 0;
