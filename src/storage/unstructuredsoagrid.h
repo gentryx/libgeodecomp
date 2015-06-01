@@ -339,6 +339,12 @@ public:
         elements.callback(functor);
     }
 
+    template<typename FUNCTOR>
+    void callback(UnstructuredSoAGrid *newGrid, FUNCTOR functor) const
+    {
+        elements.callback(&newGrid->elements, functor);
+    }
+
 protected:
     void saveMemberImplementation(
         char *target, const Selector<ELEMENT_TYPE>& selector, const Region<DIM>& region) const

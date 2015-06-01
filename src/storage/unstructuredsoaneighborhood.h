@@ -16,71 +16,21 @@
 
 namespace LibGeoDecomp {
 
-namespace UnstructuredSoANeighborhoodHelpers {
-
-// FIXME: this classes should be automatically generated according
-//        to Cell's members
-/**
- * Helper class to get the pointer to Cell's
- * sum variable in SoA grid.
- */
-template<typename CELL, typename VALUE_TYPE>
-class GetSumPointer
-{
-private:
-    VALUE_TYPE **memberPointer;
-public:
-    inline GetSumPointer(VALUE_TYPE **ptr) :
-        memberPointer(ptr)
-    {}
-
-    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
-    {
-        // FIXME: index?
-        // save member pointer
-        *memberPointer = static_cast<VALUE_TYPE *>(&accessor.sum());
-    }
-};
-
-/**
- * Helper class to get the pointer to Cell's
- * value variable in SoA grid.
- */
-template<typename CELL, typename VALUE_TYPE>
-class GetValuePointer
-{
-private:
-    VALUE_TYPE **memberPointer;
-public:
-    inline GetValuePointer(VALUE_TYPE **ptr) :
-        memberPointer(ptr)
-    {}
-
-    template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
-    void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor) const
-    {
-        // FIXME: index?
-        // save member pointer
-        *memberPointer = static_cast<VALUE_TYPE *>(&accessor.value());
-    }
-};
-
-}
-
 /**
  * Neighborhood providing pointers for vectorization of UnstructuredSoAGrid.
  * Weights(id) returns a pair of two pointers. One points to the array where
  * the indices for gather are stored and the seconds points the matrix values.
  * Both pointers can be used to load LFA short_vec classes accordingly.
  */
-template<typename CELL, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+template<
+    typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX,
+    std::size_t MATRICES = 1, typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
 class UnstructuredSoANeighborhood
 {
 private:
     typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
     typedef std::pair<const unsigned *, const VALUE_TYPE *> IteratorPair;
+    typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
     const Grid& grid;           /**< old grid */
     int currentChunk;           /**< current chunk */
     int currentMatrixID;        /**< current id for matrices */
@@ -136,14 +86,11 @@ public:
     };
 
     inline
-    UnstructuredSoANeighborhood(const Grid& grid, long long startX) :
+    UnstructuredSoANeighborhood(const SoAAccessor& acc, const Grid& grid, long startX) :
         grid(grid),
-        currentChunk(startX / C)
-    {
-        // save member pointer
-        grid.callback(UnstructuredSoANeighborhoodHelpers::
-                      GetValuePointer<CELL, VALUE_TYPE>(&valuePtr));
-    }
+        currentChunk(startX / C),
+        accessor(acc)
+    {}
 
     inline
     UnstructuredSoANeighborhood& operator++()
@@ -155,23 +102,8 @@ public:
     inline
     UnstructuredSoANeighborhood operator++(int)
     {
-        UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
+        UnstructuredSoANeighborhood tmp(*this);
         operator++();
-        return tmp;
-    }
-
-    inline
-    UnstructuredSoANeighborhood& operator--()
-    {
-        --currentChunk;
-        return *this;
-    }
-
-    inline
-    UnstructuredSoANeighborhood operator--(int)
-    {
-        UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA> tmp(*this);
-        operator--();
         return tmp;
     }
 
@@ -195,7 +127,7 @@ public:
     }
 
     inline
-    UnstructuredSoANeighborhood<CELL, MATRICES, VALUE_TYPE, C, SIGMA>& weights(std::size_t matrixID)
+    UnstructuredSoANeighborhood& weights(std::size_t matrixID)
     {
         currentMatrixID = matrixID;
 
@@ -216,32 +148,27 @@ public:
         return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1]);
     }
 
-    // public cell members
-    VALUE_TYPE *valuePtr;
+    // provide access to SoA accessor for the user code
+    const SoAAccessor& accessor;
 };
 
 /**
  * Neighborhood which is used for hoodNew in updateLineX().
  * Provides access to member pointers of the new grid.
  */
-template<typename CELL, std::size_t MATRICES = 1,
-         typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
+template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
 class UnstructuredSoANeighborhoodNew
 {
 private:
-    typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
-    Grid& grid;                 /**< new grid */
+    typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
 public:
     inline explicit
-    UnstructuredSoANeighborhoodNew(Grid& grid) :
-        grid(grid)
-    {
-        grid.callback(UnstructuredSoANeighborhoodHelpers::
-                      GetSumPointer<CELL, VALUE_TYPE>(&sumPtr));
-    }
+    UnstructuredSoANeighborhoodNew(SoAAccessor& acc) :
+        accessor(acc)
+    {}
 
-    // public cell members
-    VALUE_TYPE *sumPtr;
+    // provide access to soa accessor
+    SoAAccessor& accessor;
 };
 
 /**

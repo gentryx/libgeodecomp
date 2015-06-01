@@ -2641,111 +2641,111 @@ public:
     }
 };
 
-class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
-{
-private:
-    template<typename CELL, typename GRID>
-    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
-                       GRID *gridNew, unsigned nanoStep)
-    {
-        // Assumption: Cell has both (updateLineX and update())
+// class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
+// {
+// private:
+//     template<typename CELL, typename GRID>
+//     void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+//                        GRID *gridNew, unsigned nanoStep)
+//     {
+//         // Assumption: Cell has both (updateLineX and update())
 
-        // loop peeling: streak's start might point to middle of chunks
-        // if so: vectorization cannot be done -> solution: additionally
-        // update the first and last chunk of complete streak scalar by
-        // calling update() instead
-        int startX = streak.origin.x();
-        if ((startX % C) != 0) {
-            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                hoodOld(gridOld, startX);
-            const int cellsToUpdate = C - (startX % C);
-            CELL cells[cellsToUpdate];
-            Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
+//         // loop peeling: streak's start might point to middle of chunks
+//         // if so: vectorization cannot be done -> solution: additionally
+//         // update the first and last chunk of complete streak scalar by
+//         // calling update() instead
+//         int startX = streak.origin.x();
+//         if ((startX % C) != 0) {
+//             UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+//                 hoodOld(gridOld, startX);
+//             const int cellsToUpdate = C - (startX % C);
+//             CELL cells[cellsToUpdate];
+//             Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
 
-            // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            gridNew->get(cellStreak, cells);
-            // call update
-            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-                cells[i].update(hoodOld, nanoStep);
-            }
-            gridNew->set(cellStreak, cells);
+//             // update SoA grid: copy cells to local buffer, update, copy data back to grid
+//             gridNew->get(cellStreak, cells);
+//             // call update
+//             for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+//                 cells[i].update(hoodOld, nanoStep);
+//             }
+//             gridNew->set(cellStreak, cells);
 
-            startX += cellsToUpdate;
-        }
+//             startX += cellsToUpdate;
+//         }
 
-        // call updateLineX with adjusted indices
-        UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodOld(gridOld, startX);
-        UnstructuredSoANeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
-            hoodNew(*gridNew);
-        const int endX = streak.endX / C;
-        CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
+//         // call updateLineX with adjusted indices
+//         UnstructuredSoANeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+//             hoodOld(gridOld, startX);
+//         UnstructuredSoANeighborhoodNew<CELL, MATRICES, ValueType, C, SIGMA>
+//             hoodNew(*gridNew);
+//         const int endX = streak.endX / C;
+//         CELL::updateLineX(hoodNew, endX, hoodOld, nanoStep);
 
-        // call scalar updates for last chunk
-        if ((streak.endX % C) != 0) {
-            const int cellsToUpdate = streak.endX % C;
-            UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
-                hoodOld(gridOld, streak.endX - cellsToUpdate);
-            CELL cells[cellsToUpdate];
-            Streak<1> cellStreak(Coord<1>(streak.endX - cellsToUpdate), streak.endX);
+//         // call scalar updates for last chunk
+//         if ((streak.endX % C) != 0) {
+//             const int cellsToUpdate = streak.endX % C;
+//             UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+//                 hoodOld(gridOld, streak.endX - cellsToUpdate);
+//             CELL cells[cellsToUpdate];
+//             Streak<1> cellStreak(Coord<1>(streak.endX - cellsToUpdate), streak.endX);
 
-            // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            gridNew->get(cellStreak, cells);
-            // call update
-            for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
-                cells[i].update(hoodOld, nanoStep);
-            }
-            gridNew->set(cellStreak, cells);
-        }
-    }
+//             // update SoA grid: copy cells to local buffer, update, copy data back to grid
+//             gridNew->get(cellStreak, cells);
+//             // call update
+//             for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
+//                 cells[i].update(hoodOld, nanoStep);
+//             }
+//             gridNew->set(cellStreak, cells);
+//         }
+//     }
 
-public:
-    std::string family()
-    {
-        return "SPMVM";
-    }
+// public:
+//     std::string family()
+//     {
+//         return "SPMVM";
+//     }
 
-    std::string species()
-    {
-        return "gold";
-    }
+//     std::string species()
+//     {
+//         return "gold";
+//     }
 
-    double performance2(const Coord<3>& dim)
-    {
-        // 1. create grids
-        typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
-        const Coord<1> size(dim.x());
-        Grid gridOld(size);
-        Grid gridNew(size);
+//     double performance2(const Coord<3>& dim)
+//     {
+//         // 1. create grids
+//         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
+//         const Coord<1> size(dim.x());
+//         Grid gridOld(size);
+//         Grid gridNew(size);
 
-        // 2. init grid old
-        const int maxT = 1;
-        SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
-        init.grid(&gridOld);
+//         // 2. init grid old
+//         const int maxT = 1;
+//         SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
+//         init.grid(&gridOld);
 
-        // 3. call updateFunctor()
-        double seconds = 0;
-        Streak<1> streak(Coord<1>(0), size.x());
-        {
-            ScopedTimer t(&seconds);
-            updateFunctor<SPMVMSoACell, Grid>(streak, gridOld, &gridNew, 0);
-        }
+//         // 3. call updateFunctor()
+//         double seconds = 0;
+//         Streak<1> streak(Coord<1>(0), size.x());
+//         {
+//             ScopedTimer t(&seconds);
+//             updateFunctor<SPMVMSoACell, Grid>(streak, gridOld, &gridNew, 0);
+//         }
 
-        if (gridNew.get(Coord<1>(1)).sum == 4711) {
-            std::cout << "this statement just serves to prevent the compiler from"
-                      << "optimizing away the loops above\n";
-        }
+//         if (gridNew.get(Coord<1>(1)).sum == 4711) {
+//             std::cout << "this statement just serves to prevent the compiler from"
+//                       << "optimizing away the loops above\n";
+//         }
 
-        const double numOps = 2. * (size.x() / 100) * (size.x());
-        const double gflops = 1.0e-9 * numOps / seconds;
-        return gflops;
-    }
+//         const double numOps = 2. * (size.x() / 100) * (size.x());
+//         const double gflops = 1.0e-9 * numOps / seconds;
+//         return gflops;
+//     }
 
-    std::string unit()
-    {
-        return "GFLOP/s";
-    }
-};
+//     std::string unit()
+//     {
+//         return "GFLOP/s";
+//     }
+// };
 
 #ifdef __AVX__
 class SparseMatrixVectorMultiplicationNative : public CPUBenchmark
@@ -2880,9 +2880,9 @@ int main(int argc, char **argv)
         }
 #endif
 
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
-        }
+        // for (std::size_t i = 0; i < sizes.size(); ++i) {
+        //     eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
+        // }
         sizes.clear();
     }
 #endif
