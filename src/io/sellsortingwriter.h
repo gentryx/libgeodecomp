@@ -102,6 +102,9 @@ public:
         if (SIGMA <= 1) {
             throw std::logic_error("The SortingWriter makes only sense to use with a SIGMA greater 1.");
         }
+        if (delegate == nullptr) {
+            throw std::invalid_argument("Writer pointer is NULL.");
+        }
     }
 
     ~SellSortingWriter()
