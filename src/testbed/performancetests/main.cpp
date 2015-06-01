@@ -2537,7 +2537,7 @@ class SellMatrixInitializer : public CPUBenchmark
 
     std::string species()
     {
-        return "matrix";
+        return "bronze";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2601,7 +2601,6 @@ public:
 
     std::string species()
     {
-        // FIXME
         return "vanilla";
     }
 
@@ -2706,7 +2705,7 @@ public:
 
     std::string species()
     {
-        return "SoA";
+        return "gold";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2755,7 +2754,7 @@ public:
 
     std::string species()
     {
-        return "native";
+        return "platinum";
     }
 
     double performance2(const Coord<3>& dim)
