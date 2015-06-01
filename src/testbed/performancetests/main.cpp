@@ -2520,8 +2520,7 @@ public:
             }
         }
 
-        // grid->setAdjacency(0, adjacency.begin(), adjacency.end());
-        grid->setCompleteAdjacency(0, size, adjacency);
+        grid->setAdjacency(0, size, adjacency);
 
         // setup rhs: not needed, since the grid is intialized with default cells
         // default value of SPMVMCell is 8.0
@@ -2529,54 +2528,6 @@ public:
 };
 
 class SellMatrixInitializer : public CPUBenchmark
-{
-    public:
-    std::string family()
-    {
-        return "SELLInit";
-    }
-
-    std::string species()
-    {
-        return "point";
-    }
-
-    double performance2(const Coord<3>& dim)
-    {
-        Coord<1> dim1d(dim.x() * dim.y() * dim.z());
-        int size = dim.x() * dim.y() * dim.z();
-        UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
-        std::map<Coord<2>, ValueType> adjacency;
-
-        // setup matrix: ~1 % non zero entries
-        for (int row = 0; row < size; ++row) {
-            for (int col = 0; col < size / 100; ++col) {
-                adjacency[Coord<2>(row, col * 100)] = 5.0;
-            }
-        }
-
-        double seconds = 0;
-        {
-            ScopedTimer t(&seconds);
-
-            grid.setAdjacency(0, adjacency.begin(), adjacency.end());
-        }
-
-        if (grid.get(Coord<1>(1)).sum == 4711) {
-            std::cout << "this statement just serves to prevent the compiler from"
-                      << "optimizing away the loops above\n";
-        }
-
-        return seconds;
-    }
-
-    std::string unit()
-    {
-        return "s";
-    }
-};
-
-class SellAddPointInitializer : public CPUBenchmark
 {
     public:
     std::string family()
@@ -2607,7 +2558,7 @@ class SellAddPointInitializer : public CPUBenchmark
         {
             ScopedTimer t(&seconds);
 
-            grid.setCompleteAdjacency(0, size, adjacency);
+            grid.setAdjacency(0, size, adjacency);
         }
 
         if (grid.get(Coord<1>(1)).sum == 4711) {
@@ -2912,10 +2863,6 @@ int main(int argc, char **argv)
               << Coord<3>(55, 55, 55);
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SellMatrixInitializer(), toVector(sizes[i]));
-        }
-
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SellAddPointInitializer(), toVector(sizes[i]));
         }
 
         for (std::size_t i = 0; i < sizes.size(); ++i) {

@@ -21,6 +21,9 @@ namespace LibGeoDecomp {
 
 namespace SellHelpers {
 
+/**
+ * Helper struct used for sorting.
+ */
 struct SortItem
 {
 public:
@@ -34,6 +37,11 @@ public:
     int rowIndex;
 };
 
+/**
+ * Helper class to initialize the sell container from an adjacency matrix.
+ * This is a class and not a method, because there are two different implementations,
+ * one for SIGMA = 1 and one for SIGMA > 1.
+ */
 template<int SIGMA>
 class InitFromMatrix
 {
@@ -126,6 +134,9 @@ public:
     }
 };
 
+/**
+ * See doc above.
+ */
 template<>
 class InitFromMatrix<1>
 {
@@ -193,7 +204,12 @@ public:
 
 }
 
-//OHNE SORTIEREN! SIGMA =1 TODO
+/**
+ * This class represents an container which uses an efficient
+ * storage layout for sparse matrices.
+ *
+ * See: http://arxiv.org/abs/1307.6209
+ */
 template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
@@ -240,11 +256,9 @@ public:
                 for (int row = 0; row < C; ++row) {
                     VALUETYPE val = values[offs];
                     int columnINDEX = column[offs++];
-                    // fixme: get rid of this conditional by making -1 a valid address within the source data structure. -1 should be a symbol for "empty field", perhaps edge cell.
-                    if (columnINDEX != -1) {
-                        VALUETYPE b = rhs[columnINDEX];
-                        tmp[row] += val * b;
-                    }
+                    // note: val might be zero due to padding
+                    VALUETYPE b = rhs[columnINDEX];
+                    tmp[row] += val * b;
                 }
             }
 
@@ -284,110 +298,6 @@ public:
             template operator()<VALUETYPE, C>(matrixSize, matrix, values, column,
                                               chunkLength, chunkOffset, rowLength,
                                               realRowToSorted, chunkRowToReal);
-    }
-
-    /**
-     * Row [0:N-1]; Col [0:N-1]
-     */
-    void addPoint(int const row, int const col, VALUETYPE value)
-    {
-        static_assert(SIGMA == 1, "SIGMA must be '1'; everything else is not implemented yet!");
-
-        if (row < 0 || col < 0 || (std::size_t)row >= dimension) {
-            throw std::invalid_argument("row and colum must be >= 0");
-        }
-
-        int const chunk (row/C);
-
-        //// case 1: row is NOT the bigest in chunk
-        if (rowLength[row] < chunkLength[chunk]) {
-            auto itCol = column.begin() + chunkOffset[chunk] + row % C;
-
-            while (col > *itCol && -1 != *itCol) {
-                itCol += C;
-            }
-            if (col == *itCol) {
-                *itCol = col;
-                values[itCol - column.begin()] = value;
-                return;
-            }
-
-            if (-1 != *itCol) {
-                //// case 1.a add value in mid of row
-                int lastElement = chunkOffset[chunk + 1] - C + (row%C);
-                int end = itCol - column.begin();
-
-                for (int i = lastElement; i > end; i -= C) {
-                    values[i] = values[i-C];
-                    column[i] = column[i-C];
-                }
-            }
-
-            values[itCol - column.begin()] = value;
-            *itCol = col;
-
-            ++rowLength[row];
-        } else {
-            //// case 2: row is the longest in chunk -> expend chunk
-            int const offset    = chunkOffset[chunk] + row % C;
-            int const offsetEnd = chunkOffset[chunk+1];
-
-            int index = offset;
-            while (index < offsetEnd && col > column[index]) {
-                index += C;
-            }
-
-            if (index >= offsetEnd) {
-                index = offsetEnd;
-
-                auto itCol = column.begin() + index;
-                auto itVal = values.begin() + index;
-
-                for (int i = 0; i < C; ++i) {
-                    itCol = column.insert(itCol, -1);   //TODO für matvecmul flag array?
-                    itVal = values.insert(itVal, VALUETYPE());
-                }
-                *(itCol + (row%C)) = col;
-                *(itVal + (row%C)) = value;
-            } else {
-                if (col == column[index]) {
-                    column[index] = col;
-                    values[index] = value;
-                    return;
-                }
-
-                auto itCol = column.begin() + index;
-                auto itVal = values.begin() + index;
-
-                for (int i = 0; i < C; ++i) {
-                    itCol = column.insert(itCol, -1);
-                    itVal = values.insert(itVal, VALUETYPE());
-                }
-                *itVal = value;
-                *itCol = col;
-
-                //// fix order
-                for (int i = index; i < offsetEnd; ++i) {
-                    if (i%C != row%C) {
-                        values[i] = values[i + C];
-                        column[i] = column[i + C];
-                    }
-                }
-                for (int i = 0; i < C; ++i ) {
-                    if (i != row % C) {
-                        values[offsetEnd + i] = VALUETYPE();
-                        column[offsetEnd + i] = -1;
-                    }
-                }
-            }
-
-            ++rowLength[row];
-            chunkLength[chunk] = rowLength[row];
-
-            for (unsigned ch = chunk+1; ch < chunkOffset.size(); ++ch) {
-                chunkOffset[ch] += C;
-            }
-        }
     }
 
     inline bool operator==(const SellCSigmaSparseMatrixContainer& other) const

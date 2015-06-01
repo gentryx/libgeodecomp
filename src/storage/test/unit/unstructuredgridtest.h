@@ -182,8 +182,10 @@ public:
         const int DIM = 128;
         UnstructuredGrid<int, 2, double, 4, 1> *grid =
             new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
-        std::map<Coord<2>,int> adjacenc0;
-        std::map<Coord<2>,int> adjacenc1;
+        std::map<Coord<2>,double> adjacenc0;
+        std::map<Coord<2>,double> adjacenc1;
+        std::map<Coord<2>,double> _matrix0;
+        std::map<Coord<2>,double> _matrix1;
         SellCSigmaSparseMatrixContainer<double,4,1> matrix0 (DIM);
         SellCSigmaSparseMatrixContainer<double,4,1> matrix1 (DIM);
 
@@ -193,20 +195,22 @@ public:
             adjacenc0 [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
             adjacenc0 [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
             adjacenc0 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
-            matrix0.addPoint   (i,abs(i*57)     %DIM   , i   /DIM);
-            matrix0.addPoint   (i,abs(i*57 + 75)%DIM   , i*57/DIM);
-            matrix0.addPoint   (i,abs(i*57 - 7 )%DIM   , i*7 /DIM);
+            _matrix0  [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
+            _matrix0  [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
+            _matrix0  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
 
             adjacenc1 [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
             adjacenc1 [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
             adjacenc1 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
-            matrix1.addPoint   (i,abs(i*57)     %DIM   , -i   /DIM);
-            matrix1.addPoint   (i,abs(i*57 + 75)%DIM   , -i*57/DIM);
-            matrix1.addPoint   (i,abs(i*57 - 7 )%DIM   , -i*7 /DIM);
+            _matrix1  [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
+            _matrix1  [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
+            _matrix1  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
         }
 
-        grid->setAdjacency(0, adjacenc0.begin(), adjacenc0.end());
-        grid->setAdjacency(1, adjacenc1.begin(), adjacenc1.end());
+        matrix0.initFromMatrix(DIM, _matrix0);
+        matrix1.initFromMatrix(DIM, _matrix1);
+        grid->setAdjacency(0, DIM, adjacenc0);
+        grid->setAdjacency(1, DIM, adjacenc1);
 
         TS_ASSERT_EQUALS(matrix0, grid->getAdjacency(0));
         TS_ASSERT_EQUALS(matrix1, grid->getAdjacency(1));

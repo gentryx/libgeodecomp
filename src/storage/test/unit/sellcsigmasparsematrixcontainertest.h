@@ -1,7 +1,9 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
 #include <libgeodecomp/geometry/coord.h>
+
 #include <cxxtest/TestSuite.h>
+
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
@@ -13,12 +15,15 @@ namespace LibGeoDecomp {
 
 class SellCSigmaSparseMatrixContainerTest : public CxxTest::TestSuite
 {
+private:
+    using IMatrix = std::map<Coord<2>, int>;
+    using CMatrix = std::map<Coord<2>, char>;
+    using DMatrix = std::map<Coord<2>, double>;
 public:
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     void testGetRow_one()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14
-//std::cout << "\n\n\nTEST 1: C=1 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
         SellCSigmaSparseMatrixContainer<int, 1, 1> smc(8);
 
         /* add a test 8x8 Matrix:
@@ -32,14 +37,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(3, 3, 4);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(7, 7, 8);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(3, 3)] = 4;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(7, 7)] = 8;
+        smc.initFromMatrix(8, matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -119,14 +126,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(7, 7, 8);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(3, 3, 4);
+        IMatrix matrix;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(7, 7)] = 8;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(3, 3)] = 4;
+        smc.initFromMatrix(8, matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -208,14 +217,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(7, 7, 8);
-        smc.addPoint(3, 3, 4);
+        IMatrix matrix;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(7, 7)] = 8;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(3, 3)] = 4;
+        smc.initFromMatrix(8, matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -296,14 +307,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(3, 3, 4);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(7, 7, 8);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(3, 3)] = 4;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(7, 7)] = 8;
+        smc.initFromMatrix(8, matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -390,25 +403,27 @@ public:
          *  8  | 0 0 0 S 0 Q 0 R 0 |
          */
 
-        smc.addPoint(4, 0, 'G');
-        smc.addPoint(8, 7, 'R');
-        smc.addPoint(6, 3, 'K');
-        smc.addPoint(7, 6, 'O');
-        smc.addPoint(7, 4, 'N');
-        smc.addPoint(7, 2, 'M');
-        smc.addPoint(0, 4, 'A');
-        smc.addPoint(3, 8, 'F');
-        smc.addPoint(7, 0, 'L');
-        smc.addPoint(3, 7, 'E');
-        smc.addPoint(2, 4, 'B');
-        smc.addPoint(5, 1, 'I');
-        smc.addPoint(7, 8, 'P');
-        smc.addPoint(3, 2, 'D');
-        smc.addPoint(8, 5, 'Q');
-        smc.addPoint(8, 3, 'S');
-        smc.addPoint(5, 2, 'J');
-        smc.addPoint(4, 5, 'H');
-        smc.addPoint(2, 6, 'C');
+        CMatrix matrix;
+        matrix[Coord<2>(4, 0)] = 'G';
+        matrix[Coord<2>(8, 7)] = 'R';
+        matrix[Coord<2>(6, 3)] = 'K';
+        matrix[Coord<2>(7, 6)] = 'O';
+        matrix[Coord<2>(7, 4)] = 'N';
+        matrix[Coord<2>(7, 2)] = 'M';
+        matrix[Coord<2>(0, 4)] = 'A';
+        matrix[Coord<2>(3, 8)] = 'F';
+        matrix[Coord<2>(7, 0)] = 'L';
+        matrix[Coord<2>(3, 7)] = 'E';
+        matrix[Coord<2>(2, 4)] = 'B';
+        matrix[Coord<2>(5, 1)] = 'I';
+        matrix[Coord<2>(7, 8)] = 'P';
+        matrix[Coord<2>(3, 2)] = 'D';
+        matrix[Coord<2>(8, 5)] = 'Q';
+        matrix[Coord<2>(8, 3)] = 'S';
+        matrix[Coord<2>(5, 2)] = 'J';
+        matrix[Coord<2>(4, 5)] = 'H';
+        matrix[Coord<2>(2, 6)] = 'C';
+        smc.initFromMatrix(8, matrix);
 
         std::vector< std::pair<int, char> > row0;
         std::pair<int, char> pair0(4, 'A');
@@ -521,13 +536,14 @@ public:
          * 0 0 6
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(0, 2, 4);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(2, 2, 3);
-
-        smc.addPoint(1, 1, 5);
-        smc.addPoint(2, 2, 6);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(0, 2)] = 4;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(1, 1)] = 5;
+        matrix[Coord<2>(2, 2)] = 6;
+        smc.initFromMatrix(3, matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -572,14 +588,16 @@ public:
          * 8       0 0 0 0 0 0 0 1      8
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(1, 1, 1);
-        smc.addPoint(2, 2, 1);
-        smc.addPoint(3, 3, 1);
-        smc.addPoint(4, 4, 1);
-        smc.addPoint(5, 5, 1);
-        smc.addPoint(6, 6, 1);
-        smc.addPoint(7, 7, 1);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(1, 1)] = 1;
+        matrix[Coord<2>(2, 2)] = 1;
+        matrix[Coord<2>(3, 3)] = 1;
+        matrix[Coord<2>(4, 4)] = 1;
+        matrix[Coord<2>(5, 5)] = 1;
+        matrix[Coord<2>(6, 6)] = 1;
+        matrix[Coord<2>(7, 7)] = 1;
+        smc.initFromMatrix(8, matrix);
 
         std::vector<int> lhs(8);
         std::vector<int> rhs(8);
@@ -611,10 +629,12 @@ public:
          * 2       0 1 0 0       4
          */
 
-        smc.addPoint(0, 2, 1);
-        smc.addPoint(1, 0, 1);
-        smc.addPoint(2, 3, 1);
-        smc.addPoint(3, 1, 1);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 2)] = 1;
+        matrix[Coord<2>(1, 0)] = 1;
+        matrix[Coord<2>(2, 3)] = 1;
+        matrix[Coord<2>(3, 1)] = 1;
+        smc.initFromMatrix(4, matrix);
 
         std::vector<int> lhs(4);
         std::vector<int> rhs(4);
@@ -651,22 +671,24 @@ public:
          * 13       3 4 2 -1       4
          */
 
-        smc.addPoint(0, 0, 0);
-        smc.addPoint(0, 1, 1);
-        smc.addPoint(0, 2, 2);
-        smc.addPoint(0, 3, -3);
-        smc.addPoint(1, 0, -4);
-        smc.addPoint(1, 1, 3);
-        smc.addPoint(1, 2, 2);
-        smc.addPoint(1, 3, 1);
-        smc.addPoint(2, 0, 2);
-        smc.addPoint(2, 1, -3);
-        smc.addPoint(2, 2, 4);
-        smc.addPoint(2, 3, 1);
-        smc.addPoint(3, 0, 3);
-        smc.addPoint(3, 1, 4);
-        smc.addPoint(3, 2, 2);
-        smc.addPoint(3, 3, -1);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 0;
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(0, 2)] = 2;
+        matrix[Coord<2>(0, 3)] = -3;
+        matrix[Coord<2>(1, 0)] = -4;
+        matrix[Coord<2>(1, 1)] = 3;
+        matrix[Coord<2>(1, 2)] = 2;
+        matrix[Coord<2>(1, 3)] = 1;
+        matrix[Coord<2>(2, 0)] = 2;
+        matrix[Coord<2>(2, 1)] = -3;
+        matrix[Coord<2>(2, 2)] = 4;
+        matrix[Coord<2>(2, 3)] = 1;
+        matrix[Coord<2>(3, 0)] = 3;
+        matrix[Coord<2>(3, 1)] = 4;
+        matrix[Coord<2>(3, 2)] = 2;
+        matrix[Coord<2>(3, 3)] = -1;
+        smc.initFromMatrix(4, matrix);
 
         std::vector<int> lhs(4);
         std::vector<int> rhs(4);
@@ -697,22 +719,22 @@ public:
         SellCSigmaSparseMatrixContainer<double,2,1> a(DIM);
         SellCSigmaSparseMatrixContainer<double,2,1> b(DIM);
 
+        DMatrix aMatrix;
+        DMatrix bMatrix;
         for (int i=0; i<DIM; ++i) {
-            a.addPoint(i, abs(i*17+57)%DIM, (i*17+57)/DIM);
-            a.addPoint(i, abs(i*17-57)%DIM, (i*17-57)/DIM);
-            a.addPoint(i, abs(i*57+17)%DIM, (i*57+17)/DIM);
+            aMatrix[Coord<2>(i, abs(i*17+57)%DIM)] = (i*17+57)/DIM;
+            aMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
+            aMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
 
-            b.addPoint(i, abs(i*17+57)%DIM, (i*17+57)/DIM);
-            b.addPoint(i, abs(i*17-57)%DIM, (i*17-57)/DIM);
-            b.addPoint(i, abs(i*57+17)%DIM, (i*57+17)/DIM);
+            bMatrix[Coord<2>(i, abs(i*17+57)%DIM)] = (i*17+57)/DIM;
+            bMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
+            bMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
         }
+        a.initFromMatrix(DIM, aMatrix);
+        b.initFromMatrix(DIM, bMatrix);
 
         TS_ASSERT(a == a);
         TS_ASSERT(a == b);
-
-        b.addPoint(DIM-17, DIM - 7, 0.666);
-
-        TS_ASSERT_EQUALS((a == b), false);
 #endif
     }
 

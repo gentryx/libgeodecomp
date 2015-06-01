@@ -172,25 +172,11 @@ public:
     }
 
     inline
-    void setCompleteAdjacency(std::size_t matrixID, std::size_t matrixSize,
-                              const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void setAdjacency(std::size_t matrixID, std::size_t matrixSize,
+                      const std::map<Coord<2>, VALUE_TYPE>& matrix)
     {
         assert(matrixID < MATRICES);
         matrices[matrixID].initFromMatrix(matrixSize, matrix);
-    }
-
-    /**
-     * iterator musst be an interator over pair< Coord<2>, VALUE_TYPE >
-     */
-    template<typename ITERATOR>
-    void setAdjacency(std::size_t const  matrixID, const ITERATOR& start,
-                      const ITERATOR& end)
-    {
-        assert(matrixID < MATRICES);
-        for (ITERATOR i = start; i != end; ++i) {
-            Coord<2> c = i->first;
-            matrices[matrixID].addPoint(c.x(), c.y(), i->second);
-        }
     }
 
     inline

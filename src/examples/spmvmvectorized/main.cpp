@@ -118,8 +118,7 @@ public:
             adjacency[Coord<2>(i, i)] = static_cast<ValueType>(i) + 0.1;
         }
 
-        // grid->setAdjacency(0, adjacency.begin(), adjacency.end());
-        grid->setCompleteAdjacency(0, 100, adjacency);
+        grid->setAdjacency(0, 100, adjacency);
     }
 };
 
@@ -186,8 +185,7 @@ public:
         rhsIfs.close();
         matrixIfs.close();
 
-        // grid->setAdjacency(0, adjacency.begin(), adjacency.end());
-        grid->setCompleteAdjacency(0, size, adjacency);
+        grid->setAdjacency(0, size, adjacency);
     }
 };
 
