@@ -46,7 +46,7 @@ public:
         matrix[Coord<2>(5, 5)] = 6;
         matrix[Coord<2>(6, 6)] = 7;
         matrix[Coord<2>(7, 7)] = 8;
-        smc.initFromMatrix(8, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -135,7 +135,7 @@ public:
         matrix[Coord<2>(2, 2)] = 3;
         matrix[Coord<2>(5, 5)] = 6;
         matrix[Coord<2>(3, 3)] = 4;
-        smc.initFromMatrix(8, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -226,7 +226,7 @@ public:
         matrix[Coord<2>(7, 7)] = 8;
         matrix[Coord<2>(2, 2)] = 3;
         matrix[Coord<2>(3, 3)] = 4;
-        smc.initFromMatrix(8, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -316,7 +316,7 @@ public:
         matrix[Coord<2>(5, 5)] = 6;
         matrix[Coord<2>(6, 6)] = 7;
         matrix[Coord<2>(7, 7)] = 8;
-        smc.initFromMatrix(8, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -423,7 +423,7 @@ public:
         matrix[Coord<2>(5, 2)] = 'J';
         matrix[Coord<2>(4, 5)] = 'H';
         matrix[Coord<2>(2, 6)] = 'C';
-        smc.initFromMatrix(8, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, char> > row0;
         std::pair<int, char> pair0(4, 'A');
@@ -543,7 +543,7 @@ public:
         matrix[Coord<2>(2, 2)] = 3;
         matrix[Coord<2>(1, 1)] = 5;
         matrix[Coord<2>(2, 2)] = 6;
-        smc.initFromMatrix(3, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -597,7 +597,7 @@ public:
         matrix[Coord<2>(5, 5)] = 1;
         matrix[Coord<2>(6, 6)] = 1;
         matrix[Coord<2>(7, 7)] = 1;
-        smc.initFromMatrix(8, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector<int> lhs(8);
         std::vector<int> rhs(8);
@@ -634,7 +634,7 @@ public:
         matrix[Coord<2>(1, 0)] = 1;
         matrix[Coord<2>(2, 3)] = 1;
         matrix[Coord<2>(3, 1)] = 1;
-        smc.initFromMatrix(4, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector<int> lhs(4);
         std::vector<int> rhs(4);
@@ -688,7 +688,7 @@ public:
         matrix[Coord<2>(3, 1)] = 4;
         matrix[Coord<2>(3, 2)] = 2;
         matrix[Coord<2>(3, 3)] = -1;
-        smc.initFromMatrix(4, matrix);
+        smc.initFromMatrix(matrix);
 
         std::vector<int> lhs(4);
         std::vector<int> rhs(4);
@@ -730,8 +730,8 @@ public:
             bMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
             bMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
         }
-        a.initFromMatrix(DIM, aMatrix);
-        b.initFromMatrix(DIM, bMatrix);
+        a.initFromMatrix(aMatrix);
+        b.initFromMatrix(bMatrix);
 
         TS_ASSERT(a == a);
         TS_ASSERT(a == b);
@@ -755,7 +755,7 @@ public:
         matrix[Coord<2>(3, 0)] = 1;
         matrix[Coord<2>(3, 1)] = 1;
 
-        a.initFromMatrix(4, matrix);
+        a.initFromMatrix(matrix);
 
         const auto& val = a.valuesVec();
         const auto& col = a.columnVec();
@@ -815,7 +815,7 @@ public:
         matrix[Coord<2>(4, 3)] = 2;
         matrix[Coord<2>(4, 4)] = 3;
 
-        a.initFromMatrix(5, matrix);
+        a.initFromMatrix(matrix);
 
         const auto& val = a.valuesVec();
         const auto& col = a.columnVec();
@@ -897,7 +897,7 @@ public:
         matrix[Coord<2>(4, 3)] = 2;
         matrix[Coord<2>(4, 4)] = 3;
 
-        a.initFromMatrix(5, matrix);
+        a.initFromMatrix(matrix);
 
         const auto& val = a.valuesVec();
         const auto& col = a.columnVec();
@@ -971,7 +971,7 @@ public:
         matrix[Coord<2>(4, 3)] = 2;
         matrix[Coord<2>(4, 4)] = 3;
 
-        a.initFromMatrix(5, matrix);
+        a.initFromMatrix(matrix);
 
         const auto& val = a.valuesVec();
         const auto& col = a.columnVec();

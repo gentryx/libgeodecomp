@@ -2520,7 +2520,7 @@ public:
             }
         }
 
-        grid->setAdjacency(0, size, adjacency);
+        grid->setAdjacency(0, adjacency);
 
         // setup rhs: not needed, since the grid is intialized with default cells
         // default value of SPMVMCell is 8.0
@@ -2558,7 +2558,7 @@ class SellMatrixInitializer : public CPUBenchmark
         {
             ScopedTimer t(&seconds);
 
-            grid.setAdjacency(0, size, adjacency);
+            grid.setAdjacency(0, adjacency);
         }
 
         if (grid.get(Coord<1>(1)).sum == 4711) {

@@ -75,7 +75,7 @@ public:
         adjacency[Coord<2>(1, 1)] = 2;
         adjacency[Coord<2>(2, 2)] = 3;
         adjacency[Coord<2>(3, 3)] = 4;
-        grid.setAdjacency(0, 4, adjacency);
+        grid.setAdjacency(0, adjacency);
 
         // init neighborhood
         UnstructuredNeighborhood<MyCell, 1, double, 1, 1> nb(grid, 0);
@@ -131,7 +131,7 @@ public:
         adjacency[Coord<2>(1, 4)] = 7;
         adjacency[Coord<2>(1, 5)] = 6;
         adjacency[Coord<2>(1, 6)] = 4;
-        grid.setAdjacency(0, 8, adjacency);
+        grid.setAdjacency(0, adjacency);
 
         // init neighborhood
         UnstructuredNeighborhood<MyCell, 1, double, 1, 1> nb(grid, 0);

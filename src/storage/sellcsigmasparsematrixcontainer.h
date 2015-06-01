@@ -292,10 +292,10 @@ public:
      * _complete_ matrix. Matrix is represented as map, key is Coord<2> which contains
      * (row, column). value_type of map contains the actual value.
      */
-    void initFromMatrix(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix)
+    void initFromMatrix(const std::map<Coord<2>, VALUETYPE>& matrix)
     {
         SellHelpers::InitFromMatrix<SIGMA>().
-            template operator()<VALUETYPE, C>(matrixSize, matrix, values, column,
+            template operator()<VALUETYPE, C>(dimension, matrix, values, column,
                                               chunkLength, chunkOffset, rowLength,
                                               realRowToSorted, chunkRowToReal);
     }

@@ -172,11 +172,10 @@ public:
     }
 
     inline
-    void setAdjacency(std::size_t matrixID, std::size_t matrixSize,
-                      const std::map<Coord<2>, VALUE_TYPE>& matrix)
+    void setAdjacency(std::size_t matrixID, const std::map<Coord<2>, VALUE_TYPE>& matrix)
     {
         assert(matrixID < MATRICES);
-        matrices[matrixID].initFromMatrix(matrixSize, matrix);
+        matrices[matrixID].initFromMatrix(matrix);
     }
 
     inline

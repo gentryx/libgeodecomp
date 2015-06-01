@@ -207,10 +207,10 @@ public:
             _matrix1  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
         }
 
-        matrix0.initFromMatrix(DIM, _matrix0);
-        matrix1.initFromMatrix(DIM, _matrix1);
-        grid->setAdjacency(0, DIM, adjacenc0);
-        grid->setAdjacency(1, DIM, adjacenc1);
+        matrix0.initFromMatrix(_matrix0);
+        matrix1.initFromMatrix(_matrix1);
+        grid->setAdjacency(0, adjacenc0);
+        grid->setAdjacency(1, adjacenc1);
 
         TS_ASSERT_EQUALS(matrix0, grid->getAdjacency(0));
         TS_ASSERT_EQUALS(matrix1, grid->getAdjacency(1));
