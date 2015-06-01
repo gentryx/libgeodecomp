@@ -7,8 +7,6 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/storage/unstructuredgrid.h>
-#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 

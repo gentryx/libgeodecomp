@@ -13,7 +13,7 @@
 
 namespace LibGeoDecomp {
 
-namespace UnstructuredGridHelpers {
+namespace UnstructuredNeighborhoodHelpers {
 
 /**
  * Used for iterating over neighboring cells.
@@ -56,26 +56,20 @@ public:
     }
 };
 
-}
-
 /**
- * Simple neighborhood for UnstructuredGrid. This implementation
- * takes SIGMA into account. This is slower than using SIGMA = 1,
- * since the chunk and offset are computed by an indirection.
- *
- * Usage:
- *  for (const auto& i: hoodOld.weights()) {
- *    const CELL& cell  = hoodOld[i.first];
- *    VALUE_TYPE weight = i.second;
- *  }
+ * Base class for UnstructuredNeighborhoods. There are two implementations:
+ * this is used if SIGMA is greater than one which is slower. For SIGMA = 1,
+ * see class specialization below.
+ * Moreover this class is also used for scalar updates in vectorized case.
+ * This is why the GRID is a template parameter.
  */
-template<typename CELL, std::size_t MATRICES = 1,
+template<typename CELL, typename GRID, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
-class UnstructuredNeighborhood
+class UnstructuredNeighborhoodBase
 {
-private:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
-    using Iterator = UnstructuredGridHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
+protected:
+    using Grid = GRID;
+    using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
     const Grid& grid;           /**< old grid */
     long xOffset;               /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
@@ -84,7 +78,7 @@ private:
 
 public:
     inline
-    UnstructuredNeighborhood(const Grid& grid, long startX) :
+    UnstructuredNeighborhoodBase(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
         currentChunk(0),
@@ -92,38 +86,17 @@ public:
     {}
 
     inline
-    const CELL& operator[](int index) const
-    {
-        return grid[index];
-    }
-
-    inline
-    UnstructuredNeighborhood& operator++()
+    UnstructuredNeighborhoodBase& operator++()
     {
         ++xOffset;
         return *this;
     }
 
     inline
-    UnstructuredNeighborhood operator++(int)
+    UnstructuredNeighborhoodBase operator++(int)
     {
-        UnstructuredNeighborhood tmp(*this);
+        UnstructuredNeighborhoodBase tmp(*this);
         operator++();
-        return tmp;
-    }
-
-    inline
-    UnstructuredNeighborhood& operator--()
-    {
-        --xOffset;
-        return *this;
-    }
-
-    inline
-    UnstructuredNeighborhood operator--(int)
-    {
-        UnstructuredNeighborhood tmp(*this);
-        operator--();
         return tmp;
     }
 
@@ -134,14 +107,14 @@ public:
     long& index() { return xOffset; }
 
     inline
-    UnstructuredNeighborhood& weights()
+    UnstructuredNeighborhoodBase& weights()
     {
         // default neighborhood is for matrix 0
         return weights(0);
     }
 
     inline
-    UnstructuredNeighborhood& weights(std::size_t matrixID)
+    UnstructuredNeighborhoodBase& weights(std::size_t matrixID)
     {
         currentMatrixID = matrixID;
 
@@ -169,20 +142,15 @@ public:
 };
 
 /**
- * Simple neighborhood for UnstructuredGrid. SIGMA = 1.
- *
- * Usage:
- *  for (const auto& i: hoodOld.weights()) {
- *    const CELL& cell  = hoodOld[i.first];
- *    VALUE_TYPE weight = i.second;
- *  }
+ * Same as above, except SIGMA = 1 which is faster.
  */
-template<typename CELL, std::size_t MATRICES, typename VALUE_TYPE, int C>
-class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1>
+template<typename CELL, typename GRID, std::size_t MATRICES,
+         typename VALUE_TYPE, int C>
+class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, 1>
 {
-private:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>;
-    using Iterator = UnstructuredGridHelpers::Iterator<VALUE_TYPE, C, 1>;
+protected:
+    using Grid = GRID;
+    using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, 1>;
     const Grid& grid;
     long xOffset;               /**< initial offset for updateLineX function */
     int currentChunk;           /**< current chunk */
@@ -194,7 +162,7 @@ private:
      * may change. This function updates the internal data structures
      * accordingly.
      *
-     * @param difference amount which is added or subtracted from xOffset
+     * @param difference amount which is added to xOffset
      */
     inline
     void updateIndices(int difference)
@@ -203,11 +171,7 @@ private:
         const int newChunkOffset = chunkOffset + difference;
 
         // update chunk and offset, if necessary
-        if (newChunkOffset < 0) {
-            --currentChunk;
-            chunkOffset = C - 1;
-            return;
-        } else if (newChunkOffset >= C) {
+        if (newChunkOffset >= C) {
             ++currentChunk;
             chunkOffset = 0;
             return;
@@ -217,7 +181,7 @@ private:
     }
 public:
     inline
-    UnstructuredNeighborhood(const Grid& grid, long startX) :
+    UnstructuredNeighborhoodBase(const Grid& grid, long startX) :
         grid(grid),
         xOffset(startX),
         currentChunk(startX / C),
@@ -225,38 +189,17 @@ public:
     {}
 
     inline
-    const CELL& operator[](int index) const
-    {
-        return grid[index];
-    }
-
-    inline
-    UnstructuredNeighborhood& operator++()
+    UnstructuredNeighborhoodBase& operator++()
     {
         updateIndices(1);
         return *this;
     }
 
     inline
-    UnstructuredNeighborhood operator++(int)
+    UnstructuredNeighborhoodBase operator++(int)
     {
-        UnstructuredNeighborhood tmp(*this);
+        UnstructuredNeighborhoodBase tmp(*this);
         operator++();
-        return tmp;
-    }
-
-    inline
-    UnstructuredNeighborhood& operator--()
-    {
-        updateIndices(-1);
-        return *this;
-    }
-
-    inline
-    UnstructuredNeighborhood operator--(int)
-    {
-        UnstructuredNeighborhood tmp(*this);
-        operator--();
         return tmp;
     }
 
@@ -267,14 +210,14 @@ public:
     long& index() { return xOffset; }
 
     inline
-    UnstructuredNeighborhood& weights()
+    UnstructuredNeighborhoodBase& weights()
     {
         // default neighborhood is for matrix 0
         return weights(0);
     }
 
     inline
-    UnstructuredNeighborhood& weights(std::size_t matrixID)
+    UnstructuredNeighborhoodBase& weights(std::size_t matrixID)
     {
         currentMatrixID = matrixID;
 
@@ -299,6 +242,42 @@ public:
     }
 };
 
+}
+
+/**
+ * Simple neighborhood for UnstructuredGrid. This is used as hoodOld in update()
+ * or updateLineX().
+ *
+ * Usage:
+ *  for (const auto& i: hoodOld.weights()) {
+ *    const CELL& cell  = hoodOld[i.first];
+ *    VALUE_TYPE weight = i.second;
+ *  }
+ */
+template<typename CELL, std::size_t MATRICES,
+         typename VALUE_TYPE, int C, int SIGMA>
+class UnstructuredNeighborhood :
+        public UnstructuredNeighborhoodHelpers::
+        UnstructuredNeighborhoodBase<CELL, UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>, MATRICES, VALUE_TYPE, C, SIGMA>
+{
+private:
+    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
+    using UnstructuredNeighborhoodHelpers::
+    UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>::grid;
+
+public:
+    inline
+    UnstructuredNeighborhood(const Grid& grid, long startX) :
+        UnstructuredNeighborhoodHelpers::
+        UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA>(grid, startX)
+    {}
+
+    const CELL& operator[](int index) const
+    {
+        return grid[index];
+    }
+};
+
 /**
  * Simple neighborhood which is used for hoodNew in updateLineX().
  * Provides access to cells via an identifier which is returned by
@@ -309,7 +288,7 @@ template<typename CELL, std::size_t MATRICES = 1,
 class CellIDNeighborhood
 {
 private:
-    typedef UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
+    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     Grid& grid;                 /**< new grid */
 public:
     inline explicit

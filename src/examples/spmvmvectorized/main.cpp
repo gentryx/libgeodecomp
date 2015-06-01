@@ -25,7 +25,7 @@ using namespace LibFlatArray;
 typedef double ValueType;
 static const std::size_t MATRICES = 1;
 static const int C = 4;
-static const int SIGMA = 16;
+static const int SIGMA = 1;
 typedef short_vec<ValueType, C> ShortVec;
 
 class Cell
