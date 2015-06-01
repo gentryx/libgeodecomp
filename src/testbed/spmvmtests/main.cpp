@@ -181,7 +181,9 @@ public:
         for (int i = 0; i < nz; ++i) {
             int m, n;
             double tmp;
-            fscanf(f, "%d %d %lg\n", &m, &n, &tmp);
+            if (fscanf(f, "%d %d %lg\n", &m, &n, &tmp) != 3) {
+                throw std::logic_error("Failed to parse mtx format");
+            }
             adjacency[Coord<2>(m - 1, n - 1)] = tmp;
         }
 
@@ -374,15 +376,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    bool quick = false;
     int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
-        }
-        argumentIndex = 2;
-    }
     std::string revision = argv[argumentIndex + 0];
 
     std::stringstream s;
