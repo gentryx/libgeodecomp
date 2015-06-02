@@ -41,8 +41,6 @@ public:
     template<long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
     void operator()(LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> accessor)
     {
-        // FIXME: currently this method uses a copy of the Cell's member array
-        //        which is kind of memory intensive
         const auto& rowsVec = forward ? matrix.realRowToSortedVec() : matrix.chunkRowToRealVec();
         const std::size_t size = rowsVec.size(); // -> corresponds to rowsPadded
         char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
@@ -135,6 +133,8 @@ private:
         }
 
         const auto& matrix = soaGrid->getAdjacency(matrixID);
+        // fixme: we'll need to rework this api at some later point of time as a
+        //        writer should treat the grid as read-only'
         soaGrid->callback(SellSortingWriterHelpers::
                           SortMember<CELL, ValueType, C, SIGMA>(selector, matrix, forward));
     }

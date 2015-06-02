@@ -110,10 +110,16 @@ public:
     }
 
     inline
-    const long& index() const { return xOffset; }
+    long index() const
+    {
+        return xOffset;
+    }
 
     inline
-    long& index() { return xOffset; }
+    long index()
+    {
+        return xOffset;
+    }
 
     inline
     UnstructuredNeighborhoodBase& weights()
@@ -123,7 +129,7 @@ public:
     }
 
     inline
-    UnstructuredNeighborhoodBase& weights(std::size_t matrixID)
+    UnstructuredNeighborhoodBase& weights(const std::size_t matrixID)
     {
         currentMatrixID = matrixID;
 
@@ -146,7 +152,7 @@ public:
         const auto& matrix = grid.getAdjacency(currentMatrixID);
         int index = matrix.chunkOffsetVec()[currentChunk] + chunkOffset;
         const int realRow = matrix.realRowToSortedVec()[xOffset];
-        index    += C * matrix.rowLengthVec()[realRow];
+        index += C * matrix.rowLengthVec()[realRow];
         return Iterator(matrix, index);
     }
 };

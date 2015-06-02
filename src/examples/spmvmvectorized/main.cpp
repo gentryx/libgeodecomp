@@ -82,7 +82,7 @@ public:
 
     inline bool operator==(const Cell& cell) const
     {
-        return cell.sum == sum && cell.value == value;
+        return (cell.sum == sum) && (cell.value == value);
     }
 
     inline bool operator!=(const Cell& cell) const
@@ -166,7 +166,7 @@ public:
         if (!(matrixIfs >> rows >> cols)) {
             throw std::logic_error("Failed to read from matrix file");
         }
-        if (rows != cols || rows != i || rows != size) {
+        if ((rows != cols) || (rows != i) || (rows != size)) {
             throw std::logic_error("Dimensions do not match");
         }
 

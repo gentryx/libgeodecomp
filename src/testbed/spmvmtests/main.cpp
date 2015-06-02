@@ -1,3 +1,14 @@
+/**
+ * This test operates on the following matrices:
+ *   - http://www.cise.ufl.edu/research/sparse/MM/Fluorem/RM07R.tar.gz
+ *   - http://www.cise.ufl.edu/research/sparse/MM/Zaoui/kkt_power.tar.gz
+ *   - http://www.cise.ufl.edu/research/sparse/MM/Janna/ML_Geer.tar.gz
+ *   - http://www.cise.ufl.edu/research/sparse/MM/Hamrle/Hamrle3.tar.gz
+ *
+ * And uses the Matrix Market IO library:
+ * http://math.nist.gov/MatrixMarket/mmio-c.html
+ *
+ */
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
@@ -39,6 +50,9 @@
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;
+
+// FIXME: This is a macro right now: reason, see:
+// https://bitbucket.org/gentryx/libflatarray/issue/16/libflatarray_register_soa-does-not-work
 
 // VALUE_TYPE = double, MATRICES = 1
 #define SOA_CELL(C, SIGMA)                                                  \

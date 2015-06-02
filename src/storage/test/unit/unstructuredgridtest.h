@@ -184,8 +184,8 @@ public:
             new UnstructuredGrid<int, 2, double, 4, 1>(Coord<1>(DIM));
         std::map<Coord<2>,double> adjacenc0;
         std::map<Coord<2>,double> adjacenc1;
-        std::map<Coord<2>,double> _matrix0;
-        std::map<Coord<2>,double> _matrix1;
+        std::map<Coord<2>,double> rawMatrix0;
+        std::map<Coord<2>,double> rawMatrix1;
         SellCSigmaSparseMatrixContainer<double,4,1> matrix0 (DIM);
         SellCSigmaSparseMatrixContainer<double,4,1> matrix1 (DIM);
 
@@ -207,8 +207,8 @@ public:
             _matrix1  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
         }
 
-        matrix0.initFromMatrix(_matrix0);
-        matrix1.initFromMatrix(_matrix1);
+        matrix0.initFromMatrix(rawMatrix0);
+        matrix1.initFromMatrix(rawMatrix1);
         grid->setAdjacency(0, adjacenc0);
         grid->setAdjacency(1, adjacenc1);
 
