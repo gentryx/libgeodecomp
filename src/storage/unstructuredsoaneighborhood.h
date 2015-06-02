@@ -34,6 +34,7 @@ private:
     const Grid& grid;           /**< old grid */
     int currentChunk;           /**< current chunk */
     int currentMatrixID;        /**< current id for matrices */
+    const SoAAccessor& accessor;
 
 public:
     /**
@@ -148,8 +149,11 @@ public:
         return Iterator(matrix, matrix.chunkOffsetVec()[currentChunk + 1]);
     }
 
-    // provide access to SoA accessor for the user code
-    const SoAAccessor& accessor;
+    inline
+    const SoAAccessor *operator->()
+    {
+        return &accessor;
+    }
 };
 
 /**
@@ -161,14 +165,19 @@ class UnstructuredSoANeighborhoodNew
 {
 private:
     typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
+    SoAAccessor& accessor;
+
 public:
     inline explicit
     UnstructuredSoANeighborhoodNew(SoAAccessor& acc) :
         accessor(acc)
     {}
 
-    // provide access to soa accessor
-    SoAAccessor& accessor;
+    inline
+    SoAAccessor *operator->()
+    {
+        return &accessor;
+    }
 };
 
 /**

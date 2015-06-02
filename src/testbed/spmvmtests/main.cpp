@@ -71,18 +71,16 @@ using namespace LibFlatArray;
     template<typename HOOD_NEW, typename HOOD_OLD>                          \
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */) \
     {                                                                       \
-        const auto& membersOld = hoodOld.accessor;                          \
-        auto& membersNew = hoodNew.accessor;                                \
         for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {       \
             ShortVec tmp;                                                   \
-            tmp.load_aligned(&membersNew.sum() + i * C);                    \
+            tmp.load_aligned(&hoodNew->sum() + i * C);                      \
             for (const auto& j: hoodOld.weights(0)) {                       \
                 ShortVec weights, values;                                   \
                 weights.load_aligned(j.second);                             \
-                values.gather(&membersOld.value(), j.first);                \
+                values.gather(&hoodOld->value(), j.first);                  \
                 tmp += values * weights;                                    \
             }                                                               \
-            tmp.store_aligned(&membersNew.sum() + i * C);                   \
+            tmp.store_aligned(&hoodNew->sum() + i * C);                     \
         }                                                                   \
     }                                                                       \
                                                                             \
