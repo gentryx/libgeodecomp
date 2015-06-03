@@ -177,7 +177,6 @@ public:
         // other special case: right boundary
         if (TOPOLOGY::template WrapsAxis<0>::VALUE &&
             ((originOld.x() + streak.length()) == (*dimensionsNew).x())) {
-
             long indexEndRight = indexEnd - 1;
             CELL::updateLineX(hood, indexEndRight, hoodNew, nanoStep);
 
@@ -202,7 +201,7 @@ public:
 
             CELL::updateLineX(hoodRight, indexEnd, hoodNew, nanoStep);
         } else {
-            CELL::updateLineX(hood, indexEnd,      hoodNew, nanoStep);
+            CELL::updateLineX(hood,      indexEnd, hoodNew, nanoStep);
         }
     }
 };

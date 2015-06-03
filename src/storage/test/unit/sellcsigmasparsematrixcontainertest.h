@@ -15,10 +15,6 @@ namespace LibGeoDecomp {
 
 class SellCSigmaSparseMatrixContainerTest : public CxxTest::TestSuite
 {
-private:
-    using IMatrix = std::map<Coord<2>, int>;
-    using CMatrix = std::map<Coord<2>, char>;
-    using DMatrix = std::map<Coord<2>, double>;
 public:
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     void testGetRow_one()
@@ -1022,6 +1018,13 @@ public:
         TS_ASSERT(col[13] == 0);
 #endif
     }
+
+private:
+#ifdef LIBGEODECOMP_WITH_CPP14
+    using IMatrix = std::map<Coord<2>, int>;
+    using CMatrix = std::map<Coord<2>, char>;
+    using DMatrix = std::map<Coord<2>, double>;
+#endif
 };
 
 }
