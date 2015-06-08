@@ -56,6 +56,13 @@ public:
         return fabs(c[0]);
     }
 
+    inline
+    FloatCoord<1> abs() const
+    {
+        return FloatCoord<1>(
+            fabs(c[0]));
+    }
+
     template<template<int> class OTHER_COORD>
     inline bool
     dominates(const OTHER_COORD<1>& other) const
@@ -258,6 +265,14 @@ public:
     {
         return sqrt(c[0] * c[0] +
                     c[1] * c[1]);
+    }
+
+    inline
+    FloatCoord<2> abs() const
+    {
+        return FloatCoord<2>(
+            fabs(c[0]),
+            fabs(c[1]));
     }
 
     template<template<int> class OTHER_COORD>
@@ -486,6 +501,15 @@ public:
         return sqrt(c[0] * c[0] +
                     c[1] * c[1] +
                     c[2] * c[2]);
+    }
+
+    inline
+    FloatCoord<3> abs() const
+    {
+        return FloatCoord<3>(
+            fabs(c[0]),
+            fabs(c[1]),
+            fabs(c[2]));
     }
 
     template<template<int> class OTHER_COORD>

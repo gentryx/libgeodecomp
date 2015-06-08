@@ -29,6 +29,18 @@ public:
         TS_ASSERT_EQUALS_DOUBLE(7.0, FloatCoord<3>(2, 3, 6).length());
     }
 
+    void testAbs()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(1.1), FloatCoord<1>( 1.1).abs());
+        TS_ASSERT_EQUALS(FloatCoord<1>(2.1), FloatCoord<1>(-2.1).abs());
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(3.1, 4.1), FloatCoord<2>( 3.1,  4.1).abs());
+        TS_ASSERT_EQUALS(FloatCoord<2>(5.1, 6.1), FloatCoord<2>(-5.1, -6.1).abs());
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(7.1, 8.1, 9.1), FloatCoord<3>( 7.1,  8.1,  9.1).abs());
+        TS_ASSERT_EQUALS(FloatCoord<3>(7.2, 8.2, 9.2), FloatCoord<3>(-7.2, -8.2, -9.2).abs());
+    }
+
     void testSum()
     {
         TS_ASSERT_EQUALS_DOUBLE(2.0, FloatCoord<1>(2.0).sum());
