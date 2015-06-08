@@ -734,6 +734,7 @@ private:
         return center;
     }
 
+    // fixme: use gridspacingcalculator here once in sync with hpx again
     double determineMaximumDiameter(
         const std::vector<FloatCoord<2> >* points,
         const std::vector<neighborTable> myNeighborTables)
