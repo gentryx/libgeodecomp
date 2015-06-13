@@ -159,7 +159,10 @@ public:
         TS_ASSERT_EQUALS(FloatCoord<2>(1, 1), mesher.cellDimension());
         TS_ASSERT_EQUALS(Coord<2>(5, 4),      mesher.logicalGridDimension());
 
-
+        TS_ASSERT_EQUALS(Coord<2>( 0, -2), mesher.positionToLogicalCoord(FloatCoord<2>(1.00,  0.00)));
+        TS_ASSERT_EQUALS(Coord<2>( 0, -1), mesher.positionToLogicalCoord(FloatCoord<2>(1.00,  1.00)));
+        TS_ASSERT_EQUALS(Coord<2>( 0,  0), mesher.positionToLogicalCoord(FloatCoord<2>(1.00,  2.00)));
+        TS_ASSERT_EQUALS(Coord<2>( 4,  3), mesher.positionToLogicalCoord(FloatCoord<2>(5.00,  5.00)));
     }
 };
 
