@@ -22,6 +22,9 @@ namespace LibGeoDecomp {
 template<int DIM>
 class UnstructuredGridMesher {
 public:
+    UnstructuredGridMesher()
+    {}
+
     template<typename COORD_LIST, typename NEIGHBORS_LIST>
     UnstructuredGridMesher(
         const COORD_LIST& points,
