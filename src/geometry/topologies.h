@@ -53,12 +53,14 @@ template<class TOPOLOGY>
 class NormalizeEdges
 {
 public:
+    __host__ __device__
     Coord<1> operator()(const Coord<1>& coord, const Coord<1>& dim)
     {
         return Coord<1>(
             wrap(coord[0], dim[0]));
     }
 
+    __host__ __device__
     Coord<2> operator()(const Coord<2>& coord, const Coord<2>& dim)
     {
         return Coord<2>(
@@ -66,6 +68,7 @@ public:
             wrap(coord[1], dim[1]));
     }
 
+    __host__ __device__
     Coord<3> operator()(const Coord<3>& coord, const Coord<3>& dim)
     {
         return Coord<3>(
@@ -75,6 +78,7 @@ public:
     }
 
 private:
+    __host__ __device__
     inline int wrap(int x, int dim)
     {
         // fixme: drop this conditional as it's more expensive than the additional addition?
@@ -96,12 +100,14 @@ template<class TOPOLOGY>
 class OutOfBounds
 {
 public:
+    __host__ __device__
     bool operator()(const Coord<1> coord, const Coord<1> dim)
     {
         return
             ((!WrapsAxis<0, TOPOLOGY>::VALUE) && ((coord[0] < 0) || (coord[0] >= dim[0])));
     }
 
+    __host__ __device__
     bool operator()(const Coord<2> coord, const Coord<2> dim)
     {
         return
@@ -109,6 +115,7 @@ public:
             ((!WrapsAxis<1, TOPOLOGY>::VALUE) && ((coord[1] < 0) || (coord[1] >= dim[1])));
     }
 
+    __host__ __device__
     bool operator()(const Coord<3> coord, const Coord<3> dim)
     {
         return
@@ -126,6 +133,7 @@ class NormalizeCoord
 {
 public:
     template<int DIM>
+    __host__ __device__
     Coord<DIM> operator()(const Coord<DIM>& coord, const Coord<DIM>& dim)
     {
         if (OutOfBounds<TOPOLOGY>()(coord, dim)) {
@@ -264,11 +272,13 @@ public:
         static const bool VALUE = TopologiesHelpers::WrapsAxis<D, RawTopologyType>::VALUE;
     };
 
+    __host__ __device__
     static Coord<DIM> normalize(const Coord<DIMENSIONS>& coord, const Coord<DIMENSIONS>& dimensions)
     {
         return NormalizeCoord<RawTopologyType>()(coord, dimensions);
     }
 
+    __host__ __device__
     static bool isOutOfBounds(const Coord<DIM>& coord, const Coord<DIM>& dim)
     {
         return TopologiesHelpers::OutOfBounds<RawTopologyType>()(coord, dim);
