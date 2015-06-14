@@ -201,7 +201,7 @@ public:
             return;
         }
 
-        Stencils::Repeat<STENCIL::VOLUME,
+        Stencils::RepeatCuda<STENCIL::VOLUME,
                          TestCellHelpers::CheckNeighbor,
                          STENCIL>()(&isValid, this, neighborhood);
 

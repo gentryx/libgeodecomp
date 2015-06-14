@@ -62,7 +62,6 @@ public:
     class Repeat
     {
     public:
-        __host__ __device__
         void operator()() const
         {
             Repeat<NUM - 1, TEMPLATE, PARAM>()();
@@ -70,7 +69,6 @@ public:
         }
 
         template<typename CARGO>
-        __host__ __device__
         void operator()(CARGO cargo) const
         {
             Repeat<NUM - 1, TEMPLATE, PARAM>()(cargo);
@@ -78,7 +76,6 @@ public:
         }
 
         template<typename CARGO1, typename CARGO2>
-        __host__ __device__
         void operator()(CARGO1 cargo1, CARGO2 cargo2) const
         {
             Repeat<NUM - 1, TEMPLATE, PARAM>()(cargo1, cargo2);
@@ -86,7 +83,6 @@ public:
         }
 
         template<typename CARGO1, typename CARGO2, typename CARGO3>
-        __host__ __device__
         void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
         {
             Repeat<NUM - 1, TEMPLATE, PARAM>()(cargo1, cargo2, cargo3);
@@ -96,6 +92,65 @@ public:
 
     template<template<class C, int I> class TEMPLATE, class PARAM>
     class Repeat<0, TEMPLATE, PARAM>
+    {
+    public:
+        void operator()() const
+        {}
+
+        template<typename CARGO>
+        void operator()(const CARGO& cargo) const
+        {}
+
+        template<typename CARGO1, typename CARGO2>
+        void operator()(CARGO1 cargo1, CARGO2 cargo2) const
+        {}
+
+        template<typename CARGO1, typename CARGO2, typename CARGO3>
+        void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
+        {}
+    };
+
+    /**
+     * Same as Repeat, but enabled for CUDA.
+     */
+    template<int NUM, template<class C, int I> class TEMPLATE, class PARAM>
+    class RepeatCuda
+    {
+    public:
+        __host__ __device__
+        void operator()() const
+        {
+            RepeatCuda<NUM - 1, TEMPLATE, PARAM>()();
+            TEMPLATE<PARAM, NUM - 1>()();
+        }
+
+        template<typename CARGO>
+        __host__ __device__
+        void operator()(CARGO cargo) const
+        {
+            RepeatCuda<NUM - 1, TEMPLATE, PARAM>()(cargo);
+            TEMPLATE<PARAM, NUM - 1>()(cargo);
+        }
+
+        template<typename CARGO1, typename CARGO2>
+        __host__ __device__
+        void operator()(CARGO1 cargo1, CARGO2 cargo2) const
+        {
+            RepeatCuda<NUM - 1, TEMPLATE, PARAM>()(cargo1, cargo2);
+            TEMPLATE<PARAM, NUM - 1>()(cargo1, cargo2);
+        }
+
+        template<typename CARGO1, typename CARGO2, typename CARGO3>
+        __host__ __device__
+        void operator()(CARGO1 cargo1, CARGO2 cargo2, CARGO3 cargo3) const
+        {
+            RepeatCuda<NUM - 1, TEMPLATE, PARAM>()(cargo1, cargo2, cargo3);
+            TEMPLATE<PARAM, NUM - 1>()(cargo1, cargo2, cargo3);
+        }
+    };
+
+    template<template<class C, int I> class TEMPLATE, class PARAM>
+    class RepeatCuda<0, TEMPLATE, PARAM>
     {
     public:
         __host__ __device__
