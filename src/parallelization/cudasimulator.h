@@ -2,8 +2,10 @@
 #define LIBGEODECOMP_PARALLELIZATION_CUDASIMULATOR_H
 
 #include <libgeodecomp/geometry/fixedcoord.h>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/cudautil.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/storage/grid.h>
 
@@ -194,9 +196,9 @@ public:
 
         for (; stepNum < initializer->maxSteps();) {
             step();
+            CUDAUtil::checkForError();
         }
 
-        CUDAUtil::checkForError();
         for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->stepFinished(
                 *getGrid(),
@@ -231,8 +233,16 @@ private:
         Coord<DIM> d = initializer->gridDimensions();
         dim3 dim(d.x(), d.y(), d.z());
         dim3 dimBlock(blockSize.x(), blockSize.y(), blockSize.z());
-        dim3 dimGrid(dim.x / dimBlock.x, dim.y / dimBlock.y, 1);
+        dim3 dimGrid(
+            ceil(1.0 * dim.x / dimBlock.x),
+            ceil(1.0 * dim.y / dimBlock.y),
+            1);
         int dimZ = dim.z / dimGrid.z;
+
+        LOG(DBG, "CudaSimulator running kernel on grid size " << d
+            << " with dimGrid " << dimGrid
+            << " and dimBlock " << dimBlock);
+
         kernel<CELL_TYPE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, dim, dimZ);
     }
 };
