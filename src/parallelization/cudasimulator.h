@@ -15,23 +15,53 @@ class HoodType
 {
 public:
     __device__
-    HoodType(int *index, dim3 *gridDim, CELL_TYPE *grid) :
+    HoodType(int *index,
+             CELL_TYPE *grid,
+             int *offsetY,
+             int *offsetZ,
+             int *addWest,
+             int *addEast,
+             int *addTop,
+             int *addBottom,
+             int *addSouth,
+             int *addNorth) :
         index(index),
-        gridDim(gridDim),
-        grid(grid)
+        grid(grid),
+        offsetY(offsetY),
+        offsetZ(offsetZ),
+        addWest(addWest),
+        addEast(addEast),
+        addTop(addTop),
+        addBottom(addBottom),
+        addSouth(addSouth),
+        addNorth(addNorth)
     {}
 
     template<int X, int Y, int Z>
     __device__
     const CELL_TYPE& operator[](FixedCoord<X, Y, Z> coord) const
     {
-        return grid[*index + (Z * gridDim->x * gridDim->y) + (Y * gridDim->x) + X];
+        return grid[
+            *index +
+            ((X < 0) ? *addWest   + X : 0) +
+            ((X > 0) ? *addEast   + X : 0) +
+            ((Y < 0) ? *addTop    + Y * *offsetY : 0) +
+            ((Y > 0) ? *addBottom + Y * *offsetY : 0) +
+            ((Z < 0) ? *addSouth  + Z * *offsetZ : 0) +
+            ((Z > 0) ? *addNorth  + Z * *offsetZ : 0)];
     }
 
 private:
     int *index;
-    dim3 *gridDim;
     CELL_TYPE *grid;
+    int *offsetY;
+    int *offsetZ;
+    int *addWest;
+    int *addEast;
+    int *addTop;
+    int *addBottom;
+    int *addSouth;
+    int *addNorth;
 };
 
 template<class CELL_TYPE>
@@ -41,6 +71,16 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, dim3 gridDim, int dimZ)
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
     int z = blockIdx.z * blockDim.z + threadIdx.z;
+    int offsetY = gridDim.x;
+    int offsetZ = gridDim.x * gridDim.y;
+
+    int addWest = 0;
+    int addEast = 0;
+    int addTop = 0;
+    int addBottom = 0;
+    int addSouth = 0;
+    int addNorth = 0;
+
     int minZ = (z + 0) * dimZ;
     int maxZ = (z + 1) * dimZ;
     int index =
@@ -52,7 +92,17 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, dim3 gridDim, int dimZ)
         return;
     }
 
-    HoodType<CELL_TYPE> hood(&index, &gridDim, gridOld);
+    HoodType<CELL_TYPE> hood(
+        &index,
+        gridOld,
+        &offsetY,
+        &offsetZ,
+        &addWest,
+        &addEast,
+        &addTop,
+        &addBottom,
+        &addSouth,
+        &addNorth);
 
     for (int myZ = (minZ + 1); myZ < (maxZ - 1); ++myZ) {
         index += gridDim.x * gridDim.y;
