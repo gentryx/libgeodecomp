@@ -69,15 +69,15 @@ public:
     {
         typedef SOA_ACCESSOR_OUT<CELL, LIBFLATARRAY_PARAMS_FULL(X, Y, Z, DIM_X, DIM_Y, DIM_Z, INDEX)> ACCESSOR;
         ACCESSOR tempAccessor = accessor[LibFlatArray::coord<X, Y, Z>()];
-        //fixme: use gen_index from ACCESSOR?
         tempIndex =
             *tempAccessor.get_index() +
-            (((X < 0) ? offsetWest                   : 0) +
-             ((X > 0) ? offsetEast                   : 0)) +
-            (((Y < 0) ? offsetTop    * DIM_X         : 0) +
-             ((Y > 0) ? offsetBottom * DIM_X         : 0)) +
-            (((Z < 0) ? offsetSouth  * DIM_X * DIM_Y : 0) +
-             ((Z > 0) ? offsetNorth  * DIM_X * DIM_Y : 0));
+            ACCESSOR::gen_index(
+                ((X < 0) ? offsetWest   : 0) +
+                ((X > 0) ? offsetEast   : 0),
+                ((Y < 0) ? offsetTop    : 0) +
+                ((Y > 0) ? offsetBottom : 0),
+                ((Z < 0) ? offsetSouth  : 0) +
+                ((Z > 0) ? offsetNorth  : 0));
 
         return ACCESSOR(tempAccessor.get_data(), tempIndex);
     }
