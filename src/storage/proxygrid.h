@@ -19,25 +19,21 @@ public:
         viewBox(viewBox)
     {}
 
-    // fixme: needs test
     virtual void set(const Coord<DIM>& coord, const CELL& cell)
     {
         delegate.set(coord, cell);
     }
 
-    // fixme: needs test
     virtual void set(const Streak<DIM>& streak, const CELL *cells)
     {
         delegate.set(streak, cells);
     }
 
-    // fixme: needs test
     virtual CELL get(const Coord<DIM>& coord) const
     {
         return delegate.get(coord);
     }
 
-    // fixme: needs test
     virtual void get(const Streak<DIM>& streak, CELL *cells) const
     {
         delegate.get(streak, cells);
