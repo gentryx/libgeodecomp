@@ -14,7 +14,7 @@ public:
     {
         std::cout << "============================================================================\n";
         DisplacedGrid<int> mainGrid(CoordBox<2>(Coord<2>(-1, -2), Coord<2>(22, 14)));
-        ProxyGrid<int, 2> subGrid(mainGrid, CoordBox<2>(Coord<2>(0, 0), Coord<2>(20, 10)));
+        ProxyGrid<int, 2> subGrid(&mainGrid, CoordBox<2>(Coord<2>(0, 0), Coord<2>(20, 10)));
 
         TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>( 0,  0), Coord<2>(20, 10)), subGrid.boundingBox());
         TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(-1, -2), Coord<2>(22, 14)), mainGrid.boundingBox());
@@ -66,7 +66,7 @@ public:
     {
         SoAGrid<TestCellSoA, Topologies::Cube<3>::Topology> mainGrid(
             CoordBox<3>(Coord<3>(-3, -2, -1), Coord<3>(26, 14, 12)));
-        ProxyGrid<TestCellSoA, 3> subGrid(mainGrid, CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(20, 10, 10)));
+        ProxyGrid<TestCellSoA, 3> subGrid(&mainGrid, CoordBox<3>(Coord<3>(0, 0, 0), Coord<3>(20, 10, 10)));
 
         std::vector<double> vecA;
         vecA << 10.0

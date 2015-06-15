@@ -14,39 +14,39 @@ template<typename CELL, int DIM>
 class ProxyGrid : public GridBase<CELL, DIM>
 {
 public:
-    ProxyGrid(GridBase<CELL, DIM>& delegate, const CoordBox<DIM>& viewBox) :
+    ProxyGrid(GridBase<CELL, DIM> *delegate, const CoordBox<DIM>& viewBox) :
         delegate(delegate),
         viewBox(viewBox)
     {}
 
     virtual void set(const Coord<DIM>& coord, const CELL& cell)
     {
-        delegate.set(coord, cell);
+        delegate->set(coord, cell);
     }
 
     virtual void set(const Streak<DIM>& streak, const CELL *cells)
     {
-        delegate.set(streak, cells);
+        delegate->set(streak, cells);
     }
 
     virtual CELL get(const Coord<DIM>& coord) const
     {
-        return delegate.get(coord);
+        return delegate->get(coord);
     }
 
     virtual void get(const Streak<DIM>& streak, CELL *cells) const
     {
-        delegate.get(streak, cells);
+        delegate->get(streak, cells);
     }
 
     virtual void setEdge(const CELL& cell)
     {
-        delegate.setEdge(cell);
+        delegate->setEdge(cell);
     }
 
     virtual const CELL& getEdge() const
     {
-        return delegate.getEdge();
+        return delegate->getEdge();
     }
 
     virtual CoordBox<DIM> boundingBox() const
@@ -56,16 +56,16 @@ public:
 
     void saveMemberImplementation(char *s, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
-        delegate.saveMemberImplementation(s, selector, region);
+        delegate->saveMemberImplementation(s, selector, region);
     }
 
     void loadMemberImplementation(const char *s, const Selector<CELL>& selector, const Region<DIM>& region)
     {
-        delegate.loadMemberImplementation(s, selector, region);
+        delegate->loadMemberImplementation(s, selector, region);
     }
 
 private:
-    GridBase<CELL, DIM>& delegate;
+    GridBase<CELL, DIM> *delegate;
     CoordBox<DIM> viewBox;
 };
 
