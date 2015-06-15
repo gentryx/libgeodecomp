@@ -7,7 +7,8 @@
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
-#include <libgeodecomp/storage/grid.h>
+#include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/proxygrid.h>
 
 namespace LibGeoDecomp {
 
@@ -121,7 +122,7 @@ class CudaSimulator : public MonolithicSimulator<CELL_TYPE>
 public:
     friend class CudaSimulatorTest;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
-    typedef Grid<CELL_TYPE, Topology> GridType;
+    typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
     static const int DIM = Topology::DIM;
 
     /**
@@ -133,17 +134,39 @@ public:
         Initializer<CELL_TYPE> *initializer,
         Coord<3> blockSize = Coord<3>(128, 4, 1)) :
         MonolithicSimulator<CELL_TYPE>(initializer),
-        blockSize(blockSize)
+        blockSize(blockSize),
+        ioGrid(&grid, CoordBox<DIM>())
     {
         stepNum = initializer->startStep();
+
+        // to avoid conditionals within the kernel when accessing
+        // neighboring cells at the grid's boundary, we'll simply pad
+        // the grid on those faces where we don't use periodic
+        // boundary conditions:
+        Coord<DIM> offset;
         Coord<DIM> dim = initializer->gridBox().dimensions;
-        grid = GridType(dim);
+        for (int d = 0; d < DIM; ++d) {
+            if (!Topology::wrapsAxis(d)) {
+                offset[d] = -1;
+                dim[d] += 2;
+            }
+        }
+
+        grid = GridType(CoordBox<DIM>(offset, dim));
         byteSize = dim.prod() * sizeof(CELL_TYPE);
         cudaMalloc(&devGridOld, byteSize);
         cudaMalloc(&devGridNew, byteSize);
 
         CoordBox<DIM> box = grid.boundingBox();
         simArea << box;
+
+        ioGrid = ProxyGrid<CELL_TYPE, DIM> (&grid, initializer->gridBox());
+    }
+
+    ~CudaSimulator()
+    {
+        cudaFree(devGridOld);
+        cudaFree(devGridNew);
     }
 
     /**
@@ -154,7 +177,7 @@ public:
         // notify all registered Steerers
         for(unsigned i = 0; i < steerers.size(); ++i) {
             if (stepNum % steerers[i]->getPeriod() == 0) {
-                steerers[i]->nextStep(&grid, simArea, simArea.boundingBox().dimensions, stepNum, STEERER_NEXT_STEP, 0, true, 0);
+                steerers[i]->nextStep(&ioGrid, simArea, simArea.boundingBox().dimensions, stepNum, STEERER_NEXT_STEP, 0, true, 0);
             }
         }
 
@@ -181,7 +204,16 @@ public:
      */
     virtual void run()
     {
-        initializer->grid(&grid);
+        initializer->grid(&ioGrid);
+
+        // pad boundaries, see c-tor
+        Region<DIM> padding;
+        padding << grid.boundingBox();
+        padding >> initializer->gridBox();
+        for (typename Region<DIM>::Iterator i = padding.begin(); i != padding.end(); ++i) {
+            grid.set(*i, grid.getEdge());
+        }
+
         cudaMemcpy(devGridOld, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
         cudaMemcpy(devGridNew, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
         stepNum = initializer->startStep();
@@ -189,7 +221,7 @@ public:
 
         for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->stepFinished(
-                *getGrid(),
+                ioGrid,
                 getStep(),
                 WRITER_INITIALIZED);
         }
@@ -201,7 +233,7 @@ public:
 
         for(unsigned i = 0; i < writers.size(); ++i) {
             writers[i]->stepFinished(
-                *getGrid(),
+                ioGrid,
                 getStep(),
                 WRITER_ALL_DONE);
         }
@@ -216,6 +248,7 @@ public:
 private:
     Coord<3> blockSize;
     GridType grid;
+    ProxyGrid<CELL_TYPE, DIM> ioGrid;
     CELL_TYPE *devGridOld;
     CELL_TYPE *devGridNew;
     int baseAddress;
