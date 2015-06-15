@@ -54,13 +54,11 @@ public:
         return viewBox;
     }
 
-    // fixme: needs test
     void saveMemberImplementation(char *s, const Selector<CELL>& selector, const Region<DIM>& region) const
     {
         delegate.saveMemberImplementation(s, selector, region);
     }
 
-    // fixme: needs test
     void loadMemberImplementation(const char *s, const Selector<CELL>& selector, const Region<DIM>& region)
     {
         delegate.loadMemberImplementation(s, selector, region);
