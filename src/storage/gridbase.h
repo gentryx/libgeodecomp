@@ -9,6 +9,9 @@
 
 namespace LibGeoDecomp {
 
+template<typename CELL, int DIM>
+class ProxyGrid;
+
 /**
  * This is an abstract base class for all grid classes. It's generic
  * because all methods are virtual, but not very efficient -- for the
@@ -18,6 +21,8 @@ template<typename CELL, int DIMENSIONS>
 class GridBase
 {
 public:
+    friend class ProxyGrid<CELL, DIMENSIONS>;
+
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;
 
