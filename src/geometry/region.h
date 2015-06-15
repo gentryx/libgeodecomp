@@ -644,6 +644,15 @@ public:
         return *this;
     }
 
+    inline Region& operator>>(const CoordBox<DIM>& box)
+    {
+        for (typename CoordBox<DIM>::StreakIterator i = box.beginStreak(); i != box.endStreak(); ++i) {
+            *this >> *i;
+        }
+
+        return *this;
+    }
+
     inline void operator-=(const Region& other)
     {
         Region newValue = *this - other;

@@ -567,6 +567,26 @@ public:
         TS_ASSERT_EQUALS(30, c.indices[1][20].second);
     }
 
+    void testSubstractionOfCoordBox()
+    {
+        Region<3> r1;
+        r1 << CoordBox<3>(Coord<3>(10, 10, 10), Coord<3>(400, 300, 200));
+        r1 >> CoordBox<3>(Coord<3>(50, 40, 30), Coord<3>(333, 222, 111));
+
+        Region<3> r2;
+        // add south and north boxes first:
+        r2 << CoordBox<3>(Coord<3>( 10,  10,  10), Coord<3>(400, 300,  20))
+           << CoordBox<3>(Coord<3>( 10,  10, 141), Coord<3>(400, 300,  69));
+        // next: top and bottom:
+        r2 << CoordBox<3>(Coord<3>( 10,  10,  10), Coord<3>(400,  30, 200))
+           << CoordBox<3>(Coord<3>( 10, 262,  10), Coord<3>(400,  48, 200));
+        // last: west and east boxes:
+        r2 << CoordBox<3>(Coord<3>( 10,  10,  10), Coord<3>( 40, 300, 200))
+           << CoordBox<3>(Coord<3>(383,  10,  10), Coord<3>( 27, 300, 200));
+
+        TS_ASSERT_EQUALS(r1, r2);
+    }
+
     void testEmpty()
     {
         Region<2> c;
