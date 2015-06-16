@@ -282,6 +282,7 @@ public:
 #endif
             return false;
         }
+
         bool otherShouldBeEdge = !inBounds(pos + relativeLoc);
         if (other.isEdgeCell != otherShouldBeEdge) {
 #ifndef __CUDACC__
@@ -292,6 +293,7 @@ public:
 #endif
             return false;
         }
+
         if (!otherShouldBeEdge) {
             if (other.cycleCounter != cycleCounter) {
 #ifndef __CUDACC__
@@ -302,6 +304,7 @@ public:
 #endif
                 return false;
             }
+
             if (other.dimensions != dimensions) {
 #ifndef __CUDACC__
                 OUTPUT() << "TestCell error: grid dimensions differ. Expected: "
@@ -311,8 +314,7 @@ public:
             }
 
             Coord<DIM> rawPos = pos + relativeLoc;
-            Coord<DIM> expectedPos =
-                TOPOLOGY::normalize(rawPos, dimensions.dimensions);
+            Coord<DIM> expectedPos = TOPOLOGY::normalize(rawPos, dimensions.dimensions);
 
             if (other.pos != expectedPos) {
 #ifndef __CUDACC__
