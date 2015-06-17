@@ -489,6 +489,26 @@ public:
         c[2] = Z;
     }
 
+#ifdef __CUDACC__
+    inline Coord(const dim3& dim)
+    {
+        c[0] = dim.x;
+        c[1] = dim.y;
+        c[2] = dim.z;
+    }
+
+    inline operator dim3()
+    {
+        dim3 ret;
+
+        ret.x = c[0];
+        ret.y = c[1];
+        ret.z = c[2];
+
+        return ret;
+    }
+#endif
+
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
      */
