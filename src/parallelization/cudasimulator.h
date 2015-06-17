@@ -67,36 +67,43 @@ private:
     int *addNorth;
 };
 
-template<class CELL_TYPE>
+template<class CELL_TYPE, bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
 __global__
-void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, dim3 gridDim, dim3 realGridDim, int dimZ)
+void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, dim3 logicalGridDim, dim3 paddedGridDim, int dimZ)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x - offset.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y - offset.y;
-    int z = blockIdx.z * blockDim.z + threadIdx.z;
-    int offsetY = realGridDim.x;
-    int offsetZ = realGridDim.x * realGridDim.y;
+    // we need to distinguish logical coordinates and padded
+    // coordinates: padded coords will be used to compute addresses
+    // within the actual grid while logical coords correspond to a
+    // cells position within the topology.
+    int logicalX = blockIdx.x * blockDim.x + threadIdx.x;
+    int logicalY = blockIdx.y * blockDim.y + threadIdx.y;
+    int logicalZ = blockIdx.z * blockDim.z + threadIdx.z;
 
-    int addWest = 0;
-    int addEast = 0;
-    int addTop = 0;
-    int addBottom = 0;
-    int addSouth = 0;
-    int addNorth = 0;
-
-    int minZ = (z + 0) * dimZ - offset.z;
-    int maxZ = (z + 1) * dimZ - offset.z;
-    int maxZ2 = gridDim.z - offset.z;
-    if (maxZ2 < maxZ) {
-        maxZ = maxZ2;
+    int paddedX = logicalX - offset.x;
+    int paddedY = logicalY - offset.y;
+    int paddedMinZ = (logicalZ + 0) * dimZ - offset.z;
+    int paddedMaxZ = (logicalZ + 1) * dimZ - offset.z;
+    int paddedMaxZ2 = logicalGridDim.z - offset.z;
+    if (paddedMaxZ2 < paddedMaxZ) {
+        paddedMaxZ = paddedMaxZ2;
     }
 
-    int index =
-        z * offsetZ +
-        y * offsetY +
-        x;
+    int offsetY = paddedGridDim.x;
+    int offsetZ = paddedGridDim.x * paddedGridDim.y;
 
-    if ((x >= (gridDim.x - offset.x)) || (y >= (gridDim.y - offset.y))) {
+    int addWest   = WRAP_X_AXIS && (logicalX == 0                     ) ?  logicalGridDim.x : 0;
+    int addEast   = WRAP_X_AXIS && (logicalX == (logicalGridDim.x - 1)) ? -logicalGridDim.x : 0;
+    int addTop    = WRAP_Y_AXIS && (logicalY == 0                     ) ?  (logicalGridDim.y * offsetY) : 0;
+    int addBottom = WRAP_Y_AXIS && (logicalY == (logicalGridDim.y - 1)) ? -(logicalGridDim.y * offsetY) : 0;
+    int addSouth =  0;
+    int addNorth =  0;
+
+    int index =
+        paddedMinZ * offsetZ +
+        paddedY    * offsetY +
+        paddedX;
+
+    if ((logicalX >= logicalGridDim.x) || (logicalY >= logicalGridDim.y)) {
         return;
     }
 
@@ -112,9 +119,34 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, d
         &addSouth,
         &addNorth);
 
-    for (int myZ = minZ; myZ < maxZ; ++myZ) {
-        index += offsetZ;
+    if (WRAP_Z_AXIS && (paddedMinZ == 0)) {
+        addSouth = logicalGridDim.z * offsetZ;
+        addNorth = 0;
+
         gridNew[index].update(hood, nanoStep);
+        paddedMinZ += 1;
+        index += offsetZ;
+    }
+
+    addSouth = 0;
+    addNorth = 0;
+
+    if (WRAP_Z_AXIS && (paddedMaxZ == logicalGridDim.z)) {
+#pragma unroll
+        for (int myZ = paddedMinZ; myZ < (paddedMaxZ - 1); ++myZ) {
+            gridNew[index].update(hood, nanoStep);
+            index += offsetZ;
+        }
+
+        addSouth = 0;
+        addNorth = -logicalGridDim.z * offsetZ;
+        gridNew[index].update(hood, nanoStep);
+    } else {
+#pragma unroll
+        for (int myZ = paddedMinZ; myZ < paddedMaxZ; ++myZ) {
+            gridNew[index].update(hood, nanoStep);
+            index += offsetZ;
+        }
     }
 }
 
@@ -187,18 +219,20 @@ public:
         }
 
         for (unsigned i = 0; i < APITraits::SelectNanoSteps<CELL_TYPE>::VALUE; ++i) {
+            // fixme
             // std::cout << "nanoStep(" << stepNum << ", " << i << ") " << devGridOld << " -> " << devGridNew << "\n";
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
-            {
-                // cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
-                // std::cout << "i: " << i << "\n";
-                // std::cout << "  ioGrid[0, 0,  0] cycle: " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 0,  0)).testValue << "\n";
-                // std::cout << "  ioGrid[1, 1,  1] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  1)).testValue << "\n";
-                // std::cout << "  ioGrid[1, 1,  8] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  8)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  8)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  8)).testValue << "\n";
-                // std::cout << "  ioGrid[1, 1,  9] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  9)).testValue << "\n";
-                // std::cout << "  ioGrid[1, 1, 10] cycle: " << ioGrid.get(Coord<DIM>(1, 1, 10)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1, 10)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1, 10)).testValue << "\n";
-            }
+            // fixme
+            // {
+            //     cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+            //     std::cout << "i: " << i << "\n";
+            //     std::cout << "  ioGrid[0, 0,  0] cycle: " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 0,  0)).testValue << "\n";
+            //     std::cout << "  ioGrid[1, 1,  1] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  1)).testValue << "\n";
+            //     std::cout << "  ioGrid[1, 1,  8] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  8)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  8)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  8)).testValue << "\n";
+            //     std::cout << "  ioGrid[1, 1,  9] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  9)).testValue << "\n";
+            //     std::cout << "  ioGrid[1, 1, 10] cycle: " << ioGrid.get(Coord<DIM>(1, 1, 10)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1, 10)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1, 10)).testValue << "\n";
+            // }
         }
 
         ++stepNum;
@@ -238,6 +272,7 @@ public:
             grid.set(*i, grid.getEdge());
         }
 
+        // fixme
         // std::cout << "ioGrid[0, 0,  0] " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isEdgeCell << "\n";
         // std::cout << "ioGrid[1, 1,  1] " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  1)).isEdgeCell << "\n";
         // std::cout << "ioGrid[1, 1,  9] " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  9)).isEdgeCell << "\n";
@@ -296,7 +331,7 @@ private:
             1);
         int dimZ = dim.z / dimGrid.z;
         dim3 offset = grid.boundingBox().origin;
-        dim3 realGridDim = grid.boundingBox().dimensions;
+        dim3 paddedGridDim = grid.boundingBox().dimensions;
 
         LOG(DBG, "CudaSimulator running kernel on grid size " << d
             << " with dimGrid " << dimGrid
@@ -306,7 +341,11 @@ private:
             << " and dimZ " << dimZ);
 
         // fixme: check case when dimZ is smaller than effective grid size in z direction (i.e. two wavefronts traverse the grid)
-        kernel<CELL_TYPE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, nanoStep, offset, dim, realGridDim, dimZ);
+        kernel<
+            CELL_TYPE,
+            Topology::template WrapsAxis<0>::VALUE,
+            Topology::template WrapsAxis<1>::VALUE,
+            Topology::template WrapsAxis<2>::VALUE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, nanoStep, offset, dim, paddedGridDim, dimZ);
     }
 };
 
