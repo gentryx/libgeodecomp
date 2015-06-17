@@ -52,6 +52,11 @@ public:
         TS_ASSERT_TEST_GRID2(GridType, grid, myExpectedCycle, typename);
     }
 
+    bool allEventsDone() const
+    {
+        return expectedSteps.empty() && expectedEvents.empty();
+    }
+
 private:
     std::vector<int> expectedSteps;
     std::vector<WriterEvent> expectedEvents;
