@@ -91,6 +91,22 @@ public:
         c[0] = X;
     }
 
+#ifdef __CUDACC__
+    inline Coord(const dim3& dim)
+    {
+        c[0] = dim.x;
+    }
+
+    inline operator dim3()
+    {
+        dim3 ret;
+
+        ret.x = c[0];
+
+        return ret;
+    }
+#endif
+
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord.
      */
@@ -283,6 +299,24 @@ public:
         c[0] = X;
         c[1] = Y;
     }
+
+#ifdef __CUDACC__
+    inline Coord(const dim3& dim)
+    {
+        c[0] = dim.x;
+        c[1] = dim.y;
+    }
+
+    inline operator dim3()
+    {
+        dim3 ret;
+
+        ret.x = c[0];
+        ret.y = c[1];
+
+        return ret;
+    }
+#endif
 
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord

@@ -10,8 +10,37 @@ namespace LibGeoDecomp {
 class CoordTest2 : public CxxTest::TestSuite
 {
 public:
+    void testConversion1d()
+    {
+        dim3 d;
+        d.x = 6;
+        Coord<1> c = d;
+        TS_ASSERT_EQUALS(Coord<1>(6), c);
 
-    void testConversion()
+        c.x() = 666;
+        d = c;
+        TS_ASSERT_EQUALS(666, d.x);
+        TS_ASSERT_EQUALS(1,   d.y);
+        TS_ASSERT_EQUALS(1,   d.z);
+    }
+
+    void testConversion2d()
+    {
+        dim3 d;
+        d.x = 4;
+        d.y = 5;
+        Coord<2> c = d;
+        TS_ASSERT_EQUALS(Coord<2>(4, 5), c);
+
+        c.x() = 19;
+        c.y() = 81;
+        d = c;
+        TS_ASSERT_EQUALS(19, d.x);
+        TS_ASSERT_EQUALS(81, d.y);
+        TS_ASSERT_EQUALS(1,  d.z);
+    }
+
+    void testConversion3d()
     {
         dim3 d;
         d.x = 1;
