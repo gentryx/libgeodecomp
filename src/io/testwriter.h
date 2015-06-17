@@ -13,39 +13,47 @@ namespace LibGeoDecomp {
  * This class serves to verify the callback behavior of
  * implementations of MonolithicSimulator.
  */
-class TestWriter : public Clonable<Writer<TestCell<2> >, TestWriter>
+template<typename CELL = TestCell<2> >
+class TestWriter : public Clonable<Writer<CELL>, TestWriter<CELL> >
 {
 public:
-    typedef Writer<TestCell<2> >::GridType GridType;
+    using Writer<CELL>::NANO_STEPS;
+    using typename Writer<CELL>::GridType;
 
     TestWriter(
-        const unsigned& period,
-        const std::vector<unsigned>& expectedSteps,
-        const std::vector<WriterEvent> expectedEvents)  :
-        Clonable<Writer<TestCell<2> >, TestWriter>("", period),
+        unsigned period,
+        const std::vector<int>& expectedSteps,
+        const std::vector<WriterEvent>& expectedEvents)  :
+        Clonable<Writer<CELL>, TestWriter<CELL> >("", period),
         expectedSteps(expectedSteps),
         expectedEvents(expectedEvents)
     {}
 
     virtual void stepFinished(
         const GridType& grid,
-        const unsigned step,
+        unsigned step,
         WriterEvent event)
     {
         unsigned myExpectedCycle = NANO_STEPS * step;
-        TS_ASSERT_TEST_GRID(GridType, grid, myExpectedCycle);
 
         TS_ASSERT(!expectedSteps.empty());
         unsigned expectedStep = expectedSteps.front();
         WriterEvent expectedEvent = expectedEvents.front();
+
+        LOG(DBG, "TestWriter::stepFinished()\n"
+            << "  expected: " << expectedEvent << "@" << expectedStep << "\n"
+            << "    actual: " << event         << "@" << step << "\n")
+
         expectedSteps.erase(expectedSteps.begin());
         expectedEvents.erase(expectedEvents.begin());
         TS_ASSERT_EQUALS(expectedStep, step);
         TS_ASSERT_EQUALS(expectedEvent, event);
+
+        TS_ASSERT_TEST_GRID2(GridType, grid, myExpectedCycle, typename);
     }
 
 private:
-    std::vector<unsigned> expectedSteps;
+    std::vector<int> expectedSteps;
     std::vector<WriterEvent> expectedEvents;
 };
 
