@@ -69,13 +69,13 @@ private:
 
 template<class CELL_TYPE>
 __global__
-void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, dim3 gridDim, int dimZ)
+void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, dim3 gridDim, dim3 realGridDim, int dimZ)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int x = blockIdx.x * blockDim.x + threadIdx.x - offset.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y - offset.y;
     int z = blockIdx.z * blockDim.z + threadIdx.z;
-    int offsetY = gridDim.x;
-    int offsetZ = gridDim.x * gridDim.y;
+    int offsetY = realGridDim.x;
+    int offsetZ = realGridDim.x * realGridDim.y;
 
     int addWest = 0;
     int addEast = 0;
@@ -84,14 +84,19 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, dim3 gridDim, int dimZ)
     int addSouth = 0;
     int addNorth = 0;
 
-    int minZ = (z + 0) * dimZ;
-    int maxZ = (z + 1) * dimZ;
+    int minZ = (z + 0) * dimZ - offset.z;
+    int maxZ = (z + 1) * dimZ - offset.z;
+    int maxZ2 = gridDim.z - offset.z;
+    if (maxZ2 < maxZ) {
+        maxZ = maxZ2;
+    }
+
     int index =
-        z * gridDim.y * gridDim.x +
-        y * gridDim.y +
+        z * offsetZ +
+        y * offsetY +
         x;
 
-    if ((x > gridDim.x) || (y > gridDim.y)) {
+    if ((x >= (gridDim.x - offset.x)) || (y >= (gridDim.y - offset.y))) {
         return;
     }
 
@@ -107,9 +112,9 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, dim3 gridDim, int dimZ)
         &addSouth,
         &addNorth);
 
-    for (int myZ = (minZ + 1); myZ < (maxZ - 1); ++myZ) {
-        index += gridDim.x * gridDim.y;
-        gridNew[index].update(hood, 0);
+    for (int myZ = minZ; myZ < maxZ; ++myZ) {
+        index += offsetZ;
+        gridNew[index].update(hood, nanoStep);
     }
 }
 
@@ -182,11 +187,23 @@ public:
         }
 
         for (unsigned i = 0; i < APITraits::SelectNanoSteps<CELL_TYPE>::VALUE; ++i) {
+            // std::cout << "nanoStep(" << stepNum << ", " << i << ") " << devGridOld << " -> " << devGridNew << "\n";
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
+            {
+                // cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+                // std::cout << "i: " << i << "\n";
+                // std::cout << "  ioGrid[0, 0,  0] cycle: " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 0,  0)).testValue << "\n";
+                // std::cout << "  ioGrid[1, 1,  1] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  1)).testValue << "\n";
+                // std::cout << "  ioGrid[1, 1,  8] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  8)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  8)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  8)).testValue << "\n";
+                // std::cout << "  ioGrid[1, 1,  9] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  9)).testValue << "\n";
+                // std::cout << "  ioGrid[1, 1, 10] cycle: " << ioGrid.get(Coord<DIM>(1, 1, 10)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1, 10)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1, 10)).testValue << "\n";
+            }
         }
 
         ++stepNum;
+
+        cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
 
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {
@@ -197,6 +214,13 @@ public:
                     WRITER_STEP_FINISHED);
             }
         }
+    }
+
+    const typename Simulator<CELL_TYPE>::GridType *getGrid()
+    {
+        // fixme: only copy back if required by writers
+        cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+        return &ioGrid;
     }
 
     /**
@@ -213,6 +237,11 @@ public:
         for (typename Region<DIM>::Iterator i = padding.begin(); i != padding.end(); ++i) {
             grid.set(*i, grid.getEdge());
         }
+
+        // std::cout << "ioGrid[0, 0,  0] " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isEdgeCell << "\n";
+        // std::cout << "ioGrid[1, 1,  1] " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  1)).isEdgeCell << "\n";
+        // std::cout << "ioGrid[1, 1,  9] " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  9)).isEdgeCell << "\n";
+        // std::cout << "ioGrid[1, 1, 10] " << ioGrid.get(Coord<DIM>(1, 1, 10)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1, 10)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0, 10)).isEdgeCell << "\n";
 
         cudaMemcpy(devGridOld, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
         cudaMemcpy(devGridNew, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
@@ -239,12 +268,6 @@ public:
         }
     }
 
-    virtual const GridType *getGrid()
-    {
-        cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
-        return &grid;
-    }
-
 private:
     Coord<3> blockSize;
     GridType grid;
@@ -263,6 +286,7 @@ private:
 
     void nanoStep(const unsigned nanoStep)
     {
+        // fixme: rename vars:
         Coord<DIM> d = initializer->gridDimensions();
         dim3 dim(d.x(), d.y(), d.z());
         dim3 dimBlock(blockSize.x(), blockSize.y(), blockSize.z());
@@ -271,12 +295,18 @@ private:
             ceil(1.0 * dim.y / dimBlock.y),
             1);
         int dimZ = dim.z / dimGrid.z;
+        dim3 offset = grid.boundingBox().origin;
+        dim3 realGridDim = grid.boundingBox().dimensions;
 
         LOG(DBG, "CudaSimulator running kernel on grid size " << d
             << " with dimGrid " << dimGrid
-            << " and dimBlock " << dimBlock);
+            << " and dimBlock " << dimBlock
+            << " and offset " << offset
+            << " and dim " << dim
+            << " and dimZ " << dimZ);
 
-        kernel<CELL_TYPE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, dim, dimZ);
+        // fixme: check case when dimZ is smaller than effective grid size in z direction (i.e. two wavefronts traverse the grid)
+        kernel<CELL_TYPE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, nanoStep, offset, dim, realGridDim, dimZ);
     }
 };
 
