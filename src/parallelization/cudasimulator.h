@@ -12,6 +12,11 @@
 
 namespace LibGeoDecomp {
 
+namespace CudaSimulatorHelpers {
+
+}
+
+// fixme: test 1D, too
 // fixme: needs test, move to dedicated namespace?
 template<class CELL_TYPE>
 class HoodType
@@ -69,7 +74,7 @@ private:
 
 template<class CELL_TYPE, bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
 __global__
-void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, dim3 logicalGridDim, dim3 paddedGridDim, int dimZ)
+void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, dim3 logicalGridDim, dim3 paddedGridDim, int wavefrontLength)
 {
     // we need to distinguish logical coordinates and padded
     // coordinates: padded coords will be used to compute addresses
@@ -81,14 +86,15 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, d
 
     int paddedX = logicalX - offset.x;
     int paddedY = logicalY - offset.y;
-    int paddedMinZ = (logicalZ + 0) * dimZ - offset.z;
-    int paddedMaxZ = (logicalZ + 1) * dimZ - offset.z;
+    int paddedMinZ = (logicalZ + 0) * wavefrontLength - offset.z;
+    int paddedMaxZ = (logicalZ + 1) * wavefrontLength - offset.z;
     int paddedMaxZ2 = logicalGridDim.z - offset.z;
     if (paddedMaxZ2 < paddedMaxZ) {
         paddedMaxZ = paddedMaxZ2;
     }
 
     int offsetY = paddedGridDim.x;
+    // fixme: make this a kernele parameter
     int offsetZ = paddedGridDim.x * paddedGridDim.y;
 
     int addWest   = WRAP_X_AXIS && (logicalX == 0                     ) ?  logicalGridDim.x : 0;
@@ -158,8 +164,10 @@ class CudaSimulator : public MonolithicSimulator<CELL_TYPE>
 {
 public:
     friend class CudaSimulatorTest;
-    typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
+
+    typedef typename MonolithicSimulator<CELL_TYPE>::Topology Topology;
     typedef DisplacedGrid<CELL_TYPE, Topology> GridType;
+
     static const int DIM = Topology::DIM;
 
     /**
@@ -321,31 +329,49 @@ private:
 
     void nanoStep(const unsigned nanoStep)
     {
+        // fixme: measure time for this preprocessing via chronometer
         // fixme: rename vars:
-        Coord<DIM> d = initializer->gridDimensions();
-        dim3 dim(d.x(), d.y(), d.z());
-        dim3 dimBlock(blockSize.x(), blockSize.y(), blockSize.z());
-        dim3 dimGrid(
-            ceil(1.0 * dim.x / dimBlock.x),
-            ceil(1.0 * dim.y / dimBlock.y),
-            1);
-        int dimZ = dim.z / dimGrid.z;
-        dim3 offset = grid.boundingBox().origin;
+        Coord<DIM> initGridDim = initializer->gridDimensions();
+
+        Coord<DIM> cudaGridDim;
+        for (int d = 0; d < (DIM - 1); ++d) {
+            cudaGridDim[d] = ceil(1.0 * initGridDim[d] / blockSize[d]);
+        }
+        // fixme: make the number of wavefronts configurable
+        cudaGridDim[DIM - 1] = 1;
+
+        dim3 dim = initGridDim;
+        dim3 dimBlock = blockSize;
+        dim3 dimGrid = cudaGridDim;
+
+        Coord<3> rawOffset;
+        for (int d = 0; d < DIM; ++d) {
+            rawOffset[d] = grid.boundingBox().origin[d];
+        }
+        for (int d = DIM; d < 3; ++d) {
+            rawOffset[d] = 0;
+        }
+        dim3 offset = rawOffset;
         dim3 paddedGridDim = grid.boundingBox().dimensions;
 
-        LOG(DBG, "CudaSimulator running kernel on grid size " << d
+        int wavefrontLength = initGridDim[DIM - 1] / cudaGridDim[DIM - 1];
+        if (wavefrontLength == 0) {
+            wavefrontLength = 1;
+        }
+
+        LOG(DBG, "CudaSimulator running kernel on grid size " << initGridDim
             << " with dimGrid " << dimGrid
             << " and dimBlock " << dimBlock
             << " and offset " << offset
             << " and dim " << dim
-            << " and dimZ " << dimZ);
+            << " and wavefrontLength " << wavefrontLength);
 
         // fixme: check case when dimZ is smaller than effective grid size in z direction (i.e. two wavefronts traverse the grid)
         kernel<
             CELL_TYPE,
             Topology::template WrapsAxis<0>::VALUE,
             Topology::template WrapsAxis<1>::VALUE,
-            Topology::template WrapsAxis<2>::VALUE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, nanoStep, offset, dim, paddedGridDim, dimZ);
+            Topology::template WrapsAxis<2>::VALUE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, nanoStep, offset, dim, paddedGridDim, wavefrontLength);
     }
 };
 
