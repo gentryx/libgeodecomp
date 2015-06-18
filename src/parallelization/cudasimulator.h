@@ -14,10 +14,6 @@ namespace LibGeoDecomp {
 
 namespace CudaSimulatorHelpers {
 
-}
-
-// fixme: test 1D, too
-// fixme: needs test, move to dedicated namespace?
 template<class CELL_TYPE>
 class HoodType
 {
@@ -72,9 +68,90 @@ private:
     int *addNorth;
 };
 
-template<class CELL_TYPE, bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
+template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
-void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, dim3 logicalGridDim, dim3 paddedGridDim, int wavefrontLength)
+void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 paddedGridDim, int wavefrontLength)
+{
+    // we need to distinguish logical coordinates and padded
+    // coordinates: padded coords will be used to compute addresses
+    // within the actual grid while logical coords correspond to a
+    // cells position within the topology.
+    int logicalX = blockIdx.x * blockDim.x + threadIdx.x;
+    int logicalY = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int paddedX = logicalX - gridOffset.x;
+    int paddedMinY = (logicalY + 0) * wavefrontLength - gridOffset.y;
+    int paddedMaxY = (logicalY + 1) * wavefrontLength - gridOffset.y;
+    int paddedMaxY2 = logicalGridDim.y - gridOffset.y;
+    if (paddedMaxY2 < paddedMaxY) {
+        paddedMaxY = paddedMaxY2;
+    }
+
+    int offsetY = paddedGridDim.x;
+    int offsetZ = 0;
+
+    int addWest   = WRAP_X_AXIS && (logicalX == 0                     ) ?  logicalGridDim.x : 0;
+    int addEast   = WRAP_X_AXIS && (logicalX == (logicalGridDim.x - 1)) ? -logicalGridDim.x : 0;
+    int addTop    =  0;
+    int addBottom =  0;
+    int addNorth  =  0;
+    int addSouth  =  0;
+
+    int index =
+        paddedMinY * offsetY +
+        paddedX;
+
+    if (logicalX >= logicalGridDim.x) {
+        return;
+    }
+
+    HoodType<CELL_TYPE> hood(
+        &index,
+        gridOld,
+        &offsetY,
+        &offsetZ,
+        &addWest,
+        &addEast,
+        &addTop,
+        &addBottom,
+        &addSouth,
+        &addNorth);
+
+    if (WRAP_Y_AXIS && (paddedMinY == 0)) {
+        addTop    = logicalGridDim.y * offsetY;
+        addBottom = 0;
+
+        gridNew[index].update(hood, nanoStep);
+        paddedMinY += 1;
+        index += offsetY;
+    }
+
+    addTop    = 0;
+    addBottom = 0;
+
+    if (WRAP_Y_AXIS && (paddedMaxY == logicalGridDim.y)) {
+#pragma unroll
+        for (int myY = paddedMinY; myY < (paddedMaxY - 1); ++myY) {
+            gridNew[index].update(hood, nanoStep);
+            index += offsetY;
+        }
+
+        addTop = 0;
+        addBottom = -logicalGridDim.y * offsetY;
+        gridNew[index].update(hood, nanoStep);
+
+    } else {
+#pragma unroll
+        for (int myY = paddedMinY; myY < paddedMaxY; ++myY) {
+            gridNew[index].update(hood, nanoStep);
+            index += offsetY;
+        }
+    }
+}
+
+template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
+__global__
+void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 paddedGridDim, int wavefrontLength)
 {
     // we need to distinguish logical coordinates and padded
     // coordinates: padded coords will be used to compute addresses
@@ -84,11 +161,11 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, d
     int logicalY = blockIdx.y * blockDim.y + threadIdx.y;
     int logicalZ = blockIdx.z * blockDim.z + threadIdx.z;
 
-    int paddedX = logicalX - offset.x;
-    int paddedY = logicalY - offset.y;
-    int paddedMinZ = (logicalZ + 0) * wavefrontLength - offset.z;
-    int paddedMaxZ = (logicalZ + 1) * wavefrontLength - offset.z;
-    int paddedMaxZ2 = logicalGridDim.z - offset.z;
+    int paddedX = logicalX - gridOffset.x;
+    int paddedY = logicalY - gridOffset.y;
+    int paddedMinZ = (logicalZ + 0) * wavefrontLength - gridOffset.z;
+    int paddedMaxZ = (logicalZ + 1) * wavefrontLength - gridOffset.z;
+    int paddedMaxZ2 = logicalGridDim.z - gridOffset.z;
     if (paddedMaxZ2 < paddedMaxZ) {
         paddedMaxZ = paddedMaxZ2;
     }
@@ -147,6 +224,7 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, d
         addSouth = 0;
         addNorth = -logicalGridDim.z * offsetZ;
         gridNew[index].update(hood, nanoStep);
+
     } else {
 #pragma unroll
         for (int myZ = paddedMinZ; myZ < paddedMaxZ; ++myZ) {
@@ -154,6 +232,35 @@ void kernel(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 offset, d
             index += offsetZ;
         }
     }
+}
+
+template<int DIM, bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
+class KernelWrapper;
+
+template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
+class KernelWrapper<2, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
+{
+public:
+    template<class CELL_TYPE>
+    void operator()(dim3 dimGrid, dim3 dimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 paddedGridDim, int wavefrontLength) const
+    {
+        kernel2D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<dimGrid, dimBlock>>>(
+                devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, paddedGridDim, wavefrontLength);
+    }
+};
+
+template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
+class KernelWrapper<3, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
+{
+public:
+    template<class CELL_TYPE>
+    void operator()(dim3 dimGrid, dim3 dimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 paddedGridDim, int wavefrontLength) const
+    {
+        kernel3D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<dimGrid, dimBlock>>>(
+                devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, paddedGridDim, wavefrontLength);
+    }
+};
+
 }
 
 /**
@@ -349,7 +456,7 @@ private:
         for (int d = DIM; d < 3; ++d) {
             rawOffset[d] = 0;
         }
-        dim3 offset = rawOffset;
+        dim3 gridOffset = rawOffset;
         dim3 paddedGridDim = grid.boundingBox().dimensions;
 
         int wavefrontLength = initGridDim[DIM - 1] / cudaGridDim[DIM - 1];
@@ -360,16 +467,18 @@ private:
         LOG(DBG, "CudaSimulator running kernel on grid size " << initGridDim
             << " with dimGrid " << dimGrid
             << " and dimBlock " << dimBlock
-            << " and offset " << offset
+            << " and gridOffset " << gridOffset
             << " and dim " << dim
             << " and wavefrontLength " << wavefrontLength);
 
         // fixme: check case when dimZ is smaller than effective grid size in z direction (i.e. two wavefronts traverse the grid)
-        kernel<
-            CELL_TYPE,
+
+        CudaSimulatorHelpers::KernelWrapper<
+            DIM,
             Topology::template WrapsAxis<0>::VALUE,
             Topology::template WrapsAxis<1>::VALUE,
-            Topology::template WrapsAxis<2>::VALUE><<<dimGrid, dimBlock>>>(devGridOld, devGridNew, nanoStep, offset, dim, paddedGridDim, wavefrontLength);
+            Topology::template WrapsAxis<2>::VALUE>()(
+                dimGrid, dimBlock, devGridOld, devGridNew, nanoStep, gridOffset, dim, paddedGridDim, wavefrontLength);
     }
 };
 

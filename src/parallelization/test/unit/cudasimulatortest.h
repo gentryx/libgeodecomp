@@ -28,13 +28,19 @@ public:
     typedef TestInitializer<TestCell3dCube> TestInitializer3dCube;
     typedef TestInitializer<TestCell3dTorus> TestInitializer3dTorus;
 
+    // fixme: test 1D, too
+
     void test2dCube()
     {
         Coord<2> dim(421, 351);
         int numSteps = 21;
         CudaSimulator<TestCell2dCube> sim(new TestInitializer2dCube(dim, numSteps));
 
+        TestWriter<TestCell2dCube> *writer = new TestWriter<TestCell2dCube>(1, 0, numSteps);
+        sim.addWriter(writer);
+
         sim.run();
+        TS_ASSERT(writer->allEventsDone());
     }
 
     void test3dCube()
