@@ -246,6 +246,10 @@ public:
         ++stepNum;
 
         cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
+        CUDAUtil::checkForError();
+
+        WriterEvent event = (stepNum != initializer->maxSteps()) ? WRITER_STEP_FINISHED : WRITER_ALL_DONE;
+
 
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {
@@ -253,7 +257,7 @@ public:
                 writers[i]->stepFinished(
                     *getGrid(),
                     getStep(),
-                    WRITER_STEP_FINISHED);
+                    event);
             }
         }
     }
@@ -300,14 +304,6 @@ public:
 
         for (; stepNum < initializer->maxSteps();) {
             step();
-            CUDAUtil::checkForError();
-        }
-
-        for(unsigned i = 0; i < writers.size(); ++i) {
-            writers[i]->stepFinished(
-                ioGrid,
-                getStep(),
-                WRITER_ALL_DONE);
         }
     }
 

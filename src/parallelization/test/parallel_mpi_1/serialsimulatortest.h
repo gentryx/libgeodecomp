@@ -72,18 +72,7 @@ public:
     void testWriterInvocation()
     {
         unsigned period = 4;
-        std::vector<int> expectedSteps;
-        std::vector<WriterEvent> expectedEvents;
-        expectedSteps << 13
-                      << 16
-                      << 20
-                      << 21;
-        expectedEvents << WRITER_INITIALIZED
-                       << WRITER_STEP_FINISHED
-                       << WRITER_STEP_FINISHED
-                       << WRITER_ALL_DONE;
-
-        simulator->addWriter(new TestWriter<>(period, expectedSteps, expectedEvents));
+        simulator->addWriter(new TestWriter<>(period, 13, 21));
         simulator->run();
     }
 

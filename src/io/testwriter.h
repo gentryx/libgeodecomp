@@ -21,13 +21,21 @@ public:
     using typename Writer<CELL>::GridType;
 
     TestWriter(
-        unsigned period,
-        const std::vector<int>& expectedSteps,
-        const std::vector<WriterEvent>& expectedEvents)  :
-        Clonable<Writer<CELL>, TestWriter<CELL> >("", period),
-        expectedSteps(expectedSteps),
-        expectedEvents(expectedEvents)
-    {}
+        int period,
+        int firstStep,
+        int lastStep)  :
+        Clonable<Writer<CELL>, TestWriter<CELL> >("", period)
+    {
+        expectedSteps << firstStep;
+        expectedEvents << WRITER_INITIALIZED;
+        for (int i = firstStep + period - firstStep % period; i < lastStep; i += period) {
+            expectedSteps << i;
+            expectedEvents << WRITER_STEP_FINISHED;
+        }
+
+        expectedSteps << lastStep;
+        expectedEvents << WRITER_ALL_DONE;
+    }
 
     virtual void stepFinished(
         const GridType& grid,
