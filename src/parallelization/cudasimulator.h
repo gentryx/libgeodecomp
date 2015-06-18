@@ -338,20 +338,8 @@ public:
         }
 
         for (unsigned i = 0; i < APITraits::SelectNanoSteps<CELL_TYPE>::VALUE; ++i) {
-            // fixme
-            // std::cout << "nanoStep(" << stepNum << ", " << i << ") " << devGridOld << " -> " << devGridNew << "\n";
             nanoStep(i);
             std::swap(devGridOld, devGridNew);
-            // fixme
-            // {
-            //     cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
-            //     std::cout << "i: " << i << "\n";
-            //     std::cout << "  ioGrid[0, 0] cycle: " << ioGrid.get(Coord<DIM>(0, 0)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 0)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 0)).testValue << "\n";
-            //     std::cout << "  ioGrid[1, 1] cycle: " << ioGrid.get(Coord<DIM>(1, 1)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1)).testValue << "\n";
-            //     std::cout << "  ioGrid[0, 348] cycle: " << ioGrid.get(Coord<DIM>(0, 348)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 348)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 348)).testValue << "\n";
-            //     std::cout << "  ioGrid[0, 349] cycle: " << ioGrid.get(Coord<DIM>(0, 349)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 349)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 349)).testValue << "\n";
-            //     std::cout << "  ioGrid[0, 350] cycle: " << ioGrid.get(Coord<DIM>(0, 350)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 350)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 350)).testValue << "\n";
-            // }
         }
 
         ++stepNum;
@@ -396,12 +384,6 @@ public:
         for (typename Region<DIM>::Iterator i = padding.begin(); i != padding.end(); ++i) {
             grid.set(*i, grid.getEdge());
         }
-
-        // fixme
-        // std::cout << "ioGrid[0, 0,  0] " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isEdgeCell << "\n";
-        // std::cout << "ioGrid[1, 1,  1] " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  1)).isEdgeCell << "\n";
-        // std::cout << "ioGrid[1, 1,  9] " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0,  9)).isEdgeCell << "\n";
-        // std::cout << "ioGrid[1, 1, 10] " << ioGrid.get(Coord<DIM>(1, 1, 10)).cycleCounter << ", valid: " << ioGrid.get(Coord<DIM>(1, 1, 10)).isValid << ", edge: " << ioGrid.get(Coord<DIM>(0, 0, 10)).isEdgeCell << "\n";
 
         cudaMemcpy(devGridOld, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
         cudaMemcpy(devGridNew, grid.baseAddress(), byteSize, cudaMemcpyHostToDevice);
