@@ -284,7 +284,11 @@ public:
      */
     CudaSimulator(
         Initializer<CELL_TYPE> *initializer,
-        Coord<3> blockSize = Coord<3>(128, 4, 1)) :
+        // blockSize depends on DIM as we want 1D blocks for our
+        // wavefront algorithm. This is still very stupid and should
+        // be driven by an auto-tuner or at least come with a better
+        // heuristic.
+        Coord<3> blockSize = Coord<3>(128, (DIM * 3 - 5), 1)) :
         MonolithicSimulator<CELL_TYPE>(initializer),
         blockSize(blockSize),
         ioGrid(&grid, CoordBox<DIM>())
@@ -342,11 +346,11 @@ public:
             // {
             //     cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
             //     std::cout << "i: " << i << "\n";
-            //     std::cout << "  ioGrid[0, 0,  0] cycle: " << ioGrid.get(Coord<DIM>(0, 0,  0)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 0,  0)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 0,  0)).testValue << "\n";
-            //     std::cout << "  ioGrid[1, 1,  1] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  1)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  1)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  1)).testValue << "\n";
-            //     std::cout << "  ioGrid[1, 1,  8] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  8)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  8)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  8)).testValue << "\n";
-            //     std::cout << "  ioGrid[1, 1,  9] cycle: " << ioGrid.get(Coord<DIM>(1, 1,  9)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1,  9)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1,  9)).testValue << "\n";
-            //     std::cout << "  ioGrid[1, 1, 10] cycle: " << ioGrid.get(Coord<DIM>(1, 1, 10)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1, 10)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1, 10)).testValue << "\n";
+            //     std::cout << "  ioGrid[0, 0] cycle: " << ioGrid.get(Coord<DIM>(0, 0)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 0)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 0)).testValue << "\n";
+            //     std::cout << "  ioGrid[1, 1] cycle: " << ioGrid.get(Coord<DIM>(1, 1)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(1, 1)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(1, 1)).testValue << "\n";
+            //     std::cout << "  ioGrid[0, 348] cycle: " << ioGrid.get(Coord<DIM>(0, 348)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 348)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 348)).testValue << "\n";
+            //     std::cout << "  ioGrid[0, 349] cycle: " << ioGrid.get(Coord<DIM>(0, 349)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 349)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 349)).testValue << "\n";
+            //     std::cout << "  ioGrid[0, 350] cycle: " << ioGrid.get(Coord<DIM>(0, 350)).cycleCounter <<  ", valid: " << ioGrid.get(Coord<DIM>(0, 350)).isValid << ", testValue: " << ioGrid.get(Coord<DIM>(0, 350)).testValue << "\n";
             // }
         }
 

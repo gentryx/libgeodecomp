@@ -43,6 +43,20 @@ public:
         TS_ASSERT(writer->allEventsDone());
     }
 
+    void test2dTorus()
+    {
+        Coord<2> dim(421, 351);
+        int startStep = 35;
+        int endStep = 60;
+        CudaSimulator<TestCell2dTorus> sim(new TestInitializer2dTorus(dim, endStep, startStep));
+
+        TestWriter<TestCell2dTorus> *writer = new TestWriter<TestCell2dTorus>(3, startStep, endStep);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
     void test3dCube()
     {
         Coord<3> dim(50, 20, 10);
