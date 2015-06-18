@@ -248,12 +248,14 @@ public:
         cudaMemcpy(grid.baseAddress(), devGridOld, byteSize, cudaMemcpyDeviceToHost);
         CUDAUtil::checkForError();
 
-        WriterEvent event = (stepNum != initializer->maxSteps()) ? WRITER_STEP_FINISHED : WRITER_ALL_DONE;
-
+        bool lastStep = (stepNum == initializer->maxSteps());
+        WriterEvent event = lastStep ? WRITER_ALL_DONE : WRITER_STEP_FINISHED;
 
         // call back all registered Writers
         for(unsigned i = 0; i < writers.size(); ++i) {
-            if (stepNum % writers[i]->getPeriod() == 0) {
+            bool writerRequestsWakeup = (stepNum % writers[i]->getPeriod() == 0);
+
+            if (writerRequestsWakeup || lastStep) {
                 writers[i]->stepFinished(
                     *getGrid(),
                     getStep(),

@@ -53,10 +53,12 @@ public:
     void test3DTorus()
     {
         Coord<3> dim(50, 20, 10);
-        int numSteps = 5;
-        CudaSimulator<TestCell3dTorus> sim(new TestInitializer3dTorus(dim, numSteps));
+        int startStep = 28;
+        int endStep = 38;
+        int ioPeriod = 3;
+        CudaSimulator<TestCell3dTorus> sim(new TestInitializer3dTorus(dim, endStep, startStep));
 
-        TestWriter<TestCell3dTorus> *writer = new TestWriter<TestCell3dTorus>(1, 0, numSteps);
+        TestWriter<TestCell3dTorus> *writer = new TestWriter<TestCell3dTorus>(ioPeriod, startStep, endStep);
         sim.addWriter(writer);
 
         sim.run();
