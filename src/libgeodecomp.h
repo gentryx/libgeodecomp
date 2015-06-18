@@ -2,18 +2,20 @@
 #define LIBGEODECOMP_LIBGEODECOMP_H
 #include <libgeodecomp/config.h>
 
+#if defined (LIBGEODECOMP_WITH_HPX) || defined (LIBGEODECOMP_WITH_MPI)
+#include <libgeodecomp/geometry/partitions/checkerboardingpartition.h>
+#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
+#endif
+
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <libgeodecomp/io/hpxwritercollector.h>
-#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
-#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #endif
 
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <mpi.h>
-#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
-#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/collectingwriter.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/parallelization/hiparsimulator.h>
