@@ -14,6 +14,13 @@ namespace LibGeoDecomp {
 
 namespace CudaSimulatorHelpers {
 
+/**
+ * Simple neighborhood object, optimized for GPUs (actually: NVCC as
+ * we're prefering "int*" over "int" -- the switch from int* to int in
+ * LibFlatArray's soa_accessor crilpled performance in our CUDA
+ * performance tests, hence the creation of the soa_accessor_light...)
+ * and AoS storage.
+ */
 template<class CELL_TYPE>
 class HoodType
 {
@@ -68,6 +75,9 @@ private:
     int *addNorth;
 };
 
+/**
+ * see CudaStepper::nanoStep() for a documentation of the parameters.
+ */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
 void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength)
@@ -146,6 +156,9 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     }
 }
 
+/**
+ * see CudaStepper::nanoStep() for a documentation of the parameters.
+ */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS, class CELL_TYPE>
 __global__
 void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength)
@@ -227,29 +240,41 @@ void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     }
 }
 
+/**
+ * Type gate for kernel selection based on the model's dimensionality.
+ * Weird: placing the kernels as static methods directly into the
+ * classes led to all sorts of "interesting" compiler errors (e.g.
+ * "inline hint illegal").
+ */
 template<int DIM, bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
 class KernelWrapper;
 
+/**
+ * See above
+ */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
 class KernelWrapper<2, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
 {
 public:
     template<class CELL_TYPE>
-    void operator()(dim3 dimGrid, dim3 dimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
+    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
     {
-        kernel2D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<dimGrid, dimBlock>>>(
+        kernel2D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<cudaDimGrid, cudaDimBlock>>>(
             devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
     }
 };
 
+/**
+ * See above
+ */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
 class KernelWrapper<3, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
 {
 public:
     template<class CELL_TYPE>
-    void operator()(dim3 dimGrid, dim3 dimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
+    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
     {
-        kernel3D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<dimGrid, dimBlock>>>(
+        kernel3D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<cudaDimGrid, cudaDimBlock>>>(
             devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
     }
 };
@@ -411,10 +436,53 @@ private:
     using MonolithicSimulator<CELL_TYPE>::writers;
     using MonolithicSimulator<CELL_TYPE>::getStep;
 
+    /**
+     * We'll need a couple of parameters to describe the topology of
+     * the problem space to the kernel. Here is a quick scetch. As an
+     * example I'll use a 2D model with constant boundary conditions.
+     * The grid will be padded on its boundary. Some parameters will
+     * be used to calculate addresses within the memory allocated for
+     * the grid:
+     *
+     * - offsetY/Z: how many cells separate two adjecent lines (y) or
+     *   frames (z)?
+     *
+     * - axisWrapOffset: the same, but calculated for opposing sides
+     *   of the grid (hence each is a multiple of the logicalGridDim
+     *   and the corresponding offsetY/Z. "offsetX" is trivially
+     *   assumed to be 1).
+     *
+     * - wavefrontLength will be used to determine how many cells each
+     *   thread is tasked to traverse along the higest dimension of
+     *   the simspace (Y axis for 2D, Z axis for 3D).
+     *
+     *                 gridOffset.x
+     *                 -
+     *  gridOffset.y | XXXXXXXXXXXXXX -
+     *                 X$$$$$$$$$$$$X |      -
+     *                 X$$$$$$$$$$$$X |      |
+     *                 X$$$$$$$$$$$$X |      |
+     *                 X$$$$$$$$$$$$X |      |
+     *                 X$$$$$$$$$$$$X |      - logicalGridDim.y
+     *                 XXXXXXXXXXXXXX - paddedGrid.y
+     *
+     *                    paddedGridDim.x
+     *                 <------------>
+     *
+     *                    logicalGridDim.x
+     *                  <---------->
+     *
+     *
+     *
+     * Legend
+     * ------
+     *
+     * X: Boundary
+     * $: Active grid content (i.e. cells which are going to be updated)
+     */
     void nanoStep(const unsigned nanoStep)
     {
         // fixme: measure time for this preprocessing via chronometer
-        // fixme: rename vars:
         Coord<DIM> initGridDim = initializer->gridDimensions();
 
         Coord<DIM> cudaGridDim;
@@ -425,8 +493,8 @@ private:
         cudaGridDim[DIM - 1] = 1;
 
         dim3 logicalGridDim = initGridDim;
-        dim3 dimBlock = blockSize;
-        dim3 dimGrid = cudaGridDim;
+        dim3 cudaDimBlock = blockSize;
+        dim3 cudaDimGrid = cudaGridDim;
 
         Coord<3> rawOffset;
         for (int d = 0; d < DIM; ++d) {
@@ -451,8 +519,8 @@ private:
         }
 
         LOG(DBG, "CudaSimulator running kernel on grid size " << initGridDim
-            << " with dimGrid " << dimGrid
-            << " and dimBlock " << dimBlock
+            << " with cudaDimGrid " << cudaDimGrid
+            << " and cudaDimBlock " << cudaDimBlock
             << " and gridOffset " << gridOffset
             << " and logicalGridDim " << logicalGridDim
             << " and wavefrontLength " << wavefrontLength);
@@ -464,7 +532,7 @@ private:
             Topology::template WrapsAxis<0>::VALUE,
             Topology::template WrapsAxis<1>::VALUE,
             Topology::template WrapsAxis<2>::VALUE>()(
-                dimGrid, dimBlock, devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
+                cudaDimGrid, cudaDimBlock, devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
     }
 };
 
