@@ -4,12 +4,13 @@
 
 namespace LibGeoDecomp {
 
-void copy(const Coord<2>& upperLeftSource,
-          const Image& source,
-          const Coord<2>& upperLeftTarget,
-          Image* target,
-          const unsigned& width,
-          const unsigned& height)
+void copy(
+    const Coord<2>& upperLeftSource,
+    const Image& source,
+    const Coord<2>& upperLeftTarget,
+    Image* target,
+    const unsigned width,
+    const unsigned height)
 {
     const Coord<2>& uls = upperLeftSource;
     const Coord<2>& ult = upperLeftTarget;
@@ -35,15 +36,15 @@ void copy(const Coord<2>& upperLeftSource,
                     " is not within " + sourceRect.toString());
             }
 
-            (*target)[cTarget.y()][cTarget.x()] =
-                source[cSource.y()][cSource.x()];
+            target->set(cTarget, source.get(cSource));
         }
     }
 }
 
-Image Image::slice(const Coord<2>& upperLeft,
-                   const unsigned& width,
-                   const unsigned& height)
+Image Image::slice(
+    const Coord<2>& upperLeft,
+    const unsigned width,
+    const unsigned height)
 {
     Image ret(width, height);
     copy(upperLeft, *this, Coord<2>(0,0), &ret, width, height);
@@ -51,20 +52,26 @@ Image Image::slice(const Coord<2>& upperLeft,
 }
 
 
-Image Image::slice(const unsigned& x, const unsigned& y, const unsigned& width, const unsigned& height)
+Image Image::slice(
+    const unsigned x,
+    const unsigned y,
+    const unsigned width,
+    const unsigned height)
 {
     return slice(Coord<2>(x, y), width, height);
 }
 
 
-void Image::paste(const Coord<2>& upperLeft, const Image& img)
+void Image::paste(
+    const Coord<2>& upperLeft,
+    const Image& img)
 {
     copy(Coord<2>(0,0), img, upperLeft, this,
          img.getDimensions().x(), img.getDimensions().y());
 }
 
 
-void Image::paste(const int& x, const int& y, const Image& img)
+void Image::paste(const int x, const int y, const Image& img)
 {
     paste(Coord<2>(x, y), img);
 }

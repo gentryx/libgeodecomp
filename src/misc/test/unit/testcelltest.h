@@ -66,20 +66,20 @@ public:
     void testUpdateUnsyncedNanoStep()
     {
         update(3);
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     void testUpdateOutOfBoundsNanoStep()
     {
         update(100);
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     void testUpdateBadEdgeCellInner()
     {
-        grid[1][1] = TestCellType(Coord<2>(-1, -1), Coord<2>(width, height));
+        grid[Coord<2>(1, 1)] = TestCellType(Coord<2>(-1, -1), Coord<2>(width, height));
         update();
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     void testUpdateBadEdgeCellOuter()
@@ -87,40 +87,40 @@ public:
         grid[Coord<2>(-1, -1)] =
             TestCellType(Coord<2>(1, 1), Coord<2>(width, height));
         update();
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     void testUpdateInvalidNeighbor()
     {
-        grid[1][0] = TestCellType();
+        grid[Coord<2>(1, 0)] = TestCellType();
         update();
-        TS_ASSERT(!grid[0][0].isValid);
-        TS_ASSERT(!grid[1][0].isValid);
-        TS_ASSERT(!grid[2][0].isValid);
-        TS_ASSERT(!grid[0][1].isValid);
-        TS_ASSERT(!grid[1][1].isValid);
-        TS_ASSERT(!grid[2][1].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
+        TS_ASSERT(!grid[Coord<2>(1, 0)].isValid);
+        TS_ASSERT(!grid[Coord<2>(2, 0)].isValid);
+        TS_ASSERT(!grid[Coord<2>(0, 1)].isValid);
+        TS_ASSERT(!grid[Coord<2>(1, 1)].isValid);
+        TS_ASSERT(!grid[Coord<2>(2, 1)].isValid);
     }
 
     void testUpdateBadCycle()
     {
-        grid[0][0].cycleCounter = 1;
+        grid[Coord<2>()].cycleCounter = 1;
         update();
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     void testUpdateBadRect()
     {
-        grid[0][0] = TestCellType(Coord<2>(0, 0), Coord<2>(123, 456));
+        grid[Coord<2>()] = TestCellType(Coord<2>(0, 0), Coord<2>(123, 456));
         update();
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     void testUpdateBadPos()
     {
-        grid[0][0].pos = Coord<2>(1, 0);
+        grid[Coord<2>()].pos = Coord<2>(1, 0);
         update();
-        TS_ASSERT(!grid[0][0].isValid);
+        TS_ASSERT(!grid[Coord<2>()].isValid);
     }
 
     typedef TestCell<

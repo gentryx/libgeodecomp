@@ -17,7 +17,7 @@ public:
         Grid<double> g(Coord<2>(width, height));
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < width; y++) {
-                g[y][x] = y * width + x + 47.11;
+                g[Coord<2>(x, y)] = y * width + x + 47.11;
             }
         }
 

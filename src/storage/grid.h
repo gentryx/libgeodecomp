@@ -101,6 +101,7 @@ class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
 public:
     friend class GridTest;
+    friend class TopologiesTest;
     friend class ParallelStripingSimulatorTest;
     const static int DIM = TOPOLOGY::DIM;
 
@@ -201,28 +202,12 @@ public:
 
     inline CELL_TYPE& operator[](const Coord<DIM>& coord)
     {
-        return Topology::locate(*this, coord);
+        return Topology::locate(cellMatrix, coord, dimensions, edgeCell);
     }
 
     inline const CELL_TYPE& operator[](const Coord<DIM>& coord) const
     {
-        return (const_cast<Grid&>(*this))[coord];
-    }
-
-    /**
-     * WARNING: this operator doesn't honor topology properties
-     */
-    inline const ConstSliceRef operator[](const Index y) const
-    {
-        return cellMatrix[y];
-    }
-
-    /**
-     * WARNING: this operator doesn't honor topology properties
-     */
-    inline SliceRef operator[](const Index y)
-    {
-        return cellMatrix[y];
+        return Topology::locate(cellMatrix, coord, dimensions, edgeCell);
     }
 
     inline bool operator==(const Grid& other) const

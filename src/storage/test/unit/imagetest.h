@@ -23,7 +23,7 @@ public:
         Image big(bigWidth, bigHeight);
         for (int y = 0; y < bigHeight; y++) {
             for (int x = 0; x < bigWidth; x++) {
-                big[y][x] = Color(x, y, 47);
+                big[Coord<2>(x, y)] = Color(x, y, 47);
             }
         }
 
@@ -32,7 +32,7 @@ public:
         Image small(30, 40);
         for (int y = 0; y < smallHeight; y++) {
             for (int x = 0; x < smallWidth; x++) {
-                small[y][x] = Color(x+10, y+20, 47);
+                small[Coord<2>(x, y)] = Color(x+10, y+20, 47);
             }
         }
 

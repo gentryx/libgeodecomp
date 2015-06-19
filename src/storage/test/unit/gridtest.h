@@ -99,7 +99,7 @@ public:
     {
         Grid<double> g(Coord<2>(10, 12), 14.16, 47.11);
         TS_ASSERT_EQUALS(Coord<2>(10, 12), g.getDimensions());
-        TS_ASSERT_EQUALS(14.16, g[5][6]);
+        TS_ASSERT_EQUALS(14.16, g[Coord<2>( 5,  6)]);
         TS_ASSERT_EQUALS(47.11, g[Coord<2>(-1, -1)]);
     }
 
@@ -125,10 +125,12 @@ public:
         Coord<2> changedCoord(0, 4);
 
         Grid<TestCell<2> > other(Coord<2>(width, height));
-        TS_ASSERT(!other[4][2].isValid);
-        for(int x = 0; x < width; x++)
-            for(int y = 0; y < height; y++)
+        TS_ASSERT(!other[Coord<2>(2, 4)].isValid);
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
                 other.cellMatrix[y][x] = testGrid->cellMatrix[y][x];
+            }
+        }
 
         TS_ASSERT(*testGrid == other);
 

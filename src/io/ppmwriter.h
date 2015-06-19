@@ -97,7 +97,7 @@ public:
         // body second:
         for (int y = 0; y < img.getDimensions().y(); ++y) {
             for (int x = 0; x < img.getDimensions().x(); ++x) {
-                const Color& rgb = img[y][x];
+                const Color& rgb = img[Coord<2>(x, y)];
                 outfile << (char)rgb.red()
                         << (char)rgb.green()
                         << (char)rgb.blue();

@@ -236,32 +236,34 @@ public:
     static const int DIM = DIMENSIONS;
 
     template<typename GRID, int DIM>
-    static inline const typename GRID::CellType& locate(
+    static inline const typename GRID::element& locate(
         const GRID& grid,
-        const Coord<DIM>& coord)
+        const Coord<DIM>& coord,
+        const Coord<DIM>& gridDim,
+        const typename GRID::element& edgeCell)
     {
-        const Coord<DIM>& dim = grid.getDimensions();
-        if (OutOfBounds<RawTopologyType>()(coord, dim)) {
-            return grid.getEdgeCell();
+        if (OutOfBounds<RawTopologyType>()(coord, gridDim)) {
+            return edgeCell;
         }
 
-        typename GRID::CellType *ret;
-        Accessor<DIM>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, dim));
+        const typename GRID::element *ret;
+        Accessor<DIM>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, gridDim));
         return *ret;
     }
 
     template<typename GRID>
-    static inline typename GRID::CellType& locate(
+    static inline typename GRID::element& locate(
         GRID& grid,
-        const Coord<DIMENSIONS>& coord)
+        const Coord<DIMENSIONS>& coord,
+        const Coord<DIM>& gridDim,
+        typename GRID::element& edgeCell)
     {
-        const Coord<DIMENSIONS>& dim = grid.getDimensions();
-        if (OutOfBounds<RawTopologyType>()(coord, dim)) {
-            return grid.getEdgeCell();
+        if (OutOfBounds<RawTopologyType>()(coord, gridDim)) {
+            return edgeCell;
         }
 
-        typename GRID::CellType *ret;
-        Accessor<DIMENSIONS>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, dim));
+        typename GRID::element *ret;
+        Accessor<DIMENSIONS>()(grid, &ret, NormalizeEdges<RawTopologyType>()(coord, gridDim));
         return *ret;
     }
 
