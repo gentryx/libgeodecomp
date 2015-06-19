@@ -12,6 +12,11 @@ namespace LibGeoDecomp {
 class CudaSimulatorTest : public CxxTest::TestSuite
 {
 public:
+    typedef TestCell<1, Stencils::VonNeumann<1, 1>, Topologies::Cube<1>::Topology,
+                     TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCell1dCube;
+    typedef TestCell<1, Stencils::Moore<1, 1>, Topologies::Torus<1>::Topology,
+                     TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCell1dTorus;
+
     typedef TestCell<2, Stencils::VonNeumann<2, 1>, Topologies::Cube<2>::Topology,
                      TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCell2dCube;
     typedef TestCell<2, Stencils::Moore<2, 1>, Topologies::Torus<2>::Topology,
@@ -22,13 +27,41 @@ public:
     typedef TestCell<3, Stencils::Moore<3, 1>, Topologies::Torus<3>::Topology,
                      TestCellHelpers::EmptyAPI, TestCellHelpers::NoOutput> TestCell3dTorus;
 
+    typedef TestInitializer<TestCell1dCube> TestInitializer1dCube;
+    typedef TestInitializer<TestCell1dTorus> TestInitializer1dTorus;
+
     typedef TestInitializer<TestCell2dCube> TestInitializer2dCube;
     typedef TestInitializer<TestCell2dTorus> TestInitializer2dTorus;
 
     typedef TestInitializer<TestCell3dCube> TestInitializer3dCube;
     typedef TestInitializer<TestCell3dTorus> TestInitializer3dTorus;
 
-    // fixme: test 1D, too
+    void test1dCube()
+    {
+        Coord<1> dim(777);
+        int numSteps = 33;
+        CudaSimulator<TestCell1dCube> sim(new TestInitializer1dCube(dim, numSteps));
+
+        TestWriter<TestCell1dCube> *writer = new TestWriter<TestCell1dCube>(1, 0, numSteps);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
+    void test1dTorus()
+    {
+        Coord<1> dim(666);
+        int startStep = 40;
+        int endStep = 70;
+        CudaSimulator<TestCell1dTorus> sim(new TestInitializer1dTorus(dim, endStep, startStep));
+
+        TestWriter<TestCell1dTorus> *writer = new TestWriter<TestCell1dTorus>(3, startStep, endStep);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
 
     void test2dCube()
     {

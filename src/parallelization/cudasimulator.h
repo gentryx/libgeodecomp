@@ -253,6 +253,21 @@ class KernelWrapper;
  * See above
  */
 template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
+class KernelWrapper<1, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
+{
+public:
+    template<class CELL_TYPE>
+    void operator()(dim3 cudaDimGrid, dim3 cudaDimBlock, CELL_TYPE *devGridOld, CELL_TYPE *devGridNew, int nanoStep, dim3 gridOffset, dim3 logicalGridDim, dim3 axisWrapOffset, int offsetY, int offsetZ, int wavefrontLength) const
+    {
+        kernel2D<WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS><<<cudaDimGrid, cudaDimBlock>>>(
+            devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
+    }
+};
+
+/**
+ * See above
+ */
+template<bool WRAP_X_AXIS, bool WRAP_Y_AXIS, bool WRAP_Z_AXIS>
 class KernelWrapper<2, WRAP_X_AXIS, WRAP_Y_AXIS, WRAP_Z_AXIS>
 {
 public:
@@ -302,11 +317,9 @@ public:
      */
     CudaSimulator(
         Initializer<CELL_TYPE> *initializer,
-        // blockSize depends on DIM as we want 1D blocks for our
-        // wavefront algorithm. This is still very stupid and should
-        // be driven by an auto-tuner or at least come with a better
-        // heuristic.
-        Coord<3> blockSize = Coord<3>(128, (DIM * 3 - 5), 1)) :
+        // fixme: blockSize should be driven by an auto-tuner or at
+        // least come with a better heuristic.
+        Coord<3> blockSize = Coord<3>(128, (DIM < 3) ? 1 : 4, 1)) :
         MonolithicSimulator<CELL_TYPE>(initializer),
         blockSize(blockSize),
         ioGrid(&grid, CoordBox<DIM>())
@@ -486,11 +499,17 @@ private:
         Coord<DIM> initGridDim = initializer->gridDimensions();
 
         Coord<DIM> cudaGridDim;
-        for (int d = 0; d < (DIM - 1); ++d) {
+        // hack: treat 1D as special case of 2D, we don't need
+        // wavefront traversal in this case:
+        const int lastDim = (DIM == 1) ? 1 : DIM - 1;
+
+        for (int d = 0; d < lastDim; ++d) {
             cudaGridDim[d] = ceil(1.0 * initGridDim[d] / blockSize[d]);
         }
-        // fixme: make the number of wavefronts configurable
-        cudaGridDim[DIM - 1] = 1;
+        // fixme: make the number of wavefronts configurable, must remain 1 for 1D though
+        if (lastDim < DIM) {
+            cudaGridDim[lastDim] = 1;
+        }
 
         dim3 logicalGridDim = initGridDim;
         dim3 cudaDimBlock = blockSize;
@@ -513,7 +532,7 @@ private:
         axisWrapOffset.y = logicalGridDim.y * offsetY;
         axisWrapOffset.z = logicalGridDim.z * offsetZ;
 
-        int wavefrontLength = initGridDim[DIM - 1] / cudaGridDim[DIM - 1];
+        int wavefrontLength = lastDim < DIM ? (initGridDim[lastDim] / cudaGridDim[lastDim]) : 1;
         if (wavefrontLength == 0) {
             wavefrontLength = 1;
         }
