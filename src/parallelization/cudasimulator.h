@@ -7,6 +7,7 @@
 #include <libgeodecomp/misc/cudautil.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
+#include <libgeodecomp/storage/cudaupdatefunctor.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/proxygrid.h>
 
@@ -128,9 +129,8 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
         addTop    = axisWrapOffset.y;
         addBottom = 0;
 
-        gridNew[index].update(hood, nanoStep);
+        CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
         paddedMinY += 1;
-        index += offsetY;
     }
 
     addTop    = 0;
@@ -139,8 +139,7 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     if (WRAP_Y_AXIS && (paddedMaxY == logicalGridDim.y)) {
 #pragma unroll
         for (int myY = paddedMinY; myY < (paddedMaxY - 1); ++myY) {
-            gridNew[index].update(hood, nanoStep);
-            index += offsetY;
+            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
         }
 
         addTop = 0;
@@ -150,8 +149,7 @@ void kernel2D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     } else {
 #pragma unroll
         for (int myY = paddedMinY; myY < paddedMaxY; ++myY) {
-            gridNew[index].update(hood, nanoStep);
-            index += offsetY;
+            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetY, hood, nanoStep);
         }
     }
 }
@@ -212,9 +210,8 @@ void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
         addSouth = axisWrapOffset.z;
         addNorth = 0;
 
-        gridNew[index].update(hood, nanoStep);
+        CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
         paddedMinZ += 1;
-        index += offsetZ;
     }
 
     addSouth = 0;
@@ -223,19 +220,17 @@ void kernel3D(CELL_TYPE *gridOld, CELL_TYPE *gridNew, int nanoStep, dim3 gridOff
     if (WRAP_Z_AXIS && (paddedMaxZ == logicalGridDim.z)) {
 #pragma unroll
         for (int myZ = paddedMinZ; myZ < (paddedMaxZ - 1); ++myZ) {
-            gridNew[index].update(hood, nanoStep);
-            index += offsetZ;
+            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
         }
 
         addSouth = 0;
         addNorth = -axisWrapOffset.z;
-        gridNew[index].update(hood, nanoStep);
+        CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
 
     } else {
 #pragma unroll
         for (int myZ = paddedMinZ; myZ < paddedMaxZ; ++myZ) {
-            gridNew[index].update(hood, nanoStep);
-            index += offsetZ;
+            CudaUpdateFunctor<CELL_TYPE>()(gridNew, index, offsetZ, hood, nanoStep);
         }
     }
 }
