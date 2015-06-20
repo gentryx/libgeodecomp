@@ -28,6 +28,7 @@
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 #include <libgeodecomp/storage/unstructuredupdatefunctor.h>
+#include <libgeodecomp/testbed/spmvmtests/mmio.h>
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
@@ -46,7 +47,6 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "mmio.h"
 
 using namespace LibGeoDecomp;
 using namespace LibFlatArray;

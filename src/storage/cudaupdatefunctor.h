@@ -5,8 +5,7 @@
 
 #ifdef LIBGEODECOMP_WITH_CUDA
 
-namespace LibGeoDecomp
-{
+namespace LibGeoDecomp {
 
 /**
  * Simpler counterpart to the UpdateFunctor, optimized for CUDA code.
