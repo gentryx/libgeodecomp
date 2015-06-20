@@ -1036,6 +1036,35 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_SEPARATE_CUDA_UPDATE = void>
+    class SelectSeparateCudaUpdate
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectSeparateCudaUpdate<CELL, typename CELL::API::SupportsSeparateCudaUpdate>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Cells with this feature feature a separate updateCuda(),
+     * additionally to their usual update(). This may be beneficial if
+     * the code in update() is not CUDA-compatible, e.g. because it's
+     * pulling in certain parts of the STL or external libraries.
+     *
+     */
+    class HasSeparateCudaUpdate
+    {
+    public:
+        typedef void SupportsSeparateCudaUpdate;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     // Trait Template:
 
     // template<typename CELL, typename HAS_TEMPLATE_NAME = void>
