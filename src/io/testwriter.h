@@ -17,8 +17,8 @@ template<typename CELL = TestCell<2> >
 class TestWriter : public Clonable<Writer<CELL>, TestWriter<CELL> >
 {
 public:
+    typedef typename Writer<CELL>::GridType GridType;
     using Writer<CELL>::NANO_STEPS;
-    using typename Writer<CELL>::GridType;
 
     TestWriter(
         int period,
