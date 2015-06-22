@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/proxygrid.h>
 #include <libgeodecomp/storage/soagrid.h>
