@@ -24,12 +24,14 @@ public:
 
     void tearDown()
     {
-        for (std::size_t i = 0; i < files.size(); ++i)
+        for (std::size_t i = 0; i < files.size(); ++i) {
             boost::filesystem::remove(files[i]);
+        }
     }
 
     void testBasic()
     {
+	MPIIO<TestCell<3> > mpiio;
         TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
         SerialSimulator<TestCell<3> > sim(init);
         MPIIOWriter<TestCell<3> > *writer = new MPIIOWriter<TestCell<3> >(
@@ -56,12 +58,12 @@ public:
             Coord<3> dimensions;
             unsigned step;
             unsigned maxSteps;
-            MPIIO<TestCell<3> >::readMetadata(&dimensions, &step, &maxSteps, filename);
+            mpiio.readMetadata(&dimensions, &step, &maxSteps, filename);
 
             Region<3> region;
             region << CoordBox<3>(Coord<3>(), dimensions);
             Grid<TestCell<3>, Topology> buffer(dimensions);
-            MPIIO<TestCell<3> >::readRegion(
+            mpiio.readRegion(
                 &buffer,
                 filename,
                 region);

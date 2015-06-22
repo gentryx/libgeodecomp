@@ -83,7 +83,8 @@ public:
         Coord<3> dimensions)
     {
         Grid<double, Topologies::Cube<3>::Topology> ret(dimensions);
-        MPI_File file = MPIIO<TestCell<3>, Topologies::Cube<3>::Topology>::openFileForRead(
+        MPIIO<TestCell<3>, Topologies::Cube<3>::Topology> mpiio;
+        MPI_File file = mpiio.openFileForRead(
             filename, MPI_COMM_SELF);
         MPI_File_read(file, &ret[Coord<3>()], dimensions.prod(), MPI_DOUBLE, MPI_STATUS_IGNORE);
         MPI_File_close(&file);

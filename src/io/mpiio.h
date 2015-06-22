@@ -20,7 +20,7 @@ class MPIIO
 {
 public:
     template<typename GRID_TYPE, int DIM>
-    static void readRegion(
+    void readRegion(
         GRID_TYPE *grid,
         const std::string& filename,
         const Region<DIM>& region,
@@ -61,7 +61,7 @@ public:
     }
 
     template<int DIM>
-    static void readMetadata(
+    void readMetadata(
         Coord<DIM> *dimensions,
         unsigned *step,
         unsigned *maxSteps,
@@ -76,7 +76,7 @@ public:
     }
 
     template<typename GRID_TYPE, int DIM>
-    static void writeRegion(
+    void writeRegion(
         const GRID_TYPE& grid,
         const Coord<DIM>& dimensions,
         const unsigned& step,
@@ -130,7 +130,7 @@ public:
         MPI_File_close(&file);
     }
 
-    static MPI_File openFileForRead(
+    MPI_File openFileForRead(
         const std::string& filename,
         MPI_Comm comm)
     {
@@ -144,7 +144,7 @@ public:
     }
 
 
-    static MPI_File openFileForWrite(
+    MPI_File openFileForWrite(
         const std::string& filename,
         MPI_Comm comm)
     {
@@ -157,7 +157,7 @@ public:
         return file;
     }
 
-    static MPI_Aint getLength(const MPI_Datatype& datatype)
+    MPI_Aint getLength(const MPI_Datatype& datatype)
     {
         MPI_Aint length;
         MPI_Aint lowerBound;
@@ -166,9 +166,11 @@ public:
     }
 
 private:
+    // fixme: use MPILayer for MPI-IO
+    MPILayer mpiLayer;
 
     template<int DIM>
-    static MPI_Offset offset(
+    MPI_Offset offset(
         const MPI_Offset& headerLength,
         const Coord<DIM>& c,
         const Coord<DIM>& dimensions,
@@ -178,7 +180,7 @@ private:
     }
 
     template<int DIM>
-    static void getLengths(
+    void getLengths(
         MPI_Aint *headerLength,
         MPI_Aint *cellLength,
         const MPI_Datatype& mpiDatatype)
@@ -190,7 +192,7 @@ private:
     }
 
     template<int DIM>
-    static Coord<DIM> getDimensions(MPI_File file)
+    Coord<DIM> getDimensions(MPI_File file)
     {
         Coord<DIM> ret;
         MPI_File_read(file, &ret, 1, Typemaps::lookup<Coord<DIM> >(), MPI_STATUS_IGNORE);

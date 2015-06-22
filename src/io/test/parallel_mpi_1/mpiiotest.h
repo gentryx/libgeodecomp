@@ -20,22 +20,25 @@ public:
         unsigned step = 42;
         unsigned maxSteps = 4711;
         std::string filename = TempFile::parallel("mpiio");
+	MPIIO<double, Topologies::Cube<2>::Topology> mpiio;
 
         Grid<double> grid1(Coord<2>(width, height));
         grid1.getEdgeCell() = -1.245;
-        for (int y = 0; y < height; ++y)
-            for (int x = 0; x < width; ++x)
-                grid1[Coord<2>(x, y)] = y * 10 + x;
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+              grid1[Coord<2>(x, y)] = y * 10 + x;
+            }
+        }
         Region<2> region;
-        for (int y = 0; y < height; ++y)
+        for (int y = 0; y < height; ++y) {
             region << Streak<2>(Coord<2>(0, y), width);
-        MPIIO<double, Topologies::Cube<2>::Topology>::writeRegion(
-            grid1, grid1.getDimensions(), step, maxSteps, filename, region);
+        }
+        mpiio.writeRegion(grid1, grid1.getDimensions(), step, maxSteps, filename, region);
 
         Coord<2> dimensions;
         unsigned s;
         unsigned ms;
-        MPIIO<double, Topologies::Cube<2>::Topology>::readMetadata(
+        mpiio.readMetadata(
             &dimensions, &s, &ms, filename);
         TS_ASSERT_EQUALS(Coord<2>(width, height), dimensions);
         TS_ASSERT_EQUALS(s, step);
@@ -43,7 +46,7 @@ public:
 
         Grid<double> grid2(dimensions);
         TS_ASSERT_DIFFERS(grid1, grid2);
-        MPIIO<double, Topologies::Cube<2>::Topology>::readRegion(&grid2, filename, region);
+        mpiio.readRegion(&grid2, filename, region);
         TS_ASSERT_EQUALS(grid1, grid2);
     }
 
@@ -55,26 +58,32 @@ public:
         unsigned maxSteps = 47;
         unsigned step = 11;
         std::string filename = TempFile::parallel("mpiio");
+        MPIIO<double, Topologies::Cube<3>::Topology> mpiio;
 
         Grid<double, Topologies::Cube<3>::Topology> grid1(
             Coord<3>(width, height, depth));
-        for (int z = 0; z < depth; ++z)
-            for (int y = 0; y < height; ++y)
-                for (int x = 0; x < width; ++x)
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
                     grid1[Coord<3>(x, y, z)] = z * 100 + y * 10 + x;
+                }
+            }
+        }
 
         Region<3> region;
-        for (int z = 0; z < depth; ++z)
-            for (int y = 0; y < height; ++y)
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
                 region << Streak<3>(Coord<3>(0, y, z), width);
+            }
+        }
 
-        MPIIO<double, Topologies::Cube<3>::Topology>::writeRegion(
+        mpiio.writeRegion(
             grid1, grid1.getDimensions(), step, maxSteps, filename, region);
 
         Coord<3> dimensions;
         unsigned s;
         unsigned ms;
-        MPIIO<double, Topologies::Cube<3>::Topology>::readMetadata(
+        mpiio.readMetadata(
             &dimensions, &s, &ms, filename);
         TS_ASSERT_EQUALS(Coord<3>(width, height, depth), dimensions);
         TS_ASSERT_EQUALS(step, s);
@@ -82,7 +91,7 @@ public:
 
         Grid<double, Topologies::Cube<3>::Topology> grid2(dimensions);
         TS_ASSERT_DIFFERS(grid1, grid2);
-        MPIIO<double, Topologies::Cube<3>::Topology>::readRegion(&grid2, filename, region);
+        mpiio.readRegion(&grid2, filename, region);
         TS_ASSERT_EQUALS(grid1, grid2);
     }
 
@@ -94,26 +103,31 @@ public:
         unsigned maxSteps = 31;
         unsigned step = 7;
         std::string filename = TempFile::parallel("mpiio");
+        MPIIO<double, Topologies::Cube<3>::Topology> mpiio;
 
         Grid<double, Topologies::Cube<3>::Topology> grid1(
             Coord<3>(width, height, depth));
-        for (int z = 0; z < depth; ++z)
-            for (int y = 0; y < height; ++y)
-                for (int x = 0; x < width; ++x)
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
                     grid1[Coord<3>(x, y, z)] = z * 100 + y * 10 + x;
+                }
+            }
+        }
 
         Region<3> region;
-        for (int z = 0; z < depth; ++z)
-            for (int y = 0; y < height; ++y)
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
                 region << Streak<3>(Coord<3>(y + z, y, z), width);
+            }
+        }
 
-        MPIIO<double, Topologies::Cube<3>::Topology>::writeRegion(
-            grid1, grid1.getDimensions(), step, maxSteps, filename, region);
+        mpiio.writeRegion(grid1, grid1.getDimensions(), step, maxSteps, filename, region);
 
         Coord<3> dimensions;
         unsigned s;
         unsigned ms;
-        MPIIO<double, Topologies::Cube<3>::Topology>::readMetadata(
+        mpiio.readMetadata(
             &dimensions, &s, &ms, filename);
         TS_ASSERT_EQUALS(Coord<3>(width, height, depth), dimensions);
         TS_ASSERT_EQUALS(step, s);
@@ -121,7 +135,7 @@ public:
 
         Grid<double, Topologies::Cube<3>::Topology> grid2(dimensions, -1);
         TS_ASSERT_DIFFERS(grid1, grid2);
-        MPIIO<double, Topologies::Cube<3>::Topology>::readRegion(&grid2, filename, region);
+        mpiio.readRegion(&grid2, filename, region);
 
         for (int z = 0; z < depth; ++z) {
             for (int y = 0; y < height; ++y) {

@@ -16,6 +16,8 @@ class MPIIOTest : public CxxTest::TestSuite
 public:
     void testReadWrite()
     {
+        MPIIO<double, Topologies::Cube<3>::Topology> mpiio;
+
         int width = 5;
         int height = 3;
         int depth = 7;
@@ -40,28 +42,32 @@ public:
 
         std::string filename = TempFile::parallel("mpiio");
 
-        Grid<double, Topologies::Cube<3>::Topology> grid1(
-            Coord<3>(width, height, depth), -2);
-        for (int z = 0; z < depth; ++z)
-            for (int y = 0; y < height; ++y)
-                for (int x = 0; x < width; ++x)
+        Grid<double, Topologies::Cube<3>::Topology> grid1(Coord<3>(width, height, depth), -2);
+        for (int z = 0; z < depth; ++z) {
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
                     grid1[Coord<3>(x, y, z)] = z * 100 + y * 10 + x;
+                }
+            }
+        }
 
         Region<3> region;
-        for (int z = sz1; z < ez1; ++z)
-            for (int y = 0; y < height; ++y)
+        for (int z = sz1; z < ez1; ++z) {
+            for (int y = 0; y < height; ++y) {
                 region << Streak<3>(Coord<3>(0, y, z), width);
-        MPIIO<double, Topologies::Cube<3>::Topology>::writeRegion(
-            grid1, grid1.getDimensions(), step, maxSteps, filename, region);
+            }
+        }
+        mpiio.writeRegion(grid1, grid1.getDimensions(), step, maxSteps, filename, region);
 
-        Grid<double, Topologies::Cube<3>::Topology> grid2(
-            Coord<3>(width, height, depth), -1);
+        Grid<double, Topologies::Cube<3>::Topology> grid2(Coord<3>(width, height, depth), -1);
 
         region.clear();
-        for (int z = sz2; z < ez2; ++z)
-            for (int y = 0; y < height; ++y)
+        for (int z = sz2; z < ez2; ++z) {
+            for (int y = 0; y < height; ++y) {
                 region << Streak<3>(Coord<3>(0, y, z), width);
-        MPIIO<double, Topologies::Cube<3>::Topology>::readRegion(&grid2, filename, region);
+            }
+        }
+        mpiio.readRegion(&grid2, filename, region);
 
         for (int z = 0; z < depth; ++z) {
             for (int y = 0; y < height; ++y) {

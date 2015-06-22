@@ -25,6 +25,8 @@ public:
     typedef typename ParallelWriter<CELL_TYPE>::GridType GridType;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     static const int DIM = Topology::DIM;
+    using ParallelWriter<CELL_TYPE>::period;
+    using ParallelWriter<CELL_TYPE>::prefix;
 
     ParallelMPIIOWriter(
         const std::string& prefix,
@@ -49,7 +51,7 @@ public:
             return;
         }
 
-        MPIIO<CELL_TYPE>::writeRegion(
+        mpiio.writeRegion(
             grid,
             globalDimensions,
             step,
@@ -61,9 +63,7 @@ public:
     }
 
 private:
-    using ParallelWriter<CELL_TYPE>::period;
-    using ParallelWriter<CELL_TYPE>::prefix;
-
+    MPIIO<CELL_TYPE> mpiio;
     unsigned maxSteps;
     MPI_Comm comm;
 
