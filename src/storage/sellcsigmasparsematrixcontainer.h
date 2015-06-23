@@ -229,11 +229,10 @@ public:
 template<typename VALUETYPE, int C = 1, int SIGMA = 1>
 class SellCSigmaSparseMatrixContainer
 {
-private:
+public:
     using AlignedValueVector = std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >;
     using AlignedIntVector   = std::vector<int, LibFlatArray::aligned_allocator<int, 64> >;
 
-public:
     friend SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>;
 
     explicit
