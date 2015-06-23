@@ -25,6 +25,16 @@ class SiloWriter;
 #include <silo.h>
 #include <typeinfo>
 
+namespace boost {
+
+namespace serialization {
+
+class access;
+
+}
+
+}
+
 namespace LibGeoDecomp {
 
 namespace SiloWriterHelpers {
