@@ -163,13 +163,11 @@ public:
         int numberOfValues = 0;
 
         // save references to sell data structures
-        auto& chunkOffset     = container->chunkOffset;
-        auto& chunkLength     = container->chunkLength;
-        auto& rowLength       = container->rowLength;
-        auto& realRowToSorted = container->realRowToSorted;
-        auto& chunkRowToReal  = container->chunkRowToReal;
-        auto& values          = container->values;
-        auto& column          = container->column;
+        auto& chunkOffset = container->chunkOffset;
+        auto& chunkLength = container->chunkLength;
+        auto& rowLength   = container->rowLength;
+        auto& values      = container->values;
+        auto& column      = container->column;
 
         // allocate memory
         chunkOffset.resize(numberOfChunks + 1);
