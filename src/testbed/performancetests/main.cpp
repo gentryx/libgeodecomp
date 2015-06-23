@@ -2602,7 +2602,7 @@ public:
 
     std::string species()
     {
-        return "vanilla";
+        return "bronze";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2738,7 +2738,7 @@ public:
 
     std::string species()
     {
-        return "platinum";
+        return "pepper";
     }
 
     double performance2(const Coord<3>& dim)
