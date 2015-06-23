@@ -104,13 +104,13 @@ public:
     }
 
     inline
-    const int& index() const
+    int index() const
     {
         return currentChunk;
     }
 
     inline
-    int& index()
+    int index()
     {
         return currentChunk;
     }
