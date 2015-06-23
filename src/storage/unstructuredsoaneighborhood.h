@@ -27,16 +27,11 @@ template<
     std::size_t MATRICES = 1, typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
 class UnstructuredSoANeighborhood
 {
-private:
-    typedef UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA> Grid;
-    typedef std::pair<const unsigned *, const VALUE_TYPE *> IteratorPair;
-    typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
-    const Grid& grid;           /**< old grid */
-    int currentChunk;           /**< current chunk */
-    int currentMatrixID;        /**< current id for matrices */
-    const SoAAccessor& accessor;
-
 public:
+    using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
+    using IteratorPair = std::pair<const unsigned *, const VALUE_TYPE *>;
+    using SoAAccessor = LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
+
     /**
      * This iterator returns objects/values needed to update
      * the current chunk. Iterator consists of a pair: indices pointer
@@ -154,6 +149,12 @@ public:
     {
         return &accessor;
     }
+
+private:
+    const Grid& grid;            /**< old grid */
+    int currentChunk;            /**< current chunk */
+    int currentMatrixID;         /**< current id for matrices */
+    const SoAAccessor& accessor; /**< accessor to old grid */
 };
 
 /**
@@ -163,11 +164,9 @@ public:
 template<typename CELL, long DIM_X, long DIM_Y, long DIM_Z, long INDEX>
 class UnstructuredSoANeighborhoodNew
 {
-private:
-    typedef LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX> SoAAccessor;
-    SoAAccessor& accessor;
-
 public:
+    using SoAAccessor = LibFlatArray::soa_accessor<CELL, DIM_X, DIM_Y, DIM_Z, INDEX>;
+
     inline explicit
     UnstructuredSoANeighborhoodNew(SoAAccessor& acc) :
         accessor(acc)
@@ -178,6 +177,9 @@ public:
     {
         return &accessor;
     }
+
+private:
+    SoAAccessor& accessor;      /**< accessor to new grid */
 };
 
 /**
@@ -193,12 +195,11 @@ class UnstructuredSoAScalarNeighborhood :
                                                                VALUE_TYPE, C, SIGMA>,
                                      MATRICES, VALUE_TYPE, C, SIGMA, false>
 {
-private:
+public:
     using Grid = UnstructuredSoAGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     using UnstructuredNeighborhoodHelpers::
     UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, false>::grid;
 
-public:
     inline
     UnstructuredSoAScalarNeighborhood(const Grid& grid, long startX) :
         UnstructuredNeighborhoodHelpers::

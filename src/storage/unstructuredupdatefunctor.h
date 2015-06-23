@@ -20,7 +20,7 @@ namespace UnstructuredUpdateFunctorHelpers {
 template<typename CELL>
 class UnstructuredGridSoAUpdateHelper
 {
-private:
+public:
     using Topology = typename APITraits::SelectTopology<CELL>::Value;
     using ValueType = typename APITraits::SelectSellType<CELL>::Value;
     static const auto MATRICES = APITraits::SelectSellMatrices<CELL>::VALUE;
@@ -29,11 +29,6 @@ private:
     static const auto DIM = Topology::DIM;
     using Grid = UnstructuredSoAGrid<CELL, MATRICES, ValueType, C, SIGMA>;
 
-    const Grid& gridOld;
-    Grid *gridNew;
-    const Streak<DIM>& streak;
-    unsigned nanoStep;
-public:
     UnstructuredGridSoAUpdateHelper(
         const Grid& gridOld,
         Grid *gridNew,
@@ -103,6 +98,12 @@ public:
             gridNew->set(cellStreak, cells);
         }
     }
+
+private:
+    const Grid& gridOld;
+    Grid *gridNew;
+    const Streak<DIM>& streak;
+    unsigned nanoStep;
 };
 
 }
@@ -114,7 +115,7 @@ public:
 template<typename CELL>
 class UnstructuredUpdateFunctor
 {
-private:
+public:
     using Topology = typename APITraits::SelectTopology<CELL>::Value;
     using ValueType = typename APITraits::SelectSellType<CELL>::Value;
     static const std::size_t MATRICES = APITraits::SelectSellMatrices<CELL>::VALUE;
@@ -122,6 +123,20 @@ private:
     static const int SIGMA = APITraits::SelectSellSigma<CELL>::VALUE;
     static const int DIM = Topology::DIM;
 
+    template<typename GRID1, typename GRID2>
+    void operator()(
+        const Streak<DIM>& streak,
+        const GRID1& gridOld,
+        GRID2 *gridNew,
+        unsigned nanoStep)
+    {
+        typedef typename APITraits::SelectSoA<CELL>::Value SoAFlag;
+
+        // switch between SoA and non-SoA code
+        soaWrapper(streak, gridOld, gridNew, nanoStep, SoAFlag());
+    }
+
+private:
     template<typename HOOD_NEW, typename HOOD_OLD>
     void apiWrapper(HOOD_NEW& hoodNew, int endX, HOOD_OLD& hoodOld, unsigned nanoStep, APITraits::FalseType)
     {
@@ -158,20 +173,6 @@ private:
         gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
                          UnstructuredGridSoAUpdateHelper<CELL>(gridOld, gridNew,
                                                                streak, nanoStep));
-    }
-
-public:
-    template<typename GRID1, typename GRID2>
-    void operator()(
-        const Streak<DIM>& streak,
-        const GRID1& gridOld,
-        GRID2 *gridNew,
-        unsigned nanoStep)
-    {
-        typedef typename APITraits::SelectSoA<CELL>::Value SoAFlag;
-
-        // switch between SoA and non-SoA code
-        soaWrapper(streak, gridOld, gridNew, nanoStep, SoAFlag());
     }
 };
 
