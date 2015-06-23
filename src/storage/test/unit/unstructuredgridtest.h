@@ -24,7 +24,7 @@ public:
         return val;
     }
 
-    const int operator()() const
+    int operator()() const
     {
         return val;
     }
