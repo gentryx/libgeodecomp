@@ -19,6 +19,9 @@
 
 namespace LibGeoDecomp {
 
+template<typename VALUETYPE, int C, int SIGMA>
+class SellCSigmaSparseMatrixContainer;
+
 namespace SellHelpers {
 
 /**
@@ -42,25 +45,32 @@ public:
  * This is a class and not a method, because there are two different implementations,
  * one for SIGMA = 1 and one for SIGMA > 1.
  */
-template<int SIGMA>
+template<typename VALUETYPE, int C, int SIGMA>
 class InitFromMatrix
 {
 public:
-    template<typename VALUETYPE, int C>
-    void operator()(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
-                    std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >& values,
-                    std::vector<int, LibFlatArray::aligned_allocator<int, 64> >& column,
-                    std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength, std::vector<int>& realRowToSorted,
-                    std::vector<int>& chunkRowToReal)
+    using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, SIGMA>;
+    using Matrix = std::map<Coord<2>, VALUETYPE>;
+
+    void operator()(SellContainer *container, const Matrix& matrix) const
     {
         std::vector<int> rowLengthCopy;
+
         // calculate size for arrays
-        const int matrixRows = matrixSize;
+        const int matrixRows = container->dimension;
         const int numberOfChunks = (matrixRows - 1) / C + 1;
         const int numberOfSigmas = (matrixRows - 1) / SIGMA + 1;
         const int rowsPadded = numberOfChunks * C;
         int numberOfValues = 0;
+
+        // save references to sell data structures
+        auto& chunkOffset     = container->chunkOffset;
+        auto& chunkLength     = container->chunkLength;
+        auto& rowLength       = container->rowLength;
+        auto& realRowToSorted = container->realRowToSorted;
+        auto& chunkRowToReal  = container->chunkRowToReal;
+        auto& values          = container->values;
+        auto& column          = container->column;
 
         // allocate memory
         chunkOffset.resize(numberOfChunks + 1);
@@ -137,23 +147,29 @@ public:
 /**
  * See doc above.
  */
-template<>
-class InitFromMatrix<1>
+template<typename VALUETYPE, int C>
+class InitFromMatrix<VALUETYPE, C, 1>
 {
 public:
-    template<typename VALUETYPE, int C>
-    void operator()(std::size_t matrixSize, const std::map<Coord<2>, VALUETYPE>& matrix,
-                    std::vector<VALUETYPE, LibFlatArray::aligned_allocator<VALUETYPE, 64> >& values,
-                    std::vector<int, LibFlatArray::aligned_allocator<int, 64> >& column,
-                    std::vector<int>& chunkLength, std::vector<int>& chunkOffset,
-                    std::vector<int>& rowLength, std::vector<int>& /* realRowToSorted */,
-                    std::vector<int>& /* chunkRowToReal */)
+    using SellContainer = SellCSigmaSparseMatrixContainer<VALUETYPE, C, 1>;
+    using Matrix = std::map<Coord<2>, VALUETYPE>;
+
+    void operator()(SellContainer *container, const Matrix& matrix) const
     {
         // calculate size for arrays
-        const int matrixRows = matrixSize;
+        const int matrixRows = container->dimension;
         const int numberOfChunks = (matrixRows - 1) / C + 1;
         const int rowsPadded = numberOfChunks * C;
         int numberOfValues = 0;
+
+        // save references to sell data structures
+        auto& chunkOffset     = container->chunkOffset;
+        auto& chunkLength     = container->chunkLength;
+        auto& rowLength       = container->rowLength;
+        auto& realRowToSorted = container->realRowToSorted;
+        auto& chunkRowToReal  = container->chunkRowToReal;
+        auto& values          = container->values;
+        auto& column          = container->column;
 
         // allocate memory
         chunkOffset.resize(numberOfChunks + 1);
@@ -218,6 +234,8 @@ private:
     using AlignedIntVector   = std::vector<int, LibFlatArray::aligned_allocator<int, 64> >;
 
 public:
+    friend SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>;
+
     explicit
     SellCSigmaSparseMatrixContainer(const int N = 0) :
         values(),
@@ -294,10 +312,7 @@ public:
      */
     void initFromMatrix(const std::map<Coord<2>, VALUETYPE>& matrix)
     {
-        SellHelpers::InitFromMatrix<SIGMA>().
-            template operator()<VALUETYPE, C>(dimension, matrix, values, column,
-                                              chunkLength, chunkOffset, rowLength,
-                                              realRowToSorted, chunkRowToReal);
+        SellHelpers::InitFromMatrix<VALUETYPE, C, SIGMA>()(this, matrix);
     }
 
     inline bool operator==(const SellCSigmaSparseMatrixContainer& other) const
