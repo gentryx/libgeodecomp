@@ -150,7 +150,7 @@ public:
     }
 
     inline
-    const SoAAccessor *operator->()
+    const SoAAccessor *operator->() const
     {
         return &accessor;
     }
@@ -174,7 +174,7 @@ public:
     {}
 
     inline
-    SoAAccessor *operator->()
+    SoAAccessor *operator->() const
     {
         return &accessor;
     }
