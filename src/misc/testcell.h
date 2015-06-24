@@ -364,7 +364,14 @@ class TestCellMPIDatatypeHelper
 
 }
 
-LIBFLATARRAY_REGISTER_SOA(LibGeoDecomp::TestCellSoA, ((LibGeoDecomp::Coord<3>)(pos))((LibGeoDecomp::CoordBox<3>)(dimensions))((unsigned)(cycleCounter))((bool)(isEdgeCell))((bool)(isValid))((double)(testValue)))
+LIBFLATARRAY_REGISTER_SOA(
+    LibGeoDecomp::TestCellSoA,
+    ((LibGeoDecomp::Coord<3>)(pos))
+    ((LibGeoDecomp::CoordBox<3>)(dimensions))
+    ((unsigned)(cycleCounter))
+    ((bool)(isEdgeCell))
+    ((bool)(isValid))
+    ((double)(testValue)))
 
 template<
     typename CharT,
