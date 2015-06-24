@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ "$2" != -np ]; then
+  cat >&2 <<EOF
+Usage: $0 -np N ARCH COMMAND
+
+where N is the number of processes to spawn, ARCH is the machine architecture to emulate (see documentation of SDE) and COMMAND is the command to run
+EOF
+
+  exit 1
+fi
+
+ARCH=$1
+NUM_PROCESSES=$3
+
+ARGS=( "$@" )
+unset ARGS[0]
+unset ARGS[1]
+unset ARGS[2]
+
+mpirun -np $NUM_PROCESSES sde64 $ARCH -- "${ARGS[@]}"
