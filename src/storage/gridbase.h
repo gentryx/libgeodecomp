@@ -26,101 +26,6 @@ public:
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;
 
-    /**
-     * Convenice class for reading multiple cells. Incurs overhead due
-     * to copying cells -- probably more often than desired.
-     */
-    class ConstIterator
-    {
-    public:
-    ConstIterator(const GridBase<CELL, DIM> *grid, const Coord<DIM>& origin) :
-        grid(grid),
-        cursor(origin)
-    {
-        cell = grid->get(cursor);
-    }
-
-    const CELL& operator*() const
-    {
-        return cell;
-    }
-
-    const CELL *operator->() const
-    {
-        return &cell;
-    }
-
-    ConstIterator& operator>>(CELL& target)
-    {
-        target = cell;
-        ++(*this);
-        return *this;
-    }
-
-    void operator++()
-    {
-        ++cursor.x();
-        cell = grid->get(cursor);
-    }
-
-    private:
-    const GridBase<CELL, DIM> *grid;
-    Coord<DIM> cursor;
-    CELL cell;
-    };
-
-    /**
-     * Convenice class for reading/writing multiple cells. Incurs
-     * overhead due to copying cells -- probably more often than
-     * desired.
-     */
-    class Iterator
-    {
-    public:
-    Iterator(GridBase<CELL, DIM> *grid, const Coord<DIM>& origin) :
-        grid(grid),
-        cursor(origin)
-    {
-        cell = grid->get(cursor);
-    }
-
-    const CELL& operator*() const
-    {
-        return cell;
-    }
-
-    const CELL *operator->() const
-    {
-        return &cell;
-    }
-
-    Iterator& operator>>(CELL& target)
-    {
-        target = cell;
-        ++(*this);
-        return *this;
-    }
-
-    Iterator& operator<<(const CELL& source)
-    {
-        cell = source;
-        grid->set(cursor, cell);
-        ++(*this);
-        return *this;
-    }
-
-    void operator++()
-    {
-        ++cursor.x();
-        cell = grid->get(cursor);
-    }
-
-    private:
-    GridBase<CELL, DIM> *grid;
-    Coord<DIM> cursor;
-    CELL cell;
-    };
-
     virtual ~GridBase()
     {}
 
@@ -131,16 +36,6 @@ public:
     virtual void setEdge(const CELL&) = 0;
     virtual const CELL& getEdge() const = 0;
     virtual CoordBox<DIM> boundingBox() const = 0;
-
-    ConstIterator at(const Coord<DIM>& coord) const
-    {
-        return ConstIterator(this, coord);
-    }
-
-    Iterator at(const Coord<DIM>& coord)
-    {
-        return Iterator(this, coord);
-    }
 
     Coord<DIM> dimensions() const
     {
