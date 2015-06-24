@@ -117,6 +117,86 @@ public:
         sim.run();
         TS_ASSERT(writer->allEventsDone());
     }
+
+    void testMultipleWavefronts2DCube()
+    {
+        Coord<2> dim(421, 351);
+        int numSteps = 21;
+        CudaSimulator<TestCell2dCube> sim(
+            new TestInitializer2dCube(dim, numSteps),
+            Coord<3>(128, 5, 1));
+
+        TestWriter<TestCell2dCube> *writer = new TestWriter<TestCell2dCube>(1, 0, numSteps);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
+    void testMultipleWavefronts2DTorus()
+    {
+        Coord<2> dim(421, 351);
+        int numSteps = 21;
+        CudaSimulator<TestCell2dTorus> sim(
+            new TestInitializer2dTorus(dim, numSteps),
+            Coord<3>(128, 5, 1));
+
+        TestWriter<TestCell2dTorus> *writer = new TestWriter<TestCell2dTorus>(1, 0, numSteps);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
+    void testMultipleWavefronts3DCube()
+    {
+        Coord<3> dim(52, 20, 14);
+        int numSteps = 6;
+        CudaSimulator<TestCell3dCube> sim(
+            new TestInitializer3dCube(dim, numSteps),
+            Coord<3>(128, 2, 3));
+
+        TestWriter<TestCell3dCube> *writer = new TestWriter<TestCell3dCube>(1, 0, numSteps);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
+    void testMultipleWavefronts3DTorus()
+    {
+        Coord<3> dim(54, 20, 13);
+        int numSteps = 7;
+        CudaSimulator<TestCell3dTorus> sim(
+            new TestInitializer3dTorus(dim, numSteps),
+            Coord<3>(64, 2, 3));
+
+        TestWriter<TestCell3dTorus> *writer = new TestWriter<TestCell3dTorus>(1, 0, numSteps);
+        sim.addWriter(writer);
+
+        sim.run();
+        TS_ASSERT(writer->allEventsDone());
+    }
+
+    void testSoa2dTorus()
+    {
+        // fixme
+    }
+
+    void testSoa2dCube()
+    {
+        // fixme
+    }
+
+    void testSoa3dTorus()
+    {
+        // fixme
+    }
+
+    void testSoa3dCube()
+    {
+        // fixme
+    }
 };
 
 }

@@ -527,7 +527,7 @@ private:
         axisWrapOffset.y = logicalGridDim.y * offsetY;
         axisWrapOffset.z = logicalGridDim.z * offsetZ;
 
-        int wavefrontLength = lastDim < DIM ? (initGridDim[lastDim] / cudaGridDim[lastDim]) : 1;
+        int wavefrontLength = lastDim < DIM ? ceil(1.0 * initGridDim[lastDim] / blockSize[lastDim]) : 1;
         if (wavefrontLength == 0) {
             wavefrontLength = 1;
         }
