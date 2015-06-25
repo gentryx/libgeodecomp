@@ -33,7 +33,7 @@ public:
         }
 
         filter->copyMemberIn(reinterpret_cast<char*>(&hostBuffer[0]), &hostCellVec[0], 40, memberPointer);
-        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+        for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             TS_ASSERT_EQUALS(47.11 + i, hostCellVec[i].testValue);
         }
     }
