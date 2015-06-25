@@ -11,7 +11,6 @@ namespace LibGeoDecomp {
 class CUDAArrayTest : public CxxTest::TestSuite
 {
 public:
-
     void testBasic()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
@@ -56,6 +55,21 @@ public:
 
         cudaDeviceSynchronize();
         CUDAUtil::checkForError();
+#endif
+    }
+
+    void testInitialization()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+        int value = 4711;
+        CUDAArray<int> deviceArray(3, value);
+
+        std::vector<int> hostVec(3);
+        deviceArray.save(&hostVec[0]);
+
+        TS_ASSERT_EQUALS(hostVec[0], 4711);
+        TS_ASSERT_EQUALS(hostVec[1], 4711);
+        TS_ASSERT_EQUALS(hostVec[2], 4711);
 #endif
     }
 

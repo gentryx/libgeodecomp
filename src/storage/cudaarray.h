@@ -19,6 +19,15 @@ public:
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
     {}
 
+    inline CUDAArray(std::size_t size, const ELEMENT_TYPE& defaultValue) :
+        size(size),
+        dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
+    {
+        for (std::size_t i = 0; i < size; ++i) {
+            cudaMemcpy(dataPointer + i, &defaultValue, sizeof(ELEMENT_TYPE), cudaMemcpyHostToDevice);
+        }
+    }
+
     inline CUDAArray(const CUDAArray& array) :
         size(array.size),
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(array.size))
