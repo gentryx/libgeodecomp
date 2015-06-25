@@ -664,25 +664,6 @@ public:
         {
             ScopedTimer t(&seconds);
 
-#if 0
-            // scalar code
-            for (int i = 0; i < dim.x(); ++i) {
-                double sum = 0.0, sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, sum3 = 0.0;
-                int j;
-                for (j = row[i]; j < row[i + 1] - 3; j += 4) {
-                    sum0 += values[j + 0] * rhsPtr[col[j + 0]];
-                    sum1 += values[j + 1] * rhsPtr[col[j + 1]];
-                    sum2 += values[j + 2] * rhsPtr[col[j + 2]];
-                    sum3 += values[j + 3] * rhsPtr[col[j + 3]];
-                }
-                sum = sum0 + sum1 + sum2 + sum3;
-                for (; j < row[i + 1]; ++j) {
-                    sum += values[j] * rhsPtr[col[j]];
-                }
-                resPtr[i] = sum;
-            }
-#endif
-
             // AVX code
             for (int i = 0; i < dim.x(); ++i) {
                 int j;
