@@ -7,6 +7,7 @@
 */
 
 
+#include <stdexcept>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -74,7 +75,10 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
 
     for (i=0; i<nz; i++)
     {
-        fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+        int rc = fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+		if (rc != 3) {
+			throw std::runtime_error("failed to parse input file");
+		}
         I[i]--;  /* adjust from 1-based to 0-based */
         J[i]--;
     }
@@ -455,7 +459,7 @@ char *mm_strdup(const char *s)
 char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
-    char *types[4];
+    const char *types[4];
 	char *mm_strdup(const char *);
     int error =0;
 
