@@ -6,6 +6,11 @@
 #include <iostream>
 #include <stdexcept>
 
+#ifdef LIBGEODECOMP_WITH_CUDA
+#include <cuda.h>
+#include <cuda_runtime.h>
+#endif
+
 #ifndef __host__
 #define __host__
 #endif
@@ -15,10 +20,6 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-
-#ifdef __CUDACC__
-
-#include <cuda.h>
 
 namespace LibGeoDecomp {
 
@@ -40,8 +41,6 @@ public:
 };
 
 }
-
-#endif
 
 #endif
 
