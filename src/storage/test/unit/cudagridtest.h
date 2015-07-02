@@ -9,10 +9,26 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+class SimpleCUDATestCell
+{
+public:
+    SimpleCUDATestCell(double val = -1, int counter = -2) :
+        val(val),
+        counter(counter)
+    {}
+
+    bool operator==(const SimpleCUDATestCell& other) const
+    {
+        return (val == other.val) && (counter == other.counter);
+    }
+
+    double val;
+    int counter;
+};
+
 class CUDAGridTest : public CxxTest::TestSuite
 {
 public:
-
     void testBasic()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
@@ -209,6 +225,93 @@ public:
         }
 #endif
     }
+
+    void testGridBaseCompatibilityAndBoundingBox()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+        Coord<3> dim(30, 10, 5);
+        CoordBox<3> box(Coord<3>(), dim);
+        CUDAGrid<int, Topologies::Torus<3>::Topology> deviceGrid(box);
+
+        GridBase<int, 3>& gridReference = deviceGrid;
+        TS_ASSERT_EQUALS(gridReference.boundingBox(), deviceGrid.boundingBox());
+#endif
+    }
+
+    void testGetSetOfSingleCells2D()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+        Coord<2> dim(40, 50);
+        Coord<2> origin(30, 20);
+        CoordBox<2> box(origin, dim);
+
+        CUDAGrid<SimpleCUDATestCell, Topologies::Cube<2>::Topology, true> grid(box, box.dimensions);
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(-1, -2), grid.hostEdgeCell);
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(-1, -2), grid.get(Coord<2>(-3, -2)));
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(-1, -2), grid.getEdge());
+
+        grid.set(Coord<2>(30, 20), SimpleCUDATestCell(1.2, 3));
+        grid.set(Coord<2>(31, 20), SimpleCUDATestCell(4.5, 6));
+        grid.set(Coord<2>(69, 69), SimpleCUDATestCell(7.8, 9));
+        grid.set(Coord<2>(20, 20), SimpleCUDATestCell(-4, -8));
+
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(1.2, 3), grid.get(Coord<2>(30, 20)));
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(4.5, 6), grid.get(Coord<2>(31, 20)));
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(7.8, 9), grid.get(Coord<2>(69, 69)));
+        // this ensures topology is honored and the edge cell has been
+        // set in the out-of-bounds access above:
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(-4, -8), grid.getEdge());
+#endif
+    }
+
+    void testGetSetOfSingleCells3D()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+        Coord<3> dim(30, 10, 5);
+        Coord<3> origin(-3, -2, -1);
+        CoordBox<3> box(origin, dim);
+
+        CUDAGrid<SimpleCUDATestCell, Topologies::Torus<3>::Topology, true> grid(box, box.dimensions);
+        grid.set(Coord<3>(-3, -2, -1), SimpleCUDATestCell(1.2, 3));
+        grid.set(Coord<3>(-2, -2, -1), SimpleCUDATestCell(4.5, 6));
+        grid.set(Coord<3>(26,  7,  3), SimpleCUDATestCell(7.8, 9));
+        grid.set(Coord<3>(-4, -2, -1), SimpleCUDATestCell(6.6, 6));
+
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(1.2, 3), grid.get(Coord<3>(-3, -2, -1)));
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(4.5, 6), grid.get(Coord<3>(-2, -2, -1)));
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(7.8, 9), grid.get(Coord<3>(26,  7,  3)));
+        // important for ensuring the torus topology was honored in
+        // the out-of-bounds access above:
+        TS_ASSERT_EQUALS(SimpleCUDATestCell(6.6, 6), grid.get(Coord<3>(26, -2, -1)));
+#endif
+    }
+
+    void testGetSetOfMultipleCells2D()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+        Coord<2> dim(40, 50);
+        Coord<2> origin(30, 20);
+        CoordBox<2> box(origin, dim);
+
+        CUDAGrid<SimpleCUDATestCell, Topologies::Cube<2>::Topology> grid(box);
+
+        std::vector<SimpleCUDATestCell> source;
+        std::vector<SimpleCUDATestCell> target(6);
+        source << SimpleCUDATestCell(1.1, 1)
+               << SimpleCUDATestCell(2.2, 2)
+               << SimpleCUDATestCell(3.3, 3)
+               << SimpleCUDATestCell(4.4, 4)
+               << SimpleCUDATestCell(5.5, 5)
+               << SimpleCUDATestCell(6.6, 6);
+        Streak<2> streak(Coord<2>(35, 27), 41);
+
+        grid.set(streak, &source[0]);
+        grid.get(streak, &target[0]);
+
+        TS_ASSERT_EQUALS(source, target);
+#endif
+    }
+
 };
 
 }
