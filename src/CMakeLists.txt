@@ -21,6 +21,7 @@ endif()
 
 if(WITH_CUDA)
   set(CUDA_NVCC_FLAGS "--gpu-architecture=sm_20")
+  list(APPEND INSTALL_INCLUDE_DIRECTORIES ${CUDA_INCLUDE_DIRS})
 endif()
 
 if(WITH_FORTRAN)
@@ -247,6 +248,12 @@ if(WITH_HPX)
     hpx_serialization${HPX_LIB_SUFFIX}
     hpx_init${HPX_LIB_SUFFIX}
     ${HPX_LIBRARIES})
+endif()
+
+if(WITH_CUDA)
+  set(LIBGEODECOMP_LINK_LIBRARIES
+    ${LIBGEODECOMP_LINK_LIBRARIES}
+    ${CUDA_LIBRARIES})
 endif()
 
 if(WITH_SILO)
