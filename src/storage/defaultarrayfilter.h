@@ -16,7 +16,12 @@ public:
     friend class Serialization;
 
     void copyStreakInImpl(
-        const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             for (std::size_t j = 0; j < ARITY; ++j) {
@@ -26,7 +31,12 @@ public:
     }
 
     void copyStreakOutImpl(
-        const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride)
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             for (std::size_t j = 0; j < ARITY; ++j) {
@@ -36,17 +46,29 @@ public:
     }
 
     void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER CELL:: *memberPointer)
     {
         copyMemberInImpl(
             source,
+            sourceLocation,
             target,
+            targetLocation,
             num,
             reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
     }
 
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
         for (std::size_t i = 0; i < num; ++i) {
             std::copy(
@@ -57,17 +79,29 @@ public:
     }
 
     void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER CELL:: *memberPointer)
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER CELL:: *memberPointer)
     {
         copyMemberOutImpl(
             source,
+            sourceLocation,
             target,
+            targetLocation,
             num,
             reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
     }
 
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
         for (std::size_t i = 0; i < num; ++i) {
             std::copy(

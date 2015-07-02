@@ -5,6 +5,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/storage/memorylocation.h>
 #include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
@@ -73,13 +74,17 @@ public:
      * cells within the given region. Assumes that target points to an area with sufficient space.
      */
     template<typename MEMBER>
-    void saveMember(MEMBER *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    void saveMember(
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
     {
         if (!selector.template checkTypeID<MEMBER>()) {
             throw std::invalid_argument("cannot save member as selector was created for different type");
         }
 
-        saveMemberImplementation(reinterpret_cast<char*>(target), selector, region);
+        saveMemberImplementation(reinterpret_cast<char*>(target), targetLocation, selector, region);
     }
 
     /**
@@ -87,9 +92,13 @@ public:
      * Writers and other components that might not know about the
      * variable's type.
      */
-    void saveMemberUnchecked(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    void saveMemberUnchecked(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
     {
-        saveMemberImplementation(target, selector, region);
+        saveMemberImplementation(target, targetLocation, selector, region);
     }
 
     /**
@@ -98,20 +107,31 @@ public:
      * contains coordinates.
      */
     template<typename MEMBER>
-    void loadMember(const MEMBER *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    void loadMember(
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region)
     {
         if (!selector.template checkTypeID<MEMBER>()) {
             throw std::invalid_argument("cannot load member as selector was created for different type");
         }
-        loadMemberImplementation(reinterpret_cast<const char*>(source), selector, region);
+
+        loadMemberImplementation(reinterpret_cast<const char*>(source), sourceLocation, selector, region);
     }
 
 protected:
     virtual void saveMemberImplementation(
-        char *target, const Selector<CELL>& selector, const Region<DIM>& region) const = 0;
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const = 0;
 
     virtual void loadMemberImplementation(
-        const char *source, const Selector<CELL>& selector, const Region<DIM>& region) = 0;
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) = 0;
 
 };
 

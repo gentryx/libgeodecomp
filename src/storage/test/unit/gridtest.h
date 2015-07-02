@@ -437,9 +437,9 @@ public:
         std::vector<double> yVector(region.size(), -1);
         std::vector<char  > zVector(region.size(), -1);
 
-        grid.saveMember(&xVector[0], xSelector, region);
-        grid.saveMember(&yVector[0], ySelector, region);
-        grid.saveMember(&zVector[0], zSelector, region);
+        grid.saveMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
+        grid.saveMember(&yVector[0], MemoryLocation::HOST, ySelector, region);
+        grid.saveMember(&zVector[0], MemoryLocation::HOST, zSelector, region);
 
         Region<2>::Iterator cursor = region.begin();
 
@@ -458,9 +458,9 @@ public:
             zVector[i] = i;
         }
 
-        grid.loadMember(&xVector[0], xSelector, region);
-        grid.loadMember(&yVector[0], ySelector, region);
-        grid.loadMember(&zVector[0], zSelector, region);
+        grid.loadMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
+        grid.loadMember(&yVector[0], MemoryLocation::HOST, ySelector, region);
+        grid.loadMember(&zVector[0], MemoryLocation::HOST, zSelector, region);
 
         int counter = 0;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {

@@ -7,6 +7,7 @@
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libflatarray/flat_array.hpp>
+#include <stdexcept>
 #include <typeinfo>
 
 #ifdef LIBGEODECOMP_WITH_SILO
@@ -101,14 +102,39 @@ public:
         return 0;
     }
 
-    void copyMemberIn(const char *source, CELL *target, int num) const
+    void copyMemberIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
+        if (sourceLocation != MemoryLocation::HOST) {
+            throw std::logic_error("FIXME: can't yet source from locations other than HOST (1)");
+        }
+        if (targetLocation != MemoryLocation::HOST) {
+            throw std::logic_error("FIXME: can't yet target locations other than HOST (1)");
+        }
+
+
         const CELL *actualSource = reinterpret_cast<const CELL*>(source);
         std::copy(actualSource, actualSource + num, target);
     }
 
-    void copyMemberOut(const CELL *source, char *target, int num) const
+    void copyMemberOut(
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
+        if (sourceLocation != MemoryLocation::HOST) {
+            throw std::logic_error("FIXME: can't yet source from locations other than HOST (2)");
+        }
+        if (targetLocation != MemoryLocation::HOST) {
+            throw std::logic_error("FIXME: can't yet target locations other than HOST (2)");
+        }
+
         CELL *actualTarget = reinterpret_cast<CELL*>(target);
         std::copy(source, source + num, actualTarget);
     }
@@ -233,36 +259,58 @@ public:
      * Read the data from source and set the corresponding member of
      * each CELL at target. Only useful for AoS memory layout.
      */
-    inline void copyMemberIn(const char *source, CELL *target, int num) const
+    inline void copyMemberIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
-        filter->copyMemberIn(source, target, num, memberPointer);
+        filter->copyMemberIn(source, sourceLocation, target, targetLocation, num, memberPointer);
     }
 
     /**
      * Read the member of all CELLs at source and store them
      * contiguously at target. Only useful for AoS memory layout.
      */
-    inline void copyMemberOut(const CELL *source, char *target, int num) const
+    inline void copyMemberOut(
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
-        filter->copyMemberOut(source, target, num, memberPointer);
+        filter->copyMemberOut(source, sourceLocation, target, targetLocation, num, memberPointer);
     }
 
     /**
      * This is a helper function for writing members of a SoA memory
      * layout.
      */
-    inline void copyStreakIn(const char *source, char *target, const std::size_t num, const std::size_t stride) const
+    inline void copyStreakIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) const
     {
-        filter->copyStreakIn(source, target, num, stride);
+        filter->copyStreakIn(source, sourceLocation, target, targetLocation, num, stride);
     }
 
     /**
      * This is a helper function for reading members from a SoA memory
      * layout.
      */
-    inline void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride) const
+    inline void copyStreakOut(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) const
     {
-        filter->copyStreakOut(source, target, num, stride);
+        filter->copyStreakOut(source, sourceLocation, target, targetLocation, num, stride);
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO

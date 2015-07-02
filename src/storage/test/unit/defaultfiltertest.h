@@ -23,7 +23,14 @@ public:
         FilterBase<TestCell<2> > *filter = new DefaultFilter<TestCell<2>, double, double>();
         char TestCell<2>::* memberPointer = reinterpret_cast<char TestCell<2>::*>(&TestCell<2>::testValue);
 
-        filter->copyMemberOut(&hostCellVec[0], reinterpret_cast<char*>(&hostBuffer[0]), 40, memberPointer);
+        filter->copyMemberOut(
+            &hostCellVec[0],
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            40,
+            memberPointer);
+
         for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
             TS_ASSERT_EQUALS(i + 0.5, hostBuffer[i]);
         }
@@ -32,7 +39,14 @@ public:
             hostBuffer[i] = 47.11 + i;
         }
 
-        filter->copyMemberIn(reinterpret_cast<char*>(&hostBuffer[0]), &hostCellVec[0], 40, memberPointer);
+        filter->copyMemberIn(
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            &hostCellVec[0],
+            MemoryLocation::HOST,
+            40,
+            memberPointer);
+
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             TS_ASSERT_EQUALS(47.11 + i, hostCellVec[i].testValue);
         }
@@ -51,8 +65,11 @@ public:
 
         filter->copyStreakOut(
             reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
             reinterpret_cast<char*>(&hostBuffer[0]),
-            40, 40);
+            MemoryLocation::HOST,
+            40,
+            40);
 
         for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
             TS_ASSERT_EQUALS(i + 0.7, hostBuffer[i]);
@@ -64,8 +81,11 @@ public:
 
         filter->copyStreakIn(
             reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
             reinterpret_cast<char*>(&hostMemberVec[0]),
-            40, 40);
+            MemoryLocation::HOST,
+            40,
+            40);
 
         for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
             TS_ASSERT_EQUALS(47.11 + i, hostMemberVec[i]);

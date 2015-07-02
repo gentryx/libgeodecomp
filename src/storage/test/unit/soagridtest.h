@@ -514,7 +514,12 @@ public:
         }
 
         // test whether default grid data is accurately copied back:
-        grid.saveMember(&yVector[0], ySelector, region);
+        grid.saveMember(
+            &yVector[0],
+            MemoryLocation::HOST,
+            ySelector,
+            region);
+
         for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(yVector[i], defaultValue);
         }
@@ -524,7 +529,12 @@ public:
             grid.set(*i, MyDummyCell(1, i->x() + i->y(), 1));
         }
 
-        grid.saveMember(&yVector[0], ySelector, region);
+        grid.saveMember(
+            &yVector[0],
+            MemoryLocation::HOST,
+            ySelector,
+            region);
+
         Region<2>::Iterator cursor = region.begin();
         for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(yVector[i], cursor->x() + cursor->y());
@@ -535,7 +545,11 @@ public:
         for (std::size_t i = 0; i < region.size(); ++i) {
             yVector[i] = i + 0.4711;
         }
-        grid.loadMember(&yVector[0], ySelector, region);
+        grid.loadMember(
+            &yVector[0],
+            MemoryLocation::HOST,
+            ySelector,
+            region);
 
         int counter = 0;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
@@ -569,7 +583,12 @@ public:
         }
 
         // test whether default grid data is accurately copied back:
-        grid.saveMember(&posVector[0], posSelector, region);
+        grid.saveMember(
+            &posVector[0],
+            MemoryLocation::HOST,
+            posSelector,
+            region);
+
         for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(posVector[i], Coord<3>(-1, -2, -3));
         }
@@ -579,7 +598,12 @@ public:
             grid.set(*i, TestCellType2(*i, dim, 1, 47.11));
         }
 
-        grid.saveMember(&posVector[0], posSelector, region);
+        grid.saveMember(
+            &posVector[0],
+            MemoryLocation::HOST,
+            posSelector,
+            region);
+
         Region<3>::Iterator cursor = region.begin();
         for (std::size_t i = 0; i < region.size(); ++i) {
             TS_ASSERT_EQUALS(posVector[i], *cursor);
@@ -590,7 +614,11 @@ public:
         for (std::size_t i = 0; i < region.size(); ++i) {
             posVector[i] = Coord<3>(i, i * 1000, 4711);
         }
-        grid.loadMember(&posVector[0], posSelector, region);
+        grid.loadMember(
+            &posVector[0],
+            MemoryLocation::HOST,
+            posSelector,
+            region);
 
         int counter = 0;
         for (Region<3>::Iterator i = region.begin(); i != region.end(); ++i) {

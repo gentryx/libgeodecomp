@@ -556,7 +556,7 @@ private:
 
         std::size_t newSize = region.size() * selector.sizeOfExternal();
         variableData.resize(newSize);
-        grid.saveMemberUnchecked(&variableData[0], selector, region);
+        grid.saveMemberUnchecked(&variableData[0], MemoryLocation::HOST, selector, region);
     }
 
     template<typename CARGO, typename COLLECTION_INTERFACE>
@@ -709,7 +709,7 @@ private:
         char *cursor = target;
 
         for (ITERATOR i = start; i != end; ++i) {
-            selector.copyMemberOut(&*i, cursor, 1);
+            selector.copyMemberOut(&*i, MemoryLocation::HOST, cursor, MemoryLocation::HOST, 1);
             cursor += selector.sizeOfExternal();
         }
     }

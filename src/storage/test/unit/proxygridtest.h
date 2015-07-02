@@ -94,7 +94,7 @@ public:
           << Coord<3>( 0, 9, 9)
           << Coord<3>(19, 9, 9);
 
-        subGrid.loadMember(&vecA[0], s, r);
+        subGrid.loadMember(&vecA[0], MemoryLocation::HOST, s, r);
         TS_ASSERT_EQUALS(10.0, subGrid.get(Coord<3>( 0, 0, 0)).testValue);
         TS_ASSERT_EQUALS(10.1, subGrid.get(Coord<3>( 1, 0, 0)).testValue);
         TS_ASSERT_EQUALS(10.2, subGrid.get(Coord<3>( 2, 0, 0)).testValue);
@@ -118,7 +118,7 @@ public:
         TS_ASSERT_EQUALS(10.9, mainGrid.get(Coord<3>(19, 9, 9)).testValue);
 
         std::vector<double> vecB(10);
-        subGrid.saveMember(&vecB[0], s, r);
+        subGrid.saveMember(&vecB[0], MemoryLocation::HOST, s, r);
         TS_ASSERT_EQUALS(vecA, vecB);
 }
 };

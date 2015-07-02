@@ -54,7 +54,14 @@ public:
         FilterBase<MyDumbSoACell> *filter = new DefaultArrayFilter<MyDumbSoACell, double, double, 3>();
         char MyDumbSoACell::* memberPointer = reinterpret_cast<char MyDumbSoACell::*>(&MyDumbSoACell::y);
 
-        filter->copyMemberOut(&hostCellVec[0], reinterpret_cast<char*>(&hostBuffer[0]), 40, memberPointer);
+        filter->copyMemberOut(
+            &hostCellVec[0],
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            40,
+            memberPointer);
+
         for (std::size_t i = 0; i < hostBuffer.size(); i += 3) {
             TS_ASSERT_EQUALS(i / 3 + 0.5, hostBuffer[i + 0]);
             TS_ASSERT_EQUALS(i / 3 + 0.6, hostBuffer[i + 1]);
@@ -67,7 +74,14 @@ public:
             hostBuffer[i + 2] = i * 2 + 1002.0;
         }
 
-        filter->copyMemberIn(reinterpret_cast<char*>(&hostBuffer[0]), &hostCellVec[0], 40, memberPointer);
+        filter->copyMemberIn(
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            &hostCellVec[0],
+            MemoryLocation::HOST,
+            40,
+            memberPointer);
+
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             TS_ASSERT_EQUALS(i * 6 + 1000.0, hostCellVec[i].y[0]);
             TS_ASSERT_EQUALS(i * 6 + 1001.0, hostCellVec[i].y[1]);
@@ -88,8 +102,12 @@ public:
 
         filter->copyStreakOut(
             reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
             reinterpret_cast<char*>(&hostBuffer[0]),
-            40, 40);
+            MemoryLocation::HOST,
+            40,
+            40);
+
         for (std::size_t i = 0; i < 40; i += 3) {
             TS_ASSERT_EQUALS(i / 3 +  0.7, hostBuffer[i + 0]);
             TS_ASSERT_EQUALS(i / 3 + 40.7, hostBuffer[i + 1]);
@@ -104,8 +122,12 @@ public:
 
         filter->copyStreakIn(
             reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
             reinterpret_cast<char*>(&hostMemberVec[0]),
-            40, 40);
+            MemoryLocation::HOST,
+            40,
+            40);
+
         for (std::size_t i = 0; i < 40; ++i) {
             TS_ASSERT_EQUALS(i + 0.1, hostMemberVec[i +  0]);
             TS_ASSERT_EQUALS(i + 0.2, hostMemberVec[i + 40]);

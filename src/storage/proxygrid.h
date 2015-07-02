@@ -54,14 +54,22 @@ public:
         return viewBox;
     }
 
-    void saveMemberImplementation(char *s, const Selector<CELL>& selector, const Region<DIM>& region) const
+    void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
     {
-        delegate->saveMemberImplementation(s, selector, region);
+        delegate->saveMemberImplementation(target, targetLocation, selector, region);
     }
 
-    void loadMemberImplementation(const char *s, const Selector<CELL>& selector, const Region<DIM>& region)
+    void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region)
     {
-        delegate->loadMemberImplementation(s, selector, region);
+        delegate->loadMemberImplementation(source, sourceLocation, selector, region);
     }
 
 private:

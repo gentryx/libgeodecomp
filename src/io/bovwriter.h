@@ -160,7 +160,7 @@ private:
 
             Region<DIM> tempRegion;
             tempRegion << *i;
-            grid.saveMemberUnchecked(&buffer[0], selector, tempRegion);
+            grid.saveMemberUnchecked(&buffer[0], MemoryLocation::HOST, selector, tempRegion);
 
             MPI_File_write(file, &buffer[0], length, datatype, MPI_STATUS_IGNORE);
         }

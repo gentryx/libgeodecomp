@@ -194,19 +194,35 @@ public:
 
 protected:
     void saveMemberImplementation(
-        char *target, const Selector<CELL_TYPE>& selector, const Region<DIM>& region) const
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL_TYPE>& selector,
+        const Region<DIM>& region) const
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], target, i->length());
+            selector.copyMemberOut(
+                &(*this)[i->origin],
+                MemoryLocation::HOST,
+                target,
+                targetLocation,
+                i->length());
             target += selector.sizeOfExternal() * i->length();
         }
     }
 
     void loadMemberImplementation(
-        const char *source, const Selector<CELL_TYPE>& selector, const Region<DIM>& region)
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL_TYPE>& selector,
+        const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberIn(source, &(*this)[i->origin], i->length());
+            selector.copyMemberIn(
+                source,
+                sourceLocation,
+                &(*this)[i->origin],
+                MemoryLocation::HOST,
+                i->length());
             source += selector.sizeOfExternal() * i->length();
         }
     }

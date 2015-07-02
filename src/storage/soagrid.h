@@ -156,11 +156,13 @@ class SaveMember
 public:
     SaveMember(
         char *target,
+        MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         target(target),
+        targetLocation(targetLocation),
         selector(selector),
         region(region),
         origin(origin),
@@ -175,13 +177,20 @@ public:
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakOut(data, currentTarget, i->length(), DIM_X * DIM_Y * DIM_Z);
+            selector.copyStreakOut(
+                data,
+                MemoryLocation::HOST,
+                currentTarget,
+                targetLocation,
+                i->length(),
+                DIM_X * DIM_Y * DIM_Z);
             currentTarget += selector.sizeOfExternal() * i->length();
         }
     }
 
 private:
     char *target;
+    MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
     const Coord<DIM>& origin;
@@ -198,11 +207,13 @@ class LoadMember
 public:
     LoadMember(
         const char *source,
+        MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region,
         const Coord<DIM>& origin,
         const Coord<3>& edgeRadii) :
         source(source),
+        sourceLocation(sourceLocation),
         selector(selector),
         region(region),
         origin(origin),
@@ -218,7 +229,13 @@ public:
             accessor.index = GenIndex<DIM_X, DIM_Y, DIM_Z>()(i->origin - origin, edgeRadii);
 
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakIn(currentSource, currentTarget, i->length(), DIM_X * DIM_Y * DIM_Z);
+            selector.copyStreakIn(
+                currentSource,
+                sourceLocation,
+                currentTarget,
+                MemoryLocation::HOST,
+                i->length(),
+                DIM_X * DIM_Y * DIM_Z);
 
             currentSource += selector.sizeOfExternal() * i->length();
         }
@@ -226,6 +243,7 @@ public:
 
 private:
     const char *source;
+    MemoryLocation::Location sourceLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
     const Coord<DIM>& origin;
@@ -411,19 +429,25 @@ public:
 
 protected:
     void saveMemberImplementation(
-        char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
     {
         delegate.callback(
             SoAGridHelpers::SaveMember<CELL, DIM>(
-                target, selector, region, box.origin, edgeRadii));
+                target, targetLocation, selector, region, box.origin, edgeRadii));
     }
 
     void loadMemberImplementation(
-        const char *source, const Selector<CELL>& selector, const Region<DIM>& region)
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region)
     {
         delegate.callback(
             SoAGridHelpers::LoadMember<CELL, DIM>(
-                source, selector, region, box.origin, edgeRadii));
+                source, sourceLocation, selector, region, box.origin, edgeRadii));
     }
 
 private:

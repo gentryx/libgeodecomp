@@ -2,6 +2,8 @@
 #define LIBGEODECOMP_STORAGE_FILTERBASE_H
 
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/storage/memorylocation.h>
+#include <libgeodecomp/storage/memorylocation.h>
 
 #ifdef LIBGEODECOMP_WITH_MPI
 #include <libgeodecomp/communication/typemaps.h>
@@ -52,12 +54,38 @@ public:
      * "stride", followed by all values for "foo[1]" and finally
      * "foo[2]".
      */
-    virtual void copyStreakIn( const char *source, char *target, const std::size_t num, const std::size_t stride) = 0;
-    virtual void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride) = 0;
+    virtual void copyStreakIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) = 0;
+
+    virtual void copyStreakOut(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) = 0;
+
     virtual void copyMemberIn(
-        const char *source, CELL *target, std::size_t num, char CELL:: *memberPointer) = 0;
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        char CELL:: *memberPointer) = 0;
+
     virtual void copyMemberOut(
-        const CELL *source, char *target, std::size_t num, char CELL:: *memberPointer) = 0;
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        char CELL:: *memberPointer) = 0;
+
     virtual bool checkExternalTypeID(const std::type_info& otherID) const = 0;
 };
 

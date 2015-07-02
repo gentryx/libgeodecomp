@@ -136,7 +136,7 @@ private:
 
             Region<DIM> tempRegion;
             tempRegion << s;
-            grid.saveMemberUnchecked(&buffer[0], selector, tempRegion);
+            grid.saveMemberUnchecked(&buffer[0], MemoryLocation::HOST, selector, tempRegion);
 
             file.write(
                 &buffer[0],
