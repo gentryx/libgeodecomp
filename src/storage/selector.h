@@ -4,6 +4,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <libgeodecomp/storage/defaultcudafilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libflatarray/flat_array.hpp>
@@ -168,6 +169,7 @@ public:
         memberName("memberName not initialized")
     {}
 
+    // fixme: needs test with cuda device memory
     template<typename MEMBER>
     Selector(
         MEMBER CELL:: *memberPointer,
@@ -179,7 +181,11 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
+#ifdef __CUDACC__
+        filter(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>)
+#else
         filter(new DefaultFilter<CELL, MEMBER, MEMBER>)
+#endif
     {}
 
     template<typename MEMBER, int ARITY>
