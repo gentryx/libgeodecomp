@@ -13,7 +13,6 @@ class ProxyGridTest : public CxxTest::TestSuite
 public:
     void testBasic()
     {
-        std::cout << "============================================================================\n";
         DisplacedGrid<int> mainGrid(CoordBox<2>(Coord<2>(-1, -2), Coord<2>(22, 14)));
         ProxyGrid<int, 2> subGrid(&mainGrid, CoordBox<2>(Coord<2>(0, 0), Coord<2>(20, 10)));
 
