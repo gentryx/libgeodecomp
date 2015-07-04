@@ -4,10 +4,6 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/filter.h>
 
-#ifdef LIBGEODECOMP_WITH_CUDA
-#include <cuda_runtime.h>
-#endif
-
 namespace LibGeoDecomp {
 
 /**
@@ -28,6 +24,8 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         const EXTERNAL *end = source + num;
         std::copy(source, end, target);
     }
@@ -40,6 +38,8 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         const MEMBER *end = source + num;
         std::copy(source, end, target);
     }
@@ -52,18 +52,7 @@ public:
         std::size_t num,
         MEMBER CELL:: *memberPointer)
     {
-// #if defined LIBGEODECOMP_WITH_CUDA  && defined __CUDACC__
-//         cudaPointerAttributes attributes;
-//         cudaPointerGetAttributes(&attributes, target);
-
-//         // if (attributes.memoryType == cudaMemoryTypeDevice) {
-//         //     std::cout << "would now copy to device...\n";
-//         //     return;
-//         // } else {
-//         //     std::cout << "ok1\n";
-//         // }
-//         return;
-// #endif
+        checkMemoryLocations(sourceLocation, targetLocation);
 
         for (std::size_t i = 0; i < num; ++i) {
             target[i].*memberPointer = source[i];
@@ -78,35 +67,26 @@ public:
         std::size_t num,
         MEMBER CELL:: *memberPointer)
     {
-        if ((sourceLocation == MemoryLocation::HOST) &&
-            (targetLocation == MemoryLocation::HOST)) {
-            for (std::size_t i = 0; i < num; ++i) {
-                target[i] = source[i].*memberPointer;
-            }
-            return;
-        }
+        checkMemoryLocations(sourceLocation, targetLocation);
 
-#ifdef LIBGEODECOMP_WITH_CUDA
-        if ((sourceLocation == MemoryLocation::HOST) &&
+        for (std::size_t i = 0; i < num; ++i) {
+            target[i] = source[i].*memberPointer;
+        }
+    }
+
+    void checkMemoryLocations(
+        MemoryLocation::Location sourceLocation,
+        MemoryLocation::Location targetLocation)
+    {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) ||
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
-            throw std::logic_error("not implemented yet (HOST->CUDA_DEVICE)");
+            throw std::logic_error("DefaultFilter can't access CUDA device memory");
         }
 
-        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
-            (targetLocation == MemoryLocation::HOST)) {
-            throw std::logic_error("not implemented yet (CUDA_DEVICE->HOST)");
+        if ((sourceLocation != MemoryLocation::HOST) ||
+            (targetLocation != MemoryLocation::HOST)) {
+            throw std::invalid_argument("unknown combination of source and target memory locations");
         }
-
-        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
-            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
-            throw std::logic_error("not implemented yet (CUDA_DEVICE->CUDA_DEVICE)");
-        }
-
-        throw std::invalid_argument("unknown combination of source and target memory locations");
-#else
-        throw std::invalid_argument("LibGeoDecomp was configured without support for CUDA, can't access device memory.");
-#endif
-
 
     }
 };
