@@ -221,20 +221,6 @@ public:
             return;
         }
 
-        // fixme: reoder this so that LSB changes first
-        if ((sourceLocation == MemoryLocation::HOST) &&
-            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
-            std::size_t byteSize = num * sizeof(MEMBER);
-            MEMBER *deviceBuffer;
-            cudaMalloc(&deviceBuffer, byteSize);
-            cudaMemcpy(deviceBuffer, source, byteSize, cudaMemcpyHostToDevice);
-
-            DefaultCUDAFilterHelpers::runDistributeMemberKernel(deviceBuffer, target, memberPointer, num);
-            cudaFree(deviceBuffer);
-            return;
-
-        }
-
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::HOST)) {
             std::vector<EXTERNAL> hostBuffer(num);
@@ -248,6 +234,19 @@ public:
                 num,
                 memberPointer);
             return;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            MEMBER *deviceBuffer;
+            cudaMalloc(&deviceBuffer, byteSize);
+            cudaMemcpy(deviceBuffer, source, byteSize, cudaMemcpyHostToDevice);
+
+            DefaultCUDAFilterHelpers::runDistributeMemberKernel(deviceBuffer, target, memberPointer, num);
+            cudaFree(deviceBuffer);
+            return;
+
         }
 
         if ((sourceLocation == MemoryLocation::HOST) &&
