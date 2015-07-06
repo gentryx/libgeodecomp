@@ -19,7 +19,7 @@ class DefaultCUDAFilterTest : public CxxTest::TestSuite
 {
 public:
 
-    void testCudaAoSWithGridOnDeviceBuffersOnHost()
+    void testCudaAoSWithGridOnDeviceAndBuffersOnHost()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Device)
@@ -72,7 +72,7 @@ public:
 #endif
     }
 
-    void testCudaAoSWithGridOnDeviceBuffersOnDevice()
+    void testCudaAoSWithGridOnDeviceAndBuffersOnDevice()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Device to Device)
@@ -129,7 +129,7 @@ public:
 #endif
     }
 
-    void testCudaAoSWithGridOnHostBuffersOnHost()
+    void testCudaAoSWithGridOnHostAndBuffersOnHost()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Host)
@@ -178,7 +178,7 @@ public:
 #endif
     }
 
-    void testCudaAoSWithGridOnHostBuffersOnDevice()
+    void testCudaAoSWithGridOnHostAndBuffersOnDevice()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
         // TEST 1: Copy Out (Host to Device)
@@ -227,7 +227,30 @@ public:
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             TS_ASSERT_EQUALS(4444 + i, hostCellVec[i].testValue);
         }
+#endif
+    }
 
+    void testCudaSoAWithGridOnDeviceAndBuffersOnDevice()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+#endif
+    }
+
+    void testCudaSoAWithGridOnDeviceAndBuffersOnHost()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+#endif
+    }
+
+    void testCudaSoAWithGridOnHostAndBuffersOnDevice()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
+#endif
+    }
+
+    void testCudaSoAWithGridOnHostAndBuffersOnHost()
+    {
+#ifdef LIBGEODECOMP_WITH_CUDA
 #endif
     }
 
