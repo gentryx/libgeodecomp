@@ -46,6 +46,20 @@ void aggregateMember(
     }
 }
 
+template<typename CELL, typename EXTERNAL, typename MEMBER>
+__global__
+void distributeMember(
+    const EXTERNAL *source,
+    CELL *target,
+    MemberPointerWrapper<MEMBER CELL::*> memberPointerWrapper,
+    int num)
+{
+    int index = blockDim.x * blockIdx.x + threadIdx.x;
+    if (index < num) {
+        target[index].*memberPointerWrapper.value = source[index];
+    }
+}
+
 
 template<typename CELL, typename EXTERNAL, typename MEMBER>
 void runAggregateMemberKernel(
@@ -69,6 +83,32 @@ void runAggregateMemberKernel(
         num);
 
     cudaMemcpy(target, deviceBuffer, byteSize, cudaMemcpyDeviceToHost);
+    cudaFree(deviceBuffer);
+    CUDAUtil::checkForError();
+}
+
+template<typename EXTERNAL, typename CELL, typename MEMBER>
+void runDistributeMemberKernel(
+    const EXTERNAL *source,
+    CELL *target,
+    MEMBER CELL:: *memberPointer,
+    std::size_t num)
+{
+    dim3 gridDim(num / 32 + 1, 1, 1);
+    dim3 blockDim(32, 1, 1);
+    CUDAUtil::checkForError();
+
+    std::size_t byteSize = num * sizeof(MEMBER);
+    MEMBER *deviceBuffer;
+    cudaMalloc(&deviceBuffer, byteSize);
+    cudaMemcpy(deviceBuffer, source, byteSize, cudaMemcpyHostToDevice);
+
+    distributeMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
+        deviceBuffer,
+        target,
+        MemberPointerWrapper<MEMBER CELL:: *>(memberPointer),
+        num);
+
     cudaFree(deviceBuffer);
     CUDAUtil::checkForError();
 }
@@ -114,7 +154,7 @@ public:
         std::size_t num,
         MEMBER CELL:: *memberPointer)
     {
-        std::cout << "  OOOOPPPPSSSIIIIDOOOPPPSSSYYY3\n";
+        DefaultCUDAFilterHelpers::runDistributeMemberKernel(source, target, memberPointer, num);
     }
 
     void copyMemberOutImpl(
