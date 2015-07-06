@@ -125,7 +125,8 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
-        std::cout << "  OOOOPPPPSSSIIIIDOOOPPPSSSYYY1\n";
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAFilter::copyStreakInImpl()");
     }
 
     void copyStreakOutImpl(
@@ -136,7 +137,8 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
-        std::cout << "  OOOOPPPPSSSIIIIDOOOPPPSSSYYY2\n";
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAFilter::copyStreakOutImpl()");
     }
 
     void copyMemberInImpl(
@@ -153,6 +155,7 @@ public:
             return;
         }
 
+        // fixme: reoder this so that LSB changes first
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
             std::size_t byteSize = num * sizeof(MEMBER);
@@ -193,8 +196,8 @@ public:
             return;
         }
 
-
-        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation in DefaultCUDAFilter::copyMemberInImpl()");
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAFilter::copyMemberInImpl()");
     }
 
     void copyMemberOutImpl(
@@ -250,7 +253,8 @@ public:
             return;
         }
 
-        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation in DefaultCUDAFilter::copyMemberOutImpl()");
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAFilter::copyMemberOutImpl()");
     }
 };
 
