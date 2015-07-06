@@ -233,24 +233,188 @@ public:
     void testCudaSoAWithGridOnDeviceAndBuffersOnDevice()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
+        // TEST 1: Copy Out (Device to Device)
+        CUDAArray<double> deviceMemberVec(66, -1);
+        std::vector<double> hostMemberVec(66, -2);
+        CUDAArray<double> deviceBuffer(66, -3);
+        std::vector<double> hostBuffer(66, -4);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            hostMemberVec[i] = i + 0.661;
+        }
+        deviceMemberVec.load(&hostMemberVec[0]);
+
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(deviceMemberVec.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            66,
+            66);
+        deviceBuffer.save(&hostBuffer[0]);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            TS_ASSERT_EQUALS(i + 0.661, hostBuffer[i]);
+        }
+
+        // TEST 2: Copy In (Device to Device)
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            hostBuffer[i] = 0.662 + i;
+        }
+        deviceBuffer.load(&hostBuffer[0]);
+
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(deviceMemberVec.data()),
+            MemoryLocation::CUDA_DEVICE,
+            66,
+            66);
+
+        deviceMemberVec.save(&hostMemberVec[0]);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            TS_ASSERT_EQUALS(0.662 + i, hostMemberVec[i]);
+        }
 #endif
     }
 
     void testCudaSoAWithGridOnDeviceAndBuffersOnHost()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
+        // TEST 1: Copy Out (Device to Host)
+        CUDAArray<double> deviceMemberVec(77, -1);
+        std::vector<double> hostMemberVec(77, -2);
+        std::vector<double> hostBuffer(77, -4);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            hostMemberVec[i] = i + 0.771;
+        }
+        deviceMemberVec.load(&hostMemberVec[0]);
+
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(deviceMemberVec.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            77,
+            77);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            TS_ASSERT_EQUALS(i + 0.771, hostBuffer[i]);
+        }
+
+        // TEST 2: Copy In (Host to Device)
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            hostBuffer[i] = 0.772 + i;
+        }
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(deviceMemberVec.data()),
+            MemoryLocation::CUDA_DEVICE,
+            77,
+            77);
+
+        deviceMemberVec.save(&hostMemberVec[0]);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            TS_ASSERT_EQUALS(0.772 + i, hostMemberVec[i]);
+        }
 #endif
     }
 
     void testCudaSoAWithGridOnHostAndBuffersOnDevice()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
+        // TEST 1: Copy Out (Host to Device)
+        std::vector<double> hostMemberVec(99, -2);
+        CUDAArray<double> deviceBuffer(99, -3);
+        std::vector<double> hostBuffer(99, -4);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            hostMemberVec[i] = i + 0.991;
+        }
+
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            99,
+            99);
+        deviceBuffer.save(&hostBuffer[0]);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            TS_ASSERT_EQUALS(i + 0.991, hostBuffer[i]);
+        }
+
+        // TEST 2: Copy In (Device to Host)
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            hostBuffer[i] = 0.992 + i;
+        }
+        deviceBuffer.load(&hostBuffer[0]);
+
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            99,
+            99);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            TS_ASSERT_EQUALS(0.992 + i, hostMemberVec[i]);
+        }
 #endif
     }
 
     void testCudaSoAWithGridOnHostAndBuffersOnHost()
     {
 #ifdef LIBGEODECOMP_WITH_CUDA
+        // TEST 1: Copy Out (Host to Host)
+        std::vector<double> hostMemberVec(55, -1);
+        std::vector<double> hostBuffer(55, -2);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            hostMemberVec[i] = i + 0.551;
+        }
+
+        FilterBase<TestCell<2> > *filter = new DefaultCUDAFilter<TestCell<2>, double, double>();
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            55,
+            55);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            TS_ASSERT_EQUALS(i + 0.551, hostBuffer[i]);
+        }
+
+        // TEST 2: Copy In (Host to Host)
+        for (std::size_t i = 0; i < hostBuffer.size(); ++i) {
+            hostBuffer[i] = 0.552 + i;
+        }
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            55,
+            55);
+
+        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
+            TS_ASSERT_EQUALS(0.552 + i, hostMemberVec[i]);
+        }
 #endif
     }
 

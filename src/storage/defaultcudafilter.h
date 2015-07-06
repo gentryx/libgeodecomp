@@ -125,6 +125,39 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            cudaMemcpy(target, source, byteSize, cudaMemcpyDeviceToDevice);
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            cudaMemcpy(target, source, byteSize, cudaMemcpyDeviceToHost);
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            cudaMemcpy(target, source, byteSize, cudaMemcpyHostToDevice);
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            DefaultFilter<CELL, MEMBER, EXTERNAL>().copyStreakInImpl(
+                source,
+                sourceLocation,
+                target,
+                targetLocation,
+                num,
+                stride);
+            return;
+        }
+
         throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
                                " in DefaultCUDAFilter::copyStreakInImpl()");
     }
@@ -137,6 +170,39 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            cudaMemcpy(target, source, byteSize, cudaMemcpyDeviceToDevice);
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            cudaMemcpy(target, source, byteSize, cudaMemcpyDeviceToHost);
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            std::size_t byteSize = num * sizeof(MEMBER);
+            cudaMemcpy(target, source, byteSize, cudaMemcpyHostToDevice);
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            DefaultFilter<CELL, MEMBER, EXTERNAL>().copyStreakInImpl(
+                source,
+                sourceLocation,
+                target,
+                targetLocation,
+                num,
+                stride);
+            return;
+        }
+
         throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
                                " in DefaultCUDAFilter::copyStreakOutImpl()");
     }
