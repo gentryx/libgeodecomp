@@ -2,15 +2,17 @@
 #ifndef LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 #define LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 
-// This is a Implementation of the siplex algorithm, dicribet in "Evolution and Optimum
-// Seeking" written by Hans-Paul Schwefel.
-
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <utility>
 
 namespace LibGeoDecomp {
 
+
+/**
+ * This is a Implementation of the siplex algorithm, dicribet in
+ * "Evolution and Optimum Seeking" written by Hans-Paul Schwefel.
+ */
 class SimplexOptimizer : public Optimizer
 {
 public:

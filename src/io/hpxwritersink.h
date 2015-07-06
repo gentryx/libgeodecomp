@@ -14,9 +14,16 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration
+ */
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
+/**
+ * This class leverages HPX to inteface a (serial) Writer with the
+ * (parallel) HpxSimulator.
+ */
 template<typename CELL_TYPE>
 class HpxWriterSink
 {

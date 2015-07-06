@@ -20,6 +20,10 @@ std::string operator+(const std::string& a, const std::string& b)
 
 namespace LibGeoDecomp {
 
+/**
+ * Common string operations which are mysterically missing in C++'s
+ * standard library.
+ */
 class StringOps
 {
 public:

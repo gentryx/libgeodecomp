@@ -5,6 +5,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Simple wrapper to generate (somewhat) safe filenames for temporary files
+ */
 class TempFile
 {
 public:

@@ -17,6 +17,10 @@ namespace LibGeoDecomp {
 
 namespace UnstructuredUpdateFunctorHelpers {
 
+/**
+ * Functor to be used from with LibFlatArray from within
+ * UnstructuredUpdateFunctor. Hides much of the boilerplate code.
+ */
 template<typename CELL>
 class UnstructuredGridSoAUpdateHelper
 {

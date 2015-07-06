@@ -10,6 +10,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration
+ */
 template<typename CELL, int DIM>
 class ProxyGrid;
 

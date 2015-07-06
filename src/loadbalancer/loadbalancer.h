@@ -5,6 +5,11 @@
 
 namespace LibGeoDecomp {
 
+
+/**
+ * The purpose of a load-balancer is to even out the computational
+ * load on all MPI processes/HPX localities.
+ */
 class LoadBalancer
 {
 public:

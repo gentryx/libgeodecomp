@@ -10,6 +10,9 @@ namespace LibGeoDecomp {
 
 namespace FixedNeighborhoodUpdateFunctorHelpers {
 
+/**
+ * Recursively bind template parameters for the different boundary conditions.
+ */
 template<
     typename CELL,
     int CUR_DIM,
@@ -80,6 +83,9 @@ public:
     }
 };
 
+/**
+ * See above
+ */
 template<
     typename CELL,
     bool HIGH,

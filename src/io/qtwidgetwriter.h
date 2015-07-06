@@ -26,10 +26,17 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration
+ */
 class QtWidgetWriterTest;
 
 namespace QtWidgetWriterHelpers {
 
+/**
+ * Generic interface between Qt and LibGeoDecomp -- we need this class
+ * as a Widget can't be a template class.
+ */
 class Widget : public QWidget
 {
 public:
@@ -74,6 +81,9 @@ private:
     QImage bufImage;
 };
 
+/**
+ * Wraps a QPainter and exposes the painter interface expected by a Plotter.
+ */
 class PainterWrapper
 {
 public:

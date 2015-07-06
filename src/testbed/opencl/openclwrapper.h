@@ -26,6 +26,9 @@ std::ostream & operator<<(std::ostream &, cl::Platform);
 
 std::ostream & operator<<(std::ostream &, cl::Device);
 
+/**
+ * C++ interface for C API of OpenCL
+ */
 template<typename DATA_TYPE>
 class OpenCLWrapper
 {

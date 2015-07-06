@@ -5,6 +5,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Small utility class which keeps track of the averagy frames per
+ * second (FPS). Useful for interactive Writers, e.g. QtWidgetWriter.
+ */
 class FPSCounter
 {
 public:

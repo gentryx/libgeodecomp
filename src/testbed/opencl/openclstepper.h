@@ -9,6 +9,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Dead prototype
+ */
 template<typename CELL_TYPE, typename DATA_TYPE>
 class OpenCLCellInterface {
 public:
@@ -27,6 +30,9 @@ public:
 
 namespace HiParSimulator {
 
+/**
+ * Dead prototype
+ */
 template<typename CELL_TYPE, typename DATA_TYPE>
 class OpenCLStepper : public Stepper<CELL_TYPE>
 {

@@ -26,6 +26,10 @@ namespace APITraitsHelpers {
 
 #ifdef LIBGEODECOMP_WITH_MPI
 
+/**
+ * Utility class which provides searches a provider class for a given
+ * MPI datatype.
+ */
 template<typename PROVIDER, typename CELL>
 class DefaultMPIDataTypeLookup
 {

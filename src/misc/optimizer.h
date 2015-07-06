@@ -7,6 +7,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * An Optimizer's purpose is to drive generic parameters so that the
+ * fitness function will be maximized.
+ */
 class Optimizer
 {
 public:

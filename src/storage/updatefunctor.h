@@ -14,6 +14,11 @@ namespace LibGeoDecomp {
 
 namespace UpdateFunctorHelpers {
 
+/**
+ * Switches between different implementations of the UpdateFunctor,
+ * depending on the properties of the model/grid. Not to be confused
+ * with src/storage/selector.h.
+ */
 template<typename CELL>
 class Selector
 {
@@ -83,7 +88,12 @@ public:
 
         gridOld.callback(
             gridNew,
-            SoARegionUpdateHelper(&region, &realSourceOffset, &realTargetOffset, &gridNewDimensions, nanoStep));
+            SoARegionUpdateHelper(
+                &region,
+                &realSourceOffset,
+                &realTargetOffset,
+                &gridNewDimensions,
+                nanoStep));
     }
 
     template<typename GRID1, typename GRID2, typename ANY_API, typename ANY_TOPOLOGY>

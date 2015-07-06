@@ -14,12 +14,17 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration
+ */
 template<typename CELL_TYPE>
 class DistributedSimulator;
 
+/**
+ * HPX component to complement HpxWriterSink
+ */
 template<typename CELL_TYPE>
-class HpxWriterSinkServer :
-        public hpx::components::managed_component_base<HpxWriterSinkServer<CELL_TYPE> >
+class HpxWriterSinkServer : public hpx::components::managed_component_base<HpxWriterSinkServer<CELL_TYPE> >
 {
 private:
     class RegionInfo;

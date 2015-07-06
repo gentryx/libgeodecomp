@@ -5,6 +5,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Our own rudimentary pixel implementation, mostly used to plot 2D
+ * simulation data.
+ */
 class Color
 {
  public:

@@ -7,6 +7,9 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
+/**
+ * Generic test functions to exercise all Optimizer implementations
+ */
 class OptimizerTestFunctions
 {
 public:

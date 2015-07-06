@@ -3,6 +3,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Enumeration which allows us to distinguish to which address space a
+ * given pointer belongs.
+ */
 class MemoryLocation
 {
 public:
