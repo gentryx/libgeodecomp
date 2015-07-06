@@ -34,7 +34,20 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
-        // fixme
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyStreakInImpl(
+                source,
+                sourceLocation,
+                target,
+                targetLocation,
+                num,
+                stride);
+            return;
+        }
+
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAArrayFilter::copyStreakInImpl()");
     }
 
     void copyStreakOutImpl(
@@ -45,7 +58,20 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
-        // fixme
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyStreakOutImpl(
+                source,
+                sourceLocation,
+                target,
+                targetLocation,
+                num,
+                stride);
+            return;
+        }
+
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAArrayFilter::copyStreakOutImpl()");
     }
 
     void copyMemberInImpl(
@@ -54,20 +80,46 @@ public:
         CELL *target,
         MemoryLocation::Location targetLocation,
         std::size_t num,
-        MEMBER CELL:: *memberPointer)
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
-        // fixme
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyMemberInImpl(
+                source,
+                sourceLocation,
+                target,
+                targetLocation,
+                num,
+                memberPointer);
+            return;
+        }
+
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAArrayFilter::copyMemberInImpl()");
     }
 
-    virtual void copyMemberInImpl(
-        const EXTERNAL *source,
+    virtual void copyMemberOutImpl(
+        const CELL *source,
         MemoryLocation::Location sourceLocation,
-        CELL *target,
+        EXTERNAL *target,
         MemoryLocation::Location targetLocation,
         std::size_t num,
         MEMBER (CELL:: *memberPointer)[ARITY])
     {
-        // fixme
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyMemberOutImpl(
+                source,
+                sourceLocation,
+                target,
+                targetLocation,
+                num,
+                memberPointer);
+            return;
+        }
+
+        throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
+                               " in DefaultCUDAArrayFilter::copyMemberOutImpl()");
     }
 
 };
