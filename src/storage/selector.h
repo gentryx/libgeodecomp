@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
 #include <libgeodecomp/storage/defaultcudafilter.h>
+#include <libgeodecomp/storage/defaultcudaarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libflatarray/flat_array.hpp>
@@ -199,7 +200,11 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
+#ifdef __CUDACC__
+        filter(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
+#else
         filter(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
+#endif
     {}
 
     template<typename MEMBER>
