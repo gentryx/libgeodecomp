@@ -108,7 +108,7 @@ public:
             40,
             40);
 
-        for (std::size_t i = 0; i < 40; i += 3) {
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 3) {
             TS_ASSERT_EQUALS(i / 3 +  0.7, hostBuffer[i + 0]);
             TS_ASSERT_EQUALS(i / 3 + 40.7, hostBuffer[i + 1]);
             TS_ASSERT_EQUALS(i / 3 + 80.7, hostBuffer[i + 2]);
