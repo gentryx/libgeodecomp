@@ -49,23 +49,6 @@ public:
         }
     }
 
-    void copyMemberInImpl(
-        const EXTERNAL *source,
-        MemoryLocation::Location sourceLocation,
-        CELL *target,
-        MemoryLocation::Location targetLocation,
-        std::size_t num,
-        MEMBER CELL:: *memberPointer)
-    {
-        copyMemberInImpl(
-            source,
-            sourceLocation,
-            target,
-            targetLocation,
-            num,
-            reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
-    }
-
     virtual void copyMemberInImpl(
         const EXTERNAL *source,
         MemoryLocation::Location sourceLocation,
@@ -84,22 +67,6 @@ public:
         }
     }
 
-    void copyMemberOutImpl(
-        const CELL *source,
-        MemoryLocation::Location sourceLocation,
-        EXTERNAL *target,
-        MemoryLocation::Location targetLocation,
-        std::size_t num,
-        MEMBER CELL:: *memberPointer)
-    {
-        copyMemberOutImpl(
-            source,
-            sourceLocation,
-            target,
-            targetLocation,
-            num,
-            reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
-    }
 
     virtual void copyMemberOutImpl(
         const CELL *source,
