@@ -47,7 +47,7 @@ class DefaultCUDAArrayFilterTest : public CxxTest::TestSuite
 public:
     void testCudaAoSWithGridOnDeviceAndBuffersOnDevice()
     {
-        // TEST 1: Copy Out (Device to Host)
+        // TEST 1: Copy Out (Device to Device)
         CUDAArray<MyDumbestSoACell> deviceCellVec(222);
         std::vector<MyDumbestSoACell> hostCellVec(222);
 
@@ -81,7 +81,7 @@ public:
             }
         }
 
-        // TEST 2: Copy In (Device to Host)
+        // TEST 2: Copy In (Device to Device)
         for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
             for (std::size_t j = 0; j < 256; ++j) {
                 hostBuffer[i + j] = i * 1000 + j + 0.222;
@@ -165,7 +165,59 @@ public:
 
     void testCudaAoSWithGridOnHostAndBuffersOnDevice()
     {
-        // fixme
+        // TEST 1: Copy Out (Host to Device)
+        std::vector<MyDumbestSoACell> hostCellVec(444);
+
+        CUDAArray<double> deviceBuffer(444 * 256);
+        std::vector<double> hostBuffer(444 * 256);
+
+        for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostCellVec[i].y[j] = i + j + 0.441;
+            }
+        }
+
+        FilterBase<MyDumbestSoACell> *filter =
+            new DefaultCUDAArrayFilter<MyDumbestSoACell, double, double, 256>();
+        char MyDumbestSoACell::* memberPointer =
+            reinterpret_cast<char MyDumbestSoACell::*>(&MyDumbestSoACell::y);
+
+        filter->copyMemberOut(
+            &hostCellVec[0],
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            444,
+            memberPointer);
+        deviceBuffer.save(&hostBuffer[0]);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i / 256 + j + 0.441, hostBuffer[i + j]);
+            }
+        }
+
+        // TEST 2: Copy In (Device to Host)
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostBuffer[i + j] = i * 1000 + j + 0.442;
+            }
+        }
+        deviceBuffer.load(&hostBuffer[0]);
+
+        filter->copyMemberIn(
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            &hostCellVec[0],
+            MemoryLocation::HOST,
+            444,
+            memberPointer);
+
+        for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i * 1000 * 256 + j + 0.442, hostCellVec[i].y[j]);
+            }
+        }
     }
     void testCudaAoSWithGridOnHostAndBuffersOnHost()
     {
