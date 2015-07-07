@@ -719,6 +719,19 @@ public:
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 4000 + 40000 + 300000, cell.y[2]);
         }
     }
+
+
+    void testWithTestCell()
+    {
+        // this is important to ensure that there are no linker woes
+        // because of different instantiations of the selector type
+        // from NVCC and the host compiler, where earch gets a
+        // different filter (DefaultCUDAFilter vs. DefaultFilter).
+
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
+        selector.copyMemberIn(
+            0, MemoryLocation::HOST, 0, MemoryLocation::HOST, 0);
+    }
 };
 
 }

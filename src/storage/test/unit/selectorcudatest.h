@@ -139,6 +139,18 @@ public:
 #endif
     }
 
+    void testWithTestCell()
+    {
+        // this is important to ensure that there are no linker woes
+        // because of different instantiations of the selector type
+        // from NVCC and the host compiler, where earch gets a
+        // different filter (DefaultCUDAFilter vs. DefaultFilter).
+
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
+        selector.copyMemberIn(
+            0, MemoryLocation::CUDA_DEVICE, 0, MemoryLocation::CUDA_DEVICE, 0);
+    }
+
 };
 
 }
