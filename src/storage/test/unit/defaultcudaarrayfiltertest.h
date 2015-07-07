@@ -285,7 +285,56 @@ public:
     }
     void testCudaSoAWithGridOnHostAndBuffersOnHost()
     {
-        // fixme
+        // elements of a member array are split up according to a
+        // certain stride (in this case 5555). In an external buffer
+        // (hostBuffer) these array elements will be aggregated and
+        // stored directly one after another:
+
+        std::vector<double> hostMemberVec(256 * 5555);
+        std::vector<double> hostBuffer(256 * 5555, -1);
+
+        for (std::size_t i = 0; i < 5555; ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostMemberVec[i + j * 5555] = i * 1000 + j + 0.5551;
+            }
+        }
+
+        FilterBase<MyDumbestSoACell > *filter =
+            new DefaultArrayFilter<MyDumbestSoACell, double, double, 256>();
+
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            5555,
+            5555);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i / 256 * 1000 + j + 0.5551, hostBuffer[i + j]);
+            }
+        }
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostBuffer[i + j] = i / 256 * 1000 + j + 0.5552;
+            }
+        }
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(&hostBuffer[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            5555,
+            5555);
+
+        for (std::size_t i = 0; i < 5555; ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i * 1000 + j + 0.5552, hostMemberVec[i + j * 5555]);
+            }
+        }
     }
 };
 
