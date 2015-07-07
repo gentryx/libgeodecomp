@@ -39,7 +39,7 @@ void aggregateMember(
     const CELL *source,
     EXTERNAL *target,
     MemberPointerWrapper<MEMBER CELL::*> memberPointerWrapper,
-    int num)
+    const std::size_t num)
 {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     if (index < num) {
@@ -53,7 +53,7 @@ void distributeMember(
     const EXTERNAL *source,
     CELL *target,
     MemberPointerWrapper<MEMBER CELL::*> memberPointerWrapper,
-    int num)
+    const std::size_t num)
 {
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     if (index < num) {
@@ -67,11 +67,10 @@ void runAggregateMemberKernel(
     const CELL *source,
     EXTERNAL *target,
     MEMBER CELL:: *memberPointer,
-    std::size_t num)
+    const std::size_t num)
 {
     dim3 gridDim(num / 32 + 1, 1, 1);
     dim3 blockDim(32, 1, 1);
-    CUDAUtil::checkForError();
 
     aggregateMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
         source,
@@ -87,11 +86,10 @@ void runDistributeMemberKernel(
     const EXTERNAL *source,
     CELL *target,
     MEMBER CELL:: *memberPointer,
-    std::size_t num)
+    const std::size_t num)
 {
     dim3 gridDim(num / 32 + 1, 1, 1);
     dim3 blockDim(32, 1, 1);
-    CUDAUtil::checkForError();
 
     distributeMember<CELL, EXTERNAL, MEMBER><<<gridDim, blockDim>>>(
         source,
