@@ -219,6 +219,7 @@ public:
             }
         }
     }
+
     void testCudaAoSWithGridOnHostAndBuffersOnHost()
     {
         std::vector<MyDumbestSoACell> hostCellVec(111);
@@ -274,6 +275,7 @@ public:
     {
         // fixme
     }
+
     void testCudaSoAWithGridOnDeviceAndBuffersOnHost()
     {
         // fixme
@@ -283,6 +285,7 @@ public:
     {
         // fixme
     }
+
     void testCudaSoAWithGridOnHostAndBuffersOnHost()
     {
         // elements of a member array are split up according to a
@@ -290,6 +293,7 @@ public:
         // (hostBuffer) these array elements will be aggregated and
         // stored directly one after another:
 
+        // TEST 1: Copy Out (Host to Host)
         std::vector<double> hostMemberVec(256 * 5555);
         std::vector<double> hostBuffer(256 * 5555, -1);
 
@@ -300,7 +304,7 @@ public:
         }
 
         FilterBase<MyDumbestSoACell > *filter =
-            new DefaultArrayFilter<MyDumbestSoACell, double, double, 256>();
+            new DefaultCUDAArrayFilter<MyDumbestSoACell, double, double, 256>();
 
         filter->copyStreakOut(
             reinterpret_cast<char*>(&hostMemberVec[0]),
@@ -316,6 +320,7 @@ public:
             }
         }
 
+        // TEST 2: Copy In (Host to Host)
         for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
             for (std::size_t j = 0; j < 256; ++j) {
                 hostBuffer[i + j] = i / 256 * 1000 + j + 0.5552;
