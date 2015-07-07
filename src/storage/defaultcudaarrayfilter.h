@@ -13,6 +13,74 @@
 
 namespace LibGeoDecomp {
 
+namespace DefaultCUDAArrayFilterHelpers {
+
+template<typename MEMBER, typename EXTERNAL, int ARITY>
+__global__
+void aggregateMemberArray(
+    const MEMBER *source,
+    EXTERNAL *target,
+    const std::size_t num,
+    const std::size_t stride)
+{
+    for (int i = threadIdx.x; i < ARITY; i += blockDim.x) {
+        target[blockIdx.x * ARITY + i] = source[i * stride + blockIdx.x];
+    }
+}
+
+template<typename MEMBER, typename EXTERNAL, int ARITY>
+__global__
+void distributeMemberArray(
+    const EXTERNAL *source,
+    MEMBER *target,
+    const std::size_t num,
+    const std::size_t stride)
+{
+    for (int i = threadIdx.x; i < num; i += blockDim.x) {
+        target[blockIdx.x * num + i] = source[i * ARITY + blockIdx.x];
+    }
+}
+
+template<typename EXTERNAL, typename MEMBER, int ARITY>
+void runAggregateMemberArrayKernel(
+    const MEMBER *source,
+    EXTERNAL *target,
+    const std::size_t num,
+    const std::size_t stride)
+{
+    dim3 gridDim(num, 1, 1);
+    dim3 blockDim(32, 1, 1);
+
+    aggregateMemberArray<MEMBER, EXTERNAL, ARITY><<<gridDim, blockDim>>>(
+        source,
+        target,
+        num,
+        stride);
+
+    CUDAUtil::checkForError();
+}
+
+template<typename EXTERNAL, typename MEMBER, int ARITY>
+void runDistributeMemberArrayKernel(
+    const EXTERNAL *source,
+    MEMBER *target,
+    const std::size_t num,
+    const std::size_t stride)
+{
+    dim3 gridDim(ARITY, 1, 1);
+    dim3 blockDim(32, 1, 1);
+
+    distributeMemberArray<MEMBER, EXTERNAL, ARITY><<<gridDim, blockDim>>>(
+        source,
+        target,
+        num,
+        stride);
+
+    CUDAUtil::checkForError();
+}
+
+}
+
 /**
  * CUDA-aware re-implementation of DefaultArrayFilter. Originally this
  * functionality was to be merged into the DefaultFilter. However, the
@@ -34,6 +102,16 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            DefaultCUDAArrayFilterHelpers::runDistributeMemberArrayKernel<MEMBER, EXTERNAL, ARITY>(
+                source,
+                target,
+                num,
+                stride);
+            return;
+        }
+
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::HOST)) {
             DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyStreakInImpl(
@@ -58,6 +136,16 @@ public:
         const std::size_t num,
         const std::size_t stride)
     {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            DefaultCUDAArrayFilterHelpers::runAggregateMemberArrayKernel<MEMBER, EXTERNAL, ARITY>(
+                source,
+                target,
+                num,
+                stride);
+            return;
+        }
+
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::HOST)) {
             DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyStreakOutImpl(

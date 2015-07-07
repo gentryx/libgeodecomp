@@ -273,7 +273,68 @@ public:
 
     void testCudaSoAWithGridOnDeviceAndBuffersOnDevice()
     {
-        // fixme
+        // elements of a member array are split up according to a
+        // certain stride (in this case 6666). In an external buffer
+        // (hostBuffer) these array elements will be aggregated and
+        // stored directly one after another:
+
+        // TEST 1: Copy Out (Device to Device)
+        std::vector<double> hostMemberVec(256 * 6666, -1);
+        CUDAArray<double> deviceMemberVec(&hostMemberVec[0], 256 * 6666);
+
+        std::vector<double> hostBuffer(256 * 6666, -2);
+        CUDAArray<double> deviceBuffer(&hostBuffer[0], 256 * 6666);
+
+        for (std::size_t i = 0; i < 6666; ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostMemberVec[i + j * 6666] = i * 1000 + j + 0.6661;
+            }
+        }
+
+        deviceMemberVec.load(&hostMemberVec[0]);
+
+        FilterBase<MyDumbestSoACell > *filter =
+            new DefaultCUDAArrayFilter<MyDumbestSoACell, double, double, 256>();
+
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(deviceMemberVec.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            6666,
+            6666);
+
+        deviceBuffer.save(&hostBuffer[0]);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i / 256 * 1000 + j + 0.6661, hostBuffer[i + j]);
+            }
+        }
+
+        // TEST 2: Copy In (Device to Device)
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostBuffer[i + j] = i / 256 * 1000 + j + 0.6662;
+            }
+        }
+        deviceBuffer.load(&hostBuffer[0]);
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(deviceMemberVec.data()),
+            MemoryLocation::CUDA_DEVICE,
+            6666,
+            6666);
+
+        deviceMemberVec.save(&hostMemberVec[0]);
+
+        for (std::size_t i = 0; i < 6666; ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i * 1000 + j + 0.6662, hostMemberVec[i + j * 6666]);
+            }
+        }
     }
 
     void testCudaSoAWithGridOnDeviceAndBuffersOnHost()
