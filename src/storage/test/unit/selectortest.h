@@ -125,24 +125,24 @@ public:
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ");
 
         std::vector<MyDummyCell> vec(20);
-        std::vector<long long> targetX;
-        std::vector<double>    targetY;
-        std::vector<char>      targetZ;
+        std::vector<long long> sourceX;
+        std::vector<double>    sourceY;
+        std::vector<char>      sourceZ;
 
         for (int i = 0; i < 20; ++i) {
-            targetX << i * 2 + 13;
-            targetY << 1.0 + i / 100.0;
-            targetZ << i + 69;
+            sourceX << i * 2 + 13;
+            sourceY << 1.0 + i / 100.0;
+            sourceZ << i + 69;
         }
 
-        selectorX.copyMemberIn((char*)&targetX[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
-        selectorY.copyMemberIn((char*)&targetY[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
-        selectorZ.copyMemberIn((char*)&targetZ[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
+        selectorX.copyMemberIn((char*)&sourceX[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
+        selectorY.copyMemberIn((char*)&sourceY[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
+        selectorZ.copyMemberIn((char*)&sourceZ[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
 
         for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(targetX[i], i * 2 + 13);
-            TS_ASSERT_EQUALS(targetY[i], 1.0 + i / 100.0);
-            TS_ASSERT_EQUALS(targetZ[i], i + 69);
+            TS_ASSERT_EQUALS(vec[i].x, i * 2 + 13);
+            TS_ASSERT_EQUALS(vec[i].y, 1.0 + i / 100.0);
+            TS_ASSERT_EQUALS(vec[i].z, i + 69);
         }
     }
 
