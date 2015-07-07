@@ -82,18 +82,24 @@ public:
         std::size_t num,
         MEMBER (CELL:: *memberPointer)[ARITY])
     {
+        cudaMemcpyKind direction = cudaMemcpyDefault;
+
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
 
-            for (std::size_t i = 0; i < num; ++i) {
-                cudaMemcpy(
-                    (target[i].*memberPointer),
-                    source + i * ARITY,
-                    ARITY * sizeof(MEMBER),
-                    cudaMemcpyDeviceToDevice);
-            }
+            direction = cudaMemcpyDeviceToDevice;
+        }
 
-            return;
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::HOST)) {
+
+            direction = cudaMemcpyDeviceToHost;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
+            direction = cudaMemcpyHostToDevice;
         }
 
         if ((sourceLocation == MemoryLocation::HOST) &&
@@ -109,6 +115,21 @@ public:
             return;
         }
 
+        // we use this as a special case to catch combinations of
+        // locations which are not covered by the conditions above:
+        if (direction != cudaMemcpyDefault) {
+            for (std::size_t i = 0; i < num; ++i) {
+                cudaMemcpy(
+                    (target[i].*memberPointer),
+                    source + i * ARITY,
+                    ARITY * sizeof(MEMBER),
+                    direction);
+            }
+
+            CUDAUtil::checkForError();
+            return;
+        }
+
         throw std::logic_error("Unsupported combination of sourceLocation and targetLocation"
                                " in DefaultCUDAArrayFilter::copyMemberInImpl()");
     }
@@ -121,18 +142,23 @@ public:
         std::size_t num,
         MEMBER (CELL:: *memberPointer)[ARITY])
     {
+        cudaMemcpyKind direction = cudaMemcpyDefault;
+
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
 
-            for (std::size_t i = 0; i < num; ++i) {
-                cudaMemcpy(
-                    target + i * ARITY,
-                    (source[i].*memberPointer),
-                    ARITY * sizeof(EXTERNAL),
-                    cudaMemcpyDeviceToDevice);
-            }
+            direction = cudaMemcpyDeviceToDevice;
+        }
 
-            return;
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::HOST)) {
+            direction = cudaMemcpyDeviceToHost;
+        }
+
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
+            direction = cudaMemcpyHostToDevice;
         }
 
         if ((sourceLocation == MemoryLocation::HOST) &&
@@ -144,6 +170,21 @@ public:
                 targetLocation,
                 num,
                 memberPointer);
+            return;
+        }
+
+        // we use this as a special case to catch combinations of
+        // locations which are not covered by the conditions above:
+        if (direction != cudaMemcpyDefault) {
+            for (std::size_t i = 0; i < num; ++i) {
+                cudaMemcpy(
+                    target + i * ARITY,
+                    (source[i].*memberPointer),
+                    ARITY * sizeof(EXTERNAL),
+                    direction);
+            }
+
+            CUDAUtil::checkForError();
             return;
         }
 
