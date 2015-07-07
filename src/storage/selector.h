@@ -112,10 +112,12 @@ public:
         int num) const
     {
         if (sourceLocation != MemoryLocation::HOST) {
-            throw std::logic_error("FIXME: can't yet source from locations other than HOST (1)");
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST source memory (1)");
         }
         if (targetLocation != MemoryLocation::HOST) {
-            throw std::logic_error("FIXME: can't yet target locations other than HOST (1)");
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST target memory (1)");
         }
 
 
@@ -131,10 +133,12 @@ public:
         int num) const
     {
         if (sourceLocation != MemoryLocation::HOST) {
-            throw std::logic_error("FIXME: can't yet source from locations other than HOST (2)");
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST source memory (2)");
         }
         if (targetLocation != MemoryLocation::HOST) {
-            throw std::logic_error("FIXME: can't yet target locations other than HOST (2)");
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST target memory (2)");
         }
 
         CELL *actualTarget = reinterpret_cast<CELL*>(target);
