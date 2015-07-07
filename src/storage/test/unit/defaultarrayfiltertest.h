@@ -91,11 +91,18 @@ public:
 
     void testHostSoA()
     {
+        // SoA format in grid (i.e. hostMemberVec) mandates that the
+        // elements of a member array are split up according to a
+        // certain stride (in this case 40). In an external buffer
+        // (hostBuffer) these array elements will be aggregated and
+        // stored directly one after another:
         std::vector<double> hostMemberVec(120);
         std::vector<double> hostBuffer(120, -1);
 
-        for (std::size_t i = 0; i < hostMemberVec.size(); ++i) {
-            hostMemberVec[i] = i + 0.7;
+        for (std::size_t i = 0; i < 40; ++i) {
+            hostMemberVec[i + 0 * 40] = i + 0.71;
+            hostMemberVec[i + 1 * 40] = i + 0.72;
+            hostMemberVec[i + 2 * 40] = i + 0.73;
         }
 
         FilterBase<MyDumbSoACell > *filter = new DefaultArrayFilter<MyDumbSoACell, double, double, 3>();
@@ -109,15 +116,15 @@ public:
             40);
 
         for (std::size_t i = 0; i < hostBuffer.size(); i += 3) {
-            TS_ASSERT_EQUALS(i / 3 +  0.7, hostBuffer[i + 0]);
-            TS_ASSERT_EQUALS(i / 3 + 40.7, hostBuffer[i + 1]);
-            TS_ASSERT_EQUALS(i / 3 + 80.7, hostBuffer[i + 2]);
+            TS_ASSERT_EQUALS(i / 3 + 0.71, hostBuffer[i + 0]);
+            TS_ASSERT_EQUALS(i / 3 + 0.72, hostBuffer[i + 1]);
+            TS_ASSERT_EQUALS(i / 3 + 0.73, hostBuffer[i + 2]);
         }
 
-        for (std::size_t i = 0; i < 40; ++i) {
-            hostBuffer[i * 3 + 0] = i + 0.1;
-            hostBuffer[i * 3 + 1] = i + 0.2;
-            hostBuffer[i * 3 + 2] = i + 0.3;
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 3) {
+            hostBuffer[i + 0] = i / 3 + 0.1;
+            hostBuffer[i + 1] = i / 3 + 0.2;
+            hostBuffer[i + 2] = i / 3 + 0.3;
         }
 
         filter->copyStreakIn(
