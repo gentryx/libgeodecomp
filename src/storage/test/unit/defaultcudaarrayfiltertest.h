@@ -401,7 +401,63 @@ public:
 
     void testCudaSoAWithGridOnHostAndBuffersOnDevice()
     {
-        // fixme
+        // elements of a member array are split up according to a
+        // certain stride (in this case 8888). In an external buffer
+        // (hostBuffer) these array elements will be aggregated and
+        // stored directly one after another:
+
+        // TEST 1: Copy Out (Host to Device)
+        std::vector<double> hostMemberVec(256 * 8888, -1);
+
+        std::vector<double> hostBuffer(256 * 8888, -2);
+        CUDAArray<double> deviceBuffer(&hostBuffer[0], 256 * 8888);
+
+        for (std::size_t i = 0; i < 8888; ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostMemberVec[i + j * 8888] = i * 1000 + j + 0.8881;
+            }
+        }
+
+        FilterBase<MyDumbestSoACell > *filter =
+            new DefaultCUDAArrayFilter<MyDumbestSoACell, double, double, 256>();
+
+        filter->copyStreakOut(
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            8888,
+            8888);
+
+        deviceBuffer.save(&hostBuffer[0]);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i / 256 * 1000 + j + 0.8881, hostBuffer[i + j]);
+            }
+        }
+
+        // TEST 2: Copy In (Device to Host)
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostBuffer[i + j] = i / 256 * 1000 + j + 0.8882;
+            }
+        }
+        deviceBuffer.load(&hostBuffer[0]);
+
+        filter->copyStreakIn(
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(&hostMemberVec[0]),
+            MemoryLocation::HOST,
+            8888,
+            8888);
+
+        for (std::size_t i = 0; i < 8888; ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i * 1000 + j + 0.8882, hostMemberVec[i + j * 8888]);
+            }
+        }
     }
 
     void testCudaSoAWithGridOnHostAndBuffersOnHost()

@@ -104,11 +104,31 @@ public:
     {
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
             DefaultCUDAArrayFilterHelpers::runDistributeMemberArrayKernel<MEMBER, EXTERNAL, ARITY>(
                 source,
                 target,
                 num,
                 stride);
+
+            return;
+        }
+
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::HOST)) {
+
+            std::size_t byteSize = num * ARITY * sizeof(EXTERNAL);
+            MEMBER *deviceBuffer;
+            cudaMalloc(&deviceBuffer, byteSize);
+
+            DefaultCUDAArrayFilterHelpers::runDistributeMemberArrayKernel<MEMBER, EXTERNAL, ARITY>(
+                source,
+                deviceBuffer,
+                num,
+                stride);
+
+            cudaMemcpy(target, deviceBuffer, byteSize, cudaMemcpyDeviceToHost);
+            cudaFree(deviceBuffer);
             return;
         }
 
@@ -127,12 +147,12 @@ public:
                 stride);
 
             cudaFree(deviceBuffer);
-
             return;
         }
 
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::HOST)) {
+
             DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyStreakInImpl(
                 source,
                 sourceLocation,
@@ -140,6 +160,7 @@ public:
                 targetLocation,
                 num,
                 stride);
+
             return;
         }
 
@@ -157,11 +178,13 @@ public:
     {
         if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
             (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
             DefaultCUDAArrayFilterHelpers::runAggregateMemberArrayKernel<MEMBER, EXTERNAL, ARITY>(
                 source,
                 target,
                 num,
                 stride);
+
             return;
         }
 
@@ -180,12 +203,30 @@ public:
 
             cudaMemcpy(target, deviceBuffer, byteSize, cudaMemcpyDeviceToHost);
             cudaFree(deviceBuffer);
+            return;
+        }
 
+        if ((sourceLocation == MemoryLocation::HOST) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
+            std::size_t byteSize = num * ARITY * sizeof(MEMBER);
+            MEMBER *deviceBuffer;
+            cudaMalloc(&deviceBuffer, byteSize);
+            cudaMemcpy(deviceBuffer, source, byteSize, cudaMemcpyHostToDevice);
+
+            DefaultCUDAArrayFilterHelpers::runAggregateMemberArrayKernel<MEMBER, EXTERNAL, ARITY>(
+                deviceBuffer,
+                target,
+                num,
+                stride);
+
+            cudaFree(deviceBuffer);
             return;
         }
 
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::HOST)) {
+
             DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyStreakOutImpl(
                 source,
                 sourceLocation,
@@ -193,6 +234,7 @@ public:
                 targetLocation,
                 num,
                 stride);
+
             return;
         }
 
@@ -238,12 +280,14 @@ public:
                 targetLocation,
                 num,
                 memberPointer);
+
             return;
         }
 
         // we use this as a special case to catch combinations of
         // locations which are not covered by the conditions above:
         if (direction != cudaMemcpyDefault) {
+
             for (std::size_t i = 0; i < num; ++i) {
                 cudaMemcpy(
                     (target[i].*memberPointer),
