@@ -170,7 +170,6 @@ public:
         memberName("memberName not initialized")
     {}
 
-    // fixme: needs test with cuda device memory
     template<typename MEMBER>
     Selector(
         MEMBER CELL:: *memberPointer,
