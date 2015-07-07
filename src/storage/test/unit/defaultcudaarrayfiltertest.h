@@ -47,7 +47,61 @@ class DefaultCUDAArrayFilterTest : public CxxTest::TestSuite
 public:
     void testCudaAoSWithGridOnDeviceAndBuffersOnDevice()
     {
-        // fixme
+        CUDAArray<MyDumbestSoACell> deviceCellVec(222);
+        std::vector<MyDumbestSoACell> hostCellVec(222);
+
+        CUDAArray<double> deviceBuffer(222 * 256);
+        std::vector<double> hostBuffer(222 * 256);
+
+        for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostCellVec[i].y[j] = i + j / 1000 + 0.221;
+            }
+        }
+        deviceCellVec.load(&hostCellVec[0]);
+
+        FilterBase<MyDumbestSoACell> *filter =
+            new DefaultCUDAArrayFilter<MyDumbestSoACell, double, double, 256>();
+        char MyDumbestSoACell::* memberPointer =
+            reinterpret_cast<char MyDumbestSoACell::*>(&MyDumbestSoACell::y);
+
+        filter->copyMemberOut(
+            deviceCellVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            222,
+            memberPointer);
+        deviceBuffer.save(&hostBuffer[0]);
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i / 256 + (j / 1000) + 0.221, hostBuffer[i + j]);
+            }
+        }
+
+        for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                hostBuffer[i + j] = i * 1000 + j + 0.222;
+            }
+        }
+        deviceBuffer.load(&hostBuffer[0]);
+
+        filter->copyMemberIn(
+            reinterpret_cast<char*>(deviceBuffer.data()),
+            MemoryLocation::CUDA_DEVICE,
+            deviceCellVec.data(),
+            MemoryLocation::CUDA_DEVICE,
+            222,
+            memberPointer);
+
+        deviceCellVec.save(&hostCellVec[0]);
+
+        for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
+            for (std::size_t j = 0; j < 256; ++j) {
+                TS_ASSERT_EQUALS(i * 1000 * 256 + j + 0.222, hostCellVec[i].y[j]);
+            }
+        }
     }
     void testCudaAoSWithGridOnDeviceAndBuffersOnHost()
     {

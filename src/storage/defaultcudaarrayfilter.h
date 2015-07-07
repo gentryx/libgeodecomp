@@ -82,8 +82,23 @@ public:
         std::size_t num,
         MEMBER (CELL:: *memberPointer)[ARITY])
     {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
+            for (std::size_t i = 0; i < num; ++i) {
+                cudaMemcpy(
+                    (target[i].*memberPointer),
+                    source + i * ARITY,
+                    ARITY * sizeof(MEMBER),
+                    cudaMemcpyDeviceToDevice);
+            }
+
+            return;
+        }
+
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::HOST)) {
+
             DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyMemberInImpl(
                 source,
                 sourceLocation,
@@ -106,6 +121,20 @@ public:
         std::size_t num,
         MEMBER (CELL:: *memberPointer)[ARITY])
     {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) &&
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+
+            for (std::size_t i = 0; i < num; ++i) {
+                cudaMemcpy(
+                    target + i * ARITY,
+                    (source[i].*memberPointer),
+                    ARITY * sizeof(EXTERNAL),
+                    cudaMemcpyDeviceToDevice);
+            }
+
+            return;
+        }
+
         if ((sourceLocation == MemoryLocation::HOST) &&
             (targetLocation == MemoryLocation::HOST)) {
             DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>().copyMemberOutImpl(
