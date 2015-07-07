@@ -60,12 +60,12 @@ public:
     }
     void testCudaAoSWithGridOnHostAndBuffersOnHost()
     {
-        std::vector<MyDumbestSoACell> hostCellVec(40);
-        std::vector<double> hostBuffer(40 * 256);
+        std::vector<MyDumbestSoACell> hostCellVec(111);
+        std::vector<double> hostBuffer(111 * 256);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             for (std::size_t j = 0; j < 256; ++j) {
-                hostCellVec[i].y[j] = i + j / 1000;
+                hostCellVec[i].y[j] = i + j / 1000 + 0.111;
             }
         }
 
@@ -79,18 +79,18 @@ public:
             MemoryLocation::HOST,
             reinterpret_cast<char*>(&hostBuffer[0]),
             MemoryLocation::HOST,
-            40,
+            111,
             memberPointer);
 
         for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
             for (std::size_t j = 0; j < 256; ++j) {
-                TS_ASSERT_EQUALS(i / 256 + (j / 1000), hostBuffer[i + j]);
+                TS_ASSERT_EQUALS(i / 256 + (j / 1000) + 0.111, hostBuffer[i + j]);
             }
         }
 
         for (std::size_t i = 0; i < hostBuffer.size(); i += 256) {
             for (std::size_t j = 0; j < 256; ++j) {
-                hostBuffer[i + j] = i * 1000 + j;
+                hostBuffer[i + j] = i * 1000 + j + 0.112;
             }
         }
 
@@ -99,12 +99,12 @@ public:
             MemoryLocation::HOST,
             &hostCellVec[0],
             MemoryLocation::HOST,
-            40,
+            111,
             memberPointer);
 
         for (std::size_t i = 0; i < hostCellVec.size(); ++i) {
             for (std::size_t j = 0; j < 256; ++j) {
-                TS_ASSERT_EQUALS(i * 1000 * 256 + j, hostCellVec[i].y[j]);
+                TS_ASSERT_EQUALS(i * 1000 * 256 + j + 0.112, hostCellVec[i].y[j]);
             }
         }
     }
