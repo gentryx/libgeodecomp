@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/cudaarray.h>
+#include <libgeodecomp/storage/gridbase.h>
 
 #include <cuda.h>
 
