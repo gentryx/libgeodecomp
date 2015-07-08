@@ -70,7 +70,7 @@ public:
 
             Region<DIM> region;
             region << *i;
-            grid.saveMemberUnchecked(0, selector, region);
+            grid.saveMemberUnchecked(0, MemoryLocation::HOST, selector, region);
         }
 
         if (!outfile.good()) {
@@ -102,36 +102,78 @@ private:
     public:
         using OutputDelegate::outfile;
 
-        void copyStreakInImpl(const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
+        void copyStreakInImpl(
+            const EXTERNAL *source,
+            MemoryLocation::Location sourceLocation,
+            MEMBER *target,
+            MemoryLocation::Location targetLocation,
+            const std::size_t num,
+            const std::size_t stride)
         {
             throw std::logic_error("this filter is meant for output only");
         }
 
-        void copyStreakOutImpl(const MEMBER *source, EXTERNAL */*target*/, const std::size_t num, const std::size_t stride)
+        void copyStreakOutImpl(
+            const MEMBER *source,
+            MemoryLocation::Location sourceLocation,
+            EXTERNAL */*target*/,
+            MemoryLocation::Location targetLocation,
+            const std::size_t num,
+            const std::size_t stride)
         {
+            checkMemoryLocations(sourceLocation, targetLocation);
+
             for (std::size_t i = 0; i < num; ++i) {
                 *outfile << source[i] << " ";
             }
         }
 
         void copyMemberInImpl(
-            const EXTERNAL *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
+            const EXTERNAL *source,
+            MemoryLocation::Location sourceLocation,
+            CELL *target,
+            MemoryLocation::Location targetLocation,
+            std::size_t num,
+            MEMBER CELL:: *memberPointer)
         {
             throw std::logic_error("this filter is meant for output only");
         }
 
         void copyMemberOutImpl(
-            const CELL *source, EXTERNAL */*target*/, std::size_t num, MEMBER CELL:: *memberPointer)
+            const CELL *source,
+            MemoryLocation::Location sourceLocation,
+            EXTERNAL */*target*/,
+            MemoryLocation::Location targetLocation,
+            std::size_t num,
+            MEMBER CELL:: *memberPointer)
         {
+            checkMemoryLocations(sourceLocation, targetLocation);
+
             for (std::size_t i = 0; i < num; ++i) {
                 *outfile << source[i].*memberPointer << " ";
             }
+        }
+
+    private:
+        void checkMemoryLocations(
+            MemoryLocation::Location sourceLocation,
+            MemoryLocation::Location targetLocation)
+        {
+            if ((sourceLocation == MemoryLocation::CUDA_DEVICE) ||
+                (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+                throw std::logic_error("DefaultFilter can't access CUDA device memory");
+            }
+
+            if ((sourceLocation != MemoryLocation::HOST) ||
+                (targetLocation != MemoryLocation::HOST)) {
+                throw std::invalid_argument("unknown combination of source and target memory locations");
+            }
+
         }
     };
 
     OutputDelegate *filter;
     Selector<CELL_TYPE> selector;
-
 };
 
 }
