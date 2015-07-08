@@ -13,6 +13,7 @@
 
 namespace LibGeoDecomp {
 
+// fixme: rename Cuda to CUDA
 namespace CudaSimulatorHelpers {
 
 /**
@@ -444,6 +445,11 @@ private:
     using MonolithicSimulator<CELL_TYPE>::writers;
     using MonolithicSimulator<CELL_TYPE>::getStep;
 
+    void nanoStep(const unsigned nanoStep)
+    {
+        nanoStepImpl(nanoStep, typename APITraits::SelectSoA<CELL_TYPE>::Value());
+    }
+
     /**
      * We'll need a couple of parameters to describe the topology of
      * the problem space to the kernel. Here is a quick scetch. As an
@@ -488,7 +494,7 @@ private:
      * X: Boundary
      * $: Active grid content (i.e. cells which are going to be updated)
      */
-    void nanoStep(const unsigned nanoStep)
+    void nanoStepImpl(const unsigned nanoStep, APITraits::FalseType /* has no SoA */)
     {
         // fixme: measure time for this preprocessing via chronometer
         Coord<DIM> initGridDim = initializer->gridDimensions();
@@ -501,7 +507,7 @@ private:
         for (int d = 0; d < lastDim; ++d) {
             cudaGridDim[d] = ceil(1.0 * initGridDim[d] / blockSize[d]);
         }
-        // fixme: make the number of wavefronts configurable, must remain 1 for 1D though
+
         if (lastDim < DIM) {
             cudaGridDim[lastDim] = 1;
         }
@@ -539,15 +545,28 @@ private:
             << " and logicalGridDim " << logicalGridDim
             << " and wavefrontLength " << wavefrontLength);
 
-        // fixme: check case when dimZ is smaller than effective grid size in z direction (i.e. two wavefronts traverse the grid)
-
         CudaSimulatorHelpers::KernelWrapper<
             DIM,
             Topology::template WrapsAxis<0>::VALUE,
             Topology::template WrapsAxis<1>::VALUE,
             Topology::template WrapsAxis<2>::VALUE>()(
-                cudaDimGrid, cudaDimBlock, devGridOld, devGridNew, nanoStep, gridOffset, logicalGridDim, axisWrapOffset, offsetY, offsetZ, wavefrontLength);
+                cudaDimGrid,
+                cudaDimBlock,
+                devGridOld,
+                devGridNew,
+                nanoStep,
+                gridOffset,
+                logicalGridDim,
+                axisWrapOffset,
+                offsetY,
+                offsetZ,
+                wavefrontLength);
     }
+
+    void nanoStepImpl(const unsigned nanoStep, APITraits::TrueType /* has SoA */)
+    {
+    }
+
 };
 
 }
