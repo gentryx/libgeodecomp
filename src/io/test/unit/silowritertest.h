@@ -183,28 +183,69 @@ public:
 class ParticleFilterBase : public Filter<DummyParticle, FloatCoord<2>, double>
 {
 public:
-    void copyStreakInImpl(const double *source, FloatCoord<2> *target, const std::size_t num, const std::size_t stride)
+    void copyStreakInImpl(
+        const double *source,
+        MemoryLocation::Location sourceLocation,
+        FloatCoord<2> *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         // left blank as it's not needed in our tests
     }
 
-    void copyStreakOutImpl(const FloatCoord<2> *source, double *target, const std::size_t num, const std::size_t stride)
+    void copyStreakOutImpl(
+        const FloatCoord<2> *source,
+        MemoryLocation::Location sourceLocation,
+        double *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         // left blank as it's not needed in our tests
     }
 
     void copyMemberInImpl(
-        const double *source, DummyParticle *target, std::size_t num, FloatCoord<2> DummyParticle:: *memberPointer)
+        const double *source,
+        MemoryLocation::Location sourceLocation,
+        DummyParticle *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        FloatCoord<2> DummyParticle:: *memberPointer)
     {
         // left blank as it's not needed in our tests
+    }
+
+protected:
+    void checkMemoryLocations(
+        MemoryLocation::Location sourceLocation,
+        MemoryLocation::Location targetLocation)
+    {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) ||
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            throw std::logic_error("DefaultFilter can't access CUDA device memory");
+        }
+
+        if ((sourceLocation != MemoryLocation::HOST) ||
+            (targetLocation != MemoryLocation::HOST)) {
+            throw std::invalid_argument("unknown combination of source and target memory locations");
+        }
+
     }
 };
 
 class ParticleFilterX : public ParticleFilterBase
 {
     void copyMemberOutImpl(
-        const DummyParticle *source, double *target, std::size_t num, FloatCoord<2> DummyParticle:: *memberPointer)
+        const DummyParticle *source,
+        MemoryLocation::Location sourceLocation,
+        double *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        FloatCoord<2> DummyParticle:: *memberPointer)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             target[i] = (source[i].*memberPointer)[0];
         }
@@ -214,8 +255,15 @@ class ParticleFilterX : public ParticleFilterBase
 class ParticleFilterY : public ParticleFilterBase
 {
     void copyMemberOutImpl(
-        const DummyParticle *source, double *target, std::size_t num, FloatCoord<2> DummyParticle:: *memberPointer)
+        const DummyParticle *source,
+        MemoryLocation::Location sourceLocation,
+        double *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        FloatCoord<2> DummyParticle:: *memberPointer)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             target[i] = (source[i].*memberPointer)[1];
         }
