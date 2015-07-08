@@ -1,5 +1,6 @@
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/simplefilter.h>
