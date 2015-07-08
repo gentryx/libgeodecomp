@@ -2494,6 +2494,65 @@ public:
 
 LIBFLATARRAY_REGISTER_SOA(SPMVMSoACell, ((double)(sum))((double)(value)))
 
+class SPMVMSoACellInf
+{
+public:
+    using REAL = ShortVec;
+
+    class API :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {
+    public:
+        // uniform sizes lead to std::bad_alloc,
+        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
+        // as dimension (DIM = 1)
+        LIBFLATARRAY_CUSTOM_SIZES(
+            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
+            (65536)(131072)(262144)(524288)(1048576),
+            (1),
+            (1))
+    };
+
+    inline explicit SPMVMSoACellInf(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        REAL tmp, weights, values;
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            tmp = &hoodNew->sum() + i * C;
+            for (const auto& j: hoodOld.weights(0)) {
+                weights = j.second;
+                values.gather(&hoodOld->value(), j.first);
+                tmp += values * weights;
+            }
+            (&hoodNew->sum() + i * C) << tmp;
+        }
+    }
+
+    template<typename NEIGHBORHOOD>
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    {
+        sum = 0.;
+        for (const auto& j: neighborhood.weights(0)) {
+            sum += neighborhood[j.first].value * j.second;
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+LIBFLATARRAY_REGISTER_SOA(SPMVMSoACellInf, ((double)(sum))((double)(value)))
+
 // setup a sparse matrix
 template<typename CELL, typename GRID>
 class SparseMatrixInitializer : public SimpleInitializer<CELL>
@@ -2602,7 +2661,7 @@ public:
 
     std::string species()
     {
-        return "vanilla";
+        return "bronze";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2662,7 +2721,7 @@ public:
 
     std::string species()
     {
-        return "gold";
+        return "platinum";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2684,6 +2743,66 @@ public:
         {
             ScopedTimer t(&seconds);
             updateFunctor<SPMVMSoACell, Grid>(streak, gridOld, &gridNew, 0);
+        }
+
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GFLOP/s";
+    }
+};
+
+class SparseMatrixVectorMultiplicationVectorizedInf : public CPUBenchmark
+{
+private:
+    template<typename CELL, typename GRID>
+    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+                       GRID *gridNew, unsigned nanoStep)
+    {
+        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
+                         UnstructuredGridSoAUpdateHelper<CELL>(
+                             gridOld, gridNew, streak, nanoStep));
+    }
+
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance2(const Coord<3>& dim)
+    {
+        // 1. create grids
+        typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
+        const Coord<1> size(dim.x());
+        Grid gridOld(size);
+        Grid gridNew(size);
+
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. call updateFunctor()
+        double seconds = 0;
+        Streak<1> streak(Coord<1>(0), size.x());
+        {
+            ScopedTimer t(&seconds);
+            updateFunctor<SPMVMSoACellInf, Grid>(streak, gridOld, &gridNew, 0);
         }
 
         if (gridNew.get(Coord<1>(1)).sum == 4711) {
@@ -2738,7 +2857,7 @@ public:
 
     std::string species()
     {
-        return "platinum";
+        return "pepper";
     }
 
     double performance2(const Coord<3>& dim)
@@ -2859,6 +2978,10 @@ int main(int argc, char **argv)
 
         for (std::size_t i = 0; i < sizes.size(); ++i) {
             eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
+        }
+
+        for (std::size_t i = 0; i < sizes.size(); ++i) {
+            eval(SparseMatrixVectorMultiplicationVectorizedInf(), toVector(sizes[i]));
         }
         sizes.clear();
     }

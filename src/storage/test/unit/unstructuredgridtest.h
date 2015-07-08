@@ -24,7 +24,7 @@ public:
         return val;
     }
 
-    const int operator()() const
+    int operator()() const
     {
         return val;
     }
@@ -192,19 +192,19 @@ public:
         for (int i = 0; i < DIM; ++i) {
             grid->set(Coord<1>(i), i);
 
-            adjacenc0 [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
-            adjacenc0 [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
-            adjacenc0 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
-            _matrix0  [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
-            _matrix0  [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
-            _matrix0  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
+            adjacenc0  [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
+            adjacenc0  [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
+            adjacenc0  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
+            rawMatrix0 [Coord<2>(i,abs(i*57)     %DIM)] = i   /DIM;
+            rawMatrix0 [Coord<2>(i,abs(i*57 + 75)%DIM)] = i*57/DIM;
+            rawMatrix0 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = i*7 /DIM;
 
-            adjacenc1 [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
-            adjacenc1 [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
-            adjacenc1 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
-            _matrix1  [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
-            _matrix1  [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
-            _matrix1  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
+            adjacenc1  [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
+            adjacenc1  [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
+            adjacenc1  [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
+            rawMatrix1 [Coord<2>(i,abs(i*57)     %DIM)] = -i   /DIM;
+            rawMatrix1 [Coord<2>(i,abs(i*57 + 75)%DIM)] = -i*57/DIM;
+            rawMatrix1 [Coord<2>(i,abs(i*57 - 7 )%DIM)] = -i*7 /DIM;
         }
 
         matrix0.initFromMatrix(rawMatrix0);

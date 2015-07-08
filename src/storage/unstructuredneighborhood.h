@@ -22,11 +22,9 @@ template<typename VALUE_TYPE, int C, int SIGMA>
 class Iterator : public std::iterator<std::forward_iterator_tag,
                                       const std::pair<int, VALUE_TYPE> >
 {
-private:
-    typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
-    const Matrix& matrix;
-    int index;
 public:
+    using Matrix = SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>;
+
     inline
     Iterator(const Matrix& matrix, int startIndex) :
         matrix(matrix), index(startIndex)
@@ -54,6 +52,10 @@ public:
         return std::make_pair(matrix.columnVec()[index],
                               matrix.valuesVec()[index]);
     }
+
+private:
+    const Matrix& matrix;
+    int index;
 };
 
 /**
@@ -76,16 +78,10 @@ template<typename CELL, typename GRID, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, true>
 {
-protected:
+public:
     using Grid = GRID;
     using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
-    const Grid& grid;           /**< old grid */
-    long xOffset;               /**< initial offset for updateLineX function */
-    int currentChunk;           /**< current chunk */
-    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
-    int currentMatrixID;        /**< current id for matrices */
 
-public:
     inline
     UnstructuredNeighborhoodBase(const Grid& grid, long startX) :
         grid(grid),
@@ -155,6 +151,13 @@ public:
         index += C * matrix.rowLengthVec()[realRow];
         return Iterator(matrix, index);
     }
+
+protected:
+    const Grid& grid;           /**< old grid */
+    long xOffset;               /**< initial offset for updateLineX function */
+    int currentChunk;           /**< current chunk */
+    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
+    int currentMatrixID;        /**< current id for matrices */
 };
 
 /**
@@ -164,38 +167,10 @@ template<typename CELL, typename GRID, std::size_t MATRICES,
          typename VALUE_TYPE, int C, int SIGMA>
 class UnstructuredNeighborhoodBase<CELL, GRID, MATRICES, VALUE_TYPE, C, SIGMA, false>
 {
-protected:
+public:
     using Grid = GRID;
     using Iterator = UnstructuredNeighborhoodHelpers::Iterator<VALUE_TYPE, C, SIGMA>;
-    const Grid& grid;
-    long xOffset;               /**< initial offset for updateLineX function */
-    int currentChunk;           /**< current chunk */
-    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
-    int currentMatrixID;        /**< current id for matrices */
 
-    /**
-     * If xOffset is changed, the current chunk and chunkOffset
-     * may change. This function updates the internal data structures
-     * accordingly.
-     *
-     * @param difference amount which is added to xOffset
-     */
-    inline
-    void updateIndices(int difference)
-    {
-        xOffset += difference;
-        const int newChunkOffset = chunkOffset + difference;
-
-        // update chunk and offset, if necessary
-        if (newChunkOffset >= C) {
-            ++currentChunk;
-            chunkOffset = 0;
-            return;
-        }
-
-        chunkOffset += difference;
-    }
-public:
     inline
     UnstructuredNeighborhoodBase(const Grid& grid, long startX) :
         grid(grid),
@@ -256,6 +231,36 @@ public:
         index += C * matrix.rowLengthVec()[xOffset];
         return Iterator(matrix, index);
     }
+
+protected:
+    /**
+     * If xOffset is changed, the current chunk and chunkOffset
+     * may change. This function updates the internal data structures
+     * accordingly.
+     *
+     * @param difference amount which is added to xOffset
+     */
+    inline
+    void updateIndices(int difference)
+    {
+        xOffset += difference;
+        const int newChunkOffset = chunkOffset + difference;
+
+        // update chunk and offset, if necessary
+        if (newChunkOffset >= C) {
+            ++currentChunk;
+            chunkOffset = 0;
+            return;
+        }
+
+        chunkOffset += difference;
+    }
+
+    const Grid& grid;           /**< old grid */
+    long xOffset;               /**< initial offset for updateLineX function */
+    int currentChunk;           /**< current chunk */
+    int chunkOffset;            /**< offset inside current chunk: 0 <= x < C */
+    int currentMatrixID;        /**< current id for matrices */
 };
 
 }
@@ -279,12 +284,11 @@ class UnstructuredNeighborhood :
                                                             VALUE_TYPE, C, SIGMA>,
                                      MATRICES, VALUE_TYPE, C, SIGMA, true>
 {
-private:
+public:
     using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
     using UnstructuredNeighborhoodHelpers::
     UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, SIGMA, true>::grid;
 
-public:
     inline
     UnstructuredNeighborhood(const Grid& grid, long startX) :
         UnstructuredNeighborhoodHelpers::
@@ -308,12 +312,11 @@ class UnstructuredNeighborhood<CELL, MATRICES, VALUE_TYPE, C, 1> :
                                                             VALUE_TYPE, C, 1>,
                                      MATRICES, VALUE_TYPE, C, 1, false>
 {
-private:
+public:
     using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, 1>;
     using UnstructuredNeighborhoodHelpers::
     UnstructuredNeighborhoodBase<CELL, Grid, MATRICES, VALUE_TYPE, C, 1, false>::grid;
 
-public:
     inline
     UnstructuredNeighborhood(const Grid& grid, long startX) :
         UnstructuredNeighborhoodHelpers::
@@ -329,16 +332,15 @@ public:
 /**
  * Simple neighborhood which is used for hoodNew in updateLineX().
  * Provides access to cells via an identifier which is returned by
- * hoodOld (see Iterator classes above).
+ * hoodOld (see Iterator classe above).
  */
 template<typename CELL, std::size_t MATRICES = 1,
          typename VALUE_TYPE = double, int C = 64, int SIGMA = 1>
 class CellIDNeighborhood
 {
-private:
-    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
-    Grid& grid;                 /**< new grid */
 public:
+    using Grid = UnstructuredGrid<CELL, MATRICES, VALUE_TYPE, C, SIGMA>;
+
     inline explicit
     CellIDNeighborhood(Grid& grid) :
         grid(grid)
@@ -355,6 +357,9 @@ public:
     {
         return grid[index];
     }
+
+private:
+    Grid& grid;                 /**< new grid */
 };
 
 }
