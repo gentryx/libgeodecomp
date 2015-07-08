@@ -144,7 +144,18 @@ protected:
         const Selector<CELL_TYPE>& selector,
         const Region<DIM>& region) const
     {
-        // fixme: needs test
+        char *targetCursor = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            selector.copyMemberOut(
+                address(i->origin),
+                MemoryLocation::CUDA_DEVICE,
+                targetCursor,
+                targetLocation,
+                i->length());
+
+            targetCursor += i->length() * selector.sizeOfExternal();
+        }
     }
 
     virtual void loadMemberImplementation(
@@ -153,8 +164,19 @@ protected:
         const Selector<CELL_TYPE>& selector,
         const Region<DIM>& region)
     {
-        std::vector<CELL_TYPE> buffer(region.size());
-        // fixme: needs test
+        
+        const char *sourceCursor = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            selector.copyMemberIn(
+                sourceCursor,
+                sourceLocation,
+                address(i->origin) ,
+                MemoryLocation::CUDA_DEVICE,
+                i->length());
+
+            sourceCursor += i->length() * selector.sizeOfExternal();
+        }
     }
 
 private:

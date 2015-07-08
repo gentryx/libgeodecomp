@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/cudagrid.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
@@ -310,6 +311,42 @@ public:
 
         TS_ASSERT_EQUALS(source, target);
 #endif
+    }
+
+    void testSelectorLoadSaveMember()
+    {
+        Coord<2> origin(30, 20);
+        Coord<2> dim(40, 50);
+        CoordBox<2> box(origin, dim);
+
+        CUDAGrid<TestCell<2> > grid(box);
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
+
+        std::vector<double> buffer;
+        for (int i = 0; i < 90; ++i) {
+            buffer << i;
+        }
+
+        Region<2> region;
+        for (int i = 0; i < 30; ++i) {
+            region << Coord<2>(30 + i, 30);
+        }
+
+        for (int i = 0; i < 30; ++i) {
+            region << Coord<2>(35 + i, 40);
+        }
+
+        for (int i = 0; i < 30; ++i) {
+            region << Coord<2>(40 + i, 50);
+        }
+
+        grid.loadMember(&buffer[0], MemoryLocation::HOST, selector, region);
+
+        int counter = 0;
+        for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
+            TS_ASSERT_EQUALS(counter, grid.get(*i).testValue);
+            ++counter;
+        }
     }
 
 };
