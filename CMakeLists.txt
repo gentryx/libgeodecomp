@@ -40,12 +40,14 @@ if(NOT HPX_FOUND)
   # will reset Boost_LIBRARIES.
   find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
   set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS serialization)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS thread)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  find_package(Boost COMPONENTS move)
-  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+  if(NOT WITH_SIMPLE_BOOST)
+    find_package(Boost COMPONENTS serialization)
+    set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+    find_package(Boost COMPONENTS thread)
+    set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+    find_package(Boost COMPONENTS move)
+    set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+  endif()
 else()
   # If HPX was found, we use the Boost libraries found by HPX
   set(ALL_BOOST_LIBS
@@ -62,8 +64,10 @@ else()
   set(Boost_THREAD_FOUND true)
 endif()
 
-find_package(Boost COMPONENTS mpi)
-set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
+if(NOT WITH_SIMPLE_BOOST)
+  find_package(Boost COMPONENTS mpi)
+  set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
+endif()
 
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
 find_package(libflatarray QUIET)
