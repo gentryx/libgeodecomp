@@ -152,6 +152,14 @@ public:
 
 }
 
+#ifdef __CUDACC__
+#define MAKE_SELECTOR(CELL, MEMBER)								\
+	LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER, true)
+#else
+#define MAKE_SELECTOR(CELL, MEMBER)							\
+	LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER)
+#endif
+
 /**
  * A Selector can be used by library code to extract data from user
  * code, e.g. so that writers can access a cell's member variable.
@@ -192,6 +200,23 @@ public:
 #endif
     {}
 
+#ifdef __CUDACC__
+    template<typename MEMBER>
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        const std::string& memberName,
+        bool forceCUDA) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBER)),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>)
+    {}
+#endif
+
     template<typename MEMBER, int ARITY>
     Selector(
         MEMBER (CELL:: *memberPointer)[ARITY],
@@ -209,6 +234,23 @@ public:
         filter(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
 #endif
     {}
+
+#ifdef __CUDACC__
+    template<typename MEMBER, int ARITY>
+    Selector(
+        MEMBER (CELL:: *memberPointer)[ARITY],
+        const std::string& memberName,
+        bool forceCUDA) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBER) * ARITY),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
+    {}
+#endif
 
     template<typename MEMBER>
     Selector(
