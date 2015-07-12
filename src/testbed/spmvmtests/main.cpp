@@ -88,6 +88,33 @@ public:
         value(v), sum(0)
     {}
 
+#ifdef __MIC__
+    /**
+     * Does the same as below, but is written a little bit different.
+     * By this rewriting the ICC is able to insert prefetching instructions
+     * which are needed for performance.
+     */
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        ShortVec tmp, weights, values;
+        auto indPtr = (*hoodOld.begin()).first;
+        auto matPtr = (*hoodOld.begin()).second;
+        auto sumPtr = &hoodNew->sum();
+        int offs = 0;
+#pragma loop count(1000)
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            tmp.load_aligned(sumPtr + i * C);
+            for (const auto& j: hoodOld.weights(0)) {
+                weights.load_aligned(matPtr + offs);
+                values.gather(&hoodOld->value(), indPtr + offs);
+                tmp += values * weights;
+                offs += C;
+            }
+            tmp.store_aligned(sumPtr + i * C);
+        }
+    }
+#else
     template<typename HOOD_NEW, typename HOOD_OLD>
     static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
     {
@@ -102,6 +129,7 @@ public:
             tmp.store_aligned(&hoodNew->sum() + i * C);
         }
     }
+#endif
 
     template<typename NEIGHBORHOOD>
     void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
