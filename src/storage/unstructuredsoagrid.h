@@ -33,9 +33,11 @@ class SaveMember
 public:
     SaveMember(
         char *target,
+        MemoryLocation::Location targetLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region) :
         target(target),
+        targetLocation(targetLocation),
         selector(selector),
         region(region)
     {}
@@ -45,16 +47,18 @@ public:
     {
         char *currentTarget = target;
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (auto i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index = i->origin.x();
             const char *data = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakOut(data, currentTarget, i->length(), DIM_X);
+            selector.copyStreakOut(data, MemoryLocation::HOST, currentTarget,
+                                   targetLocation, i->length(), DIM_X);
             currentTarget += selector.sizeOfExternal() * i->length();
         }
     }
 
 private:
     char *target;
+    MemoryLocation::Location targetLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
 };
@@ -68,9 +72,11 @@ class LoadMember
 public:
     LoadMember(
         const char *source,
+        MemoryLocation::Location sourceLocation,
         const Selector<CELL>& selector,
         const Region<DIM>& region) :
         source(source),
+        sourceLocation(sourceLocation),
         selector(selector),
         region(region)
     {}
@@ -80,16 +86,18 @@ public:
     {
         const char *currentSource = source;
 
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+        for (auto i = region.beginStreak(); i != region.endStreak(); ++i) {
             accessor.index = i->origin.x();
             char *currentTarget = accessor.access_member(selector.sizeOfMember(), selector.offset());
-            selector.copyStreakIn(currentSource, currentTarget, i->length(), DIM_X);
+            selector.copyStreakIn(currentSource, sourceLocation, currentTarget,
+                                  MemoryLocation::HOST, i->length(), DIM_X);
             currentSource += selector.sizeOfExternal() * i->length();
         }
     }
 
 private:
     const char *source;
+    MemoryLocation::Location sourceLocation;
     const Selector<CELL>& selector;
     const Region<DIM>& region;
 };
@@ -347,20 +355,25 @@ public:
 
 protected:
     void saveMemberImplementation(
-        char *target, const Selector<ELEMENT_TYPE>& selector, const Region<DIM>& region) const
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<ELEMENT_TYPE>& selector,
+        const Region<DIM>& region) const
     {
         elements.callback(
             UnstructuredSoAGridHelpers::SaveMember<ELEMENT_TYPE, DIM>(
-                target, selector, region));
+                target, targetLocation, selector, region));
     }
 
     void loadMemberImplementation(
-        const char *source, const Selector<ELEMENT_TYPE>& selector,
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<ELEMENT_TYPE>& selector,
         const Region<DIM>& region)
     {
         elements.callback(
             UnstructuredSoAGridHelpers::LoadMember<ELEMENT_TYPE, DIM>(
-                source, selector, region));
+                source, sourceLocation, selector, region));
     }
 
 private:
