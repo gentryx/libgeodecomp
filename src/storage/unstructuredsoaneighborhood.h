@@ -40,12 +40,9 @@ public:
     class Iterator : public std::iterator<std::forward_iterator_tag,
                                           const IteratorPair>
     {
-    private:
-        typedef SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA> Matrix;
-        const Matrix& matrix;   /**< matrix to use */
-        int offset;             /**< Where are we right now inside chunk?  */
-
     public:
+        using Matrix = SellCSigmaSparseMatrixContainer<VALUE_TYPE, C, SIGMA>;
+
         inline
         Iterator(const Matrix& matrix, int offset) :
             matrix(matrix), offset(offset)
@@ -79,6 +76,10 @@ public:
                 reinterpret_cast<const unsigned *>(matrix.columnVec().data() + offset);
             return std::make_pair(indices, weights);
         }
+
+    private:
+        const Matrix& matrix;   /**< matrix to use */
+        int offset;             /**< Where are we right now inside chunk?  */
     };
 
     inline
