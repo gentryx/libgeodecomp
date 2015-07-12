@@ -681,7 +681,7 @@ public:
                     sum    = _mm256_add_pd(sum, _mm256_mul_pd(val, rhs));
                 }
                 double tmp[4] __attribute__((aligned (32)));
-                _mm512_store_pd(tmp, sum);
+                _mm256_store_pd(tmp, sum);
                 resPtr[i] = tmp[0] + tmp[1] + tmp[2] + tmp[3];
 
                 // reminder loop
