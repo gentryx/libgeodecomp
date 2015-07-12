@@ -365,7 +365,7 @@ public:
      * For unstructured grid, this specifies the C of SELL-C-q format. Default: 4
      * which is suitable for AVX.
      */
-    template<unsigned C>
+    template<int C>
     class HasSellC
     {
     public:
@@ -394,13 +394,13 @@ public:
      * For unstructured grid, this specifies the SIGMA of SELL-C-q format.
      * Should be C^2. Default is 1 which means nothing is sorted.
      */
-    template<unsigned SIGMA>
+    template<int SIGMA>
     class HasSellSigma
     {
     public:
         typedef void SupportsSellSigma;
 
-        static const unsigned SELL_SIGMA = SIGMA;
+        static const int SELL_SIGMA = SIGMA;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -423,13 +423,13 @@ public:
      * For unstructured grid, this specifies the amount of different matrices.
      * Default is 1.
      */
-    template<unsigned MATRICES>
+    template<std::size_t MATRICES>
     class HasSellMatrices
     {
     public:
         typedef void SupportsSellMatrices;
 
-        static const unsigned SELL_MATRICES = MATRICES;
+        static const std::size_t SELL_MATRICES = MATRICES;
     };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
