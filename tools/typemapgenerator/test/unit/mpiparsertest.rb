@@ -443,7 +443,7 @@ class TestMPIParser < Test::Unit::TestCase
     expected_classes = ["Coord<1 >", "Coord<3 >"] +
       %w{Engine Car Wheel Rim Tire Label}
     expected_classes = expected_classes.to_set
-    actual_classes = @parser.find_classes_to_be_serialized("Serialization")
+    actual_classes = @parser.find_classes_to_be_serialized("BoostSerialization")
 
     assert_equal(expected_classes, actual_classes)
   end
