@@ -4,15 +4,17 @@
 template<int DIMENSIONS>
 class FloatCoord
 {
-    friend class Typemaps;
 private:
+    friend class Typemaps;
+
     float vec[DIMENSIONS];
 };
 
 class FloatCoordTypemapsHelper
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
+
     FloatCoord<1> pA;
     FloatCoord<2> pB;
     FloatCoord<4> pC;
