@@ -68,7 +68,8 @@ class MPIParser
     @datatype_map.merge!(map_enums)
     classes_to_be_serialized =
       find_classes_to_be_serialized("Typemaps") +
-      find_classes_to_be_serialized("Serialization")
+      find_classes_to_be_serialized("BoostSerialization") +
+      find_classes_to_be_serialized("HPXSerialization")
     @type_hierarchy_closure = @datatype_map.keys.to_set + classes_to_be_serialized
     @all_classes = classes_to_be_serialized
   end
@@ -76,7 +77,7 @@ class MPIParser
   def grep_typemap_candidates(path)
     files = []
 
-    ["Typemaps", "Serialization"].each do |klass|
+    ["Typemaps", "BoostSerialization", "HPXSerialization"].each do |klass|
       files += `grep "friend class #{klass}"             #{path}/class*.xml | cut -d : -f 1`.split("\n")
       files += `grep "<definition>#{klass}</definition>" #{path}/class*.xml | cut -d : -f 1`.split("\n")
     end

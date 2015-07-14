@@ -24,14 +24,16 @@ class TypemapGenerator
       hpx_generator = HPXGenerator.new(template_path, namespace, macro_guard_hpx)
 
       mpi_classes = parser.find_classes_to_be_serialized("Typemaps").sort
-      boost_classes = parser.find_classes_to_be_serialized("Serialization").sort
+      boost_classes = parser.find_classes_to_be_serialized("BoostSerialization").sort
+      hpx_classes = parser.find_classes_to_be_serialized("HPXSerialization").sort
 
-      mpi_options = parser.resolve_forest(mpi_classes)         + [header_pattern, header_replacement]
+      mpi_options   = parser.resolve_forest(mpi_classes)       + [header_pattern, header_replacement]
       boost_options = parser.shallow_resolution(boost_classes) + [header_pattern, header_replacement]
+      hpx_options   = parser.shallow_resolution(hpx_classes)   + [header_pattern, header_replacement]
 
       mpi_ret = mpi_generator.generate_forest(*mpi_options)
       boost_ret = boost_generator.generate_forest(*boost_options)
-      hpx_ret = hpx_generator.generate_forest(*boost_options)
+      hpx_ret = hpx_generator.generate_forest(*hpx_options)
       return boost_ret + hpx_ret + mpi_ret
     end
 
