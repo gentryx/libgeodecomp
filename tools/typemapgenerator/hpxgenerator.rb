@@ -16,6 +16,28 @@ class HPXGenerator
     "hpx::serialization::base_object"
   end
 
+  def class_registrations(classes, template_parameters)
+    ret = []
+
+    classes.each do |klass|
+      if template_parameters[klass].size == 0
+        ret.push "HPX_SERIALIZATION_REGISTER_CLASS(#{klass});"
+      else
+        params1 = render_template_params1(template_parameters[klass])
+        params2 = render_template_params2(template_parameters[klass])
+        ret.push "HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <#{params1}>), (#{klass}#{params2}));"
+      end
+    end
+
+    return ret.join("\n") + "\n\n"
+  end
+
+  def generate_header(classes, resolved_classes, resolved_parents, template_parameters, headers, header_pattern=nil, header_replacement=nil)
+
+    return super(classes, resolved_classes, resolved_parents, template_parameters, headers, header_pattern, header_replacement)
+
+  end
+
   # wraps the code generation for multiple typemaps.
   def generate_forest(resolved_classes, resolved_parents, template_parameters, class_sortation, headers, header_pattern=nil, header_replacement=nil)
     return [generate_header(class_sortation, resolved_classes, resolved_parents, template_parameters, headers, header_pattern, header_replacement)]

@@ -11,6 +11,7 @@ public:
 };
 NAMESPACE_END
 
+CLASS_REGISTRATIONS
 namespace SERIALIZATION_NAMESPACE {
 namespace serialization {
 
