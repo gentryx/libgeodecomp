@@ -1,11 +1,49 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="bmw_8h" kind="file">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="bmw_8h" kind="file" language="C++">
     <compoundname>bmw.h</compoundname>
     <includes refid="car_8h" local="yes">car.h</includes>
     <includes refid="luxury_8h" local="yes">luxury.h</includes>
     <includedby refid="main_8cpp" local="yes">src/main.cpp</includedby>
     <incdepgraph>
+      <node id="0">
+        <label>src/bmw.h</label>
+        <link refid="bmw.h"/>
+        <childnode refid="1" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>luxury.h</label>
+        <link refid="luxury_8h"/>
+      </node>
+      <node id="3">
+        <label>mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="1" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="2">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
+      <node id="6">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="4">
+        <label>wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
       <node id="1">
         <label>car.h</label>
         <link refid="car_8h"/>
@@ -16,55 +54,17 @@
         <childnode refid="4" relation="include">
         </childnode>
       </node>
-      <node id="4">
-        <label>wheel.h</label>
-        <link refid="wheel_8h"/>
-        <childnode refid="5" relation="include">
-        </childnode>
-        <childnode refid="6" relation="include">
-        </childnode>
-      </node>
-      <node id="3">
-        <label>mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="1" relation="include">
-        </childnode>
-      </node>
-      <node id="6">
-        <label>rim.h</label>
-        <link refid="rim_8h"/>
-      </node>
-      <node id="5">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
-      </node>
-      <node id="7">
-        <label>luxury.h</label>
-        <link refid="luxury_8h"/>
-      </node>
-      <node id="2">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
-      </node>
-      <node id="0">
-        <label>src/bmw.h</label>
-        <link refid="bmw.h"/>
-        <childnode refid="1" relation="include">
-        </childnode>
-        <childnode refid="7" relation="include">
-        </childnode>
-      </node>
     </incdepgraph>
     <invincdepgraph>
-      <node id="9">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
-      </node>
       <node id="8">
         <label>src/bmw.h</label>
         <link refid="bmw.h"/>
         <childnode refid="9" relation="include">
         </childnode>
+      </node>
+      <node id="9">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
       </node>
     </invincdepgraph>
     <innerclass refid="classBMW" prot="public">BMW</innerclass>
@@ -73,23 +73,25 @@
     <detaileddescription>
     </detaileddescription>
     <programlisting>
-<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_BMW_h_</highlight></codeline>
-<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_BMW_h_</highlight></codeline>
-<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_BMW_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_BMW_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
 <codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="car_8h" kindref="compound">car.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="luxury_8h" kindref="compound">luxury.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="6"><highlight class="normal"></highlight></codeline>
 <codeline lineno="7" refid="classBMW" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classBMW" kindref="compound">BMW</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="classCar" kindref="compound">Car</ref>,<sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal"><sp/><ref refid="classLuxury" kindref="compound">Luxury</ref></highlight></codeline>
 <codeline lineno="8"><highlight class="normal">{</highlight></codeline>
-<codeline lineno="9" refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
-<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
-<codeline lineno="11" refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kindref="member">price</ref>;</highlight></codeline>
-<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
-<codeline lineno="13" refid="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" kindref="member">serial</ref>;</highlight></codeline>
-<codeline lineno="14"><highlight class="normal">};</highlight></codeline>
-<codeline lineno="15"><highlight class="normal"></highlight></codeline>
-<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="10" refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12" refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kindref="member">price</ref>;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="15" refid="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classBMW_1a87b6b1cac371d94ba2336c12cf449ad4" kindref="member">serial</ref>;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/bmw.h"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/bmw.h"/>
   </compounddef>
 </doxygen>

@@ -1,9 +1,51 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="tire_8h" kind="file">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="tire_8h" kind="file" language="C++">
     <compoundname>tire.h</compoundname>
     <includedby refid="wheel_8h" local="yes">src/wheel.h</includedby>
     <invincdepgraph>
+      <node id="115">
+        <label>src/bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="116" relation="include">
+        </childnode>
+      </node>
+      <node id="120">
+        <label>src/carcontainer.h</label>
+        <link refid="carcontainer_8h"/>
+      </node>
+      <node id="119">
+        <label>src/car.cpp</label>
+        <link refid="car_8cpp"/>
+      </node>
+      <node id="117">
+        <label>src/mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="114" relation="include">
+        </childnode>
+        <childnode refid="118" relation="include">
+        </childnode>
+      </node>
+      <node id="112">
+        <label>src/tire.h</label>
+        <link refid="tire.h"/>
+        <childnode refid="113" relation="include">
+        </childnode>
+      </node>
+      <node id="116">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+      <node id="118">
+        <label>src/mech.cpp</label>
+        <link refid="mech_8cpp"/>
+      </node>
+      <node id="113">
+        <label>src/wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="114" relation="include">
+        </childnode>
+      </node>
       <node id="114">
         <label>src/car.h</label>
         <link refid="car_8h"/>
@@ -18,48 +60,6 @@
         <childnode refid="116" relation="include">
         </childnode>
       </node>
-      <node id="116">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
-      </node>
-      <node id="120">
-        <label>src/carcontainer.h</label>
-        <link refid="carcontainer_8h"/>
-      </node>
-      <node id="113">
-        <label>src/wheel.h</label>
-        <link refid="wheel_8h"/>
-        <childnode refid="114" relation="include">
-        </childnode>
-      </node>
-      <node id="118">
-        <label>src/mech.cpp</label>
-        <link refid="mech_8cpp"/>
-      </node>
-      <node id="117">
-        <label>src/mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="114" relation="include">
-        </childnode>
-        <childnode refid="118" relation="include">
-        </childnode>
-      </node>
-      <node id="119">
-        <label>src/car.cpp</label>
-        <link refid="car_8cpp"/>
-      </node>
-      <node id="112">
-        <label>src/tire.h</label>
-        <link refid="tire.h"/>
-        <childnode refid="113" relation="include">
-        </childnode>
-      </node>
-      <node id="115">
-        <label>src/bmw.h</label>
-        <link refid="bmw_8h"/>
-        <childnode refid="116" relation="include">
-        </childnode>
-      </node>
     </invincdepgraph>
     <innerclass refid="classTire" prot="public">Tire</innerclass>
     <briefdescription>
@@ -67,19 +67,20 @@
     <detaileddescription>
     </detaileddescription>
     <programlisting>
-<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_tire_h_</highlight></codeline>
-<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_tire_h_</highlight></codeline>
-<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_tire_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_tire_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
 <codeline lineno="4" refid="classTire" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTire" kindref="compound">Tire</ref></highlight></codeline>
 <codeline lineno="5"><highlight class="normal">{</highlight></codeline>
 <codeline lineno="6" refid="classTire_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTire_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
-<codeline lineno="7" refid="classTire_1a36ab6ccf31a4ecabebe771ed2a806419" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTire_1a36ab6ccf31a4ecabebe771ed2a806419" kindref="member">Serialization</ref>;</highlight></codeline>
-<codeline lineno="8"><highlight class="normal"></highlight></codeline>
-<codeline lineno="9" refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" kindref="member">treadDepth</ref>;</highlight></codeline>
-<codeline lineno="10"><highlight class="normal">};</highlight></codeline>
-<codeline lineno="11"><highlight class="normal"></highlight></codeline>
-<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="7" refid="classTire_1ae209e8b29da963ccf420282f01b5e061" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTire_1ae209e8b29da963ccf420282f01b5e061" kindref="member">BoostSerialization</ref>;</highlight></codeline>
+<codeline lineno="8" refid="classTire_1a02113963f83e2a30e214e24048de1be8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classTire_1a02113963f83e2a30e214e24048de1be8" kindref="member">HPXSerialization</ref>;</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10" refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" kindref="member">treadDepth</ref>;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/tire.h"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/tire.h"/>
   </compounddef>
 </doxygen>

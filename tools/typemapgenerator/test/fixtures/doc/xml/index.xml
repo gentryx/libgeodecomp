@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.4">
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.9.1">
   <compound refid="classBMW" kind="class"><name>BMW</name>
     <member refid="classBMW_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
     <member refid="classBMW_1ac7e8d6958eac5f14b13a5d3d1c2e96d4" kind="variable"><name>price</name></member>
@@ -7,7 +7,8 @@
   </compound>
   <compound refid="classCar" kind="class"><name>Car</name>
     <member refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classCar_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classCar_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classCar_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" kind="variable"><name>NumWheels</name></member>
     <member refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" kind="variable"><name>wheels</name></member>
     <member refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" kind="variable"><name>engine</name></member>
@@ -26,7 +27,8 @@
   <compound refid="classCoord" kind="class"><name>Coord</name>
   </compound>
   <compound refid="classCoord_3_011_01_4" kind="class"><name>Coord&lt; 1 &gt;</name>
-    <member refid="classCoord_3_011_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classCoord_3_011_01_4_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classCoord_3_011_01_4_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classCoord_3_011_01_4_1acee005d94f907f13449ef45532214750" kind="variable"><name>x</name></member>
   </compound>
   <compound refid="classCoord_3_012_01_4" kind="class"><name>Coord&lt; 2 &gt;</name>
@@ -36,7 +38,8 @@
   </compound>
   <compound refid="classCoord_3_013_01_4" kind="class"><name>Coord&lt; 3 &gt;</name>
     <member refid="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classCoord_3_013_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classCoord_3_013_01_4_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classCoord_3_013_01_4_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classCoord_3_013_01_4_1a7f23cad7fae04639fb4c8770e6bcca27" kind="variable"><name>x</name></member>
     <member refid="classCoord_3_013_01_4_1a39b49f99ea21d316f463fa50ea152d10" kind="variable"><name>y</name></member>
     <member refid="classCoord_3_013_01_4_1a0b00dc30f1500de789d9d1f21708ec2d" kind="variable"><name>z</name></member>
@@ -68,7 +71,8 @@
     <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160af2bd1d4fbfa758d1c912902505c3dc9a" kind="enumvalue"><name>GASOLINE</name></member>
     <member refid="classEngine_1a0840fcf48cfd34c39baba4da1c3c2160ac9683a44177815441e518e565f09f95c" kind="enumvalue"><name>AUTOGAS</name></member>
     <member refid="classEngine_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classEngine_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classEngine_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classEngine_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classEngine_1ad874d9a0b419440d94ab443becb64257" kind="variable"><name>capacity</name></member>
     <member refid="classEngine_1a63e4cfe1b4cb0316ef7020fc3d7b2e61" kind="variable"><name>fuel</name></member>
     <member refid="classEngine_1a5d7b07a44edc1c34d846daa6b03b4496" kind="variable"><name>gearRatios</name></member>
@@ -95,22 +99,25 @@
     <member refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" kind="variable"><name>armor</name></member>
     <member refid="classMech_1a0a24b56451092323eef033edfa3969b5" kind="variable"><name>ammo</name></member>
     <member refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" kind="variable"><name>power</name></member>
-    <member refid="classMech_1af16dc449c38d2e30c15aadb6869b7d77" kind="function"><name>Mech</name></member>
+    <member refid="classMech_1afb7034e29aeef6606b846271dd0f78e2" kind="function"><name>Mech</name></member>
     <member refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" kind="function"><name>transformToCar</name></member>
   </compound>
   <compound refid="classRim" kind="class"><name>Rim</name>
     <member refid="classRim_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classRim_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classRim_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classRim_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classRim_1af3aa5502df8e41468157661e861b7773" kind="variable"><name>chromePlated</name></member>
   </compound>
   <compound refid="classTire" kind="class"><name>Tire</name>
     <member refid="classTire_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classTire_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classTire_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classTire_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classTire_1a13e65abb1bbf82d8bdaba1b3741d4f7a" kind="variable"><name>treadDepth</name></member>
   </compound>
   <compound refid="classWheel" kind="class"><name>Wheel</name>
     <member refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" kind="friend"><name>Typemaps</name></member>
-    <member refid="classWheel_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classWheel_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classWheel_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" kind="variable"><name>tire</name></member>
     <member refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" kind="variable"><name>rim</name></member>
   </compound>

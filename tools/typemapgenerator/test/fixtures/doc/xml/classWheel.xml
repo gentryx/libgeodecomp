@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classWheel" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classWheel" kind="class" language="C++" prot="public">
     <compoundname>Wheel</compoundname>
     <includes refid="wheel_8h" local="no">wheel.h</includes>
       <sectiondef kind="friend">
@@ -15,20 +15,33 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="9" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="9" bodyend="-1"/>
       </memberdef>
-      <memberdef kind="friend" id="classWheel_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classWheel_1ae209e8b29da963ccf420282f01b5e061" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
-        <definition>friend class Serialization</definition>
+        <definition>friend class BoostSerialization</definition>
         <argsstring></argsstring>
-        <name>Serialization</name>
+        <name>BoostSerialization</name>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="10" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classWheel_1a02113963f83e2a30e214e24048de1be8" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class HPXSerialization</definition>
+        <argsstring></argsstring>
+        <name>HPXSerialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
@@ -43,7 +56,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="12" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classWheel_1ab06f8ebfea44fd279b081980f7e24594" prot="private" static="no" mutable="no">
         <type><ref refid="classRim" kindref="compound">Rim</ref></type>
@@ -56,7 +69,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="12" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="13" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -83,10 +96,11 @@
         <link refid="classRim"/>
       </node>
     </collaborationgraph>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="7" bodyend="13"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/wheel.h" bodystart="7" bodyend="14"/>
     <listofallmembers>
+      <member refid="classWheel_1ae209e8b29da963ccf420282f01b5e061" prot="private" virt="non-virtual"><scope>Wheel</scope><name>BoostSerialization</name></member>
+      <member refid="classWheel_1a02113963f83e2a30e214e24048de1be8" prot="private" virt="non-virtual"><scope>Wheel</scope><name>HPXSerialization</name></member>
       <member refid="classWheel_1ab06f8ebfea44fd279b081980f7e24594" prot="private" virt="non-virtual"><scope>Wheel</scope><name>rim</name></member>
-      <member refid="classWheel_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Wheel</scope><name>Serialization</name></member>
       <member refid="classWheel_1a3ded9cdfba7bcb08d95c6d22680d1403" prot="private" virt="non-virtual"><scope>Wheel</scope><name>tire</name></member>
       <member refid="classWheel_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Wheel</scope><name>Typemaps</name></member>
     </listofallmembers>

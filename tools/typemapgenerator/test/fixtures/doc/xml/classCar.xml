@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classCar" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classCar" kind="class" language="C++" prot="public">
     <compoundname>Car</compoundname>
     <derivedcompoundref refid="classBMW" prot="public" virt="non-virtual">BMW</derivedcompoundref>
     <includes refid="car_8h" local="no">car.h</includes>
@@ -16,20 +16,33 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="12" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="12" bodyend="-1"/>
       </memberdef>
-      <memberdef kind="friend" id="classCar_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classCar_1ae209e8b29da963ccf420282f01b5e061" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
-        <definition>friend class Serialization</definition>
+        <definition>friend class BoostSerialization</definition>
         <argsstring></argsstring>
-        <name>Serialization</name>
+        <name>BoostSerialization</name>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="13" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="13" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classCar_1a02113963f83e2a30e214e24048de1be8" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class HPXSerialization</definition>
+        <argsstring></argsstring>
+        <name>HPXSerialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="14" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="14" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-static-attrib">
@@ -45,7 +58,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="15" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="15" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="16" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="16" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="private-attrib">
@@ -60,7 +73,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="16" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="16" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="17" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="17" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classCar_1a6120a2d6a20db3b25035536006ed6f9e" prot="private" static="no" mutable="no">
         <type><ref refid="classEngine" kindref="compound">Engine</ref></type>
@@ -73,7 +86,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="17" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="17" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="18" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="18" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-func">
@@ -88,7 +101,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="20" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.cpp" bodystart="3" bodyend="5"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="21" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.cpp" bodystart="3" bodyend="5"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -141,11 +154,12 @@
         <link refid="classEngine"/>
       </node>
     </collaborationgraph>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="10" bodyend="21"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/car.h" bodystart="10" bodyend="22"/>
     <listofallmembers>
+      <member refid="classCar_1ae209e8b29da963ccf420282f01b5e061" prot="private" virt="non-virtual"><scope>Car</scope><name>BoostSerialization</name></member>
       <member refid="classCar_1a6120a2d6a20db3b25035536006ed6f9e" prot="private" virt="non-virtual"><scope>Car</scope><name>engine</name></member>
+      <member refid="classCar_1a02113963f83e2a30e214e24048de1be8" prot="private" virt="non-virtual"><scope>Car</scope><name>HPXSerialization</name></member>
       <member refid="classCar_1a537b21a6a24cd5277a3a3e95ff72d0a3" prot="private" virt="non-virtual"><scope>Car</scope><name>NumWheels</name></member>
-      <member refid="classCar_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Car</scope><name>Serialization</name></member>
       <member refid="classCar_1a8d6dff139470450cebbf9011ee9b1ba7" prot="public" virt="non-virtual"><scope>Car</scope><name>transformToMech</name></member>
       <member refid="classCar_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Car</scope><name>Typemaps</name></member>
       <member refid="classCar_1a00a8f5a07dfea308f0e1278ac13f8d4a" prot="private" virt="non-virtual"><scope>Car</scope><name>wheels</name></member>

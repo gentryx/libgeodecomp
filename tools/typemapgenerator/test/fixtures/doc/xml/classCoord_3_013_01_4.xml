@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classCoord_3_013_01_4" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classCoord_3_013_01_4" kind="class" language="C++" prot="public">
     <compoundname>Coord&lt; 3 &gt;</compoundname>
     <includes refid="coord_8h" local="no">coord.h</includes>
       <sectiondef kind="friend">
-      <memberdef kind="friend" id="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
         <definition>friend class Typemaps</definition>
         <argsstring></argsstring>
@@ -15,20 +15,33 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="23" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="23" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="27" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="27" bodyend="-1"/>
       </memberdef>
-      <memberdef kind="friend" id="classCoord_3_013_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classCoord_3_013_01_4_1ae209e8b29da963ccf420282f01b5e061" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
-        <definition>friend class Serialization</definition>
+        <definition>friend class BoostSerialization</definition>
         <argsstring></argsstring>
-        <name>Serialization</name>
+        <name>BoostSerialization</name>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="24" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="24" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="28" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classCoord_3_013_01_4_1a02113963f83e2a30e214e24048de1be8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class HPXSerialization</definition>
+        <argsstring></argsstring>
+        <name>HPXSerialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="29" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="29" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-attrib">
@@ -43,7 +56,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="26" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="26" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="31" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="31" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classCoord_3_013_01_4_1a39b49f99ea21d316f463fa50ea152d10" prot="public" static="no" mutable="no">
         <type>int</type>
@@ -56,7 +69,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="26" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="26" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="31" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="31" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classCoord_3_013_01_4_1a0b00dc30f1500de789d9d1f21708ec2d" prot="public" static="no" mutable="no">
         <type>int</type>
@@ -69,17 +82,18 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="26" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="26" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="31" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="31" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="22" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="21" bodyend="27"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="25" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="24" bodyend="32"/>
     <listofallmembers>
-      <member refid="classCoord_3_013_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>Serialization</name></member>
-      <member refid="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>Typemaps</name></member>
+      <member refid="classCoord_3_013_01_4_1ae209e8b29da963ccf420282f01b5e061" prot="public" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>BoostSerialization</name></member>
+      <member refid="classCoord_3_013_01_4_1a02113963f83e2a30e214e24048de1be8" prot="public" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>HPXSerialization</name></member>
+      <member refid="classCoord_3_013_01_4_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="public" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>Typemaps</name></member>
       <member refid="classCoord_3_013_01_4_1a7f23cad7fae04639fb4c8770e6bcca27" prot="public" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>x</name></member>
       <member refid="classCoord_3_013_01_4_1a39b49f99ea21d316f463fa50ea152d10" prot="public" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>y</name></member>
       <member refid="classCoord_3_013_01_4_1a0b00dc30f1500de789d9d1f21708ec2d" prot="public" virt="non-virtual"><scope>Coord&lt; 3 &gt;</scope><name>z</name></member>
