@@ -88,7 +88,8 @@
     <member refid="classFloatCoordTypemapsHelper_1a4348e974d6e694d18311f6faab7d9398" kind="variable"><name>pC</name></member>
   </compound>
   <compound refid="classLabel" kind="class"><name>Label</name>
-    <member refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" kind="friend"><name>Serialization</name></member>
+    <member refid="classLabel_1ae209e8b29da963ccf420282f01b5e061" kind="friend"><name>BoostSerialization</name></member>
+    <member refid="classLabel_1a02113963f83e2a30e214e24048de1be8" kind="friend"><name>HPXSerialization</name></member>
     <member refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" kind="variable"><name>name</name></member>
   </compound>
   <compound refid="classLuxury" kind="class"><name>Luxury</name>

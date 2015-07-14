@@ -28,11 +28,13 @@
 <codeline lineno="6" refid="classLabel" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel" kindref="compound">Label</ref></highlight></codeline>
 <codeline lineno="7"><highlight class="normal">{</highlight></codeline>
 <codeline lineno="8"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
-<codeline lineno="9" refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" kindref="member">Serialization</ref>;</highlight></codeline>
-<codeline lineno="10" refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" kindref="member">name</ref>;</highlight></codeline>
-<codeline lineno="11"><highlight class="normal">};</highlight></codeline>
-<codeline lineno="12"><highlight class="normal"></highlight></codeline>
-<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="9" refid="classLabel_1ae209e8b29da963ccf420282f01b5e061" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel_1ae209e8b29da963ccf420282f01b5e061" kindref="member">BoostSerialization</ref>;</highlight></codeline>
+<codeline lineno="10" refid="classLabel_1a02113963f83e2a30e214e24048de1be8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classLabel_1a02113963f83e2a30e214e24048de1be8" kindref="member">HPXSerialization</ref>;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12" refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>std::string<sp/><ref refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" kindref="member">name</ref>;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
     <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h"/>
   </compounddef>
