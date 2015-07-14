@@ -5,6 +5,7 @@ class TestTypeParser < Test::Unit::TestCase
   def setup
     @mpi_generator = MPIGenerator.new("./")
     @boost_generator = BoostGenerator.new("./")
+    @hpx_generator = HPXGenerator.new("./")
     @parser = MPIParser.new("./test/fixtures/doc/xml/", true)
     @mpi_classes = ["Car",
                 "Coord<2 >",
@@ -32,10 +33,12 @@ class TestTypeParser < Test::Unit::TestCase
   # simple integration test for free.
   def test_generate_forest
     expected = @boost_generator.generate_forest(*@boost_res) +
+      @hpx_generator.generate_forest(*@boost_res) +
       @mpi_generator.generate_forest(*@mpi_res)
     actual = TypemapGenerator.generate_forest("./test/fixtures/doc/xml/",
                                               "./",
                                               true)
+    assert_equal(expected.size, actual.size)
     assert_equal(expected, actual)
   end
 

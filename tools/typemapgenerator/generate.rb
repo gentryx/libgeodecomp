@@ -66,6 +66,10 @@ opts = OptionParser.new do |o|
        "encapsulate Boost Serialization code in #ifdef(MACRO), #endif guards") do |macro|
     options[:macro_guard_boost] = macro
   end
+  o.on("--macro-guard-hpx MACRO",
+       "encapsulate HPX Serialization code in #ifdef(MACRO), #endif guards") do |macro|
+    options[:macro_guard_hpx] = macro
+  end
   o.on("-p", "--profile",
        "profile execution") do
     options[:profiling] = true
@@ -159,15 +163,17 @@ if options[:profiling]
 end
 
 output_path = Pathname.new(ARGV[1] || "./")
-boost_header, mpi_header, mpi_source =
+boost_header, hpx_serialization, mpi_header, mpi_source =
   TypemapGenerator.generate_forest(xml_path, basedir,
                                    options[:sloppy],
                                    options[:namespace],
                                    /#{options[:header_pattern]}/,
                                    options[:header_replacement],
                                    options[:macro_guard_mpi],
-                                   options[:macro_guard_boost])
-File.open(output_path + "serialization.h", "w").write(boost_header)
+                                   options[:macro_guard_boost],
+                                   options[:macro_guard_hpx])
+File.open(output_path + "boost_serialization.h", "w").write(boost_header)
+File.open(output_path + "hpx_serialization.h", "w").write(hpx_header)
 File.open(output_path + "typemaps.h", "w").write(mpi_header)
 File.open(output_path + "typemaps.#{options[:extension]}", "w").write(mpi_source)
 
