@@ -6,6 +6,8 @@
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
 
+#include <hpx/runtime/serialization/serialize.hpp>
+
 namespace LibGeoDecomp {
 
 /**
@@ -19,7 +21,8 @@ template<typename CELL>
 class Initializer
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef CELL Cell;
@@ -95,9 +98,10 @@ public:
         Random::seed(index);
     }
 
-
 };
 
 }
+
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL>), LibGeoDecomp::Initializer<CELL>);
 
 #endif

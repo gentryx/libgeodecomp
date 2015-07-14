@@ -4,6 +4,10 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/initializer.h>
 
+#include <hpx/runtime/serialization/serialize.hpp>
+#include <hpx/runtime/serialization/base_object.hpp>
+#include <hpx/runtime/serialization/shared_ptr.hpp>
+
 namespace LibGeoDecomp {
 
 /**
@@ -14,7 +18,8 @@ template<typename CELL_TYPE>
 class SimpleInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     typedef typename Initializer<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
 
@@ -46,5 +51,7 @@ protected:
 };
 
 }
+
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), LibGeoDecomp::SimpleInitializer<CELL_TYPE>);
 
 #endif
