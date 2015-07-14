@@ -458,7 +458,6 @@ if(WITH_HPX)
   set(LIBGEODECOMP_LINK_LIBRARIES
     ${LIBGEODECOMP_LINK_LIBRARIES}
     hpx${HPX_LIB_SUFFIX}
-    hpx_serialization${HPX_LIB_SUFFIX}
     hpx_init${HPX_LIB_SUFFIX}
     ${HPX_LIBRARIES})
 endif()
