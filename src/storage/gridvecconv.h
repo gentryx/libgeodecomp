@@ -11,6 +11,8 @@
 #include <boost/iostreams/device/back_inserter.hpp>
 
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/serialize.hpp>
+#include <hpx/runtime/serialization/binary_filter.hpp>
 #include <hpx/runtime/serialization/input_archive.hpp>
 #include <hpx/runtime/serialization/output_archive.hpp>
 #else
@@ -130,7 +132,7 @@ private:
 #ifdef LIBGEODECOMP_WITH_HPX
         int archive_flags = boost::archive::no_header;
         archive_flags |= hpx::serialization::disable_data_chunking;
-        hpx::util::binary_filter *f = 0;
+        hpx::serialization::binary_filter *f = 0;
         hpx::serialization::output_archive archive(*vec, f, archive_flags);
 #else
         typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
