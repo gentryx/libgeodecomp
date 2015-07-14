@@ -13,7 +13,8 @@ template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 class DefaultArrayFilter : public ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     void copyStreakInImpl(
         const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)

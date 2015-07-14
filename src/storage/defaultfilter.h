@@ -13,7 +13,8 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class DefaultFilter : public Filter<CELL, MEMBER, EXTERNAL>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     void copyStreakInImpl(
         const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)

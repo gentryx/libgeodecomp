@@ -301,7 +301,8 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class Filter : public FilterBase<CELL>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     std::size_t sizeOf() const
     {

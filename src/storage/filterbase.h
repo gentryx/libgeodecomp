@@ -22,7 +22,8 @@ template<typename CELL>
 class FilterBase
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     virtual ~FilterBase()
     {}
