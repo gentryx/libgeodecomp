@@ -3,14 +3,15 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-#include <libgeodecomp/communication/serialization.h>
-#ifdef LIBGEODECOMP_WITH_HPX
-#include <hpx/util/portable_binary_oarchive.hpp>
-#include <hpx/util/portable_binary_iarchive.hpp>
-#else
+#include <libgeodecomp/communication/boostserialization.h>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #endif
+
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <libgeodecomp/communication/hpxserialization.h>
+#include <hpx/util/portable_binary_oarchive.hpp>
+#include <hpx/util/portable_binary_iarchive.hpp>
 #endif
 
 #include <sstream>

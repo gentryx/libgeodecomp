@@ -24,7 +24,8 @@ template<>
 class FloatCoord<1>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef double ValueType;
 
@@ -213,7 +214,8 @@ template<>
 class FloatCoord<2>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef double ValueType;
 
@@ -425,7 +427,8 @@ template<>
 class FloatCoord<3>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef double ValueType;
 

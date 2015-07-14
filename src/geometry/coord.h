@@ -65,7 +65,8 @@ template<>
 class Coord<1>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef int ValueType;
 
@@ -244,7 +245,8 @@ template<>
 class Coord<2>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef int ValueType;
 
@@ -453,7 +455,8 @@ template<>
 class Coord<3>
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef int ValueType;
 

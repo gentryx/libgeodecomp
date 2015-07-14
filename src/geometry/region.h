@@ -328,7 +328,8 @@ template<int DIM>
 class Region
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
     template<int MY_DIM> friend class RegionHelpers::RegionInsertHelper;

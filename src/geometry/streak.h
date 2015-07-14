@@ -16,7 +16,8 @@ template<int DIM>
 class Streak
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
 
     inline explicit Streak(
