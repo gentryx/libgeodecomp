@@ -14,7 +14,7 @@ NAMESPACE_END
 namespace boost {
 namespace serialization {
 
-BOOST_NAMESPACE_LINK
+NAMESPACE_LINK
 
 }
 }
