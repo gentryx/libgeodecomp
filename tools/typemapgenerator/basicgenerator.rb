@@ -33,4 +33,51 @@ module BasicGenerator
     end
     return h.join("\n")
   end
+
+  def generate_serialize_function(klass, members, parents, template_parameters)
+    params1 = render_template_params1(template_parameters)
+    params2 = render_template_params2(template_parameters)
+
+    ret = <<EOF
+    template<typename ARCHIVE#{params1}>
+    inline
+    static void serialize(ARCHIVE& archive, #{klass}#{params2}& object, const unsigned /*version*/)
+    {
+EOF
+
+    parents.sort.each do |parent_type|
+      ret += <<EOF
+        archive & #{base_object_name}<#{parent_type} >(object);
+EOF
+    end
+
+    members.keys.sort.each do |member|
+      ret += <<EOF
+        archive & object.#{member};
+EOF
+    end
+
+    ret += <<EOF
+    }
+EOF
+
+    return ret
+  end
+
+  def render_template_params1(template_parameters)
+    params = ""
+    template_parameters.each do |parameter|
+      params += ", #{parameter[:type]} #{parameter[:name]}"
+    end
+
+    return params
+  end
+
+  def render_template_params2(template_parameters)
+    params = template_parameters.map { |parameter| parameter[:name] }
+    params = params.join(", ")
+    if (params.size > 0)
+      params = "<#{params}>"
+    end
+  end
 end
