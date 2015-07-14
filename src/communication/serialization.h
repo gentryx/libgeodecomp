@@ -34,6 +34,7 @@
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/communication/serialization.h>
 
 namespace LibGeoDecomp {
 class Serialization
@@ -43,7 +44,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
     }
 
     template<typename ARCHIVE>
@@ -57,7 +58,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<BASE >(object);
+        archive & hpx::serialization::base_object<BASE >(object);
     }
 
     template<typename ARCHIVE>
@@ -93,21 +94,21 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL > >(object);
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::FilterBase<CELL > >(object);
     }
 
     template<typename ARCHIVE, typename CELL>
@@ -149,7 +150,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, HpxWriterCollector<CELL_TYPE > > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, HpxWriterCollector<CELL_TYPE > > >(object);
         archive & object.sink;
     }
 
@@ -180,7 +181,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
         archive & object.newLoadWeight;
     }
 
@@ -207,7 +208,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE > > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, SerialBOVWriter<CELL_TYPE > > >(object);
         archive & object.brickletDim;
         archive & object.selector;
     }
@@ -216,21 +217,21 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL > >(object);
     }
 
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleInitializer<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Initializer<CELL_TYPE > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Initializer<CELL_TYPE > >(object);
         archive & object.dimensions;
         archive & object.steps;
     }
@@ -255,7 +256,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
         archive & object.balancer;
         archive & object.stream;
     }
@@ -264,8 +265,8 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
+        archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
         archive & object.lastStep;
         archive & object.maxSteps;
         archive & object.outputRank;
@@ -479,7 +480,9 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const 
 }
 }
 
+
 namespace hpx {
+
 namespace serialization {
 
 using namespace LibGeoDecomp;
@@ -673,6 +676,7 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const 
 
 }
 }
+
 
 #endif
 
