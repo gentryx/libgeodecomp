@@ -194,7 +194,8 @@ class Chronometer
 {
 public:
     friend class ChronometerTest;
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
 
     // measure one time interval per class of events

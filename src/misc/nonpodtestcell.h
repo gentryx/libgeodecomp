@@ -23,7 +23,8 @@ class NonPoDTestCell
 {
 public:
     friend class NonPoDTestCellTest;
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     class API :
         public APITraits::HasBoostSerialization,

@@ -13,7 +13,8 @@ template<typename BASE, typename IMPLEMENTATION>
 class Clonable : public BASE
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     /**
      * these c-tors simply delegate to the BASE type, which includes
