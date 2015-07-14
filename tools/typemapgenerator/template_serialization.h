@@ -4,14 +4,14 @@
 HEADERS
 
 NAMESPACE_BEGIN
-class Serialization
+class SERIALIZATION_CLASS_NAME
 {
 public:
     BOOST_SERIALIZATIION_DEFINITIONS
 };
 NAMESPACE_END
 
-namespace boost {
+namespace SERIALIZATION_NAMESPACE {
 namespace serialization {
 
 NAMESPACE_LINK

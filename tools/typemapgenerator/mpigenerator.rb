@@ -6,6 +6,7 @@ class MPIGenerator
   include BasicGenerator
 
   def initialize(template_path="./", namespace=nil, macro_guard_mpi=nil)
+    @serialization_class_name = "Typemaps"
     init_generator(template_path, namespace)
     @macro_guard_mpi   = macro_guard_mpi
   end

@@ -6,11 +6,11 @@ module BasicGenerator
     @namespace = namespace
 
     if namespace
-      @namespace_guard = namespace.upcase + "_"
+      @namespace_guard = namespace.upcase + "_" + @serialization_class_name.upcase + "_"
       @namespace_begin = "namespace #{namespace} {\n"
       @namespace_end = "}\n"
     else
-      @namespace_guard = ""
+      @namespace_guard = @serialization_class_name.upcase
       @namespace_begin = ""
       @namespace_end = ""
     end
@@ -44,7 +44,7 @@ module BasicGenerator
 template<class ARCHIVE#{params1}>
 void serialize(ARCHIVE& archive, #{klass}#{params2}& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    #{@serialization_class_name}::serialize(archive, object, version);
 }
 EOF
   end
@@ -86,6 +86,8 @@ EOF
     ret.gsub!(/NAMESPACE_GUARD/, @namespace_guard)
     ret.gsub!(/NAMESPACE_BEGIN\n/, @namespace_begin)
     ret.gsub!(/NAMESPACE_END\n/, @namespace_end)
+    ret.gsub!(/SERIALIZATION_CLASS_NAME/, @serialization_class_name)
+    ret.gsub!(/SERIALIZATION_NAMESPACE/, @serialization_namespace)
 
     serializations = classes.map do |klass|
       generate_serialize_function(klass, resolved_classes[klass], resolved_parents[klass], template_parameters[klass])

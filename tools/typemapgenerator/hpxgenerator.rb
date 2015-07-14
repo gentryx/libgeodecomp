@@ -6,6 +6,8 @@ class HPXGenerator
   include BasicGenerator
 
   def initialize(template_path="./", namespace=nil, macro_guard_hpx=nil)
+    @serialization_class_name = "HPXSerialization"
+    @serialization_namespace = "hpx"
     init_generator(template_path, namespace)
     @macro_guard = macro_guard_hpx
   end

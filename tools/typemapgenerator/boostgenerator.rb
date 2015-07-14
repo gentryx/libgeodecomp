@@ -6,6 +6,8 @@ class BoostGenerator
   include BasicGenerator
 
   def initialize(template_path="./", namespace=nil, macro_guard_boost=nil)
+    @serialization_class_name = "BoostSerialization"
+    @serialization_namespace = "boost"
     init_generator(template_path, namespace)
     @macro_guard = macro_guard_boost
   end
