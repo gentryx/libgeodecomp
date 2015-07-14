@@ -6,7 +6,7 @@ module BasicGenerator
     @namespace = namespace
 
     if namespace
-      @namespace_guard = namespace.upcase + "_" + @serialization_class_name.upcase + "_"
+      @namespace_guard = namespace.upcase + "_" + @serialization_class_name.upcase
       @namespace_begin = "namespace #{namespace} {\n"
       @namespace_end = "}\n"
     else
