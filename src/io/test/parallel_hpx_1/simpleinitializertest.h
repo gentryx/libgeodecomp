@@ -19,6 +19,8 @@ public:
     {}
 
     virtual Coord<2> gridDimensions() = 0;
+    virtual int maxSteps() = 0;
+    virtual std::string getMessage() = 0;
 };
 
 template<typename T>
@@ -53,8 +55,14 @@ public:
         message(message)
     {}
 
-    virtual void grid(GridBase<int, 2> *target)
+    void grid(GridBase<int, 2> *target)
     {}
+
+    std::string getMessage()
+    {
+        return message;
+    }
+
 
     std::string message;
 };
@@ -92,14 +100,14 @@ namespace LibGeoDecomp {
 class SimpleInitializerTest : public CxxTest::TestSuite
 {
 public:
-    void testSerializationOfTestClasses()
+    void testSerializationOfTestClassesByReference()
     {
         HPXSerializationTest::Concrete init1(Coord<2>(123, 456), 789, "Dodge");
         HPXSerializationTest::Concrete init2(Coord<2>( -1,  -1),   1, "Fuski");
 
-        TS_ASSERT_EQUALS(Coord<2>(-1, -1), init2.gridDimensions());
-        TS_ASSERT_EQUALS(1, init2.maxSteps());
-        TS_ASSERT_EQUALS("Fuski", init2.message);
+        TS_ASSERT_EQUALS(init2.gridDimensions(), Coord<2>(-1, -1));
+        TS_ASSERT_EQUALS(init2.maxSteps(),       1);
+        TS_ASSERT_EQUALS(init2.message,          "Fuski");
 
         std::vector<char> buffer;
         hpx::serialization::output_archive outputArchive(buffer);
@@ -109,9 +117,28 @@ public:
         hpx::serialization::input_archive inputArchive(buffer);
         inputArchive >> init2;
 
-        TS_ASSERT_EQUALS(Coord<2>(123, 456), init2.gridDimensions());
-        TS_ASSERT_EQUALS(789, init2.maxSteps());
-        TS_ASSERT_EQUALS("Dodge", init2.message);
+        TS_ASSERT_EQUALS(init2.gridDimensions(), Coord<2>(123, 456));
+        TS_ASSERT_EQUALS(init2.maxSteps(),       789);
+        TS_ASSERT_EQUALS(init2.message,          "Dodge");
+    }
+
+    void testSerializationOfTestClassesViaPolymorphicSharedPointer()
+    {
+        boost::shared_ptr<HPXSerializationTest::BasicDummy<int> > init1(
+            new HPXSerializationTest::Concrete(Coord<2>(123, 456), 789, "Dodge"));
+        boost::shared_ptr<HPXSerializationTest::BasicDummy<int> > init2;
+
+        std::vector<char> buffer;
+        hpx::serialization::output_archive outputArchive(buffer);
+
+        outputArchive << init1;
+
+        hpx::serialization::input_archive inputArchive(buffer);
+        inputArchive >> init2;
+
+        TS_ASSERT_EQUALS(init2->gridDimensions(), Coord<2>(123, 456));
+        TS_ASSERT_EQUALS(init2->maxSteps(),       789);
+        TS_ASSERT_EQUALS(init2->getMessage(),     "Dodge");
     }
 };
 
