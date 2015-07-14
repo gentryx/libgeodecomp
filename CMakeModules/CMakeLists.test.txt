@@ -117,7 +117,12 @@ int hpx_main(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    return hpx::init(argc, argv);
+    // We want HPX to run hpx_main() on all localities to avoid the
+    // initial overhead caused by broadcasting the work from one to
+    // all other localities:
+    std::vector<std::string> config(1, \"hpx.run_hpx_main!=1\");
+
+    return hpx::init(argc, argv, config);
 }
 ")
   endif()
