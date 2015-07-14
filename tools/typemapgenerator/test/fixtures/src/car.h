@@ -10,7 +10,8 @@ class Mech;
 class Car
 {
     friend class Typemaps;
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     static const unsigned NumWheels = 4;
     Wheel wheels[NumWheels];

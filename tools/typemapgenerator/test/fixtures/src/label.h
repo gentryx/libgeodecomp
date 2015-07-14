@@ -5,8 +5,10 @@
 
 class Label
 {
-    friend class Serialization;
 public:
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     std::string name;
 };
 

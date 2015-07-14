@@ -4,7 +4,8 @@
 class Rim
 {
     friend class Typemaps;
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     bool chromePlated;
 };
