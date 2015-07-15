@@ -113,6 +113,7 @@ class MPIParser
     res.resolved_classes = { }
     res.resolved_parents = { }
     res.topological_class_sortation = []
+    res.is_abstract = {}
     @type_hierarchy_closure = @type_hierarchy_closure.union(classes)
 
     while classes.any?
@@ -127,7 +128,7 @@ class MPIParser
       temp_classes.each do |klass|
         resolve_class(klass, classes,
                       res.resolved_classes, res.resolved_parents,
-                      res.topological_class_sortation)
+                      res.topological_class_sortation, res.is_abstract)
       end
 
       # fail if no class could be resolved in the last iteration
@@ -150,11 +151,13 @@ class MPIParser
     res.members = {}
     res.resolved_parents = {}
     res.template_params = {}
+    res.is_abstract = {}
 
     classes.each do |klass|
       res.members[klass] = get_members(klass)
       res.resolved_parents[klass] = get_parents(klass)
       res.template_params[klass] = template_parameters(klass)
+      res.is_abstract[klass] = is_abstract?(klass)
     end
 
     res.headers = classes.map { |klass| find_header(klass) }
@@ -284,7 +287,7 @@ class MPIParser
   # wraps the resolution process (mapping of members) for a single class.
   def resolve_class(klass, classes,
                     resolved_classes, resolved_parents,
-                    topological_class_sortation)
+                    topological_class_sortation, is_abstract)
     begin
       members = get_members(klass)
       parents = get_parents(klass)
@@ -311,7 +314,7 @@ class MPIParser
         resolve_class_simple(klass, members, parents,
                              classes,
                              resolved_classes, resolved_parents,
-                             topological_class_sortation)
+                             topological_class_sortation, is_abstract)
       else
         used_params = used_template_parameters(klass)
 
@@ -325,7 +328,7 @@ class MPIParser
           resolve_class_simple(new_class, new_members, parents,
                                classes,
                                resolved_classes, resolved_parents,
-                               topological_class_sortation)
+                               topological_class_sortation, is_abstract)
         end
       end
 
@@ -351,7 +354,7 @@ class MPIParser
 
   def resolve_class_simple(klass, members, parents, classes,
                            resolved_classes, resolved_parents,
-                           topological_class_sortation)
+                           topological_class_sortation, is_abstract)
     @log.debug("resolve_class_simple(#{klass})")
 
     actual_members = prune_unresolvable_members(members)
@@ -363,6 +366,23 @@ class MPIParser
     @datatype_map[klass] = Datatype.cpp_to_mpi(klass, partial?(members))
     resolved_classes[klass] = member_map
     resolved_parents[klass] = parents_map
+    is_abstract[klass] = is_abstract?(klass)
+  end
+
+  def is_abstract?(klass)
+    @log.debug "is_abstract?(#{klass})"
+
+    begin
+      filename = class_to_filename(klass)
+      doc = get_xml(filename)
+      xpath = "doxygen/compounddef/basecompoundref"
+
+      value = doc.elements["doxygen/compounddef"].attributes["abstract"]
+      return "yes" == value
+    rescue Exception => e
+      return false
+    end
+    return false
   end
 
   # checks if some class members will be excluded from serialization.

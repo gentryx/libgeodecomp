@@ -16,12 +16,16 @@ class HPXGenerator
     "hpx::serialization::base_object"
   end
 
-  def class_registrations(classes, template_parameters)
+  def class_registrations(classes, template_parameters, is_abstract)
     ret = []
 
     classes.each do |klass|
       if template_parameters[klass].size == 0
-        ret.push "HPX_SERIALIZATION_REGISTER_CLASS(#{klass});"
+        if is_abstract[klass]
+          ret.push "HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(#{klass});"
+        else
+          ret.push "HPX_SERIALIZATION_REGISTER_CLASS(#{klass});"
+        end
       else
         params1 = render_template_params1(template_parameters[klass])
         params2 = render_template_params2(template_parameters[klass])
