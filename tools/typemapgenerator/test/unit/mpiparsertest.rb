@@ -322,10 +322,9 @@ class TestMPIParser < Test::Unit::TestCase
 
   def test_resolve_forest_success
     classes = %w{Engine Car Wheel Rim Tire}.to_set
-    resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers =
-      @parser.resolve_forest(classes)
+    opts = @parser.resolve_forest(classes)
 
-    headers.map! { |elem| elem.gsub!(/(.+\/)(fixtures.+)/) { |match| $2 } }
+    opts.headers.map! { |elem| elem.gsub!(/(.+\/)(fixtures.+)/) { |match| $2 } }
 
     expected_datatype_map = Datatype.new
     expected_datatype_map.merge!(@parser.map_enums)
@@ -410,10 +409,10 @@ class TestMPIParser < Test::Unit::TestCase
       "fixtures/src/wheel.h",
       "fixtures/src/car.h"]
 
-    assert_equal(expected_datatype_map, datatype_map)
-    assert_equal(expected_classes, resolved_classes)
-    assert_equal(expected_sortation, topological_class_sortation)
-    assert_equal(expected_headers, headers)
+    assert_equal(expected_datatype_map, opts.datatype_map)
+    assert_equal(expected_classes,      opts.resolved_classes)
+    assert_equal(expected_sortation,    opts.topological_class_sortation)
+    assert_equal(expected_headers,      opts.headers)
   end
 
   def test_resolve_forest_failure
@@ -465,14 +464,15 @@ class TestSloppyParsing < Test::Unit::TestCase
   def test_incomplete_sloppy_parsing_should_yield_correct_members
     @parser.type_hierarchy_closure.delete "Engine"
     classes = %w(Car Wheel Rim Tire CarContainer)
-    resolved_classes = @parser.resolve_forest(classes)[0]
+    resolved_classes = @parser.resolve_forest(classes).resolved_classes
 
     assert_equal(%w(wheels), resolved_classes["Car"].keys)
     assert_equal(%w(size spareWheel), resolved_classes["CarContainer"].keys.sort)
   end
 
   def test_incomplete_sloppy_parsing_should_yield_correct_typemap_names
-    datatype_map = @parser.resolve_forest(%w(CarContainer Car Engine Wheel Rim Tire))[2]
+    datatype_map = @parser.resolve_forest(%w(CarContainer Car Engine Wheel Rim Tire)).datatype_map
+
     %w(Car Engine Wheel Rim Tire).each do |klass|
       assert_equal(Datatype.cpp_to_mpi(klass), datatype_map[klass])
     end

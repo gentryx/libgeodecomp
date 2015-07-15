@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 require 'rexml/document'
 require 'logger'
-require 'set'
+require 'ostruct'
 require 'pp'
+require 'set'
 require 'stringio'
 load 'datatype.rb'
 
@@ -107,25 +108,26 @@ class MPIParser
     @log.info "resolve_forest()"
     @log.debug pp(classes)
 
+    res = OpenStruct.new
     classes = classes.sort
-    resolved_classes = { }
-    resolved_parents = { }
-    topological_class_sortation = []
+    res.resolved_classes = { }
+    res.resolved_parents = { }
+    res.topological_class_sortation = []
     @type_hierarchy_closure = @type_hierarchy_closure.union(classes)
 
     while classes.any?
       @log.debug "  classes:"
       @log.debug pp(classes)
       @log.debug "  resolved_classes:"
-      @log.debug pp(resolved_classes)
+      @log.debug pp(res.resolved_classes)
       num_unresolved = classes.size
       # this temporary clone is required to avoid interference with deleted elements
       temp_classes = classes.clone
 
       temp_classes.each do |klass|
         resolve_class(klass, classes,
-                      resolved_classes, resolved_parents,
-                      topological_class_sortation)
+                      res.resolved_classes, res.resolved_parents,
+                      res.topological_class_sortation)
       end
 
       # fail if no class could be resolved in the last iteration
@@ -135,28 +137,28 @@ class MPIParser
       end
     end
 
-    headers = topological_class_sortation.map { |klass| find_header(klass) }
-
-    return [resolved_classes, resolved_parents,
-            @datatype_map, topological_class_sortation, headers]
+    res.headers = res.topological_class_sortation.map { |klass| find_header(klass) }
+    res.datatype_map = @datatype_map
+    return res
   end
 
   def shallow_resolution(classes)
     classes = classes.sort
 
-    members = {}
-    parents = {}
-    template_params = {}
+    res = OpenStruct.new
+    res.topological_class_sortation = classes.sort
+    res.members = {}
+    res.resolved_parents = {}
+    res.template_params = {}
 
     classes.each do |klass|
-      members[klass] = get_members(klass)
-      parents[klass] = get_parents(klass)
-      template_params[klass] = template_parameters(klass)
+      res.members[klass] = get_members(klass)
+      res.resolved_parents[klass] = get_parents(klass)
+      res.template_params[klass] = template_parameters(klass)
     end
 
-    headers = classes.map { |klass| find_header(klass) }
-
-    return [members, parents, template_params, classes, headers]
+    res.headers = classes.map { |klass| find_header(klass) }
+    return res
   end
 
   def template_parameters(klass)

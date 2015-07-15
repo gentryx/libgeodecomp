@@ -7,13 +7,18 @@ class TestHPXGenerator < Test::Unit::TestCase
     @generator = HPXGenerator.new("./")
     @parser = MPIParser.new("./test/fixtures/doc/xml/")
     @classes = %w{Wheel Tire Rim Car Label}
-    @resolved_classes, @resolved_parents, @template_params, @class_sortation, @headers =
-      @parser.shallow_resolution(@classes)
+
+    @res = @parser.shallow_resolution(@classes)
+    @resolved_classes = @res.classes
+    @resolved_parents = @res.resolved_parents
+    @template_params = @res.template_params
+    @class_sortation = @res.class_sortation
+    @headers = @res.headers
   end
 
   def test_generate_hpx_serialize_function
     classes = %w{Car}
-    members = @parser.shallow_resolution(classes)[0]
+    members = @parser.shallow_resolution(classes).members
 
     actual_def = @generator.generate_serialize_function(classes[0],
                                                         members[classes[0]],

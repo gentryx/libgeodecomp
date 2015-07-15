@@ -32,14 +32,8 @@ class HPXGenerator
     return ret.join("\n") + "\n\n"
   end
 
-  def generate_header(classes, resolved_classes, resolved_parents, template_parameters, headers, header_pattern=nil, header_replacement=nil)
-
-    return super(classes, resolved_classes, resolved_parents, template_parameters, headers, header_pattern, header_replacement)
-
-  end
-
   # wraps the code generation for multiple typemaps.
-  def generate_forest(resolved_classes, resolved_parents, template_parameters, class_sortation, headers, header_pattern=nil, header_replacement=nil)
-    return [generate_header(class_sortation, resolved_classes, resolved_parents, template_parameters, headers, header_pattern, header_replacement)]
+  def generate_forest(options)
+    return [generate_header(options)]
   end
 end

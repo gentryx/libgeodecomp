@@ -41,33 +41,33 @@ class MPIGenerator
 
   # The Typemap Class needs a header file, declaring all the static
   # variables, macros and so on. This method will generate it's code.
-  def generate_header(classes, datatype_map, resolved_classes, resolved_parents, headers, header_pattern=nil, header_replacement=nil)
+  def generate_header(options)
     ret = File.read(@path + "template_typemaps.h");
-    ret.gsub!(/HEADERS/, map_headers(headers, header_pattern, header_replacement))
+    ret.gsub!(/HEADERS/, map_headers(options.headers, options.header_pattern, options.header_replacement))
     ret.gsub!(/NAMESPACE_GUARD/, @namespace_guard)
     ret.gsub!(/NAMESPACE_BEGIN\n/, @namespace_begin)
     ret.gsub!(/NAMESPACE_END\n/, @namespace_end)
 
-    class_vars = classes.map do |klass|
-      klass_name = datatype_map[klass]
+    class_vars = options.topological_class_sortation.map do |klass|
+      klass_name = options.datatype_map[klass]
       "extern MPI_Datatype #{klass_name};"
     end
     ret.sub!(/.*CLASS_VARS/, class_vars.join("\n"))
 
-    mapgens = classes.map do |klass|
+    mapgens = options.topological_class_sortation.map do |klass|
       "    static MPI_Datatype generateMap#{simple_name(klass)}();"
     end
     ret.sub!(/.*MAPGEN_DECLARATIONS/, mapgens.join("\n"))
 
     lookup_types = Datatype.new.find_all { |k, v| v != :ignore }
     lookup_types = lookup_types.map {|k, v| k }
-    lookup_types = (lookup_types.sort + classes).uniq
+    lookup_types = (lookup_types.sort + options.topological_class_sortation).uniq
 
     lookups = lookup_types.map do |klass|
       <<EOF
     static inline MPI_Datatype lookup(#{klass}*)
     {
-        return #{datatype_map[klass]};
+        return #{options.datatype_map[klass]};
     }
 EOF
     end
@@ -78,24 +78,26 @@ EOF
 
   # The Typemap Class needs a source file, containing all the method
   # bodys and variable definitions. This methods creates the code.
-  def generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)
+  def generate_source(options)
     ret = File.read(@path + "template_typemaps.cpp");
 
-    class_vars = topological_class_sortation.map do |klass|
-      klass_name = datatype_map[klass]
+    class_vars = options.topological_class_sortation.map do |klass|
+      klass_name = options.datatype_map[klass]
       "MPI_Datatype #{klass_name};"
     end
     ret.sub!(/ *CLASS_VARS/, class_vars.join("\n"))
     ret.sub!(/NAMESPACE_BEGIN\n/, @namespace_begin)
     ret.sub!(/NAMESPACE_END\n/, @namespace_end)
 
-    methods = topological_class_sortation.map do |klass|
-      generate_single_map(klass, resolved_classes[klass], resolved_parents[klass])
+    methods = options.topological_class_sortation.map do |klass|
+      generate_single_map(klass,
+                          options.resolved_classes[klass],
+                          options.resolved_parents[klass])
     end
     ret.sub!(/METHOD_DEFINITIONS/, methods.join("\n"))
 
-    assignments = topological_class_sortation.map do |klass|
-      "    #{datatype_map[klass]} = generateMap#{simple_name(klass)}();"
+    assignments = options.topological_class_sortation.map do |klass|
+      "    #{options.datatype_map[klass]} = generateMap#{simple_name(klass)}();"
     end
     ret.sub!(/.+ASSIGNMENTS/, assignments.join("\n"))
 
@@ -107,8 +109,8 @@ EOF
   end
 
   # wraps the code generation for multiple typemaps.
-  def generate_forest(resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers, header_pattern=nil, header_replacement=nil)
-    return [generate_header(topological_class_sortation, datatype_map, resolved_classes, resolved_parents, headers, header_pattern, header_replacement),
-            generate_source(topological_class_sortation, datatype_map, resolved_classes, resolved_parents)]
+  def generate_forest(options)
+    return [generate_header(options),
+            generate_source(options)]
   end
 end
