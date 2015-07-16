@@ -7,6 +7,17 @@
 #include <iostream>
 
 namespace LibGeoDecomp {
+class TracingBalancer;
+}
+
+namespace hpx {
+namespace serialization {
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version);
+}
+}
+
+namespace LibGeoDecomp {
 
 /**
  * This class relies on another LoadBalancer to do the job, but is
@@ -15,10 +26,12 @@ namespace LibGeoDecomp {
 class TracingBalancer : public LoadBalancer
 {
 public:
-    friend class Serialization;
+    template<class ARCHIVE>
+    friend void hpx::serialization::serialize(
+        ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version);
 
     explicit TracingBalancer(
-        LoadBalancer *balancer,
+        LoadBalancer *balancer = 0,
         std::ostream& stream = std::cout) :
         balancer(balancer),
         stream(stream)
@@ -41,18 +54,19 @@ private:
 
 }
 
-namespace boost {
+namespace hpx {
 namespace serialization {
 
-template<class Archive, typename CELL_TYPE>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::TracingBalancer *object, const unsigned version)
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version)
 {
-    ::new(object)LibGeoDecomp::TracingBalancer(0);
-    serialize(archive, *object, version);
+    archive & hpx::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
+    archive & object.balancer;
 }
 
 }
 }
+
+HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::TracingBalancer);
 
 #endif

@@ -5,10 +5,16 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * A LoadBalancer's task is to try and dynamically equalize
+ * computational by assigning a fraction of the total work to each
+ * rank/locality.
+ */
 class LoadBalancer
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     typedef std::vector<std::size_t> WeightVec;
     typedef std::vector<double> LoadVec;
