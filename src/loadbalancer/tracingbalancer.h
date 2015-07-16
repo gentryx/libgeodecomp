@@ -1,10 +1,15 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-
 #include <boost/shared_ptr.hpp>
 #include <iostream>
+
+#ifdef LIBGEODECOMP_WITH_HPX
+
+#include <libgeodecomp/communication/hpxserialization.h>
+#include <hpx/runtime/serialization/set.hpp>
 
 namespace LibGeoDecomp {
 class TracingBalancer;
@@ -16,6 +21,7 @@ template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version);
 }
 }
+#endif
 
 namespace LibGeoDecomp {
 
@@ -26,9 +32,11 @@ namespace LibGeoDecomp {
 class TracingBalancer : public LoadBalancer
 {
 public:
+#ifdef LIBGEODECOMP_WITH_HPX
     template<class ARCHIVE>
     friend void hpx::serialization::serialize(
         ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version);
+#endif
 
     explicit TracingBalancer(
         LoadBalancer *balancer = 0,
@@ -54,6 +62,7 @@ private:
 
 }
 
+#ifdef LIBGEODECOMP_WITH_HPX
 namespace hpx {
 namespace serialization {
 
@@ -68,5 +77,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const un
 }
 
 HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::TracingBalancer);
+#endif
 
 #endif
