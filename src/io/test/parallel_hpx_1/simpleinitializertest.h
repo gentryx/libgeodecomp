@@ -68,17 +68,17 @@ public:
 };
 
 template <typename Archive, typename T>
-void serialize(Archive & ar, BasicDummy<T> & d1, unsigned)
+void serialize(Archive & archive, BasicDummy<T> & dummy, unsigned)
 {
 }
 
 template <typename Archive, typename T>
-void serialize(Archive & ar, Dummy<T> & d1, unsigned)
+void serialize(Archive & archive, Dummy<T> & dummy, unsigned)
 {
-    ar
-        & hpx::serialization::base_object<BasicDummy<int> >(d1)
-        & d1.c
-        & d1.s;
+    archive
+        & hpx::serialization::base_object<BasicDummy<int> >(dummy)
+        & dummy.c
+        & dummy.s;
 }
 
 template<class ARCHIVE>
