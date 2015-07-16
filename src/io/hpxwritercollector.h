@@ -113,7 +113,8 @@ template<typename CELL_TYPE>
 class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class boost::serialization::access;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;

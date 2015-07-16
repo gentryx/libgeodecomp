@@ -102,6 +102,4 @@ public:
 
 }
 
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL>), LibGeoDecomp::Initializer<CELL>);
-
 #endif

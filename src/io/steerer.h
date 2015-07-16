@@ -26,7 +26,8 @@ template<typename CELL_TYPE>
 class Steerer
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     typedef typename APITraits::SelectStaticData<CELL_TYPE>::Value StaticData;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef GridBase<CELL_TYPE, Topology::DIM> GridType;

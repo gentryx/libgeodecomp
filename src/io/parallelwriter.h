@@ -32,7 +32,8 @@ template<typename CELL_TYPE>
 class ParallelWriter
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename DistributedSimulator<CELL_TYPE>::GridType GridType;
     typedef Region<Topology::DIM> RegionType;

@@ -4,10 +4,6 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/initializer.h>
 
-#include <hpx/runtime/serialization/serialize.hpp>
-#include <hpx/runtime/serialization/base_object.hpp>
-#include <hpx/runtime/serialization/shared_ptr.hpp>
-
 namespace LibGeoDecomp {
 
 /**
@@ -51,7 +47,5 @@ protected:
 };
 
 }
-
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), LibGeoDecomp::SimpleInitializer<CELL_TYPE>);
 
 #endif

@@ -8,7 +8,6 @@
 #endif
 
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
-
 #include <string>
 #include <stdexcept>
 
@@ -33,7 +32,8 @@ template<typename CELL_TYPE>
 class Writer
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class WriterTest;
 
     typedef typename MonolithicSimulator<CELL_TYPE>::GridType GridType;

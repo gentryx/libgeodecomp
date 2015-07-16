@@ -36,7 +36,8 @@ class TracingWriter :
         public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class boost::serialization::access;
 
     using Writer<CELL_TYPE>::NANO_STEPS;

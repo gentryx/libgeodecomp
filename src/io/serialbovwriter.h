@@ -20,7 +20,8 @@ template<typename CELL_TYPE>
 class SerialBOVWriter : public Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
     typedef typename Writer<CELL_TYPE>::GridType GridType;
