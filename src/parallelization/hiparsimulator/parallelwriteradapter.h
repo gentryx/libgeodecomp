@@ -1,7 +1,7 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
-#include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {
