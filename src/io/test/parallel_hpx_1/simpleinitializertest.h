@@ -68,12 +68,12 @@ public:
 };
 
 template <typename Archive, typename T>
-void serialize(Archive & archive, BasicDummy<T> & dummy, unsigned)
+void serialize(Archive & archive, BasicDummy<T>& dummy, unsigned)
 {
 }
 
 template <typename Archive, typename T>
-void serialize(Archive & archive, Dummy<T> & dummy, unsigned)
+void serialize(Archive & archive, Dummy<T>& dummy, unsigned)
 {
     archive
         & hpx::serialization::base_object<BasicDummy<int> >(dummy)
@@ -95,12 +95,12 @@ HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <class T>), HPXSerializat
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <class T>), HPXSerializationTest::Dummy<T>)
 HPX_SERIALIZATION_REGISTER_CLASS(HPXSerializationTest::Concrete);
 
-namespace LibGeoDecomp {
+namespace HPXSerializationTest {
 
-class SerializationTestInitializer : public SimpleInitializer<int>
+class TestInitializer : public SimpleInitializer<int>
 {
 public:
-    SerializationTestInitializer(
+    TestInitializer(
         int defaultValue = 0,
         const Coord<2>& dim = Coord<2>(),
         unsigned lastStep = 0) :
@@ -117,7 +117,7 @@ public:
 };
 
 template<class ARCHIVE>
-void serialize(ARCHIVE& archive, SerializationTestInitializer& init, const unsigned version)
+void serialize(ARCHIVE& archive, TestInitializer& init, const unsigned version)
 {
     archive
         & hpx::serialization::base_object<SimpleInitializer<int> >(init)
@@ -126,7 +126,7 @@ void serialize(ARCHIVE& archive, SerializationTestInitializer& init, const unsig
 
 }
 
-HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::SerializationTestInitializer);
+HPX_SERIALIZATION_REGISTER_CLASS(HPXSerializationTest::TestInitializer);
 
 namespace LibGeoDecomp {
 
@@ -176,8 +176,8 @@ public:
 
     void testSerializationOfInitializerByReference()
     {
-        SerializationTestInitializer init1(888, Coord<2>(666, 777), 999);
-        SerializationTestInitializer init2(333, Coord<2>(111, 222), 444);
+        HPXSerializationTest::TestInitializer init1(888, Coord<2>(666, 777), 999);
+        HPXSerializationTest::TestInitializer init2(333, Coord<2>(111, 222), 444);
         Grid<int> grid(Coord<2>(1, 1), -1);
 
         init2.grid(&grid);
