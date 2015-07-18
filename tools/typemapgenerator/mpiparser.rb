@@ -373,12 +373,14 @@ class MPIParser
     @log.debug "is_abstract?(#{klass})"
 
     begin
-      filename = class_to_filename(klass)
-      doc = get_xml(filename)
-      xpath = "doxygen/compounddef/basecompoundref"
+      sweep_all_functions(klass) do |member|
+        next if member.attributes["virt"].nil?
 
-      value = doc.elements["doxygen/compounddef"].attributes["abstract"]
-      return "yes" == value
+        if member.attributes["virt"] == "pure-virtual"
+          return true
+        end
+
+      end
     rescue Exception => e
       return false
     end
@@ -693,6 +695,19 @@ class MPIParser
     end
   end
 
+  def sweep_all_functions(klass)
+    @log.debug "sweep_all_functions(#{klass})"
+    filename = class_to_filename(klass)
+    @log.debug "  filename = #{filename}"
+
+    doc = get_xml(filename)
+    xpath = "doxygen/compounddef/listofallmembers/member"
+
+    doc.elements.each(xpath) do |member|
+      yield member
+    end
+  end
+
   # locate the header filename
   def find_header(klass)
     begin
@@ -740,7 +755,9 @@ class MPIParser
   end
 
   def class_to_filename(klass)
-    @filename_cache[klass]
+    klass =~ /([^\<]+)/
+    stripped_class = $1
+    @filename_cache[klass] || @filename_cache[stripped_class]
   end
 
   def parse_class_name(klass)

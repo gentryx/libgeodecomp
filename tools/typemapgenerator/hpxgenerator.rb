@@ -23,11 +23,15 @@ class HPXGenerator
       if template_parameters[klass].size == 0
         if is_abstract[klass]
           ret.push "HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(#{klass});"
+        # else
+        #   ret.push "HPX_SERIALIZATION_REGISTER_CLASS(#{klass});"
         end
       else
-        params1 = render_template_params1(template_parameters[klass])
-        params2 = render_template_params2(template_parameters[klass])
-        ret.push "HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <#{params1}>), (#{klass}#{params2}));"
+        if is_abstract[klass]
+          params1 = render_template_params1(template_parameters[klass])
+          params2 = render_template_params2(template_parameters[klass])
+          ret.push "HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <#{params1}>), (#{klass}#{params2}));"
+        end
       end
     end
 
