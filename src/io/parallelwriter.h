@@ -44,7 +44,7 @@ public:
      */
     ParallelWriter(
         const std::string& prefix,
-        const unsigned& period) :
+        const unsigned period) :
         prefix(prefix),
         period(period)
     {
