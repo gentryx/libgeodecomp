@@ -96,10 +96,6 @@ if(WITH_HPX AND NOT HPX_FOUND)
   message(FATAL_ERROR "WITH_HPX selected but could not find HPX. Specify HPX_DIR to point to your HPX CMake scripts (e.g. cmake -DHPX_DIR=/home/alice/local_install/lib/cmake/hpx).")
 endif()
 
-if(WITH_HPX AND NOT Boost_SERIALIZATION_FOUND)
-  message(FATAL_ERROR "WITH_HPX selected but Boost.Serialization is missing. Is your Boost installation incomplete?")
-endif()
-
 if(WITH_MPI)
   if(NOT MPI_FOUND)
     message(FATAL_ERROR "WITH_MPI selected, but could find no MPI implementation.")
