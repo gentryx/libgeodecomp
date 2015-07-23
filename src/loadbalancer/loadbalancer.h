@@ -13,13 +13,15 @@ namespace LibGeoDecomp {
 class LoadBalancer
 {
 public:
+    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
 
     typedef std::vector<std::size_t> WeightVec;
     typedef std::vector<double> LoadVec;
 
-    virtual ~LoadBalancer() {}
+    virtual ~LoadBalancer()
+    {}
 
     /**
      * Given the current workload distribution weights
