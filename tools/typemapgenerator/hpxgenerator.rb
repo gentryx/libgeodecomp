@@ -41,8 +41,23 @@ class HPXGenerator
     return ret.join("\n") + "\n\n"
   end
 
+  def class_registrations_source(classes, template_parameters, is_abstract)
+    ret = []
+
+    classes.each do |klass|
+      if template_parameters[klass].size == 0
+        if !is_abstract[klass]
+          ret.push "HPX_SERIALIZATION_REGISTER_CLASS(#{klass})"
+        end
+      end
+    end
+
+    return ret.join("\n") + "\n\n"
+  end
+
   # wraps the code generation for multiple typemaps.
   def generate_forest(options)
-    return [generate_header(options)]
+    return [generate_header(options),
+            generate_source(options)]
   end
 end

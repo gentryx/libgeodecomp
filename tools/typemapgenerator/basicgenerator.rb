@@ -121,6 +121,16 @@ EOF
     return guard(@macro_guard, ret)
   end
 
+  def generate_source(options)
+    ret = File.read(@path + "template_serialization.cpp");
+    ret.gsub!(/MACROS\n/,
+      class_registrations_source(options.topological_class_sortation,
+                                 options.template_params,
+                                 options.is_abstract))
+
+    return ret
+  end
+
   def render_template_params1(template_parameters)
     params = template_parameters.map do |parameter|
       "#{parameter[:type]} #{parameter[:name]}"

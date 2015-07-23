@@ -163,7 +163,7 @@ if options[:profiling]
 end
 
 output_path = Pathname.new(ARGV[1] || "./")
-boost_header, hpx_header, mpi_header, mpi_source =
+boost_header, hpx_header, hpx_source, mpi_header, mpi_source =
   TypemapGenerator.generate_forest(xml_path, basedir,
                                    options[:sloppy],
                                    options[:namespace],
@@ -174,6 +174,7 @@ boost_header, hpx_header, mpi_header, mpi_source =
                                    options[:macro_guard_hpx])
 File.open(output_path + "boostserialization.h", "w").write(boost_header)
 File.open(output_path + "hpxserialization.h", "w").write(hpx_header)
+File.open(output_path + "hpxserialization.cpp", "w").write(hpx_source)
 File.open(output_path + "typemaps.h", "w").write(mpi_header)
 File.open(output_path + "typemaps.#{options[:extension]}", "w").write(mpi_source)
 
