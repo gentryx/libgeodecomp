@@ -81,7 +81,7 @@ EOF
     return ret
   end
 
-  def class_registrations(classes, template_parameters, is_abstract)
+  def class_registrations(options)
     return ""
   end
 
@@ -92,8 +92,7 @@ EOF
     ret.gsub!(/NAMESPACE_GUARD/, @namespace_guard)
     ret.gsub!(/NAMESPACE_BEGIN\n/, @namespace_begin)
     ret.gsub!(/NAMESPACE_END\n/, @namespace_end)
-    ret.gsub!(/CLASS_REGISTRATIONS\n/,
-      class_registrations(options.topological_class_sortation, options.template_params, options.is_abstract))
+    ret.gsub!(/CLASS_REGISTRATIONS\n/, class_registrations(options))
     ret.gsub!(/SERIALIZATION_CLASS_NAME/, @serialization_class_name)
     ret.gsub!(/SERIALIZATION_NAMESPACE/, @serialization_namespace)
 
@@ -123,10 +122,7 @@ EOF
 
   def generate_source(options)
     ret = File.read(@path + "template_serialization.cpp");
-    ret.gsub!(/MACROS\n/,
-      class_registrations_source(options.topological_class_sortation,
-                                 options.template_params,
-                                 options.is_abstract))
+    ret.gsub!(/MACROS\n/, class_registrations_source(options))
 
     return ret
   end
