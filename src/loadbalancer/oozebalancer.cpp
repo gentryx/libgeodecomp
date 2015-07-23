@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 
 namespace LibGeoDecomp {
@@ -85,15 +86,15 @@ OozeBalancer::WeightVec OozeBalancer::balance(
 
     WeightVec ret = equalize(newLoads);
     if (sum(weights) != sum(ret)) {
-        std::cerr << "OozeBalancer::balance() failed\n"
-                  << "  weights.sum() = " << sum(weights) << "\n"
-                  << "  ret.sum() = " << sum(ret) << "\n"
-                  << "  expectedOptimal.sum() = " << sum(expectedOptimal) << "\n"
-                  << "  weights = " << weights << "\n"
-                  << "  relativeLoads = " << relativeLoads << "\n"
-                  << "  expectedOptimal = " << expectedOptimal << "\n"
-                  << "  newLoads = " << newLoads << "\n"
-                  << "  ret = " << ret << "\n";
+        LOG(ERROR, "OozeBalancer::balance() failed\n"
+            << "  weights.sum() = " << sum(weights) << "\n"
+            << "  ret.sum() = " << sum(ret) << "\n"
+            << "  expectedOptimal.sum() = " << sum(expectedOptimal) << "\n"
+            << "  weights = " << weights << "\n"
+            << "  relativeLoads = " << relativeLoads << "\n"
+            << "  expectedOptimal = " << expectedOptimal << "\n"
+            << "  newLoads = " << newLoads << "\n"
+            << "  ret = " << ret << "\n");
         throw std::logic_error("ret.sum does not match weights.sum");
     }
     return ret;
