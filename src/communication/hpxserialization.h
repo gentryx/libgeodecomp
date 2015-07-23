@@ -273,16 +273,19 @@ public:
 }
 
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>), (LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>));
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>), (LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>));
+HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>), (LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>));
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL>), (LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>));
+HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL>), (LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL>), (LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL>), (LibGeoDecomp::FilterBase<CELL>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL>), (LibGeoDecomp::Initializer<CELL>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(LibGeoDecomp::LoadBalancer);
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(LibGeoDecomp::OozeBalancer);
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::ParallelWriter<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>), (LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL>), (LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SimpleInitializer<CELL_TYPE>));
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::Steerer<CELL_TYPE>));
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::Writer<CELL_TYPE>));
 
 namespace hpx {
