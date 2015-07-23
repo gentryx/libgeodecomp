@@ -137,12 +137,17 @@ template<typename CELL>
 class Selector
 {
 public:
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE(Selector);
+
     Selector() :
         memberPointer(0),
         memberSize(0),
         externalSize(0),
         memberOffset(0),
         memberName("memberName not initialized")
+    {}
+
+    virtual ~Selector()
     {}
 
     template<typename MEMBER>
