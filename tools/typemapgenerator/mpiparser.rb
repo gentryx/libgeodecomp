@@ -152,12 +152,14 @@ class MPIParser
     res.resolved_parents = {}
     res.template_params = {}
     res.is_abstract = {}
+    res.wants_polymorphic_serialization = {}
 
     classes.each do |klass|
       res.members[klass] = get_members(klass)
       res.resolved_parents[klass] = get_parents(klass)
       res.template_params[klass] = template_parameters(klass)
       res.is_abstract[klass] = is_abstract?(klass)
+      res.wants_polymorphic_serialization[klass] = wants_polymorphic_serialization?(klass)
     end
 
     res.headers = classes.map { |klass| find_header(klass) }
@@ -748,6 +750,20 @@ class MPIParser
     end
 
     return ret
+  end
+
+  def wants_polymorphic_serialization?(klass)
+    filename = class_to_filename(klass)
+    doc = get_xml(filename)
+
+    doc.elements.each("doxygen/compounddef/sectiondef/memberdef") do |member|
+      if (member.attributes["kind"] == "friend") &&
+          (member.elements["name"].text == "PolymorphicSerialization")
+        return true
+      end
+    end
+
+    return false
   end
 
   def is_class_declaration(filename)
