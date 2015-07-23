@@ -13,6 +13,7 @@ template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY = 1>
 class ArrayFilter : public FilterBase<CELL>
 {
 public:
+    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
 

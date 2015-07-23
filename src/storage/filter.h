@@ -301,6 +301,7 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class Filter : public FilterBase<CELL>
 {
 public:
+    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
 
