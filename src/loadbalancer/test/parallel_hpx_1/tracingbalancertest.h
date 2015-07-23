@@ -41,6 +41,7 @@ void serialize(Archive & archive, TestBalancer& balancer, unsigned)
 
 }
 
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(HPXSerializationTest::TestBalancer);
 HPX_SERIALIZATION_REGISTER_CLASS(HPXSerializationTest::TestBalancer);
 
 namespace LibGeoDecomp {
@@ -48,7 +49,6 @@ namespace LibGeoDecomp {
 class TracingBalancerTest : public CxxTest::TestSuite
 {
 public:
-
     void testSerializationByValue()
     {
         std::ostringstream voidStream;

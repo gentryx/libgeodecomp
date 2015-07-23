@@ -63,6 +63,9 @@ private:
 }
 
 #ifdef LIBGEODECOMP_WITH_HPX
+
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(LibGeoDecomp::TracingBalancer);
+
 namespace hpx {
 namespace serialization {
 
@@ -76,7 +79,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const un
 }
 }
 
-HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::TracingBalancer);
 #endif
 
 #endif
