@@ -445,7 +445,7 @@ public:
         geometryCacheTainted(false)
     {}
 
-#if (__cplusplus >= 201103L)
+#ifdef LIBGEODECOMP_WITH_CPP14
     inline Region(const Region<DIM>& other) = default;
 
     inline Region(Region<DIM>&& other) :
