@@ -52,6 +52,33 @@ public:
         }
     }
 
+    void testSerializationWithScalarMemberViaPointer()
+    {
+        boost::shared_ptr<Selector<HPXSerializationTest::TestStructA> > selector1(
+            new Selector<HPXSerializationTest::TestStructA>(&HPXSerializationTest::TestStructA::x, "x"));
+        boost::shared_ptr<Selector<HPXSerializationTest::TestStructA> > selector2;
+
+        std::vector<char> buffer;
+        hpx::serialization::output_archive outputArchive(buffer);
+
+        outputArchive << selector1;
+
+        hpx::serialization::input_archive inputArchive(buffer);
+        inputArchive >> selector2;
+
+        std::vector<HPXSerializationTest::TestStructA> source(400);
+        for (int i = 0; i < 400; ++i) {
+            source[i].x = i + 9876;
+        }
+
+        std::vector<int> target(400);
+        selector2->copyMemberOut(&source[0], reinterpret_cast<char*>(&target[0]), 400);
+
+        for (int i = 0; i < 400; ++i) {
+            TS_ASSERT_EQUALS(i + 9876, target[i]);
+        }
+    }
+
     void testSerializationWithArrayMember()
     {
         Selector<HPXSerializationTest::TestStructA> selector1(&HPXSerializationTest::TestStructA::y, "y");
