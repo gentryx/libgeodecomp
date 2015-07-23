@@ -84,6 +84,11 @@ public:
         return "primitiveType";
     }
 
+    MPI_Datatype mpiDatatype() const
+    {
+        return Typemaps::lookup<CELL>();
+    }
+
     std::size_t sizeOfMember() const
     {
         return sizeof(CELL);
