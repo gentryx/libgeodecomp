@@ -21,6 +21,7 @@ template<typename CELL>
 class Initializer
 {
 public:
+    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
 

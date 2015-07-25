@@ -36,6 +36,8 @@ class TracingWriter :
         public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(TracingWriter);
+
     friend class BoostSerialization;
     friend class HPXSerialization;
     friend class boost::serialization::access;

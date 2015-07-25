@@ -57,6 +57,8 @@ template<typename CARGO>
 class HumbleTestWriter : public ParallelWriter<CARGO>
 {
 public:
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(HumbleTestWriter)
+
     template <typename Archive>
     friend void serialize(Archive & archive, HumbleTestWriter& writer, unsigned);
 
@@ -89,8 +91,6 @@ public:
         bool lastCall)
     {}
 
-
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(HumbleTestWriter)
 private:
     double cargo;
 };
@@ -119,6 +119,8 @@ void serialize(Archive & archive, HumbleTestWriter<double>& writer, unsigned)
 }
 
 HPX_SERIALIZATION_REGISTER_CLASS(HPXSerializationTest::FancyTestWriter);
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(HPXSerializationTest::FancyTestWriter);
+
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE(
     (template <typename CARGO>),
     (HPXSerializationTest::HumbleTestWriter<CARGO>));
