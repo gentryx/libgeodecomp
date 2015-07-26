@@ -378,7 +378,7 @@ class MPIParser
       sweep_all_functions(klass) do |member|
         next if member.attributes["virt"].nil?
 
-        if member.attributes["virt"] == "pure-virtual"
+        if member.attributes["virt"] == "pure-virtual" && member.attributes["ambiguityscope"].nil?
           return true
         end
 
