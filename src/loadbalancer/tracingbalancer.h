@@ -33,9 +33,9 @@ class TracingBalancer : public LoadBalancer
 {
 public:
 #ifdef LIBGEODECOMP_WITH_HPX
-    template<class ARCHIVE>
+    template<typename ARCHIVE>
     friend void hpx::serialization::serialize(
-        ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version);
+        ARCHIVE& archive, TracingBalancer& object, const unsigned version);
 #endif
 
     explicit TracingBalancer(
