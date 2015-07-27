@@ -145,6 +145,8 @@ public:
         ARCHIVE& archive, LibGeoDecomp::Selector<CELL2>& object, const unsigned version);
 #endif
 
+    friend class PPMWriterTest;
+
     Selector() :
         memberPointer(0),
         memberSize(0),

@@ -36,7 +36,14 @@ public:
         hpx::serialization::input_archive inputArchive(buffer);
         inputArchive >> writer2;
 
-        // fixme
+        QuickPalette<double> palette = static_cast<
+            SimpleCellPlotterHelpers::CellToColor<TestCell<2>, double, QuickPalette<double> >*>(
+                &*writer2.plotter.cellPlotter.cellToColor.filter)->palette;
+
+        TS_ASSERT_EQUALS(Color::BLACK,     palette[-1]);
+        TS_ASSERT_EQUALS(Color::WHITE,     palette[ 2]);
+        TS_ASSERT_EQUALS(Color(0, 0, 255), palette[ 0]);
+        TS_ASSERT_EQUALS(Color(255, 0, 0), palette[ 1]);
     }
 
 };

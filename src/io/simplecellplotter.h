@@ -11,6 +11,8 @@
 
 namespace LibGeoDecomp {
 
+class PPMWriterTest;
+
 namespace SimpleCellPlotterHelpers {
 
 template<typename CELL, typename MEMBER, typename PALETTE>
@@ -29,6 +31,7 @@ public:
     friend class BoostSerialization;
     friend class HPXSerialization;
     friend class LibGeoDecomp::HPXSerialization;
+    friend class LibGeoDecomp::PPMWriterTest;
 
     // fixme: drop this default c-tor once HPX serialization is up to snuff
     explicit
@@ -83,6 +86,7 @@ class SimpleCellPlotter
 public:
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class PPMWriterTest;
 
     template<typename MEMBER, typename PALETTE>
     explicit SimpleCellPlotter(MEMBER CELL_TYPE:: *memberPointer, const PALETTE& palette) :

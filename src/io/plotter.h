@@ -22,6 +22,7 @@ class Plotter
 {
 public:
     friend class HPXSerialization;
+    friend class PPMWriterTest;
 
     explicit Plotter(const Coord<2>& cellDim = Coord<2>(32, 32),
                      const CELL_PLOTTER& cellPlotter = CELL_PLOTTER()) :

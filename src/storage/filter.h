@@ -304,6 +304,7 @@ public:
     friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class PPMWriterTest;
 
     std::size_t sizeOf() const
     {
