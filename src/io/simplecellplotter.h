@@ -17,6 +17,24 @@ template<typename CELL, typename MEMBER, typename PALETTE>
 class CellToColor : public Filter<CELL, MEMBER, Color>
 {
 public:
+#ifdef LIBGEODECOMP_WITH_HPX
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(CellToColor);
+
+    template<typename ARCHIVE, typename CELL2, typename MEMBER2, typename PALETTE2>
+    friend void hpx::serialization::serialize(
+        ARCHIVE& archive, CellToColor<CELL2, MEMBER2, PALETTE2>& object, const unsigned version);
+#endif
+
+    friend class PolymorphicSerialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+    friend class LibGeoDecomp::HPXSerialization;
+
+    // fixme: drop this default c-tor once HPX serialization is up to snuff
+    explicit
+    CellToColor()
+    {}
+
     explicit
     CellToColor(const PALETTE& palette) :
         palette(palette)
@@ -63,6 +81,9 @@ template<typename CELL_TYPE>
 class SimpleCellPlotter
 {
 public:
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     template<typename MEMBER, typename PALETTE>
     explicit SimpleCellPlotter(MEMBER CELL_TYPE:: *memberPointer, const PALETTE& palette) :
         cellToColor(

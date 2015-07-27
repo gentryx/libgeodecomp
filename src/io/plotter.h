@@ -21,6 +21,8 @@ template<typename CELL, class CELL_PLOTTER = SimpleCellPlotter<CELL> >
 class Plotter
 {
 public:
+    friend class HPXSerialization;
+
     explicit Plotter(const Coord<2>& cellDim = Coord<2>(32, 32),
                      const CELL_PLOTTER& cellPlotter = CELL_PLOTTER()) :
 	cellDim(cellDim),

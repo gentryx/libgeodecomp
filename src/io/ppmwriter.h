@@ -26,10 +26,27 @@ template<typename CELL_TYPE, typename CELL_PLOTTER = SimpleCellPlotter<CELL_TYPE
 class PPMWriter : public Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >
 {
 public:
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(PPMWriter);
+
+    friend class PolymorphicSerialization;
+    friend class HPXSerialization;
     friend class PPMWriterTest;
+
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
+
+    // fixme: default c-tors considered harmful. will remove them once
+    // HPX serialization doesn't require them any more.
+    PPMWriter() :
+        Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >("", 1),
+        plotter(
+            Coord<2>(1, 1),
+            CELL_PLOTTER(
+                &CELL_TYPE::testValue,
+                QuickPalette<double>(0, 1)))
+    {}
+
 
     /**
      * This PPMWriter will render a given member (e.g. &Cell::fooBar).

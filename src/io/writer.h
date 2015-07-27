@@ -32,6 +32,7 @@ template<typename CELL_TYPE>
 class Writer
 {
 public:
+    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
     friend class WriterTest;

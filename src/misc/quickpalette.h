@@ -13,6 +13,13 @@ template<typename VALUE>
 class QuickPalette
 {
 public:
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
+    // fixme: drop this default c-tor once HPX serialization is up to snuff
+    QuickPalette()
+    {}
+
     QuickPalette(VALUE min, VALUE max) :
         mark0(min),
         mark1((min * 3 + max * 1) / 4),
