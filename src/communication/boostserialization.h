@@ -5,7 +5,6 @@
 
 #include <libgeodecomp/storage/arrayfilter.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/misc/clonable.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -24,9 +23,12 @@
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
@@ -50,13 +52,6 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned /*version*/)
     {
         archive & object.totalTimes;
-    }
-
-    template<typename ARCHIVE, typename BASE, typename IMPLEMENTATION>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<BASE >(object);
     }
 
     template<typename ARCHIVE>
@@ -192,6 +187,18 @@ public:
         archive & object.region;
     }
 
+    template<typename ARCHIVE, typename VALUE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, const unsigned /*version*/)
+    {
+        archive & object.mark0;
+        archive & object.mark1;
+        archive & object.mark2;
+        archive & object.mark3;
+        archive & object.mark4;
+        archive & object.mult;
+    }
+
     template<typename ARCHIVE, int DIM>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned /*version*/)
@@ -216,6 +223,21 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
     {
         archive & boost::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
+    }
+
+    template<typename ARCHIVE, typename CELL_TYPE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned /*version*/)
+    {
+        archive & object.cellToColor;
+    }
+
+    template<typename ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, Color > >(object);
+        archive & object.palette;
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
@@ -287,12 +309,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNA
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned version)
-{
-    BoostSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename BASE, typename IMPLEMENTATION>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }
@@ -405,6 +421,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object
     BoostSerialization::serialize(archive, object, version);
 }
 
+template<class ARCHIVE, typename VALUE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
+}
+
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
 {
@@ -419,6 +441,18 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& objec
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }
