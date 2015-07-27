@@ -3,6 +3,10 @@
 
 #include <stdexcept>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/base_object.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 /**
@@ -13,9 +17,6 @@ template<typename BASE, typename IMPLEMENTATION>
 class Clonable : public BASE
 {
 public:
-    friend class BoostSerialization;
-    friend class HPXSerialization;
-
     /**
      * these c-tors simply delegate to the BASE type, which includes
      * the default c-tor, sans parameters.
@@ -54,5 +55,24 @@ public:
 };
 
 }
+
+#ifdef LIBGEODECOMP_WITH_HPX
+
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename BASE, typename IMPLEMENTATION>), (LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>));
+
+namespace hpx {
+namespace serialization {
+
+template<typename ARCHIVE, typename BASE, typename IMPLEMENTATION>
+inline
+static void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned /*version*/)
+{
+    archive & hpx::serialization::base_object<BASE >(object);
+}
+
+}
+}
+
+#endif
 
 #endif
