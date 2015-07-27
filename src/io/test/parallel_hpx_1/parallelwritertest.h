@@ -57,7 +57,7 @@ template<typename CARGO>
 class HumbleTestWriter : public ParallelWriter<CARGO>
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(HumbleTestWriter)
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(HumbleTestWriter);
 
     template <typename Archive>
     friend void serialize(Archive & archive, HumbleTestWriter& writer, unsigned);
@@ -133,7 +133,7 @@ namespace LibGeoDecomp {
 class ParallelWriterTest : public CxxTest::TestSuite
 {
 public:
-    void testSerializationOfInitializerByReference()
+    void testSerializationOfWriterByReference()
     {
         HPXSerializationTest::FancyTestWriter writer1("foo", 10, 3.14);
         HPXSerializationTest::FancyTestWriter writer2("bar",  1, 0);
@@ -155,7 +155,7 @@ public:
         TS_ASSERT_EQUALS(writer2.cargo,       3.14);
     }
 
-    void testSerializationOfInitializerBySmartPointer()
+    void testSerializationOfWriterBySmartPointer()
     {
         boost::shared_ptr<LibGeoDecomp::ParallelWriter<double> > writer1(
             new HPXSerializationTest::FancyTestWriter("goo", 20, 6644));
