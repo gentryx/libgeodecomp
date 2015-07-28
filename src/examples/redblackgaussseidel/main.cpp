@@ -26,17 +26,10 @@ public:
         public APITraits::HasOpaqueMPIDataType<Cell>
     {};
 
-    inline Cell() :
-        temp(0), type(BOUNDARY)
-    {}
-
-    inline Cell(CellType cellType, double v) :
-        temp(v), type(cellType)
-    {}
-
     explicit
-    inline Cell(double v) :
-        temp(v), type(RED)
+    inline Cell(double cellType = 0, double v = BOUNDARY) :
+        temp(v),
+        type(cellType)
     {}
 
     template<typename COORD_MAP>
