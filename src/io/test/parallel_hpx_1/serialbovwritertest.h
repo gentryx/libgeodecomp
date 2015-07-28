@@ -35,6 +35,7 @@ public:
 
         TS_ASSERT_EQUALS(Coord<3>(1, 2, 3), writer2.brickletDim);
     }
+
     void testSerializationOfWriterViaSharedPtr()
     {
         boost::shared_ptr<Writer<TestCell<2> > > writer1(new SerialBOVWriter<TestCell<2> >(
