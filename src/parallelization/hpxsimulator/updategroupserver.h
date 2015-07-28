@@ -4,8 +4,11 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
+#include <libgeodecomp/geometry/partitionmanager.h>
+#include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
+#include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/patchlink.h>
 
 #include <hpx/include/components.hpp>
@@ -73,8 +76,8 @@ public:
 
     typedef std::pair<std::size_t, std::size_t> StepPairType;
 
-    UpdateGroupServer()
-      : stopped(false)
+    UpdateGroupServer() :
+        stopped(false)
     {}
 
     void initPartitions(const typename ClientType::InitData& initData, std::size_t global_idx)
@@ -134,7 +137,7 @@ public:
             }
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, initPartitions, InitPartitionsAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, initPartitions, InitPartitionsAction);
 
     void init()
     {
@@ -245,7 +248,7 @@ public:
 
         initEvents();
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, init, InitAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, init, InitAction);
 
     void addPatchProvider(
         const PatchProviderPtr& patchProvider,
@@ -270,7 +273,7 @@ public:
             return std::make_pair(initializer->startStep(), 0u);
         }
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, currentStep, CurrentStepAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, currentStep, CurrentStepAction);
 
     std::size_t getStep() const
     {
@@ -288,13 +291,13 @@ public:
         }
         return stepper->statistics();
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, nanoStep, NanoStepAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, nanoStep, NanoStepAction);
 
     void stop()
     {
         stopped = true;
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, stop, StopAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, stop, StopAction);
 
     void setOuterGhostZone(
         std::size_t srcRank,
@@ -315,7 +318,7 @@ public:
 
         patchlinkIter->second->setBuffer(buffer, nanoStep);
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, setOuterGhostZone, SetOuterGhostZoneAction);
 
     double getCellSpeed(APITraits::FalseType) const
     {
@@ -331,7 +334,7 @@ public:
     {
         return getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
     }
-    HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, speed, SpeedAction);
+    // HPX_DEFINE_COMPONENT_ACTION(UpdateGroupServer, speed, SpeedAction);
 
     std::size_t getRank() const
     {
