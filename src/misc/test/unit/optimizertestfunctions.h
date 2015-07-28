@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/misc/optimizer.h>
 #include <cmath>
+
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
@@ -13,11 +14,9 @@ public:
     class TestableEvaluator : public Optimizer::Evaluator
     {
     public:
-        virtual ~TestableEvaluator()
-        {}
-
-        TestableEvaluator():
-            calls(0)
+        TestableEvaluator(double maximum) :
+            calls(0),
+            maxima(1, maximum)
         {}
 
         double getGlobalMax()
@@ -48,10 +47,9 @@ public:
     class GoalFunction : public TestableEvaluator
     {
     public:
-        GoalFunction():TestableEvaluator()
-        {
-            maxima.push_back(1000);
-        }
+        GoalFunction() :
+            TestableEvaluator(1000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -65,10 +63,9 @@ public:
     class ThreeDimFunction : public TestableEvaluator
     {
     public:
-        ThreeDimFunction()
-        {
-            maxima.push_back(2600);
-        }
+        ThreeDimFunction() :
+            TestableEvaluator(2600)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -84,10 +81,9 @@ public:
     {
     public:
 
-        FiveDimFunction()
-        {
-            maxima.push_back(5000);
-        }
+        FiveDimFunction() :
+            TestableEvaluator(5000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -115,11 +111,11 @@ public:
     class MultimodTwoDim : public TestableEvaluator
     {
     public:
-        MultimodTwoDim()
-        {
-            maxima.push_back(4999.57);	//first value is global min
-            maxima.push_back(4687.77);
-        }
+        MultimodTwoDim() :
+            TestableEvaluator(
+                4999.57, // first value is global min
+                4687.77)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -133,11 +129,11 @@ public:
     class JumpingFunction : public TestableEvaluator
     {
     public:
-        JumpingFunction()
-        {
-            maxima.push_back(1103.9);
-            maxima.push_back(1096);
-        }
+        JumpingFunction() :
+            TestableEvaluator(
+                1103.9,
+                1096)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -159,10 +155,9 @@ public:
     class HimmelblauFunction : public TestableEvaluator
     {
     public:
-        HimmelblauFunction()
-        {
-            maxima.push_back(1000);
-        }
+        HimmelblauFunction() :
+            TestableEvaluator(1000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -181,10 +176,9 @@ public:
     class HimmelblauFunctionDouble : public TestableEvaluator
     {
     public:
-        HimmelblauFunctionDouble()
-        {
-            maxima.push_back(1000);
-        }
+        HimmelblauFunctionDouble() :
+            TestableEvaluator(1000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -205,10 +199,9 @@ public:
     class Rosenbrock2DFunction : public TestableEvaluator
     {
     public:
-        Rosenbrock2DFunction()
-        {
-            maxima.push_back(3000);
-        }
+        Rosenbrock2DFunction() :
+            TestableEvaluator(3000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
@@ -221,13 +214,13 @@ public:
                 + (x - 1) * (x - 1));
         }
     };
+
     class Rosenbrock5DFunction : public TestableEvaluator
     {
     public:
-        Rosenbrock5DFunction()
-        {
-            maxima.push_back(100000);
-        }
+        Rosenbrock5DFunction() :
+            TestableEvaluator(100000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {
