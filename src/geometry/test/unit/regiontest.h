@@ -54,7 +54,46 @@ public:
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
     }
-
+    
+    void testMoveAssignment()
+    {
+        Region<2> expected;
+        expected << Coord<2>(5, 5);
+        expected << Coord<2>(2, 5);
+        
+        Region<2> dummy = expected;
+        Region<2> actual;
+        actual = std::move(dummy);
+        
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+    }
+    
+    void testMoveConstructor()
+    {
+        Region<2> expected;
+        expected << Coord<2>(5, 5);
+        expected << Coord<2>(2, 5);
+        
+        Region<2> dummy = expected;
+        Region<2> actual(std::move(dummy));
+        
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+    }
+    
     void testIntersectOrTouch()
     {
         RegionHelpers::RegionInsertHelper<0> h;

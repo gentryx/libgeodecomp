@@ -462,14 +462,8 @@ public:
 
     inline Region& operator=(Region<DIM>&& other)
     {
-        std::swap(myBoundingBox, other.myBoundingBox);
-        std::swap(mySize, other.mySize);
-        std::swap(geometryCacheTainted, other.geometryCacheTainted);
-
-        for (int i = 0; i < DIM; ++i) {
-            indices[i] = std::move(other.indices[i]);
-        }
-
+        using std::swap;
+        swap(*this, other);
         return *this;
     }
 #endif
