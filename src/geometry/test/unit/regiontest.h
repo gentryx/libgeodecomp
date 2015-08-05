@@ -54,7 +54,8 @@ public:
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
     }
-    
+   
+#ifdef LIBGEODECOMP_WITH_CPP14
     void testMoveAssignment()
     {
         Region<2> expected;
@@ -93,7 +94,8 @@ public:
         TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
         TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
     }
-    
+#endif 
+
     void testIntersectOrTouch()
     {
         RegionHelpers::RegionInsertHelper<0> h;
