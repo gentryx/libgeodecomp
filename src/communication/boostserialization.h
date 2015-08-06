@@ -229,7 +229,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & object.cellToColor;
+        archive & object.cellToColorSelector;
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>

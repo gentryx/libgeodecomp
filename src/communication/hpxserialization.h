@@ -245,7 +245,7 @@ public:
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned /*version*/)
     {
-        archive & object.cellToColor;
+        archive & object.cellToColorSelector;
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
@@ -325,6 +325,8 @@ HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(LibGeoDecomp::OozeBalancer);
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE, typename CELL_PLOTTER>), (LibGeoDecomp::PPMWriter<CELL_TYPE, CELL_PLOTTER>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE, typename CELL_PLOTTER>), (LibGeoDecomp::PPMWriter<CELL_TYPE, CELL_PLOTTER>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::ParallelWriter<CELL_TYPE>));
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, class CELL_PLOTTER>), (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>));
+HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, class CELL_PLOTTER>), (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SerialBOVWriter<CELL_TYPE>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SerialBOVWriter<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>), (LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>));
