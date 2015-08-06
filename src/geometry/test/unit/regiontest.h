@@ -55,9 +55,9 @@ public:
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
     }
    
-#ifdef LIBGEODECOMP_WITH_CPP14
     void testMoveAssignment()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         Region<2> expected;
         expected << Coord<2>(5, 5);
         expected << Coord<2>(2, 5);
@@ -74,10 +74,12 @@ public:
         
         TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
         TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+#endif 
     }
     
     void testMoveConstructor()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         Region<2> expected;
         expected << Coord<2>(5, 5);
         expected << Coord<2>(2, 5);
@@ -93,8 +95,8 @@ public:
         
         TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
         TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
-    }
 #endif 
+    }
 
     void testIntersectOrTouch()
     {
