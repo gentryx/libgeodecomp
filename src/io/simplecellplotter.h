@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/misc/palette.h>
+#include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/storage/filter.h>
 #include <libgeodecomp/storage/selector.h>
 
@@ -33,19 +34,15 @@ public:
     friend class LibGeoDecomp::HPXSerialization;
     friend class LibGeoDecomp::PPMWriterTest;
 
-    // fixme: drop this default c-tor once HPX serialization is up to snuff
     explicit
-    CellToColor()
-    {}
-
-    explicit
-    CellToColor(const PALETTE& palette) :
+    CellToColor(const PALETTE& palette = PALETTE()) :
         palette(palette)
     {}
 
     void copyStreakInImpl(const Color *source, MEMBER *target, const std::size_t num, const std::size_t stride)
     {
-        throw std::logic_error("undefined behavior: can only convert members to colors, not the other way around");
+        throw std::logic_error(
+            "undefined behavior: can only convert members to colors, not the other way around");
     }
 
     void copyStreakOutImpl(const MEMBER *source, Color *target, const std::size_t num, const std::size_t stride)
@@ -90,11 +87,14 @@ public:
 
     template<typename MEMBER, typename PALETTE>
     explicit SimpleCellPlotter(MEMBER CELL_TYPE:: *memberPointer, const PALETTE& palette) :
-        cellToColor(
+        cellToColorSelector(
             memberPointer,
             "unnamed parameter",
             boost::shared_ptr<FilterBase<CELL_TYPE> >(
                 new SimpleCellPlotterHelpers::CellToColor<CELL_TYPE, MEMBER, PALETTE>(palette)))
+    {}
+
+    virtual ~SimpleCellPlotter()
     {}
 
     template<typename PAINTER>
@@ -104,7 +104,7 @@ public:
         const Coord<2>& cellDimensions) const
     {
         Color color;
-        cellToColor.copyMemberOut(&cell, reinterpret_cast<char*>(&color), 1);
+        cellToColorSelector.copyMemberOut(&cell, reinterpret_cast<char*>(&color), 1);
 
         painter.fillRect(
             0, 0,
@@ -113,7 +113,7 @@ public:
     }
 
 private:
-    Selector<CELL_TYPE> cellToColor;
+    Selector<CELL_TYPE> cellToColorSelector;
 };
 
 }
