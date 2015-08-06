@@ -26,7 +26,22 @@ template<typename CELL_TYPE, typename CELL_PLOTTER = SimpleCellPlotter<CELL_TYPE
 class PPMWriter : public Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >
 {
 public:
+#ifdef LIBGEODECOMP_WITH_HPX
     HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(PPMWriter);
+
+    template<typename ARCHIVE, typename TARGET>
+    static PPMWriter *create(ARCHIVE& archive, TARGET* /*unused*/)
+    {
+        PPMWriter *ret = new PPMWriter(
+            static_cast<int CELL_TYPE:: *>(0),
+            int(),
+            int(),
+            "foo",
+            1);;
+        serialize(archive, *ret, 0);
+        return ret;
+    }
+#endif
 
     friend class PolymorphicSerialization;
     friend class HPXSerialization;
@@ -35,18 +50,6 @@ public:
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
-
-    // fixme: default c-tors considered harmful. will remove them once
-    // HPX serialization doesn't require them any more.
-    PPMWriter() :
-        Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >("", 1),
-        plotter(
-            Coord<2>(1, 1),
-            CELL_PLOTTER(
-                &CELL_TYPE::testValue,
-                QuickPalette<double>(0, 1)))
-    {}
-
 
     /**
      * This PPMWriter will render a given member (e.g. &Cell::fooBar).
@@ -129,5 +132,10 @@ public:
 };
 
 }
+
+HPX_SERIALIZATION_WITH_CUSTOM_CONSTRUCTOR_TEMPLATE(
+    (template<typename CELL, typename CELL_PLOTTER>),
+    (LibGeoDecomp::PPMWriter<CELL, CELL_PLOTTER>),
+    (LibGeoDecomp::PPMWriter<CELL, CELL_PLOTTER>::create))
 
 #endif

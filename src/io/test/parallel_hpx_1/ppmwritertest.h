@@ -12,6 +12,7 @@ class PPMWriterTest : public CxxTest::TestSuite
 public:
     void testSerializationOfWriterByReference()
     {
+        std::cout << "  ping1\n";
         PPMWriter<TestCell<2> > writer1(
             &TestCell<2>::testValue,
             0.0,
@@ -30,7 +31,6 @@ public:
 
         std::vector<char> buffer;
         hpx::serialization::output_archive outputArchive(buffer);
-
         outputArchive << writer1;
 
         hpx::serialization::input_archive inputArchive(buffer);
@@ -38,7 +38,7 @@ public:
 
         QuickPalette<double> palette = dynamic_cast<
             SimpleCellPlotterHelpers::CellToColor<TestCell<2>, double, QuickPalette<double> >*>(
-                &*writer2.plotter.cellPlotter.cellToColor.filter)->palette;
+                &*writer2.plotter.cellPlotter.cellToColorSelector.filter)->palette;
 
         TS_ASSERT_EQUALS(Color::BLACK,     palette[-1]);
         TS_ASSERT_EQUALS(Color::WHITE,     palette[ 2]);
@@ -53,24 +53,27 @@ public:
             5.0,
             6.0,
             "bingo",
-            4711,
+            47110,
             Coord<2>(1, 2)));
 
         boost::shared_ptr<Writer<TestCell<2> > > writer2;
 
         std::vector<char> buffer;
-        hpx::serialization::output_archive outputArchive(buffer);
+        {
+            hpx::serialization::output_archive outputArchive(buffer);
 
-        outputArchive << writer1;
-
-        hpx::serialization::input_archive inputArchive(buffer);
-        inputArchive >> writer2;
+            outputArchive << writer1;
+        }
+        {
+            hpx::serialization::input_archive inputArchive(buffer);
+            inputArchive >> writer2;
+        }
 
         PPMWriter<TestCell<2> > *writer3 = dynamic_cast<PPMWriter<TestCell<2> >*>(&*writer2);
 
         QuickPalette<double> palette = dynamic_cast<
             SimpleCellPlotterHelpers::CellToColor<TestCell<2>, double, QuickPalette<double> >*>(
-                &*writer3->plotter.cellPlotter.cellToColor.filter)->palette;
+                &*writer3->plotter.cellPlotter.cellToColorSelector.filter)->palette;
 
         TS_ASSERT_EQUALS(Color::BLACK,     palette[4]);
         TS_ASSERT_EQUALS(Color::WHITE,     palette[7]);
