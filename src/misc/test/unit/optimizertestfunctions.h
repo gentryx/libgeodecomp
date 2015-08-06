@@ -19,6 +19,13 @@ public:
             maxima(1, maximum)
         {}
 
+        TestableEvaluator(double maximum1, double maximum2) :
+            calls(0)
+        {
+            maxima.push_back(maximum1);
+            maxima.push_back(maximum2);
+        }
+
         double getGlobalMax()
         {
             return maxima[0];
