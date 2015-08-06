@@ -16,11 +16,7 @@ public:
     friend class BoostSerialization;
     friend class HPXSerialization;
 
-    // fixme: drop this default c-tor once HPX serialization is up to snuff
-    QuickPalette()
-    {}
-
-    QuickPalette(VALUE min, VALUE max) :
+    QuickPalette(VALUE min = VALUE(), VALUE max = VALUE()) :
         mark0(min),
         mark1((min * 3 + max * 1) / 4),
         mark2((min * 2 + max * 2) / 4),
@@ -64,5 +60,7 @@ private:
 };
 
 }
+
+
 
 #endif
