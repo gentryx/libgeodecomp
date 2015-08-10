@@ -1,19 +1,19 @@
 #include <cxxtest/TestSuite.h>
 #include <libgeodecomp/communication/hpxserialization.h>
-#include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/geometry/streak.h>
 
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class CoordBoxTest : public CxxTest::TestSuite
+class StreakTest : public CxxTest::TestSuite
 {
 public:
     void testSerializationOfWriterByReference()
     {
-        CoordBox<1> ca1(Coord<1>(1),       Coord<1>(2));
-        CoordBox<2> ca2(Coord<2>(3, 4),    Coord<2>(5, 6));
-        CoordBox<3> ca3(Coord<3>(7, 8, 9), Coord<3>(10, 11, 12));
+        Streak<1> ca1(Coord<1>(10),         11);
+        Streak<2> ca2(Coord<2>(12, 13),     14);
+        Streak<3> ca3(Coord<3>(15, 16, 17), 18);
 
         std::vector<char> buffer;
         hpx::serialization::output_archive outputArchive(buffer);
@@ -22,9 +22,9 @@ public:
         outputArchive << ca2;
         outputArchive << ca3;
 
-        CoordBox<1> cb1(Coord<1>(-1),         Coord<1>(-1));
-        CoordBox<2> cb2(Coord<2>(-1, -1),     Coord<2>(-1, -1));
-        CoordBox<3> cb3(Coord<3>(-1, -1, -1), Coord<3>(-1, -1, -1));
+        Streak<1> cb1(Coord<1>(-1),         -1);
+        Streak<2> cb2(Coord<2>(-1, -1),     -1);
+        Streak<3> cb3(Coord<3>(-1, -1, -1), -1);
 
         hpx::serialization::input_archive inputArchive(buffer);
         inputArchive >> cb1;
@@ -38,9 +38,9 @@ public:
 
     void testSerializationViaSharedPointer()
     {
-        boost::shared_ptr<CoordBox<1> > ca1(new CoordBox<1>(Coord<1>(1),       Coord<1>(2)));
-        boost::shared_ptr<CoordBox<2> > ca2(new CoordBox<2>(Coord<2>(3, 4),    Coord<2>(5, 6)));
-        boost::shared_ptr<CoordBox<3> > ca3(new CoordBox<3>(Coord<3>(7, 8, 9), Coord<3>(10, 11, 12)));
+        boost::shared_ptr<Streak<1> > ca1(new Streak<1>(Coord<1>(20),         21));
+        boost::shared_ptr<Streak<2> > ca2(new Streak<2>(Coord<2>(30, 31),     32));
+        boost::shared_ptr<Streak<3> > ca3(new Streak<3>(Coord<3>(34, 35, 36), 37));
 
         std::vector<char> buffer;
         hpx::serialization::output_archive outputArchive(buffer);
@@ -48,9 +48,9 @@ public:
         outputArchive << ca2;
         outputArchive << ca3;
 
-        boost::shared_ptr<CoordBox<1> > cb1;
-        boost::shared_ptr<CoordBox<2> > cb2;
-        boost::shared_ptr<CoordBox<3> > cb3;
+        boost::shared_ptr<Streak<1> > cb1;
+        boost::shared_ptr<Streak<2> > cb2;
+        boost::shared_ptr<Streak<3> > cb3;
 
         hpx::serialization::input_archive inputArchive(buffer);
         inputArchive >> cb1;
