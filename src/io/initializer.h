@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/geometry/adjacency.h>
 
 namespace LibGeoDecomp {
 
@@ -95,6 +96,10 @@ public:
         Random::seed(index);
     }
 
+    Adjacency getAdjacency() const
+    {
+        return Adjacency();
+    }
 
 };
 
