@@ -55,9 +55,6 @@ public:
         >
         ComponentParallelWriterCreateActionType;
 
-    HpxWriterSink()
-    {}
-
     HpxWriterSink(const std::string& name) :
         thisId(hpx::naming::invalid_id)
     {

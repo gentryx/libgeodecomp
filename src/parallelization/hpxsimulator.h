@@ -5,10 +5,11 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 
 #include <hpx/config.hpp>
+#include <hpx/runtime/serialization/set.hpp>
+#include <hpx/runtime/serialization/vector.hpp>
 #include <hpx/lcos/broadcast.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 
-#include <libgeodecomp/communication/serialization.h>
+#include <libgeodecomp/communication/hpxserialization.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
@@ -259,26 +260,26 @@ public:
             );
         }
         hpx::wait_all(boundingBoxesFutures);
-        typename UpdateGroupType::InitData initData =
-        {
-            //updateGroups,
-            loadBalancingPeriod,
-            ghostZoneWidth,
-            initializer,
-            writers,
-            steerers,
-            boundingBoxes,
-            weights
-        };
-        hpx::lcos::broadcast_with_index<
-            typename UpdateGroupType::ComponentType::InitPartitionsAction
-        >(
-            updateGroupsIds,
-            initData
-        ).wait();
-        hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
-            updateGroupsIds
-        ).wait();
+        // typename UpdateGroupType::InitData initData =
+        // {
+        //     //updateGroups,
+        //     loadBalancingPeriod,
+        //     ghostZoneWidth,
+        //     initializer,
+        //     writers,
+        //     steerers,
+        //     boundingBoxes,
+        //     weights
+        // };
+        // hpx::lcos::broadcast_with_index<
+        //     typename UpdateGroupType::ComponentType::InitPartitionsAction
+        // >(
+        //     updateGroupsIds,
+        //     initData
+        // ).wait();
+        // hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
+        //     updateGroupsIds
+        // ).wait();
 
         initialized = true;
     }
@@ -290,9 +291,9 @@ public:
 
     void stop()
     {
-        hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
-            updateGroupsIds
-        ).wait();
+        // hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
+        //     updateGroupsIds
+        // ).wait();
     }
 
     inline void step()
@@ -304,10 +305,11 @@ public:
     virtual unsigned getStep() const
     {
         if (initialized) {
-            return typename UpdateGroupType::ComponentType::CurrentStepAction()(updateGroupsIds[0]).first;
+            // return typename UpdateGroupType::ComponentType::CurrentStepAction()(updateGroupsIds[0]).first;
         } else {
             return initializer->startStep();
         }
+
         return 0;
     }
 
@@ -346,33 +348,34 @@ private:
 
     std::vector<Chronometer> nanoStep(std::size_t remainingNanoSteps)
     {
-        return
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
-                updateGroupsIds,
-                remainingNanoSteps
-            ).get();
+        return std::vector<Chronometer>();
+        // return
+        //     hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
+        //         updateGroupsIds,
+        //         remainingNanoSteps
+        //     ).get();
     }
 
     std::vector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
     {
-        std::vector<double> speeds(
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
-                updateGroupsIds
-            ).get());
-        double s = sum(speeds);
+        // std::vector<double> speeds(
+        //     hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
+        //         updateGroupsIds
+        //     ).get());
+        // double s = sum(speeds);
         std::vector<std::size_t> ret(size);
 
-        std::size_t lastPos = 0;
-        double partialSum = 0.0;
-        if(size > 1) {
-            for (std::size_t i = 0; i < size -1; ++i) {
-                partialSum += speeds[i];
-                std::size_t nextPos = items * (partialSum / s);
-                ret[i] = nextPos - lastPos;
-                lastPos = nextPos;
-            }
-        }
-        ret[size-1] = items - lastPos;
+        // std::size_t lastPos = 0;
+        // double partialSum = 0.0;
+        // if(size > 1) {
+        //     for (std::size_t i = 0; i < size -1; ++i) {
+        //         partialSum += speeds[i];
+        //         std::size_t nextPos = items * (partialSum / s);
+        //         ret[i] = nextPos - lastPos;
+        //         lastPos = nextPos;
+        //     }
+        // }
+        // ret[size-1] = items - lastPos;
 
         return ret;
     }

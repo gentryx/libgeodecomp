@@ -113,6 +113,8 @@ template<typename CELL_TYPE>
 class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >
 {
 public:
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(HpxWriterCollector);
+
     friend class BoostSerialization;
     friend class HPXSerialization;
     friend class boost::serialization::access;
@@ -129,7 +131,7 @@ public:
 
     typedef HpxWriterSink<CELL_TYPE> SinkType;
 
-    explicit HpxWriterCollector(const SinkType& sink = SinkType()) :
+    explicit HpxWriterCollector(const SinkType& sink) :
         Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >(
             "",
             sink.getPeriod()),

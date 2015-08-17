@@ -2,6 +2,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 
 using namespace LibGeoDecomp;
@@ -106,32 +107,32 @@ public:
 typedef
     HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
     SimulatorType;
-LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
-    SimulatorType,
-    ConwayCellSimulator
-)
-LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
-    SimulatorType,
-    ConwayCellSimulator
-)
+// LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
+//     SimulatorType,
+//     ConwayCellSimulator
+// )
+// LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
+//     SimulatorType,
+//     ConwayCellSimulator
+// )
 
-BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
+// BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
 
 typedef LibGeoDecomp::SerialBOVWriter<ConwayCell> BovWriterType;
-BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
+// BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
 
 typedef
     LibGeoDecomp::HpxWriterCollector<ConwayCell>
     HpxWriterCollectorType;
 
-LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
-    HpxWriterCollectorType,
-    ConwayCellWriterCollector
-)
-LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(
-    HpxWriterCollectorType,
-    ConwayCellWriterCollector
-)
+// LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
+//     HpxWriterCollectorType,
+//     ConwayCellWriterCollector
+// )
+// LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(
+//     HpxWriterCollectorType,
+//     ConwayCellWriterCollector
+// )
 
 namespace LibGeoDecomp {
 
@@ -159,6 +160,7 @@ public:
 
     void testBasic()
     {
+        std::cout << "boomer\n";
         CellInitializer *init = new CellInitializer(maxTimeSteps);
 
         SimulatorType sim(
@@ -169,11 +171,11 @@ public:
             1 // ghostZoneWidth
                           );
 
-        HpxWriterCollectorType::SinkType sink(
-            new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
-            sim.numUpdateGroups());
+        // HpxWriterCollectorType::SinkType sink(
+        //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
+        //     sim.numUpdateGroups());
 
-        sim.addWriter(new HpxWriterCollectorType(sink));
+        // sim.addWriter(new HpxWriterCollectorType(sink));
 
         sim.run();
     }

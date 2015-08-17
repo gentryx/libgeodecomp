@@ -2,6 +2,7 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/config.hpp>
 #include <boost/foreach.hpp>
+
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 
 HPX_REGISTER_BASE_LCO_WITH_VALUE(

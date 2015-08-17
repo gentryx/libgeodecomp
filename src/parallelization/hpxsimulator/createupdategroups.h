@@ -6,7 +6,6 @@
 
 #include <hpx/config.hpp>
 #include <hpx/hpx_fwd.hpp>
-#include <hpx/util/locality_result.hpp>
 #include <hpx/runtime/actions/plain_action.hpp>
 
 #include <libgeodecomp/io/initializer.h>
@@ -36,17 +35,17 @@ namespace Implementation {
         }
     };
 
-typedef
-    std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-    CreateUpdateGroupsReturnType;
+// typedef
+//     std::pair<std::size_t, std::vector<hpx::id_type> >
+//     CreateUpdateGroupsReturnType;
 
-std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
-createUpdateGroups(
-    std::vector<hpx::id_type> localities,
-    hpx::components::component_type type,
-    const hpx::util::function<std::size_t()>& numUpdateGroups);
+// std::pair<std::size_t, std::vector<hpx::id_type> >
+// createUpdateGroups(
+//     std::vector<hpx::id_type> localities,
+//     hpx::components::component_type type,
+//     const hpx::util::function<std::size_t()>& numUpdateGroups);
 
-HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
+// HPX_DEFINE_PLAIN_ACTION(createUpdateGroups, CreateUpdateGroupsAction);
 
 } // namespace Implementation
 
@@ -55,29 +54,35 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(
     const hpx::util::function<std::size_t()>& numUpdateGroups
 )
 {
+    // std::vector<hpx::id_type> ids = hpx::new_<UPDATEGROUP[]>(
+    //     hpx::default_layout(hpx::find_all_localities()), numUpdateGroups()).get();
+
+    std::vector<UPDATEGROUP> components;
+
+         /*
     hpx::components::component_type type =
         hpx::components::get_component_type<typename UPDATEGROUP::ComponentType>();
 
     std::vector<hpx::id_type> localities = hpx::find_all_localities(type);
 
     hpx::id_type id = localities[0];
-    hpx::future<std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> > >
+    hpx::future<std::pair<std::size_t, std::vector<hpx::id_type> > >
         asyncResult = hpx::async<Implementation::CreateUpdateGroupsAction>(
             id, boost::move(localities), type, numUpdateGroups);
 
     std::vector<UPDATEGROUP> components;
 
-    std::pair<std::size_t, std::vector<hpx::util::remote_locality_result> >
+    std::pair<std::size_t, std::vector<hpx::id_type> >
         result(asyncResult.get());
 
     std::size_t numComponents = result.first;
     components.reserve(numComponents);
 
-    std::vector<hpx::util::locality_result> res;
+    std::vector<hpx::id_type> res;
     res.reserve(result.second.size());
     boost::copy(result.second, std::back_inserter(res));
-    boost::copy(hpx::util::locality_results(res), std::back_inserter(components));
-
+    boost::copy(res, std::back_inserter(components));
+         */
     return components;
 }
 
@@ -91,24 +96,24 @@ inline std::vector<UPDATEGROUP> createUpdateGroups(float overcommitFactor)
 }
 }
 
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(
-    LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsAction
-)
+// HPX_REGISTER_PLAIN_ACTION_DECLARATION(
+//     LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsAction
+// )
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsReturnType,
-    hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
-)
+// HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
+//     LibGeoDecomp::HpxSimulator::Implementation::CreateUpdateGroupsReturnType,
+//     hpx_base_lco_std_pair_std_size_t_std_vector_hpx_util_remote_locality_result
+// )
 
-HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
-    std::size_t(),
-    LibGeoDecomp::HpxSimulator::Implementation::OvercommitFunctor,
-    LibGeoDecompHpxSimulatorImplementationOvercommitFunctor)
+// HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
+//     std::size_t(),
+//     LibGeoDecomp::HpxSimulator::Implementation::OvercommitFunctor,
+//     LibGeoDecompHpxSimulatorImplementationOvercommitFunctor)
 
-HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
-    std::size_t(),
-    hpx::util::function<std::size_t()>,
-    LibGeoDecompHpxSimulatorImplementationFunction)
+// HPX_UTIL_REGISTER_FUNCTION_DECLARATION(
+//     std::size_t(),
+//     hpx::util::function<std::size_t()>,
+//     LibGeoDecompHpxSimulatorImplementationFunction)
 
 #endif
 #endif
