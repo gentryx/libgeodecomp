@@ -4,82 +4,210 @@
 #include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 #include <libgeodecomp/config.h>
 
-std::vector<hpx::id_type> localUpdateGroupIDs;
-std::vector<hpx::id_type> globalUpdateGroupIDs;
-boost::atomic<std::size_t> localIndexCounter;
+namespace DummySimulatorHelpers {
+
+hpx::lcos::local::promise<std::size_t> localUpdateGroups;
+hpx::lcos::local::promise<std::size_t> globalUpdateGroups;
+hpx::lcos::local::promise<std::vector<std::size_t> > localityIndices;
+
+}
+
+
+
+/**
+ * in HPXSimulator
+ * - allgather number of UpdateGroups per locality
+ * - set up weight vector
+ * - create UpdateGroups
+ * - allgather updategroup ids
+ * - updateGroups.inits(allIDs)
+ *
+ * in UpdateGroup.init
+ * - allgather bounding boxes
+ * - create patchlinks
+ * - register patchlinks with basename
+ * - let patchlinks look up remote IDs via basenames
+ */
 
 template<typename CELL>
-struct test_server : hpx::components::simple_component_base<test_server<int> >
+struct DummyUpdateGroup : hpx::components::simple_component_base<DummyUpdateGroup<CELL> >
 {
-    test_server()
+    DummyUpdateGroup()
     {
         localID = localIndexCounter++;
-        std::cout << "creating test_server " << localID << "\n";
+        std::cout << "creating DummyUpdateGroup " << localID << "\n";
     }
 
     hpx::id_type call() const
     {
-        std::cout << "test_server::call()";
+        std::cout << "DummyUpdateGroup::call()";
         return hpx::find_here();
     }
-    HPX_DEFINE_COMPONENT_ACTION(test_server, call, call_action);
+    HPX_DEFINE_COMPONENT_ACTION(DummyUpdateGroup, call, call_action);
+
+    static boost::atomic<std::size_t> localIndexCounter;
 
 private:
     std::size_t localID;
 };
 
+template<typename CELL>
+boost::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
 
-typedef hpx::components::simple_component<test_server<int> > server_type;
-HPX_REGISTER_COMPONENT(server_type, test_server_int );
+typedef hpx::components::simple_component<DummyUpdateGroup<int> > server_type_int;
+HPX_REGISTER_COMPONENT(server_type_int, DummyUpdateGroup_int );
+typedef hpx::components::simple_component<DummyUpdateGroup<std::size_t> > server_type_std_size_t;
+HPX_REGISTER_COMPONENT(server_type_std_size_t, DummyUpdateGroup_std_size_t );
 
-typedef test_server<int>::call_action call_action;
+typedef DummyUpdateGroup<int>::call_action call_action;
 HPX_REGISTER_ACTION(call_action);
 
+std::size_t getNumberOfUpdateGroups()
+{
+    hpx::lcos::future<std::size_t> future = DummySimulatorHelpers::localUpdateGroups.get_future();
+    return future.get();
+}
+
+HPX_PLAIN_ACTION(getNumberOfUpdateGroups);
+HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getNumberOfUpdateGroups_action)
+HPX_REGISTER_BROADCAST_ACTION(getNumberOfUpdateGroups_action)
+
+void setNumberOfUpdatesGroups(const std::size_t globalUpdateGroups, const std::vector<std::size_t>& indices)
+{
+    DummySimulatorHelpers::globalUpdateGroups.set_value(globalUpdateGroups);
+    DummySimulatorHelpers::localityIndices.set_value(indices);
+}
+
+HPX_PLAIN_ACTION(setNumberOfUpdatesGroups);
+HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setNumberOfUpdatesGroups_action)
+HPX_REGISTER_BROADCAST_ACTION(setNumberOfUpdatesGroups_action)
+
+template<typename CELL>
 class DummySimulator
 {
 public:
-    DummySimulator()
+    DummySimulator(
+        std::size_t localUpdateGroups = 10,
+        std::string basename = typeid(DummySimulator).name()) :
+        localUpdateGroups(localUpdateGroups),
+        basename(basename),
+        here(hpx::find_here()),
+        localities(hpx::find_all_localities())
     {
-        int oversubscriptionFactor = 10;
-        localUpdateGroupIDs = hpx::new_<test_server<int>[]>(hpx::find_here(), oversubscriptionFactor).get();
-        char const* basename = "/HPXSimulatorUpdateGroupFixme/";
-        for (int i = 0; i < oversubscriptionFactor; ++i) {
-            std::size_t id = hpx::get_locality_id() * oversubscriptionFactor + i;
-            hpx::register_id_with_basename(basename, localUpdateGroupIDs[i], id).get();
+        DummySimulatorHelpers::localUpdateGroups.set_value(localUpdateGroups);
+
+        if (hpx::get_locality_id() == 0) {
+            gatherAndBroadcastLocalityIndices();
+        }
+
+        saveLocalityIndices();
+
+        // fixme
+        using namespace LibGeoDecomp;
+        std::cout << "DummySimulator(@" << hpx::get_locality_id() << ") -> " << localityIndices << "/" << globalUpdateGroups << "\n";
+
+        DummyUpdateGroup<std::size_t>::localIndexCounter = localityIndices[hpx::get_locality_id()];
+        localUpdateGroupIDs = hpx::new_<DummyUpdateGroup<std::size_t>[]>(
+            hpx::find_here(), localUpdateGroups).get();
+
+        for (std::size_t i = 0; i < localUpdateGroups; ++i) {
+            std::size_t id = localityIndices[hpx::get_locality_id()] + i;
+            hpx::register_id_with_basename(basename.c_str(), localUpdateGroupIDs[i], id).get();
         }
     }
 
+    ~DummySimulator()
+    {
+        // fixme: unregister updategroups
+    }
+
+    // int getNumberOfUpdateGroups() const
+    // {
+    //     return oversubscriptionFactor;
+    // }
+
+
+    // HPX_DEFINE_COMPONENT_ACTION(DummySimulator, getNumberOfUpdateGroups, getNumberOfUpdateGroups_action);
+
+private:
+    std::size_t localUpdateGroups;
+    std::size_t globalUpdateGroups;
+    std::vector<std::size_t> localityIndices;
     std::vector<hpx::id_type> localUpdateGroupIDs;
+    std::string basename;
+    hpx::id_type here;
+    std::vector<hpx::id_type> localities;
+
+
+    /**
+     * Initially we don't have global knowledge on how many
+     * UpdateGroups we'll create on each locality. For domain
+     * decomposition, we need the sum and also the indices per
+     * locality (e.g. given 3 localities with 8, 10, and 2
+     * UpdateGroups respectively. Indices per locality: [0, 8, 18])
+     */
+    void gatherAndBroadcastLocalityIndices()
+    {
+        // fixme
+        using namespace LibGeoDecomp;
+
+        std::vector<std::size_t> globalUpdateGroupNumbers =
+            hpx::lcos::broadcast<getNumberOfUpdateGroups_action>(localities).get();
+        std::vector<std::size_t> indices;
+        indices.reserve(globalUpdateGroupNumbers.size());
+
+        std::size_t sum = 0;
+        for (auto i: globalUpdateGroupNumbers) {
+            indices << sum;
+            sum += i;
+        }
+
+        hpx::lcos::broadcast<setNumberOfUpdatesGroups_action>(
+            localities,
+            sum,
+            indices).get();
+    }
+
+    void saveLocalityIndices()
+    {
+        globalUpdateGroups = DummySimulatorHelpers::globalUpdateGroups.get_future().get();
+        localityIndices = DummySimulatorHelpers::localityIndices.get_future().get();
+
+        // fixme: how to reset?
+        // DummySimulatorHelpers::globalUpdateGroups.reset();
+        // DummySimulatorHelpers::localityIndices.reset();
+    }
 };
 
-std::vector<hpx::id_type> getUpdateGroupIDs()
-{
-    std::cout << "broadcast called\n";
-    for (int i = 0; i < 10; ++i) {
-        localUpdateGroupIDs.push_back(hpx::new_<test_server<int> >(hpx::find_here()).get());
-    }
-    // localUpdateGroupIDs = hpx::new_<test_server<int>[]>(hpx::find_here(), 10).get();
-    return localUpdateGroupIDs;
-}
+// td::vector<hpx::id_type> getUpdateGroupIDs()
+// {
+//     std::cout << "broadcast called\n";
+//     for (int i = 0; i < 10; ++i) {
+//         localUpdateGroupIDs.push_back(hpx::new_<test_server<int> >(hpx::find_here()).get());
+//     }
+//     // localUpdateGroupIDs = hpx::new_<test_server<int>[]>(hpx::find_here(), 10).get();
+//     return localUpdateGroupIDs;
+// }
 
-HPX_PLAIN_ACTION(getUpdateGroupIDs);
-HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupIDs_action)
-HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupIDs_action)
+// HPX_PLAIN_ACTION(getUpdateGroupIDs);
+// HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupIDs_action)
+// HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupIDs_action)
 
-void setUpdateGroupIDs(std::vector<hpx::id_type> ids)
-{
-    std::cout << "setting globalUpdateGroupIDs, size: " << ids.size() << "\n";
-    globalUpdateGroupIDs = ids;
-}
+// void setUpdateGroupIDs(std::vector<hpx::id_type> ids)
+// {
+//     std::cout << "setting globalUpdateGroupIDs, size: " << ids.size() << "\n";
+//     globalUpdateGroupIDs = ids;
+// }
 
-HPX_PLAIN_ACTION(setUpdateGroupIDs);
-HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setUpdateGroupIDs_action)
-HPX_REGISTER_BROADCAST_ACTION(setUpdateGroupIDs_action)
+// HPX_PLAIN_ACTION(setUpdateGroupIDs);
+// HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setUpdateGroupIDs_action)
+// HPX_REGISTER_BROADCAST_ACTION(setUpdateGroupIDs_action)
 
 // std::vector<hpx::id_type> 
 
@@ -148,7 +276,7 @@ public:
 
 
         std::cout << "======================================================1\n";
-        DummySimulator sim;
+        DummySimulator<int> sim;
         std::cout << "======================================================2\n";
         char const* basename = "/HPXSimulatorUpdateGroupFixme/";
         std::cout << "======================================================3\n";
