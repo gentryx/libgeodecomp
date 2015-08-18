@@ -10,6 +10,8 @@
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 #include <libgeodecomp/config.h>
 
+namespace LibGeoDecomp {
+
 namespace DummySimulatorHelpers {
 
 hpx::lcos::local::promise<std::size_t> localUpdateGroups;
@@ -60,33 +62,37 @@ private:
 template<typename CELL>
 boost::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
 
-typedef hpx::components::simple_component<DummyUpdateGroup<int> > server_type_int;
-HPX_REGISTER_COMPONENT(server_type_int, DummyUpdateGroup_int );
-typedef hpx::components::simple_component<DummyUpdateGroup<std::size_t> > server_type_std_size_t;
-HPX_REGISTER_COMPONENT(server_type_std_size_t, DummyUpdateGroup_std_size_t );
-
-typedef DummyUpdateGroup<int>::call_action call_action;
-HPX_REGISTER_ACTION(call_action);
-
 std::size_t getNumberOfUpdateGroups()
 {
-    hpx::lcos::future<std::size_t> future = DummySimulatorHelpers::localUpdateGroups.get_future();
+    hpx::lcos::future<std::size_t> future = LibGeoDecomp::DummySimulatorHelpers::localUpdateGroups.get_future();
     return future.get();
 }
 
-HPX_PLAIN_ACTION(getNumberOfUpdateGroups);
+void setNumberOfUpdatesGroups(const std::size_t globalUpdateGroups, const std::vector<std::size_t>& indices)
+{
+    LibGeoDecomp::DummySimulatorHelpers::globalUpdateGroups.set_value(globalUpdateGroups);
+    LibGeoDecomp::DummySimulatorHelpers::localityIndices.set_value(indices);
+}
+
+}
+
+typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<int> > server_type_int;
+HPX_REGISTER_COMPONENT(server_type_int, DummyUpdateGroup_int );
+typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<std::size_t> > server_type_std_size_t;
+HPX_REGISTER_COMPONENT(server_type_std_size_t, DummyUpdateGroup_std_size_t );
+
+typedef LibGeoDecomp::DummyUpdateGroup<int>::call_action call_action;
+HPX_REGISTER_ACTION(call_action);
+
+HPX_PLAIN_ACTION(LibGeoDecomp::getNumberOfUpdateGroups, getNumberOfUpdateGroups_action);
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getNumberOfUpdateGroups_action)
 HPX_REGISTER_BROADCAST_ACTION(getNumberOfUpdateGroups_action)
 
-void setNumberOfUpdatesGroups(const std::size_t globalUpdateGroups, const std::vector<std::size_t>& indices)
-{
-    DummySimulatorHelpers::globalUpdateGroups.set_value(globalUpdateGroups);
-    DummySimulatorHelpers::localityIndices.set_value(indices);
-}
-
-HPX_PLAIN_ACTION(setNumberOfUpdatesGroups);
+HPX_PLAIN_ACTION(LibGeoDecomp::setNumberOfUpdatesGroups, setNumberOfUpdatesGroups_action);
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setNumberOfUpdatesGroups_action)
 HPX_REGISTER_BROADCAST_ACTION(setNumberOfUpdatesGroups_action)
+
+namespace LibGeoDecomp {
 
 template<typename CELL>
 class DummySimulator
@@ -237,6 +243,8 @@ private:
 
 //     hpx::id_type call() const { return call_action()(this->get_id()); }
 // };
+
+}
 
 using namespace LibGeoDecomp;
 
