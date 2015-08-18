@@ -3,6 +3,7 @@
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
+#include <libgeodecomp/communication/hpxserialization.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -40,10 +41,10 @@ hpx::lcos::local::promise<std::vector<std::size_t> > localityIndices;
 template<typename CELL>
 struct DummyUpdateGroup : hpx::components::simple_component_base<DummyUpdateGroup<CELL> >
 {
-    DummyUpdateGroup()
+    DummyUpdateGroup(const CoordBox<2>& gridDim = CoordBox<2>())
     {
         localID = localIndexCounter++;
-        std::cout << "creating DummyUpdateGroup " << localID << "\n";
+        std::cout << "DummyUpdateGroup(" << gridDim << ") @" << localID << "\n";
     }
 
     hpx::id_type call() const
@@ -114,13 +115,11 @@ public:
 
         saveLocalityIndices();
 
-        // fixme
-        using namespace LibGeoDecomp;
         std::cout << "DummySimulator(@" << hpx::get_locality_id() << ") -> " << localityIndices << "/" << globalUpdateGroups << "\n";
 
         DummyUpdateGroup<std::size_t>::localIndexCounter = localityIndices[hpx::get_locality_id()];
         localUpdateGroupIDs = hpx::new_<DummyUpdateGroup<std::size_t>[]>(
-            hpx::find_here(), localUpdateGroups).get();
+            hpx::find_here(), localUpdateGroups, CoordBox<2>(Coord<2>(100, 200), Coord<2>(300, 200))).get();
 
         for (std::size_t i = 0; i < localUpdateGroups; ++i) {
             std::size_t id = localityIndices[hpx::get_locality_id()] + i;
@@ -130,16 +129,11 @@ public:
 
     ~DummySimulator()
     {
-        // fixme: unregister updategroups
+        for (std::size_t i = 0; i < localUpdateGroups; ++i) {
+            std::size_t id = localityIndices[hpx::get_locality_id()] + i;
+            hpx::unregister_id_with_basename(basename.c_str(), id);
+        }
     }
-
-    // int getNumberOfUpdateGroups() const
-    // {
-    //     return oversubscriptionFactor;
-    // }
-
-
-    // HPX_DEFINE_COMPONENT_ACTION(DummySimulator, getNumberOfUpdateGroups, getNumberOfUpdateGroups_action);
 
 private:
     std::size_t localUpdateGroups;
@@ -160,16 +154,13 @@ private:
      */
     void gatherAndBroadcastLocalityIndices()
     {
-        // fixme
-        using namespace LibGeoDecomp;
-
         std::vector<std::size_t> globalUpdateGroupNumbers =
             hpx::lcos::broadcast<getNumberOfUpdateGroups_action>(localities).get();
         std::vector<std::size_t> indices;
         indices.reserve(globalUpdateGroupNumbers.size());
 
         std::size_t sum = 0;
-        for (auto i: globalUpdateGroupNumbers) {
+        for (auto&& i: globalUpdateGroupNumbers) {
             indices << sum;
             sum += i;
         }
