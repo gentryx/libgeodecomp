@@ -40,7 +40,7 @@ public:
 
     void put(const CoordBox<2>& box)
     {
-        std::cout << "DummyPatchLinkAccepter::put(" << sourceID
+        std::cout << "    DummyPatchLinkAccepter::put(" << sourceID
                   << "->" << targetID
                   << "), box: " << box << "\n";
     }
@@ -103,13 +103,28 @@ public:
 
     void step() const
     {
-        std::cout << "  DummyUpdateGroup::step()";
+        std::cout << "  DummyUpdateGroup::step()\n";
+
+        std::cout << "  ..would update ghost here\n";
+
         typename DummyPatchLinkAccepter<CELL>::put_action putAction;
+        std::vector<hpx::lcos::future<void> > ghostFutures;
+        ghostFutures.reserve(patchAccepters.size());
 
         for (std::size_t i = 0; i < patchAccepters.size(); ++i) {
-            putAction(patchAccepters[i], gridDim);
+            // fixme: so we don't need put_action after all?
+            // fixme: add patchProvider and connect to patchAccepter
+            ghostFutures.push_back(hpx::async(putAction, patchAccepters[i], gridDim));
         }
-    }
+
+        std::cout << "  ..would update interior here\n";
+
+        std::cout << "  ..waiting for ghost comm\n";
+        for (auto&& i: ghostFutures) {
+            i.get();
+        }
+
+}
     HPX_DEFINE_COMPONENT_ACTION(DummyUpdateGroup, step, step_action);
 
     static boost::atomic<std::size_t> localIndexCounter;
