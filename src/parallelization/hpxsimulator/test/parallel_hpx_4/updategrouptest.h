@@ -78,6 +78,9 @@ public:
         std::cout << "    DummyPatchLinkAccepter::put(" << sourceID
                   << "->" << targetID
                   << "), box: " << box << "\n";
+        // fixme: make sure any previous receiveAction is finished here
+        // fixme: serialize data to new buffer here
+        // fixme: then invoce receiveAction, while moving that buffer to the action
         typename DummyPatchLinkProvider<CELL>::receive_action receiveAction;
         hpx::async(receiveAction, remoteID, box);
     }
