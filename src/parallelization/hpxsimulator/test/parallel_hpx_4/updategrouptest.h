@@ -31,21 +31,20 @@ public:
         targetID(targetID)
     {}
 
-    void init()
-    {
-        std::cout << "  DummyPatchLinkProvider(" << sourceID << "->" << targetID << ") is here\n";
-    }
-
-    HPX_DEFINE_COMPONENT_ACTION(DummyPatchLinkProvider, init, init_action);
-
     void receive(const CoordBox<2>& box)
     {
         std::cout << "    DummyPatchLinkProvider::receive(" << sourceID
                   << "->" << targetID
                   << "), box: " << box << "\n";
+        // fixme: make sure previous buffer contents have already been consumed. hold data in buffer.
     }
 
     HPX_DEFINE_COMPONENT_ACTION(DummyPatchLinkProvider, receive, receive_action);
+
+    void get()
+    {
+        // fixme: ensure data has arrived, copy data from buffer to grid, release buffer
+    }
 
 private:
     std::string basename;
@@ -131,13 +130,10 @@ public:
             hpx::find_here(), std::string("fixme"), rightNeighbor, id).get();
 
         std::string prefix = basename + "_PatchProvider_" + StringOps::itoa(id) + "-";
-        typename DummyPatchLinkProvider<CELL>::init_action initAction;
         for (auto&& i: patchProviders) {
             std::string name = prefix + StringOps::itoa(i.first);
             std::cout << "  ..registering: " << name << "\n";
             hpx::register_id_with_basename(name.c_str(), i.second).get();
-
-            initAction(i.second);
         }
 
         // create PatchAccepters
@@ -206,12 +202,6 @@ typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<i
 HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_int, DummyPatchLinkProvider_int );
 typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<std::size_t> > DummyPatchLinkProviderType_std_size_t;
 HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_std_size_t, DummyPatchLinkProvider_std_size_t );
-
-// register action
-typedef LibGeoDecomp::DummyPatchLinkProvider<int>::init_action DummyPatchLinkProvider_init_action_int;
-HPX_REGISTER_ACTION(DummyPatchLinkProvider_init_action_int);
-typedef LibGeoDecomp::DummyPatchLinkProvider<std::size_t>::init_action DummyPatchLinkProvider_init_action_std_size_t;
-HPX_REGISTER_ACTION(DummyPatchLinkProvider_init_action_std_size_t);
 
 // register action
 typedef LibGeoDecomp::DummyPatchLinkProvider<int>::receive_action DummyPatchLinkProvider_receive_action_int;
