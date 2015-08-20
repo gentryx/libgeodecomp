@@ -43,11 +43,6 @@ public:
         std::cout << "    DummyPatchLinkProvider::receive(" << sourceID
                   << "->" << targetID
                   << "), box: " << box << "\n";
-
-        // typename DummyPatchLinkAccepter<CELL>::put_action putAction;
-        // std::vector<hpx::lcos::future<void> > ghostFutures;
-        // ghostFutures.reserve(patchAccepters.size());
-        //     ghostFutures.push_back(hpx::async(putAction, patchAccepters[i], gridDim));
     }
 
     HPX_DEFINE_COMPONENT_ACTION(DummyPatchLinkProvider, receive, receive_action);
@@ -160,9 +155,8 @@ public:
         ghostFutures.reserve(patchAccepters.size());
 
         for (std::size_t i = 0; i < patchAccepters.size(); ++i) {
-            // fixme: so we don't need put_action after all?
-            // fixme: add patchProvider and connect to patchAccepter
-            ghostFutures.push_back(hpx::async(&DummyPatchLinkAccepter<CELL>::put, patchAccepters[i], gridDim));
+            ghostFutures.push_back(
+                hpx::async(&DummyPatchLinkAccepter<CELL>::put, patchAccepters[i], gridDim));
         }
 
         std::cout << "  ..would update interior here\n";
@@ -348,59 +342,6 @@ private:
     }
 };
 
-// td::vector<hpx::id_type> getUpdateGroupIDs()
-// {
-//     std::cout << "broadcast called\n";
-//     for (int i = 0; i < 10; ++i) {
-//         localUpdateGroupIDs.push_back(hpx::new_<test_server<int> >(hpx::find_here()).get());
-//     }
-//     // localUpdateGroupIDs = hpx::new_<test_server<int>[]>(hpx::find_here(), 10).get();
-//     return localUpdateGroupIDs;
-// }
-
-// HPX_PLAIN_ACTION(getUpdateGroupIDs);
-// HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupIDs_action)
-// HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupIDs_action)
-
-// void setUpdateGroupIDs(std::vector<hpx::id_type> ids)
-// {
-//     std::cout << "setting globalUpdateGroupIDs, size: " << ids.size() << "\n";
-//     globalUpdateGroupIDs = ids;
-// }
-
-// HPX_PLAIN_ACTION(setUpdateGroupIDs);
-// HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setUpdateGroupIDs_action)
-// HPX_REGISTER_BROADCAST_ACTION(setUpdateGroupIDs_action)
-
-// std::vector<hpx::id_type> 
-
-
-
-
-// int f2(int x)
-// {
-//     std::cout << "f2(" << x << ")\n";
-//     return x * 1000 + hpx::get_locality_id();
-// }
-// HPX_PLAIN_ACTION(f2);
-
-// HPX_REGISTER_BROADCAST_ACTION_DECLARATION(f2_action)
-// HPX_REGISTER_BROADCAST_ACTION(f2_action)
-
-
-// struct test_client
-//   : hpx::components::client_base<test_client, test_server>
-// {
-//     typedef hpx::components::client_base<test_client, test_server>
-//         base_type;
-
-//     test_client() {}
-//     test_client(hpx::id_type const& id) : base_type(id) {}
-//     test_client(hpx::shared_future<hpx::id_type> const& id) : base_type(id) {}
-
-//     hpx::id_type call() const { return call_action()(this->get_id()); }
-// };
-
 }
 
 using namespace LibGeoDecomp;
@@ -422,62 +363,12 @@ public:
         hpx::id_type here = hpx::find_here();
         std::vector<hpx::id_type> localities = hpx::find_all_localities();
 
-        // if (hpx::get_locality_id() == 0) {
-        //     std::vector<std::vector<hpx::id_type> > idTree;
-        //     idTree = hpx::lcos::broadcast<getUpdateGroupIDs_action>(localities).get();
-
-        //     std::vector<hpx::id_type> allIDs;
-        //     for (auto& i: idTree) {
-        //         allIDs.insert(allIDs.end(), i.begin(), i.end());
-        //     }
-
-        //     std::cout << here << " -> " << allIDs.size()
-        //               << ", " << (hpx::get_locality_id() == 0 ? "HERE" : "NAY")
-        //               << ", " << hpx::get_locality_id()
-        //               << ", " << hpx::get_locality() << "\n";
-
-        //     hpx::lcos::broadcast<setUpdateGroupIDs_action>(localities, allIDs).get();
-        // }
-
-
         std::cout << "======================================================1\n";
         DummySimulator<int> sim;
         std::cout << "======================================================2\n";
         // fixme: test multiple steps here
         sim.step();
         std::cout << "======================================================3\n";
-
-
-
-        
-
-        // std::vector<int> f2_res;
-
-        // hpx::id_type here = hpx::find_here();
-        // std::cout << "XXXX here: " << here << "\n";
-
-        // f2_res = hpx::lcos::broadcast<f2_action>(localities, 1).get();
-        // std::cout << "f2_res: " << f2_res << "\n";
-
-        // std::cout << "BOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMERBOOOMER!\n";
-
-        // char const* basename = "/find_all_ids_from_prefix_test/";
-
-        // test_client t1 = test_client::create(hpx::find_here());
-        // hpx::id_type client_id = t1.get_id();
-
-        // std::cout << "check1: " << hpx::naming::invalid_id << ", " << client_id << "\n";
-
-        // // register our component with AGAS
-        // std::cout << "register_id_with_basename: " << (hpx::register_id_with_basename(basename, client_id).get()) << "\n";
-
-        // // wait for all localities to register their component
-
-        // std::vector<hpx::future<hpx::id_type> > all_ids = hpx::find_all_ids_from_basename(basename, localities.size());
-        // std::cout << "all_ids.size() = " << all_ids.size() << "\n"
-        //           << "localities.size() = " << localities.size() << "\n";
-
-        // std::cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
 }
 };
 
