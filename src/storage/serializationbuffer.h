@@ -5,92 +5,93 @@
 
 namespace LibGeoDecomp {
 
-namespace SerializationBufferHelpers
+namespace SerializationBufferHelpers {
+
+/**
+ * This is an n-way switch to allow other classes to select the
+ * appropriate type to buffer regions of a grid; for use with GridVecConv.
+ */
+template<typename CELL, typename SUPPORTS_SOA = void, typename SUPPORTS_BOOST_SERIALIZATION = void>
+class Implementation
 {
-    /**
-     * This is an n-way switch to allow other classes to select the
-     * appropriate type to buffer regions of a grid; for use with GridVecConv.
-     */
-    template<typename CELL, typename SUPPORTS_SOA = void, typename SUPPORTS_BOOST_SERIALIZATION = void>
-    class Implementation
+public:
+    typedef std::vector<CELL> BufferType;
+    typedef CELL ElementType;
+    typedef typename APITraits::TrueType FixedSize;
+
+    template<typename REGION>
+    static BufferType create(const REGION& region)
     {
-    public:
-        typedef std::vector<CELL> BufferType;
-        typedef CELL ElementType;
-        typedef typename APITraits::TrueType FixedSize;
+        return BufferType(region.size());
+    }
 
-        template<typename REGION>
-        static BufferType create(const REGION& region)
-        {
-            return BufferType(region.size());
-        }
-
-        static ElementType *getData(BufferType& buffer)
-        {
-            return &buffer.first();
-        }
+    static ElementType *getData(BufferType& buffer)
+    {
+        return &buffer.first();
+    }
 
 #ifdef LIBGEODECOMP_WITH_MPI
-        static inline MPI_Datatype cellMPIDataType()
-        {
-            return APITraits::SelectMPIDataType<ElementType>::value();
-        }
-#endif
-    };
-
-    template<typename CELL>
-    class Implementation<CELL, typename CELL::API::SupportsSoA, void>
+    static inline MPI_Datatype cellMPIDataType()
     {
-    public:
-        typedef std::vector<char> BufferType;
-        typedef char ElementType;
-        typedef typename APITraits::TrueType FixedSize;
+        return APITraits::SelectMPIDataType<ElementType>::value();
+    }
+#endif
+};
 
-        template<typename REGION>
-        static BufferType create(const REGION& region)
-        {
-            return BufferType(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
-        }
+template<typename CELL>
+class Implementation<CELL, typename CELL::API::SupportsSoA, void>
+{
+public:
+    typedef std::vector<char> BufferType;
+    typedef char ElementType;
+    typedef typename APITraits::TrueType FixedSize;
 
-        static ElementType *getData(BufferType& buffer)
-        {
-            return &buffer.front();
-        }
+    template<typename REGION>
+    static BufferType create(const REGION& region)
+    {
+        return BufferType(LibFlatArray::aggregated_member_size<CELL>::VALUE * region.size());
+    }
+
+    static ElementType *getData(BufferType& buffer)
+    {
+        return &buffer.front();
+    }
 
 #ifdef LIBGEODECOMP_WITH_MPI
-        static inline MPI_Datatype cellMPIDataType()
-        {
-            return MPI_CHAR;
-        }
-#endif
-    };
-
-    template<typename CELL>
-    class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
+    static inline MPI_Datatype cellMPIDataType()
     {
-    public:
-        typedef std::vector<char> BufferType;
-        typedef char ElementType;
-        typedef typename APITraits::FalseType FixedSize;
+        return MPI_CHAR;
+    }
+#endif
+};
 
-        template<typename REGION>
-        static BufferType create(const REGION& region)
-        {
-            return BufferType();
-        }
+template<typename CELL>
+class Implementation<CELL, void, typename CELL::API::SupportsBoostSerialization>
+{
+public:
+    typedef std::vector<char> BufferType;
+    typedef char ElementType;
+    typedef typename APITraits::FalseType FixedSize;
 
-        static ElementType *getData(BufferType& buffer)
-        {
-            return &buffer.front();
-        }
+    template<typename REGION>
+    static BufferType create(const REGION& region)
+    {
+        return BufferType();
+    }
+
+    static ElementType *getData(BufferType& buffer)
+    {
+        return &buffer.front();
+    }
 
 #ifdef LIBGEODECOMP_WITH_MPI
-        static inline MPI_Datatype cellMPIDataType()
-        {
-            return MPI_CHAR;
-        }
+    static inline MPI_Datatype cellMPIDataType()
+    {
+        return MPI_CHAR;
+    }
 #endif
-    };
+};
+
 }
 
 /**
