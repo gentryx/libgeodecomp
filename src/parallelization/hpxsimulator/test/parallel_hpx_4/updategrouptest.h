@@ -167,8 +167,8 @@ public:
         ghostFutures.reserve(patchAccepters.size());
 
         for (std::size_t i = 0; i < patchAccepters.size(); ++i) {
-            ghostFutures.push_back(
-                hpx::async(&DummyPatchLinkAccepter<CELL>::put, patchAccepters[i], stepCounter + 1, gridDim));
+            ghostFutures << hpx::async(
+                &DummyPatchLinkAccepter<CELL>::put, patchAccepters[i], stepCounter + 1, gridDim);
         }
 
         std::cout << "  ..would update interior here\n";
@@ -307,14 +307,14 @@ public:
 
         std::vector<hpx::future<hpx::id_type> > tempFutures;
         for (std::size_t i = 0; i < localUpdateGroups; ++i) {
-            tempFutures.push_back(hpx::new_<DummyUpdateGroup<CELL> >(
-                                      hpx::find_here(),
-                                      basename,
-                                      globalUpdateGroups,
-                                      CoordBox<2>(Coord<2>(100, 200), Coord<2>(300, 200))));
+            tempFutures << hpx::new_<DummyUpdateGroup<CELL> >(
+                hpx::find_here(),
+                basename,
+                globalUpdateGroups,
+                CoordBox<2>(Coord<2>(100, 200), Coord<2>(300, 200)));
         }
         for (std::size_t i = 0; i < localUpdateGroups; ++i) {
-            localUpdateGroupIDs.push_back(tempFutures[i].get());
+            localUpdateGroupIDs << tempFutures[i].get();
         }
 
         std::cout << "  got " << localUpdateGroupIDs.size() << "\n";
@@ -339,7 +339,7 @@ public:
 
         std::vector<hpx::future<void> > updateFutures;
         for (auto&& i: localUpdateGroupIDs) {
-            updateFutures.push_back(hpx::async(stepAction, i));
+            updateFutures << hpx::async(stepAction, i);
         }
         for (auto&& i: updateFutures) {
             i.get();
