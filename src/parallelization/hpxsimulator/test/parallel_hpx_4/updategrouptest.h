@@ -16,9 +16,9 @@ namespace LibGeoDecomp {
 
 namespace DummySimulatorHelpers {
 
-hpx::lcos::local::promise<std::size_t> localUpdateGroups;
-hpx::lcos::local::promise<std::size_t> globalUpdateGroups;
-hpx::lcos::local::promise<std::vector<std::size_t> > localityIndices;
+std::map<std::string, hpx::lcos::local::promise<std::size_t> > localUpdateGroups;
+std::map<std::string, hpx::lcos::local::promise<std::size_t> > globalUpdateGroups;
+std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > localityIndices;
 hpx::lcos::local::promise<bool> allDone;
 
 std::string patchProviderName(const std::string& basename, std::size_t sourceRank, std::size_t targetRank)
@@ -207,21 +207,24 @@ private:
 template<typename CELL>
 boost::atomic<std::size_t> DummyUpdateGroup<CELL>::localIndexCounter;
 
-std::size_t getNumberOfUpdateGroups()
+std::size_t getNumberOfUpdateGroups(const std::string& basename)
 {
-    hpx::lcos::future<std::size_t> future = LibGeoDecomp::DummySimulatorHelpers::localUpdateGroups.get_future();
+    hpx::lcos::future<std::size_t> future = DummySimulatorHelpers::localUpdateGroups[basename].get_future();
     return future.get();
 }
 
-void setNumberOfUpdateGroups(const std::size_t globalUpdateGroups, const std::vector<std::size_t>& indices)
+void setNumberOfUpdateGroups(
+    const std::string& basename,
+    const std::size_t globalUpdateGroups,
+    const std::vector<std::size_t>& indices)
 {
-    LibGeoDecomp::DummySimulatorHelpers::globalUpdateGroups.set_value(globalUpdateGroups);
-    LibGeoDecomp::DummySimulatorHelpers::localityIndices.set_value(indices);
+    DummySimulatorHelpers::globalUpdateGroups[basename].set_value(globalUpdateGroups);
+    DummySimulatorHelpers::localityIndices[basename].set_value(indices);
 }
 
 void allDone()
 {
-    LibGeoDecomp::DummySimulatorHelpers::allDone.get_future().get();
+    DummySimulatorHelpers::allDone.get_future().get();
 }
 
 }
@@ -283,10 +286,10 @@ public:
         here(hpx::find_here()),
         localities(hpx::find_all_localities())
     {
-        DummySimulatorHelpers::localUpdateGroups.set_value(localUpdateGroups);
+        DummySimulatorHelpers::localUpdateGroups[basename].set_value(localUpdateGroups);
 
         if (hpx::get_locality_id() == 0) {
-            gatherAndBroadcastLocalityIndices();
+            gatherAndBroadcastLocalityIndices(basename);
         }
 
         saveLocalityIndices();
@@ -360,10 +363,10 @@ private:
      * locality (e.g. given 3 localities with 8, 10, and 2
      * UpdateGroups respectively. Indices per locality: [0, 8, 18])
      */
-    void gatherAndBroadcastLocalityIndices()
+    void gatherAndBroadcastLocalityIndices(const std::string& basename)
     {
         std::vector<std::size_t> globalUpdateGroupNumbers =
-            hpx::lcos::broadcast<getNumberOfUpdateGroups_action>(localities).get();
+            hpx::lcos::broadcast<getNumberOfUpdateGroups_action>(localities, basename).get();
         std::vector<std::size_t> indices;
         indices.reserve(globalUpdateGroupNumbers.size());
 
@@ -375,18 +378,19 @@ private:
 
         hpx::lcos::broadcast<setNumberOfUpdateGroups_action>(
             localities,
+            basename,
             sum,
             indices).get();
     }
 
     void saveLocalityIndices()
     {
-        globalUpdateGroups = DummySimulatorHelpers::globalUpdateGroups.get_future().get();
-        localityIndices = DummySimulatorHelpers::localityIndices.get_future().get();
+        globalUpdateGroups = DummySimulatorHelpers::globalUpdateGroups[basename].get_future().get();
+        localityIndices = DummySimulatorHelpers::localityIndices[basename].get_future().get();
 
-        // fixme: how to reset?
-        // DummySimulatorHelpers::globalUpdateGroups.reset();
-        // DummySimulatorHelpers::localityIndices.reset();
+        DummySimulatorHelpers::globalUpdateGroups[basename] = hpx::lcos::local::promise<std::size_t>();
+        DummySimulatorHelpers::localUpdateGroups[basename] = hpx::lcos::local::promise<std::size_t>();
+        DummySimulatorHelpers::localityIndices[basename] = hpx::lcos::local::promise<std::vector<std::size_t> >();
     }
 };
 
@@ -414,7 +418,6 @@ public:
         std::cout << "======================================================1\n";
         DummySimulator<int> sim;
         std::cout << "======================================================2\n";
-        // fixme: test multiple steps here
         sim.step();
         sim.step();
         sim.step();
