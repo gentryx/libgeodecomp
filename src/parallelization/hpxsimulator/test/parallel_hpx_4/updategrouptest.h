@@ -20,6 +20,12 @@ hpx::lcos::local::promise<std::size_t> localUpdateGroups;
 hpx::lcos::local::promise<std::size_t> globalUpdateGroups;
 hpx::lcos::local::promise<std::vector<std::size_t> > localityIndices;
 hpx::lcos::local::promise<bool> allDone;
+
+std::string patchProviderName(const std::string& basename, std::size_t sourceID, std::size_t targetID)
+{
+    return basename + "_PatchProvider_" + StringOps::itoa(sourceID) + "-" + StringOps::itoa(targetID);
+}
+
 }
 
 template<typename CELL>
@@ -34,7 +40,9 @@ public:
 
     void receive(std::size_t step, const CoordBox<2>& box)
     {
-        std::cout << "    DummyPatchLinkProvider::receive(" << sourceID
+        std::cout << "    DummyPatchLinkProvider::receive("
+                  << "@" << step
+                  << ", " << sourceID
                   << "->" << targetID
                   << "), box: " << box << "\n";
 
@@ -67,8 +75,7 @@ public:
         sourceID(sourceID),
         targetID(targetID)
     {
-        // fixme: outsource name generation to external function, used by UpdateGroup & PatchAccepter
-        std::string name = basename + "_PatchProvider_" + StringOps::itoa(sourceID) + "-" + StringOps::itoa(targetID);
+        std::string name = DummySimulatorHelpers::patchProviderName(basename, sourceID, targetID);
         std::cout << "  ..XXXsearching: " << name << "\n";
 
         std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_ids_from_basename(name.c_str(), 1);
@@ -144,9 +151,8 @@ public:
             hpx::find_here(), std::string("fixme"), rightNeighbor, id).get();
         std::cout << "DummyUpdateGroup(pingA @" << id << ")\n";
 
-        std::string prefix = basename + "_PatchProvider_" + StringOps::itoa(id) + "-";
         for (auto&& i: patchProviders) {
-            std::string name = prefix + StringOps::itoa(i.first);
+            std::string name = DummySimulatorHelpers::patchProviderName(basename, id, i.first);
             std::cout << "  ..XXXregistering: " << name << "\n";
             hpx::register_id_with_basename(name.c_str(), i.second, 0).get();
         }
@@ -413,6 +419,11 @@ public:
         DummySimulator<int> sim;
         std::cout << "======================================================2\n";
         // fixme: test multiple steps here
+        sim.step();
+        sim.step();
+        sim.step();
+        sim.step();
+        sim.step();
         sim.step();
         std::cout << "======================================================3\n";
 
