@@ -32,8 +32,7 @@ template<typename CELL>
 class DummyPatchLinkProvider : public hpx::components::simple_component_base<DummyPatchLinkProvider<CELL> >
 {
 public:
-    DummyPatchLinkProvider(const std::string& basename = "", std::size_t sourceRank = -1, std::size_t targetRank = -1) :
-        basename(basename),
+    DummyPatchLinkProvider(std::size_t sourceRank = -1, std::size_t targetRank = -1) :
         sourceRank(sourceRank),
         targetRank(targetRank)
     {}
@@ -61,7 +60,6 @@ public:
 
 private:
     hpx::lcos::local::receive_buffer<CoordBox<2> > receiveBuffer;
-    std::string basename;
     std::size_t sourceRank;
     std::size_t targetRank;
 };
@@ -141,9 +139,9 @@ public:
 
         // create PatchProviders
         patchProviders[leftNeighbor ] = hpx::new_<DummyPatchLinkProvider<CELL> >(
-            hpx::find_here(), std::string("fixme"), leftNeighbor,  id).get();
+            hpx::find_here(), leftNeighbor,  id).get();
         patchProviders[rightNeighbor] = hpx::new_<DummyPatchLinkProvider<CELL> >(
-            hpx::find_here(), std::string("fixme"), rightNeighbor, id).get();
+            hpx::find_here(), rightNeighbor, id).get();
         std::cout << "DummyUpdateGroup(pingA @" << id << ")\n";
 
         for (auto&& i: patchProviders) {
