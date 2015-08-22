@@ -21,9 +21,9 @@ hpx::lcos::local::promise<std::size_t> globalUpdateGroups;
 hpx::lcos::local::promise<std::vector<std::size_t> > localityIndices;
 hpx::lcos::local::promise<bool> allDone;
 
-std::string patchProviderName(const std::string& basename, std::size_t sourceID, std::size_t targetID)
+std::string patchProviderName(const std::string& basename, std::size_t sourceRank, std::size_t targetRank)
 {
-    return basename + "_PatchProvider_" + StringOps::itoa(sourceID) + "-" + StringOps::itoa(targetID);
+    return basename + "_PatchProvider_" + StringOps::itoa(sourceRank) + "-" + StringOps::itoa(targetRank);
 }
 
 }
@@ -32,18 +32,18 @@ template<typename CELL>
 class DummyPatchLinkProvider : public hpx::components::simple_component_base<DummyPatchLinkProvider<CELL> >
 {
 public:
-    DummyPatchLinkProvider(const std::string& basename = "", std::size_t sourceID = -1, std::size_t targetID = -1) :
+    DummyPatchLinkProvider(const std::string& basename = "", std::size_t sourceRank = -1, std::size_t targetRank = -1) :
         basename(basename),
-        sourceID(sourceID),
-        targetID(targetID)
+        sourceRank(sourceRank),
+        targetRank(targetRank)
     {}
 
     void receive(std::size_t step, const CoordBox<2>& box)
     {
         std::cout << "    DummyPatchLinkProvider::receive("
                   << "@" << step
-                  << ", " << sourceID
-                  << "->" << targetID
+                  << ", " << sourceRank
+                  << "->" << targetRank
                   << "), box: " << box << "\n";
 
         receiveBuffer.store_received(step, CoordBox<2>(box));
@@ -62,20 +62,20 @@ public:
 private:
     hpx::lcos::local::receive_buffer<CoordBox<2> > receiveBuffer;
     std::string basename;
-    std::size_t sourceID;
-    std::size_t targetID;
+    std::size_t sourceRank;
+    std::size_t targetRank;
 };
 
 template<typename CELL>
 class DummyPatchLinkAccepter : public hpx::components::simple_component_base<DummyPatchLinkAccepter<CELL> >
 {
 public:
-    DummyPatchLinkAccepter(const std::string& basename = "", std::size_t sourceID = -1, std::size_t targetID = -1) :
+    DummyPatchLinkAccepter(const std::string& basename = "", std::size_t sourceRank = -1, std::size_t targetRank = -1) :
         basename(basename),
-        sourceID(sourceID),
-        targetID(targetID)
+        sourceRank(sourceRank),
+        targetRank(targetRank)
     {
-        std::string name = DummySimulatorHelpers::patchProviderName(basename, sourceID, targetID);
+        std::string name = DummySimulatorHelpers::patchProviderName(basename, sourceRank, targetRank);
         std::cout << "  ..XXXsearching: " << name << "\n";
 
         std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_ids_from_basename(name.c_str(), 1);
@@ -88,22 +88,17 @@ public:
 
     void put(std::size_t step, const CoordBox<2>& box)
     {
-        std::cout << "    DummyPatchLinkAccepter::put(" << sourceID
-                  << "->" << targetID
+        std::cout << "    DummyPatchLinkAccepter::put(" << sourceRank
+                  << "->" << targetRank
                   << "), box: " << box << "\n";
-        // fixme: make sure any previous receiveAction is finished here
-        // fixme: serialize data to new buffer here
-        // fixme: then invoce receiveAction, while moving that buffer to the action
-
         typename DummyPatchLinkProvider<CELL>::receive_action receiveAction;
         hpx::async(receiveAction, remoteID, step, box);
     }
 
 private:
     std::string basename;
-    // fixme: find naming scheme to distinguish integer IDs from id_type
-    std::size_t sourceID;
-    std::size_t targetID;
+    std::size_t sourceRank;
+    std::size_t targetRank;
     hpx::id_type remoteID;
 };
 
