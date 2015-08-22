@@ -33,7 +33,6 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
@@ -274,19 +273,6 @@ public:
 
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
-        archive & object.lastStep;
-        archive & object.maxSteps;
-        archive & object.outputRank;
-        archive & object.startTime;
-        archive & object.stream;
-    }
-
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned /*version*/)
     {
         archive & object.period;
@@ -477,12 +463,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned version)
-{
-    BoostSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }
