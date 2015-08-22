@@ -334,10 +334,13 @@ public:
         std::cout << "DummySimulator::step()\n";
         typename DummyUpdateGroup<CELL>::step_action stepAction;
 
+        std::vector<hpx::future<void> > updateFutures;
         for (auto&& i: localUpdateGroupIDs) {
-            stepAction(i);
+            updateFutures.push_back(hpx::async(stepAction, i));
         }
-    // fixme: wait for execution here
+        for (auto&& i: updateFutures) {
+            i.get();
+        }
     }
 
 private:
