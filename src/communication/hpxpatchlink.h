@@ -25,6 +25,12 @@ public:
     class Link
     {
     public:
+        std::string genLinkName(const std::string& basename, std::size_t sourceRank, std::size_t targetRank)
+        {
+            return basename + "/PatchLink::/" +
+                StringOps::itoa(sourceRank) + "-" + StringOps::itoa(targetRank);
+        }
+
         /**
          * We'll use the linkName to uniquely identify the endpoints in AGAS.
          */
@@ -142,7 +148,6 @@ public:
         using Link::lastNanoStep;
         using Link::region;
         using Link::stride;
-        using Link::tag;
         using Link::wait;
         using PatchProvider<GRID_TYPE>::checkNanoStepGet;
         using PatchProvider<GRID_TYPE>::infinity;
