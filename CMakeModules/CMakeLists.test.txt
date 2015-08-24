@@ -111,8 +111,9 @@ int run_tests(int argc, char **argv);
 
 int hpx_main(int argc, char **argv)
 {
-    run_tests(argc, argv);
-    return hpx::finalize();
+    int ret1 = run_tests(argc, argv);
+    int ret2 = hpx::finalize();
+    return ret1 || ret2;
 }
 
 int main(int argc, char **argv)
