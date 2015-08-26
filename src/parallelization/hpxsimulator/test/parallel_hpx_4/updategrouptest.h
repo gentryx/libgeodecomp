@@ -4,7 +4,7 @@
 #include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -39,12 +39,6 @@ public:
 
     void receive(std::size_t step, const CoordBox<2>& box)
     {
-        std::cout << "    DummyPatchLinkProvider::receive("
-                  << "@" << step
-                  << ", " << sourceRank
-                  << "->" << targetRank
-                  << "), box: " << box << "\n";
-
         receiveBuffer.store_received(step, CoordBox<2>(box));
     }
 
@@ -53,7 +47,6 @@ public:
     void get(std::size_t step)
     {
         CoordBox<2> box = receiveBuffer.receive(step).get();
-        std::cout << "DummyPatchLinkProvider.get() -> " << box << "\n";
     }
 
     HPX_DEFINE_COMPONENT_ACTION(DummyPatchLinkProvider, get, get_action);
@@ -74,21 +67,16 @@ public:
         targetRank(targetRank)
     {
         std::string name = DummySimulatorHelpers::patchProviderName(basename, sourceRank, targetRank);
-        std::cout << "  ..XXXsearching: " << name << "\n";
 
-        std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_ids_from_basename(name.c_str(), 1);
+        std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_from_basename(name, 1);
         if (ids.size() != 1) {
             throw std::logic_error("unexpected amount of PatchProviders found in AGAS, expected exactly 1");
         }
         remoteID = ids[0].get();
-        std::cout << "  ..XXXfound: " << name << "\n";
     }
 
     void put(std::size_t step, const CoordBox<2>& box)
     {
-        std::cout << "    DummyPatchLinkAccepter::put(" << sourceRank
-                  << "->" << targetRank
-                  << "), box: " << box << "\n";
         typename DummyPatchLinkProvider<CELL>::receive_action receiveAction;
         hpx::async(receiveAction, remoteID, step, box);
     }
@@ -126,43 +114,29 @@ public:
         stepCounter(0),
         gridDim(gridDim)
     {
-        std::cout << "localIndexCounterA=" << localIndexCounter << "\n";
         id = localIndexCounter++;
-        std::cout << "localIndexCounterB=" << localIndexCounter << "\n";
 
         std::size_t leftNeighbor  = (id - 1 + globalUpdateGroups) % globalUpdateGroups;
         std::size_t rightNeighbor = (id + 1) % globalUpdateGroups;
-
-        std::cout << "DummyUpdateGroup(basename: »" << basename << "«, "
-                  << gridDim << ") @" << id << "/" << globalUpdateGroups << "\n"
-                  << "  left: " << leftNeighbor << ", rightNeighbor: " << rightNeighbor << "\n";
 
         // create PatchProviders
         patchProviders[leftNeighbor ] = hpx::new_<DummyPatchLinkProvider<CELL> >(
             hpx::find_here(), leftNeighbor,  id).get();
         patchProviders[rightNeighbor] = hpx::new_<DummyPatchLinkProvider<CELL> >(
             hpx::find_here(), rightNeighbor, id).get();
-        std::cout << "DummyUpdateGroup(pingA @" << id << ")\n";
 
         for (auto&& i: patchProviders) {
             std::string name = DummySimulatorHelpers::patchProviderName(basename, id, i.first);
-            std::cout << "  ..XXXregistering: " << name << "\n";
-            hpx::register_id_with_basename(name.c_str(), i.second, 0).get();
+            hpx::register_with_basename(name, i.second, 0).get();
         }
-        std::cout << "DummyUpdateGroup(pingB @" << id << ")\n";
 
         // create PatchAccepters
         patchAccepters << DummyPatchLinkAccepter<CELL>(basename, id, leftNeighbor);
         patchAccepters << DummyPatchLinkAccepter<CELL>(basename, id, rightNeighbor);
-        std::cout << "DummyUpdateGroup(pingC @" << id << ")\n";
     }
 
     void step()
     {
-        std::cout << "  DummyUpdateGroup::step()\n";
-
-        std::cout << "  ..would update ghost here\n";
-
         std::vector<hpx::lcos::future<void> > ghostFutures;
         ghostFutures.reserve(patchAccepters.size());
 
@@ -171,25 +145,20 @@ public:
                 &DummyPatchLinkAccepter<CELL>::put, patchAccepters[i], stepCounter + 1, gridDim);
         }
 
-        std::cout << "  ..would update interior here\n";
+        // would update interior here
 
         stepCounter += 1;
-        std::cout << "  ..waiting for sends\n";
         for (auto&& i: ghostFutures) {
             i.get();
         }
-        std::cout << "  ..waiting for recvs\n";
         std::map<std::size_t, hpx::lcos::future<void> > ghostFutures2;
         typename DummyPatchLinkProvider<CELL>::get_action getAction;
         for (auto&& i: patchProviders) {
             ghostFutures2[i.first] = hpx::async(getAction, i.second, stepCounter);
-            std::cout << "  ..ping\n";
         }
         for (auto i = ghostFutures2.begin(); i != ghostFutures2.end(); ++i) {
             i->second.get();
-            std::cout << "  ..pong, " << id << " <- " << i->first << "\n";
         }
-        std::cout << "  ..done\n";
     }
 
     HPX_DEFINE_COMPONENT_ACTION(DummyUpdateGroup, step, step_action);
@@ -294,16 +263,7 @@ public:
 
         saveLocalityIndices();
 
-        std::cout << "DummySimulator(" << basename << ", localUpdateGroups: " << localUpdateGroups << " @" << hpx::get_locality_id() << ") -> " << localityIndices << "/" << globalUpdateGroups << "\n";
-
         DummyUpdateGroup<CELL>::localIndexCounter = localityIndices[hpx::get_locality_id()];
-        std::cout << "  localIndexCounter: " << DummyUpdateGroup<CELL>::localIndexCounter << " @" << hpx::get_locality_id() << "\n";
-        std::cout << "  creating " << localUpdateGroups << " instances at " << hpx::get_locality_id() << "\n";
-        // localUpdateGroupIDs = hpx::new_<DummyUpdateGroup<CELL>[]>(
-        //     hpx::find_here(), localUpdateGroups,
-        //     basename,
-        //     globalUpdateGroups,
-        //     CoordBox<2>(Coord<2>(100, 200), Coord<2>(300, 200))).get();
 
         std::vector<hpx::future<hpx::id_type> > tempFutures;
         for (std::size_t i = 0; i < localUpdateGroups; ++i) {
@@ -317,10 +277,9 @@ public:
             localUpdateGroupIDs << tempFutures[i].get();
         }
 
-        std::cout << "  got " << localUpdateGroupIDs.size() << "\n";
         for (std::size_t i = 0; i < localUpdateGroups; ++i) {
             std::size_t id = localityIndices[hpx::get_locality_id()] + i;
-            hpx::register_id_with_basename(basename.c_str(), localUpdateGroupIDs[i], id).get();
+            hpx::register_with_basename(basename, localUpdateGroupIDs[i], id).get();
         }
     }
 
@@ -328,13 +287,12 @@ public:
     {
         for (std::size_t i = 0; i < localUpdateGroups; ++i) {
             std::size_t id = localityIndices[hpx::get_locality_id()] + i;
-            hpx::unregister_id_with_basename(basename.c_str(), id);
+            hpx::unregister_with_basename(basename, id);
         }
     }
 
     void step()
     {
-        std::cout << "DummySimulator::step()\n";
         typename DummyUpdateGroup<CELL>::step_action stepAction;
 
         std::vector<hpx::future<void> > updateFutures;
