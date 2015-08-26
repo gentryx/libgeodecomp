@@ -16,8 +16,9 @@ class TypemapGenerator
                         header_replacement="",
                         macro_guard_mpi=nil,
                         macro_guard_boost=nil,
-                        macro_guard_hpx=nil)
-      parser = MPIParser.new(xml_path, sloppy, namespace)
+                        macro_guard_hpx=nil,
+                        include_prefix=nil)
+      parser = MPIParser.new(xml_path, sloppy, namespace, include_prefix)
 
       mpi_generator = MPIGenerator.new(template_path, namespace, macro_guard_mpi)
       boost_generator = BoostGenerator.new(template_path, namespace, macro_guard_boost)

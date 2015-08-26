@@ -21,7 +21,7 @@ class MPIParser
   # that this won't work if the to be excluded members are of a
   # template type for whitch typemaps will be generated using other
   # parameters. Yeah, it's complicated.
-  def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="")
+  def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="", include_prefix="")
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
@@ -32,6 +32,8 @@ class MPIParser
     class_files = grep_typemap_candidates(path)
     @xml_docs = { }
     @xml_cache = {}
+
+    @include_prefix = include_prefix
 
     threads = []
     num_threads = 1
@@ -138,7 +140,7 @@ class MPIParser
       end
     end
 
-    res.headers = res.topological_class_sortation.map { |klass| find_header(klass) }
+    res.headers = res.topological_class_sortation.map { |klass| find_header(klass, @include_prefix) }
     res.datatype_map = @datatype_map
     return res
   end
@@ -162,7 +164,7 @@ class MPIParser
       res.wants_polymorphic_serialization[klass] = wants_polymorphic_serialization?(klass)
     end
 
-    res.headers = classes.map { |klass| find_header(klass) }
+    res.headers = classes.map { |klass| find_header(klass, @include_prefix) }
     return res
   end
 
@@ -711,12 +713,12 @@ class MPIParser
   end
 
   # locate the header filename
-  def find_header(klass)
+  def find_header(klass, prefix="")
     begin
-        find_header_simple(klass)
+      return prefix + find_header_simple(klass)
     rescue Exception => e
       if klass =~ /<.+>/
-        find_header_simple(template_basename(klass))
+        prefix + find_header_simple(template_basename(klass))
       else
         raise e
       end

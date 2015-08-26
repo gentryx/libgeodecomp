@@ -12,6 +12,7 @@ require 'typemapgenerator'
 options = {}
 options[:exclude] = []
 options[:extension] = "cpp"
+options[:include_prefix] = ""
 
 opts = OptionParser.new do |o|
   o.banner = "Usage: #$0 [OPTIONS] PATH_TO_XML_DOC [OUTPUT_PATH]"
@@ -69,6 +70,10 @@ opts = OptionParser.new do |o|
   o.on("--macro-guard-hpx MACRO",
        "encapsulate HPX Serialization code in #ifdef(MACRO), #endif guards") do |macro|
     options[:macro_guard_hpx] = macro
+  end
+  o.on("-i", "--include-prefix PREFIX",
+       "Prepend PREFIX to all include paths in header file includes") do |prefix|
+    options[:include_prefix] = prefix
   end
   o.on("-p", "--profile",
        "profile execution") do
@@ -171,7 +176,8 @@ boost_header, hpx_header, hpx_source, mpi_header, mpi_source =
                                    options[:header_replacement],
                                    options[:macro_guard_mpi],
                                    options[:macro_guard_boost],
-                                   options[:macro_guard_hpx])
+                                   options[:macro_guard_hpx],
+                                   options[:include_prefix])
 File.open(output_path + "boostserialization.h", "w").write(boost_header)
 File.open(output_path + "hpxserialization.h", "w").write(hpx_header)
 File.open(output_path + "hpxserialization.cpp", "w").write(hpx_source)
