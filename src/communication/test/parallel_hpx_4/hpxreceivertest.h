@@ -111,9 +111,15 @@ extern "C" __attribute__((visibility ("default")))
 std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry();
 
 namespace {
-struct hpx_plugin_exporter_registry_hpx_ReceiverType1Component
+
+template<typename T>
+class hpx_plugin_exporter_registry;
+
+template<>
+class hpx_plugin_exporter_registry<ReceiverType1>
 {
-    hpx_plugin_exporter_registry_hpx_ReceiverType1Component()
+public:
+    hpx_plugin_exporter_registry()
     {
         static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check> > cf;
         hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf;
@@ -122,7 +128,16 @@ struct hpx_plugin_exporter_registry_hpx_ReceiverType1Component
         boost::algorithm::to_lower(actname);
         hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w));
     }
-} hpx_plugin_exporter_instance_registry_hpx_ReceiverType1Component;
+
+    static hpx_plugin_exporter_registry instance;
+    static void ping()
+    {
+        std::cout << &instance;
+    }
+};
+
+hpx_plugin_exporter_registry<ReceiverType1> hpx_plugin_exporter_registry<ReceiverType1>::instance;
+
 }
 
 namespace hpx {
