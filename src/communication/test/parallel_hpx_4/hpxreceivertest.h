@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
+#include <hpx/runtime/serialization/serialize_buffer.hpp>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 
@@ -24,7 +25,7 @@ namespace LibGeoDecomp {
 class HPXReceiverTest : public CxxTest::TestSuite
 {
 public:
-    void setUp()
+    void mySetUp(std::string basename)
     {
         rank = hpx::get_locality_id();
         size = hpx::find_all_localities().size();
@@ -32,13 +33,14 @@ public:
         leftNeighbor  = (rank - 1 + size) % size;
         rightNeighbor = (rank + 1       ) % size;
 
-        name      = "foo/" + StringOps::itoa(rank);
-        leftName  = "foo/" + StringOps::itoa(leftNeighbor);
-        rightName = "foo/" + StringOps::itoa(rightNeighbor);
+        name      = basename + "/" + StringOps::itoa(rank);
+        leftName  = basename + "/" + StringOps::itoa(leftNeighbor);
+        rightName = basename + "/" + StringOps::itoa(rightNeighbor);
     }
 
     void testBasic()
     {
+        mySetUp("foo");
         boost::shared_ptr<ReceiverType1> receiver = ReceiverType1::make(name).get();
 
         hpx::id_type leftID  = ReceiverType1::find(leftName ).get();
@@ -51,9 +53,9 @@ public:
 
         std::vector<int> fromLeft  = receiver->get(11).get();
         std::vector<int> fromRight = receiver->get(10).get();
+
         TS_ASSERT_EQUALS(1, fromLeft.size());
         TS_ASSERT_EQUALS(1, fromRight.size());
-
         TS_ASSERT_EQUALS(leftNeighbor,  fromLeft[0]);
         TS_ASSERT_EQUALS(rightNeighbor, fromRight[0]);
 
@@ -62,10 +64,30 @@ public:
 
     void testWithSerializationBuffer()
     {
-        std::vector<char> sendToLeft( leftNeighbor  + 10, char(leftNeighbor));
-        std::vector<char> sendToRight(rightNeighbor + 10, char(rightNeighbor));
+        mySetUp("bar");
 
-        
+        std::vector<char> sendToLeft( rank + 10, char(leftNeighbor));
+        std::vector<char> sendToRight(rank + 10, char(rightNeighbor));
+        hpx::serialization::serialize_buffer<char> sendLeftBuffer( &sendToLeft[0],  sendToLeft.size());
+        hpx::serialization::serialize_buffer<char> sendRightBuffer(&sendToRight[0], sendToRight.size());
+
+        boost::shared_ptr<ReceiverType2> receiver = ReceiverType2::make(name).get();
+
+        hpx::id_type leftID  = ReceiverType2::find(leftName ).get();
+        hpx::id_type rightID = ReceiverType2::find(rightName).get();
+
+        hpx::apply(ReceiverType2::receiveAction(), leftID,  20, sendLeftBuffer);
+        hpx::apply(ReceiverType2::receiveAction(), rightID, 21, sendRightBuffer);
+
+        hpx::serialization::serialize_buffer<char> fromLeft  = receiver->get(21).get();
+        hpx::serialization::serialize_buffer<char> fromRight = receiver->get(20).get();
+
+        TS_ASSERT_EQUALS(rank, std::size_t(fromLeft[0]));
+        TS_ASSERT_EQUALS(rank, std::size_t(fromRight[0]));
+        TS_ASSERT_EQUALS(10 + leftNeighbor,  fromLeft.size());
+        TS_ASSERT_EQUALS(10 + rightNeighbor, fromRight.size());
+
+        hpx::unregister_with_basename(name, 0);
     }
 
 private:
