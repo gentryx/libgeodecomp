@@ -54,6 +54,49 @@ public:
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
     }
+   
+    void testMoveAssignment()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Region<2> expected;
+        expected << Coord<2>(5, 5);
+        expected << Coord<2>(2, 5);
+        
+        Region<2> dummy = expected;
+        Region<2> actual;
+        actual = std::move(dummy);
+        
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+#endif 
+    }
+    
+    void testMoveConstructor()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Region<2> expected;
+        expected << Coord<2>(5, 5);
+        expected << Coord<2>(2, 5);
+        
+        Region<2> dummy = expected;
+        Region<2> actual(std::move(dummy));
+        
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(2, 5)));
+        
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+#endif 
+    }
 
     void testIntersectOrTouch()
     {

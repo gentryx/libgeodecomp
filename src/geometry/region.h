@@ -445,6 +445,29 @@ public:
         geometryCacheTainted(false)
     {}
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+    inline Region(const Region<DIM>& other) = default;
+
+    inline Region(Region<DIM>&& other) :
+        myBoundingBox(other.myBoundingBox),
+        mySize(other.mySize),
+        geometryCacheTainted(other.geometryCacheTainted)
+    {
+        for (int i = 0; i < DIM; ++i) {
+            indices[i] = std::move(other.indices[i]);
+        }
+    }
+
+    inline Region& operator=(const Region<DIM>& other) = default;
+
+    inline Region& operator=(Region<DIM>&& other)
+    {
+        using std::swap;
+        swap(*this, other);
+        return *this;
+    }
+#endif
+
     template<class ITERATOR1, class ITERATOR2>
     inline Region(const ITERATOR1& start, const ITERATOR2& end) :
         mySize(0),
