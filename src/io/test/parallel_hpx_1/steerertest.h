@@ -2,7 +2,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <libgeodecomp/io/steerer.h>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 
 using namespace LibGeoDecomp;
 

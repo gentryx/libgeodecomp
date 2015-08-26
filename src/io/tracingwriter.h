@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>

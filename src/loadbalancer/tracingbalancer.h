@@ -8,8 +8,7 @@
 
 #ifdef LIBGEODECOMP_WITH_HPX
 
-#include <libgeodecomp/communication/hpxserialization.h>
-#include <hpx/runtime/serialization/set.hpp>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 
 namespace LibGeoDecomp {
 class TracingBalancer;

@@ -2,10 +2,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <libgeodecomp/storage/selector.h>
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
-#include <libgeodecomp/communication/hpxserialization.h>
-#endif
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 
 using namespace LibGeoDecomp;
 

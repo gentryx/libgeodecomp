@@ -2,7 +2,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/runtime/serialization/set.hpp>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 
 using namespace LibGeoDecomp;

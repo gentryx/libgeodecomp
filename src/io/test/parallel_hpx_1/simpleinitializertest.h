@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 
 using namespace LibGeoDecomp;

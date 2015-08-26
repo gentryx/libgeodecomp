@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/storage/fixedarray.h>
 
 using namespace LibGeoDecomp;
