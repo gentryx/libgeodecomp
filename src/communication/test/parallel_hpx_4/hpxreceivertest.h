@@ -7,16 +7,22 @@
 // fixme: find unified macro for this, or even better: define template magic for this, akin to serialization macros
 typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
 typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
+typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
 
 typedef hpx::components::simple_component<ReceiverType1> ReceiverType1Component;
-HPX_REGISTER_COMPONENT(ReceiverType1Component, ReceiverType1ComponentVectorInt );
-typedef ReceiverType1::receiveAction ReceiverType1ComponentVectorIntReceiveActionReceiveAction;
-HPX_REGISTER_ACTION(ReceiverType1ComponentVectorIntReceiveActionReceiveAction);
+HPX_REGISTER_COMPONENT(ReceiverType1Component, ReceiverType1Component );
+typedef ReceiverType1::receiveAction ReceiverType1ComponentReceiveActionReceiveAction;
+HPX_REGISTER_ACTION(ReceiverType1ComponentReceiveActionReceiveAction);
 
 typedef hpx::components::simple_component<ReceiverType2> ReceiverType2Component;
-HPX_REGISTER_COMPONENT(ReceiverType2Component, ReceiverType2ComponentVectorInt );
-typedef ReceiverType2::receiveAction ReceiverType2ComponentVectorIntReceiveActionReceiveAction;
-HPX_REGISTER_ACTION(ReceiverType2ComponentVectorIntReceiveActionReceiveAction);
+HPX_REGISTER_COMPONENT(ReceiverType2Component, ReceiverType2Component );
+typedef ReceiverType2::receiveAction ReceiverType2ComponentReceiveActionReceiveAction;
+HPX_REGISTER_ACTION(ReceiverType2ComponentReceiveActionReceiveAction);
+
+typedef hpx::components::simple_component<ReceiverType3> ReceiverType3Component;
+HPX_REGISTER_COMPONENT(ReceiverType3Component, ReceiverType3Component );
+typedef ReceiverType3::receiveAction ReceiverType3ComponentReceiveActionReceiveAction;
+HPX_REGISTER_ACTION(ReceiverType3ComponentReceiveActionReceiveAction);
 
 using namespace LibGeoDecomp;
 
@@ -40,7 +46,7 @@ public:
 
     void testBasic()
     {
-        mySetUp("foo");
+        mySetUp("HPXReceiverTest::testBasic");
         boost::shared_ptr<ReceiverType1> receiver = ReceiverType1::make(name).get();
 
         hpx::id_type leftID  = ReceiverType1::find(leftName ).get();
@@ -64,7 +70,7 @@ public:
 
     void testWithSerializationBuffer()
     {
-        mySetUp("bar");
+        mySetUp("HPXReceiverTest::testWithSerializationBuffer");
 
         std::vector<char> sendToLeft( rank + 10, char(leftNeighbor));
         std::vector<char> sendToRight(rank + 10, char(rightNeighbor));
@@ -86,6 +92,30 @@ public:
         TS_ASSERT_EQUALS(rank, std::size_t(fromRight[0]));
         TS_ASSERT_EQUALS(10 + leftNeighbor,  fromLeft.size());
         TS_ASSERT_EQUALS(10 + rightNeighbor, fromRight.size());
+
+        hpx::unregister_with_basename(name, 0);
+    }
+
+    void testWithDouble()
+    {
+        mySetUp("HPXReceiverTest::testWithDouble");
+
+        double sendToLeft  = rank + 10.123;
+        double sendToRight = rank + 10.234;
+
+        boost::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name).get();
+
+        hpx::id_type leftID  = ReceiverType3::find(leftName ).get();
+        hpx::id_type rightID = ReceiverType3::find(rightName).get();
+
+        hpx::apply(ReceiverType3::receiveAction(), leftID,  30, sendToLeft);
+        hpx::apply(ReceiverType3::receiveAction(), rightID, 31, sendToRight);
+
+        double fromLeft  = receiver->get(31).get();
+        double fromRight = receiver->get(30).get();
+
+        TS_ASSERT_EQUALS(10.234 + leftNeighbor,  fromLeft);
+        TS_ASSERT_EQUALS(10.123 + rightNeighbor, fromRight);
 
         hpx::unregister_with_basename(name, 0);
     }
