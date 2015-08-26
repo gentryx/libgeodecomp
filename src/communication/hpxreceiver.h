@@ -16,13 +16,13 @@ public:
     static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name)
     {
         hpx::id_type id = hpx::new_<HPXReceiver>(hpx::find_here()).get();
-        hpx::register_id_with_basename(name.c_str(), id, 0).get();
+        hpx::register_with_basename(name, id, 0).get();
         return hpx::get_ptr<HPXReceiver>(id);
     }
 
     static hpx::future<hpx::id_type> find(const std::string& name)
     {
-        std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_ids_from_basename(name.c_str(), 1);
+        std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_from_basename(name, 1);
         if (ids.size() != 1) {
             throw std::logic_error("Unexpected amount of PatchProviders found in AGAS, expected exactly 1");
         }
