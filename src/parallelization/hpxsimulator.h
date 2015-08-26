@@ -9,7 +9,7 @@
 #include <hpx/runtime/serialization/vector.hpp>
 #include <hpx/lcos/broadcast.hpp>
 
-#include <libgeodecomp/communication/hpxserialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
