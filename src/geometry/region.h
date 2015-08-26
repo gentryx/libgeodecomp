@@ -579,6 +579,7 @@ public:
         return ret;
     }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     /**
      * does the same as expand, but reads adjacent indices out of
      * an adjacency list
@@ -615,6 +616,7 @@ public:
 
         return ret;
     }
+#endif // LIBGEODECOMP_WITH_CPP14
 
     inline bool operator==(const Region<DIM>& other) const
     {

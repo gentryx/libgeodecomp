@@ -57,6 +57,7 @@ public:
 
     void testExpandWithAdjacency()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         {
             Region<1> region;
 
@@ -117,6 +118,7 @@ public:
 
             TS_ASSERT_EQUALS(expanded1, expanded2);
         }
+#ifdef LIBGEODECOMP_WITH_CPP14
     }
 
     void testMoveAssignment()
