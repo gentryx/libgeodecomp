@@ -5,14 +5,183 @@
 #include <libgeodecomp/misc/stringops.h>
 
 // fixme: find unified macro for this, or even better: define template magic for this, akin to serialization macros
+// typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
 typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
 typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
 typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
 
-typedef hpx::components::simple_component<ReceiverType1> ReceiverType1Component;
-HPX_REGISTER_COMPONENT(ReceiverType1Component, ReceiverType1Component );
-typedef ReceiverType1::receiveAction ReceiverType1ComponentReceiveActionReceiveAction;
-HPX_REGISTER_ACTION(ReceiverType1ComponentReceiveActionReceiveAction);
+// int ficken1;
+
+// typedef hpx::components::simple_component<ReceiverType1> ReceiverType1Component;
+// HPX_REGISTER_COMPONENT(ReceiverType1Component, ReceiverType1Component );
+
+// int ficken2;
+
+// typedef ReceiverType1::receiveAction ReceiverType1ComponentReceiveActionReceiveAction;
+// HPX_REGISTER_ACTION(ReceiverType1ComponentReceiveActionReceiveAction);
+
+// int ficken3 = "";
+
+int ficken1;
+
+// typedef hpx::components::simple_component<ReceiverType1> ReceiverType1Component;
+
+extern "C" __attribute__((visibility ("default")))
+std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_factory();
+
+namespace {
+
+template<typename COMPONENT>
+class hpx_plugin_exporter_factory;
+
+template<>
+class hpx_plugin_exporter_factory<ReceiverType1>
+{
+public:
+    hpx_plugin_exporter_factory()
+    {
+        static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>> > cf;
+        hpx::util::plugin::abstract_factory<hpx::components::component_factory_base>* w = &cf;
+
+        std::string actname(typeid(hpx::components::simple_component<ReceiverType1>).name());
+        boost::algorithm::to_lower(actname);
+        hpx_exported_plugins_list_hpx_factory()->insert( std::make_pair(actname, w));
+    }
+
+    static hpx_plugin_exporter_factory instance;
+    static void ping()
+    {
+        std::cout << &instance;
+    }
+
+};
+
+hpx_plugin_exporter_factory<ReceiverType1> hpx_plugin_exporter_factory<ReceiverType1>::instance;
+
+}
+
+extern "C" __attribute__((visibility ("default")))
+
+std::map<std::string, boost::any>* hpx_exported_plugins_list_hpx_factory();
+
+namespace {
+
+template<typename COMPONENT>
+class init_registry_factory_static;
+
+template<>
+class init_registry_factory_static<ReceiverType1>
+{
+public:
+    init_registry_factory_static<ReceiverType1>()
+    {
+        hpx::components::static_factory_load_data_type data = { typeid(hpx::components::simple_component<ReceiverType1>).name(), hpx_exported_plugins_list_hpx_factory };
+        hpx::components::init_registry_factory(data);
+    }
+
+    static init_registry_factory_static<ReceiverType1> instance;
+
+    static void ping()
+    {
+        std::cout << &instance;
+    }
+};
+
+init_registry_factory_static<ReceiverType1> init_registry_factory_static<ReceiverType1>::instance;
+
+}
+
+namespace hpx {
+namespace components {
+
+template <> struct unique_component_name<hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>> >
+{
+    typedef char const* type; static type call (void)
+    {
+        return typeid(hpx::components::simple_component<ReceiverType1>).name();
+    }
+};
+}
+}
+
+template struct hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>>;
+// typedef hpx::components::component_registry<ReceiverType1Component, ::hpx::components::factory_check> ReceiverType1Component_component_registry_type;
+
+extern "C" __attribute__((visibility ("default")))
+std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry();
+
+namespace {
+struct hpx_plugin_exporter_registry_hpx_ReceiverType1Component
+{
+    hpx_plugin_exporter_registry_hpx_ReceiverType1Component()
+    {
+        static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check> > cf;
+        hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf;
+        // std::string actname("ReceiverType1Component");
+        std::string actname(typeid(hpx::components::simple_component<ReceiverType1>).name());
+        boost::algorithm::to_lower(actname);
+        hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w));
+    }
+} hpx_plugin_exporter_instance_registry_hpx_ReceiverType1Component;
+}
+
+namespace hpx {
+namespace components {
+
+template <>
+struct unique_component_name<hpx::components::component_registry<hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check> >
+{
+    typedef char const* type;
+    static type call (void)
+    {
+        return typeid(hpx::components::simple_component<ReceiverType1>).name();
+    }
+};
+
+}
+}
+
+template struct hpx::components::component_registry< hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check>;
+
+namespace hpx {
+namespace traits {
+
+template <>
+__attribute__((visibility("default")))
+components::component_type component_type_database<hpx::components::simple_component<ReceiverType1>::wrapped_type>::get()
+{
+    return value;
+}
+
+template <>
+__attribute__((visibility("default")))
+void component_type_database<hpx::components::simple_component<ReceiverType1>::wrapped_type>::set( components::component_type t)
+{
+    value = t;
+}
+
+}};
+
+int ficken2;
+
+// typedef ReceiverType1::receiveAction ReceiverType1ComponentReceiveActionReceiveAction;
+
+namespace hpx {
+namespace actions {
+namespace detail {
+
+template<>
+__attribute__((visibility("default")))
+char const* get_action_name<ReceiverType1::receiveAction// ReceiverType1ComponentReceiveActionReceiveAction
+                            >()
+{
+    return typeid(ReceiverType1::receiveAction).name();
+}
+
+}}};
+
+int ficken3;
+
 
 typedef hpx::components::simple_component<ReceiverType2> ReceiverType2Component;
 HPX_REGISTER_COMPONENT(ReceiverType2Component, ReceiverType2Component );
