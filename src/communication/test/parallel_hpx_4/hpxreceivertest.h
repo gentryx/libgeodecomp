@@ -10,22 +10,6 @@ typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
 typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
 typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
 
-// int ficken1;
-
-// typedef hpx::components::simple_component<ReceiverType1> ReceiverType1Component;
-// HPX_REGISTER_COMPONENT(ReceiverType1Component, ReceiverType1Component );
-
-// int ficken2;
-
-// typedef ReceiverType1::receiveAction ReceiverType1ComponentReceiveActionReceiveAction;
-// HPX_REGISTER_ACTION(ReceiverType1ComponentReceiveActionReceiveAction);
-
-// int ficken3 = "";
-
-int ficken1;
-
-// typedef hpx::components::simple_component<ReceiverType1> ReceiverType1Component;
-
 extern "C" __attribute__((visibility ("default")))
 std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_factory();
 
@@ -123,7 +107,6 @@ public:
     {
         static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check> > cf;
         hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf;
-        // std::string actname("ReceiverType1Component");
         std::string actname(typeid(hpx::components::simple_component<ReceiverType1>).name());
         boost::algorithm::to_lower(actname);
         hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w));
@@ -143,13 +126,13 @@ hpx_plugin_exporter_registry<ReceiverType1> hpx_plugin_exporter_registry<Receive
 namespace hpx {
 namespace components {
 
-template <>
-struct unique_component_name<hpx::components::component_registry<hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check> >
+template <typename CARGO>
+struct unique_component_name<hpx::components::component_registry<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> >, ::hpx::components::factory_check> >
 {
     typedef char const* type;
     static type call (void)
     {
-        return typeid(hpx::components::simple_component<ReceiverType1>).name();
+        return typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> >).name();
     }
 };
 
@@ -161,42 +144,21 @@ template struct hpx::components::component_registry< hpx::components::simple_com
 namespace hpx {
 namespace traits {
 
-template <>
+template<typename CARGO, typename ENABLE>
 __attribute__((visibility("default")))
-components::component_type component_type_database<hpx::components::simple_component<ReceiverType1>::wrapped_type>::get()
+components::component_type component_type_database<CARGO, ENABLE>::get()
 {
     return value;
 }
 
-template <>
+template<typename CARGO, typename ENABLE>
 __attribute__((visibility("default")))
-void component_type_database<hpx::components::simple_component<ReceiverType1>::wrapped_type>::set( components::component_type t)
+void component_type_database<CARGO, ENABLE>::set( components::component_type t)
 {
     value = t;
 }
 
 }};
-
-int ficken2;
-
-// typedef ReceiverType1::receiveAction ReceiverType1ComponentReceiveActionReceiveAction;
-
-namespace hpx {
-namespace actions {
-namespace detail {
-
-template<>
-__attribute__((visibility("default")))
-char const* get_action_name<ReceiverType1::receiveAction// ReceiverType1ComponentReceiveActionReceiveAction
-                            >()
-{
-    return typeid(ReceiverType1::receiveAction).name();
-}
-
-}}};
-
-int ficken3;
-
 
 typedef hpx::components::simple_component<ReceiverType2> ReceiverType2Component;
 HPX_REGISTER_COMPONENT(ReceiverType2Component, ReceiverType2Component );
@@ -302,6 +264,7 @@ public:
         TS_ASSERT_EQUALS(10.123 + rightNeighbor, fromRight);
 
         hpx::unregister_with_basename(name, 0);
+
     }
 
 private:
