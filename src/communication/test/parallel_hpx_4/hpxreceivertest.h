@@ -15,7 +15,7 @@
     template<typename COMPONENT>                                        \
     class hpx_plugin_exporter_factory;                                  \
                                                                         \
-    template<PARAMS>                                            \
+    template<PARAMS>                                                    \
     class hpx_plugin_exporter_factory<TEMPLATE > \
     {                                                                   \
     public:                                                             \
@@ -32,118 +32,121 @@
         static hpx_plugin_exporter_factory instance;                    \
     };                                                                  \
                                                                         \
-    template<PARAMS>                                            \
+    template<PARAMS>                                                    \
     hpx_plugin_exporter_factory<TEMPLATE> hpx_plugin_exporter_factory<TEMPLATE>::instance; \
                                                                         \
     }                                                                   \
                                                                         \
     extern "C" __attribute__((visibility ("default")))                  \
     std::map<std::string, boost::any>* hpx_exported_plugins_list_hpx_factory(); \
-
+                                                                        \
+    namespace {                                                         \
+                                                                        \
+    template<typename COMPONENT>                                        \
+    class init_registry_factory_static;                                 \
+                                                                        \
+    template<PARAMS>                                                    \
+    class init_registry_factory_static<TEMPLATE >                       \
+    {                                                                   \
+    public:                                                             \
+        init_registry_factory_static<TEMPLATE>()                        \
+        {                                                               \
+            hpx::components::static_factory_load_data_type data = { typeid(hpx::components::simple_component<TEMPLATE>).name(), hpx_exported_plugins_list_hpx_factory }; \
+            hpx::components::init_registry_factory(data);               \
+        }                                                               \
+                                                                        \
+        static init_registry_factory_static<TEMPLATE> instance;         \
+    };                                                                  \
+                                                                        \
+    template<PARAMS>                                                    \
+    init_registry_factory_static<TEMPLATE> init_registry_factory_static<TEMPLATE>::instance; \
+                                                                        \
+    }                                                                   \
+                                                                        \
+    namespace hpx {                                                     \
+    namespace components {                                              \
+                                                                        \
+    template <PARAMS> struct unique_component_name<hpx::components::component_factory<hpx::components::simple_component<TEMPLATE > > > \
+    {                                                                   \
+        typedef char const* type;                                       \
+                                                                        \
+        static type call(void)                                          \
+        {                                                               \
+            return typeid(hpx::components::simple_component<TEMPLATE >).name(); \
+        }                                                               \
+    };                                                                  \
+                                                                        \
+    }                                                                   \
+    }                                                                   \
+                                                                        \
+    extern "C" __attribute__((visibility ("default")))                  \
+    std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry(); \
+                                                                        \
+    namespace {                                                         \
+                                                                        \
+    template<typename T>                                                \
+    class hpx_plugin_exporter_registry;                                 \
+                                                                        \
+    template<PARAMS>                                                    \
+    class hpx_plugin_exporter_registry<TEMPLATE> \
+    {                                                                   \
+    public:                                                             \
+        hpx_plugin_exporter_registry()                                  \
+        {                                                               \
+            static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<TEMPLATE>, ::hpx::components::factory_check> > cf; \
+            hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf; \
+            std::string actname(typeid(hpx::components::simple_component<TEMPLATE>).name()); \
+            boost::algorithm::to_lower(actname);                        \
+            hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w)); \
+        }                                                               \
+                                                                        \
+        static hpx_plugin_exporter_registry instance;                   \
+    };                                                                  \
+                                                                        \
+    template<PARAMS>                                                    \
+    hpx_plugin_exporter_registry<TEMPLATE> hpx_plugin_exporter_registry<TEMPLATE>::instance; \
+                                                                        \
+    }                                                                   \
+                                                                        \
+    namespace hpx {                                                     \
+    namespace components {                                              \
+                                                                        \
+    template <PARAMS>                                                   \
+    struct unique_component_name<hpx::components::component_registry<hpx::components::simple_component<TEMPLATE >, ::hpx::components::factory_check> > \
+    {                                                                   \
+        typedef char const* type;                                       \
+        static type call (void)                                         \
+        {                                                               \
+            return typeid(hpx::components::simple_component<TEMPLATE >).name(); \
+        }                                                               \
+    };                                                                  \
+                                                                        \
+    }                                                                   \
+    }                                                                   \
+                                                                        \
+    namespace hpx {                                                     \
+    namespace traits {                                                  \
+                                                                        \
+    template<PARAMS, typename ENABLE>                                   \
+    __attribute__((visibility("default")))                              \
+    components::component_type component_type_database<CARGO, ENABLE>::get() \
+    {                                                                   \
+        return value;                                                   \
+    }                                                                   \
+                                                                        \
+    template<PARAMS, typename ENABLE>                                   \
+    __attribute__((visibility("default")))                              \
+    void component_type_database<CARGO, ENABLE>::set( components::component_type t) \
+    {                                                                   \
+        value = t;                                                      \
+    }                                                                   \
+                                                                        \
+    }                                                                   \
+    };                                                                  \
+    //
 
 LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(typename CARGO, LibGeoDecomp::HPXReceiver<CARGO>)
 
-
-namespace {
-
-template<typename COMPONENT>
-class init_registry_factory_static;
-
-template<typename CARGO>
-class init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO> >
-{
-public:
-    init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>>()
-    {
-        hpx::components::static_factory_load_data_type data = { typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>).name(), hpx_exported_plugins_list_hpx_factory };
-        hpx::components::init_registry_factory(data);
-    }
-
-    static init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>> instance;
-};
-
-template<typename CARGO>
-init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>> init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>>::instance;
-
-}
-
-namespace hpx {
-namespace components {
-
-template <typename CARGO> struct unique_component_name<hpx::components::component_factory<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > > >
-{
-    typedef char const* type; static type call (void)
-    {
-        return typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> >).name();
-    }
-};
-
-}
-}
-
-extern "C" __attribute__((visibility ("default")))
-std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry();
-
-namespace {
-
-template<typename T>
-class hpx_plugin_exporter_registry;
-
-template<typename CARGO>
-class hpx_plugin_exporter_registry<LibGeoDecomp::HPXReceiver<CARGO>>
-{
-public:
-    hpx_plugin_exporter_registry()
-    {
-        static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>, ::hpx::components::factory_check> > cf;
-        hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf;
-        std::string actname(typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>).name());
-        boost::algorithm::to_lower(actname);
-        hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w));
-    }
-
-    static hpx_plugin_exporter_registry instance;
-};
-
-template<typename CARGO>
-hpx_plugin_exporter_registry<LibGeoDecomp::HPXReceiver<CARGO>> hpx_plugin_exporter_registry<LibGeoDecomp::HPXReceiver<CARGO>>::instance;
-
-}
-
-namespace hpx {
-namespace components {
-
-template <typename CARGO>
-struct unique_component_name<hpx::components::component_registry<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> >, ::hpx::components::factory_check> >
-{
-    typedef char const* type;
-    static type call (void)
-    {
-        return typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> >).name();
-    }
-};
-
-}
-}
-
-namespace hpx {
-namespace traits {
-
-template<typename CARGO, typename ENABLE>
-__attribute__((visibility("default")))
-components::component_type component_type_database<CARGO, ENABLE>::get()
-{
-    return value;
-}
-
-template<typename CARGO, typename ENABLE>
-__attribute__((visibility("default")))
-void component_type_database<CARGO, ENABLE>::set( components::component_type t)
-{
-    value = t;
-}
-
-}};
 
 // fixme: find unified macro for this, or even better: define template magic for this, akin to serialization macros
 typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
