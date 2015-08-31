@@ -18,29 +18,25 @@ namespace {
 template<typename COMPONENT>
 class hpx_plugin_exporter_factory;
 
-template<>
-class hpx_plugin_exporter_factory<ReceiverType1>
+template<typename CARGO>
+class hpx_plugin_exporter_factory<LibGeoDecomp::HPXReceiver<CARGO> >
 {
 public:
     hpx_plugin_exporter_factory()
     {
-        static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>> > cf;
+        static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>> > cf;
         hpx::util::plugin::abstract_factory<hpx::components::component_factory_base>* w = &cf;
 
-        std::string actname(typeid(hpx::components::simple_component<ReceiverType1>).name());
+        std::string actname(typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>).name());
         boost::algorithm::to_lower(actname);
         hpx_exported_plugins_list_hpx_factory()->insert( std::make_pair(actname, w));
     }
 
     static hpx_plugin_exporter_factory instance;
-    static void ping()
-    {
-        std::cout << &instance;
-    }
-
 };
 
-hpx_plugin_exporter_factory<ReceiverType1> hpx_plugin_exporter_factory<ReceiverType1>::instance;
+template<typename CARGO>
+hpx_plugin_exporter_factory<LibGeoDecomp::HPXReceiver<CARGO>> hpx_plugin_exporter_factory<LibGeoDecomp::HPXReceiver<CARGO>>::instance;
 
 }
 

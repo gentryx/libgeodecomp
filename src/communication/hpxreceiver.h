@@ -4,6 +4,11 @@
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
 
+namespace {
+template<typename COMPONENT>
+class hpx_plugin_exporter_factory;
+}
+
 namespace LibGeoDecomp {
 
 template <typename CARGO, typename BUFFER=hpx::lcos::local::receive_buffer<CARGO> >
@@ -39,6 +44,11 @@ public:
     hpx::future<Cargo> get(std::size_t step)
     {
         return buffer.receive(step);
+    }
+
+    virtual hpx_plugin_exporter_factory<HPXReceiver> hpx_plugin_exporter_factory_registration()
+    {
+        return hpx_plugin_exporter_factory<HPXReceiver>::instance;
     }
 
 private:
