@@ -553,9 +553,12 @@ public:
 
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
-        const std::map<int, std::vec<int> >& adjacency,
+        const std::map<int, std::vector<int> >& adjacency,
         TOPOLOGY /* unused */) const
     {
+        // fixme: this is just a stub, the actual code remains to be
+        // implemented.
+        return *this;
     }
 
     /**
