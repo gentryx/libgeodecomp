@@ -112,12 +112,12 @@ private:
                           0,
                           cellNbr,
                           verttabGra,
-                          nullptr,
-                          nullptr,
-                          nullptr,
+                          0,
+                          0,
+                          0,
                           edgenbrGra,
                           edgetabGra,
-                          nullptr);
+                          0);
 
         SCOTCH_Strat *straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
