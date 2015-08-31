@@ -72,6 +72,7 @@ public:
                       sizeRegion0 > compSize - 5 ||
                       sizeRegion0 < compSize + 5);
         }
+
 #endif
     }
 

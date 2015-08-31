@@ -55,6 +55,72 @@ public:
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
     }
 
+    void testExpandWithAdjacency()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        {
+            Region<1> region;
+
+            region << Coord<1>(1);
+
+            Adjacency adjacency =
+            {
+                std::make_pair(1, std::vector<int>{2, 3}),
+                std::make_pair(2, std::vector<int>{4, 5, 6}),
+            };
+
+            Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
+            TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(1)));
+            TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(2)));
+            TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(3)));
+            TS_ASSERT_EQUALS(0, expanded1.count(Coord<1>(4)));
+            TS_ASSERT_EQUALS(0, expanded1.count(Coord<1>(5)));
+            TS_ASSERT_EQUALS(0, expanded1.count(Coord<1>(6)));
+
+            Region<1> expanded2 = region.expandWithAdjacency(2, adjacency);
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(1)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(2)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(3)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(4)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(5)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(6)));
+
+            Region<1> expanded22 = expanded1.expandWithAdjacency(1, adjacency);
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(1)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(2)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(3)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(4)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(5)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(6)));
+
+            TS_ASSERT_EQUALS(expanded2, expanded22);
+        }
+
+        {
+            Region<1> region;
+
+            region << Coord<1>(1);
+            region << Coord<1>(2);
+
+            Adjacency adjacency =
+            {
+                std::make_pair(1, std::vector<int>{2, 3, 7, 8}),
+                std::make_pair(2, std::vector<int>{4, 5, 6}),
+            };
+
+            Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
+            for(int i = 1; i <= 8; ++i)
+            {
+                TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(i)));
+            }
+
+            Region<1> expanded2 = region.expandWithAdjacency(5, adjacency);
+
+            TS_ASSERT_EQUALS(expanded1, expanded2);
+        }
+#ifdef LIBGEODECOMP_WITH_CPP14
+    }
+
     void testMoveAssignment()
     {
 #ifdef LIBGEODECOMP_WITH_CPP14

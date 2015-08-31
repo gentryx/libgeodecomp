@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
@@ -584,6 +585,45 @@ public:
 
         return ret;
     }
+
+#ifdef LIBGEODECOMP_WITH_CPP14
+    /**
+     * does the same as expand, but reads adjacent indices out of
+     * an adjacency list
+     */
+    inline Region expandWithAdjacency(
+        const unsigned& width,
+        const Adjacency& adjacency) const
+    {
+        static_assert(DIM == 1, "expanding with adjacency only works on unstructured, i.e. 1-dimensional grids.");
+
+        Region ret = *this;
+
+        for (unsigned pass = 0; pass < width; ++pass) {
+            std::vector<int> neighbors;
+
+            // walk over all indices and remember adjacent neighbors
+            // this is done in a separate pass to ensure that
+            // 1. no vectors are changed while iterating them
+            // 2. no indices are inserted while checking for neighbors
+            //    which could lead to insertion of neighbor's neighbors
+            for (const Coord<1> index : ret) {
+                auto it = adjacency.find(index.x());
+                if (it != adjacency.end()) {
+                    neighbors.insert(neighbors.end(),
+                                    it->second.begin(),
+                                    it->second.end());
+                }
+            }
+
+            for (int index : neighbors) {
+                ret.insert(Coord<1>(index));
+            }
+        }
+
+        return ret;
+    }
+#endif // LIBGEODECOMP_WITH_CPP14
 
     inline bool operator==(const Region<DIM>& other) const
     {
