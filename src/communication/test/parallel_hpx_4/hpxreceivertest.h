@@ -8,12 +8,11 @@
 
 LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(typename CARGO, LibGeoDecomp::HPXReceiver<CARGO>)
 
-
 typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
 typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
 typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
 
-LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType1);
+// LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType1);
 LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType2);
 LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType3);
 
@@ -24,6 +23,8 @@ namespace LibGeoDecomp {
 class HPXReceiverTest : public CxxTest::TestSuite
 {
 public:
+
+
     void mySetUp(std::string basename)
     {
         rank = hpx::get_locality_id();
@@ -35,6 +36,21 @@ public:
         name      = basename + "/" + StringOps::itoa(rank);
         leftName  = basename + "/" + StringOps::itoa(leftNeighbor);
         rightName = basename + "/" + StringOps::itoa(rightNeighbor);
+    }
+
+    static hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<std::vector<int> > > > *instance123;
+    static hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<std::vector<int> >>, ::hpx::components::factory_check> *instance234;
+
+    virtual hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<std::vector<int> > > > *foo1()
+    {
+        instance123 = new hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<std::vector<int> > > >(0, 0, false);
+        return instance123;
+    }
+
+    virtual hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<std::vector<int> >>, ::hpx::components::factory_check> *foo2()
+    {
+        instance234 = new hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<std::vector<int> >>, ::hpx::components::factory_check>();
+        return instance234;
     }
 
     void testBasic()
@@ -123,5 +139,9 @@ private:
     std::string leftName;
     std::string rightName;
 };
+
+hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<std::vector<int> > > > *HPXReceiverTest::instance123;
+hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<std::vector<int> >>, ::hpx::components::factory_check> *HPXReceiverTest::instance234;
+
 
 }
