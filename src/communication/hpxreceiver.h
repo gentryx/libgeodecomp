@@ -11,6 +11,9 @@ class hpx_plugin_exporter_factory;
 template<typename COMPONENT>
 class init_registry_factory_static;
 
+template<typename T>
+class hpx_plugin_exporter_registry;
+
 }
 
 namespace LibGeoDecomp {
@@ -61,6 +64,11 @@ public:
     virtual init_registry_factory_static<HPXReceiver> hpx_init_registry_factory_static_registration()
     {
         return init_registry_factory_static<HPXReceiver>::instance;
+    }
+
+    virtual hpx_plugin_exporter_registry<HPXReceiver> hpx_plugin_exporter_registry_registration()
+    {
+        return hpx_plugin_exporter_registry<HPXReceiver>::instance;
     }
 
 private:

@@ -82,6 +82,7 @@ template <typename CARGO> struct unique_component_name<hpx::components::componen
 }
 }
 
+// fixme: to macro
 template struct hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>>;
 
 extern "C" __attribute__((visibility ("default")))
@@ -92,27 +93,24 @@ namespace {
 template<typename T>
 class hpx_plugin_exporter_registry;
 
-template<>
-class hpx_plugin_exporter_registry<ReceiverType1>
+template<typename CARGO>
+class hpx_plugin_exporter_registry<LibGeoDecomp::HPXReceiver<CARGO>>
 {
 public:
     hpx_plugin_exporter_registry()
     {
-        static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check> > cf;
+        static hpx::util::plugin::concrete_factory< hpx::components::component_registry_base, hpx::components::component_registry<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>, ::hpx::components::factory_check> > cf;
         hpx::util::plugin::abstract_factory<hpx::components::component_registry_base>* w = &cf;
-        std::string actname(typeid(hpx::components::simple_component<ReceiverType1>).name());
+        std::string actname(typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>).name());
         boost::algorithm::to_lower(actname);
         hpx_exported_plugins_list_hpx_registry()->insert( std::make_pair(actname, w));
     }
 
     static hpx_plugin_exporter_registry instance;
-    static void ping()
-    {
-        std::cout << &instance;
-    }
 };
 
-hpx_plugin_exporter_registry<ReceiverType1> hpx_plugin_exporter_registry<ReceiverType1>::instance;
+template<typename CARGO>
+hpx_plugin_exporter_registry<LibGeoDecomp::HPXReceiver<CARGO>> hpx_plugin_exporter_registry<LibGeoDecomp::HPXReceiver<CARGO>>::instance;
 
 }
 
