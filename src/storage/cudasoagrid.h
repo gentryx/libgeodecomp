@@ -12,7 +12,7 @@ namespace LibGeoDecomp {
  * CUDA-enabled implementation of SoAGrid, relies on
  * LibFlatArray::soa_grid.
  */
-template<typename CELL_TYPE,
+template<typename CELL,
          typename TOPOLOGY=Topologies::Cube<2>::Topology,
          bool TOPOLOGICALLY_CORRECT=false>
 class CUDASoAGrid : public GridBase<CELL, TOPOLOGY::DIM>
@@ -45,6 +45,16 @@ public:
     {
     }
 
+private:
+    Coord<3> edgeRadii;
+    CELL edgeCell;
+    CoordBox<DIM> box;
+    Coord<DIM> topoDimensions;
+
+    static Coord<3> calcEdgeRadii()
+    {
+        return SoAGrid<CELL>::calcEdgeRadii();
+    }
 };
 
 }
