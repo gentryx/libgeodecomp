@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
+#include <hpx/runtime/components/component_factory.hpp>
 #include <hpx/runtime/serialization/serialize_buffer.hpp>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
@@ -70,18 +71,18 @@ init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>> init_registry_fac
 namespace hpx {
 namespace components {
 
-template <> struct unique_component_name<hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>> >
+template <typename CARGO> struct unique_component_name<hpx::components::component_factory<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > > >
 {
     typedef char const* type; static type call (void)
     {
-        return typeid(hpx::components::simple_component<ReceiverType1>).name();
+        return typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> >).name();
     }
 };
+
 }
 }
 
 template struct hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>>;
-// typedef hpx::components::component_registry<ReceiverType1Component, ::hpx::components::factory_check> ReceiverType1Component_component_registry_type;
 
 extern "C" __attribute__((visibility ("default")))
 std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry();
@@ -256,7 +257,6 @@ public:
         TS_ASSERT_EQUALS(10.123 + rightNeighbor, fromRight);
 
         hpx::unregister_with_basename(name, 0);
-
     }
 
 private:
