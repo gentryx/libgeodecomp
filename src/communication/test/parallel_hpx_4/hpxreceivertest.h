@@ -145,27 +145,21 @@
     };                                                                  \
     //
 
+#define LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(TYPENAME) \
+    template struct hpx::components::component_factory<hpx::components::simple_component<TYPENAME>>; \
+    template struct hpx::components::component_registry< hpx::components::simple_component<TYPENAME>, ::hpx::components::factory_check>;
+
+
 LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(typename CARGO, LibGeoDecomp::HPXReceiver<CARGO>)
 
 
-// fixme: find unified macro for this, or even better: define template magic for this, akin to serialization macros
 typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
 typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
 typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
 
-// fixme: to macro
-template struct hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>>;
-template struct hpx::components::component_registry< hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check>;
-
-typedef hpx::components::simple_component<ReceiverType2> ReceiverType2Component;
-HPX_REGISTER_COMPONENT(ReceiverType2Component, ReceiverType2Component );
-typedef ReceiverType2::receiveAction ReceiverType2ComponentReceiveActionReceiveAction;
-HPX_REGISTER_ACTION(ReceiverType2ComponentReceiveActionReceiveAction);
-
-typedef hpx::components::simple_component<ReceiverType3> ReceiverType3Component;
-HPX_REGISTER_COMPONENT(ReceiverType3Component, ReceiverType3Component );
-typedef ReceiverType3::receiveAction ReceiverType3ComponentReceiveActionReceiveAction;
-HPX_REGISTER_ACTION(ReceiverType3ComponentReceiveActionReceiveAction);
+LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType1);
+LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType2);
+LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(ReceiverType3);
 
 using namespace LibGeoDecomp;
 
