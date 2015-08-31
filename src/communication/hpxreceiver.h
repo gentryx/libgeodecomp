@@ -3,18 +3,7 @@
 
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
-
-namespace {
-template<typename COMPONENT>
-class hpx_plugin_exporter_factory;
-
-template<typename COMPONENT>
-class init_registry_factory_static;
-
-template<typename T>
-class hpx_plugin_exporter_registry;
-
-}
+#include <libgeodecomp/communication/hpxcomponentregsitrationhelper.h>
 
 namespace LibGeoDecomp {
 
@@ -56,23 +45,10 @@ public:
         return buffer.receive(step);
     }
 
-    virtual hpx_plugin_exporter_factory<HPXReceiver> hpx_plugin_exporter_factory_registration()
-    {
-        return hpx_plugin_exporter_factory<HPXReceiver>::instance;
-    }
-
-    virtual init_registry_factory_static<HPXReceiver> hpx_init_registry_factory_static_registration()
-    {
-        return init_registry_factory_static<HPXReceiver>::instance;
-    }
-
-    virtual hpx_plugin_exporter_registry<HPXReceiver> hpx_plugin_exporter_registry_registration()
-    {
-        return hpx_plugin_exporter_registry<HPXReceiver>::instance;
-    }
-
 private:
     Buffer buffer;
+
+    LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANTIATIONS(HPXReceiver);
 };
 
 }
