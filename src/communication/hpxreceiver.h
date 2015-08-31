@@ -39,6 +39,9 @@ public:
         return std::move(ids[0]);
     }
 
+    virtual ~HPXReceiver()
+    {}
+
     void receive(std::size_t step, Cargo&& val)
     {
         buffer.store_received(step, std::move(val));
