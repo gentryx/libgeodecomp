@@ -7,6 +7,10 @@
 namespace {
 template<typename COMPONENT>
 class hpx_plugin_exporter_factory;
+
+template<typename COMPONENT>
+class init_registry_factory_static;
+
 }
 
 namespace LibGeoDecomp {
@@ -49,6 +53,11 @@ public:
     virtual hpx_plugin_exporter_factory<HPXReceiver> hpx_plugin_exporter_factory_registration()
     {
         return hpx_plugin_exporter_factory<HPXReceiver>::instance;
+    }
+
+    virtual init_registry_factory_static<HPXReceiver> hpx_init_registry_factory_static_registration()
+    {
+        return init_registry_factory_static<HPXReceiver>::instance;
     }
 
 private:

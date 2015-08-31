@@ -49,25 +49,21 @@ namespace {
 template<typename COMPONENT>
 class init_registry_factory_static;
 
-template<>
-class init_registry_factory_static<ReceiverType1>
+template<typename CARGO>
+class init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO> >
 {
 public:
-    init_registry_factory_static<ReceiverType1>()
+    init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>>()
     {
-        hpx::components::static_factory_load_data_type data = { typeid(hpx::components::simple_component<ReceiverType1>).name(), hpx_exported_plugins_list_hpx_factory };
+        hpx::components::static_factory_load_data_type data = { typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>).name(), hpx_exported_plugins_list_hpx_factory };
         hpx::components::init_registry_factory(data);
     }
 
-    static init_registry_factory_static<ReceiverType1> instance;
-
-    static void ping()
-    {
-        std::cout << &instance;
-    }
+    static init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>> instance;
 };
 
-init_registry_factory_static<ReceiverType1> init_registry_factory_static<ReceiverType1>::instance;
+template<typename CARGO>
+init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>> init_registry_factory_static<LibGeoDecomp::HPXReceiver<CARGO>>::instance;
 
 }
 
