@@ -5,39 +5,44 @@
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 
-extern "C" __attribute__((visibility ("default")))
-std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_factory();
+// fixme: lacks deletion of parentheses
+#define LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(PARAMS, TEMPLATE)  \
+    extern "C" __attribute__((visibility ("default")))                  \
+    std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_factory(); \
+                                                                        \
+    namespace {                                                         \
+                                                                        \
+    template<typename COMPONENT>                                        \
+    class hpx_plugin_exporter_factory;                                  \
+                                                                        \
+    template<PARAMS>                                            \
+    class hpx_plugin_exporter_factory<TEMPLATE > \
+    {                                                                   \
+    public:                                                             \
+        hpx_plugin_exporter_factory()                                   \
+        {                                                               \
+            static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::simple_component<TEMPLATE>> > cf; \
+            hpx::util::plugin::abstract_factory<hpx::components::component_factory_base>* w = &cf; \
+                                                                        \
+            std::string actname(typeid(hpx::components::simple_component<TEMPLATE>).name()); \
+            boost::algorithm::to_lower(actname);                        \
+            hpx_exported_plugins_list_hpx_factory()->insert( std::make_pair(actname, w)); \
+        }                                                               \
+                                                                        \
+        static hpx_plugin_exporter_factory instance;                    \
+    };                                                                  \
+                                                                        \
+    template<PARAMS>                                            \
+    hpx_plugin_exporter_factory<TEMPLATE> hpx_plugin_exporter_factory<TEMPLATE>::instance; \
+                                                                        \
+    }                                                                   \
+                                                                        \
+    extern "C" __attribute__((visibility ("default")))                  \
+    std::map<std::string, boost::any>* hpx_exported_plugins_list_hpx_factory(); \
 
-namespace {
 
-template<typename COMPONENT>
-class hpx_plugin_exporter_factory;
+LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(typename CARGO, LibGeoDecomp::HPXReceiver<CARGO>)
 
-template<typename CARGO>
-class hpx_plugin_exporter_factory<LibGeoDecomp::HPXReceiver<CARGO> >
-{
-public:
-    hpx_plugin_exporter_factory()
-    {
-        static hpx::util::plugin::concrete_factory< hpx::components::component_factory_base, hpx::components::component_factory<hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>> > cf;
-        hpx::util::plugin::abstract_factory<hpx::components::component_factory_base>* w = &cf;
-
-        std::string actname(typeid(hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO>>).name());
-        boost::algorithm::to_lower(actname);
-        hpx_exported_plugins_list_hpx_factory()->insert( std::make_pair(actname, w));
-    }
-
-    static hpx_plugin_exporter_factory instance;
-};
-
-template<typename CARGO>
-hpx_plugin_exporter_factory<LibGeoDecomp::HPXReceiver<CARGO>> hpx_plugin_exporter_factory<LibGeoDecomp::HPXReceiver<CARGO>>::instance;
-
-}
-
-extern "C" __attribute__((visibility ("default")))
-
-std::map<std::string, boost::any>* hpx_exported_plugins_list_hpx_factory();
 
 namespace {
 
