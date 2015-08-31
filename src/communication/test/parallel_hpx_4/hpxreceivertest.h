@@ -5,12 +5,6 @@
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 
-// fixme: find unified macro for this, or even better: define template magic for this, akin to serialization macros
-// typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
-typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
-typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
-typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
-
 extern "C" __attribute__((visibility ("default")))
 std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_factory();
 
@@ -82,9 +76,6 @@ template <typename CARGO> struct unique_component_name<hpx::components::componen
 }
 }
 
-// fixme: to macro
-template struct hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>>;
-
 extern "C" __attribute__((visibility ("default")))
 std::map<std::string, boost::any> * hpx_exported_plugins_list_hpx_registry();
 
@@ -130,8 +121,6 @@ struct unique_component_name<hpx::components::component_registry<hpx::components
 }
 }
 
-template struct hpx::components::component_registry< hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check>;
-
 namespace hpx {
 namespace traits {
 
@@ -150,6 +139,15 @@ void component_type_database<CARGO, ENABLE>::set( components::component_type t)
 }
 
 }};
+
+// fixme: find unified macro for this, or even better: define template magic for this, akin to serialization macros
+typedef LibGeoDecomp::HPXReceiver<std::vector<int> > ReceiverType1;
+typedef LibGeoDecomp::HPXReceiver<hpx::serialization::serialize_buffer<char> > ReceiverType2;
+typedef LibGeoDecomp::HPXReceiver<double> ReceiverType3;
+
+// fixme: to macro
+template struct hpx::components::component_factory<hpx::components::simple_component<ReceiverType1>>;
+template struct hpx::components::component_registry< hpx::components::simple_component<ReceiverType1>, ::hpx::components::factory_check>;
 
 typedef hpx::components::simple_component<ReceiverType2> ReceiverType2Component;
 HPX_REGISTER_COMPONENT(ReceiverType2Component, ReceiverType2Component );
