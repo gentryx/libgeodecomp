@@ -118,7 +118,7 @@ public:
 
             TS_ASSERT_EQUALS(expanded1, expanded2);
         }
-#ifdef LIBGEODECOMP_WITH_CPP14
+#endif
     }
 
     void testMoveAssignment()
