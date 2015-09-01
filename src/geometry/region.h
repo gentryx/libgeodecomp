@@ -1,10 +1,11 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGION_H
 #define LIBGEODECOMP_GEOMETRY_REGION_H
 
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/geometry/adjacency.h>
+#include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
@@ -580,6 +581,25 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
+    template<typename TOPOLOGY>
+    inline Region expandWithTopology(
+        const unsigned& width,
+        const Coord<DIM>& dimensions,
+        TOPOLOGY topology,
+        const Adjacency& adjacency) const
+    {
+        return expandWithTopology(width, dimensions, topology);
+    }
+
+    inline Region expandWithTopology(
+        const unsigned& width,
+        const Coord<DIM>& /* unused: dimensions */,
+        Topologies::Unstructured /* used just for overload */,
+        const Adjacency& adjacency) const
+    {
+        return expandWithAdjacency(width, adjacency);
+    }
+
     /**
      * does the same as expand, but reads adjacent indices out of
      * an adjacency list

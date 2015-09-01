@@ -115,8 +115,10 @@ public:
             }
 
             Region<1> expanded2 = region.expandWithAdjacency(5, adjacency);
+            Region<1> expanded3 = region.expandWithTopology(5, Coord<1>(), Topologies::Unstructured(), adjacency);
 
             TS_ASSERT_EQUALS(expanded1, expanded2);
+            TS_ASSERT_EQUALS(expanded1, expanded3);
         }
 #endif
     }
@@ -1255,10 +1257,15 @@ public:
                << Streak<2>(Coord<2>(0, 1), 20)
                << Streak<2>(Coord<2>(0, 2), 20);
 
-        Region<2> actual = region.expandWithTopology(
+        Region<2> actual1 = region.expandWithTopology(
             2,
             Coord<2>(20, 20),
             Topologies::Torus<2>::Topology());
+        Region<2> actual2 = region.expandWithTopology(
+            2,
+            Coord<2>(20, 20),
+            Topologies::Torus<2>::Topology(),
+            Adjacency());
 
         Region<2> expected;
         expected << Streak<2>(Coord<2>(0,   0), 20)
@@ -1270,7 +1277,8 @@ public:
                  << Streak<2>(Coord<2>(18, 18), 20)
                  << Streak<2>(Coord<2>(0,  19), 20);
 
-        TS_ASSERT_EQUALS(actual, expected);
+        TS_ASSERT_EQUALS(actual1, expected);
+        TS_ASSERT_EQUALS(actual2, expected);
     }
 
     void testExpandWithTopology2()
