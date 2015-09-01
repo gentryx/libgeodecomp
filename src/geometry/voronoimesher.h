@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_GEOMETRY_VORONOIMESHER_H
 
 #include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/geometry/plane.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/random.h>
@@ -23,50 +24,6 @@ Coord<DIM> farAway()
  * Internal helper class
  */
 template<typename COORD, typename ID = int>
-class Equation
-{
-public:
-    Equation(const COORD& base, const COORD& dir, ID id = ID()) :
-        base(base),
-        dir(dir),
-        neighborID(id),
-        length(-1)
-    {}
-
-    bool includes(const COORD& point) const
-    {
-        return (point - base) * dir > 0;
-    }
-
-    bool operator==(const Equation& other) const
-    {
-        // intentionally not including ID and length here, as we're
-        // rather interested if both Equations refer to the same set
-        // of coordinates:
-        return
-            (base == other.base) &&
-            (dir  == other.dir);
-    }
-
-    COORD base;
-    COORD dir;
-    ID neighborID;
-    double length;
-};
-
-template<typename _CharT, typename _Traits, typename COORD>
-std::basic_ostream<_CharT, _Traits>&
-operator<<(std::basic_ostream<_CharT, _Traits>& os,
-           const Equation<COORD>& e)
-{
-    os << "Equation(base=" << e.base << ", dir" << e.dir << ")";
-    return os;
-}
-
-/**
- * Internal helper class
- */
-template<typename COORD, typename ID = int>
 class Element
 {
 public:
@@ -74,7 +31,7 @@ public:
 
     const static std::size_t SAMPLES = 1000;
 
-    typedef Equation<COORD, ID> EquationType;
+    typedef Plane<COORD, ID> EquationType;
 
     Element(const COORD& center,
             const COORD& quadrantSize,
@@ -246,7 +203,7 @@ public:
     bool includes(const COORD& c)
     {
         for (std::size_t i = 0; i < limits.size(); ++i) {
-            if (!limits[i].includes(c)) {
+            if (!limits[i].isOnTop(c)) {
                 return false;
             }
         }
@@ -466,7 +423,7 @@ public:
     typedef VoronoiMesherHelpers::Element<
         typename APITraits::SelectCoordType<CONTAINER_CELL>::Value,
         typename APITraits::SelectIDType<CONTAINER_CELL>::Value> ElementType;
-    typedef VoronoiMesherHelpers::Equation<
+    typedef Plane<
         typename APITraits::SelectCoordType<CONTAINER_CELL>::Value,
         typename APITraits::SelectIDType<CONTAINER_CELL>::Value> EquationType;
     typedef typename APITraits::SelectTopology<ContainerCellType>::Value Topology;

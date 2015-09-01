@@ -82,7 +82,7 @@ public:
             0);
 
         FloatCoord<2> origin = FloatCoord<2>(0.939096, 29.2884);
-        VoronoiMesherHelpers::Equation<FloatCoord<2> > equation(origin, (center - origin) * 2, 1);
+        Plane<FloatCoord<2> > equation(origin, (center - origin) * 2, 1);
         element << equation;
         TS_ASSERT_EQUALS(element.getShape().size(), std::size_t(5));
 
