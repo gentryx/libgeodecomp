@@ -210,7 +210,7 @@ public:
         }
 
         COORD min = simSpaceDim;
-        COORD max(0, 0);
+        COORD max = -simSpaceDim;
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
             COORD& c = cutPoints[i];
             max = c.max(max);
@@ -242,6 +242,7 @@ public:
             throw std::logic_error("element too large");
         }
 
+        // fixme: this is wrong
         double newDiameter = *std::max_element(&delta[0], &delta[0] + 2);
         if (newDiameter > diameter) {
             throw std::logic_error("diameter should never ever increase!");
