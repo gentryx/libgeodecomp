@@ -45,10 +45,10 @@ public:
     double length;
 };
 
-template<typename _CharT, typename _Traits, typename COORD>
+template<typename _CharT, typename _Traits, typename COORD, typename ID>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& os,
-           const Plane<COORD>& e)
+           const Plane<COORD, ID>& e)
 {
     os << "Plane(base=" << e.base << ", dir" << e.dir << ")";
     return os;

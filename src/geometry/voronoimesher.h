@@ -104,7 +104,7 @@ public:
                              j != container2.end();
                              ++j) {
                             if (cell.center != j->center) {
-                                e << *j;
+                                e << std::make_pair(j->center, i->id);
                             }
                         }
                     }

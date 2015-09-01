@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/plane.h>
 #include <libgeodecomp/misc/random.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
 
@@ -21,6 +22,7 @@ public:
 
     ConvexPolytope(
         const COORD& center,
+        // fixme: get rid of this
         const COORD& quadrantSize,
         const COORD& simSpaceDim,
         const double minCellDistance,
@@ -98,11 +100,11 @@ public:
     }
 
     template<typename POINT>
-    ConvexPolytope& operator<<(const POINT& c)
+    ConvexPolytope& operator<<(const std::pair<POINT, ID>& c)
     {
-        COORD base = (center + c.center) / 2;
-        COORD dir = center - c.center;
-        *this << EquationType(base, dir, c.id);
+        COORD base = (center + c.first) / 2;
+        COORD dir = center - c.first;
+        *this << EquationType(base, dir, c.second);
         return *this;
     }
 
@@ -277,7 +279,7 @@ public:
 private:
     COORD center;
     FloatCoord<2> quadrantSize;
-    FloatCoord<2> simSpaceDim;
+    COORD simSpaceDim;
     double minCellDistance;
     ID id;
     double area;
