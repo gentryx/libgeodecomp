@@ -551,6 +551,16 @@ public:
         return accumulator;
     }
 
+    template<typename TOPOLOGY>
+    inline Region expandWithTopology(
+        const std::map<int, std::vector<int> >& adjacency,
+        TOPOLOGY /* unused */) const
+    {
+        // fixme: this is just a stub, the actual code remains to be
+        // implemented.
+        return *this;
+    }
+
     /**
      * does the same as expand, but will wrap overlap at edges
      * correctly. The instance of the TOPOLOGY is actually unused, but

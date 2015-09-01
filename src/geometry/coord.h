@@ -233,14 +233,18 @@ public:
         return x();
     }
 
+    __host__ __device__
     inline Coord<1> (max)(const Coord<1>& other) const
     {
-        return Coord<1>((std::max)(x(), other.x()));
+        return Coord<1>(
+            x() > other.x() ? x() : other.x());
     }
 
+    __host__ __device__
     inline Coord<1> (min)(const Coord<1>& other) const
     {
-        return Coord<1>((std::min)(x(), other.x()));
+        return Coord<1>(
+            x() < other.x() ? x() : other.x());
     }
 
     boost::detail::multi_array::extent_gen<1ul> toExtents() const
@@ -459,18 +463,20 @@ public:
         return x() + y();
     }
 
+    __host__ __device__
     inline Coord<2> (max)(const Coord<2>& other) const
     {
         return Coord<2>(
-            (std::max)(x(), other.x()),
-            (std::max)(y(), other.y()));
+            x() > other.x() ? x() : other.x(),
+            y() > other.y() ? y() : other.y());
     }
 
+    __host__ __device__
     inline Coord<2> (min)(const Coord<2>& other) const
     {
         return Coord<2>(
-            (std::min)(x(), other.x()),
-            (std::min)(y(), other.y()));
+            x() < other.x() ? x() : other.x(),
+            y() < other.y() ? y() : other.y());
     }
 
     boost::detail::multi_array::extent_gen<2ul> toExtents() const
@@ -711,20 +717,22 @@ public:
         return x() + y() + z();
     }
 
+    __host__ __device__
     inline Coord<3> (max)(const Coord<3>& other) const
     {
         return Coord<3>(
-            (std::max)(x(), other.x()),
-            (std::max)(y(), other.y()),
-            (std::max)(z(), other.z()));
+            x() > other.x() ? x() : other.x(),
+            y() > other.y() ? y() : other.y(),
+            z() > other.z() ? z() : other.z());
     }
 
+    __host__ __device__
     inline Coord<3> (min)(const Coord<3>& other) const
     {
         return Coord<3>(
-            (std::min)(x(), other.x()),
-            (std::min)(y(), other.y()),
-            (std::min)(z(), other.z()));
+            x() < other.x() ? x() : other.x(),
+            y() < other.y() ? y() : other.y(),
+            z() < other.z() ? z() : other.z());
     }
 
     boost::detail::multi_array::extent_gen<3ul> toExtents() const
