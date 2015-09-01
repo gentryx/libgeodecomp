@@ -55,7 +55,7 @@ public:
                   << std::make_pair(Coord<2>( 10, -10), 12345);
         triangle1.updateGeometryData();
 
-        expectedVolume = 0.5 * 100 * 100;
+        double expectedVolume = 0.5 * 100 * 100;
         TS_ASSERT_LESS_THAN(0.9 * expectedVolume, triangle1.getVolume());
         TS_ASSERT_LESS_THAN(triangle1.getVolume(), 1.1 * expectedVolume);
     }
