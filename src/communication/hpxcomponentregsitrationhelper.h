@@ -13,6 +13,44 @@ class hpx_plugin_exporter_registry;
 
 }
 
+namespace LibGeoDecomp {
+
+/**
+ * Instantiate this template to ensure the instantiation of an HPX
+ * component template is actually registered. See HPXReceiver for an
+ * example on how to use this class and its assorted macros.
+ */
+template<typename COMPONENT>
+class HPXComponentRegistrator
+{
+public:
+    virtual ~HPXComponentRegistrator()
+    {}
+
+    static hpx::components::component_factory<hpx::components::simple_component<COMPONENT> > *instanceA;
+    static hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check> *instanceB;
+
+    virtual hpx::components::component_factory<hpx::components::simple_component<COMPONENT> > *foo1()
+    {
+        instanceA = new hpx::components::component_factory<hpx::components::simple_component<COMPONENT> >(0, 0, false);
+        return instanceA;
+    }
+
+    virtual hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check> *foo2()
+    {
+        instanceB = new hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check>();
+        return instanceB;
+    }
+};
+
+template<typename COMPONENT>
+hpx::components::component_factory<hpx::components::simple_component<COMPONENT> > *HPXComponentRegistrator<COMPONENT>::instanceA;
+
+template<typename COMPONENT>
+hpx::components::component_registry< hpx::components::simple_component<COMPONENT>, ::hpx::components::factory_check> *HPXComponentRegistrator<COMPONENT>::instanceB;
+
+}
+
 // fixme: lacks deletion of parentheses
 #define LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(PARAMS, TEMPLATE)  \
     extern "C" __attribute__((visibility ("default")))                  \
