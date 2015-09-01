@@ -108,55 +108,6 @@ public:
         return *this;
     }
 
-    std::vector<COORD > generateCutPoints(const std::vector<EquationType>& equations) const
-    {
-        std::vector<COORD > buf(2 * equations.size(), farAway<2>());
-
-        for (std::size_t i = 0; i < equations.size(); ++i) {
-            for (std::size_t j = 0; j < equations.size(); ++j) {
-                if (i != j) {
-                    COORD cut = cutPoint(equations[i], equations[j]);
-                    int offset = 2 * i;
-                    COORD delta = cut - equations[i].base;
-                    COORD turnedDir = turnLeft90(equations[i].dir);
-                    double distance =
-                        1.0 * delta[0] * turnedDir[0] +
-                        1.0 * delta[1] * turnedDir[1];
-
-
-                    bool isLeftCandidate = true;
-                    if (equations[j].dir * turnedDir > 0) {
-                        isLeftCandidate = false;
-                        offset += 1;
-                    }
-
-                    delta = buf[offset] - equations[i].base;
-                    double referenceDist =
-                        1.0 * delta[0] * turnedDir[0] +
-                        1.0 * delta[1] * turnedDir[1];
-                    bool flag = false;
-                    if (buf[offset] == farAway<2>()) {
-                        flag = true;
-                    }
-                    if (isLeftCandidate  && (distance < referenceDist)) {
-                        flag = true;
-                    }
-                    if (!isLeftCandidate && (distance > referenceDist)) {
-                        flag = true;
-                    }
-                    if (cut == farAway<2>()) {
-                        flag = false;
-                    }
-                    if (flag) {
-                        buf[offset] = cut;
-                    }
-                }
-            }
-        }
-
-        return buf;
-    }
-
     std::vector<COORD > getShape() const
     {
         std::vector<COORD > cutPoints = generateCutPoints(limits);
@@ -293,6 +244,100 @@ private:
         return Coord<DIM>::diagonal(-1);
     }
 
+    static COORD turnLeft90(const COORD& c)
+    {
+        return COORD(-c[1], c[0]);
+    }
+
+    std::vector<COORD > generateCutPoints(const std::vector<EquationType>& equations) const
+    {
+        std::vector<COORD > buf(2 * equations.size(), farAway<2>());
+
+        for (std::size_t i = 0; i < equations.size(); ++i) {
+            for (std::size_t j = 0; j < equations.size(); ++j) {
+                if (i != j) {
+                    COORD cut = cutPoint(equations[i], equations[j]);
+                    int offset = 2 * i;
+                    COORD delta = cut - equations[i].base;
+                    COORD turnedDir = turnLeft90(equations[i].dir);
+                    double distance =
+                        1.0 * delta[0] * turnedDir[0] +
+                        1.0 * delta[1] * turnedDir[1];
+
+
+                    bool isLeftCandidate = true;
+                    if (equations[j].dir * turnedDir > 0) {
+                        isLeftCandidate = false;
+                        offset += 1;
+                    }
+
+                    delta = buf[offset] - equations[i].base;
+                    double referenceDist =
+                        1.0 * delta[0] * turnedDir[0] +
+                        1.0 * delta[1] * turnedDir[1];
+                    bool flag = false;
+                    if (buf[offset] == farAway<2>()) {
+                        flag = true;
+                    }
+                    if (isLeftCandidate  && (distance < referenceDist)) {
+                        flag = true;
+                    }
+                    if (!isLeftCandidate && (distance > referenceDist)) {
+                        flag = true;
+                    }
+                    if (cut == farAway<2>()) {
+                        flag = false;
+                    }
+                    if (flag) {
+                        buf[offset] = cut;
+                    }
+                }
+            }
+        }
+
+        return buf;
+    }
+
+    COORD cutPoint(EquationType eq1, EquationType eq2) const
+    {
+        if (eq1.dir[1] == 0) {
+            if (eq2.dir[1] == 0) {
+                // throw std::invalid_argument("both lines are vertical")
+                return farAway<2>();
+            }
+            std::swap(eq1, eq2);
+        }
+
+        COORD dir1 = turnLeft90(eq1.dir);
+        double m1 = 1.0 * dir1[1] / dir1[0];
+        double d1 = eq1.base[1] - m1 * eq1.base[0];
+
+        if (eq2.dir[1] == 0) {
+            return COORD(eq2.base[0], eq2.base[0] * m1 + d1);
+        }
+
+        COORD dir2 = turnLeft90(eq2.dir);
+        double m2 = 1.0 * dir2[1] / dir2[0];
+        double d2 = eq2.base[1] - m2 * eq2.base[0];
+
+        if (m1 == m2) {
+            // throw std::invalid_argument("parallel lines")
+            return farAway<2>();
+        }
+
+        double x = (d2 - d1) / (m1 - m2);
+        double y = d1 + x * m1;
+
+        if ((x < (-10 * simSpaceDim[0])) ||
+            (x > ( 10 * simSpaceDim[0])) ||
+            (y < (-10 * simSpaceDim[1])) ||
+            (y > ( 10 * simSpaceDim[1]))) {
+            return farAway<2>();
+        }
+
+        return COORD(x, y);
+    }
+
     double relativeCoordToAngle(const COORD& delta, const std::vector<COORD >& cutPoints) const
     {
         double length = sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
@@ -356,51 +401,6 @@ private:
         }
 
         throw std::logic_error("oops, boundary case in boundary generation should be logically impossible!");
-    }
-
-    static COORD turnLeft90(const COORD& c)
-    {
-        return COORD(-c[1], c[0]);
-    }
-
-    COORD cutPoint(EquationType eq1, EquationType eq2) const
-    {
-        if (eq1.dir[1] == 0) {
-            if (eq2.dir[1] == 0) {
-                // throw std::invalid_argument("both lines are vertical")
-                return farAway<2>();
-            }
-            std::swap(eq1, eq2);
-        }
-
-        COORD dir1 = turnLeft90(eq1.dir);
-        double m1 = 1.0 * dir1[1] / dir1[0];
-        double d1 = eq1.base[1] - m1 * eq1.base[0];
-
-        if (eq2.dir[1] == 0) {
-            return COORD(eq2.base[0], eq2.base[0] * m1 + d1);
-        }
-
-        COORD dir2 = turnLeft90(eq2.dir);
-        double m2 = 1.0 * dir2[1] / dir2[0];
-        double d2 = eq2.base[1] - m2 * eq2.base[0];
-
-        if (m1 == m2) {
-            // throw std::invalid_argument("parallel lines")
-            return farAway<2>();
-        }
-
-        double x = (d2 - d1) / (m1 - m2);
-        double y = d1 + x * m1;
-
-        if ((x < (-10 * simSpaceDim[0])) ||
-            (x > ( 10 * simSpaceDim[0])) ||
-            (y < (-10 * simSpaceDim[1])) ||
-            (y > ( 10 * simSpaceDim[1]))) {
-            return farAway<2>();
-        }
-
-        return COORD(x, y);
     }
 };
 
