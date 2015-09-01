@@ -108,6 +108,32 @@ public:
                          FloatCoord<3>(-2.0,  0.0, -4.0).min(FloatCoord<3>( 0.0, -3.0,  0.0)));
     }
 
+    void testMaxElement()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(5).maxElement(), 5);
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(6, 1).maxElement(), 6);
+        TS_ASSERT_EQUALS(FloatCoord<2>(5, 7).maxElement(), 7);
+
+        TS_ASSERT_EQUALS(FloatCoord<3>( 8,  1, 0).maxElement(), 8);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5,  9, 0).maxElement(), 9);
+        TS_ASSERT_EQUALS(FloatCoord<3>(-5, -7, 0).maxElement(), 0);
+        TS_ASSERT_EQUALS(FloatCoord<3>(-7, -5, 0).maxElement(), 0);
+    }
+
+    void testMinElement()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(5).minElement(), 5);
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(6, 1).minElement(), 1);
+        TS_ASSERT_EQUALS(FloatCoord<2>(5, 7).minElement(), 5);
+
+        TS_ASSERT_EQUALS(FloatCoord<3>( 8, 10, 100).minElement(), 8);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5, 90, 100).minElement(), 5);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5,  7,   1).minElement(), 1);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 7,  5,   0).minElement(), 0);
+    }
+
     void testOperatorPlus()
     {
         TS_ASSERT_EQUALS(FloatCoord<1>(3),
