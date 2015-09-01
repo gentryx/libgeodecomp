@@ -152,11 +152,6 @@ class hpx_plugin_exporter_registry;
     }                                                                   \
     };
 
-// fixme: lacks deletion of parentheses
-#define LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANCE(TYPENAME) \
-    template struct hpx::components::component_factory<hpx::components::simple_component<TYPENAME>>; \
-    template struct hpx::components::component_registry< hpx::components::simple_component<TYPENAME>, ::hpx::components::factory_check>;
-
 #define LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE_INSTANTIATIONS(TYPENAME) \
     virtual hpx_plugin_exporter_factory<TYPENAME> hpx_plugin_exporter_factory_registration() \
     {                                                                   \

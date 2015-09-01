@@ -7,6 +7,9 @@
 
 namespace LibGeoDecomp {
 
+template<typename CARGO, typename BUFFER>
+class HPXDummie;
+
 template <typename CARGO, typename BUFFER=hpx::lcos::local::receive_buffer<CARGO> >
 class HPXReceiver : public hpx::components::simple_component_base<HPXReceiver<CARGO> >
 {
@@ -16,6 +19,8 @@ public:
 
     static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name)
     {
+        HPXDummie<CARGO, BUFFER> dummy;
+
         hpx::id_type id = hpx::new_<HPXReceiver>(hpx::find_here()).get();
         hpx::register_with_basename(name, id, 0).get();
         return hpx::get_ptr<HPXReceiver>(id);
@@ -52,4 +57,40 @@ private:
 };
 
 }
+
+namespace LibGeoDecomp {
+
+template<typename CARGO, typename BUFFER = hpx::lcos::local::receive_buffer<CARGO> >
+class HPXDummie
+{
+public:
+    ~HPXDummie()
+    {}
+
+    static hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<CARGO, BUFFER> > > *instance123;
+    static hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<CARGO, BUFFER> >, ::hpx::components::factory_check> *instance234;
+
+    virtual hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<CARGO, BUFFER> > > *foo1()
+    {
+        instance123 = new hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<CARGO, BUFFER> > >(0, 0, false);
+        return instance123;
+    }
+
+    virtual hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<CARGO, BUFFER>>, ::hpx::components::factory_check> *foo2()
+    {
+        instance234 = new hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<CARGO, BUFFER>>, ::hpx::components::factory_check>();
+        return instance234;
+    }
+};
+
+template<typename CARGO, typename BUFFER>
+hpx::components::component_factory<hpx::components::simple_component<HPXReceiver<CARGO, BUFFER> > > *HPXDummie<CARGO, BUFFER>::instance123;
+
+template<typename CARGO, typename BUFFER>
+hpx::components::component_registry< hpx::components::simple_component<HPXReceiver<CARGO, BUFFER>>, ::hpx::components::factory_check> *HPXDummie<CARGO, BUFFER>::instance234;
+
+}
+
+LIBGEODECOMP_REGISTER_HPX_COMPONENT_TEMPLATE(typename CARGO, LibGeoDecomp::HPXReceiver<CARGO>)
+
 #endif
