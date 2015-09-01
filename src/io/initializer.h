@@ -96,7 +96,7 @@ public:
         Random::seed(index);
     }
 
-    Adjacency getAdjacency() const
+    virtual Adjacency getAdjacency() const
     {
         return Adjacency();
     }
