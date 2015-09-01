@@ -6,7 +6,8 @@ namespace LibGeoDecomp {
 /**
  * This utility class ecapsulates the mathematical concept of a plane.
  * Its normal vector is given by "dir". Its main purpose is to check
- * on which side ponts lie.
+ * on which side ponts lie. In that sense it can also be viewed as a
+ * half-space.
  */
 template<typename COORD, typename ID = int>
 class Plane

@@ -74,7 +74,7 @@ public:
     void testElementDoesntRemoveLimitsAfterDuplicateInsertion()
     {
         FloatCoord<2> center(1.87819, 58.5767);
-        VoronoiMesherHelpers::Element<FloatCoord<2> > element(
+        ConvexPolytope<FloatCoord<2> > element(
             center,
             FloatCoord<2>(400, 400),
             FloatCoord<2>(4000, 1600),
