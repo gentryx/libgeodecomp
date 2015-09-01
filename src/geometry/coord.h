@@ -247,6 +247,16 @@ public:
             x() < other.x() ? x() : other.x());
     }
 
+    inline int minElement() const
+    {
+        return x();
+    }
+
+    inline int maxElement() const
+    {
+        return x();
+    }
+
     boost::detail::multi_array::extent_gen<1ul> toExtents() const
     {
         return boost::extents[x()];
@@ -477,6 +487,16 @@ public:
         return Coord<2>(
             x() < other.x() ? x() : other.x(),
             y() < other.y() ? y() : other.y());
+    }
+
+    inline int minElement() const
+    {
+        return x() < y() ? x() : y();
+    }
+
+    inline int maxElement() const
+    {
+        return x() > y() ? x() : y();
     }
 
     boost::detail::multi_array::extent_gen<2ul> toExtents() const
@@ -733,6 +753,18 @@ public:
             x() < other.x() ? x() : other.x(),
             y() < other.y() ? y() : other.y(),
             z() < other.z() ? z() : other.z());
+    }
+
+    inline int minElement() const
+    {
+        return x() < y() ?
+                  (x() < z() ? x() : z()) : (y() < z() ? y() : z());
+    }
+
+    inline int maxElement() const
+    {
+        return x() > y() ?
+                  (x() > z() ? x() : z()) : (y() > z() ? y() : z());
     }
 
     boost::detail::multi_array::extent_gen<3ul> toExtents() const

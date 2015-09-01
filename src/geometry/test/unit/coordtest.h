@@ -310,6 +310,32 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 9, 11, 1).min(Coord<3>(10, 12, 14)), Coord<3>(9, 11, 1));
     }
 
+    void testMaxElement()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(5).maxElement(), 5);
+
+        TS_ASSERT_EQUALS(Coord<2>(6, 1).maxElement(), 6);
+        TS_ASSERT_EQUALS(Coord<2>(5, 7).maxElement(), 7);
+
+        TS_ASSERT_EQUALS(Coord<3>( 8,  1, 0).maxElement(), 8);
+        TS_ASSERT_EQUALS(Coord<3>( 5,  9, 0).maxElement(), 9);
+        TS_ASSERT_EQUALS(Coord<3>(-5, -7, 0).maxElement(), 0);
+        TS_ASSERT_EQUALS(Coord<3>(-7, -5, 0).maxElement(), 0);
+    }
+
+    void testMinElement()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(5).minElement(), 5);
+
+        TS_ASSERT_EQUALS(Coord<2>(6, 1).minElement(), 1);
+        TS_ASSERT_EQUALS(Coord<2>(5, 7).minElement(), 5);
+
+        TS_ASSERT_EQUALS(Coord<3>( 8, 10, 100).minElement(), 8);
+        TS_ASSERT_EQUALS(Coord<3>( 5, 90, 100).minElement(), 5);
+        TS_ASSERT_EQUALS(Coord<3>( 5,  7,   1).minElement(), 1);
+        TS_ASSERT_EQUALS(Coord<3>( 7,  5,   0).minElement(), 0);
+    }
+
     void testSum()
     {
         TS_ASSERT_EQUALS(Coord<1>(6).sum(),        6);
@@ -329,7 +355,7 @@ public:
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
         Coord<2> c(47,11);
         Coord<2> d(1, 2);
-        
+
 #ifdef LIBGEODECOMP_WITH_HPX
         std::vector<char> buf;
         int archive_flags = boost::archive::no_header;
