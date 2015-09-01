@@ -193,8 +193,7 @@ public:
             throw std::logic_error("element too large");
         }
 
-        // fixme: this is wrong
-        double newDiameter = *std::max_element(&delta[0], &delta[0] + 2);
+        double newDiameter = delta.maxElement();
         if (newDiameter > diameter) {
             throw std::logic_error("diameter should never ever increase!");
 
