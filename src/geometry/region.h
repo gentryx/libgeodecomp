@@ -560,7 +560,7 @@ public:
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
         const unsigned& width,
-        const Coord<DIM>& dimensions,
+        const Coord<DIM>& globalDimensions,
         TOPOLOGY /* unused */) const
     {
         Coord<DIM> dia = Coord<DIM>::diagonal(width);
@@ -570,10 +570,10 @@ public:
         for (StreakIterator i = buffer.beginStreak(); i != buffer.endStreak(); ++i) {
             Streak<DIM> streak = *i;
             if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
-                splitStreak<TOPOLOGY>(streak, &ret, dimensions);
+                splitStreak<TOPOLOGY>(streak, &ret, globalDimensions);
             } else {
                 normalizeStreak<TOPOLOGY>(
-                    trimStreak(streak, dimensions), &ret, dimensions);
+                    trimStreak(streak, globalDimensions), &ret, globalDimensions);
             }
         }
 
@@ -584,16 +584,16 @@ public:
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
         const unsigned& width,
-        const Coord<DIM>& dimensions,
+        const Coord<DIM>& globalDimensions,
         TOPOLOGY topology,
         const Adjacency& adjacency) const
     {
-        return expandWithTopology(width, dimensions, topology);
+        return expandWithTopology(width, globalDimensions, topology);
     }
 
     inline Region expandWithTopology(
         const unsigned& width,
-        const Coord<DIM>& /* unused: dimensions */,
+        const Coord<DIM>& /* unused: globalDimensions */,
         Topologies::Unstructured /* used just for overload */,
         const Adjacency& adjacency) const
     {
