@@ -76,8 +76,7 @@ public:
         FloatCoord<2> center(1.87819, 58.5767);
         ConvexPolytope<FloatCoord<2> > element(
             center,
-            FloatCoord<2>(4000, 1600),
-            0);
+            FloatCoord<2>(4000, 1600));
 
         FloatCoord<2> origin = FloatCoord<2>(0.939096, 29.2884);
         Plane<FloatCoord<2> > equation(origin, (center - origin) * 2, 1);
