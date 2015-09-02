@@ -45,19 +45,21 @@ public:
         TS_ASSERT_EQUALS(false, poly.includes(Coord<2>(100, 150)));
         TS_ASSERT_EQUALS(false, poly.includes(Coord<2>(200, 150)));
         TS_ASSERT_EQUALS(false, poly.includes(Coord<2>(300, 150)));
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(150, 50), Coord<2>(100, 100)), poly.boundingBox());
     }
 
     void testTriangle2D()
     {
-        ConvexPolytope<Coord<2> > triangle1(Coord<2>(110, 10), Coord<2>(1000, 1000));
-        triangle1 << std::make_pair(Coord<2>(190,  90), 4711)
-                  << std::make_pair(Coord<2>( 90,  10), 666)
-                  << std::make_pair(Coord<2>( 10, -10), 12345);
-        triangle1.updateGeometryData();
+        ConvexPolytope<Coord<2> > triangle(Coord<2>(110, 10), Coord<2>(1000, 1000));
+        triangle << std::make_pair(Coord<2>(190,  90), 4711)
+                 << std::make_pair(Coord<2>( 90,  10), 666)
+                 << std::make_pair(Coord<2>( 10, -10), 12345);
+        triangle.updateGeometryData();
 
         double expectedVolume = 0.5 * 100 * 100;
-        TS_ASSERT_LESS_THAN(0.9 * expectedVolume, triangle1.getVolume());
-        TS_ASSERT_LESS_THAN(triangle1.getVolume(), 1.1 * expectedVolume);
+        TS_ASSERT_LESS_THAN(0.9 * expectedVolume, triangle.getVolume());
+        TS_ASSERT_LESS_THAN(triangle.getVolume(), 1.1 * expectedVolume);
+        TS_ASSERT_EQUALS(CoordBox<2>(Coord<2>(100, 0), Coord<2>(100, 100)), triangle.boundingBox());
     }
 
     void testEdgeElimination()

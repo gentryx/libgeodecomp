@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_GEOMETRY_CONVEXPOLYHEDRON_H
 #define LIBGEODECOMP_GEOMETRY_CONVEXPOLYHEDRON_H
 
+#include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/plane.h>
 #include <libgeodecomp/misc/random.h>
@@ -17,6 +18,7 @@ class ConvexPolytope
 {
 public:
     const static std::size_t SAMPLES = 1000;
+    const static int DIM = COORD::DIM;
 
     typedef Plane<COORD, ID> EquationType;
 
@@ -144,6 +146,11 @@ public:
         return true;
     }
 
+    const CoordBox<DIM>& boundingBox() const
+    {
+        return myBoundingBox;
+    }
+
     void updateGeometryData()
     {
         std::vector<COORD > cutPoints = generateCutPoints(limits);
@@ -161,6 +168,10 @@ public:
             min = c.min(min);
         }
         COORD delta = max - min;
+        // fixme
+        Coord<DIM> minInt(min[0], min[1]);
+        Coord<DIM> dltInt(delta[0], delta[1]);
+        myBoundingBox = CoordBox<DIM>(minInt, dltInt);
 
         int hits = 0;
         for (std::size_t i = 0; i < SAMPLES; ++i) {
@@ -209,6 +220,7 @@ public:
 private:
     COORD center;
     COORD simSpaceDim;
+    CoordBox<DIM> myBoundingBox;
     double area;
     double diameter;
     std::vector<EquationType> limits;
