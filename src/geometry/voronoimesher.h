@@ -94,7 +94,7 @@ public:
 
             for (typename ContainerCellType::Iterator i = container.begin(); i != container.end(); ++i) {
                 Cargo& cell = *i;
-                ElementType e(cell.center, quadrantSize, simSpaceDim, minCellDistance, cell.id);
+                ElementType e(cell.center, simSpaceDim, minCellDistance, cell.id);
 
                 for (int y = -1; y < 2; ++y) {
                     for (int x = -1; x < 2; ++x) {
@@ -111,6 +111,10 @@ public:
                 }
 
                 e.updateGeometryData();
+                if (e.getDiameter() > quadrantSize.minElement()) {
+                    throw std::logic_error("element geometry too large for container cell");
+                }
+
                 cell.setArea(e.getVolume());
                 cell.setShape(e.getShape());
 

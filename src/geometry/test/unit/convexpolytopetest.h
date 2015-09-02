@@ -9,7 +9,7 @@ class ConvexPolytopeTest : public CxxTest::TestSuite
 public:
     void testSquare2D()
     {
-        ConvexPolytope<Coord<2> > poly(Coord<2>(200, 100), Coord<2>(300, 300), Coord<2>(1000, 1000), 0.5, 0);
+        ConvexPolytope<Coord<2> > poly(Coord<2>(200, 100), Coord<2>(1000, 1000), 0.5, 0);
 
         // create a square:
         poly << std::make_pair(Coord<2>(200,   0), 0)
@@ -49,7 +49,7 @@ public:
 
     void testTriangle2D()
     {
-        ConvexPolytope<Coord<2> > triangle1(Coord<2>(110, 10), Coord<2>(300, 300), Coord<2>(1000, 1000), 0.5, 0);
+        ConvexPolytope<Coord<2> > triangle1(Coord<2>(110, 10), Coord<2>(1000, 1000), 0.5, 0);
         triangle1 << std::make_pair(Coord<2>(190,  90), 4711)
                   << std::make_pair(Coord<2>( 90,  10), 666)
                   << std::make_pair(Coord<2>( 10, -10), 12345);
@@ -62,7 +62,7 @@ public:
 
     void testEdgeElimination()
     {
-        ConvexPolytope<Coord<2> > poly(Coord<2>(200, 100), Coord<2>(300, 300), Coord<2>(1000, 1000), 0.5, 0);
+        ConvexPolytope<Coord<2> > poly(Coord<2>(200, 100), Coord<2>(1000, 1000), 0.5, 0);
 
         // create a square:
         poly << std::make_pair(Coord<2>(200,   0), 10)

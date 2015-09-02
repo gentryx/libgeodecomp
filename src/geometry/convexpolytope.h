@@ -22,13 +22,10 @@ public:
 
     ConvexPolytope(
         const COORD& center,
-        // fixme: get rid of this
-        const COORD& quadrantSize,
         const COORD& simSpaceDim,
         const double minCellDistance,
         ID id) :
         center(center),
-        quadrantSize(quadrantSize),
         simSpaceDim(simSpaceDim),
         minCellDistance(minCellDistance),
         id(id),
@@ -179,20 +176,6 @@ public:
         }
         area = 1.0 * hits / SAMPLES * delta.prod();
 
-        double radiusSquared = delta * delta;
-        double maxRadiusSquared = quadrantSize * quadrantSize * 0.5;
-        if (radiusSquared > maxRadiusSquared) {
-            std::cerr << "center: " << center << "\n"
-                      << "my diameter: " << diameter << "\n"
-                      << "maxRadiusSquared: " << maxRadiusSquared << "\n"
-                      << "quadrantSize: " << quadrantSize << "\n"
-                      << "cutPoints: " << cutPoints << "\n"
-                      << "min: " << min << "\n"
-                      << "max: " << max << "\n";
-
-            throw std::logic_error("element too large");
-        }
-
         double newDiameter = delta.maxElement();
         if (newDiameter > diameter) {
             throw std::logic_error("diameter should never ever increase!");
@@ -229,7 +212,6 @@ public:
 
 private:
     COORD center;
-    FloatCoord<2> quadrantSize;
     COORD simSpaceDim;
     double minCellDistance;
     ID id;

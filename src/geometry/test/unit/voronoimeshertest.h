@@ -76,7 +76,6 @@ public:
         FloatCoord<2> center(1.87819, 58.5767);
         ConvexPolytope<FloatCoord<2> > element(
             center,
-            FloatCoord<2>(400, 400),
             FloatCoord<2>(4000, 1600),
             10,
             0);
