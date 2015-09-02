@@ -71,6 +71,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 1;
 
     __host__ __device__
     static Coord<1> diagonal(const int& nx)
@@ -283,6 +284,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 2;
 
     __host__ __device__
     static Coord<2> diagonal(const int& nx)
@@ -525,6 +527,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 3;
 
     __host__ __device__
     static Coord<3> diagonal(const int& nx)

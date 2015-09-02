@@ -385,6 +385,13 @@ public:
 #endif
     }
 
+    void testDim()
+    {
+        TS_ASSERT_EQUALS(1, Coord<1>::DIM);
+        TS_ASSERT_EQUALS(2, Coord<2>::DIM);
+        TS_ASSERT_EQUALS(3, Coord<3>::DIM);
+    }
+
 private:
     Coord<2> *c1;
 };

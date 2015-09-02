@@ -30,6 +30,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef double ValueType;
+    static const int DIM = 1;
 
     static inline FloatCoord<1> diagonal(const double& x)
     {
@@ -246,6 +247,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef double ValueType;
+    static const int DIM = 2;
 
     static inline FloatCoord<2> diagonal(const double& x)
     {
@@ -488,6 +490,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef double ValueType;
+    static const int DIM = 3;
 
     static inline FloatCoord<3> diagonal(const double& x)
     {

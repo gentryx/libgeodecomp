@@ -577,6 +577,13 @@ public:
         TS_ASSERT(!fC.strictlyDominates(c3));
         TS_ASSERT(!fC.strictlyDominates(c4));
     }
+
+    void testDim()
+    {
+        TS_ASSERT_EQUALS(1, FloatCoord<1>::DIM);
+        TS_ASSERT_EQUALS(2, FloatCoord<2>::DIM);
+        TS_ASSERT_EQUALS(3, FloatCoord<3>::DIM);
+    }
 };
 
 }
