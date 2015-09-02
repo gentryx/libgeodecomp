@@ -108,6 +108,11 @@ public:
     }
 #endif
 
+    inline Coord abs() const
+    {
+        return Coord(std::abs(x()));
+    }
+
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord.
      */
@@ -333,6 +338,11 @@ public:
         return ret;
     }
 #endif
+
+    inline Coord abs() const
+    {
+        return Coord(std::abs(x()), std::abs(y()));
+    }
 
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
@@ -571,6 +581,11 @@ public:
         return ret;
     }
 #endif
+
+    inline Coord abs()
+    {
+        return Coord(std::abs(x()), std::abs(y()), std::abs(z()));
+    }
 
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord

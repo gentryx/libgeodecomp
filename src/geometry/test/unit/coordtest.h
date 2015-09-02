@@ -336,6 +336,26 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 7,  5,   0).minElement(), 0);
     }
 
+    void testAbs()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(10), Coord<1>( 10).abs());
+        TS_ASSERT_EQUALS(Coord<1>(11), Coord<1>(-11).abs());
+
+        TS_ASSERT_EQUALS(Coord<2>(20, 21), Coord<2>( 20,  21).abs());
+        TS_ASSERT_EQUALS(Coord<2>(22, 23), Coord<2>( 22, -23).abs());
+        TS_ASSERT_EQUALS(Coord<2>(24, 25), Coord<2>(-24,  25).abs());
+        TS_ASSERT_EQUALS(Coord<2>(26, 27), Coord<2>(-26, -27).abs());
+
+        TS_ASSERT_EQUALS(Coord<3>(30, 31, 32), Coord<3>( 30,  31,  32).abs());
+        TS_ASSERT_EQUALS(Coord<3>(33, 34, 35), Coord<3>( 33,  34, -35).abs());
+        TS_ASSERT_EQUALS(Coord<3>(36, 37, 38), Coord<3>( 36, -37,  38).abs());
+        TS_ASSERT_EQUALS(Coord<3>(39, 40, 41), Coord<3>( 39, -40, -41).abs());
+        TS_ASSERT_EQUALS(Coord<3>(42, 43, 44), Coord<3>(-42,  43,  44).abs());
+        TS_ASSERT_EQUALS(Coord<3>(45, 46, 47), Coord<3>(-45,  46, -47).abs());
+        TS_ASSERT_EQUALS(Coord<3>(48, 49, 50), Coord<3>(-48, -49,  50).abs());
+        TS_ASSERT_EQUALS(Coord<3>(51, 52, 53), Coord<3>(-51, -52, -53).abs());
+    }
+
     void testSum()
     {
         TS_ASSERT_EQUALS(Coord<1>(6).sum(),        6);
