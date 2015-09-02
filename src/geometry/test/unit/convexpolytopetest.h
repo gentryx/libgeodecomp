@@ -59,6 +59,26 @@ public:
         TS_ASSERT_LESS_THAN(0.9 * expectedVolume, triangle1.getVolume());
         TS_ASSERT_LESS_THAN(triangle1.getVolume(), 1.1 * expectedVolume);
     }
+
+    void testEdgeElimination()
+    {
+        ConvexPolytope<Coord<2> > poly(Coord<2>(200, 100), Coord<2>(300, 300), Coord<2>(1000, 1000), 0.5, 0);
+
+        // create a square:
+        poly << std::make_pair(Coord<2>(200,   0), 10)
+             << std::make_pair(Coord<2>(400, 100), 11)
+             << std::make_pair(Coord<2>(200, 300), 12)
+             << std::make_pair(Coord<2>(100, 100), 13);
+
+        // now eliminate two edges:
+        poly<< std::make_pair(Coord<2>(220, 120), 24);
+        poly.updateGeometryData();
+
+        TS_ASSERT_EQUALS(3, poly.getShape().size());
+        TS_ASSERT_EQUALS(10, poly.getLimits()[0].neighborID);
+        TS_ASSERT_EQUALS(13, poly.getLimits()[1].neighborID);
+        TS_ASSERT_EQUALS(24, poly.getLimits()[2].neighborID);
+    }
 };
 
 }
