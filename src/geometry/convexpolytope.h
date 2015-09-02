@@ -23,11 +23,9 @@ public:
     ConvexPolytope(
         const COORD& center,
         const COORD& simSpaceDim,
-        const double minCellDistance,
         ID id) :
         center(center),
         simSpaceDim(simSpaceDim),
-        minCellDistance(minCellDistance),
         id(id),
         area(simSpaceDim.prod()),
         diameter(*std::max_element(&simSpaceDim[0], &simSpaceDim[0] + 2))
@@ -213,7 +211,6 @@ public:
 private:
     COORD center;
     COORD simSpaceDim;
-    double minCellDistance;
     ID id;
     double area;
     double diameter;
