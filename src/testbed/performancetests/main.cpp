@@ -317,6 +317,227 @@ private:
     int expansionWidth;
 };
 
+class RegionExpandWithAdjacency : public CPUBenchmark
+{
+public:
+    RegionExpandWithAdjacency(
+        std::map<int, ConvexPolytope<Coord<2> > > cells) :
+        rawCells(cells)
+    {}
+
+    std::string family()
+    {
+        std::stringstream buf;
+        buf << "RegionExpandWithAdjacency";
+        return buf.str();
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    static std::map<int, ConvexPolytope<Coord<2> > > genGrid(int numCells)
+    {
+        int elementsPerChunk = 5;
+        int numChunks = numCells / elementsPerChunk;
+        Coord<2> gridSize = Coord<2>::diagonal(sqrt(numChunks));
+        Coord<2> chunkDim(100, 100);
+        Coord<2> globalDim = chunkDim.scale(gridSize);
+        double minDistance = 10;
+        int counter = 0;
+
+        Grid<std::map<int, Coord<2> >, Topologies::Torus<2>::Topology> grid(gridSize);
+        for (int y = 0; y < gridSize.y(); ++y) {
+            for (int x = 0; x < gridSize.x(); ++x) {
+                Coord<2> gridIndex(x, y);
+                Coord<2> chunkOffset = chunkDim.scale(gridIndex);
+                fillChunk(&grid, gridIndex, &counter, elementsPerChunk, chunkDim, minDistance);
+            }
+        }
+
+        std::map<int, ConvexPolytope<Coord<2> > > cells;
+        for (int y = 0; y < gridSize.y(); ++y) {
+            for (int x = 0; x < gridSize.x(); ++x) {
+                Coord<2> gridIndex(x, y);
+                const std::map<int, Coord<2> >& chunk = grid[gridIndex];
+
+                for (std::map<int, Coord<2> >::const_iterator i = chunk.begin(); i != chunk.end(); ++i) {
+                    ConvexPolytope<Coord<2> > element(i->second, globalDim);
+
+                    for (int y = -1; y < 2; ++y) {
+                        for (int x = -1; x < 2; ++x) {
+                            Coord<2> currentIndex = gridIndex + Coord<2>(x, y);
+                            const std::map<int, Coord<2> >& neighbors = grid[currentIndex];
+                            for (std::map<int, Coord<2> >::const_iterator j = neighbors.begin();
+                                 j != neighbors.end();
+                                 ++j) {
+                                if (j->second != i->second) {
+                                    element << std::make_pair(j->second, j->first);
+                                }
+                            }
+                        }
+                    }
+
+                    cells[i->first] = element;
+                }
+            }
+        }
+
+        return cells;
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        double seconds = 0;
+
+        // I. Adapt Voronio Mesh (i.e. Set of Cells)
+        std::size_t numCells = dim[0];
+        int skipCells = dim[1];
+        int expansionWidth = dim[2];
+        int idStreakLength = dim[3];
+
+        std::map<int, ConvexPolytope<Coord<2> > > cells = mapIDs(rawCells, idStreakLength);
+
+        // II. Extract Adjacency List from Cells
+        Adjacency adjacency;
+
+        for (std::map<int, ConvexPolytope<Coord<2> > >::iterator  i = cells.begin(); i != cells.end(); ++i) {
+            int id = i->first;
+            const ConvexPolytope<Coord<2> > element = i->second;
+
+            addNeighbors(&adjacency[id], element.getLimits());
+        }
+
+        // III. Fill Region
+        Region<1> r;
+        int counter = 0;
+        bool select = true;
+        for (Adjacency::iterator i = adjacency.begin(); i != adjacency.end(); ++i) {
+            ++counter;
+            if (counter >= skipCells) {
+                counter = 0;
+                select = !select;
+            }
+
+            if (select) {
+                r << Coord<1>(i->first);
+            }
+        }
+
+        // IV. Performance Measurement
+        {
+            ScopedTimer t(&seconds);
+
+            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured(), adjacency);
+
+            if (q.size() == 4711) {
+                std::cout << "pure debug statement to prevent the compiler from optimizing away the previous function";
+            }
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    std::map<int, ConvexPolytope<Coord<2> > > rawCells;
+
+    static std::map<int, ConvexPolytope<Coord<2> > > mapIDs(
+        const std::map<int, ConvexPolytope<Coord<2> > >& rawCells, int idStreakLength)
+    {
+        std::map<int, ConvexPolytope<Coord<2> > > ret;
+        for (std::map<int, ConvexPolytope<Coord<2> > >::const_iterator i = rawCells.begin(); i != rawCells.end(); ++i) {
+            ConvexPolytope<Coord<2> > element = i->second;
+            mapLimitIDs(&element.getLimits(), idStreakLength);
+            ret[mapID(i->first, idStreakLength)] = element;
+        }
+
+        return ret;
+    }
+
+    template<typename LIMITS_CONTAINER>
+    static void mapLimitIDs(LIMITS_CONTAINER *limits, int idStreakLength)
+    {
+        for (typename LIMITS_CONTAINER::iterator i = limits->begin(); i != limits->end(); ++i) {
+            i->neighborID = mapID(i->neighborID, idStreakLength);
+        }
+    }
+
+    static int mapID(int id, int idStreakLength)
+    {
+        if (idStreakLength == -1) {
+            return id;
+        }
+
+        return id / idStreakLength * 2 * idStreakLength + id % idStreakLength;
+    }
+
+    template<typename GRID>
+    static void fillChunk(GRID *grid, const Coord<2>& gridIndex, int *counter, int elementsPerChunk, const Coord<2>& chunkDim, double minDistance)
+    {
+        Coord<2> chunkOffset = gridIndex.scale(chunkDim);
+
+        for (int i = 0; i < elementsPerChunk; ++i) {
+            Coord<2> randomCoord = Coord<2>(Random::gen_u(chunkDim.x()), Random::gen_u(chunkDim.y()));
+            randomCoord += chunkOffset;
+
+            if (doesNotCollide(randomCoord, *grid, gridIndex, minDistance)) {
+                int id = (*counter)++;
+                (*grid)[gridIndex][id] = randomCoord;
+            }
+        }
+    }
+
+    template<typename COORD, typename GRID>
+    static bool doesNotCollide(COORD position, const GRID& grid, Coord<2> gridIndex, double minDistance)
+    {
+        for (int y = -1; y < 2; ++y) {
+            for (int x = -1; x < 2; ++x) {
+                Coord<2> currentIndex = gridIndex + Coord<2>(x, y);
+                bool valid = positionMaintainsMinDistanceToOthers(
+                    position,
+                    grid[currentIndex].begin(),
+                    grid[currentIndex].end(),
+                    minDistance);
+
+                if (!valid) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    template<typename COORD, typename ITERATOR1, typename ITERATOR2>
+    static bool positionMaintainsMinDistanceToOthers(
+        const COORD& position, const ITERATOR1& begin, const ITERATOR2& end, double minDistance)
+    {
+        for (ITERATOR1 i = begin; i != end; ++i) {
+            COORD delta = i->second - position;
+            if (delta.abs().maxElement() < minDistance) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template<typename VECTOR, typename LIMITS>
+    void addNeighbors(VECTOR *vec, const LIMITS& limits)
+    {
+        for (typename LIMITS::const_iterator i = limits.begin(); i != limits.end(); ++i) {
+            (*vec) << i->neighborID;
+        }
+    }
+};
+
+
 class CoordEnumerationVanilla : public CPUBenchmark
 {
 public:
@@ -3040,6 +3261,41 @@ int main(int argc, char **argv)
         eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
         eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
         eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
+
+        std::vector<int> params(4);
+        int numCells;
+        {
+            numCells = 500000;
+            std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
+
+            params[0] = numCells;
+            params[1] = numCells; // skip cells
+            params[2] = 1; // expansion width
+            params[3] = -1; // id streak lenght
+            eval(RegionExpandWithAdjacency(cells), params);
+            params[1] = 50000; // skip cells
+            params[3] = 500; // id streak lenght
+            eval(RegionExpandWithAdjacency(cells), params);
+        }
+
+        {
+            numCells = 50000;
+            params[0] = numCells;
+            std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
+
+            params[1] = 100;
+            params[2] = 50;
+            params[3] = 100;
+            eval(RegionExpandWithAdjacency(cells), params);
+
+            params[2] = 20;
+            params[3] = 10;
+            eval(RegionExpandWithAdjacency(cells), params);
+
+            params[2] = 10;
+            params[3] = 2;
+            eval(RegionExpandWithAdjacency(cells), params);
+        }
 
         eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
         eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
