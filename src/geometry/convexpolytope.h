@@ -23,8 +23,8 @@ public:
     typedef Plane<COORD, ID> EquationType;
 
     ConvexPolytope(
-        const COORD& center,
-        const COORD& simSpaceDim) :
+        const COORD& center = COORD(),
+        const COORD& simSpaceDim = COORD()) :
         center(center),
         simSpaceDim(simSpaceDim),
         area(simSpaceDim.prod()),
@@ -208,6 +208,11 @@ public:
     }
 
     const std::vector<EquationType>& getLimits() const
+    {
+        return limits;
+    }
+
+    std::vector<EquationType>& getLimits()
     {
         return limits;
     }
