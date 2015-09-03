@@ -611,27 +611,26 @@ public:
         static_assert(DIM == 1, "expanding with adjacency only works on unstructured, i.e. 1-dimensional grids.");
 
         Region ret = *this;
+        Region newCoords = *this;
 
         for (unsigned pass = 0; pass < width; ++pass) {
-            std::vector<int> neighbors;
+            Region add;
 
             // walk over all indices and remember adjacent neighbors
             // this is done in a separate pass to ensure that
-            // 1. no vectors are changed while iterating them
-            // 2. no indices are inserted while checking for neighbors
-            //    which could lead to insertion of neighbor's neighbors
-            for (const Coord<1> index : ret) {
+            // containers are changed while iterating them.
+            for (const Coord<1> index : newCoords) {
                 auto it = adjacency.find(index.x());
                 if (it != adjacency.end()) {
-                    neighbors.insert(neighbors.end(),
-                                    it->second.begin(),
-                                    it->second.end());
+                    for (auto&& i: it->second) {
+                        add << Coord<DIM>(i);
+                    }
                 }
             }
 
-            for (int index : neighbors) {
-                ret.insert(Coord<1>(index));
-            }
+            ret += add;
+            using std::swap;
+            swap(add, newCoords);
         }
 
         return ret;
