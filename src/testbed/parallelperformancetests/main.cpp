@@ -36,9 +36,10 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
         MPILayer mpiLayer;
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
 
         Writer<CELL_TYPE> *cargoWriter = 0;
         if (mpiLayer.rank() == 0) {
@@ -113,9 +114,10 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
         MPILayer mpiLayer;
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
 
         typedef typename HiParSimulator::Stepper<CELL_TYPE>::GridType GridType;
 
@@ -198,9 +200,10 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
         MPILayer mpiLayer;
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
 
         double seconds = 0;
         {

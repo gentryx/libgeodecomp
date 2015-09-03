@@ -375,8 +375,9 @@ public:
         return FILENAME;
     }
 
-    virtual double performance2(const Coord<3>& dim)
+    virtual double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         const Coord<1> size(dim.x());
         Grid gridOld(size);
@@ -455,8 +456,10 @@ public:
         return FILENAME;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+
         // 1. create grids
         const Coord<1> size(dim.x());
         Grid gridOld(size);
@@ -560,8 +563,10 @@ public:
         return FILENAME;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+
         // 1. create grids
         const Coord<1> size(dim.x());
         Grid gridOld(size);
@@ -670,8 +675,10 @@ public:
         return FILENAME;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+
         // 1. create grids
         const Coord<1> size(dim.x());
         Grid gridOld(size);
@@ -779,8 +786,10 @@ public:
         return FILENAME;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+
         // 1. create grids
         const Coord<1> size(dim.x());
         Grid gridOld(size);

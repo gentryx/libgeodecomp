@@ -2,6 +2,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/geometry/convexpolytope.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/region.h>
@@ -53,8 +54,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int sum = 0;
         Region<3> r;
         for (int z = 0; z < dim.z(); ++z) {
@@ -102,8 +104,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -138,8 +141,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -184,8 +188,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -230,8 +235,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -282,8 +288,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -323,8 +330,9 @@ public:
         return "vanilla";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -367,8 +375,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -413,8 +422,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -461,8 +471,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -507,8 +518,9 @@ public:
         return "vanilla";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int dimX = dim.x();
         int dimY = dim.y();
         int dimZ = dim.z();
@@ -583,8 +595,9 @@ public:
         return "pepper";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int dimX = dim.x();
         int dimY = dim.y();
         int dimZ = dim.z();
@@ -834,8 +847,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 5;
         SerialSimulator<JacobiCellClassic> sim(
             new NoOpInitializer<JacobiCellClassic>(dim, maxT));
@@ -905,8 +919,9 @@ public:
         return "silver";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
 
         SerialSimulator<JacobiCellFixedHood> sim(
@@ -1136,8 +1151,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         typedef SoAGrid<
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
@@ -1196,8 +1212,9 @@ public:
         return "platinum";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
         SerialSimulator<JacobiCellStreakUpdate> sim(
             new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
@@ -2247,8 +2264,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
@@ -2290,8 +2308,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 10;
         SerialSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
@@ -2338,8 +2357,9 @@ public:
         return name;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double duration = 0;
         Coord<2> accu;
         Coord<2> realDim(dim.x(), dim.y());
@@ -2600,8 +2620,9 @@ class SellMatrixInitializer : public CPUBenchmark
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         const Coord<1> dim1d(dim.x());
         const int size = dim.x();
         UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
@@ -2664,8 +2685,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
         const Coord<1> size(dim.x());
@@ -2724,8 +2746,9 @@ public:
         return "platinum";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         const Coord<1> size(dim.x());
@@ -2784,8 +2807,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
         const Coord<1> size(dim.x());
@@ -2860,8 +2884,9 @@ public:
         return "pepper";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
