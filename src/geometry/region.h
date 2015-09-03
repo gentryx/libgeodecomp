@@ -683,6 +683,10 @@ public:
             return *this;
         }
 
+        if (count(s) == 0) {
+            return *this;
+        }
+
         geometryCacheTainted = true;
         RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);
         return *this;
