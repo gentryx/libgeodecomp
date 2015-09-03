@@ -3171,24 +3171,27 @@ public:
 #endif
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-void cudaTests(std::string revision, bool quick, int cudaDevice);
+void cudaTests(std::string name, std::string revision, int cudaDevice);
 #endif
 
 int main(int argc, char **argv)
 {
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << " [-q,--quick] REVISION CUDA_DEVICE\n";
+    if ((argc < 3) || (argc == 4) || (argc > 5)) {
+        std::cerr << "usage: " << argv[0] << " [-n,--name SUBSTRING] REVISION CUDA_DEVICE \n"
+                  << "  - optional: only run tests whose name contains a SUBSTRING,\n"
+                  << "  - REVISION is purely for output reasons,\n"
+                  << "  - CUDA_DEVICE causes CUDA tests to run on the device with the given ID.\n";
         return 1;
     }
 
-    bool quick = false;
+    std::string name = "";
     int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
+    if (argc == 5) {
+        if ((std::string(argv[1]) == "-n") ||
+            (std::string(argv[1]) == "--name")) {
+            name = std::string(argv[2]);
         }
-        argumentIndex = 2;
+        argumentIndex = 3;
     }
     std::string revision = argv[argumentIndex + 0];
 
@@ -3197,131 +3200,125 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    LibFlatArray::evaluate eval(revision);
+    LibFlatArray::evaluate eval(name, revision);
     eval.print_header();
 
     std::vector<Coord<3> > sizes;
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    if (!quick) {
-        sizes << Coord<3>(10648 , 1, 1)
-              << Coord<3>(35937 , 1, 1)
-              << Coord<3>(85184 , 1, 1)
-              << Coord<3>(166375, 1, 1);
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SellMatrixInitializer(), toVector(sizes[i]));
-        }
+    sizes << Coord<3>(10648 , 1, 1)
+          << Coord<3>(35937 , 1, 1)
+          << Coord<3>(85184 , 1, 1)
+          << Coord<3>(166375, 1, 1);
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SellMatrixInitializer(), toVector(sizes[i]));
+    }
 
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
-        }
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
+    }
 
 #ifdef __AVX__
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationNative(), toVector(sizes[i]));
-        }
-#endif
-
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
-        }
-
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationVectorizedInf(), toVector(sizes[i]));
-        }
-        sizes.clear();
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationNative(), toVector(sizes[i]));
     }
 #endif
 
-    if (!quick) {
-        eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionExpand(1), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
-
-        std::vector<int> params(4);
-        int numCells;
-        {
-            numCells = 500000;
-            std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
-
-            params[0] = numCells;
-            params[1] = numCells; // skip cells
-            params[2] = 1; // expansion width
-            params[3] = -1; // id streak lenght
-            eval(RegionExpandWithAdjacency(cells), params);
-            params[1] = 50000; // skip cells
-            params[3] = 500; // id streak lenght
-            eval(RegionExpandWithAdjacency(cells), params);
-        }
-
-        {
-            numCells = 50000;
-            params[0] = numCells;
-            std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
-
-            params[1] = 100;
-            params[2] = 50;
-            params[3] = 100;
-            eval(RegionExpandWithAdjacency(cells), params);
-
-            params[2] = 20;
-            params[3] = 10;
-            eval(RegionExpandWithAdjacency(cells), params);
-
-            params[2] = 10;
-            params[3] = 2;
-            eval(RegionExpandWithAdjacency(cells), params);
-        }
-
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
     }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationVectorizedInf(), toVector(sizes[i]));
+    }
+    sizes.clear();
+#endif
+
+    eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionExpand(1), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
+
+    std::vector<int> params(4);
+    int numCells;
+    {
+        numCells = 500000;
+        std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
+
+        params[0] = numCells;
+        params[1] = numCells; // skip cells
+        params[2] = 1; // expansion width
+        params[3] = -1; // id streak lenght
+        eval(RegionExpandWithAdjacency(cells), params);
+        params[1] = 50000; // skip cells
+        params[3] = 500; // id streak lenght
+        eval(RegionExpandWithAdjacency(cells), params);
+    }
+
+    {
+        numCells = 50000;
+        params[0] = numCells;
+        std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
+
+        params[1] = 100;
+        params[2] = 50;
+        params[3] = 100;
+        eval(RegionExpandWithAdjacency(cells), params);
+
+        params[2] = 20;
+        params[3] = 10;
+        eval(RegionExpandWithAdjacency(cells), params);
+
+        params[2] = 10;
+        params[3] = 2;
+        eval(RegionExpandWithAdjacency(cells), params);
+    }
+
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
     eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(64, 64, 64)
-              << Coord<3>(68, 68, 68)
-              << Coord<3>(106, 106, 106)
-              << Coord<3>(128, 128, 128)
-              << Coord<3>(150, 150, 150)
-              << Coord<3>(512, 512, 32)
-              << Coord<3>(518, 518, 32);
-    }
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128)
+          << Coord<3>(150, 150, 150)
+          << Coord<3>(512, 512, 32)
+          << Coord<3>(518, 518, 32);
 
     sizes << Coord<3>(1024, 1024, 32)
           << Coord<3>(1026, 1026, 32);
@@ -3352,13 +3349,11 @@ int main(int argc, char **argv)
 
     sizes.clear();
 
-    if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(64, 64, 64)
-              << Coord<3>(68, 68, 68)
-              << Coord<3>(106, 106, 106)
-              << Coord<3>(128, 128, 128);
-    }
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128);
 
     sizes << Coord<3>(160, 160, 160);
 
@@ -3370,16 +3365,14 @@ int main(int argc, char **argv)
         eval(LBMSoA(), toVector(sizes[i]));
     }
 
-    if (!quick) {
-        std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
-        eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
-        eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
-        eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
-        eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
-    }
+    std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
+    eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
+    eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
+    eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
+    eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-    cudaTests(revision, quick, cudaDevice);
+    cudaTests(name, revision, cudaDevice);
 #endif
 
     return 0;

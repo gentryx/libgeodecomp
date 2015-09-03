@@ -601,10 +601,10 @@ public:
     }
 };
 
-void cudaTests(std::string revision, bool quick, int cudaDevice)
+void cudaTests(std::string name, std::string revision, bool quick, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
-    LibFlatArray::evaluate eval(revision);
+    LibFlatArray::evaluate eval(name, revision);
 
     int increment = 4;
     if (quick) {

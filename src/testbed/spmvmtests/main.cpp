@@ -856,15 +856,30 @@ std::string ML   = "ML_Geer.mtx";
 
 int main(int argc, char **argv)
 {
-    if (argc != 2) {
-        std::cerr << "usage: " << argv[0] << " REVISION\n";
+    if ((argc < 3) || (argc == 4) || (argc > 5)) {
+        std::cerr << "usage: " << argv[0] << " [-n,--name SUBSTRING] REVISION CUDA_DEVICE \n"
+                  << "  - optional: only run tests whose name contains a SUBSTRING,\n"
+                  << "  - REVISION is purely for output reasons,\n"
+                  << "  - CUDA_DEVICE causes CUDA tests to run on the device with the given ID.\n";
         return 1;
     }
-
+    std::string name = "";
     int argumentIndex = 1;
+    if (argc == 5) {
+        if ((std::string(argv[1]) == "-n") ||
+            (std::string(argv[1]) == "--name")) {
+            name = std::string(argv[2]);
+        }
+        argumentIndex = 3;
+    }
     std::string revision = argv[argumentIndex + 0];
 
-    LibFlatArray::evaluate eval(revision);
+    std::stringstream s;
+    s << argv[argumentIndex + 1];
+    int cudaDevice;
+    s >> cudaDevice;
+
+    evaluate eval(name, revision);
     eval.print_header();
 
     // matrix: RM07R
