@@ -607,10 +607,9 @@ public:
         const unsigned& width,
         const Adjacency& adjacency) const
     {
-        static_assert(DIM == 1, "expanding with adjacency only works on unstructured, i.e. 1-dimensional grids.");
-
-        Region ret = *this;
-        Region newCoords = *this;
+        // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids
+        Region<1> ret = *this;
+        Region<1> newCoords = *this;
 
         for (unsigned pass = 0; pass < width; ++pass) {
             Region add;
