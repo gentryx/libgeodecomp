@@ -23,7 +23,6 @@ public:
             }
         }
 
-
         Iterator i = r.beginStreak();
         Iterator t = r[Coord<3>(0, 0, 0)];
         TS_ASSERT_EQUALS(*i, *t);
