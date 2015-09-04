@@ -328,7 +328,9 @@ public:
     std::string family()
     {
         std::stringstream buf;
-        buf << "RegionExpandWithAdjacency";
+        // we don't name this RegionExpandWithAdjacency to users can
+        // still selectively run RegionExpand sans this test.
+        buf << "RegionExpWithAdjacency";
         return buf.str();
     }
 
@@ -3266,8 +3268,10 @@ int main(int argc, char **argv)
     int numCells;
     {
         numCells = 500000;
-        std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
-
+        std::map<int, ConvexPolytope<Coord<2> > > cells;
+        if (std::string("RegionExpWithAdjacency").find(name) != std::string::npos) {
+            cells = RegionExpandWithAdjacency::genGrid(numCells);
+        }
         params[0] = numCells;
         params[1] = numCells; // skip cells
         params[2] = 1; // expansion width
