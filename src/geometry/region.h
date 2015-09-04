@@ -618,13 +618,17 @@ public:
             // walk over all indices and remember adjacent neighbors
             // this is done in a separate pass to ensure that
             // containers are changed while iterating them.
-            for (const Coord<1> index : newCoords) {
-                auto it = adjacency.find(index.x());
-                if (it != adjacency.end()) {
-                    for (auto&& i: it->second) {
-                        Coord<DIM> c(i);
-                        if (ret.count(c) == 0) {
-                            add << c;
+            for (RegionStreakIterator<DIM, Region<DIM> > streak = newCoords.beginStreak();
+                 streak != newCoords.endStreak();
+                 ++streak) {
+                for (int x = streak->origin.x(); x < streak->endX; ++x) {
+                    Adjacency::const_iterator it = adjacency.find(x);
+                    if (it != adjacency.end()) {
+                        for (std::vector<int>::const_iterator i = it->second.begin(); i != it->second.end(); ++i) {
+                            Coord<DIM> c(*i);
+                            if (ret.count(c) == 0) {
+                                add << c;
+                            }
                         }
                     }
                 }
