@@ -580,7 +580,6 @@ public:
         return ret;
     }
 
-#ifdef LIBGEODECOMP_WITH_CPP14
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
         const unsigned& width,
@@ -623,7 +622,10 @@ public:
                 auto it = adjacency.find(index.x());
                 if (it != adjacency.end()) {
                     for (auto&& i: it->second) {
-                        add << Coord<DIM>(i);
+                        Coord<DIM> c(i);
+                        if (ret.count(c) == 0) {
+                            add << c;
+                        }
                     }
                 }
             }
@@ -635,7 +637,6 @@ public:
 
         return ret;
     }
-#endif // LIBGEODECOMP_WITH_CPP14
 
     inline bool operator==(const Region<DIM>& other) const
     {
@@ -680,10 +681,6 @@ public:
     {
         //ignore 0 length streaks
         if (s.endX <= s.origin.x()) {
-            return *this;
-        }
-
-        if (count(s) == 0) {
             return *this;
         }
 
@@ -858,9 +855,11 @@ public:
         *this = newValue;
     }
 
-#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)            \
+#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
             if (*ITERATOR != lastInsert) {         \
-                ret << *ITERATOR;                  \
+                if (ret.count(*ITERATOR) == 0) {   \
+                    ret << *ITERATOR;              \
+                }                                  \
                 lastInsert = *ITERATOR;            \
             }                                      \
             ++ITERATOR;                            \
