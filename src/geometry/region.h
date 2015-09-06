@@ -1,10 +1,11 @@
 #ifndef LIBGEODECOMP_GEOMETRY_REGION_H
 #define LIBGEODECOMP_GEOMETRY_REGION_H
 
+#include <libgeodecomp/geometry/adjacency.h>
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/regionstreakiterator.h>
 #include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/geometry/adjacency.h>
+#include <libgeodecomp/geometry/topologies.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
 namespace LibGeoDecomp {
@@ -551,16 +552,6 @@ public:
         return accumulator;
     }
 
-    template<typename TOPOLOGY>
-    inline Region expandWithTopology(
-        const std::map<int, std::vector<int> >& adjacency,
-        TOPOLOGY /* unused */) const
-    {
-        // fixme: this is just a stub, the actual code remains to be
-        // implemented.
-        return *this;
-    }
-
     /**
      * does the same as expand, but will wrap overlap at edges
      * correctly. The instance of the TOPOLOGY is actually unused, but
@@ -569,7 +560,7 @@ public:
     template<typename TOPOLOGY>
     inline Region expandWithTopology(
         const unsigned& width,
-        const Coord<DIM>& dimensions,
+        const Coord<DIM>& globalDimensions,
         TOPOLOGY /* unused */) const
     {
         Coord<DIM> dia = Coord<DIM>::diagonal(width);
@@ -579,17 +570,35 @@ public:
         for (StreakIterator i = buffer.beginStreak(); i != buffer.endStreak(); ++i) {
             Streak<DIM> streak = *i;
             if (TOPOLOGY::template WrapsAxis<0>::VALUE) {
-                splitStreak<TOPOLOGY>(streak, &ret, dimensions);
+                splitStreak<TOPOLOGY>(streak, &ret, globalDimensions);
             } else {
                 normalizeStreak<TOPOLOGY>(
-                    trimStreak(streak, dimensions), &ret, dimensions);
+                    trimStreak(streak, globalDimensions), &ret, globalDimensions);
             }
         }
 
         return ret;
     }
 
-#ifdef LIBGEODECOMP_WITH_CPP14
+    template<typename TOPOLOGY>
+    inline Region expandWithTopology(
+        const unsigned& width,
+        const Coord<DIM>& globalDimensions,
+        TOPOLOGY topology,
+        const Adjacency& adjacency) const
+    {
+        return expandWithTopology(width, globalDimensions, topology);
+    }
+
+    inline Region expandWithTopology(
+        const unsigned& width,
+        const Coord<DIM>& /* unused: globalDimensions */,
+        Topologies::Unstructured /* used just for overload */,
+        const Adjacency& adjacency) const
+    {
+        return expandWithAdjacency(width, adjacency);
+    }
+
     /**
      * does the same as expand, but reads adjacent indices out of
      * an adjacency list
@@ -598,35 +607,39 @@ public:
         const unsigned& width,
         const Adjacency& adjacency) const
     {
-        static_assert(DIM == 1, "expanding with adjacency only works on unstructured, i.e. 1-dimensional grids.");
-
-        Region ret = *this;
+        // expanding with adjacency only works on unstructured, i.e. 1-dimensional grids
+        Region<1> ret = *this;
+        Region<1> newCoords = *this;
 
         for (unsigned pass = 0; pass < width; ++pass) {
-            std::vector<int> neighbors;
+            Region add;
 
             // walk over all indices and remember adjacent neighbors
             // this is done in a separate pass to ensure that
-            // 1. no vectors are changed while iterating them
-            // 2. no indices are inserted while checking for neighbors
-            //    which could lead to insertion of neighbor's neighbors
-            for (const Coord<1> index : ret) {
-                auto it = adjacency.find(index.x());
-                if (it != adjacency.end()) {
-                    neighbors.insert(neighbors.end(),
-                                    it->second.begin(),
-                                    it->second.end());
+            // containers are changed while iterating them.
+            for (RegionStreakIterator<DIM, Region<DIM> > streak = newCoords.beginStreak();
+                 streak != newCoords.endStreak();
+                 ++streak) {
+                for (int x = streak->origin.x(); x < streak->endX; ++x) {
+                    Adjacency::const_iterator it = adjacency.find(x);
+                    if (it != adjacency.end()) {
+                        for (std::vector<int>::const_iterator i = it->second.begin(); i != it->second.end(); ++i) {
+                            Coord<DIM> c(*i);
+                            if (ret.count(c) == 0) {
+                                add << c;
+                            }
+                        }
+                    }
                 }
             }
 
-            for (int index : neighbors) {
-                ret.insert(Coord<1>(index));
-            }
+            ret += add;
+            using std::swap;
+            swap(add, newCoords);
         }
 
         return ret;
     }
-#endif // LIBGEODECOMP_WITH_CPP14
 
     inline bool operator==(const Region<DIM>& other) const
     {
@@ -845,9 +858,11 @@ public:
         *this = newValue;
     }
 
-#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)            \
+#define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
             if (*ITERATOR != lastInsert) {         \
-                ret << *ITERATOR;                  \
+                if (ret.count(*ITERATOR) == 0) {   \
+                    ret << *ITERATOR;              \
+                }                                  \
                 lastInsert = *ITERATOR;            \
             }                                      \
             ++ITERATOR;                            \

@@ -16,7 +16,9 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    inline bool operator()(const IndexVectorType::const_iterator *a, const IndexVectorType::const_iterator *b)
+    inline bool operator()(
+        const IndexVectorType::const_iterator *a,
+        const IndexVectorType::const_iterator *b)
     {
         if (a[DIM] != b[DIM]) {
             return false;
@@ -33,7 +35,9 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    inline bool operator()(const IndexVectorType::const_iterator *a, const IndexVectorType::const_iterator *b)
+    inline bool operator()(
+        const IndexVectorType::const_iterator *a,
+        const IndexVectorType::const_iterator *b)
     {
         return a[0] == b[0];
     }

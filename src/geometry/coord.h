@@ -71,6 +71,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 1;
 
     __host__ __device__
     static Coord<1> diagonal(const int& nx)
@@ -106,6 +107,11 @@ public:
         return ret;
     }
 #endif
+
+    inline Coord abs() const
+    {
+        return Coord(std::abs(x()));
+    }
 
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord.
@@ -247,6 +253,16 @@ public:
             x() < other.x() ? x() : other.x());
     }
 
+    inline int minElement() const
+    {
+        return x();
+    }
+
+    inline int maxElement() const
+    {
+        return x();
+    }
+
     boost::detail::multi_array::extent_gen<1ul> toExtents() const
     {
         return boost::extents[x()];
@@ -273,6 +289,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 2;
 
     __host__ __device__
     static Coord<2> diagonal(const int& nx)
@@ -321,6 +338,11 @@ public:
         return ret;
     }
 #endif
+
+    inline Coord abs() const
+    {
+        return Coord(std::abs(x()), std::abs(y()));
+    }
 
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
@@ -479,6 +501,16 @@ public:
             y() < other.y() ? y() : other.y());
     }
 
+    inline int minElement() const
+    {
+        return x() < y() ? x() : y();
+    }
+
+    inline int maxElement() const
+    {
+        return x() > y() ? x() : y();
+    }
+
     boost::detail::multi_array::extent_gen<2ul> toExtents() const
     {
         return boost::extents[y()][x()];
@@ -505,6 +537,7 @@ public:
     friend class Serialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 3;
 
     __host__ __device__
     static Coord<3> diagonal(const int& nx)
@@ -548,6 +581,11 @@ public:
         return ret;
     }
 #endif
+
+    inline Coord abs()
+    {
+        return Coord(std::abs(x()), std::abs(y()), std::abs(z()));
+    }
 
     /**
      * converts a linear index to a coordinate in a cuboid of size given by the Coord
@@ -733,6 +771,18 @@ public:
             x() < other.x() ? x() : other.x(),
             y() < other.y() ? y() : other.y(),
             z() < other.z() ? z() : other.z());
+    }
+
+    inline int minElement() const
+    {
+        return x() < y() ?
+                  (x() < z() ? x() : z()) : (y() < z() ? y() : z());
+    }
+
+    inline int maxElement() const
+    {
+        return x() > y() ?
+                  (x() > z() ? x() : z()) : (y() > z() ? y() : z());
     }
 
     boost::detail::multi_array::extent_gen<3ul> toExtents() const

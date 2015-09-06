@@ -601,15 +601,12 @@ public:
     }
 };
 
-void cudaTests(std::string revision, bool quick, int cudaDevice)
+void cudaTests(std::string name, std::string revision, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
-    LibFlatArray::evaluate eval(revision);
+    LibFlatArray::evaluate eval(name, revision);
 
     int increment = 4;
-    if (quick) {
-        increment = 32;
-    }
 
     for (int d = 32; d <= 544; d += increment) {
         eval(BenchmarkCUDA<RTMClassic>(), toVector(Coord<3>::diagonal(d)));

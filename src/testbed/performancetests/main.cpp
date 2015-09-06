@@ -2,6 +2,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/geometry/convexpolytope.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/region.h>
@@ -53,8 +54,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int sum = 0;
         Region<3> r;
         for (int z = 0; z < dim.z(); ++z) {
@@ -102,8 +104,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -138,8 +141,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -184,8 +188,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -230,8 +235,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -282,8 +288,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -310,6 +317,229 @@ private:
     int expansionWidth;
 };
 
+class RegionExpandWithAdjacency : public CPUBenchmark
+{
+public:
+    RegionExpandWithAdjacency(
+        std::map<int, ConvexPolytope<Coord<2> > > cells) :
+        rawCells(cells)
+    {}
+
+    std::string family()
+    {
+        std::stringstream buf;
+        // we don't name this RegionExpandWithAdjacency to users can
+        // still selectively run RegionExpand sans this test.
+        buf << "RegionExpWithAdjacency";
+        return buf.str();
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    static std::map<int, ConvexPolytope<Coord<2> > > genGrid(int numCells)
+    {
+        int elementsPerChunk = 5;
+        int numChunks = numCells / elementsPerChunk;
+        Coord<2> gridSize = Coord<2>::diagonal(sqrt(numChunks));
+        Coord<2> chunkDim(100, 100);
+        Coord<2> globalDim = chunkDim.scale(gridSize);
+        double minDistance = 10;
+        int counter = 0;
+
+        Grid<std::map<int, Coord<2> >, Topologies::Torus<2>::Topology> grid(gridSize);
+        for (int y = 0; y < gridSize.y(); ++y) {
+            for (int x = 0; x < gridSize.x(); ++x) {
+                Coord<2> gridIndex(x, y);
+                Coord<2> chunkOffset = chunkDim.scale(gridIndex);
+                fillChunk(&grid, gridIndex, &counter, elementsPerChunk, chunkDim, minDistance);
+            }
+        }
+
+        std::map<int, ConvexPolytope<Coord<2> > > cells;
+        for (int y = 0; y < gridSize.y(); ++y) {
+            for (int x = 0; x < gridSize.x(); ++x) {
+                Coord<2> gridIndex(x, y);
+                const std::map<int, Coord<2> >& chunk = grid[gridIndex];
+
+                for (std::map<int, Coord<2> >::const_iterator i = chunk.begin(); i != chunk.end(); ++i) {
+                    ConvexPolytope<Coord<2> > element(i->second, globalDim);
+
+                    for (int y = -1; y < 2; ++y) {
+                        for (int x = -1; x < 2; ++x) {
+                            Coord<2> currentIndex = gridIndex + Coord<2>(x, y);
+                            const std::map<int, Coord<2> >& neighbors = grid[currentIndex];
+                            for (std::map<int, Coord<2> >::const_iterator j = neighbors.begin();
+                                 j != neighbors.end();
+                                 ++j) {
+                                if (j->second != i->second) {
+                                    element << std::make_pair(j->second, j->first);
+                                }
+                            }
+                        }
+                    }
+
+                    cells[i->first] = element;
+                }
+            }
+        }
+
+        return cells;
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        double seconds = 0;
+
+        // I. Adapt Voronio Mesh (i.e. Set of Cells)
+        std::size_t numCells = dim[0];
+        int skipCells = dim[1];
+        int expansionWidth = dim[2];
+        int idStreakLength = dim[3];
+
+        std::map<int, ConvexPolytope<Coord<2> > > cells = mapIDs(rawCells, idStreakLength);
+
+        // II. Extract Adjacency List from Cells
+        Adjacency adjacency;
+
+        for (std::map<int, ConvexPolytope<Coord<2> > >::iterator  i = cells.begin(); i != cells.end(); ++i) {
+            int id = i->first;
+            const ConvexPolytope<Coord<2> > element = i->second;
+
+            addNeighbors(&adjacency[id], element.getLimits());
+        }
+
+        // III. Fill Region
+        Region<1> r;
+        int counter = 0;
+        bool select = true;
+        for (Adjacency::iterator i = adjacency.begin(); i != adjacency.end(); ++i) {
+            ++counter;
+            if (counter >= skipCells) {
+                counter = 0;
+                select = !select;
+            }
+
+            if (select) {
+                r << Coord<1>(i->first);
+            }
+        }
+
+        // IV. Performance Measurement
+        {
+            ScopedTimer t(&seconds);
+
+            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured(), adjacency);
+
+            if (q.size() == 4711) {
+                std::cout << "pure debug statement to prevent the compiler from optimizing away the previous function";
+            }
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    std::map<int, ConvexPolytope<Coord<2> > > rawCells;
+
+    static std::map<int, ConvexPolytope<Coord<2> > > mapIDs(
+        const std::map<int, ConvexPolytope<Coord<2> > >& rawCells, int idStreakLength)
+    {
+        std::map<int, ConvexPolytope<Coord<2> > > ret;
+        for (std::map<int, ConvexPolytope<Coord<2> > >::const_iterator i = rawCells.begin(); i != rawCells.end(); ++i) {
+            ConvexPolytope<Coord<2> > element = i->second;
+            mapLimitIDs(&element.getLimits(), idStreakLength);
+            ret[mapID(i->first, idStreakLength)] = element;
+        }
+
+        return ret;
+    }
+
+    template<typename LIMITS_CONTAINER>
+    static void mapLimitIDs(LIMITS_CONTAINER *limits, int idStreakLength)
+    {
+        for (typename LIMITS_CONTAINER::iterator i = limits->begin(); i != limits->end(); ++i) {
+            i->neighborID = mapID(i->neighborID, idStreakLength);
+        }
+    }
+
+    static int mapID(int id, int idStreakLength)
+    {
+        if (idStreakLength == -1) {
+            return id;
+        }
+
+        return id / idStreakLength * 2 * idStreakLength + id % idStreakLength;
+    }
+
+    template<typename GRID>
+    static void fillChunk(GRID *grid, const Coord<2>& gridIndex, int *counter, int elementsPerChunk, const Coord<2>& chunkDim, double minDistance)
+    {
+        Coord<2> chunkOffset = gridIndex.scale(chunkDim);
+
+        for (int i = 0; i < elementsPerChunk; ++i) {
+            Coord<2> randomCoord = Coord<2>(Random::gen_u(chunkDim.x()), Random::gen_u(chunkDim.y()));
+            randomCoord += chunkOffset;
+
+            if (doesNotCollide(randomCoord, *grid, gridIndex, minDistance)) {
+                int id = (*counter)++;
+                (*grid)[gridIndex][id] = randomCoord;
+            }
+        }
+    }
+
+    template<typename COORD, typename GRID>
+    static bool doesNotCollide(COORD position, const GRID& grid, Coord<2> gridIndex, double minDistance)
+    {
+        for (int y = -1; y < 2; ++y) {
+            for (int x = -1; x < 2; ++x) {
+                Coord<2> currentIndex = gridIndex + Coord<2>(x, y);
+                bool valid = positionMaintainsMinDistanceToOthers(
+                    position,
+                    grid[currentIndex].begin(),
+                    grid[currentIndex].end(),
+                    minDistance);
+
+                if (!valid) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    template<typename COORD, typename ITERATOR1, typename ITERATOR2>
+    static bool positionMaintainsMinDistanceToOthers(
+        const COORD& position, const ITERATOR1& begin, const ITERATOR2& end, double minDistance)
+    {
+        for (ITERATOR1 i = begin; i != end; ++i) {
+            COORD delta = i->second - position;
+            if (delta.abs().maxElement() < minDistance) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template<typename VECTOR, typename LIMITS>
+    void addNeighbors(VECTOR *vec, const LIMITS& limits)
+    {
+        for (typename LIMITS::const_iterator i = limits.begin(); i != limits.end(); ++i) {
+            (*vec) << i->neighborID;
+        }
+    }
+};
+
+
 class CoordEnumerationVanilla : public CPUBenchmark
 {
 public:
@@ -323,8 +553,9 @@ public:
         return "vanilla";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -367,8 +598,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -413,8 +645,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -461,8 +694,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -507,8 +741,9 @@ public:
         return "vanilla";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int dimX = dim.x();
         int dimY = dim.y();
         int dimZ = dim.z();
@@ -583,8 +818,9 @@ public:
         return "pepper";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int dimX = dim.x();
         int dimY = dim.y();
         int dimZ = dim.z();
@@ -834,8 +1070,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 5;
         SerialSimulator<JacobiCellClassic> sim(
             new NoOpInitializer<JacobiCellClassic>(dim, maxT));
@@ -905,8 +1142,9 @@ public:
         return "silver";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
 
         SerialSimulator<JacobiCellFixedHood> sim(
@@ -1136,8 +1374,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         typedef SoAGrid<
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
@@ -1196,8 +1435,9 @@ public:
         return "platinum";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
         SerialSimulator<JacobiCellStreakUpdate> sim(
             new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
@@ -2247,8 +2487,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
@@ -2290,8 +2531,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 10;
         SerialSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
@@ -2338,8 +2580,9 @@ public:
         return name;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double duration = 0;
         Coord<2> accu;
         Coord<2> realDim(dim.x(), dim.y());
@@ -2600,8 +2843,9 @@ class SellMatrixInitializer : public CPUBenchmark
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         const Coord<1> dim1d(dim.x());
         const int size = dim.x();
         UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
@@ -2664,8 +2908,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
         const Coord<1> size(dim.x());
@@ -2724,8 +2969,9 @@ public:
         return "platinum";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         const Coord<1> size(dim.x());
@@ -2784,8 +3030,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
         const Coord<1> size(dim.x());
@@ -2860,8 +3107,9 @@ public:
         return "pepper";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         // 1. create grids
         typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
         typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
@@ -2925,24 +3173,27 @@ public:
 #endif
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-void cudaTests(std::string revision, bool quick, int cudaDevice);
+void cudaTests(std::string name, std::string revision, int cudaDevice);
 #endif
 
 int main(int argc, char **argv)
 {
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << " [-q,--quick] REVISION CUDA_DEVICE\n";
+    if ((argc < 3) || (argc == 4) || (argc > 5)) {
+        std::cerr << "usage: " << argv[0] << " [-n,--name SUBSTRING] REVISION CUDA_DEVICE \n"
+                  << "  - optional: only run tests whose name contains a SUBSTRING,\n"
+                  << "  - REVISION is purely for output reasons,\n"
+                  << "  - CUDA_DEVICE causes CUDA tests to run on the device with the given ID.\n";
         return 1;
     }
 
-    bool quick = false;
+    std::string name = "";
     int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
+    if (argc == 5) {
+        if ((std::string(argv[1]) == "-n") ||
+            (std::string(argv[1]) == "--name")) {
+            name = std::string(argv[2]);
         }
-        argumentIndex = 2;
+        argumentIndex = 3;
     }
     std::string revision = argv[argumentIndex + 0];
 
@@ -2951,96 +3202,127 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    LibFlatArray::evaluate eval(revision);
+    LibFlatArray::evaluate eval(name, revision);
     eval.print_header();
 
     std::vector<Coord<3> > sizes;
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    if (!quick) {
-        sizes << Coord<3>(10648 , 1, 1)
-              << Coord<3>(35937 , 1, 1)
-              << Coord<3>(85184 , 1, 1)
-              << Coord<3>(166375, 1, 1);
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SellMatrixInitializer(), toVector(sizes[i]));
-        }
+    sizes << Coord<3>(10648 , 1, 1)
+          << Coord<3>(35937 , 1, 1)
+          << Coord<3>(85184 , 1, 1)
+          << Coord<3>(166375, 1, 1);
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SellMatrixInitializer(), toVector(sizes[i]));
+    }
 
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
-        }
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
+    }
 
 #ifdef __AVX__
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationNative(), toVector(sizes[i]));
-        }
-#endif
-
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
-        }
-
-        for (std::size_t i = 0; i < sizes.size(); ++i) {
-            eval(SparseMatrixVectorMultiplicationVectorizedInf(), toVector(sizes[i]));
-        }
-        sizes.clear();
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationNative(), toVector(sizes[i]));
     }
 #endif
 
-    if (!quick) {
-        eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionExpand(1), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
     }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationVectorizedInf(), toVector(sizes[i]));
+    }
+    sizes.clear();
+#endif
+
+    eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionExpand(1), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
+
+    std::vector<int> params(4);
+    int numCells;
+    {
+        numCells = 500000;
+        std::map<int, ConvexPolytope<Coord<2> > > cells;
+        if (std::string("RegionExpWithAdjacency").find(name) != std::string::npos) {
+            cells = RegionExpandWithAdjacency::genGrid(numCells);
+        }
+        params[0] = numCells;
+        params[1] = numCells; // skip cells
+        params[2] = 1; // expansion width
+        params[3] = -1; // id streak lenght
+        eval(RegionExpandWithAdjacency(cells), params);
+        params[1] = 50000; // skip cells
+        params[3] = 500; // id streak lenght
+        eval(RegionExpandWithAdjacency(cells), params);
+    }
+
+    {
+        numCells = 50000;
+        params[0] = numCells;
+        std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
+
+        params[1] = 100;
+        params[2] = 50;
+        params[3] = 100;
+        eval(RegionExpandWithAdjacency(cells), params);
+
+        params[2] = 20;
+        params[3] = 10;
+        eval(RegionExpandWithAdjacency(cells), params);
+
+        params[2] = 10;
+        params[3] = 2;
+        eval(RegionExpandWithAdjacency(cells), params);
+    }
+
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
     eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
-    if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(64, 64, 64)
-              << Coord<3>(68, 68, 68)
-              << Coord<3>(106, 106, 106)
-              << Coord<3>(128, 128, 128)
-              << Coord<3>(150, 150, 150)
-              << Coord<3>(512, 512, 32)
-              << Coord<3>(518, 518, 32);
-    }
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128)
+          << Coord<3>(150, 150, 150)
+          << Coord<3>(512, 512, 32)
+          << Coord<3>(518, 518, 32);
 
     sizes << Coord<3>(1024, 1024, 32)
           << Coord<3>(1026, 1026, 32);
@@ -3071,13 +3353,11 @@ int main(int argc, char **argv)
 
     sizes.clear();
 
-    if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(64, 64, 64)
-              << Coord<3>(68, 68, 68)
-              << Coord<3>(106, 106, 106)
-              << Coord<3>(128, 128, 128);
-    }
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128);
 
     sizes << Coord<3>(160, 160, 160);
 
@@ -3089,16 +3369,14 @@ int main(int argc, char **argv)
         eval(LBMSoA(), toVector(sizes[i]));
     }
 
-    if (!quick) {
-        std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
-        eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
-        eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
-        eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
-        eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
-    }
+    std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
+    eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
+    eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
+    eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
+    eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-    cudaTests(revision, quick, cudaDevice);
+    cudaTests(name, revision, cudaDevice);
 #endif
 
     return 0;

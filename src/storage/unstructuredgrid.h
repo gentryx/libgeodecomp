@@ -36,7 +36,8 @@ public:
     explicit UnstructuredGrid(
         const Coord<DIM>& dim = Coord<DIM>(),
         const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(dim.x(), defaultElement),
         edgeElement(edgeElement),
         dimension(dim)
@@ -48,9 +49,11 @@ public:
     }
 
     explicit
-    UnstructuredGrid(const CoordBox<DIM> box,
-                     const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
-                     const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE()) :
+    UnstructuredGrid(
+        const CoordBox<DIM> box,
+        const ELEMENT_TYPE& defaultElement = ELEMENT_TYPE(),
+        const ELEMENT_TYPE& edgeElement = ELEMENT_TYPE(),
+        const Coord<DIM>& topologicalDimensionIsIrrelevantHere = Coord<DIM>()) :
         elements(box.dimensions.x(), defaultElement),
         edgeElement(edgeElement),
         dimension(box.dimensions)
