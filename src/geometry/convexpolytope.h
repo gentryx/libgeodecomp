@@ -163,9 +163,8 @@ public:
         COORD min = simSpaceDim;
         COORD max = -simSpaceDim;
         for (std::size_t i = 0; i < cutPoints.size(); ++i) {
-            COORD& c = cutPoints[i];
-            max = c.max(max);
-            min = c.min(min);
+            max = cutPoints[i].max(max);
+            min = cutPoints[i].min(min);
         }
         COORD delta = max - min;
         // fixme
