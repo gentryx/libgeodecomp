@@ -88,7 +88,7 @@ public:
             const std::size_t source,
             const std::size_t target) :
             Link(region, Link::genLinkName(basename, source, target)),
-            receiverID(HPXReceiver<std::vector<CellType> >::find(linkName).get())
+            receiverID(HPXReceiver<BufferType>::find(linkName).get())
         {}
 
         virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
@@ -107,8 +107,7 @@ public:
             }
 
             GridVecConv::gridToVector(grid, &buffer, region);
-            hpx::apply(typename HPXReceiver<std::vector<CellType> >::receiveAction(),
-                       receiverID,  nanoStep, buffer);
+            hpx::apply(typename HPXReceiver<BufferType>::receiveAction(), receiverID,  nanoStep, buffer);
 
             std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
             if ((lastNanoStep == infinity()) ||
@@ -144,7 +143,7 @@ public:
             const std::size_t source,
             const std::size_t target) :
             Link(region, Link::genLinkName(basename, source, target)),
-            receiver(HPXReceiver<std::vector<CellType> >::make(linkName).get())
+            receiver(HPXReceiver<BufferType>::make(linkName).get())
         {}
 
         virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
@@ -182,7 +181,7 @@ public:
         }
 
     private:
-        boost::shared_ptr<HPXReceiver<std::vector<CellType> > > receiver;
+        boost::shared_ptr<HPXReceiver<BufferType> > receiver;
     };
 };
 
