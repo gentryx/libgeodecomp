@@ -1,9 +1,7 @@
 #ifndef LIBGEODECOMP_COMMUNICATION_HPXPATCHLINK_H
 #define LIBGEODECOMP_COMMUNICATION_HPXPATCHLINK_H
 
-#include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
-
+#include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/storage/gridvecconv.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 #include <libgeodecomp/storage/patchprovider.h>
@@ -65,14 +63,12 @@ public:
 
         inline void wait()
         {
-            // fixme
-            // mpiLayer.wait(tag);
+            // MPI relict, unnecessary for HPX
         }
 
         inline void cancel()
         {
-            // fixme
-            // mpiLayer.cancelAll();
+            // MPI relict, unnecessary for HPX
         }
 
     protected:
@@ -104,7 +100,8 @@ public:
             std::string basename,
             const std::size_t source,
             const std::size_t target) :
-            Link(region, Link::genLinkName(basename, source, target))
+            Link(region, Link::genLinkName(basename, source, target)),
+            receiverID(HPXReceiver<std::vector<CellType> >::find(linkName).get())
         {}
 
         virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
@@ -118,24 +115,26 @@ public:
             const Region<DIM>& /*validRegion*/,
             const std::size_t nanoStep)
         {
+            std::cout << "put(" << nanoStep << ") validity: " << checkNanoStepPut(nanoStep) << "\n";
             if (!checkNanoStepPut(nanoStep)) {
                 return;
             }
 
-            // fixme
-            // wait();
-            // GridVecConv::gridToVector(grid, &buffer, region);
-            // sendHeader(FixedSize());
-            // mpiLayer.send(&buffer[0], dest, buffer.size(), tag, cellMPIDatatype);
+            GridVecConv::gridToVector(grid, &buffer, region);
+            hpx::apply(typename HPXReceiver<std::vector<CellType> >::receiveAction(),
+                       receiverID,  nanoStep, buffer);
 
-            // std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
-            // if ((lastNanoStep == infinity()) ||
-            //     (nextNanoStep < lastNanoStep)) {
-            //     requestedNanoSteps << nextNanoStep;
-            // }
+            std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
+            if ((lastNanoStep == infinity()) ||
+                (nextNanoStep < lastNanoStep)) {
+                requestedNanoSteps << nextNanoStep;
+            }
 
-            // erase_min(requestedNanoSteps);
+            erase_min(requestedNanoSteps);
         }
+
+    private:
+        hpx::id_type receiverID;
     };
 
     class Provider :
@@ -159,22 +158,19 @@ public:
             std::string basename,
             const std::size_t source,
             const std::size_t target) :
-            Link(region, Link::genLinkName(basename, source, target))
+            Link(region, Link::genLinkName(basename, source, target)),
+            receiver(HPXReceiver<std::vector<CellType> >::make(linkName).get())
         {}
 
         virtual void cleanup()
         {
-            // fixme
-            // if (transmissionInFlight) {
-            //     recvSecondPart(FixedSize());
-            // }
+            // MPI relict, unnecessary for HPX
         }
 
         virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
         {
             Link::charge(next, last, newStride);
-            // fixme
-            // recv(next);
+            recv(next);
         }
 
         virtual void get(
@@ -188,37 +184,28 @@ public:
             }
 
             checkNanoStepGet(nanoStep);
-            // fixme
-            // wait();
-            // recvSecondPart(FixedSize());
-            // transmissionInFlight = false;
 
-            // GridVecConv::vectorToGrid(buffer, grid, region);
+            GridVecConv::vectorToGrid(receiver->get(nanoStep).get(), grid, region);
 
-            // std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
-            // if ((lastNanoStep == infinity()) ||
-            //     (nextNanoStep < lastNanoStep)) {
-            //     recv(nextNanoStep);
-            // }
+            std::size_t nextNanoStep = (min)(storedNanoSteps) + stride;
+            if ((lastNanoStep == infinity()) ||
+                (nextNanoStep < lastNanoStep)) {
+                recv(nextNanoStep);
+            }
 
-            // erase_min(storedNanoSteps);
+            erase_min(storedNanoSteps);
         }
 
         void recv(const std::size_t nanoStep)
         {
             storedNanoSteps << nanoStep;
-            // fixme:
-            // recvFirstPart(FixedSize());
-            // transmissionInFlight = true;
         }
 
     private:
-        // bool transmissionInFlight;
+        boost::shared_ptr<HPXReceiver<std::vector<CellType> > > receiver;
     };
 };
 
 }
-
-#endif
 
 #endif
