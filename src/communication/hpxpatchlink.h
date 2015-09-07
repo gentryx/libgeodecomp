@@ -43,9 +43,7 @@ public:
         {}
 
         virtual ~Link()
-        {
-            wait();
-        }
+        {}
 
         /**
          * Should be called prior to destruction to allow
@@ -59,16 +57,6 @@ public:
         {
             lastNanoStep = last;
             stride = newStride;
-        }
-
-        inline void wait()
-        {
-            // MPI relict, unnecessary for HPX
-        }
-
-        inline void cancel()
-        {
-            // MPI relict, unnecessary for HPX
         }
 
     protected:
@@ -89,7 +77,6 @@ public:
         using Link::lastNanoStep;
         using Link::region;
         using Link::stride;
-        using Link::wait;
         using PatchAccepter<GRID_TYPE>::checkNanoStepPut;
         using PatchAccepter<GRID_TYPE>::infinity;
         using PatchAccepter<GRID_TYPE>::pushRequest;
@@ -115,7 +102,6 @@ public:
             const Region<DIM>& /*validRegion*/,
             const std::size_t nanoStep)
         {
-            std::cout << "put(" << nanoStep << ") validity: " << checkNanoStepPut(nanoStep) << "\n";
             if (!checkNanoStepPut(nanoStep)) {
                 return;
             }
@@ -147,7 +133,6 @@ public:
         using Link::lastNanoStep;
         using Link::region;
         using Link::stride;
-        using Link::wait;
         using PatchProvider<GRID_TYPE>::checkNanoStepGet;
         using PatchProvider<GRID_TYPE>::infinity;
         using PatchProvider<GRID_TYPE>::storedNanoSteps;
@@ -161,11 +146,6 @@ public:
             Link(region, Link::genLinkName(basename, source, target)),
             receiver(HPXReceiver<std::vector<CellType> >::make(linkName).get())
         {}
-
-        virtual void cleanup()
-        {
-            // MPI relict, unnecessary for HPX
-        }
 
         virtual void charge(const std::size_t next, const std::size_t last, const std::size_t newStride)
         {
