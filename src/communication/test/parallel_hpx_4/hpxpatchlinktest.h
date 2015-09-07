@@ -25,31 +25,32 @@ public:
         Region<2> recvRegionLeft;
         Region<2> recvRegionRight;
         Region<2> gridRegion;
-        int timeStep = 10;
 
         recvRegionLeft  << Streak<2>(Coord<2>(0, leftNeighbor),  dim.x());
         recvRegionRight << Streak<2>(Coord<2>(0, rightNeighbor), dim.x());
         sendRegion  << Streak<2>(Coord<2>(0, rank),          dim.x());
         gridRegion << CoordBox<2>(Coord<2>(), dim);
 
-        for (auto&& i: sendRegion) {
-            grid[i] = rank + timeStep;
-        }
-
         HPXPatchLink<DisplacedGrid<double> >::Provider providerLeft( recvRegionLeft,  basename, leftNeighbor,  rank);
         HPXPatchLink<DisplacedGrid<double> >::Provider providerRight(recvRegionRight, basename, rightNeighbor, rank);
         HPXPatchLink<DisplacedGrid<double> >::Accepter accepterLeft( sendRegion,      basename, rank, leftNeighbor);
         HPXPatchLink<DisplacedGrid<double> >::Accepter accepterRight(sendRegion,      basename, rank, rightNeighbor);
 
-        providerLeft.charge( 10, 30, 2);
-        providerRight.charge(10, 30, 2);
-        accepterLeft.charge( 10, 30, 2);
-        accepterRight.charge(10, 30, 2);
+        providerLeft.charge( 10, 30, 5);
+        providerRight.charge(10, 30, 5);
+        accepterLeft.charge( 10, 30, 5);
+        accepterRight.charge(10, 30, 5);
 
-        accepterLeft.put(  grid, gridRegion, 10);
-        accepterRight.put( grid, gridRegion, 10);
-        providerLeft.get( &grid, gridRegion, 10);
-        providerRight.get(&grid, gridRegion, 10);
+        // Step #0
+        int timeStep = 10;
+        for (auto&& i: sendRegion) {
+            grid[i] = rank + timeStep;
+        }
+
+        accepterLeft.put(  grid, gridRegion, timeStep);
+        accepterRight.put( grid, gridRegion, timeStep);
+        providerLeft.get( &grid, gridRegion, timeStep);
+        providerRight.get(&grid, gridRegion, timeStep);
 
         double expectedValue = timeStep + leftNeighbor;
         for (auto&& i: recvRegionLeft) {
@@ -60,7 +61,27 @@ public:
         for (auto&& i: recvRegionRight) {
             TS_ASSERT_EQUALS(grid[i], expectedValue);
         }
-        // fixme: test next send/recv
+
+        // Step #1
+        timeStep += 5;
+        for (auto&& i: sendRegion) {
+            grid[i] = rank + timeStep;
+        }
+
+        accepterLeft.put(  grid, gridRegion, timeStep);
+        accepterRight.put( grid, gridRegion, timeStep);
+        providerLeft.get( &grid, gridRegion, timeStep);
+        providerRight.get(&grid, gridRegion, timeStep);
+
+        expectedValue = timeStep + leftNeighbor;
+        for (auto&& i: recvRegionLeft) {
+            TS_ASSERT_EQUALS(grid[i], expectedValue);
+        }
+
+        expectedValue = timeStep + rightNeighbor;
+        for (auto&& i: recvRegionRight) {
+            TS_ASSERT_EQUALS(grid[i], expectedValue);
+        }
     }
 
     // fixme: test soa too
