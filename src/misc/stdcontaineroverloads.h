@@ -8,6 +8,9 @@
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/vector.hpp>
 #endif
+#ifdef LIBGEODECOMP_WITH_CPP14
+#include <utility>
+#endif
 
 #include <algorithm>
 #include <iterator>
@@ -112,12 +115,16 @@ inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, con
     return vec;
 }
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+
 template <typename T, typename Allocator, typename U>
 inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, U&& obj)
 {
-    vec.push_back(std::move(obj));
+    vec.push_back(std::forward<U>(obj));
     return vec;
 }
+
+#endif
 
 template <typename T, typename Allocator>
 inline std::vector<T, Allocator> operator+(std::vector<T, Allocator>& target, const std::vector<T, Allocator>& other)

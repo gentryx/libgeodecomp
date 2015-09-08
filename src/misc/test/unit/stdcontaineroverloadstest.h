@@ -3,6 +3,7 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 
 #include <boost/assign/std/vector.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace boost::assign;
@@ -241,6 +242,19 @@ public:
         TS_ASSERT_EQUALS(1, pop_front(stack));
         TS_ASSERT_EQUALS(2, pop_front(stack));
         TS_ASSERT_EQUALS(3, pop_front(stack));
+    }
+
+    void testMove()
+    {
+        boost::shared_ptr<double> ptr(new double);
+        *ptr = 555.666;
+        TS_ASSERT(0 != get_pointer(ptr));
+        std::vector<boost::shared_ptr<double> > vec;
+
+        vec << ptr;
+
+        TS_ASSERT(0 != get_pointer(ptr));
+        TS_ASSERT_EQUALS(555.666, *ptr);
     }
 
     void testPushFront()
