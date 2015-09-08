@@ -143,7 +143,7 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     EventMap events;
-    PartitionManager<Topology> partitionManager;
+//    PartitionManager<Topology> partitionManager;
     MPILayer mpiLayer;
     boost::shared_ptr<UpdateGroupType> updateGroup;
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
