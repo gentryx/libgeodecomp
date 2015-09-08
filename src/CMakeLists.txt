@@ -33,15 +33,16 @@ else()
     ${HPX_BOOST_DATE_TIME_LIBRARY}
     ${HPX_BOOST_FILESYSTEM_LIBRARY}
     ${HPX_BOOST_SYSTEM_LIBRARY}
-    ${HPX_BOOST_SERIALIZATION_LIBRARY}
     ${HPX_BOOST_THREAD_LIBRARY}
   )
   set(Boost_DATE_TIME_FOUND true)
   set(Boost_FILESYSTEM_FOUND true)
   set(Boost_SYSTEM_FOUND true)
-  set(Boost_SERIALIZATION_FOUND true)
   set(Boost_THREAD_FOUND true)
 endif()
+
+find_package(Boost COMPONENTS serialization)
+set(Boost_SERIALIZATION_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 
 find_package(Boost COMPONENTS mpi)
 set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
@@ -137,6 +138,8 @@ detect_distro()
 # compute default flags:
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
 
+check_cxx_compiler_flag("-std=c++14" SUPPORTS_CPP14)
+
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
   set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
@@ -214,6 +217,8 @@ add_config_option(WITH_THREADS "Lets you control whether we'll use threads (e.g.
 
 add_config_option(WITH_TYPEMAPS "Controls whether the build system should regenerate typemaps.{h,cpp}. Requires Ruby and some Unix tools." ${DEFAULT_TYPEMAP_GENERATION} false)
 
+add_config_option(WITH_CPP14 "LibGeoDecomp is largely written in C++98, but some components use language features from a newer standard. This option will enable those." ${SUPPORTS_CPP14} true)
+
 add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
 print_options()
@@ -238,6 +243,10 @@ generate_sourcelists("./")
 
 if(WITH_BOOST_MPI)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_MPI_LIBRARIES}")
+endif()
+
+if(WITH_BOOST_SERIALIZATION)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_SERIALIZATION_LIBRARIES}")
 endif()
 
 if(WITH_CUDA)
