@@ -46,7 +46,7 @@ public:
 
     void get(std::size_t step)
     {
-        CoordBox<2> box = receiveBuffer.receive(step).get();
+        receiveBuffer.receive(step).get();
     }
 
     HPX_DEFINE_COMPONENT_ACTION(DummyPatchLinkProvider, get, get_action);
