@@ -1,3 +1,4 @@
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/grid.h>

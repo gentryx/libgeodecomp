@@ -1,8 +1,6 @@
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
-#include <libgeodecomp/communication/hpxserialization.h>
-#endif
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/storage/selector.h>

@@ -1,3 +1,4 @@
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/misc/testhelper.h>

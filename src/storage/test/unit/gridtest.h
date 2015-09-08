@@ -2,6 +2,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/grid.h>

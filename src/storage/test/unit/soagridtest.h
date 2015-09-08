@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/testcell.h>

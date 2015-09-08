@@ -1,3 +1,4 @@
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/clonable.h>
 
 using namespace LibGeoDecomp;
