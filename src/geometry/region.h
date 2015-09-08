@@ -860,9 +860,7 @@ public:
 
 #define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
             if (*ITERATOR != lastInsert) {         \
-                if (ret.count(*ITERATOR) == 0) {   \
-                    ret << *ITERATOR;              \
-                }                                  \
+                ret << *ITERATOR;                  \
                 lastInsert = *ITERATOR;            \
             }                                      \
             ++ITERATOR;                            \
