@@ -18,6 +18,9 @@ template<typename VALUE>
 class Palette
 {
 public:
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     void addColor(const VALUE& val, const Color& color)
     {
         colors[val] = color;

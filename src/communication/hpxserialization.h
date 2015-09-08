@@ -3,6 +3,7 @@
 
 #include <libgeodecomp/storage/arrayfilter.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -21,6 +22,7 @@
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 #include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/misc/palette.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/plotter.h>
 #include <libgeodecomp/misc/quickpalette.h>
@@ -51,6 +53,13 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned /*version*/)
     {
         archive & object.totalTimes;
+    }
+
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Color& object, const unsigned /*version*/)
+    {
+        archive & object.rgb;
     }
 
     template<typename ARCHIVE>
@@ -185,6 +194,13 @@ public:
         archive & object.plotter;
     }
 
+    template<typename ARCHIVE, typename VALUE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Palette<VALUE>& object, const unsigned /*version*/)
+    {
+        archive & object.colors;
+    }
+
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned /*version*/)
@@ -315,10 +331,8 @@ HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, class CEL
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, class CELL_PLOTTER>), (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SerialBOVWriter<CELL_TYPE>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SerialBOVWriter<CELL_TYPE>));
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>), (LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename PALETTE>), (LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL, typename MEMBER, typename PALETTE>), (LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>));
-HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL, typename MEMBER, typename EXTERNAL>), (LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::SimpleInitializer<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::Steerer<CELL_TYPE>));
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::Writer<CELL_TYPE>));
@@ -336,6 +350,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNA
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned version)
+{
+    HPXSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Color& object, const unsigned version)
 {
     HPXSerialization::serialize(archive, object, version);
 }
@@ -444,6 +464,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsig
 
 template<class ARCHIVE, typename CELL_TYPE, typename CELL_PLOTTER>
 void serialize(ARCHIVE& archive, LibGeoDecomp::PPMWriter<CELL_TYPE, CELL_PLOTTER>& object, const unsigned version)
+{
+    HPXSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename VALUE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Palette<VALUE>& object, const unsigned version)
 {
     HPXSerialization::serialize(archive, object, version);
 }

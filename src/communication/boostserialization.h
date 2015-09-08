@@ -5,6 +5,7 @@
 
 #include <libgeodecomp/storage/arrayfilter.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -22,6 +23,7 @@
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
+#include <libgeodecomp/misc/palette.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/geometry/region.h>
@@ -51,6 +53,13 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned /*version*/)
     {
         archive & object.totalTimes;
+    }
+
+    template<typename ARCHIVE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Color& object, const unsigned /*version*/)
+    {
+        archive & object.rgb;
     }
 
     template<typename ARCHIVE>
@@ -177,6 +186,13 @@ public:
         archive & object.newLoadWeight;
     }
 
+    template<typename ARCHIVE, typename VALUE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Palette<VALUE>& object, const unsigned /*version*/)
+    {
+        archive & object.colors;
+    }
+
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned /*version*/)
@@ -300,6 +316,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsign
 }
 
 template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Color& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<1 >& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
@@ -397,6 +419,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::NonPoDTestCell& object, const uns
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename VALUE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Palette<VALUE>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }

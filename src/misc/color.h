@@ -8,6 +8,9 @@ namespace LibGeoDecomp {
 class Color
 {
  public:
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     static const Color BLACK;
     static const Color WHITE ;
 
