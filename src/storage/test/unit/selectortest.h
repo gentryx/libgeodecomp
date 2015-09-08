@@ -623,8 +623,6 @@ public:
 
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
             MyOtherDummyCell cell = grid.get(*i);
-            int expected = i->y() * 100 + i->x() + 2000 + 20000 + 100000;
-            int delta =  cell.y[0] - expected;
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 2000 + 20000 + 100000, cell.y[0]);
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 3000 + 30000 + 200000, cell.y[1]);
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 4000 + 40000 + 300000, cell.y[2]);
