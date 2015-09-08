@@ -593,7 +593,7 @@ public:
     inline Region expandWithTopology(
         const unsigned& width,
         const Coord<DIM>& /* unused: globalDimensions */,
-        Topologies::Unstructured /* used just for overload */,
+        Topologies::Unstructured::Topology /* used just for overload */,
         const Adjacency& adjacency) const
     {
         return expandWithAdjacency(width, adjacency);
