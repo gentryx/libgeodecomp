@@ -14,9 +14,6 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class SimpleFilter : public Filter<CELL, MEMBER, EXTERNAL>
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(SimpleFilter);
-
-    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
 

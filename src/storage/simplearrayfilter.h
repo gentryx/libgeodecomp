@@ -13,9 +13,6 @@ template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 class SimpleArrayFilter : public ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(SimpleArrayFilter);
-
-    friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
 
