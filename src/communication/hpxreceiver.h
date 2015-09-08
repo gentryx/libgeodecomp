@@ -1,6 +1,11 @@
 #ifndef LIBGEODECOMP_COMMUNICATION_HPXRECEIVER_H
 #define LIBGEODECOMP_COMMUNICATION_HPXRECEIVER_H
 
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_CPP14
+#include <utility>
+#endif
+
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
 #include <libgeodecomp/communication/hpxcomponentregsitrationhelper.h>
@@ -38,7 +43,7 @@ public:
 
     void receive(std::size_t step, Cargo&& val)
     {
-        buffer.store_received(step, std::move(val));
+        buffer.store_received(step, std::forward<Cargo>(val));
     }
     HPX_DEFINE_COMPONENT_ACTION(HPXReceiver, receive, receiveAction);
 
