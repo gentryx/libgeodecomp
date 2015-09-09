@@ -124,6 +124,19 @@ public:
         }
     }
 
+    void testAllGather()
+    {
+        std::string name = "testAllGather";
+        double data = rank + 0.4711;
+        std::vector<double> vec = HPXReceiver<double>::allGather(data, rank, size, name);
+
+        TS_ASSERT_EQUALS(size, vec.size());
+        for (std::size_t i = 0; i < size; ++i) {
+            double expected = i + 0.4711;
+            TS_ASSERT_EQUALS(expected, vec[i]);
+        }
+    }
+
 private:
     std::size_t rank;
     std::size_t size;

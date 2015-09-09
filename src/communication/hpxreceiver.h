@@ -6,6 +6,7 @@
 #include <utility>
 #endif
 
+#include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
 #include <libgeodecomp/communication/hpxcomponentregsitrationhelper.h>
@@ -48,6 +49,27 @@ public:
         }
 
         return std::move(ids);
+    }
+
+    static std::vector<CARGO> allGather(
+        const CARGO& data,
+        std::size_t rank,
+        std::size_t size,
+        const std::string& name)
+    {
+        auto receiver = HPXReceiver<CARGO>::make(name, rank).get();
+        std::vector<hpx::future<hpx::id_type> > futures = HPXReceiver<CARGO>::find_all(name, size);
+        std::vector<hpx::id_type> ids = hpx::util::unwrapped(std::move(futures));
+        std::vector<CARGO> vec;
+        vec.reserve(size);
+
+        hpx::lcos::broadcast_apply<typename HPXReceiver::receiveAction>(ids, rank, data);
+
+        for (std::size_t i = 0; i < size; ++i) {
+            vec << receiver->get(i).get();
+        }
+
+        return std::move(vec);
     }
 
     virtual ~HPXReceiver()
