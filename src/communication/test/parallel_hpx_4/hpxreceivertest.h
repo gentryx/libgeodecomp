@@ -21,7 +21,7 @@ public:
     void mySetUp(std::string basename)
     {
         rank = hpx::get_locality_id();
-        size = hpx::find_all_localities().size();
+        size = hpx::get_num_localities().get();
 
         leftNeighbor  = (rank - 1 + size) % size;
         rightNeighbor = (rank + 1       ) % size;

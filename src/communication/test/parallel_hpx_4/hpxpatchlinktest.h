@@ -13,7 +13,7 @@ public:
     void testCircle()
     {
         std::size_t rank = hpx::get_locality_id();
-        std::size_t size = hpx::find_all_localities().size();
+        std::size_t size = hpx::get_num_localities().get();
         std::size_t leftNeighbor  = (rank - 1 + size) % size;
         std::size_t rightNeighbor = (rank + 1)        % size;
 
@@ -88,7 +88,7 @@ public:
     {
         typedef SoAGrid<TestCellSoA, Topologies::Torus<3>::Topology> GridType;
         std::size_t rank = hpx::get_locality_id();
-        std::size_t size = hpx::find_all_localities().size();
+        std::size_t size = hpx::get_num_localities().get();
         std::size_t leftNeighbor  = (rank - 1 + size) % size;
         std::size_t rightNeighbor = (rank + 1)        % size;
 

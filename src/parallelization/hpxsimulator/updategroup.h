@@ -83,9 +83,9 @@ public:
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
 
         // fixme
-        // std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
+        std::vector<CoordBox<DIM> > boundingBoxes(hpx::get_num_localities().get());
         // mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
-        // partitionManager->resetGhostZones(boundingBoxes);
+        partitionManager->resetGhostZones(boundingBoxes);
 
         long firstSyncPoint =
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +

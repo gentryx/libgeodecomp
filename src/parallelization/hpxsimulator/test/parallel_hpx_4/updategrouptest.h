@@ -397,7 +397,7 @@ public:
 
         rank = hpx::get_locality_id();
         dimensions = Coord<2>(231, 350);
-        weights = genWeights(dimensions.x(), dimensions.y(), hpx::find_all_localities().size());
+        weights = genWeights(dimensions.x(), dimensions.y(), hpx::get_num_localities().get());
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         ghostZoneWidth = 9;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
