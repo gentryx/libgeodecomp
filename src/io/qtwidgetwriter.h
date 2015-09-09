@@ -186,7 +186,7 @@ public:
 
     boost::shared_ptr<QtWidgetWriterHelpers::Widget> widget()
     {
-	return myWidget;
+        return myWidget;
     }
 
 private:

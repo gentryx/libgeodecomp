@@ -76,9 +76,9 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     for (i=0; i<nz; i++)
     {
         int rc = fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
-		if (rc != 3) {
-			throw std::runtime_error("failed to parse input file");
-		}
+        if (rc != 3) {
+            throw std::runtime_error("failed to parse input file");
+        }
         I[i]--;  /* adjust from 1-based to 0-based */
         J[i]--;
     }
@@ -451,16 +451,16 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
 */
 char *mm_strdup(const char *s)
 {
-	int len = strlen(s);
-	char *s2 = (char *) malloc((len+1)*sizeof(char));
-	return strcpy(s2, s);
+    int len = strlen(s);
+    char *s2 = (char *) malloc((len+1)*sizeof(char));
+    return strcpy(s2, s);
 }
 
 char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
     const char *types[4];
-	char *mm_strdup(const char *);
+    char *mm_strdup(const char *);
     int error =0;
 
     /* check for MTX type */

@@ -31,7 +31,7 @@ public:
 
     void testBasic()
     {
-	MPIIO<TestCell<3> > mpiio;
+        MPIIO<TestCell<3> > mpiio;
         TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
         SerialSimulator<TestCell<3> > sim(init);
         MPIIOWriter<TestCell<3> > *writer = new MPIIOWriter<TestCell<3> >(
