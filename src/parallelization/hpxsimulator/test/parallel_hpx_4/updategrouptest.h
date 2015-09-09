@@ -4,13 +4,16 @@
 #include <hpx/include/lcos.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
+#include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/testcell.h>
+#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
-#include <libgeodecomp/config.h>
+#include <libgeodecomp/storage/mockpatchaccepter.h>
 
 namespace LibGeoDecomp {
 
@@ -361,34 +364,92 @@ namespace LibGeoDecomp {
 class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
+
+    typedef RecursiveBisectionPartition<2> PartitionType;
+    typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2> > StepperType;
+    typedef HpxSimulator::UpdateGroup<TestCell<2> > UpdateGroupType;
+    typedef StepperType::GridType GridType;
+
+
     void testBasic()
     {
-        typedef HpxSimulator::UpdateGroup<
-            TestCell<2>,
-            RecursiveBisectionPartition<2>,
-            HiParSimulator::HpxStepper<TestCell<2> > > UpdateGroupType;
-
-        UpdateGroupType updateGroup;
-
         hpx::id_type here = hpx::find_here();
         std::vector<hpx::id_type> localities = hpx::find_all_localities();
 
-        std::cout << "======================================================1\n";
         DummySimulator<int> sim;
-        std::cout << "======================================================2\n";
         sim.step();
         sim.step();
         sim.step();
         sim.step();
         sim.step();
         sim.step();
-        std::cout << "======================================================3\n";
 
         DummySimulatorHelpers::allDone.set_value(true);
         hpx::lcos::broadcast<allDone_action>(
             localities).get();
-        std::cout << "======================================================3\n";
-}
+    }
+
+    void testCreation()
+    {
+        using namespace boost::assign;
+
+        boost::shared_ptr<UpdateGroupType> updateGroup;
+
+        rank = hpx::get_locality_id();
+        dimensions = Coord<2>(231, 350);
+        weights = genWeights(dimensions.x(), dimensions.y(), hpx::find_all_localities().size());
+        partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
+        ghostZoneWidth = 9;
+        init.reset(new TestInitializer<TestCell<2> >(dimensions));
+        updateGroup.reset(
+            new UpdateGroupType(
+                partition,
+                CoordBox<2>(Coord<2>(), dimensions),
+                ghostZoneWidth,
+                init,
+                reinterpret_cast<StepperType*>(0)));
+        expectedNanoSteps.clear();
+        expectedNanoSteps += 5, 7, 8, 33, 55;
+        mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
+        for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
+             i != expectedNanoSteps.end();
+             ++i) {
+            mockPatchAccepter->pushRequest(*i);
+        }
+        // updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
+
+    }
+
+private:
+    std::deque<std::size_t> expectedNanoSteps;
+    int rank;
+    Coord<2> dimensions;
+    std::vector<std::size_t> weights;
+    unsigned ghostZoneWidth;
+    boost::shared_ptr<PartitionType> partition;
+    boost::shared_ptr<Initializer<TestCell<2> > > init;
+    boost::shared_ptr<UpdateGroupType> updateGroup;
+    boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
+
+    std::vector<std::size_t> genWeights(
+        const unsigned& width,
+        const unsigned& height,
+        const unsigned& size)
+    {
+        std::vector<std::size_t> ret(size);
+        unsigned totalSize = width * height;
+        for (std::size_t i = 0; i < ret.size(); ++i) {
+            ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
+        }
+
+        return ret;
+    }
+
+    long pos(const unsigned& i, const unsigned& size, const unsigned& totalSize)
+    {
+        return i * totalSize / size;
+    }
+
 };
 
 }
