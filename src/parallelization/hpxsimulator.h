@@ -157,7 +157,7 @@ public:
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
-    typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
+    typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
 
     static const int DIM = Topology::DIM;
@@ -175,11 +175,11 @@ public:
         ghostZoneWidth(ghostZoneWidth),
         initialized(false)
     {
-        std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor));
-        updateGroupsIds.reserve(updateGroups.size());
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            updateGroupsIds.push_back(ug.gid());
-        }
+        // std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor));
+        // updateGroupsIds.reserve(updateGroups.size());
+        // BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
+        //     updateGroupsIds.push_back(ug.gid());
+        // }
     }
 
     inline HpxSimulator(
@@ -194,11 +194,11 @@ public:
         ghostZoneWidth(ghostZoneWidth),
         initialized(false)
     {
-        std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(numUpdateGroups));
-        updateGroupsIds.reserve(updateGroups.size());
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            updateGroupsIds.push_back(ug.gid());
-        }
+        // std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(numUpdateGroups));
+        // updateGroupsIds.reserve(updateGroups.size());
+        // BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
+        //     updateGroupsIds.push_back(ug.gid());
+        // }
     }
 
     void calculateBoundingBoxes(
@@ -208,85 +208,66 @@ public:
         const CoordBox<DIM>& box,
         const std::vector<std::size_t>& weights)
     {
-        typedef PartitionManager<Topology> PartitionManagerType;
+        // typedef PartitionManager<Topology> PartitionManagerType;
 
-        for(std::size_t rank = rank_start; rank != rank_end; ++rank) {
-            PartitionManagerType partitionManager;
+        // for(std::size_t rank = rank_start; rank != rank_end; ++rank) {
+        //     PartitionManagerType partitionManager;
 
-            boost::shared_ptr<PARTITION> partition(
-                new PARTITION(
-                    box.origin,
-                    box.dimensions,
-                    0,
-                    weights));
+        //     boost::shared_ptr<PARTITION> partition(
+        //         new PARTITION(
+        //             box.origin,
+        //             box.dimensions,
+        //             0,
+        //             weights));
 
-            partitionManager.resetRegions(
-                    box,
-                    partition,
-                    rank,
-                    ghostZoneWidth
-                );
-            boundingBoxes[rank] = boost::move(partitionManager.ownRegion().boundingBox());
-        }
+        //     partitionManager.resetRegions(
+        //             box,
+        //             partition,
+        //             rank,
+        //             ghostZoneWidth
+        //         );
+        //     boundingBoxes[rank] = boost::move(partitionManager.ownRegion().boundingBox());
+        // }
     }
 
     void init()
     {
-        if(initialized) {
-            return;
-        }
-        std::vector<CoordBox<DIM> > boundingBoxes;
-        std::size_t numPartitions = updateGroupsIds.size();
-        boundingBoxes.resize(numPartitions);
+        // if(initialized) {
+        //     return;
+        // }
+        // std::vector<CoordBox<DIM> > boundingBoxes;
+        // std::size_t numPartitions = updateGroupsIds.size();
+        // boundingBoxes.resize(numPartitions);
 
-        CoordBox<DIM> box = initializer->gridBox();
+        // CoordBox<DIM> box = initializer->gridBox();
 
-        std::vector<hpx::future<void> > boundingBoxesFutures;
-        boundingBoxesFutures.reserve(numPartitions);
-        std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
+        // std::vector<hpx::future<void> > boundingBoxesFutures;
+        // boundingBoxesFutures.reserve(numPartitions);
+        // std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
 
-        std::vector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
-        for(std::size_t i = 0; i < numPartitions; i += steps) {
-            boundingBoxesFutures.push_back(
-                hpx::async(
-                    hpx::util::bind(
-                        &HpxSimulator::calculateBoundingBoxes,
-                        this,
-                        boost::ref(boundingBoxes),
-                        i, (std::min)(numPartitions, i + steps), box,
-                        boost::cref(weights)
-                    )
-                )
-            );
-        }
-        hpx::wait_all(boundingBoxesFutures);
-        // typename UpdateGroupType::InitData initData =
-        // {
-        //     //updateGroups,
-        //     loadBalancingPeriod,
-        //     ghostZoneWidth,
-        //     initializer,
-        //     writers,
-        //     steerers,
-        //     boundingBoxes,
-        //     weights
-        // };
-        // hpx::lcos::broadcast_with_index<
-        //     typename UpdateGroupType::ComponentType::InitPartitionsAction
-        // >(
-        //     updateGroupsIds,
-        //     initData
-        // ).wait();
-        // hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
-        //     updateGroupsIds
-        // ).wait();
+        // std::vector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
+        // for(std::size_t i = 0; i < numPartitions; i += steps) {
+        //     boundingBoxesFutures.push_back(
+        //         hpx::async(
+        //             hpx::util::bind(
+        //                 &HpxSimulator::calculateBoundingBoxes,
+        //                 this,
+        //                 boost::ref(boundingBoxes),
+        //                 i, (std::min)(numPartitions, i + steps), box,
+        //                 boost::cref(weights)
+        //             )
+        //         )
+        //     );
+        // }
+        // hpx::wait_all(boundingBoxesFutures);
+
 
         initialized = true;
     }
 
     inline void run()
     {
-        statistics = runTimed();
+        // statistics = runTimed();
     }
 
     void stop()
@@ -298,8 +279,8 @@ public:
 
     inline void step()
     {
-        init();
-        nanoStep(NANO_STEPS);
+        // init();
+        // nanoStep(NANO_STEPS);
     }
 
     virtual unsigned getStep() const
@@ -349,33 +330,11 @@ private:
     std::vector<Chronometer> nanoStep(std::size_t remainingNanoSteps)
     {
         return std::vector<Chronometer>();
-        // return
-        //     hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
-        //         updateGroupsIds,
-        //         remainingNanoSteps
-        //     ).get();
     }
 
     std::vector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
     {
-        // std::vector<double> speeds(
-        //     hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
-        //         updateGroupsIds
-        //     ).get());
-        // double s = sum(speeds);
         std::vector<std::size_t> ret(size);
-
-        // std::size_t lastPos = 0;
-        // double partialSum = 0.0;
-        // if(size > 1) {
-        //     for (std::size_t i = 0; i < size -1; ++i) {
-        //         partialSum += speeds[i];
-        //         std::size_t nextPos = items * (partialSum / s);
-        //         ret[i] = nextPos - lastPos;
-        //         lastPos = nextPos;
-        //     }
-        // }
-        // ret[size-1] = items - lastPos;
 
         return ret;
     }
