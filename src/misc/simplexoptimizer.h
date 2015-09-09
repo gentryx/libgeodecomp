@@ -72,7 +72,7 @@ private:
     int comperator(double fitness);
     std::string simplexToString() const;
     double epsilon;
-    double stepMultiplicator;       // stepMultiplicator = c in Algo 
+    double stepMultiplicator;       // stepMultiplicator = c in Algo
     std::vector<double> stepsizes;  // stepsizes = s_i in Algo
     SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };
