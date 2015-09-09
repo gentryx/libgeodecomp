@@ -88,7 +88,7 @@ public:
             const std::size_t source,
             const std::size_t target) :
             Link(region, Link::genLinkName(basename, source, target)),
-            receiverID(HPXReceiver<BufferType>::find(linkName).get())
+            receiverID(hpx::invalid_id)
         {}
 
         virtual void charge(std::size_t next, std::size_t last, std::size_t newStride)
@@ -107,6 +107,9 @@ public:
             }
 
             GridVecConv::gridToVector(grid, &buffer, region);
+            if (receiverID == hpx::invalid_id) {
+                receiverID = HPXReceiver<BufferType>::find(linkName).get();
+            }
             hpx::apply(typename HPXReceiver<BufferType>::receiveAction(), receiverID,  nanoStep, buffer);
 
             std::size_t nextNanoStep = (min)(requestedNanoSteps) + stride;
