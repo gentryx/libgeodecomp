@@ -1,7 +1,9 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
+#include <hpx/lcos/broadcast.hpp>
 #include <hpx/runtime/components/component_factory.hpp>
 #include <hpx/runtime/serialization/serialize_buffer.hpp>
+#include <hpx/util/unwrapped.hpp>
 #include <libgeodecomp/communication/hpxreceiver.h>
 #include <libgeodecomp/misc/stringops.h>
 
@@ -105,6 +107,21 @@ public:
         TS_ASSERT_EQUALS(10.123 + rightNeighbor, fromRight);
 
         hpx::unregister_with_basename(name, 0);
+    }
+
+    void testMultipleReceivers()
+    {
+        std::string name = "testMultipleReceivers";
+        boost::shared_ptr<ReceiverType3> receiver = ReceiverType3::make(name, rank).get();
+        std::vector<hpx::future<hpx::id_type> > futures = ReceiverType3::find_all(name, size);
+        std::vector<hpx::id_type> ids = hpx::util::unwrapped(futures);
+
+        hpx::lcos::broadcast_apply<ReceiverType3::receiveAction>(ids, rank, rank + 0.456);
+
+        for (std::size_t i = 0; i < size; ++i) {
+            double expected = i + 0.456;
+            TS_ASSERT_EQUALS(expected, receiver->get(i).get());
+        }
     }
 
 private:

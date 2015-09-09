@@ -9,6 +9,7 @@
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>
 #include <libgeodecomp/communication/hpxcomponentregsitrationhelper.h>
+#include <libgeodecomp/misc/stringops.h>
 
 namespace LibGeoDecomp {
 
@@ -19,12 +20,12 @@ public:
     typedef CARGO Cargo;
     typedef BUFFER Buffer;
 
-    static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name)
+    static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name, std::size_t rank = 0)
     {
         HPXComponentRegistrator<HPXReceiver> thisEnsuresHPXRegistrationCodeIsRunPriorToComponentCreation;
 
         hpx::id_type id = hpx::new_<HPXReceiver>(hpx::find_here()).get();
-        hpx::register_with_basename(name, id, 0).get();
+        hpx::register_with_basename(name, id, rank).get();
         return hpx::get_ptr<HPXReceiver>(id);
     }
 
@@ -32,10 +33,21 @@ public:
     {
         std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_from_basename(name, 1);
         if (ids.size() != 1) {
-            throw std::logic_error("Unexpected amount of PatchProviders found in AGAS, expected exactly 1");
+            throw std::logic_error("Unexpected amount of HPXReceivers found in AGAS, expected exactly 1");
         }
 
         return std::move(ids[0]);
+    }
+
+    static std::vector<hpx::future<hpx::id_type> > find_all(const std::string& name, std::size_t num)
+    {
+        std::vector<hpx::future<hpx::id_type> > ids = hpx::find_all_from_basename(name, num);
+        if (ids.size() != num) {
+            throw std::logic_error("Unexpected amount of HPXReceivers found in AGAS, exected exactly " +
+                                   StringOps::itoa(num));
+        }
+
+        return std::move(ids);
     }
 
     virtual ~HPXReceiver()
