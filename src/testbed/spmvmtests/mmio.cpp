@@ -65,6 +65,10 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     J = (int *) malloc(nz * sizeof(int));
     val = (double *) malloc(nz * sizeof(double));
 
+    if (!I || !J || !val) {
+        throw std::runtime_error("malloc() failed");
+    }
+
     *val_ = val;
     *I_ = I;
     *J_ = J;
@@ -361,9 +365,16 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
     *J = (int *)  malloc(*nz * sizeof(int));
     *val = NULL;
 
+    if (*I == NULL || *J == NULL) {
+        throw std::runtime_error("malloc() failed");
+    }
+
     if (mm_is_complex(*matcode))
     {
         *val = (double *) malloc(*nz * 2 * sizeof(double));
+        if (*val == NULL) {
+            throw std::runtime_error("malloc() failed");
+        }
         ret_code = mm_read_mtx_crd_data(f, *M, *N, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
@@ -371,6 +382,9 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
     else if (mm_is_real(*matcode))
     {
         *val = (double *) malloc(*nz * sizeof(double));
+        if (*val == NULL) {
+            throw std::runtime_error("malloc() failed");
+        }
         ret_code = mm_read_mtx_crd_data(f, *M, *N, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
@@ -453,6 +467,9 @@ char *mm_strdup(const char *s)
 {
     int len = strlen(s);
     char *s2 = (char *) malloc((len+1)*sizeof(char));
+    if (!s2) {
+        throw std::runtime_error("malloc() failed");
+    }
     return strcpy(s2, s);
 }
 
