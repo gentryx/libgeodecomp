@@ -35,6 +35,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
@@ -303,6 +304,18 @@ public:
         archive & object.origin;
     }
 
+    template<typename ARCHIVE, int DIM, typename STENCIL, typename TOPOLOGY, typename ADDITIONAL_API, typename OUTPUT>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::TestCell<DIM, STENCIL, TOPOLOGY, ADDITIONAL_API, OUTPUT>& object, const unsigned /*version*/)
+    {
+        archive & object.cycleCounter;
+        archive & object.dimensions;
+        archive & object.isEdgeCell;
+        archive & object.isValid;
+        archive & object.pos;
+        archive & object.testValue;
+    }
+
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned /*version*/)
@@ -542,6 +555,12 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned version)
+{
+    HPXSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, int DIM, typename STENCIL, typename TOPOLOGY, typename ADDITIONAL_API, typename OUTPUT>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TestCell<DIM, STENCIL, TOPOLOGY, ADDITIONAL_API, OUTPUT>& object, const unsigned version)
 {
     HPXSerialization::serialize(archive, object, version);
 }
