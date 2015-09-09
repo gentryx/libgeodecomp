@@ -63,10 +63,12 @@ public:
             partition,
             rank,
             ghostZoneWidth);
-        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
+
+        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
+
         long firstSyncPoint =
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
             ghostZoneWidth;

@@ -13,6 +13,7 @@
 #include <libgeodecomp/storage/patchprovider.h>
 
 namespace LibGeoDecomp {
+// fixme: move to LibGeoDecomp namespace
 namespace HiParSimulator {
 
 /**
