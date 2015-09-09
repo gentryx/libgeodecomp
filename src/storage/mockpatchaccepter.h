@@ -5,12 +5,10 @@
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {
-namespace HiParSimulator {
 
 template<class GRID_TYPE>
 class MockPatchAccepter : public PatchAccepter<GRID_TYPE>
 {
-    friend class VanillaStepperBasicTest;
 public:
     const static int DIM = GRID_TYPE::DIM;
 
@@ -51,7 +49,6 @@ private:
     std::deque<std::size_t> offeredNanoSteps;
 };
 
-}
 }
 
 #endif
