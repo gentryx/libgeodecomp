@@ -146,20 +146,11 @@ private:
     PartitionManager<Topology> partitionManager;
     MPILayer mpiLayer;
     boost::shared_ptr<UpdateGroupType> updateGroup;
+
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
-
-    double getCellSpeed(APITraits::FalseType) const
-    {
-        return 1.0;
-    }
-
-    double getCellSpeed(APITraits::TrueType) const
-    {
-        return CELL_TYPE::speed();
-    }
 
     /**
      * computes an initial weight distribution of the work items (i.e.
@@ -217,7 +208,7 @@ private:
 
         CoordBox<DIM> box = initializer->gridBox();
 
-        double mySpeed = getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
+        double mySpeed = APITraits::SelectSpeedGuide<CELL_TYPE>::value();
         std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
         std::vector<std::size_t> weights = initialWeights(
             box.dimensions.prod(),
