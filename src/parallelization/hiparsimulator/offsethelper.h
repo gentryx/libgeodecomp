@@ -63,6 +63,22 @@ public:
     {}
 };
 
+template<int INDEX, int DIM>
+class OffsetHelper<INDEX, DIM, Topologies::Unstructured::Topology>
+{
+public:
+    void operator()(
+        Coord<DIM> *offset,
+        Coord<DIM> *dimensions,
+        const CoordBox<DIM>& ownBoundingBox,
+        const CoordBox<DIM>& simulationArea,
+        const int& ghostZoneWidth)
+    {
+        *offset = ownBoundingBox.origin;
+        *dimensions = simulationArea.dimensions;
+    }
+};
+
 }
 }
 
