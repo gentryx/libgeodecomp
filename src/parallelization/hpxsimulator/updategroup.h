@@ -4,15 +4,16 @@
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
 
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/communication/hpxpatchlink.h>
 #include <libgeodecomp/geometry/partitionmanager.h>
 #include <libgeodecomp/parallelization/hiparsimulator/stepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroupserver.h>
 #include <libgeodecomp/storage/displacedgrid.h>
 
-#include <hpx/apply.hpp>
-
 namespace LibGeoDecomp {
+
+
 // fixme: move to LibGeoDecomp namespace
 namespace HpxSimulator {
 
@@ -69,10 +70,13 @@ public:
         PatchAccepterVec patchAcceptersGhost = PatchAccepterVec(),
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost = PatchProviderVec(),
-        PatchProviderVec patchProvidersInner = PatchProviderVec()) :
+        PatchProviderVec patchProvidersInner = PatchProviderVec(),
+        std::string basename = "HPXSimulator::UpdateGroup",
+        int rank = hpx::get_locality_id()) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
-        rank(hpx::get_locality_id())
+        basename(basename),
+        rank(rank)
     {
         partitionManager.reset(new PartitionManagerType());
         partitionManager->resetRegions(
@@ -83,38 +87,104 @@ public:
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
 
         // fixme
-        std::vector<CoordBox<DIM> > boundingBoxes(hpx::get_num_localities().get());
-        // mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
+        std::size_t size = partition->getWeights().size();
+        std::string broadcastName = basename + "/boundingBoxes";
+        std::vector<CoordBox<DIM> > boundingBoxes;
+
+        boundingBoxes = HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
         partitionManager->resetGhostZones(boundingBoxes);
 
         long firstSyncPoint =
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
             ghostZoneWidth;
 
+        // fixme
+        // We need to create the patch providers first, as the patch
+        // accepters will look up their IDs upon creation:
+        PatchProviderVec patchLinkProviders;
+        const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
+            if (!i->second.back().empty()) {
+                boost::shared_ptr<typename HPXPatchLink<GridType>::Provider> link(
+                    new typename HPXPatchLink<GridType>::Provider(
+                        i->second.back(),
+                        basename,
+                        // fixme?
+                        rank,
+                        i->first));
+                patchLinkProviders << link;
+                patchLinks << link;
+
+                link->charge(
+                    firstSyncPoint,
+                    PatchProvider<GridType>::infinity(),
+                    ghostZoneWidth);
+
+                link->setRegion(partitionManager->ownRegion());
+            }
+        }
+
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
         // upon creation and we have to send those over to our neighbors.
         PatchAccepterVec ghostZoneAccepterLinks;
-        // RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
-        // for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-        //     if (!i->second.back().empty()) {
-        //         boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
-        //             new typename PatchLink<GridType>::Accepter(
-        //                 i->second.back(),
-        //                 i->first,
-        //                 MPILayer::PATCH_LINK,
-        //                 SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
-        //                 mpiLayer.communicator()));
-        //         ghostZoneAccepterLinks << link;
-        //         patchLinks << link;
+        const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
+            if (!i->second.back().empty()) {
+                // fixme
+                boost::shared_ptr<typename HPXPatchLink<GridType>::Accepter> link(
+                    new typename HPXPatchLink<GridType>::Accepter(
+                        i->second.back(),
+                        basename,
+                        rank,
+                        i->first));
+                ghostZoneAccepterLinks << link;
+                patchLinks << link;
 
-        //         link->charge(
-        //             firstSyncPoint,
-        //             PatchAccepter<GridType>::infinity(),
-        //             ghostZoneWidth);
+                link->charge(
+                    firstSyncPoint,
+                    PatchAccepter<GridType>::infinity(),
+                    ghostZoneWidth);
 
-        //         link->setRegion(partitionManager->ownRegion());
-        //     }
+                link->setRegion(partitionManager->ownRegion());
+            }
+        }
+
+        // notify all PatchAccepters of the process' region:
+        for (std::size_t i = 0; i < patchAcceptersGhost.size(); ++i) {
+            patchAcceptersGhost[i]->setRegion(partitionManager->ownRegion());
+        }
+        for (std::size_t i = 0; i < patchAcceptersInner.size(); ++i) {
+            patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
+        }
+
+        stepper.reset(new STEPPER(
+                          partitionManager,
+                          this->initializer,
+                          patchAcceptersGhost + ghostZoneAccepterLinks,
+                          patchAcceptersInner));
+
+        // the ghostzone receivers may be safely added after
+        // initialization as they're only really needed when the next
+        // ghostzone generation is being received.
+        for (typename PatchProviderVec::iterator i = patchLinkProviders.begin(); i != patchLinkProviders.end(); ++i) {
+            addPatchProvider(*i, StepperType::GHOST);
+        }
+
+        // // add external PatchProviders last to allow them to override
+        // // the local ghost zone providers (a.k.a. PatchLink::Source).
+        // for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
+        //      i != patchProvidersGhost.end();
+        //      ++i) {
+        //     (*i)->setRegion(partitionManager->ownRegion());
+        //     addPatchProvider(*i, StepperType::GHOST);
+        // }
+
+        // for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
+        //      i != patchProvidersInner.end();
+        //      ++i) {
+        //     (*i)->setRegion(partitionManager->ownRegion());
+        //     addPatchProvider(*i, StepperType::INNER_SET);
         // }
     }
 
@@ -239,6 +309,7 @@ private:
     std::vector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;
     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
+    std::string basename;
     unsigned rank;
 };
 
