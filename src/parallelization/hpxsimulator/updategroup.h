@@ -17,7 +17,7 @@ namespace LibGeoDecomp {
 // fixme: move to LibGeoDecomp namespace
 namespace HpxSimulator {
 
-// fixme: can't we reuse the MPI UpdateGroup here? 
+// fixme: can't we reuse the MPI UpdateGroup here?
 template <class CELL_TYPE>
 class UpdateGroup
 {
@@ -36,29 +36,6 @@ public:
     typedef typename StepperType::PatchProviderVec PatchProviderVec;
 
     const static int DIM = Topology::DIM;
-
-    // friend class hpx::serialization::access;
-    // friend class UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER>;
-
-    // typedef typename STEPPER::Topology Topology;
-    // typedef DisplacedGrid<CELL_TYPE, Topology, true> GridType;
-    // typedef typename STEPPER::PatchType PatchType;
-    // typedef typename STEPPER::PatchProviderPtr PatchProviderPtr;
-    // typedef typename STEPPER::PatchAccepterPtr PatchAccepterPtr;
-    // typedef typename STEPPER::PatchAccepterVec PatchAccepterVec;
-    // typedef typename STEPPER::PatchProviderVec PatchProviderVec;
-    // const static int DIM = Topology::DIM;
-
-    // typedef
-    //     typename DistributedSimulator<CELL_TYPE>::WriterVector
-    //     WriterVector;
-    // typedef
-    //     typename DistributedSimulator<CELL_TYPE>::SteererVector
-    //     SteererVector;
-
-    // typedef UpdateGroupServer<CELL_TYPE, PARTITION, STEPPER> ComponentType;
-
-    // typedef std::pair<std::size_t, std::size_t> StepPairType;
 
     template<typename STEPPER>
     UpdateGroup(

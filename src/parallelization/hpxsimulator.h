@@ -15,7 +15,6 @@
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
-#include <libgeodecomp/parallelization/hpxsimulator/createupdategroups.h>
 
 #define LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)        \
     typedef                                                                     \
@@ -350,30 +349,30 @@ private:
 }
 }
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::HpxSimulator::StepPairType,
-    LibGeoDecomp_BaseLcoStepPair
-)
+// HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
+//     LibGeoDecomp::HpxSimulator::StepPairType,
+//     LibGeoDecomp_BaseLcoStepPair
+// )
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::CoordBox<2>,
-    LibGeoDecomp_BaseLcoCoordBox2
-)
+// HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
+//     LibGeoDecomp::CoordBox<2>,
+//     LibGeoDecomp_BaseLcoCoordBox2
+// )
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    std::vector<double>,
-    LibGeoDecomp_BaseLcovector_double
-)
+// HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
+//     std::vector<double>,
+//     LibGeoDecomp_BaseLcovector_double
+// )
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::Chronometer,
-    LibGeoDecomp_BaseLcovector_Statistics
-)
+// HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
+//     LibGeoDecomp::Chronometer,
+//     LibGeoDecomp_BaseLcovector_Statistics
+// )
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    std::vector<LibGeoDecomp::Chronometer>,
-    LibGeoDecomp_BaseLcovector_StatisticsVector
-)
+// HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
+//     std::vector<LibGeoDecomp::Chronometer>,
+//     LibGeoDecomp_BaseLcovector_StatisticsVector
+// )
 
 #endif
 #endif
