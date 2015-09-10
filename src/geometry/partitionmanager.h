@@ -207,6 +207,17 @@ public:
         return partition->getWeights();
     }
 
+    inline void setAdjacency(const Adjacency &in)
+    {
+        adjacency = in;
+    }
+
+    inline const Adjacency &getAdjacency() const
+    {
+        return adjacency;
+    }
+
+
 private:
     boost::shared_ptr<Partition<DIM> > partition;
     CoordBox<DIM> simulationArea;
