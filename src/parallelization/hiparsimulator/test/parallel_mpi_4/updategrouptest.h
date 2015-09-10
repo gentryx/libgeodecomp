@@ -57,7 +57,7 @@ public:
         updateGroup.reset();
     }
 
-    void testBench()
+    void testUpdate()
     {
         updateGroup->update(100);
         std::deque<std::size_t> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();

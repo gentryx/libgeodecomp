@@ -416,8 +416,15 @@ public:
              ++i) {
             mockPatchAccepter->pushRequest(*i);
         }
-        // updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
+        updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
 
+        updateGroup->update(100);
+
+        std::deque<std::size_t> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();
+        std::deque<std::size_t> expectedNanoSteps;
+        expectedNanoSteps += 5, 7, 8, 33, 55;
+
+        TS_ASSERT_EQUALS(actualNanoSteps, expectedNanoSteps);
     }
 
 private:

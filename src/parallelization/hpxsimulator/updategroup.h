@@ -109,9 +109,8 @@ public:
                     new typename HPXPatchLink<GridType>::Provider(
                         i->second.back(),
                         basename,
-                        // fixme?
-                        rank,
-                        i->first));
+                        i->first,
+                        rank));
                 patchLinkProviders << link;
                 patchLinks << link;
 
