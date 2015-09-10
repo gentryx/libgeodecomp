@@ -171,21 +171,21 @@ public:
             addPatchProvider(*i, StepperType::GHOST);
         }
 
-        // // add external PatchProviders last to allow them to override
-        // // the local ghost zone providers (a.k.a. PatchLink::Source).
-        // for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
-        //      i != patchProvidersGhost.end();
-        //      ++i) {
-        //     (*i)->setRegion(partitionManager->ownRegion());
-        //     addPatchProvider(*i, StepperType::GHOST);
-        // }
+        // add external PatchProviders last to allow them to override
+        // the local ghost zone providers (a.k.a. PatchLink::Source).
+        for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
+             i != patchProvidersGhost.end();
+             ++i) {
+            (*i)->setRegion(partitionManager->ownRegion());
+            addPatchProvider(*i, StepperType::GHOST);
+        }
 
-        // for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
-        //      i != patchProvidersInner.end();
-        //      ++i) {
-        //     (*i)->setRegion(partitionManager->ownRegion());
-        //     addPatchProvider(*i, StepperType::INNER_SET);
-        // }
+        for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
+             i != patchProvidersInner.end();
+             ++i) {
+            (*i)->setRegion(partitionManager->ownRegion());
+            addPatchProvider(*i, StepperType::INNER_SET);
+        }
     }
 
     virtual ~UpdateGroup()
@@ -255,53 +255,6 @@ public:
     {
         return stepper->patchAcceptersTime;
     }
-
-        // UpdateGroup(hpx::id_type thisId = hpx::id_type()) :
-    //     thisId(thisId)
-    // {}
-
-    // struct InitData
-    // {
-    //     unsigned loadBalancingPeriod;
-    //     unsigned ghostZoneWidth;
-    //     boost::shared_ptr<Initializer<CELL_TYPE> > initializer;
-    //     WriterVector writers;
-    //     SteererVector steerers;
-    //     std::vector<CoordBox<DIM> > boundingBoxes;
-    //     std::vector<std::size_t> initialWeights;
-
-    //     template <typename ARCHIVE>
-    //     void serialize(ARCHIVE& ar, unsigned)
-    //     {
-    //         ar & loadBalancingPeriod;
-    //         ar & ghostZoneWidth;
-    //         ar & initializer;
-    //         ar & writers;
-    //         ar & steerers;
-    //         ar & boundingBoxes;
-    //         ar & initialWeights;
-    //     }
-    // };
-
-    // hpx::naming::id_type gid() const
-    // {
-    //     return thisId;
-    // }
-
-    // hpx::future<void> setOuterGhostZone(
-    //     std::size_t srcRank,
-    //     boost::shared_ptr<std::vector<CELL_TYPE> > buffer,
-    //     long nanoStep)
-    // {
-    //     return
-    //         hpx::async<typename ComponentType::SetOuterGhostZoneAction>(
-    //             thisId,
-    //             srcRank,
-    //             buffer,
-    //             nanoStep
-    //         );
-    // }
-
 
 private:
     boost::shared_ptr<StepperType> stepper;
