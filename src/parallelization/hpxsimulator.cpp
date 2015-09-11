@@ -7,21 +7,21 @@ namespace LibGeoDecomp {
 namespace HpxSimulator {
 namespace HpxSimulatorHelpers {
 
-std::map<std::string, hpx::lcos::local::promise<std::size_t> > localUpdateGroups;
-std::map<std::string, hpx::lcos::local::promise<std::size_t> > globalUpdateGroups;
+std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > localUpdateGroupWeights;
+std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > globalUpdateGroupWeights;
 std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > localityIndices;
 
-std::size_t getNumberOfUpdateGroups(const std::string& basename)
+std::vector<double> getUpdateGroupWeights(const std::string& basename)
 {
-    return localUpdateGroups[basename].get_future().get();
+    return localUpdateGroupWeights[basename].get_future().get();
 }
 
 void setNumberOfUpdateGroups(
     const std::string& basename,
-    const std::size_t totalUpdateGroups,
+    const std::vector<double>& updateGroupWeights,
     const std::vector<std::size_t>& indices)
 {
-    globalUpdateGroups[basename].set_value(totalUpdateGroups);
+    globalUpdateGroupWeights[basename].set_value(updateGroupWeights);
     localityIndices[basename].set_value(indices);
 }
 
@@ -29,13 +29,13 @@ void setNumberOfUpdateGroups(
 }
 }
 
-HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulator::HpxSimulatorHelpers::getNumberOfUpdateGroups, getNumberOfUpdateGroups_action);
+HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulator::HpxSimulatorHelpers::getUpdateGroupWeights, getUpdateGroupWeights_action);
 HPX_PLAIN_ACTION(LibGeoDecomp::HpxSimulator::HpxSimulatorHelpers::setNumberOfUpdateGroups, setNumberOfUpdateGroups_action);
 
-HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getNumberOfUpdateGroups_action)
+HPX_REGISTER_BROADCAST_ACTION_DECLARATION(getUpdateGroupWeights_action)
 HPX_REGISTER_BROADCAST_ACTION_DECLARATION(setNumberOfUpdateGroups_action)
 
-HPX_REGISTER_BROADCAST_ACTION(getNumberOfUpdateGroups_action)
+HPX_REGISTER_BROADCAST_ACTION(getUpdateGroupWeights_action)
 HPX_REGISTER_BROADCAST_ACTION(setNumberOfUpdateGroups_action)
 
 namespace LibGeoDecomp {
@@ -55,30 +55,32 @@ void gatherAndBroadcastLocalityIndices(
 {
     std::vector<hpx::id_type> localities = hpx::find_all_localities();
 
-    localUpdateGroups[basename].set_value(updateGroupWeights.size());
+    localUpdateGroupWeights[basename].set_value(updateGroupWeights);
 
     if (hpx::get_locality_id() != 0) {
         return;
     }
 
-    std::vector<std::size_t> globalUpdateGroupNumbers =
-        hpx::lcos::broadcast<getNumberOfUpdateGroups_action>(
-            localities,
-            basename).get();
+    std::vector<std::vector<double> > globalUpdateGroupWeights =
+        hpx::lcos::broadcast<getUpdateGroupWeights_action>(localities, basename).get();
 
     std::vector<std::size_t> indices;
-    indices.reserve(globalUpdateGroupNumbers.size());
+    std::vector<double> flattenedUpdateGroupWeights;
+    std::size_t indexSum = 0;
 
-    std::size_t sum = 0;
-    for (auto&& i: globalUpdateGroupNumbers) {
-        indices << sum;
-        sum += i;
+    for (auto&& vec: globalUpdateGroupWeights) {
+        for (auto&& weight: vec) {
+            flattenedUpdateGroupWeights << weight;
+        }
+
+        indices << indexSum;
+        indexSum += vec.size();
     }
 
     hpx::lcos::broadcast<setNumberOfUpdateGroups_action>(
         localities,
         basename,
-        sum,
+        flattenedUpdateGroupWeights,
         indices).get();
 }
 

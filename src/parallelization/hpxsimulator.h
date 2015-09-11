@@ -21,16 +21,10 @@ namespace HpxSimulator {
 
 namespace HpxSimulatorHelpers {
 
-extern std::map<std::string, hpx::lcos::local::promise<std::size_t> > localUpdateGroups;
-extern std::map<std::string, hpx::lcos::local::promise<std::size_t> > globalUpdateGroups;
+// fixme: return these from gatherAndBroadcastLocalityIndices
+extern std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > globalUpdateGroupWeights;
 extern std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > localityIndices;
 
-std::size_t getNumberOfUpdateGroups(const std::string& basename);
-
-void setNumberOfUpdateGroups(
-    const std::string& basename,
-    const std::size_t totalUpdateGroups,
-    const std::vector<std::size_t>& indices);
 
 void gatherAndBroadcastLocalityIndices(
     const std::string& basename,
@@ -88,6 +82,7 @@ public:
         std::string basename = "fixme";
         HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(basename, updateGroupWeights);
         std::cout << "indices: " << HpxSimulatorHelpers::localityIndices[basename].get_future().get() << "\n";
+        std::cout << "weights: " << HpxSimulatorHelpers::globalUpdateGroupWeights[basename].get_future().get() << "\n";
     }
 
     inline void run()
