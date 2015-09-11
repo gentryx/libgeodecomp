@@ -160,7 +160,7 @@ public:
 
         // sim.addWriter(new HpxWriterCollectorType(sink));
 
-        // sim.run();
+        sim.run();
     }
 
     void removeFile(std::string name)

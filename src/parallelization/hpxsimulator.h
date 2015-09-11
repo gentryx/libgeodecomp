@@ -21,17 +21,14 @@ namespace HpxSimulator {
 
 namespace HpxSimulatorHelpers {
 
-// fixme: return these from gatherAndBroadcastLocalityIndices
-extern std::map<std::string, hpx::lcos::local::promise<std::vector<double> > > globalUpdateGroupWeights;
-extern std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > localityIndices;
-
-
 void gatherAndBroadcastLocalityIndices(
+    double speedGuide,
+    std::vector<double> *globalUpdateGroupSpeeds,
+    std::vector<std::size_t> *localityIndices,
     const std::string& basename,
-    const std::vector<double> updateGroupWeights);
+    const std::vector<double> updateGroupSpeeds);
 
 }
-
 }
 }
 
@@ -63,33 +60,40 @@ public:
 public:
     /**
      * Creates an HpxSimulator. Parameters are essentially the same as
-     * for the HiParSimulator. The vector updateGroupWeights controls
+     * for the HiParSimulator. The vector updateGroupSpeeds controls
      * how many UpdateGroups will be created and how large their
      * individual domain should be.
      */
     inline HpxSimulator(
         Initializer<CELL_TYPE> *initializer,
-        const std::vector<double> updateGroupWeights = std::vector<double>(1, 1.0),
+        const std::vector<double> updateGroupSpeeds = std::vector<double>(1, 1.0),
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1) :
         ParentType(initializer),
-        updateGroupWeights(updateGroupWeights),
+        updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth)
     {
         std::string basename = "fixme";
-        HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(basename, updateGroupWeights);
-        std::cout << "indices: " << HpxSimulatorHelpers::localityIndices[basename].get_future().get() << "\n";
-        std::cout << "weights: " << HpxSimulatorHelpers::globalUpdateGroupWeights[basename].get_future().get() << "\n";
+
+        HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(
+            APITraits::SelectSpeedGuide<CELL_TYPE>::value(),
+            &globalUpdateGroupSpeeds,
+            &localityIndices,
+            basename,
+            updateGroupSpeeds);
+
+        std::cout << "speeds: " << globalUpdateGroupSpeeds << "\n";
+        std::cout << "indices: " << localityIndices << "\n";
     }
 
     inline void run()
     {
         initSimulation();
 
-        statistics = nanoStep(timeToLastEvent());
+        // statistics = nanoStep(timeToLastEvent());
     }
 
     void stop()
@@ -141,7 +145,7 @@ private:
     using DistributedSimulator<CELL_TYPE>::steerers;
     using DistributedSimulator<CELL_TYPE>::writers;
 
-    std::vector<double> updateGroupWeights;
+    std::vector<double> updateGroupSpeeds;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
@@ -149,6 +153,8 @@ private:
     PartitionManager<Topology> partitionManager;
     std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
 
+    std::vector<double> globalUpdateGroupSpeeds;
+    std::vector<std::size_t> localityIndices;
 
     boost::atomic<bool> initialized;
     std::vector<Chronometer> statistics;
@@ -161,17 +167,11 @@ private:
 
         CoordBox<DIM> box = initializer->gridBox();
 
-        double myBaseSpeed = APITraits::SelectSpeedGuide<CELL_TYPE>::value();
-        std::vector<double> mySpeeds;
-        for (double weight: updateGroupWeights) {
-            mySpeeds << myBaseSpeed * weight;
-        }
-        // fixme: allgather myspeeds here!
+        std::vector<std::size_t> weights = initialWeights(
+            box.dimensions.prod(),
+            globalUpdateGroupSpeeds);
 
-        // std::vector<std::size_t> weights = initialWeights(
-        //     box.dimensions.prod(),
-        //     rankSpeeds);
-
+        std::cout << "weights: " << weights << "\n";
         // boost::shared_ptr<PARTITION> partition(
         //     new PARTITION(
         //         box.origin,
@@ -266,12 +266,34 @@ private:
         return std::vector<Chronometer>();
     }
 
-    std::vector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
+    /**
+     * computes an initial weight distribution of the work items (i.e.
+     * number of cells in the simulation space). rankSpeeds gives an
+     * estimate of the relative performance of the different ranks
+     * (good when running on heterogeneous systems, e.g. clusters
+     * comprised of multiple genrations of nodes or x86 clusters with
+     * additional Xeon Phi accelerators).
+     */
+    // fixme: stolen from HiParSimulator
+    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds) const
     {
+        std::size_t size = rankSpeeds.size();
+        double totalSum = sum(rankSpeeds);
         std::vector<std::size_t> ret(size);
+
+        std::size_t lastPos = 0;
+        double partialSum = 0.0;
+        for (std::size_t i = 0; i < size - 1; ++i) {
+            partialSum += rankSpeeds[i];
+            std::size_t nextPos = items * partialSum / totalSum;
+            ret[i] = nextPos - lastPos;
+            lastPos = nextPos;
+        }
+        ret[size - 1] = items - lastPos;
 
         return ret;
     }
+
 };
 
 }
