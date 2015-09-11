@@ -143,15 +143,42 @@ public:
         std::cout << "boomer\n";
         CellInitializer *init = new CellInitializer(maxTimeSteps);
 
-        std::vector<double> overcommitFactor(1, 1.0);
+        std::vector<double> updateGroupSpeeds(1, 1.0);
         int loadBalancingPeriod = 10;
         int ghostZoneWidth = 1;
         SimulatorType sim(
             init,
-            overcommitFactor,
+            updateGroupSpeeds,
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
-            ghostZoneWidth);
+            ghostZoneWidth,
+            "HpxSimulatorTest::testBasic");
+
+        // fixme: add writer!
+        // HpxWriterCollectorType::SinkType sink(
+        //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
+        //     sim.numUpdateGroups());
+
+        // sim.addWriter(new HpxWriterCollectorType(sink));
+
+        sim.run();
+    }
+
+    void testHeterogeneous()
+    {
+        std::size_t rank = hpx::get_locality_id();
+        CellInitializer *init = new CellInitializer(maxTimeSteps);
+
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "HpxSimulatorTest::testHeterogeneous");
 
         // fixme: add writer!
         // HpxWriterCollectorType::SinkType sink(

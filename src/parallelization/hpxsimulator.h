@@ -69,15 +69,15 @@ public:
         const std::vector<double> updateGroupSpeeds = std::vector<double>(1, 1.0),
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
-        const unsigned ghostZoneWidth = 1) :
+        const unsigned ghostZoneWidth = 1,
+        std::string basename = "HPXSimulator") :
         ParentType(initializer),
         updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
-        ghostZoneWidth(ghostZoneWidth)
+        ghostZoneWidth(ghostZoneWidth),
+        basename(basename)
     {
-        std::string basename = "fixme";
-
         HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(
             APITraits::SelectSpeedGuide<CELL_TYPE>::value(),
             &globalUpdateGroupSpeeds,
@@ -92,7 +92,6 @@ public:
     inline void run()
     {
         initSimulation();
-
         // statistics = nanoStep(timeToLastEvent());
     }
 
@@ -111,11 +110,11 @@ public:
 
     virtual unsigned getStep() const
     {
-        if (initialized) {
+        // if (initialized) {
             // return typename UpdateGroupType::ComponentType::CurrentStepAction()(updateGroupsIds[0]).first;
-        } else {
-            return initializer->startStep();
-        }
+        // } else {
+        //     return initializer->startStep();
+        // }
 
         return 0;
     }
@@ -149,14 +148,14 @@ private:
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
+    std::string basename;
     EventMap events;
     PartitionManager<Topology> partitionManager;
-    std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
 
+    std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
     std::vector<double> globalUpdateGroupSpeeds;
     std::vector<std::size_t> localityIndices;
 
-    boost::atomic<bool> initialized;
     std::vector<Chronometer> statistics;
 
     inline void initSimulation()
