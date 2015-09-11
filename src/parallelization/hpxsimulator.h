@@ -19,6 +19,32 @@
 namespace LibGeoDecomp {
 namespace HpxSimulator {
 
+namespace HpxSimulatorHelpers {
+
+extern std::map<std::string, hpx::lcos::local::promise<std::size_t> > localUpdateGroups;
+extern std::map<std::string, hpx::lcos::local::promise<std::size_t> > globalUpdateGroups;
+extern std::map<std::string, hpx::lcos::local::promise<std::vector<std::size_t> > > localityIndices;
+
+std::size_t getNumberOfUpdateGroups(const std::string& basename);
+
+void setNumberOfUpdateGroups(
+    const std::string& basename,
+    const std::size_t totalUpdateGroups,
+    const std::vector<std::size_t>& indices);
+
+void gatherAndBroadcastLocalityIndices(
+    const std::string& basename,
+    const std::vector<double> updateGroupWeights);
+
+}
+
+}
+}
+
+namespace LibGeoDecomp {
+namespace HpxSimulator {
+
+
 enum EventPoint {LOAD_BALANCING, END};
 typedef std::set<EventPoint> EventSet;
 typedef std::map<long, EventSet> EventMap;
@@ -58,7 +84,11 @@ public:
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth)
-    {}
+    {
+        std::string basename = "fixme";
+        HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(basename, updateGroupWeights);
+        std::cout << "indices: " << HpxSimulatorHelpers::localityIndices[basename].get_future().get() << "\n";
+    }
 
     inline void run()
     {
