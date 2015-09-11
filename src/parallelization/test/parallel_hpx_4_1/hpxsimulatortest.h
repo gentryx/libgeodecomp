@@ -107,32 +107,12 @@ public:
 typedef
     HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
     SimulatorType;
-// LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
-//     SimulatorType,
-//     ConwayCellSimulator
-// )
-// LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
-//     SimulatorType,
-//     ConwayCellSimulator
-// )
-
-// BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
 
 typedef LibGeoDecomp::SerialBOVWriter<ConwayCell> BovWriterType;
-// BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
 
 typedef
     LibGeoDecomp::HpxWriterCollector<ConwayCell>
     HpxWriterCollectorType;
-
-// LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
-//     HpxWriterCollectorType,
-//     ConwayCellWriterCollector
-// )
-// LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(
-//     HpxWriterCollectorType,
-//     ConwayCellWriterCollector
-// )
 
 namespace LibGeoDecomp {
 
@@ -163,21 +143,24 @@ public:
         std::cout << "boomer\n";
         CellInitializer *init = new CellInitializer(maxTimeSteps);
 
+        std::vector<double> overcommitFactor(1, 1.0);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
         SimulatorType sim(
             init,
-            1, // overcommitFactor
+            overcommitFactor,
             new TracingBalancer(new OozeBalancer()),
-            10, // balancingPeriod
-            1 // ghostZoneWidth
-                          );
+            loadBalancingPeriod,
+            ghostZoneWidth);
 
+        // fixme: add writer!
         // HpxWriterCollectorType::SinkType sink(
         //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
         //     sim.numUpdateGroups());
 
         // sim.addWriter(new HpxWriterCollectorType(sink));
 
-        sim.run();
+        // sim.run();
     }
 
     void removeFile(std::string name)
