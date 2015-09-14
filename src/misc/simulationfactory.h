@@ -27,8 +27,8 @@ public:
     {
         std::vector<std::string> simulatorTypes;
         simulatorTypes << "SerialSimulator"
- //                      << "CacheBlockingSimulator"
-                       << "CudaSimulator";
+//                       << "CudaSimulator"
+                       << "CacheBlockingSimulator";
         parameterSet.addParameter("Simulator", simulatorTypes);
         parameterSet.addParameter("WavefrontWidth",  10, 1000);
         parameterSet.addParameter("WavefrontHeight", 10, 1000);

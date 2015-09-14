@@ -96,7 +96,6 @@ public:
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
         ats.run();
-        
     }
 
     void xtestBasicSimplexOptimized()
@@ -130,8 +129,10 @@ private:
     Coord<3> dim;
     unsigned maxSteps;
 };
+
 class SimulationFactoryTest : public CxxTest::TestSuite
 {
+
 public:
     void setUp()
     {
@@ -183,12 +184,11 @@ public:
 
     void xtestAddWriterToFactory()
     {
-        LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToFactory()"
+        LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToFactory()")
         fab->parameters()["Simulator"] = "CacheBlockingSimulator";
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
         fab->addWriter(*writer);
         fab->operator()(fab->parameters());
-
     }
 
 private:
