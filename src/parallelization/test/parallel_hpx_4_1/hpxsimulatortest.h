@@ -238,8 +238,6 @@ public:
 
         std::string basename = "HpxSimulatorTesttestBasicsdsdfsfd";
         boost::shared_ptr<UpdateGroupType> updateGroup;
-        typedef typename UpdateGroupType::PatchAccepterVec PatchAccepterVec;
-        typedef typename UpdateGroupType::PatchProviderVec PatchProviderVec;
         boost::shared_ptr<PartitionType> partition;
         boost::shared_ptr<Initializer<TestCell<2>> > init;
 
@@ -289,21 +287,17 @@ public:
         using namespace boost::assign;
 
         std::string basename = "HPXSimulatorUpdateGroupSdfafafasdasd";
+        boost::shared_ptr<UpdateGroupType> updateGroup;
+        boost::shared_ptr<PartitionType> partition;
+        boost::shared_ptr<Initializer<TestCell<2> > > init;
+
+        rank = hpx::get_locality_id();
         Coord<2> dimensions;
         std::vector<std::size_t> weights;
         unsigned ghostZoneWidth;
-        boost::shared_ptr<PartitionType> partition;
-        boost::shared_ptr<Initializer<TestCell<2> > > init;
         std::deque<std::size_t> expectedNanoSteps;
-        int rank;
         boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
 
-        // xxxxxxxxxxxxxxxxxxxxx
-        using namespace boost::assign;
-
-        boost::shared_ptr<UpdateGroupType> updateGroup;
-
-        rank = hpx::get_locality_id();
         dimensions = Coord<2>(231, 350);
         weights = genWeights(dimensions.x(), dimensions.y(), hpx::get_num_localities().get());
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
