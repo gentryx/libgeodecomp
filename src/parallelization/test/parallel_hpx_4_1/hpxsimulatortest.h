@@ -161,11 +161,11 @@ public:
     void testBasic()
     {
         return;
-        CellInitializer *init = new CellInitializer(maxTimeSteps);
+        // CellInitializer *init = new CellInitializer(maxTimeSteps);
 
-        std::vector<double> updateGroupSpeeds(1, 1.0);
-        int loadBalancingPeriod = 10;
-        int ghostZoneWidth = 1;
+        // std::vector<double> updateGroupSpeeds(1, 1.0);
+        // int loadBalancingPeriod = 10;
+        // int ghostZoneWidth = 1;
         // SimulatorType sim(
         //     init,
         //     updateGroupSpeeds,
@@ -248,6 +248,7 @@ public:
                 << 3600
                 << 3600
                 << 3600;
+        std::cout << "weights: " << weights << "\n";
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         int ghostZoneWidth = 1;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
@@ -292,16 +293,14 @@ public:
         boost::shared_ptr<Initializer<TestCell<2> > > init;
 
         rank = hpx::get_locality_id();
-        Coord<2> dimensions;
+        Coord<2> dimensions = Coord<2>(160, 90);
         std::vector<std::size_t> weights;
-        unsigned ghostZoneWidth;
+        int ghostZoneWidth = 1;
         std::deque<std::size_t> expectedNanoSteps;
         boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
-
-        dimensions = Coord<2>(231, 350);
         weights = genWeights(dimensions.x(), dimensions.y(), hpx::get_num_localities().get());
+        std::cout << "weights: " << weights << "\n";
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
-        ghostZoneWidth = 9;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
         updateGroup.reset(
             new UpdateGroupType(
