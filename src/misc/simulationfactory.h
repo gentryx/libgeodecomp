@@ -6,7 +6,9 @@
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
-#include <libgeodecomp/parallelization/cudasimulator.h>
+// There are problems if cuda is not installed on the system
+// FIXME it ned to be checked by the preprocessor
+//#include <libgeodecomp/parallelization/cudasimulator.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 
 namespace LibGeoDecomp {
@@ -25,15 +27,15 @@ public:
     {
         std::vector<std::string> simulatorTypes;
         simulatorTypes << "SerialSimulator"
-                       << "CacheBlockingSimulator"
+ //                      << "CacheBlockingSimulator"
                        << "CudaSimulator";
         parameterSet.addParameter("Simulator", simulatorTypes);
         parameterSet.addParameter("WavefrontWidth",  10, 1000);
         parameterSet.addParameter("WavefrontHeight", 10, 1000);
         parameterSet.addParameter("PipelineLength",   1,   30);
-        parameterSet.addParameter("BlockDimX",        1,  128);
-        parameterSet.addParameter("BlockDimY",        1,    8);
-        parameterSet.addParameter("BlockDimz",        1,    8);
+//        parameterSet.addParameter("BlockDimX",        1,  128);
+//        parameterSet.addParameter("BlockDimY",        1,    8);
+//        parameterSet.addParameter("BlockDimz",        1,    8);
     }
 
     ~SimulationFactory()
@@ -103,10 +105,10 @@ private:
             return new CacheBlockingSimulator<CELL>(initializer, pipelineLength, wavefrontDim);
         }
 
-        if (params["Simulator"] == "CudaSimulator") {
-            Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
-            return new CudaSimulator<CELL>(initializer, blockSize);
-        }
+        //if (params["Simulator"] == "CudaSimulator") {
+        //    Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
+        //    return new CudaSimulator<CELL>(initializer, blockSize);
+        //}
 
         // FIXME: add writers here?
 
