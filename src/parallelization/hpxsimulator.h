@@ -334,7 +334,7 @@ private:
                 PatchAccepterVec(),
                 PatchProviderVec(),
                 PatchProviderVec(),
-                basename + "/UpdateGroup",
+                basename,
                 rank));
         std::cout << "  createUpdateGroup4\n";
         return ret;

@@ -161,18 +161,19 @@ public:
     void testBasic()
     {
         return;
-        // CellInitializer *init = new CellInitializer(maxTimeSteps);
+        // works:
+        CellInitializer *init = new CellInitializer(maxTimeSteps);
 
-        // std::vector<double> updateGroupSpeeds(1, 1.0);
-        // int loadBalancingPeriod = 10;
-        // int ghostZoneWidth = 1;
-        // SimulatorType sim(
-        //     init,
-        //     updateGroupSpeeds,
-        //     new TracingBalancer(new OozeBalancer()),
-        //     loadBalancingPeriod,
-        //     ghostZoneWidth,
-        //     "HpxSimulatorTestTestBasic");
+        std::vector<double> updateGroupSpeeds(1, 1.0);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "HPXSimulatorUpdateGroupSdfafafasdasd");
 
         // fixme: add writer!
         // HpxWriterCollectorType::SinkType sink(
@@ -181,7 +182,7 @@ public:
 
         // sim.addWriter(new HpxWriterCollectorType(sink));
 
-        // sim.run();
+        sim.run();
 
         // if (rank == 0) {
         //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testBasic"));
@@ -224,22 +225,52 @@ public:
 
     }
 
+    void testBar()
+    {
+        // std::string basename = "HPXSimulatorUpdateGr";
+        // rank = hpx::get_locality_id();
+        // boost::shared_ptr<HPXReceiver<int> > boundingBoxReceiver = HPXReceiver<int>::make(basename + "/boundingBoxes", rank).get();
+        // std::vector<boost::shared_ptr<HPXReceiver<double> > > boundingBoxReceivers;
+        // for (int i = 0; i < 4; ++i) {
+        //     if (i == rank)
+        //         continue;
+        //     boundingBoxReceivers.push_back(HPXReceiver<double>::make(
+        //                                        basename + "/PatchLink/" +
+        //                                        StringOps::itoa(i) + "-" +
+        //                                        StringOps::itoa(rank), rank).get());
+        // }
+
+        // std::cout << "gonzo " << rank << ", size: " << boundingBoxReceivers.size() << "\n";
+    }
+
     void testFoo()
     {
-        return; // fixme: bad code
+        // return; // fixme: bad code
         typedef RecursiveBisectionPartition<2> PartitionType;
-        typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2>> StepperType;
-        typedef HpxSimulator::UpdateGroup<TestCell<2>> UpdateGroupType;
+        typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2> > StepperType;
+        typedef HpxSimulator::UpdateGroup<TestCell<2> > UpdateGroupType;
         typedef StepperType::GridType GridType;
-        typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
         typedef typename StepperType::PatchProviderVec PatchProviderVec;
+        typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
 
         using namespace boost::assign;
 
-        std::string basename = "HpxSimulatorTesttestBasicsdsdfsfd";
+        // good
+        // std::string basename = "HPXSimulatorUpdateGroupSdfafafasdasd";
+
+        std::string basename = "HPXSimulatorUpdateGroupSdfafafasdasf";
+
+        // bad
+        // std::string basename = "HPXSimulatorUpdateGroupSdfafa";
+
+        // bad
+        // std::string basename = "HPXSimulatorUpdateGroup";
+
+        // bad
+        // std::string basename = "HPXSimulatorTesfd";
         boost::shared_ptr<UpdateGroupType> updateGroup;
         boost::shared_ptr<PartitionType> partition;
-        boost::shared_ptr<Initializer<TestCell<2>> > init;
+        boost::shared_ptr<Initializer<TestCell<2> > > init;
 
         rank = hpx::get_locality_id();
         Coord<2> dimensions = Coord<2>(160, 90);
@@ -265,7 +296,6 @@ public:
                 PatchProviderVec(),
                 basename));
 
-
         updateGroup->update(100);
 
         // if (rank == 0) {
@@ -277,10 +307,10 @@ public:
 
     void testCreation()
     {
-        // fixme: good code
+        return; // fixme: good code
         typedef RecursiveBisectionPartition<2> PartitionType;
         typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2> > StepperType;
-        typedef HpxSimulator::UpdateGroup<TestCell<2>> UpdateGroupType;
+        typedef HpxSimulator::UpdateGroup<TestCell<2> > UpdateGroupType;
         typedef StepperType::GridType GridType;
         typedef typename StepperType::PatchProviderVec PatchProviderVec;
         typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
@@ -300,10 +330,8 @@ public:
                 << 3600
                 << 3600;
         std::cout << "weights: " << weights << "\n";
-        int ghostZoneWidth = 1;
-        std::deque<std::size_t> expectedNanoSteps;
-        boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
+        int ghostZoneWidth = 1;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
         updateGroup.reset(
             new UpdateGroupType(
