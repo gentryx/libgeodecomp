@@ -13,6 +13,7 @@
 #endif
 
 #include <algorithm>
+#include <deque>
 #include <iterator>
 #include <map>
 #include <numeric>
@@ -127,10 +128,10 @@ inline std::vector<T, Allocator>& operator<<(std::vector<T, Allocator>& vec, U&&
 #endif
 
 template <typename T, typename Allocator>
-inline std::vector<T, Allocator> operator+(std::vector<T, Allocator>& target, const std::vector<T, Allocator>& other)
+inline std::vector<T, Allocator> operator+(const std::vector<T, Allocator>& source1, const std::vector<T, Allocator>& source2)
 {
-    std::vector<T, Allocator> ret(target);
-    append(ret, other);
+    std::vector<T, Allocator> ret(source1);
+    append(ret, source2);
     return ret;
 }
 
@@ -242,6 +243,73 @@ inline std::set<T, Allocator> operator-(
     return ret;
 }
 
+/**
+ * deque
+ */
+template <typename T, typename Allocator>
+inline void append(std::deque<T, Allocator>& target, const std::deque<T, Allocator>& other)
+{
+    target.insert(target.end(), other.begin(), other.end());
+}
+
+template <typename T, typename Allocator, typename U>
+inline std::deque<T, Allocator>& operator<<(std::deque<T, Allocator>& deque, const U& obj)
+{
+    deque.push_back(obj);
+    return deque;
+}
+
+template <typename T, typename Allocator>
+inline std::deque<T, Allocator> operator+(
+    const std::deque<T, Allocator>& source1, const std::deque<T, Allocator>& source2)
+{
+    std::deque<T, Allocator> ret(source1);
+    append(ret, source2);
+    return ret;
+}
+
+template <typename T, typename Allocator>
+inline T sum(const std::deque<T, Allocator>& vec)
+{
+    return std::accumulate(vec.begin(), vec.end(), T());
+
+}
+
+template <typename T, typename Allocator>
+inline bool contains(const std::deque<T, Allocator>& vec, const T& element)
+{
+    return std::find(vec.begin(), vec.end(), element) != vec.end();
+}
+
+template <typename T, typename Allocator>
+inline void sort(std::deque<T, Allocator>& vec)
+{
+    std::sort(vec.begin(), vec.end());
+}
+
+template <typename T, typename Allocator>
+T& (min)(std::deque<T, Allocator>& vec)
+{
+    return *(std::min_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator>
+const T& (min)(const std::deque<T, Allocator>& vec)
+{
+    return *(std::min_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator>
+T& (max)(std::deque<T, Allocator>& vec)
+{
+    return *(std::max_element(vec.begin(), vec.end()));
+}
+
+template <typename T, typename Allocator>
+const T& (max)(const std::deque<T, Allocator>& vec)
+{
+    return *(std::max_element(vec.begin(), vec.end()));
+}
 
 /**
  * Output
@@ -318,6 +386,28 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
     }
 
     os << "}";
+
+    return os;
+}
+
+template<typename _CharT, typename _Traits, typename T, typename Allocator>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
+           const std::deque<T, Allocator>& deque)
+{
+    os << "(";
+
+    if (deque.size()) {
+        typename std::deque<T, Allocator>::const_iterator i = deque.begin();
+        os << *i;
+        ++i;
+
+        for (; i != deque.end(); ++i) {
+            os << ", " << *i;
+        }
+    }
+
+    os << ")";
 
     return os;
 }

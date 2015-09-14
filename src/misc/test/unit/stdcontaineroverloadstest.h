@@ -2,6 +2,7 @@
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 
+#include <boost/assign/std/deque.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -373,4 +374,91 @@ public:
     }
 };
 
+
+class StdContainerOverloadsTest_StdDeque : public CxxTest::TestSuite
+{
+public:
+    void testOperatorLessLess()
+    {
+        std::deque<int> s;
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("()", temp.str());
+        }
+
+        s << 1;
+
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("(1)", temp.str());
+        }
+
+        s << 3 << 5;
+
+        {
+            std::ostringstream temp;
+            temp << s;
+            TS_ASSERT_EQUALS("(1, 3, 5)", temp.str());
+        }
+    }
+
+    void testOperatorPlus()
+    {
+        std::deque<int> a;
+        std::deque<int> b;
+        std::deque<int> c;
+        std::deque<int> d;
+
+        a << 1 << 2 << 3 << 4;
+        b << 5 << 6 << 7 << 0;
+
+        c << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 0;
+
+        d = a + b;
+
+        TS_ASSERT_EQUALS(d, c);
+    }
+
+    void testMinMax()
+    {
+        std::deque<int> a;
+        a << 4 << 1 << 5 << 2 << 7 << 9;
+
+        TS_ASSERT_EQUALS((min)(a), 1);
+        TS_ASSERT_EQUALS((max)(a), 9);
+    }
+
+    void testSort()
+    {
+        std::deque<int> a;
+        std::deque<int> b;
+        a << 4 << 1 << 5 << 2 << 7 << 9 << 0;
+        b << 0 << 1 << 2 << 4 << 5 << 7 << 9;
+
+        sort(a);
+        TS_ASSERT_EQUALS(a, b);
+    }
+
+    void testContains()
+    {
+        std::deque<int> a;
+        a += 0, 1, 4, -1;
+        TS_ASSERT_EQUALS(contains(a,  2), false);
+        TS_ASSERT_EQUALS(contains(a,  3), false);
+        TS_ASSERT_EQUALS(contains(a,  1), true);
+        TS_ASSERT_EQUALS(contains(a, -1), true);
+        TS_ASSERT_EQUALS(contains(a,  4), true);
+    }
+
+    void testSum()
+    {
+        std::deque<int> a;
+        a += 5, 2, 6, 1, 3, 100;
+
+        TS_ASSERT_EQUALS(sum(a), 117);
+    }
 };
+
+}
