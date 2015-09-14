@@ -295,11 +295,14 @@ public:
         rank = hpx::get_locality_id();
         Coord<2> dimensions = Coord<2>(160, 90);
         std::vector<std::size_t> weights;
+        weights << 3600
+                << 3600
+                << 3600
+                << 3600;
+        std::cout << "weights: " << weights << "\n";
         int ghostZoneWidth = 1;
         std::deque<std::size_t> expectedNanoSteps;
         boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
-        weights = genWeights(dimensions.x(), dimensions.y(), hpx::get_num_localities().get());
-        std::cout << "weights: " << weights << "\n";
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
         updateGroup.reset(
