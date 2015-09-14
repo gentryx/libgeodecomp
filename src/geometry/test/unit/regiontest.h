@@ -115,7 +115,7 @@ public:
             }
 
             Region<1> expanded2 = region.expandWithAdjacency(5, adjacency);
-            Region<1> expanded3 = region.expandWithTopology(5, Coord<1>(), Topologies::Unstructured(), adjacency);
+            Region<1> expanded3 = region.expandWithTopology(5, Coord<1>(), Topologies::Unstructured::Topology(), adjacency);
 
             TS_ASSERT_EQUALS(expanded1, expanded2);
             TS_ASSERT_EQUALS(expanded1, expanded3);
