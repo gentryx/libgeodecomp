@@ -23,10 +23,15 @@ public:
 
     static hpx::future<boost::shared_ptr<HPXReceiver> > make(const std::string& name, std::size_t rank = 0)
     {
+        int myRank = hpx::get_locality_id();
+        std::cout << "      makeA, name: " << name << ", rank: " << rank << " myRank: " << myRank << "\n";
         HPXComponentRegistrator<HPXReceiver> thisEnsuresHPXRegistrationCodeIsRunPriorToComponentCreation;
 
+        std::cout << "      makeB, name: " << name << ", rank: " << rank << " myRank: " << myRank << "\n";
         hpx::id_type id = hpx::new_<HPXReceiver>(hpx::find_here()).get();
+        std::cout << "      makeC, name: " << name << ", rank: " << rank << " myRank: " << myRank << "\n";
         hpx::register_with_basename(name, id, rank).get();
+        std::cout << "      makeD, name: " << name << ", rank: " << rank << " myRank: " << myRank << "\n";
         return hpx::get_ptr<HPXReceiver>(id);
     }
 

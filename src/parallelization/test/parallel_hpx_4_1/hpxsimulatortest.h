@@ -296,7 +296,7 @@ public:
                 PatchProviderVec(),
                 basename));
 
-        updateGroup->update(100);
+        // updateGroup->update(100);
 
         // if (rank == 0) {
         //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testFoo"));
