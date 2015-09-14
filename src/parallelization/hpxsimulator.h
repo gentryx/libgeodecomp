@@ -13,6 +13,7 @@
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
 
@@ -43,7 +44,7 @@ typedef std::map<long, EventSet> EventMap;
 template<
     class CELL_TYPE,
     class PARTITION,
-    class STEPPER=LibGeoDecomp::HiParSimulator::HpxStepper<CELL_TYPE>
+    class STEPPER=LibGeoDecomp::HiParSimulator::VanillaStepper<CELL_TYPE>
 >
 class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {
@@ -91,7 +92,9 @@ public:
 
     inline void run()
     {
+        std::cout << "runA\n";
         initSimulation();
+        std::cout << "runB\n";
         // statistics = nanoStep(timeToLastEvent());
     }
 
@@ -170,26 +173,36 @@ private:
             box.dimensions.prod(),
             globalUpdateGroupSpeeds);
 
-        std::cout << "weights: " << weights << "\n";
-        // boost::shared_ptr<PARTITION> partition(
-        //     new PARTITION(
-        //         box.origin,
-        //         box.dimensions,
-        //         0,
-        //         weights));
+        std::cout << "andiTraceA: " << box << "\n"
+                  << "andiTraceB: " << globalUpdateGroupSpeeds << "\n"
+                  << "andiTraceC: " << weights << "\n";
 
-        // updateGroup.reset(
-        //     new UpdateGroupType(
-        //         partition,
-        //         box,
-        //         ghostZoneWidth,
-        //         initializer,
-        //         static_cast<STEPPER*>(0),
-        //         writerAdaptersGhost,
-        //         writerAdaptersInner,
-        //         steererAdaptersGhost,
-        //         steererAdaptersInner,
-        //         mpiLayer.communicator()));
+        boost::shared_ptr<PARTITION> partition(
+            new PARTITION(
+                box.origin,
+                box.dimensions,
+                0,
+                weights));
+
+        std::vector<hpx::future<boost::shared_ptr<UpdateGroup<CELL_TYPE> > > > updateGroupCreationFutures;
+        std::size_t rank = hpx::get_locality_id();
+
+        std::cout << "peng1\n";
+        for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
+            // fixme: add writers/steerers
+            std::cout << "peng1a\n";
+            // updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
+            createUpdateGroup(i, partition);
+            std::cout << "peng1b\n";
+        }
+
+        std::cout << "peng2\n";
+        for (auto& i: updateGroupCreationFutures) {
+            std::cout << "peng2a\n";
+            updateGroups << i.get();
+            std::cout << "peng2b\n";
+        }
+        std::cout << "peng3\n";
 
         // writerAdaptersGhost.clear();
         // writerAdaptersInner.clear();
@@ -291,6 +304,41 @@ private:
         ret[size - 1] = items - lastPos;
 
         return ret;
+    }
+
+    boost::shared_ptr<UpdateGroup<CELL_TYPE> > createUpdateGroup(
+        std::size_t rank,
+        boost::shared_ptr<PARTITION> partition)
+    {
+        std::cout << "  createUpdateGroup1\n";
+        CoordBox<DIM> box = initializer->gridBox();
+        typedef typename UpdateGroup<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
+        typedef typename UpdateGroup<CELL_TYPE>::PatchProviderVec PatchProviderVec;
+
+        std::cout << "andiTraceD: " << box << "\n"
+                  << "andiTraceE: " << ghostZoneWidth << "\n"
+                  << "andiTraceF: " << basename << "\n"
+                  << "andiTraceG: " << rank << "\n";
+
+        
+        std::cout << "  createUpdateGroup2\n";
+        boost::shared_ptr<UpdateGroupType> ret;
+        std::cout << "  createUpdateGroup3\n";
+        ret.reset(new UpdateGroupType(
+                partition,
+                box,
+                ghostZoneWidth,
+                initializer,
+                reinterpret_cast<STEPPER*>(0),
+                PatchAccepterVec(),
+                PatchAccepterVec(),
+                PatchProviderVec(),
+                PatchProviderVec(),
+                basename + "/UpdateGroup",
+                rank));
+        std::cout << "  createUpdateGroup4\n";
+        return ret;
+
     }
 
 };

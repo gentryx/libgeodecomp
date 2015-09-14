@@ -1,12 +1,30 @@
 #include <cxxtest/TestSuite.h>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
+#include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 
+#include <libgeodecomp/io/testinitializer.h>
+#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
+#include <libgeodecomp/storage/mockpatchaccepter.h>
+#include <libgeodecomp/misc/stdcontaineroverloads.h>
+
 using namespace LibGeoDecomp;
 using namespace boost::assign;
+
+std::map<std::string, hpx::lcos::promise<int> > p;
+
+void barrier(std::string s)
+{
+    p[s].set_value(5);
+}
+
+HPX_PLAIN_ACTION(barrier, barrier_action);
+HPX_REGISTER_BROADCAST_ACTION_DECLARATION(barrier_action)
+HPX_REGISTER_BROADCAST_ACTION(barrier_action)
+
 
 class ConwayCell
 {
@@ -123,6 +141,8 @@ public:
     {
         outputFrequency = 1;
         maxTimeSteps = 10;
+        rank = hpx::get_locality_id();
+        localities = hpx::find_all_localities();
     }
 
     void tearDown()
@@ -140,19 +160,19 @@ public:
 
     void testBasic()
     {
-        std::cout << "boomer\n";
+        return;
         CellInitializer *init = new CellInitializer(maxTimeSteps);
 
         std::vector<double> updateGroupSpeeds(1, 1.0);
         int loadBalancingPeriod = 10;
         int ghostZoneWidth = 1;
-        SimulatorType sim(
-            init,
-            updateGroupSpeeds,
-            new TracingBalancer(new OozeBalancer()),
-            loadBalancingPeriod,
-            ghostZoneWidth,
-            "HpxSimulatorTest::testBasic");
+        // SimulatorType sim(
+        //     init,
+        //     updateGroupSpeeds,
+        //     new TracingBalancer(new OozeBalancer()),
+        //     loadBalancingPeriod,
+        //     ghostZoneWidth,
+        //     "HpxSimulatorTest::testBasic1");
 
         // fixme: add writer!
         // HpxWriterCollectorType::SinkType sink(
@@ -161,33 +181,185 @@ public:
 
         // sim.addWriter(new HpxWriterCollectorType(sink));
 
-        sim.run();
+        // sim.run();
+
+        // if (rank == 0) {
+        //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testBasic"));
+        // }
+        // p["testBasic"].get_future().get();
     }
 
     void testHeterogeneous()
     {
         std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
         CellInitializer *init = new CellInitializer(maxTimeSteps);
 
-        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
-        int loadBalancingPeriod = 10;
-        int ghostZoneWidth = 1;
-        SimulatorType sim(
-            init,
-            updateGroupSpeeds,
-            new TracingBalancer(new OozeBalancer()),
-            loadBalancingPeriod,
-            ghostZoneWidth,
-            "HpxSimulatorTest::testHeterogeneous");
+        // std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        // int loadBalancingPeriod = 10;
+        // int ghostZoneWidth = 1;
+        // SimulatorType sim(
+        //     init,
+        //     updateGroupSpeeds,
+        //     new TracingBalancer(new OozeBalancer()),
+        //     loadBalancingPeriod,
+        //     ghostZoneWidth,
+        //     "HpxSimulatorTest::testHeterogeneousSDFASFAsdaDASDasdAD");
 
-        // fixme: add writer!
-        // HpxWriterCollectorType::SinkType sink(
-        //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
-        //     sim.numUpdateGroups());
+        // // fixme: add writer!
+        // // HpxWriterCollectorType::SinkType sink(
+        // //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
+        // //     sim.numUpdateGroups());
 
-        // sim.addWriter(new HpxWriterCollectorType(sink));
+        // // sim.addWriter(new HpxWriterCollectorType(sink));
 
-        sim.run();
+        // std::cout << "testC\n";
+        // sim.run();
+        // std::cout << "testD\n";
+
+        // if (rank == 0) {
+        //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testHeterogeneous"));
+        // }
+        // p["testHeterogeneous"].get_future().get();
+
+    }
+
+    void testFoo()
+    {
+        // fixme: bad code
+        // typedef RecursiveBisectionPartition<2> PartitionType;
+        // typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2>> StepperType;
+        // typedef HpxSimulator::UpdateGroup<TestCell<2>> UpdateGroupType;
+        // typedef StepperType::GridType GridType;
+        // typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
+        // typedef typename StepperType::PatchProviderVec PatchProviderVec;
+
+        // using namespace boost::assign;
+
+        // std::string basename = "HpxSimulatorTest::testBasicsdsdfsfd";
+        // boost::shared_ptr<UpdateGroupType> updateGroup;
+        // typedef typename UpdateGroupType::PatchAccepterVec PatchAccepterVec;
+        // typedef typename UpdateGroupType::PatchProviderVec PatchProviderVec;
+        // boost::shared_ptr<PartitionType> partition;
+        // boost::shared_ptr<Initializer<TestCell<2>> > init;
+
+        // rank = hpx::get_locality_id();
+        // Coord<2> dimensions = Coord<2>(160, 90);
+        // std::vector<std::size_t> weights;
+        // weights << 3600
+        //         << 3600
+        //         << 3600
+        //         << 3600;
+        // partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
+        // int ghostZoneWidth = 1;
+        // init.reset(new TestInitializer<TestCell<2> >(dimensions));
+        // updateGroup.reset(
+        //     new UpdateGroupType(
+        //         partition,
+        //         CoordBox<2>(Coord<2>(), dimensions),
+        //         ghostZoneWidth,
+        //         init,
+        //         reinterpret_cast<StepperType*>(0),
+        //         PatchAccepterVec(),
+        //         PatchAccepterVec(),
+        //         PatchProviderVec(),
+        //         PatchProviderVec(),
+        //         basename));
+
+
+        // updateGroup->update(100);
+
+        // if (rank == 0) {
+        //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testFoo"));
+        // }
+        // p["testFoo"].get_future().get();
+
+    }
+
+    void testCreation()
+    {
+        // fixme: good code
+        typedef RecursiveBisectionPartition<2> PartitionType;
+        typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2> > StepperType;
+        typedef HpxSimulator::UpdateGroup<TestCell<2>> UpdateGroupType;
+        typedef StepperType::GridType GridType;
+        typedef typename StepperType::PatchProviderVec PatchProviderVec;
+        typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
+
+
+        Coord<2> dimensions;
+        std::vector<std::size_t> weights;
+        unsigned ghostZoneWidth;
+        boost::shared_ptr<PartitionType> partition;
+        boost::shared_ptr<Initializer<TestCell<2> > > init;
+        std::deque<std::size_t> expectedNanoSteps;
+        int rank;
+        boost::shared_ptr<MockPatchAccepter<GridType> > mockPatchAccepter;
+
+        // xxxxxxxxxxxxxxxxxxxxx
+        using namespace boost::assign;
+
+        boost::shared_ptr<UpdateGroupType> updateGroup;
+
+        rank = hpx::get_locality_id();
+        dimensions = Coord<2>(231, 350);
+        weights = genWeights(dimensions.x(), dimensions.y(), hpx::get_num_localities().get());
+        partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
+        ghostZoneWidth = 9;
+        init.reset(new TestInitializer<TestCell<2> >(dimensions));
+        updateGroup.reset(
+            new UpdateGroupType(
+                partition,
+                CoordBox<2>(Coord<2>(), dimensions),
+                ghostZoneWidth,
+                init,
+                reinterpret_cast<StepperType*>(0),
+                PatchAccepterVec(),
+                PatchAccepterVec(),
+                PatchProviderVec(),
+                PatchProviderVec(),
+                "HPXSimulatorUpdateGroupSdfafafasdasd"
+                                ));
+        expectedNanoSteps.clear();
+        expectedNanoSteps += 5, 7, 8, 33, 55;
+        mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
+        for (std::deque<std::size_t>::iterator i = expectedNanoSteps.begin();
+             i != expectedNanoSteps.end();
+             ++i) {
+            mockPatchAccepter->pushRequest(*i);
+        }
+        updateGroup->addPatchAccepter(mockPatchAccepter, StepperType::INNER_SET);
+
+        updateGroup->update(100);
+
+        std::deque<std::size_t> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();
+        expectedNanoSteps.clear();
+        expectedNanoSteps += 5, 7, 8, 33, 55;
+
+        TS_ASSERT_EQUALS(actualNanoSteps, expectedNanoSteps);
+    }
+
+
+
+    // xxx
+    std::vector<std::size_t> genWeights(
+        const unsigned& width,
+        const unsigned& height,
+        const unsigned& size)
+    {
+        std::vector<std::size_t> ret(size);
+        unsigned totalSize = width * height;
+        for (std::size_t i = 0; i < ret.size(); ++i) {
+            ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
+        }
+
+        return ret;
+    }
+
+    // xxx
+    long pos(const unsigned& i, const unsigned& size, const unsigned& totalSize)
+    {
+        return i * totalSize / size;
     }
 
     void removeFile(std::string name)
@@ -203,9 +375,10 @@ public:
         removeFile(buf.str() + ".data");
     }
 
+    std::size_t rank;
+    std::vector<hpx::id_type> localities;
     int outputFrequency;
     int maxTimeSteps;
-
 };
 
 }

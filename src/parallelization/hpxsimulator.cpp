@@ -82,6 +82,7 @@ void gatherAndBroadcastLocalityIndices(
             indices << indexSum;
             indexSum += vec.size();
         }
+        indices << indexSum;
 
         hpx::lcos::broadcast<setNumberOfUpdateGroups_action>(
             localities,
