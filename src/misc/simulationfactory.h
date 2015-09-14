@@ -80,7 +80,7 @@ public:
         }
 
         delete sim;
-        return chrono.interval<TimeCompute>();
+        return chrono.interval<TimeCompute>() * -1.0;
     }
 
     SimulationParameters& parameters()
