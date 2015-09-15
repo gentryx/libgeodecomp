@@ -14,7 +14,7 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/mpiiowriter.h>
 
-//#define LIBGEODECOMP_DEBUG_LEVEL 4 
+#define LIBGEODECOMP_DEBUG_LEVEL 4 
 
 using namespace LibGeoDecomp;
 
@@ -138,7 +138,10 @@ public:
     {
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
-        fab = new SimulationFactory<SimFabTestCell>(SimFabTestInitializer(dim, maxSteps));
+        cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(
+                    SimFabTestInitializer(dim, maxSteps));
+        fab = new SerialSimulationFactory<SimFabTestCell>(
+                    SimFabTestInitializer(dim, maxSteps));
     }
 
     void tearDown()
@@ -149,7 +152,6 @@ public:
     void testBasic()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testBasic")
-        fab->parameters()["Simulator"] = "CacheBlockingSimulator";
         for (int i =1;i<=2;i++)
         {
             Simulator<SimFabTestCell> *sim = fab->operator()();
@@ -158,15 +160,14 @@ public:
         }
     }
 
-    void testFitness()
+    void testCacheBlockingFitness()
     {
-        LOG(Logger::INFO, "SimulationFactoryTest::testFitness()")
+        LOG(Logger::INFO, "SimulationFactoryTest::testCacheBlockingFitness()")
         for(int i = 1;i <= 2; i++){
-            fab->parameters()["PipelineLength"].setValue(1);
-            fab->parameters()["WavefrontWidth"].setValue(100);
-            fab->parameters()["WavefrontHeight"].setValue(40);
-            fab->parameters()["Simulator"] = "CacheBlockingSimulator";
-            double fitness = fab->operator()(fab->parameters());
+            cfab->parameters()["PipelineLength"].setValue(1);
+            cfab->parameters()["WavefrontWidth"].setValue(100);
+            cfab->parameters()["WavefrontHeight"].setValue(40);
+            double fitness = cfab->operator()(cfab->parameters());
             LOG(Logger::INFO,  i << " fitness: " << fitness )
         }
     }
@@ -174,25 +175,33 @@ public:
     void xtestAddWriterToSimulator()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSimulator()")
-        fab->parameters()["Simulator"] = "CacheBlockingSimulator";
         CacheBlockingSimulator<SimFabTestCell> *sim =  (
-            CacheBlockingSimulator<SimFabTestCell> *)fab->operator()();
+            CacheBlockingSimulator<SimFabTestCell> *)cfab->operator()();
         sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100));
         sim->run();
-        double fitness = fab->operator()(fab->parameters());
+        double fitness = cfab->operator()(cfab->parameters());
     }
 
-    void xtestAddWriterToFactory()
+    void xtestAddWriterToSerialSimulationFactory()
     {
-        LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToFactory()")
-        fab->parameters()["Simulator"] = "CacheBlockingSimulator";
+        LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSerialSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
         fab->addWriter(*writer);
         fab->operator()(fab->parameters());
     }
 
+    void xtestAddWriterToCacheBlockingSimulationFactory()
+    {
+        LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToCacheBlockingSimulationFactory()")
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        cfab->addWriter(*writer);
+        cfab->operator()(cfab->parameters());
+    }
+
+
+
 private:
     Coord<3> dim;
     unsigned maxSteps;
-    SimulationFactory<SimFabTestCell> *fab;
+    SimulationFactory<SimFabTestCell> *fab, *cfab;
 };
