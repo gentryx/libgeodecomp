@@ -34,6 +34,7 @@ public:
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
+
     static const int DIM = Topology::DIM;
 
     inline explicit HiParSimulator(
@@ -74,13 +75,12 @@ public:
 
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
-        boost::shared_ptr<Steerer<CELL_TYPE> > steererPointer(steerer);
-        steerers << steererPointer;
+        DistributedSimulator<CELL_TYPE>::addSteerer(steerer);
 
         // two adapters needed, just as for the writers
         typename UpdateGroupType::PatchProviderPtr adapterGhost(
             new SteererAdapterType(
-                steererPointer,
+                steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
@@ -89,7 +89,7 @@ public:
 
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
             new SteererAdapterType(
-                steererPointer,
+                steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
@@ -236,6 +236,8 @@ private:
 
         writerAdaptersGhost.clear();
         writerAdaptersInner.clear();
+        steererAdaptersGhost.clear();
+        steererAdaptersInner.clear();
 
         initEvents();
     }

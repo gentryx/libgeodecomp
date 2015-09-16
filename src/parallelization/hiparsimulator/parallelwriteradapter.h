@@ -5,6 +5,7 @@
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {
+// fixme: move to LibGeoDecomp namespace
 namespace HiParSimulator {
 
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER>
