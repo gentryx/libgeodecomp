@@ -3,13 +3,12 @@
 #include <hpx/hpx_init.hpp>
 #include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/io/mockwriter.h>
+#include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/parallelization/hpxsimulator.h>
-
-#include <libgeodecomp/io/testinitializer.h>
-#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
-#include <libgeodecomp/storage/mockpatchaccepter.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/mockpatchaccepter.h>
 
 using namespace LibGeoDecomp;
 using namespace boost::assign;
@@ -110,15 +109,7 @@ public:
     }
 };
 
-typedef
-    HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
-    SimulatorType;
-
-typedef LibGeoDecomp::SerialBOVWriter<ConwayCell> BovWriterType;
-
-typedef
-    LibGeoDecomp::HpxWriterCollector<ConwayCell>
-    HpxWriterCollectorType;
+typedef HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> > SimulatorType;
 
 namespace LibGeoDecomp {
 
@@ -161,14 +152,13 @@ public:
             ghostZoneWidth,
             "/0/fixme_HPXSimulatorUpdateGroupSdfafafasdasd");
 
-        // fixme: add writer!
-        // HpxWriterCollectorType::SinkType sink(
-        //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
-        //     sim.numUpdateGroups());
+        // fixme: use an external vector to record events
+        MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(outputFrequency);
+        sim.addWriter(writer);
 
-        // sim.addWriter(new HpxWriterCollectorType(sink));
-
+        std::cout << "pre:  " << writer->events() << "\n";
         sim.run();
+        std::cout << "post: " << writer->events() << "\n";
 
         // if (rank == 0) {
         //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testBasic"));
@@ -278,7 +268,6 @@ public:
         typedef RecursiveBisectionPartition<2> PartitionType;
         typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2> > StepperType;
         typedef HpxSimulator::UpdateGroup<TestCell<2> > UpdateGroupType;
-        typedef StepperType::GridType GridType;
         typedef typename StepperType::PatchProviderVec PatchProviderVec;
         typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
 
