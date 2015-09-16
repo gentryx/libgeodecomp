@@ -48,7 +48,7 @@ public:
         PatchAccepterVec patchAcceptersInner = PatchAccepterVec(),
         PatchProviderVec patchProvidersGhost = PatchProviderVec(),
         PatchProviderVec patchProvidersInner = PatchProviderVec(),
-        std::string basename = "HPXSimulator::UpdateGroup",
+        std::string basename = "/0_fixme_HPXSimulator::UpdateGroup",
         int rank = hpx::get_locality_id()) :
         ghostZoneWidth(ghostZoneWidth),
         initializer(initializer),
@@ -66,56 +66,45 @@ public:
 
         // fixme
         std::size_t size = partition->getWeights().size();
-        // std::string broadcastName = basename + "/boundingBoxes";
+        std::string broadcastName = basename + "/boundingBoxes";
         std::vector<CoordBox<DIM> > boundingBoxes;
 
-        // boundingBoxes = HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
-
-        boundingBoxes.clear();
-        boundingBoxes << CoordBox<2>(Coord<2>( 0,  0), Coord<2>(80, 45))
-                      << CoordBox<2>(Coord<2>( 0, 45), Coord<2>(80, 45))
-                      << CoordBox<2>(Coord<2>(80,  0), Coord<2>(80, 45))
-                      << CoordBox<2>(Coord<2>(80, 45), Coord<2>(80, 45));
+        boundingBoxes = HPXReceiver<CoordBox<DIM> >::allGather(ownBoundingBox, rank, size, broadcastName);
 
         partitionManager->resetGhostZones(boundingBoxes);
-        std::cout << "boundingBoxes: " << boundingBoxes << "\n";
 
         long firstSyncPoint =
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
             ghostZoneWidth;
 
-        std::cout << "    UpdateGroupB\n";
         // fixme
         // We need to create the patch providers first, as the patch
         // accepters will look up their IDs upon creation:
         PatchProviderVec patchLinkProviders;
         const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
-        // for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
-        //     if (!i->second.back().empty()) {
-        for (int i = 0; i < 4; ++i) {
-            if (i != rank) {
-                // std::cout << "    UpdateGroupB1 " << i->first << "->" << rank << "\n";
-                std::cout << "    UpdateGroupB1 " << i << "->" << rank << "\n";
+        for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
+            if (!i->second.back().empty()) {
+                std::cout << "    UpdateGroupB1 " << i->first << "->" << rank << "\n";
+                // std::cout << "    UpdateGroupB1 " << i << "->" << rank << "\n";
                 boost::shared_ptr<typename HPXPatchLink<GridType>::Provider> link(
                     new typename HPXPatchLink<GridType>::Provider(
-                        Region<2>(),
+                        i->second.back(),
                         basename,
-                        i,
-                        // i->first,
+                        i->first,
                         rank));
                 // std::cout << "    UpdateGroupB2 " << i->first << "->" << rank << "\n";
-                // patchLinkProviders << link;
+                patchLinkProviders << link;
                 // std::cout << "    UpdateGroupB3 " << i->first << "->" << rank << "\n";
-                // patchLinks << link;
+                patchLinks << link;
 
                 // std::cout << "    UpdateGroupB4 " << i->first << "->" << rank << "\n";
-                // link->charge(
-                //     firstSyncPoint,
-                //     PatchProvider<GridType>::infinity(),
-                //     ghostZoneWidth);
+                link->charge(
+                    firstSyncPoint,
+                    PatchProvider<GridType>::infinity(),
+                    ghostZoneWidth);
 
                 // std::cout << "    UpdateGroupB5 " << i->first << "->" << rank << "\n";
-                // link->setRegion(partitionManager->ownRegion());
+                link->setRegion(partitionManager->ownRegion());
                 // std::cout << "    UpdateGroupB6 " << i->first << "->" << rank << "\n";
             }
         }
@@ -157,37 +146,37 @@ public:
         }
 
         std::cout << "    UpdateGroupE\n";
-        // stepper.reset(new STEPPER(
-        //                   partitionManager,
-        //                   this->initializer,
-        //                   patchAcceptersGhost + ghostZoneAccepterLinks,
-        //                   patchAcceptersInner));
-        // std::cout << "    UpdateGroupF\n";
+        stepper.reset(new STEPPER(
+                          partitionManager,
+                          this->initializer,
+                          patchAcceptersGhost + ghostZoneAccepterLinks,
+                          patchAcceptersInner));
+        std::cout << "    UpdateGroupF\n";
 
-        // // the ghostzone receivers may be safely added after
-        // // initialization as they're only really needed when the next
-        // // ghostzone generation is being received.
-        // for (typename PatchProviderVec::iterator i = patchLinkProviders.begin(); i != patchLinkProviders.end(); ++i) {
-        //     addPatchProvider(*i, StepperType::GHOST);
-        // }
-        // std::cout << "    UpdateGroupG\n";
+        // the ghostzone receivers may be safely added after
+        // initialization as they're only really needed when the next
+        // ghostzone generation is being received.
+        for (typename PatchProviderVec::iterator i = patchLinkProviders.begin(); i != patchLinkProviders.end(); ++i) {
+            addPatchProvider(*i, StepperType::GHOST);
+        }
+        std::cout << "    UpdateGroupG\n";
 
-        // // add external PatchProviders last to allow them to override
-        // // the local ghost zone providers (a.k.a. PatchLink::Source).
-        // for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
-        //      i != patchProvidersGhost.end();
-        //      ++i) {
-        //     (*i)->setRegion(partitionManager->ownRegion());
-        //     addPatchProvider(*i, StepperType::GHOST);
-        // }
-        // std::cout << "    UpdateGroupH\n";
+        // add external PatchProviders last to allow them to override
+        // the local ghost zone providers (a.k.a. PatchLink::Source).
+        for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
+             i != patchProvidersGhost.end();
+             ++i) {
+            (*i)->setRegion(partitionManager->ownRegion());
+            addPatchProvider(*i, StepperType::GHOST);
+        }
+        std::cout << "    UpdateGroupH\n";
 
-        // for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
-        //      i != patchProvidersInner.end();
-        //      ++i) {
-        //     (*i)->setRegion(partitionManager->ownRegion());
-        //     addPatchProvider(*i, StepperType::INNER_SET);
-        // }
+        for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
+             i != patchProvidersInner.end();
+             ++i) {
+            (*i)->setRegion(partitionManager->ownRegion());
+            addPatchProvider(*i, StepperType::INNER_SET);
+        }
         std::cout << "    UpdateGroupI\n";
     }
 
