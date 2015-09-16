@@ -100,7 +100,7 @@ public:
 
     void testRegisterWriter()
     {
-        MockWriter *w = new MockWriter();
+        MockWriter<> *w = new MockWriter<>();
         simulator->addWriter(w);
         SerialSimulator<TestCell<2> >::WriterVector writers = simulator->writers;
         TS_ASSERT_EQUALS(std::size_t(1), writers.size());
@@ -109,11 +109,11 @@ public:
 
     void testSerialSimulatorShouldCallBackWriter()
     {
-        MockWriter *w = new MockWriter(3);
+        MockWriter<> *w = new MockWriter<>(3);
         simulator->addWriter(w);
         simulator->run();
 
-        MockWriter::EventVec expectedEvents;
+        MockWriter<>::EventVec expectedEvents;
         expectedEvents << MockWriterHelpers::MockWriterEvent(startStep, WRITER_INITIALIZED, 0, true);
 
         for (unsigned i = startStep + 2; i <= init->maxSteps(); i += 3) {
@@ -127,23 +127,23 @@ public:
 
     void testRunMustResetGridPriorToSimulation()
     {
-        MockWriter *eventWriter1 = new MockWriter();
+        MockWriter<> *eventWriter1 = new MockWriter<>();
         MemoryWriter<TestCell<2> > *gridWriter1 =
             new MemoryWriter<TestCell<2> >();
         simulator->addWriter(eventWriter1);
         simulator->addWriter(gridWriter1);
 
         simulator->run();
-        MockWriter::EventVec events1 = eventWriter1->events();
+        MockWriter<>::EventVec events1 = eventWriter1->events();
         std::vector<Grid<TestCell<2> > > grids1 = gridWriter1->getGrids();
 
-        MockWriter *eventWriter2 = new MockWriter();
+        MockWriter<> *eventWriter2 = new MockWriter<>();
         MemoryWriter<TestCell<2> > *gridWriter2 =
             new MemoryWriter<TestCell<2> >();
         simulator->addWriter(eventWriter2);
         simulator->addWriter(gridWriter2);
         simulator->run();
-        MockWriter::EventVec events2 = eventWriter2->events();
+        MockWriter<>::EventVec events2 = eventWriter2->events();
         std::vector<Grid<TestCell<2> > > grids2 = gridWriter2->getGrids();
 
         TS_ASSERT_EQUALS(events1, events2);

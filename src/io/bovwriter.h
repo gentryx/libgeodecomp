@@ -92,6 +92,7 @@ private:
     {
         MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
             filename(step, "bov"), comm);
+        // fixme: deduce from stepFinished()
         int rank;
         MPI_Comm_rank(comm, &rank);
 

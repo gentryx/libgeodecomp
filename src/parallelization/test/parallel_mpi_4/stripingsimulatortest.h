@@ -190,8 +190,8 @@ public:
 
     void checkRunAndWriterInteraction(int everyN)
     {
-        MockWriter *expectedCalls = new MockWriter();
-        MockWriter *actualCalls = new MockWriter();
+        MockWriter<> *expectedCalls = new MockWriter<>();
+        MockWriter<> *actualCalls = new MockWriter<>();
 
         referenceSim->addWriter(expectedCalls);
         testSim->addWriter(actualCalls);
@@ -199,8 +199,8 @@ public:
         testSim->run();
         referenceSim->run();
 
-        MockWriter::EventVec expectedEvents = expectedCalls->events();
-        for (MockWriter::EventVec::iterator i = expectedEvents.begin();
+        MockWriter<>::EventVec expectedEvents = expectedCalls->events();
+        for (MockWriter<>::EventVec::iterator i = expectedEvents.begin();
              i != expectedEvents.end();
              ++i) {
             i->rank = MPILayer().rank();
@@ -337,16 +337,16 @@ public:
             balancer,
             balanceEveryN);
 
-        MockWriter *expectedCalls = new MockWriter();
-        MockWriter *actualCalls = new MockWriter();
+        MockWriter<> *expectedCalls = new MockWriter<>();
+        MockWriter<> *actualCalls = new MockWriter<>();
         referenceSim->addWriter(expectedCalls);
         localTestSim.addWriter(actualCalls);
 
         localTestSim.run();
         referenceSim->run();
 
-        MockWriter::EventVec expectedEvents = expectedCalls->events();
-        for (MockWriter::EventVec::iterator i = expectedEvents.begin();
+        MockWriter<>::EventVec expectedEvents = expectedCalls->events();
+        for (MockWriter<>::EventVec::iterator i = expectedEvents.begin();
              i != expectedEvents.end();
              ++i) {
             i->rank = MPILayer().rank();

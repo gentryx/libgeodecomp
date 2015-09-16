@@ -13,58 +13,61 @@
 namespace LibGeoDecomp {
 
 namespace MockWriterHelpers {
-    class MockWriterEvent
+
+class MockWriterEvent
+{
+public:
+    MockWriterEvent(unsigned step, WriterEvent event, std::size_t rank, bool lastCall) :
+        step(step),
+        event(event),
+        rank(rank),
+        lastCall(lastCall)
+    {}
+
+    bool operator==(const MockWriterEvent& other) const
     {
-    public:
-        MockWriterEvent(unsigned step, WriterEvent event, std::size_t rank, bool lastCall) :
-            step(step),
-            event(event),
-            rank(rank),
-            lastCall(lastCall)
-        {}
+        return
+            (other.step     == step    ) &&
+            (other.event    == event   ) &&
+            (other.rank     == rank    ) &&
+            (other.lastCall == lastCall);
+    }
 
-        bool operator==(const MockWriterEvent& other) const
-        {
-            return
-                (other.step     == step    ) &&
-                (other.event    == event   ) &&
-                (other.rank     == rank    ) &&
-                (other.lastCall == lastCall);
+    std::string toString() const
+    {
+        std::stringstream buf;
+        buf << "MockWriterEvent(" << step << ", ";
+        switch(event) {
+        case WRITER_INITIALIZED:
+            buf << "WRITER_INITIALIZED";
+            break;
+        case WRITER_STEP_FINISHED:
+            buf << "WRITER_STEP_FINISHED";
+            break;
+        case WRITER_ALL_DONE:
+            buf << "WRITER_ALL_DONE";
+            break;
+        default:
+            buf << "unknown event";
+            break;
         }
+        buf << ", " << rank << ", " << lastCall << ")\n";
 
-        std::string toString() const
-        {
-            std::stringstream buf;
-            buf << "MockWriterEvent(" << step << ", ";
-            switch(event) {
-            case WRITER_INITIALIZED:
-                buf << "WRITER_INITIALIZED";
-                break;
-            case WRITER_STEP_FINISHED:
-                buf << "WRITER_STEP_FINISHED";
-                break;
-            case WRITER_ALL_DONE:
-                buf << "WRITER_ALL_DONE";
-                break;
-            default:
-                buf << "unknown event";
-                break;
-            }
-            buf << ", " << rank << ", " << lastCall << ")\n";
+        return buf.str();
+    }
 
-            return buf.str();
-        }
+    unsigned step;
+    WriterEvent event;
+    std::size_t rank;
+    bool lastCall;
+};
 
-        unsigned step;
-        WriterEvent event;
-        std::size_t rank;
-        bool lastCall;
-    };
 }
 
+template<typename CELL_TYPE=TestCell<2> >
 class MockWriter :
-        public Clonable<Writer<TestCell<2> >, MockWriter>,
-        public Clonable<ParallelWriter<TestCell<2> >, MockWriter>
+        public Clonable<Writer<        CELL_TYPE>, MockWriter<CELL_TYPE> >,
+        public Clonable<ParallelWriter<CELL_TYPE>, MockWriter<CELL_TYPE> >
 {
 public:
     static std::string staticEvents;
@@ -72,8 +75,8 @@ public:
     typedef std::vector<MockWriterHelpers::MockWriterEvent> EventVec;
 
     explicit MockWriter(const unsigned& period=1) :
-        Clonable<Writer<TestCell<2> >, MockWriter>("", period),
-        Clonable<ParallelWriter<TestCell<2> >, MockWriter>("", period)
+        Clonable<Writer<CELL_TYPE>, MockWriter>("", period),
+        Clonable<ParallelWriter<CELL_TYPE>, MockWriter>("", period)
     {}
 
     ~MockWriter()
@@ -82,7 +85,7 @@ public:
     }
 
     void stepFinished(
-        const Writer<TestCell<2> >::GridType& grid,
+        const typename Writer<CELL_TYPE>::GridType& grid,
         unsigned step,
         WriterEvent event)
     {
@@ -90,7 +93,7 @@ public:
     }
 
     void stepFinished(
-        const ParallelWriter<TestCell<2> >::GridType& grid,
+        const typename ParallelWriter<CELL_TYPE>::GridType& grid,
         const Region<2>& validRegion,
         const Coord<2>& globalDimensions,
         unsigned step,
@@ -101,7 +104,7 @@ public:
         stepFinished(step, event, rank, lastCall);
     }
 
-    EventVec events()
+    EventVec& events()
     {
         return myEvents;
     }
@@ -116,15 +119,18 @@ private:
     }
 };
 
-}
+template<typename CELL_TYPE>
+std::string MockWriter<CELL_TYPE>::staticEvents;
 
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const LibGeoDecomp::MockWriterHelpers::MockWriterEvent& event)
+           const MockWriterHelpers::MockWriterEvent& event)
 {
     __os << event.toString();
     return __os;
+}
+
 }
 
 #endif

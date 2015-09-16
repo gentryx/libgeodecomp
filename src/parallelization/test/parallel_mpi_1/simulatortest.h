@@ -18,16 +18,16 @@ public:
     {
         MockInitializer::events = "";
         MockSimulator::events = "";
-        MockWriter::staticEvents = "";
+        MockWriter<>::staticEvents = "";
         {
             MockSimulator sim(new MockInitializer);
-            sim.addWriter(new MockWriter());
-            sim.addWriter(new MockWriter());
-            sim.addWriter(new MockWriter());
+            sim.addWriter(new MockWriter<>());
+            sim.addWriter(new MockWriter<>());
+            sim.addWriter(new MockWriter<>());
         }
         TS_ASSERT_EQUALS("created, configString: ''\ndeleted\n", MockInitializer::events);
         TS_ASSERT_EQUALS("deleted\n", MockSimulator::events);
-        TS_ASSERT_EQUALS("deleted\ndeleted\ndeleted\n", MockWriter::staticEvents);
+        TS_ASSERT_EQUALS("deleted\ndeleted\ndeleted\n", MockWriter<>::staticEvents);
     }
 
 };
