@@ -85,17 +85,12 @@ public:
             &localityIndices,
             basename,
             updateGroupSpeeds);
-
-        std::cout << "speeds: " << globalUpdateGroupSpeeds << "\n";
-        std::cout << "indices: " << localityIndices << "\n";
     }
 
     inline void run()
     {
-        std::cout << "runA\n";
         initSimulation();
-        std::cout << "runB\n";
-        // statistics = nanoStep(timeToLastEvent());
+        statistics = nanoStep(timeToLastEvent());
     }
 
     void stop()
