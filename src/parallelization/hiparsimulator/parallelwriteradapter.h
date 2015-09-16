@@ -68,6 +68,9 @@ public:
         if (nanoStep == lastNanoStep) {
             event = WRITER_ALL_DONE;
         }
+        if (nanoStep > lastNanoStep) {
+            return;
+        }
 
         writer->stepFinished(
             grid,

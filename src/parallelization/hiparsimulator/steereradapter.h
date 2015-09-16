@@ -69,6 +69,9 @@ public:
         if (globalNanoStep == lastNanoStep) {
             event = STEERER_ALL_DONE;
         }
+        if (globalNanoStep > lastNanoStep) {
+            return;
+        }
 
         if ((event == STEERER_NEXT_STEP) && (step % steerer->getPeriod() != 0)) {
             throw std::logic_error("SteererAdapter called at wrong step (got " + StringOps::itoa(step) +
