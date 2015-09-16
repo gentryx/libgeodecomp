@@ -120,7 +120,7 @@ public:
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
         
-        ats.setParameters(params);
+        //ats.setParameters(params);
         ats.run();
 
     }
