@@ -169,7 +169,7 @@ public:
 
         // sim.addWriter(new HpxWriterCollectorType(sink));
 
-        // sim.run();
+        sim.run();
 
         // if (rank == 0) {
         //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testBasic"));

@@ -90,7 +90,7 @@ public:
     inline void run()
     {
         initSimulation();
-        statistics = nanoStep(timeToLastEvent());
+        nanoStep(timeToLastEvent());
     }
 
     void stop()
@@ -168,10 +168,6 @@ private:
             box.dimensions.prod(),
             globalUpdateGroupSpeeds);
 
-        std::cout << "andiTraceA: " << box << "\n"
-                  << "andiTraceB: " << globalUpdateGroupSpeeds << "\n"
-                  << "andiTraceC: " << weights << "\n";
-
         boost::shared_ptr<PARTITION> partition(
             new PARTITION(
                 box.origin,
@@ -182,27 +178,20 @@ private:
         std::vector<hpx::future<boost::shared_ptr<UpdateGroup<CELL_TYPE> > > > updateGroupCreationFutures;
         std::size_t rank = hpx::get_locality_id();
 
-        std::cout << "peng1\n";
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
             // fixme: add writers/steerers
-            std::cout << "peng1a\n";
-            // updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
-            createUpdateGroup(i, partition);
-            std::cout << "peng1b\n";
+            updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
         }
 
-        std::cout << "peng2\n";
+        // fixme: use unwrapped here?
         for (auto& i: updateGroupCreationFutures) {
-            std::cout << "peng2a\n";
             updateGroups << i.get();
-            std::cout << "peng2b\n";
         }
-        std::cout << "peng3\n";
 
         // writerAdaptersGhost.clear();
         // writerAdaptersInner.clear();
 
-        // initEvents();
+        initEvents();
     }
 
     // fixme: reduce duplication from HiParSimulator
@@ -268,9 +257,19 @@ private:
         // fixme: do we need this after all?
     }
 
-    std::vector<Chronometer> nanoStep(std::size_t remainingNanoSteps)
+    void nanoStep(std::size_t remainingNanoSteps)
     {
-        return std::vector<Chronometer>();
+        std::vector<hpx::future<void> > updateFutures;
+        updateFutures.reserve(updateGroups.size());
+
+        for (auto& i: updateGroups) {
+            updateFutures << hpx::async(&UpdateGroupType::update, i, remainingNanoSteps);
+        }
+
+        // fixme: use wait all here
+        for (auto& i: updateFutures) {
+            i.get();
+        }
     }
 
     /**
