@@ -95,7 +95,8 @@ public:
                     new MockBalancer(),
                     loadBalancingPeriod,
                     ghostZoneWidth));
-        mockWriter = new MockWriter<>();
+        events.reset(new MockWriter<>::EventVec);
+        mockWriter = new MockWriter<>(events);
         memoryWriter = new MemoryWriterType(outputPeriod);
         sim->addWriter(mockWriter);
         sim->addWriter(memoryWriter);
@@ -120,13 +121,13 @@ public:
 
         std::size_t rank = MPILayer().rank();
         MockWriter<>::EventVec expectedEvents;
-        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, false)
-                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, true);
+        expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, false)
+                       << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, true);
         for (int t = 21; t < 25; t += 1) {
-            expectedEvents << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, rank, false)
-                           << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, rank, true);
+            expectedEvents << MockWriter<>::Event(t, WRITER_STEP_FINISHED, rank, false)
+                           << MockWriter<>::Event(t, WRITER_STEP_FINISHED, rank, true);
         }
-        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
+        TS_ASSERT_EQUALS(expectedEvents, *events);
 
         for (int t = 20; t < 25; t += outputPeriod) {
             int globalNanoStep = t * NANO_STEPS;
@@ -295,6 +296,7 @@ private:
     unsigned outputPeriod;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
+    boost::shared_ptr<MockWriter<>::EventVec> events;
     MockWriter<> *mockWriter;
     MemoryWriterType *memoryWriter;
 };

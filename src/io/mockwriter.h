@@ -45,7 +45,11 @@ public:
             buf << "WRITER_STEP_FINISHED";
             break;
         case WRITER_ALL_DONE:
-            buf << "WRITER_ALL_DONE";
+            if (step != -1) {
+                buf << "WRITER_ALL_DONE";
+            } else {
+                buf << "DELETED";
+            }
             break;
         default:
             buf << "unknown event";
@@ -56,7 +60,7 @@ public:
         return buf.str();
     }
 
-    unsigned step;
+    int step;
     WriterEvent event;
     std::size_t rank;
     bool lastCall;
@@ -70,18 +74,18 @@ class MockWriter :
         public Clonable<ParallelWriter<CELL_TYPE>, MockWriter<CELL_TYPE> >
 {
 public:
-    static std::string staticEvents;
+    typedef MockWriterHelpers::MockWriterEvent Event;
+    typedef std::vector<Event> EventVec;
 
-    typedef std::vector<MockWriterHelpers::MockWriterEvent> EventVec;
-
-    explicit MockWriter(const unsigned& period=1) :
+    explicit MockWriter(boost::shared_ptr<EventVec> events, const unsigned& period = 1) :
         Clonable<Writer<CELL_TYPE>, MockWriter>("", period),
-        Clonable<ParallelWriter<CELL_TYPE>, MockWriter>("", period)
+        Clonable<ParallelWriter<CELL_TYPE>, MockWriter>("", period),
+        events(events)
     {}
 
     ~MockWriter()
     {
-        staticEvents += "deleted\n";
+        *events << Event(-1, WRITER_ALL_DONE, -1, true);
     }
 
     void stepFinished(
@@ -104,28 +108,20 @@ public:
         stepFinished(step, event, rank, lastCall);
     }
 
-    EventVec& events()
-    {
-        return myEvents;
-    }
-
 private:
-    EventVec myEvents;
+    boost::shared_ptr<MockWriter::EventVec> events;
 
     void stepFinished(unsigned step, WriterEvent event, std::size_t rank, bool lastCall)
 
     {
-        myEvents << MockWriterHelpers::MockWriterEvent(step, event, rank, lastCall);
+        *events << Event(step, event, rank, lastCall);
     }
 };
-
-template<typename CELL_TYPE>
-std::string MockWriter<CELL_TYPE>::staticEvents;
 
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const MockWriterHelpers::MockWriterEvent& event)
+           const MockWriter<>::Event& event)
 {
     __os << event.toString();
     return __os;

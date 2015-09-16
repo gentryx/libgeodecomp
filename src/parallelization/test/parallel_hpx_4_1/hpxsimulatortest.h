@@ -122,6 +122,7 @@ public:
         maxTimeSteps = 10;
         rank = hpx::get_locality_id();
         localities = hpx::find_all_localities();
+        events.reset(new MockWriter<>::EventVec);
     }
 
     void tearDown()
@@ -153,17 +154,26 @@ public:
             "/0/fixme_HPXSimulatorUpdateGroupSdfafafasdasd");
 
         // fixme: use an external vector to record events
-        MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(outputFrequency);
+        MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
         sim.addWriter(writer);
 
-        std::cout << "pre:  " << writer->events() << "\n";
         sim.run();
-        std::cout << "post: " << writer->events() << "\n";
 
-        // if (rank == 0) {
-        //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testBasic"));
-        // }
-        // p["testBasic"].get_future().get();
+        MockWriter<>::EventVec expectedEvents;
+        int startStep = init->startStep();
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
+        for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
+        }
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
+
+        std::cout << "actual: " << *events << "\n"
+                  << "expected: " << expectedEvents << "\n";
+        TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
+        TS_ASSERT_EQUALS(expectedEvents,       *events);
     }
 
     void fastestHeterogeneous()
@@ -346,10 +356,12 @@ public:
         removeFile(buf.str() + ".data");
     }
 
+private:
     std::size_t rank;
     std::vector<hpx::id_type> localities;
     int outputFrequency;
     int maxTimeSteps;
+    boost::shared_ptr<MockWriter<>::EventVec> events;
 };
 
 }
