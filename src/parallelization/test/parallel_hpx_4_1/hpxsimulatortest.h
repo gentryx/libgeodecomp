@@ -148,7 +148,6 @@ public:
 
     void testBasic()
     {
-        // works:
         CellInitializer *init = new CellInitializer(maxTimeSteps);
 
         std::vector<double> updateGroupSpeeds(1, 1.0);
@@ -160,7 +159,7 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0_fixme_HPXSimulatorUpdateGroupSdfafafasdasd");
+            "/0/fixme_HPXSimulatorUpdateGroupSdfafafasdasd");
 
         // fixme: add writer!
         // HpxWriterCollectorType::SinkType sink(
@@ -214,7 +213,7 @@ public:
 
     std::string genName(int source, int target)
     {
-        std::string basename = "/0_fixme_HPXSimulatorUpdateGroupSdfafafasdasd";
+        std::string basename = "/0/fixme_HPXSimulatorUpdateGroupSdfafafasdasd";
 
         return basename + "/PatchLink/" +
             StringOps::itoa(source) + "-" +
@@ -232,19 +231,8 @@ public:
 
         using namespace boost::assign;
 
-        // good
-        // std::string basename = "HPXSimulatorUpdateGroupSdfafafasdasd";
+        std::string basename = "/0/HPXSimulatorUpdateGroupSdfafafaXXX";
 
-        std::string basename = "/0_HPXSimulatorUpdateGroupSdfafafaXXX";
-
-        // bad
-        // std::string basename = "HPXSimulatorUpdateGroupSdfafa";
-
-        // bad
-        // std::string basename = "HPXSimulatorUpdateGroup";
-
-        // bad
-        // std::string basename = "HPXSimulatorTesfd";
         boost::shared_ptr<UpdateGroupType> updateGroup;
         boost::shared_ptr<PartitionType> partition;
         boost::shared_ptr<Initializer<TestCell<2> > > init;
@@ -256,7 +244,6 @@ public:
                 << 3600
                 << 3600
                 << 3600;
-        std::cout << "weights: " << weights << "\n";
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         int ghostZoneWidth = 1;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));
@@ -297,7 +284,7 @@ public:
 
         using namespace boost::assign;
 
-        std::string basename = "/0_HpxSimulatorTestCreation";
+        std::string basename = "/0/HpxSimulatorTestCreation";
         boost::shared_ptr<UpdateGroupType> updateGroup;
         boost::shared_ptr<PartitionType> partition;
         boost::shared_ptr<Initializer<TestCell<2> > > init;
@@ -309,7 +296,6 @@ public:
                 << 3600
                 << 3600
                 << 3600;
-        std::cout << "weights: " << weights << "\n";
         partition.reset(new PartitionType(Coord<2>(), dimensions, 0, weights));
         int ghostZoneWidth = 1;
         init.reset(new TestInitializer<TestCell<2> >(dimensions));

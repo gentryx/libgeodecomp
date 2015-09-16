@@ -19,7 +19,6 @@
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
-
 namespace HpxSimulatorHelpers {
 
 void gatherAndBroadcastLocalityIndices(
@@ -30,12 +29,6 @@ void gatherAndBroadcastLocalityIndices(
     const std::vector<double> updateGroupSpeeds);
 
 }
-}
-}
-
-namespace LibGeoDecomp {
-namespace HpxSimulator {
-
 
 enum EventPoint {LOAD_BALANCING, END};
 typedef std::set<EventPoint> EventSet;
@@ -58,7 +51,6 @@ public:
 
     static const int DIM = Topology::DIM;
 
-public:
     /**
      * Creates an HpxSimulator. Parameters are essentially the same as
      * for the HiParSimulator. The vector updateGroupSpeeds controls
@@ -71,7 +63,7 @@ public:
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1,
-        std::string basename = "HPXSimulator") :
+        std::string basename = "/0/fixme_HPXSimulator") :
         ParentType(initializer),
         updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
@@ -93,28 +85,21 @@ public:
         nanoStep(timeToLastEvent());
     }
 
-    void stop()
-    {
-        // hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
-        //     updateGroupsIds
-        // ).wait();
-    }
-
+    // fixme: needs test
     inline void step()
     {
-        // init();
-        // nanoStep(NANO_STEPS);
+        initSimulation();
+        nanoStep(NANO_STEPS);
     }
 
+    // fixme: needs test
     virtual unsigned getStep() const
     {
-        // if (initialized) {
-            // return typename UpdateGroupType::ComponentType::CurrentStepAction()(updateGroupsIds[0]).first;
-        // } else {
-        //     return initializer->startStep();
-        // }
+        if (updateGroups.size() == 0) {
+            return initializer->startStep();
+        }
 
-        return 0;
+        return updateGroups[0]->currentStep().first;
     }
 
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
@@ -304,20 +289,11 @@ private:
         std::size_t rank,
         boost::shared_ptr<PARTITION> partition)
     {
-        std::cout << "  createUpdateGroup1\n";
         CoordBox<DIM> box = initializer->gridBox();
         typedef typename UpdateGroup<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
         typedef typename UpdateGroup<CELL_TYPE>::PatchProviderVec PatchProviderVec;
 
-        std::cout << "andiTraceD: " << box << "\n"
-                  << "andiTraceE: " << ghostZoneWidth << "\n"
-                  << "andiTraceF: " << basename << "\n"
-                  << "andiTraceG: " << rank << "\n";
-
-        
-        std::cout << "  createUpdateGroup2\n";
         boost::shared_ptr<UpdateGroupType> ret;
-        std::cout << "  createUpdateGroup3\n";
         ret.reset(new UpdateGroupType(
                 partition,
                 box,
@@ -330,9 +306,7 @@ private:
                 PatchProviderVec(),
                 basename,
                 rank));
-        std::cout << "  createUpdateGroup4\n";
         return ret;
-
     }
 
 };
