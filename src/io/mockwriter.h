@@ -76,6 +76,7 @@ class MockWriter :
 public:
     typedef MockWriterHelpers::MockWriterEvent Event;
     typedef std::vector<Event> EventVec;
+    using Writer<CELL_TYPE>::DIM;
 
     explicit MockWriter(boost::shared_ptr<EventVec> events, const unsigned& period = 1) :
         Clonable<Writer<CELL_TYPE>, MockWriter>("", period),
@@ -98,8 +99,8 @@ public:
 
     void stepFinished(
         const typename ParallelWriter<CELL_TYPE>::GridType& grid,
-        const Region<2>& validRegion,
-        const Coord<2>& globalDimensions,
+        const Region<DIM>& validRegion,
+        const Coord<DIM>& globalDimensions,
         unsigned step,
         WriterEvent event,
         std::size_t rank,
