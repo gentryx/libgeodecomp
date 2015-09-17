@@ -22,9 +22,11 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
+    typedef typename ParentType::PatchProviderVec PatchProviderVec;
 
     using Stepper<CELL_TYPE>::guessOffset;
     using Stepper<CELL_TYPE>::addPatchAccepter;
+    using Stepper<CELL_TYPE>::addPatchProvider;
     using Stepper<CELL_TYPE>::chronometer;
     using Stepper<CELL_TYPE>::initializer;
     using Stepper<CELL_TYPE>::partitionManager;
@@ -35,7 +37,9 @@ public:
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
-        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
+        const PatchAccepterVec& innerSetPatchAccepters  = PatchAccepterVec(),
+        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& innerSetPatchProviders  = PatchProviderVec()) :
         Stepper<CELL_TYPE>(
             partitionManager,
             initializer)
@@ -49,7 +53,14 @@ public:
         for (std::size_t i = 0; i < innerSetPatchAccepters.size(); ++i) {
             addPatchAccepter(innerSetPatchAccepters[i], ParentType::INNER_SET);
         }
-    }
+
+        for (std::size_t i = 0; i < ghostZonePatchProviders.size(); ++i) {
+            addPatchProvider(ghostZonePatchProviders[i], ParentType::GHOST);
+        }
+        for (std::size_t i = 0; i < innerSetPatchProviders.size(); ++i) {
+            addPatchProvider(innerSetPatchProviders[i], ParentType::INNER_SET);
+        }
+}
 
     inline virtual void update(std::size_t nanoSteps)
     {
@@ -136,9 +147,12 @@ protected:
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         initializer->grid(&*oldGrid);
-        newGrid->setEdge(oldGrid->getEdge());
-        resetValidGhostZoneWidth();
+        notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
+        notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
+        newGrid->setEdge(oldGrid->getEdge());
+
+        resetValidGhostZoneWidth();
         kernelBuffer = PatchBufferType1(getVolatileKernel());
         rimBuffer = PatchBufferType2(rim());
 

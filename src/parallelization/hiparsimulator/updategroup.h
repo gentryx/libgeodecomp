@@ -134,34 +134,23 @@ public:
             patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
         }
 
+        // notify all PatchProviders of the process' region:
+        for (std::size_t i = 0; i < patchProvidersGhost.size(); ++i) {
+            patchProvidersGhost[i]->setRegion(partitionManager->ownRegion());
+        }
+        for (std::size_t i = 0; i < patchProvidersInner.size(); ++i) {
+            patchProvidersInner[i]->setRegion(partitionManager->ownRegion());
+        }
+
         stepper.reset(new STEPPER(
                           partitionManager,
                           this->initializer,
                           patchAcceptersGhost + ghostZoneAccepterLinks,
-                          patchAcceptersInner));
-
-        // the ghostzone receivers may be safely added after
-        // initialization as they're only really needed when the next
-        // ghostzone generation is being received.
-        for (typename PatchProviderVec::iterator i = patchLinkProviders.begin(); i != patchLinkProviders.end(); ++i) {
-            addPatchProvider(*i, StepperType::GHOST);
-        }
-
-        // add external PatchProviders last to allow them to override
-        // the local ghost zone providers (a.k.a. PatchLink::Source).
-        for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
-             i != patchProvidersGhost.end();
-             ++i) {
-            (*i)->setRegion(partitionManager->ownRegion());
-            addPatchProvider(*i, StepperType::GHOST);
-        }
-
-        for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
-             i != patchProvidersInner.end();
-             ++i) {
-            (*i)->setRegion(partitionManager->ownRegion());
-            addPatchProvider(*i, StepperType::INNER_SET);
-        }
+                          patchAcceptersInner,
+                          // add external PatchProviders last to allow them to override
+                          // the local ghost zone providers (a.k.a. PatchLink::Source).
+                          patchLinkProviders + patchProvidersGhost,
+                          patchProvidersInner));
     }
 
     virtual ~UpdateGroup()

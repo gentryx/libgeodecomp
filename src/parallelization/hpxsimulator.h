@@ -67,7 +67,7 @@ public:
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
         const unsigned ghostZoneWidth = 1,
-        std::string basename = "/0/fixme_HPXSimulator") :
+        std::string basename = "/0/fixme/HPXSimulator") :
         ParentType(initializer),
         updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
@@ -89,14 +89,12 @@ public:
         nanoStep(timeToLastEvent());
     }
 
-    // fixme: needs test
     inline void step()
     {
         initSimulation();
         nanoStep(NANO_STEPS);
     }
 
-    // fixme: needs test
     virtual unsigned getStep() const
     {
         if (updateGroups.size() == 0) {
@@ -220,14 +218,9 @@ private:
         std::size_t rank = hpx::get_locality_id();
 
         for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
-            // fixme: add writers/steerers
             updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
         }
-
-        // fixme: use unwrapped here?
-        for (auto& i: updateGroupCreationFutures) {
-            updateGroups << i.get();
-        }
+        updateGroups = hpx::util::unwrapped(std::move(updateGroupCreationFutures));
 
         writerAdaptersGhost.clear();
         writerAdaptersInner.clear();
@@ -309,10 +302,7 @@ private:
             updateFutures << hpx::async(&UpdateGroupType::update, i, remainingNanoSteps);
         }
 
-        // fixme: use wait all here
-        for (auto& i: updateFutures) {
-            i.get();
-        }
+        hpx::lcos::wait_all(std::move(updateFutures));
     }
 
     /**

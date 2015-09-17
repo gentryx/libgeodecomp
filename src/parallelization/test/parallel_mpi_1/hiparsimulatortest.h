@@ -154,7 +154,9 @@ public:
         s.reset();
 
         std::stringstream expected;
-        expected << "created, period = 5\n";
+        expected << "created, period = 5\n"
+                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, 0, 0)\n"
+                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, 0, 1)\n";
         for (int i = 25; i < 200; i += 5) {
             expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 0)\n"
                      << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";

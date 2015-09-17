@@ -291,6 +291,36 @@ public:
         TS_ASSERT_EQUALS(expectedEvents,       *events);
     }
 
+    void testStepAndGetStep()
+    {
+        typedef HpxSimulator::HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        outputFrequency = 5;
+        int startStep = 4;
+        maxTimeSteps = 29;
+        Coord<3> dim(80, 40, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps, startStep);
+        std::vector<double> updateGroupSpeeds(4, 1.0);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/0/fixme/HpxSimulatorTest/testStepAndGetStep");
+
+        TS_ASSERT_EQUALS(startStep + 0, sim.getStep());
+
+        sim.step();
+        TS_ASSERT_EQUALS(startStep + 1, sim.getStep());
+
+        sim.step();
+        TS_ASSERT_EQUALS(startStep + 2, sim.getStep());
+    }
+
     void removeFile(std::string name)
     {
         remove(name.c_str());
