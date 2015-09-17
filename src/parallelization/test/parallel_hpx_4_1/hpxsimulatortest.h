@@ -3,6 +3,7 @@
 #include <hpx/hpx_init.hpp>
 #include <boost/assign/std/deque.hpp>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+#include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/mockwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
@@ -192,6 +193,85 @@ public:
             "/0/fixme/HpxSimulatorTest/testHeterogeneous");
 
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
+        sim.addWriter(writer);
+
+        sim.run();
+
+        MockWriter<>::EventVec expectedEvents;
+        int startStep = init->startStep();
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
+        for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
+        }
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
+
+        TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
+        TS_ASSERT_EQUALS(expectedEvents,       *events);
+    }
+
+    void testWithTestCell2D()
+    {
+        typedef HpxSimulator::HpxSimulator<TestCell<2>, RecursiveBisectionPartition<2> > SimulatorType;
+        std::vector<double> updateGroupSpeeds(1, 1.0);
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        Coord<2> dim(100, 50);
+
+        TestInitializer<TestCell<2> > *init = new TestInitializer<TestCell<2> >(dim, maxTimeSteps);
+
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/0/fixme/HpxSimulatorTest/testWithTestCell2D");
+
+        MockWriter<TestCell<2> > *writer = new MockWriter<TestCell<2> >(events, outputFrequency);
+        sim.addWriter(writer);
+
+        sim.run();
+
+        MockWriter<>::EventVec expectedEvents;
+        int startStep = init->startStep();
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
+        for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
+        }
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
+
+        TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
+        TS_ASSERT_EQUALS(expectedEvents,       *events);
+    }
+
+    void testWithTestCell3DHeterogeneous()
+    {
+        typedef HpxSimulator::HpxSimulator<TestCell<3>, ZCurvePartition<3> > SimulatorType;
+        std::size_t rank = hpx::get_locality_id();
+        std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        outputFrequency = 5;
+        maxTimeSteps = 9;
+        Coord<3> dim(50, 40, 30);
+
+        TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >(dim, maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/0/fixme/HpxSimulatorTest/testWithTestCell3DHeterogeneous");
+
+        MockWriter<TestCell<3>> *writer = new MockWriter<TestCell<3>>(events, outputFrequency);
         sim.addWriter(writer);
 
         sim.run();
