@@ -622,12 +622,15 @@ public:
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
                     Adjacency::const_iterator it = adjacency.find(x);
-                    if (it != adjacency.end()) {
-                        for (std::vector<int>::const_iterator i = it->second.begin(); i != it->second.end(); ++i) {
-                            Coord<DIM> c(*i);
-                            if (ret.count(c) == 0) {
-                                add << c;
-                            }
+                    if (it == adjacency.end()) {
+                        continue;
+                    }
+
+                    const std::vector<int>& neighbors = it->second;
+                    for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
+                        Coord<DIM> c(*i);
+                        if (ret.count(c) == 0) {
+                            add << c;
                         }
                     }
                 }
@@ -858,6 +861,129 @@ public:
         *this = newValue;
     }
 
+    inline Region operator+(const Region& other) const
+    {
+        Region ret;
+
+        merge2way(
+            ret,
+            this->beginStreak(), this->endStreak(),
+            other.beginStreak(), other.endStreak());
+
+        return ret;
+    }
+
+    inline std::vector<Streak<DIM> > toVector() const
+    {
+        std::vector<Streak<DIM> > ret(numStreaks());
+        std::copy(beginStreak(), endStreak(), ret.begin());
+        return ret;
+    }
+
+    inline std::string toString() const
+    {
+        std::ostringstream buf;
+        buf << "Region<" << DIM << ">(\n";
+        for (int dim = 0; dim < DIM; ++dim) {
+            buf << "  indices[" << dim << "] = "
+                << indices[dim] << "\n";
+        }
+        buf << ")\n";
+
+        return buf.str();
+
+    }
+
+    inline std::string prettyPrint() const
+    {
+        std::ostringstream buf;
+        buf << "Region<" << DIM << ">(\n";
+
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+            buf << "  " << *i << "\n";
+        }
+
+        buf << ")\n";
+
+        return buf.str();
+    }
+
+    inline bool empty() const
+    {
+        return (indices[0].size() == 0);
+    }
+
+    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
+    }
+
+    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset);
+    }
+
+    /**
+     * Returns an iterator whose internal iterators are set to the
+     * given offsets from the corresponding array starts. Runs in O(1)
+     * time.
+     */
+    inline StreakIterator operator[](const Coord<DIM>& offsets) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitOffsets<DIM - 1, DIM>(offsets));
+    }
+
+    /**
+     * Yields an iterator to the offset'th Streak in the Region. Runs
+     * in O(log n) time.
+     */
+    inline StreakIterator operator[](std::size_t offset) const
+    {
+        if (offset == 0) {
+            return beginStreak();
+        }
+        if (offset >= numStreaks()) {
+            return endStreak();
+        }
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
+    }
+
+    inline Iterator begin() const
+    {
+        return Iterator(beginStreak());
+    }
+
+    inline Iterator end() const
+    {
+        return Iterator(endStreak());
+    }
+
+    inline std::size_t indicesSize(std::size_t dim) const
+    {
+        return indices[dim].size();
+    }
+
+    inline IndexVectorType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
+    {
+        return indices[dim].begin() + offset;
+    }
+
+    inline IndexVectorType::const_iterator indicesBegin(std::size_t dim) const
+    {
+        return indices[dim].begin();
+    }
+
+    inline IndexVectorType::const_iterator indicesEnd(std::size_t dim) const
+    {
+        return indices[dim].end();
+    }
+
+private:
+    IndexVectorType indices[DIM];
+    mutable CoordBox<DIM> myBoundingBox;
+    mutable std::size_t mySize;
+    mutable bool geometryCacheTainted;
+
 #define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
             if (*ITERATOR != lastInsert) {         \
                 ret << *ITERATOR;                  \
@@ -984,129 +1110,6 @@ public:
     }
 
 #undef LIBGEODECOMP_REGION_ADVANCE_ITERATOR
-
-    inline Region operator+(const Region& other) const
-    {
-        Region ret;
-
-        merge2way(
-            ret,
-            this->beginStreak(), this->endStreak(),
-            other.beginStreak(), other.endStreak());
-
-        return ret;
-    }
-
-    inline std::vector<Streak<DIM> > toVector() const
-    {
-        std::vector<Streak<DIM> > ret(numStreaks());
-        std::copy(beginStreak(), endStreak(), ret.begin());
-        return ret;
-    }
-
-    inline std::string toString() const
-    {
-        std::ostringstream buf;
-        buf << "Region<" << DIM << ">(\n";
-        for (int dim = 0; dim < DIM; ++dim) {
-            buf << "  indices[" << dim << "] = "
-                << indices[dim] << "\n";
-        }
-        buf << ")\n";
-
-        return buf.str();
-
-    }
-
-    inline std::string prettyPrint() const
-    {
-        std::ostringstream buf;
-        buf << "Region<" << DIM << ">(\n";
-
-        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
-            buf << "  " << *i << "\n";
-        }
-
-        buf << ")\n";
-
-        return buf.str();
-    }
-
-    inline bool empty() const
-    {
-        return (indices[0].size() == 0);
-    }
-
-    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
-    {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
-    }
-
-    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>()) const
-    {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset);
-    }
-
-    /**
-     * Returns an iterator whose internal iterators are set to the
-     * given offsets from the corresponding array starts. Runs in O(1)
-     * time.
-     */
-    inline StreakIterator operator[](const Coord<DIM>& offsets) const
-    {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitOffsets<DIM - 1, DIM>(offsets));
-    }
-
-    /**
-     * Yields an iterator to the offset'th Streak in the Region. Runs
-     * in O(log n) time.
-     */
-    inline StreakIterator operator[](std::size_t offset) const
-    {
-        if (offset == 0) {
-            return beginStreak();
-        }
-        if (offset >= numStreaks()) {
-            return endStreak();
-        }
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
-    }
-
-    inline Iterator begin() const
-    {
-        return Iterator(beginStreak());
-    }
-
-    inline Iterator end() const
-    {
-        return Iterator(endStreak());
-    }
-
-    inline std::size_t indicesSize(std::size_t dim) const
-    {
-        return indices[dim].size();
-    }
-
-    inline IndexVectorType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
-    {
-        return indices[dim].begin() + offset;
-    }
-
-    inline IndexVectorType::const_iterator indicesBegin(std::size_t dim) const
-    {
-        return indices[dim].begin();
-    }
-
-    inline IndexVectorType::const_iterator indicesEnd(std::size_t dim) const
-    {
-        return indices[dim].end();
-    }
-
-private:
-    IndexVectorType indices[DIM];
-    mutable CoordBox<DIM> myBoundingBox;
-    mutable std::size_t mySize;
-    mutable bool geometryCacheTainted;
 
     inline void determineGeometry() const
     {
