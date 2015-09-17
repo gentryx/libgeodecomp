@@ -5,27 +5,27 @@
 
 #include <mpi.h>
 #include <complex>
-#include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/coord.h>
-#include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/geometry/coordbox.h>
-#include <libgeodecomp/storage/fixedarray.h>
-#include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/testcell.h>
-#include <libgeodecomp/misc/chronometer.h>
+#include <geometry/coord.h>
+#include <geometry/coord.h>
+#include <geometry/coord.h>
+#include <geometry/coordbox.h>
+#include <geometry/coordbox.h>
+#include <geometry/coordbox.h>
+#include <geometry/coordbox.h>
+#include <storage/fixedarray.h>
+#include <geometry/floatcoord.h>
+#include <geometry/floatcoord.h>
+#include <geometry/floatcoord.h>
+#include <geometry/floatcoord.h>
+#include <geometry/streak.h>
+#include <geometry/streak.h>
+#include <geometry/streak.h>
+#include <geometry/streak.h>
+#include <misc/testcell.h>
+#include <misc/testcell.h>
+#include <misc/testcell.h>
+#include <misc/testcell.h>
+#include <misc/chronometer.h>
 
 extern MPI_Datatype MPI_LIBGEODECOMP_COORD_1_;
 extern MPI_Datatype MPI_LIBGEODECOMP_COORD_2_;

@@ -90,13 +90,42 @@ public:
  * internal helper class
  */
 template<int DIM>
+class StreakIteratorInitPlaneOffset
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef std::vector<IntPair> IndexVectorType;
+
+    explicit StreakIteratorInitPlaneOffset(const std::size_t offset) :
+        offset(offset)
+    {}
+
+    template<int STREAK_DIM, typename REGION>
+    inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& unusedOffsets) const
+    {
+        iterators[DIM] = region.indicesBegin(DIM) + offset;
+        for (int d = DIM - 1; d >= 0; --d) {
+            iterators[d] = region.indicesBegin(d) + iterators[d + 1]->second;
+        }
+
+        ConstructStreakFromIterators<DIM>()(streak, iterators, unusedOffsets);
+    }
+
+private:
+    const std::size_t offset;
+};
+
+/**
+ * internal helper class
+ */
+template<int DIM>
 class StreakIteratorInitSingleOffset
 {
 public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffset(const std::size_t& offsetIndex) :
+    explicit StreakIteratorInitSingleOffset(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
 
@@ -118,7 +147,7 @@ public:
     }
 
 private:
-    const std::size_t& offsetIndex;
+    const std::size_t offsetIndex;
 };
 
 /**
@@ -131,7 +160,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffset(const std::size_t& offsetIndex) :
+    explicit StreakIteratorInitSingleOffset(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
 
@@ -143,7 +172,7 @@ public:
     }
 
 private:
-    const std::size_t& offsetIndex;
+    const std::size_t offsetIndex;
 };
 
 /**
@@ -156,7 +185,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t& offsetIndex) :
+    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
 
@@ -169,7 +198,7 @@ public:
     }
 
 private:
-    const std::size_t& offsetIndex;
+    const std::size_t offsetIndex;
 };
 
 /**
@@ -182,7 +211,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM> offsets) :
         offsets(offsets)
     {}
 
@@ -196,7 +225,7 @@ public:
     }
 
 private:
-    const Coord<COORD_DIM>& offsets;
+    const Coord<COORD_DIM> offsets;
 };
 
 /**
@@ -209,7 +238,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM> offsets) :
         offsets(offsets)
     {}
 
@@ -224,7 +253,7 @@ public:
     }
 
 private:
-    const Coord<COORD_DIM>& offsets;
+    const Coord<COORD_DIM> offsets;
 };
 
 /**
@@ -925,7 +954,7 @@ public:
 
     /**
      * Returns an iterator whose internal iterators are set to the
-     * given offsets from the corresponding array starts. Runs in O(1)
+     * given offsets from the corresponding array starts. Runs in O(DIM)
      * time.
      */
     inline StreakIterator operator[](const Coord<DIM>& offsets) const
@@ -935,7 +964,7 @@ public:
 
     /**
      * Yields an iterator to the offset'th Streak in the Region. Runs
-     * in O(log n) time.
+     * in O(DIM * log n) time.
      */
     inline StreakIterator operator[](std::size_t offset) const
     {
@@ -946,6 +975,29 @@ public:
             return endStreak();
         }
         return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
+    }
+
+    /**
+     * Yields an iterator to the offset'th plane in the region (i.e. a
+     * XY-plane for 3D or a row for 2D). Runs in O(DIM). This is an
+     * efficient way to generate starting points for multi-threaded
+     * iteration through a Region.
+     */
+    inline StreakIterator planeStreakIterator(std::size_t offset) const
+    {
+        if (offset == 0) {
+            return beginStreak();
+        }
+        if (offset >= numPlanes()) {
+            return endStreak();
+        }
+
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitPlaneOffset<DIM - 1>(offset));
+    }
+
+    inline std::size_t numPlanes() const
+    {
+        return indices[DIM -1].size();
     }
 
     inline Iterator begin() const
