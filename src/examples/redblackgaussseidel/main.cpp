@@ -27,7 +27,7 @@ public:
     {};
 
     explicit
-    inline Cell(double cellType = 0, double v = BOUNDARY) :
+    inline Cell(CellType cellType = BOUNDARY, double v = 0) :
         temp(v),
         type(cellType)
     {}

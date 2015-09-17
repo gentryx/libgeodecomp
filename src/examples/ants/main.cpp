@@ -3,6 +3,7 @@
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/communication/hpxserialization.h>
 
 using namespace LibGeoDecomp;
 
