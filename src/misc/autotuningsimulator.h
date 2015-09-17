@@ -20,7 +20,7 @@ public:
         Result(std::string name = std::string(),
             SimulationParameters param=SimulationParameters(), 
             double fit = DBL_MAX):
-            nameOfSimulation(name),
+            nameOfSimulation(name),  
             parameters(param),
             fitness(fit)
         {}
@@ -36,6 +36,7 @@ public:
         result_ptr result;
         simFactory_ptr simulationFactory;
     };
+        typedef typename std::map<const std::string, Simulation>::iterator iter_type;
 
     template<typename INITIALIZER>
     AutoTuningSimulator(INITIALIZER initializer):
@@ -45,29 +46,72 @@ public:
 
 
         simFactory_ptr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
-        result_ptr ss_result(new Result("SerialSimulation", ss_p->parameters()));
+        result_ptr sr_p(new Result("SerialSimulation", ss_p->parameters()));
         Simulation ss_simulation;
-        ss_simulation.result = ss_result;
+        ss_simulation.result = sr_p;
         ss_simulation.simulationFactory = ss_p;
         simulations["SerialSimulation"] = ss_simulation;
 
         simFactory_ptr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-        result_ptr cbs_result(new Result("CacheBlockingSimulatoin", cbs_p->parameters()));
+        result_ptr cbs_result(new Result("CacheBlockingSimulation", cbs_p->parameters()));
         Simulation cbs_simulation;
         cbs_simulation.result = cbs_result;
         cbs_simulation.simulationFactory = cbs_p;
         simulations["CacheBlockingSimulation"] = cbs_simulation;
+
+/*        simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+        result_ptr cudar_p(new Result("CudaSimulation", cudas_p->parameters()));
+        Simulation cudas_simulation;
+        simulations["CudaSimulation"].result = cudar_p;
+        simulations["CudaSimulation"].simulationFactory = cudas_p;*/
     }
 
     ~AutoTuningSimulator()
     {}
-
-    void addNewSimulation(Simulation simulation, std::string name)
-    {}
-
-    SimulationParameters getSimulationParameters(const std::string simulationType)
+    
+    template<typename INITIALIZER>
+    void addNewSimulation(Result& newResult, std::string name, INITIALIZER initializer)
     {
-        return simulations[simulationType].result->parameters;
+        // FIXME in newResult maybe no or wrong params!?
+        std::string simName = newResult.nameOfSimulation;
+        if (simName == "SerialSimulation")
+        {
+            simFactory_ptr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
+            result_ptr cbr_p(new Result(newResult));
+            simulations[name].result = cbr_p;
+            simulations[name].simulationFactory = ss_p;
+            return;
+        }
+        if (simName == "CacheBlockingSimulation")
+        {
+            simFactory_ptr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+            result_ptr cbr_p(new Result(newResult));
+            simulations[name].result = cbr_p;
+            simulations[name].simulationFactory = cbs_p;
+            return;
+        }
+        if (simName == "CudaSimulation")
+        {
+            simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+            result_ptr cbr_p(new Result(newResult));
+            simulations[name].result = cbr_p;
+            simulations[name].simulationFactory = cudas_p;
+        }
+        // FIXME throw excetion!!
+        throw std::invalid_argument("unknown Simulator type");
+    }
+
+    void deleteAllSimulations()
+    {
+        simulations.clear();
+    }
+
+    SimulationParameters getSimulationParameters(const std::string simulationName)const
+    {
+        if (isInMap(simulationName))
+            return simulations[simulationName].result->parameters;
+        else
+            return NULL;
     }
     
     void setSimulationSteps(unsigned steps)
@@ -77,16 +121,23 @@ public:
     
 
     void setParameters(SimulationParameters params, std::string name)
-    {}
+    {
+           
+        if (isInMap(name))
+            simulations[name].result->parameters = params;
+        else
+            throw std::invalid_argument(
+                "AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
+    }
 
     void setOptimizer(OPTIMIZER_TYPE optimizer)
     {/*FIXME*/}
 
     virtual void run()
     {
-        typedef typename std::map<const std::string, Simulation>::iterator iter_type;
-        for (iter_type iter = simulations.begin(); iter != simulations.end(); ++iter)
+        for (iter_type iter = simulations.begin(); iter != simulations.end(); iter++)
         {
+            LOG(Logger::DBG, iter->first)
             OPTIMIZER_TYPE optimizer(iter->second.result->parameters);
             iter->second.result->parameters = optimizer(
                 simulationSteps, 
@@ -103,6 +154,14 @@ private:
     std::map<const std::string, Simulation> simulations;
     std::vector<result_ptr> results;
     unsigned simulationSteps;
+
+    bool isInMap(const std::string name)const
+    {
+        if (simulations.find(name) == simulations.end())
+            return false;
+        else
+            return true;
+    }
 }; //AutoTunigSimulator
 } // namespace LibGeoDecomp
 

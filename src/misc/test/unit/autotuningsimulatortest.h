@@ -95,6 +95,7 @@ public:
         LOG(Logger::INFO, "AutotuningSimulatorTest::TestBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
+        ats.setSimulationSteps(4);
         ats.run();
     }
 
@@ -103,6 +104,24 @@ public:
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
+        ats.run();
+    }
+
+    void xtestAddOwnSimulations()
+    {
+        LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
+            SimFabTestInitializer(dim, maxSteps));
+        ats.deleteAllSimulations();
+        SimulationParameters params;
+        params.addParameter("WavefrontWidth", 1, 300);
+        params.addParameter("WavefrontHeight", 1, 300);
+        params.addParameter("PipelineLength", 1, 25);
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer>::Result newResult(
+            "CacheBlockingSimulation",
+            params);
+        ats.addNewSimulation(newResult, "1.CacheBlockingSimulator",
+            SimFabTestInitializer(dim,maxSteps));
         ats.run();
     }
 
@@ -120,7 +139,7 @@ public:
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
         
-        //ats.setParameters(params);
+        ats.setParameters(params, "CacheBlockingSimulation");
         ats.run();
 
     }
