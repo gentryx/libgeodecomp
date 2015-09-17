@@ -151,9 +151,8 @@ public:
             new TracingBalancer(new OozeBalancer()),
             loadBalancingPeriod,
             ghostZoneWidth,
-            "/0/fixme_HPXSimulatorUpdateGroupSdfafafasdasd");
+            "/0/fixme/HpxSimulatorTest/testBasic");
 
-        // fixme: use an external vector to record events
         MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
         sim.addWriter(writer);
 
@@ -170,45 +169,46 @@ public:
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
         expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
 
-        std::cout << "actual: " << *events << "\n"
-                  << "expected: " << expectedEvents << "\n";
         TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
         TS_ASSERT_EQUALS(expectedEvents,       *events);
     }
 
-    void fastestHeterogeneous()
+    void testHeterogeneous()
     {
         std::size_t rank = hpx::get_locality_id();
         std::vector<hpx::id_type> localities = hpx::find_all_localities();
+        outputFrequency = 5;
+        maxTimeSteps = 66;
         CellInitializer *init = new CellInitializer(maxTimeSteps);
+        std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
+        int loadBalancingPeriod = 10;
+        int ghostZoneWidth = 1;
+        SimulatorType sim(
+            init,
+            updateGroupSpeeds,
+            new TracingBalancer(new OozeBalancer()),
+            loadBalancingPeriod,
+            ghostZoneWidth,
+            "/0/fixme/HpxSimulatorTest/testHeterogeneous");
 
-        // std::vector<double> updateGroupSpeeds(1 + rank, 10.0 / (rank + 10));
-        // int loadBalancingPeriod = 10;
-        // int ghostZoneWidth = 1;
-        // SimulatorType sim(
-        //     init,
-        //     updateGroupSpeeds,
-        //     new TracingBalancer(new OozeBalancer()),
-        //     loadBalancingPeriod,
-        //     ghostZoneWidth,
-        //     "HpxSimulatorTestTestHeterogeneous");
+        MockWriter<ConwayCell> *writer = new MockWriter<ConwayCell>(events, outputFrequency);
+        sim.addWriter(writer);
 
-        // // fixme: add writer!
-        // // HpxWriterCollectorType::SinkType sink(
-        // //     new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
-        // //     sim.numUpdateGroups());
+        sim.run();
 
-        // // sim.addWriter(new HpxWriterCollectorType(sink));
+        MockWriter<>::EventVec expectedEvents;
+        int startStep = init->startStep();
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, false);
+        expectedEvents << MockWriter<>::Event(startStep, WRITER_INITIALIZED, rank, true);
+        for (unsigned i = startStep + outputFrequency; i < init->maxSteps(); i += outputFrequency) {
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, false);
+            expectedEvents << MockWriter<>::Event(i, WRITER_STEP_FINISHED, rank, true);
+        }
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, false);
+        expectedEvents << MockWriter<>::Event(init->maxSteps(), WRITER_ALL_DONE, rank, true);
 
-        // std::cout << "testC\n";
-        // sim.run();
-        // std::cout << "testD\n";
-
-        // if (rank == 0) {
-        //     hpx::lcos::broadcast<barrier_action>(localities, std::string("testHeterogeneous"));
-        // }
-        // p["testHeterogeneous"].get_future().get();
-
+        TS_ASSERT_EQUALS(expectedEvents.size(), events->size());
+        TS_ASSERT_EQUALS(expectedEvents,       *events);
     }
 
     std::string genName(int source, int target)
