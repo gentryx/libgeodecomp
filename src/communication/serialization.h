@@ -3,38 +3,38 @@
 #ifndef LIBGEODECOMP_SERIALIZATION_H
 #define LIBGEODECOMP_SERIALIZATION_H
 
-#include <storage/arrayfilter.h>
-#include <misc/chronometer.h>
-#include <misc/clonable.h>
-#include <geometry/coord.h>
-#include <geometry/coord.h>
-#include <geometry/coord.h>
-#include <geometry/coordbox.h>
-#include <storage/defaultarrayfilter.h>
-#include <storage/defaultfilter.h>
-#include <storage/filter.h>
-#include <storage/filterbase.h>
-#include <storage/fixedarray.h>
-#include <geometry/floatcoord.h>
-#include <geometry/floatcoord.h>
-#include <geometry/floatcoord.h>
-#include <io/hpxwritercollector.h>
-#include <io/initializer.h>
-#include <loadbalancer/loadbalancer.h>
-#include <misc/nonpodtestcell.h>
-#include <loadbalancer/oozebalancer.h>
-#include <io/parallelwriter.h>
-#include <geometry/region.h>
-#include <io/serialbovwriter.h>
-#include <io/silowriter.h>
-#include <storage/simplearrayfilter.h>
-#include <storage/simplefilter.h>
-#include <io/simpleinitializer.h>
-#include <io/steerer.h>
-#include <geometry/streak.h>
-#include <loadbalancer/tracingbalancer.h>
-#include <io/tracingwriter.h>
-#include <io/writer.h>
+#include <libgeodecomp/storage/arrayfilter.h>
+#include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/coord.h>
+#include <libgeodecomp/geometry/coordbox.h>
+#include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <libgeodecomp/storage/defaultfilter.h>
+#include <libgeodecomp/storage/filter.h>
+#include <libgeodecomp/storage/filterbase.h>
+#include <libgeodecomp/storage/fixedarray.h>
+#include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/geometry/floatcoord.h>
+#include <libgeodecomp/io/hpxwritercollector.h>
+#include <libgeodecomp/io/initializer.h>
+#include <libgeodecomp/loadbalancer/loadbalancer.h>
+#include <libgeodecomp/misc/nonpodtestcell.h>
+#include <libgeodecomp/loadbalancer/oozebalancer.h>
+#include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/geometry/region.h>
+#include <libgeodecomp/io/serialbovwriter.h>
+#include <libgeodecomp/io/silowriter.h>
+#include <libgeodecomp/storage/simplearrayfilter.h>
+#include <libgeodecomp/storage/simplefilter.h>
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/steerer.h>
+#include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
+#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
 class Serialization
@@ -451,6 +451,201 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& objec
 
 template<class ARCHIVE, typename CELL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SiloWriter<CELL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleInitializer<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, int DIM>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+
+}
+}
+
+namespace hpx {
+namespace serialization {
+
+using namespace LibGeoDecomp;
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename BASE, typename IMPLEMENTATION>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<1 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<2 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<3 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, int DIM>
+void serialize(ARCHIVE& archive, LibGeoDecomp::CoordBox<DIM>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
+void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::FilterBase<CELL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename T, int SIZE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::FixedArray<T, SIZE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<1 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<2 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::LoadBalancer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::NonPoDTestCell& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, int DIM>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
+{
+    Serialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
 {
     Serialization::serialize(archive, object, version);
 }
