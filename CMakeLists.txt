@@ -158,6 +158,9 @@ lgd_detect_distro()
 set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
 
 check_cxx_compiler_flag("-std=c++14" SUPPORTS_CPP14)
+if(NOT SUPPORTS_CPP14)
+  set(SUPPORTS_CPP14 false)
+endif()
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
