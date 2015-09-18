@@ -26,7 +26,9 @@ public:
 
     class Iterator;
     class StreakIterator;
+    typedef Coord<DIM> CoordType;
 
+    // fixme: add template parameter to choose between Coord and FloatCoord
     Coord<DIM> origin;
     Coord<DIM> dimensions;
 
@@ -37,6 +39,7 @@ public:
         dimensions(dimensions)
     {}
 
+    __host__ __device__
     inline bool operator==(const CoordBox& other) const
     {
         return (origin == other.origin &&
@@ -44,6 +47,7 @@ public:
     }
 
 
+    __host__ __device__
     inline bool operator!=(const CoordBox& other) const
     {
         return !(*this == other);
@@ -75,6 +79,7 @@ public:
     /**
      * checks whether the box' volume includes coord.
      */
+    __host__ __device__
     inline bool inBounds(const Coord<DIM>& coord) const
     {
         Coord<DIM> relativeCoord = coord - origin;
@@ -89,12 +94,14 @@ public:
         return temp.str();
     }
 
+    __host__ __device__
     bool intersects(const CoordBox& other) const
     {
         Coord<DIM> maxOrigin = (origin.max)(other.origin);
         return inBounds(maxOrigin) && other.inBounds(maxOrigin);
     }
 
+    __host__ __device__
     inline unsigned size() const
     {
         return dimensions.prod();

@@ -83,7 +83,7 @@ public:
     }
 };
 
-class MySoATestCell
+class MySoATestCellWithDoubleAndBool
 {
 public:
     class API :
@@ -95,7 +95,7 @@ public:
         public LibFlatArray::api_traits::has_asymmetric_dual_callback
     {};
 
-    explicit MySoATestCell(
+    explicit MySoATestCellWithDoubleAndBool(
         double temp = 0.0,
         bool alive = false) :
         temp(temp),
@@ -122,7 +122,7 @@ public:
     bool alive;
 };
 
-LIBFLATARRAY_REGISTER_SOA(MySoATestCell, ((double)(temp))((bool)(alive)))
+LIBFLATARRAY_REGISTER_SOA(MySoATestCellWithDoubleAndBool, ((double)(temp))((bool)(alive)))
 
 namespace LibGeoDecomp {
 
@@ -190,14 +190,14 @@ public:
     {
         CoordBox<3> box1(Coord<3>(0,  0,  0),  Coord<3>(30, 20, 10));
         CoordBox<3> box2(Coord<3>(50, 20, 50), Coord<3>(50, 10, 10));
+        typedef APITraits::SelectTopology<MySoATestCellWithDoubleAndBool>::Value Topology;
 
-        typedef APITraits::SelectTopology<MySoATestCell>::Value Topology;
-        SoAGrid<MySoATestCell, Topology> gridOld(box1, MySoATestCell(47), MySoATestCell(1));
-        SoAGrid<MySoATestCell, Topology> gridNew(box2, MySoATestCell(11), MySoATestCell(0));
+        SoAGrid<MySoATestCellWithDoubleAndBool, Topology> gridOld(box1, MySoATestCellWithDoubleAndBool(47), MySoATestCellWithDoubleAndBool(1));
+        SoAGrid<MySoATestCellWithDoubleAndBool, Topology> gridNew(box2, MySoATestCellWithDoubleAndBool(11), MySoATestCellWithDoubleAndBool(0));
 
         for (int i = 5; i < 27; ++i) {
             Coord<3> c(i, 2, 1);
-            gridOld.set(c, MySoATestCell(i - 5));
+            gridOld.set(c, MySoATestCellWithDoubleAndBool(i - 5));
             TS_ASSERT_EQUALS(gridOld.get(c).temp,  i - 5);
         }
         for (int i = 57; i < 79; ++i) {
@@ -210,7 +210,7 @@ public:
         Coord<3> targetOffset(53, 26, 56);
         Region<3> region;
         region << streak;
-        UpdateFunctor<MySoATestCell>()(region, sourceOffset, targetOffset, gridOld, &gridNew, 0);
+        UpdateFunctor<MySoATestCellWithDoubleAndBool>()(region, sourceOffset, targetOffset, gridOld, &gridNew, 0);
 
         for (int i = 57; i < 79; ++i) {
             Coord<3> c(i, 27, 56);

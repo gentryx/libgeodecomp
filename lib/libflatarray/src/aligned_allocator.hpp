@@ -1,5 +1,6 @@
 /**
- * Copyright 2012-2013, 2015 Andreas Schäfer
+ * Copyright 2012-2015 Andreas Schäfer
+ * Copyright 2015 Kurt Kanzenbach
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -94,9 +95,28 @@ public:
         std::allocator<T>().construct(p, val);
     }
 
+    /**
+     * Added due to compiling for Intel MIC with CPP14=TRUE
+     * GCC Bug Report: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51626
+     */
+    void construct(pointer p)
+    {
+        std::allocator<T>().construct(p, value_type());
+    }
+
     void destroy(pointer p)
     {
         std::allocator<T>().destroy(p);
+    }
+
+    bool operator!=(const aligned_allocator& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool operator==(const aligned_allocator& other) const
+    {
+        return true;
     }
 
 private:

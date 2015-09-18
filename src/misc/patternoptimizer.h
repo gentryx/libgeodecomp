@@ -1,4 +1,3 @@
-// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_MISC_PATTERNOPTIMIZER_H
 #define LIBGEODECOMP_MISC_PATTERNOPTIMIZER_H
 
@@ -7,6 +6,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This class implements a direct search (pattern search) which
+ * searches a given neighborhood to find better parameters.
+ */
 class PatternOptimizer : public Optimizer
 {
 public:

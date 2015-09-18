@@ -13,14 +13,10 @@
 // #include <math.h>
 // #include <boost/assign/std/vector.hpp>
 
-#include "hull.h"
+#include <libgeodecomp/examples/gameoflife_adcirc/hull.h>
 
 using namespace boost::assign;
 using namespace LibGeoDecomp;
-
-FloatCoord<2> origin;
-FloatCoord<2> quadrantDim;
-
 
 extern "C" {
     void kernel_(
@@ -112,12 +108,12 @@ public:
     public:
         inline FloatCoord<2> getRegularGridSpacing()
         {
-            return quadrantDim;
+            return DomainCell::quadrantDim;
         }
 
         inline FloatCoord<2> getRegularGridOrigin()
         {
-            return origin;
+            return DomainCell::quadrantOrigin;
         }
     };
 
@@ -200,17 +196,23 @@ public:
         return ret;
     }
 
-    // Coordinates of the center of the Domain:
-    LibGeoDecomp::FloatCoord<2> center;
-    // ID of the domain
-    int id;
-    int alive;
+    static FloatCoord<2> quadrantOrigin;
+    static FloatCoord<2> quadrantDim;
+
+    LibGeoDecomp::FloatCoord<2> center; // Coordinates of the center
+                                        // of the Domain
+    int id; // ID of the domain
+    int alive; // not being used currently
+
     int outputStep;
     //IDs of neighboring nodes
     std::vector<int> neighboringNodes;
     neighborTable myNeighborTable;
     std::map<int,SubNode> localNodes;
 };
+
+FloatCoord<2> DomainCell::quadrantOrigin;
+FloatCoord<2> DomainCell::quadrantDim;
 
 // ContainerCell translates between the unstructured grid and the
 // regular grid currently required by LGD
@@ -397,6 +399,7 @@ public:
 
     virtual void grid(GridType *grid)
     {
+        std::cout << "ADCIRCInitializer::init(" << grid->boundingBox() << ")\n";
         std::ifstream fort80File;
 
         int numberOfDomains;
@@ -539,7 +542,17 @@ public:
 
             FloatCoord<2> gridCoordFloat = (node.center - minCoord) / quadrantDim;
             Coord<2> gridCoord(gridCoordFloat[0], gridCoordFloat[1]);
+            std::cout << "node.center: " << node.center << "\n"
+                      << "minCoord: " << minCoord << "\n"
+                      << "quadrantDim: " << quadrantDim << "\n"
+                      << "gridCoord: " << gridCoord << "\n"
+                      << "gridCoordFloat: " << gridCoordFloat << "\n\n";
 
+            // fixme
+            if (gridCoord.x() < 0) {
+                gridCoord = Coord<2>(1, 1);
+            }
+            std::cout << "  inserting at " << gridCoord << " id " << node.id << "\n";
             ContainerCellType container = grid->get(gridCoord);
             container.insert(node.id, node);
             grid->set(gridCoord, container);
@@ -556,6 +569,8 @@ private:
     double maxDiameter;
     FloatCoord<2> minCoord;
     FloatCoord<2> maxCoord;
+    FloatCoord<2> quadrantOrigin;
+    FloatCoord<2> quadrantDim;
 
     void determineGridDimensions()
     {
@@ -608,10 +623,14 @@ private:
             maxCoord = maxCoord.max(p);
         }
 
-        origin = minCoord;
+        quadrantOrigin = minCoord;
         // add a safety factor for the cell spacing so we can be sure
         // neighboring elements are never more than 1 cell apart in the grid:
         quadrantDim = FloatCoord<2>(maxDiameter * 2.0, maxDiameter * 2.0);
+
+        DomainCell::quadrantOrigin = quadrantOrigin;
+        DomainCell::quadrantDim = quadrantDim;
+
         FloatCoord<2> floatDimensions = (maxCoord - minCoord) / quadrantDim;
         dimensions = Coord<2>(
             ceil(floatDimensions[0]),
@@ -636,6 +655,7 @@ private:
         return center;
     }
 
+    // fixme: use gridspacingcalculator here once in sync with hpx again
     double determineMaximumDiameter(
         const std::vector<FloatCoord<2> >* points,
         const std::vector<neighborTable> myNeighborTables)
@@ -924,9 +944,6 @@ void serialize(ARCHIVE& archive, ADCIRCInitializer& initializer, const unsigned 
 }
 
 
-// HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(ADCIRCInitializer);
-
-
 typedef HpxSimulator::HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > SimulatorType;
 
 void runSimulation()
@@ -955,6 +972,18 @@ void runSimulation()
     //     &DomainCell::alive,
     //     "DomainCell_alive");
     // sim.addWriter(writer);
+
+    int ioPeriod = 1;
+    SiloWriterType *writer = new SiloWriter<ContainerCellType>("mesh", ioPeriod);
+    writer->addSelectorForUnstructuredGrid(
+        &DomainCell::alive,
+        "DomainCell_alive");
+
+    // HpxWriterCollectorType::SinkType sink(
+    //     writer,
+    //     sim.numUpdateGroups(),
+    //     "fancyFixme");
+    // sim.addWriter(new HpxWriterCollectorType(sink));
 
     sim.run();
 }

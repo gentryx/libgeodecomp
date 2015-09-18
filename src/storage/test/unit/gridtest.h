@@ -100,7 +100,7 @@ public:
     {
         Grid<double> g(Coord<2>(10, 12), 14.16, 47.11);
         TS_ASSERT_EQUALS(Coord<2>(10, 12), g.getDimensions());
-        TS_ASSERT_EQUALS(14.16, g[5][6]);
+        TS_ASSERT_EQUALS(14.16, g[Coord<2>( 5,  6)]);
         TS_ASSERT_EQUALS(47.11, g[Coord<2>(-1, -1)]);
     }
 
@@ -126,10 +126,12 @@ public:
         Coord<2> changedCoord(0, 4);
 
         Grid<TestCell<2> > other(Coord<2>(width, height));
-        TS_ASSERT(!other[4][2].isValid);
-        for(int x = 0; x < width; x++)
-            for(int y = 0; y < height; y++)
+        TS_ASSERT(!other[Coord<2>(2, 4)].isValid);
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
                 other.cellMatrix[y][x] = testGrid->cellMatrix[y][x];
+            }
+        }
 
         TS_ASSERT(*testGrid == other);
 
@@ -227,21 +229,21 @@ public:
 
     void testGetSetManyCells()
     {
-	TestCell<2> cells[2];
-	testGrid->get(Streak<2>(Coord<2>(1, 3), 3), cells);
+        TestCell<2> cells[2];
+        testGrid->get(Streak<2>(Coord<2>(1, 3), 3), cells);
 
-	for (int i = 0; i < 2; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
-	}
+        for (int i = 0; i < 2; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
+        }
 
-	for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 2; ++i) {
             cells[i].testValue = i + 1234;
         }
         testGrid->set(Streak<2>(Coord<2>(1, 3), 3), cells);
 
-	for (int i = 0; i < 2; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
-	}
+        for (int i = 0; i < 2; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid->get(Coord<2>(i + 1, 3)));
+        }
     }
 
     void testToString()
@@ -436,9 +438,9 @@ public:
         std::vector<double> yVector(region.size(), -1);
         std::vector<char  > zVector(region.size(), -1);
 
-        grid.saveMember(&xVector[0], xSelector, region);
-        grid.saveMember(&yVector[0], ySelector, region);
-        grid.saveMember(&zVector[0], zSelector, region);
+        grid.saveMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
+        grid.saveMember(&yVector[0], MemoryLocation::HOST, ySelector, region);
+        grid.saveMember(&zVector[0], MemoryLocation::HOST, zSelector, region);
 
         Region<2>::Iterator cursor = region.begin();
 
@@ -457,9 +459,9 @@ public:
             zVector[i] = i;
         }
 
-        grid.loadMember(&xVector[0], xSelector, region);
-        grid.loadMember(&yVector[0], ySelector, region);
-        grid.loadMember(&zVector[0], zSelector, region);
+        grid.loadMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
+        grid.loadMember(&yVector[0], MemoryLocation::HOST, ySelector, region);
+        grid.loadMember(&zVector[0], MemoryLocation::HOST, zSelector, region);
 
         int counter = 0;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {

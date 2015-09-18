@@ -34,6 +34,7 @@ public:
     void testBasic()
     {
         TestInitializer<TestCell<3> > *init = new TestInitializer<TestCell<3> >();
+        MPIIO<TestCell<3> > mpiio;
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
         StripingSimulator<TestCell<3> > simTest(init, balancer);
@@ -67,14 +68,14 @@ public:
                 Coord<3> dimensions;
                 unsigned step;
                 unsigned maxSteps;
-                MPIIO<TestCell<3> >::readMetadata(
+                mpiio.readMetadata(
                     &dimensions, &step, &maxSteps, filename,
                     MPI_COMM_SELF);
 
                 Region<3> region;
                 region << CoordBox<3>(Coord<3>(), dimensions);
                 Grid<TestCell<3>, Topology> buffer(dimensions);
-                MPIIO<TestCell<3> >::readRegion(
+                mpiio.readRegion(
                     &buffer,
                     filename,
                     region,

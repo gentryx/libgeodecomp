@@ -14,23 +14,29 @@
 // (at least the version that ships with C++ Builder 2009)
 #ifndef __CODEGEARC__
 #include <boost/multi_array.hpp>
-#else
-#include <libgeodecomp/misc/supervector.h>
 #endif
 
-#include <boost/foreach.hpp>
 #include <iostream>
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration, both classes depend on each other
+ */
 template<typename CELL_TYPE, typename GRID_TYPE>
 class CoordMap;
 
 namespace GridHelpers {
 
+/**
+ * Helper for setting a cuboid domain within a grid
+ */
 template<int DIM>
 class FillCoordBox;
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<1>
 {
@@ -43,6 +49,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<2>
 {
@@ -59,6 +68,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class FillCoordBox<3>
 {
@@ -89,6 +101,7 @@ class Grid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
 public:
     friend class GridTest;
+    friend class TopologiesTest;
     friend class ParallelStripingSimulatorTest;
     const static int DIM = TOPOLOGY::DIM;
 
@@ -189,28 +202,12 @@ public:
 
     inline CELL_TYPE& operator[](const Coord<DIM>& coord)
     {
-        return Topology::locate(*this, coord);
+        return Topology::locate(cellMatrix, coord, dimensions, edgeCell);
     }
 
     inline const CELL_TYPE& operator[](const Coord<DIM>& coord) const
     {
-        return (const_cast<Grid&>(*this))[coord];
-    }
-
-    /**
-     * WARNING: this operator doesn't honor topology properties
-     */
-    inline const ConstSliceRef operator[](const Index y) const
-    {
-        return cellMatrix[y];
-    }
-
-    /**
-     * WARNING: this operator doesn't honor topology properties
-     */
-    inline SliceRef operator[](const Index y)
-    {
-        return cellMatrix[y];
+        return Topology::locate(cellMatrix, coord, dimensions, edgeCell);
     }
 
     inline bool operator==(const Grid& other) const
@@ -327,19 +324,35 @@ public:
 
 protected:
     void saveMemberImplementation(
-        char *target, const Selector<CELL_TYPE>& selector, const Region<DIM>& region) const
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL_TYPE>& selector,
+        const Region<DIM>& region) const
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberOut(&(*this)[i->origin], target, i->length());
+            selector.copyMemberOut(
+                &(*this)[i->origin],
+                MemoryLocation::HOST,
+                target,
+                targetLocation,
+                i->length());
             target += selector.sizeOfExternal() * i->length();
         }
     }
 
     void loadMemberImplementation(
-        const char *source, const Selector<CELL_TYPE>& selector, const Region<DIM>& region)
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL_TYPE>& selector,
+        const Region<DIM>& region)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            selector.copyMemberIn(source, &(*this)[i->origin], i->length());
+            selector.copyMemberIn(
+                source,
+                sourceLocation,
+                &(*this)[i->origin],
+                MemoryLocation::HOST,
+                i->length());
             source += selector.sizeOfExternal() * i->length();
         }
     }

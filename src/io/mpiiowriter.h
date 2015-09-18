@@ -20,6 +20,9 @@ template<typename CELL_TYPE>
 class MPIIOWriter : public Clonable<Writer<CELL_TYPE>, MPIIOWriter<CELL_TYPE> >
 {
 public:
+    using Writer<CELL_TYPE>::period;
+    using Writer<CELL_TYPE>::prefix;
+
     friend class MPIIOWriterTest;
     friend class MPIIOInitializerTest;
 
@@ -49,7 +52,7 @@ public:
         Region<DIM> region;
         region << grid.boundingBox();
 
-        MPIIO<CELL_TYPE>::writeRegion(
+        mpiio.writeRegion(
             grid,
             grid.dimensions(),
             step,
@@ -61,11 +64,10 @@ public:
     }
 
 private:
-    using Writer<CELL_TYPE>::period;
-    using Writer<CELL_TYPE>::prefix;
     unsigned maxSteps;
     MPI_Comm comm;
     MPI_Datatype datatype;
+    MPIIO<CELL_TYPE> mpiio;
 
     std::string filename(const unsigned& step) const
     {

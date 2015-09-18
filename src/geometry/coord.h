@@ -61,6 +61,9 @@ namespace LibGeoDecomp {
 template<int DIMENSIONS>
 class Coord;
 
+/**
+ * see above
+ */
 template<>
 class Coord<1>
 {
@@ -69,6 +72,7 @@ public:
     friend class HPXSerialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 1;
 
     __host__ __device__
     static Coord<1> diagonal(const int& nx)
@@ -87,6 +91,27 @@ public:
     inline explicit Coord(FixedCoord<X, Y, Z> /*unused*/)
     {
         c[0] = X;
+    }
+
+#ifdef __CUDACC__
+    inline Coord(const dim3& dim)
+    {
+        c[0] = dim.x;
+    }
+
+    inline operator dim3()
+    {
+        dim3 ret;
+
+        ret.x = c[0];
+
+        return ret;
+    }
+#endif
+
+    inline Coord abs() const
+    {
+        return Coord(std::abs(x()));
     }
 
     /**
@@ -215,14 +240,28 @@ public:
         return x();
     }
 
+    __host__ __device__
     inline Coord<1> (max)(const Coord<1>& other) const
     {
-        return Coord<1>((std::max)(x(), other.x()));
+        return Coord<1>(
+            x() > other.x() ? x() : other.x());
     }
 
+    __host__ __device__
     inline Coord<1> (min)(const Coord<1>& other) const
     {
-        return Coord<1>((std::min)(x(), other.x()));
+        return Coord<1>(
+            x() < other.x() ? x() : other.x());
+    }
+
+    inline int minElement() const
+    {
+        return x();
+    }
+
+    inline int maxElement() const
+    {
+        return x();
     }
 
     boost::detail::multi_array::extent_gen<1ul> toExtents() const
@@ -241,6 +280,9 @@ private:
     int c[1];
 };
 
+/**
+ * see above
+ */
 template<>
 class Coord<2>
 {
@@ -249,6 +291,7 @@ public:
     friend class HPXSerialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 2;
 
     __host__ __device__
     static Coord<2> diagonal(const int& nx)
@@ -278,6 +321,29 @@ public:
     {
         c[0] = X;
         c[1] = Y;
+    }
+
+#ifdef __CUDACC__
+    inline Coord(const dim3& dim)
+    {
+        c[0] = dim.x;
+        c[1] = dim.y;
+    }
+
+    inline operator dim3()
+    {
+        dim3 ret;
+
+        ret.x = c[0];
+        ret.y = c[1];
+
+        return ret;
+    }
+#endif
+
+    inline Coord abs() const
+    {
+        return Coord(std::abs(x()), std::abs(y()));
     }
 
     /**
@@ -421,18 +487,30 @@ public:
         return x() + y();
     }
 
+    __host__ __device__
     inline Coord<2> (max)(const Coord<2>& other) const
     {
         return Coord<2>(
-            (std::max)(x(), other.x()),
-            (std::max)(y(), other.y()));
+            x() > other.x() ? x() : other.x(),
+            y() > other.y() ? y() : other.y());
     }
 
+    __host__ __device__
     inline Coord<2> (min)(const Coord<2>& other) const
     {
         return Coord<2>(
-            (std::min)(x(), other.x()),
-            (std::min)(y(), other.y()));
+            x() < other.x() ? x() : other.x(),
+            y() < other.y() ? y() : other.y());
+    }
+
+    inline int minElement() const
+    {
+        return x() < y() ? x() : y();
+    }
+
+    inline int maxElement() const
+    {
+        return x() > y() ? x() : y();
     }
 
     boost::detail::multi_array::extent_gen<2ul> toExtents() const
@@ -451,6 +529,9 @@ private:
     int c[2];
 };
 
+/**
+ * see above
+ */
 template<>
 class Coord<3>
 {
@@ -459,6 +540,7 @@ public:
     friend class HPXSerialization;
     friend class Typemaps;
     typedef int ValueType;
+    static const int DIM = 3;
 
     __host__ __device__
     static Coord<3> diagonal(const int& nx)
@@ -481,6 +563,31 @@ public:
         c[0] = X;
         c[1] = Y;
         c[2] = Z;
+    }
+
+#ifdef __CUDACC__
+    inline Coord(const dim3& dim)
+    {
+        c[0] = dim.x;
+        c[1] = dim.y;
+        c[2] = dim.z;
+    }
+
+    inline operator dim3()
+    {
+        dim3 ret;
+
+        ret.x = c[0];
+        ret.y = c[1];
+        ret.z = c[2];
+
+        return ret;
+    }
+#endif
+
+    inline Coord abs()
+    {
+        return Coord(std::abs(x()), std::abs(y()), std::abs(z()));
     }
 
     /**
@@ -626,7 +733,9 @@ public:
     __host__ __device__
     inline Coord operator/(const int& divisor) const
     {
-        return Coord(x()/ divisor, y() / divisor, z() / divisor);
+        return Coord(x() / divisor,
+                     y() / divisor,
+                     z() / divisor);
     }
 
     __host__ __device__
@@ -649,20 +758,34 @@ public:
         return x() + y() + z();
     }
 
+    __host__ __device__
     inline Coord<3> (max)(const Coord<3>& other) const
     {
         return Coord<3>(
-            (std::max)(x(), other.x()),
-            (std::max)(y(), other.y()),
-            (std::max)(z(), other.z()));
+            x() > other.x() ? x() : other.x(),
+            y() > other.y() ? y() : other.y(),
+            z() > other.z() ? z() : other.z());
     }
 
+    __host__ __device__
     inline Coord<3> (min)(const Coord<3>& other) const
     {
         return Coord<3>(
-            (std::min)(x(), other.x()),
-            (std::min)(y(), other.y()),
-            (std::min)(z(), other.z()));
+            x() < other.x() ? x() : other.x(),
+            y() < other.y() ? y() : other.y(),
+            z() < other.z() ? z() : other.z());
+    }
+
+    inline int minElement() const
+    {
+        return x() < y() ?
+                  (x() < z() ? x() : z()) : (y() < z() ? y() : z());
+    }
+
+    inline int maxElement() const
+    {
+        return x() > y() ?
+                  (x() > z() ? x() : z()) : (y() > z() ? y() : z());
     }
 
     boost::detail::multi_array::extent_gen<3ul> toExtents() const

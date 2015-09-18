@@ -58,8 +58,8 @@ private:
         }
         SCOTCH_archCmpltw(&arch, vertnbrArch, velotabArch);
 
-        SCOTCH_Dgraph grafdat;
-        SCOTCH_dgraphInit(&grafdat, MPI_COMM_WORLD);
+        SCOTCH_Graph grafdat;
+        SCOTCH_graphInit(&grafdat);
 
         SCOTCH_Num edgenbrGra = 2 * (dimensions[0] *
                                      (dimensions[1] - 1) +
@@ -108,28 +108,24 @@ private:
         }
         verttabGra[cellNbr] = pointer;
 
-        SCOTCH_dgraphBuild(&grafdat,
-                           0,
-                           cellNbr,
-                           cellNbr,
-                           verttabGra,
-                           verttabGra +1,
-                           NULL,
-                           NULL,
-                           edgenbrGra,
-                           edgenbrGra,
-                           edgetabGra,
-                           NULL,
-                           NULL);
-
+        SCOTCH_graphBuild(&grafdat,
+                          0,
+                          cellNbr,
+                          verttabGra,
+                          0,
+                          0,
+                          0,
+                          edgenbrGra,
+                          edgetabGra,
+                          0);
 
         SCOTCH_Strat *straptr = SCOTCH_stratAlloc();;
         SCOTCH_stratInit(straptr);
 
-        SCOTCH_dgraphMap(&grafdat, &arch, straptr, indices);
+        SCOTCH_graphMap(&grafdat, &arch, straptr, indices);
 
         SCOTCH_archExit(&arch);
-        SCOTCH_dgraphExit(&grafdat);
+        SCOTCH_graphExit(&grafdat);
         SCOTCH_stratExit(straptr);
         delete[] velotabArch;
         delete[] verttabGra;

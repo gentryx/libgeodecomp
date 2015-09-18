@@ -29,6 +29,18 @@ public:
         TS_ASSERT_EQUALS_DOUBLE(7.0, FloatCoord<3>(2, 3, 6).length());
     }
 
+    void testAbs()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(1.1), FloatCoord<1>( 1.1).abs());
+        TS_ASSERT_EQUALS(FloatCoord<1>(2.1), FloatCoord<1>(-2.1).abs());
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(3.1, 4.1), FloatCoord<2>( 3.1,  4.1).abs());
+        TS_ASSERT_EQUALS(FloatCoord<2>(5.1, 6.1), FloatCoord<2>(-5.1, -6.1).abs());
+
+        TS_ASSERT_EQUALS(FloatCoord<3>(7.1, 8.1, 9.1), FloatCoord<3>( 7.1,  8.1,  9.1).abs());
+        TS_ASSERT_EQUALS(FloatCoord<3>(7.2, 8.2, 9.2), FloatCoord<3>(-7.2, -8.2, -9.2).abs());
+    }
+
     void testSum()
     {
         TS_ASSERT_EQUALS_DOUBLE(2.0, FloatCoord<1>(2.0).sum());
@@ -94,6 +106,32 @@ public:
                          FloatCoord<3>( 0.0, -3.0,  0.0).min(FloatCoord<3>(-2.0,  0.0, -4.0)));
         TS_ASSERT_EQUALS(FloatCoord<3>(-2.0, -3.0, -4.0),
                          FloatCoord<3>(-2.0,  0.0, -4.0).min(FloatCoord<3>( 0.0, -3.0,  0.0)));
+    }
+
+    void testMaxElement()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(5).maxElement(), 5);
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(6, 1).maxElement(), 6);
+        TS_ASSERT_EQUALS(FloatCoord<2>(5, 7).maxElement(), 7);
+
+        TS_ASSERT_EQUALS(FloatCoord<3>( 8,  1, 0).maxElement(), 8);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5,  9, 0).maxElement(), 9);
+        TS_ASSERT_EQUALS(FloatCoord<3>(-5, -7, 0).maxElement(), 0);
+        TS_ASSERT_EQUALS(FloatCoord<3>(-7, -5, 0).maxElement(), 0);
+    }
+
+    void testMinElement()
+    {
+        TS_ASSERT_EQUALS(FloatCoord<1>(5).minElement(), 5);
+
+        TS_ASSERT_EQUALS(FloatCoord<2>(6, 1).minElement(), 1);
+        TS_ASSERT_EQUALS(FloatCoord<2>(5, 7).minElement(), 5);
+
+        TS_ASSERT_EQUALS(FloatCoord<3>( 8, 10, 100).minElement(), 8);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5, 90, 100).minElement(), 5);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 5,  7,   1).minElement(), 1);
+        TS_ASSERT_EQUALS(FloatCoord<3>( 7,  5,   0).minElement(), 0);
     }
 
     void testOperatorPlus()
@@ -282,21 +320,46 @@ public:
     {
         TS_ASSERT_EQUALS(FloatCoord<1>(4), FloatCoord<1>(4));
         TS_ASSERT(!(FloatCoord<1>(4) == FloatCoord<1>(5)));
+        TS_ASSERT( (FloatCoord<1>(4) != FloatCoord<1>(5)));
 
         TS_ASSERT_EQUALS(FloatCoord<2>(4, 1), FloatCoord<2>(4, 1));
         TS_ASSERT(!(FloatCoord<2>(4, 4) == FloatCoord<2>(5, 4)));
+        TS_ASSERT( (FloatCoord<2>(4, 4) != FloatCoord<2>(5, 4)));
 
         TS_ASSERT_EQUALS(FloatCoord<3>(4, 1, 5), FloatCoord<3>(4, 1, 5));
         TS_ASSERT(!(FloatCoord<3>(4, 4, 4) == FloatCoord<3>(4, 4, 3)));
+        TS_ASSERT( (FloatCoord<3>(4, 4, 4) != FloatCoord<3>(4, 4, 3)));
 
         TS_ASSERT(FloatCoord<1>(1) != FloatCoord<1>(2));
         TS_ASSERT(!(FloatCoord<1>(1) != FloatCoord<1>(1)));
+        TS_ASSERT( (FloatCoord<1>(1) == FloatCoord<1>(1)));
 
         TS_ASSERT(FloatCoord<2>(1, 2) != FloatCoord<2>(1, 9));
         TS_ASSERT(!(FloatCoord<2>(1, 2) != FloatCoord<2>(1, 2)));
+        TS_ASSERT( (FloatCoord<2>(1, 2) == FloatCoord<2>(1, 2)));
 
         TS_ASSERT(FloatCoord<3>(1, 2, 3) != FloatCoord<3>(1, 2, 4));
         TS_ASSERT(!(FloatCoord<3>(1, 2, 3) != FloatCoord<3>(1, 2, 3)));
+        TS_ASSERT( (FloatCoord<3>(1, 2, 3) == FloatCoord<3>(1, 2, 3)));
+    }
+
+    void testOperatorLess()
+    {
+        TS_ASSERT(  FloatCoord<1>(4.0) < FloatCoord<1>(4.1));
+        TS_ASSERT(!(FloatCoord<1>(4.2) < FloatCoord<1>(4.1)));
+
+        TS_ASSERT(  FloatCoord<2>(3.9, 4.0) < FloatCoord<2>(4.0, 4.0));
+        TS_ASSERT(  FloatCoord<2>(4.0, 3.9) < FloatCoord<2>(4.0, 4.0));
+        TS_ASSERT(!(FloatCoord<2>(4.0, 4.0) < FloatCoord<2>(4.0, 4.0)));
+
+        TS_ASSERT(  FloatCoord<3>(3.9, 4.0, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0));
+        TS_ASSERT(  FloatCoord<3>(4.0, 3.9, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0));
+        TS_ASSERT(  FloatCoord<3>(4.0, 4.0, 3.9) < FloatCoord<3>(4.0, 4.0, 4.0));
+        TS_ASSERT(!(FloatCoord<3>(4.0, 4.0, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0)));
+
+        TS_ASSERT(!(FloatCoord<3>(4.1, 4.0, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0)));
+        TS_ASSERT(!(FloatCoord<3>(4.0, 4.1, 4.0) < FloatCoord<3>(4.0, 4.0, 4.0)));
+        TS_ASSERT(!(FloatCoord<3>(4.0, 4.0, 4.1) < FloatCoord<3>(4.0, 4.0, 4.0)));
     }
 
     void testOperatorEqualsWithOtherCoordType()
@@ -513,6 +576,13 @@ public:
         TS_ASSERT( fC.strictlyDominates(c2));
         TS_ASSERT(!fC.strictlyDominates(c3));
         TS_ASSERT(!fC.strictlyDominates(c4));
+    }
+
+    void testDim()
+    {
+        TS_ASSERT_EQUALS(1, FloatCoord<1>::DIM);
+        TS_ASSERT_EQUALS(2, FloatCoord<2>::DIM);
+        TS_ASSERT_EQUALS(3, FloatCoord<3>::DIM);
     }
 };
 

@@ -6,6 +6,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Helper class with we use to stitch together an actual neighborhood
+ * based on the streak's location in the grid.
+ */
 class LinePointerNeighborhoodHelper
 {
 public:

@@ -6,6 +6,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * This implementation of the PatchAccepter can record events, which
+ * is useful for testing and debugging.
+ */
 template<class GRID_TYPE>
 class MockPatchAccepter : public PatchAccepter<GRID_TYPE>
 {

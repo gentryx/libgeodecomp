@@ -7,6 +7,7 @@
 namespace LibGeoDecomp {
 
 namespace LinePointerAssemblyHelpers {
+
 /**
  * Utility class to deduce the X coordinate from a streak using the
  * original stencil's shape. See LinePointerUpdateFunctor for a
@@ -15,6 +16,9 @@ namespace LinePointerAssemblyHelpers {
 template<int X>
 class CalcXCoord;
 
+/**
+ * see above
+ */
 template<>
 class CalcXCoord<-1>
 {
@@ -26,6 +30,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class CalcXCoord<0>
 {
@@ -37,6 +44,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class CalcXCoord<1>
 {
@@ -48,9 +58,18 @@ public:
     }
 };
 
+/**
+ * Another helper class for looking up the correct pointer depending
+ * on a (compile-time constant) coordinate specifier. This specifier
+ * is important to distinguish left and right boundary of a streak, as
+ * wrapping around the x-axis may happen here.
+ */
 template<int DIM>
 class DetermineLinePointerCoord;
 
+/**
+ * see above
+ */
 template<>
 class DetermineLinePointerCoord<1>
 {
@@ -62,6 +81,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class DetermineLinePointerCoord<2>
 {
@@ -74,6 +96,9 @@ public:
     }
 };
 
+/**
+ * see above
+ */
 template<>
 class DetermineLinePointerCoord<3>
 {
@@ -87,6 +112,9 @@ public:
     }
 };
 
+/**
+ * Sample all pointers as speficied by a stencil:
+ */
 template<class STENCIL, int INDEX>
 class CopyCellPointer
 {

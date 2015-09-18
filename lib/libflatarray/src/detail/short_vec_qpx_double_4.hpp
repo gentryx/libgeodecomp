@@ -11,6 +11,11 @@
 #ifdef __VECTOR4DOUBLE__
 
 #include <libflatarray/detail/sqrt_reference.hpp>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 #ifndef __CUDA_ARCH__
 
@@ -49,8 +54,17 @@ public:
         val1(val1)
     {}
 
+#ifdef LIBFLATARRAY_WITH_CPP14
     inline
-    short_vec(const sqrt_reference<double, 4> other);
+    short_vec(const std::initializer_list<double>& il)
+    {
+        const double *ptr = static_cast<const double *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
+
+    inline
+    short_vec(const sqrt_reference<double, 4>& other);
 
     inline
     void operator-=(const short_vec<double, 4>& other)
@@ -118,9 +132,54 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = vec_ld(0, const_cast<double*>(data))
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        val1 = vec_lda(0, const_cast<double*>(data))
+    }
+
+    inline
     void store(double *data) const
     {
         vec_st(val1, 0, data);
+    }
+
+    inline
+    void store_aligned(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 32);
+        vec_sta(val1, 0, data);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        double *base = const_cast<double *>(ptr);
+        val1 = vec_insert(base[offsets[0]], val1, 0);
+        val1 = vec_insert(base[offsets[1]], val1, 1);
+        val1 = vec_insert(base[offsets[2]], val1, 2);
+        val1 = vec_insert(base[offsets[3]], val1, 3);
+    }
+
+    inline
+    void scatter(double *ptr, const unsigned *offsets) const
+    {
+        ptr[offsets[0]] = vec_extract(val1, 0);
+        ptr[offsets[1]] = vec_extract(val1, 1);
+        ptr[offsets[2]] = vec_extract(val1, 2);
+        ptr[offsets[3]] = vec_extract(val1, 3);
     }
 
 private:
@@ -153,7 +212,7 @@ private:
 };
 
 inline
-short_vec<double, 4>::short_vec(const sqrt_reference<double, 4> other) :
+short_vec<double, 4>::short_vec(const sqrt_reference<double, 4>& other) :
     val1(vec_swsqrt(other.vec.val1))
 {}
 

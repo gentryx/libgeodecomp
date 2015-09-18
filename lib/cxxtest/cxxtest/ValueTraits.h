@@ -315,11 +315,11 @@ CXXTEST_COPY_CONST_TRAITS(unsigned long int);
 // All decimals are the same as the long version
 //
 
-CXXTEST_COPY_TRAITS(const signed int, const signed long int);
-CXXTEST_COPY_TRAITS(const unsigned int, const unsigned long int);
-CXXTEST_COPY_TRAITS(const signed short int, const signed long int);
-CXXTEST_COPY_TRAITS(const unsigned short int, const unsigned long int);
-CXXTEST_COPY_TRAITS(const unsigned char, const unsigned long int);
+CXXTEST_COPY_TRAITS(const signed int, signed long int);
+CXXTEST_COPY_TRAITS(const unsigned int, unsigned long int);
+CXXTEST_COPY_TRAITS(const signed short int, signed long int);
+CXXTEST_COPY_TRAITS(const unsigned short int, unsigned long int);
+CXXTEST_COPY_TRAITS(const unsigned char, unsigned long int);
 
 CXXTEST_COPY_CONST_TRAITS(signed int);
 CXXTEST_COPY_CONST_TRAITS(unsigned int);
@@ -346,7 +346,7 @@ CXXTEST_COPY_CONST_TRAITS(char);
 // ValueTraits: signed char
 // Same as char, some compilers need it
 //
-CXXTEST_COPY_TRAITS(const signed char, const char);
+CXXTEST_COPY_TRAITS(const signed char, char);
 CXXTEST_COPY_CONST_TRAITS(signed char);
 
 //
@@ -391,7 +391,7 @@ CXXTEST_COPY_CONST_TRAITS(double);
 //
 // ValueTraits: float
 //
-CXXTEST_COPY_TRAITS(const float, const double);
+CXXTEST_COPY_TRAITS(const float, double);
 CXXTEST_COPY_CONST_TRAITS(float);
 #endif // !CXXTEST_USER_VALUE_TRAITS
 }

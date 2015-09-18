@@ -49,33 +49,63 @@ public:
     /**
      * Copy a streak of variables to an AoS layout.
      */
-    virtual void copyStreakInImpl(const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride) = 0;
+    virtual void copyStreakInImpl(
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) = 0;
 
     /**
      * Extract a steak of members from an AoS layout.
      */
-    virtual void copyStreakOutImpl(const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride) = 0;
+    virtual void copyStreakOutImpl(
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) = 0;
 
     /**
      * Copy a streak of variables to the members of a streak of cells.
      */
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
 
     /**
      * Extract a streak of members from a streak of cells.
      */
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY]) = 0;
 
     /**
      * Do not override this function! It is final.
      */
-    void copyStreakIn(const char *source, char *target, const std::size_t num, const std::size_t stride)
+    void copyStreakIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         copyStreakInImpl(
             reinterpret_cast<const EXTERNAL*>(source),
+            sourceLocation,
             reinterpret_cast<MEMBER*>(target),
+            targetLocation,
             num,
             stride);
     }
@@ -83,11 +113,19 @@ public:
     /**
      * Do not override this function! It is final.
      */
-    void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride)
+    void copyStreakOut(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         copyStreakOutImpl(
             reinterpret_cast<const MEMBER*>(source),
+            sourceLocation,
             reinterpret_cast<EXTERNAL*>(target),
+            targetLocation,
             num,
             stride);
     }
@@ -96,11 +134,18 @@ public:
      * Do not override this function! It is final.
      */
     void copyMemberIn(
-        const char *source, CELL *target, std::size_t num, char CELL:: *memberPointer)
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        char CELL:: *memberPointer)
     {
         copyMemberInImpl(
             reinterpret_cast<const EXTERNAL*>(source),
+            sourceLocation,
             target,
+            targetLocation,
             num,
             reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
     }
@@ -109,11 +154,18 @@ public:
      * Do not override this function! It is final.
      */
     void copyMemberOut(
-        const CELL *source, char *target, std::size_t num, char CELL:: *memberPointer)
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        char CELL:: *memberPointer)
     {
         copyMemberOutImpl(
             source,
+            sourceLocation,
             reinterpret_cast<EXTERNAL*>(target),
+            targetLocation,
             num,
             reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
     }

@@ -6,9 +6,9 @@
 namespace LibGeoDecomp {
 
 /**
- * A LoadBalancer's task is to try and dynamically equalize
- * computational by assigning a fraction of the total work to each
- * rank/locality.
+ * The purpose of a load-balancer is to even out the computational
+ * load by assigning a fraction of the total work to each
+ * MPI processes/HPX localities.
  */
 class LoadBalancer
 {

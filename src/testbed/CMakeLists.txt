@@ -1,7 +1,8 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 
 add_subdirectory(jacobituning)
 add_subdirectory(parallelperformancetests)
 add_subdirectory(performancetests)
 add_subdirectory(opencl)
 add_subdirectory(reversetimemigration)
+add_subdirectory(spmvmtests)

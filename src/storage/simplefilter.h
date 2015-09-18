@@ -17,17 +17,34 @@ public:
     friend class BoostSerialization;
     friend class HPXSerialization;
 
-    virtual void load(const EXTERNAL& source, MEMBER   *target) = 0;
-    virtual void save(const MEMBER&   source, EXTERNAL *target) = 0;
+    virtual void load(
+        const EXTERNAL& source,
+        MEMBER *target) = 0;
 
-    virtual void copyStreakInImpl(const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
+    virtual void save(
+        const MEMBER& source,
+        EXTERNAL *target) = 0;
+
+    virtual void copyStreakInImpl(
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             load(source[i], &target[i]);
         }
     }
 
-    virtual void copyStreakOutImpl(const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride)
+    virtual void copyStreakOutImpl(
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             save(source[i], &target[i]);
@@ -35,7 +52,12 @@ public:
     }
 
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, const std::size_t num, MEMBER CELL:: *memberPointer)
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        MEMBER CELL:: *memberPointer)
     {
         for (std::size_t i = 0; i < num; ++i) {
             load(source[i], &(target[i].*memberPointer));
@@ -43,7 +65,12 @@ public:
     }
 
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, const std::size_t  num, MEMBER CELL:: *memberPointer)
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        MEMBER CELL:: *memberPointer)
     {
         for (std::size_t i = 0; i < num; ++i) {
             save(source[i].*memberPointer, &target[i]);

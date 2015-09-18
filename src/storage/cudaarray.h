@@ -2,6 +2,7 @@
 #define LIBGEODECOMP_STORAGE_CUDAARRAY_H
 
 #include <libflatarray/cuda_allocator.hpp>
+#include <libgeodecomp/io/logger.h>
 #include <cuda.h>
 
 namespace LibGeoDecomp {
@@ -18,6 +19,18 @@ public:
         size(size),
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
     {}
+
+    inline CUDAArray(std::size_t size, const ELEMENT_TYPE& defaultValue) :
+        size(size),
+        dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
+    {
+        LOG(WARN, "initialization of CUDAArray from single element is SLOW,"
+            " better initialize by copying from std::vector");
+
+        for (std::size_t i = 0; i < size; ++i) {
+            cudaMemcpy(dataPointer + i, &defaultValue, sizeof(ELEMENT_TYPE), cudaMemcpyHostToDevice);
+        }
+    }
 
     inline CUDAArray(const CUDAArray& array) :
         size(array.size),

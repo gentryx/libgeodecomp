@@ -3,6 +3,17 @@
 
 #include <libgeodecomp/config.h>
 
+namespace LibGeoDecomp {
+
+/**
+ * forward declaration required to let class Serialization function
+ * properly even if building without Silo.
+ */
+template<typename CELL>
+class SiloWriter;
+
+}
+
 #ifdef LIBGEODECOMP_WITH_SILO
 
 #include <libgeodecomp/io/logger.h>
@@ -13,6 +24,16 @@
 
 #include <silo.h>
 #include <typeinfo>
+
+namespace boost {
+
+namespace serialization {
+
+class access;
+
+}
+
+}
 
 namespace LibGeoDecomp {
 
@@ -178,6 +199,9 @@ template<typename CELL>
 class SiloWriter : public Clonable<Writer<CELL>, SiloWriter<CELL> >
 {
 public:
+    friend class Serialization;
+    friend class boost::serialization::access;
+
     template<typename SILO_WRITER, typename COLLECTION_INTERFACE>
     friend class SiloWriterHelpers::SelectorContainerImplementation;
 
@@ -532,7 +556,7 @@ private:
 
         std::size_t newSize = region.size() * selector.sizeOfExternal();
         variableData.resize(newSize);
-        grid.saveMemberUnchecked(&variableData[0], selector, region);
+        grid.saveMemberUnchecked(&variableData[0], MemoryLocation::HOST, selector, region);
     }
 
     template<typename CARGO, typename COLLECTION_INTERFACE>
@@ -685,7 +709,7 @@ private:
         char *cursor = target;
 
         for (ITERATOR i = start; i != end; ++i) {
-            selector.copyMemberOut(&*i, cursor, 1);
+            selector.copyMemberOut(&*i, MemoryLocation::HOST, cursor, MemoryLocation::HOST, 1);
             cursor += selector.sizeOfExternal();
         }
     }

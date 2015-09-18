@@ -12,7 +12,6 @@ using namespace HiParSimulator;
 int main(int argc, char *argv[])
 {
     MPI_Init(&argc, &argv);
-    Typemaps::initializeMaps();
     MPILayer layer;
 
     int length;

@@ -76,6 +76,7 @@ public:
 
 
 private:
+    MPIIO<CELL_TYPE, Topology> mpiio;
     Selector<CELL_TYPE> selector;
     Coord<3> brickletDim;
     MPI_Comm comm;
@@ -90,7 +91,7 @@ private:
 
     void writeHeader(const unsigned& step, const Coord<DIM>& dimensions)
     {
-        MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
+        MPI_File file = mpiio.openFileForWrite(
             filename(step, "bov"), comm);
         // fixme: deduce from stepFinished()
         int rank;
@@ -136,9 +137,9 @@ private:
         const GRID_TYPE& grid,
         const Region<DIM>& region)
     {
-        MPI_File file = MPIIO<CELL_TYPE, Topology>::openFileForWrite(
+        MPI_File file = mpiio.openFileForWrite(
             filename(step, "data"), comm);
-        MPI_Aint varLength = MPIIO<CELL_TYPE, Topology>::getLength(datatype);
+        MPI_Aint varLength = mpiio.getLength(datatype);
         std::vector<char> buffer;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak();
@@ -160,7 +161,7 @@ private:
 
             Region<DIM> tempRegion;
             tempRegion << *i;
-            grid.saveMemberUnchecked(&buffer[0], selector, tempRegion);
+            grid.saveMemberUnchecked(&buffer[0], MemoryLocation::HOST, selector, tempRegion);
 
             MPI_File_write(file, &buffer[0], length, datatype, MPI_STATUS_IGNORE);
         }

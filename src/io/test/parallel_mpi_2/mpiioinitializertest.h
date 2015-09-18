@@ -38,6 +38,7 @@ public:
 
     void testBasic()
     {
+        MPIIO<TestCell<3> > mpiio;
         files << "testmpiioinitializer1_00000.mpiio"
               << "testmpiioinitializer1_00004.mpiio"
               << "testmpiioinitializer1_00008.mpiio"
@@ -91,10 +92,8 @@ public:
 
             Region<3> region;
             region << CoordBox<3>(Coord<3>(), dimensions);
-            MPIIO<TestCell<3> >::readRegion(
-                &expected, "testmpiioinitializer1_00021.mpiio", region, MPI_COMM_SELF);
-            MPIIO<TestCell<3> >::readRegion(
-                &actual,   "testmpiioinitializer2_00021.mpiio", region, MPI_COMM_SELF);
+            mpiio.readRegion(&expected, "testmpiioinitializer1_00021.mpiio", region, MPI_COMM_SELF);
+            mpiio.readRegion(&actual,   "testmpiioinitializer2_00021.mpiio", region, MPI_COMM_SELF);
 
             TS_ASSERT_EQUALS(expected, actual);
         }

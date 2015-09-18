@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/random.h>
 #include <libgeodecomp/storage/gridbase.h>
+#include <libgeodecomp/geometry/adjacency.h>
 
 #include <hpx/runtime/serialization/serialize.hpp>
 
@@ -99,6 +100,10 @@ public:
         Random::seed(index);
     }
 
+    virtual Adjacency getAdjacency() const
+    {
+        return Adjacency();
+    }
 };
 
 }

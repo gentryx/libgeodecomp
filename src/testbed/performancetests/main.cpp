@@ -2,6 +2,7 @@
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/chronometer.h>
+#include <libgeodecomp/geometry/convexpolytope.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/region.h>
@@ -16,10 +17,17 @@
 #include <libgeodecomp/storage/updatefunctor.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/testbed/performancetests/cpubenchmark.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/storage/unstructuredneighborhood.h>
+#include <libgeodecomp/storage/unstructuredsoagrid.h>
+#include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
+#include <libgeodecomp/storage/unstructuredupdatefunctor.h>
 
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
+#include <libflatarray/api_traits.hpp>
+#include <libflatarray/macros.hpp>
 
 #include <emmintrin.h>
 #ifdef __AVX__
@@ -31,6 +39,7 @@
 #include <stdio.h>
 
 using namespace LibGeoDecomp;
+using namespace LibFlatArray;
 
 class RegionCount : public CPUBenchmark
 {
@@ -45,8 +54,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int sum = 0;
         Region<3> r;
         for (int z = 0; z < dim.z(); ++z) {
@@ -94,8 +104,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -130,8 +141,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -163,6 +175,371 @@ public:
     }
 };
 
+class RegionSubtract : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "RegionSubtract";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Region<3> r1;
+            Region<3> r2;
+
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            for (int z = 1; z < (dim.z() - 1); ++z) {
+                for (int y = 1; y < (dim.y() - 1); ++y) {
+                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+                }
+            }
+
+            Region<3> r3 = r1 - r2;
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class RegionUnion : public CPUBenchmark
+{
+public:
+    std::string family()
+    {
+        return "RegionUnion";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Region<3> r1;
+            Region<3> r2;
+
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            for (int z = 1; z < (dim.z() - 1); ++z) {
+                for (int y = 1; y < (dim.y() - 1); ++y) {
+                    r2 << Streak<3>(Coord<3>(1, y, z), dim.x() - 1);
+                }
+            }
+
+            Region<3> r3 = r1 + r2;
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class RegionExpand : public CPUBenchmark
+{
+public:
+    RegionExpand(int expansionWidth) :
+        expansionWidth(expansionWidth)
+    {}
+
+    std::string family()
+    {
+        std::stringstream buf;
+        buf << "RegionExpand" << expansionWidth;
+        return buf.str();
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            Region<3> r1;
+            for (int z = 0; z < dim.z(); ++z) {
+                for (int y = 0; y < dim.y(); ++y) {
+                    r1 << Streak<3>(Coord<3>(0, y, z), dim.x());
+                }
+            }
+
+            Region<3> r2 = r1.expand(expansionWidth);
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    int expansionWidth;
+};
+
+class RegionExpandWithAdjacency : public CPUBenchmark
+{
+public:
+    RegionExpandWithAdjacency(
+        std::map<int, ConvexPolytope<Coord<2> > > cells) :
+        rawCells(cells)
+    {}
+
+    std::string family()
+    {
+        std::stringstream buf;
+        // we don't name this RegionExpandWithAdjacency to users can
+        // still selectively run RegionExpand sans this test.
+        buf << "RegionExpWithAdjacency";
+        return buf.str();
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    static std::map<int, ConvexPolytope<Coord<2> > > genGrid(int numCells)
+    {
+        int elementsPerChunk = 5;
+        int numChunks = numCells / elementsPerChunk;
+        Coord<2> gridSize = Coord<2>::diagonal(sqrt(numChunks));
+        Coord<2> chunkDim(100, 100);
+        Coord<2> globalDim = chunkDim.scale(gridSize);
+        double minDistance = 10;
+        int counter = 0;
+
+        Grid<std::map<int, Coord<2> >, Topologies::Torus<2>::Topology> grid(gridSize);
+        for (int y = 0; y < gridSize.y(); ++y) {
+            for (int x = 0; x < gridSize.x(); ++x) {
+                Coord<2> gridIndex(x, y);
+                Coord<2> chunkOffset = chunkDim.scale(gridIndex);
+                fillChunk(&grid, gridIndex, &counter, elementsPerChunk, chunkDim, minDistance);
+            }
+        }
+
+        std::map<int, ConvexPolytope<Coord<2> > > cells;
+        for (int y = 0; y < gridSize.y(); ++y) {
+            for (int x = 0; x < gridSize.x(); ++x) {
+                Coord<2> gridIndex(x, y);
+                const std::map<int, Coord<2> >& chunk = grid[gridIndex];
+
+                for (std::map<int, Coord<2> >::const_iterator i = chunk.begin(); i != chunk.end(); ++i) {
+                    ConvexPolytope<Coord<2> > element(i->second, globalDim);
+
+                    for (int y = -1; y < 2; ++y) {
+                        for (int x = -1; x < 2; ++x) {
+                            Coord<2> currentIndex = gridIndex + Coord<2>(x, y);
+                            const std::map<int, Coord<2> >& neighbors = grid[currentIndex];
+                            for (std::map<int, Coord<2> >::const_iterator j = neighbors.begin();
+                                 j != neighbors.end();
+                                 ++j) {
+                                if (j->second != i->second) {
+                                    element << std::make_pair(j->second, j->first);
+                                }
+                            }
+                        }
+                    }
+
+                    cells[i->first] = element;
+                }
+            }
+        }
+
+        return cells;
+    }
+
+    double performance(std::vector<int> dim)
+    {
+        double seconds = 0;
+
+        // I. Adapt Voronio Mesh (i.e. Set of Cells)
+        std::size_t numCells = dim[0];
+        int skipCells = dim[1];
+        int expansionWidth = dim[2];
+        int idStreakLength = dim[3];
+
+        std::map<int, ConvexPolytope<Coord<2> > > cells = mapIDs(rawCells, idStreakLength);
+
+        // II. Extract Adjacency List from Cells
+        Adjacency adjacency;
+
+        for (std::map<int, ConvexPolytope<Coord<2> > >::iterator  i = cells.begin(); i != cells.end(); ++i) {
+            int id = i->first;
+            const ConvexPolytope<Coord<2> > element = i->second;
+
+            addNeighbors(&adjacency[id], element.getLimits());
+        }
+
+        // III. Fill Region
+        Region<1> r;
+        int counter = 0;
+        bool select = true;
+        for (Adjacency::iterator i = adjacency.begin(); i != adjacency.end(); ++i) {
+            ++counter;
+            if (counter >= skipCells) {
+                counter = 0;
+                select = !select;
+            }
+
+            if (select) {
+                r << Coord<1>(i->first);
+            }
+        }
+
+        // IV. Performance Measurement
+        {
+            ScopedTimer t(&seconds);
+
+            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured(), adjacency);
+
+            if (q.size() == 4711) {
+                std::cout << "pure debug statement to prevent the compiler from optimizing away the previous function";
+            }
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+
+private:
+    std::map<int, ConvexPolytope<Coord<2> > > rawCells;
+
+    static std::map<int, ConvexPolytope<Coord<2> > > mapIDs(
+        const std::map<int, ConvexPolytope<Coord<2> > >& rawCells, int idStreakLength)
+    {
+        std::map<int, ConvexPolytope<Coord<2> > > ret;
+        for (std::map<int, ConvexPolytope<Coord<2> > >::const_iterator i = rawCells.begin(); i != rawCells.end(); ++i) {
+            ConvexPolytope<Coord<2> > element = i->second;
+            mapLimitIDs(&element.getLimits(), idStreakLength);
+            ret[mapID(i->first, idStreakLength)] = element;
+        }
+
+        return ret;
+    }
+
+    template<typename LIMITS_CONTAINER>
+    static void mapLimitIDs(LIMITS_CONTAINER *limits, int idStreakLength)
+    {
+        for (typename LIMITS_CONTAINER::iterator i = limits->begin(); i != limits->end(); ++i) {
+            i->neighborID = mapID(i->neighborID, idStreakLength);
+        }
+    }
+
+    static int mapID(int id, int idStreakLength)
+    {
+        if (idStreakLength == -1) {
+            return id;
+        }
+
+        return id / idStreakLength * 2 * idStreakLength + id % idStreakLength;
+    }
+
+    template<typename GRID>
+    static void fillChunk(GRID *grid, const Coord<2>& gridIndex, int *counter, int elementsPerChunk, const Coord<2>& chunkDim, double minDistance)
+    {
+        Coord<2> chunkOffset = gridIndex.scale(chunkDim);
+
+        for (int i = 0; i < elementsPerChunk; ++i) {
+            Coord<2> randomCoord = Coord<2>(Random::gen_u(chunkDim.x()), Random::gen_u(chunkDim.y()));
+            randomCoord += chunkOffset;
+
+            if (doesNotCollide(randomCoord, *grid, gridIndex, minDistance)) {
+                int id = (*counter)++;
+                (*grid)[gridIndex][id] = randomCoord;
+            }
+        }
+    }
+
+    template<typename COORD, typename GRID>
+    static bool doesNotCollide(COORD position, const GRID& grid, Coord<2> gridIndex, double minDistance)
+    {
+        for (int y = -1; y < 2; ++y) {
+            for (int x = -1; x < 2; ++x) {
+                Coord<2> currentIndex = gridIndex + Coord<2>(x, y);
+                bool valid = positionMaintainsMinDistanceToOthers(
+                    position,
+                    grid[currentIndex].begin(),
+                    grid[currentIndex].end(),
+                    minDistance);
+
+                if (!valid) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    template<typename COORD, typename ITERATOR1, typename ITERATOR2>
+    static bool positionMaintainsMinDistanceToOthers(
+        const COORD& position, const ITERATOR1& begin, const ITERATOR2& end, double minDistance)
+    {
+        for (ITERATOR1 i = begin; i != end; ++i) {
+            COORD delta = i->second - position;
+            if (delta.abs().maxElement() < minDistance) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template<typename VECTOR, typename LIMITS>
+    void addNeighbors(VECTOR *vec, const LIMITS& limits)
+    {
+        for (typename LIMITS::const_iterator i = limits.begin(); i != limits.end(); ++i) {
+            (*vec) << i->neighborID;
+        }
+    }
+};
+
+
 class CoordEnumerationVanilla : public CPUBenchmark
 {
 public:
@@ -176,8 +553,9 @@ public:
         return "vanilla";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -220,8 +598,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -266,8 +645,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         Region<3> region;
         for (int z = 0; z < dim.z(); ++z) {
             for (int y = 0; y < dim.y(); ++y) {
@@ -314,8 +694,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double seconds = 0;
         {
             ScopedTimer t(&seconds);
@@ -360,8 +741,9 @@ public:
         return "vanilla";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int dimX = dim.x();
         int dimY = dim.y();
         int dimZ = dim.z();
@@ -436,8 +818,9 @@ public:
         return "pepper";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int dimX = dim.x();
         int dimY = dim.y();
         int dimZ = dim.z();
@@ -687,8 +1070,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 5;
         SerialSimulator<JacobiCellClassic> sim(
             new NoOpInitializer<JacobiCellClassic>(dim, maxT));
@@ -758,8 +1142,9 @@ public:
         return "silver";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
 
         SerialSimulator<JacobiCellFixedHood> sim(
@@ -989,8 +1374,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         typedef SoAGrid<
             JacobiCellStreakUpdate,
             APITraits::SelectTopology<JacobiCellStreakUpdate>::Value> GridType;
@@ -1013,7 +1399,7 @@ public:
                 typedef UpdateFunctorHelpers::Selector<JacobiCellStreakUpdate>::SoARegionUpdateHelper Updater;
 
                 Coord<3> offset(1, 1, 1);
-                Updater updater(&region, offset, offset, 0);
+                Updater updater(&region, &offset, &offset, &box.dimensions, 0);
                 gridNew->callback(gridOld, updater);
                 std::swap(gridOld, gridNew);
             }
@@ -1049,8 +1435,9 @@ public:
         return "platinum";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
         SerialSimulator<JacobiCellStreakUpdate> sim(
             new NoOpInitializer<JacobiCellStreakUpdate>(dim, maxT));
@@ -2100,8 +2487,9 @@ public:
         return "bronze";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 20;
         SerialSimulator<LBMCell> sim(
             new NoOpInitializer<LBMCell>(dim, maxT));
@@ -2143,8 +2531,9 @@ public:
         return "gold";
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         int maxT = 10;
         SerialSimulator<LBMSoACell> sim(
             new NoOpInitializer<LBMSoACell>(dim, maxT));
@@ -2191,8 +2580,9 @@ public:
         return name;
     }
 
-    double performance2(const Coord<3>& dim)
+    double performance(std::vector<int> rawDim)
     {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
         double duration = 0;
         Coord<2> accu;
         Coord<2> realDim(dim.x(), dim.y());
@@ -2223,25 +2613,587 @@ private:
     std::string name;
 };
 
+#ifdef LIBGEODECOMP_WITH_CPP14
+typedef double ValueType;
+static const std::size_t MATRICES = 1;
+static const int C = 4;         // AVX
+static const int SIGMA = 1;
+typedef short_vec<ValueType, C> ShortVec;
+
+class SPMVMCell
+{
+public:
+    class API :
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {};
+
+    inline explicit SPMVMCell(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename NEIGHBORHOOD>
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    {
+        sum = 0.;
+        for (const auto& j: neighborhood.weights(0)) {
+            sum += neighborhood[j.first].value * j.second;
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+class SPMVMCellStreak
+{
+public:
+    class API :
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {};
+
+    inline explicit SPMVMCellStreak(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            hoodNew[i].sum = 0.;
+            for (const auto& j: hoodOld.weights(0)) {
+                hoodNew[i].sum += hoodOld[j.first].value * j.second;
+            }
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+class SPMVMSoACell
+{
+public:
+    class API :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {
+    public:
+        // uniform sizes lead to std::bad_alloc,
+        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
+        // as dimension (DIM = 1)
+        LIBFLATARRAY_CUSTOM_SIZES(
+            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
+            (65536)(131072)(262144)(524288)(1048576),
+            (1),
+            (1))
+    };
+
+    inline explicit SPMVMSoACell(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            ShortVec tmp;
+            tmp.load_aligned(&hoodNew->sum() + i * C);
+            for (const auto& j: hoodOld.weights(0)) {
+                ShortVec weights, values;
+                weights.load_aligned(j.second);
+                values.gather(&hoodOld->value(), j.first);
+                tmp += values * weights;
+            }
+            tmp.store_aligned(&hoodNew->sum() + i * C);
+        }
+    }
+
+    template<typename NEIGHBORHOOD>
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    {
+        sum = 0.;
+        for (const auto& j: neighborhood.weights(0)) {
+            sum += neighborhood[j.first].value * j.second;
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+LIBFLATARRAY_REGISTER_SOA(SPMVMSoACell, ((double)(sum))((double)(value)))
+
+class SPMVMSoACellInf
+{
+public:
+    using REAL = ShortVec;
+
+    class API :
+        public APITraits::HasSoA,
+        public APITraits::HasUpdateLineX,
+        public APITraits::HasUnstructuredTopology,
+        public APITraits::HasSellType<ValueType>,
+        public APITraits::HasSellMatrices<MATRICES>,
+        public APITraits::HasSellC<C>,
+        public APITraits::HasSellSigma<SIGMA>
+    {
+    public:
+        // uniform sizes lead to std::bad_alloc,
+        // since UnstructuredSoAGrid uses (dim.x(), 1, 1)
+        // as dimension (DIM = 1)
+        LIBFLATARRAY_CUSTOM_SIZES(
+            (16)(32)(64)(128)(256)(512)(1024)(2048)(4096)(8192)(16384)(32768)
+            (65536)(131072)(262144)(524288)(1048576),
+            (1),
+            (1))
+    };
+
+    inline explicit SPMVMSoACellInf(double v = 8.0) :
+        value(v), sum(0)
+    {}
+
+    template<typename HOOD_NEW, typename HOOD_OLD>
+    static void updateLineX(HOOD_NEW& hoodNew, int indexEnd, HOOD_OLD& hoodOld, unsigned /* nanoStep */)
+    {
+        REAL tmp, weights, values;
+        for (int i = hoodOld.index(); i < indexEnd; ++i, ++hoodOld) {
+            tmp = &hoodNew->sum() + i * C;
+            for (const auto& j: hoodOld.weights(0)) {
+                weights = j.second;
+                values.gather(&hoodOld->value(), j.first);
+                tmp += values * weights;
+            }
+            (&hoodNew->sum() + i * C) << tmp;
+        }
+    }
+
+    template<typename NEIGHBORHOOD>
+    void update(NEIGHBORHOOD& neighborhood, unsigned /* nanoStep */)
+    {
+        sum = 0.;
+        for (const auto& j: neighborhood.weights(0)) {
+            sum += neighborhood[j.first].value * j.second;
+        }
+    }
+
+    double value;
+    double sum;
+};
+
+LIBFLATARRAY_REGISTER_SOA(SPMVMSoACellInf, ((double)(sum))((double)(value)))
+
+// setup a sparse matrix
+template<typename CELL, typename GRID>
+class SparseMatrixInitializer : public SimpleInitializer<CELL>
+{
+private:
+    int size;
+
+public:
+    inline
+    SparseMatrixInitializer(const Coord<3>& dim, int maxT) :
+        SimpleInitializer<CELL>(Coord<1>(dim.x()), maxT),
+        size(dim.x())
+    {}
+
+    virtual void grid(GridBase<CELL, 1> *ret)
+    {
+        // setup sparse matrix
+        GRID *grid = dynamic_cast<GRID *>(ret);
+        std::map<Coord<2>, ValueType> adjacency;
+
+        // setup matrix: ~1 % non zero entries
+        for (int row = 0; row < size; ++row) {
+            for (int col = 0; col < size / 100; ++col) {
+                adjacency[Coord<2>(row, col * 100)] = 5.0;
+            }
+        }
+
+        grid->setAdjacency(0, adjacency);
+
+        // setup rhs: not needed, since the grid is intialized with default cells
+        // default value of SPMVMCell is 8.0
+    }
+};
+
+class SellMatrixInitializer : public CPUBenchmark
+{
+    public:
+    std::string family()
+    {
+        return "SELLInit";
+    }
+
+    std::string species()
+    {
+        return "bronze";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        const Coord<1> dim1d(dim.x());
+        const int size = dim.x();
+        UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> grid(dim1d);
+        std::map<Coord<2>, ValueType> adjacency;
+
+        // setup matrix: ~1 % non zero entries
+        for (int row = 0; row < size; ++row) {
+            for (int col = 0; col < size / 100; ++col) {
+                adjacency[Coord<2>(row, col * 100)] = 5.0;
+            }
+        }
+
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+
+            grid.setAdjacency(0, adjacency);
+        }
+
+        if (grid.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        return seconds;
+    }
+
+    std::string unit()
+    {
+        return "s";
+    }
+};
+
+class SparseMatrixVectorMultiplication : public CPUBenchmark
+{
+private:
+    template<typename CELL, typename GRID>
+    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+                       GRID *gridNew, unsigned nanoStep)
+    {
+        UnstructuredNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodOld(gridOld, streak.origin.x());
+        CellIDNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
+            hoodNew(*gridNew);
+
+        // call update()
+        for (int i = hoodOld.index(); i < streak.endX; ++i, ++hoodOld) {
+            hoodNew[i].update(hoodOld, nanoStep);
+        }
+    }
+
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "bronze";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        // 1. create grids
+        typedef UnstructuredGrid<SPMVMCell, MATRICES, ValueType, C, SIGMA> Grid;
+        const Coord<1> size(dim.x());
+        Grid gridOld(size);
+        Grid gridNew(size);
+
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMCell, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. call updateFunctor()
+        double seconds = 0;
+        Streak<1> streak(Coord<1>(0), size.x());
+        {
+            ScopedTimer t(&seconds);
+            updateFunctor<SPMVMCell, Grid>(streak, gridOld, &gridNew, 0);
+        }
+
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GFLOP/s";
+    }
+};
+
+class SparseMatrixVectorMultiplicationVectorized : public CPUBenchmark
+{
+private:
+    template<typename CELL, typename GRID>
+    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+                       GRID *gridNew, unsigned nanoStep)
+    {
+        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
+                         UnstructuredGridSoAUpdateHelper<CELL>(
+                             gridOld, gridNew, streak, nanoStep));
+    }
+
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "platinum";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        // 1. create grids
+        typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
+        const Coord<1> size(dim.x());
+        Grid gridOld(size);
+        Grid gridNew(size);
+
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. call updateFunctor()
+        double seconds = 0;
+        Streak<1> streak(Coord<1>(0), size.x());
+        {
+            ScopedTimer t(&seconds);
+            updateFunctor<SPMVMSoACell, Grid>(streak, gridOld, &gridNew, 0);
+        }
+
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GFLOP/s";
+    }
+};
+
+class SparseMatrixVectorMultiplicationVectorizedInf : public CPUBenchmark
+{
+private:
+    template<typename CELL, typename GRID>
+    void updateFunctor(const Streak<1>& streak, const GRID& gridOld,
+                       GRID *gridNew, unsigned nanoStep)
+    {
+        gridOld.callback(gridNew, UnstructuredUpdateFunctorHelpers::
+                         UnstructuredGridSoAUpdateHelper<CELL>(
+                             gridOld, gridNew, streak, nanoStep));
+    }
+
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "gold";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        // 1. create grids
+        typedef UnstructuredSoAGrid<SPMVMSoACellInf, MATRICES, ValueType, C, SIGMA> Grid;
+        const Coord<1> size(dim.x());
+        Grid gridOld(size);
+        Grid gridNew(size);
+
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMSoACellInf, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. call updateFunctor()
+        double seconds = 0;
+        Streak<1> streak(Coord<1>(0), size.x());
+        {
+            ScopedTimer t(&seconds);
+            updateFunctor<SPMVMSoACellInf, Grid>(streak, gridOld, &gridNew, 0);
+        }
+
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GFLOP/s";
+    }
+};
+
+#ifdef __AVX__
+class SparseMatrixVectorMultiplicationNative : public CPUBenchmark
+{
+private:
+    // callback to get cell's member pointer
+    template<typename CELL, typename VALUE_TYPE>
+    class GetPointer
+    {
+    private:
+        VALUE_TYPE **sumPtr;
+        VALUE_TYPE **valuePtr;
+    public:
+        GetPointer(VALUE_TYPE **sumPtr, VALUE_TYPE **valuePtr) :
+            sumPtr(sumPtr), valuePtr(valuePtr)
+        {}
+
+        template<
+            typename CELL1, long MY_DIM_X1, long MY_DIM_Y1, long MY_DIM_Z1, long INDEX1,
+            typename CELL2, long MY_DIM_X2, long MY_DIM_Y2, long MY_DIM_Z2, long INDEX2>
+        void operator()(
+            LibFlatArray::soa_accessor<CELL1, MY_DIM_X1, MY_DIM_Y1, MY_DIM_Z1, INDEX1>& oldAccessor,
+            LibFlatArray::soa_accessor<CELL2, MY_DIM_X2, MY_DIM_Y2, MY_DIM_Z2, INDEX2>& newAccessor) const
+        {
+            *sumPtr = &newAccessor.sum();
+            *valuePtr = &oldAccessor.value();
+        }
+    };
+
+public:
+    std::string family()
+    {
+        return "SPMVM";
+    }
+
+    std::string species()
+    {
+        return "pepper";
+    }
+
+    double performance(std::vector<int> rawDim)
+    {
+        Coord<3> dim(rawDim[0], rawDim[1], rawDim[2]);
+        // 1. create grids
+        typedef UnstructuredSoAGrid<SPMVMSoACell, MATRICES, ValueType, C, SIGMA> Grid;
+        typedef SellCSigmaSparseMatrixContainer<ValueType, C, SIGMA> Matrix;
+        const Coord<1> size(dim.x());
+        Grid gridOld(size);
+        Grid gridNew(size);
+
+        // 2. init grid old
+        const int maxT = 1;
+        SparseMatrixInitializer<SPMVMSoACell, Grid> init(dim, maxT);
+        init.grid(&gridOld);
+
+        // 3. native kernel
+        const Matrix& matrix = gridOld.getAdjacency(0);
+        const ValueType *values = matrix.valuesVec().data();
+        const int *cl = matrix.chunkLengthVec().data();
+        const int *cs = matrix.chunkOffsetVec().data();
+        const int *col = matrix.columnVec().data();
+        ValueType *rhsPtr; // = hoodOld.valuePtr;
+        ValueType *resPtr; // = hoodNew.sumPtr;
+        gridOld.callback(&gridNew, GetPointer<SPMVMSoACell, ValueType>(&resPtr, &rhsPtr));
+        const int rowsPadded = ((size.x() - 1) / C + 1) * C;
+        double seconds = 0;
+        {
+            ScopedTimer t(&seconds);
+            for (int i = 0; i < rowsPadded / C; ++i) {
+                int offs = cs[i];
+                __m256d tmp = _mm256_load_pd(resPtr + i*C);
+                for (int j = 0; j < cl[i]; ++j) {
+                    __m128d rhstmp;
+                    __m256d rhs, val;
+                    val    = _mm256_load_pd(values + offs);
+                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 0);
+                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
+                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 1);
+                    tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
+                }
+                _mm256_store_pd(resPtr + i*C, tmp);
+            }
+        }
+
+        if (gridNew.get(Coord<1>(1)).sum == 4711) {
+            std::cout << "this statement just serves to prevent the compiler from"
+                      << "optimizing away the loops above\n";
+        }
+
+        const double numOps = 2. * (size.x() / 100) * (size.x());
+        const double gflops = 1.0e-9 * numOps / seconds;
+        return gflops;
+    }
+
+    std::string unit()
+    {
+        return "GFLOP/s";
+    }
+};
+#endif
+#endif
+
 #ifdef LIBGEODECOMP_WITH_CUDA
-void cudaTests(std::string revision, bool quick, int cudaDevice);
+void cudaTests(std::string name, std::string revision, int cudaDevice);
 #endif
 
 int main(int argc, char **argv)
 {
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << " [-q,--quick] REVISION CUDA_DEVICE\n";
+    if ((argc < 3) || (argc == 4) || (argc > 5)) {
+        std::cerr << "usage: " << argv[0] << " [-n,--name SUBSTRING] REVISION CUDA_DEVICE \n"
+                  << "  - optional: only run tests whose name contains a SUBSTRING,\n"
+                  << "  - REVISION is purely for output reasons,\n"
+                  << "  - CUDA_DEVICE causes CUDA tests to run on the device with the given ID.\n";
         return 1;
     }
 
-    bool quick = false;
+    std::string name = "";
     int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
+    if (argc == 5) {
+        if ((std::string(argv[1]) == "-n") ||
+            (std::string(argv[1]) == "--name")) {
+            name = std::string(argv[2]);
         }
-        argumentIndex = 2;
+        argumentIndex = 3;
     }
     std::string revision = argv[argumentIndex + 0];
 
@@ -2250,49 +3202,127 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    LibFlatArray::evaluate eval(revision);
+    LibFlatArray::evaluate eval(name, revision);
     eval.print_header();
-
-    if (!quick) {
-        eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
-        eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
-        eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
-
-        eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
-        eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
-        eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
-    }
-
-    eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
 
     std::vector<Coord<3> > sizes;
 
-    if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(64, 64, 64)
-              << Coord<3>(68, 68, 68)
-              << Coord<3>(106, 106, 106)
-              << Coord<3>(128, 128, 128)
-              << Coord<3>(150, 150, 150)
-              << Coord<3>(512, 512, 32)
-              << Coord<3>(518, 518, 32);
+#ifdef LIBGEODECOMP_WITH_CPP14
+    sizes << Coord<3>(10648 , 1, 1)
+          << Coord<3>(35937 , 1, 1)
+          << Coord<3>(85184 , 1, 1)
+          << Coord<3>(166375, 1, 1);
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SellMatrixInitializer(), toVector(sizes[i]));
     }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplication(), toVector(sizes[i]));
+    }
+
+#ifdef __AVX__
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationNative(), toVector(sizes[i]));
+    }
+#endif
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationVectorized(), toVector(sizes[i]));
+    }
+
+    for (std::size_t i = 0; i < sizes.size(); ++i) {
+        eval(SparseMatrixVectorMultiplicationVectorizedInf(), toVector(sizes[i]));
+    }
+    sizes.clear();
+#endif
+
+    eval(RegionCount(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionCount(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionCount(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionInsert(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionInsert(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionInsert(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionIntersect(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionIntersect(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionIntersect(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionSubtract(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionSubtract(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionSubtract(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionUnion(), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionUnion(), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionUnion(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionExpand(1), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionExpand(1), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionExpand(1), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(RegionExpand(5), toVector(Coord<3>( 128,  128,  128)));
+    eval(RegionExpand(5), toVector(Coord<3>( 512,  512,  512)));
+    eval(RegionExpand(5), toVector(Coord<3>(2048, 2048, 2048)));
+
+    std::vector<int> params(4);
+    int numCells;
+    {
+        numCells = 500000;
+        std::map<int, ConvexPolytope<Coord<2> > > cells;
+        if (std::string("RegionExpWithAdjacency").find(name) != std::string::npos) {
+            cells = RegionExpandWithAdjacency::genGrid(numCells);
+        }
+        params[0] = numCells;
+        params[1] = numCells; // skip cells
+        params[2] = 1; // expansion width
+        params[3] = -1; // id streak lenght
+        eval(RegionExpandWithAdjacency(cells), params);
+        params[1] = 50000; // skip cells
+        params[3] = 500; // id streak lenght
+        eval(RegionExpandWithAdjacency(cells), params);
+    }
+
+    {
+        numCells = 50000;
+        params[0] = numCells;
+        std::map<int, ConvexPolytope<Coord<2> > > cells = RegionExpandWithAdjacency::genGrid(numCells);
+
+        params[1] = 100;
+        params[2] = 50;
+        params[3] = 100;
+        eval(RegionExpandWithAdjacency(cells), params);
+
+        params[2] = 20;
+        params[3] = 10;
+        eval(RegionExpandWithAdjacency(cells), params);
+
+        params[2] = 10;
+        params[3] = 2;
+        eval(RegionExpandWithAdjacency(cells), params);
+    }
+
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationVanilla(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationBronze(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 128,  128,  128)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>( 512,  512,  512)));
+    eval(CoordEnumerationGold(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    eval(FloatCoordAccumulationGold(), toVector(Coord<3>(2048, 2048, 2048)));
+
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128)
+          << Coord<3>(150, 150, 150)
+          << Coord<3>(512, 512, 32)
+          << Coord<3>(518, 518, 32);
 
     sizes << Coord<3>(1024, 1024, 32)
           << Coord<3>(1026, 1026, 32);
@@ -2323,13 +3353,11 @@ int main(int argc, char **argv)
 
     sizes.clear();
 
-    if (!quick) {
-        sizes << Coord<3>(22, 22, 22)
-              << Coord<3>(64, 64, 64)
-              << Coord<3>(68, 68, 68)
-              << Coord<3>(106, 106, 106)
-              << Coord<3>(128, 128, 128);
-    }
+    sizes << Coord<3>(22, 22, 22)
+          << Coord<3>(64, 64, 64)
+          << Coord<3>(68, 68, 68)
+          << Coord<3>(106, 106, 106)
+          << Coord<3>(128, 128, 128);
 
     sizes << Coord<3>(160, 160, 160);
 
@@ -2341,16 +3369,14 @@ int main(int argc, char **argv)
         eval(LBMSoA(), toVector(sizes[i]));
     }
 
-    if (!quick) {
-        std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
-        eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
-        eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
-        eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
-        eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
-    }
+    std::vector<int> dim = toVector(Coord<3>(32 * 1024, 32 * 1024, 1));
+    eval(PartitionBenchmark<HIndexingPartition   >("PartitionHIndexing"), dim);
+    eval(PartitionBenchmark<StripingPartition<2> >("PartitionStriping"),  dim);
+    eval(PartitionBenchmark<HilbertPartition     >("PartitionHilbert"),   dim);
+    eval(PartitionBenchmark<ZCurvePartition<2>   >("PartitionZCurve"),    dim);
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-    cudaTests(revision, quick, cudaDevice);
+    cudaTests(name, revision, cudaDevice);
 #endif
 
     return 0;

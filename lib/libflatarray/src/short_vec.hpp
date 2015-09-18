@@ -28,9 +28,22 @@ public:
 
     class sse
     {};
+
+    class mic
+    {};
+
+    class neon
+    {};
 };
 
 #include <sstream>
+
+#include <libflatarray/detail/short_vec_avx512_double_8.hpp>
+#include <libflatarray/detail/short_vec_avx512_double_16.hpp>
+#include <libflatarray/detail/short_vec_avx512_double_32.hpp>
+
+#include <libflatarray/detail/short_vec_avx512_float_16.hpp>
+#include <libflatarray/detail/short_vec_avx512_float_32.hpp>
 
 #include <libflatarray/detail/short_vec_avx_double_4.hpp>
 #include <libflatarray/detail/short_vec_avx_double_8.hpp>
@@ -39,6 +52,8 @@ public:
 #include <libflatarray/detail/short_vec_avx_float_8.hpp>
 #include <libflatarray/detail/short_vec_avx_float_16.hpp>
 #include <libflatarray/detail/short_vec_avx_float_32.hpp>
+
+#include <libflatarray/detail/short_vec_neon_float_4.hpp>
 
 #include <libflatarray/detail/short_vec_scalar_double_1.hpp>
 #include <libflatarray/detail/short_vec_scalar_double_2.hpp>
@@ -63,5 +78,16 @@ public:
 #include <libflatarray/detail/short_vec_sse_float_16.hpp>
 
 #include <libflatarray/detail/short_vec_qpx_double_4.hpp>
+
+#include <libflatarray/detail/short_vec_neon_float_4.hpp>
+#include <libflatarray/detail/short_vec_neon_float_8.hpp>
+#include <libflatarray/detail/short_vec_neon_float_16.hpp>
+#include <libflatarray/detail/short_vec_neon_float_32.hpp>
+
+#include <libflatarray/detail/short_vec_mic_double_8.hpp>
+#include <libflatarray/detail/short_vec_mic_double_16.hpp>
+#include <libflatarray/detail/short_vec_mic_double_32.hpp>
+#include <libflatarray/detail/short_vec_mic_float_16.hpp>
+#include <libflatarray/detail/short_vec_mic_float_32.hpp>
 
 #endif

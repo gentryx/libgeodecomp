@@ -12,6 +12,17 @@
 
 #include <emmintrin.h>
 #include <libflatarray/detail/sqrt_reference.hpp>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
+#include <iostream>
+
+#ifdef __SSE4_1__
+#include <smmintrin.h>
+#endif
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 #ifndef __CUDA_ARCH__
 
@@ -48,17 +59,27 @@ public:
     {}
 
     inline
-    short_vec(const float *data) :
-        val1(_mm_loadu_ps(data +  0))
-    {}
+    short_vec(const float *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m128& val1) :
         val1(val1)
     {}
 
+#ifdef LIBFLATARRAY_WITH_CPP14
     inline
-    short_vec(const sqrt_reference<float, 4> other);
+    short_vec(const std::initializer_list<float>& il)
+    {
+        const float *ptr = static_cast<const float *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
+
+    inline
+    short_vec(const sqrt_reference<float, 4>& other);
 
     inline
     void operator-=(const short_vec<float, 4>& other)
@@ -126,10 +147,88 @@ public:
     }
 
     inline
+    void load(const float *data)
+    {
+        val1 = _mm_loadu_ps(data);
+    }
+
+    inline
+    void load_aligned(const float *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        val1 = _mm_load_ps(data);
+    }
+
+    inline
     void store(float *data) const
     {
-        _mm_storeu_ps(data +  0, val1);
+        _mm_storeu_ps(data + 0, val1);
     }
+
+    inline
+    void store_aligned(float *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        _mm_store_ps(data + 0, val1);
+    }
+
+    inline
+    void store_nt(float *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        _mm_stream_ps(data + 0, val1);
+    }
+
+#ifdef __SSE4_1__
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        val1 = _mm_load_ss(ptr + offsets[0]);
+        SHORTVEC_INSERT_PS(val1, ptr, offsets[1], _MM_MK_INSERTPS_NDX(0,1,0));
+        SHORTVEC_INSERT_PS(val1, ptr, offsets[2], _MM_MK_INSERTPS_NDX(0,2,0));
+        SHORTVEC_INSERT_PS(val1, ptr, offsets[3], _MM_MK_INSERTPS_NDX(0,3,0));
+    }
+
+    inline
+    void scatter(float *ptr, const unsigned *offsets) const
+    {
+        ShortVecHelpers::ExtractResult r1, r2, r3, r4;
+        r1.i = _mm_extract_ps(val1, 0);
+        r2.i = _mm_extract_ps(val1, 1);
+        r3.i = _mm_extract_ps(val1, 2);
+        r4.i = _mm_extract_ps(val1, 3);
+        ptr[offsets[0]] = r1.f;
+        ptr[offsets[1]] = r2.f;
+        ptr[offsets[2]] = r3.f;
+        ptr[offsets[3]] = r4.f;
+    }
+#else
+    inline
+    void gather(const float *ptr, const unsigned *offsets)
+    {
+        __m128 f1, f2, f3, f4;
+        f1   = _mm_load_ss(ptr + offsets[0]);
+        f2   = _mm_load_ss(ptr + offsets[2]);
+        f1   = _mm_unpacklo_ps(f1, f2);
+        f3   = _mm_load_ss(ptr + offsets[1]);
+        f4   = _mm_load_ss(ptr + offsets[3]);
+        f3   = _mm_unpacklo_ps(f3, f4);
+        val1 = _mm_unpacklo_ps(f1, f3);
+    }
+
+    inline
+    void scatter(float *ptr, const unsigned *offsets) const
+    {
+        __m128 tmp = val1;
+        _mm_store_ss(ptr + offsets[0], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[1], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[2], tmp);
+        tmp = _mm_shuffle_ps(tmp, tmp, _MM_SHUFFLE(0,3,2,1));
+        _mm_store_ss(ptr + offsets[3], tmp);
+    }
+#endif
 
 private:
     __m128 val1;
@@ -161,7 +260,7 @@ private:
 #endif
 
 inline
-short_vec<float, 4>::short_vec(const sqrt_reference<float, 4> other) :
+short_vec<float, 4>::short_vec(const sqrt_reference<float, 4>& other) :
     val1(_mm_sqrt_ps(other.vec.val1))
 {}
 

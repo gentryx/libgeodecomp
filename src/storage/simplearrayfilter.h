@@ -19,7 +19,13 @@ public:
     virtual void load(const EXTERNAL source[ARITY], MEMBER   target[ARITY]) = 0;
     virtual void save(const MEMBER   source[ARITY], EXTERNAL target[ARITY]) = 0;
 
-    virtual void copyStreakInImpl(const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
+    virtual void copyStreakInImpl(
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             MEMBER buffer[ARITY];
@@ -31,7 +37,13 @@ public:
         }
     }
 
-    virtual void copyStreakOutImpl(const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride)
+    virtual void copyStreakOutImpl(
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             MEMBER buffer[ARITY];
@@ -44,7 +56,12 @@ public:
     }
 
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, const std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
         for (std::size_t i = 0; i < num; ++i) {
             load(&source[i * ARITY], target[i].*memberPointer);
@@ -52,7 +69,12 @@ public:
     }
 
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, const std::size_t  num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
         for (std::size_t i = 0; i < num; ++i) {
             save(source[i].*memberPointer, &target[i * ARITY]);

@@ -27,21 +27,26 @@ public:
         endX(endX)
     {}
 
-    Coord<DIM> end() const
+    inline Coord<DIM> end() const
     {
         Coord<DIM> ret = origin;
         ret.x() = endX;
         return ret;
     }
 
-    bool operator==(const Streak& other) const
+    inline bool operator==(const Streak& other) const
     {
         return
             (origin == other.origin) &&
             (endX == other.endX);
     }
 
-    int length() const
+    inline bool operator!=(const Streak& other) const
+    {
+        return !(*this == other);
+    }
+
+    inline int length() const
     {
         return endX - origin.x();
     }

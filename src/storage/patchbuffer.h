@@ -7,6 +7,13 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * The PatchBuffer stores a queue of grid fragments, specified by a
+ * Region, for later retrieval. Useful for building Steppers which
+ * implement overlapping communication and calculation (and hence need
+ * to buffer certain parts of the grid which will be temporarily
+ * overwritten).
+ */
 template<class GRID_TYPE1, class GRID_TYPE2>
 class PatchBuffer :
         public PatchAccepter<GRID_TYPE1>,

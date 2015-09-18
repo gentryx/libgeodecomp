@@ -11,7 +11,7 @@ library can harness all state of the art hardware architectures:
 - GPUs (currently only NVIDIA GPUs, via CUDA)
 - Intel Xeon Phi (thanks to the HPX backend)
 - MPI clusters (with or without accelerators)
-- and yes: the Raspberry Pi, too
+- and yes: the Raspberry Pi, too.
 
 Here is how it works: the library takes over the spatial and temporal
 loops of the simulation as well as storage of the simulation data. It
@@ -128,6 +128,7 @@ DIRECTORY LAYOUT
 
 4. libgeodecomp/tools/
 ----------------------
+
   Tools that help us to generate code (typemap generator for MPI
   datatypes) or compile (build system).
 
@@ -159,10 +160,26 @@ as the standard compiler:
 
   cmake -DCMAKE_CXX_COMPILER=/usr/x86_64-pc-linux-gnu/gcc-bin/4.7.0/g++ ../../
 
-Additionally you may want to run the library's unit tests via "make
-test" to ensure that it's actually working. For speedier builds you
-may want to run make in parallel, e.g. "make -j 4". Replace the 4 by
-the number of cores in your system. For more details please refer to:
+After your build is complete, you might want to ensure that
+LibGeoDecomp is functioning as advertised by running its unit tests:
+
+  make check
+
+For speedier builds you may want to run make in parallel, e.g. "make
+-j 4". Replace the 4 by the number of cores in your system. For more
+details please refer to:
 
   http://www.libgeodecomp.org/documentation.html#userguide and
   http://www.libgeodecomp.org/faq.html
+
+INSTALLATION
+============
+
+After building the library you can install it via
+
+  make install
+
+An installation prefix can be configured via CMake by specifying the
+option CMAKE_INSTALL_PREFIX. Alternatively you could check whether
+your distribution (in the case of Linux) already comes with a
+prepackaged version of LibGeoDecomp.

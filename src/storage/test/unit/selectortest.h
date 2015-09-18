@@ -1,6 +1,7 @@
 #include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/grid.h>
 #include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/simplefilter.h>
@@ -104,13 +105,13 @@ public:
             vec << MyDummyCell(i, 47.11 + i, 'a' + i);
         }
 
-        std::vector<long long>    targetX(20, -1);
-        std::vector<double> targetY(20, -1);
-        std::vector<char>   targetZ(20, 'A');
+        std::vector<long long> targetX(20, -1);
+        std::vector<double>    targetY(20, -1);
+        std::vector<char>      targetZ(20, 'A');
 
-        selectorX.copyMemberOut(&vec[0], (char*)&targetX[0], 20);
-        selectorY.copyMemberOut(&vec[0], (char*)&targetY[0], 20);
-        selectorZ.copyMemberOut(&vec[0], (char*)&targetZ[0], 20);
+        selectorX.copyMemberOut(&vec[0], MemoryLocation::HOST, (char*)&targetX[0], MemoryLocation::HOST, 20);
+        selectorY.copyMemberOut(&vec[0], MemoryLocation::HOST, (char*)&targetY[0], MemoryLocation::HOST, 20);
+        selectorZ.copyMemberOut(&vec[0], MemoryLocation::HOST, (char*)&targetZ[0], MemoryLocation::HOST, 20);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(targetX[i], i);
@@ -126,38 +127,50 @@ public:
         Selector<MyDummyCell> selectorZ(&MyDummyCell::z, "varZ");
 
         std::vector<MyDummyCell> vec(20);
-        std::vector<long long> targetX;
-        std::vector<double>    targetY;
-        std::vector<char>      targetZ;
+        std::vector<long long> sourceX;
+        std::vector<double>    sourceY;
+        std::vector<char>      sourceZ;
 
         for (int i = 0; i < 20; ++i) {
-            targetX << i * 2 + 13;
-            targetY << 1.0 + i / 100.0;
-            targetZ << i + 69;
+            sourceX << i * 2 + 13;
+            sourceY << 1.0 + i / 100.0;
+            sourceZ << i + 69;
         }
 
-        selectorX.copyMemberIn((char*)&targetX[0], &vec[0], 20);
-        selectorY.copyMemberIn((char*)&targetY[0], &vec[0], 20);
-        selectorZ.copyMemberIn((char*)&targetZ[0], &vec[0], 20);
+        selectorX.copyMemberIn((char*)&sourceX[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
+        selectorY.copyMemberIn((char*)&sourceY[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
+        selectorZ.copyMemberIn((char*)&sourceZ[0], MemoryLocation::HOST, &vec[0], MemoryLocation::HOST, 20);
 
         for (int i = 0; i < 20; ++i) {
-            TS_ASSERT_EQUALS(targetX[i], i * 2 + 13);
-            TS_ASSERT_EQUALS(targetY[i], 1.0 + i / 100.0);
-            TS_ASSERT_EQUALS(targetZ[i], i + 69);
+            TS_ASSERT_EQUALS(vec[i].x, i * 2 + 13);
+            TS_ASSERT_EQUALS(vec[i].y, 1.0 + i / 100.0);
+            TS_ASSERT_EQUALS(vec[i].z, i + 69);
         }
     }
 
     class MyDummyFilter : public Filter<MyDummyCell, double, Color>
     {
     public:
-        void copyStreakInImpl(const Color *source, double *target, const std::size_t num, const std::size_t stride)
+        void copyStreakInImpl(
+            const Color *source,
+            MemoryLocation::Location sourceLocation,
+            double *target,
+            MemoryLocation::Location targetLocation,
+            const std::size_t num,
+            const std::size_t stride)
         {
             for (std::size_t i = 0; i < num; ++i) {
                 target[i] = source[i].red() * 2 + 10;
             }
         }
 
-        void copyStreakOutImpl(const double *source, Color *target, const std::size_t num, const std::size_t stride)
+        void copyStreakOutImpl(
+            const double *source,
+            MemoryLocation::Location sourceLocation,
+            Color *target,
+            MemoryLocation::Location targetLocation,
+            const std::size_t num,
+            const std::size_t stride)
         {
             for (std::size_t i = 0; i < num; ++i) {
                 target[i] = Color(source[i], 47, 11);
@@ -165,7 +178,12 @@ public:
         }
 
         void copyMemberInImpl(
-            const Color *source, MyDummyCell *target, std::size_t num, double MyDummyCell:: *memberPointer)
+            const Color *source,
+            MemoryLocation::Location sourceLocation,
+            MyDummyCell *target,
+            MemoryLocation::Location targetLocation,
+            std::size_t num,
+            double MyDummyCell:: *memberPointer)
         {
             for (std::size_t i = 0; i < num; ++i) {
                 target[i].*memberPointer = source[i].red() * 2 + 10;
@@ -173,7 +191,12 @@ public:
         }
 
         void copyMemberOutImpl(
-            const MyDummyCell *source, Color *target, std::size_t num, double MyDummyCell:: *memberPointer)
+            const MyDummyCell *source,
+            MemoryLocation::Location sourceLocation,
+            Color *target,
+            MemoryLocation::Location targetLocation,
+            std::size_t num,
+            double MyDummyCell:: *memberPointer)
         {
             for (std::size_t i = 0; i < num; ++i) {
                 target[i] = Color(source[i].*memberPointer, 47, 11);
@@ -221,14 +244,26 @@ public:
         }
 
         std::vector<double> target(13);
-        selector.copyMemberOut(&vec[0], (char*)&target[0], 13);
+        selector.copyMemberOut(
+            &vec[0],
+            MemoryLocation::HOST,
+            (char*)&target[0],
+            MemoryLocation::HOST,
+            13);
+
         for (int i = 0; i < 13; ++i) {
             // expecting 'A' + "offset from save()" + index
             double expected = 65 + 20 + i;
             TS_ASSERT_EQUALS(expected, target[i]);
         }
 
-        selector.copyMemberIn((char*)&target[0], &vec[0], 10);
+        selector.copyMemberIn(
+            (char*)&target[0],
+            MemoryLocation::HOST,
+            &vec[0],
+            MemoryLocation::HOST,
+            10);
+
         for (int i = 0; i < 13; ++i) {
             // expecting 'A' + "offset from save()" + "offset from load()" + index
             char expected = 65 + i;
@@ -255,14 +290,24 @@ public:
         }
 
         std::vector<Color> targetY(20);
-        selectorY.copyMemberOut(&vec[0], (char*)&targetY[0], 20);
+        selectorY.copyMemberOut(
+            &vec[0],
+            MemoryLocation::HOST,
+            (char*)&targetY[0],
+            MemoryLocation::HOST,
+            20);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(Color(i, 47, 11), targetY[i]);
         }
 
         // test copyMemberIn:
-        selectorY.copyMemberIn((char*)&targetY[0], &vec[0], 20);
+        selectorY.copyMemberIn(
+            (char*)&targetY[0],
+            MemoryLocation::HOST,
+            &vec[0],
+            MemoryLocation::HOST,
+            20);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(vec[i].y, i * 2 + 10);
@@ -284,14 +329,24 @@ public:
         }
 
         std::vector<double> targetZ(20);
-        selectorZ.copyMemberOut(&vec[0], (char*)&targetZ[0], 20);
+        selectorZ.copyMemberOut(
+            &vec[0],
+            MemoryLocation::HOST,
+            (char*)&targetZ[0],
+            MemoryLocation::HOST,
+            20);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(i + 20 + 'a', targetZ[i]);
         }
 
         // test copyMemberIn:
-        selectorZ.copyMemberIn((char*)&targetZ[0], &vec[0], 20);
+        selectorZ.copyMemberIn(
+            (char*)&targetZ[0],
+            MemoryLocation::HOST,
+            &vec[0],
+            MemoryLocation::HOST,
+            20);
 
         for (int i = 0; i < 20; ++i) {
             char expected = i;
@@ -315,14 +370,26 @@ public:
         }
 
         std::vector<Color> targetY(20);
-        selectorY.copyStreakOut((char*)&vec[0], (char*)&targetY[0], 20, 0);
+        selectorY.copyStreakOut(
+            (char*)&vec[0],
+            MemoryLocation::HOST,
+            (char*)&targetY[0],
+            MemoryLocation::HOST,
+            20,
+            0);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
         }
 
         // test copyStreakIn:
-        selectorY.copyStreakIn((char*)&targetY[0], (char*)&vec[0], 20, 0);
+        selectorY.copyStreakIn(
+            (char*)&targetY[0],
+            MemoryLocation::HOST,
+            (char*)&vec[0],
+            MemoryLocation::HOST,
+            20,
+            0);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(vec[i], (50 + i) * 2 + 10);
@@ -351,14 +418,22 @@ public:
         }
 
         std::vector<Color> targetY(20);
-        grid.saveMember(&targetY[0], selectorY, region);
+        grid.saveMember(
+            &targetY[0],
+            MemoryLocation::HOST,
+            selectorY,
+            region);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(Color(i + 50, 47, 11), targetY[i]);
         }
 
         // test copyStreakIn:
-        grid.loadMember(&targetY[0], selectorY, region);
+        grid.loadMember(
+            &targetY[0],
+            MemoryLocation::HOST,
+            selectorY,
+            region);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(grid.get(Coord<2>(i, 0)).y, (50 + i) * 2 + 10);
@@ -387,14 +462,14 @@ public:
         }
 
         std::vector<double> targetZ(20);
-        grid.saveMember(&targetZ[0], selectorZ, region);
+        grid.saveMember(&targetZ[0], MemoryLocation::HOST, selectorZ, region);
 
         for (int i = 0; i < 20; ++i) {
             TS_ASSERT_EQUALS(i + 'a' + 20, targetZ[i]);
         }
 
         // test copyStreakIn:
-        grid.loadMember(&targetZ[0], selectorZ, region);
+        grid.loadMember(&targetZ[0], MemoryLocation::HOST, selectorZ, region);
 
         for (int i = 0; i < 20; ++i) {
             char expected = i;
@@ -427,7 +502,7 @@ public:
             }
         }
 
-        grid.saveMember(&targetY[0], selectorY, region);
+        grid.saveMember(&targetY[0], MemoryLocation::HOST, selectorY, region);
 
         Region<2>::Iterator i = region.begin();
         for (std::size_t j = 0; j < targetY.size(); j += 3) {
@@ -450,7 +525,7 @@ public:
             sourceY[i * 3 + 2] = i * 3.0 + 5.0;
         }
 
-        grid.loadMember(&sourceY[0], selectorY, region);
+        grid.loadMember(&sourceY[0], MemoryLocation::HOST, selectorY, region);
 
         i = region.begin();
         for (std::size_t j = 0; j < region.size(); ++j) {
@@ -487,7 +562,7 @@ public:
             }
         }
 
-        grid.saveMember(&targetY[0], selectorY, region);
+        grid.saveMember(&targetY[0], MemoryLocation::HOST, selectorY, region);
 
         Region<2>::Iterator i = region.begin();
         for (std::size_t j = 0; j < targetY.size(); j += 3) {
@@ -510,7 +585,7 @@ public:
             sourceY[i * 3 + 2] = i * 7.0 + 555.0;
         }
 
-        grid.loadMember(&sourceY[0], selectorY, region);
+        grid.loadMember(&sourceY[0], MemoryLocation::HOST, selectorY, region);
 
         i = region.begin();
         for (std::size_t j = 0; j < region.size(); ++j) {
@@ -555,7 +630,11 @@ public:
         }
 
         std::vector<int> targetY(120);
-        selectorY.copyMemberOut(&vec[0], (char*)&targetY[0], 40);
+        selectorY.copyMemberOut(
+            &vec[0],
+            MemoryLocation::HOST,
+            (char*)&targetY[0],
+            MemoryLocation::HOST, 40);
 
         for (int i = 0; i < 40; ++i) {
             TS_ASSERT_EQUALS(i + 2000 + 20000, targetY[i * 3 + 0]);
@@ -564,7 +643,12 @@ public:
         }
 
         // test copyMemberIn:
-        selectorY.copyMemberIn((char*)&targetY[0], &vec[0], 40);
+        selectorY.copyMemberIn(
+            (char*)&targetY[0],
+            MemoryLocation::HOST,
+            &vec[0],
+            MemoryLocation::HOST,
+            40);
 
         for (int i = 0; i < 40; ++i) {
             TS_ASSERT_EQUALS(vec[i].y[0], i + 2000 + 20000 + 100000);
@@ -609,7 +693,11 @@ public:
                << Streak<2>(Coord<2>( 0, 5), 10)
                << Streak<2>(Coord<2>(10, 9), 15);
 
-        grid.saveMember(&targetY[0], selectorY, region);
+        grid.saveMember(
+            &targetY[0],
+            MemoryLocation::HOST,
+            selectorY,
+            region);
 
         int counter = 0;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
@@ -620,7 +708,11 @@ public:
         }
 
         // test copyStreakIn:
-        grid.loadMember(&targetY[0], selectorY, region);
+        grid.loadMember(
+            &targetY[0],
+            MemoryLocation::HOST,
+            selectorY,
+            region);
 
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {
             MyOtherDummyCell cell = grid.get(*i);
@@ -628,6 +720,19 @@ public:
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 3000 + 30000 + 200000, cell.y[1]);
             TS_ASSERT_EQUALS(i->y() * 100 + i->x() + 4000 + 40000 + 300000, cell.y[2]);
         }
+    }
+
+
+    void testWithTestCell()
+    {
+        // this is important to ensure that there are no linker woes
+        // because of different instantiations of the selector type
+        // from NVCC and the host compiler, where earch gets a
+        // different filter (DefaultCUDAFilter vs. DefaultFilter).
+
+        Selector<TestCell<2> > selector(&TestCell<2>::testValue, "testValue");
+        selector.copyMemberIn(
+            0, MemoryLocation::HOST, 0, MemoryLocation::HOST, 0);
     }
 };
 

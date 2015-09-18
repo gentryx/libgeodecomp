@@ -14,9 +14,11 @@ class Compare
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
-    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
+    inline bool operator()(
+        const IndexVectorType::const_iterator *a,
+        const IndexVectorType::const_iterator *b)
     {
         if (a[DIM] != b[DIM]) {
             return false;
@@ -31,9 +33,11 @@ class Compare<0>
 {
 public:
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
-    inline bool operator()(const VecType::const_iterator *a, const VecType::const_iterator *b)
+    inline bool operator()(
+        const IndexVectorType::const_iterator *a,
+        const IndexVectorType::const_iterator *b)
     {
         return a[0] == b[0];
     }
@@ -51,14 +55,20 @@ public:
 
     template<int> friend class InitIterators;
     template<int> friend class Region;
+    friend class RegionStreakIteratorTest;
+
     typedef std::pair<int, int> IntPair;
-    typedef std::vector<IntPair> VecType;
+    typedef std::vector<IntPair> IndexVectorType;
 
     template<typename INIT_HELPER>
-    inline RegionStreakIterator(const REGION *region, INIT_HELPER initHelper) :
+    inline RegionStreakIterator(
+        const REGION *region,
+        INIT_HELPER initHelper,
+        const Coord<DIM>& offset = Coord<DIM>()) :
+        offset(offset),
         region(region)
     {
-        initHelper(&streak, iterators, *region);
+        initHelper(&streak, iterators, *region, offset);
     }
 
     inline void operator++()
@@ -70,8 +80,8 @@ public:
             }
             return;
         } else {
-            streak.origin[0] = iterators[0]->first;
-            streak.endX = iterators[0]->second;
+            streak.origin[0] = iterators[0]->first + offset[0];
+            streak.endX = iterators[0]->second + offset[0];
         }
 
         for (int i = 1; i < DIM; ++i) {
@@ -83,7 +93,7 @@ public:
                 return;
             }
 
-            VecType::const_iterator nextEnd =
+            IndexVectorType::const_iterator nextEnd =
                 region->indicesBegin(i - 1) + (iterators[i] + 1)->second;
 
             if (iterators[i - 1] != nextEnd) {
@@ -91,7 +101,7 @@ public:
             }
 
             ++iterators[i];
-            streak.origin[i] = iterators[i]->first;
+            streak.origin[i] = iterators[i]->first + offset[i];
         }
     }
 
@@ -121,8 +131,9 @@ public:
     }
 
 private:
-    VecType::const_iterator iterators[DIM];
+    IndexVectorType::const_iterator iterators[DIM];
     Streak<DIM> streak;
+    Coord<DIM> offset;
     const REGION *region;
 };
 

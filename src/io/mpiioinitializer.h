@@ -32,7 +32,7 @@ public:
         datatype(mpiDatatype),
         communicator(comm)
     {
-        MPIIO<CELL_TYPE>::readMetadata(
+        mpiio.readMetadata(
             &dimensions, &currentStep, &maximumSteps, file, communicator);
     }
 
@@ -40,7 +40,7 @@ public:
     {
         Region<DIM> region;
         region << target->boundingBox();
-        MPIIO<CELL_TYPE>::readRegion(target, file, region, communicator, datatype);
+        mpiio.readRegion(target, file, region, communicator, datatype);
     }
 
     virtual Coord<DIM> gridDimensions() const
@@ -62,6 +62,7 @@ private:
     std::string file;
     MPI_Datatype datatype;
     MPI_Comm communicator;
+    MPIIO<CELL_TYPE> mpiio;
     unsigned currentStep;
     unsigned maximumSteps;
     Coord<DIM> dimensions;

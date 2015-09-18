@@ -5,6 +5,10 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * MockBalancer is a non-operative test class which will record all
+ * calls made to its public interface.
+ */
 class MockBalancer : public LoadBalancer
 {
 public:

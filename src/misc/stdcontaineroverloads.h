@@ -412,7 +412,24 @@ operator<<(std::basic_ostream<_CharT, _Traits>& os,
     return os;
 }
 
+#ifdef LIBGEODECOMP_WITH_CUDA
+#ifdef __CUDACC__
+
+template<typename _CharT, typename _Traits>
+std::basic_ostream<_CharT, _Traits>&
+operator<<(std::basic_ostream<_CharT, _Traits>& os,
+           dim3 dim)
+{
+    os << "(" << dim.x << ", " << dim.y << ", " << dim.z << ")";
+    return os;
+}
+
+#endif
+#endif
 
 }
+
+
+
 
 #endif

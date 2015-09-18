@@ -855,10 +855,21 @@ Typemaps::generateMapLibGeoDecomp_Chronometer() {
     return objType;
 }
 
+
 void Typemaps::initializeMaps()
 {
+    if (mapsCreated) {
+        throw std::logic_error("Typemaps already initialized, duplicate initialization would leak memory");
+    }
+
     if (sizeof(std::size_t) != sizeof(unsigned long)) {
         throw std::logic_error("MPI_UNSIGNED_LONG not suited for communication of std::size_t, needs to be redefined");
+    }
+
+    int mpiInitState = 0;
+    MPI_Initialized(&mpiInitState);
+    if (!mpiInitState) {
+        throw std::logic_error("MPI needs to be initialized prior to setting up Typemaps");
     }
 
     MPI_LIBGEODECOMP_COORD_1_ = generateMapLibGeoDecomp_Coord_1_();
@@ -882,7 +893,11 @@ void Typemaps::initializeMaps()
     MPI_LIBGEODECOMP_TESTCELL_3_ = generateMapLibGeoDecomp_TestCell_3_();
     MPI_LIBGEODECOMP_TESTCELLMPIDATATYPEHELPER = generateMapLibGeoDecomp_TestCellMPIDatatypeHelper();
     MPI_LIBGEODECOMP_CHRONOMETER = generateMapLibGeoDecomp_Chronometer();
+
+    mapsCreated = true;
 }
+
+bool Typemaps::mapsCreated = false;
 
 }
 

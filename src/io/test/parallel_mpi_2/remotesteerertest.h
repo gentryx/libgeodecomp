@@ -96,6 +96,7 @@ public:
     void setUp()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
+        mpiLayer.reset(new MPILayer());
         unsigned steererPeriod = 3;
         unsigned writerPeriod = 2;
         port = 47112;
@@ -103,7 +104,7 @@ public:
 
         sim.reset(new StripingSimulator<TestCell<2> >(
                       new TestInitializer<TestCell<2> >(Coord<2>(20, 10), maxSteps),
-                      mpiLayer.rank() ? 0 : new NoOpBalancer,
+                      mpiLayer->rank() ? 0 : new NoOpBalancer,
                       10000000));
 
         steerer = new RemoteSteerer<TestCell<2> >(steererPeriod, port);
@@ -119,13 +120,14 @@ public:
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
         sim.reset();
+        mpiLayer.reset();
 #endif
     }
 
     void testBasic()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             steerer->addAction(new FlushAction);
             StringVec feedback = steerer->sendCommandWithFeedback("flush 1234 9", 1);
             TS_ASSERT_EQUALS(std::size_t(1), feedback.size());
@@ -158,7 +160,7 @@ public:
     void testNonExistentAction()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             StringVec res;
             res = steerer->sendCommandWithFeedback("nonExistentAction  1 2 3", 2);
 
@@ -175,22 +177,22 @@ public:
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
         boost::shared_ptr<Interactor> interactor;
 
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("nonExistentHandler", "blah"));
             interactor.reset(new Interactor("nonExistentHandler bongo", 2, true, port));
         }
 
         // sleep until the request has made it into the pipeline
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
 
         sim->run();
 
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             interactor->waitForCompletion();
             StringVec expected;
             expected << "handler not found: nonExistentHandler"
@@ -204,24 +206,24 @@ public:
     void testHandlerNotFound1()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
         boost::shared_ptr<Interactor> interactor;
 
-        if (mpiLayer.rank() == 1) {
+        if (mpiLayer->rank() == 1) {
             steerer->addHandler(new EchoHandler());
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
         }
 
         // sleep until the request has made it into the pipeline
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
         sim->run();
 
         if (interactor) {
@@ -237,24 +239,24 @@ public:
     void testHandlerNotFound2()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
         boost::shared_ptr<Interactor> interactor;
 
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             steerer->addHandler(new EchoHandler());
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
         }
 
         // sleep until the request has made it into the pipeline
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
         sim->run();
 
         if (interactor) {
@@ -270,23 +272,23 @@ public:
     void testHandlerNotFound3()
     {
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             steerer->addAction(new PassThroughAction<TestCell<2> >("echo", "blah"));
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
         boost::shared_ptr<Interactor> interactor;
 
-        if (mpiLayer.rank() == 1) {
+        if (mpiLayer->rank() == 1) {
             interactor.reset(new Interactor("echo romeo,tango,yankee,papa,echo", 2, true, port));
         }
 
         // sleep until the request has made it into the pipeline
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
         sim->run();
 
         if (interactor) {
@@ -304,19 +306,19 @@ public:
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
         steerer->addDataAccessor(new TestValueAccessor());
         boost::shared_ptr<Interactor> interactor;
-        mpiLayer.barrier();
+        mpiLayer->barrier();
 
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             interactor.reset(new Interactor("get_testValue 2 1 3", 2, true, port));
         }
 
         // sleep until the request has made it into the pipeline
-        if (mpiLayer.rank() == 0) {
+        if (mpiLayer->rank() == 0) {
             while (steerer->pipe->copySteeringRequestsQueue().size() == 0) {
                 usleep(10000);
             }
         }
-        mpiLayer.barrier();
+        mpiLayer->barrier();
 
         sim->run();
 
@@ -329,7 +331,7 @@ public:
 
 private:
 #if defined LIBGEODECOMP_WITH_THREADS && defined LIBGEODECOMP_WITH_BOOST_ASIO
-    MPILayer mpiLayer;
+    boost::shared_ptr<MPILayer> mpiLayer;
     boost::shared_ptr<StripingSimulator<TestCell<2> > > sim;
     RemoteSteerer<TestCell<2> > *steerer;
     ParallelMemoryWriter<TestCell<2> > *writer;

@@ -15,7 +15,7 @@ class RegionTest : public CxxTest::TestSuite
 public:
     typedef std::vector<Coord<2> > CoordVector;
     typedef Region<1>::IntPair IntPair;
-    typedef Region<1>::VecType VecType;
+    typedef Region<1>::IndexVectorType IndexVectorType;
 
     void setUp()
     {
@@ -53,6 +53,117 @@ public:
         bigInsertOrdered = transform(s);
         bigInsertShuffled = bigInsertOrdered;
         std::random_shuffle(bigInsertShuffled.begin(), bigInsertShuffled.end());
+    }
+
+    void testExpandWithAdjacency()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        {
+            Region<1> region;
+
+            region << Coord<1>(1);
+
+            Adjacency adjacency =
+            {
+                std::make_pair(1, std::vector<int>{2, 3}),
+                std::make_pair(2, std::vector<int>{4, 5, 6}),
+            };
+
+            Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
+            TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(1)));
+            TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(2)));
+            TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(3)));
+            TS_ASSERT_EQUALS(0, expanded1.count(Coord<1>(4)));
+            TS_ASSERT_EQUALS(0, expanded1.count(Coord<1>(5)));
+            TS_ASSERT_EQUALS(0, expanded1.count(Coord<1>(6)));
+
+            Region<1> expanded2 = region.expandWithAdjacency(2, adjacency);
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(1)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(2)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(3)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(4)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(5)));
+            TS_ASSERT_EQUALS(1, expanded2.count(Coord<1>(6)));
+
+            Region<1> expanded22 = expanded1.expandWithAdjacency(1, adjacency);
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(1)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(2)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(3)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(4)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(5)));
+            TS_ASSERT_EQUALS(1, expanded22.count(Coord<1>(6)));
+
+            TS_ASSERT_EQUALS(expanded2, expanded22);
+        }
+
+        {
+            Region<1> region;
+
+            region << Coord<1>(1);
+            region << Coord<1>(2);
+
+            Adjacency adjacency =
+            {
+                std::make_pair(1, std::vector<int>{2, 3, 7, 8}),
+                std::make_pair(2, std::vector<int>{4, 5, 6}),
+            };
+
+            Region<1> expanded1 = region.expandWithAdjacency(1, adjacency);
+            for(int i = 1; i <= 8; ++i)
+            {
+                TS_ASSERT_EQUALS(1, expanded1.count(Coord<1>(i)));
+            }
+
+            Region<1> expanded2 = region.expandWithAdjacency(5, adjacency);
+            Region<1> expanded3 = region.expandWithTopology(5, Coord<1>(), Topologies::Unstructured(), adjacency);
+
+            TS_ASSERT_EQUALS(expanded1, expanded2);
+            TS_ASSERT_EQUALS(expanded1, expanded3);
+        }
+#endif
+    }
+
+    void testMoveAssignment()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Region<2> expected;
+        expected << Coord<2>(5, 5);
+        expected << Coord<2>(2, 5);
+
+        Region<2> dummy = expected;
+        Region<2> actual;
+        actual = std::move(dummy);
+
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(2, 5)));
+
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(2, 5)));
+
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+#endif
+    }
+
+    void testMoveConstructor()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        Region<2> expected;
+        expected << Coord<2>(5, 5);
+        expected << Coord<2>(2, 5);
+
+        Region<2> dummy = expected;
+        Region<2> actual(std::move(dummy));
+
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, expected.count(Coord<2>(2, 5)));
+
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(1, actual.count(Coord<2>(2, 5)));
+
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(5, 5)));
+        TS_ASSERT_EQUALS(0, dummy.count(Coord<2>(2, 5)));
+#endif
     }
 
     void testIntersectOrTouch()
@@ -150,7 +261,7 @@ public:
     void testSubstract()
     {
         RegionHelpers::RegionRemoveHelper<0> h;
-        Region<2>::VecType expected;
+        Region<2>::IndexVectorType expected;
 
         TS_ASSERT_EQUALS(
             expected, h.substract(IntPair(40, 50),
@@ -197,6 +308,13 @@ public:
         TS_ASSERT_EQUALS(10, c.indices[0][0].first);
     }
 
+    void testInsert1c()
+    {
+        Region<1> region;
+        region << Streak<1>(Coord<1>(0),  50)
+               << Streak<1>(Coord<1>(50), 90);
+        TS_ASSERT_EQUALS(region.size(), 90);
+    }
 
     void testInsert2()
     {
@@ -230,7 +348,54 @@ public:
         TS_ASSERT_EQUALS(std::size_t(7), c.indices[0].size());
     }
 
-    void testInsertCoordBox()
+    void testInsert3()
+    {
+        Region<1> r;
+        r << Coord<1>(10)
+          << Coord<1>( 9)
+          << Coord<1>(15)
+          << Coord<1>( 5)
+          << Coord<1>( 7)
+          << Coord<1>( 8)
+          << Coord<1>( 6);
+
+        TS_ASSERT_EQUALS(7, r.size());
+
+        Region<1>::StreakIterator iter = r.beginStreak();
+        TS_ASSERT_EQUALS(Streak<1>(Coord<1>( 5), 11), *iter);
+        ++iter;
+        TS_ASSERT_EQUALS(Streak<1>(Coord<1>(15), 16), *iter);
+        ++iter;
+        TS_ASSERT_EQUALS(r.endStreak(), iter);
+    }
+
+    void testInsertCoordBox1D()
+    {
+        Region<1> expected, actual;
+
+        for (int x = -5; x < 15; ++x) {
+            expected << Coord<1>(x);
+        }
+
+        actual << CoordBox<1>(Coord<1>(-5), Coord<1>(20));
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testInsertCoordBox2D()
+    {
+        Region<2> expected, actual;
+
+        for (int x = 0; x < 10; ++x) {
+            for (int y = 5; y < 12; ++y) {
+                    expected << Coord<2>(x, y);
+            }
+        }
+
+        actual << CoordBox<2>(Coord<2>(0, 5), Coord<2>(10, 7));
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testInsertCoordBox3D()
     {
         Region<3> expected, actual;
 
@@ -245,6 +410,7 @@ public:
         actual << CoordBox<3>(Coord<3>(0, 5, 3), Coord<3>(10, 7, 14));
         TS_ASSERT_EQUALS(expected, actual);
     }
+
 
     void testInsert3D()
     {
@@ -304,6 +470,24 @@ public:
 
     void testCount()
     {
+        Region<1> r0;
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>(-1), 2)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 1), 2)));
+
+        r0 << Coord<1>(1);
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>(-1), 2)));
+        TS_ASSERT_EQUALS(1, r0.count(Streak<1>(Coord<1>( 1), 2)));
+
+        r0 << Coord<1>(-1);
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(0, r0.count(Streak<1>(Coord<1>(-1), 2)));
+
+        r0 << Coord<1>(0);
+        TS_ASSERT_EQUALS(1, r0.count(Streak<1>(Coord<1>( 0), 1)));
+        TS_ASSERT_EQUALS(1, r0.count(Streak<1>(Coord<1>(-1), 2)));
+
         Region<2> r1;
         TS_ASSERT_EQUALS(0, r1.count(Streak<2>(Coord<2>(0, 0), 1)));
 
@@ -494,6 +678,26 @@ public:
         TS_ASSERT_EQUALS(30, c.indices[1][20].second);
     }
 
+    void testSubstractionOfCoordBox()
+    {
+        Region<3> r1;
+        r1 << CoordBox<3>(Coord<3>(10, 10, 10), Coord<3>(400, 300, 200));
+        r1 >> CoordBox<3>(Coord<3>(50, 40, 30), Coord<3>(333, 222, 111));
+
+        Region<3> r2;
+        // add south and north boxes first:
+        r2 << CoordBox<3>(Coord<3>( 10,  10,  10), Coord<3>(400, 300,  20))
+           << CoordBox<3>(Coord<3>( 10,  10, 141), Coord<3>(400, 300,  69));
+        // next: top and bottom:
+        r2 << CoordBox<3>(Coord<3>( 10,  10,  10), Coord<3>(400,  30, 200))
+           << CoordBox<3>(Coord<3>( 10, 262,  10), Coord<3>(400,  48, 200));
+        // last: west and east boxes:
+        r2 << CoordBox<3>(Coord<3>( 10,  10,  10), Coord<3>( 40, 300, 200))
+           << CoordBox<3>(Coord<3>(383,  10,  10), Coord<3>( 27, 300, 200));
+
+        TS_ASSERT_EQUALS(r1, r2);
+    }
+
     void testEmpty()
     {
         Region<2> c;
@@ -569,6 +773,18 @@ public:
         TS_ASSERT_EQUALS(std::size_t(88), c.size());
     }
 
+    void testDimension()
+    {
+        Region<3> r;
+        TS_ASSERT_EQUALS(Coord<3>(), r.dimension());
+
+        r << Streak<3>(Coord<3>(-100, -90, -80), 200);
+        TS_ASSERT_EQUALS(Coord<3>(300, 1, 1), r.dimension());
+
+        r << Coord<3>(10, 20, 30);
+        TS_ASSERT_EQUALS(Coord<3>(300, 111, 111), r.dimension());
+    }
+
     void testExpand1()
     {
         //
@@ -636,9 +852,31 @@ public:
         TS_ASSERT_EQUALS(actual, expected);
     }
 
+    void testExpand3()
+    {
+        for(int x = 0; x < 10; ++x) {
+            for(int y = 0; y < 20; ++y) {
+                c << Coord<2>(x, y);
+            }
+        }
+
+        for (int radius = 0; radius < 30; ++radius) {
+            Region<2> actual = c.expand(radius);
+            Region<2> expected;
+
+            for(int x = -radius; x < (10 + radius); ++x) {
+                for(int y = -radius; y < (20 + radius); ++y) {
+                    expected << Coord<2>(x, y);
+                }
+            }
+
+            TS_ASSERT_EQUALS(actual, expected);
+        }
+    }
+
     void testDelete()
     {
-        Region<2>::VecType expected;
+        Region<2>::IndexVectorType expected;
         expected << IntPair(0, 10)  // 0
                                     // 1
                  << IntPair(0, 10)  // 2
@@ -713,7 +951,8 @@ public:
         }
 
         expanded = c.expand();
-        TS_ASSERT_EQUALS(expected, expanded -c);
+        Region<2> ring = expanded - c;
+        TS_ASSERT_EQUALS(expected, ring);
     }
 
     void testAndAssignmentOperator()
@@ -1018,10 +1257,15 @@ public:
                << Streak<2>(Coord<2>(0, 1), 20)
                << Streak<2>(Coord<2>(0, 2), 20);
 
-        Region<2> actual = region.expandWithTopology(
+        Region<2> actual1 = region.expandWithTopology(
             2,
             Coord<2>(20, 20),
             Topologies::Torus<2>::Topology());
+        Region<2> actual2 = region.expandWithTopology(
+            2,
+            Coord<2>(20, 20),
+            Topologies::Torus<2>::Topology(),
+            Adjacency());
 
         Region<2> expected;
         expected << Streak<2>(Coord<2>(0,   0), 20)
@@ -1033,7 +1277,8 @@ public:
                  << Streak<2>(Coord<2>(18, 18), 20)
                  << Streak<2>(Coord<2>(0,  19), 20);
 
-        TS_ASSERT_EQUALS(actual, expected);
+        TS_ASSERT_EQUALS(actual1, expected);
+        TS_ASSERT_EQUALS(actual2, expected);
     }
 
     void testExpandWithTopology2()
@@ -1054,6 +1299,50 @@ public:
                  << Streak<2>(Coord<2>(0,   2), 20)
                  << Streak<2>(Coord<2>(0,   3), 20)
                  << Streak<2>(Coord<2>(0,   4), 20);
+
+        TS_ASSERT_EQUALS(actual, expected);
+    }
+
+    void testExpandWithRadius1D()
+    {
+        Region<1> r;
+        r << Streak<1>(Coord<1>( 10),  30)
+          << Streak<1>(Coord<1>( 45),  55)
+          << Streak<1>(Coord<1>(100), 130);
+
+        Region<1> actual = r.expand(Coord<1>(10));
+
+        Region<1> expected;
+        expected << Streak<1>(Coord<1>( 0),  65)
+                 << Streak<1>(Coord<1>(90), 140);
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testExpandWithRadius2D()
+    {
+        Region<2> r;
+        r << CoordBox<2>(Coord<2>(10, 20), Coord<2>(5, 6));
+
+        Region<2> actual = r.expand(Coord<2>(2, 1));
+
+        Region<2> expected;
+        expected << CoordBox<2>(Coord<2>(8, 19), Coord<2>(9, 8));
+
+        TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testExpandWithRadius3D()
+    {
+        Region<3> r;
+        r << CoordBox<3>(Coord<3>(100, 120, 140), Coord<3>(50, 20, 10))
+          << CoordBox<3>(Coord<3>(300, 300, 300), Coord<3>(20, 40, 30));
+
+        Region<3> actual = r.expand(Coord<3>(5, 6, 7));
+
+        Region<3> expected;
+        expected << CoordBox<3>(Coord<3>( 95, 114, 133), Coord<3>(60, 32, 24))
+                 << CoordBox<3>(Coord<3>(295, 294, 293), Coord<3>(30, 52, 44));
 
         TS_ASSERT_EQUALS(actual, expected);
     }
@@ -1086,6 +1375,46 @@ public:
         TS_ASSERT_EQUALS(leftCube + frontCube, mergerFL);
         TS_ASSERT_EQUALS(mergerFL - frontCube, leftCube);
         TS_ASSERT_EQUALS(mergerFL - leftCube,  frontCube);
+    }
+
+    void testSwap()
+    {
+        using std::swap;
+        Region<2> region1;
+        Region<2> region2;
+
+        region1 << Streak<2>(Coord<2>(10, 10), 20);
+        region2 << Coord<2>(11, 12);
+
+        TS_ASSERT_EQUALS(region1.size(), 10);
+        TS_ASSERT_EQUALS(region2.size(),  1);
+        TS_ASSERT_EQUALS(region1.boundingBox(), CoordBox<2>(Coord<2>(10, 10), Coord<2>(10, 1)));
+        TS_ASSERT_EQUALS(region2.boundingBox(), CoordBox<2>(Coord<2>(11, 12), Coord<2>( 1, 1)));
+        TS_ASSERT_EQUALS(*region1.beginStreak(), Streak<2>(Coord<2>(10, 10), 20));
+        TS_ASSERT_EQUALS(*region2.beginStreak(), Streak<2>(Coord<2>(11, 12), 12));
+
+        swap(region1, region2);
+
+        TS_ASSERT_EQUALS(region2.size(), 10);
+        TS_ASSERT_EQUALS(region1.size(),  1);
+        TS_ASSERT_EQUALS(region2.boundingBox(), CoordBox<2>(Coord<2>(10, 10), Coord<2>(10, 1)));
+        TS_ASSERT_EQUALS(region1.boundingBox(), CoordBox<2>(Coord<2>(11, 12), Coord<2>( 1, 1)));
+        TS_ASSERT_EQUALS(*region2.beginStreak(), Streak<2>(Coord<2>(10, 10), 20));
+        TS_ASSERT_EQUALS(*region1.beginStreak(), Streak<2>(Coord<2>(11, 12), 12));
+    }
+
+    void testRemove1D()
+    {
+        Region<1> r;
+
+        r << Coord<1>(10);
+        TS_ASSERT_EQUALS(1, r.size());
+
+        r >> Streak<1>(Coord<1>(10), 11);
+        TS_ASSERT_EQUALS(0, r.size());
+
+        r << Streak<1>(Coord<1>(0), 20);
+        TS_ASSERT_EQUALS(20, r.size());
     }
 
     void testRemove3D()
@@ -1141,6 +1470,136 @@ public:
         TS_ASSERT_EQUALS(r.indices[0].size(), std::size_t(0));
         TS_ASSERT_EQUALS(r.indices[1].size(), std::size_t(0));
         TS_ASSERT_EQUALS(r.indices[2].size(), std::size_t(0));
+    }
+
+    void testMerge2way()
+    {
+        Region<2> r1;
+        Region<2> r2;
+
+        for (int y = 0; y < 10; ++y) {
+            r1 << Streak<2>(Coord<2>(10, y), 20);
+        }
+
+        Region<2> r3;
+        Region<2>::merge2way(r3, r1.beginStreak(), r1.endStreak(), r2.beginStreak(), r2.endStreak());
+        TS_ASSERT_EQUALS(r3, r1);
+
+        r3.clear();
+        Region<2>::merge2way(r3, r2.beginStreak(), r2.endStreak(), r1.beginStreak(), r1.endStreak());
+        TS_ASSERT_EQUALS(r3, r1);
+
+        Region<2>::merge2way(r2, r3.beginStreak(), r3.endStreak(), r1.beginStreak(), r1.endStreak());
+        TS_ASSERT_EQUALS(r2, r1);
+    }
+    void testMerge3way()
+    {
+        Region<2> r1;
+        Region<2> r2;
+        Region<2> r3;
+
+        for (int y = 0; y < 10; ++y) {
+            r1 << Streak<2>(Coord<2>(10, y), 20);
+            r2 << Streak<2>(Coord<2>(20, y), 20);
+            r3 << Streak<2>(Coord<2>(30, y), 20);
+        }
+
+        Region<2> empty;
+        Region<2> actual;
+        Region<2> expected;
+
+        actual.clear();
+        expected = r1 + r2 + r3;
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(), r1.endStreak(),
+            r2.beginStreak(), r2.endStreak(),
+            r3.beginStreak(), r3.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(), r1.endStreak(),
+            r3.beginStreak(), r3.endStreak(),
+            r2.beginStreak(), r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r3.beginStreak(), r3.endStreak(),
+            r1.beginStreak(), r1.endStreak(),
+            r2.beginStreak(), r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected = r1 + r2;
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(),    r1.endStreak(),
+            r2.beginStreak(),    r2.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r1.beginStreak(),    r1.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            r2.beginStreak(),    r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            r1.beginStreak(),    r1.endStreak(),
+            r2.beginStreak(),    r2.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected = r3;
+        Region<2>::merge3way(
+            actual,
+            r3.beginStreak(),    r3.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            r3.beginStreak(),    r3.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            r3.beginStreak(),    r3.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
+        actual.clear();
+        expected.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+        actual.clear();
+        Region<2>::merge3way(
+            actual,
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak(),
+            empty.beginStreak(), empty.endStreak());
+        TS_ASSERT_EQUALS(actual, expected);
+
     }
 
     void testStreakIterator()
@@ -1333,6 +1792,64 @@ public:
         std::string actual = region.prettyPrint();
 
         TS_ASSERT_EQUALS(expected, actual);
+    }
+
+    void testPlaneStreakIterator3D()
+    {
+        Region<3> region;
+        region << CoordBox<3>(Coord<3>(150, 140, 120), Coord<3>(200, 100, 50));
+
+        Region<3>::StreakIterator i = region.planeStreakIterator(0);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 120), 350));
+        ++i;
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 141, 120), 350));
+        ++i;
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 142, 120), 350));
+        ++i;
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 143, 120), 350));
+        for (int c = 0; c < 97; ++c) {
+            ++i;
+        }
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 121), 350));
+
+        i = region.planeStreakIterator(1);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 121), 350));
+
+        i = region.planeStreakIterator(2);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 122), 350));
+
+        i = region.planeStreakIterator(10);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 130), 350));
+
+        i = region.planeStreakIterator(20);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 140), 350));
+
+        i = region.planeStreakIterator(30);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 150), 350));
+
+        i = region.planeStreakIterator(49);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 169), 350));
+
+        i = region.planeStreakIterator(50);
+        TS_ASSERT_EQUALS(i, region.endStreak());
+    }
+
+    void testPlaneStreakIterator2D()
+    {
+        Region<2> region;
+        Region<2> accumulator;
+        region << CoordBox<2>(Coord<2>(150, 140), Coord<2>(200, 100));
+        int stride = 10;
+
+        for (int i = 0; i < 100; i += stride) {
+            for (Region<2>::StreakIterator iter = region.planeStreakIterator(i);
+                 iter != region.planeStreakIterator(i + stride);
+                 ++iter) {
+                accumulator << *iter;
+            }
+        }
+
+        TS_ASSERT_EQUALS(region, accumulator);
     }
 
     void testPrintToBOV()

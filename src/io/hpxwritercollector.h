@@ -3,6 +3,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward declaration
+ */
 template<typename CELL_TYPE>
 class HpxWriterCollector;
 
@@ -109,6 +112,9 @@ class HpxWriterCollector;
 
 namespace LibGeoDecomp {
 
+/**
+ * Encapsulates an HpxWriterSink and exposes a ParallelWriter-interface
+ */
 template<typename CELL_TYPE>
 class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >
 {
@@ -157,8 +163,6 @@ public:
 private:
     SinkType sink;
 };
-
-class Serialization;
 
 }
 

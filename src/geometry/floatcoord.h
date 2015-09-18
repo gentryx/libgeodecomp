@@ -20,6 +20,9 @@ namespace LibGeoDecomp {
 template<int DIM>
 class FloatCoord;
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<1>
 {
@@ -28,6 +31,7 @@ public:
     friend class HPXSerialization;
     friend class Typemaps;
     typedef double ValueType;
+    static const int DIM = 1;
 
     static inline FloatCoord<1> diagonal(const double& x)
     {
@@ -52,6 +56,13 @@ public:
     double length() const
     {
         return fabs(c[0]);
+    }
+
+    inline
+    FloatCoord<1> abs() const
+    {
+        return FloatCoord<1>(
+            fabs(c[0]));
     }
 
     template<template<int> class OTHER_COORD>
@@ -158,6 +169,13 @@ public:
         return !(*this == a);
     }
 
+    template<template<int> class OTHER_COORD>
+    inline
+    bool operator<(const OTHER_COORD<1>& comp) const
+    {
+        return (c[0] < comp[0]);
+    }
+
     inline double& operator[](const int i)
     {
         return c[i];
@@ -197,6 +215,16 @@ public:
             (std::min)(c[0], other[0]));
     }
 
+    inline int minElement() const
+    {
+        return c[0];
+    }
+
+    inline int maxElement() const
+    {
+        return c[0];
+    }
+
     inline
     std::string toString() const
     {
@@ -210,6 +238,9 @@ public:
     double c[1];
 };
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<2>
 {
@@ -218,6 +249,7 @@ public:
     friend class HPXSerialization;
     friend class Typemaps;
     typedef double ValueType;
+    static const int DIM = 2;
 
     static inline FloatCoord<2> diagonal(const double& x)
     {
@@ -247,6 +279,14 @@ public:
     {
         return sqrt(c[0] * c[0] +
                     c[1] * c[1]);
+    }
+
+    inline
+    FloatCoord<2> abs() const
+    {
+        return FloatCoord<2>(
+            fabs(c[0]),
+            fabs(c[1]));
     }
 
     template<template<int> class OTHER_COORD>
@@ -366,6 +406,15 @@ public:
         return !(*this == a);
     }
 
+    template<template<int> class OTHER_COORD>
+    inline
+    bool operator<(const OTHER_COORD<2>& comp) const
+    {
+        return
+            (c[0] <  comp[0]) ||
+            ((c[0] == comp[0]) && (c[1] <  comp[1]));
+    }
+
     inline double& operator[](const int i)
     {
         return c[i];
@@ -408,6 +457,16 @@ public:
             (std::min)(c[1], other[1]));
     }
 
+    inline int minElement() const
+    {
+        return c[0] < c[1] ? c[0] : c[1];
+    }
+
+    inline int maxElement() const
+    {
+        return c[0] > c[1] ? c[0] : c[1];
+    }
+
     inline
     std::string toString() const
     {
@@ -423,6 +482,9 @@ public:
     double c[2];
 };
 
+/**
+ * see above
+ */
 template<>
 class FloatCoord<3>
 {
@@ -431,6 +493,7 @@ public:
     friend class HPXSerialization;
     friend class Typemaps;
     typedef double ValueType;
+    static const int DIM = 3;
 
     static inline FloatCoord<3> diagonal(const double& x)
     {
@@ -464,6 +527,15 @@ public:
         return sqrt(c[0] * c[0] +
                     c[1] * c[1] +
                     c[2] * c[2]);
+    }
+
+    inline
+    FloatCoord<3> abs() const
+    {
+        return FloatCoord<3>(
+            fabs(c[0]),
+            fabs(c[1]),
+            fabs(c[2]));
     }
 
     template<template<int> class OTHER_COORD>
@@ -593,6 +665,16 @@ public:
         return !(*this == a);
     }
 
+    template<template<int> class OTHER_COORD>
+    inline
+    bool operator<(const OTHER_COORD<3>& comp) const
+    {
+        return
+            (c[0] <  comp[0]) ||
+            ((c[0] == comp[0]) && (c[1] <  comp[1])) ||
+            ((c[0] == comp[0]) && (c[1] == comp[1]) && (c[2] <  comp[2]));
+    }
+
     inline double& operator[](const int i)
     {
         return c[i];
@@ -636,6 +718,18 @@ public:
             (std::min)(c[0], other[0]),
             (std::min)(c[1], other[1]),
             (std::min)(c[2], other[2]));
+    }
+
+    inline int minElement() const
+    {
+        return c[0] < c[1] ?
+                  (c[0] < c[2] ? c[0] : c[2]) : (c[1] < c[2] ? c[1] : c[2]);
+    }
+
+    inline int maxElement() const
+    {
+        return c[0] > c[1] ?
+                  (c[0] > c[2] ? c[0] : c[2]) : (c[1] > c[2] ? c[1] : c[2]);
     }
 
     inline

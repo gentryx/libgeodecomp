@@ -309,10 +309,14 @@ __global__ void benchmarkLBMSoA(int dimX, int dimY, int dimZ, double *gridOld, d
     long offset = DIM_X * DIM_Y;
     long end = DIM_X * DIM_Y * (dimZ - 2);
 
+    long tempIndex = 0;
     LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodNew((char*)gridNew, index);
     LibFlatArray::soa_accessor_light<CellLBM, DIM_X, DIM_Y, DIM_Z, 0> hoodOldInternal((char*)gridOld, index);
-    FixedNeighborhood<CellLBM, APITraits::SelectTopology<CellLBM>::Value, DIM_X, DIM_Y, DIM_Z, 0, LibFlatArray::soa_accessor_light> hoodOld(
-        hoodOldInternal);
+    FixedNeighborhood<
+        CellLBM,
+        DIM_X, DIM_Y, DIM_Z, 0,
+        LibFlatArray::soa_accessor_light, LibFlatArray::soa_accessor_light> hoodOld(
+            hoodOldInternal, tempIndex, -1, 1, -1, 1, -1, 1);
 
 #pragma unroll 10
     for (; index < end; index += offset) {
@@ -597,15 +601,12 @@ public:
     }
 };
 
-void cudaTests(std::string revision, bool quick, int cudaDevice)
+void cudaTests(std::string name, std::string revision, int cudaDevice)
 {
     cudaSetDevice(cudaDevice);
-    LibFlatArray::evaluate eval(revision);
+    LibFlatArray::evaluate eval(name, revision);
 
     int increment = 4;
-    if (quick) {
-        increment = 32;
-    }
 
     for (int d = 32; d <= 544; d += increment) {
         eval(BenchmarkCUDA<RTMClassic>(), toVector(Coord<3>::diagonal(d)));

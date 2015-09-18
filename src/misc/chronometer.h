@@ -18,6 +18,10 @@ namespace ChronometerHelpers {
 template<int ID>
 class EventUtil;
 
+/**
+ * This class is being subclassed from by generated event classes (see
+ * below).
+ */
 class BasicTimerImplementation
 {
 public:
@@ -44,6 +48,9 @@ protected:
     double t;
 };
 
+/**
+ * See above.
+ */
 template<int ID>
 class EventUtil
 {
@@ -69,7 +76,7 @@ public:
     class EventUtil<EVENT_ID>                                       \
     {                                                               \
     public:                                                         \
-        static const std::size_t EVENT_COUNTER = EVENT_ID + 1;           \
+        static const std::size_t EVENT_COUNTER = EVENT_ID + 1;      \
                                                                     \
         std::string operator()()                                    \
         {                                                           \
@@ -131,6 +138,10 @@ DEFINE_EVENT(TimeOutput,         ChronometerHelpers::BasicTimer,   "output_time"
 
 namespace ChronometerHelpers {
 
+/**
+ * Being able to convert an event's ID to a string is useful for
+ * debugging purposes.
+ */
 class EventToString
 {
 public:

@@ -305,6 +305,52 @@ public:
         TS_ASSERT_EQUALS(Coord<3>( 9, 11, 1).min(Coord<3>(10, 12, 14)), Coord<3>(9, 11, 1));
     }
 
+    void testMaxElement()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(5).maxElement(), 5);
+
+        TS_ASSERT_EQUALS(Coord<2>(6, 1).maxElement(), 6);
+        TS_ASSERT_EQUALS(Coord<2>(5, 7).maxElement(), 7);
+
+        TS_ASSERT_EQUALS(Coord<3>( 8,  1, 0).maxElement(), 8);
+        TS_ASSERT_EQUALS(Coord<3>( 5,  9, 0).maxElement(), 9);
+        TS_ASSERT_EQUALS(Coord<3>(-5, -7, 0).maxElement(), 0);
+        TS_ASSERT_EQUALS(Coord<3>(-7, -5, 0).maxElement(), 0);
+    }
+
+    void testMinElement()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(5).minElement(), 5);
+
+        TS_ASSERT_EQUALS(Coord<2>(6, 1).minElement(), 1);
+        TS_ASSERT_EQUALS(Coord<2>(5, 7).minElement(), 5);
+
+        TS_ASSERT_EQUALS(Coord<3>( 8, 10, 100).minElement(), 8);
+        TS_ASSERT_EQUALS(Coord<3>( 5, 90, 100).minElement(), 5);
+        TS_ASSERT_EQUALS(Coord<3>( 5,  7,   1).minElement(), 1);
+        TS_ASSERT_EQUALS(Coord<3>( 7,  5,   0).minElement(), 0);
+    }
+
+    void testAbs()
+    {
+        TS_ASSERT_EQUALS(Coord<1>(10), Coord<1>( 10).abs());
+        TS_ASSERT_EQUALS(Coord<1>(11), Coord<1>(-11).abs());
+
+        TS_ASSERT_EQUALS(Coord<2>(20, 21), Coord<2>( 20,  21).abs());
+        TS_ASSERT_EQUALS(Coord<2>(22, 23), Coord<2>( 22, -23).abs());
+        TS_ASSERT_EQUALS(Coord<2>(24, 25), Coord<2>(-24,  25).abs());
+        TS_ASSERT_EQUALS(Coord<2>(26, 27), Coord<2>(-26, -27).abs());
+
+        TS_ASSERT_EQUALS(Coord<3>(30, 31, 32), Coord<3>( 30,  31,  32).abs());
+        TS_ASSERT_EQUALS(Coord<3>(33, 34, 35), Coord<3>( 33,  34, -35).abs());
+        TS_ASSERT_EQUALS(Coord<3>(36, 37, 38), Coord<3>( 36, -37,  38).abs());
+        TS_ASSERT_EQUALS(Coord<3>(39, 40, 41), Coord<3>( 39, -40, -41).abs());
+        TS_ASSERT_EQUALS(Coord<3>(42, 43, 44), Coord<3>(-42,  43,  44).abs());
+        TS_ASSERT_EQUALS(Coord<3>(45, 46, 47), Coord<3>(-45,  46, -47).abs());
+        TS_ASSERT_EQUALS(Coord<3>(48, 49, 50), Coord<3>(-48, -49,  50).abs());
+        TS_ASSERT_EQUALS(Coord<3>(51, 52, 53), Coord<3>(-51, -52, -53).abs());
+    }
+
     void testSum()
     {
         TS_ASSERT_EQUALS(Coord<1>(6).sum(),        6);
@@ -325,6 +371,20 @@ public:
         Coord<2> c(47,11);
         Coord<2> d(1, 2);
 
+#ifdef LIBGEODECOMP_WITH_HPX
+        std::vector<char> buf;
+        int archive_flags = boost::archive::no_header;
+        archive_flags |= hpx::util::disable_data_chunking;
+        {
+            hpx::util::binary_filter *f = 0;
+            hpx::util::portable_binary_oarchive archive(buf, f, archive_flags);
+            archive << c;
+        }
+        {
+            hpx::util::portable_binary_iarchive archive(buf, buf.size(), archive_flags);
+            archive >> d;
+        }
+#else
         std::stringstream buf;
         {
             boost::archive::text_oarchive archive(buf);
@@ -336,6 +396,13 @@ public:
         }
         TS_ASSERT_EQUALS(c, d);
 #endif
+    }
+
+    void testDim()
+    {
+        TS_ASSERT_EQUALS(1, Coord<1>::DIM);
+        TS_ASSERT_EQUALS(2, Coord<2>::DIM);
+        TS_ASSERT_EQUALS(3, Coord<3>::DIM);
     }
 
 private:

@@ -8,7 +8,15 @@
 #ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_16_HPP
 #define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_16_HPP
 
+#ifndef __AVX512F__
 #ifndef __AVX__
+#ifndef __MIC__
+
+#include <libflatarray/config.h>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 namespace LibFlatArray {
 
@@ -55,24 +63,10 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1( *(data +  0)),
-        val2( *(data +  1)),
-        val3( *(data +  2)),
-        val4( *(data +  3)),
-        val5( *(data +  4)),
-        val6( *(data +  5)),
-        val7( *(data +  6)),
-        val8( *(data +  7)),
-        val9( *(data +  8)),
-        val10(*(data +  9)),
-        val11(*(data + 10)),
-        val12(*(data + 11)),
-        val13(*(data + 12)),
-        val14(*(data + 13)),
-        val15(*(data + 14)),
-        val16(*(data + 15))
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(
@@ -109,6 +103,15 @@ public:
         val15(val15),
         val16(val16)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        const double *ptr = static_cast<const double *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 16>& other)
@@ -305,6 +308,33 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1  = data[ 0];
+        val2  = data[ 1];
+        val3  = data[ 2];
+        val4  = data[ 3];
+        val5  = data[ 4];
+        val6  = data[ 5];
+        val7  = data[ 6];
+        val8  = data[ 7];
+        val9  = data[ 8];
+        val10 = data[ 9];
+        val11 = data[10];
+        val12 = data[11];
+        val13 = data[12];
+        val14 = data[13];
+        val15 = data[14];
+        val16 = data[15];
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        load(data);
+    }
+
+    inline
     void store(double *data) const
     {
         *(data +  0) = val1;
@@ -323,6 +353,60 @@ public:
         *(data + 13) = val14;
         *(data + 14) = val15;
         *(data + 15) = val16;
+    }
+
+    inline
+    void store_aligned(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        store(data);
+    }
+
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        val1  = ptr[offsets[ 0]];
+        val2  = ptr[offsets[ 1]];
+        val3  = ptr[offsets[ 2]];
+        val4  = ptr[offsets[ 3]];
+        val5  = ptr[offsets[ 4]];
+        val6  = ptr[offsets[ 5]];
+        val7  = ptr[offsets[ 6]];
+        val8  = ptr[offsets[ 7]];
+        val9  = ptr[offsets[ 8]];
+        val10 = ptr[offsets[ 9]];
+        val11 = ptr[offsets[10]];
+        val12 = ptr[offsets[11]];
+        val13 = ptr[offsets[12]];
+        val14 = ptr[offsets[13]];
+        val15 = ptr[offsets[14]];
+        val16 = ptr[offsets[15]];
+    }
+
+    inline
+    void scatter(double *ptr, const unsigned *offsets) const
+    {
+        ptr[offsets[0]]  = val1;
+        ptr[offsets[1]]  = val2;
+        ptr[offsets[2]]  = val3;
+        ptr[offsets[3]]  = val4;
+        ptr[offsets[4]]  = val5;
+        ptr[offsets[5]]  = val6;
+        ptr[offsets[6]]  = val7;
+        ptr[offsets[7]]  = val8;
+        ptr[offsets[8]]  = val9;
+        ptr[offsets[9]]  = val10;
+        ptr[offsets[10]] = val11;
+        ptr[offsets[11]] = val12;
+        ptr[offsets[12]] = val13;
+        ptr[offsets[13]] = val14;
+        ptr[offsets[14]] = val15;
+        ptr[offsets[15]] = val16;
     }
 
 private:
@@ -375,6 +459,8 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
+#endif
 #endif
 
 #endif

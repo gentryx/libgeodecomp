@@ -11,6 +11,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Records the time between creation and destruction.
+ */
 class ScopedTimer
 {
 public:

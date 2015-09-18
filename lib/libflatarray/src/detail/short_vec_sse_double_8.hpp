@@ -11,7 +11,14 @@
 #ifdef __SSE__
 
 #include <emmintrin.h>
+#include <libflatarray/detail/short_vec_helpers.hpp>
+#include <libflatarray/config.h>
 
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
+
+#ifndef __AVX512F__
 #ifndef __AVX__
 #ifndef __CUDA_ARCH__
 
@@ -48,12 +55,10 @@ public:
     {}
 
     inline
-    short_vec(const double *data) :
-        val1(_mm_loadu_pd(data + 0)),
-        val2(_mm_loadu_pd(data + 2)),
-        val3(_mm_loadu_pd(data + 4)),
-        val4(_mm_loadu_pd(data + 6))
-    {}
+    short_vec(const double *data)
+    {
+        load(data);
+    }
 
     inline
     short_vec(const __m128d& val1, const __m128d& val2, const __m128d& val3, const __m128d& val4) :
@@ -62,6 +67,15 @@ public:
         val3(val3),
         val4(val4)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<double>& il)
+    {
+        const double *ptr = static_cast<const double *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<double, 8>& other)
@@ -150,12 +164,77 @@ public:
     }
 
     inline
+    void load(const double *data)
+    {
+        val1 = _mm_loadu_pd(data + 0);
+        val2 = _mm_loadu_pd(data + 2);
+        val3 = _mm_loadu_pd(data + 4);
+        val4 = _mm_loadu_pd(data + 6);
+    }
+
+    inline
+    void load_aligned(const double *data)
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        val1 = _mm_load_pd(data + 0);
+        val2 = _mm_load_pd(data + 2);
+        val3 = _mm_load_pd(data + 4);
+        val4 = _mm_load_pd(data + 6);
+    }
+
+    inline
     void store(double *data) const
     {
         _mm_storeu_pd(data + 0, val1);
         _mm_storeu_pd(data + 2, val2);
         _mm_storeu_pd(data + 4, val3);
         _mm_storeu_pd(data + 6, val4);
+    }
+
+    inline
+    void store_aligned(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        _mm_store_pd(data + 0, val1);
+        _mm_store_pd(data + 2, val2);
+        _mm_store_pd(data + 4, val3);
+        _mm_store_pd(data + 6, val4);
+    }
+
+    inline
+    void store_nt(double *data) const
+    {
+        SHORTVEC_ASSERT_ALIGNED(data, 16);
+        _mm_stream_pd(data + 0, val1);
+        _mm_stream_pd(data + 2, val2);
+        _mm_stream_pd(data + 4, val3);
+        _mm_stream_pd(data + 6, val4);
+    }
+
+    inline
+    void gather(const double *ptr, const unsigned *offsets)
+    {
+        val1 = _mm_loadl_pd(val1, ptr + offsets[0]);
+        val1 = _mm_loadh_pd(val1, ptr + offsets[1]);
+        val2 = _mm_loadl_pd(val2, ptr + offsets[2]);
+        val2 = _mm_loadh_pd(val2, ptr + offsets[3]);
+        val3 = _mm_loadl_pd(val3, ptr + offsets[4]);
+        val3 = _mm_loadh_pd(val3, ptr + offsets[5]);
+        val4 = _mm_loadl_pd(val4, ptr + offsets[6]);
+        val4 = _mm_loadh_pd(val4, ptr + offsets[7]);
+    }
+
+    inline
+    void scatter(double *ptr, const unsigned *offsets) const
+    {
+        _mm_storel_pd(ptr + offsets[0], val1);
+        _mm_storeh_pd(ptr + offsets[1], val1);
+        _mm_storel_pd(ptr + offsets[2], val2);
+        _mm_storeh_pd(ptr + offsets[3], val2);
+        _mm_storel_pd(ptr + offsets[4], val3);
+        _mm_storeh_pd(ptr + offsets[5], val3);
+        _mm_storel_pd(ptr + offsets[6], val4);
+        _mm_storeh_pd(ptr + offsets[7], val4);
     }
 
 private:
@@ -196,6 +275,7 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
+#endif
 #endif
 #endif
 #endif

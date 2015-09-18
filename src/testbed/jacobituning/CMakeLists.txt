@@ -1,9 +1,10 @@
-generate_sourcelists("./")
+lgd_generate_sourcelists("./")
 
 set(RELATIVE_PATH "")
 include(auto.cmake)
 
 if(WITH_CUDA AND WITH_THREADS)
-  cuda_add_executable(jacobituning main.cu)
-  target_link_libraries(jacobituning ${LOCAL_LIBGEODECOMP_LINK_LIB})
+  cuda_add_executable(libgeodecomp_testbed_jacobituning main.cu)
+  set_target_properties(libgeodecomp_testbed_jacobituning PROPERTIES OUTPUT_NAME jacobituning)
+  target_link_libraries(libgeodecomp_testbed_jacobituning ${LOCAL_LIBGEODECOMP_LINK_LIB})
 endif()

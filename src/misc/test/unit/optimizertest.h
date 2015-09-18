@@ -55,6 +55,59 @@ public:
         LOG(Logger::INFO, "SimplexOptimizertest with other start values: "
                         << std::endl << "getFitness(): " << optimizer.getFitness())
     }
+    void testRightUpperCornerPatternDefault()
+    {
+        params["x"] = 20;
+        params["y"] = 10;
+        std::vector<double> stepwidth;
+        std::vector<double> minStepwidth;
+        for(std::size_t i = 0; i < params.size(); ++i){
+            stepwidth.push_back(3);
+            minStepwidth.push_back(1);
+        }
+        PatternOptimizer optimizer(params, stepwidth, minStepwidth);
+        params = optimizer(5000, eval);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
+        LOG(Logger::INFO, " testRightUpperCornerPatternDefault: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testRightUpperCornerSimplexDefault()
+    {
+        params["x"] = 20;
+        params["y"] = 10;
+        SimplexOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
+        LOG(Logger::INFO, " testRightUpperCornerSimplexDefault: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testRightLowerCornerPatternDefault()
+    {
+        params["x"] = 20;
+        params["y"] = -10;
+        std::vector<double> stepwidth;
+        std::vector<double> minStepwidth;
+        for(std::size_t i = 0; i < params.size(); ++i){
+            stepwidth.push_back(3);
+            minStepwidth.push_back(1);
+        }
+        PatternOptimizer optimizer(params, stepwidth, minStepwidth);
+        params = optimizer(5000, eval);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
+        LOG(Logger::INFO, " testRightLowerCornerPatternDefault: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testRightLowerCornerSimplexDefault()
+    {
+        params["x"] = 20;
+        params["y"] = -10;
+        SimplexOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT_EQUALS(eval.getGlobalMax(), optimizer.getFitness());
+        LOG(Logger::INFO, " testRightLowerCornerSimplexDefault: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+
 private:
     SimulationParameters params;
     OptimizerTestFunctions::GoalFunction eval;
@@ -326,7 +379,7 @@ public:
         LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
                 << "x: " <<  (double) params["x"].getValue()
                 << " y: " << (double) params["y"].getValue()
-                << " granulatity from x " << params["x"].getGranularity() 
+                << " granulatity from x " << params["x"].getGranularity()
                 << std::endl);
     }
     void testPatternDefault()
@@ -396,6 +449,44 @@ public:
 private:
     SimulationParameters params;
     OptimizerTestFunctions::Rosenbrock2DFunction eval;
+};
+class Rosenbrock2DTestDouble : public CxxTest::TestSuite
+{
+public:
+    void setUp()
+    {
+        eval = OptimizerTestFunctions::Rosenbrock2DFunctionDouble();
+        params = SimulationParameters();
+        params.addParameter("x", (double) -1000.0, (double)1000.0,0);
+        params.addParameter("y", (double)-500.0, (double)1500.0,0);
+        LOG(Logger::INFO, "Rosenbrock-Function 2D Double:")
+    }
+    void tearDown()
+    {
+        LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
+                   << "x: " << (double) params["x"]
+                   << " y: " << (double) params["y"]
+                   << std::endl)
+    }
+    void testPatternDefault()
+    {
+        PatternOptimizer optimizer(params);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 1.0) < optimizer.getFitness()));
+        LOG(Logger::INFO, "Patternoptimizertest with default parameters: "
+                         << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+    void testSimplexDefault()
+    {
+        SimplexOptimizer optimizer(params, 0.0000001,64);
+        params = optimizer(5000, eval);
+        TS_ASSERT(((eval.getGlobalMax() - 1.0) < optimizer.getFitness()));
+        LOG(Logger::INFO, "SimplexOptimizertest with default parameters: "
+                        << std::endl << "getFitness(): " << optimizer.getFitness())
+    }
+private:
+    SimulationParameters params;
+    OptimizerTestFunctions::Rosenbrock2DFunctionDouble eval;
 };
 class Rosenbrock5DTest : public CxxTest::TestSuite
 {

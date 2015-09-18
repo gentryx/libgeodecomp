@@ -146,21 +146,21 @@ public:
             }
         }
 
-	TestCell<2> cells[5];
-	testGrid.get(Streak<2>(Coord<2>(21, 18), 26), cells);
+        TestCell<2> cells[5];
+        testGrid.get(Streak<2>(Coord<2>(21, 18), 26), cells);
 
-	for (int i = 0; i < 5; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
-	}
+        for (int i = 0; i < 5; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+        }
 
-	for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; ++i) {
             cells[i].testValue = i + 1234;
         }
         testGrid.set(Streak<2>(Coord<2>(21, 18), 26), cells);
 
-	for (int i = 0; i < 5; ++i) {
-	    TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
-	}
+        for (int i = 0; i < 5; ++i) {
+            TS_ASSERT_EQUALS(cells[i], testGrid.get(Coord<2>(i + 21, 18)));
+        }
     }
 
     void testFill3D()
@@ -258,9 +258,9 @@ public:
         std::vector<double> yVector(region.size(), -1);
         std::vector<char  > zVector(region.size(), -1);
 
-        grid.saveMember(&xVector[0], xSelector, region);
-        grid.saveMember(&yVector[0], ySelector, region);
-        grid.saveMember(&zVector[0], zSelector, region);
+        grid.saveMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
+        grid.saveMember(&yVector[0], MemoryLocation::HOST, ySelector, region);
+        grid.saveMember(&zVector[0], MemoryLocation::HOST, zSelector, region);
 
         Region<2>::Iterator cursor = region.begin();
 
@@ -279,9 +279,9 @@ public:
             zVector[i] = i;
         }
 
-        grid.loadMember(&xVector[0], xSelector, region);
-        grid.loadMember(&yVector[0], ySelector, region);
-        grid.loadMember(&zVector[0], zSelector, region);
+        grid.loadMember(&xVector[0], MemoryLocation::HOST, xSelector, region);
+        grid.loadMember(&yVector[0], MemoryLocation::HOST, ySelector, region);
+        grid.loadMember(&zVector[0], MemoryLocation::HOST, zSelector, region);
 
         int counter = 0;
         for (Region<2>::Iterator i = region.begin(); i != region.end(); ++i) {

@@ -23,9 +23,15 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * just a forward-declaration
+ */
 template<typename CELL, typename TOPOLOGY, bool TOPOLOGICALLY_CORRECT>
 class SoAGrid;
 
+/**
+ * Extract a number of cells from a grid type as specified by a Region -- and vice versa.
+ */
 class GridVecConv
 {
 public:

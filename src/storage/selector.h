@@ -2,12 +2,14 @@
 #define LIBGEODECOMP_STORAGE_SELECTOR_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <libgeodecomp/storage/defaultcudafilter.h>
+#include <libgeodecomp/storage/defaultcudaarrayfilter.h>
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filterbase.h>
 #include <libflatarray/flat_array.hpp>
+#include <stdexcept>
 #include <typeinfo>
 
 #ifdef LIBGEODECOMP_WITH_SILO
@@ -20,6 +22,9 @@
 
 namespace LibGeoDecomp {
 
+/**
+ * Forward-declaration to resolve cyclic dependency
+ */
 class APITraits;
 
 namespace SelectorHelpers {
@@ -104,14 +109,43 @@ public:
         return 0;
     }
 
-    void copyMemberIn(const char *source, CELL *target, int num) const
+    void copyMemberIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
+        if (sourceLocation != MemoryLocation::HOST) {
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST source memory (1)");
+        }
+        if (targetLocation != MemoryLocation::HOST) {
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST target memory (1)");
+        }
+
+
         const CELL *actualSource = reinterpret_cast<const CELL*>(source);
         std::copy(actualSource, actualSource + num, target);
     }
 
-    void copyMemberOut(const CELL *source, char *target, int num) const
+    void copyMemberOut(
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
+        if (sourceLocation != MemoryLocation::HOST) {
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST source memory (2)");
+        }
+        if (targetLocation != MemoryLocation::HOST) {
+            throw std::logic_error("PrimitiveSelector is for test purposes only,"
+                                   " it's limited to HOST target memory (2)");
+        }
+
         CELL *actualTarget = reinterpret_cast<CELL*>(target);
         std::copy(source, source + num, actualTarget);
     }
@@ -122,6 +156,14 @@ public:
 };
 
 }
+
+#ifdef __CUDACC__
+#define MAKE_SELECTOR(CELL, MEMBER)								\
+    LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER, true)
+#else
+#define MAKE_SELECTOR(CELL, MEMBER)							\
+    LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER)
+#endif
 
 /**
  * A Selector can be used by library code to extract data from user
@@ -169,8 +211,29 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
+#ifdef __CUDACC__
+        filter(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>)
+#else
         filter(new DefaultFilter<CELL, MEMBER, MEMBER>)
+#endif
     {}
+
+#ifdef __CUDACC__
+    template<typename MEMBER>
+    Selector(
+        MEMBER CELL:: *memberPointer,
+        const std::string& memberName,
+        bool forceCUDA) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBER)),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(new DefaultCUDAFilter<CELL, MEMBER, MEMBER>)
+    {}
+#endif
 
     template<typename MEMBER, int ARITY>
     Selector(
@@ -183,8 +246,29 @@ public:
                          memberPointer,
                          typename APITraits::SelectSoA<CELL>::Value())),
         memberName(memberName),
+#ifdef __CUDACC__
+        filter(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
+#else
         filter(new DefaultArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
+#endif
     {}
+
+#ifdef __CUDACC__
+    template<typename MEMBER, int ARITY>
+    Selector(
+        MEMBER (CELL:: *memberPointer)[ARITY],
+        const std::string& memberName,
+        bool forceCUDA) :
+        memberPointer(reinterpret_cast<char CELL::*>(memberPointer)),
+        memberSize(sizeof(MEMBER)),
+        externalSize(sizeof(MEMBER) * ARITY),
+        memberOffset(typename SelectorHelpers::GetMemberOffset<CELL, MEMBER>()(
+                         memberPointer,
+                         typename APITraits::SelectSoA<CELL>::Value())),
+        memberName(memberName),
+        filter(new DefaultCUDAArrayFilter<CELL, MEMBER, MEMBER, ARITY>)
+    {}
+#endif
 
     template<typename MEMBER>
     Selector(
@@ -249,36 +333,58 @@ public:
      * Read the data from source and set the corresponding member of
      * each CELL at target. Only useful for AoS memory layout.
      */
-    inline void copyMemberIn(const char *source, CELL *target, int num) const
+    inline void copyMemberIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
-        filter->copyMemberIn(source, target, num, memberPointer);
+        filter->copyMemberIn(source, sourceLocation, target, targetLocation, num, memberPointer);
     }
 
     /**
      * Read the member of all CELLs at source and store them
      * contiguously at target. Only useful for AoS memory layout.
      */
-    inline void copyMemberOut(const CELL *source, char *target, int num) const
+    inline void copyMemberOut(
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        int num) const
     {
-        filter->copyMemberOut(source, target, num, memberPointer);
+        filter->copyMemberOut(source, sourceLocation, target, targetLocation, num, memberPointer);
     }
 
     /**
      * This is a helper function for writing members of a SoA memory
      * layout.
      */
-    inline void copyStreakIn(const char *source, char *target, const std::size_t num, const std::size_t stride) const
+    inline void copyStreakIn(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) const
     {
-        filter->copyStreakIn(source, target, num, stride);
+        filter->copyStreakIn(source, sourceLocation, target, targetLocation, num, stride);
     }
 
     /**
      * This is a helper function for reading members from a SoA memory
      * layout.
      */
-    inline void copyStreakOut(const char *source, char *target, const std::size_t num, const std::size_t stride) const
+    inline void copyStreakOut(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride) const
     {
-        filter->copyStreakOut(source, target, num, stride);
+        filter->copyStreakOut(source, sourceLocation, target, targetLocation, num, stride);
     }
 
 #ifdef LIBGEODECOMP_WITH_SILO
@@ -338,21 +444,33 @@ class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<unsigned> : public SelectorHelpers::PrimitiveSelector<unsigned>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<float> : public SelectorHelpers::PrimitiveSelector<float>
 {
 };
 
+/**
+ * see above
+ */
 template<>
 class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 {

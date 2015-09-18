@@ -2,15 +2,17 @@
 #ifndef LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 #define LIBGEODECOMP_MISC_SIMPLEXOPTIMIZER_H
 
-// This is a Implementation of the siplex algorithm, dicribet in "Evolution and Optimum
-// Seeking" written by Hans-Paul Schwefel.
-
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <utility>
 
 namespace LibGeoDecomp {
 
+
+/**
+ * This is a Implementation of the siplex algorithm, dicribet in
+ * "Evolution and Optimum Seeking" written by Hans-Paul Schwefel.
+ */
 class SimplexOptimizer : public Optimizer
 {
 public:
@@ -36,9 +38,9 @@ public:
 
         std::string toString() const;
 
-        void setFitness(const double fitness)
+        void resetFitness()
         {
-            this->fitness = fitness;
+            this->fitness = -1;
         }
 
     private:
@@ -59,7 +61,6 @@ private:
     std::size_t minInSimplex();
     std::size_t maxInSimplex();
     void totalContraction();
-    bool checkTermination();
     bool checkConvergence();
     std::pair<SimplexVertex, SimplexVertex> reflection();
     void initSimplex(SimulationParameters param);
@@ -71,7 +72,7 @@ private:
     int comperator(double fitness);
     std::string simplexToString() const;
     double epsilon;
-    double stepMultiplicator;       // stepMultiplicator = c in Algo 
+    double stepMultiplicator;       // stepMultiplicator = c in Algo
     std::vector<double> stepsizes;  // stepsizes = s_i in Algo
     SimplexVertex merge(const SimplexVertex& a, const SimplexVertex& b) const;
 };

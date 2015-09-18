@@ -1,8 +1,13 @@
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/storage/sellcsigmasparsematrixcontainer.h>
+#include <libgeodecomp/geometry/coord.h>
+
 #include <cxxtest/TestSuite.h>
+
 #include <iostream>
 #include <cstdlib>
-
+#include <algorithm>
+#include <map>
 
 using namespace LibGeoDecomp;
 
@@ -11,10 +16,16 @@ namespace LibGeoDecomp {
 class SellCSigmaSparseMatrixContainerTest : public CxxTest::TestSuite
 {
 public:
+#ifdef LIBGEODECOMP_WITH_CPP14
+    using IMatrix = std::map<Coord<2>, int>;
+    using CMatrix = std::map<Coord<2>, char>;
+    using DMatrix = std::map<Coord<2>, double>;
+#endif
+
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     void testGetRow_one()
     {
-//std::cout << "\n\n\nTEST 1: C=1 Sigma=1 Diagonalmatrix sotiert" <<std::endl;
+#ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<int, 1, 1> smc(8);
 
         /* add a test 8x8 Matrix:
@@ -28,14 +39,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(3, 3, 4);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(7, 7, 8);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(3, 3)] = 4;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(7, 7)] = 8;
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -94,12 +107,14 @@ public:
                 smc.getRow(7),
                 row7
                 );
+#endif
     }
 
     // test with a 8x8 diagonal Matrix, C = 1; Sigma = 1
     // randome addPoints
     void testGetRow_two()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<int, 1, 1> smc(8);
 
         /* add a test 8x8 Matrix:
@@ -113,14 +128,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(7, 7, 8);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(3, 3, 4);
+        IMatrix matrix;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(7, 7)] = 8;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(3, 3)] = 4;
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -179,13 +196,14 @@ public:
                 smc.getRow(7),
                 row7
                 );
+#endif
     }
 
     // test with a 8x8 diagonal Matrix, C = 2; Sigma = 1
     // randome addPoints
     void testGetRow_three()
     {
-
+#ifdef LIBGEODECOMP_WITH_CPP14
         int const C(2);
         int const SIGMA(1);
         SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc(8);
@@ -201,14 +219,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(7, 7, 8);
-        smc.addPoint(3, 3, 4);
+        IMatrix matrix;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(7, 7)] = 8;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(3, 3)] = 4;
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -267,11 +287,13 @@ public:
                 smc.getRow(7),
                 row7
                 );
+#endif
     }
 
     // test with a 8x8 diagonal Matrix, C = 2; Sigma = 1
     void testGetRow_fore()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         int const C(3);
         int const SIGMA(1);
         SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc(8);
@@ -287,14 +309,16 @@ public:
          * 0 0 0 0 0 0 0 8
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(2, 2, 3);
-        smc.addPoint(3, 3, 4);
-        smc.addPoint(4, 4, 5);
-        smc.addPoint(5, 5, 6);
-        smc.addPoint(6, 6, 7);
-        smc.addPoint(7, 7, 8);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(3, 3)] = 4;
+        matrix[Coord<2>(4, 4)] = 5;
+        matrix[Coord<2>(5, 5)] = 6;
+        matrix[Coord<2>(6, 6)] = 7;
+        matrix[Coord<2>(7, 7)] = 8;
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -353,11 +377,13 @@ public:
                 smc.getRow(7),
                 row7
                 );
+#endif
     }
 
     // test with a 9x9 sparse Matrix, C = 3; Sigma = 1
     void testGetRow_five()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         int const C(3);
         int const SIGMA(1);
         SellCSigmaSparseMatrixContainer<char, C, SIGMA> smc(9);
@@ -379,25 +405,27 @@ public:
          *  8  | 0 0 0 S 0 Q 0 R 0 |
          */
 
-        smc.addPoint(4, 0, 'G');
-        smc.addPoint(8, 7, 'R');
-        smc.addPoint(6, 3, 'K');
-        smc.addPoint(7, 6, 'O');
-        smc.addPoint(7, 4, 'N');
-        smc.addPoint(7, 2, 'M');
-        smc.addPoint(0, 4, 'A');
-        smc.addPoint(3, 8, 'F');
-        smc.addPoint(7, 0, 'L');
-        smc.addPoint(3, 7, 'E');
-        smc.addPoint(2, 4, 'B');
-        smc.addPoint(5, 1, 'I');
-        smc.addPoint(7, 8, 'P');
-        smc.addPoint(3, 2, 'D');
-        smc.addPoint(8, 5, 'Q');
-        smc.addPoint(8, 3, 'S');
-        smc.addPoint(5, 2, 'J');
-        smc.addPoint(4, 5, 'H');
-        smc.addPoint(2, 6, 'C');
+        CMatrix matrix;
+        matrix[Coord<2>(4, 0)] = 'G';
+        matrix[Coord<2>(8, 7)] = 'R';
+        matrix[Coord<2>(6, 3)] = 'K';
+        matrix[Coord<2>(7, 6)] = 'O';
+        matrix[Coord<2>(7, 4)] = 'N';
+        matrix[Coord<2>(7, 2)] = 'M';
+        matrix[Coord<2>(0, 4)] = 'A';
+        matrix[Coord<2>(3, 8)] = 'F';
+        matrix[Coord<2>(7, 0)] = 'L';
+        matrix[Coord<2>(3, 7)] = 'E';
+        matrix[Coord<2>(2, 4)] = 'B';
+        matrix[Coord<2>(5, 1)] = 'I';
+        matrix[Coord<2>(7, 8)] = 'P';
+        matrix[Coord<2>(3, 2)] = 'D';
+        matrix[Coord<2>(8, 5)] = 'Q';
+        matrix[Coord<2>(8, 3)] = 'S';
+        matrix[Coord<2>(5, 2)] = 'J';
+        matrix[Coord<2>(4, 5)] = 'H';
+        matrix[Coord<2>(2, 6)] = 'C';
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, char> > row0;
         std::pair<int, char> pair0(4, 'A');
@@ -492,12 +520,14 @@ public:
                 smc.getRow(8),
                 row8
                 );
+#endif
     }
 
     // test with a 3x3 diagonal Matrix, C = 2; Sigma = 1
     // overwite a value
     void testGetRow_six()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         int const C(2);
         int const SIGMA(1);
         SellCSigmaSparseMatrixContainer<int, C, SIGMA> smc(3);
@@ -508,13 +538,14 @@ public:
          * 0 0 6
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(0, 2, 4);
-        smc.addPoint(1, 1, 2);
-        smc.addPoint(2, 2, 3);
-
-        smc.addPoint(1, 1, 5);
-        smc.addPoint(2, 2, 6);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(0, 2)] = 4;
+        matrix[Coord<2>(1, 1)] = 2;
+        matrix[Coord<2>(2, 2)] = 3;
+        matrix[Coord<2>(1, 1)] = 5;
+        matrix[Coord<2>(2, 2)] = 6;
+        smc.initFromMatrix(matrix);
 
         std::vector< std::pair<int, int> > row0;
         std::pair<int, int> pair0(0, 1);
@@ -540,11 +571,12 @@ public:
                 smc.getRow(2),
                 row2
                 );
+#endif
     }
 
     void testMatVecMul_diag()
-{
-
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<int, 4, 1> smc(8);
 
         /* add a test 8x8 Matrix:
@@ -558,14 +590,16 @@ public:
          * 8       0 0 0 0 0 0 0 1      8
          */
 
-        smc.addPoint(0, 0, 1);
-        smc.addPoint(1, 1, 1);
-        smc.addPoint(2, 2, 1);
-        smc.addPoint(3, 3, 1);
-        smc.addPoint(4, 4, 1);
-        smc.addPoint(5, 5, 1);
-        smc.addPoint(6, 6, 1);
-        smc.addPoint(7, 7, 1);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 1;
+        matrix[Coord<2>(1, 1)] = 1;
+        matrix[Coord<2>(2, 2)] = 1;
+        matrix[Coord<2>(3, 3)] = 1;
+        matrix[Coord<2>(4, 4)] = 1;
+        matrix[Coord<2>(5, 5)] = 1;
+        matrix[Coord<2>(6, 6)] = 1;
+        matrix[Coord<2>(7, 7)] = 1;
+        smc.initFromMatrix(matrix);
 
         std::vector<int> lhs(8);
         std::vector<int> rhs(8);
@@ -582,13 +616,12 @@ public:
                 lhs,
                 expected
                 );
-
-
+#endif
     }
 
     void testMatVecMul_easy()
-{
-
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<int, 2, 1> smc(4);
 
         /* add a test 4x4 Matrix:
@@ -598,10 +631,12 @@ public:
          * 2       0 1 0 0       4
          */
 
-        smc.addPoint(0, 2, 1);
-        smc.addPoint(1, 0, 1);
-        smc.addPoint(2, 3, 1);
-        smc.addPoint(3, 1, 1);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 2)] = 1;
+        matrix[Coord<2>(1, 0)] = 1;
+        matrix[Coord<2>(2, 3)] = 1;
+        matrix[Coord<2>(3, 1)] = 1;
+        smc.initFromMatrix(matrix);
 
         std::vector<int> lhs(4);
         std::vector<int> rhs(4);
@@ -622,12 +657,13 @@ public:
                 lhs,
                 expected
                 );
+#endif
     }
 
 
     void testMatVecMul_two()
-{
-
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
         SellCSigmaSparseMatrixContainer<int, 2, 1> smc(4);
 
         /* add a test 4x4 Matrix:
@@ -637,22 +673,24 @@ public:
          * 13       3 4 2 -1       4
          */
 
-        smc.addPoint(0, 0, 0);
-        smc.addPoint(0, 1, 1);
-        smc.addPoint(0, 2, 2);
-        smc.addPoint(0, 3, -3);
-        smc.addPoint(1, 0, -4);
-        smc.addPoint(1, 1, 3);
-        smc.addPoint(1, 2, 2);
-        smc.addPoint(1, 3, 1);
-        smc.addPoint(2, 0, 2);
-        smc.addPoint(2, 1, -3);
-        smc.addPoint(2, 2, 4);
-        smc.addPoint(2, 3, 1);
-        smc.addPoint(3, 0, 3);
-        smc.addPoint(3, 1, 4);
-        smc.addPoint(3, 2, 2);
-        smc.addPoint(3, 3, -1);
+        IMatrix matrix;
+        matrix[Coord<2>(0, 0)] = 0;
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(0, 2)] = 2;
+        matrix[Coord<2>(0, 3)] = -3;
+        matrix[Coord<2>(1, 0)] = -4;
+        matrix[Coord<2>(1, 1)] = 3;
+        matrix[Coord<2>(1, 2)] = 2;
+        matrix[Coord<2>(1, 3)] = 1;
+        matrix[Coord<2>(2, 0)] = 2;
+        matrix[Coord<2>(2, 1)] = -3;
+        matrix[Coord<2>(2, 2)] = 4;
+        matrix[Coord<2>(2, 3)] = 1;
+        matrix[Coord<2>(3, 0)] = 3;
+        matrix[Coord<2>(3, 1)] = 4;
+        matrix[Coord<2>(3, 2)] = 2;
+        matrix[Coord<2>(3, 3)] = -1;
+        smc.initFromMatrix(matrix);
 
         std::vector<int> lhs(4);
         std::vector<int> rhs(4);
@@ -673,33 +711,319 @@ public:
                 lhs,
                 expected
                 );
+#endif
     }
 
     void testEqualOperator()
     {
+#ifdef LIBGEODECOMP_WITH_CPP14
         const int DIM = 128;
         SellCSigmaSparseMatrixContainer<double,2,1> a(DIM);
         SellCSigmaSparseMatrixContainer<double,2,1> b(DIM);
 
+        DMatrix aMatrix;
+        DMatrix bMatrix;
         for (int i=0; i<DIM; ++i) {
-            a.addPoint(i, abs(i*17+57)%DIM, (i*17+57)/DIM);
-            a.addPoint(i, abs(i*17-57)%DIM, (i*17-57)/DIM);
-            a.addPoint(i, abs(i*57+17)%DIM, (i*57+17)/DIM);
+            aMatrix[Coord<2>(i, abs(i*17+57)%DIM)] = (i*17+57)/DIM;
+            aMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
+            aMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
 
-            b.addPoint(i, abs(i*17+57)%DIM, (i*17+57)/DIM);
-            b.addPoint(i, abs(i*17-57)%DIM, (i*17-57)/DIM);
-            b.addPoint(i, abs(i*57+17)%DIM, (i*57+17)/DIM);
+            bMatrix[Coord<2>(i, abs(i*17+57)%DIM)] = (i*17+57)/DIM;
+            bMatrix[Coord<2>(i, abs(i*17-57)%DIM)] = (i*17-57)/DIM;
+            bMatrix[Coord<2>(i, abs(i*57+17)%DIM)] = (i*57+17)/DIM;
         }
+        a.initFromMatrix(aMatrix);
+        b.initFromMatrix(bMatrix);
 
         TS_ASSERT(a == a);
         TS_ASSERT(a == b);
-
-        b.addPoint(DIM-17, DIM - 7, 0.666);
-
-        TS_ASSERT_EQUALS((a == b), false);
-        
+#endif
     }
 
+    void testInitFromMatrix()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        SellCSigmaSparseMatrixContainer<double, 2, 1> a(4);
+        std::map<Coord<2>, double> matrix;
+        // 0 1 0 2
+        // 0 0 0 1
+        // 0 2 0 3
+        // 1 1 0 0
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(0, 3)] = 2;
+        matrix[Coord<2>(1, 3)] = 1;
+        matrix[Coord<2>(2, 1)] = 2;
+        matrix[Coord<2>(2, 3)] = 3;
+        matrix[Coord<2>(3, 0)] = 1;
+        matrix[Coord<2>(3, 1)] = 1;
+
+        a.initFromMatrix(matrix);
+
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
+
+        TS_ASSERT_EQUALS(3, std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(2, std::distance(begin(cl),  end(cl)));
+        TS_ASSERT_EQUALS(8, std::distance(begin(val), end(val)));
+        TS_ASSERT_EQUALS(8, std::distance(begin(col), end(col)));
+
+        TS_ASSERT(cs[0] == 0);
+        TS_ASSERT(cs[1] == 4);
+        TS_ASSERT(cs[2] == 8);
+        TS_ASSERT(cl[0] == 2);
+        TS_ASSERT(cl[1] == 2);
+
+        TS_ASSERT(val[0] == 1);
+        TS_ASSERT(val[1] == 1);
+        TS_ASSERT(val[2] == 2);
+        TS_ASSERT(val[3] == 0);
+        TS_ASSERT(val[4] == 2);
+        TS_ASSERT(val[5] == 1);
+        TS_ASSERT(val[6] == 3);
+        TS_ASSERT(val[7] == 1);
+
+        TS_ASSERT(col[0] == 1);
+        TS_ASSERT(col[1] == 3);
+        TS_ASSERT(col[2] == 3);
+        TS_ASSERT(col[3] == 0);
+        TS_ASSERT(col[4] == 1);
+        TS_ASSERT(col[5] == 0);
+        TS_ASSERT(col[6] == 3);
+        TS_ASSERT(col[7] == 1);
+#endif
+    }
+
+    void testInitFromMatrixWithoutSIGMA()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        SellCSigmaSparseMatrixContainer<double, 2, 1> a(5);
+        std::map<Coord<2>, double> matrix;
+        // 0 1 0 0 0
+        // 0 5 0 8 7
+        // 1 4 0 3 2
+        // 0 0 5 0 0
+        // 0 0 0 2 3
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(1, 1)] = 5;
+        matrix[Coord<2>(1, 3)] = 8;
+        matrix[Coord<2>(1, 4)] = 7;
+        matrix[Coord<2>(2, 0)] = 1;
+        matrix[Coord<2>(2, 1)] = 4;
+        matrix[Coord<2>(2, 3)] = 3;
+        matrix[Coord<2>(2, 4)] = 2;
+        matrix[Coord<2>(3, 2)] = 5;
+        matrix[Coord<2>(4, 3)] = 2;
+        matrix[Coord<2>(4, 4)] = 3;
+
+        a.initFromMatrix(matrix);
+
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
+
+        TS_ASSERT_EQUALS(4,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
+        TS_ASSERT_EQUALS(18, std::distance(begin(val), end(val)));
+        TS_ASSERT_EQUALS(18, std::distance(begin(col), end(col)));
+
+        TS_ASSERT(cs[0] ==  0);
+        TS_ASSERT(cs[1] ==  6);
+        TS_ASSERT(cs[2] == 14);
+        TS_ASSERT(cs[3] == 18);
+        TS_ASSERT(cl[0] == 3);
+        TS_ASSERT(cl[1] == 4);
+        TS_ASSERT(cl[2] == 2);
+
+        TS_ASSERT(val[ 0] == 1);
+        TS_ASSERT(val[ 1] == 5);
+        TS_ASSERT(val[ 2] == 0);
+        TS_ASSERT(val[ 3] == 8);
+        TS_ASSERT(val[ 4] == 0);
+        TS_ASSERT(val[ 5] == 7);
+        TS_ASSERT(val[ 6] == 1);
+        TS_ASSERT(val[ 7] == 5);
+        TS_ASSERT(val[ 8] == 4);
+        TS_ASSERT(val[ 9] == 0);
+        TS_ASSERT(val[10] == 3);
+        TS_ASSERT(val[11] == 0);
+        TS_ASSERT(val[12] == 2);
+        TS_ASSERT(val[13] == 0);
+        TS_ASSERT(val[14] == 2);
+        TS_ASSERT(val[15] == 0);
+        TS_ASSERT(val[16] == 3);
+        TS_ASSERT(val[17] == 0);
+
+        TS_ASSERT(col[ 0] == 1);
+        TS_ASSERT(col[ 1] == 1);
+        TS_ASSERT(col[ 2] == 0);
+        TS_ASSERT(col[ 3] == 3);
+        TS_ASSERT(col[ 4] == 0);
+        TS_ASSERT(col[ 5] == 4);
+        TS_ASSERT(col[ 6] == 0);
+        TS_ASSERT(col[ 7] == 2);
+        TS_ASSERT(col[ 8] == 1);
+        TS_ASSERT(col[ 9] == 0);
+        TS_ASSERT(col[10] == 3);
+        TS_ASSERT(col[11] == 0);
+        TS_ASSERT(col[12] == 4);
+        TS_ASSERT(col[13] == 0);
+        TS_ASSERT(col[14] == 3);
+        TS_ASSERT(col[15] == 0);
+        TS_ASSERT(col[16] == 4);
+        TS_ASSERT(col[17] == 0);
+#endif
+    }
+
+    void testInitFromMatrixWithSIGMA1()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        SellCSigmaSparseMatrixContainer<double, 2, 4> a(5);
+        std::map<Coord<2>, double> matrix;
+        // 0 1 0 0 0
+        // 0 5 0 8 7
+        // 1 4 0 3 2
+        // 0 0 5 0 0
+        // 0 0 0 2 3
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(1, 1)] = 5;
+        matrix[Coord<2>(1, 3)] = 8;
+        matrix[Coord<2>(1, 4)] = 7;
+        matrix[Coord<2>(2, 0)] = 1;
+        matrix[Coord<2>(2, 1)] = 4;
+        matrix[Coord<2>(2, 3)] = 3;
+        matrix[Coord<2>(2, 4)] = 2;
+        matrix[Coord<2>(3, 2)] = 5;
+        matrix[Coord<2>(4, 3)] = 2;
+        matrix[Coord<2>(4, 4)] = 3;
+
+        a.initFromMatrix(matrix);
+
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
+
+        TS_ASSERT_EQUALS(4,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
+        TS_ASSERT_EQUALS(14, std::distance(begin(val), end(val)));
+        TS_ASSERT_EQUALS(14, std::distance(begin(col), end(col)));
+
+        TS_ASSERT(cs[0] ==  0);
+        TS_ASSERT(cs[1] ==  8);
+        TS_ASSERT(cs[2] == 10);
+        TS_ASSERT(cs[3] == 14);
+        TS_ASSERT(cl[0] == 4);
+        TS_ASSERT(cl[1] == 1);
+        TS_ASSERT(cl[2] == 2);
+
+        TS_ASSERT(val[ 0] == 1);
+        TS_ASSERT(val[ 1] == 5);
+        TS_ASSERT(val[ 2] == 4);
+        TS_ASSERT(val[ 3] == 8);
+        TS_ASSERT(val[ 4] == 3);
+        TS_ASSERT(val[ 5] == 7);
+        TS_ASSERT(val[ 6] == 2);
+        TS_ASSERT(val[ 7] == 0);
+        TS_ASSERT(val[ 8] == 1);
+        TS_ASSERT(val[ 9] == 5);
+        TS_ASSERT(val[10] == 2);
+        TS_ASSERT(val[11] == 0);
+        TS_ASSERT(val[12] == 3);
+        TS_ASSERT(val[13] == 0);
+
+        TS_ASSERT(col[ 0] == 0);
+        TS_ASSERT(col[ 1] == 1);
+        TS_ASSERT(col[ 2] == 1);
+        TS_ASSERT(col[ 3] == 3);
+        TS_ASSERT(col[ 4] == 3);
+        TS_ASSERT(col[ 5] == 4);
+        TS_ASSERT(col[ 6] == 4);
+        TS_ASSERT(col[ 7] == 0);
+        TS_ASSERT(col[ 8] == 1);
+        TS_ASSERT(col[ 9] == 2);
+        TS_ASSERT(col[10] == 3);
+        TS_ASSERT(col[11] == 0);
+        TS_ASSERT(col[12] == 4);
+        TS_ASSERT(col[13] == 0);
+#endif
+    }
+
+    void testInitFromMatrixWithSIGMA2()
+    {
+#ifdef LIBGEODECOMP_WITH_CPP14
+        SellCSigmaSparseMatrixContainer<double, 2, 8> a(5);
+        std::map<Coord<2>, double> matrix;
+        // 0 1 0 0 0
+        // 0 5 0 8 7
+        // 1 4 0 3 2
+        // 0 0 5 0 0
+        // 0 0 0 2 3
+        matrix[Coord<2>(0, 1)] = 1;
+        matrix[Coord<2>(1, 1)] = 5;
+        matrix[Coord<2>(1, 3)] = 8;
+        matrix[Coord<2>(1, 4)] = 7;
+        matrix[Coord<2>(2, 0)] = 1;
+        matrix[Coord<2>(2, 1)] = 4;
+        matrix[Coord<2>(2, 3)] = 3;
+        matrix[Coord<2>(2, 4)] = 2;
+        matrix[Coord<2>(3, 2)] = 5;
+        matrix[Coord<2>(4, 3)] = 2;
+        matrix[Coord<2>(4, 4)] = 3;
+
+        a.initFromMatrix(matrix);
+
+        const auto& val = a.valuesVec();
+        const auto& col = a.columnVec();
+        const auto& cl  = a.chunkLengthVec();
+        const auto& cs  = a.chunkOffsetVec();
+
+        TS_ASSERT_EQUALS(4,  std::distance(begin(cs),  end(cs)));
+        TS_ASSERT_EQUALS(3,  std::distance(begin(cl),  end(cl)));
+        TS_ASSERT_EQUALS(14, std::distance(begin(val), end(val)));
+        TS_ASSERT_EQUALS(14, std::distance(begin(col), end(col)));
+
+        TS_ASSERT(cs[0] ==  0);
+        TS_ASSERT(cs[1] ==  8);
+        TS_ASSERT(cs[2] == 12);
+        TS_ASSERT(cs[3] == 14);
+        TS_ASSERT(cl[0] == 4);
+        TS_ASSERT(cl[1] == 2);
+        TS_ASSERT(cl[2] == 1);
+
+        TS_ASSERT(val[ 0] == 1);
+        TS_ASSERT(val[ 1] == 5);
+        TS_ASSERT(val[ 2] == 4);
+        TS_ASSERT(val[ 3] == 8);
+        TS_ASSERT(val[ 4] == 3);
+        TS_ASSERT(val[ 5] == 7);
+        TS_ASSERT(val[ 6] == 2);
+        TS_ASSERT(val[ 7] == 0);
+        TS_ASSERT(val[ 8] == 2);
+        TS_ASSERT(val[ 9] == 1);
+        TS_ASSERT(val[10] == 3);
+        TS_ASSERT(val[11] == 0);
+        TS_ASSERT(val[12] == 5);
+        TS_ASSERT(val[13] == 0);
+
+        TS_ASSERT(col[ 0] == 0);
+        TS_ASSERT(col[ 1] == 1);
+        TS_ASSERT(col[ 2] == 1);
+        TS_ASSERT(col[ 3] == 3);
+        TS_ASSERT(col[ 4] == 3);
+        TS_ASSERT(col[ 5] == 4);
+        TS_ASSERT(col[ 6] == 4);
+        TS_ASSERT(col[ 7] == 0);
+        TS_ASSERT(col[ 8] == 3);
+        TS_ASSERT(col[ 9] == 1);
+        TS_ASSERT(col[10] == 4);
+        TS_ASSERT(col[11] == 0);
+        TS_ASSERT(col[12] == 2);
+        TS_ASSERT(col[13] == 0);
+#endif
+    }
 };
 
 }

@@ -5,7 +5,6 @@ using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-
 class StencilsTest : public CxxTest::TestSuite
 {
 public:

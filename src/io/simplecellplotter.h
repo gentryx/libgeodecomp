@@ -39,13 +39,25 @@ public:
         palette(palette)
     {}
 
-    void copyStreakInImpl(const Color *source, MEMBER *target, const std::size_t num, const std::size_t stride)
+    void copyStreakInImpl(
+        const Color *source,
+        MemoryLocation::Location sourceLocation,
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         throw std::logic_error(
             "undefined behavior: can only convert members to colors, not the other way around");
     }
 
-    void copyStreakOutImpl(const MEMBER *source, Color *target, const std::size_t num, const std::size_t stride)
+    void copyStreakOutImpl(
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        Color *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
         for (std::size_t i = 0; i < num; ++i) {
             target[i] = palette[source[i]];
@@ -53,14 +65,24 @@ public:
     }
 
     void copyMemberInImpl(
-        const Color *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
+        const Color *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER CELL:: *memberPointer)
     {
 
         throw std::logic_error("undefined behavior: can only convert cells to colors, not the other way around");
     }
 
     void copyMemberOutImpl(
-        const CELL *source, Color *target, std::size_t num, MEMBER CELL:: *memberPointer)
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        Color *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER CELL:: *memberPointer)
     {
         for (std::size_t i = 0; i < num; ++i) {
             target[i] = palette[source[i].*memberPointer];
@@ -100,11 +122,16 @@ public:
     template<typename PAINTER>
     void operator()(
         const CELL_TYPE& cell,
-	PAINTER& painter,
+        PAINTER& painter,
         const Coord<2>& cellDimensions) const
     {
         Color color;
-        cellToColorSelector.copyMemberOut(&cell, reinterpret_cast<char*>(&color), 1);
+        cellToColorSelector.copyMemberOut(
+            &cell,
+            MemoryLocation::HOST,
+            reinterpret_cast<char*>(&color),
+            MemoryLocation::HOST,
+            1);
 
         painter.fillRect(
             0, 0,

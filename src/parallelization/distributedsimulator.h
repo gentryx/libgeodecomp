@@ -27,6 +27,10 @@ public:
         Simulator<CELL_TYPE>(initializer)
     {}
 
+    inline explicit DistributedSimulator(const boost::shared_ptr<Initializer<CELL_TYPE> >& initializer) :
+        Simulator<CELL_TYPE>(initializer)
+    {}
+
     /**
      * register  writer which will observe the simulation. The
      * DistributedSimulator will assume that it now owns the

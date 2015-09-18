@@ -131,21 +131,43 @@ class FindSizeTWithOutStd < TestBase
   end
 end
 
-def scour_files(tester)
+class FindUnprefixedTargetNames < TestBase
+  def test(filename, content)
+    return 0 unless filename =~ /(testbed|examples)/
+
+    expected_name = "libgeodecomp_" + Pathname.new(filename).parent.relative_path_from(PATH).to_s.gsub(/\//, "_")
+    ret = 0
+
+    ["executable", "library"].each do |target_token|
+      content.scan(/add_#{target_token}\((\S*) /i) do
+        match = $1
+        unless (match =~ /^#{expected_name}/)
+          # warn user, may clash with user targets if LibGeoDecomp is a subproject of other CMake projects:
+          log "#{filename}: non-safeguarded #{target_token} target name »#{match}« found"
+          ret += 1
+        end
+      end
+    end
+
+    return ret
+  end
+end
+
+def scour_files(files, tester)
   failures = 0
 
-  FILES.each do |file|
+  files.each do |file|
     content = File.read(file)
     failures += tester.test(file, content)
   end
 
   delimiter = "=" * 80
   puts delimiter if !SUMMARY_MODE
-  puts "#{tester.class}: #{failures}/#{FILES.size} tests failed"
+  puts "#{tester.class}: #{failures}/#{files.size} tests failed"
   puts delimiter if !SUMMARY_MODE
 end
 
-DEFAULT_PATH=Pathname.new($0).parent.parent.realpath + "src"
+DEFAULT_PATH=Pathname.new($0).parent.parent.parent.realpath + "src"
 
 if (ARGV.size > 2) || ((ARGV.size > 1) && (ARGV[0] != "-s"))
   STDERR.puts <<EOF
@@ -163,10 +185,14 @@ SUMMARY_MODE = (ARGV.size > 1)
 PATH = Pathname.new(ARGV.last || DEFAULT_PATH)
 
 pattern = PATH + "**" + "*.{h,cpp,cu}"
-FILES = Dir.glob(pattern)
+cpp_files = Dir.glob(pattern)
+scour_files(cpp_files, FindUndocumentedClasses.new)
+scour_files(cpp_files, FindUnmatchedHeaderGuards.new)
+scour_files(cpp_files, FindFixmes.new)
+scour_files(cpp_files, FindBadIncludes.new)
+scour_files(cpp_files, FindSizeTWithOutStd.new)
 
-scour_files(FindUndocumentedClasses.new)
-scour_files(FindUnmatchedHeaderGuards.new)
-scour_files(FindFixmes.new)
-scour_files(FindBadIncludes.new)
-scour_files(FindSizeTWithOutStd.new)
+pattern = PATH + "**" + "CMakeLists.*txt"
+cmake_files = Dir.glob(pattern)
+
+scour_files(cmake_files, FindUnprefixedTargetNames.new)

@@ -26,6 +26,10 @@ namespace APITraitsHelpers {
 
 #ifdef LIBGEODECOMP_WITH_MPI
 
+/**
+ * Utility class which provides searches a provider class for a given
+ * MPI datatype.
+ */
 template<typename PROVIDER, typename CELL>
 class DefaultMPIDataTypeLookup
 {
@@ -334,6 +338,128 @@ public:
     template<int DIM>
     class HasTorusTopology : public HasTopology<typename Topologies::Torus<DIM>::Topology>
     {};
+
+    /**
+     * Replaces the grid type from regular grid to an unstructured grid.
+     */
+    class HasUnstructuredTopology: public HasTopology<Topologies::Unstructured::Topology>
+    {};
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_SELL_C = void>
+    class SelectSellC
+    {
+    public:
+        static const unsigned VALUE = 4;
+    };
+
+    template<typename CELL>
+    class SelectSellC<CELL, typename CELL::API::SupportsSellC>
+    {
+    public:
+        static const int VALUE = CELL::API::SELL_C;
+    };
+
+    /**
+     * For unstructured grid, this specifies the C of SELL-C-q format. Default: 4
+     * which is suitable for AVX.
+     */
+    template<int C>
+    class HasSellC
+    {
+    public:
+        typedef void SupportsSellC;
+
+        static const int SELL_C = C;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_SELL_SIGMA = void>
+    class SelectSellSigma
+    {
+    public:
+        static const int VALUE = 1;
+    };
+
+    template<typename CELL>
+    class SelectSellSigma<CELL, typename CELL::API::SupportsSellSigma>
+    {
+    public:
+        static const int VALUE = CELL::API::SELL_SIGMA;
+    };
+
+    /**
+     * For unstructured grid, this specifies the SIGMA of SELL-C-q format.
+     * Should be C^2. Default is 1 which means nothing is sorted.
+     */
+    template<int SIGMA>
+    class HasSellSigma
+    {
+    public:
+        typedef void SupportsSellSigma;
+
+        static const int SELL_SIGMA = SIGMA;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_SELL_MATRICES = void>
+    class SelectSellMatrices
+    {
+    public:
+        static const std::size_t VALUE = 1;
+    };
+
+    template<typename CELL>
+    class SelectSellMatrices<CELL, typename CELL::API::SupportsSellMatrices>
+    {
+    public:
+        static const std::size_t VALUE = CELL::API::SELL_MATRICES;
+    };
+
+    /**
+     * For unstructured grid, this specifies the amount of different matrices.
+     * Default is 1.
+     */
+    template<std::size_t MATRICES>
+    class HasSellMatrices
+    {
+    public:
+        typedef void SupportsSellMatrices;
+
+        static const std::size_t SELL_MATRICES = MATRICES;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+    template<typename CELL, typename HAS_SELL_TYPE = void>
+    class SelectSellType
+    {
+    public:
+        typedef double Value;
+    };
+
+    template<typename CELL>
+    class SelectSellType<CELL, typename CELL::API::SupportsSellType>
+    {
+    public:
+        typedef typename CELL::API::SellType Value;
+    };
+
+    /**
+     * For unstructured grid, this specifies the type of values inside the
+     * SELL-C-q matrices. Default is double.
+     */
+    template<typename SELL_TYPE>
+    class HasSellType
+    {
+    public:
+        typedef void SupportsSellType;
+
+        typedef SELL_TYPE SellType;
+    };
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -920,6 +1046,35 @@ public:
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+    template<typename CELL, typename HAS_SEPARATE_CUDA_UPDATE = void>
+    class SelectSeparateCudaUpdate
+    {
+    public:
+        typedef FalseType Value;
+    };
+
+    template<typename CELL>
+    class SelectSeparateCudaUpdate<CELL, typename CELL::API::SupportsSeparateCudaUpdate>
+    {
+    public:
+        typedef TrueType Value;
+    };
+
+    /**
+     * Cells with this feature feature a separate updateCuda(),
+     * additionally to their usual update(). This may be beneficial if
+     * the code in update() is not CUDA-compatible, e.g. because it's
+     * pulling in certain parts of the STL or external libraries.
+     *
+     */
+    class HasSeparateCudaUpdate
+    {
+    public:
+        typedef void SupportsSeparateCudaUpdate;
+    };
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
     // Trait Template:
 
     // template<typename CELL, typename HAS_TEMPLATE_NAME = void>
@@ -950,4 +1105,3 @@ public:
 }
 
 #endif
-

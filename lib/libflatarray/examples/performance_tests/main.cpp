@@ -10,7 +10,14 @@
 #include <libflatarray/short_vec.hpp>
 #include <libflatarray/testbed/cpu_benchmark.hpp>
 #include <libflatarray/testbed/evaluate.hpp>
+
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
+
+#ifdef __AVX__
 #include <immintrin.h>
+#endif
 
 #define WEIGHT_S 0.11
 #define WEIGHT_T 0.12
@@ -117,6 +124,8 @@ private:
         }
     }
 };
+
+#ifdef __SSE__
 
 class JacobiD3Q7Pepper : public JacobiD3Q7
 {
@@ -293,6 +302,8 @@ private:
     }
 };
 
+#endif
+
 class JacobiCell
 {
 public:
@@ -413,6 +424,8 @@ private:
         }
     }
 };
+
+#ifdef __SSE__
 
 class JacobiD3Q7Silver : public JacobiD3Q7
 {
@@ -631,6 +644,8 @@ private:
         }
     }
 };
+
+#endif
 
 class Particle
 {
@@ -1588,19 +1603,21 @@ public:
 
 int main(int argc, char **argv)
 {
-    if ((argc < 3) || (argc > 4)) {
-        std::cerr << "usage: " << argv[0] << "[-q,--quick] REVISION CUDA_DEVICE\n";
+    if ((argc < 3) || (argc == 4) || (argc > 5)) {
+        std::cerr << "usage: " << argv[0] << " [-n,--name SUBSTRING] REVISION CUDA_DEVICE \n"
+                  << "  - optional: only run tests whose name contains a SUBSTRING,\n"
+                  << "  - REVISION is purely for output reasons,\n"
+                  << "  - CUDA_DEVICE causes CUDA tests to run on the device with the given ID.\n";
         return 1;
     }
-
-    bool quick = false;
+    std::string name = "";
     int argumentIndex = 1;
-    if (argc == 4) {
-        if ((std::string(argv[1]) == "-q") ||
-            (std::string(argv[1]) == "--quick")) {
-            quick = true;
+    if (argc == 5) {
+        if ((std::string(argv[1]) == "-n") ||
+            (std::string(argv[1]) == "--name")) {
+            name = std::string(argv[2]);
         }
-        argumentIndex = 2;
+        argumentIndex = 3;
     }
     std::string revision = argv[argumentIndex + 0];
 
@@ -1609,7 +1626,7 @@ int main(int argc, char **argv)
     int cudaDevice;
     s >> cudaDevice;
 
-    evaluate eval(revision);
+    evaluate eval(name, revision);
     eval.print_header();
 
     std::vector<std::vector<int> > sizes;
@@ -1623,7 +1640,7 @@ int main(int argc, char **argv)
         eval(JacobiD3Q7Vanilla(), *i);
     }
 
-#ifdef __AVX__
+#ifdef __SSE__
     for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
         eval(JacobiD3Q7Pepper(), *i);
     }
@@ -1633,9 +1650,11 @@ int main(int argc, char **argv)
         eval(JacobiD3Q7Bronze(), *i);
     }
 
+#ifdef __SSE__
     for (std::vector<std::vector<int> >::iterator i = sizes.begin(); i != sizes.end(); ++i) {
         eval(JacobiD3Q7Silver(), *i);
     }
+#endif
 
     sizes.clear();
 

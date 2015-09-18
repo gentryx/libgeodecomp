@@ -53,10 +53,10 @@ public:
     template<typename PAINTER>
     void plotGrid(const typename Writer<CELL>::GridType& grid, PAINTER& painter) const
     {
-	CoordBox<2> viewport(
-	    Coord<2>(0, 0),
-	    Coord<2>(cellDim.x() * grid.dimensions().x(),
-		     cellDim.y() * grid.dimensions().y()));
+        CoordBox<2> viewport(
+            Coord<2>(0, 0),
+            Coord<2>(cellDim.x() * grid.dimensions().x(),
+                     cellDim.y() * grid.dimensions().y()));
         plotGridInViewport(grid, painter, viewport);
     }
 
@@ -67,7 +67,7 @@ public:
     template<typename PAINTER>
     void plotGridInViewport(
         const typename Writer<CELL>::GridType& grid,
-	PAINTER& painter,
+        PAINTER& painter,
         const CoordBox<2>& viewport) const
     {
         int sx = viewport.origin.x() / cellDim.x();
@@ -85,7 +85,7 @@ public:
                 painter.moveTo(relativeUpperLeft);
                 cellPlotter(
                     grid.get(Coord<2>(x, y)),
-		    painter,
+                    painter,
                     cellDim);
             }
         }

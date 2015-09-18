@@ -14,6 +14,7 @@ public:
         public APITraits::HasFixedCoordsOnlyUpdate,
         public APITraits::HasStencil<Stencils::VonNeumann<3, 1> >,
         public APITraits::HasTorusTopology<3>,
+        public APITraits::HasSeparateCUDAUpdate,
         public APITraits::HasPredefinedMPIDataType<double>
     {};
 
@@ -21,9 +22,20 @@ public:
     {}
 
     template<typename COORD_MAP>
-    __device__
     __host__
     void update(const COORD_MAP& neighborhood, const unsigned& nanoStep)
+    {
+        temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
+                neighborhood[FixedCoord< 0, -1,  0>()].temp +
+                neighborhood[FixedCoord<-1,  0,  0>()].temp +
+                neighborhood[FixedCoord< 1,  0,  0>()].temp +
+                neighborhood[FixedCoord< 0,  1,  0>()].temp +
+                neighborhood[FixedCoord< 0,  0,  1>()].temp) * (1.0 / 6.0);
+    }
+
+    template<typename COORD_MAP>
+    __device__
+    void updateCuda(const COORD_MAP& neighborhood, const unsigned& nanoStep)
     {
         temp = (neighborhood[FixedCoord< 0,  0, -1>()].temp +
                 neighborhood[FixedCoord< 0, -1,  0>()].temp +

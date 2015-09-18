@@ -25,8 +25,15 @@ public:
     friend class HPXSerialization;
 
     void copyStreakInImpl(
-        const EXTERNAL *source, MEMBER *target, const std::size_t num, const std::size_t stride)
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             for (std::size_t j = 0; j < ARITY; ++j) {
                 target[j * stride + i] = source[i * ARITY + j];
@@ -35,8 +42,15 @@ public:
     }
 
     void copyStreakOutImpl(
-        const MEMBER *source, EXTERNAL *target, const std::size_t num, const std::size_t stride)
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        const std::size_t num,
+        const std::size_t stride)
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             for (std::size_t j = 0; j < ARITY; ++j) {
                 target[i * ARITY + j] = source[j * stride + i];
@@ -44,19 +58,16 @@ public:
         }
     }
 
-    void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER CELL:: *memberPointer)
-    {
-        copyMemberInImpl(
-            source,
-            target,
-            num,
-            reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
-    }
-
     virtual void copyMemberInImpl(
-        const EXTERNAL *source, CELL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const EXTERNAL *source,
+        MemoryLocation::Location sourceLocation,
+        CELL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             std::copy(
                 source + i * ARITY,
@@ -65,25 +76,40 @@ public:
         }
     }
 
-    void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER CELL:: *memberPointer)
-    {
-        copyMemberOutImpl(
-            source,
-            target,
-            num,
-            reinterpret_cast<MEMBER (CELL:: *)[ARITY]>(memberPointer));
-    }
 
     virtual void copyMemberOutImpl(
-        const CELL *source, EXTERNAL *target, std::size_t num, MEMBER (CELL:: *memberPointer)[ARITY])
+        const CELL *source,
+        MemoryLocation::Location sourceLocation,
+        EXTERNAL *target,
+        MemoryLocation::Location targetLocation,
+        std::size_t num,
+        MEMBER (CELL:: *memberPointer)[ARITY])
     {
+        checkMemoryLocations(sourceLocation, targetLocation);
+
         for (std::size_t i = 0; i < num; ++i) {
             std::copy(
                 (source[i].*memberPointer) + 0,
                 (source[i].*memberPointer) + ARITY,
                 target + i * ARITY);
         }
+
+    }
+
+    void checkMemoryLocations(
+        MemoryLocation::Location sourceLocation,
+        MemoryLocation::Location targetLocation)
+    {
+        if ((sourceLocation == MemoryLocation::CUDA_DEVICE) ||
+            (targetLocation == MemoryLocation::CUDA_DEVICE)) {
+            throw std::logic_error("DefaultFilter can't access CUDA device memory");
+        }
+
+        if ((sourceLocation != MemoryLocation::HOST) ||
+            (targetLocation != MemoryLocation::HOST)) {
+            throw std::invalid_argument("unknown combination of source and target memory locations");
+        }
+
     }
 };
 

@@ -95,7 +95,7 @@ public:
         }
 
         MEMBER_TYPE *p = &(dataBuffer[0]);
-        grid->saveMember(p, this->selector, region);
+        grid->saveMember(p, MemoryLocation::HOST, this->selector, region);
         setData(handle, VISIT_OWNER_SIM, 1, dataBuffer.size(), &dataBuffer[0]);
 
         return handle;

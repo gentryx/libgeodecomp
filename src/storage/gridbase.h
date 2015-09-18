@@ -5,9 +5,16 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/geometry/streak.h>
+#include <libgeodecomp/storage/memorylocation.h>
 #include <libgeodecomp/storage/selector.h>
 
 namespace LibGeoDecomp {
+
+/**
+ * Forward declaration
+ */
+template<typename CELL, int DIM>
+class ProxyGrid;
 
 /**
  * This is an abstract base class for all grid classes. It's generic
@@ -18,103 +25,10 @@ template<typename CELL, int DIMENSIONS>
 class GridBase
 {
 public:
+    friend class ProxyGrid<CELL, DIMENSIONS>;
+
     typedef CELL CellType;
     const static int DIM = DIMENSIONS;
-
-    /**
-     * Convenice class for reading multiple cells. Incurs overhead due
-     * to copying cells -- probably more often than desired.
-     */
-    class ConstIterator
-    {
-    public:
-    ConstIterator(const GridBase<CELL, DIM> *grid, const Coord<DIM>& origin) :
-        grid(grid),
-        cursor(origin)
-    {
-        cell = grid->get(cursor);
-    }
-
-    const CELL& operator*() const
-    {
-        return cell;
-    }
-
-    const CELL *operator->() const
-    {
-        return &cell;
-    }
-
-    ConstIterator& operator>>(CELL& target)
-    {
-        target = cell;
-        ++(*this);
-        return *this;
-    }
-
-    void operator++()
-    {
-        ++cursor.x();
-        cell = grid->get(cursor);
-    }
-
-    private:
-    const GridBase<CELL, DIM> *grid;
-    Coord<DIM> cursor;
-    CELL cell;
-    };
-
-    /**
-     * Convenice class for reading/writing multiple cells. Incurs
-     * overhead due to copying cells -- probably more often than
-     * desired.
-     */
-    class Iterator
-    {
-    public:
-    Iterator(GridBase<CELL, DIM> *grid, const Coord<DIM>& origin) :
-        grid(grid),
-        cursor(origin)
-    {
-        cell = grid->get(cursor);
-    }
-
-    const CELL& operator*() const
-    {
-        return cell;
-    }
-
-    const CELL *operator->() const
-    {
-        return &cell;
-    }
-
-    Iterator& operator>>(CELL& target)
-    {
-        target = cell;
-        ++(*this);
-        return *this;
-    }
-
-    Iterator& operator<<(const CELL& source)
-    {
-        cell = source;
-        grid->set(cursor, cell);
-        ++(*this);
-        return *this;
-    }
-
-    void operator++()
-    {
-        ++cursor.x();
-        cell = grid->get(cursor);
-    }
-
-    private:
-    GridBase<CELL, DIM> *grid;
-    Coord<DIM> cursor;
-    CELL cell;
-    };
 
     virtual ~GridBase()
     {}
@@ -126,16 +40,6 @@ public:
     virtual void setEdge(const CELL&) = 0;
     virtual const CELL& getEdge() const = 0;
     virtual CoordBox<DIM> boundingBox() const = 0;
-
-    ConstIterator at(const Coord<DIM>& coord) const
-    {
-        return ConstIterator(this, coord);
-    }
-
-    Iterator at(const Coord<DIM>& coord)
-    {
-        return Iterator(this, coord);
-    }
 
     Coord<DIM> dimensions() const
     {
@@ -173,13 +77,17 @@ public:
      * cells within the given region. Assumes that target points to an area with sufficient space.
      */
     template<typename MEMBER>
-    void saveMember(MEMBER *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    void saveMember(
+        MEMBER *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
     {
         if (!selector.template checkTypeID<MEMBER>()) {
             throw std::invalid_argument("cannot save member as selector was created for different type");
         }
 
-        saveMemberImplementation(reinterpret_cast<char*>(target), selector, region);
+        saveMemberImplementation(reinterpret_cast<char*>(target), targetLocation, selector, region);
     }
 
     /**
@@ -187,9 +95,13 @@ public:
      * Writers and other components that might not know about the
      * variable's type.
      */
-    void saveMemberUnchecked(char *target, const Selector<CELL>& selector, const Region<DIM>& region) const
+    void saveMemberUnchecked(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const
     {
-        saveMemberImplementation(target, selector, region);
+        saveMemberImplementation(target, targetLocation, selector, region);
     }
 
     /**
@@ -198,20 +110,31 @@ public:
      * contains coordinates.
      */
     template<typename MEMBER>
-    void loadMember(const MEMBER *source, const Selector<CELL>& selector, const Region<DIM>& region)
+    void loadMember(
+        const MEMBER *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region)
     {
         if (!selector.template checkTypeID<MEMBER>()) {
             throw std::invalid_argument("cannot load member as selector was created for different type");
         }
-        loadMemberImplementation(reinterpret_cast<const char*>(source), selector, region);
+
+        loadMemberImplementation(reinterpret_cast<const char*>(source), sourceLocation, selector, region);
     }
 
 protected:
     virtual void saveMemberImplementation(
-        char *target, const Selector<CELL>& selector, const Region<DIM>& region) const = 0;
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) const = 0;
 
     virtual void loadMemberImplementation(
-        const char *source, const Selector<CELL>& selector, const Region<DIM>& region) = 0;
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL>& selector,
+        const Region<DIM>& region) = 0;
 
 };
 

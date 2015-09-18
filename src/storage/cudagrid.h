@@ -4,6 +4,7 @@
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/cudaarray.h>
+#include <libgeodecomp/storage/gridbase.h>
 
 #include <cuda.h>
 
@@ -11,14 +12,12 @@ namespace LibGeoDecomp {
 
 /**
  * A lightweight AoS-style (Array of Structs) grid class, to manage
- * memory allocation and bulk data transfer on NVDIA GPUs. It does not
- * implement the GridBase interface as its small-scale data access
- * functions would yield an an unacceptably slow interface.
+ * memory allocation and bulk data transfer on NVDIA GPUs.
  */
 template<typename CELL_TYPE,
          typename TOPOLOGY=Topologies::Cube<2>::Topology,
          bool TOPOLOGICALLY_CORRECT=false>
-class CUDAGrid
+class CUDAGrid : public GridBase<CELL_TYPE, TOPOLOGY::DIM>
 {
 public:
     friend class CUDAGridTest;
@@ -34,19 +33,57 @@ public:
         box(box),
         topoDimensions(topologicalDimensions),
         array(box.dimensions.prod()),
-        edgeCellStore(1)
+        edgeCellStore(1, CELL_TYPE())
     {}
+
+    inline
+    void set(const Coord<DIM>& coord, const CELL_TYPE& source)
+    {
+        std::size_t length = sizeof(CellType);
+        CELL_TYPE *target = address(coord);
+        if (target == edgeCellStore.data()) {
+            hostEdgeCell = source;
+        }
+        cudaMemcpy(target, &source, length, cudaMemcpyHostToDevice);
+    }
+
+    inline
+    void set(const Streak<DIM>& streak, const CELL_TYPE *source)
+    {
+        std::size_t length = streak.length() * sizeof(CellType);
+        cudaMemcpy(address(streak.origin), source, length, cudaMemcpyHostToDevice);
+    }
+
+    inline
+    CELL_TYPE get(const Coord<DIM>& coord) const
+    {
+        CELL_TYPE ret;
+        std::size_t length = sizeof(CellType);
+        cudaMemcpy(&ret, const_cast<CellType*>(address(coord)), length, cudaMemcpyDeviceToHost);
+        return ret;
+    }
+
+    inline
+    void get(const Streak<DIM>& streak, CELL_TYPE *target) const
+    {
+        std::size_t length = streak.length() * sizeof(CellType);
+        cudaMemcpy(target, const_cast<CellType*>(address(streak.origin)), length, cudaMemcpyDeviceToHost);
+    }
 
     void setEdge(const CELL_TYPE& cell)
     {
-        cudaMemcpy(edgeCellStore.data(), &cell, sizeof(CELL_TYPE), cudaMemcpyHostToDevice);
+        hostEdgeCell = cell;
+        cudaMemcpy(edgeCellStore.data(), &hostEdgeCell, sizeof(CELL_TYPE), cudaMemcpyHostToDevice);
     }
 
-    CELL_TYPE getEdge() const
+    const CELL_TYPE& getEdge() const
     {
-        CELL_TYPE cell;
-        cudaMemcpy(&cell, edgeCellStore.data(), sizeof(CELL_TYPE), cudaMemcpyDeviceToHost);
-        return cell;
+        return hostEdgeCell;
+    }
+
+    CoordBox<DIM> boundingBox() const
+    {
+        return box;
     }
 
     template<typename GRID_TYPE, typename REGION>
@@ -101,35 +138,89 @@ public:
         return edgeCellStore.data();
     }
 
+protected:
+    virtual void saveMemberImplementation(
+        char *target,
+        MemoryLocation::Location targetLocation,
+        const Selector<CELL_TYPE>& selector,
+        const Region<DIM>& region) const
+    {
+        char *targetCursor = target;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            selector.copyMemberOut(
+                address(i->origin),
+                MemoryLocation::CUDA_DEVICE,
+                targetCursor,
+                targetLocation,
+                i->length());
+
+            targetCursor += i->length() * selector.sizeOfExternal();
+        }
+    }
+
+    virtual void loadMemberImplementation(
+        const char *source,
+        MemoryLocation::Location sourceLocation,
+        const Selector<CELL_TYPE>& selector,
+        const Region<DIM>& region)
+    {
+        const char *sourceCursor = source;
+
+        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
+            selector.copyMemberIn(
+                sourceCursor,
+                sourceLocation,
+                address(i->origin) ,
+                MemoryLocation::CUDA_DEVICE,
+                i->length());
+
+            sourceCursor += i->length() * selector.sizeOfExternal();
+        }
+    }
+
 private:
     CoordBox<DIM> box;
     Coord<DIM> topoDimensions;
     CUDAArray<CellType> array;
     CUDAArray<CellType> edgeCellStore;
+    CellType hostEdgeCell;
 
     std::size_t byteSize() const
     {
         return box.dimensions.prod() * sizeof(CellType);
     }
 
-    std::size_t offset(const Coord<DIM>& absoluteCoord) const
+    Coord<DIM> toRelativeCoord(const Coord<DIM>& absoluteCoord) const
     {
         Coord<DIM> relativeCoord = absoluteCoord - box.origin;
         if (TOPOLOGICALLY_CORRECT) {
             relativeCoord = Topology::normalize(relativeCoord, topoDimensions);
         }
 
-        return relativeCoord.toIndex(box.dimensions);
+        return relativeCoord;
     }
 
     CellType *address(const Coord<DIM>& absoluteCoord)
     {
-        return data() + offset(absoluteCoord);
+        Coord<DIM> relativeCoord = toRelativeCoord(absoluteCoord);
+
+        if (Topology::isOutOfBounds(relativeCoord, box.dimensions)) {
+            return edgeCellStore.data();
+        }
+
+        return data() + relativeCoord.toIndex(box.dimensions);
     }
 
     const CellType *address(const Coord<DIM>& absoluteCoord) const
     {
-        return data() + offset(absoluteCoord);
+        Coord<DIM> relativeCoord = toRelativeCoord(absoluteCoord);
+
+        if (Topology::isOutOfBounds(relativeCoord, box.dimensions)) {
+            return edgeCellStore.data();
+        }
+
+        return data() + relativeCoord.toIndex(box.dimensions);
     }
 };
 
