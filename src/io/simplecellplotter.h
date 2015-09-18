@@ -22,15 +22,12 @@ class CellToColor : public Filter<CELL, MEMBER, Color>
 public:
 #ifdef LIBGEODECOMP_WITH_HPX
     HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(CellToColor);
-
-    template<typename ARCHIVE, typename CELL2, typename MEMBER2, typename PALETTE2>
-    friend void hpx::serialization::serialize(
-        ARCHIVE& archive, CellToColor<CELL2, MEMBER2, PALETTE2>& object, const unsigned version);
 #endif
 
     friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
+    friend class LibGeoDecomp::HPXSerialization;
     friend class LibGeoDecomp::PPMWriterTest;
 
     explicit
