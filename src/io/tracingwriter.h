@@ -25,10 +25,12 @@ class TracingWriter :
         public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(TracingWriter);
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(TracingWriter)
 
+#ifdef LIBGEODECOMP_WITH_HPX
     template<typename ARCHIVE, typename CELL_TYPE2>
     friend void hpx::serialization::serialize(ARCHIVE&, TracingWriter<CELL_TYPE2>&, const unsigned);
+#endif
     friend class boost::serialization::access;
 
     using Writer<CELL_TYPE>::NANO_STEPS;
@@ -148,6 +150,7 @@ private:
 
 }
 
+#ifdef LIBGEODECOMP_WITH_HPX
 namespace hpx {
 namespace serialization {
 
@@ -170,6 +173,7 @@ static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& 
 
 HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
 HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
+#endif
 
 
 #endif

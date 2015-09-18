@@ -6,19 +6,19 @@
 #include <libgeodecomp/storage/displacedgrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/serialization/serialize.hpp>
 #include <hpx/runtime/serialization/binary_filter.hpp>
 #include <hpx/runtime/serialization/input_archive.hpp>
 #include <hpx/runtime/serialization/output_archive.hpp>
-#else
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#endif
 #endif
 
 namespace LibGeoDecomp {

@@ -133,9 +133,11 @@ public:
 
 }
 
+#ifdef LIBGEODECOMP_WITH_HPX
 HPX_SERIALIZATION_WITH_CUSTOM_CONSTRUCTOR_TEMPLATE(
     (template<typename CELL, typename CELL_PLOTTER>),
     (LibGeoDecomp::PPMWriter<CELL, CELL_PLOTTER>),
     (LibGeoDecomp::PPMWriter<CELL, CELL_PLOTTER>::create))
+#endif
 
 #endif

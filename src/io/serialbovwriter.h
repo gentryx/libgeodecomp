@@ -20,7 +20,7 @@ template<typename CELL_TYPE>
 class SerialBOVWriter : public Clonable<Writer<CELL_TYPE>, SerialBOVWriter<CELL_TYPE> >
 {
 public:
-    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(SerialBOVWriter);
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(SerialBOVWriter)
 
     friend class PolymorphicSerialization;
     friend class BoostSerialization;

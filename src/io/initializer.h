@@ -7,7 +7,9 @@
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/geometry/adjacency.h>
 
+#ifdef LIBGEODECOMP_WITH_HPX
 #include <hpx/runtime/serialization/serialize.hpp>
+#endif
 
 namespace LibGeoDecomp {
 

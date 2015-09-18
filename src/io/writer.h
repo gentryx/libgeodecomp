@@ -7,6 +7,10 @@
 #include <mpi.h>
 #endif
 
+#ifndef LIBGEODECOMP_WITH_HPX
+#define HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(FOO)
+#endif
+
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <string>
 #include <stdexcept>

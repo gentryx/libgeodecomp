@@ -14,6 +14,10 @@
 #include <libgeodecomp/communication/typemaps.h>
 #endif
 
+#ifndef LIBGEODECOMP_WITH_HPX
+#define HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(FOO)
+#endif
+
 namespace LibGeoDecomp {
 
 namespace FilterHelpers {

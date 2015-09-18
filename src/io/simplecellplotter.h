@@ -31,7 +31,6 @@ public:
     friend class PolymorphicSerialization;
     friend class BoostSerialization;
     friend class HPXSerialization;
-    friend class LibGeoDecomp::HPXSerialization;
     friend class LibGeoDecomp::PPMWriterTest;
 
     explicit
