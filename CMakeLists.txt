@@ -70,12 +70,11 @@ set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
 find_package(libflatarray QUIET)
 if(NOT libflatarray_FOUND)
-  set(libflatarray_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray")
-  find_package(libflatarray)
+  add_subdirectory(lib/libflatarray)
   # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
   # not be exported during install in any case (the build tree must be
   # considered a temporary directory, and CMake would complain).
-  list(APPEND BUILD_INCLUDE_DIRECTORIES ${libflatarray_INCLUDE_DIR})
+  list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/src")
 else()
   # if LibFlatArray was found outside, we'll assume we're not using
   # the bundled version and we need export the relevant directory:
