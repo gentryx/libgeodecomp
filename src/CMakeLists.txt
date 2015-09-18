@@ -99,6 +99,10 @@ if(WITH_HPX AND NOT HPX_FOUND)
   message(FATAL_ERROR "WITH_HPX selected but could not find HPX. Specify HPX_DIR to point to your HPX CMake scripts (e.g. cmake -DHPX_DIR=/home/alice/local_install/lib/cmake/hpx).")
 endif()
 
+if(WITH_HPX AND NOT WITH_CPP14)
+  message(FATAL_ERROR "WITH_HPX selected but no C++14 support activated. Try -DWITH_CPP14=true")
+endif()
+
 if(WITH_MPI)
   if(NOT MPI_FOUND)
     message(FATAL_ERROR "WITH_MPI selected, but could find no MPI implementation.")
@@ -435,7 +439,7 @@ if (WITH_TYPEMAPS)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.h" "${CMAKE_CURRENT_SOURCE_DIR}/communication/typemaps.cpp"
     COMMAND cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf
-    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" --include-prefix "libgeodecomp/" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
+    COMMAND ruby "${CMAKE_CURRENT_SOURCE_DIR}/../tools/typemapgenerator/generate.rb" --namespace LibGeoDecomp --header-fix "^.+/src:libgeodecomp" --macro-guard-mpi LIBGEODECOMP_WITH_MPI --macro-guard-hpx LIBGEODECOMP_WITH_HPX --macro-guard-boost LIBGEODECOMP_WITH_BOOST_SERIALIZATION "${CMAKE_CURRENT_SOURCE_DIR}/../doc/xml" --include-prefix "libgeodecomp/" "${CMAKE_CURRENT_SOURCE_DIR}/communication"
     DEPENDS "${CMAKE_BINARY_DIR}/cache")
 
   list(REMOVE_ITEM ALL_HEADERS "communication/typemaps.h")

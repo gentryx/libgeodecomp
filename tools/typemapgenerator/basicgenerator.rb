@@ -124,6 +124,7 @@ EOF
     ret = File.read(@path + "template_serialization.cpp");
     ret.gsub!(/MACROS\n/, class_registrations_source(options))
 
+    return guard(@macro_guard, ret)
     return ret
   end
 

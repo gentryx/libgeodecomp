@@ -1,3 +1,5 @@
+#include<libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_HPX
 #include "hpxserialization.h"
 
 HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::Chronometer)
@@ -11,3 +13,5 @@ HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::FloatCoord<3 >)
 HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::NonPoDTestCell)
 HPX_SERIALIZATION_REGISTER_CLASS(LibGeoDecomp::OozeBalancer)
 
+
+#endif
