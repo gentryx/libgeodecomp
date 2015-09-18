@@ -228,10 +228,9 @@ public:
     class Rosenbrock2DFunctionDouble : public TestableEvaluator
     {
     public:
-        Rosenbrock2DFunctionDouble()
-        {
-            maxima.push_back(3000);
-        }
+        Rosenbrock2DFunctionDouble() :
+            TestableEvaluator(3000)
+        {}
 
         double operator()(const SimulationParameters& params)
         {

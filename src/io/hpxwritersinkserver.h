@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_HPXWRITERSINKSERVER_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
+#ifdef LIBGEODECOMP_WITH_HPX_XXX
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>

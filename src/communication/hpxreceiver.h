@@ -6,6 +6,7 @@
 #include <utility>
 #endif
 
+#include <hpx/include/components.hpp>
 #include <hpx/lcos/broadcast.hpp>
 #include <hpx/lcos/local/receive_buffer.hpp>
 #include <hpx/runtime/get_ptr.hpp>

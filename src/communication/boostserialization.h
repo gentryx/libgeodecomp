@@ -18,7 +18,6 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
@@ -145,14 +144,6 @@ public:
     static void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned /*version*/)
     {
         archive & object.c;
-    }
-
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, HpxWriterCollector<CELL_TYPE > > >(object);
-        archive & object.sink;
     }
 
     template<typename ARCHIVE, typename CELL>
@@ -389,12 +380,6 @@ void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<2 >& object, const uns
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned version)
-{
-    BoostSerialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned version)
 {
     BoostSerialization::serialize(archive, object, version);
 }

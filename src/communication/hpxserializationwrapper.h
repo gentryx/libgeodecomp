@@ -9,6 +9,7 @@
  * in as well. Repeating those on all sites is tedious. Instead we
  * just pull in this header.
  */
+// fixme
 // #include <hpx/runtime/serialization/serialization_fwd.hpp>
 // #include <hpx/runtime/serialization/serialization_chunk.hpp>
 // #include <hpx/runtime/serialization/input_container.hpp>
@@ -16,8 +17,10 @@
 // #include <hpx/runtime/serialization/base_object.hpp>
 // #include <hpx/runtime/serialization/set.hpp>
 #include <libgeodecomp/communication/hpxserialization.h>
+#include <hpx/runtime/serialization/map.hpp>
 #include <hpx/runtime/serialization/serialize.hpp>
 #include <hpx/runtime/serialization/shared_ptr.hpp>
+#include <hpx/runtime/serialization/vector.hpp>
 
 #endif
 

@@ -4,9 +4,9 @@
 #include <libgeodecomp/storage/arrayfilter.h>
 #include <libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/array.hpp>
 #include <hpx/runtime/serialization/serialize.hpp>
 #endif
-
 
 namespace LibGeoDecomp {
 

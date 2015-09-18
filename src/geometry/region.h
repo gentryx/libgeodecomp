@@ -101,7 +101,7 @@ public:
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& unusedOffsets) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& unusedOffsets) const
     {
         iterators[DIM] = region.indicesBegin(DIM) + offset;
         for (int d = DIM - 1; d >= 0; --d) {
@@ -1516,13 +1516,6 @@ public:
     inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
     {
         IndexVectorType& indices = region->indices[0];
-        (*this)(region, s, 0, indices.size());
-    }
-
-    template<int MY_DIM>
-    inline void operator()(Region<MY_DIM> *region, const Streak<MY_DIM>& s)
-    {
-        VecType& indices = region->indices[0];
         (*this)(region, s, 0, indices.size());
     }
 

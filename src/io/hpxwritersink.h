@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_HPXWRITERSINK_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
+#ifdef LIBGEODECOMP_WITH_HPX_XXX
 
 #include <libgeodecomp/io/hpxwritersinkserver.h>
 #include <libgeodecomp/storage/gridvecconv.h>

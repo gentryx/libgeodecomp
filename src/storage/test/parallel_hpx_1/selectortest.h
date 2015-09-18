@@ -42,7 +42,8 @@ public:
         }
 
         std::vector<int> target(10);
-        selector2.copyMemberOut(&source[0], reinterpret_cast<char*>(&target[0]), 10);
+        selector2.copyMemberOut(&source[0], MemoryLocation::HOST,
+                                reinterpret_cast<char*>(&target[0]), MemoryLocation::HOST, 10);
 
         for (int i = 0; i < 10; ++i) {
             TS_ASSERT_EQUALS(i + 4711, target[i]);
@@ -69,7 +70,8 @@ public:
         }
 
         std::vector<int> target(400);
-        selector2->copyMemberOut(&source[0], reinterpret_cast<char*>(&target[0]), 400);
+        selector2->copyMemberOut(&source[0], MemoryLocation::HOST,
+                                 reinterpret_cast<char*>(&target[0]), MemoryLocation::HOST, 400);
 
         for (int i = 0; i < 400; ++i) {
             TS_ASSERT_EQUALS(i + 9876, target[i]);
@@ -97,7 +99,8 @@ public:
         }
 
         std::vector<double> target(20 * 5);
-        selector2.copyMemberOut(&source[0], reinterpret_cast<char*>(&target[0]), 20);
+        selector2.copyMemberOut(&source[0], MemoryLocation::HOST,
+                                reinterpret_cast<char*>(&target[0]), MemoryLocation::HOST, 20);
 
         for (int i = 0; i < 20; ++i) {
             for (int j = 0; j < 5; ++j) {

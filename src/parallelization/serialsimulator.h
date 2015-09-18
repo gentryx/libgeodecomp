@@ -4,6 +4,7 @@
 // include this file first to avoid clashes of Intel MPI with stdio.h.
 #include <libgeodecomp/misc/apitraits.h>
 
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/parallelization/monolithicsimulator.h>
 #include <libgeodecomp/storage/gridtypeselector.h>

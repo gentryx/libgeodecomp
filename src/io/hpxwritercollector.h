@@ -12,7 +12,7 @@ class HpxWriterCollector;
 }
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
+#ifdef LIBGEODECOMP_WITH_HPX_XXX
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/hpxwritersink.h>
