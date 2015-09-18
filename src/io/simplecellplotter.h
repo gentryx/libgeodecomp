@@ -13,6 +13,7 @@
 namespace LibGeoDecomp {
 
 class PPMWriterTest;
+class HPXSerialization;
 
 namespace SimpleCellPlotterHelpers {
 
