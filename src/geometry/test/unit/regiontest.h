@@ -1794,6 +1794,64 @@ public:
         TS_ASSERT_EQUALS(expected, actual);
     }
 
+    void testPlaneStreakIterator3D()
+    {
+        Region<3> region;
+        region << CoordBox<3>(Coord<3>(150, 140, 120), Coord<3>(200, 100, 50));
+
+        Region<3>::StreakIterator i = region.planeStreakIterator(0);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 120), 350));
+        ++i;
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 141, 120), 350));
+        ++i;
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 142, 120), 350));
+        ++i;
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 143, 120), 350));
+        for (int c = 0; c < 97; ++c) {
+            ++i;
+        }
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 121), 350));
+
+        i = region.planeStreakIterator(1);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 121), 350));
+
+        i = region.planeStreakIterator(2);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 122), 350));
+
+        i = region.planeStreakIterator(10);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 130), 350));
+
+        i = region.planeStreakIterator(20);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 140), 350));
+
+        i = region.planeStreakIterator(30);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 150), 350));
+
+        i = region.planeStreakIterator(49);
+        TS_ASSERT_EQUALS(*i, Streak<3>(Coord<3>(150, 140, 169), 350));
+
+        i = region.planeStreakIterator(50);
+        TS_ASSERT_EQUALS(i, region.endStreak());
+    }
+
+    void testPlaneStreakIterator2D()
+    {
+        Region<2> region;
+        Region<2> accumulator;
+        region << CoordBox<2>(Coord<2>(150, 140), Coord<2>(200, 100));
+        int stride = 10;
+
+        for (int i = 0; i < 100; i += stride) {
+            for (Region<2>::StreakIterator iter = region.planeStreakIterator(i);
+                 iter != region.planeStreakIterator(i + stride);
+                 ++iter) {
+                accumulator << *iter;
+            }
+        }
+
+        TS_ASSERT_EQUALS(region, accumulator);
+    }
+
     void testPrintToBOV()
     {
         // fixme
