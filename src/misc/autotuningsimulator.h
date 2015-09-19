@@ -58,12 +58,13 @@ public:
         cbs_simulation.result = cbs_result;
         cbs_simulation.simulationFactory = cbs_p;
         simulations["CacheBlockingSimulation"] = cbs_simulation;
-
-/*        simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+#ifdef WITH_CUDA
+        simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
         result_ptr cudar_p(new Result("CudaSimulation", cudas_p->parameters()));
         Simulation cudas_simulation;
         simulations["CudaSimulation"].result = cudar_p;
-        simulations["CudaSimulation"].simulationFactory = cudas_p;*/
+        simulations["CudaSimulation"].simulationFactory = cudas_p;
+#endif
     }
 
     ~AutoTuningSimulator()
@@ -90,6 +91,7 @@ public:
             simulations[name].simulationFactory = cbs_p;
             return;
         }
+#ifdef WITH_CUDA
         if (simName == "CudaSimulation")
         {
             simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
@@ -97,7 +99,7 @@ public:
             simulations[name].result = cbr_p;
             simulations[name].simulationFactory = cudas_p;
         }
-        // FIXME throw excetion!!
+#endif
         throw std::invalid_argument("unknown Simulator type");
     }
 

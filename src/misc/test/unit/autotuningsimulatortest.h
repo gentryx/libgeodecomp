@@ -1,4 +1,4 @@
-// vim: noai:ts=4:sw=4:ewpandtab
+// vim: noai:ts=4:sw=4:expandtab
 #include <libgeodecomp/misc/autotuningsimulator.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
@@ -13,7 +13,7 @@
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/mpiiowriter.h>
-
+//#include <libgeodecomp/parallelization/cudasimulator.h>
 #define LIBGEODECOMP_DEBUG_LEVEL 4 
 
 using namespace LibGeoDecomp;
@@ -173,6 +173,9 @@ public:
         LOG(Logger::INFO, "SimulationFactoryTest::testBasic")
         for (int i =1;i<=2;i++)
         {
+#ifdef WIHT_CUDA
+            std::cout << "Cuda is active" << std::endl;
+#endif
             Simulator<SimFabTestCell> *sim = fab->operator()();
             sim->run();
             delete sim;

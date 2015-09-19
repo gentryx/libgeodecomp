@@ -1,6 +1,9 @@
 #ifndef LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 #define LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 
+
+#define WITH_CUDA
+
 #include <libgeodecomp/io/clonableinitializerwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/optimizer.h>
@@ -8,9 +11,14 @@
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 // There are problems if cuda is not installed on the system
 // FIXME it ned to be checked by the preprocessor
-//#include <libgeodecomp/parallelization/cudasimulator.h>
+#ifdef WITH_CUDA
+#include <libgeodecomp/parallelization/cudasimulator.h>
+#endif
 #include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/io/logger.h>
 
+
+#define LIBGEODECOMP_DEBUG_LEVEL 4
 namespace LibGeoDecomp {
 
 /**
@@ -53,20 +61,25 @@ public:
      */
     Simulator<CELL> *operator()()
     {
+        LOG(Logger::DBG, "SimulationFactory::operator()")
         Simulator<CELL> *sim = buildSimulator(initializer->clone(), parameterSet);
         return sim;
     }
 
     double operator()(const SimulationParameters& params)
     {
+        LOG(Logger::DBG, "SimulationFactory::operator(params)")
         Simulator<CELL> *sim = buildSimulator(initializer->clone(), params);
+        LOG(Logger::DBG, "sim get buildSimulator(initializer->clone(), params)")
         Chronometer chrono;
 
         {
             TimeCompute t(&chrono);
+            LOG(Logger::DBG,"next step is sim->run()")
             sim->run();
         }
 
+        LOG(Logger::DBG,"now delet sim")
         delete sim;
         return chrono.interval<TimeCompute>() * -1.0;
     }
@@ -150,7 +163,7 @@ protected:
 };
 
 // FIXME: everything in this file which is depends on CUDA is not tested!
-/*
+#ifdef WITH_CUDA
 template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
 {
@@ -161,24 +174,29 @@ public:
     {
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimY", 1,   8);
-        SimulationFactory<CELL>::parameterSet.addParameter("BlockDimz", 1,   8);
+        SimulationFactory<CELL>::parameterSet.addParameter("BlockDimZ", 1,   8);
     }
 protected:
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
-        const SimulationFactory& params) const
+        const SimulationParameters& params) const
     {
+            LOG(Logger::DBG, "enter CudaSimulationFactory::build()")
             Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
+            LOG(Logger::DBG, "generate new CudaSimulator")
             CudaSimulator<CELL> * cSim = new CudaSimulator<CELL>(initializer, blockSize);
-            for (unsigned i = 0; i < writers.size(); ++i)
-                cSim->addWriter(writers[i].get()->clone());
-            for (unsigned i = 0; i < steerers.size(); ++i)
-                cSim->addSteerer(steerers[i].get()->clone());
+            LOG(Logger::DBG, "addWriters")
+            for (unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i)
+                cSim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
+            LOG(Logger::DBG, "addSteers")
+            for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i)
+                cSim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
+            LOG(Logger::DBG, "return cSim")
             return cSim;
 
     }
 };
-*/
+#endif
 }//namespace LibGeoDecomp
 
 #endif
