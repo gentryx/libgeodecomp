@@ -320,14 +320,17 @@ public:
         blockSize(blockSize),
         ioGrid(&grid, CoordBox<DIM>())
     {
+        std::cout << "cudaSimulator c-Tor:" << std::endl;
         stepNum = initializer->startStep();
-
         // to avoid conditionals within the kernel when accessing
         // neighboring cells at the grid's boundary, we'll simply pad
         // the grid on those faces where we don't use periodic
         // boundary conditions:
+        std::cout << "create offset" << std::endl;
         Coord<DIM> offset;
+        std::cout << "create and initalize dim"<< std::endl;
         Coord<DIM> dim = initializer->gridBox().dimensions;
+        std::cout << "loop over dim..." << std::endl;
         for (int d = 0; d < DIM; ++d) {
             if (!Topology::wrapsAxis(d)) {
                 offset[d] = -1;
@@ -335,14 +338,18 @@ public:
             }
         }
 
+        std::cout << "getGrid"<< std::endl;
         grid = GridType(CoordBox<DIM>(offset, dim));
+        std::cout << "getByteSize"<< std::endl;
         byteSize = dim.prod() * sizeof(CELL_TYPE);
+        std::cout << "cudaMallocOld" << std::endl;
         cudaMalloc(&devGridOld, byteSize);
+        std::cout << "cudaMallocNew" << std::endl;
         cudaMalloc(&devGridNew, byteSize);
-
+        std::cout<< "boundingBox()" << std::endl;
         CoordBox<DIM> box = grid.boundingBox();
         simArea << box;
-
+        std::cout << "ProxyGrid" << std::endl;
         ioGrid = ProxyGrid<CELL_TYPE, DIM> (&grid, initializer->gridBox());
     }
 

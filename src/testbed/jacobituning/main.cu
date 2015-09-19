@@ -3,7 +3,6 @@
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/cudasimulator.h>
-
 using namespace LibGeoDecomp;
 
 class Cell
@@ -89,26 +88,31 @@ public:
 void runSimulation()
 {
     int outputFrequency = 1000;
-    int maxSteps = 1000;
+    int maxSteps = 5;
     CellInitializer init(1, maxSteps);
 
-    SimulationFactory<Cell> fab(init);
+    CudaSimulationFactory<Cell> fab(init);
 
-    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
+    std::cout << "CudaSimulationFactory<Cell>" << std::endl;
+//    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
 
-    std::vector<std::string> simulatorTypes;
-    simulatorTypes << "CudaSimulator";
-    fab.parameters()["Simulator"] = SimulationParametersHelpers::DiscreteSet<std::string>(
-        simulatorTypes);
+//    std::vector<std::string> simulatorTypes;
+//    simulatorTypes << "CudaSimulator";
+//    fab.parameters()["Simulator"] = SimulationParametersHelpers::DiscreteSet<std::string>(
+//        simulatorTypes);
 
-    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n\n";
+//    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n\n";
     std::cout << "fab: " << fab.parameters() << "\n";
 
     std::vector<double> stepWidths(fab.parameters().size(), 1);
     std::vector<double> minStepwidths(fab.parameters().size(), 1);
-
-    PatternOptimizer optimizer(fab.parameters(), stepWidths, minStepwidths);
-    // optimizer(10, fab);
+    std::cout<< "PatternPptimizer wird angelegt" << std::endl;
+    std::cout << "bevor fab()"<<std::endl;
+    double result = fab(fab.parameters());
+    std::cout<< "after fab() result: " << result << std::endl;
+    //PatternOptimizer optimizer(fab.parameters());
+    //std::cout << "optimizer(3,fab)"<< std::endl;
+    //optimizer(3, fab);
     std::cout << "-----------------\n";
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
