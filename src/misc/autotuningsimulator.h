@@ -29,14 +29,14 @@ public:
         double fitness;
     };
     
-    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > simFactory_ptr;
-    typedef boost::shared_ptr<Result> result_ptr;
+    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
+    typedef boost::shared_ptr<Result> ResultPtr;
  
     struct Simulation {
-        result_ptr result;
-        simFactory_ptr simulationFactory;
+        ResultPtr result;
+        SimFactoryPtr simulationFactory;
     };
-        typedef typename std::map<const std::string, Simulation>::iterator iter_type;
+    typedef typename std::map<const std::string, Simulation>::iterator IterType;
 
     template<typename INITIALIZER>
     AutoTuningSimulator(INITIALIZER initializer):
@@ -45,22 +45,22 @@ public:
         // FIXME simulation faktories erzeugen, wie soll herausgefunden werden welche verfügbar sind oder welche verwendet werden sollen...
 
 
-        simFactory_ptr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
-        result_ptr sr_p(new Result("SerialSimulation", ss_p->parameters()));
+        SimFactoryPtr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
+        ResultPtr sr_p(new Result("SerialSimulation", ss_p->parameters()));
         Simulation ss_simulation;
         ss_simulation.result = sr_p;
         ss_simulation.simulationFactory = ss_p;
         simulations["SerialSimulation"] = ss_simulation;
 
-        simFactory_ptr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-        result_ptr cbs_result(new Result("CacheBlockingSimulation", cbs_p->parameters()));
+        SimFactoryPtr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+        ResultPtr cbs_result(new Result("CacheBlockingSimulation", cbs_p->parameters()));
         Simulation cbs_simulation;
         cbs_simulation.result = cbs_result;
         cbs_simulation.simulationFactory = cbs_p;
         simulations["CacheBlockingSimulation"] = cbs_simulation;
 #ifdef WITH_CUDA
-        simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
-        result_ptr cudar_p(new Result("CudaSimulation", cudas_p->parameters()));
+        SimFactoryPtr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+        ResultPtr cudar_p(new Result("CudaSimulation", cudas_p->parameters()));
         Simulation cudas_simulation;
         simulations["CudaSimulation"].result = cudar_p;
         simulations["CudaSimulation"].simulationFactory = cudas_p;
@@ -77,16 +77,16 @@ public:
         std::string simName = newResult.nameOfSimulation;
         if (simName == "SerialSimulation")
         {
-            simFactory_ptr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
-            result_ptr cbr_p(new Result(newResult));
+            SimFactoryPtr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
+            ResultPtr cbr_p(new Result(newResult));
             simulations[name].result = cbr_p;
             simulations[name].simulationFactory = ss_p;
             return;
         }
         if (simName == "CacheBlockingSimulation")
         {
-            simFactory_ptr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-            result_ptr cbr_p(new Result(newResult));
+            SimFactoryPtr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+            ResultPtr cbr_p(new Result(newResult));
             simulations[name].result = cbr_p;
             simulations[name].simulationFactory = cbs_p;
             return;
@@ -94,8 +94,8 @@ public:
 #ifdef WITH_CUDA
         if (simName == "CudaSimulation")
         {
-            simFactory_ptr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
-            result_ptr cbr_p(new Result(newResult));
+            SimFactoryPtr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+            ResultPtr cbr_p(new Result(newResult));
             simulations[name].result = cbr_p;
             simulations[name].simulationFactory = cudas_p;
         }
@@ -137,7 +137,7 @@ public:
 
     virtual void run()
     {
-        for (iter_type iter = simulations.begin(); iter != simulations.end(); iter++)
+        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
         {
             LOG(Logger::DBG, iter->first)
             OPTIMIZER_TYPE optimizer(iter->second.result->parameters);
@@ -154,7 +154,7 @@ public:
 
 private:
     std::map<const std::string, Simulation> simulations;
-    std::vector<result_ptr> results;
+    std::vector<ResultPtr> results;
     unsigned simulationSteps;
 
     bool isInMap(const std::string name)const

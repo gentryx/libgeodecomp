@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 
 
-#define WITH_CUDA
+//#define WITH_CUDA
 
 #include <libgeodecomp/io/clonableinitializerwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
