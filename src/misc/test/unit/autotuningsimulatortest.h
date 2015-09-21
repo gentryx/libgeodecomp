@@ -173,9 +173,6 @@ public:
         LOG(Logger::INFO, "SimulationFactoryTest::testBasic")
         for (int i =1;i<=2;i++)
         {
-#ifdef WIHT_CUDA
-            std::cout << "Cuda is active" << std::endl;
-#endif
             Simulator<SimFabTestCell> *sim = fab->operator()();
             sim->run();
             delete sim;
