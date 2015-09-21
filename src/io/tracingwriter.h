@@ -31,7 +31,6 @@ public:
     template<typename ARCHIVE, typename CELL_TYPE2>
     friend void hpx::serialization::serialize(ARCHIVE&, TracingWriter<CELL_TYPE2>&, const unsigned);
 #endif
-    friend class boost::serialization::access;
 
     using Writer<CELL_TYPE>::NANO_STEPS;
 
