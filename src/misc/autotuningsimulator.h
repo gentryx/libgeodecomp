@@ -8,7 +8,6 @@
 #include <libgeodecomp/io/logger.h>
 #include <cfloat>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp{
 
@@ -58,7 +57,7 @@ public:
         cbs_simulation.result = cbs_result;
         cbs_simulation.simulationFactory = cbs_p;
         simulations["CacheBlockingSimulation"] = cbs_simulation;
-#ifdef WITH_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
         SimFactoryPtr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
         ResultPtr cudar_p(new Result("CudaSimulation", cudas_p->parameters()));
         Simulation cudas_simulation;

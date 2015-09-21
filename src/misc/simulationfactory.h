@@ -1,24 +1,19 @@
+// vim: noai:ts=4:sw=4:expandtab
 #ifndef LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
 #define LIBGEODECOMP_MISC_SIMULATIONFACTORY_H
-
-
-//#define WITH_CUDA
 
 #include <libgeodecomp/io/clonableinitializerwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
-// There are problems if cuda is not installed on the system
-// FIXME it ned to be checked by the preprocessor
-#ifdef WITH_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 #include <libgeodecomp/parallelization/cudasimulator.h>
 #endif
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/logger.h>
 
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
 namespace LibGeoDecomp {
 
 /**
@@ -163,7 +158,7 @@ protected:
 };
 
 // FIXME: everything in this file which is depends on CUDA is not tested!
-#ifdef WITH_CUDA
+#ifdef LIBGEODECOMP_WITH_CUDA
 template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
 {
@@ -196,7 +191,7 @@ protected:
 
     }
 };
-#endif
+#endif // LIBGEODECOMP_WITH_CUDA
 }//namespace LibGeoDecomp
 
 #endif
