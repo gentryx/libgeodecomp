@@ -1,5 +1,5 @@
-#ifndef NAMESPACE_GUARDTYPEMAPS_H
-#define NAMESPACE_GUARDTYPEMAPS_H
+#ifndef NAMESPACE_GUARD_H
+#define NAMESPACE_GUARD_H
 
 #include <mpi.h>
 #include <complex>

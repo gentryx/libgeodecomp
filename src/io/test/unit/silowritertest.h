@@ -5,6 +5,7 @@
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/storage/multicontainercell.h>
 #include <libgeodecomp/storage/selector.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 
 #ifdef LIBGEODECOMP_WITH_SILO
 #ifdef LIBGEODECOMP_WITH_VISIT

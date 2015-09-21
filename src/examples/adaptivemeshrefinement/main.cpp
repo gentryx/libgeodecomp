@@ -1,7 +1,5 @@
 #include <libgeodecomp.h>
-
 using namespace LibGeoDecomp;
-
 
 /**
  * A simple Adaptive Mesh Refinement (AMR) demo with automatic grid
@@ -547,8 +545,8 @@ class AMRInitializer : public SimpleInitializer<AMRDiffusionCell<> >
 {
 public:
     explicit AMRInitializer(
-        const Coord<2> dim,
-        const unsigned steps) :
+        const Coord<2> dim = Coord<2>(),
+        const unsigned steps = 0) :
         SimpleInitializer<AMRDiffusionCell<> >(dim, steps)
     {}
 
@@ -615,6 +613,7 @@ public:
             ret->set(*i, cell);
         }
     }
+
 };
 
 // class FooBar

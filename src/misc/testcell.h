@@ -113,6 +113,7 @@ class TestCell
 public:
     friend class Typemaps;
     friend class TestCellTest;
+    friend class HPXSerialization;
 
     static const int DIMENSIONS = DIM;
     static const unsigned NANO_STEPS = 27;

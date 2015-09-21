@@ -1,10 +1,26 @@
 #ifndef LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 #define LIBGEODECOMP_LOADBALANCER_TRACINGBALANCER_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
-
 #include <boost/shared_ptr.hpp>
 #include <iostream>
+
+#ifdef LIBGEODECOMP_WITH_HPX
+
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
+
+namespace LibGeoDecomp {
+class TracingBalancer;
+}
+
+namespace hpx {
+namespace serialization {
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version);
+}
+}
+#endif
 
 namespace LibGeoDecomp {
 
@@ -15,10 +31,14 @@ namespace LibGeoDecomp {
 class TracingBalancer : public LoadBalancer
 {
 public:
-    friend class Serialization;
+#ifdef LIBGEODECOMP_WITH_HPX
+    template<typename ARCHIVE>
+    friend void hpx::serialization::serialize(
+        ARCHIVE& archive, TracingBalancer& object, const unsigned version);
+#endif
 
     explicit TracingBalancer(
-        LoadBalancer *balancer,
+        LoadBalancer *balancer = 0,
         std::ostream& stream = std::cout) :
         balancer(balancer),
         stream(stream)
@@ -41,18 +61,23 @@ private:
 
 }
 
-namespace boost {
+#ifdef LIBGEODECOMP_WITH_HPX
+
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC(LibGeoDecomp::TracingBalancer);
+
+namespace hpx {
 namespace serialization {
 
-template<class Archive, typename CELL_TYPE>
-inline void load_construct_data(
-    Archive& archive, LibGeoDecomp::TracingBalancer *object, const unsigned version)
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version)
 {
-    ::new(object)LibGeoDecomp::TracingBalancer(0);
-    serialize(archive, *object, version);
+    archive & hpx::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
+    archive & object.balancer;
 }
 
 }
 }
+
+#endif
 
 #endif

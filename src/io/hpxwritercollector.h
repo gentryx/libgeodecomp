@@ -12,7 +12,7 @@ class HpxWriterCollector;
 }
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
+#ifdef LIBGEODECOMP_WITH_HPX_XXX
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/hpxwritersink.h>
@@ -119,7 +119,10 @@ template<typename CELL_TYPE>
 class HpxWriterCollector : public Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >
 {
 public:
-    friend class Serialization;
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(HpxWriterCollector);
+
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class boost::serialization::access;
 
     typedef typename APITraits::SelectTopology<CELL_TYPE>::Value Topology;
@@ -134,7 +137,7 @@ public:
 
     typedef HpxWriterSink<CELL_TYPE> SinkType;
 
-    explicit HpxWriterCollector(const SinkType& sink = SinkType()) :
+    explicit HpxWriterCollector(const SinkType& sink) :
         Clonable<ParallelWriter<CELL_TYPE>, HpxWriterCollector<CELL_TYPE> >(
             "",
             sink.getPeriod()),

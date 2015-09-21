@@ -1,11 +1,11 @@
 #include<libgeodecomp/config.h>
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
-#ifndef LIBGEODECOMP_SERIALIZATION_H
-#define LIBGEODECOMP_SERIALIZATION_H
+#ifndef LIBGEODECOMP_BOOSTSERIALIZATION_H
+#define LIBGEODECOMP_BOOSTSERIALIZATION_H
 
 #include <libgeodecomp/storage/arrayfilter.h>
 #include <libgeodecomp/misc/chronometer.h>
-#include <libgeodecomp/misc/clonable.h>
+#include <libgeodecomp/misc/color.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
 #include <libgeodecomp/geometry/coord.h>
@@ -18,26 +18,26 @@
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
 #include <libgeodecomp/geometry/floatcoord.h>
-#include <libgeodecomp/io/hpxwritercollector.h>
 #include <libgeodecomp/io/initializer.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/misc/nonpodtestcell.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
+#include <libgeodecomp/misc/palette.h>
 #include <libgeodecomp/io/parallelwriter.h>
+#include <libgeodecomp/misc/quickpalette.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/io/serialbovwriter.h>
-#include <libgeodecomp/io/silowriter.h>
 #include <libgeodecomp/storage/simplearrayfilter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
 #include <libgeodecomp/storage/simplefilter.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/steerer.h>
 #include <libgeodecomp/geometry/streak.h>
-#include <libgeodecomp/loadbalancer/tracingbalancer.h>
-#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/io/writer.h>
 
 namespace LibGeoDecomp {
-class Serialization
+class BoostSerialization
 {
 public:
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
@@ -54,11 +54,11 @@ public:
         archive & object.totalTimes;
     }
 
-    template<typename ARCHIVE, typename BASE, typename IMPLEMENTATION>
+    template<typename ARCHIVE>
     inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned /*version*/)
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Color& object, const unsigned /*version*/)
     {
-        archive & boost::serialization::base_object<BASE >(object);
+        archive & object.rgb;
     }
 
     template<typename ARCHIVE>
@@ -146,14 +146,6 @@ public:
         archive & object.c;
     }
 
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, HpxWriterCollector<CELL_TYPE > > >(object);
-        archive & object.sink;
-    }
-
     template<typename ARCHIVE, typename CELL>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const unsigned /*version*/)
@@ -185,6 +177,13 @@ public:
         archive & object.newLoadWeight;
     }
 
+    template<typename ARCHIVE, typename VALUE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::Palette<VALUE>& object, const unsigned /*version*/)
+    {
+        archive & object.colors;
+    }
+
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned /*version*/)
@@ -192,6 +191,18 @@ public:
         archive & object.period;
         archive & object.prefix;
         archive & object.region;
+    }
+
+    template<typename ARCHIVE, typename VALUE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, const unsigned /*version*/)
+    {
+        archive & object.mark0;
+        archive & object.mark1;
+        archive & object.mark2;
+        archive & object.mark3;
+        archive & object.mark4;
+        archive & object.mult;
     }
 
     template<typename ARCHIVE, int DIM>
@@ -213,32 +224,26 @@ public:
         archive & object.selector;
     }
 
-    template<typename ARCHIVE, typename CELL>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::SiloWriter<CELL>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL >, SiloWriter<CELL > > >(object);
-        archive & object.cellSelectors;
-        archive & object.coords;
-        archive & object.databaseType;
-        archive & object.elementTypes;
-        archive & object.nodeList;
-        archive & object.pointMeshLabel;
-        archive & object.pointMeshSelectors;
-        archive & object.region;
-        archive & object.regularGridLabel;
-        archive & object.shapeCounts;
-        archive & object.shapeSizes;
-        archive & object.unstructuredGridSelectors;
-        archive & object.unstructuredMeshLabel;
-        archive & object.variableData;
-    }
-
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned /*version*/)
     {
         archive & boost::serialization::base_object<LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY > >(object);
+    }
+
+    template<typename ARCHIVE, typename CELL_TYPE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned /*version*/)
+    {
+        archive & object.cellToColorSelector;
+    }
+
+    template<typename ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
+    inline
+    static void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>& object, const unsigned /*version*/)
+    {
+        archive & boost::serialization::base_object<LibGeoDecomp::Filter<CELL, MEMBER, Color > >(object);
+        archive & object.palette;
     }
 
     template<typename ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
@@ -273,28 +278,6 @@ public:
         archive & object.origin;
     }
 
-    template<typename ARCHIVE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::LoadBalancer >(object);
-        archive & object.balancer;
-        archive & object.stream;
-    }
-
-    template<typename ARCHIVE, typename CELL_TYPE>
-    inline
-    static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned /*version*/)
-    {
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<ParallelWriter<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
-        archive & boost::serialization::base_object<LibGeoDecomp::Clonable<Writer<CELL_TYPE >, TracingWriter<CELL_TYPE > > >(object);
-        archive & object.lastStep;
-        archive & object.maxSteps;
-        archive & object.outputRank;
-        archive & object.startTime;
-        archive & object.stream;
-    }
-
     template<typename ARCHIVE, typename CELL_TYPE>
     inline
     static void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned /*version*/)
@@ -314,388 +297,193 @@ using namespace LibGeoDecomp;
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
-template<class ARCHIVE, typename BASE, typename IMPLEMENTATION>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned version)
+template<class ARCHIVE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Color& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<1 >& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<2 >& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<3 >& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::CoordBox<DIM>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FilterBase<CELL>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename T, int SIZE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FixedArray<T, SIZE>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<1 >& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<2 >& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::LoadBalancer& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::NonPoDTestCell& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename VALUE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Palette<VALUE>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename VALUE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::QuickPalette<VALUE>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SiloWriter<CELL>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL_TYPE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotter<CELL_TYPE>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
+}
+
+template<class ARCHIVE, typename CELL, typename MEMBER, typename PALETTE>
+void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleCellPlotterHelpers::CellToColor<CELL, MEMBER, PALETTE>& object, const unsigned version)
+{
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleInitializer<CELL_TYPE>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, int DIM>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 template<class ARCHIVE, typename CELL_TYPE>
 void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned version)
 {
-    Serialization::serialize(archive, object, version);
-}
-
-
-}
-}
-
-namespace hpx {
-namespace serialization {
-
-using namespace LibGeoDecomp;
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
-void serialize(ARCHIVE& archive, LibGeoDecomp::ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Chronometer& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename BASE, typename IMPLEMENTATION>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Clonable<BASE, IMPLEMENTATION>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<1 >& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<2 >& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Coord<3 >& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, int DIM>
-void serialize(ARCHIVE& archive, LibGeoDecomp::CoordBox<DIM>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
-void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::DefaultFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Filter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::FilterBase<CELL>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename T, int SIZE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::FixedArray<T, SIZE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<1 >& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<2 >& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::FloatCoord<3 >& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::HpxWriterCollector<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Initializer<CELL>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::LoadBalancer& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::NonPoDTestCell& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::OozeBalancer& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::ParallelWriter<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, int DIM>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Region<DIM>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SerialBOVWriter<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL, typename MEMBER, typename EXTERNAL>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleFilter<CELL, MEMBER, EXTERNAL>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::SimpleInitializer<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Steerer<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, int DIM>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Streak<DIM>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::TracingBalancer& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
-}
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, LibGeoDecomp::Writer<CELL_TYPE>& object, const unsigned version)
-{
-    Serialization::serialize(archive, object, version);
+    BoostSerialization::serialize(archive, object, version);
 }
 
 

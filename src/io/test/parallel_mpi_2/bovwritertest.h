@@ -1,3 +1,4 @@
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/zcurvepartition.h>
 #include <libgeodecomp/io/bovwriter.h>
 #include <libgeodecomp/io/testinitializer.h>

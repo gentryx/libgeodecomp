@@ -1,21 +1,34 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classCoord_3_011_01_4" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classCoord_3_011_01_4" kind="class" language="C++" prot="public">
     <compoundname>Coord&lt; 1 &gt;</compoundname>
     <includes refid="coord_8h" local="no">coord.h</includes>
       <sectiondef kind="friend">
-      <memberdef kind="friend" id="classCoord_3_011_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classCoord_3_011_01_4_1ae209e8b29da963ccf420282f01b5e061" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
-        <definition>friend class Serialization</definition>
+        <definition>friend class BoostSerialization</definition>
         <argsstring></argsstring>
-        <name>Serialization</name>
+        <name>BoostSerialization</name>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="9" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classCoord_3_011_01_4_1a02113963f83e2a30e214e24048de1be8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class HPXSerialization</definition>
+        <argsstring></argsstring>
+        <name>HPXSerialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-attrib">
@@ -30,16 +43,17 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="13" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="7" bodyend="12"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coord.h" bodystart="7" bodyend="14"/>
     <listofallmembers>
-      <member refid="classCoord_3_011_01_4_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Coord&lt; 1 &gt;</scope><name>Serialization</name></member>
+      <member refid="classCoord_3_011_01_4_1ae209e8b29da963ccf420282f01b5e061" prot="public" virt="non-virtual"><scope>Coord&lt; 1 &gt;</scope><name>BoostSerialization</name></member>
+      <member refid="classCoord_3_011_01_4_1a02113963f83e2a30e214e24048de1be8" prot="public" virt="non-virtual"><scope>Coord&lt; 1 &gt;</scope><name>HPXSerialization</name></member>
       <member refid="classCoord_3_011_01_4_1acee005d94f907f13449ef45532214750" prot="public" virt="non-virtual"><scope>Coord&lt; 1 &gt;</scope><name>x</name></member>
     </listofallmembers>
   </compounddef>

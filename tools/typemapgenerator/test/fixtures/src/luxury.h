@@ -3,8 +3,8 @@
 
 class Luxury
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
     char sort;
 };
 

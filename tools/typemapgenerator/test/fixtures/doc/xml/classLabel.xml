@@ -1,21 +1,34 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classLabel" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classLabel" kind="class" language="C++" prot="public">
     <compoundname>Label</compoundname>
     <includes refid="label_8h" local="no">label.h</includes>
       <sectiondef kind="friend">
-      <memberdef kind="friend" id="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classLabel_1ae209e8b29da963ccf420282f01b5e061" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
-        <definition>friend class Serialization</definition>
+        <definition>friend class BoostSerialization</definition>
         <argsstring></argsstring>
-        <name>Serialization</name>
+        <name>BoostSerialization</name>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="8" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="9" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="friend" id="classLabel_1a02113963f83e2a30e214e24048de1be8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend class</type>
+        <definition>friend class HPXSerialization</definition>
+        <argsstring></argsstring>
+        <name>HPXSerialization</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="10" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-attrib">
@@ -30,17 +43,18 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="10" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="12" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="6" bodyend="11"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" line="7" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/label.h" bodystart="6" bodyend="13"/>
     <listofallmembers>
+      <member refid="classLabel_1ae209e8b29da963ccf420282f01b5e061" prot="public" virt="non-virtual"><scope>Label</scope><name>BoostSerialization</name></member>
+      <member refid="classLabel_1a02113963f83e2a30e214e24048de1be8" prot="public" virt="non-virtual"><scope>Label</scope><name>HPXSerialization</name></member>
       <member refid="classLabel_1a645ed74c7024ac515f72d604cabadafe" prot="public" virt="non-virtual"><scope>Label</scope><name>name</name></member>
-      <member refid="classLabel_1a36ab6ccf31a4ecabebe771ed2a806419" prot="private" virt="non-virtual"><scope>Label</scope><name>Serialization</name></member>
     </listofallmembers>
   </compounddef>
 </doxygen>

@@ -1,10 +1,12 @@
 #include <iostream>
 #include <stdexcept>
+#include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/loadbalancer/oozebalancer.h>
 
 namespace LibGeoDecomp {
 
-OozeBalancer::OozeBalancer(double newLoadWeight) : newLoadWeight(newLoadWeight)
+OozeBalancer::OozeBalancer(double newLoadWeight) :
+    newLoadWeight(newLoadWeight)
 {
     if (newLoadWeight < 0 || newLoadWeight > 1) {
         throw std::invalid_argument(
@@ -21,8 +23,9 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
     // calculate approximate load share we want on each node
     double targetLoadPerNode = sum(relativeLoads) / n;
 
-    if (targetLoadPerNode == 0)
+    if (targetLoadPerNode == 0) {
         return LoadVec(n, sum(weights)/ (double)n);
+    }
 
     LoadVec ret(n, 0);
     LoadVec loadPerItem;
@@ -40,9 +43,12 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
     // targeted share...
     for (unsigned nodeC = 0; nodeC < n - 1; nodeC++) {
         double remLoad = targetLoadPerNode;
+
         for (unsigned itemC = 0; itemC < loadPerItem.size(); itemC++) {
             // skip already assigned items
-            if (remFractPerItem[itemC] == 0) continue;
+            if (remFractPerItem[itemC] == 0) {
+                continue;
+            }
 
             // can we assign the whole remainder?
             double l = remFractPerItem[itemC] * loadPerItem[itemC];
@@ -58,7 +64,9 @@ OozeBalancer::LoadVec OozeBalancer::expectedOptimalDistribution(
             }
 
             // break if node filled up
-            if (remLoad == 0) break;
+            if (remLoad == 0) {
+                break;
+            }
         }
     }
 
@@ -78,15 +86,15 @@ OozeBalancer::WeightVec OozeBalancer::balance(
 
     WeightVec ret = equalize(newLoads);
     if (sum(weights) != sum(ret)) {
-        std::cerr << "OozeBalancer::balance() failed\n"
-                  << "  weights.sum() = " << sum(weights) << "\n"
-                  << "  ret.sum() = " << sum(ret) << "\n"
-                  << "  expectedOptimal.sum() = " << sum(expectedOptimal) << "\n"
-                  << "  weights = " << weights << "\n"
-                  << "  relativeLoads = " << relativeLoads << "\n"
-                  << "  expectedOptimal = " << expectedOptimal << "\n"
-                  << "  newLoads = " << newLoads << "\n"
-                  << "  ret = " << ret << "\n";
+        LOG(ERROR, "OozeBalancer::balance() failed\n"
+            << "  weights.sum() = " << sum(weights) << "\n"
+            << "  ret.sum() = " << sum(ret) << "\n"
+            << "  expectedOptimal.sum() = " << sum(expectedOptimal) << "\n"
+            << "  weights = " << weights << "\n"
+            << "  relativeLoads = " << relativeLoads << "\n"
+            << "  expectedOptimal = " << expectedOptimal << "\n"
+            << "  newLoads = " << newLoads << "\n"
+            << "  ret = " << ret << "\n");
         throw std::logic_error("ret.sum does not match weights.sum");
     }
     return ret;
@@ -96,7 +104,10 @@ OozeBalancer::WeightVec OozeBalancer::balance(
 inline double frac(const double& d)
 {
     double f = d - (long long)d;
-    if (f < 0) f = -f;
+    if (f < 0) {
+        f = -f;
+    }
+
     return f;
 }
 
@@ -119,8 +130,9 @@ OozeBalancer::WeightVec OozeBalancer::equalize(const LoadVec& loads)
     }
 
     ret.back() = (long)loads.back();
-    if (frac(loads.back())  > (0.5 - balance))
+    if (frac(loads.back())  > (0.5 - balance)) {
         ret.back()++;
+    }
 
     return ret;
 }
@@ -131,9 +143,11 @@ OozeBalancer::LoadVec OozeBalancer::linearCombo(
     const OozeBalancer::LoadVec& newLoads)
 {
     OozeBalancer::LoadVec ret(newLoads.size());
-    for (unsigned i = 0; i < ret.size(); i++)
+    for (unsigned i = 0; i < ret.size(); i++) {
         ret[i] = newLoads[i] * newLoadWeight +
             oldLoads[i] * (1 - newLoadWeight);
+    }
+
     return ret;
 }
 

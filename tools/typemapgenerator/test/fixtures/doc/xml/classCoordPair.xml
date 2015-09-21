@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classCoordPair" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classCoordPair" kind="class" language="C++" prot="public">
     <compoundname>CoordPair</compoundname>
     <includes refid="pair_8h" local="no">pair.h</includes>
     <templateparamlist>
@@ -16,7 +16,7 @@
       </param>
     </templateparamlist>
       <sectiondef kind="friend">
-      <memberdef kind="friend" id="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
         <definition>friend class Typemaps</definition>
         <argsstring></argsstring>
@@ -27,7 +27,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="9" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="10" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-attrib">
@@ -42,7 +42,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="11" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" prot="public" static="no" mutable="no">
         <type>B</type>
@@ -55,7 +55,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="12" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="12" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -80,11 +80,11 @@
         </childnode>
       </node>
     </collaborationgraph>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="7" bodyend="13"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" line="8" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h" bodystart="7" bodyend="13"/>
     <listofallmembers>
       <member refid="classCoordPair_1af50cd114d307e8e7b8e8c921a42f836c" prot="public" virt="non-virtual"><scope>CoordPair</scope><name>a</name></member>
       <member refid="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" prot="public" virt="non-virtual"><scope>CoordPair</scope><name>b</name></member>
-      <member refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>CoordPair</scope><name>Typemaps</name></member>
+      <member refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="public" virt="non-virtual"><scope>CoordPair</scope><name>Typemaps</name></member>
     </listofallmembers>
   </compounddef>
 </doxygen>

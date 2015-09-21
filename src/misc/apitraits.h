@@ -470,14 +470,20 @@ public:
     class SelectSpeedGuide
     {
     public:
-        typedef FalseType Value;
+        static double value()
+        {
+            return 1.0;
+        }
     };
 
     template<typename CELL>
     class SelectSpeedGuide<CELL, typename CELL::API::SupportsSpeed>
     {
     public:
-        typedef TrueType Value;
+        static double value()
+        {
+            return CELL::cellSpeed();
+        }
     };
 
     /**

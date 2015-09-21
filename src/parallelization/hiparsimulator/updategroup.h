@@ -26,17 +26,18 @@ public:
     friend class UpdateGroupPrototypeTest;
     friend class UpdateGroupTest;
 
-    typedef typename Stepper<CELL_TYPE>::Topology Topology;
+    typedef Stepper<CELL_TYPE> StepperType;
+    typedef typename StepperType::Topology Topology;
     typedef typename APITraits::SelectSoA<CELL_TYPE>::Value SupportsSoA;
     typedef typename GridTypeSelector<CELL_TYPE, Topology, true, SupportsSoA>::Value GridType;
-    typedef typename Stepper<CELL_TYPE>::PatchType PatchType;
-    typedef typename Stepper<CELL_TYPE>::PatchProviderPtr PatchProviderPtr;
-    typedef typename Stepper<CELL_TYPE>::PatchAccepterPtr PatchAccepterPtr;
+    typedef typename StepperType::PatchType PatchType;
+    typedef typename StepperType::PatchProviderPtr PatchProviderPtr;
+    typedef typename StepperType::PatchAccepterPtr PatchAccepterPtr;
     typedef boost::shared_ptr<typename PatchLink<GridType>::Link> PatchLinkPtr;
     typedef PartitionManager<Topology> PartitionManagerType;
     typedef typename PartitionManagerType::RegionVecMap RegionVecMap;
-    typedef typename Stepper<CELL_TYPE>::PatchAccepterVec PatchAccepterVec;
-    typedef typename Stepper<CELL_TYPE>::PatchProviderVec PatchProviderVec;
+    typedef typename StepperType::PatchAccepterVec PatchAccepterVec;
+    typedef typename StepperType::PatchProviderVec PatchProviderVec;
 
     const static int DIM = Topology::DIM;
 
@@ -63,20 +64,48 @@ public:
             partition,
             rank,
             ghostZoneWidth);
-        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         CoordBox<DIM> ownBoundingBox(partitionManager->ownRegion().boundingBox());
+
+        std::vector<CoordBox<DIM> > boundingBoxes(mpiLayer.size());
         mpiLayer.allGather(ownBoundingBox, &boundingBoxes);
         partitionManager->resetGhostZones(boundingBoxes);
+
         long firstSyncPoint =
             initializer->startStep() * APITraits::SelectNanoSteps<CELL_TYPE>::VALUE +
             ghostZoneWidth;
+
+        // For conformance with the HPX UpdateGroup, we're creating
+        // the PatchProviders early:
+        PatchProviderVec patchLinkProviders;
+        const RegionVecMap& map1 = partitionManager->getOuterGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = map1.begin(); i != map1.end(); ++i) {
+            if (!i->second.back().empty()) {
+                boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
+                    new typename PatchLink<GridType>::Provider(
+                        i->second.back(),
+                        i->first,
+                        MPILayer::PATCH_LINK,
+                        SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
+                        mpiLayer.communicator()));
+                patchLinkProviders << link;
+                patchLinks << link;
+
+                link->charge(
+                    firstSyncPoint,
+                    PatchProvider<GridType>::infinity(),
+                    ghostZoneWidth);
+
+                link->setRegion(partitionManager->ownRegion());
+            }
+        }
+
 
         // we have to hand over a list of all ghostzone senders as the
         // stepper will perform an initial update of the ghostzones
         // upon creation and we have to send those over to our neighbors.
         PatchAccepterVec ghostZoneAccepterLinks;
-        RegionVecMap map = partitionManager->getInnerGhostZoneFragments();
-        for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
+        const RegionVecMap& map2 = partitionManager->getInnerGhostZoneFragments();
+        for (typename RegionVecMap::const_iterator i = map2.begin(); i != map2.end(); ++i) {
             if (!i->second.back().empty()) {
                 boost::shared_ptr<typename PatchLink<GridType>::Accepter> link(
                     new typename PatchLink<GridType>::Accepter(
@@ -105,52 +134,23 @@ public:
             patchAcceptersInner[i]->setRegion(partitionManager->ownRegion());
         }
 
+        // notify all PatchProviders of the process' region:
+        for (std::size_t i = 0; i < patchProvidersGhost.size(); ++i) {
+            patchProvidersGhost[i]->setRegion(partitionManager->ownRegion());
+        }
+        for (std::size_t i = 0; i < patchProvidersInner.size(); ++i) {
+            patchProvidersInner[i]->setRegion(partitionManager->ownRegion());
+        }
+
         stepper.reset(new STEPPER(
                           partitionManager,
                           this->initializer,
                           patchAcceptersGhost + ghostZoneAccepterLinks,
-                          patchAcceptersInner));
-
-        // the ghostzone receivers may be safely added after
-        // initialization as they're only really needed when the next
-        // ghostzone generation is being received.
-        map = partitionManager->getOuterGhostZoneFragments();
-        for (typename RegionVecMap::iterator i = map.begin(); i != map.end(); ++i) {
-            if (!i->second.back().empty()) {
-                boost::shared_ptr<typename PatchLink<GridType>::Provider> link(
-                    new typename PatchLink<GridType>::Provider(
-                        i->second.back(),
-                        i->first,
-                        MPILayer::PATCH_LINK,
-                        SerializationBuffer<CELL_TYPE>::cellMPIDataType(),
-                        mpiLayer.communicator()));
-                addPatchProvider(link, Stepper<CELL_TYPE>::GHOST);
-                patchLinks << link;
-
-                link->charge(
-                    firstSyncPoint,
-                    PatchProvider<GridType>::infinity(),
-                    ghostZoneWidth);
-
-                link->setRegion(partitionManager->ownRegion());
-            }
-        }
-
-        // add external PatchProviders last to allow them to override
-        // the local ghost zone providers (a.k.a. PatchLink::Source).
-        for (typename PatchProviderVec::iterator i = patchProvidersGhost.begin();
-             i != patchProvidersGhost.end();
-             ++i) {
-            (*i)->setRegion(partitionManager->ownRegion());
-            addPatchProvider(*i, Stepper<CELL_TYPE>::GHOST);
-        }
-
-        for (typename PatchProviderVec::iterator i = patchProvidersInner.begin();
-             i != patchProvidersInner.end();
-             ++i) {
-            (*i)->setRegion(partitionManager->ownRegion());
-            addPatchProvider(*i, Stepper<CELL_TYPE>::INNER_SET);
-        }
+                          patchAcceptersInner,
+                          // add external PatchProviders last to allow them to override
+                          // the local ghost zone providers (a.k.a. PatchLink::Source).
+                          patchLinkProviders + patchProvidersGhost,
+                          patchProvidersInner));
     }
 
     virtual ~UpdateGroup()
@@ -222,7 +222,7 @@ public:
     }
 
 private:
-    boost::shared_ptr<Stepper<CELL_TYPE> > stepper;
+    boost::shared_ptr<StepperType> stepper;
     boost::shared_ptr<PartitionManagerType> partitionManager;
     std::vector<PatchLinkPtr> patchLinks;
     unsigned ghostZoneWidth;

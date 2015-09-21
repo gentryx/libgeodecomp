@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_HPXWRITERSINK_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
+#ifdef LIBGEODECOMP_WITH_HPX_XXX
 
 #include <libgeodecomp/io/hpxwritersinkserver.h>
 #include <libgeodecomp/storage/gridvecconv.h>
@@ -61,9 +61,6 @@ public:
             std::size_t
         >
         ComponentParallelWriterCreateActionType;
-
-    HpxWriterSink()
-    {}
 
     HpxWriterSink(const std::string& name) :
         thisId(hpx::naming::invalid_id)

@@ -1,7 +1,9 @@
 #include <libgeodecomp/communication/mpilayer.h>
-#include <libgeodecomp/io/selector.h>
+#include <libgeodecomp/config.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
+#include <libgeodecomp/storage/selector.h>
 #include <libgeodecomp/storage/soagrid.h>
 
 using namespace LibGeoDecomp;
@@ -19,9 +21,6 @@ public:
     int i;
 };
 
-
-MPI_Datatype FooCell::MPIDataType = MPI_DATATYPE_NULL;
-
 class SelectorTest : public CxxTest::TestSuite
 {
 public:
@@ -30,19 +29,14 @@ public:
     {
         MPI_Datatype mpiType;
 
-        mpiType = SelectorHelpers::GetMPIDatatype<int>()();
+        mpiType = Selector<int>().mpiDatatype();
         TS_ASSERT_EQUALS(mpiType, MPI_INT);
 
-        mpiType = SelectorHelpers::GetMPIDatatype<char>()();
+        mpiType = Selector<char>().mpiDatatype();
         TS_ASSERT_EQUALS(mpiType, MPI_CHAR);
 
-        mpiType = SelectorHelpers::GetMPIDatatype<double>()();
+        mpiType = Selector<double>().mpiDatatype();
         TS_ASSERT_EQUALS(mpiType, MPI_DOUBLE);
-
-        mpiType = SelectorHelpers::GetMPIDatatype<FooCell>()();
-        TS_ASSERT_EQUALS(mpiType, FooCell::MPIDataType);
-
-        TS_ASSERT_THROWS(SelectorHelpers::GetMPIDatatype<SelectorTest>()(), std::invalid_argument);
 
         Selector<FooCell> selector1(&FooCell::d, "d");
         Selector<FooCell> selector2(&FooCell::c, "c");

@@ -5,15 +5,12 @@
 #include <libgeodecomp/geometry/partitions/spacefillingcurve.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
-#include <boost/assign/std/vector.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
-using namespace boost::assign;
 
 namespace LibGeoDecomp {
 

@@ -7,6 +7,10 @@
 #include <libgeodecomp/storage/gridbase.h>
 #include <libgeodecomp/geometry/adjacency.h>
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/serialize.hpp>
+#endif
+
 namespace LibGeoDecomp {
 
 /**
@@ -20,7 +24,9 @@ template<typename CELL>
 class Initializer
 {
 public:
-    friend class Serialization;
+    friend class PolymorphicSerialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
     typedef CELL Cell;
@@ -96,11 +102,10 @@ public:
         Random::seed(index);
     }
 
-    Adjacency getAdjacency() const
+    virtual Adjacency getAdjacency() const
     {
         return Adjacency();
     }
-
 };
 
 }

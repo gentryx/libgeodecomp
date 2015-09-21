@@ -93,6 +93,7 @@ private:
     {
         MPI_File file = mpiio.openFileForWrite(
             filename(step, "bov"), comm);
+        // fixme: deduce from stepFinished()
         int rank;
         MPI_Comm_rank(comm, &rank);
 

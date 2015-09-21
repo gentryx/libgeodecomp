@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/io/qtwidgetwriter.h>
 #include <libgeodecomp/io/simplecellplotter.h>

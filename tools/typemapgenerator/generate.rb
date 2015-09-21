@@ -12,6 +12,7 @@ require 'typemapgenerator'
 options = {}
 options[:exclude] = []
 options[:extension] = "cpp"
+options[:include_prefix] = ""
 
 opts = OptionParser.new do |o|
   o.banner = "Usage: #$0 [OPTIONS] PATH_TO_XML_DOC [OUTPUT_PATH]"
@@ -65,6 +66,14 @@ opts = OptionParser.new do |o|
   o.on("--macro-guard-boost MACRO",
        "encapsulate Boost Serialization code in #ifdef(MACRO), #endif guards") do |macro|
     options[:macro_guard_boost] = macro
+  end
+  o.on("--macro-guard-hpx MACRO",
+       "encapsulate HPX Serialization code in #ifdef(MACRO), #endif guards") do |macro|
+    options[:macro_guard_hpx] = macro
+  end
+  o.on("-i", "--include-prefix PREFIX",
+       "Prepend PREFIX to all include paths in header file includes") do |prefix|
+    options[:include_prefix] = prefix
   end
   o.on("-p", "--profile",
        "profile execution") do
@@ -159,15 +168,19 @@ if options[:profiling]
 end
 
 output_path = Pathname.new(ARGV[1] || "./")
-boost_header, mpi_header, mpi_source =
+boost_header, hpx_header, hpx_source, mpi_header, mpi_source =
   TypemapGenerator.generate_forest(xml_path, basedir,
                                    options[:sloppy],
                                    options[:namespace],
                                    /#{options[:header_pattern]}/,
                                    options[:header_replacement],
                                    options[:macro_guard_mpi],
-                                   options[:macro_guard_boost])
-File.open(output_path + "serialization.h", "w").write(boost_header)
+                                   options[:macro_guard_boost],
+                                   options[:macro_guard_hpx],
+                                   options[:include_prefix])
+File.open(output_path + "boostserialization.h", "w").write(boost_header)
+File.open(output_path + "hpxserialization.h", "w").write(hpx_header)
+File.open(output_path + "hpxserialization.cpp", "w").write(hpx_source)
 File.open(output_path + "typemaps.h", "w").write(mpi_header)
 File.open(output_path + "typemaps.#{options[:extension]}", "w").write(mpi_source)
 

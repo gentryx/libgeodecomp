@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 require 'rexml/document'
 require 'logger'
-require 'set'
+require 'ostruct'
 require 'pp'
+require 'set'
 require 'stringio'
 load 'datatype.rb'
 
@@ -20,7 +21,7 @@ class MPIParser
   # that this won't work if the to be excluded members are of a
   # template type for whitch typemaps will be generated using other
   # parameters. Yeah, it's complicated.
-  def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="")
+  def initialize(path="../../../trunk/doc/xml", sloppy=false, namespace="", include_prefix="")
     @path, @sloppy, @namespace = path, sloppy, namespace
     @log = Logger.new(STDOUT)
     @log.level = Logger::WARN
@@ -31,6 +32,8 @@ class MPIParser
     class_files = grep_typemap_candidates(path)
     @xml_docs = { }
     @xml_cache = {}
+
+    @include_prefix = include_prefix
 
     threads = []
     num_threads = 1
@@ -68,7 +71,8 @@ class MPIParser
     @datatype_map.merge!(map_enums)
     classes_to_be_serialized =
       find_classes_to_be_serialized("Typemaps") +
-      find_classes_to_be_serialized("Serialization")
+      find_classes_to_be_serialized("BoostSerialization") +
+      find_classes_to_be_serialized("HPXSerialization")
     @type_hierarchy_closure = @datatype_map.keys.to_set + classes_to_be_serialized
     @all_classes = classes_to_be_serialized
   end
@@ -76,7 +80,7 @@ class MPIParser
   def grep_typemap_candidates(path)
     files = []
 
-    ["Typemaps", "Serialization"].each do |klass|
+    ["Typemaps", "BoostSerialization", "HPXSerialization"].each do |klass|
       files += `grep "friend class #{klass}"             #{path}/class*.xml | cut -d : -f 1`.split("\n")
       files += `grep "<definition>#{klass}</definition>" #{path}/class*.xml | cut -d : -f 1`.split("\n")
     end
@@ -106,25 +110,27 @@ class MPIParser
     @log.info "resolve_forest()"
     @log.debug pp(classes)
 
+    res = OpenStruct.new
     classes = classes.sort
-    resolved_classes = { }
-    resolved_parents = { }
-    topological_class_sortation = []
+    res.resolved_classes = { }
+    res.resolved_parents = { }
+    res.topological_class_sortation = []
+    res.is_abstract = {}
     @type_hierarchy_closure = @type_hierarchy_closure.union(classes)
 
     while classes.any?
       @log.debug "  classes:"
       @log.debug pp(classes)
       @log.debug "  resolved_classes:"
-      @log.debug pp(resolved_classes)
+      @log.debug pp(res.resolved_classes)
       num_unresolved = classes.size
       # this temporary clone is required to avoid interference with deleted elements
       temp_classes = classes.clone
 
       temp_classes.each do |klass|
         resolve_class(klass, classes,
-                      resolved_classes, resolved_parents,
-                      topological_class_sortation)
+                      res.resolved_classes, res.resolved_parents,
+                      res.topological_class_sortation, res.is_abstract)
       end
 
       # fail if no class could be resolved in the last iteration
@@ -134,28 +140,32 @@ class MPIParser
       end
     end
 
-    headers = topological_class_sortation.map { |klass| find_header(klass) }
-
-    return [resolved_classes, resolved_parents,
-            @datatype_map, topological_class_sortation, headers]
+    res.headers = res.topological_class_sortation.map { |klass| find_header(klass, @include_prefix) }
+    res.datatype_map = @datatype_map
+    return res
   end
 
   def shallow_resolution(classes)
     classes = classes.sort
 
-    members = {}
-    parents = {}
-    template_params = {}
+    res = OpenStruct.new
+    res.topological_class_sortation = classes.sort
+    res.members = {}
+    res.resolved_parents = {}
+    res.template_params = {}
+    res.is_abstract = {}
+    res.wants_polymorphic_serialization = {}
 
     classes.each do |klass|
-      members[klass] = get_members(klass)
-      parents[klass] = get_parents(klass)
-      template_params[klass] = template_parameters(klass)
+      res.members[klass] = get_members(klass)
+      res.resolved_parents[klass] = get_parents(klass)
+      res.template_params[klass] = template_parameters(klass)
+      res.is_abstract[klass] = is_abstract?(klass)
+      res.wants_polymorphic_serialization[klass] = wants_polymorphic_serialization?(klass)
     end
 
-    headers = classes.map { |klass| find_header(klass) }
-
-    return [members, parents, template_params, classes, headers]
+    res.headers = classes.map { |klass| find_header(klass, @include_prefix) }
+    return res
   end
 
   def template_parameters(klass)
@@ -281,7 +291,7 @@ class MPIParser
   # wraps the resolution process (mapping of members) for a single class.
   def resolve_class(klass, classes,
                     resolved_classes, resolved_parents,
-                    topological_class_sortation)
+                    topological_class_sortation, is_abstract)
     begin
       members = get_members(klass)
       parents = get_parents(klass)
@@ -308,7 +318,7 @@ class MPIParser
         resolve_class_simple(klass, members, parents,
                              classes,
                              resolved_classes, resolved_parents,
-                             topological_class_sortation)
+                             topological_class_sortation, is_abstract)
       else
         used_params = used_template_parameters(klass)
 
@@ -322,7 +332,7 @@ class MPIParser
           resolve_class_simple(new_class, new_members, parents,
                                classes,
                                resolved_classes, resolved_parents,
-                               topological_class_sortation)
+                               topological_class_sortation, is_abstract)
         end
       end
 
@@ -348,7 +358,7 @@ class MPIParser
 
   def resolve_class_simple(klass, members, parents, classes,
                            resolved_classes, resolved_parents,
-                           topological_class_sortation)
+                           topological_class_sortation, is_abstract)
     @log.debug("resolve_class_simple(#{klass})")
 
     actual_members = prune_unresolvable_members(members)
@@ -360,6 +370,25 @@ class MPIParser
     @datatype_map[klass] = Datatype.cpp_to_mpi(klass, partial?(members))
     resolved_classes[klass] = member_map
     resolved_parents[klass] = parents_map
+    is_abstract[klass] = is_abstract?(klass)
+  end
+
+  def is_abstract?(klass)
+    @log.debug "is_abstract?(#{klass})"
+
+    begin
+      sweep_all_functions(klass) do |member|
+        next if member.attributes["virt"].nil?
+
+        if member.attributes["virt"] == "pure-virtual" && member.attributes["ambiguityscope"].nil?
+          return true
+        end
+
+      end
+    rescue Exception => e
+      return false
+    end
+    return false
   end
 
   # checks if some class members will be excluded from serialization.
@@ -670,13 +699,26 @@ class MPIParser
     end
   end
 
+  def sweep_all_functions(klass)
+    @log.debug "sweep_all_functions(#{klass})"
+    filename = class_to_filename(klass)
+    @log.debug "  filename = #{filename}"
+
+    doc = get_xml(filename)
+    xpath = "doxygen/compounddef/listofallmembers/member"
+
+    doc.elements.each(xpath) do |member|
+      yield member
+    end
+  end
+
   # locate the header filename
-  def find_header(klass)
+  def find_header(klass, prefix="")
     begin
-        find_header_simple(klass)
+      return prefix + find_header_simple(klass)
     rescue Exception => e
       if klass =~ /<.+>/
-        find_header_simple(template_basename(klass))
+        prefix + find_header_simple(template_basename(klass))
       else
         raise e
       end
@@ -712,12 +754,28 @@ class MPIParser
     return ret
   end
 
+  def wants_polymorphic_serialization?(klass)
+    filename = class_to_filename(klass)
+    doc = get_xml(filename)
+
+    doc.elements.each("doxygen/compounddef/sectiondef/memberdef") do |member|
+      if (member.attributes["kind"] == "friend") &&
+          (member.elements["name"].text == "PolymorphicSerialization")
+        return true
+      end
+    end
+
+    return false
+  end
+
   def is_class_declaration(filename)
     (filename =~ /\/class/)
   end
 
   def class_to_filename(klass)
-    @filename_cache[klass]
+    klass =~ /([^\<]+)/
+    stripped_class = $1
+    @filename_cache[klass] || @filename_cache[stripped_class]
   end
 
   def parse_class_name(klass)

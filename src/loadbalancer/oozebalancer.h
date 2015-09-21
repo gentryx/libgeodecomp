@@ -23,7 +23,9 @@ namespace LibGeoDecomp {
 class OozeBalancer : public LoadBalancer
 {
 public:
-    friend class Serialization;
+    friend class PolymorphicSerialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class OozeBalancerTest1;
     friend class OozeBalancerTest2;
 

@@ -26,7 +26,27 @@ template<typename CELL_TYPE, typename CELL_PLOTTER = SimpleCellPlotter<CELL_TYPE
 class PPMWriter : public Clonable<Writer<CELL_TYPE>, PPMWriter<CELL_TYPE, CELL_PLOTTER> >
 {
 public:
+#ifdef LIBGEODECOMP_WITH_HPX
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(PPMWriter);
+
+    template<typename ARCHIVE, typename TARGET>
+    static PPMWriter *create(ARCHIVE& archive, TARGET* /*unused*/)
+    {
+        PPMWriter *ret = new PPMWriter(
+            static_cast<int CELL_TYPE:: *>(0),
+            int(),
+            int(),
+            "foo",
+            1);;
+        serialize(archive, *ret, 0);
+        return ret;
+    }
+#endif
+
+    friend class PolymorphicSerialization;
+    friend class HPXSerialization;
     friend class PPMWriterTest;
+
     typedef typename Writer<CELL_TYPE>::GridType GridType;
     using Writer<CELL_TYPE>::period;
     using Writer<CELL_TYPE>::prefix;
@@ -112,5 +132,12 @@ public:
 };
 
 }
+
+#ifdef LIBGEODECOMP_WITH_HPX
+HPX_SERIALIZATION_WITH_CUSTOM_CONSTRUCTOR_TEMPLATE(
+    (template<typename CELL, typename CELL_PLOTTER>),
+    (LibGeoDecomp::PPMWriter<CELL, CELL_PLOTTER>),
+    (LibGeoDecomp::PPMWriter<CELL, CELL_PLOTTER>::create))
+#endif
 
 #endif

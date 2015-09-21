@@ -2,6 +2,11 @@
 #define LIBGEODECOMP_STORAGE_DEFAULTARRAYFILTER_H
 
 #include <libgeodecomp/storage/arrayfilter.h>
+#include <libgeodecomp/config.h>
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/array.hpp>
+#include <hpx/runtime/serialization/serialize.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -13,7 +18,11 @@ template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 class DefaultArrayFilter : public ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>
 {
 public:
-    friend class Serialization;
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(DefaultArrayFilter)
+
+    friend class PolymorphicSerialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     void copyStreakInImpl(
         const EXTERNAL *source,

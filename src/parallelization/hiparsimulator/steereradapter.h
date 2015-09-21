@@ -37,8 +37,7 @@ public:
         std::size_t offset = firstStep % period;
         firstRegularEventStep = firstStep + period - offset;
 
-        // fixme: make tests work with the following line enabled (ATM steerers never get the STEERER_INITIALIZED event from us if firstStep is not a multiple of period()
-        // storedNanoSteps << firstNanoStep;
+        storedNanoSteps << firstNanoStep;
         storedNanoSteps << firstRegularEventStep * NANO_STEPS;
         storedNanoSteps << lastNanoStep;
     }
@@ -69,6 +68,9 @@ public:
         if (globalNanoStep == lastNanoStep) {
             event = STEERER_ALL_DONE;
         }
+        if (globalNanoStep > lastNanoStep) {
+            return;
+        }
 
         if ((event == STEERER_NEXT_STEP) && (step % steerer->getPeriod() != 0)) {
             throw std::logic_error("SteererAdapter called at wrong step (got " + StringOps::itoa(step) +
@@ -87,7 +89,7 @@ public:
             lastCall,
             &feedback);
 
-        if ((event != STEERER_INITIALIZED) && remove) {
+        if (remove) {
             storedNanoSteps.erase(globalNanoStep);
             storedNanoSteps << globalNanoStep + NANO_STEPS * steerer->getPeriod();
         }

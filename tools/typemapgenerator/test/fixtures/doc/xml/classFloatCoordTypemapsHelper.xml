@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classFloatCoordTypemapsHelper" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classFloatCoordTypemapsHelper" kind="class" language="C++" prot="public">
     <compoundname>FloatCoordTypemapsHelper</compoundname>
     <includes refid="floatcoordbase_8h" local="no">floatcoordbase.h</includes>
       <sectiondef kind="friend">
-      <memberdef kind="friend" id="classFloatCoordTypemapsHelper_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="friend" id="classFloatCoordTypemapsHelper_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>friend class</type>
         <definition>friend class Typemaps</definition>
         <argsstring></argsstring>
@@ -15,7 +15,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="14" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="14" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="16" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="16" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-attrib">
@@ -30,7 +30,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="16" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="16" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="18" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="18" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classFloatCoordTypemapsHelper_1ae015781e3d331f35b1104e57b02b6d9e" prot="public" static="no" mutable="no">
         <type><ref refid="classFloatCoord" kindref="compound">FloatCoord</ref>&lt; 2 &gt;</type>
@@ -43,7 +43,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="17" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="17" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="19" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="19" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classFloatCoordTypemapsHelper_1a4348e974d6e694d18311f6faab7d9398" prot="public" static="no" mutable="no">
         <type><ref refid="classFloatCoord" kindref="compound">FloatCoord</ref>&lt; 4 &gt;</type>
@@ -56,7 +56,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="18" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="18" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="20" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="20" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -90,12 +90,12 @@
         </childnode>
       </node>
     </collaborationgraph>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="12" bodyend="19"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" line="14" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/floatcoordbase.h" bodystart="13" bodyend="21"/>
     <listofallmembers>
       <member refid="classFloatCoordTypemapsHelper_1aeea6f2857d50f9a50e947a94a496364e" prot="public" virt="non-virtual"><scope>FloatCoordTypemapsHelper</scope><name>pA</name></member>
       <member refid="classFloatCoordTypemapsHelper_1ae015781e3d331f35b1104e57b02b6d9e" prot="public" virt="non-virtual"><scope>FloatCoordTypemapsHelper</scope><name>pB</name></member>
       <member refid="classFloatCoordTypemapsHelper_1a4348e974d6e694d18311f6faab7d9398" prot="public" virt="non-virtual"><scope>FloatCoordTypemapsHelper</scope><name>pC</name></member>
-      <member refid="classFloatCoordTypemapsHelper_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="private" virt="non-virtual"><scope>FloatCoordTypemapsHelper</scope><name>Typemaps</name></member>
+      <member refid="classFloatCoordTypemapsHelper_1afc4f4c9697c6a1241774b044f6fbeb3f" prot="public" virt="non-virtual"><scope>FloatCoordTypemapsHelper</scope><name>Typemaps</name></member>
     </listofallmembers>
   </compounddef>
 </doxygen>

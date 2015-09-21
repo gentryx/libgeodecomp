@@ -3,6 +3,7 @@
 #include <libgeodecomp/storage/displacedgrid.h>
 #include <libgeodecomp/storage/proxygrid.h>
 #include <libgeodecomp/storage/soagrid.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 
 using namespace LibGeoDecomp;
 

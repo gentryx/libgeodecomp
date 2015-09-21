@@ -33,8 +33,6 @@ public:
     class Link
     {
     public:
-        typedef typename GRID_TYPE::CellType CellType;
-
         /**
          * MPI matches messages by communicator, rank and tag. To
          * avoid collisions if more than two patchlinks per node-pair

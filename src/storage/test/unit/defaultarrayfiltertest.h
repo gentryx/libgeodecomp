@@ -1,8 +1,8 @@
-#include <vector>
-
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/defaultarrayfilter.h>
+#include <vector>
 
 using namespace LibGeoDecomp;
 

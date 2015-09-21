@@ -1,10 +1,11 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_PARALLELWRITERADAPTER_H
 
-#include <libgeodecomp/io/writer.h>
+#include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/storage/patchaccepter.h>
 
 namespace LibGeoDecomp {
+// fixme: move to LibGeoDecomp namespace
 namespace HiParSimulator {
 
 template<typename CELL_TYPE, typename PARTITION, typename STEPPER>
@@ -66,6 +67,9 @@ public:
         }
         if (nanoStep == lastNanoStep) {
             event = WRITER_ALL_DONE;
+        }
+        if (nanoStep > lastNanoStep) {
+            return;
         }
 
         writer->stepFinished(

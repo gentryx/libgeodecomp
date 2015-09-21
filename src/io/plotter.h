@@ -21,10 +21,33 @@ template<typename CELL, class CELL_PLOTTER = SimpleCellPlotter<CELL> >
 class Plotter
 {
 public:
-    explicit Plotter(const Coord<2>& cellDim = Coord<2>(32, 32),
-                     const CELL_PLOTTER& cellPlotter = CELL_PLOTTER()) :
-        cellDim(cellDim),
+#ifdef LIBGEODECOMP_WITH_HPX
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(Plotter);
+
+    template<typename ARCHIVE, typename TARGET>
+    static Plotter *create(ARCHIVE& archive, TARGET */*unused*/)
+    {
+        Plotter *ret = new Plotter(
+            Coord<2>(1, 1),
+            CELL_PLOTTER(
+                static_cast<int CELL:: *>(0),
+                QuickPalette<int>(0, 0)));
+        archive & *ret;
+        return ret;
+    }
+#endif
+
+    friend class PolymorphicSerialization;
+    friend class HPXSerialization;
+    friend class PPMWriterTest;
+
+    explicit Plotter(const Coord<2>& cellDim,
+                     const CELL_PLOTTER& cellPlotter) :
+	cellDim(cellDim),
         cellPlotter(cellPlotter)
+    {}
+
+    virtual ~Plotter()
     {}
 
     template<typename PAINTER>
@@ -86,5 +109,12 @@ private:
 };
 
 }
+
+#ifdef LIBGEODECOMP_WITH_HPX
+HPX_SERIALIZATION_WITH_CUSTOM_CONSTRUCTOR_TEMPLATE(
+    (template<typename CELL, typename CELL_PLOTTER>),
+    (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>),
+    (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>::create))
+#endif
 
 #endif

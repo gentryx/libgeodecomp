@@ -101,7 +101,7 @@ public:
     {}
 
     template<int STREAK_DIM, typename REGION>
-    inline std::size_t operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& unusedOffsets) const
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& unusedOffsets) const
     {
         iterators[DIM] = region.indicesBegin(DIM) + offset;
         for (int d = DIM - 1; d >= 0; --d) {
@@ -413,7 +413,8 @@ template<int DIM>
 class Region
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     template<int MY_DIM> friend void swap(Region<MY_DIM>&, Region<MY_DIM>&);
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;

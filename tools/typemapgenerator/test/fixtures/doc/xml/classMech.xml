@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="classMech" kind="class" prot="public">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="classMech" kind="class" language="C++" prot="public">
     <compoundname>Mech</compoundname>
     <includes refid="mech_8h" local="no">mech.h</includes>
       <sectiondef kind="private-attrib">
@@ -15,7 +15,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" line="10" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="10" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" line="16" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="16" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classMech_1a0a24b56451092323eef033edfa3969b5" prot="private" static="no" mutable="no">
         <type>int</type>
@@ -28,7 +28,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="11" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" line="17" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="17" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" prot="private" static="no" mutable="no">
         <type>int</type>
@@ -41,26 +41,26 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" line="12" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="12" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" line="18" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="18" bodyend="-1"/>
       </memberdef>
       </sectiondef>
       <sectiondef kind="public-func">
-      <memberdef kind="function" id="classMech_1af16dc449c38d2e30c15aadb6869b7d77" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="classMech_1afb7034e29aeef6606b846271dd0f78e2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type></type>
         <definition>Mech::Mech</definition>
-        <argsstring>(int armor_, int ammo_, int power_)</argsstring>
+        <argsstring>(int armor, int ammo, int power)</argsstring>
         <name>Mech</name>
         <param>
           <type>int</type>
-          <declname>armor_</declname>
+          <declname>armor</declname>
         </param>
         <param>
           <type>int</type>
-          <declname>ammo_</declname>
+          <declname>ammo</declname>
         </param>
         <param>
           <type>int</type>
-          <declname>power_</declname>
+          <declname>power</declname>
         </param>
         <briefdescription>
         </briefdescription>
@@ -68,7 +68,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" line="15" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.cpp" bodystart="3" bodyend="5"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" line="11" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.cpp" bodystart="3" bodyend="7"/>
       </memberdef>
       <memberdef kind="function" id="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type><ref refid="classCar" kindref="compound">Car</ref></type>
@@ -81,18 +81,18 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" line="16" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.cpp" bodystart="8" bodyend="10"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" line="13" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.cpp" bodystart="10" bodyend="12"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="8" bodyend="17"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" line="9" column="1" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h" bodystart="8" bodyend="19"/>
     <listofallmembers>
       <member refid="classMech_1a0a24b56451092323eef033edfa3969b5" prot="private" virt="non-virtual"><scope>Mech</scope><name>ammo</name></member>
       <member refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" prot="private" virt="non-virtual"><scope>Mech</scope><name>armor</name></member>
-      <member refid="classMech_1af16dc449c38d2e30c15aadb6869b7d77" prot="public" virt="non-virtual"><scope>Mech</scope><name>Mech</name></member>
+      <member refid="classMech_1afb7034e29aeef6606b846271dd0f78e2" prot="public" virt="non-virtual"><scope>Mech</scope><name>Mech</name></member>
       <member refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" prot="private" virt="non-virtual"><scope>Mech</scope><name>power</name></member>
       <member refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" prot="public" virt="non-virtual"><scope>Mech</scope><name>transformToCar</name></member>
     </listofallmembers>

@@ -34,6 +34,7 @@ public:
     typedef typename ParentType::GridType GridType;
     typedef ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
     typedef SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
+
     static const int DIM = Topology::DIM;
 
     inline explicit HiParSimulator(
@@ -74,13 +75,12 @@ public:
 
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
-        boost::shared_ptr<Steerer<CELL_TYPE> > steererPointer(steerer);
-        steerers << steererPointer;
+        DistributedSimulator<CELL_TYPE>::addSteerer(steerer);
 
         // two adapters needed, just as for the writers
         typename UpdateGroupType::PatchProviderPtr adapterGhost(
             new SteererAdapterType(
-                steererPointer,
+                steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
@@ -89,7 +89,7 @@ public:
 
         typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
             new SteererAdapterType(
-                steererPointer,
+                steerers.back(),
                 initializer->startStep(),
                 initializer->maxSteps(),
                 initializer->gridDimensions(),
@@ -146,20 +146,11 @@ private:
     PartitionManager<Topology> partitionManager;
     MPILayer mpiLayer;
     boost::shared_ptr<UpdateGroupType> updateGroup;
+
     typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
     typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
     typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
-
-    double getCellSpeed(APITraits::FalseType) const
-    {
-        return 1.0;
-    }
-
-    double getCellSpeed(APITraits::TrueType) const
-    {
-        return CELL_TYPE::speed();
-    }
 
     /**
      * computes an initial weight distribution of the work items (i.e.
@@ -217,7 +208,7 @@ private:
 
         CoordBox<DIM> box = initializer->gridBox();
 
-        double mySpeed = getCellSpeed(typename APITraits::SelectSpeedGuide<CELL_TYPE>::Value());
+        double mySpeed = APITraits::SelectSpeedGuide<CELL_TYPE>::value();
         std::vector<double> rankSpeeds = mpiLayer.allGather(mySpeed);
         std::vector<std::size_t> weights = initialWeights(
             box.dimensions.prod(),
@@ -245,6 +236,8 @@ private:
 
         writerAdaptersGhost.clear();
         writerAdaptersInner.clear();
+        steererAdaptersGhost.clear();
+        steererAdaptersInner.clear();
 
         initEvents();
     }

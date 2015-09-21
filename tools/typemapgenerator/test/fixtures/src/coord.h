@@ -6,23 +6,28 @@ class Coord;
 
 class Coord<1>
 {
-    friend class Serialization;
 public:
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     int x;
 };
 
 class Coord<2>
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
+
     int x, y;
 };
 
 class Coord<3>
 {
-    friend class Typemaps;
-    friend class Serialization;
 public:
+    friend class Typemaps;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     int x, y, z;
 };
 

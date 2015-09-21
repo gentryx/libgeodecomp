@@ -7,13 +7,15 @@ class Car;
 
 class Mech
 {
+public:
+    Mech(int armor, int ammo, int power);
+
+    Car transformToCar();
+
+private:
     int armor;
     int ammo;
     int power;
-
-public:
-    Mech(int armor_, int ammo_, int power_);
-    Car transformToCar();
 };
 
 #endif

@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="pair_8h" kind="file">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="pair_8h" kind="file" language="C++">
     <compoundname>pair.h</compoundname>
     <includes refid="coord_8h" local="yes">coord.h</includes>
     <incdepgraph>
+      <node id="99">
+        <label>coord.h</label>
+        <link refid="coord_8h"/>
+      </node>
       <node id="98">
         <label>src/pair.h</label>
         <link refid="pair.h"/>
         <childnode refid="99" relation="include">
         </childnode>
-      </node>
-      <node id="99">
-        <label>coord.h</label>
-        <link refid="coord_8h"/>
       </node>
     </incdepgraph>
     <innerclass refid="classCoordPair" prot="public">CoordPair</innerclass>
@@ -22,16 +22,16 @@
     <detaileddescription>
     </detaileddescription>
     <programlisting>
-<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_pair_h_</highlight></codeline>
-<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_pair_h_</highlight></codeline>
-<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_pair_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_pair_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
 <codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="coord_8h" kindref="compound">coord.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="5"><highlight class="normal"></highlight></codeline>
 <codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">template</highlight><highlight class="normal">&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>A,<sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>B&gt;</highlight></codeline>
 <codeline lineno="7" refid="classCoordPair" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordPair" kindref="compound">CoordPair</ref></highlight></codeline>
 <codeline lineno="8"><highlight class="normal">{</highlight></codeline>
-<codeline lineno="9" refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
-<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="10" refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordPair_1afc4f4c9697c6a1241774b044f6fbeb3f" kindref="member">Typemaps</ref>;</highlight></codeline>
 <codeline lineno="11" refid="classCoordPair_1af50cd114d307e8e7b8e8c921a42f836c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>A<sp/><ref refid="classCoordPair_1af50cd114d307e8e7b8e8c921a42f836c" kindref="member">a</ref>;</highlight></codeline>
 <codeline lineno="12" refid="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>B<sp/><ref refid="classCoordPair_1ae14433d6a3054a3290b24db8223e5bc0" kindref="member">b</ref>;</highlight></codeline>
 <codeline lineno="13"><highlight class="normal">};</highlight></codeline>
@@ -47,6 +47,6 @@
 <codeline lineno="23"><highlight class="normal"></highlight></codeline>
 <codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/pair.h"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/pair.h"/>
   </compounddef>
 </doxygen>

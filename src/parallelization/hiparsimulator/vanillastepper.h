@@ -33,47 +33,52 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
+    typedef typename ParentType::PatchProviderVec PatchProviderVec;
 
-    using CommonStepper<CELL_TYPE>::initializer;
-    using CommonStepper<CELL_TYPE>::patchAccepters;
-    using CommonStepper<CELL_TYPE>::patchProviders;
-    using CommonStepper<CELL_TYPE>::partitionManager;
-    using CommonStepper<CELL_TYPE>::chronometer;
-    using CommonStepper<CELL_TYPE>::notifyPatchAccepters;
-    using CommonStepper<CELL_TYPE>::notifyPatchProviders;
+    using ParentType::initializer;
+    using ParentType::patchAccepters;
+    using ParentType::patchProviders;
+    using ParentType::partitionManager;
+    using ParentType::chronometer;
+    using ParentType::notifyPatchAccepters;
+    using ParentType::notifyPatchProviders;
 
-    using CommonStepper<CELL_TYPE>::innerSet;
-    using CommonStepper<CELL_TYPE>::saveKernel;
-    using CommonStepper<CELL_TYPE>::restoreRim;
-    using CommonStepper<CELL_TYPE>::globalNanoStep;
-    using CommonStepper<CELL_TYPE>::rim;
-    using CommonStepper<CELL_TYPE>::resetValidGhostZoneWidth;
-    using CommonStepper<CELL_TYPE>::initGridsCommon;
-    using CommonStepper<CELL_TYPE>::getVolatileKernel;
-    using CommonStepper<CELL_TYPE>::saveRim;
-    using CommonStepper<CELL_TYPE>::getInnerRim;
-    using CommonStepper<CELL_TYPE>::restoreKernel;
+    using ParentType::innerSet;
+    using ParentType::saveKernel;
+    using ParentType::restoreRim;
+    using ParentType::globalNanoStep;
+    using ParentType::rim;
+    using ParentType::resetValidGhostZoneWidth;
+    using ParentType::initGridsCommon;
+    using ParentType::getVolatileKernel;
+    using ParentType::saveRim;
+    using ParentType::getInnerRim;
+    using ParentType::restoreKernel;
 
-    using CommonStepper<CELL_TYPE>::curStep;
-    using CommonStepper<CELL_TYPE>::curNanoStep;
-    using CommonStepper<CELL_TYPE>::validGhostZoneWidth;
-    using CommonStepper<CELL_TYPE>::ghostZoneWidth;
-    using CommonStepper<CELL_TYPE>::oldGrid;
-    using CommonStepper<CELL_TYPE>::newGrid;
-    using CommonStepper<CELL_TYPE>::rimBuffer;
-    using CommonStepper<CELL_TYPE>::kernelBuffer;
-    using CommonStepper<CELL_TYPE>::kernelFraction;
+    using ParentType::curStep;
+    using ParentType::curNanoStep;
+    using ParentType::validGhostZoneWidth;
+    using ParentType::ghostZoneWidth;
+    using ParentType::oldGrid;
+    using ParentType::newGrid;
+    using ParentType::rimBuffer;
+    using ParentType::kernelBuffer;
+    using ParentType::kernelFraction;
 
     inline VanillaStepper(
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
-        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
-        CommonStepper<CELL_TYPE>(
+        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
+        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& innerSetPatchProviders = PatchProviderVec()) :
+        ParentType(
             partitionManager,
             initializer,
             ghostZonePatchAccepters,
-            innerSetPatchAccepters)
+            innerSetPatchAccepters,
+            ghostZonePatchProviders,
+            innerSetPatchProviders)
     {
         initGrids();
     }

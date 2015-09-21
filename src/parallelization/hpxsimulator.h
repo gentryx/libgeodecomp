@@ -5,149 +5,41 @@
 #ifdef LIBGEODECOMP_WITH_HPX
 
 #include <hpx/config.hpp>
+#include <hpx/runtime/serialization/set.hpp>
+#include <hpx/runtime/serialization/vector.hpp>
 #include <hpx/lcos/broadcast.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 
-#include <libgeodecomp/communication/serialization.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
+#include <libgeodecomp/parallelization/hiparsimulator/vanillastepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/hpxstepper.h>
 #include <libgeodecomp/parallelization/hpxsimulator/updategroup.h>
-#include <libgeodecomp/parallelization/hpxsimulator/createupdategroups.h>
-
-#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(SIMULATOR, NAME)        \
-    typedef                                                                     \
-        SIMULATOR ::UpdateGroupType::ComponentType                              \
-        BOOST_PP_CAT(NAME, UpdateGroupType);                                    \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitPartitionsAction)     \
-    );                                                                          \
-    HPX_ACTION_USES_HUGE_STACK(                                                 \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction               \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitAction)               \
-    );                                                                          \
-    HPX_ACTION_USES_HUGE_STACK(                                                 \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction                         \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::CurrentStepAction,                 \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), CurrentStepAction)        \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
-    );                                                                          \
-    HPX_ACTION_USES_HUGE_STACK(                                                 \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction                     \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::SetOuterGhostZoneAction,           \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SetOuterGhostZoneAction)  \
-    );                                                                          \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SpeedZoneAction)          \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_WITH_INDEX_ACTION_DECLARATION_2(                     \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitPartitionsAction) \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitAction)           \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), NanoStepAction)       \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), SpeedAction)          \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_DECLARATION_2(                                \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), StopAction)           \
-    );                                                                          \
-/**/
-
-#define LIBGEODECOMP_REGISTER_HPX_SIMULATOR(SIMULATOR, NAME)                    \
-    typedef                                                                     \
-        hpx::components::managed_component<                                     \
-            BOOST_PP_CAT(NAME, UpdateGroupType)                                 \
-        >                                                                       \
-        BOOST_PP_CAT(NAME, UpdateGroupComponentType);                           \
-    HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(                                     \
-        BOOST_PP_CAT(NAME, UpdateGroupComponentType),                           \
-        BOOST_PP_CAT(NAME, UpdateGroupComponentType)                            \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitPartitionsAction)     \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), InitAction)               \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::CurrentStepAction,                 \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), CurrentStepAction)        \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), NanoStepAction)           \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), StopAction)               \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::SetOuterGhostZoneAction,           \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SetOuterGhostZoneAction)  \
-    );                                                                          \
-    HPX_REGISTER_ACTION(                                                        \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroup), SpeedZoneAction)          \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_WITH_INDEX_ACTION_2(                                 \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitPartitionsAction,              \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitPartitionsAction) \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::InitAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), InitAction)           \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::NanoStepAction,                    \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), NanoStepAction)       \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::SpeedAction,                       \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), SpeedAction)          \
-    );                                                                          \
-    HPX_REGISTER_BROADCAST_ACTION_2(                                            \
-        BOOST_PP_CAT(NAME, UpdateGroupType)::StopAction,                        \
-        BOOST_PP_CAT(BOOST_PP_CAT(NAME, UpdateGroupType), StopAction)           \
-    );                                                                          \
-/**/
+#include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
+#include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 
 namespace LibGeoDecomp {
 namespace HpxSimulator {
+namespace HpxSimulatorHelpers {
 
-typedef std::pair<std::size_t, std::size_t> StepPairType;
+void gatherAndBroadcastLocalityIndices(
+    double speedGuide,
+    std::vector<double> *globalUpdateGroupSpeeds,
+    std::vector<std::size_t> *localityIndices,
+    const std::string& basename,
+    const std::vector<double> updateGroupSpeeds);
+
+}
+
+enum EventPoint {LOAD_BALANCING, END};
+typedef std::set<EventPoint> EventSet;
+typedef std::map<long, EventSet> EventMap;
 
 template<
     class CELL_TYPE,
     class PARTITION,
-    class STEPPER=LibGeoDecomp::HiParSimulator::HpxStepper<CELL_TYPE>
+    class STEPPER=LibGeoDecomp::HiParSimulator::VanillaStepper<CELL_TYPE>
 >
 class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {
@@ -156,178 +48,129 @@ public:
     using DistributedSimulator<CELL_TYPE>::NANO_STEPS;
     typedef typename DistributedSimulator<CELL_TYPE>::Topology Topology;
     typedef LibGeoDecomp::DistributedSimulator<CELL_TYPE> ParentType;
-    typedef UpdateGroup<CELL_TYPE, PARTITION, STEPPER> UpdateGroupType;
+    typedef UpdateGroup<CELL_TYPE> UpdateGroupType;
     typedef typename ParentType::GridType GridType;
+    typedef LibGeoDecomp::HiParSimulator::ParallelWriterAdapter<typename UpdateGroupType::GridType, CELL_TYPE> ParallelWriterAdapterType;
+    typedef LibGeoDecomp::HiParSimulator::SteererAdapter<typename UpdateGroupType::GridType, CELL_TYPE> SteererAdapterType;
 
     static const int DIM = Topology::DIM;
 
+    /**
+     * Creates an HpxSimulator. Parameters are essentially the same as
+     * for the HiParSimulator. The vector updateGroupSpeeds controls
+     * how many UpdateGroups will be created and how large their
+     * individual domain should be.
+     */
     inline HpxSimulator(
         Initializer<CELL_TYPE> *initializer,
-        const float overcommitFactor,
+        const std::vector<double> updateGroupSpeeds = std::vector<double>(1, 1.0),
         LoadBalancer *balancer = 0,
         const unsigned loadBalancingPeriod = 1,
-        const unsigned ghostZoneWidth = 1) :
+        const unsigned ghostZoneWidth = 1,
+        std::string basename = "/0/fixme/HPXSimulator") :
         ParentType(initializer),
+        updateGroupSpeeds(updateGroupSpeeds),
         balancer(balancer),
         loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
         ghostZoneWidth(ghostZoneWidth),
-        initialized(false)
+        basename(basename)
     {
-        std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(overcommitFactor));
-        updateGroupsIds.reserve(updateGroups.size());
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            updateGroupsIds.push_back(ug.gid());
-        }
-    }
-
-    inline HpxSimulator(
-        Initializer<CELL_TYPE> *initializer,
-        const hpx::util::function<std::size_t()>& numUpdateGroups,
-        LoadBalancer *balancer = 0,
-        const unsigned loadBalancingPeriod = 1,
-        const unsigned ghostZoneWidth = 1) :
-        ParentType(initializer),
-        balancer(balancer),
-        loadBalancingPeriod(loadBalancingPeriod * NANO_STEPS),
-        ghostZoneWidth(ghostZoneWidth),
-        initialized(false)
-    {
-        std::vector<UpdateGroupType> updateGroups(createUpdateGroups<UpdateGroupType>(numUpdateGroups));
-        updateGroupsIds.reserve(updateGroups.size());
-        BOOST_FOREACH(UpdateGroupType& ug, updateGroups) {
-            updateGroupsIds.push_back(ug.gid());
-        }
-    }
-
-    void calculateBoundingBoxes(
-        std::vector<CoordBox<DIM> >& boundingBoxes,
-        std::size_t rank_start,
-        std::size_t rank_end,
-        const CoordBox<DIM>& box,
-        const std::vector<std::size_t>& weights)
-    {
-        typedef PartitionManager<Topology> PartitionManagerType;
-
-        for(std::size_t rank = rank_start; rank != rank_end; ++rank) {
-            PartitionManagerType partitionManager;
-
-            boost::shared_ptr<PARTITION> partition(
-                new PARTITION(
-                    box.origin,
-                    box.dimensions,
-                    0,
-                    weights));
-
-            partitionManager.resetRegions(
-                    box,
-                    partition,
-                    rank,
-                    ghostZoneWidth
-                );
-            boundingBoxes[rank] = boost::move(partitionManager.ownRegion().boundingBox());
-        }
-    }
-
-    void init()
-    {
-        if(initialized) {
-            return;
-        }
-        std::vector<CoordBox<DIM> > boundingBoxes;
-        std::size_t numPartitions = updateGroupsIds.size();
-        boundingBoxes.resize(numPartitions);
-
-        CoordBox<DIM> box = initializer->gridBox();
-
-        std::vector<hpx::future<void> > boundingBoxesFutures;
-        boundingBoxesFutures.reserve(numPartitions);
-        std::size_t steps = numPartitions/hpx::get_os_thread_count() + 1;
-
-        std::vector<std::size_t> weights(initialWeights(box.dimensions.prod(), numPartitions));
-        for(std::size_t i = 0; i < numPartitions; i += steps) {
-            boundingBoxesFutures.push_back(
-                hpx::async(
-                    hpx::util::bind(
-                        &HpxSimulator::calculateBoundingBoxes,
-                        this,
-                        boost::ref(boundingBoxes),
-                        i, (std::min)(numPartitions, i + steps), box,
-                        boost::cref(weights)
-                    )
-                )
-            );
-        }
-        hpx::wait_all(boundingBoxesFutures);
-        typename UpdateGroupType::InitData initData =
-        {
-            //updateGroups,
-            loadBalancingPeriod,
-            ghostZoneWidth,
-            initializer,
-            writers,
-            steerers,
-            boundingBoxes,
-            weights
-        };
-        hpx::lcos::broadcast_with_index<
-            typename UpdateGroupType::ComponentType::InitPartitionsAction
-        >(
-            updateGroupsIds,
-            initData
-        ).wait();
-        hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::InitAction>(
-            updateGroupsIds
-        ).wait();
-
-        initialized = true;
+        HpxSimulatorHelpers::gatherAndBroadcastLocalityIndices(
+            APITraits::SelectSpeedGuide<CELL_TYPE>::value(),
+            &globalUpdateGroupSpeeds,
+            &localityIndices,
+            basename,
+            updateGroupSpeeds);
     }
 
     inline void run()
     {
-        statistics = runTimed();
-    }
-
-    void stop()
-    {
-        hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::StopAction>(
-            updateGroupsIds
-        ).wait();
+        initSimulation();
+        nanoStep(timeToLastEvent());
     }
 
     inline void step()
     {
-        init();
+        initSimulation();
         nanoStep(NANO_STEPS);
     }
 
     virtual unsigned getStep() const
     {
-        if (initialized) {
-            return typename UpdateGroupType::ComponentType::CurrentStepAction()(updateGroupsIds[0]).first;
-        } else {
+        if (updateGroups.size() == 0) {
             return initializer->startStep();
         }
-        return 0;
+
+        return updateGroups[0]->currentStep().first;
     }
 
     virtual void addSteerer(Steerer<CELL_TYPE> *steerer)
     {
         DistributedSimulator<CELL_TYPE>::addSteerer(steerer);
+
+        // two adapters needed, just as for the writers
+        typename UpdateGroupType::PatchProviderPtr adapterGhost(
+            new SteererAdapterType(
+                steerers.back(),
+                initializer->startStep(),
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                // fixme: move this data to get()/put()
+                hpx::get_locality_id(),
+                false));
+
+        typename UpdateGroupType::PatchProviderPtr adapterInnerSet(
+            new SteererAdapterType(
+                steerers.back(),
+                initializer->startStep(),
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                // fixme: move this data to get()/put(), remove from HiParSimulator, too
+                hpx::get_locality_id(),
+                true));
+
+        steererAdaptersGhost.push_back(adapterGhost);
+        steererAdaptersInner.push_back(adapterInnerSet);
     }
 
     virtual void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
         DistributedSimulator<CELL_TYPE>::addWriter(writer);
+
+        // we need two adapters as each ParallelWriter needs to be
+        // notified twice: once for the (inner) ghost zone, and once
+        // for the inner set.
+        typename UpdateGroupType::PatchAccepterPtr adapterGhost(
+            new ParallelWriterAdapterType(
+                writers.back(),
+                initializer->startStep(),
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                hpx::get_locality_id(),
+                false));
+        typename UpdateGroupType::PatchAccepterPtr adapterInnerSet(
+            new ParallelWriterAdapterType(
+                writers.back(),
+                initializer->startStep(),
+                initializer->maxSteps(),
+                initializer->gridDimensions(),
+                hpx::get_locality_id(),
+                true));
+
+        writerAdaptersGhost.push_back(adapterGhost);
+        writerAdaptersInner.push_back(adapterInnerSet);
     }
 
     std::size_t numUpdateGroups() const
     {
-        return updateGroupsIds.size();
+        return updateGroups.size();
     }
 
     std::vector<Chronometer> gatherStatistics()
     {
-        return statistics;
+        // fixme
+        Chronometer statistics;
+        return std::vector<Chronometer>(1, statistics);
     }
 
 private:
@@ -335,82 +178,187 @@ private:
     using DistributedSimulator<CELL_TYPE>::steerers;
     using DistributedSimulator<CELL_TYPE>::writers;
 
+    std::vector<double> updateGroupSpeeds;
     boost::shared_ptr<LoadBalancer> balancer;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
+    std::string basename;
+    EventMap events;
     PartitionManager<Topology> partitionManager;
-    std::vector<hpx::id_type> updateGroupsIds;
-    boost::atomic<bool> initialized;
-    std::vector<Chronometer> statistics;
 
-    std::vector<Chronometer> nanoStep(std::size_t remainingNanoSteps)
+    std::vector<boost::shared_ptr<UpdateGroupType> > updateGroups;
+    std::vector<double> globalUpdateGroupSpeeds;
+    std::vector<std::size_t> localityIndices;
+
+    typename UpdateGroupType::PatchProviderVec steererAdaptersGhost;
+    typename UpdateGroupType::PatchProviderVec steererAdaptersInner;
+    typename UpdateGroupType::PatchAccepterVec writerAdaptersGhost;
+    typename UpdateGroupType::PatchAccepterVec writerAdaptersInner;
+
+    inline void initSimulation()
     {
-        return
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::NanoStepAction>(
-                updateGroupsIds,
-                remainingNanoSteps
-            ).get();
+        if (updateGroups.size() != 0) {
+            return;
+        }
+
+        CoordBox<DIM> box = initializer->gridBox();
+
+        std::vector<std::size_t> weights = initialWeights(
+            box.dimensions.prod(),
+            globalUpdateGroupSpeeds);
+
+        boost::shared_ptr<PARTITION> partition(
+            new PARTITION(
+                box.origin,
+                box.dimensions,
+                0,
+                weights));
+
+        std::vector<hpx::future<boost::shared_ptr<UpdateGroup<CELL_TYPE> > > > updateGroupCreationFutures;
+        std::size_t rank = hpx::get_locality_id();
+
+        for (std::size_t i = localityIndices[rank + 0]; i < localityIndices[rank + 1]; ++i) {
+            updateGroupCreationFutures << hpx::async(&HpxSimulator::createUpdateGroup, this, i, partition);
+        }
+        updateGroups = hpx::util::unwrapped(std::move(updateGroupCreationFutures));
+
+        writerAdaptersGhost.clear();
+        writerAdaptersInner.clear();
+        steererAdaptersGhost.clear();
+        steererAdaptersInner.clear();
+
+        initEvents();
     }
 
-    std::vector<std::size_t> initialWeights(const std::size_t items, const std::size_t size) const
+    // fixme: reduce duplication from HiParSimulator
+    inline void initEvents()
     {
-        std::vector<double> speeds(
-            hpx::lcos::broadcast<typename UpdateGroupType::ComponentType::SpeedAction>(
-                updateGroupsIds
-            ).get());
-        double s = sum(speeds);
+        events.clear();
+        long lastNanoStep = initializer->maxSteps() * NANO_STEPS;
+        events[lastNanoStep] << END;
+
+        insertNextLoadBalancingEvent();
+    }
+
+    inline void handleEvents()
+    {
+        if (currentNanoStep() > events.begin()->first) {
+            throw std::logic_error("stale event found, should have been handled previously");
+        }
+        if (currentNanoStep() < events.begin()->first) {
+            // don't need to handle future events now
+            return;
+        }
+
+        const EventSet& curEvents = events.begin()->second;
+        for (EventSet::const_iterator i = curEvents.begin(); i != curEvents.end(); ++i) {
+            if (*i == LOAD_BALANCING) {
+                balanceLoad();
+                insertNextLoadBalancingEvent();
+            }
+        }
+        events.erase(events.begin());
+    }
+
+    inline void insertNextLoadBalancingEvent()
+    {
+        long nextLoadBalancing = currentNanoStep() + loadBalancingPeriod;
+        events[nextLoadBalancing] << LOAD_BALANCING;
+    }
+
+    inline long currentNanoStep() const
+    {
+        std::pair<int, int> now = updateGroups[0]->currentStep();
+        return (long)now.first * NANO_STEPS + now.second;
+    }
+
+    /**
+     * returns the number of nano steps until the next event needs to be handled.
+     */
+    inline long timeToNextEvent() const
+    {
+        return events.begin()->first - currentNanoStep();
+    }
+
+    /**
+     * returns the number of nano steps until simulation end.
+     */
+    inline long timeToLastEvent() const
+    {
+        return  events.rbegin()->first - currentNanoStep();
+    }
+
+    inline void balanceLoad()
+    {
+        // fixme: do we need this after all?
+    }
+
+    void nanoStep(std::size_t remainingNanoSteps)
+    {
+        std::vector<hpx::future<void> > updateFutures;
+        updateFutures.reserve(updateGroups.size());
+
+        for (auto& i: updateGroups) {
+            updateFutures << hpx::async(&UpdateGroupType::update, i, remainingNanoSteps);
+        }
+
+        hpx::lcos::wait_all(std::move(updateFutures));
+    }
+
+    /**
+     * computes an initial weight distribution of the work items (i.e.
+     * number of cells in the simulation space). rankSpeeds gives an
+     * estimate of the relative performance of the different ranks
+     * (good when running on heterogeneous systems, e.g. clusters
+     * comprised of multiple genrations of nodes or x86 clusters with
+     * additional Xeon Phi accelerators).
+     */
+    // fixme: stolen from HiParSimulator
+    std::vector<std::size_t> initialWeights(std::size_t items, const std::vector<double> rankSpeeds) const
+    {
+        std::size_t size = rankSpeeds.size();
+        double totalSum = sum(rankSpeeds);
         std::vector<std::size_t> ret(size);
 
         std::size_t lastPos = 0;
         double partialSum = 0.0;
-        if(size > 1) {
-            for (std::size_t i = 0; i < size -1; ++i) {
-                partialSum += speeds[i];
-                std::size_t nextPos = items * (partialSum / s);
-                ret[i] = nextPos - lastPos;
-                lastPos = nextPos;
-            }
+        for (std::size_t i = 0; i < size - 1; ++i) {
+            partialSum += rankSpeeds[i];
+            std::size_t nextPos = items * partialSum / totalSum;
+            ret[i] = nextPos - lastPos;
+            lastPos = nextPos;
         }
-        ret[size-1] = items - lastPos;
+        ret[size - 1] = items - lastPos;
 
         return ret;
     }
 
-    inline std::vector<Chronometer> runTimed()
+    boost::shared_ptr<UpdateGroup<CELL_TYPE> > createUpdateGroup(
+        std::size_t rank,
+        boost::shared_ptr<PARTITION> partition)
     {
-        init();
-        std::size_t lastNanoStep = initializer->maxSteps() * NANO_STEPS;
-        return nanoStep(lastNanoStep);
+        CoordBox<DIM> box = initializer->gridBox();
+
+        boost::shared_ptr<UpdateGroupType> ret;
+        ret.reset(new UpdateGroupType(
+                      partition,
+                      box,
+                      ghostZoneWidth,
+                      initializer,
+                      reinterpret_cast<STEPPER*>(0),
+                      writerAdaptersGhost,
+                      writerAdaptersInner,
+                      steererAdaptersGhost,
+                      steererAdaptersInner,
+                      basename,
+                      rank));
+        return ret;
     }
+
 };
 
 }
 }
-
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::HpxSimulator::StepPairType,
-    LibGeoDecomp_BaseLcoStepPair
-)
-
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::CoordBox<2>,
-    LibGeoDecomp_BaseLcoCoordBox2
-)
-
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    std::vector<double>,
-    LibGeoDecomp_BaseLcovector_double
-)
-
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    LibGeoDecomp::Chronometer,
-    LibGeoDecomp_BaseLcovector_Statistics
-)
-
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    std::vector<LibGeoDecomp::Chronometer>,
-    LibGeoDecomp_BaseLcovector_StatisticsVector
-)
 
 #endif
 #endif
