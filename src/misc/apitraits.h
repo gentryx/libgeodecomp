@@ -69,11 +69,35 @@ public:
 class APITraits
 {
 public:
+    class TrueType;
+
     class FalseType
-    {};
+    {
+    public:
+        inline operator bool() const
+        {
+            return false;
+        }
+
+        TrueType operator!() const
+        {
+            return TrueType();
+        }
+    };
 
     class TrueType
-    {};
+    {
+    public:
+        inline operator bool() const
+        {
+            return true;
+        }
+
+        FalseType operator!() const
+        {
+            return FalseType();
+        }
+    };
 
     /**
      * Helper class for specializations. Thanks to Hartmut Kaiser for
@@ -1101,6 +1125,86 @@ public:
     //     typedef void SupportsTemplateName;
     // };
 };
+
+inline bool operator&&(APITraits::TrueType, bool other)
+{
+    return other;
+}
+
+inline bool operator&&(bool other, APITraits::TrueType)
+{
+    return other;
+}
+
+inline bool operator&&(APITraits::FalseType, bool other)
+{
+    return false;
+}
+
+inline bool operator&&(bool other, APITraits::FalseType)
+{
+    return false;
+}
+
+inline APITraits::TrueType operator&&(APITraits::TrueType, APITraits::TrueType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::FalseType operator&&(APITraits::TrueType, APITraits::FalseType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::FalseType operator&&(APITraits::FalseType, APITraits::TrueType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::FalseType operator&&(APITraits::FalseType, APITraits::FalseType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::TrueType operator==(APITraits::TrueType, APITraits::TrueType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::FalseType operator==(APITraits::TrueType, APITraits::FalseType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::FalseType operator==(APITraits::FalseType, APITraits::TrueType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::TrueType operator==(APITraits::FalseType, APITraits::FalseType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::FalseType operator!=(APITraits::TrueType, APITraits::TrueType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::TrueType operator!=(APITraits::TrueType, APITraits::FalseType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::TrueType operator!=(APITraits::FalseType, APITraits::TrueType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::TrueType operator!=(APITraits::FalseType, APITraits::FalseType)
+{
+    return APITraits::TrueType();
+}
 
 }
 
