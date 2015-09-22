@@ -155,7 +155,14 @@ set(RELEASE false)
 lgd_detect_distro()
 
 # compute default flags:
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
+set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
+set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall -Wno-sign-conversion -Wnon-virtual-dtor")
+
+check_cxx_compiler_flag("-fdiagnostics-color=always" SUPPORTS_COLOR)
+if(SUPPORTS_COLOR)
+  set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -fdiagnostics-color=always")
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -fdiagnostics-color=always")
+endif()
 
 check_cxx_compiler_flag("-std=c++14" SUPPORTS_CPP14)
 if(NOT SUPPORTS_CPP14)
@@ -164,7 +171,8 @@ endif()
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
-  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
+  set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -march=native")
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -march=native")
 endif()
 
 # configure whether the dreaded typemap-generator will run:
@@ -184,7 +192,8 @@ if (MACHINE_ARCH MATCHES "x86_64")
 endif()
 
 #============= 3. CONFIGURABLE BUILD OPTIONS =========================
-lgd_add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
+lgd_add_config_option(LGD_ADDITIONAL_C_COMPILE_FLAGS   "Add these flags when compiling C code."   "${DEFAULT_C_FLAGS}"   false)
+lgd_add_config_option(LGD_ADDITIONAL_CXX_COMPILE_FLAGS "Add these flags when compiling C++ code." "${DEFAULT_CXX_FLAGS}" false)
 
 lgd_add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
 
