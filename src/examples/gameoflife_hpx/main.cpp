@@ -98,7 +98,7 @@ public:
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
-        ar & boost::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
+        ar & hpx::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
     }
 };
 
