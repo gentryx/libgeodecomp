@@ -15,8 +15,7 @@ namespace LibGeoDecomp {
 namespace UpdateFunctorHelpers {
 
 #ifdef LIBGEODECOMP_WITH_THREADS
-
-#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR1                          \
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1                         \
     if (concurrencySpec.enableOpenMP() &&                               \
         !modelThreadingSpec.hasOpenMP()) {                              \
         if (concurrencySpec.preferStaticScheduling()) {                 \
@@ -28,6 +27,8 @@ namespace UpdateFunctorHelpers {
                     LGD_UPDATE_FUNCTOR_BODY;                            \
                 }                                                       \
             }                                                           \
+    /**/
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2                         \
         } else {                                                        \
             std::cout << "updatefunctor::omp2\n";                       \
             _Pragma("omp parallel for schedule(dynamic)")               \
@@ -42,12 +43,12 @@ namespace UpdateFunctorHelpers {
     }                                                                   \
     /**/
 #else
-#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR1
-    /**/
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
 #endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
-#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR2                          \
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3                         \
     if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {  \
         std::cout << "updatefunctor::hpx1\n";                           \
         hpx::parallel::for_each(hpx::parallel::par, 0, region.numPlanes(), [](std::size_t c) { \
@@ -61,14 +62,11 @@ namespace UpdateFunctorHelpers {
     }                                                                   \
     /**/
 #else
-#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR2
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
     /**/
 #endif
 
-#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR                           \
-    LGD_UPDATE_FUNCTOR_THREADING_SELECTOR1;                             \
-    LGD_UPDATE_FUNCTOR_THREADING_SELECTOR2;                             \
-                                                                        \
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4                         \
     for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) { \
         LGD_UPDATE_FUNCTOR_BODY;                                        \
     }                                                                   \
@@ -191,9 +189,10 @@ public:
             streak, gridOld.boundingBox(), pointers,                    \
             &(*gridNew)[realTargetCoord], nanoStep);                    \
         /**/
-
-        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR;
-
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
 #undef LGD_UPDATE_FUNCTOR_BODY
     }
 
