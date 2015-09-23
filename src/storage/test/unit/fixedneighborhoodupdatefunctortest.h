@@ -99,7 +99,6 @@ public:
             sum += normalize(*i + Coord<3>( 0,  0,  1), box);
 
             double expected = sum.x() + sum.y() * 1000.0 + sum.z() * 1000 * 1000.0;
-            double delta = cell.valB - expected;
             TS_ASSERT_EQUALS(cell.valB, expected);
         }
     }

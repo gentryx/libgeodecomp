@@ -716,10 +716,17 @@ public:
      */
     inline Region& operator<<(const Streak<DIM>& s)
     {
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
         //ignore 0 length streaks
         if (s.endX <= s.origin.x()) {
             return *this;
         }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
         geometryCacheTainted = true;
         RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);
