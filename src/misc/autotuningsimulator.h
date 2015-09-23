@@ -8,61 +8,48 @@
 #include <libgeodecomp/io/logger.h>
 #include <cfloat>
 
-
 namespace LibGeoDecomp{
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
 class AutoTuningSimulator 
 {
 public:
-    struct Result{
-        Result(std::string name = std::string(),
-            SimulationParameters param=SimulationParameters(), 
+    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
+    class Simulation{
+    public:
+        Simulation(std::string name,
+            SimFactoryPtr simFactory,
+            SimulationParameters param, 
             double fit = DBL_MAX):
-            nameOfSimulation(name),  
+            simulationType(name),  
+            simulationFactory(simFactory),
             parameters(param),
             fitness(fit)
         {}
-        std::string nameOfSimulation;
+        std::string simulationType;
+        SimFactoryPtr simulationFactory;
         SimulationParameters parameters;
         double fitness;
     };
     
-    typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
-    typedef boost::shared_ptr<Result> ResultPtr;
- 
-    struct Simulation {
-        ResultPtr result;
-        SimFactoryPtr simulationFactory;
-    };
-    typedef typename std::map<const std::string, Simulation>::iterator IterType;
+    typedef boost::shared_ptr<Simulation> SimulationPtr;
 
     template<typename INITIALIZER>
     AutoTuningSimulator(INITIALIZER initializer):
         simulationSteps(10)
     {
-        // FIXME simulation faktories erzeugen, wie soll herausgefunden werden welche verfügbar sind oder welche verwendet werden sollen...
+        addNewSimulation("SerialSimulation",
+            "SerialSimulation",
+            initializer);
 
+        addNewSimulation("CacheBlockingSimulation",
+            "CacheBlockingSimulation",
+            initializer);
 
-        SimFactoryPtr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
-        ResultPtr sr_p(new Result("SerialSimulation", ss_p->parameters()));
-        Simulation ss_simulation;
-        ss_simulation.result = sr_p;
-        ss_simulation.simulationFactory = ss_p;
-        simulations["SerialSimulation"] = ss_simulation;
-
-        SimFactoryPtr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-        ResultPtr cbs_result(new Result("CacheBlockingSimulation", cbs_p->parameters()));
-        Simulation cbs_simulation;
-        cbs_simulation.result = cbs_result;
-        cbs_simulation.simulationFactory = cbs_p;
-        simulations["CacheBlockingSimulation"] = cbs_simulation;
 #ifdef LIBGEODECOMP_WITH_CUDA
-        SimFactoryPtr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
-        ResultPtr cudar_p(new Result("CudaSimulation", cudas_p->parameters()));
-        Simulation cudas_simulation;
-        simulations["CudaSimulation"].result = cudar_p;
-        simulations["CudaSimulation"].simulationFactory = cudas_p;
+        addNewSimulation("CudaSimulationFactory",
+            "CudaSimulationFactory",
+            initializer);
 #endif
     }
 
@@ -70,36 +57,44 @@ public:
     {}
     
     template<typename INITIALIZER>
-    void addNewSimulation(Result& newResult, std::string name, INITIALIZER initializer)
+    void addNewSimulation(std::string name, std::string typeOfSimulation, INITIALIZER initializer)
     {
-        // FIXME in newResult maybe no or wrong params!?
-        std::string simName = newResult.nameOfSimulation;
-        if (simName == "SerialSimulation")
+        if (typeOfSimulation == "SerialSimulation")
         {
-            SimFactoryPtr ss_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
-            ResultPtr cbr_p(new Result(newResult));
-            simulations[name].result = cbr_p;
-            simulations[name].simulationFactory = ss_p;
+            SimFactoryPtr simFac_p(new SerialSimulationFactory<CELL_TYPE>(initializer));
+            SimulationPtr sim_p(new Simulation(
+                    typeOfSimulation,
+                    simFac_p,
+                    simFac_p->parameters()));
+            simulations[name] = sim_p;
             return;
         }
-        if (simName == "CacheBlockingSimulation")
+        
+        if (typeOfSimulation == "CacheBlockingSimulation")
         {
-            SimFactoryPtr cbs_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
-            ResultPtr cbr_p(new Result(newResult));
-            simulations[name].result = cbr_p;
-            simulations[name].simulationFactory = cbs_p;
+            SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
+            SimulationPtr sim_p(new Simulation(
+                    typeOfSimulation,
+                    simFac_p,
+                    simFac_p->parameters()));
+            simulations[name] = sim_p;
             return;
         }
-#ifdef WITH_CUDA
-        if (simName == "CudaSimulation")
-        {
-            SimFactoryPtr cudas_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
-            ResultPtr cbr_p(new Result(newResult));
-            simulations[name].result = cbr_p;
-            simulations[name].simulationFactory = cudas_p;
-        }
+
+#ifdef LIBGEODECOMP_WITH_CUDA
+         if (typeOfSimulation == "CudaSimulation")
+         {
+            SimFactoryPtr simFac_p(new CudaSimulationFactory<CELL_TYPE>(initializer));
+            SimulationPtr sim_p(new Simulation(
+                    typeOfSimulation,
+                    simFac_p,
+                    simFac_p->parameters()));
+            simulations[name] = sim_p;
+            return;
+         }
 #endif
-        throw std::invalid_argument("unknown Simulator type");
+
+        throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");
     }
 
     void deleteAllSimulations()
@@ -107,12 +102,12 @@ public:
         simulations.clear();
     }
 
-    SimulationParameters getSimulationParameters(const std::string simulationName)const
+    SimulationParameters getSimulationParameters(std::string simulationName)
     {
         if (isInMap(simulationName))
-            return simulations[simulationName].result->parameters;
+            return simulations[simulationName]->parameters;
         else
-            return NULL;
+            throw std::invalid_argument("getSimulationParameters(simulationName) get invalid simulationName");
     }
     
     void setSimulationSteps(unsigned steps)
@@ -125,35 +120,34 @@ public:
     {
            
         if (isInMap(name))
-            simulations[name].result->parameters = params;
+            simulations[name]->parameters = params;
         else
             throw std::invalid_argument(
                 "AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
     }
 
-    void setOptimizer(OPTIMIZER_TYPE optimizer)
-    {/*FIXME*/}
-
     virtual void run()
     {
+        typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
         for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
         {
             LOG(Logger::DBG, iter->first)
-            OPTIMIZER_TYPE optimizer(iter->second.result->parameters);
-            iter->second.result->parameters = optimizer(
+            
+            OPTIMIZER_TYPE optimizer(iter->second->parameters);
+            iter->second->parameters = optimizer(
                 simulationSteps, 
-                *iter->second.simulationFactory);
-            iter->second.result->fitness = optimizer.getFitness();
-            LOG(Logger::DBG, "Result of the "<< iter->second.result->nameOfSimulation 
-                << ": " << iter->second.result->fitness << std::endl 
-                << "new Parameters:"<< std::endl << iter->second.result->parameters 
+                *iter->second->simulationFactory);
+            iter->second->fitness = optimizer.getFitness();
+            
+            LOG(Logger::DBG, "Result of the " << iter->second->simulationType 
+                << ": " << iter->second->fitness << std::endl 
+                << "new Parameters:"<< std::endl << iter->second->parameters 
                 << std::endl)
         }
     }
 
 private:
-    std::map<const std::string, Simulation> simulations;
-    std::vector<ResultPtr> results;
+    std::map<const std::string, SimulationPtr> simulations;
     unsigned simulationSteps;
 
     bool isInMap(const std::string name)const
