@@ -128,7 +128,14 @@ protected:
     {
         TimeCompute t(&chronometer);
 
-        UpdateFunctor<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP>()(simArea, Coord<DIM>(), Coord<DIM>(), *curGrid, newGrid, nanoStep, UpdateFunctorHelpers::ConcurrencyEnableOpenMP());
+        UpdateFunctor<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableOpenMP>()(
+            simArea,
+            Coord<DIM>(),
+            Coord<DIM>(),
+            *curGrid,
+            newGrid,
+            nanoStep,
+            UpdateFunctorHelpers::ConcurrencyEnableOpenMP());
         std::swap(curGrid, newGrid);
     }
 

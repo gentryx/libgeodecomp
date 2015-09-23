@@ -22,7 +22,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
     typedef ZCurvePartition<2> PartitionType;
-    typedef VanillaStepper<TestCell<2> > StepperType;
+    typedef VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyNoP> StepperType;
     typedef UpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 

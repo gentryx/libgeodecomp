@@ -14,6 +14,66 @@ namespace LibGeoDecomp {
 
 namespace UpdateFunctorHelpers {
 
+#ifdef LIBGEODECOMP_WITH_THREADS
+
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR1                          \
+    if (concurrencySpec.enableOpenMP() &&                               \
+        !modelThreadingSpec.hasOpenMP()) {                              \
+        if (concurrencySpec.preferStaticScheduling()) {                 \
+            std::cout << "updatefunctor::omp1\n";                       \
+            _Pragma("omp parallel for schedule(static)")                \
+            for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
+                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
+                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) { \
+                    LGD_UPDATE_FUNCTOR_BODY;                            \
+                }                                                       \
+            }                                                           \
+        } else {                                                        \
+            std::cout << "updatefunctor::omp2\n";                       \
+            _Pragma("omp parallel for schedule(dynamic)")               \
+            for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
+                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
+                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) { \
+                    LGD_UPDATE_FUNCTOR_BODY;                            \
+                }                                                       \
+            }                                                           \
+        }                                                               \
+        return;                                                         \
+    }                                                                   \
+    /**/
+#else
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR1
+    /**/
+#endif
+
+#ifdef LIBGEODECOMP_WITH_HPX
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR2                          \
+    if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {  \
+        std::cout << "updatefunctor::hpx1\n";                           \
+        hpx::parallel::for_each(hpx::parallel::par, 0, region.numPlanes(), [](std::size_t c) { \
+                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
+                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) { \
+                    LGD_UPDATE_FUNCTOR_BODY;                            \
+                }                                                       \
+            });                                                         \
+                                                                        \
+        return;                                                         \
+    }                                                                   \
+    /**/
+#else
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR2
+    /**/
+#endif
+
+#define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR                           \
+    LGD_UPDATE_FUNCTOR_THREADING_SELECTOR1;                             \
+    LGD_UPDATE_FUNCTOR_THREADING_SELECTOR2;                             \
+                                                                        \
+    for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) { \
+        LGD_UPDATE_FUNCTOR_BODY;                                        \
+    }                                                                   \
+    /**/
+
 /**
  * Switches between different implementations of the UpdateFunctor,
  * depending on the properties of the model/grid. Not to be confused
@@ -121,49 +181,20 @@ public:
     {
         const CELL *pointers[Stencil::VOLUME];
 
-#ifdef LIBGEODECOMP_WITH_THREADS
-        if (concurrencySpec.enableOpenMP() && !modelThreadingSpec.hasOpenMP()) {
-#pragma omp parallel for schedule(static)
-            for (std::size_t c = 0; c < region.numPlanes(); ++c) {
-                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1);
-                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) {
-                    Streak<DIM> streak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-                    Coord<DIM> realTargetCoord = i->origin + targetOffset;
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        Streak<DIM> streak(i->origin + sourceOffset,                    \
+                           i->endX + sourceOffset.x());                 \
+        Coord<DIM> realTargetCoord = i->origin + targetOffset;          \
+                                                                        \
+        LinePointerAssembly<Stencil>()(pointers, *i, gridOld);          \
+        LinePointerUpdateFunctor<CELL>()(                               \
+            streak, gridOld.boundingBox(), pointers,                    \
+            &(*gridNew)[realTargetCoord], nanoStep);                    \
+        /**/
 
-                    LinePointerAssembly<Stencil>()(pointers, *i, gridOld);
-                    LinePointerUpdateFunctor<CELL>()(
-                        streak, gridOld.boundingBox(), pointers, &(*gridNew)[realTargetCoord], nanoStep);
-                }
-            }
-            return;
-        }
-#endif
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR;
 
-#ifdef LIBGEODECOMP_WITH_HPX
-        if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {
-            for (std::size_t c = 0; c < region.numPlanes(); ++c) {
-                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1);
-                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) {
-                    Streak<DIM> streak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-                    Coord<DIM> realTargetCoord = i->origin + targetOffset;
-
-                    LinePointerAssembly<Stencil>()(pointers, *i, gridOld);
-                    LinePointerUpdateFunctor<CELL>()(
-                        streak, gridOld.boundingBox(), pointers, &(*gridNew)[realTargetCoord], nanoStep);
-                }
-            }
-            return;
-        }
-#endif
-
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            Streak<DIM> streak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-            Coord<DIM> realTargetCoord = i->origin + targetOffset;
-
-            LinePointerAssembly<Stencil>()(pointers, *i, gridOld);
-            LinePointerUpdateFunctor<CELL>()(
-                streak, gridOld.boundingBox(), pointers, &(*gridNew)[realTargetCoord], nanoStep);
-        }
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 
     template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_THREADED_UPDATE>
@@ -256,7 +287,21 @@ public:
 class ConcurrencyNoP
 {
 public:
+    inline
+    explicit ConcurrencyNoP(bool /* unused */ = false)
+    {}
+
     bool enableOpenMP() const
+    {
+        return false;
+    }
+
+    bool enableHPX() const
+    {
+        return false;
+    }
+
+    bool preferStaticScheduling() const
     {
         return false;
     }
@@ -265,9 +310,46 @@ public:
 class ConcurrencyEnableOpenMP
 {
 public:
+    inline
+    explicit ConcurrencyEnableOpenMP(bool updatingGhost=true) :
+        updatingGhost(updatingGhost)
+    {}
+
     bool enableOpenMP() const
     {
         return true;
+    }
+
+    bool enableHPX() const
+    {
+        return false;
+    }
+
+    bool preferStaticScheduling() const
+    {
+        return !updatingGhost;
+    }
+
+private:
+    bool updatingGhost;
+};
+
+class ConcurrencyEnableHPX
+{
+public:
+    bool enableOpenMP() const
+    {
+        return false;
+    }
+
+    bool enableHPX() const
+    {
+        return true;
+    }
+
+    bool preferStaticScheduling() const
+    {
+        return false;
     }
 };
 

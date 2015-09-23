@@ -16,7 +16,7 @@ class VanillaStepperBasicTest : public CxxTest::TestSuite
 {
 public:
     typedef DisplacedGrid<TestCell<2>, Topologies::Cube<2>::Topology, true> GridType;
-    typedef VanillaStepper<TestCell<2> > StepperType;
+    typedef VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyNoP> StepperType;
 
     void setUp()
     {

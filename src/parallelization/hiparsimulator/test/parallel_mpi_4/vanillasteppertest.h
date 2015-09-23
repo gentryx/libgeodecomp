@@ -22,7 +22,7 @@ class VanillaStepperTest : public CxxTest::TestSuite
 public:
     typedef APITraits::SelectTopology<TestCell<3> >::Value Topology;
     typedef PartitionManager<Topology> PartitionManagerType;
-    typedef VanillaStepper<TestCell<3> > StepperType;
+    typedef VanillaStepper<TestCell<3>, UpdateFunctorHelpers::ConcurrencyNoP> StepperType;
     typedef PatchLink<StepperType::GridType> PatchLinkType;
     typedef boost::shared_ptr<PatchLinkType::Accepter> PatchAccepterPtrType;
     typedef boost::shared_ptr<PatchLinkType::Provider> PatchProviderPtrType;

@@ -15,7 +15,7 @@ namespace HiParSimulator {
  * zones of width k mean that synchronization only needs to be done
  * every k'th (nano) step.
  */
-template<typename CELL_TYPE>
+template<typename CELL_TYPE, typename CONCURRENCY_SPEC>
 class VanillaStepper : public CommonStepper<CELL_TYPE>
 {
 public:
@@ -92,13 +92,14 @@ private:
         {
             TimeComputeInner t(&chronometer);
 
-            UpdateFunctor<CELL_TYPE>()(
+            UpdateFunctor<CELL_TYPE, CONCURRENCY_SPEC>()(
                 region,
                 Coord<DIM>(),
                 Coord<DIM>(),
                 *oldGrid,
                 &*newGrid,
-                curNanoStep);
+                curNanoStep,
+                CONCURRENCY_SPEC(false));
             std::swap(oldGrid, newGrid);
 
             ++curNanoStep;
@@ -173,13 +174,14 @@ private:
                 TimeComputeGhost timer(&chronometer);
 
                 const Region<DIM>& region = rim(t + 1);
-                UpdateFunctor<CELL_TYPE>()(
+                UpdateFunctor<CELL_TYPE, CONCURRENCY_SPEC>()(
                     region,
                     Coord<DIM>(),
                     Coord<DIM>(),
                     *oldGrid,
                     &*newGrid,
-                    curNanoStep);
+                    curNanoStep,
+                    CONCURRENCY_SPEC(true));
 
                 ++curNanoStep;
                 if (curNanoStep == NANO_STEPS) {
