@@ -1,4 +1,7 @@
 // vim: noai:ts=4:sw=4:expandtab
+
+#ifndef LIBGEODECOMB_WITH_CUDA
+
 #include <libgeodecomp/misc/autotuningsimulator.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
@@ -13,7 +16,6 @@
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/mpiiowriter.h>
-//#include <libgeodecomp/parallelization/cudasimulator.h>
 #define LIBGEODECOMP_DEBUG_LEVEL 4 
 
 using namespace LibGeoDecomp;
@@ -90,7 +92,7 @@ public:
     {
     }
 
-    void xtestBasicPatternOptimized()
+    void testBasicPatternOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::TestBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -107,7 +109,7 @@ public:
         ats.run();
     }
 
-    void xtestAddOwnSimulations()
+    void testAddOwnSimulations()
     {
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -224,3 +226,4 @@ private:
     unsigned maxSteps;
     SimulationFactory<SimFabTestCell> *fab, *cfab;
 };
+#endif // LIBGEDODECOMP_WITH_CUDA
