@@ -1,7 +1,5 @@
 // vim: noai:ts=4:sw=4:expandtab
 
-#ifndef LIBGEODECOMB_WITH_CUDA
-
 #include <libgeodecomp/misc/autotuningsimulator.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
@@ -226,4 +224,3 @@ private:
     unsigned maxSteps;
     SimulationFactory<SimFabTestCell> *fab, *cfab;
 };
-#endif // LIBGEDODECOMP_WITH_CUDA
