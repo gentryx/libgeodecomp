@@ -62,7 +62,7 @@ public:
         const unsigned nanoStep;
     };
 
-    template<typename GRID1, typename GRID2, typename ANY_TOPOLOGY>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_TOPOLOGY, typename ANY_THREADED_UPDATE>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -70,6 +70,7 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
         // SelectFixedCoordsOnlyUpdate
         APITraits::TrueType,
         // SelectSoA
@@ -77,7 +78,9 @@ public:
         // SelectUpdateLineX
         APITraits::TrueType,
         // SelectTopology,
-        ANY_TOPOLOGY)
+        ANY_TOPOLOGY,
+        // SelectThreadedUpdate,
+        ANY_THREADED_UPDATE)
     {
         Coord<DIM> gridOldOrigin = gridOld.boundingBox().origin;
         Coord<DIM> gridNewOrigin = gridNew->boundingBox().origin;
@@ -96,7 +99,7 @@ public:
                 nanoStep));
     }
 
-    template<typename GRID1, typename GRID2, typename ANY_API, typename ANY_TOPOLOGY>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_TOPOLOGY, typename ANY_THREADED_UPDATE>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -104,6 +107,7 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
         // SelectFixedCoordsOnlyUpdate
         APITraits::TrueType,
         // SelectSoA
@@ -111,9 +115,46 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        ANY_TOPOLOGY)
+        ANY_TOPOLOGY,
+        // SelectThreadedUpdate,
+        ANY_THREADED_UPDATE modelThreadingSpec)
     {
         const CELL *pointers[Stencil::VOLUME];
+
+#ifdef LIBGEODECOMP_WITH_THREADS
+        if (concurrencySpec.enableOpenMP() && !modelThreadingSpec.hasOpenMP()) {
+#pragma omp parallel for schedule(static)
+            for (std::size_t c = 0; c < region.numPlanes(); ++c) {
+                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1);
+                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) {
+                    Streak<DIM> streak(i->origin + sourceOffset, i->endX + sourceOffset.x());
+                    Coord<DIM> realTargetCoord = i->origin + targetOffset;
+
+                    LinePointerAssembly<Stencil>()(pointers, *i, gridOld);
+                    LinePointerUpdateFunctor<CELL>()(
+                        streak, gridOld.boundingBox(), pointers, &(*gridNew)[realTargetCoord], nanoStep);
+                }
+            }
+            return;
+        }
+#endif
+
+#ifdef LIBGEODECOMP_WITH_HPX
+        if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {
+            for (std::size_t c = 0; c < region.numPlanes(); ++c) {
+                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1);
+                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) {
+                    Streak<DIM> streak(i->origin + sourceOffset, i->endX + sourceOffset.x());
+                    Coord<DIM> realTargetCoord = i->origin + targetOffset;
+
+                    LinePointerAssembly<Stencil>()(pointers, *i, gridOld);
+                    LinePointerUpdateFunctor<CELL>()(
+                        streak, gridOld.boundingBox(), pointers, &(*gridNew)[realTargetCoord], nanoStep);
+                }
+            }
+            return;
+        }
+#endif
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> streak(i->origin + sourceOffset, i->endX + sourceOffset.x());
@@ -125,7 +166,7 @@ public:
         }
     }
 
-    template<typename GRID1, typename GRID2, typename ANY_API>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_THREADED_UPDATE>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -133,6 +174,7 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
         // SelectFixedCoordsOnlyUpdate
         APITraits::FalseType,
         // SelectSoA
@@ -140,7 +182,9 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        TopologiesHelpers::Topology<DIM, false, false, false>)
+        TopologiesHelpers::Topology<DIM, false, false, false>,
+        // SelectThreadedUpdate,
+        ANY_THREADED_UPDATE)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
@@ -149,7 +193,7 @@ public:
         }
     }
 
-    template<typename GRID1, typename GRID2, typename ANY_API>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_THREADED_UPDATE>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -157,6 +201,7 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
         // SelectFixedCoordsOnlyUpdate
         APITraits::FalseType,
         // SelectSoA
@@ -164,7 +209,9 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        TopologiesHelpers::Topology<DIM, true, true, true>)
+        TopologiesHelpers::Topology<DIM, true, true, true>,
+        // SelectThreadedUpdate,
+        ANY_THREADED_UPDATE)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
@@ -174,7 +221,7 @@ public:
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
-    template<typename GRID1, typename GRID2, typename ANY_API, typename ANY_GRID_TYPE>
+    template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_GRID_TYPE, typename ANY_THREADED_UPDATE>
     void operator()(
         const Region<DIM>& region,
         const Coord<DIM>& sourceOffset,
@@ -182,6 +229,7 @@ public:
         const GRID1& gridOld,
         GRID2 *gridNew,
         unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec,
         // SelectFixedCoordsOnlyUpdate
         APITraits::FalseType,
         // SelectSoA
@@ -189,7 +237,9 @@ public:
         // SelectUpdateLineX
         ANY_API,
         // SelectTopology
-        TopologiesHelpers::UnstructuredTopology)
+        TopologiesHelpers::UnstructuredTopology,
+        // SelectThreadedUpdate,
+        ANY_THREADED_UPDATE)
     {
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
             Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
@@ -199,19 +249,45 @@ public:
 #endif
 };
 
+/**
+ * The default CONCURRENCY_FUNCTOR for UpdateFunctor: won't request
+ * threading and won't execute any sideband actions.
+ */
+class ConcurrencyNoP
+{
+public:
+    bool enableOpenMP() const
+    {
+        return false;
+    }
+};
+
+class ConcurrencyEnableOpenMP
+{
+public:
+    bool enableOpenMP() const
+    {
+        return true;
+    }
+};
+
 }
 
 /**
- * UpdateFunctor a wrapper which delegates the update of a set of
+ * UpdateFunctor is a wrapper which delegates the update of a set of
  * cells to a suitable implementation. The implementation may depend
  * on the properties of the CELL as well as the datastructure which
  * holds the grid data.
+ *
+ * The CONCURRENCY_FUNCTOR can be used to control threading and to
+ * execute sideband functions (e.g. MPI pacing).
  */
-template<typename CELL>
+template<typename CELL, typename CONCURRENCY_FUNCTOR = UpdateFunctorHelpers::ConcurrencyNoP>
 class UpdateFunctor
 {
 public:
     typedef typename APITraits::SelectTopology<CELL>::Value Topology;
+
     static const int DIM = Topology::DIM;
 
     template<typename GRID1, typename GRID2>
@@ -221,14 +297,16 @@ public:
         const Coord<DIM>& targetOffset,
         const GRID1& gridOld,
         GRID2 *gridNew,
-        unsigned nanoStep)
+        unsigned nanoStep,
+        const CONCURRENCY_FUNCTOR& concurrencySpec = UpdateFunctorHelpers::ConcurrencyNoP())
     {
         UpdateFunctorHelpers::Selector<CELL>()(
-            region, sourceOffset, targetOffset, gridOld, gridNew, nanoStep,
+            region, sourceOffset, targetOffset, gridOld, gridNew, nanoStep, concurrencySpec,
             typename APITraits::SelectFixedCoordsOnlyUpdate<CELL>::Value(),
             typename APITraits::SelectSoA<CELL>::Value(),
             typename APITraits::SelectUpdateLineX<CELL>::Value(),
-            typename APITraits::SelectTopology<CELL>::Value());
+            typename APITraits::SelectTopology<CELL>::Value(),
+            typename APITraits::SelectThreadedUpdate<CELL>::Value());
     }
 };
 

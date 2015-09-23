@@ -719,7 +719,24 @@ public:
     class SelectThreadedUpdate
     {
     public:
-        typedef FalseType Value;
+        class Value
+        {
+        public:
+            inline FalseType hasOpenMP() const
+            {
+                return FalseType();
+            }
+
+            inline FalseType hasHPX() const
+            {
+                return FalseType();
+            }
+
+            inline FalseType hasCUDA() const
+            {
+                return FalseType();
+            }
+        };
     };
 
     template<typename CELL>
