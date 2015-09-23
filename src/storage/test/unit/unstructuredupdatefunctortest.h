@@ -174,9 +174,9 @@ public:
         }
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (coord.x() >= 10  && coord.x() < 30 ||
-                coord.x() >= 40  && coord.x() < 60 ||
-                coord.x() >= 100 && coord.x() < 150) {
+            if (((coord.x() >=  10) && (coord.x() <  30)) ||
+                ((coord.x() >=  40) && (coord.x() <  60)) ||
+                ((coord.x() >= 100) && (coord.x() < 150))) {
                 const double sum = (DIM / 2.0) * 200.0;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
@@ -224,9 +224,9 @@ public:
         }
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (coord.x() >= 10  && coord.x() < 30 ||
-                coord.x() >= 40  && coord.x() < 60 ||
-                coord.x() >= 100 && coord.x() < 150) {
+            if (((coord.x() >=  10) && (coord.x() <  30)) ||
+                ((coord.x() >=  40) && (coord.x() <  60)) ||
+                ((coord.x() >= 100) && (coord.x() < 150))) {
                 const double sum = coord.x() * 200.0;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
@@ -276,9 +276,9 @@ public:
         }
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (coord.x() >= 10  && coord.x() < 30 ||
-                coord.x() >= 37  && coord.x() < 60 ||
-                coord.x() >= 100 && coord.x() < 149) {
+            if (((coord.x() >=  10) && (coord.x() <  30)) ||
+                ((coord.x() >=  37) && (coord.x() <  60)) ||
+                ((coord.x() >= 100) && (coord.x() < 149))) {
                 const double sum = coord.x() * 200.0;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
@@ -328,9 +328,9 @@ public:
         }
 
         for (Coord<1> coord(0); coord < Coord<1>(150); ++coord.x()) {
-            if (coord.x() >= 10  && coord.x() < 30 ||
-                coord.x() >= 37  && coord.x() < 60 ||
-                coord.x() >= 100 && coord.x() < 149) {
+            if (((coord.x() >=  10)) && (coord.x() <  30) ||
+                ((coord.x() >=  37)) && (coord.x() <  60) ||
+                ((coord.x() >= 100)) && (coord.x() < 149)) {
                 const double sum = (149 - coord.x()) * 200.0;
                 TS_ASSERT_EQUALS(sum, gridNew.get(coord).sum);
             } else {
