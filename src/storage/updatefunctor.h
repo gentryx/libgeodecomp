@@ -1,6 +1,7 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 
+#include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/misc/apitraits.h>
@@ -19,7 +20,6 @@ namespace UpdateFunctorHelpers {
     if (concurrencySpec.enableOpenMP() &&                               \
         !modelThreadingSpec.hasOpenMP()) {                              \
         if (concurrencySpec.preferStaticScheduling()) {                 \
-            std::cout << "updatefunctor::omp1\n";                       \
             _Pragma("omp parallel for schedule(static)")                \
             for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
                 typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
@@ -30,7 +30,6 @@ namespace UpdateFunctorHelpers {
     /**/
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2                         \
         } else {                                                        \
-            std::cout << "updatefunctor::omp2\n";                       \
             _Pragma("omp parallel for schedule(dynamic)")               \
             for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
                 typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
@@ -177,9 +176,8 @@ public:
         // SelectThreadedUpdate,
         ANY_THREADED_UPDATE modelThreadingSpec)
     {
-        const CELL *pointers[Stencil::VOLUME];
-
 #define LGD_UPDATE_FUNCTOR_BODY                                         \
+        const CELL *pointers[Stencil::VOLUME];                          \
         Streak<DIM> streak(i->origin + sourceOffset,                    \
                            i->endX + sourceOffset.x());                 \
         Coord<DIM> realTargetCoord = i->origin + targetOffset;          \
