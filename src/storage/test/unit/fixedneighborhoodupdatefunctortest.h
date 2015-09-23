@@ -16,7 +16,7 @@ public:
     {};
 
     inline
-    MySoATestCellWithTwoDoubles(const double valA = 0, const double valB = 0) :
+    explicit MySoATestCellWithTwoDoubles(const double valA = 0, const double valB = 0) :
         valA(valA),
         valB(valB)
     {}

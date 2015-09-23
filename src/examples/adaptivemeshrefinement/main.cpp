@@ -46,7 +46,8 @@ public:
     class HoodAdapter
     {
     public:
-        inline HoodAdapter(const NEIGHBORHOOD& hood) :
+        inline
+        explicit HoodAdapter(const NEIGHBORHOOD& hood) :
             hood(hood)
         {}
 
@@ -136,7 +137,7 @@ public:
     class Iterator
     {
     public:
-        Iterator(const AMRDiffusionCell *cell) :
+        explicit Iterator(const AMRDiffusionCell *cell) :
             cursors(1, cell)
         {}
 
@@ -244,7 +245,8 @@ public:
     // };
 
 
-    inline AMRDiffusionCell(
+    inline
+    explicit AMRDiffusionCell(
         const FloatCoord<2>& pos = FloatCoord<2>(0, 0),
         const FloatCoord<2>& dim = FloatCoord<2>(1, 1),
         const Coord<2>& logicalCoord = Coord<2>(),

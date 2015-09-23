@@ -480,7 +480,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline Region(const Region<DIM>& other) = default;
 
-    inline Region(Region<DIM>&& other) :
+    inline
+    explicit Region(Region<DIM>&& other) :
         myBoundingBox(other.myBoundingBox),
         mySize(other.mySize),
         geometryCacheTainted(other.geometryCacheTainted)

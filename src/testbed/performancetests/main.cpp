@@ -272,7 +272,7 @@ public:
 class RegionExpand : public CPUBenchmark
 {
 public:
-    RegionExpand(int expansionWidth) :
+    explicit RegionExpand(int expansionWidth) :
         expansionWidth(expansionWidth)
     {}
 
@@ -320,7 +320,7 @@ private:
 class RegionExpandWithAdjacency : public CPUBenchmark
 {
 public:
-    RegionExpandWithAdjacency(
+    explicit RegionExpandWithAdjacency(
         std::map<int, ConvexPolytope<Coord<2> > > cells) :
         rawCells(cells)
     {}

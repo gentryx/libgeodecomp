@@ -16,7 +16,7 @@ public:
     friend class BoostSerialization;
     friend class HPXSerialization;
 
-    QuickPalette(VALUE min = VALUE(), VALUE max = VALUE()) :
+    explicit QuickPalette(VALUE min = VALUE(), VALUE max = VALUE()) :
         mark0(min),
         mark1((min * 3 + max * 1) / 4),
         mark2((min * 2 + max * 2) / 4),

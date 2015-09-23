@@ -17,7 +17,7 @@ public:
     class TestableEvaluator : public Optimizer::Evaluator
     {
     public:
-        TestableEvaluator(double maximum) :
+        explicit TestableEvaluator(double maximum) :
             calls(0),
             maxima(1, maximum)
         {}

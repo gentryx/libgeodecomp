@@ -311,7 +311,7 @@ public:
      * blockSize will heavily influence the performance and should be
      * chosen on a per GPU basis -- GPU architectures vary greatly.
      */
-    CudaSimulator(
+    explicit CudaSimulator(
         Initializer<CELL_TYPE> *initializer,
         // fixme: blockSize should be driven by an auto-tuner or at
         // least come with a better heuristic.
@@ -346,7 +346,7 @@ public:
         ioGrid = ProxyGrid<CELL_TYPE, DIM> (&grid, initializer->gridBox());
     }
 
-    ~CudaSimulator()
+    virtual ~CudaSimulator()
     {
         cudaFree(devGridOld);
         cudaFree(devGridNew);
