@@ -14,6 +14,7 @@
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/mpiiowriter.h>
+#include <boost/assign/list_of.hpp>
 #define LIBGEODECOMP_DEBUG_LEVEL 4 
 
 using namespace LibGeoDecomp;
@@ -90,13 +91,19 @@ public:
     {
     }
 
-    void testBasicPatternOptimized()
+    void xtestBasicPatternOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::TestBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
-        ats.setSimulationSteps(4);
+        ats.setSimulationSteps(10);
         ats.run();
+        std::vector<std::string> names = ats.getSimulationNames();
+        for (std::vector<std::string>::iterator iter = names.begin();
+            iter != names.end(); iter++)
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
+            << ats.getFitness(*iter)<< std::endl 
+            << ats.getSimulationParameters(*iter))
     }
 
     void xtestBasicSimplexOptimized()
@@ -104,10 +111,17 @@ public:
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
+        ats.setSimulationSteps(10);
         ats.run();
+        std::vector<std::string> names = ats.getSimulationNames();
+        for (std::vector<std::string>::iterator iter = names.begin();
+            iter != names.end(); iter++)
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
+            << ats.getFitness(*iter)<< std::endl 
+            << ats.getSimulationParameters(*iter))
     }
 
-    void testAddOwnSimulations()
+    void xtestAddOwnSimulations()
     {
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -117,12 +131,17 @@ public:
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
-        AutoTuningSimulator<SimFabTestCell, PatternOptimizer>::Result newResult(
+        ats.addNewSimulation("1.CacheBlockingSimulator",
             "CacheBlockingSimulation",
-            params);
-        ats.addNewSimulation(newResult, "1.CacheBlockingSimulator",
             SimFabTestInitializer(dim,maxSteps));
+        ats.setParameters(params, "1.CacheBlockingSimulator");
         ats.run();
+        std::vector<std::string> names = ats.getSimulationNames();
+        for (std::vector<std::string>::iterator iter = names.begin();
+            iter != names.end(); iter++)
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
+            << ats.getFitness(*iter)<< std::endl 
+            << ats.getSimulationParameters(*iter))
     }
 
     void xtestManuallyParamterized()
@@ -132,18 +151,56 @@ public:
             SimFabTestInitializer(dim, maxSteps));
         
         SimulationParameters params;
-        std::vector<std::string> simTypes;
-        simTypes << "CacheBlockingSimulator";
-        params.addParameter("Simulator" , simTypes);
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
         
         ats.setParameters(params, "CacheBlockingSimulation");
         ats.run();
+        
+        std::vector<std::string> names = ats.getSimulationNames();
+        for (std::vector<std::string>::iterator iter = names.begin();
+            iter != names.end(); iter++)
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
+            << ats.getFitness(*iter)<< std::endl 
+            << ats.getSimulationParameters(*iter))
+    }
+
+    void xtestInvalidArguments()
+    {
+        LOG(Logger::INFO, "AutotuningSimulatorTest:testInvalidArguments()")
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
+            SimFabTestInitializer(dim, maxSteps));
+        // This test don't test SimulationParameters!!!!
+        SimulationParameters params;
+        params.addParameter("WavefrontWidth", 1, 300);
+        params.addParameter("WavefrontHeight", 1, 300);
+        params.addParameter("PipelineLength", 1, 25);
+        TS_ASSERT_THROWS(ats.addNewSimulation("1.CacheBlockingSimulator",
+            "CachBlockingSimulation",
+            SimFabTestInitializer(dim,maxSteps)), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.setParameters(params, "1.CacheBlockingSimulator"),
+            std::invalid_argument);
+        TS_ASSERT_THROWS(ats.getFitness("NoSimulator"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
+        TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
 
     }
 
+    void testAddWriter()
+    {
+        LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
+        AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
+            SimFabTestInitializer(dim, maxSteps));
+        ats.deleteAllSimulations();
+        ats.addNewSimulation(
+            "addWriterTest", 
+            "SerialSimulation",
+            SimFabTestInitializer(dim, maxSteps));
+        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
+        ats.addWriter(*writer);
+        ats.run();
+    }
 private:
     Coord<3> dim;
     unsigned maxSteps;
@@ -165,6 +222,7 @@ public:
 
     void tearDown()
     {
+        delete cfab;
         delete fab;
     }
 
@@ -199,6 +257,7 @@ public:
         sim->addWriter(new TracingWriter<SimFabTestCell>(1, 100));
         sim->run();
         double fitness = cfab->operator()(cfab->parameters());
+        LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
     }
 
     void xtestAddWriterToSerialSimulationFactory()
