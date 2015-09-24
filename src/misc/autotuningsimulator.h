@@ -11,7 +11,7 @@
 namespace LibGeoDecomp{
 
 template<typename CELL_TYPE,typename OPTIMIZER_TYPE>
-class AutoTuningSimulator 
+class AutoTuningSimulator
 {
 public:
     typedef boost::shared_ptr<SimulationFactory<CELL_TYPE> > SimFactoryPtr;
@@ -19,9 +19,9 @@ public:
     public:
         Simulation(std::string name,
             SimFactoryPtr simFactory,
-            SimulationParameters param, 
+            SimulationParameters param,
             double fit = DBL_MAX):
-            simulationType(name),  
+            simulationType(name),
             simulationFactory(simFactory),
             parameters(param),
             fitness(fit)
@@ -31,7 +31,7 @@ public:
         SimulationParameters parameters;
         double fitness;
     };
-    
+
     typedef boost::shared_ptr<Simulation> SimulationPtr;
 
     template<typename INITIALIZER>
@@ -55,7 +55,22 @@ public:
 
     ~AutoTuningSimulator()
     {}
-    
+
+    void addWriter(const ParallelWriter<CELL_TYPE>& writer)
+    {
+        parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer.clone()));
+    }
+
+    void addWriter(const Writer<CELL_TYPE>& writer)
+    {
+        writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer.clone()));
+    }
+
+    void addSteerer(const Steerer<CELL_TYPE>& steerer)
+    {
+        steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer.clone()));
+    }
+
     template<typename INITIALIZER>
     void addNewSimulation(std::string name, std::string typeOfSimulation, INITIALIZER initializer)
     {
@@ -69,7 +84,7 @@ public:
             simulations[name] = sim_p;
             return;
         }
-        
+
         if (typeOfSimulation == "CacheBlockingSimulation")
         {
             SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
@@ -102,6 +117,25 @@ public:
         simulations.clear();
     }
 
+    std::vector<std::string> getSimulationNames()
+    {
+        std::vector<std::string> result;
+        typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
+        for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
+        {
+            result.push_back(iter->first);
+        }
+        return result;
+    }
+
+    double getFitness(std::string simulationName)
+    {
+        if (isInMap(simulationName))
+            return simulations[simulationName]->fitness;
+        else
+            throw std::invalid_argument("getFitness(simulationName) get invalid simulationName");
+    }
+
     SimulationParameters getSimulationParameters(std::string simulationName)
     {
         if (isInMap(simulationName))
@@ -109,16 +143,14 @@ public:
         else
             throw std::invalid_argument("getSimulationParameters(simulationName) get invalid simulationName");
     }
-    
+
     void setSimulationSteps(unsigned steps)
     {
         simulationSteps = steps;
     }
-    
 
     void setParameters(SimulationParameters params, std::string name)
     {
-           
         if (isInMap(name))
             simulations[name]->parameters = params;
         else
@@ -126,22 +158,28 @@ public:
                 "AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
     }
 
-    virtual void run()
+    void run()
     {
         typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
         for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
         {
             LOG(Logger::DBG, iter->first)
-            
+            for (unsigned i = 0; i < writers.size(); ++i)
+                iter->second->simulationFactory->addWriter(*writers[i].get()->clone());
+            for (unsigned i = 0; i < parallelWriters.size(); ++i)
+                iter->second->simulationFactory->addWriter(*parallelWriters[i].get()->clone());
+            for (unsigned i = 0; i < steerers.size(); ++i)
+                iter->second->simulationFactory->addSteerer(*steerers[i].get()->clone()); 
+
             OPTIMIZER_TYPE optimizer(iter->second->parameters);
             iter->second->parameters = optimizer(
-                simulationSteps, 
+                simulationSteps,
                 *iter->second->simulationFactory);
             iter->second->fitness = optimizer.getFitness();
-            
-            LOG(Logger::DBG, "Result of the " << iter->second->simulationType 
-                << ": " << iter->second->fitness << std::endl 
-                << "new Parameters:"<< std::endl << iter->second->parameters 
+
+            LOG(Logger::DBG, "Result of the " << iter->second->simulationType
+                << ": " << iter->second->fitness << std::endl
+                << "new Parameters:"<< std::endl << iter->second->parameters
                 << std::endl)
         }
     }
@@ -149,6 +187,9 @@ public:
 private:
     std::map<const std::string, SimulationPtr> simulations;
     unsigned simulationSteps;
+    std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
+    std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
+    std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
 
     bool isInMap(const std::string name)const
     {
