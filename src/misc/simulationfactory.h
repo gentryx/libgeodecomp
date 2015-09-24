@@ -29,7 +29,7 @@ public:
         initializer(ClonableInitializerWrapper<INITIALIZER>::wrap(initializer))
     {}
 
-    ~SimulationFactory()
+    virtual ~SimulationFactory()
     {
         // FIXME: we can't delete the initializer here because of the missing clone() in initializer
         // delete initializer;
@@ -45,7 +45,7 @@ public:
         writers.push_back(boost::shared_ptr<Writer<CELL> >(writer.clone()));
     }
     
-    void addSteerer(const Steerer<CELL>& steerer)
+    void addSteerer(Steerer<CELL>& steerer) //FIXME why is const on steerer not working?
     {
         steerers.push_back(boost::shared_ptr<Steerer<CELL> >(steerer.clone()));
     }
@@ -107,6 +107,8 @@ public:
     {
         // Serial Simulation has no Parameters to optimize
     }
+
+    virtual ~SerialSimulationFactory(){}
 protected:
     
     virtual Simulator<CELL> *buildSimulator(
@@ -134,6 +136,7 @@ public:
         SimulationFactory<CELL>::parameterSet.addParameter("WavefrontHeight",10, 1000);
         SimulationFactory<CELL>::parameterSet.addParameter("PipelineLength",  1, 30);
     }
+    virtual ~CacheBlockingSimulationFactory(){}
 protected:
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
@@ -171,6 +174,7 @@ public:
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimY", 1,   8);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimZ", 1,   8);
     }
+    virtual ~CudaSimulationFactory(){}
 protected:
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
