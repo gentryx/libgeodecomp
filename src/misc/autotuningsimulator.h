@@ -47,8 +47,8 @@ public:
             initializer);
 
 #ifdef LIBGEODECOMP_WITH_CUDA
-        addNewSimulation("CudaSimulationFactory",
-            "CudaSimulationFactory",
+        addNewSimulation("CudaSimulation",
+            "CudaSimulation",
             initializer);
 #endif
     }

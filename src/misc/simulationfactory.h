@@ -170,7 +170,7 @@ public:
     CudaSimulationFactory<CELL>(INITIALIZER initializer):
         SimulationFactory<CELL>(initializer)
     {
-        SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
+        SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 80);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimY", 1,   8);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimZ", 1,   8);
     }

@@ -84,12 +84,11 @@ public:
     void setUp()
     {
         dim = Coord<3>(100,100,100);
-        maxSteps = 100;
+        maxSteps = 50;
     }
 
     void tearDown()
-    {
-    }
+    {}
 
     void xtestBasicPatternOptimized()
     {
@@ -166,7 +165,7 @@ public:
             << ats.getSimulationParameters(*iter))
     }
 
-    void xtestInvalidArguments()
+    void testInvalidArguments()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest:testInvalidArguments()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -187,7 +186,7 @@ public:
 
     }
 
-    void testAddWriter()
+    void xtestAddWriter()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -200,6 +199,7 @@ public:
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
         ats.addWriter(*writer);
         ats.run();
+        delete writer;
     }
 private:
     Coord<3> dim;
@@ -237,10 +237,10 @@ public:
         }
     }
 
-    void testCacheBlockingFitness()
+    void xtestCacheBlockingFitness()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testCacheBlockingFitness()")
-        for(int i = 1;i <= 2; i++){
+        for (int i = 1; i <= 2; i++){
             cfab->parameters()["PipelineLength"].setValue(1);
             cfab->parameters()["WavefrontWidth"].setValue(100);
             cfab->parameters()["WavefrontHeight"].setValue(40);
@@ -266,6 +266,7 @@ public:
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
         fab->addWriter(*writer);
         fab->operator()(fab->parameters());
+        delete writer;
     }
 
     void xtestAddWriterToCacheBlockingSimulationFactory()
@@ -274,6 +275,7 @@ public:
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
         cfab->addWriter(*writer);
         cfab->operator()(cfab->parameters());
+        delete writer;
     }
 
 
