@@ -196,10 +196,8 @@ public:
             "addWriterTest", 
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
-        Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
-        ats.addWriter(*writer);
+        ats.addWriter((Writer<SimFabTestCell> *) new TracingWriter<SimFabTestCell>(1, 100));
         ats.run();
-        delete writer;
     }
 private:
     Coord<3> dim;

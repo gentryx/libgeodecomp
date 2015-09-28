@@ -56,19 +56,19 @@ public:
     ~AutoTuningSimulator()
     {}
 
-    void addWriter(const ParallelWriter<CELL_TYPE>& writer)
+    void addWriter(ParallelWriter<CELL_TYPE> *writer)
     {
-        parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer.clone()));
+        parallelWriters.push_back(boost::shared_ptr<ParallelWriter<CELL_TYPE> >(writer));
     }
 
-    void addWriter(const Writer<CELL_TYPE>& writer)
+    void addWriter(Writer<CELL_TYPE> *writer)
     {
-        writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer.clone()));
+        writers.push_back(boost::shared_ptr<Writer<CELL_TYPE> >(writer));
     }
 
-    void addSteerer(const Steerer<CELL_TYPE>& steerer)
+    void addSteerer(const Steerer<CELL_TYPE> *steerer)
     {
-        steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer.clone()));
+        steerers.push_back(boost::shared_ptr<Steerer<CELL_TYPE> >(steerer));
     }
 
     template<typename INITIALIZER>
