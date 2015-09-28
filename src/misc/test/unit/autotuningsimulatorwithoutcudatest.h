@@ -120,7 +120,7 @@ public:
             << ats.getSimulationParameters(*iter))
     }
 
-    void xtestAddOwnSimulations()
+    void testAddOwnSimulations()
     {
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
