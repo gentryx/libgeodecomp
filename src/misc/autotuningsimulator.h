@@ -160,6 +160,11 @@ public:
 
     void run()
     {
+       runTest(); 
+    }
+
+    void runTest()
+    {
         typedef typename std::map<const std::string, SimulationPtr>::iterator IterType;
         for (IterType iter = simulations.begin(); iter != simulations.end(); iter++)
         {
@@ -186,7 +191,7 @@ public:
 
 private:
     std::map<const std::string, SimulationPtr> simulations;
-    unsigned simulationSteps;
+    unsigned simulationSteps; // maximum number of Steps for the optimizer
     std::vector<boost::shared_ptr<ParallelWriter<CELL_TYPE> > > parallelWriters;
     std::vector<boost::shared_ptr<Writer<CELL_TYPE> > > writers;
     std::vector<boost::shared_ptr<Steerer<CELL_TYPE> > > steerers;
