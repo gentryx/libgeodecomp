@@ -31,8 +31,7 @@ public:
 
     virtual ~SimulationFactory()
     {
-        // FIXME: we can't delete the initializer here because of the missing clone() in initializer
-        // delete initializer;
+        delete initializer;
     }
 
     void addWriter(const ParallelWriter<CELL>& writer)
