@@ -13,8 +13,6 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/logger.h>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
-
 namespace LibGeoDecomp {
 
 /**
@@ -190,7 +188,7 @@ public:
                 sim->run();
             }
             catch(const std::runtime_error& error){
-                 LOG(Logger::Info,"runtime error detcted")
+                 LOG(Logger::INFO,"runtime error detcted")
                 delete sim;
                 return DBL_MAX *-1.0;
             }
