@@ -13,6 +13,7 @@
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/logger.h>
 
+#define LIBGEODECOMP_DEBUG_LEVEL 4
 
 namespace LibGeoDecomp {
 
@@ -60,7 +61,7 @@ public:
         return sim;
     }
 
-    double operator()(const SimulationParameters& params)
+    virtual double operator()(const SimulationParameters& params)
     {
         LOG(Logger::DBG, "SimulationFactory::operator(params)")
         Simulator<CELL> *sim = buildSimulator(initializer->clone(), params);
@@ -159,7 +160,6 @@ protected:
     }
 };
 
-// FIXME: everything in this file which is depends on CUDA is not tested!
 #ifdef LIBGEODECOMP_WITH_CUDA
 template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
@@ -169,11 +169,37 @@ public:
     CudaSimulationFactory<CELL>(INITIALIZER initializer):
         SimulationFactory<CELL>(initializer)
     {
-        SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 80);
+        SimulationFactory<CELL>::parameterSet.addParameter("BlockDimX", 1, 128);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimY", 1,   8);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimZ", 1,   8);
     }
+    
     virtual ~CudaSimulationFactory(){}
+    
+    virtual double operator()(const SimulationParameters& params)
+    {
+        LOG(Logger::DBG, "SimulationFactory::operator(params)")
+        Simulator<CELL> *sim = buildSimulator(SimulationFactory<CELL>::initializer->clone(), params);
+        LOG(Logger::DBG, "sim get buildSimulator(initializer->clone(), params)")
+        Chronometer chrono;
+
+        {
+            TimeCompute t(&chrono);
+            LOG(Logger::DBG,"next step is sim->run()")
+            try{
+                sim->run();
+            }
+            catch(const std::runtime_error& error){
+                 LOG(Logger::Info,"runtime error detcted")
+                delete sim;
+                return DBL_MAX *-1.0;
+            }
+        }
+
+        LOG(Logger::DBG,"now delet sim")
+        delete sim;
+        return chrono.interval<TimeCompute>() * -1.0;
+    }
 protected:
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
@@ -190,6 +216,7 @@ protected:
             for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i)
                 cSim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
             LOG(Logger::DBG, "return cSim")
+            LOG(Logger::DBG, "return Simulator from CudaSimulationFactory::buildSimulator()")
             return cSim;
 
     }
