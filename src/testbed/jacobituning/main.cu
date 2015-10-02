@@ -3,6 +3,8 @@
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/cudasimulator.h>
+#include <libgeodecomp/misc/autotuningsimulator.h>
+
 using namespace LibGeoDecomp;
 
 class Cell
@@ -84,36 +86,64 @@ public:
         }
     }
 };
+int normalizeSteps(double goal)
+{
+    std::cout << "in normalizeSteps" << std::endl;
+    int steps = 5;
+    int oldSteps = 5;
+    CellInitializer init(1,1);
+    SerialSimulationFactory<Cell> fab(init);
+    double limit = fab(fab.parameters());
+    double fitness = DBL_MAX;
+    do{
+        CellInitializer init(1,steps);
+        SerialSimulationFactory<Cell> fab(init);
+        fitness = fab(fab.parameters());
+        oldSteps = steps;
+        steps = ((double) steps / fitness)* (double)goal;
+        if (steps < 1)
+            steps =1;
+        std::cout << "fitness: " << fitness << " goal " << goal << std::endl;
+    }while((!(fitness > goal + limit && fitness < goal - limit )) && (!(oldSteps <= 1 && fitness > goal)));
+    
+    
+    return oldSteps;
+}
 
 void runSimulation()
 {
-    int outputFrequency = 1000;
-    int maxSteps = 5;
-    CellInitializer init(1, maxSteps);
+    std::cout << "runSimulation" << std::endl;
+    int simSteps = 500;
+    int optSteps = normalizeSteps(-0.5);
+    std::cout << "optSteps: " << optSteps << std::endl;
+    AutoTuningSimulator<Cell,PatternOptimizer> simFactory(CellInitializer(1,optSteps));
+    simFactory.setSimulationSteps(20);
+    simFactory.runTest();
 
-    CudaSimulationFactory<Cell> fab(init);
+    std::vector<std::string> simulations = simFactory.getSimulationNames();
+    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
+        std::cout << "Factory Name: " << *iter << " Fitness: " << simFactory.getFitness(*iter) << std::endl
+        << simFactory.getSimulationParameters(*iter)<< std::endl;
+    }
+    
+    std::cout << "-----------------" << std::endl;
 
-    std::cout << "CudaSimulationFactory<Cell>" << std::endl;
-//    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
+    // looking for the best, of the best, of the best! Sir [MIB I] ;)
+    // TODO to get the best simulator for a long run, the build up costs need to be deducted.
+    optSteps *= 5;
+    double bestFitness = DBL_MAX* -1.0;
+    std::string bestSimulator;
+    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
+        if (simFactory.getFitness(*iter) >= bestFitness){
+            bestSimulator = simFactory.getSimulatorType(*iter);
+            bestFitness = simFactory.getFitness(*iter);
+        }
+    }
+    std::cout << "Best Simulator: " << bestSimulator << " wiht fitness: " << bestFitness << std::endl;
+    // let Will Smith running :)
 
-//    std::vector<std::string> simulatorTypes;
-//    simulatorTypes << "CudaSimulator";
-//    fab.parameters()["Simulator"] = SimulationParametersHelpers::DiscreteSet<std::string>(
-//        simulatorTypes);
 
-//    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n\n";
-    std::cout << "fab: " << fab.parameters() << "\n";
 
-    std::vector<double> stepWidths(fab.parameters().size(), 1);
-    std::vector<double> minStepwidths(fab.parameters().size(), 1);
-    std::cout<< "PatternPptimizer wird angelegt" << std::endl;
-    std::cout << "bevor fab()"<<std::endl;
-    double result = fab(fab.parameters());
-    std::cout<< "after fab() result: " << result << std::endl;
-    //PatternOptimizer optimizer(fab.parameters());
-    //std::cout << "optimizer(3,fab)"<< std::endl;
-    //optimizer(3, fab);
-    std::cout << "-----------------\n";
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
     //     init,
@@ -143,7 +173,7 @@ void runSimulation()
 
 int main(int argc, char **argv)
 {
-    MPI_Init(&argc, &argv);
+    //MPI_Init(&argc, &argv);
     runSimulation();
-    MPI_Finalize();
+    //MPI_Finalize();
 }
