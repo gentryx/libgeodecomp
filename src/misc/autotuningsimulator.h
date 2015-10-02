@@ -128,6 +128,14 @@ public:
         return result;
     }
 
+    std::string getSimulatorType(std::string simulationName)
+    {
+        if (isInMap(simulationName))
+            return simulations[simulationName]->simulationType;
+        else
+            throw std::invalid_argument("getSimulatorType(simulationName)) get invalid simulationName");
+    }
+
     double getFitness(std::string simulationName)
     {
         if (isInMap(simulationName))
