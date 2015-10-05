@@ -1,6 +1,12 @@
 #ifndef LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 #define LIBGEODECOMP_STORAGE_UPDATEFUNCTOR_H
 
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/launch_policy.hpp>
+#include <hpx/parallel/algorithms/for_each.hpp>
+#include <boost/iterator/counting_iterator.hpp>
+#endif
+
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/region.h>
@@ -22,8 +28,12 @@ namespace UpdateFunctorHelpers {
         if (concurrencySpec.preferStaticScheduling()) {                 \
             _Pragma("omp parallel for schedule(static)")                \
             for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
-                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
-                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) { \
+                typename Region<DIM>::StreakIterator e =                \
+                    region.planeStreakIterator(c + 1);                  \
+                typedef typename Region<DIM>::StreakIterator Iter;      \
+                for (Iter i = region.planeStreakIterator(c + 0);        \
+                     i != e;                                            \
+                     ++i) {                                             \
                     LGD_UPDATE_FUNCTOR_BODY;                            \
                 }                                                       \
             }                                                           \
@@ -32,8 +42,12 @@ namespace UpdateFunctorHelpers {
         } else {                                                        \
             _Pragma("omp parallel for schedule(dynamic)")               \
             for (std::size_t c = 0; c < region.numPlanes(); ++c) {      \
-                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
-                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) { \
+                typename Region<DIM>::StreakIterator e =                \
+                    region.planeStreakIterator(c + 1);                  \
+                typedef typename Region<DIM>::StreakIterator Iter;      \
+                for (Iter i = region.planeStreakIterator(c + 0);        \
+                     i != e;                                            \
+                     ++i) {                                             \
                     LGD_UPDATE_FUNCTOR_BODY;                            \
                 }                                                       \
             }                                                           \
@@ -49,10 +63,17 @@ namespace UpdateFunctorHelpers {
 #ifdef LIBGEODECOMP_WITH_HPX
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3                         \
     if (concurrencySpec.enableHPX() && !modelThreadingSpec.hasHPX()) {  \
-        std::cout << "updatefunctor::hpx1\n";                           \
-        hpx::parallel::for_each(hpx::parallel::par, 0, region.numPlanes(), [](std::size_t c) { \
-                typename Region<DIM>::StreakIterator e = region.planeStreakIterator(c + 1); \
-                for (typename Region<DIM>::StreakIterator i = region.planeStreakIterator(c + 0); i != e; ++i) { \
+        hpx::parallel::for_each(                                        \
+            hpx::parallel::par,                                         \
+            boost::make_counting_iterator(std::size_t(0)),              \
+            boost::make_counting_iterator(region.numPlanes()),          \
+            [&](std::size_t c) {                                        \
+                typename Region<DIM>::StreakIterator e =                \
+                    region.planeStreakIterator(c + 1);                  \
+                typedef typename Region<DIM>::StreakIterator Iter;      \
+                for (Iter i = region.planeStreakIterator(c + 0);        \
+                     i != e;                                            \
+                     ++i) {                                             \
                     LGD_UPDATE_FUNCTOR_BODY;                            \
                 }                                                       \
             });                                                         \
@@ -66,7 +87,9 @@ namespace UpdateFunctorHelpers {
 #endif
 
 #define LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4                         \
-    for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) { \
+    for (typename Region<DIM>::StreakIterator i = region.beginStreak(); \
+         i != region.endStreak();                                       \
+         ++i) {                                                         \
         LGD_UPDATE_FUNCTOR_BODY;                                        \
     }                                                                   \
     /**/
@@ -212,13 +235,20 @@ public:
         // SelectTopology
         TopologiesHelpers::Topology<DIM, false, false, false>,
         // SelectThreadedUpdate,
-        ANY_THREADED_UPDATE)
+        ANY_THREADED_UPDATE modelThreadingSpec)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-            Coord<DIM> targetOrigin = i->origin + targetOffset;
-            VanillaUpdateFunctor<CELL>()(sourceStreak, targetOrigin, gridOld, gridNew, nanoStep);
-        }
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        Streak<DIM> sourceStreak(i->origin + sourceOffset,              \
+                                 i->endX   + sourceOffset.x());         \
+        Coord<DIM> targetOrigin = i->origin + targetOffset;             \
+        VanillaUpdateFunctor<CELL>()(                                   \
+            sourceStreak, targetOrigin, gridOld, gridNew, nanoStep);    \
+        /**/
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 
     template<typename GRID1, typename GRID2, typename CONCURRENCY_FUNCTOR, typename ANY_API, typename ANY_THREADED_UPDATE>
@@ -239,13 +269,20 @@ public:
         // SelectTopology
         TopologiesHelpers::Topology<DIM, true, true, true>,
         // SelectThreadedUpdate,
-        ANY_THREADED_UPDATE)
+        ANY_THREADED_UPDATE modelThreadingSpec)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-            Coord<DIM> targetOrigin = i->origin + targetOffset;
-            VanillaUpdateFunctor<CELL>()(sourceStreak, targetOrigin, gridOld, gridNew, nanoStep);
-        }
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        Streak<DIM> sourceStreak(i->origin + sourceOffset,              \
+                                 i->endX   + sourceOffset.x());         \
+        Coord<DIM> targetOrigin = i->origin + targetOffset;             \
+        VanillaUpdateFunctor<CELL>()(                                   \
+            sourceStreak, targetOrigin, gridOld, gridNew, nanoStep);    \
+        /**/
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 
 #ifdef LIBGEODECOMP_WITH_CPP14
@@ -267,12 +304,19 @@ public:
         // SelectTopology
         TopologiesHelpers::UnstructuredTopology,
         // SelectThreadedUpdate,
-        ANY_THREADED_UPDATE)
+        ANY_THREADED_UPDATE modelThreadingSpec)
     {
-        for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
-            Streak<DIM> sourceStreak(i->origin + sourceOffset, i->endX + sourceOffset.x());
-            UnstructuredUpdateFunctor<CELL>()(sourceStreak, gridOld, gridNew, nanoStep);
-        }
+#define LGD_UPDATE_FUNCTOR_BODY                                         \
+        Streak<DIM> sourceStreak(i->origin + sourceOffset,              \
+                                 i->endX + sourceOffset.x());           \
+        UnstructuredUpdateFunctor<CELL>()(                              \
+            sourceStreak, gridOld, gridNew, nanoStep);                  \
+        /**/
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_1
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_2
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_3
+        LGD_UPDATE_FUNCTOR_THREADING_SELECTOR_4
+#undef LGD_UPDATE_FUNCTOR_BODY
     }
 #endif
 };
@@ -334,6 +378,10 @@ private:
 class ConcurrencyEnableHPX
 {
 public:
+    inline
+    explicit ConcurrencyEnableHPX(bool /* unused */)
+    {}
+
     bool enableOpenMP() const
     {
         return false;

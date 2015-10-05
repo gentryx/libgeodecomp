@@ -366,7 +366,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 public:
 
     typedef RecursiveBisectionPartition<2> PartitionType;
-    typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2> > StepperType;
+    typedef LibGeoDecomp::HiParSimulator::VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableHPX> StepperType;
     typedef HpxSimulator::UpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 

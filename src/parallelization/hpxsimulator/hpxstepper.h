@@ -253,7 +253,7 @@ private:
                 updateFutures.push_back(
                     hpx::async(
                         hpx::util::bind(
-                            UpdateFunctor<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnable>(),
+                            UpdateFunctor<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>(),
                             r,
                             Coord<DIM>(),
                             Coord<DIM>(),
