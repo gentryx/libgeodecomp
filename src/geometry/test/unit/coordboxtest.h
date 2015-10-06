@@ -210,6 +210,18 @@ public:
         TS_ASSERT_EQUALS(expected, actual);
     }
 
+    void testEmptyIteration()
+    {
+        CoordBox<1> box1(Coord<1>(4), Coord<1>());
+        TS_ASSERT_EQUALS(box1.beginStreak(), box1.endStreak());
+
+        CoordBox<2> box2(Coord<2>(1, 4), Coord<2>());
+        TS_ASSERT_EQUALS(box2.beginStreak(), box2.endStreak());
+
+        CoordBox<3> box3(Coord<3>(1, 2, 3), Coord<3>());
+        TS_ASSERT_EQUALS(box3.beginStreak(), box3.endStreak());
+    }
+
 private:
     Coord<2> origin;
     int width;
