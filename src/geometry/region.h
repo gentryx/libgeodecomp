@@ -717,15 +717,19 @@ public:
     inline Region& operator<<(const Streak<DIM>& s)
     {
 #ifdef __GNUC__
+#ifndef __CUDACC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
 #endif
         //ignore 0 length streaks
         if (s.endX <= s.origin.x()) {
             return *this;
         }
 #ifdef __GNUC__
+#ifndef __CUDACC__
 #pragma GCC diagnostic pop
+#endif
 #endif
 
         geometryCacheTainted = true;
