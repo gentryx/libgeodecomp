@@ -45,11 +45,12 @@ public:
         addNewSimulation("CacheBlockingSimulation",
             "CacheBlockingSimulation",
             initializer);
-
+#ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
         addNewSimulation("CudaSimulation",
             "CudaSimulation",
             initializer);
+#endif
 #endif
     }
 
@@ -95,7 +96,7 @@ public:
             simulations[name] = sim_p;
             return;
         }
-
+#ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
          if (typeOfSimulation == "CudaSimulation")
          {
@@ -107,6 +108,7 @@ public:
             simulations[name] = sim_p;
             return;
          }
+#endif
 #endif
 
         throw std::invalid_argument("SimulationFactory::addNewSimulation(): unknown simulator type");

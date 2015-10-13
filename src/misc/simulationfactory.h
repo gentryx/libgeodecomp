@@ -7,8 +7,10 @@
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
+#ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
 #include <libgeodecomp/parallelization/cudasimulator.h>
+#endif
 #endif
 #include <libgeodecomp/parallelization/serialsimulator.h>
 #include <libgeodecomp/io/logger.h>
@@ -157,7 +159,7 @@ protected:
         return sim;
     }
 };
-
+#ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
 template<typename CELL>
 class CudaSimulationFactory : public SimulationFactory<CELL>
@@ -219,6 +221,7 @@ protected:
     }
 };
 #endif // LIBGEODECOMP_WITH_CUDA
+#endif // __CUDACC__
 }//namespace LibGeoDecomp
 
 #endif
