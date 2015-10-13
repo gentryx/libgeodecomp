@@ -15,7 +15,6 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/io/mpiiowriter.h>
 #include <boost/assign/list_of.hpp>
-#define LIBGEODECOMP_DEBUG_LEVEL 4 
 
 using namespace LibGeoDecomp;
 
@@ -84,7 +83,7 @@ public:
     void setUp()
     {
         dim = Coord<3>(100,100,100);
-        maxSteps = 50;
+        maxSteps = 20;
     }
 
     void tearDown()
@@ -105,7 +104,7 @@ public:
             << ats.getSimulationParameters(*iter))
     }
 
-    void xtestBasicSimplexOptimized()
+    void testBasicSimplexOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
@@ -143,7 +142,7 @@ public:
             << ats.getSimulationParameters(*iter))
     }
 
-    void xtestManuallyParamterized()
+    void testManuallyParamterized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -186,7 +185,7 @@ public:
 
     }
 
-    void xtestAddWriter()
+    void testAddWriter()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -235,7 +234,7 @@ public:
         }
     }
 
-    void xtestCacheBlockingFitness()
+    void testCacheBlockingFitness()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testCacheBlockingFitness()")
         for (int i = 1; i <= 2; i++){
@@ -247,7 +246,7 @@ public:
         }
     }
     
-    void xtestAddWriterToSimulator()
+    void testAddWriterToSimulator()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSimulator()")
         CacheBlockingSimulator<SimFabTestCell> *sim =  (
@@ -258,7 +257,7 @@ public:
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
     }
 
-    void xtestAddWriterToSerialSimulationFactory()
+    void testAddWriterToSerialSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSerialSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
@@ -267,7 +266,7 @@ public:
         delete writer;
     }
 
-    void xtestAddWriterToCacheBlockingSimulationFactory()
+    void testAddWriterToCacheBlockingSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToCacheBlockingSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);

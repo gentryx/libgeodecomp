@@ -130,26 +130,29 @@ public:
 
     std::string getSimulatorType(std::string simulationName)
     {
-        if (isInMap(simulationName))
+        if (isInMap(simulationName)){
             return simulations[simulationName]->simulationType;
-        else
+        } else {
             throw std::invalid_argument("getSimulatorType(simulationName)) get invalid simulationName");
+        }
     }
 
     double getFitness(std::string simulationName)
     {
-        if (isInMap(simulationName))
+        if (isInMap(simulationName)){
             return simulations[simulationName]->fitness;
-        else
+        } else {
             throw std::invalid_argument("getFitness(simulationName) get invalid simulationName");
+        }
     }
 
     SimulationParameters getSimulationParameters(std::string simulationName)
     {
-        if (isInMap(simulationName))
+        if (isInMap(simulationName)){
             return simulations[simulationName]->parameters;
-        else
+        } else {
             throw std::invalid_argument("getSimulationParameters(simulationName) get invalid simulationName");
+        }
     }
 
     void setSimulationSteps(unsigned steps)
@@ -159,11 +162,12 @@ public:
 
     void setParameters(SimulationParameters params, std::string name)
     {
-        if (isInMap(name))
+        if (isInMap(name)){
             simulations[name]->parameters = params;
-        else
+        } else {
             throw std::invalid_argument(
                 "AutotuningSimulatro<...>::setParameters(params,name) get invalid name");
+        }
     }
 
     void run()
@@ -206,10 +210,11 @@ private:
 
     bool isInMap(const std::string name)const
     {
-        if (simulations.find(name) == simulations.end())
+        if (simulations.find(name) == simulations.end()){
             return false;
-        else
+        } else {
             return true;
+        }
     }
 }; //AutoTunigSimulator
 } // namespace LibGeoDecomp

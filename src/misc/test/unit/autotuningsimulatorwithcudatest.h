@@ -9,8 +9,6 @@
 #include <libgeodecomp/io/tracingwriter.h>
 #include <cuda.h>
 
-#define LIBGEODECOMP_DEBUG_LEVEL 4
-
 using namespace LibGeoDecomp;
 
 class SimFabTestCell
@@ -73,19 +71,19 @@ public:
 };
 namespace LibGeoDecomp {
 
-class AutotungingSimulatorWithCudaTest : public CxxTest::TestSuite
+class AutotuningSimulatorWithCudaTest : public CxxTest::TestSuite
 {
 public:
     void setUp()
     {
         dim = Coord<3>(100,100,100);
-        maxSteps = 50;
+        maxSteps = 20;
     }
 
     void tearDown()
     {}
     
-    void xtestBasicPatternOptimized()
+    void testBasicPatternOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorWithCudaTest::TestBasicPatternOptimized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -100,7 +98,7 @@ public:
             << ats.getSimulationParameters(*iter))
     }
     
-    void xtestBasicSimplexOptimized()
+    void testBasicSimplexOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
         AutoTuningSimulator<SimFabTestCell, SimplexOptimizer> ats(
@@ -114,7 +112,8 @@ public:
             << ats.getFitness(*iter)<< std::endl 
             << ats.getSimulationParameters(*iter))
     }
-    void xtestAddOwnSimulations()
+
+    void testAddOwnSimulations()
     {
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -137,7 +136,7 @@ public:
             << ats.getSimulationParameters(*iter))
     }
 
-    void xtestManuallyParamterized()
+    void testManuallyParamterized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -180,7 +179,7 @@ public:
 
     }
     
-    void xtestAddWriter()
+    void testAddWriter()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
@@ -235,7 +234,7 @@ public:
         }
     }
 
-    void xtestCacheBlockingFitness()
+    void testCacheBlockingFitness()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testCacheBlockingFitness()")
         for (int i = 1; i <= 2; i++){
@@ -247,7 +246,7 @@ public:
         }
     }
 
-    void xtestCudaFitness()
+    void testCudaFitness()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testCudaFitness()")
         for (int i = 1; i <=2; ++i){
@@ -259,7 +258,7 @@ public:
         }
     }
 
-    void xtestAddWriterToSimulator()
+    void testAddWriterToSimulator()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToSimulator()")
         CacheBlockingSimulator<SimFabTestCell> *sim =  (
@@ -270,7 +269,7 @@ public:
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
     }
  
-    void xtestAddWriterToSerialSimulationFactory()
+    void testAddWriterToSerialSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToSerialSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
@@ -279,7 +278,7 @@ public:
         delete writer;
     }
 
-    void xtestAddWriterToCacheBlockingSimulationFactory()
+    void testAddWriterToCacheBlockingSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToCacheBlockingSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
@@ -288,7 +287,7 @@ public:
         delete writer;
     }
 
-    void xtestAddWriterToCudaSimulationFactory()
+    void testAddWriterToCudaSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::TestAddWriterToCudaSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
@@ -298,7 +297,7 @@ public:
     }
 
 private:
-    Coord<3>dim;
+    Coord<3> dim;
     unsigned maxSteps;
     SimulationFactory<SimFabTestCell> *cudaFab, *fab, *cFab;
 };

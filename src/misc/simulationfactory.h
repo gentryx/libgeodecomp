@@ -72,7 +72,7 @@ public:
             sim->run();
         }
 
-        LOG(Logger::DBG,"now delet sim")
+        LOG(Logger::DBG,"now deleting sim")
         delete sim;
         return chrono.interval<TimeCompute>() * -1.0;
     }
@@ -113,12 +113,12 @@ protected:
         Initializer<CELL> *initializer,
         const SimulationParameters& params) const
     {
-        SerialSimulator<CELL> *sSim = new SerialSimulator<CELL>(initializer);
+        SerialSimulator<CELL> *sim = new SerialSimulator<CELL>(initializer);
         for (unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i)
-            sSim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
+            sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
         for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i)
-            sSim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
-        return sSim;
+            sim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
+        return sim;
     }
 };
 
@@ -144,17 +144,17 @@ protected:
         int wavefrontWidth  = params["WavefrontWidth"];
         int wavefrontHeight = params["WavefrontHeight"];
         Coord<2> wavefrontDim(wavefrontWidth, wavefrontHeight);
-        CacheBlockingSimulator<CELL> *cbSim = 
+        CacheBlockingSimulator<CELL> *sim = 
             new CacheBlockingSimulator<CELL>(
                 initializer, 
                 pipelineLength, 
                 wavefrontDim);
         for(unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i){
-            cbSim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
+            sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
         for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i)
-            cbSim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
+            sim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
         }
-        return cbSim;
+        return sim;
     }
 };
 
@@ -194,7 +194,7 @@ public:
             }
         }
 
-        LOG(Logger::DBG,"now delet sim")
+        LOG(Logger::DBG,"now deleting sim")
         delete sim;
         return chrono.interval<TimeCompute>() * -1.0;
     }
@@ -206,16 +206,15 @@ protected:
             LOG(Logger::DBG, "enter CudaSimulationFactory::build()")
             Coord<3> blockSize(params["BlockDimX"], params["BlockDimY"], params["BlockDimZ"]);
             LOG(Logger::DBG, "generate new CudaSimulator")
-            CudaSimulator<CELL> * cSim = new CudaSimulator<CELL>(initializer, blockSize);
+            CudaSimulator<CELL> * sim = new CudaSimulator<CELL>(initializer, blockSize);
             LOG(Logger::DBG, "addWriters")
             for (unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i)
-                cSim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
+                sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
             LOG(Logger::DBG, "addSteers")
             for (unsigned i = 0; i < SimulationFactory<CELL>::steerers.size(); ++i)
-                cSim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
-            LOG(Logger::DBG, "return cSim")
+                sim->addSteerer(SimulationFactory<CELL>::steerers[i].get()->clone());
             LOG(Logger::DBG, "return Simulator from CudaSimulationFactory::buildSimulator()")
-            return cSim;
+            return sim;
 
     }
 };

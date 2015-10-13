@@ -430,10 +430,11 @@ public:
 
     const SimulationParametersHelpers::Parameter& operator[](const std::string& name) const
     {
-        if (names.find(name) != names.end())
+        if (names.find(name) != names.end()){
             return *parameters[names.find(name)->second];
-        else
+        } else {
             throw std::invalid_argument("SimulationParameters[\"name\"] get invalid name!");
+        }
     }
 
     SimulationParametersHelpers::Parameter& operator[](std::size_t index)
