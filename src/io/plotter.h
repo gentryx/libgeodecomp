@@ -41,8 +41,8 @@ public:
     friend class HPXSerialization;
     friend class PPMWriterTest;
 
-    explicit Plotter(const Coord<2>& cellDim,
-                     const CELL_PLOTTER& cellPlotter) :
+    Plotter(const Coord<2>& cellDim,
+            const CELL_PLOTTER& cellPlotter) :
 	cellDim(cellDim),
         cellPlotter(cellPlotter)
     {}

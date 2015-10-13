@@ -186,6 +186,50 @@ public:
         TS_ASSERT_EQUALS(axisUnitsB, expectedUnitsB);
 
     }
+
+    void testTrueTypeFalseTypeOperators()
+    {
+        typedef APITraits::TrueType TrueType;;
+        typedef APITraits::FalseType FalseType;
+
+        // test ==
+        TS_ASSERT_EQUALS(TrueType(), TrueType());
+        TS_ASSERT_EQUALS(FalseType(), FalseType());
+
+        TS_ASSERT_EQUALS(true,  TrueType());
+        TS_ASSERT_EQUALS(false, FalseType());
+
+        // test !=
+        TS_ASSERT(TrueType()  != FalseType());
+        TS_ASSERT(FalseType() != TrueType());
+
+        TS_ASSERT(true  != FalseType());
+        TS_ASSERT(FalseType()  != true);
+
+        TS_ASSERT(false  != TrueType());
+        TS_ASSERT(TrueType()  != false);
+
+        // test !
+        TS_ASSERT_EQUALS(TrueType(),  !FalseType());
+        TS_ASSERT_EQUALS(FalseType(), !TrueType());
+
+        // test &&
+        TS_ASSERT_EQUALS(TrueType(),  TrueType()  && TrueType());
+        TS_ASSERT_EQUALS(FalseType(), TrueType()  && FalseType());
+        TS_ASSERT_EQUALS(FalseType(), FalseType() && TrueType());
+        TS_ASSERT_EQUALS(FalseType(), FalseType() && FalseType());
+
+        TS_ASSERT_EQUALS(TrueType(),  true  && TrueType());
+        TS_ASSERT_EQUALS(FalseType(), true  && FalseType());
+        TS_ASSERT_EQUALS(FalseType(), false && TrueType());
+        TS_ASSERT_EQUALS(FalseType(), false && FalseType());
+
+        TS_ASSERT_EQUALS(TrueType(),  TrueType()  && true);
+        TS_ASSERT_EQUALS(FalseType(), TrueType()  && false);
+        TS_ASSERT_EQUALS(FalseType(), FalseType() && true);
+        TS_ASSERT_EQUALS(FalseType(), FalseType() && false);
+
+    }
 };
 
 }

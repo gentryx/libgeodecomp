@@ -39,7 +39,7 @@ typedef std::map<long, EventSet> EventMap;
 template<
     class CELL_TYPE,
     class PARTITION,
-    class STEPPER=LibGeoDecomp::HiParSimulator::VanillaStepper<CELL_TYPE>
+    class STEPPER=LibGeoDecomp::HiParSimulator::VanillaStepper<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>
 >
 class HpxSimulator : public DistributedSimulator<CELL_TYPE>
 {

@@ -526,6 +526,10 @@ char  *mm_typecode_to_str(MM_typecode matcode)
     else
         return NULL;
 
+    if (error) {
+        throw std::runtime_error("error in mm_typecode_to_str()");
+    }
+
     sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
     return mm_strdup(buffer);
 

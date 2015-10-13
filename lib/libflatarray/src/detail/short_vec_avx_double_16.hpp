@@ -1,5 +1,6 @@
 /**
- * Copyright 2014 Andreas Schäfer
+ * Copyright 2014-2015 Andreas Schäfer
+ * Copyright 2015 Kurt Kanzenbach
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -229,30 +230,28 @@ public:
     inline
     void gather(const double *ptr, const unsigned *offsets)
     {
-        __m128d tmp;
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[0]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[1]);
+        __m128d tmp = _mm_set_pd(ptr[offsets[1]], ptr[offsets[0]]);
         val1 = _mm256_insertf128_pd(val1, tmp, 0);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[2]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[3]);
+
+        tmp = _mm_set_pd(ptr[offsets[3]], ptr[offsets[2]]);
         val1 = _mm256_insertf128_pd(val1, tmp, 1);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[4]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[5]);
+
+        tmp = _mm_set_pd(ptr[offsets[5]], ptr[offsets[4]]);
         val2 = _mm256_insertf128_pd(val2, tmp, 0);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[6]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[7]);
+
+        tmp = _mm_set_pd(ptr[offsets[7]], ptr[offsets[6]]);
         val2 = _mm256_insertf128_pd(val2, tmp, 1);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[8]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[9]);
+
+        tmp = _mm_set_pd(ptr[offsets[9]], ptr[offsets[8]]);
         val3 = _mm256_insertf128_pd(val3, tmp, 0);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[10]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[11]);
+
+        tmp = _mm_set_pd(ptr[offsets[11]], ptr[offsets[10]]);
         val3 = _mm256_insertf128_pd(val3, tmp, 1);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[12]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[13]);
+
+        tmp = _mm_set_pd(ptr[offsets[13]], ptr[offsets[12]]);
         val4 = _mm256_insertf128_pd(val4, tmp, 0);
-        tmp  = _mm_loadl_pd(tmp, ptr + offsets[14]);
-        tmp  = _mm_loadh_pd(tmp, ptr + offsets[15]);
+
+        tmp = _mm_set_pd(ptr[offsets[15]], ptr[offsets[14]]);
         val4 = _mm256_insertf128_pd(val4, tmp, 1);
     }
 #endif

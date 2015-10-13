@@ -105,7 +105,7 @@ public:
         }
     }
 
-    ~SellSortingWriter()
+    virtual ~SellSortingWriter()
     {
         delete delegate;
     }

@@ -22,7 +22,7 @@ public:
 
     typedef Plane<COORD, ID> EquationType;
 
-    ConvexPolytope(
+    explicit ConvexPolytope(
         const COORD& center = COORD(),
         const COORD& simSpaceDim = COORD()) :
         center(center),

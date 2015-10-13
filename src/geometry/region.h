@@ -480,7 +480,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline Region(const Region<DIM>& other) = default;
 
-    inline Region(Region<DIM>&& other) :
+    inline
+    explicit Region(Region<DIM>&& other) :
         myBoundingBox(other.myBoundingBox),
         mySize(other.mySize),
         geometryCacheTainted(other.geometryCacheTainted)
@@ -715,10 +716,25 @@ public:
      */
     inline Region& operator<<(const Streak<DIM>& s)
     {
+#ifdef __GNUC__
+#ifndef __CUDACC__
+#if __GNUC__ > 4 || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 5))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
+#endif
+#endif
         //ignore 0 length streaks
         if (s.endX <= s.origin.x()) {
             return *this;
         }
+#ifdef __GNUC__
+#ifndef __CUDACC__
+#if __GNUC__ > 4 || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 5))
+#pragma GCC diagnostic pop
+#endif
+#endif
+#endif
 
         geometryCacheTainted = true;
         RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);

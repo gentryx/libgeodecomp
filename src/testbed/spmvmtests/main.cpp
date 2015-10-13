@@ -5,7 +5,9 @@
  *   - http://www.cise.ufl.edu/research/sparse/MM/Janna/ML_Geer.tar.gz
  *   - http://www.cise.ufl.edu/research/sparse/MM/Hamrle/Hamrle3.tar.gz
  *
- * And uses the Matrix Market IO library:
+ * Use the accompanying fetch_matrices.sh to download/extract these.
+ *
+ * We're using the Matrix Market IO library for matrix parsing:
  * http://math.nist.gov/MatrixMarket/mmio-c.html
  *
  */
@@ -251,6 +253,7 @@ public:
         int M, N, nz;
         FILE *f = fopen(fileName.c_str(), "r");
         if (!f) {
+            LOG(FATAL, "CRSInitializer failed to open file " << fileName);
             throw std::logic_error("fopen() failed");
         }
 
@@ -315,6 +318,7 @@ public:
         int M, N, nz;
         FILE *f = fopen(fileName.c_str(), "r");
         if (!f) {
+            LOG(FATAL, "SparseMatrixInitializerMM failed to open file " << fileName);
             throw std::logic_error("fopen() failed");
         }
 

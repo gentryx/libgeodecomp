@@ -213,7 +213,9 @@ private:
     Coord<1> endPos(const Coord<1>& origin, const Coord<1>& dimensions) const
     {
         Coord<1> pos = origin;
-        pos[0] += 1;
+        if (dimensions.x() > 0) {
+            pos[0] += 1;
+        }
 
         return pos;
     }

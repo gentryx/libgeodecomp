@@ -89,10 +89,12 @@ public:
         return "primitiveType";
     }
 
+#ifdef LIBGEODECOMP_WITH_MPI
     MPI_Datatype mpiDatatype() const
     {
         return Typemaps::lookup<CELL>();
     }
+#endif
 
     std::size_t sizeOfMember() const
     {

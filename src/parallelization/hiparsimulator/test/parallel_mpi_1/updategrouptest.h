@@ -22,7 +22,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
     typedef ZCurvePartition<3> PartitionType;
-    typedef VanillaStepper<TestCell<3> > StepperType;
+    typedef VanillaStepper<TestCell<3>, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> StepperType;
     typedef UpdateGroup<TestCell<3> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
@@ -41,7 +41,7 @@ public:
                 CoordBox<3>(Coord<3>(), dimensions),
                 ghostZoneWidth,
                 init,
-                reinterpret_cast<VanillaStepper<TestCell<3> >*>(0)));
+                reinterpret_cast<StepperType*>(0)));
         mockPatchAccepter.reset(new MockPatchAccepter<GridType>());
         mockPatchAccepter->pushRequest(5);
         mockPatchAccepter->pushRequest(7);

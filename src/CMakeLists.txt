@@ -8,8 +8,8 @@ set(AUXDIRS)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${ADDITIONAL_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_COMPILE_FLAGS}")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_ADDITIONAL_C_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
 
 list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 lgd_generate_sourcelists("./")

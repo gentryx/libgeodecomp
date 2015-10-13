@@ -39,7 +39,7 @@ namespace CxxTest
 class ErrorPrinter : public ErrorFormatter
 {
 public:
-    ErrorPrinter(CXXTEST_STD(ostream) &o = CXXTEST_STD(cout), const char *preLine = ":", const char *postLine = "",
+    explicit ErrorPrinter(CXXTEST_STD(ostream) &o = CXXTEST_STD(cout), const char *preLine = ":", const char *postLine = "",
                  const char *errorString = "Error",
                  const char *warningString = "Warning") :
         ErrorFormatter(new Adapter(o), preLine, postLine, errorString, warningString) {}
@@ -50,7 +50,7 @@ private:
     {
         CXXTEST_STD(ostream) &_o;
     public:
-        Adapter(CXXTEST_STD(ostream) &o) : _o(o) {}
+        explicit Adapter(CXXTEST_STD(ostream) &o) : _o(o) {}
         void flush() { _o.flush(); }
         OutputStream &operator<<(const char *s) { _o << s; return *this; }
         OutputStream &operator<<(Manipulator m) { return OutputStream::operator<<(m); }

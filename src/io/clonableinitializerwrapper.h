@@ -116,7 +116,7 @@ public:
             INITIALIZER(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
     }
 
-    ClonableInitializerWrapper(const INITIALIZER& initializer) :
+    explicit ClonableInitializerWrapper(const INITIALIZER& initializer) :
         delegate(initializer)
     {}
 

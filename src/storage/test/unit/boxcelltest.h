@@ -20,7 +20,7 @@ public:
     class API : public APITraits::HasCubeTopology<DIM>
     {};
 
-    SimpleParticle(
+    explicit SimpleParticle(
         const FloatCoord<DIM>& pos = FloatCoord<DIM>(),
         const double positionFactor = 1.0,
         const double maxDistance = 0) :

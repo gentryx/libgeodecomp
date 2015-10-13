@@ -76,6 +76,7 @@ public:
         coord = HOOD( 0,  0).coord;
         simSpace = HOOD( 0,  0).simSpace;
         cycleCounter = HOOD( 0,  0).cycleCounter + 1;
+        seenNeighbors = HOOD( 0,  0).seenNeighbors;
 
         // ultimately seenNeighbors should contain all coordinates (as
         // missingNeighbors did initiallty)...
@@ -84,7 +85,6 @@ public:
         seenNeighbors |= HOOD( 1, -1).seenNeighbors;
 
         seenNeighbors |= HOOD(-1,  0).seenNeighbors;
-        seenNeighbors |= HOOD( 0,  0).seenNeighbors;
         seenNeighbors |= HOOD( 1,  0).seenNeighbors;
 
         seenNeighbors |= HOOD(-1,  1).seenNeighbors;
