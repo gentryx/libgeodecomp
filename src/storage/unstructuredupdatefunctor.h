@@ -13,8 +13,6 @@
 #include <libgeodecomp/storage/unstructuredneighborhood.h>
 #include <libgeodecomp/storage/unstructuredsoaneighborhood.h>
 
-#include <array>
-
 namespace LibGeoDecomp {
 
 namespace UnstructuredUpdateFunctorHelpers {
@@ -64,16 +62,16 @@ public:
             UnstructuredSoAScalarNeighborhood<CELL, MATRICES, ValueType, C, SIGMA>
                 hoodOld(gridOld, startX);
             const int cellsToUpdate = C - (startX % C);
-            std::array<CELL, C> cells;
+            FixedArray<CELL, C> cells;
             Streak<1> cellStreak(Coord<1>(startX), startX + cellsToUpdate);
 
             // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            gridNew->get(cellStreak, cells.data());
+            gridNew->get(cellStreak, cells.begin());
             // call update
             for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
                 cells[i].update(hoodOld, nanoStep);
             }
-            gridNew->set(cellStreak, cells.data());
+            gridNew->set(cellStreak, cells.begin());
 
             startX += cellsToUpdate;
         }
@@ -96,12 +94,12 @@ public:
             Streak<1> cellStreak(Coord<1>(streak.endX - cellsToUpdate), streak.endX);
 
             // update SoA grid: copy cells to local buffer, update, copy data back to grid
-            gridNew->get(cellStreak, cells.data());
+            gridNew->get(cellStreak, cells.begin());
             // call update
             for (int i = 0; i < cellsToUpdate; ++i, ++hoodOld) {
                 cells[i].update(hoodOld, nanoStep);
             }
-            gridNew->set(cellStreak, cells.data());
+            gridNew->set(cellStreak, cells.begin());
         }
     }
 
