@@ -98,7 +98,7 @@ public:
     class API : public APITraits::HasOpaqueMPIDataType<CellD>
     {};
 
-    CellD(char valA) :
+    explicit CellD(char valA) :
         valA(valA)
     {}
 
