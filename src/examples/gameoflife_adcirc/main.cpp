@@ -965,7 +965,6 @@ void runSimulation()
         // ghostZoneWidth:
         1);
 
-    int ioPeriod = 1;
     // fixme
     // SiloWriter<ContainerCellType> *writer = new SiloWriter<ContainerCellType>("mesh", ioPeriod);
     // writer->addSelectorForUnstructuredGrid(
@@ -974,7 +973,7 @@ void runSimulation()
     // sim.addWriter(writer);
 
     int ioPeriod = 1;
-    SiloWriterType *writer = new SiloWriter<ContainerCellType>("mesh", ioPeriod);
+    auto writer = new SiloWriter<ContainerCellType>("mesh", ioPeriod);
     writer->addSelectorForUnstructuredGrid(
         &DomainCell::alive,
         "DomainCell_alive");
