@@ -39,7 +39,7 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
-        for (; *x < endX; ++x) {
+        for (; *x < endX; ++(*x)) {
             target[*x].temp = (hood[FixedCoord< 0,  0, -1>()].temp +
                                hood[FixedCoord< 0, -1,  0>()].temp +
                                hood[FixedCoord<-1,  0,  0>()].temp +
@@ -94,16 +94,18 @@ int normalizeSteps(double goal)
     SerialSimulationFactory<Cell> fab(init);
     double limit = fab(fab.parameters());
     double fitness = DBL_MAX;
-    do{
+
+    do {
         CellInitializer init(1,steps);
         SerialSimulationFactory<Cell> fab(init);
         fitness = fab(fab.parameters());
         oldSteps = steps;
         steps = ((double) steps / fitness)* (double)goal;
-        if (steps < 1)
+        if (steps < 1) {
             steps =1;
+        }
         std::cout << "fitness: " << fitness << " goal " << goal << std::endl;
-    }while((!(fitness > goal + limit && fitness < goal - limit )) && (!(oldSteps <= 1 && fitness > goal)));
+    } while((!(fitness > goal + limit && fitness < goal - limit )) && (!(oldSteps <= 1 && fitness > goal)));
     
     
     return oldSteps;
