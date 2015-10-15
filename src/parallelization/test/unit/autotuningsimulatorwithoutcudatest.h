@@ -1,19 +1,18 @@
 // vim: noai:ts=4:sw=4:expandtab
 
-#include <libgeodecomp/misc/autotuningsimulator.h>
 #include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/io/mpiiowriter.h>
+#include <libgeodecomp/io/ppmwriter.h>
+#include <libgeodecomp/io/simplecellplotter.h>
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/misc/simulationfactory.h>
-#include <libgeodecomp/io/simpleinitializer.h>
-#include <libgeodecomp/io/ppmwriter.h>
-#include <libgeodecomp/io/simplecellplotter.h>
-#include <libgeodecomp/io/tracingwriter.h>
-#include <libgeodecomp/parallelization/serialsimulator.h>
+#include <libgeodecomp/parallelization/autotuningsimulator.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
-#include <libgeodecomp/misc/simulationparameters.h>
-#include <libgeodecomp/io/mpiiowriter.h>
+#include <libgeodecomp/parallelization/serialsimulator.h>
 #include <boost/assign/list_of.hpp>
 
 using namespace LibGeoDecomp;

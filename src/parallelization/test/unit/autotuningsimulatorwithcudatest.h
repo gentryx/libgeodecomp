@@ -1,12 +1,12 @@
 #include <cxxtest/TestSuite.h>
-#include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/io/simpleinitializer.h>
+#include <libgeodecomp/io/tracingwriter.h>
 #include <libgeodecomp/misc/simulationfactory.h>
-#include <libgeodecomp/misc/autotuningsimulator.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simplexoptimizer.h>
 #include <libgeodecomp/misc/simulationparameters.h>
-#include <libgeodecomp/io/tracingwriter.h>
+#include <libgeodecomp/parallelization/autotuningsimulator.h>
 #include <cuda.h>
 
 using namespace LibGeoDecomp;
