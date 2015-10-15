@@ -158,8 +158,8 @@ private:
     template<typename NEIGHBORHOOD>
     void updateWrapper(CELL *newLine, long *x, long endX, NEIGHBORHOOD hood, int nanoStep, APITraits::FalseType)
     {
-        for (; *x < endX; ++*x) {
-            newLine[(*x)].update(hood, nanoStep);
+        for (; *x < endX; ++(*x)) {
+            newLine[*x].update(hood, nanoStep);
         }
     }
 
