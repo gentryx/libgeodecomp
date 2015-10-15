@@ -1,9 +1,9 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
+#include <libgeodecomp/parallelization/autotuningsimulator.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/cudasimulator.h>
-#include <libgeodecomp/misc/autotuningsimulator.h>
 
 using namespace LibGeoDecomp;
 
@@ -117,14 +117,14 @@ void runSimulation()
     int simSteps = 500;
     int optSteps = normalizeSteps(-0.5);
     std::cout << "optSteps: " << optSteps << std::endl;
-    AutoTuningSimulator<Cell,PatternOptimizer> simFactory(CellInitializer(1,optSteps));
-    simFactory.setSimulationSteps(20);
-    simFactory.runTest();
+    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(CellInitializer(1,optSteps));
+    autoSim.setSimulationSteps(20);
+    autoSim.runTest();
 
-    std::vector<std::string> simulations = simFactory.getSimulationNames();
+    std::vector<std::string> simulations = autoSim.getSimulationNames();
     for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
-        std::cout << "Factory Name: " << *iter << " Fitness: " << simFactory.getFitness(*iter) << std::endl
-        << simFactory.getSimulationParameters(*iter)<< std::endl;
+        std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
+                  << autoSim.getSimulationParameters(*iter)<< std::endl;
     }
     
     std::cout << "-----------------" << std::endl;
@@ -135,12 +135,12 @@ void runSimulation()
     double bestFitness = DBL_MAX* -1.0;
     std::string bestSimulator;
     for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
-        if (simFactory.getFitness(*iter) >= bestFitness){
-            bestSimulator = simFactory.getSimulatorType(*iter);
-            bestFitness = simFactory.getFitness(*iter);
+        if (autoSim.getFitness(*iter) >= bestFitness){
+            bestSimulator = autoSim.getSimulatorType(*iter);
+            bestFitness = autoSim.getFitness(*iter);
         }
     }
-    std::cout << "Best Simulator: " << bestSimulator << " wiht fitness: " << bestFitness << std::endl;
+    std::cout << "Best Simulator: " << bestSimulator << " with fitness: " << bestFitness << std::endl;
     // let Will Smith running :)
 
 
