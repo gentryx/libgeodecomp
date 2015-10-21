@@ -450,6 +450,14 @@ class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
  * see above
  */
 template<>
+class Selector<unsigned char> : public SelectorHelpers::PrimitiveSelector<unsigned char>
+{
+};
+
+/**
+ * see above
+ */
+template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
 };
