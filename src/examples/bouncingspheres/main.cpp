@@ -8,7 +8,6 @@
 
 using namespace LibGeoDecomp;
 
-const int CONTAINER_SIZE = 30;
 const double CONTAINER_DIM = 3.0;
 const double SPHERE_RADIUS = 0.6;
 const double BOUNDARY_DIM  = 3.0;
