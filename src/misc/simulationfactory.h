@@ -44,7 +44,7 @@ public:
     {
         writers.push_back(boost::shared_ptr<Writer<CELL> >(writer.clone()));
     }
-    
+
     void addSteerer(Steerer<CELL>& steerer) //FIXME why is const on steerer not working?
     {
         steerers.push_back(boost::shared_ptr<Steerer<CELL> >(steerer.clone()));
@@ -100,7 +100,7 @@ template<typename CELL>
 class SerialSimulationFactory : public SimulationFactory<CELL>
 {
 public:
-    
+
     template<typename INITIALIZER>
     SerialSimulationFactory(INITIALIZER initializer):
         SimulationFactory<CELL>(initializer)
@@ -110,7 +110,7 @@ public:
 
     virtual ~SerialSimulationFactory(){}
 protected:
-    
+
     virtual Simulator<CELL> *buildSimulator(
         Initializer<CELL> *initializer,
         const SimulationParameters& params) const
@@ -146,10 +146,10 @@ protected:
         int wavefrontWidth  = params["WavefrontWidth"];
         int wavefrontHeight = params["WavefrontHeight"];
         Coord<2> wavefrontDim(wavefrontWidth, wavefrontHeight);
-        CacheBlockingSimulator<CELL> *sim = 
+        CacheBlockingSimulator<CELL> *sim =
             new CacheBlockingSimulator<CELL>(
-                initializer, 
-                pipelineLength, 
+                initializer,
+                pipelineLength,
                 wavefrontDim);
         for(unsigned i = 0; i < SimulationFactory<CELL>::writers.size(); ++i){
             sim->addWriter(SimulationFactory<CELL>::writers[i].get()->clone());
@@ -173,9 +173,9 @@ public:
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimY", 1,   8);
         SimulationFactory<CELL>::parameterSet.addParameter("BlockDimZ", 1,   8);
     }
-    
+
     virtual ~CudaSimulationFactory(){}
-    
+
     virtual double operator()(const SimulationParameters& params)
     {
         LOG(Logger::DBG, "SimulationFactory::operator(params)")
