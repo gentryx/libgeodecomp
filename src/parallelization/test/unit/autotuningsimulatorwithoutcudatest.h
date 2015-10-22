@@ -98,8 +98,8 @@ public:
         std::vector<std::string> names = ats.getSimulationNames();
         for (std::vector<std::string>::iterator iter = names.begin();
             iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+            << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
     }
 
@@ -113,13 +113,14 @@ public:
         std::vector<std::string> names = ats.getSimulationNames();
         for (std::vector<std::string>::iterator iter = names.begin();
             iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+            << ats.getFitness(*iter)<< std::endl
             << ats.getSimulationParameters(*iter))
     }
 
     void testAddOwnSimulations()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "AutotuningSimulationTest::testAddOwnSimulations()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
@@ -134,37 +135,42 @@ public:
         ats.setParameters(params, "1.CacheBlockingSimulator");
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
-            << ats.getSimulationParameters(*iter))
+
+        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+                << ats.getFitness(*iter)<< std::endl
+                << ats.getSimulationParameters(*iter));
+        }
+#endif
     }
 
     void testManuallyParamterized()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
-        
+
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
-        
+
         ats.setParameters(params, "CacheBlockingSimulation");
         ats.run();
-        
+
         std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
-            << ats.getSimulationParameters(*iter))
+        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+                << ats.getFitness(*iter)<< std::endl
+                << ats.getSimulationParameters(*iter));
+        }
+#endif
     }
 
     void testInvalidArguments()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "AutotuningSimulatorTest:testInvalidArguments()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
@@ -173,15 +179,19 @@ public:
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
-        TS_ASSERT_THROWS(ats.addNewSimulation("1.CacheBlockingSimulator",
-            "CachBlockingSimulation",
-            SimFabTestInitializer(dim,maxSteps)), std::invalid_argument);
-        TS_ASSERT_THROWS(ats.setParameters(params, "1.CacheBlockingSimulator"),
+
+        TS_ASSERT_THROWS(
+            ats.addNewSimulation("1.CacheBlockingSimulator",
+                                 "CachBlockingSimulation",
+                                 SimFabTestInitializer(dim,maxSteps)),
+            std::invalid_argument);
+        TS_ASSERT_THROWS(
+            ats.setParameters(params, "1.CacheBlockingSimulator"),
             std::invalid_argument);
         TS_ASSERT_THROWS(ats.getFitness("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.getSimulationParameters("NoSimulator"), std::invalid_argument);
         TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
-
+#endif
     }
 
     void testAddWriter()
@@ -191,7 +201,7 @@ public:
             SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         ats.addNewSimulation(
-            "addWriterTest", 
+            "addWriterTest",
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
         ats.addWriter((Writer<SimFabTestCell> *) new TracingWriter<SimFabTestCell>(1, 100));
@@ -210,8 +220,10 @@ public:
     {
         dim = Coord<3>(100,100,100);
         maxSteps = 100;
+#ifdef LIBGEODECOMP_WITH_THREADS
         cfab = new CacheBlockingSimulationFactory<SimFabTestCell>(
                     SimFabTestInitializer(dim, maxSteps));
+#endif
         fab = new SerialSimulationFactory<SimFabTestCell>(
                     SimFabTestInitializer(dim, maxSteps));
     }
@@ -235,18 +247,21 @@ public:
 
     void testCacheBlockingFitness()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryTest::testCacheBlockingFitness()")
-        for (int i = 1; i <= 2; i++){
+        for (int i = 1; i <= 2; ++i) {
             cfab->parameters()["PipelineLength"].setValue(1);
             cfab->parameters()["WavefrontWidth"].setValue(100);
             cfab->parameters()["WavefrontHeight"].setValue(40);
             double fitness = cfab->operator()(cfab->parameters());
             LOG(Logger::INFO,  i << " fitness: " << fitness )
         }
+#endif
     }
-    
+
     void testAddWriterToSimulator()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToSimulator()")
         CacheBlockingSimulator<SimFabTestCell> *sim =  (
             CacheBlockingSimulator<SimFabTestCell> *)cfab->operator()();
@@ -254,6 +269,7 @@ public:
         sim->run();
         double fitness = cfab->operator()(cfab->parameters());
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
+#endif
     }
 
     void testAddWriterToSerialSimulationFactory()
@@ -267,17 +283,18 @@ public:
 
     void testAddWriterToCacheBlockingSimulationFactory()
     {
+#ifdef LIBGEODECOMP_WITH_THREADS
         LOG(Logger::INFO, "SimulationFactoryTest::testAddWriterToCacheBlockingSimulationFactory()")
         Writer<SimFabTestCell> *writer = new TracingWriter<SimFabTestCell>(1, 100);
         cfab->addWriter(*writer);
         cfab->operator()(cfab->parameters());
         delete writer;
+#endif
     }
-
-
 
 private:
     Coord<3> dim;
     unsigned maxSteps;
-    SimulationFactory<SimFabTestCell> *fab, *cfab;
+    SimulationFactory<SimFabTestCell> *fab;
+    SimulationFactory<SimFabTestCell> *cfab;
 };

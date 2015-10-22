@@ -42,9 +42,12 @@ public:
             "SerialSimulation",
             initializer);
 
+#ifdef LIBGEODECOMP_WITH_THREADS
         addNewSimulation("CacheBlockingSimulation",
             "CacheBlockingSimulation",
             initializer);
+#endif
+
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
         addNewSimulation("CudaSimulation",
@@ -86,6 +89,7 @@ public:
             return;
         }
 
+#ifdef LIBGEODECOMP_WITH_THREADS
         if (typeOfSimulation == "CacheBlockingSimulation")
         {
             SimFactoryPtr simFac_p(new CacheBlockingSimulationFactory<CELL_TYPE>(initializer));
@@ -96,6 +100,8 @@ public:
             simulations[name] = sim_p;
             return;
         }
+#endif
+
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
          if (typeOfSimulation == "CudaSimulation")

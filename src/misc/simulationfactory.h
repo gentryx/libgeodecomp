@@ -124,6 +124,7 @@ protected:
     }
 };
 
+#ifdef LIBGEODECOMP_WITH_THREADS
 template<typename CELL>
 class CacheBlockingSimulationFactory : public SimulationFactory<CELL>
 {
@@ -159,6 +160,8 @@ protected:
         return sim;
     }
 };
+#endif
+
 #ifdef __CUDACC__
 #ifdef LIBGEODECOMP_WITH_CUDA
 template<typename CELL>
