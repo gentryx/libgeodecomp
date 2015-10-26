@@ -288,6 +288,8 @@ private:
 
         volatileKernel = ownInnerSets.back() & rim(1) ;
         innerRim       = ownInnerSets.back() & rim(0) ;
+
+//        ownRegion().prettyPrint1D(std::cout, Coord<2>(1000, 1000));
     }
 
     inline void intersect(unsigned node)
