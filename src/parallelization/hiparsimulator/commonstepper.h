@@ -162,6 +162,7 @@ protected:
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         initializer->grid(&*oldGrid);
+        initializer->grid(&*newGrid);
 
         Adjacency adjacency = initializer->getAdjacency();
         AdjacencySetterHelper(*oldGrid, adjacency);

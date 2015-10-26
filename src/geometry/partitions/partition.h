@@ -43,6 +43,11 @@ public:
 
     virtual Region<DIM> getRegion(const std::size_t node) const = 0;
 
+    virtual void setAdjacency(const Adjacency &) { }
+#ifdef LIBGEODECOMP_WITH_CPP14
+    virtual void setAdjacency(Adjacency &&) { }
+#endif // LIBGEODECOMP_WITH_CPP14
+
 protected:
     std::vector<std::size_t> weights;
     std::vector<std::size_t> startOffsets;

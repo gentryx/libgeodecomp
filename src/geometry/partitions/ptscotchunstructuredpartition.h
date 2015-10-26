@@ -22,35 +22,36 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
         using Partition<DIM>::weights;
 
         explicit PTScotchUnstructuredPartition(
-            const Coord<DIM> &origin = Coord<DIM>(),
-            const Coord<DIM> &dimensions = Coord<DIM>(),
-            const long &offset = 0,
-            const std::vector<std::size_t> &weights = std::vector<std::size_t>(2)) :
+                const Coord<DIM> &origin = Coord<DIM>(),
+                const Coord<DIM> &dimensions = Coord<DIM>(),
+                const long &offset = 0,
+                const std::vector<std::size_t> &weights = std::vector<std::size_t>(2)) :
             Partition<DIM>(offset, weights),
             origin(origin),
             dimensions(dimensions),
             numCells(dimensions.prod())
         {
-            std::vector<SCOTCH_Num> indices(numCells);
-            initIndices(indices);
-
-            regions.resize(weights.size());
-            createRegions(indices);
         }
 
-        Region<DIM> getRegion(const std::size_t node) const
+        Region<DIM> getRegion(const std::size_t node) const override
         {
-            return regions[node];
+            return regions.at(node);
         }
 
-        void setAdjacency(const Adjacency &in)
+        virtual void setAdjacency(const Adjacency &in) override
         {
+            std::cout << "set adjacency" << std::endl;
+
             adjacency = in;
+            buildRegions();
         }
 
-        void setAdjacency(Adjacency &&in)
+        virtual void setAdjacency(Adjacency &&in) override
         {
+            std::cout << "move adjacency" << std::endl;
+
             adjacency = std::move(in);
+            buildRegions();
         }
 
     private:
@@ -60,10 +61,17 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
         std::vector<Region<DIM> > regions;
         Adjacency adjacency;
 
+        void buildRegions()
+        {
+            std::vector<SCOTCH_Num> indices(numCells);
+            initIndices(indices);
+            regions.resize(weights.size());
+            createRegions(indices);
+        }
+
         void initIndices(std::vector<SCOTCH_Num> &indices)
         {
             // create 2D grid
-
             SCOTCH_Arch arch;
             SCOTCH_archInit(&arch);
             SCOTCH_Num *velotabArch;
@@ -105,15 +113,15 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
             verttabGra[numCells] = currentEdge;
 
             error = SCOTCH_graphBuild(&graph,
-                                      0,
-                                      numCells,
-                                      verttabGra,
-                                      nullptr,
-                                      nullptr,
-                                      nullptr,
-                                      numEdges,
-                                      edgetabGra,
-                                      nullptr);
+                    0,
+                    numCells,
+                    verttabGra,
+                    nullptr,
+                    nullptr,
+                    nullptr,
+                    numEdges,
+                    edgetabGra,
+                    nullptr);
             if (error) std::cout << "SCOTCH_graphBuild error: " << error << std::endl;
 
             error = SCOTCH_graphCheck(&graph);
@@ -140,6 +148,18 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
             {
                 regions[indices[i]] << Coord<1>(i);
             }
+
+            if (MPILayer().rank() == 0)
+            {
+                std::cout << "regions: " << std::endl;
+                for (auto &region : regions)
+                {
+                    region.prettyPrint1D(std::cout, Coord<2>(1000, 1000));
+                    std::cout << std::endl;
+                    std::cout << std::endl;
+                }
+            }
+
         }
 
     protected:

@@ -56,6 +56,7 @@ public:
         unsigned newGhostZoneWidth)
     {
         partition = newPartition;
+        partition->setAdjacency(adjacency);
         simulationArea = newSimulationArea;
         rank = newRank;
         ghostZoneWidth = newGhostZoneWidth;
