@@ -22,15 +22,18 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
         using Partition<DIM>::weights;
 
         explicit PTScotchUnstructuredPartition(
-                const Coord<DIM> &origin = Coord<DIM>(),
-                const Coord<DIM> &dimensions = Coord<DIM>(),
-                const long &offset = 0,
-                const std::vector<std::size_t> &weights = std::vector<std::size_t>(2)) :
+                const Coord<DIM> &origin,
+                const Coord<DIM> &dimensions,
+                const long &offset,
+                const std::vector<std::size_t> &weights,
+                const Adjacency &adjacency) :
             Partition<DIM>(offset, weights),
             origin(origin),
             dimensions(dimensions),
-            numCells(dimensions.prod())
+            numCells(dimensions.prod()),
+            adjacency(adjacency)
         {
+            buildRegions();
         }
 
         Region<DIM> getRegion(const std::size_t node) const override
@@ -38,20 +41,9 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
             return regions.at(node);
         }
 
-        virtual void setAdjacency(const Adjacency &in) override
+        virtual const Adjacency &getAdjacency() const override
         {
-            std::cout << "set adjacency" << std::endl;
-
-            adjacency = in;
-            buildRegions();
-        }
-
-        virtual void setAdjacency(Adjacency &&in) override
-        {
-            std::cout << "move adjacency" << std::endl;
-
-            adjacency = std::move(in);
-            buildRegions();
+            return adjacency;
         }
 
     private:
@@ -60,6 +52,7 @@ class PTScotchUnstructuredPartition : public Partition<DIM>
         SCOTCH_Num numCells;
         std::vector<Region<DIM> > regions;
         Adjacency adjacency;
+
 
         void buildRegions()
         {

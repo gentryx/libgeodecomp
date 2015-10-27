@@ -58,8 +58,6 @@ public:
         rank(mpiLayer.rank())
     {
         partitionManager.reset(new PartitionManagerType());
-        // adjacency is empty and not required for everything but unstructured grids
-        partitionManager->setAdjacency(initializer->getAdjacency());
         partitionManager->resetRegions(
             box,
             partition,
