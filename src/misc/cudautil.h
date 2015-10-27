@@ -7,8 +7,22 @@
 #include <stdexcept>
 
 #ifdef LIBGEODECOMP_WITH_CUDA
+
+#ifdef __ICC
+// disabling this warning as implicit type conversion here as it's an intented feature for dim3
+#pragma warning push
+#pragma warning (disable: 2304)
+#endif
+
+#ifdef __CUDACC__
 #include <cuda.h>
 #include <cuda_runtime.h>
+#endif
+
+#ifdef __ICC
+#pragma warning pop
+#endif
+
 #endif
 
 #ifndef __host__
@@ -20,6 +34,7 @@
 #endif
 
 #ifdef LIBGEODECOMP_WITH_CUDA
+#ifdef __CUDACC__
 
 namespace LibGeoDecomp {
 
@@ -42,6 +57,7 @@ public:
 
 }
 
+#endif
 #endif
 
 #endif

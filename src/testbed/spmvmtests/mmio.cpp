@@ -65,6 +65,10 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     J = (int *) malloc(nz * sizeof(int));
     val = (double *) malloc(nz * sizeof(double));
 
+    if (!I || !J || !val) {
+        throw std::runtime_error("malloc() failed");
+    }
+
     *val_ = val;
     *I_ = I;
     *J_ = J;
@@ -76,9 +80,9 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     for (i=0; i<nz; i++)
     {
         int rc = fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
-		if (rc != 3) {
-			throw std::runtime_error("failed to parse input file");
-		}
+        if (rc != 3) {
+            throw std::runtime_error("failed to parse input file");
+        }
         I[i]--;  /* adjust from 1-based to 0-based */
         J[i]--;
     }
@@ -361,9 +365,16 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
     *J = (int *)  malloc(*nz * sizeof(int));
     *val = NULL;
 
+    if (*I == NULL || *J == NULL) {
+        throw std::runtime_error("malloc() failed");
+    }
+
     if (mm_is_complex(*matcode))
     {
         *val = (double *) malloc(*nz * 2 * sizeof(double));
+        if (*val == NULL) {
+            throw std::runtime_error("malloc() failed");
+        }
         ret_code = mm_read_mtx_crd_data(f, *M, *N, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
@@ -371,6 +382,9 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
     else if (mm_is_real(*matcode))
     {
         *val = (double *) malloc(*nz * sizeof(double));
+        if (*val == NULL) {
+            throw std::runtime_error("malloc() failed");
+        }
         ret_code = mm_read_mtx_crd_data(f, *M, *N, *nz, *I, *J, *val,
                 *matcode);
         if (ret_code != 0) return ret_code;
@@ -451,16 +465,19 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
 */
 char *mm_strdup(const char *s)
 {
-	int len = strlen(s);
-	char *s2 = (char *) malloc((len+1)*sizeof(char));
-	return strcpy(s2, s);
+    int len = strlen(s);
+    char *s2 = (char *) malloc((len+1)*sizeof(char));
+    if (!s2) {
+        throw std::runtime_error("malloc() failed");
+    }
+    return strcpy(s2, s);
 }
 
 char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
     const char *types[4];
-	char *mm_strdup(const char *);
+    char *mm_strdup(const char *);
     int error =0;
 
     /* check for MTX type */
@@ -508,6 +525,10 @@ char  *mm_typecode_to_str(MM_typecode matcode)
         types[3] = MM_SKEW_STR;
     else
         return NULL;
+
+    if (error) {
+        throw std::runtime_error("error in mm_typecode_to_str()");
+    }
 
     sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
     return mm_strdup(buffer);

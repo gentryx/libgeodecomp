@@ -89,6 +89,13 @@ public:
         return "primitiveType";
     }
 
+#ifdef LIBGEODECOMP_WITH_MPI
+    MPI_Datatype mpiDatatype() const
+    {
+        return Typemaps::lookup<CELL>();
+    }
+#endif
+
     std::size_t sizeOfMember() const
     {
         return sizeof(CELL);
@@ -154,10 +161,10 @@ public:
 
 #ifdef __CUDACC__
 #define MAKE_SELECTOR(CELL, MEMBER)								\
-	LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER, true)
+    LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER, true)
 #else
 #define MAKE_SELECTOR(CELL, MEMBER)							\
-	LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER)
+    LibGeoDecomp::Selector<CELL >(&CELL::MEMBER, #MEMBER)
 #endif
 
 /**
@@ -174,12 +181,25 @@ template<typename CELL>
 class Selector
 {
 public:
+   #ifdef LIBGEODECOMP_WITH_HPX
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(Selector);
+
+    template<typename ARCHIVE, typename CELL2>
+    friend void hpx::serialization::serialize(
+        ARCHIVE& archive, LibGeoDecomp::Selector<CELL2>& object, const unsigned version);
+#endif
+
+    friend class PPMWriterTest;
+
     Selector() :
         memberPointer(0),
         memberSize(0),
         externalSize(0),
         memberOffset(0),
         memberName("memberName not initialized")
+    {}
+
+    virtual ~Selector()
     {}
 
     template<typename MEMBER>
@@ -430,6 +450,14 @@ class Selector<char> : public SelectorHelpers::PrimitiveSelector<char>
  * see above
  */
 template<>
+class Selector<unsigned char> : public SelectorHelpers::PrimitiveSelector<unsigned char>
+{
+};
+
+/**
+ * see above
+ */
+template<>
 class Selector<int> : public SelectorHelpers::PrimitiveSelector<int>
 {
 };
@@ -459,5 +487,32 @@ class Selector<double> : public SelectorHelpers::PrimitiveSelector<double>
 };
 
 }
+
+#ifdef LIBGEODECOMP_WITH_HPX
+
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template<typename CELL>), (LibGeoDecomp::Selector<CELL>));
+HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template<typename CELL>), (LibGeoDecomp::Selector<CELL>));
+
+namespace hpx {
+namespace serialization {
+
+template<typename ARCHIVE, typename CELL>
+void serialize(ARCHIVE& archive, LibGeoDecomp::Selector<CELL>& object, const unsigned version)
+{
+    archive & object.externalSize;
+    archive & object.filter;
+    archive & object.memberName;
+    archive & object.memberOffset;
+
+    std::size_t *buf = reinterpret_cast<std::size_t*>(const_cast<char CELL::**>(&object.memberPointer));
+    archive & *buf;
+
+    archive & object.memberSize;
+}
+
+}
+}
+
+#endif
 
 #endif

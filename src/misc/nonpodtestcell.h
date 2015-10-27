@@ -1,11 +1,18 @@
 #ifndef LIBGEODECOMP_MISC_NONPODTESTCELL_H
 #define LIBGEODECOMP_MISC_NONPODTESTCELL_H
 
+#include <libgeodecomp/config.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/serialization/set.hpp>
+#endif
+
+#ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/set.hpp>
+#endif
 
 namespace LibGeoDecomp {
 
@@ -23,7 +30,8 @@ class NonPoDTestCell
 {
 public:
     friend class NonPoDTestCellTest;
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     class API :
         public APITraits::HasBoostSerialization,
@@ -68,6 +76,7 @@ public:
         coord = HOOD( 0,  0).coord;
         simSpace = HOOD( 0,  0).simSpace;
         cycleCounter = HOOD( 0,  0).cycleCounter + 1;
+        seenNeighbors = HOOD( 0,  0).seenNeighbors;
 
         // ultimately seenNeighbors should contain all coordinates (as
         // missingNeighbors did initiallty)...
@@ -76,7 +85,6 @@ public:
         seenNeighbors |= HOOD( 1, -1).seenNeighbors;
 
         seenNeighbors |= HOOD(-1,  0).seenNeighbors;
-        seenNeighbors |= HOOD( 0,  0).seenNeighbors;
         seenNeighbors |= HOOD( 1,  0).seenNeighbors;
 
         seenNeighbors |= HOOD(-1,  1).seenNeighbors;

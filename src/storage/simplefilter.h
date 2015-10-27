@@ -14,8 +14,8 @@ template<typename CELL, typename MEMBER, typename EXTERNAL>
 class SimpleFilter : public Filter<CELL, MEMBER, EXTERNAL>
 {
 public:
-    friend class Serialization;
-    // fixme: check this class with cuda device memory as source/target
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     virtual void load(
         const EXTERNAL& source,

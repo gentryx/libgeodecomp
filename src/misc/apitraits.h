@@ -69,11 +69,35 @@ public:
 class APITraits
 {
 public:
+    class TrueType;
+
     class FalseType
-    {};
+    {
+    public:
+        inline operator bool() const
+        {
+            return false;
+        }
+
+        TrueType operator!() const
+        {
+            return TrueType();
+        }
+    };
 
     class TrueType
-    {};
+    {
+    public:
+        inline operator bool() const
+        {
+            return true;
+        }
+
+        FalseType operator!() const
+        {
+            return FalseType();
+        }
+    };
 
     /**
      * Helper class for specializations. Thanks to Hartmut Kaiser for
@@ -470,14 +494,20 @@ public:
     class SelectSpeedGuide
     {
     public:
-        typedef FalseType Value;
+        static double value()
+        {
+            return 1.0;
+        }
     };
 
     template<typename CELL>
     class SelectSpeedGuide<CELL, typename CELL::API::SupportsSpeed>
     {
     public:
-        typedef TrueType Value;
+        static double value()
+        {
+            return CELL::cellSpeed();
+        }
     };
 
     /**
@@ -689,7 +719,24 @@ public:
     class SelectThreadedUpdate
     {
     public:
-        typedef FalseType Value;
+        class Value
+        {
+        public:
+            inline FalseType hasOpenMP() const
+            {
+                return FalseType();
+            }
+
+            inline FalseType hasHPX() const
+            {
+                return FalseType();
+            }
+
+            inline FalseType hasCUDA() const
+            {
+                return FalseType();
+            }
+        };
     };
 
     template<typename CELL>
@@ -1095,6 +1142,86 @@ public:
     //     typedef void SupportsTemplateName;
     // };
 };
+
+inline bool operator&&(APITraits::TrueType, bool other)
+{
+    return other;
+}
+
+inline bool operator&&(bool other, APITraits::TrueType)
+{
+    return other;
+}
+
+inline bool operator&&(APITraits::FalseType, bool other)
+{
+    return false;
+}
+
+inline bool operator&&(bool other, APITraits::FalseType)
+{
+    return false;
+}
+
+inline APITraits::TrueType operator&&(APITraits::TrueType, APITraits::TrueType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::FalseType operator&&(APITraits::TrueType, APITraits::FalseType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::FalseType operator&&(APITraits::FalseType, APITraits::TrueType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::FalseType operator&&(APITraits::FalseType, APITraits::FalseType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::TrueType operator==(APITraits::TrueType, APITraits::TrueType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::FalseType operator==(APITraits::TrueType, APITraits::FalseType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::FalseType operator==(APITraits::FalseType, APITraits::TrueType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::TrueType operator==(APITraits::FalseType, APITraits::FalseType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::FalseType operator!=(APITraits::TrueType, APITraits::TrueType)
+{
+    return APITraits::FalseType();
+}
+
+inline APITraits::TrueType operator!=(APITraits::TrueType, APITraits::FalseType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::TrueType operator!=(APITraits::FalseType, APITraits::TrueType)
+{
+    return APITraits::TrueType();
+}
+
+inline APITraits::TrueType operator!=(APITraits::FalseType, APITraits::FalseType)
+{
+    return APITraits::TrueType();
+}
 
 }
 

@@ -1,17 +1,31 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="mech_8cpp" kind="file">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="mech_8cpp" kind="file" language="C++">
     <compoundname>mech.cpp</compoundname>
     <includes refid="mech_8h" local="yes">mech.h</includes>
     <incdepgraph>
-      <node id="79">
-        <label>car.h</label>
-        <link refid="car_8h"/>
-        <childnode refid="80" relation="include">
+      <node id="78">
+        <label>mech.h</label>
+        <link refid="mech_8h"/>
+        <childnode refid="79" relation="include">
         </childnode>
+      </node>
+      <node id="82">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="80">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
+      <node id="83">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="77">
+        <label>src/mech.cpp</label>
+        <link refid="mech.cpp"/>
         <childnode refid="78" relation="include">
-        </childnode>
-        <childnode refid="81" relation="include">
         </childnode>
       </node>
       <node id="81">
@@ -22,29 +36,15 @@
         <childnode refid="83" relation="include">
         </childnode>
       </node>
-      <node id="77">
-        <label>src/mech.cpp</label>
-        <link refid="mech.cpp"/>
+      <node id="79">
+        <label>car.h</label>
+        <link refid="car_8h"/>
+        <childnode refid="80" relation="include">
+        </childnode>
         <childnode refid="78" relation="include">
         </childnode>
-      </node>
-      <node id="78">
-        <label>mech.h</label>
-        <link refid="mech_8h"/>
-        <childnode refid="79" relation="include">
+        <childnode refid="81" relation="include">
         </childnode>
-      </node>
-      <node id="83">
-        <label>rim.h</label>
-        <link refid="rim_8h"/>
-      </node>
-      <node id="82">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
-      </node>
-      <node id="80">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
       </node>
     </incdepgraph>
     <briefdescription>
@@ -54,15 +54,17 @@
     <programlisting>
 <codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;<ref refid="mech_8h" kindref="compound">mech.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="2"><highlight class="normal"></highlight></codeline>
-<codeline lineno="3" refid="classMech_1af16dc449c38d2e30c15aadb6869b7d77" refkind="member"><highlight class="normal"><ref refid="classMech_1af16dc449c38d2e30c15aadb6869b7d77" kindref="member">Mech::Mech</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>armor_,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ammo_,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>power_)<sp/>:</highlight></codeline>
-<codeline lineno="4"><highlight class="normal"><sp/><sp/><sp/><sp/>armor(armor_),<sp/>ammo(ammo_),<sp/>power(power_)</highlight></codeline>
-<codeline lineno="5"><highlight class="normal">{}</highlight></codeline>
-<codeline lineno="6"><highlight class="normal"></highlight></codeline>
-<codeline lineno="7"><highlight class="normal"><ref refid="classCar" kindref="compound">Car</ref></highlight></codeline>
-<codeline lineno="8" refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" refkind="member"><highlight class="normal"><ref refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" kindref="member">Mech::transformToCar</ref>()<sp/>{</highlight></codeline>
-<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="classCar" kindref="compound">Car</ref>();</highlight></codeline>
-<codeline lineno="10"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="3" refid="classMech_1afb7034e29aeef6606b846271dd0f78e2" refkind="member"><highlight class="normal"><ref refid="classMech_1afb7034e29aeef6606b846271dd0f78e2" kindref="member">Mech::Mech</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>armor,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ammo,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>power)<sp/>:</highlight></codeline>
+<codeline lineno="4"><highlight class="normal"><sp/><sp/><sp/><sp/>armor(armor),</highlight></codeline>
+<codeline lineno="5"><highlight class="normal"><sp/><sp/><sp/><sp/>ammo(ammo),</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"><sp/><sp/><sp/><sp/>power(power)</highlight></codeline>
+<codeline lineno="7"><highlight class="normal">{}</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><ref refid="classCar" kindref="compound">Car</ref></highlight></codeline>
+<codeline lineno="10" refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" refkind="member"><highlight class="normal"><ref refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" kindref="member">Mech::transformToCar</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="classCar" kindref="compound">Car</ref>();</highlight></codeline>
+<codeline lineno="12"><highlight class="normal">}</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.cpp"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.cpp"/>
   </compounddef>
 </doxygen>

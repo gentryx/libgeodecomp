@@ -98,65 +98,35 @@ public:
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
-        ar & boost::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
+        ar & hpx::serialization::base_object<SimpleInitializer<ConwayCell> >(*this);
     }
 };
 
 typedef
     HpxSimulator::HpxSimulator<ConwayCell, RecursiveBisectionPartition<2> >
     SimulatorType;
-LIBGEODECOMP_REGISTER_HPX_SIMULATOR_DECLARATION(
-    SimulatorType,
-    ConwayCellSimulator
-)
-LIBGEODECOMP_REGISTER_HPX_SIMULATOR(
-    SimulatorType,
-    ConwayCellSimulator
-)
-
-BOOST_CLASS_EXPORT_GUID(CellInitializer, "CellInitializer");
 
 typedef LibGeoDecomp::TracingWriter<ConwayCell> TracingWriterType;
-BOOST_CLASS_EXPORT_GUID(TracingWriterType, "TracingWriterConwayCell");
-
-typedef LibGeoDecomp::SerialBOVWriter<ConwayCell> BovWriterType;
-BOOST_CLASS_EXPORT_GUID(BovWriterType, "BovWriterConwayCell");
-
-typedef
-    LibGeoDecomp::HpxWriterCollector<ConwayCell>
-    HpxWriterCollectorType;
-
-LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR_DECLARATION(
-    HpxWriterCollectorType,
-    ConwayCellWriterCollector
-)
-LIBGEODECOMP_REGISTER_HPX_WRITER_COLLECTOR(
-    HpxWriterCollectorType,
-    ConwayCellWriterCollector
-)
 
 int hpx_main()
 {
     {
-        int outputFrequency = 1;
         CellInitializer *init = new CellInitializer();
 
         SimulatorType sim(
             init,
-            1, // overcommitFactor
+            std::vector<double>(1, 1.0), // number an relative speed of update groups
             new TracingBalancer(new OozeBalancer()),
-            10, // balancingPeriod
-            1 // ghostZoneWidth
+            100, // load balancing period
+            1 // ghost zone width
             );
 
-        HpxWriterCollectorType::SinkType sink(
-            new BovWriterType(&ConwayCell::alive, "game", outputFrequency),
-            sim.numUpdateGroups());
-
-        sim.addWriter(
-            new HpxWriterCollectorType(
-                sink
-            ));
+        // fixme
+        // int outputFrequency = 1;
+        // sim.addWriter(
+        //     new HpxWriterCollectorType(
+        //         sink
+        //     ));
 
         sim.addWriter(
             new TracingWriterType(
@@ -166,6 +136,7 @@ int hpx_main()
 
         sim.run();
     }
+
     return hpx::finalize();
 }
 

@@ -16,7 +16,8 @@ template<typename T, int SIZE>
 class FixedArray
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
     friend class Typemaps;
     typedef T* iterator;
     typedef const T* const_iterator;

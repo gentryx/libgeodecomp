@@ -1,3 +1,4 @@
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/io/serialbovwriter.h>
 #include <libgeodecomp/io/testinitializer.h>
 #include <libgeodecomp/misc/stringops.h>

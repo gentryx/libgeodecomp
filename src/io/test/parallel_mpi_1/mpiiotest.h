@@ -20,7 +20,7 @@ public:
         unsigned step = 42;
         unsigned maxSteps = 4711;
         std::string filename = TempFile::parallel("mpiio");
-	MPIIO<double, Topologies::Cube<2>::Topology> mpiio;
+        MPIIO<double, Topologies::Cube<2>::Topology> mpiio;
 
         Grid<double> grid1(Coord<2>(width, height));
         grid1.getEdgeCell() = -1.245;

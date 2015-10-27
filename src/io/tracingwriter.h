@@ -2,25 +2,14 @@
 #define LIBGEODECOMP_IO_TRACINGWRITER_H
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/time_parsers.hpp>
 #include <iostream>
 #include <stdexcept>
 
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
 #include <libgeodecomp/misc/clonable.h>
-
-namespace boost {
-
-namespace serialization {
-
-// Don't remove this declaration. It's required for builds where no
-// Boost.Serialization is available, as we're friend with it (see
-// below).
-class access;
-
-}
-
-}
 
 namespace LibGeoDecomp {
 
@@ -36,8 +25,12 @@ class TracingWriter :
         public Clonable<ParallelWriter<CELL_TYPE>, TracingWriter<CELL_TYPE> >
 {
 public:
-    friend class Serialization;
-    friend class boost::serialization::access;
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(TracingWriter)
+
+#ifdef LIBGEODECOMP_WITH_HPX
+    template<typename ARCHIVE, typename CELL_TYPE2>
+    friend void hpx::serialization::serialize(ARCHIVE&, TracingWriter<CELL_TYPE2>&, const unsigned);
+#endif
 
     using Writer<CELL_TYPE>::NANO_STEPS;
 
@@ -154,28 +147,32 @@ private:
     }
 };
 
-class Serialization;
-
 }
 
-namespace boost {
+#ifdef LIBGEODECOMP_WITH_HPX
+namespace hpx {
 namespace serialization {
 
-template<typename ARCHIVE>
+template<typename ARCHIVE, typename CELL_TYPE>
 inline
-static void serialize(ARCHIVE& archive, std::ostream& object, const unsigned)
+static void serialize(ARCHIVE& archive, LibGeoDecomp::TracingWriter<CELL_TYPE>& object, const unsigned /*version*/)
 {
-    // intentionally left empty to ignore serialization/deserialization
+    archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<LibGeoDecomp::ParallelWriter<CELL_TYPE >, LibGeoDecomp::TracingWriter<CELL_TYPE > > >(object);
+    archive & hpx::serialization::base_object<LibGeoDecomp::Clonable<LibGeoDecomp::Writer<CELL_TYPE >, LibGeoDecomp::TracingWriter<CELL_TYPE > > >(object);
+    archive & object.lastStep;
+    archive & object.maxSteps;
+    archive & object.outputRank;
+    std::string str = to_iso_string(object.startTime);
+    archive & str;
+    object.startTime = boost::posix_time::from_iso_string(str);
 }
 
-template<typename ARCHIVE>
-inline
-static void serialize(ARCHIVE& archive, boost::posix_time::ptime& object, const unsigned)
-{
-    // intentionally left empty to ignore serialization/deserialization
+}
 }
 
-}
-}
+HPX_TRAITS_NONINTRUSIVE_POLYMORPHIC_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
+HPX_SERIALIZATION_REGISTER_CLASS_TEMPLATE((template <typename CELL_TYPE>), (LibGeoDecomp::TracingWriter<CELL_TYPE>));
+#endif
+
 
 #endif

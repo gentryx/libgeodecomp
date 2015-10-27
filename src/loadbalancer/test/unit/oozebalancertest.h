@@ -11,14 +11,12 @@ namespace LibGeoDecomp {
 class OozeBalancerTest1 : public CxxTest::TestSuite
 {
 public:
-
     void testConstructor()
     {
         // newLoadWeight gotta be in [0, 1]
         TS_ASSERT_THROWS(OozeBalancer(-1), std::invalid_argument);
         TS_ASSERT_THROWS(OozeBalancer(1.1), std::invalid_argument);
     }
-
 
     void checkExpectedOptimalDistribution(OozeBalancer::LoadVec expected, OozeBalancer::WeightVec loads, OozeBalancer::LoadVec relLoads)
     {
@@ -27,7 +25,6 @@ public:
 
         TS_ASSERT_EQUALS_DOUBLE_VEC(actual, expected);
     }
-
 
     void testExpectedOptimalDistribution1()
     {
@@ -57,7 +54,6 @@ public:
         checkExpectedOptimalDistribution(expected, loads, relLoads);
     }
 
-
     void testExpectedOptimalDistribution2()
     {
         OozeBalancer::WeightVec loads(3);
@@ -73,7 +69,6 @@ public:
         OozeBalancer::LoadVec expected(3, 100.0 / 3);
         checkExpectedOptimalDistribution(expected, loads, relLoads);
     }
-
 
     void testOptDistWithElementsTooLargeForOneNode()
     {
@@ -115,9 +110,6 @@ public:
 
         checkExpectedOptimalDistribution(expected, loads, relLoads);
     }
-
-
-
 };
 
 
@@ -130,7 +122,6 @@ public:
         TS_ASSERT_EQUALS(oldLoads.size(), newLoads.size());
         TS_ASSERT_EQUALS(sum(oldLoads), sum(newLoads));
     }
-
 
     /**
      * the time one node needs for calculation depends on its share of
@@ -149,7 +140,6 @@ public:
 
         return ret;
     }
-
 
     void checkConvergence(OozeBalancer::WeightVec startLoads, OozeBalancer::LoadVec itemLoads, OozeBalancer::LoadVec nodeSpeeds)
     {
@@ -174,7 +164,6 @@ public:
         }
     }
 
-
     OozeBalancer::LoadVec itemLoads1()
     {
         OozeBalancer::LoadVec itemLoads(1500);
@@ -187,7 +176,6 @@ public:
         return itemLoads;
     }
 
-
     OozeBalancer::LoadVec nodeSpeeds1()
     {
         OozeBalancer::LoadVec nodeSpeeds(5);
@@ -199,7 +187,6 @@ public:
         return nodeSpeeds;
     }
 
-
     void testConvergence1()
     {
         // all items to node 0
@@ -209,7 +196,6 @@ public:
         checkConvergence(startLoads, itemLoads1(), nodeSpeeds1());
     }
 
-
     void testConvergence2()
     {
         // equidistribution
@@ -217,7 +203,6 @@ public:
 
         checkConvergence(startLoads, itemLoads1(), nodeSpeeds1());
     }
-
 
     OozeBalancer::LoadVec tLoads()
     {
@@ -229,7 +214,6 @@ public:
         dLoads[4] = 6.9;
         return dLoads;
     }
-
 
     void testEqualize1()
     {
@@ -248,7 +232,6 @@ public:
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(tLoads()));
     }
 
-
     void testEqualize2()
     {
         OozeBalancer::LoadVec loads(1, 12.1);
@@ -256,14 +239,12 @@ public:
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(loads));
     }
 
-
     void testEqualize3()
     {
         OozeBalancer::LoadVec loads(1, 11.9);
         OozeBalancer::WeightVec expected(1, 12);
         TS_ASSERT_EQUALS(expected, OozeBalancer().equalize(loads));
     }
-
 
     void testLinearCombo()
     {
@@ -284,9 +265,7 @@ public:
         TS_ASSERT_EQUALS_DOUBLE_VEC(
             expected,
             OozeBalancer(0.1).linearCombo(base, tLoads()));
-
     }
-
 
     void testZeroRelativeLoads()
     {
@@ -295,4 +274,4 @@ public:
     }
 };
 
-};
+}

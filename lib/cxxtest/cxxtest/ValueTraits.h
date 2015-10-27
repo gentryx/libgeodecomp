@@ -94,7 +94,7 @@ class ValueTraits
     char _asString[sizeof("{ ") + sizeof("XX ") * MAX_BYTES + sizeof("... }")];
 
 public:
-    ValueTraits(const T &t) { bytesToString((const unsigned char *)&t, sizeof(T), MAX_BYTES, _asString); }
+    explicit ValueTraits(const T &t) { bytesToString((const unsigned char *)&t, sizeof(T), MAX_BYTES, _asString); }
     const char *asString(void) const { return _asString; }
 };
 
@@ -117,7 +117,7 @@ inline ValueTraits<T> traits(T t)
     { \
         ValueTraits< CXXTEST_OLD_CLASS > _old; \
     public: \
-        ValueTraits( CXXTEST_NEW_CLASS n ) : _old( (CXXTEST_OLD_CLASS)n ) {} \
+        explicit ValueTraits( CXXTEST_NEW_CLASS n ) : _old( (CXXTEST_OLD_CLASS)n ) {} \
         const char *asString( void ) const { return _old.asString(); } \
     }
 
@@ -204,8 +204,8 @@ class ValueTraits<const char * const &>
     const char *_asString;
 
 public:
-    ValueTraits(const char * const &value) : _asString(value) {}
-    ValueTraits(const ValueTraits &other) : _asString(other._asString) {}
+    explicit ValueTraits(const char * const &value) : _asString(value) {}
+    explicit ValueTraits(const ValueTraits &other) : _asString(other._asString) {}
     const char *asString(void) const { return _asString; }
 #if 0
     const char *asString(void) const
@@ -243,7 +243,7 @@ class ValueTraits<const bool>
     bool _value;
 
 public:
-    ValueTraits(const bool value) : _value(value) {}
+    explicit ValueTraits(const bool value) : _value(value) {}
     const char *asString(void) const { return _value ? "true" : "false"; }
 };
 
@@ -290,7 +290,7 @@ class ValueTraits<const signed long int>
     typedef signed long int T;
     char _asString[2 + 3 * sizeof(T)];
 public:
-    ValueTraits(T t) { numberToString<T>(t, _asString); }
+    explicit ValueTraits(T t) { numberToString<T>(t, _asString); }
     const char *asString(void) const { return _asString; }
 };
 
@@ -305,7 +305,7 @@ class ValueTraits<const unsigned long int>
     typedef unsigned long int T;
     char _asString[1 + 3 * sizeof(T)];
 public:
-    ValueTraits(T t) { numberToString<T>(t, _asString); }
+    explicit ValueTraits(T t) { numberToString<T>(t, _asString); }
     const char *asString(void) const { return _asString; }
 };
 
@@ -336,7 +336,7 @@ class ValueTraits<const char>
 {
     char _asString[sizeof("'\\xXX'")];
 public:
-    ValueTraits(char c) { copyString(charToString(c, copyString(_asString, "'")), "'"); }
+    explicit ValueTraits(char c) { copyString(charToString(c, copyString(_asString, "'")), "'"); }
     const char *asString(void) const { return _asString; }
 };
 
@@ -356,7 +356,7 @@ CXXTEST_TEMPLATE_INSTANTIATION
 class ValueTraits<const double>
 {
 public:
-    ValueTraits(double t)
+    explicit ValueTraits(double t)
     {
         if ((t != t) || (t >= HUGE_VAL) || (t == -HUGE_VAL))
         {

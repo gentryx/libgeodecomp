@@ -44,7 +44,8 @@ public:
         ghostzZoneWidth = 10;
         s.reset(new SimulatorType(
                     init, 0, loadBalancingPeriod, ghostzZoneWidth));
-        mockWriter = new MockWriter();
+        events.reset(new MockWriter<>::EventVec);
+        mockWriter = new MockWriter<>(events);
         memoryWriter = new MemoryWriterType(outputPeriod);
         s->addWriter(mockWriter);
         s->addWriter(memoryWriter);
@@ -96,12 +97,12 @@ public:
     {
         s->step();
 
-        MockWriter::EventVec expectedEvents;
-        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, false)
-                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, true )
-                       << MockWriterHelpers::MockWriterEvent(21, WRITER_STEP_FINISHED, 0, false)
-                       << MockWriterHelpers::MockWriterEvent(21, WRITER_STEP_FINISHED, 0, true );
-        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
+        MockWriter<>::EventVec expectedEvents;
+        expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, false)
+                       << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, true )
+                       << MockWriter<>::Event(21, WRITER_STEP_FINISHED, 0, false)
+                       << MockWriter<>::Event(21, WRITER_STEP_FINISHED, 0, true );
+        TS_ASSERT_EQUALS(expectedEvents, *events);
 
         std::vector<unsigned> actualSteps;
         std::vector<unsigned> expectedSteps;
@@ -122,17 +123,17 @@ public:
     {
         s->run();
 
-        MockWriter::EventVec expectedEvents;
-        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, false)
-                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED,   0, true);
+        MockWriter<>::EventVec expectedEvents;
+        expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, false)
+                       << MockWriter<>::Event(20, WRITER_INITIALIZED,   0, true);
         for (int t = 21; t < 200; ++t) {
-            expectedEvents << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, 0, false)
-                           << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, 0, true);
+            expectedEvents << MockWriter<>::Event(t, WRITER_STEP_FINISHED, 0, false)
+                           << MockWriter<>::Event(t, WRITER_STEP_FINISHED, 0, true);
         }
-        expectedEvents << MockWriterHelpers::MockWriterEvent(200, WRITER_ALL_DONE, 0, false)
-                       << MockWriterHelpers::MockWriterEvent(200, WRITER_ALL_DONE, 0, true);
+        expectedEvents << MockWriter<>::Event(200, WRITER_ALL_DONE, 0, false)
+                       << MockWriter<>::Event(200, WRITER_ALL_DONE, 0, true);
 
-        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
+        TS_ASSERT_EQUALS(expectedEvents, *events);
 
         for (int t = 20; t <= 200; ++t) {
             int globalNanoStep = t * APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
@@ -153,7 +154,9 @@ public:
         s.reset();
 
         std::stringstream expected;
-        expected << "created, period = 5\n";
+        expected << "created, period = 5\n"
+                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, 0, 0)\n"
+                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, 0, 1)\n";
         for (int i = 25; i < 200; i += 5) {
             expected << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 0)\n"
                      << "nextStep(" << i << ", STEERER_NEXT_STEP, 0, 1)\n";
@@ -190,7 +193,8 @@ private:
     unsigned outputPeriod;
     unsigned loadBalancingPeriod;
     unsigned ghostzZoneWidth;
-    MockWriter *mockWriter;
+    MockWriter<> *mockWriter;
+    boost::shared_ptr<MockWriter<>::EventVec> events;
     MemoryWriterType *memoryWriter;
 };
 

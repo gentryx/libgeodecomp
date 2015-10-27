@@ -254,6 +254,7 @@ public:
     typedef PatchBufferFixed<GridType, GridType, 1> PatchBufferType1;
     typedef PatchBufferFixed<GridType, GridType, 2> PatchBufferType2;
     typedef typename ParentType::PatchAccepterVec PatchAccepterVec;
+    typedef typename ParentType::PatchProviderVec PatchProviderVec;
 
     using CommonStepper<CELL_TYPE>::initializer;
     using CommonStepper<CELL_TYPE>::patchAccepters;
@@ -289,12 +290,16 @@ public:
         boost::shared_ptr<PartitionManagerType> partitionManager,
         boost::shared_ptr<Initializer<CELL_TYPE> > initializer,
         const PatchAccepterVec& ghostZonePatchAccepters = PatchAccepterVec(),
-        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec()) :
+        const PatchAccepterVec& innerSetPatchAccepters = PatchAccepterVec(),
+        const PatchProviderVec& ghostZonePatchProviders = PatchProviderVec(),
+        const PatchProviderVec& innerSetPatchProviders = PatchProviderVec()) :
         CommonStepper<CELL_TYPE>(
             partitionManager,
             initializer,
             ghostZonePatchAccepters,
-            innerSetPatchAccepters)
+            innerSetPatchAccepters,
+            ghostZonePatchProviders,
+            innerSetPatchProviders)
     {
         initGrids();
     }

@@ -143,7 +143,7 @@ public:
         cell.cellA.insert(40, SimpleCellA());
         cell.cellA.insert(50, SimpleCellA());
         cell.cellA.insert(55, SimpleCellA());
- 
+
         cell.cellB.insert(40, SimpleCellB());
         cell.cellB.insert(50, SimpleCellB());
         cell.cellB.insert(65, SimpleCellB());

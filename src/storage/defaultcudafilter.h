@@ -5,11 +5,11 @@
 #include <libgeodecomp/storage/defaultfilter.h>
 #include <libgeodecomp/storage/filter.h>
 
+#ifdef __CUDACC__
+
 #ifdef LIBGEODECOMP_WITH_CUDA
 #include <cuda_runtime.h>
 #endif
-
-#ifdef __CUDACC__
 
 namespace LibGeoDecomp {
 

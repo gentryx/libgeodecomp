@@ -15,7 +15,7 @@ template<typename ELEMENT_TYPE>
 class CUDAArray
 {
 public:
-    inline CUDAArray(std::size_t size = 0) :
+    explicit inline CUDAArray(std::size_t size = 0) :
         size(size),
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(size))
     {}
@@ -46,7 +46,7 @@ public:
         cudaMemcpy(dataPointer, hostData, byteSize(), cudaMemcpyHostToDevice);
     }
 
-    inline CUDAArray(const std::vector<ELEMENT_TYPE>& hostVector) :
+    explicit inline CUDAArray(const std::vector<ELEMENT_TYPE>& hostVector) :
         size(hostVector.size()),
         dataPointer(LibFlatArray::cuda_allocator<ELEMENT_TYPE>().allocate(hostVector.size()))
     {

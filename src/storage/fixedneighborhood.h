@@ -40,7 +40,7 @@ public:
     typedef CELL Cell;
 
     __host__ __device__
-    explicit FixedNeighborhood(
+    FixedNeighborhood(
         SoAAccessorIn& accessor,
         long& tempIndex,
         // X axis

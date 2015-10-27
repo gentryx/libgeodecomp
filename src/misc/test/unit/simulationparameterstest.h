@@ -1,14 +1,13 @@
 #include <libgeodecomp/misc/simulationparameters.h>
 #include <libgeodecomp/misc/stdcontaineroverloads.h>
 #include <libgeodecomp/misc/stringops.h>
-#include <cuda.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace LibGeoDecomp;
 
 namespace LibGeoDecomp {
 
-class SimulationFactoryTest : public CxxTest::TestSuite
+class SimulationParametersTest : public CxxTest::TestSuite
 {
 public:
     double eval(SimulationParameters params)

@@ -6,9 +6,11 @@
 
 class BMW : public Car, private Luxury
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
+
     float price;
+    
 private:
     int serial;
 };

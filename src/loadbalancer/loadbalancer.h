@@ -5,20 +5,23 @@
 
 namespace LibGeoDecomp {
 
-
 /**
  * The purpose of a load-balancer is to even out the computational
- * load on all MPI processes/HPX localities.
+ * load by assigning a fraction of the total work to each
+ * MPI processes/HPX localities.
  */
 class LoadBalancer
 {
 public:
-    friend class Serialization;
+    friend class PolymorphicSerialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     typedef std::vector<std::size_t> WeightVec;
     typedef std::vector<double> LoadVec;
 
-    virtual ~LoadBalancer() {}
+    virtual ~LoadBalancer()
+    {}
 
     /**
      * Given the current workload distribution weights

@@ -2,7 +2,7 @@
 #define LIBGEODECOMP_IO_HPXWRITERSINKSERVER_H
 
 #include <libgeodecomp/config.h>
-#ifdef LIBGEODECOMP_WITH_HPX
+#ifdef LIBGEODECOMP_WITH_HPX_XXX
 
 #include <libgeodecomp/io/parallelwriter.h>
 #include <libgeodecomp/io/writer.h>
@@ -48,15 +48,11 @@ public:
 
     typedef hpx::lcos::local::spinlock MutexType;
 
-    HpxWriterSinkServer()
-    {}
-
     HpxWriterSinkServer(
-        std::size_t numUpdateGroups) :
+        std::size_t numUpdateGroups = 0) :
         numUpdateGroups(numUpdateGroups),
         nextId(0)
-    {
-    }
+    {}
 
     HpxWriterSinkServer(
         boost::shared_ptr<ParallelWriter<CellType> > parallelWriter,
@@ -85,58 +81,58 @@ public:
         std::size_t rank,
         bool lastCall)
     {
-        typedef typename RegionInfoMapType::iterator RegionMapIterator;
-        typedef typename StepCountMapType::iterator StepCountMapIterator;
-        typedef typename GridMapType::iterator GridIterator;
+        // typedef typename RegionInfoMapType::iterator RegionMapIterator;
+        // typedef typename StepCountMapType::iterator StepCountMapIterator;
+        // typedef typename GridMapType::iterator GridIterator;
 
-        MutexType::scoped_lock l(mutex);
-        GridIterator kt = gridMap.find(step);
-        if (kt == gridMap.end())
-        {
-            CoordBox<DIM> coordBox(CoordType(), globalDimensions);
-            kt = gridMap.insert(
-                kt,
-                std::make_pair(
-                    step,
-                    GridType(coordBox)));
-        }
+        // MutexType::scoped_lock l(mutex);
+        // GridIterator kt = gridMap.find(step);
+        // if (kt == gridMap.end())
+        // {
+        //     CoordBox<DIM> coordBox(CoordType(), globalDimensions);
+        //     kt = gridMap.insert(
+        //         kt,
+        //         std::make_pair(
+        //             step,
+        //             GridType(coordBox)));
+        // }
 
-        GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);
+        // GridVecConv::vectorToGrid(*buffer, &kt->second, validRegion);
 
-        RegionMapIterator it = regionInfoMap.find(step);
-        if (it == regionInfoMap.end()) {
-            it = regionInfoMap.insert(
-                    it,
-                    std::make_pair(step, std::vector<RegionInfo>())
-                );
-        }
+        // RegionMapIterator it = regionInfoMap.find(step);
+        // if (it == regionInfoMap.end()) {
+        //     it = regionInfoMap.insert(
+        //             it,
+        //             std::make_pair(step, std::vector<RegionInfo>())
+        //         );
+        // }
 
-        it->second.push_back(
-            RegionInfo(validRegion, globalDimensions, event, rank, lastCall)
-        );
+        // it->second.push_back(
+        //     RegionInfo(validRegion, globalDimensions, event, rank, lastCall)
+        // );
 
-        if (lastCall) {
-            StepCountMapIterator jt = stepCountMap.find(step);
-            if (jt == stepCountMap.end())
-            {
-                jt = stepCountMap.insert(jt, std::make_pair(step, 1));
-            }
-            else
-            {
-                ++jt->second;
-            }
+        // if (lastCall) {
+        //     StepCountMapIterator jt = stepCountMap.find(step);
+        //     if (jt == stepCountMap.end())
+        //     {
+        //         jt = stepCountMap.insert(jt, std::make_pair(step, 1));
+        //     }
+        //     else
+        //     {
+        //         ++jt->second;
+        //     }
 
-            if (jt->second == numUpdateGroups)
-            {
-                {
-                    hpx::util::scoped_unlock<MutexType::scoped_lock> ull(l);
-                    notifyWriters(kt->second, step, event);
-                }
-                regionInfoMap.erase(it);
-                stepCountMap.erase(jt);
-                gridMap.erase(kt);
-            }
-        }
+        //     if (jt->second == numUpdateGroups)
+        //     {
+        //         {
+        //             hpx::util::scoped_unlock<MutexType::scoped_lock> ull(l);
+        //             notifyWriters(kt->second, step, event);
+        //         }
+        //         regionInfoMap.erase(it);
+        //         stepCountMap.erase(jt);
+        //         gridMap.erase(kt);
+        //     }
+        // }
     }
     HPX_DEFINE_COMPONENT_ACTION(HpxWriterSinkServer, stepFinished, StepFinishedAction);
 

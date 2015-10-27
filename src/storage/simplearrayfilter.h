@@ -13,8 +13,8 @@ template<typename CELL, typename MEMBER, typename EXTERNAL, int ARITY>
 class SimpleArrayFilter : public ArrayFilter<CELL, MEMBER, EXTERNAL, ARITY>
 {
 public:
-    friend class Serialization;
-    // fixme: check this class with cuda device memory as source/target
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     virtual void load(const EXTERNAL source[ARITY], MEMBER   target[ARITY]) = 0;
     virtual void save(const MEMBER   source[ARITY], EXTERNAL target[ARITY]) = 0;

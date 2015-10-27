@@ -6,8 +6,8 @@
 template<typename A, typename B>
 class CoordPair
 {
-    friend class Typemaps;
 public:
+    friend class Typemaps;
     A a;
     B b;
 };

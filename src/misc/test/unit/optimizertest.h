@@ -379,7 +379,7 @@ public:
         LOG(Logger::INFO, "Calls: " << eval.getCalls() << std::endl
                 << "x: " <<  (double) params["x"].getValue()
                 << " y: " << (double) params["y"].getValue()
-                << " granulatity from x " << params["x"].getGranularity() 
+                << " granulatity from x " << params["x"].getGranularity()
                 << std::endl);
     }
     void testPatternDefault()

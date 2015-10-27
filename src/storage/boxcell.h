@@ -45,7 +45,7 @@ public:
         typedef typename NeighborhoodIterator<NEIGHBORHOOD, DIM, COLLECTION_INTERFACE>::Adapter Value;
     };
 
-    explicit inline BoxCell(
+    inline explicit BoxCell(
         const FloatCoord<DIM>& origin = Coord<DIM>(),
         const FloatCoord<DIM>& dimension = Coord<DIM>()) :
         origin(origin),

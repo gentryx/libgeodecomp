@@ -1,4 +1,5 @@
 #include <libgeodecomp/config.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/storage/unstructuredsoagrid.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <cxxtest/TestSuite.h>

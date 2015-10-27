@@ -19,9 +19,10 @@ endif()
 get_directory_property(lgd_has_parent PARENT_DIRECTORY)
 
 #============= 1. FIND PACKAGES WE DEPEND ON =========================
-if(NOT HPX_FOUND)
-  find_package(HPX)
 
+find_package(HPX)
+
+if(NOT HPX_FOUND)
   if(NOT DEFINED BOOST_ROOT)
     # deduce Boost location from environment (e.g. on woody.rrze.uni-erlangen.de)
     set(BOOST_ENV_LIBDIR "$ENV{BOOST_LIBDIR}")
@@ -40,42 +41,39 @@ if(NOT HPX_FOUND)
   # will reset Boost_LIBRARIES.
   find_package(Boost REQUIRED COMPONENTS date_time filesystem system)
   set(ALL_BOOST_LIBS "${Boost_LIBRARIES}")
-  if(NOT WITH_SIMPLE_BOOST)
-    find_package(Boost COMPONENTS serialization)
-    set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-    find_package(Boost COMPONENTS thread)
-    set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-    find_package(Boost COMPONENTS move)
-    set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
-  endif()
+  find_package(Boost COMPONENTS serialization)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+  find_package(Boost COMPONENTS thread)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+  find_package(Boost COMPONENTS move)
+  set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 else()
   # If HPX was found, we use the Boost libraries found by HPX
   set(ALL_BOOST_LIBS
     ${HPX_BOOST_DATE_TIME_LIBRARY}
     ${HPX_BOOST_FILESYSTEM_LIBRARY}
     ${HPX_BOOST_SYSTEM_LIBRARY}
-    ${HPX_BOOST_SERIALIZATION_LIBRARY}
     ${HPX_BOOST_THREAD_LIBRARY}
   )
   set(Boost_DATE_TIME_FOUND true)
   set(Boost_FILESYSTEM_FOUND true)
   set(Boost_SYSTEM_FOUND true)
-  set(Boost_SERIALIZATION_FOUND true)
   set(Boost_THREAD_FOUND true)
 endif()
 
-if(NOT WITH_SIMPLE_BOOST)
-  find_package(Boost COMPONENTS mpi)
-  set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
-endif()
+find_package(Boost COMPONENTS serialization)
+set(Boost_SERIALIZATION_LIBRARIES "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
+
+find_package(Boost COMPONENTS mpi)
+set(Boost_MPI_LIBRARIES "${Boost_LIBRARIES}")
 
 # search for external LibFlatArray, but -- if none was found -- default to bundled version:
 find_package(libflatarray QUIET)
 if(NOT libflatarray_FOUND)
   add_subdirectory(lib/libflatarray)
-  # # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
-  # # not be exported during install in any case (the build tree must be
-  # # considered a temporary directory, and CMake would complain).
+  # add this include paths only to BUILD_INCLUDE_DIRECTORIES as must
+  # not be exported during install in any case (the build tree must be
+  # considered a temporary directory, and CMake would complain).
   list(APPEND BUILD_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib/libflatarray/src")
 else()
   # if LibFlatArray was found outside, we'll assume we're not using
@@ -157,11 +155,24 @@ set(RELEASE false)
 lgd_detect_distro()
 
 # compute default flags:
-set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -Wall -Wno-sign-promo -Wnon-virtual-dtor")
+set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -Wall")
+set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -Wall -Wno-sign-conversion -Wnon-virtual-dtor")
+
+check_cxx_compiler_flag("-fdiagnostics-color=always" SUPPORTS_COLOR)
+if(SUPPORTS_COLOR)
+  set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -fdiagnostics-color=always")
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -fdiagnostics-color=always")
+endif()
+
+check_cxx_compiler_flag("-std=c++14" SUPPORTS_CPP14)
+if(NOT SUPPORTS_CPP14)
+  set(SUPPORTS_CPP14 false)
+endif()
 
 check_cxx_compiler_flag("-march=native" SUPPORTS_MARCH_NATIVE)
 if(SUPPORTS_MARCH_NATIVE AND NOT APPLE)
-  set(DEFAULT_FLAGS "${DEFAULT_FLAGS} -march=native")
+  set(DEFAULT_C_FLAGS   "${DEFAULT_C_FLAGS}   -march=native")
+  set(DEFAULT_CXX_FLAGS "${DEFAULT_CXX_FLAGS} -march=native")
 endif()
 
 # configure whether the dreaded typemap-generator will run:
@@ -181,7 +192,8 @@ if (MACHINE_ARCH MATCHES "x86_64")
 endif()
 
 #============= 3. CONFIGURABLE BUILD OPTIONS =========================
-lgd_add_config_option(ADDITIONAL_COMPILE_FLAGS "Add these flags when compiling." "${DEFAULT_FLAGS}" false)
+lgd_add_config_option(LGD_ADDITIONAL_C_COMPILE_FLAGS   "Add these flags when compiling C code."   "${DEFAULT_C_FLAGS}"   false)
+lgd_add_config_option(LGD_ADDITIONAL_CXX_COMPILE_FLAGS "Add these flags when compiling C++ code." "${DEFAULT_CXX_FLAGS}" false)
 
 lgd_add_config_option(CMAKE_BUILD_TYPE "Sets the compile/link options, e.g. Debug, Release... Refer to the cmake documentation for more details." "Release" false)
 
@@ -238,7 +250,7 @@ lgd_add_config_option(WITH_TYPEMAPS "Controls whether the build system should re
 
 lgd_add_config_option(WITH_VISIT "Activate code parts which use VisitWriter and SerialVisitWriter" ${VISIT_FOUND} true)
 
-lgd_add_config_option(WITH_CPP14 "LibGeoDecomp is largely written in C++98, but some components use language features from a newer standard. This option will enable those." false true)
+lgd_add_config_option(WITH_CPP14 "LibGeoDecomp is largely written in C++98, but some components use language features from a newer standard. This option will enable those." ${SUPPORTS_CPP14} true)
 
 lgd_print_options()
 lgd_dump_config("config.h")

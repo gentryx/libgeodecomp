@@ -7,17 +7,19 @@
 #include <libgeodecomp/storage/unstructuredgrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#endif
 
 #ifdef LIBGEODECOMP_WITH_HPX
+#include <hpx/runtime/serialization/serialize.hpp>
+#include <hpx/runtime/serialization/binary_filter.hpp>
 #include <hpx/runtime/serialization/input_archive.hpp>
 #include <hpx/runtime/serialization/output_archive.hpp>
-#else
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#endif
 #endif
 
 namespace LibGeoDecomp {
@@ -137,8 +139,7 @@ private:
 #ifdef LIBGEODECOMP_WITH_HPX
         int archive_flags = boost::archive::no_header;
         archive_flags |= hpx::serialization::disable_data_chunking;
-        hpx::util::binary_filter *f = 0;
-        hpx::serialization::output_archive archive(*vec, f, archive_flags);
+        hpx::serialization::output_archive archive(*vec, archive_flags);
 #else
         typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
         Device sink(*vec);
@@ -269,9 +270,7 @@ private:
         const APITraits::TrueType&)
     {
 #ifdef LIBGEODECOMP_WITH_HPX
-        int archive_flags = boost::archive::no_header;
-        archive_flags |= hpx::serialization::disable_data_chunking;
-        hpx::serialization::input_archive archive(vec, vec.size(), archive_flags);
+        hpx::serialization::input_archive archive(vec, vec.size());
 #else
         typedef boost::iostreams::basic_array_source<char> Device;
         Device source(&vec.front(), vec.size());

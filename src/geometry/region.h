@@ -90,13 +90,42 @@ public:
  * internal helper class
  */
 template<int DIM>
+class StreakIteratorInitPlaneOffset
+{
+public:
+    typedef std::pair<int, int> IntPair;
+    typedef std::vector<IntPair> IndexVectorType;
+
+    explicit StreakIteratorInitPlaneOffset(const std::size_t offset) :
+        offset(offset)
+    {}
+
+    template<int STREAK_DIM, typename REGION>
+    inline void operator()(Streak<STREAK_DIM> *streak, IndexVectorType::const_iterator *iterators, const REGION& region, const Coord<STREAK_DIM>& unusedOffsets) const
+    {
+        iterators[DIM] = region.indicesBegin(DIM) + offset;
+        for (int d = DIM - 1; d >= 0; --d) {
+            iterators[d] = region.indicesBegin(d) + iterators[d + 1]->second;
+        }
+
+        ConstructStreakFromIterators<DIM>()(streak, iterators, unusedOffsets);
+    }
+
+private:
+    const std::size_t offset;
+};
+
+/**
+ * internal helper class
+ */
+template<int DIM>
 class StreakIteratorInitSingleOffset
 {
 public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffset(const std::size_t& offsetIndex) :
+    explicit StreakIteratorInitSingleOffset(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
 
@@ -118,7 +147,7 @@ public:
     }
 
 private:
-    const std::size_t& offsetIndex;
+    const std::size_t offsetIndex;
 };
 
 /**
@@ -131,7 +160,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffset(const std::size_t& offsetIndex) :
+    explicit StreakIteratorInitSingleOffset(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
 
@@ -143,7 +172,7 @@ public:
     }
 
 private:
-    const std::size_t& offsetIndex;
+    const std::size_t offsetIndex;
 };
 
 /**
@@ -156,7 +185,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t& offsetIndex) :
+    explicit StreakIteratorInitSingleOffsetWrapper(const std::size_t offsetIndex) :
         offsetIndex(offsetIndex)
     {}
 
@@ -169,7 +198,7 @@ public:
     }
 
 private:
-    const std::size_t& offsetIndex;
+    const std::size_t offsetIndex;
 };
 
 /**
@@ -182,7 +211,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM> offsets) :
         offsets(offsets)
     {}
 
@@ -196,7 +225,7 @@ public:
     }
 
 private:
-    const Coord<COORD_DIM>& offsets;
+    const Coord<COORD_DIM> offsets;
 };
 
 /**
@@ -209,7 +238,7 @@ public:
     typedef std::pair<int, int> IntPair;
     typedef std::vector<IntPair> IndexVectorType;
 
-    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM>& offsets) :
+    explicit StreakIteratorInitOffsets(const Coord<COORD_DIM> offsets) :
         offsets(offsets)
     {}
 
@@ -224,7 +253,7 @@ public:
     }
 
 private:
-    const Coord<COORD_DIM>& offsets;
+    const Coord<COORD_DIM> offsets;
 };
 
 /**
@@ -384,7 +413,8 @@ template<int DIM>
 class Region
 {
 public:
-    friend class Serialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
 
     template<int MY_DIM> friend void swap(Region<MY_DIM>&, Region<MY_DIM>&);
     template<int MY_DIM> friend class RegionHelpers::RegionLookupHelper;
@@ -450,7 +480,8 @@ public:
 #ifdef LIBGEODECOMP_WITH_CPP14
     inline Region(const Region<DIM>& other) = default;
 
-    inline Region(Region<DIM>&& other) :
+    inline
+    explicit Region(Region<DIM>&& other) :
         myBoundingBox(other.myBoundingBox),
         mySize(other.mySize),
         geometryCacheTainted(other.geometryCacheTainted)
@@ -622,12 +653,15 @@ public:
                  ++streak) {
                 for (int x = streak->origin.x(); x < streak->endX; ++x) {
                     Adjacency::const_iterator it = adjacency.find(x);
-                    if (it != adjacency.end()) {
-                        for (std::vector<int>::const_iterator i = it->second.begin(); i != it->second.end(); ++i) {
-                            Coord<DIM> c(*i);
-                            if (ret.count(c) == 0) {
-                                add << c;
-                            }
+                    if (it == adjacency.end()) {
+                        continue;
+                    }
+
+                    const std::vector<int>& neighbors = it->second;
+                    for (std::vector<int>::const_iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
+                        Coord<DIM> c(*i);
+                        if (ret.count(c) == 0) {
+                            add << c;
                         }
                     }
                 }
@@ -682,10 +716,25 @@ public:
      */
     inline Region& operator<<(const Streak<DIM>& s)
     {
+#ifdef __GNUC__
+#ifndef __CUDACC__
+#if __GNUC__ > 4 || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 5))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
+#endif
+#endif
         //ignore 0 length streaks
         if (s.endX <= s.origin.x()) {
             return *this;
         }
+#ifdef __GNUC__
+#ifndef __CUDACC__
+#if __GNUC__ > 4 || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 5))
+#pragma GCC diagnostic pop
+#endif
+#endif
+#endif
 
         geometryCacheTainted = true;
         RegionHelpers::RegionInsertHelper<DIM - 1>()(this, s);
@@ -858,11 +907,155 @@ public:
         *this = newValue;
     }
 
+    inline Region operator+(const Region& other) const
+    {
+        Region ret;
+
+        merge2way(
+            ret,
+            this->beginStreak(), this->endStreak(),
+            other.beginStreak(), other.endStreak());
+
+        return ret;
+    }
+
+    inline std::vector<Streak<DIM> > toVector() const
+    {
+        std::vector<Streak<DIM> > ret(numStreaks());
+        std::copy(beginStreak(), endStreak(), ret.begin());
+        return ret;
+    }
+
+    inline std::string toString() const
+    {
+        std::ostringstream buf;
+        buf << "Region<" << DIM << ">(\n";
+        for (int dim = 0; dim < DIM; ++dim) {
+            buf << "  indices[" << dim << "] = "
+                << indices[dim] << "\n";
+        }
+        buf << ")\n";
+
+        return buf.str();
+
+    }
+
+    inline std::string prettyPrint() const
+    {
+        std::ostringstream buf;
+        buf << "Region<" << DIM << ">(\n";
+
+        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
+            buf << "  " << *i << "\n";
+        }
+
+        buf << ")\n";
+
+        return buf.str();
+    }
+
+    inline bool empty() const
+    {
+        return (indices[0].size() == 0);
+    }
+
+    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
+    }
+
+    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>()) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset);
+    }
+
+    /**
+     * Returns an iterator whose internal iterators are set to the
+     * given offsets from the corresponding array starts. Runs in O(DIM)
+     * time.
+     */
+    inline StreakIterator operator[](const Coord<DIM>& offsets) const
+    {
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitOffsets<DIM - 1, DIM>(offsets));
+    }
+
+    /**
+     * Yields an iterator to the offset'th Streak in the Region. Runs
+     * in O(DIM * log n) time.
+     */
+    inline StreakIterator operator[](std::size_t offset) const
+    {
+        if (offset == 0) {
+            return beginStreak();
+        }
+        if (offset >= numStreaks()) {
+            return endStreak();
+        }
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
+    }
+
+    /**
+     * Yields an iterator to the offset'th plane in the region (i.e. a
+     * XY-plane for 3D or a row for 2D). Runs in O(DIM). This is an
+     * efficient way to generate starting points for multi-threaded
+     * iteration through a Region.
+     */
+    inline StreakIterator planeStreakIterator(std::size_t offset) const
+    {
+        if (offset == 0) {
+            return beginStreak();
+        }
+        if (offset >= numPlanes()) {
+            return endStreak();
+        }
+
+        return StreakIterator(this, RegionHelpers::StreakIteratorInitPlaneOffset<DIM - 1>(offset));
+    }
+
+    inline std::size_t numPlanes() const
+    {
+        return indices[DIM -1].size();
+    }
+
+    inline Iterator begin() const
+    {
+        return Iterator(beginStreak());
+    }
+
+    inline Iterator end() const
+    {
+        return Iterator(endStreak());
+    }
+
+    inline std::size_t indicesSize(std::size_t dim) const
+    {
+        return indices[dim].size();
+    }
+
+    inline IndexVectorType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
+    {
+        return indices[dim].begin() + offset;
+    }
+
+    inline IndexVectorType::const_iterator indicesBegin(std::size_t dim) const
+    {
+        return indices[dim].begin();
+    }
+
+    inline IndexVectorType::const_iterator indicesEnd(std::size_t dim) const
+    {
+        return indices[dim].end();
+    }
+
+private:
+    IndexVectorType indices[DIM];
+    mutable CoordBox<DIM> myBoundingBox;
+    mutable std::size_t mySize;
+    mutable bool geometryCacheTainted;
+
 #define LIBGEODECOMP_REGION_ADVANCE_ITERATOR(ITERATOR, END)     \
             if (*ITERATOR != lastInsert) {         \
-                if (ret.count(*ITERATOR) == 0) {   \
-                    ret << *ITERATOR;              \
-                }                                  \
+                ret << *ITERATOR;                  \
                 lastInsert = *ITERATOR;            \
             }                                      \
             ++ITERATOR;                            \
@@ -987,6 +1180,7 @@ public:
 
 #undef LIBGEODECOMP_REGION_ADVANCE_ITERATOR
 
+<<<<<<< local
     inline Region operator+(const Region& other) const
     {
         Region ret;
@@ -1146,6 +1340,8 @@ private:
     mutable std::size_t mySize;
     mutable bool geometryCacheTainted;
 
+=======
+>>>>>>> other
     inline void determineGeometry() const
     {
         if (empty()) {

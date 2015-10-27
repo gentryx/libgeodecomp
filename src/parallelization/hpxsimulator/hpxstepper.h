@@ -14,10 +14,10 @@ namespace HiParSimulator {
 template <typename CELL_TYPE>
 class HpxStepper : public CommonStepper<CELL_TYPE>
 {
+public:
     friend class HpxStepperRegionTest;
     friend class HpxStepperBasicTest;
     friend class HpxStepperTest;
-public:
 
     typedef typename Stepper<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
@@ -253,7 +253,7 @@ private:
                 updateFutures.push_back(
                     hpx::async(
                         hpx::util::bind(
-                            UpdateFunctor<CELL_TYPE>(),
+                            UpdateFunctor<CELL_TYPE, UpdateFunctorHelpers::ConcurrencyEnableHPX>(),
                             r,
                             Coord<DIM>(),
                             Coord<DIM>(),

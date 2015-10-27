@@ -1,3 +1,4 @@
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/testhelper.h>
 #include <libgeodecomp/misc/tempfile.h>
 #include <libgeodecomp/parallelization/serialsimulator.h>

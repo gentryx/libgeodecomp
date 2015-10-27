@@ -28,7 +28,7 @@ if (is_hpx_test AND WITH_HPX)
   string(REGEX REPLACE "_.+" "" NUM_LOCALITIES "${NUM_PROC}")
   string(REGEX REPLACE ".+_" "" NUM_THREADS    "${NUM_PROC}")
 
-  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
+  add_custom_target(${TARGET_RUN_UNIT_TEST} echo "running tests in..." && pwd && bash -c "${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${NUM_LOCALITIES} ./test --hpx:bind=balanced --hpx:threads=${NUM_THREADS} -Ihpx.parcel.tcp.enable=0 -Ihpx.parcel.mpi.enable=1")
 endif()
 
 if (is_mpi_test AND WITH_MPI)
@@ -67,7 +67,7 @@ if(allowed_test AND selected_test)
         set(HAS_CUDA_TESTS true)
         set(TEST_SUFFIX "test.cu")
       else()
-        set(TEST_SUFFIX "test.cpp")
+            set(TEST_SUFFIX "test.cpp")
       endif()
 
       string(REPLACE "test.h" "${TEST_SUFFIX}" source "${header}")
@@ -111,13 +111,19 @@ int run_tests(int argc, char **argv);
 
 int hpx_main(int argc, char **argv)
 {
-    run_tests(argc, argv);
-    return hpx::finalize();
+    int ret1 = run_tests(argc, argv);
+    int ret2 = hpx::finalize();
+    return ret1 || ret2;
 }
 
 int main(int argc, char **argv)
 {
-    return hpx::init(argc, argv);
+    // We want HPX to run hpx_main() on all localities to avoid the
+    // initial overhead caused by broadcasting the work from one to
+    // all other localities:
+    std::vector<std::string> config(1, \"hpx.run_hpx_main!=1\");
+
+    return hpx::init(argc, argv, config);
 }
 ")
   endif()

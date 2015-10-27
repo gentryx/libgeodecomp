@@ -45,7 +45,7 @@ public:
 class ErrorFormatter : public TestListener
 {
 public:
-    ErrorFormatter(OutputStream *o, const char *preLine = ":", const char *postLine = "",
+    explicit ErrorFormatter(OutputStream *o, const char *preLine = ":", const char *postLine = "",
                    const char *errorString = "Error",
                    const char *warningString = "Warning") :
         _dotting(true),

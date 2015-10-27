@@ -2,6 +2,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/streak.h>
 #include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/storage/grid.h>
@@ -467,6 +468,18 @@ public:
             TS_ASSERT_EQUALS(grid[*i], MyDummyCell(1000 + counter, 2000 + counter, counter));
             ++counter;
         }
+    }
+
+    void testCreationOfZeroSizedGrid()
+    {
+        Grid<int, Topologies::Torus<1>::Topology> grid1;
+        TS_ASSERT_EQUALS(Coord<1>(), grid1.getDimensions());
+
+        Grid<int, Topologies::Torus<2>::Topology> grid2;
+        TS_ASSERT_EQUALS(Coord<2>(), grid2.getDimensions());
+
+        Grid<int, Topologies::Torus<3>::Topology> grid3;
+        TS_ASSERT_EQUALS(Coord<3>(), grid3.getDimensions());
     }
 };
 

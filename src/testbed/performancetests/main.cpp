@@ -272,7 +272,7 @@ public:
 class RegionExpand : public CPUBenchmark
 {
 public:
-    RegionExpand(int expansionWidth) :
+    explicit RegionExpand(int expansionWidth) :
         expansionWidth(expansionWidth)
     {}
 
@@ -320,7 +320,7 @@ private:
 class RegionExpandWithAdjacency : public CPUBenchmark
 {
 public:
-    RegionExpandWithAdjacency(
+    explicit RegionExpandWithAdjacency(
         std::map<int, ConvexPolytope<Coord<2> > > cells) :
         rawCells(cells)
     {}
@@ -353,7 +353,6 @@ public:
         for (int y = 0; y < gridSize.y(); ++y) {
             for (int x = 0; x < gridSize.x(); ++x) {
                 Coord<2> gridIndex(x, y);
-                Coord<2> chunkOffset = chunkDim.scale(gridIndex);
                 fillChunk(&grid, gridIndex, &counter, elementsPerChunk, chunkDim, minDistance);
             }
         }
@@ -394,7 +393,6 @@ public:
         double seconds = 0;
 
         // I. Adapt Voronio Mesh (i.e. Set of Cells)
-        std::size_t numCells = dim[0];
         int skipCells = dim[1];
         int expansionWidth = dim[2];
         int idStreakLength = dim[3];

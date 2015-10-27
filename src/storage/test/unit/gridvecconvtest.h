@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/misc/testcell.h>
 #include <libgeodecomp/storage/gridvecconv.h>
 #include <libgeodecomp/storage/soagrid.h>
@@ -64,10 +65,10 @@ public:
         return ret;
     }
 
-    IrregularCell *sublevelNW;
-    IrregularCell *sublevelNE;
-    IrregularCell *sublevelSW;
-    IrregularCell *sublevelSE;
+    boost::shared_ptr<IrregularCell> sublevelNW;
+    boost::shared_ptr<IrregularCell> sublevelNE;
+    boost::shared_ptr<IrregularCell> sublevelSW;
+    boost::shared_ptr<IrregularCell> sublevelSE;
     int temperature;
 };
 
@@ -172,20 +173,20 @@ public:
             gridA[*i].temperature = i->x() * 100 + i->y() + 90000;
         }
 
-        gridA[Coord<2>(12, 11)].sublevelNW = new IrregularCell(1);
-        gridA[Coord<2>(12, 11)].sublevelSE = new IrregularCell(
+        gridA[Coord<2>(12, 11)].sublevelNW.reset(new IrregularCell(1));
+        gridA[Coord<2>(12, 11)].sublevelSE.reset(new IrregularCell(
             2,
             0,
             new IrregularCell(3),
             0,
-            0);
+            0));
 
-        gridA[Coord<2>(20, 19)].sublevelNE = new IrregularCell(
+        gridA[Coord<2>(20, 19)].sublevelNE.reset(new IrregularCell(
             4,
             new IrregularCell(5),
             new IrregularCell(6),
             new IrregularCell(7),
-            new IrregularCell(8, new IrregularCell(9)));
+            new IrregularCell(8, new IrregularCell(9))));
 
         for (CoordBox<2>::Iterator i = box.begin(); i != box.end(); ++i) {
             TS_ASSERT_EQUALS(gridB[*i].temperature, 0);
@@ -206,15 +207,17 @@ public:
         }
 
         TS_ASSERT_EQUALS(gridB[Coord<2>(12, 11)].size(), 4);
-        IrregularCell *null = 0;
-        IrregularCell *testCell;
+        boost::shared_ptr<IrregularCell> null;
+        boost::shared_ptr<IrregularCell> testCell;
 
-        testCell = &gridB[Coord<2>(12, 11)];
-        TS_ASSERT_EQUALS(testCell->temperature, 91211);
-        TS_ASSERT_DIFFERS(testCell->sublevelNW, null);
-        TS_ASSERT_EQUALS( testCell->sublevelNE, null);
-        TS_ASSERT_EQUALS( testCell->sublevelSW, null);
-        TS_ASSERT_DIFFERS(testCell->sublevelSE, null);
+        {
+            IrregularCell * testCell = &gridB[Coord<2>(12, 11)];
+            TS_ASSERT_EQUALS(testCell->temperature, 91211);
+            TS_ASSERT_DIFFERS(testCell->sublevelNW, null);
+            TS_ASSERT_EQUALS( testCell->sublevelNE, null);
+            TS_ASSERT_EQUALS( testCell->sublevelSW, null);
+            TS_ASSERT_DIFFERS(testCell->sublevelSE, null);
+        }
 
         testCell = gridB[Coord<2>(12, 11)].sublevelNW;
         TS_ASSERT_EQUALS(testCell->temperature, 1);

@@ -1,6 +1,7 @@
 #include <libgeodecomp.h>
 #include <libgeodecomp/misc/patternoptimizer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
+#include <libgeodecomp/parallelization/autotuningsimulator.h>
 #include <libgeodecomp/parallelization/cacheblockingsimulator.h>
 #include <libgeodecomp/parallelization/cudasimulator.h>
 
@@ -38,7 +39,7 @@ public:
     template<typename NEIGHBORHOOD>
     static void updateLineX(Cell *target, long *x, long endX, const NEIGHBORHOOD& hood, int /* nanoStep */)
     {
-        for (; *x < endX; ++x) {
+        for (; *x < endX; ++(*x)) {
             target[*x].temp = (hood[FixedCoord< 0,  0, -1>()].temp +
                                hood[FixedCoord< 0, -1,  0>()].temp +
                                hood[FixedCoord<-1,  0,  0>()].temp +
@@ -56,7 +57,6 @@ class CellInitializer : public SimpleInitializer<Cell>
 public:
     using SimpleInitializer<Cell>::gridDimensions;
 
-    explicit
     CellInitializer(
         int num,
         int maxSteps) :
@@ -85,31 +85,66 @@ public:
         }
     }
 };
+int normalizeSteps(double goal)
+{
+    std::cout << "in normalizeSteps" << std::endl;
+    int steps = 5;
+    int oldSteps = 5;
+    CellInitializer init(1,1);
+    SerialSimulationFactory<Cell> fab(init);
+    double limit = fab(fab.parameters());
+    double fitness = DBL_MAX;
+
+    do {
+        CellInitializer init(1,steps);
+        SerialSimulationFactory<Cell> fab(init);
+        fitness = fab(fab.parameters());
+        oldSteps = steps;
+        steps = ((double) steps / fitness)* (double)goal;
+        if (steps < 1) {
+            steps =1;
+        }
+        std::cout << "fitness: " << fitness << " goal " << goal << std::endl;
+    } while((!(fitness > goal + limit && fitness < goal - limit )) && (!(oldSteps <= 1 && fitness > goal)));
+    
+    
+    return oldSteps;
+}
 
 void runSimulation()
 {
-    int outputFrequency = 1000;
-    int maxSteps = 1000;
-    CellInitializer init(1, maxSteps);
+    std::cout << "runSimulation" << std::endl;
+    int simSteps = 500;
+    int optSteps = normalizeSteps(-0.5);
+    std::cout << "optSteps: " << optSteps << std::endl;
+    AutoTuningSimulator<Cell,PatternOptimizer> autoSim(CellInitializer(1,optSteps));
+    autoSim.setSimulationSteps(20);
+    autoSim.runTest();
 
-    SimulationFactory<Cell> fab(init);
+    std::vector<std::string> simulations = autoSim.getSimulationNames();
+    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
+        std::cout << "Factory Name: " << *iter << " Fitness: " << autoSim.getFitness(*iter) << std::endl
+                  << autoSim.getSimulationParameters(*iter)<< std::endl;
+    }
+    
+    std::cout << "-----------------" << std::endl;
 
-    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n";
+    // looking for the best, of the best, of the best! Sir [MIB I] ;)
+    // TODO to get the best simulator for a long run, the build up costs need to be deducted.
+    optSteps *= 5;
+    double bestFitness = DBL_MAX* -1.0;
+    std::string bestSimulator;
+    for (std::vector<std::string>::iterator iter = simulations.begin(); iter != simulations.end(); iter++){
+        if (autoSim.getFitness(*iter) >= bestFitness){
+            bestSimulator = autoSim.getSimulatorType(*iter);
+            bestFitness = autoSim.getFitness(*iter);
+        }
+    }
+    std::cout << "Best Simulator: " << bestSimulator << " with fitness: " << bestFitness << std::endl;
+    // let Will Smith running :)
 
-    std::vector<std::string> simulatorTypes;
-    simulatorTypes << "CudaSimulator";
-    fab.parameters()["Simulator"] = SimulationParametersHelpers::DiscreteSet<std::string>(
-        simulatorTypes);
 
-    std::cout << "fab: " << fab.parameters()["Simulator"].toString() << "\n\n";
-    std::cout << "fab: " << fab.parameters() << "\n";
 
-    std::vector<double> stepWidths(fab.parameters().size(), 1);
-    std::vector<double> minStepwidths(fab.parameters().size(), 1);
-
-    PatternOptimizer optimizer(fab.parameters(), stepWidths, minStepwidths);
-    // optimizer(10, fab);
-    std::cout << "-----------------\n";
 
     // HiParSimulator::HiParSimulator<Cell, RecursiveBisectionPartition<3> > sim(
     //     init,
@@ -139,7 +174,5 @@ void runSimulation()
 
 int main(int argc, char **argv)
 {
-    MPI_Init(&argc, &argv);
     runSimulation();
-    MPI_Finalize();
 }

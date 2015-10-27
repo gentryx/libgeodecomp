@@ -1,11 +1,37 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="mech_8h" kind="file">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="mech_8h" kind="file" language="C++">
     <compoundname>mech.h</compoundname>
     <includes refid="car_8h" local="yes">car.h</includes>
     <includedby refid="car_8h" local="yes">src/car.h</includedby>
     <includedby refid="mech_8cpp" local="yes">src/mech.cpp</includedby>
     <incdepgraph>
+      <node id="85">
+        <label>src/mech.h</label>
+        <link refid="mech.h"/>
+        <childnode refid="86" relation="include">
+        </childnode>
+      </node>
+      <node id="89">
+        <label>tire.h</label>
+        <link refid="tire_8h"/>
+      </node>
+      <node id="87">
+        <label>engine.h</label>
+        <link refid="engine_8h"/>
+      </node>
+      <node id="90">
+        <label>rim.h</label>
+        <link refid="rim_8h"/>
+      </node>
+      <node id="88">
+        <label>wheel.h</label>
+        <link refid="wheel_8h"/>
+        <childnode refid="89" relation="include">
+        </childnode>
+        <childnode refid="90" relation="include">
+        </childnode>
+      </node>
       <node id="86">
         <label>car.h</label>
         <link refid="car_8h"/>
@@ -16,34 +42,38 @@
         <childnode refid="88" relation="include">
         </childnode>
       </node>
-      <node id="88">
-        <label>wheel.h</label>
-        <link refid="wheel_8h"/>
-        <childnode refid="89" relation="include">
-        </childnode>
-        <childnode refid="90" relation="include">
-        </childnode>
-      </node>
-      <node id="85">
-        <label>src/mech.h</label>
-        <link refid="mech.h"/>
-        <childnode refid="86" relation="include">
-        </childnode>
-      </node>
-      <node id="90">
-        <label>rim.h</label>
-        <link refid="rim_8h"/>
-      </node>
-      <node id="89">
-        <label>tire.h</label>
-        <link refid="tire_8h"/>
-      </node>
-      <node id="87">
-        <label>engine.h</label>
-        <link refid="engine_8h"/>
-      </node>
     </incdepgraph>
     <invincdepgraph>
+      <node id="93">
+        <label>src/bmw.h</label>
+        <link refid="bmw_8h"/>
+        <childnode refid="94" relation="include">
+        </childnode>
+      </node>
+      <node id="96">
+        <label>src/carcontainer.h</label>
+        <link refid="carcontainer_8h"/>
+      </node>
+      <node id="95">
+        <label>src/car.cpp</label>
+        <link refid="car_8cpp"/>
+      </node>
+      <node id="91">
+        <label>src/mech.h</label>
+        <link refid="mech.h"/>
+        <childnode refid="92" relation="include">
+        </childnode>
+        <childnode refid="97" relation="include">
+        </childnode>
+      </node>
+      <node id="94">
+        <label>src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+      <node id="97">
+        <label>src/mech.cpp</label>
+        <link refid="mech_8cpp"/>
+      </node>
       <node id="92">
         <label>src/car.h</label>
         <link refid="car_8h"/>
@@ -58,36 +88,6 @@
         <childnode refid="94" relation="include">
         </childnode>
       </node>
-      <node id="94">
-        <label>src/main.cpp</label>
-        <link refid="main_8cpp"/>
-      </node>
-      <node id="96">
-        <label>src/carcontainer.h</label>
-        <link refid="carcontainer_8h"/>
-      </node>
-      <node id="97">
-        <label>src/mech.cpp</label>
-        <link refid="mech_8cpp"/>
-      </node>
-      <node id="91">
-        <label>src/mech.h</label>
-        <link refid="mech.h"/>
-        <childnode refid="92" relation="include">
-        </childnode>
-        <childnode refid="97" relation="include">
-        </childnode>
-      </node>
-      <node id="95">
-        <label>src/car.cpp</label>
-        <link refid="car_8cpp"/>
-      </node>
-      <node id="93">
-        <label>src/bmw.h</label>
-        <link refid="bmw_8h"/>
-        <childnode refid="94" relation="include">
-        </childnode>
-      </node>
     </invincdepgraph>
     <innerclass refid="classMech" prot="public">Mech</innerclass>
     <briefdescription>
@@ -95,26 +95,28 @@
     <detaileddescription>
     </detaileddescription>
     <programlisting>
-<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_mech_h_</highlight></codeline>
-<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_mech_h_</highlight></codeline>
-<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_mech_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_mech_h_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
 <codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="car_8h" kindref="compound">car.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="5"><highlight class="normal"></highlight></codeline>
 <codeline lineno="6"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCar" kindref="compound">Car</ref>;</highlight></codeline>
 <codeline lineno="7"><highlight class="normal"></highlight></codeline>
 <codeline lineno="8" refid="classMech" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classMech" kindref="compound">Mech</ref></highlight></codeline>
 <codeline lineno="9"><highlight class="normal">{</highlight></codeline>
-<codeline lineno="10" refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" kindref="member">armor</ref>;</highlight></codeline>
-<codeline lineno="11" refid="classMech_1a0a24b56451092323eef033edfa3969b5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1a0a24b56451092323eef033edfa3969b5" kindref="member">ammo</ref>;</highlight></codeline>
-<codeline lineno="12" refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" kindref="member">power</ref>;</highlight></codeline>
-<codeline lineno="13"><highlight class="normal"></highlight></codeline>
-<codeline lineno="14"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
-<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classMech_1af16dc449c38d2e30c15aadb6869b7d77" kindref="member">Mech</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>armor_,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ammo_,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>power_);</highlight></codeline>
-<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/><ref refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" kindref="member">transformToCar</ref>();</highlight></codeline>
-<codeline lineno="17"><highlight class="normal">};</highlight></codeline>
-<codeline lineno="18"><highlight class="normal"></highlight></codeline>
-<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classMech_1afb7034e29aeef6606b846271dd0f78e2" kindref="member">Mech</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" kindref="member">armor</ref>,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1a0a24b56451092323eef033edfa3969b5" kindref="member">ammo</ref>,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" kindref="member">power</ref>);</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="classCar" kindref="compound">Car</ref><sp/><ref refid="classMech_1a846c68f8a5e3a987a2dd4c1f81978a0b" kindref="member">transformToCar</ref>();</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="16" refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1a17c2ef2cd1aa1f2d2687a48bdae27571" kindref="member">armor</ref>;</highlight></codeline>
+<codeline lineno="17" refid="classMech_1a0a24b56451092323eef033edfa3969b5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1a0a24b56451092323eef033edfa3969b5" kindref="member">ammo</ref>;</highlight></codeline>
+<codeline lineno="18" refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="classMech_1ac0daadb87b271ca2f6d1aa2ef2f2af2b" kindref="member">power</ref>;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/mech.h"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/mech.h"/>
   </compounddef>
 </doxygen>

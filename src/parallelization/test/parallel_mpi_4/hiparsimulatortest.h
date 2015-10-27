@@ -95,7 +95,8 @@ public:
                     new MockBalancer(),
                     loadBalancingPeriod,
                     ghostZoneWidth));
-        mockWriter = new MockWriter();
+        events.reset(new MockWriter<>::EventVec);
+        mockWriter = new MockWriter<>(events);
         memoryWriter = new MemoryWriterType(outputPeriod);
         sim->addWriter(mockWriter);
         sim->addWriter(memoryWriter);
@@ -119,14 +120,14 @@ public:
         TS_ASSERT_EQUALS((101 - 20 - 4) * 27, sim->timeToLastEvent());
 
         std::size_t rank = MPILayer().rank();
-        MockWriter::EventVec expectedEvents;
-        expectedEvents << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, false)
-                       << MockWriterHelpers::MockWriterEvent(20, WRITER_INITIALIZED, rank, true);
+        MockWriter<>::EventVec expectedEvents;
+        expectedEvents << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, false)
+                       << MockWriter<>::Event(20, WRITER_INITIALIZED, rank, true);
         for (int t = 21; t < 25; t += 1) {
-            expectedEvents << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, rank, false)
-                           << MockWriterHelpers::MockWriterEvent(t, WRITER_STEP_FINISHED, rank, true);
+            expectedEvents << MockWriter<>::Event(t, WRITER_STEP_FINISHED, rank, false)
+                           << MockWriter<>::Event(t, WRITER_STEP_FINISHED, rank, true);
         }
-        TS_ASSERT_EQUALS(expectedEvents, mockWriter->events());
+        TS_ASSERT_EQUALS(expectedEvents, *events);
 
         for (int t = 20; t < 25; t += outputPeriod) {
             int globalNanoStep = t * NANO_STEPS;
@@ -181,7 +182,9 @@ public:
         sim.reset();
 
         std::stringstream expected;
-        expected << "created, period = 5\n";
+        expected << "created, period = 5\n"
+                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, " << MPILayer().rank() << ", 0)\n"
+                 << "nextStep(" << 20 << ", STEERER_INITIALIZED, " << MPILayer().rank() << ", 1)\n";
         for (int i = 25; i < 101; i += 5) {
             expected << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "0)\n"
                      << "nextStep(" << i << ", STEERER_NEXT_STEP, " << MPILayer().rank() << ", " << "1)\n";
@@ -295,7 +298,8 @@ private:
     unsigned outputPeriod;
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
-    MockWriter *mockWriter;
+    boost::shared_ptr<MockWriter<>::EventVec> events;
+    MockWriter<> *mockWriter;
     MemoryWriterType *memoryWriter;
 };
 

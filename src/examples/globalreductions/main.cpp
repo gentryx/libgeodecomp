@@ -19,7 +19,7 @@ public:
     {};
 
     inline
-    BushFireCell(
+    explicit BushFireCell(
         const double humidity = 0,
         const double fuel = 0,
         const double temperature = 0,
@@ -229,7 +229,7 @@ class TemperatureRecorder : public Clonable<Writer<BushFireCell>, TemperatureRec
 public:
     typedef Writer<BushFireCell>::GridType GridType;
 
-    TemperatureRecorder(const unsigned outputPeriod) :
+    explicit TemperatureRecorder(const unsigned outputPeriod) :
         Clonable<Writer<BushFireCell>, TemperatureRecorder>("", outputPeriod),
         avrgTemperature(0)
     {}

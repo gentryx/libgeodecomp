@@ -90,7 +90,7 @@ void SimpleNode::update(const NEIGHBORHOOD& hood, int nanoStep)
 class SimpleParticle
 {
 public:
-    SimpleParticle(const double x = 0, const double y = 0) :
+    explicit SimpleParticle(const double x = 0, const double y = 0) :
         pos(x, y)
     {}
 

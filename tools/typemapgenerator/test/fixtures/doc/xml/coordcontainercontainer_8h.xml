@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.4">
-  <compounddef id="coordcontainercontainer_8h" kind="file">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.9.1">
+  <compounddef id="coordcontainercontainer_8h" kind="file" language="C++">
     <compoundname>coordcontainercontainer.h</compoundname>
     <innerclass refid="classCoordContainerContainer" prot="public">CoordContainerContainer</innerclass>
       <sectiondef kind="define">
@@ -12,7 +12,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="2" column="9" bodyfile="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="2" bodyend="-1"/>
+        <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" line="2" column="9" bodyfile="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h" bodystart="2" bodyend="-1"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -20,9 +20,9 @@
     <detaileddescription>
     </detaileddescription>
     <programlisting>
-<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_coordcontainercontainer_</highlight></codeline>
-<codeline lineno="2" refid="coordcontainercontainer_8h_1a887c098ffbed04f2503382676b8ea1f9" refkind="member"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>_coordcontainercontainer__</highlight></codeline>
-<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>_coordcontainercontainer_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2" refid="coordcontainercontainer_8h_1a887c098ffbed04f2503382676b8ea1f9" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_coordcontainercontainer__</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
 <codeline lineno="4"><highlight class="normal">include<sp/></highlight><highlight class="stringliteral">&quot;coordcontainer.h&quot;</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="5"><highlight class="normal"></highlight></codeline>
 <codeline lineno="6" refid="classCoordContainerContainer" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="classCoordContainerContainer" kindref="compound">CoordContainerContainer</ref></highlight></codeline>
@@ -36,6 +36,6 @@
 <codeline lineno="14"><highlight class="normal"></highlight></codeline>
 <codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
     </programlisting>
-    <location file="/home/gentryx/libgeodecomp/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h"/>
+    <location file="/home/gentryx/libgeodecomp3/tools/typemapgenerator/test/fixtures/src/coordcontainercontainer.h"/>
   </compounddef>
 </doxygen>

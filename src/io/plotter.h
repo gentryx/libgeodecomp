@@ -21,19 +21,42 @@ template<typename CELL, class CELL_PLOTTER = SimpleCellPlotter<CELL> >
 class Plotter
 {
 public:
-    explicit Plotter(const Coord<2>& cellDim = Coord<2>(32, 32),
-                     const CELL_PLOTTER& cellPlotter = CELL_PLOTTER()) :
+#ifdef LIBGEODECOMP_WITH_HPX
+    HPX_SERIALIZATION_POLYMORPHIC_TEMPLATE_SEMIINTRUSIVE(Plotter);
+
+    template<typename ARCHIVE, typename TARGET>
+    static Plotter *create(ARCHIVE& archive, TARGET */*unused*/)
+    {
+        Plotter *ret = new Plotter(
+            Coord<2>(1, 1),
+            CELL_PLOTTER(
+                static_cast<int CELL:: *>(0),
+                QuickPalette<int>(0, 0)));
+        archive & *ret;
+        return ret;
+    }
+#endif
+
+    friend class PolymorphicSerialization;
+    friend class HPXSerialization;
+    friend class PPMWriterTest;
+
+    Plotter(const Coord<2>& cellDim,
+            const CELL_PLOTTER& cellPlotter) :
 	cellDim(cellDim),
         cellPlotter(cellPlotter)
+    {}
+
+    virtual ~Plotter()
     {}
 
     template<typename PAINTER>
     void plotGrid(const typename Writer<CELL>::GridType& grid, PAINTER& painter) const
     {
-	CoordBox<2> viewport(
-	    Coord<2>(0, 0),
-	    Coord<2>(cellDim.x() * grid.dimensions().x(),
-		     cellDim.y() * grid.dimensions().y()));
+        CoordBox<2> viewport(
+            Coord<2>(0, 0),
+            Coord<2>(cellDim.x() * grid.dimensions().x(),
+                     cellDim.y() * grid.dimensions().y()));
         plotGridInViewport(grid, painter, viewport);
     }
 
@@ -44,7 +67,7 @@ public:
     template<typename PAINTER>
     void plotGridInViewport(
         const typename Writer<CELL>::GridType& grid,
-	PAINTER& painter,
+        PAINTER& painter,
         const CoordBox<2>& viewport) const
     {
         int sx = viewport.origin.x() / cellDim.x();
@@ -62,7 +85,7 @@ public:
                 painter.moveTo(relativeUpperLeft);
                 cellPlotter(
                     grid.get(Coord<2>(x, y)),
-		    painter,
+                    painter,
                     cellDim);
             }
         }
@@ -86,5 +109,12 @@ private:
 };
 
 }
+
+#ifdef LIBGEODECOMP_WITH_HPX
+HPX_SERIALIZATION_WITH_CUSTOM_CONSTRUCTOR_TEMPLATE(
+    (template<typename CELL, typename CELL_PLOTTER>),
+    (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>),
+    (LibGeoDecomp::Plotter<CELL, CELL_PLOTTER>::create))
+#endif
 
 #endif

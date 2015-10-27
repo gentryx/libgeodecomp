@@ -22,7 +22,7 @@ class UpdateGroupTest : public CxxTest::TestSuite
 {
 public:
     typedef ZCurvePartition<2> PartitionType;
-    typedef VanillaStepper<TestCell<2> > StepperType;
+    typedef VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyNoP> StepperType;
     typedef UpdateGroup<TestCell<2> > UpdateGroupType;
     typedef StepperType::GridType GridType;
 
@@ -57,7 +57,7 @@ public:
         updateGroup.reset();
     }
 
-    void testBench()
+    void testUpdate()
     {
         updateGroup->update(100);
         std::deque<std::size_t> actualNanoSteps = mockPatchAccepter->getOfferedNanoSteps();
@@ -82,8 +82,9 @@ private:
     {
         std::vector<std::size_t> ret(size);
         unsigned totalSize = width * height;
-        for (std::size_t i = 0; i < ret.size(); ++i)
+        for (std::size_t i = 0; i < ret.size(); ++i) {
             ret[i] = pos(i+1, ret.size(), totalSize) - pos(i, ret.size(), totalSize);
+        }
         return ret;
     }
 

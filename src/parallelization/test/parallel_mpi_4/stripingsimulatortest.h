@@ -58,6 +58,7 @@ public:
 
         LoadBalancer *balancer = rank == 0? new NoOpBalancer : 0;
         testSim.reset(new StripingSimulator<TestCell<2> >(init, balancer));
+        events.reset(new MockWriter<>::EventVec);
     }
 
     void tearDown()
@@ -178,8 +179,10 @@ public:
 
     void checkRunAndWriterInteraction(int everyN)
     {
-        MockWriter *expectedCalls = new MockWriter();
-        MockWriter *actualCalls = new MockWriter();
+        boost::shared_ptr<MockWriter<>::EventVec> expectedEvents(new MockWriter<>::EventVec);
+
+        MockWriter<> *expectedCalls = new MockWriter<>(expectedEvents);
+        MockWriter<> *actualCalls = new MockWriter<>(events);
 
         referenceSim->addWriter(expectedCalls);
         testSim->addWriter(actualCalls);
@@ -187,14 +190,13 @@ public:
         testSim->run();
         referenceSim->run();
 
-        MockWriter::EventVec expectedEvents = expectedCalls->events();
-        for (MockWriter::EventVec::iterator i = expectedEvents.begin();
-             i != expectedEvents.end();
+        for (MockWriter<>::EventVec::iterator i = expectedEvents->begin();
+             i != expectedEvents->end();
              ++i) {
             i->rank = MPILayer().rank();
         }
 
-        TS_ASSERT_EQUALS(expectedEvents, actualCalls->events());
+        TS_ASSERT_EQUALS(*expectedEvents, *events);
     }
 
     void testEveryN1()
@@ -318,28 +320,29 @@ public:
 
     void checkLoadBalancingRealistically(unsigned balanceEveryN)
     {
+        boost::shared_ptr<MockWriter<>::EventVec> expectedEvents(new MockWriter<>::EventVec);
+
         LoadBalancer *balancer = rank? 0 : new RandomBalancer;
         StripingSimulator<TestCell<2> > localTestSim(
             new TestInitializer<TestCell<2> >(dim, maxSteps, firstStep),
             balancer,
             balanceEveryN);
 
-        MockWriter *expectedCalls = new MockWriter();
-        MockWriter *actualCalls = new MockWriter();
+        MockWriter<> *expectedCalls = new MockWriter<>(expectedEvents);
+        MockWriter<> *actualCalls = new MockWriter<>(events);
         referenceSim->addWriter(expectedCalls);
         localTestSim.addWriter(actualCalls);
 
         localTestSim.run();
         referenceSim->run();
 
-        MockWriter::EventVec expectedEvents = expectedCalls->events();
-        for (MockWriter::EventVec::iterator i = expectedEvents.begin();
-             i != expectedEvents.end();
+        for (MockWriter<>::EventVec::iterator i = expectedEvents->begin();
+             i != expectedEvents->end();
              ++i) {
             i->rank = MPILayer().rank();
         }
 
-        TS_ASSERT_EQUALS(expectedEvents, actualCalls->events());
+        TS_ASSERT_EQUALS(*expectedEvents, *events);
     }
 
     void testBalanceLoad1()
@@ -448,6 +451,7 @@ public:
     }
 
 private:
+    boost::shared_ptr<MockWriter<>::EventVec> events;
     static const unsigned NANO_STEPS = APITraits::SelectNanoSteps<TestCell<2> >::VALUE;
     boost::shared_ptr<MPILayer> layer;
     boost::shared_ptr<MonolithicSimulator<TestCell<2> > > referenceSim;
@@ -461,7 +465,6 @@ private:
     int maxSteps;
     int firstStep;
     int firstCycle;
-
 
     // just a boring partition: everything on _one_ node
     NoOpBalancer::WeightVec toMonoPartitions(NoOpBalancer::WeightVec weights1)

@@ -45,7 +45,7 @@ private:
 class VanillaStepperRegionTest : public CxxTest::TestSuite
 {
 public:
-    typedef VanillaStepper<TestCell<2> > StepperType;
+    typedef VanillaStepper<TestCell<2>, UpdateFunctorHelpers::ConcurrencyEnableOpenMP> StepperType;
     typedef StepperType::GridType GridType;
 
     void setUp()

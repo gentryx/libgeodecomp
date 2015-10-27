@@ -14,7 +14,10 @@ template<typename CELL_TYPE>
 class SimpleInitializer : public Initializer<CELL_TYPE>
 {
 public:
-    friend class Serialization;
+    friend class PolymorphicSerialization;
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
     typedef typename Initializer<CELL_TYPE>::Topology Topology;
     const static int DIM = Topology::DIM;
 

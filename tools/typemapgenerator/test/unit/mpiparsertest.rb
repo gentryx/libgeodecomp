@@ -81,11 +81,13 @@ class TestMPIParser < Test::Unit::TestCase
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
+    is_abstract = {}
 
     @parser.resolve_class_simple(klass, members, parents, classes,
                                  resolved_classes,
                                  resolved_parents,
-                                 topological_class_sortation)
+                                 topological_class_sortation,
+                                 is_abstract)
 
     resolved_classes["Coord<2>"].each do |name, spec|
       assert_equal("MPI_INT", spec[:type])
@@ -98,8 +100,14 @@ class TestMPIParser < Test::Unit::TestCase
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
+    is_abstract = {}
 
-    @parser.resolve_class(klass, classes, resolved_classes, resolved_parents, topological_class_sortation)
+    @parser.resolve_class(klass,
+                          classes,
+                          resolved_classes,
+                          resolved_parents,
+                          topological_class_sortation,
+                          is_abstract)
 
     expected_typemap = Datatype.new
     expected_typemap.merge!(@parser.map_enums)
@@ -126,12 +134,14 @@ class TestMPIParser < Test::Unit::TestCase
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
+    is_abstract = {}
 
     @parser.resolve_class(klass,
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     assert_equal(%{Apple Melon Wheel}, classes)
     assert_equal({ }, resolved_classes)
@@ -187,17 +197,21 @@ class TestMPIParser < Test::Unit::TestCase
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
+    is_abstract = {}
 
     @parser.resolve_class("Coord<2 >",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
+
     @parser.resolve_class("Coord<3 >",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     coord2_spec = {
       "x"=> { :type=>"MPI_INT", :cardinality=>1, :class => "int"},
@@ -222,30 +236,35 @@ class TestMPIParser < Test::Unit::TestCase
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
+    is_abstract = {}
 
     @parser.resolve_class("Coord<2 >",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     @parser.resolve_class("Coord<3 >",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     @parser.resolve_class("CoordPair",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     @parser.resolve_class("CoordContainer",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     expected1 = {
       "a" => { :type=>"MPI_COORD_3_", :cardinality=>1, :class => "Coord<3 >"},
@@ -271,42 +290,68 @@ class TestMPIParser < Test::Unit::TestCase
     resolved_classes = { }
     resolved_parents = { }
     topological_class_sortation = []
+    is_abstract = {}
 
     @parser.resolve_class("Coord<2 >",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     @parser.resolve_class("Coord<3 >",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     @parser.resolve_class("CoordContainer",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
+
     @parser.resolve_class("CoordContainerContainer",
                           classes,
                           resolved_classes,
                           resolved_parents,
-                          topological_class_sortation)
+                          topological_class_sortation,
+                          is_abstract)
 
     expected1 = nil
     expected2 = {
-      "pos" => { :type => "MPI_COORD_2_", :cardinality => 1, :class => "Coord<2 >"}
+      "pos" => {
+        :type => "MPI_COORD_2_",
+        :cardinality => 1,
+        :class => "Coord<2 >"
+      }
     }
     expected3 = {
-      "pos" => { :type => "MPI_COORD_3_", :cardinality => 1, :class => "Coord<3 >"}
+      "pos" => {
+        :type => "MPI_COORD_3_",
+        :cardinality => 1,
+        :class => "Coord<3 >"
+      }
     }
     expected4 = { }
     expected5 = {
-      "cargo2" => { :type => "MPI_COORDCONTAINER_2_",         :cardinality => 1, :class => "CoordContainer<2 >"},
-      "cargo3" => { :type => "MPI_COORDCONTAINER_3_",         :cardinality => 1, :class => "CoordContainer<3 >"},
-      "cargo4" => { :type => "MPI_COORDCONTAINER_4__PARTIAL", :cardinality => 1, :class => "CoordContainer<4 >"}
+      "cargo2" => {
+        :type => "MPI_COORDCONTAINER_2_",
+        :cardinality => 1,
+        :class => "CoordContainer<2 >"
+      },
+      "cargo3" => {
+        :type => "MPI_COORDCONTAINER_3_",
+        :cardinality => 1,
+        :class => "CoordContainer<3 >"
+      },
+      "cargo4" => {
+        :type => "MPI_COORDCONTAINER_4__PARTIAL",
+        :cardinality => 1,
+        :class => "CoordContainer<4 >"
+      }
     }
 
     assert_equal(expected1, resolved_classes["CoordContainer<1 >"])
@@ -322,10 +367,9 @@ class TestMPIParser < Test::Unit::TestCase
 
   def test_resolve_forest_success
     classes = %w{Engine Car Wheel Rim Tire}.to_set
-    resolved_classes, resolved_parents, datatype_map, topological_class_sortation, headers =
-      @parser.resolve_forest(classes)
+    opts = @parser.resolve_forest(classes)
 
-    headers.map! { |elem| elem.gsub!(/(.+\/)(fixtures.+)/) { |match| $2 } }
+    opts.headers.map! { |elem| elem.gsub!(/(.+\/)(fixtures.+)/) { |match| $2 } }
 
     expected_datatype_map = Datatype.new
     expected_datatype_map.merge!(@parser.map_enums)
@@ -410,10 +454,10 @@ class TestMPIParser < Test::Unit::TestCase
       "fixtures/src/wheel.h",
       "fixtures/src/car.h"]
 
-    assert_equal(expected_datatype_map, datatype_map)
-    assert_equal(expected_classes, resolved_classes)
-    assert_equal(expected_sortation, topological_class_sortation)
-    assert_equal(expected_headers, headers)
+    assert_equal(expected_datatype_map, opts.datatype_map)
+    assert_equal(expected_classes,      opts.resolved_classes)
+    assert_equal(expected_sortation,    opts.topological_class_sortation)
+    assert_equal(expected_headers,      opts.headers)
   end
 
   def test_resolve_forest_failure
@@ -443,7 +487,7 @@ class TestMPIParser < Test::Unit::TestCase
     expected_classes = ["Coord<1 >", "Coord<3 >"] +
       %w{Engine Car Wheel Rim Tire Label}
     expected_classes = expected_classes.to_set
-    actual_classes = @parser.find_classes_to_be_serialized("Serialization")
+    actual_classes = @parser.find_classes_to_be_serialized("BoostSerialization")
 
     assert_equal(expected_classes, actual_classes)
   end
@@ -465,14 +509,15 @@ class TestSloppyParsing < Test::Unit::TestCase
   def test_incomplete_sloppy_parsing_should_yield_correct_members
     @parser.type_hierarchy_closure.delete "Engine"
     classes = %w(Car Wheel Rim Tire CarContainer)
-    resolved_classes = @parser.resolve_forest(classes)[0]
+    resolved_classes = @parser.resolve_forest(classes).resolved_classes
 
     assert_equal(%w(wheels), resolved_classes["Car"].keys)
     assert_equal(%w(size spareWheel), resolved_classes["CarContainer"].keys.sort)
   end
 
   def test_incomplete_sloppy_parsing_should_yield_correct_typemap_names
-    datatype_map = @parser.resolve_forest(%w(CarContainer Car Engine Wheel Rim Tire))[2]
+    datatype_map = @parser.resolve_forest(%w(CarContainer Car Engine Wheel Rim Tire)).datatype_map
+
     %w(Car Engine Wheel Rim Tire).each do |klass|
       assert_equal(Datatype.cpp_to_mpi(klass), datatype_map[klass])
     end

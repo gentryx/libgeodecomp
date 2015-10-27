@@ -13,7 +13,10 @@ template<typename VALUE>
 class QuickPalette
 {
 public:
-    QuickPalette(VALUE min, VALUE max) :
+    friend class BoostSerialization;
+    friend class HPXSerialization;
+
+    explicit QuickPalette(VALUE min = VALUE(), VALUE max = VALUE()) :
         mark0(min),
         mark1((min * 3 + max * 1) / 4),
         mark2((min * 2 + max * 2) / 4),
@@ -57,5 +60,7 @@ private:
 };
 
 }
+
+
 
 #endif

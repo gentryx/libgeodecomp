@@ -91,7 +91,7 @@ class ValueTraits<const CXXTEST_STD(string)> : public StdTraitsBase
     }
 
 public:
-    ValueTraits(const CXXTEST_STD(string) &s)
+    explicit ValueTraits(const CXXTEST_STD(string) &s)
     {
         *this << "\"";
         for (unsigned i = 0; i < s.length(); ++ i)
@@ -126,7 +126,7 @@ CXXTEST_TEMPLATE_INSTANTIATION
 class ValueTraits<const CXXTEST_STD(basic_string<wchar_t>)> : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(basic_string<wchar_t>) &s)
+    explicit ValueTraits(const CXXTEST_STD(basic_string<wchar_t>) &s)
     {
         *this << "L\"";
         for (unsigned i = 0; i < s.length(); ++ i)
@@ -175,7 +175,7 @@ template<class First, class Second>
 class ValueTraits< CXXTEST_STD(pair)<First, Second> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(pair)<First, Second> &p)
+    explicit ValueTraits(const CXXTEST_STD(pair)<First, Second> &p)
     {
         *this << "<" << TS_AS_STRING(p.first) << ", " << TS_AS_STRING(p.second) << ">";
     }
@@ -188,7 +188,7 @@ template<class Element>
 class ValueTraits< CXXTEST_STD(vector)<Element> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(vector)<Element> &v)
+    explicit ValueTraits(const CXXTEST_STD(vector)<Element> &v)
     {
         dumpRange(*this, v.begin(), v.end());
     }
@@ -201,7 +201,7 @@ template<class Element>
 class ValueTraits< CXXTEST_STD(list)<Element> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(list)<Element> &l)
+    explicit ValueTraits(const CXXTEST_STD(list)<Element> &l)
     {
         dumpRange(*this, l.begin(), l.end());
     }
@@ -214,7 +214,7 @@ template<class Element>
 class ValueTraits< CXXTEST_STD(set)<Element> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(set)<Element> &s)
+    explicit ValueTraits(const CXXTEST_STD(set)<Element> &s)
     {
         dumpRange(*this, s.begin(), s.end());
     }
@@ -227,7 +227,7 @@ template<class Key, class Value>
 class ValueTraits< CXXTEST_STD(map)<Key, Value> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(map)<Key, Value> &m)
+    explicit ValueTraits(const CXXTEST_STD(map)<Key, Value> &m)
     {
         dumpRange(*this, m.begin(), m.end());
     }
@@ -240,7 +240,7 @@ template<class Element>
 class ValueTraits< CXXTEST_STD(deque)<Element> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(deque)<Element> &d)
+    explicit ValueTraits(const CXXTEST_STD(deque)<Element> &d)
     {
         dumpRange(*this, d.begin(), d.end());
     }
@@ -253,7 +253,7 @@ template<class Element>
 class ValueTraits< CXXTEST_STD(multiset)<Element> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(multiset)<Element> &ms)
+    explicit ValueTraits(const CXXTEST_STD(multiset)<Element> &ms)
     {
         dumpRange(*this, ms.begin(), ms.end());
     }
@@ -266,7 +266,7 @@ template<class Key, class Value>
 class ValueTraits< CXXTEST_STD(multimap)<Key, Value> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(multimap)<Key, Value> &mm)
+    explicit ValueTraits(const CXXTEST_STD(multimap)<Key, Value> &mm)
     {
         dumpRange(*this, mm.begin(), mm.end());
     }
@@ -279,7 +279,7 @@ template<class Number>
 class ValueTraits< CXXTEST_STD(complex)<Number> > : public StdTraitsBase
 {
 public:
-    ValueTraits(const CXXTEST_STD(complex)<Number> &c)
+    explicit ValueTraits(const CXXTEST_STD(complex)<Number> &c)
     {
         if (!c.imag())
         {

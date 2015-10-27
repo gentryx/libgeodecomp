@@ -1,4 +1,5 @@
 #include <cxxtest/TestSuite.h>
+#include <libgeodecomp/communication/hpxserializationwrapper.h>
 #include <libgeodecomp/geometry/stencils.h>
 #include <libgeodecomp/io/simpleinitializer.h>
 #include <libgeodecomp/misc/testcell.h>
@@ -71,7 +72,7 @@ public:
           public LibGeoDecomp::APITraits::HasSoA
     {};
 
-    CellWithArrayMember(Coord<3> var0 = Coord<3>(), Coord<3> var1 = Coord<3>(), int var2 = 0, int var3 = 0)
+    explicit CellWithArrayMember(Coord<3> var0 = Coord<3>(), Coord<3> var1 = Coord<3>(), int var2 = 0, int var3 = 0)
     {
         temp[0] = var0[0];
         temp[1] = var0[1];

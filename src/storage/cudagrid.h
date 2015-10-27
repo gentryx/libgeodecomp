@@ -27,7 +27,7 @@ public:
 
     static const int DIM = Topology::DIM;
 
-    inline CUDAGrid(
+    explicit inline CUDAGrid(
         const CoordBox<DIM>& box = CoordBox<DIM>(),
         const Coord<DIM>& topologicalDimensions = Coord<DIM>()) :
         box(box),
@@ -165,7 +165,6 @@ protected:
         const Selector<CELL_TYPE>& selector,
         const Region<DIM>& region)
     {
-        
         const char *sourceCursor = source;
 
         for (typename Region<DIM>::StreakIterator i = region.beginStreak(); i != region.endStreak(); ++i) {
