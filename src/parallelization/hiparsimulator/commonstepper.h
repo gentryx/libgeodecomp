@@ -173,20 +173,14 @@ protected:
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         initializer->grid(&*oldGrid);
-<<<<<<< local
         initializer->grid(&*newGrid);
-=======
+
         notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
->>>>>>> other
 
-<<<<<<< local
         Adjacency adjacency = initializer->getAdjacency();
         AdjacencySetterHelper(*oldGrid, adjacency);
         AdjacencySetterHelper(*newGrid, adjacency);
-
-=======
->>>>>>> other
         newGrid->setEdge(oldGrid->getEdge());
 
         resetValidGhostZoneWidth();

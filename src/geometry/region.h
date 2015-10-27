@@ -954,6 +954,42 @@ public:
         return buf.str();
     }
 
+    inline void prettyPrint1D(std::ostream &os, const Coord<2> dimensions, const Coord<2> &resolution = Coord<2>(250, 50)) const
+    {
+        for (int y = 0; y < resolution.y(); ++y) {
+            for (int x = 0; x < resolution.x(); ++x) {
+                int cx = ((float)x / (float)resolution.x()) * dimensions.x();
+                int cy = ((float)y / (float)resolution.y()) * dimensions.y();
+
+                if (count(Coord<1>(cy * dimensions.x() + cx)) > 0) {
+                    os << '#';
+                } else {
+                    os << '.';
+                }
+            }
+            os << '\n';
+        }
+    }
+
+    inline void prettyPrint2D(std::ostream &os, const Coord<2> &resolution = Coord<2>(50, 50)) const
+    {
+        Coord<2> from = boundingBox().origin();
+        Coord<2> dim = boundingBox().dimension();
+        for (int y = 0; y < resolution.y(); ++y) {
+            for (int x = 0; x < resolution.x(); ++x) {
+                int cx = from.x() + ((float)x / (float)resolution.x()) * dim.x();
+                int cy = from.x() + ((float)y / (float)resolution.y()) * dim.y();
+
+                if (count(Coord<2>(cx, cy)) > 0) {
+                    os << '#';
+                } else {
+                    os << '.';
+                }
+            }
+            os << '\n';
+        }
+    }
+
     inline bool empty() const
     {
         return (indices[0].size() == 0);
@@ -1180,168 +1216,6 @@ private:
 
 #undef LIBGEODECOMP_REGION_ADVANCE_ITERATOR
 
-<<<<<<< local
-    inline Region operator+(const Region& other) const
-    {
-        Region ret;
-
-        merge2way(
-            ret,
-            this->beginStreak(), this->endStreak(),
-            other.beginStreak(), other.endStreak());
-
-        return ret;
-    }
-
-    inline std::vector<Streak<DIM> > toVector() const
-    {
-        std::vector<Streak<DIM> > ret(numStreaks());
-        std::copy(beginStreak(), endStreak(), ret.begin());
-        return ret;
-    }
-
-    inline std::string toString() const
-    {
-        std::ostringstream buf;
-        buf << "Region<" << DIM << ">(\n";
-        for (int dim = 0; dim < DIM; ++dim) {
-            buf << "  indices[" << dim << "] = "
-                << indices[dim] << "\n";
-        }
-        buf << ")\n";
-
-        return buf.str();
-
-    }
-
-    inline std::string prettyPrint() const
-    {
-        std::ostringstream buf;
-        buf << "Region<" << DIM << ">(\n";
-
-        for (StreakIterator i = beginStreak(); i != endStreak(); ++i) {
-            buf << "  " << *i << "\n";
-        }
-
-        buf << ")\n";
-
-        return buf.str();
-    }
-
-    inline void prettyPrint1D(std::ostream &os, const Coord<2> dimensions, const Coord<2> &resolution = Coord<2>(250, 50)) const
-    {
-        for (int y = 0; y < resolution.y(); ++y) {
-            for (int x = 0; x < resolution.x(); ++x) {
-                int cx = ((float)x / (float)resolution.x()) * dimensions.x();
-                int cy = ((float)y / (float)resolution.y()) * dimensions.y();
-
-                if (count(Coord<1>(cy * dimensions.x() + cx)) > 0) {
-                    os << '#';
-                } else {
-                    os << '.';
-                }
-            }
-            os << '\n';
-        }
-    }
-
-    inline void prettyPrint2D(std::ostream &os, const Coord<2> &resolution = Coord<2>(50, 50)) const
-    {
-        Coord<2> from = boundingBox().origin();
-        Coord<2> dim = boundingBox().dimension();
-        for (int y = 0; y < resolution.y(); ++y) {
-            for (int x = 0; x < resolution.x(); ++x) {
-                int cx = from.x() + ((float)x / (float)resolution.x()) * dim.x();
-                int cy = from.x() + ((float)y / (float)resolution.y()) * dim.y();
-
-                if (count(Coord<2>(cx, cy)) > 0) {
-                    os << '#';
-                } else {
-                    os << '.';
-                }
-            }
-            os << '\n';
-        }
-    }
-
-    inline bool empty() const
-    {
-        return (indices[0].size() == 0);
-    }
-
-    inline StreakIterator beginStreak(const Coord<DIM>& offset = Coord<DIM>()) const
-    {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitBegin<DIM - 1>(), offset);
-    }
-
-    inline StreakIterator endStreak(const Coord<DIM>& offset = Coord<DIM>()) const
-    {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitEnd<DIM - 1>(), offset);
-    }
-
-    /**
-     * Returns an iterator whose internal iterators are set to the
-     * given offsets from the corresponding array starts. Runs in O(1)
-     * time.
-     */
-    inline StreakIterator operator[](const Coord<DIM>& offsets) const
-    {
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitOffsets<DIM - 1, DIM>(offsets));
-    }
-
-    /**
-     * Yields an iterator to the offset'th Streak in the Region. Runs
-     * in O(log n) time.
-     */
-    inline StreakIterator operator[](std::size_t offset) const
-    {
-        if (offset == 0) {
-            return beginStreak();
-        }
-        if (offset >= numStreaks()) {
-            return endStreak();
-        }
-        return StreakIterator(this, RegionHelpers::StreakIteratorInitSingleOffsetWrapper<DIM - 1>(offset));
-    }
-
-    inline Iterator begin() const
-    {
-        return Iterator(beginStreak());
-    }
-
-    inline Iterator end() const
-    {
-        return Iterator(endStreak());
-    }
-
-    inline std::size_t indicesSize(std::size_t dim) const
-    {
-        return indices[dim].size();
-    }
-
-    inline IndexVectorType::const_iterator indicesAt(std::size_t dim, std::size_t offset) const
-    {
-        return indices[dim].begin() + offset;
-    }
-
-    inline IndexVectorType::const_iterator indicesBegin(std::size_t dim) const
-    {
-        return indices[dim].begin();
-    }
-
-    inline IndexVectorType::const_iterator indicesEnd(std::size_t dim) const
-    {
-        return indices[dim].end();
-    }
-
-private:
-    IndexVectorType indices[DIM];
-    mutable CoordBox<DIM> myBoundingBox;
-    mutable std::size_t mySize;
-    mutable bool geometryCacheTainted;
-
-=======
->>>>>>> other
     inline void determineGeometry() const
     {
         if (empty()) {
