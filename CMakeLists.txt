@@ -49,16 +49,7 @@ if(NOT HPX_FOUND)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 else()
   # If HPX was found, we use the Boost libraries found by HPX
-  set(ALL_BOOST_LIBS
-    ${HPX_BOOST_DATE_TIME_LIBRARY}
-    ${HPX_BOOST_FILESYSTEM_LIBRARY}
-    ${HPX_BOOST_SYSTEM_LIBRARY}
-    ${HPX_BOOST_THREAD_LIBRARY}
-  )
-  set(Boost_DATE_TIME_FOUND true)
-  set(Boost_FILESYSTEM_FOUND true)
-  set(Boost_SYSTEM_FOUND true)
-  set(Boost_THREAD_FOUND true)
+  set(ALL_BOOST_LIBS ${HPX_LIBRARIES})
 endif()
 
 find_package(Boost COMPONENTS serialization)
