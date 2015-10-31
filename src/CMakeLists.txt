@@ -8,8 +8,8 @@ set(AUXDIRS)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_ADDITIONAL_C_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
+set(LGD_AGGREGATED_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_ADDITIONAL_C_COMPILE_FLAGS}"   PARENT_SCOPE)
+set(LGD_AGGREGATED_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}" PARENT_SCOPE)
 
 list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 lgd_generate_sourcelists("./")
@@ -65,15 +65,24 @@ if(WITH_SILO)
 endif()
 
 if(WITH_THREADS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
 if(WITH_CPP14)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++14")
   set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
 endif()
 
+if(WITH_THREADS)
+  if (NOT WITH_LIBPTHREAD)
+    set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -pthread")
+  endif()
+endif()
+
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_AGGREGATED_CXX_COMPILE_FLAGS}")
 
 #============= 1. SANITY CHECKS ======================================
 # import settings detected by packages to decouple from their
@@ -284,8 +293,6 @@ if(WITH_THREADS)
         ${LIBGEODECOMP_LINK_LIBRARIES}
         pthread)
     endif()
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
   endif()
 endif()
 
@@ -366,7 +373,7 @@ Name: LibGeoDecomp
 Description: Live LibGeoDecomp build tree
 Version: ${PACKAGE_VERSION}
 Libs: ${LIVE_LINK_FLAGS}
-Cflags: ${LIVE_INCLUDE_FLAGS} ${PKG_CONFIG_INCLUDE_FLAGS}
+Cflags: ${LIVE_INCLUDE_FLAGS} ${PKG_CONFIG_INCLUDE_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS}
 ")
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}.pc" "
@@ -409,6 +416,8 @@ set(libgeodecomp_INCLUDE_DIRS
   ${BUILD_INCLUDE_DIRECTORIES}
   ${INSTALL_INCLUDE_DIRECTORIES}
 )
+
+set(libgeodecomp_FLAGS ${LGD_AGGREGATED_CXX_FLAGS})
 ")
 
 # conversely, the to-be-installed config should not contain any

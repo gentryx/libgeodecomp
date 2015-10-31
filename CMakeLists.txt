@@ -261,5 +261,6 @@ add_subdirectory(src)
 #============= 5. EXPORT SETTINGS FOR NESTED USE =====================
 if(lgd_has_parent)
   # export this for users who bundle a checkout of LibGeoDecomp in their own CMake source tree
-  set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+  set(libgeodecomp_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+  set(libgeodecomp_FLAGS ${LGD_AGGREGATED_CXX_FLAGS} PARENT_SCOPE)
 endif()
