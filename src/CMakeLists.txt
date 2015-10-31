@@ -81,8 +81,8 @@ endif()
 
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_AGGREGATED_CXX_COMPILE_FLAGS}")
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS}")
 
 #============= 1. SANITY CHECKS ======================================
 # import settings detected by packages to decouple from their
