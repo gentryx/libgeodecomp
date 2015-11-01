@@ -417,7 +417,7 @@ set(libgeodecomp_INCLUDE_DIRS
   ${INSTALL_INCLUDE_DIRECTORIES}
 )
 
-set(libgeodecomp_FLAGS ${LGD_AGGREGATED_CXX_FLAGS})
+set(libgeodecomp_FLAGS \"${LGD_AGGREGATED_CXX_FLAGS}\")
 ")
 
 # conversely, the to-be-installed config should not contain any
@@ -432,6 +432,8 @@ set(libgeodecomp_INCLUDE_DIRS
   \"\${LIBGEODECOMP_CMAKE_DIR}/../../../include\"
   ${INSTALL_INCLUDE_DIRECTORIES}
 )
+
+set(libgeodecomp_FLAGS \"${LGD_AGGREGATED_CXX_FLAGS}\")
 ")
 
 set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
