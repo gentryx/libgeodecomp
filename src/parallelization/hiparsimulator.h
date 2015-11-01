@@ -5,8 +5,10 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <boost/make_shared.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
+#include <libgeodecomp/geometry/partitions/ptscotchunstructuredpartition.h>
 #include <libgeodecomp/loadbalancer/loadbalancer.h>
 #include <libgeodecomp/parallelization/distributedsimulator.h>
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
@@ -15,6 +17,42 @@
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
+
+
+template<typename PARTITION_TYPE>
+struct PartitionBuilder
+{
+    template<int DIM>
+    boost::shared_ptr<PARTITION_TYPE> operator()(
+        const CoordBox<DIM> &box,
+        const std::vector<std::size_t> &weights,
+        const Adjacency &)
+    {
+        return boost::make_shared<PARTITION_TYPE>(
+            box.origin,
+            box.dimensions,
+            0,
+            weights);
+    }
+};
+
+template<int DIM>
+struct PartitionBuilder<PTScotchUnstructuredPartition<DIM>>
+{
+    boost::shared_ptr<PTScotchUnstructuredPartition<DIM>> operator()(
+        const CoordBox<DIM> &box,
+        const std::vector<std::size_t> &weights,
+        const Adjacency &adjacency)
+    {
+        return boost::make_shared<PTScotchUnstructuredPartition<DIM>>(
+            box.origin,
+            box.dimensions,
+            0,
+            weights,
+            adjacency);
+    }
+};
+
 
 enum EventPoint {LOAD_BALANCING, END};
 typedef std::set<EventPoint> EventSet;
@@ -143,7 +181,6 @@ private:
     unsigned loadBalancingPeriod;
     unsigned ghostZoneWidth;
     EventMap events;
-    PartitionManager<Topology> partitionManager;
     MPILayer mpiLayer;
     boost::shared_ptr<UpdateGroupType> updateGroup;
 
@@ -214,12 +251,11 @@ private:
             box.dimensions.prod(),
             rankSpeeds);
 
-        boost::shared_ptr<PARTITION> partition(
-            new PARTITION(
-                box.origin,
-                box.dimensions,
-                0,
-                weights));
+        boost::shared_ptr<PARTITION> partition =
+            PartitionBuilder<PARTITION>()(
+               box,
+               weights,
+               initializer->getAdjacency());
 
         updateGroup.reset(
             new UpdateGroupType(

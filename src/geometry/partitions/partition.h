@@ -43,6 +43,8 @@ public:
 
     virtual Region<DIM> getRegion(const std::size_t node) const = 0;
 
+    virtual const Adjacency &getAdjacency() const {return Adjacency();}
+
 protected:
     std::vector<std::size_t> weights;
     std::vector<std::size_t> startOffsets;

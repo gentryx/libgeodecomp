@@ -87,7 +87,8 @@ public:
         grid(grid),
         xOffset(startX),
         currentChunk(0),
-        chunkOffset(0)
+        chunkOffset(0),
+        currentMatrixID(0)
     {}
 
     inline
@@ -176,7 +177,8 @@ public:
         grid(grid),
         xOffset(startX),
         currentChunk(startX / C),
-        chunkOffset(startX % C)
+        chunkOffset(startX % C),
+        currentMatrixID(0)
     {}
 
     inline

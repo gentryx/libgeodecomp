@@ -4,6 +4,7 @@
 #include <libgeodecomp/config.h>
 #include <libgeodecomp/geometry/region.h>
 #include <libgeodecomp/storage/displacedgrid.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
 
 #ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
 #include <boost/archive/binary_oarchive.hpp>
@@ -152,6 +153,61 @@ private:
     }
 #endif
 
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
+    static void gridToVector(
+        const UnstructuredGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid,
+        std::vector<CELL_TYPE> *vec,
+        const REGION_TYPE& region,
+        APITraits::FalseType,
+        APITraits::FalseType)
+    {
+        if (vec->size() != region.size()) {
+            throw std::logic_error("region doesn't match vector size");
+        }
+
+        if(vec->size() == 0) {
+            return;
+        }
+
+        CELL_TYPE *dest = &(*vec)[0];
+
+        for (typename Region<1>::StreakIterator i = region.beginStreak();
+             i != region.endStreak(); ++i) {
+            const CELL_TYPE *start = &(grid[i->origin]);
+            std::copy(start, start + i->length(), dest);
+            dest += i->length();
+        }
+    }
+
+#ifdef LIBGEODECOMP_WITH_BOOST_SERIALIZATION
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
+    static void gridToVector(
+        const UnstructuredGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid,
+        std::vector<char> *vec,
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::TrueType&)
+    {
+        vec->resize(0);
+#ifdef LIBGEODECOMP_WITH_HPX
+        int archive_flags = boost::archive::no_header;
+        archive_flags |= hpx::serialization::disable_data_chunking;
+        hpx::util::binary_filter *f = 0;
+        hpx::serialization::output_archive archive(*vec, f, archive_flags);
+#else
+        typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
+        Device sink(*vec);
+        boost::iostreams::stream<Device> stream(sink);
+        boost::archive::binary_oarchive archive(stream);
+#endif
+
+        for (typename REGION_TYPE::Iterator i = region.begin(); i != region.end(); ++i) {
+            archive & grid[*i];
+        }
+    }
+#endif
+
+
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
         const std::vector<CELL_TYPE>& vec,
@@ -228,6 +284,34 @@ private:
     }
 #endif
 
+    template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
+    static void vectorToGrid(
+        const std::vector<CELL_TYPE>& vec,
+        UnstructuredGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> *grid,
+        const REGION_TYPE& region,
+        const APITraits::FalseType&,
+        const APITraits::FalseType&)
+    {
+        if (vec.size() != region.size()) {
+            throw std::logic_error("vector doesn't match region's size");
+        }
+
+        if(vec.size() == 0) {
+            return;
+        }
+
+        const CELL_TYPE *source = &vec[0];
+
+        for (typename REGION_TYPE::StreakIterator i = region.beginStreak();
+             i != region.endStreak();
+             ++i) {
+            unsigned length = i->length();
+            const CELL_TYPE *end = source + length;
+            CELL_TYPE *dest = &((*grid)[i->origin]);
+            std::copy(source, end, dest);
+            source = end;
+        }
+    }
 };
 
 }

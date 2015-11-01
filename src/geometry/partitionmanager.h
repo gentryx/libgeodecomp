@@ -207,6 +207,12 @@ public:
         return partition->getWeights();
     }
 
+    const Adjacency &adjacency()
+    {
+        return partition->getAdjacency();
+    }
+
+
 private:
     boost::shared_ptr<Partition<DIM> > partition;
     CoordBox<DIM> simulationArea;
@@ -233,7 +239,8 @@ private:
             expanded = reg.expandWithTopology(
                 1,
                 simulationArea.dimensions,
-                Topology());
+                Topology(),
+                adjacency());
             regionExpansion[i] = expanded;
         }
     }
@@ -243,14 +250,15 @@ private:
         fillRegion(rank);
         Region<DIM> surface(
             ownRegion().expandWithTopology(
-                1, simulationArea.dimensions, Topology()) -
+                1, simulationArea.dimensions, Topology(), adjacency()) -
             ownRegion());
         Region<DIM> kernel(
             ownRegion() -
             surface.expandWithTopology(
                 getGhostZoneWidth(),
                 simulationArea.dimensions,
-                Topology()));
+                Topology(),
+                adjacency()));
         outerRim = ownExpandedRegion() - ownRegion();
         ownRims.resize(getGhostZoneWidth() + 1);
         ownInnerSets.resize(getGhostZoneWidth() + 1);
@@ -258,20 +266,22 @@ private:
         ownRims.back() = ownRegion() - kernel;
         for (int i = getGhostZoneWidth() - 1; i >= 0; --i) {
             ownRims[i] = ownRims[i + 1].expandWithTopology(
-                1, simulationArea.dimensions, Topology());
+                1, simulationArea.dimensions, Topology(), adjacency());
         }
 
         ownInnerSets.front() = ownRegion();
         Region<DIM> minuend = surface.expandWithTopology(
-            1, simulationArea.dimensions, Topology());
+            1, simulationArea.dimensions, Topology(), adjacency());
         for (std::size_t i = 1; i <= getGhostZoneWidth(); ++i) {
             ownInnerSets[i] = ownInnerSets[i - 1] - minuend;
             minuend = minuend.expandWithTopology(
-                1, simulationArea.dimensions, Topology());
+                1, simulationArea.dimensions, Topology(), adjacency());
         }
 
         volatileKernel = ownInnerSets.back() & rim(1) ;
         innerRim       = ownInnerSets.back() & rim(0) ;
+
+//        ownRegion().prettyPrint1D(std::cout, Coord<2>(1000, 1000));
     }
 
     inline void intersect(unsigned node)
