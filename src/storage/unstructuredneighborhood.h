@@ -197,10 +197,16 @@ public:
     }
 
     inline
-    const long& index() const { return xOffset; }
+    long index() const
+    {
+        return xOffset;
+    }
 
     inline
-    long& index() { return xOffset; }
+    long index()
+    {
+        return xOffset;
+    }
 
     inline
     UnstructuredNeighborhoodBase& weights()
