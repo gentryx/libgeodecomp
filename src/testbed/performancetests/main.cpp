@@ -429,7 +429,7 @@ public:
         {
             ScopedTimer t(&seconds);
 
-            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured(), adjacency);
+            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured::Topology(), adjacency);
 
             if (q.size() == 4711) {
                 std::cout << "pure debug statement to prevent the compiler from optimizing away the previous function";
