@@ -20,10 +20,10 @@ public:
     using Partition<1>::weights;
 
     explicit UnstructuredStripingPartition(
-            const Coord<1> &origin,
-            const Coord<1> &dimensions,
-            const long &offset,
-            const std::vector<std::size_t> &weights) :
+            const Coord<1>& origin,
+            const Coord<1>& dimensions,
+            const long offset,
+            const std::vector<std::size_t>& weights) :
         Partition<1>(offset, weights),
         nodes(weights.size())
     {
@@ -39,10 +39,8 @@ public:
 
         Region<1> region;
 
-        for (int x = 0; x < X; ++x)
-        {
-            for (int y = from.y(); y < to.y(); ++y)
-            {
+        for (int x = 0; x < X; ++x) {
+            for (int y = from.y(); y < to.y(); ++y) {
                 region << Coord<1> (y * X + x);
             }
         }
@@ -57,7 +55,6 @@ private:
 
 }
 
-#endif // LIBGEODECOMP_WITH_MPI
-
-#endif // LIBGEODECOMP_GEOMETRY_PARTITIONS_UNSTRUCTUREDSTRIPINGPARTITION_H
+#endif
+#endif
 
