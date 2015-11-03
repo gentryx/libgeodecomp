@@ -2,12 +2,11 @@
 #define LIBGEODECOMP_GEOMETRY_PARTITIONS_UNSTRUCTUREDSTRIPINGPARTITION_H
 
 #include <libgeodecomp/config.h>
-#include <libgeodecomp/geometry/partitions/partition.h>
 #include <libgeodecomp/geometry/adjacency.h>
+#include <libgeodecomp/geometry/partitions/partition.h>
 
 namespace LibGeoDecomp {
 
-template<int X, int Y>
 class UnstructuredStripingPartition : public Partition<1>
 {
 public:
@@ -15,37 +14,19 @@ public:
     using Partition<1>::weights;
 
     explicit UnstructuredStripingPartition(
-            const Coord<1>& origin,
-            const Coord<1>& dimensions,
+            const Coord<1> origin,
+            const Coord<1> /* unused: dimensions */,
             const long offset,
             const std::vector<std::size_t>& weights) :
-        Partition<1>(offset, weights),
-        nodes(weights.size())
-    {
-    }
+        Partition<1>(origin.x() + offset, weights)
+    {}
 
     Region<1> getRegion(const std::size_t node) const override
     {
-        Coord<2> origin(0, 0);
-        Coord<2> dimensions(X, Y);
-
-        Coord<2> from = origin + dimensions * (float)node / (float)nodes;
-        Coord<2> to = origin + dimensions * (float)(node + 1) / (float)nodes;
-
         Region<1> region;
-
-        for (int x = 0; x < X; ++x) {
-            for (int y = from.y(); y < to.y(); ++y) {
-                region << Coord<1> (y * X + x);
-            }
-        }
-
+        region << Streak<1>(Coord<1>(startOffsets[node + 0]), startOffsets[node + 1]);
         return region;
     }
-
-private:
-    std::size_t nodes;
-
 };
 
 }
