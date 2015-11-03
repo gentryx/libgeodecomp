@@ -5,12 +5,7 @@
 #include <libgeodecomp/geometry/partitions/partition.h>
 #include <libgeodecomp/geometry/adjacency.h>
 
-#ifdef LIBGEODECOMP_WITH_MPI
-
-#include <mpi.h>
-
-namespace LibGeoDecomp
-{
+namespace LibGeoDecomp {
 
 template<int X, int Y>
 class UnstructuredStripingPartition : public Partition<1>
@@ -49,12 +44,11 @@ public:
     }
 
 private:
-    int nodes;
+    std::size_t nodes;
 
 };
 
 }
 
-#endif
 #endif
 
