@@ -8,10 +8,14 @@ namespace LibGeoDecomp {
 
 namespace HiParSimulator {
 
-struct AdjacencySetterHelper
+namespace CommonStepperHelpers {
+
+class AdjacencySetter
 {
+public:
+#ifdef LIBGEODECOMP_WITH_CPP14
     template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
-    AdjacencySetterHelper(UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> &grid, const Adjacency &adjacency)
+    AdjacencySetter(UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> &grid, const Adjacency &adjacency)
     {
         std::map<Coord<2>, double> containerAdjacency;
 
@@ -28,11 +32,14 @@ struct AdjacencySetterHelper
 
         grid.setAdjacency(0, containerAdjacency);
     }
+#endif
 
     template<typename CONTAINER>
-    AdjacencySetterHelper(CONTAINER &, const Adjacency &) { }
+    AdjacencySetter(CONTAINER &, const Adjacency &) { }
 
 };
+
+}
 
 template<typename CELL_TYPE>
 class CommonStepper : public Stepper<CELL_TYPE>
@@ -179,8 +186,8 @@ protected:
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
         Adjacency adjacency = initializer->getAdjacency();
-        AdjacencySetterHelper(*oldGrid, adjacency);
-        AdjacencySetterHelper(*newGrid, adjacency);
+        CommonStepperHelpers::AdjacencySetter(*oldGrid, adjacency);
+        CommonStepperHelpers::AdjacencySetter(*newGrid, adjacency);
         newGrid->setEdge(oldGrid->getEdge());
 
         resetValidGhostZoneWidth();

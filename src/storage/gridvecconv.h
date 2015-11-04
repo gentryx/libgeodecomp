@@ -153,6 +153,7 @@ private:
     }
 #endif
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
     static void gridToVector(
         const UnstructuredGrid<CELL_TYPE, MATRICES, VALUE_TYPE, C, SIGMA>& grid,
@@ -207,6 +208,7 @@ private:
     }
 #endif
 
+#endif
 
     template<typename CELL_TYPE, typename TOPOLOGY_TYPE, bool TOPOLOGICALLY_CORRECT, typename REGION_TYPE>
     static void vectorToGrid(
@@ -284,6 +286,7 @@ private:
     }
 #endif
 
+#ifdef LIBGEODECOMP_WITH_CPP14
     template<typename CELL_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA, typename REGION_TYPE>
     static void vectorToGrid(
         const std::vector<CELL_TYPE>& vec,
@@ -312,6 +315,7 @@ private:
             source = end;
         }
     }
+#endif
 };
 
 }

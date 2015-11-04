@@ -21,7 +21,10 @@ public:
         Partition<1>(origin.x() + offset, weights)
     {}
 
-    Region<1> getRegion(const std::size_t node) const override
+    Region<1> getRegion(const std::size_t node) const
+#ifdef LIBGEODECOMP_WITH_CPP14
+        override
+#endif
     {
         Region<1> region;
         region << Streak<1>(Coord<1>(startOffsets[node + 0]), startOffsets[node + 1]);
