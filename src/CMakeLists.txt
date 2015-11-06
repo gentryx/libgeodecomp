@@ -171,7 +171,7 @@ if(NOT TARGET check)
   add_custom_target(check echo "Tests passed.")
 endif()
 add_custom_target(code_generation ALL echo "Code generation done.")
-add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
+add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && ${DOXYGEN_EXECUTABLE} doxygen.conf)
 
 #============= 3. CPACK INSTALLER STUFF ==============================
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})

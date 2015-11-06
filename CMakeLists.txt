@@ -79,6 +79,7 @@ set(PythonLibs_FIND_VERSION 2)
 set(PythonLibs_FIND_VERSION_MAJOR 2)
 
 find_package(CUDA)
+find_package(Doxygen)
 find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
@@ -107,6 +108,10 @@ endif()
 
 if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
+endif()
+
+if(NOT DEFINED DOXYGEN_FOUND)
+  set(DOXYGEN_FOUND false)
 endif()
 
 if(NOT DEFINED HPX_FOUND)
@@ -168,8 +173,8 @@ endif()
 
 # configure whether the dreaded typemap-generator will run:
 set(DEFAULT_TYPEMAP_GENERATION false)
-if(NOT RELEASE)
-  set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+if((NOT RELEASE) AND DOXYGEN_FOUND AND RUBY_FOUND)
+  set(DEFAULT_TYPEMAP_GENERATION true)
 endif()
 
 execute_process(
