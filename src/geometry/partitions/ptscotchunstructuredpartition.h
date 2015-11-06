@@ -5,14 +5,14 @@
 #include <libgeodecomp/geometry/partitions/partition.h>
 #include <libgeodecomp/geometry/adjacency.h>
 
+#ifdef LIBGEODECOMP_WITH_CPP14
 #ifdef LIBGEODECOMP_WITH_SCOTCH
 #ifdef LIBGEODECOMP_WITH_MPI
 
 #include <mpi.h>
 #include <ptscotch.h>
 
-namespace LibGeoDecomp
-{
+namespace LibGeoDecomp {
 
 template<int DIM>
 class PTScotchUnstructuredPartition : public Partition<DIM>
@@ -159,8 +159,9 @@ private:
 
 }
 
-#endif // LIBGEODECOMP_WITH_MPI
-#endif // LIBGEODECOMP_WITH_SCOTCH
+#endif
+#endif
+#endif
 
-#endif // LIBGEODECOMP_GEOMETRY_PARTITIONS_PTSCOTCHUNSTRUCTUREDPARTITION_H
+#endif
 
