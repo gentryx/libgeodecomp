@@ -2,10 +2,10 @@ dependencies:
     pre:
         - mkdir build
     override:
+        - sudo apt-get install openmpi-bin
         - cd build && cmake ..
         - pwd
         - ls -la
-        - sudo apt-get install openmpi-bin
 
 test:
     override:
