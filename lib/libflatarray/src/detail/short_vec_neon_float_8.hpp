@@ -10,8 +10,13 @@
 
 #ifdef __ARM_NEON__
 #include <arm_neon.h>
-#include <stdlib.h>
+#include <libflatarray/config.h>
 #include <libflatarray/detail/short_vec_helpers.hpp>
+#include <iostream>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 #ifndef __CUDA_ARCH__
 
@@ -50,6 +55,15 @@ public:
         val1(val1),
         val2(val2)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<float>& il)
+    {
+        const float *ptr = static_cast<const float *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<float, 8>& other)
@@ -164,7 +178,6 @@ public:
     short_vec<float, 8> sqrt() const
     {
         // note that vsqrtq_f32 is to be implemented in the gcc compiler
-        int i;
         float32x4_t x1 = vrsqrteq_f32(val1);
         float32x4_t x2 = vrsqrteq_f32(val2);
 
@@ -306,7 +319,7 @@ inline
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-        const short_vec<float, 8>& vec)
+           const short_vec<float, 8>& vec)
 {
     const float *data1 = reinterpret_cast<const float *>(&vec.val1);
     const float *data2 = reinterpret_cast<const float *>(&vec.val2);

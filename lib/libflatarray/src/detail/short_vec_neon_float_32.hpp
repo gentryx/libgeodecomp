@@ -10,8 +10,13 @@
 
 #ifdef __ARM_NEON__
 #include <arm_neon.h>
-#include <stdlib.h>
+#include <libflatarray/config.h>
 #include <libflatarray/detail/short_vec_helpers.hpp>
+#include <iostream>
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+#include <initializer_list>
+#endif
 
 #ifndef __CUDA_ARCH__
 
@@ -60,6 +65,15 @@ public:
         val5(val5), val6(val6),
         val7(val7), val8(val8)
     {}
+
+#ifdef LIBFLATARRAY_WITH_CPP14
+    inline
+    short_vec(const std::initializer_list<float>& il)
+    {
+        const float *ptr = static_cast<const float *>(&(*il.begin()));
+        load(ptr);
+    }
+#endif
 
     inline
     void operator-=(const short_vec<float, 32>& other)
@@ -144,7 +158,7 @@ public:
     inline
     void operator/=(const short_vec<float, 32>& other)
     {
-        int i, iterations=1;
+        int iterations = 1;
         // get an initial estimate of 1/b.
         float32x4_t reciprocal1 = vrecpeq_f32(other.val1);
         float32x4_t reciprocal2 = vrecpeq_f32(other.val2);
@@ -192,7 +206,7 @@ public:
     inline
     short_vec<float, 32> operator/(const short_vec<float, 32>& other) const
     {
-        int i, iterations=1;
+        int iterations = 1;
         // get an initial estimate of 1/b.
         float32x4_t reciprocal1 = vrecpeq_f32(other.val1);
         float32x4_t reciprocal2 = vrecpeq_f32(other.val2);
@@ -508,7 +522,7 @@ inline
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-        const short_vec<float, 32>& vec)
+           const short_vec<float, 32>& vec)
 {
     const float *data1 = reinterpret_cast<const float *>(&vec.val1);
     const float *data2 = reinterpret_cast<const float *>(&vec.val2);
