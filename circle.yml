@@ -2,12 +2,12 @@ dependencies:
     pre:
         - mkdir build
     override:
-        - cd build
+        - cd build && cmake ..
         - pwd
         - ls -la
-        - cmake ..
-        - make -j2
+
 
 test:
     override:
-        - make -j2 check
+        - cd build && make -j2 
+        - cd build && make -j2 check
