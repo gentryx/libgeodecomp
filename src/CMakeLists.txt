@@ -68,11 +68,6 @@ if(WITH_THREADS)
   set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-if(WITH_CPP14)
-  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++14")
-  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
-endif()
-
 if(WITH_THREADS)
   if (NOT WITH_LIBPTHREAD)
     set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -pthread")
@@ -80,6 +75,14 @@ if(WITH_THREADS)
 endif()
 
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+
+# We need to set this directly before exporting to CMAKE_CXX_FLAGS so
+# that we can ensure nothing gets added to LGD_AGGREGATED_CXX_FLAGS
+# later and hence lost for CUDA_NVCC_FLAGS
+if(WITH_CPP14)
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++14")
+  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS} -std=c++11")
+endif()
 
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS}")
@@ -102,6 +105,16 @@ endif()
 
 if(WITH_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "WITH_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
+endif()
+
+# Force the selection of the NVCC host compiler to circumvent the
+# studid FindCUDA CMake module from resolving symlinks (*wink* ccache
+# *wink*).
+if(CUDA_FOUND)
+  get_filename_component(exe_name "${CUDA_HOST_COMPILER}" NAME)
+  if(exe_name STREQUAL "ccache")
+    set(CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}" CACHE FILEPATH "Override host side compiler for NVCC" FORCE)
+  endif()
 endif()
 
 if(WITH_HPX AND NOT HPX_FOUND)
