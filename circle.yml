@@ -5,7 +5,7 @@ dependencies:
         - cd build && cmake ..
         - pwd
         - ls -la
-
+        - sudo apt-get install openmpi-bin
 
 test:
     override:
