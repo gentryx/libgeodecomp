@@ -23,7 +23,7 @@ public:
     class Link
     {
     public:
-        std::string genLinkName(const std::string& basename, std::size_t sourceRank, std::size_t targetRank)
+        static std::string genLinkName(const std::string& basename, std::size_t sourceRank, std::size_t targetRank)
         {
             return basename + "/PatchLink/" +
                 StringOps::itoa(sourceRank) + "-" + StringOps::itoa(targetRank);

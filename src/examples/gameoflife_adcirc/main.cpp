@@ -351,7 +351,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
       for (std::map<int, SubNode>::iterator i = localNodes.begin(); i != localNodes.end(); ++i) {
           int index = count++;
           if ((alive[index] > 1) || (alive[index]<0)) {
-              throw std::runtime_error("alive not valid! alive="+alive[index]);
+              throw std::runtime_error(std::string("alive not valid! alive=") + StringOps::itoa(alive[index]));
           }
           i->second.alive = alive[index];
         }
@@ -362,7 +362,7 @@ void DomainCell::update(const NEIGHBORHOOD& hood, int nanoStep)
     filename << "data/output" << domainID << "." << outputStep+1 << ".dat";
     std::ofstream file(filename.str().c_str());
 
-    for (std::map<int, SubNode>::const_iterator i=localNodes.begin(); i!=localNodes.end(); ++i) {
+    for (std::map<int, SubNode>::const_iterator i = localNodes.begin(); i != localNodes.end(); ++i) {
         if (i->second.globalID != -1) {
             file << i->second.localID << " ";
             file << i->second.location[0] << " ";
@@ -563,6 +563,20 @@ public:
         }
 
     }
+
+    template<class ARCHIVE, typename CELL_TYPE>
+    void serialize(ARCHIVE& archive, const unsigned version)
+    {
+        archive
+            & hpx::serialization::base_object<SimpleInitializer<ContainerCellType> >(*this)
+            & meshDir
+            & maxDiameter
+            & minCoord
+            & maxCoord
+            & quadrantOrigin
+            & quadrantDim;
+    }
+
 
 private:
     std::string meshDir;
@@ -931,18 +945,6 @@ private:
     }
 
 };
-
-template<class ARCHIVE, typename CELL_TYPE>
-void serialize(ARCHIVE& archive, ADCIRCInitializer& initializer, const unsigned version)
-{
-    archive
-        & hpx::serialization::base_object<SimpleInitializer<ContainerCellType> >(initializer)
-        & initializer.meshDir
-        & initializer.maxDiameter
-        & initializer.minCoord
-        & initializer.maxCoord;
-}
-
 
 typedef HpxSimulator::HpxSimulator<ContainerCellType, RecursiveBisectionPartition<2> > SimulatorType;
 

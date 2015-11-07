@@ -17,7 +17,6 @@ public:
     void setUp()
     {
         TestInitializer<TestCell<3> > *init = getInit();
-        Coord<3> dimensions(init->gridDimensions());
 
         LoadBalancer *balancer = MPILayer().rank()? 0 : new RandomBalancer;
         sim.reset(new StripingSimulator<TestCell<3> >(init, balancer));

@@ -50,7 +50,7 @@ public:
                                    StringOps::itoa(num));
         }
 
-        return std::move(ids);
+        return ids;
     }
 
     static std::vector<CARGO> allGather(

@@ -41,7 +41,6 @@ const double VELOCITY_MOD[] = {1.0, 0.0, 0.93};
 const double ABSORBTION_RATES[] = {0.0, 0.1, 0.0};
 
 const std::size_t SUBSTANCES = 3;
-const std::size_t SAMPLES = 1000;
 const int ELEMENT_SPACING = 50;
 const int CELL_SPACING = 400;
 
