@@ -8,6 +8,39 @@ namespace LibGeoDecomp {
 
 namespace HiParSimulator {
 
+namespace CommonStepperHelpers {
+
+class AdjacencySetter
+{
+public:
+#ifdef LIBGEODECOMP_WITH_CPP14
+    template<typename ELEMENT_TYPE, std::size_t MATRICES, typename VALUE_TYPE, int C, int SIGMA>
+    AdjacencySetter(UnstructuredGrid<ELEMENT_TYPE, MATRICES, VALUE_TYPE, C, SIGMA> &grid, const Adjacency &adjacency)
+    {
+        std::map<Coord<2>, double> containerAdjacency;
+
+        for (Adjacency::const_iterator it = adjacency.begin(); it != adjacency.end(); ++it)
+        {
+            int from = it->first;
+
+            for (Adjacency::mapped_type::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+            {
+                int to = *it2;
+                containerAdjacency[Coord<2>(from, to)] = 1.0;
+            }
+        }
+
+        grid.setAdjacency(0, containerAdjacency);
+    }
+#endif
+
+    template<typename CONTAINER>
+    AdjacencySetter(CONTAINER &, const Adjacency &) { }
+
+};
+
+}
+
 template<typename CELL_TYPE>
 class CommonStepper : public Stepper<CELL_TYPE>
 {
@@ -147,9 +180,14 @@ protected:
         newGrid.reset(new GridType(gridBox, CELL_TYPE(), CELL_TYPE(), topoDim));
 
         initializer->grid(&*oldGrid);
+        initializer->grid(&*newGrid);
+
         notifyPatchProviders(partitionManager->getOuterRim(), ParentType::GHOST,     globalNanoStep());
         notifyPatchProviders(partitionManager->ownRegion(),   ParentType::INNER_SET, globalNanoStep());
 
+        Adjacency adjacency = initializer->getAdjacency();
+        CommonStepperHelpers::AdjacencySetter(*oldGrid, adjacency);
+        CommonStepperHelpers::AdjacencySetter(*newGrid, adjacency);
         newGrid->setEdge(oldGrid->getEdge());
 
         resetValidGhostZoneWidth();

@@ -8,8 +8,8 @@ set(AUXDIRS)
 set(SUBDIRS communication examples io geometry loadbalancer misc parallelization storage testbed)
 
 set(CXX_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/cxxtest")
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_ADDITIONAL_C_COMPILE_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
+set(LGD_AGGREGATED_C_FLAGS   "${LGD_ADDITIONAL_C_COMPILE_FLAGS}"  )
+set(LGD_AGGREGATED_CXX_FLAGS "${LGD_ADDITIONAL_CXX_COMPILE_FLAGS}")
 
 list(APPEND BUILD_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 lgd_generate_sourcelists("./")
@@ -65,15 +65,27 @@ if(WITH_SILO)
 endif()
 
 if(WITH_THREADS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-if(WITH_CPP14)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
+if(WITH_THREADS)
+  if (NOT WITH_LIBPTHREAD)
+    set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -pthread")
+  endif()
 endif()
 
 list(APPEND INSTALL_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+
+# We need to set this directly before exporting to CMAKE_CXX_FLAGS so
+# that we can ensure nothing gets added to LGD_AGGREGATED_CXX_FLAGS
+# later and hence lost for CUDA_NVCC_FLAGS
+if(WITH_CPP14)
+  set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS} -std=c++14")
+  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS} -std=c++11")
+endif()
+
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${LGD_AGGREGATED_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS}")
 
 #============= 1. SANITY CHECKS ======================================
 # import settings detected by packages to decouple from their
@@ -93,6 +105,16 @@ endif()
 
 if(WITH_CUDA AND NOT CUDA_FOUND)
   message(FATAL_ERROR "WITH_CUDA selected, but could not find the NVIDIA CUDA toolkit.")
+endif()
+
+# Force the selection of the NVCC host compiler to circumvent the
+# studid FindCUDA CMake module from resolving symlinks (*wink* ccache
+# *wink*).
+if(CUDA_FOUND)
+  get_filename_component(exe_name "${CUDA_HOST_COMPILER}" NAME)
+  if(exe_name STREQUAL "ccache")
+    set(CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}" CACHE FILEPATH "Override host side compiler for NVCC" FORCE)
+  endif()
 endif()
 
 if(WITH_HPX AND NOT HPX_FOUND)
@@ -162,7 +184,7 @@ if(NOT TARGET check)
   add_custom_target(check echo "Tests passed.")
 endif()
 add_custom_target(code_generation ALL echo "Code generation done.")
-add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && doxygen doxygen.conf)
+add_custom_target(doc cd "${CMAKE_CURRENT_SOURCE_DIR}" && ${DOXYGEN_EXECUTABLE} doxygen.conf)
 
 #============= 3. CPACK INSTALLER STUFF ==============================
 set(CPACK_PACKAGE_NAME ${PACKAGE_NAME})
@@ -284,8 +306,6 @@ if(WITH_THREADS)
         ${LIBGEODECOMP_LINK_LIBRARIES}
         pthread)
     endif()
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
   endif()
 endif()
 
@@ -366,7 +386,7 @@ Name: LibGeoDecomp
 Description: Live LibGeoDecomp build tree
 Version: ${PACKAGE_VERSION}
 Libs: ${LIVE_LINK_FLAGS}
-Cflags: ${LIVE_INCLUDE_FLAGS} ${PKG_CONFIG_INCLUDE_FLAGS}
+Cflags: ${LIVE_INCLUDE_FLAGS} ${PKG_CONFIG_INCLUDE_FLAGS} ${LGD_AGGREGATED_CXX_FLAGS}
 ")
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}.pc" "
@@ -409,6 +429,8 @@ set(libgeodecomp_INCLUDE_DIRS
   ${BUILD_INCLUDE_DIRECTORIES}
   ${INSTALL_INCLUDE_DIRECTORIES}
 )
+
+set(libgeodecomp_FLAGS \"${LGD_AGGREGATED_CXX_FLAGS}\")
 ")
 
 # conversely, the to-be-installed config should not contain any
@@ -423,6 +445,8 @@ set(libgeodecomp_INCLUDE_DIRS
   \"\${LIBGEODECOMP_CMAKE_DIR}/../../../include\"
   ${INSTALL_INCLUDE_DIRECTORIES}
 )
+
+set(libgeodecomp_FLAGS \"${LGD_AGGREGATED_CXX_FLAGS}\")
 ")
 
 set(ConfigPackageLocation lib/cmake/${PACKAGE_NAME})
@@ -456,3 +480,6 @@ if (WITH_TYPEMAPS)
 endif(WITH_TYPEMAPS)
 
 set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${BUILD_INCLUDE_DIRECTORIES} ${INSTALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+
+set(LGD_AGGREGATED_C_FLAGS   "${LGD_AGGREGATED_C_FLAGS}"   PARENT_SCOPE)
+set(LGD_AGGREGATED_CXX_FLAGS "${LGD_AGGREGATED_CXX_FLAGS}" PARENT_SCOPE)

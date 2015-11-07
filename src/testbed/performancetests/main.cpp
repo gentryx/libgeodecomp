@@ -429,7 +429,7 @@ public:
         {
             ScopedTimer t(&seconds);
 
-            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured(), adjacency);
+            Region<1> q = r.expandWithTopology(expansionWidth, Coord<1>(), Topologies::Unstructured::Topology(), adjacency);
 
             if (q.size() == 4711) {
                 std::cout << "pure debug statement to prevent the compiler from optimizing away the previous function";
@@ -3207,8 +3207,7 @@ int main(int argc, char **argv)
 #ifdef LIBGEODECOMP_WITH_CPP14
     sizes << Coord<3>(10648 , 1, 1)
           << Coord<3>(35937 , 1, 1)
-          << Coord<3>(85184 , 1, 1)
-          << Coord<3>(166375, 1, 1);
+          << Coord<3>(85184 , 1, 1);
     for (std::size_t i = 0; i < sizes.size(); ++i) {
         eval(SellMatrixInitializer(), toVector(sizes[i]));
     }

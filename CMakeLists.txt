@@ -49,16 +49,7 @@ if(NOT HPX_FOUND)
   set(ALL_BOOST_LIBS "${ALL_BOOST_LIBS};${Boost_LIBRARIES}")
 else()
   # If HPX was found, we use the Boost libraries found by HPX
-  set(ALL_BOOST_LIBS
-    ${HPX_BOOST_DATE_TIME_LIBRARY}
-    ${HPX_BOOST_FILESYSTEM_LIBRARY}
-    ${HPX_BOOST_SYSTEM_LIBRARY}
-    ${HPX_BOOST_THREAD_LIBRARY}
-  )
-  set(Boost_DATE_TIME_FOUND true)
-  set(Boost_FILESYSTEM_FOUND true)
-  set(Boost_SYSTEM_FOUND true)
-  set(Boost_THREAD_FOUND true)
+  set(ALL_BOOST_LIBS ${HPX_LIBRARIES})
 endif()
 
 find_package(Boost COMPONENTS serialization)
@@ -88,6 +79,7 @@ set(PythonLibs_FIND_VERSION 2)
 set(PythonLibs_FIND_VERSION_MAJOR 2)
 
 find_package(CUDA)
+find_package(Doxygen)
 find_package(OpenCL)
 find_package(MPI)
 find_package(OpenCV)
@@ -98,6 +90,7 @@ find_package(SCOTCH)
 find_package(Silo)
 find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore)
 find_package(VisIt)
+
 
 # if a package was not found it's safer to set the corresponding
 # variable to false, this avoids undefined/unintended behavior in some
@@ -116,6 +109,10 @@ endif()
 
 if(NOT DEFINED CUDA_FOUND)
   set(CUDA_FOUND false)
+endif()
+
+if(NOT DEFINED DOXYGEN_FOUND)
+  set(DOXYGEN_FOUND false)
 endif()
 
 if(NOT DEFINED HPX_FOUND)
@@ -177,8 +174,8 @@ endif()
 
 # configure whether the dreaded typemap-generator will run:
 set(DEFAULT_TYPEMAP_GENERATION false)
-if(NOT RELEASE)
-  set(DEFAULT_TYPEMAP_GENERATION ${RUBY_FOUND})
+if((NOT RELEASE) AND DOXYGEN_FOUND AND RUBY_FOUND)
+  set(DEFAULT_TYPEMAP_GENERATION true)
 endif()
 
 execute_process(
@@ -261,5 +258,6 @@ add_subdirectory(src)
 #============= 5. EXPORT SETTINGS FOR NESTED USE =====================
 if(lgd_has_parent)
   # export this for users who bundle a checkout of LibGeoDecomp in their own CMake source tree
-  set(LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+  set(libgeodecomp_ALL_INCLUDE_DIRECTORIES ${LIBGEODECOMP_ALL_INCLUDE_DIRECTORIES} PARENT_SCOPE)
+  set(libgeodecomp_FLAGS ${LGD_AGGREGATED_CXX_FLAGS} PARENT_SCOPE)
 endif()

@@ -2,9 +2,12 @@ dependencies:
     pre:
         - mkdir build
     override:
-        - cmake ..
-        - make -j2
+        - sudo apt-get install openmpi-bin
+        - cd build && cmake -DWITH_THREADS=false ..
+        - pwd
+        - ls -la
 
 test:
     override:
-        - make -j2 check
+        - cd build && make -j2
+        - cd build && make -j2 check

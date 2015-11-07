@@ -1,17 +1,14 @@
 /**
- * Copyright 2014 Andreas Schäfer
  * Copyright 2015 Kurt Kanzenbach
  *
  * Distributed under the Boost Software License, Version 1.0. (See accompanying
  * file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_4_HPP
-#define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_DOUBLE_4_HPP
+#ifndef FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_INT_4_HPP
+#define FLAT_ARRAY_DETAIL_SHORT_VEC_SCALAR_INT_4_HPP
 
-#ifndef __SSE__
-#ifndef __AVX__
-#ifndef __VECTOR4DOUBLE__
+#ifndef __SSE2__
 
 #include <libflatarray/config.h>
 
@@ -31,7 +28,7 @@ class short_vec;
 #endif
 
 template<>
-class short_vec<double, 4>
+class short_vec<int, 4>
 {
 public:
     static const int ARITY = 4;
@@ -41,10 +38,10 @@ public:
     template<typename _CharT, typename _Traits>
     friend std::basic_ostream<_CharT, _Traits>& operator<<(
         std::basic_ostream<_CharT, _Traits>& __os,
-        const short_vec<double, 4>& vec);
+        const short_vec<int, 4>& vec);
 
     inline
-    short_vec(const double data = 0) :
+    short_vec(const int data = 0) :
         val1(data),
         val2(data),
         val3(data),
@@ -52,17 +49,17 @@ public:
     {}
 
     inline
-    short_vec(const double *data)
+    short_vec(const int *data)
     {
         load(data);
     }
 
     inline
     short_vec(
-        const double val1,
-        const double val2,
-        const double val3,
-        const double val4) :
+        const int val1,
+        const int val2,
+        const int val3,
+        const int val4) :
         val1( val1),
         val2( val2),
         val3( val3),
@@ -71,15 +68,15 @@ public:
 
 #ifdef LIBFLATARRAY_WITH_CPP14
     inline
-    short_vec(const std::initializer_list<double>& il)
+    short_vec(const std::initializer_list<int>& il)
     {
-        const double *ptr = static_cast<const double *>(&(*il.begin()));
+        const int *ptr = static_cast<const int *>(&(*il.begin()));
         load(ptr);
     }
 #endif
 
     inline
-    void operator-=(const short_vec<double, 4>& other)
+    void operator-=(const short_vec<int, 4>& other)
     {
         val1  -= other.val1;
         val2  -= other.val2;
@@ -88,9 +85,9 @@ public:
     }
 
     inline
-    short_vec<double, 4> operator-(const short_vec<double, 4>& other) const
+    short_vec<int, 4> operator-(const short_vec<int, 4>& other) const
     {
-        return short_vec<double, 4>(
+        return short_vec<int, 4>(
             val1  - other.val1,
             val2  - other.val2,
             val3  - other.val3,
@@ -98,7 +95,7 @@ public:
     }
 
     inline
-    void operator+=(const short_vec<double, 4>& other)
+    void operator+=(const short_vec<int, 4>& other)
     {
         val1  += other.val1;
         val2  += other.val2;
@@ -107,9 +104,9 @@ public:
     }
 
     inline
-    short_vec<double, 4> operator+(const short_vec<double, 4>& other) const
+    short_vec<int, 4> operator+(const short_vec<int, 4>& other) const
     {
-        return short_vec<double, 4>(
+        return short_vec<int, 4>(
             val1  + other.val1,
             val2  + other.val2,
             val3  + other.val3,
@@ -117,7 +114,7 @@ public:
     }
 
     inline
-    void operator*=(const short_vec<double, 4>& other)
+    void operator*=(const short_vec<int, 4>& other)
     {
         val1  *= other.val1;
         val2  *= other.val2;
@@ -126,9 +123,9 @@ public:
     }
 
     inline
-    short_vec<double, 4> operator*(const short_vec<double, 4>& other) const
+    short_vec<int, 4> operator*(const short_vec<int, 4>& other) const
     {
-        return short_vec<double, 4>(
+        return short_vec<int, 4>(
             val1  * other.val1,
             val2  * other.val2,
             val3  * other.val3,
@@ -136,7 +133,7 @@ public:
     }
 
     inline
-    void operator/=(const short_vec<double, 4>& other)
+    void operator/=(const short_vec<int, 4>& other)
     {
         val1  /= other.val1;
         val2  /= other.val2;
@@ -145,9 +142,9 @@ public:
     }
 
     inline
-    short_vec<double, 4> operator/(const short_vec<double, 4>& other) const
+    short_vec<int, 4> operator/(const short_vec<int, 4>& other) const
     {
-        return short_vec<double, 4>(
+        return short_vec<int, 4>(
             val1  / other.val1,
             val2  / other.val2,
             val3  / other.val3,
@@ -155,9 +152,9 @@ public:
     }
 
     inline
-    short_vec<double, 4> sqrt() const
+    short_vec<int, 4> sqrt() const
     {
-        return short_vec<double, 4>(
+        return short_vec<int, 4>(
             std::sqrt(val1),
             std::sqrt(val2),
             std::sqrt(val3),
@@ -165,7 +162,7 @@ public:
     }
 
     inline
-    void load(const double *data)
+    void load(const int *data)
     {
         val1 = data[0];
         val2 = data[1];
@@ -174,13 +171,13 @@ public:
     }
 
     inline
-    void load_aligned(const double *data)
+    void load_aligned(const int *data)
     {
         load(data);
     }
 
     inline
-    void store(double *data) const
+    void store(int *data) const
     {
         *(data +  0) = val1;
         *(data +  1) = val2;
@@ -189,19 +186,19 @@ public:
     }
 
     inline
-    void store_aligned(double *data) const
+    void store_aligned(int *data) const
     {
         store(data);
     }
 
     inline
-    void store_nt(double *data) const
+    void store_nt(int *data) const
     {
         store(data);
     }
 
     inline
-    void gather(const double *ptr, const unsigned *offsets)
+    void gather(const int *ptr, const unsigned *offsets)
     {
         val1 = ptr[offsets[0]];
         val2 = ptr[offsets[1]];
@@ -210,7 +207,7 @@ public:
     }
 
     inline
-    void scatter(double *ptr, const unsigned *offsets) const
+    void scatter(int *ptr, const unsigned *offsets) const
     {
         ptr[offsets[0]] = val1;
         ptr[offsets[1]] = val2;
@@ -219,14 +216,14 @@ public:
     }
 
 private:
-    double val1;
-    double val2;
-    double val3;
-    double val4;
+    int val1;
+    int val2;
+    int val3;
+    int val4;
 };
 
 inline
-void operator<<(double *data, const short_vec<double, 4>& vec)
+void operator<<(int *data, const short_vec<int, 4>& vec)
 {
     vec.store(data);
 }
@@ -236,7 +233,7 @@ void operator<<(double *data, const short_vec<double, 4>& vec)
 #endif
 
 inline
-short_vec<double, 4> sqrt(const short_vec<double, 4>& vec)
+short_vec<int, 4> sqrt(const short_vec<int, 4>& vec)
 {
     return vec.sqrt();
 }
@@ -244,7 +241,7 @@ short_vec<double, 4> sqrt(const short_vec<double, 4>& vec)
 template<typename _CharT, typename _Traits>
 std::basic_ostream<_CharT, _Traits>&
 operator<<(std::basic_ostream<_CharT, _Traits>& __os,
-           const short_vec<double, 4>& vec)
+           const short_vec<int, 4>& vec)
 {
     __os << "["  << vec.val1  << ", " << vec.val2  << ", " << vec.val3  << ", " << vec.val4
          << "]";
@@ -253,8 +250,6 @@ operator<<(std::basic_ostream<_CharT, _Traits>& __os,
 
 }
 
-#endif
-#endif
 #endif
 
 #endif

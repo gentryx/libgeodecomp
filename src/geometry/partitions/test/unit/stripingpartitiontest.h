@@ -24,8 +24,9 @@ public:
         CoordVector actual;
         StripingPartition<2>::Iterator end = p.end();
 
-        for (StripingPartition<2>::Iterator i = p.begin(); i != end; ++i)
+        for (StripingPartition<2>::Iterator i = p.begin(); i != end; ++i) {
             actual += *i;
+        }
 
         TS_ASSERT_EQUALS(actual, expected);
     }
