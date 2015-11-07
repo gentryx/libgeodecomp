@@ -791,8 +791,8 @@ public:
         double updates = 1.0 * maxT * actualDim.prod();
         double gLUPS = 1e-9 * updates / seconds;
 
-        delete gridOld;
-        delete gridNew;
+        delete[] gridOld;
+        delete[] gridNew;
 
         return gLUPS;
     }
@@ -867,8 +867,8 @@ public:
         double updates = 1.0 * maxT * actualDim.prod();
         double gLUPS = 1e-9 * updates / seconds;
 
-        delete gridOld;
-        delete gridNew;
+        delete[] gridOld;
+        delete[] gridNew;
 
         return gLUPS;
     }
@@ -3137,15 +3137,14 @@ public:
                 int offs = cs[i];
                 __m256d tmp = _mm256_load_pd(resPtr + i*C);
                 for (int j = 0; j < cl[i]; ++j) {
-                    __m128d rhstmp;
-                    __m256d rhs, val;
+                    __m256d rhs;
+                    __m256d val;
+                    rhs = _mm256_set_pd(
+                        *(rhsPtr + col[j + 3]),
+                        *(rhsPtr + col[j + 2]),
+                        *(rhsPtr + col[j + 1]),
+                        *(rhsPtr + col[j + 0]));
                     val    = _mm256_load_pd(values + offs);
-                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 0);
-                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 1);
                     tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
                 }
                 _mm256_store_pd(resPtr + i*C, tmp);

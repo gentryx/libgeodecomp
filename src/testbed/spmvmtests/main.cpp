@@ -491,15 +491,14 @@ public:
                 int offs = cs[i];
                 __m256d tmp = _mm256_load_pd(resPtr + i*C);
                 for (int j = 0; j < cl[i]; ++j) {
-                    __m128d rhstmp;
-                    __m256d rhs, val;
+                    __m256d rhs;
+                    __m256d val;
                     val    = _mm256_load_pd(values + offs);
-                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 0);
-                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[offs++]);
-                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 1);
+                    rhs = _mm256_set_pd(
+                        *(rhsPtr + col[j + 3]),
+                        *(rhsPtr + col[j + 2]),
+                        *(rhsPtr + col[j + 1]),
+                        *(rhsPtr + col[j + 0]));
                     tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
                 }
                 _mm256_store_pd(resPtr + i*C, tmp);
@@ -706,17 +705,17 @@ public:
             // AVX code
             for (int i = 0; i < dim.x(); ++i) {
                 int j;
-                __m256d sum, rhs, val;
-                __m128d rhstmp;
+                __m256d sum;
+                __m256d rhs;
+                __m256d val;
                 sum = _mm256_setzero_pd();
                 for (j = row[i]; j < row[i + 1] - 3; j += 4) {
-                    val    = _mm256_loadu_pd(values + j);
-                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[j + 0]);
-                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[j + 1]);
-                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 0);
-                    rhstmp = _mm_loadl_pd(rhstmp, rhsPtr + col[j + 2]);
-                    rhstmp = _mm_loadh_pd(rhstmp, rhsPtr + col[j + 3]);
-                    rhs    = _mm256_insertf128_pd(rhs, rhstmp, 1);
+                    val = _mm256_loadu_pd(values + j);
+                    rhs = _mm256_set_pd(
+                        *(rhsPtr + col[j + 3]),
+                        *(rhsPtr + col[j + 2]),
+                        *(rhsPtr + col[j + 1]),
+                        *(rhsPtr + col[j + 0]));
                     sum    = _mm256_add_pd(sum, _mm256_mul_pd(val, rhs));
                 }
                 double tmp[4] __attribute__((aligned (32)));
@@ -817,7 +816,9 @@ public:
             // MIC code
             for (int i = 0; i < dim.x(); ++i) {
                 int j;
-                __m512d sum, rhs, val;
+                __m512d sum;
+                __m512d rhs;
+                __m512d val;
                 __m512i idx;
                 sum = _mm512_setzero_pd();
                 for (j = row[i]; j < row[i + 1] - 7; j += 8) {
@@ -891,10 +892,10 @@ int main(int argc, char **argv)
         const int NZ  = 37464962;
         const int DIM = 381689;
 
-        SPMVM_TESTS(SparseMatrixVectorMultiplicationMM, RM07);
+        // SPMVM_TESTS(SparseMatrixVectorMultiplicationMM, RM07);
 
 #ifdef __AVX__
-        SPMVM_TESTS(SparseMatrixVectorMultiplicationMMNative, RM07);
+        // SPMVM_TESTS(SparseMatrixVectorMultiplicationMMNative, RM07);
         eval(SparseMatrixVectorMultiplicationMMCRS<SPMVMSoACell<1>, RM07, NZ, 1>(), toVector(Coord<3>(DIM, 1, 1)));
 #endif
 

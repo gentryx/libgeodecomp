@@ -274,13 +274,13 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
         double val[], MM_typecode matcode)
 {
     int i;
-    if (mm_is_complex(matcode))
+    if mm_is_complex(matcode)
     {
         for (i=0; i<nz; i++)
             if (fscanf(f, "%d %d %lg %lg", &I[i], &J[i], &val[2*i], &val[2*i+1])
                 != 4) return MM_PREMATURE_EOF;
     }
-    else if (mm_is_real(matcode))
+    else if mm_is_real(matcode)
     {
         for (i=0; i<nz; i++)
         {
@@ -290,7 +290,7 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
         }
     }
 
-    else if (mm_is_pattern(matcode))
+    else if mm_is_pattern(matcode)
     {
         for (i=0; i<nz; i++)
             if (fscanf(f, "%d %d", &I[i], &J[i])
@@ -306,19 +306,19 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
 int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
         double *real, double *imag, MM_typecode matcode)
 {
-    if (mm_is_complex(matcode))
+    if mm_is_complex(matcode)
     {
             if (fscanf(f, "%d %d %lg %lg", I, J, real, imag)
                 != 4) return MM_PREMATURE_EOF;
     }
-    else if (mm_is_real(matcode))
+    else if mm_is_real(matcode)
     {
             if (fscanf(f, "%d %d %lg\n", I, J, real)
                 != 3) return MM_PREMATURE_EOF;
 
     }
 
-    else if (mm_is_pattern(matcode))
+    else if mm_is_pattern(matcode)
     {
             if (fscanf(f, "%d %d", I, J) != 2) return MM_PREMATURE_EOF;
     }
@@ -369,7 +369,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
         throw std::runtime_error("malloc() failed");
     }
 
-    if (mm_is_complex(*matcode))
+    if mm_is_complex(*matcode)
     {
         *val = (double *) malloc(*nz * 2 * sizeof(double));
         if (*val == NULL) {
@@ -379,7 +379,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
                 *matcode);
         if (ret_code != 0) return ret_code;
     }
-    else if (mm_is_real(*matcode))
+    else if mm_is_real(*matcode)
     {
         *val = (double *) malloc(*nz * sizeof(double));
         if (*val == NULL) {
@@ -390,7 +390,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
         if (ret_code != 0) return ret_code;
     }
 
-    else if (mm_is_pattern(*matcode))
+    else if mm_is_pattern(*matcode)
     {
         ret_code = mm_read_mtx_crd_data(f, *M, *N, *nz, *I, *J, *val,
                 *matcode);
@@ -434,15 +434,15 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
     fprintf(f, "%d %d %d\n", M, N, nz);
 
     /* print values */
-    if (mm_is_pattern(matcode))
+    if mm_is_pattern(matcode)
         for (i=0; i<nz; i++)
             fprintf(f, "%d %d\n", I[i], J[i]);
     else
-    if (mm_is_real(matcode))
+    if mm_is_real(matcode)
         for (i=0; i<nz; i++)
             fprintf(f, "%d %d %20.16g\n", I[i], J[i], val[i]);
     else
-    if (mm_is_complex(matcode))
+    if mm_is_complex(matcode)
         for (i=0; i<nz; i++)
             fprintf(f, "%d %d %20.16g %20.16g\n", I[i], J[i], val[2*i],
                         val[2*i+1]);
@@ -481,47 +481,47 @@ char  *mm_typecode_to_str(MM_typecode matcode)
     int error =0;
 
     /* check for MTX type */
-    if (mm_is_matrix(matcode))
+    if mm_is_matrix(matcode)
         types[0] = MM_MTX_STR;
     else
         error=1;
 
     /* check for CRD or ARR matrix */
-    if (mm_is_sparse(matcode))
+    if mm_is_sparse(matcode)
         types[1] = MM_SPARSE_STR;
     else
-    if (mm_is_dense(matcode))
+    if mm_is_dense(matcode)
         types[1] = MM_DENSE_STR;
     else
         return NULL;
 
     /* check for element data type */
-    if (mm_is_real(matcode))
+    if mm_is_real(matcode)
         types[2] = MM_REAL_STR;
     else
-    if (mm_is_complex(matcode))
+    if mm_is_complex(matcode)
         types[2] = MM_COMPLEX_STR;
     else
-    if (mm_is_pattern(matcode))
+    if mm_is_pattern(matcode)
         types[2] = MM_PATTERN_STR;
     else
-    if (mm_is_integer(matcode))
+    if mm_is_integer(matcode)
         types[2] = MM_INT_STR;
     else
         return NULL;
 
 
     /* check for symmetry type */
-    if (mm_is_general(matcode))
+    if mm_is_general(matcode)
         types[3] = MM_GENERAL_STR;
     else
-    if (mm_is_symmetric(matcode))
+    if mm_is_symmetric(matcode)
         types[3] = MM_SYMM_STR;
     else
-    if (mm_is_hermitian(matcode))
+    if mm_is_hermitian(matcode)
         types[3] = MM_HERM_STR;
     else
-    if (mm_is_skew(matcode))
+    if mm_is_skew(matcode)
         types[3] = MM_SKEW_STR;
     else
         return NULL;
