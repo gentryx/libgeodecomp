@@ -21,7 +21,7 @@ compiler:
 before_script:
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake -DWITH_QT=false ..
 
 script:
     - make
