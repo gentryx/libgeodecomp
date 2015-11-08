@@ -18,7 +18,7 @@ namespace LibGeoDecomp {
 
 /**
  * Neighborhood providing pointers for vectorization of UnstructuredSoAGrid.
- * Weights(id) returns a pair of two pointers. One points to the array where
+ * weights(id) returns a pair of two pointers. One points to the array where
  * the indices for gather are stored and the seconds points the matrix values.
  * Both pointers can be used to load LFA short_vec classes accordingly.
  */

@@ -3140,12 +3140,13 @@ public:
                     __m256d rhs;
                     __m256d val;
                     rhs = _mm256_set_pd(
-                        *(rhsPtr + col[j + 3]),
-                        *(rhsPtr + col[j + 2]),
-                        *(rhsPtr + col[j + 1]),
-                        *(rhsPtr + col[j + 0]));
+                        *(rhsPtr + col[offs + 3]),
+                        *(rhsPtr + col[offs + 2]),
+                        *(rhsPtr + col[offs + 1]),
+                        *(rhsPtr + col[offs + 0]));
                     val    = _mm256_load_pd(values + offs);
                     tmp    = _mm256_add_pd(tmp, _mm256_mul_pd(val, rhs));
+                    offs += 4;
                 }
                 _mm256_store_pd(resPtr + i*C, tmp);
             }
