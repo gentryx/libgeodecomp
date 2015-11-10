@@ -20,6 +20,7 @@ class TestBase
     return true if filename =~ /typemaps\.h/
     return true if filename =~ /typemaps\.cpp/
     return true if filename =~ /serialization\.h/
+    return true if filename =~ /hpxserialization\.cpp/
     return true if filename =~ /test\.cpp$/
     return true if filename =~ /test\.cu$/
 
