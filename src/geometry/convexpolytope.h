@@ -1,5 +1,5 @@
-#ifndef LIBGEODECOMP_GEOMETRY_CONVEXPOLYHEDRON_H
-#define LIBGEODECOMP_GEOMETRY_CONVEXPOLYHEDRON_H
+#ifndef LIBGEODECOMP_GEOMETRY_CONVEXPOLYTOPE_H
+#define LIBGEODECOMP_GEOMETRY_CONVEXPOLYTOPE_H
 
 #include <libgeodecomp/geometry/coordbox.h>
 #include <libgeodecomp/geometry/floatcoord.h>

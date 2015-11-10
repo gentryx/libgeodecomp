@@ -1,6 +1,7 @@
 // vim: noai:ts=4:sw=4:expandtab
-#ifndef LIBGEODECOMP_MISC_AUTOTUNINGSIMULATOR_H
-#define LIBGEODECOMP_MISC_AUTOTUNINGSIMULATOR_H
+#ifndef LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
+#define LIBGEODECOMP_PARALLELIZATION_AUTOTUNINGSIMULATOR_H
+
 #include <libgeodecomp/misc/optimizer.h>
 #include <libgeodecomp/misc/simulationfactory.h>
 #include <libgeodecomp/misc/simulationparameters.h>
