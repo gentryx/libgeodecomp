@@ -204,32 +204,32 @@ void allDone()
 // register component
 typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkAccepter<int> > DummyPatchLinkAccepterType_int;
 HPX_REGISTER_COMPONENT(DummyPatchLinkAccepterType_int, DummyPatchLinkAccepter_int );
-typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkAccepter<std::size_t> > DummyPatchLinkAccepterType_std_size_t;
-HPX_REGISTER_COMPONENT(DummyPatchLinkAccepterType_std_size_t, DummyPatchLinkAccepter_std_size_t );
+typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkAccepter<std::size_t> > DummyPatchLinkAccepterType_stdSizeT;
+HPX_REGISTER_COMPONENT(DummyPatchLinkAccepterType_stdSizeT, DummyPatchLinkAccepter_stdSizeT );
 
 // register component
 typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<int> > DummyPatchLinkProviderType_int;
 HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_int, DummyPatchLinkProvider_int );
-typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<std::size_t> > DummyPatchLinkProviderType_std_size_t;
-HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_std_size_t, DummyPatchLinkProvider_std_size_t );
+typedef hpx::components::simple_component<LibGeoDecomp::DummyPatchLinkProvider<std::size_t> > DummyPatchLinkProviderType_stdSizeT;
+HPX_REGISTER_COMPONENT(DummyPatchLinkProviderType_stdSizeT, DummyPatchLinkProvider_stdSizeT );
 
 // register action
 typedef LibGeoDecomp::DummyPatchLinkProvider<int>::receive_action DummyPatchLinkProvider_receive_action_int;
 HPX_REGISTER_ACTION(DummyPatchLinkProvider_receive_action_int);
-typedef LibGeoDecomp::DummyPatchLinkProvider<std::size_t>::receive_action DummyPatchLinkProvider_receive_action_std_size_t;
-HPX_REGISTER_ACTION(DummyPatchLinkProvider_receive_action_std_size_t);
+typedef LibGeoDecomp::DummyPatchLinkProvider<std::size_t>::receive_action DummyPatchLinkProvider_receive_action_stdSizeT;
+HPX_REGISTER_ACTION(DummyPatchLinkProvider_receive_action_stdSizeT);
 
 // register component
 typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<int> > DummyUpdateGroupType_int;
 HPX_REGISTER_COMPONENT(DummyUpdateGroupType_int, DummyUpdateGroup_int );
-typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<std::size_t> > DummyUpdateGroupType_std_size_t;
-HPX_REGISTER_COMPONENT(DummyUpdateGroupType_std_size_t, DummyUpdateGroup_std_size_t );
+typedef hpx::components::simple_component<LibGeoDecomp::DummyUpdateGroup<std::size_t> > DummyUpdateGroupType_stdSizeT;
+HPX_REGISTER_COMPONENT(DummyUpdateGroupType_stdSizeT, DummyUpdateGroup_stdSizeT );
 
 // register action
 typedef LibGeoDecomp::DummyUpdateGroup<int>::step_action step_action_int;
 HPX_REGISTER_ACTION(step_action_int);
-typedef LibGeoDecomp::DummyUpdateGroup<std::size_t>::step_action step_action_std_size_t;
-HPX_REGISTER_ACTION(step_action_std_size_t);
+typedef LibGeoDecomp::DummyUpdateGroup<std::size_t>::step_action step_action_stdSizeT;
+HPX_REGISTER_ACTION(step_action_stdSizeT);
 
 // register broadcasts
 HPX_PLAIN_ACTION(LibGeoDecomp::getNumberOfUpdateGroups, getNumberOfUpdateGroups_action);
