@@ -1,10 +1,8 @@
-#include <emmintrin.h>
-#include <map>
-#include <mpi.h>
-
 #include <libgeodecomp/parallelization/hiparsimulator.h>
 #include <libgeodecomp/testbed/reversetimemigration/config.h>
 #include <libgeodecomp/testbed/reversetimemigration/cudastepperlib.h>
+#include <map>
+#include <mpi.h>
 
 using namespace LibGeoDecomp;
 using namespace HiParSimulator;
