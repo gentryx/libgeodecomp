@@ -3,9 +3,6 @@
 #ifndef LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_H
 #define LIBGEODECOMP_PARALLELIZATION_HIPARSIMULATOR_H
 
-#include <cmath>
-#include <stdexcept>
-#include <boost/make_shared.hpp>
 #include <libgeodecomp/communication/mpilayer.h>
 #include <libgeodecomp/geometry/partitions/stripingpartition.h>
 #include <libgeodecomp/geometry/partitions/ptscotchunstructuredpartition.h>
@@ -15,6 +12,9 @@
 #include <libgeodecomp/parallelization/hiparsimulator/parallelwriteradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/steereradapter.h>
 #include <libgeodecomp/parallelization/hiparsimulator/updategroup.h>
+#include <cmath>
+#include <stdexcept>
+#include <boost/make_shared.hpp>
 
 namespace LibGeoDecomp {
 namespace HiParSimulator {
