@@ -193,8 +193,7 @@ private:
 #ifdef LIBGEODECOMP_WITH_HPX
         int archive_flags = boost::archive::no_header;
         archive_flags |= hpx::serialization::disable_data_chunking;
-        hpx::serialization::binary_filter *f = 0;
-        hpx::serialization::output_archive archive(*vec, f, archive_flags);
+        hpx::serialization::output_archive archive(*vec, archive_flags);
 #else
         typedef boost::iostreams::back_insert_device<std::vector<char> > Device;
         Device sink(*vec);
