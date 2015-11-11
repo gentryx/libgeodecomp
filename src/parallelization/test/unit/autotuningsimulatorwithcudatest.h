@@ -62,8 +62,8 @@ public:
     virtual void grid(GridBase<SimFabTestCell, 3> *target)
     {
         int counter = 0;
-
         CoordBox<3> box = target->boundingBox();
+
         for (CoordBox<3>::Iterator i = box.begin(); i != box.end(); ++i) {
             target->set(*i, SimFabTestCell(++counter));
         }
@@ -82,7 +82,7 @@ public:
 
     void tearDown()
     {}
-    
+
     void testBasicPatternOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorWithCudaTest::TestBasicPatternOptimized()")
@@ -91,13 +91,14 @@ public:
         ats.setSimulationSteps(10);
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
-            << ats.getSimulationParameters(*iter))
+
+        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+                << ats.getFitness(*iter)<< std::endl
+                << ats.getSimulationParameters(*iter));
+        }
     }
-    
+
     void testBasicSimplexOptimized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testBasicSimplexOptimized()")
@@ -106,11 +107,12 @@ public:
         ats.setSimulationSteps(10);
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
-            << ats.getSimulationParameters(*iter))
+
+        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+                << ats.getFitness(*iter)<< std::endl
+                << ats.getSimulationParameters(*iter));
+        }
     }
 
     void testAddOwnSimulations()
@@ -129,33 +131,34 @@ public:
         ats.setParameters(params, "1.CacheBlockingSimulator");
         ats.run();
         std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
-            << ats.getSimulationParameters(*iter))
-    }
+
+        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+                << ats.getFitness(*iter)<< std::endl
+                << ats.getSimulationParameters(*iter));
+        }
 
     void testManuallyParamterized()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest:test:ManuallyParameterized()")
         AutoTuningSimulator<SimFabTestCell, PatternOptimizer> ats(
             SimFabTestInitializer(dim, maxSteps));
-        
+
         SimulationParameters params;
         params.addParameter("WavefrontWidth", 1, 300);
         params.addParameter("WavefrontHeight", 1, 300);
         params.addParameter("PipelineLength", 1, 25);
-        
+
         ats.setParameters(params, "CacheBlockingSimulation");
         ats.run();
-        
+
         std::vector<std::string> names = ats.getSimulationNames();
-        for (std::vector<std::string>::iterator iter = names.begin();
-            iter != names.end(); iter++)
-            LOG(Logger::INFO, "Name: " << *iter << " Fitness: " 
-            << ats.getFitness(*iter)<< std::endl 
-            << ats.getSimulationParameters(*iter))
+
+        for (std::vector<std::string>::iterator iter = names.begin(); iter != names.end(); iter++) {
+            LOG(Logger::INFO, "Name: " << *iter << " Fitness: "
+                << ats.getFitness(*iter)<< std::endl
+                << ats.getSimulationParameters(*iter));
+        }
     }
 
     void testInvalidArguments()
@@ -178,7 +181,7 @@ public:
         TS_ASSERT_THROWS(ats.setParameters(params, "NoSimulator"), std::invalid_argument);
 
     }
-    
+
     void testAddWriter()
     {
         LOG(Logger::INFO, "AutotuningSimulatorTest::testAddWriter()")
@@ -186,7 +189,7 @@ public:
             SimFabTestInitializer(dim, maxSteps));
         ats.deleteAllSimulations();
         ats.addNewSimulation(
-            "addWriterTest", 
+            "addWriterTest",
             "SerialSimulation",
             SimFabTestInitializer(dim, maxSteps));
         ats.addWriter((Writer<SimFabTestCell> *) new TracingWriter<SimFabTestCell>(1,100));
@@ -215,7 +218,7 @@ public:
         fab = new SerialSimulationFactory<SimFabTestCell>(
                     SimFabTestInitializer(dim, maxSteps));
     }
-    
+
     void tearDown()
     {
         delete cudaFab;
@@ -226,8 +229,7 @@ public:
     void testBasic()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testBasic")
-        for (int i =1; i <= 2; i++)
-        {
+        for (int i =1; i <= 2; i++) {
             Simulator<SimFabTestCell> *sim = fab->operator()();
             sim->run();
             delete sim;
@@ -237,24 +239,24 @@ public:
     void testCacheBlockingFitness()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testCacheBlockingFitness()")
-        for (int i = 1; i <= 2; i++){
+        for (int i = 1; i <= 2; i++) {
             cFab->parameters()["PipelineLength"].setValue(1);
             cFab->parameters()["WavefrontWidth"].setValue(100);
             cFab->parameters()["WavefrontHeight"].setValue(40);
             double fitness = cFab->operator()(cFab->parameters());
-            LOG(Logger::INFO,  i << " fitness: " << fitness )
+            LOG(Logger::INFO,  i << " fitness: " << fitness );
         }
     }
 
     void testCudaFitness()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testCudaFitness()")
-        for (int i = 1; i <=2; ++i){
+        for (int i = 1; i <=2; ++i) {
             cudaFab->parameters()["BlockDimX"].setValue(15);
             cudaFab->parameters()["BlockDimY"].setValue(6);
             cudaFab->parameters()["BlockDimZ"].setValue(6);
             double fitness = cudaFab->operator()(cudaFab->parameters());
-            LOG(Logger::INFO, i << " fitness: " << fitness)
+            LOG(Logger::INFO, i << " fitness: " << fitness);
         }
     }
 
@@ -268,7 +270,7 @@ public:
         double fitness = cFab->operator()(cFab->parameters());
         LOG(Logger::INFO, "Fitness: " << fitness << std::endl)
     }
- 
+
     void testAddWriterToSerialSimulationFactory()
     {
         LOG(Logger::INFO, "SimulationFactoryWithCudaTest::testAddWriterToSerialSimulationFactory()")
@@ -303,4 +305,3 @@ private:
 };
 
 }
-
